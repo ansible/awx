@@ -426,11 +426,11 @@ function ScheduleForm({
         if (
           DateTime.fromFormat(
             `${values.startDate} ${values.startTime}`,
-            'yyyy-LL-dd h:mm a'
+            'yyyy-LL-dd HH:mm'
           ).toMillis() >=
           DateTime.fromFormat(
             `${options.endDate} ${options.endTime}`,
-            'yyyy-LL-dd h:mm a'
+            'yyyy-LL-dd HH:mm'
           ).toMillis()
         ) {
           freqErrors.endDate = t`Please select an end date/time that comes after the start date/time.`;

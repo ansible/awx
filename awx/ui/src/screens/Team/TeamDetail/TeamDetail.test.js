@@ -42,8 +42,8 @@ describe('<TeamDetail />', () => {
       { label: 'Name', value: 'Foo' },
       { label: 'Description', value: 'Bar' },
       { label: 'Organization', value: 'Default' },
-      { label: 'Created', value: '7/7/2015, 5:21:26 PM' },
-      { label: 'Last Modified', value: '8/11/2019, 7:47:37 PM' },
+      { label: 'Created', value: '2015-07-07, 17:21:26' },
+      { label: 'Last Modified', value: '2019-08-11, 19:47:37' },
     ];
     for (let i = 0; i < testParams.length; i++) {
       const { label, value } = testParams[i];

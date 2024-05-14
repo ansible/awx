@@ -76,7 +76,7 @@ describe('<SubscriptionModal />', () => {
     expect(firstRow.at(0).find('input[type="radio"]')).toHaveLength(1);
     expect(firstRow.at(1).text()).toEqual('mock A');
     expect(firstRow.at(2).text()).toEqual('100');
-    expect(firstRow.at(3).text()).toEqual('4/24/2024, 11:11:11 PM');
+    expect(firstRow.at(3).text()).toEqual('2024-04-24, 23:11:11');
   });
 
   test('submit button should call onConfirm', async () => {

@@ -50,7 +50,7 @@ describe('<TemplateListItem />', () => {
       wrapper.find('Td[dataLabel="Organization"]').find('Link').prop('to')
     ).toBe('/organizations/1/details');
     expect(wrapper.find('Td[dataLabel="Last Ran"]').text()).toBe(
-      '2/26/2020, 10:38:41 PM'
+      '2020-02-26, 22:38:41'
     );
   });
 

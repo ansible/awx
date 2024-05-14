@@ -233,7 +233,7 @@ function getEndValue(type, options, timezone) {
 
   const date = DateTime.fromFormat(
     `${options.endDate} ${options.endTime}`,
-    'yyyy-MM-dd h:mm a',
+    'yyyy-MM-dd HH:mm',
     {
       zone: timezone,
     }

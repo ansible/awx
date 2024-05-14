@@ -8,13 +8,10 @@ export function formatDateString(dateObj, tz = null) {
     return null;
   }
 
+  let fmt = 'yyyy-LL-dd, HH:mm:ss';
   return tz !== null
-    ? DateTime.fromISO(dateObj, { zone: tz }).toLocaleString(
-        DateTime.DATETIME_SHORT_WITH_SECONDS
-      )
-    : DateTime.fromISO(dateObj).toLocaleString(
-        DateTime.DATETIME_SHORT_WITH_SECONDS
-      );
+    ? DateTime.fromISO(dateObj, { zone: tz }).toFormat(fmt)
+    : DateTime.fromISO(dateObj).toFormat(fmt);
 }
 
 export function secondsToHHMMSS(seconds) {
@@ -27,7 +24,7 @@ export function secondsToDays(seconds) {
 
 export function timeOfDay() {
   const dateTime = DateTime.local();
-  return dateTime.toFormat('hh:mm:ss:ms a');
+  return dateTime.toFormat('HH:mm:ss:ms');
 }
 
 export function dateToInputDateTime(dt, tz = null) {
@@ -37,7 +34,7 @@ export function dateToInputDateTime(dt, tz = null) {
   } else {
     dateTime = DateTime.fromISO(dt);
   }
-  return [dateTime.toFormat('yyyy-LL-dd'), dateTime.toFormat('h:mm a')];
+  return [dateTime.toFormat('yyyy-LL-dd'), dateTime.toFormat('HH:mm')];
 }
 
 export function getRRuleDayConstants(dayString) {

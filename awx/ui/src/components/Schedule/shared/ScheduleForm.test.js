@@ -143,7 +143,7 @@ const nonRRuleValuesMatch = () => {
     wrapper.find('DatePicker[aria-label="Start date"]').prop('value')
   ).toBe('2020-04-02');
   expect(wrapper.find('TimePicker[aria-label="Start time"]').prop('time')).toBe(
-    '2:45 PM'
+    '14:45'
   );
   expect(wrapper.find('select#schedule-timezone').prop('value')).toBe(
     'America/New_York'
@@ -903,7 +903,7 @@ describe('<ScheduleForm />', () => {
 
     test('should create schedule with the same start and end date provided that the end date is at a later time', async () => {
       const today = DateTime.now().toFormat('yyyy-LL-dd');
-      const laterTime = DateTime.now().plus({ hours: 1 }).toFormat('h:mm a');
+      const laterTime = DateTime.now().plus({ hours: 1 }).toFormat('HH:mm');
       await act(async () => {
         wrapper.find('DatePicker[aria-label="End date"]').prop('onChange')(
           null,
@@ -1428,7 +1428,7 @@ describe('<ScheduleForm />', () => {
       ).toBe('2021-01-01');
       expect(
         wrapper.find('TimePicker[aria-label="End time"]').prop('value')
-      ).toBe('12:00 AM');
+      ).toBe('00:00');
     });
 
     test('initially renders expected fields and values with existing schedule that runs every month on the last weekday', async () => {

@@ -10,9 +10,7 @@ describe('<DateTimePicker/>', () => {
   test('should render properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Formik
-          initialValues={{ startDate: '2021-05-26', startTime: '2:15 PM' }}
-        >
+        <Formik initialValues={{ startDate: '2021-05-26', startTime: '14:15' }}>
           <DateTimePicker
             dateFieldName="startDate"
             timeFieldName="startTime"
@@ -24,14 +22,12 @@ describe('<DateTimePicker/>', () => {
     expect(wrapper.find('DatePicker')).toHaveLength(1);
     expect(wrapper.find('DatePicker').prop('value')).toBe('2021-05-26');
     expect(wrapper.find('TimePicker')).toHaveLength(1);
-    expect(wrapper.find('TimePicker').prop('value')).toBe('2:15 PM');
+    expect(wrapper.find('TimePicker').prop('value')).toBe('14:15');
   });
   test('should update values properly', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Formik
-          initialValues={{ startDate: '2021-05-26', startTime: '2:15 PM' }}
-        >
+        <Formik initialValues={{ startDate: '2021-05-26', startTime: '14:15' }}>
           <DateTimePicker
             dateFieldName="startDate"
             timeFieldName="startTime"
@@ -47,10 +43,10 @@ describe('<DateTimePicker/>', () => {
         '2021-05-29',
         new Date('Sat May 29 2021 00:00:00 GMT-0400 (Eastern Daylight Time)')
       );
-      wrapper.find('TimePicker').prop('onChange')(null, '7:15 PM');
+      wrapper.find('TimePicker').prop('onChange')(null, '19:15');
     });
     wrapper.update();
     expect(wrapper.find('DatePicker').prop('value')).toBe('2021-05-29');
-    expect(wrapper.find('TimePicker').prop('value')).toBe('7:15 PM');
+    expect(wrapper.find('TimePicker').prop('value')).toBe('19:15');
   });
 });

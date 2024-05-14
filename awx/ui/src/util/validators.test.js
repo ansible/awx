@@ -179,12 +179,12 @@ describe('validators', () => {
   });
 
   test('validate time validates properly', () => {
-    expect(validateTime()('12:15 PM')).toBeUndefined();
-    expect(validateTime()('1:15 PM')).toBeUndefined();
-    expect(validateTime()('01:15 PM')).toBeUndefined();
     expect(validateTime()('12:15')).toBeUndefined();
-    expect(validateTime()('12:15: PM')).toEqual('Invalid time format');
-    expect(validateTime()('12.15 PM')).toEqual('Invalid time format');
-    expect(validateTime()('12;15 PM')).toEqual('Invalid time format');
+    expect(validateTime()('1:15')).toBeUndefined();
+    expect(validateTime()('01:15')).toBeUndefined();
+    expect(validateTime()('12:15')).toBeUndefined();
+    expect(validateTime()('12:15: ')).toEqual('Invalid time format');
+    expect(validateTime()('12.15')).toEqual('Invalid time format');
+    expect(validateTime()('12;15')).toEqual('Invalid time format');
   });
 });

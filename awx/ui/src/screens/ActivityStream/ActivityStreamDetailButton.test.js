@@ -67,7 +67,7 @@ describe('<ActivityStreamDetailButton />', () => {
       true
     );
 
-    assertDetail('Time', '5/25/2021, 6:17:59 PM');
+    assertDetail('Time', '2021-05-25, 18:17:59');
     assertDetail('Initiated by', 'Bob');
     assertDetail('Setting category', 'system');
     assertDetail('Setting name', 'INSIGHTS_TRACKING_STATE');

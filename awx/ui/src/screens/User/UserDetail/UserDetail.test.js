@@ -28,9 +28,9 @@ describe('<UserDetail />', () => {
     assertDetail('First Name', mockDetails.first_name);
     assertDetail('Last Name', mockDetails.last_name);
     assertDetail('User Type', 'System Administrator');
-    assertDetail('Last Login', `11/4/2019, 11:12:36 PM`);
-    assertDetail('Created', `10/28/2019, 3:01:07 PM`);
-    assertDetail('Last Modified', `7/12/2021, 7:08:33 PM`);
+    assertDetail('Last Login', `2019-11-04, 23:12:36`);
+    assertDetail('Created', `2019-10-28, 15:01:07`);
+    assertDetail('Last Modified', `2021-07-12, 19:08:33`);
     assertDetail('Type', `SOCIAL`);
   });
 

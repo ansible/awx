@@ -29,11 +29,11 @@ describe('formatDateString', () => {
       'Invalid DateTime'
     );
     expect(formatDateString('2018-01-31T01:14:52.969227Z')).toEqual(
-      '1/31/2018, 1:14:52 AM'
+      '2018-01-31, 01:14:52'
     );
     expect(
       formatDateString('2018-01-31T01:14:52.969227Z', 'America/Los_Angeles')
-    ).toEqual('1/30/2018, 5:14:52 PM');
+    ).toEqual('2018-01-30, 17:14:52');
   });
 });
 
@@ -54,7 +54,7 @@ describe('dateToInputDateTime', () => {
   test('it returns the expected value', () => {
     expect(dateToInputDateTime('2018-01-31T01:14:52.969227Z')).toEqual([
       '2018-01-31',
-      '1:14 AM',
+      '01:14',
     ]);
   });
 });

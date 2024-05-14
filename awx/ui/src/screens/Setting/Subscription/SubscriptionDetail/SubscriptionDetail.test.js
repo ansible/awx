@@ -70,11 +70,11 @@ describe('<SubscriptionDetail />', () => {
       'Red Hat Ansible Automation, Standard (1001 Managed Nodes)'
     );
     assertDetail('Trial', 'False');
-    assertDetail('Expires on', '2/27/2021, 4:59:59 AM');
+    assertDetail('Expires on', '2021-02-27, 04:59:59');
     assertDetail('Days remaining', '3');
     assertDetail('Hosts imported', '1');
     assertDetail('Hosts remaining', '1000');
-    assertDetail('Hosts automated', '12 since 3/2/2021, 7:43:48 PM');
+    assertDetail('Hosts automated', '12 since 2021-03-02, 19:43:48');
 
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(0);
   });

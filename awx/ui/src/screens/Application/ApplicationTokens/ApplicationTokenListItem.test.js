@@ -76,7 +76,7 @@ describe('<ApplicationTokenListItem/>', () => {
     });
     expect(wrapper.find('Td').at(1).text()).toBe('admin');
     expect(wrapper.find('Td').at(2).text()).toBe('Read');
-    expect(wrapper.find('Td').at(3).text()).toBe('10/25/3019, 7:56:38 PM');
+    expect(wrapper.find('Td').at(3).text()).toBe('3019-10-25, 19:56:38');
   });
 
   test('should be checked', async () => {

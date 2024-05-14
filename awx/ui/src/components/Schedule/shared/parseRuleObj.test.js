@@ -28,7 +28,7 @@ describe(parseRuleObj, () => {
 
     expect(parsed).toEqual({
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['week'],
       frequencyOptions: {
@@ -37,7 +37,7 @@ describe(parseRuleObj, () => {
           end: 'never',
           occurrences: 1,
           endDate: '2022-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           daysOfWeek: [RRule.MO],
         },
       },
@@ -58,7 +58,7 @@ describe(parseRuleObj, () => {
 
     expect(parsed).toEqual({
       startDate: '2020-04-02',
-      startTime: '2:45 PM',
+      startTime: '14:45',
       timezone: 'America/New_York',
       frequency: ['week'],
       frequencyOptions: {
@@ -67,7 +67,7 @@ describe(parseRuleObj, () => {
           end: 'onDate',
           occurrences: 1,
           endDate: '2021-01-01',
-          endTime: '12:00 AM',
+          endTime: '00:00',
           daysOfWeek: [RRule.MO, RRule.WE, RRule.FR],
         },
       },
@@ -88,7 +88,7 @@ describe(parseRuleObj, () => {
 
     expect(parsed).toEqual({
       startDate: '2022-06-08',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['hour'],
       frequencyOptions: {
@@ -97,7 +97,7 @@ describe(parseRuleObj, () => {
           end: 'onDate',
           occurrences: 1,
           endDate: '2023-06-08',
-          endTime: '1:00 PM',
+          endTime: '13:00',
         },
       },
       exceptionFrequency: [],
@@ -119,7 +119,7 @@ describe(parseRuleObj, () => {
 
     expect(parsed).toEqual({
       startDate: '2022-06-08',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['hour'],
       frequencyOptions: {
@@ -128,7 +128,7 @@ describe(parseRuleObj, () => {
           end: 'onDate',
           occurrences: 1,
           endDate: '2023-06-08',
-          endTime: '1:00 PM',
+          endTime: '13:00',
         },
       },
       exceptionFrequency: [],
@@ -148,7 +148,7 @@ describe(parseRuleObj, () => {
 
     expect(parseRuleObj(schedule)).toEqual({
       startDate: '2022-06-10',
-      startTime: '1:00 PM',
+      startTime: '13:00',
       timezone: 'US/Eastern',
       frequency: [],
       frequencyOptions: {},
@@ -161,7 +161,7 @@ describe(parseRuleObj, () => {
   test('should re-parse built complex schedule', () => {
     const values = {
       startDate: '2022-06-01',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['minute', 'month'],
       frequencyOptions: {
@@ -169,7 +169,7 @@ describe(parseRuleObj, () => {
           interval: 1,
           end: 'never',
           endDate: '2022-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
         },
         month: {
@@ -180,7 +180,7 @@ describe(parseRuleObj, () => {
           runOnTheDay: 'monday',
           runOnDayNumber: 1,
           endDate: '2022-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
         },
       },
@@ -205,7 +205,7 @@ RRULE:INTERVAL=2;FREQ=HOURLY;UNTIL=20260702T170000Z
 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
     const values = {
       startDate: '2022-06-01',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['hour', 'month'],
       frequencyOptions: {
@@ -213,7 +213,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
           interval: 2,
           end: 'onDate',
           endDate: '2026-07-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
         },
         month: {
@@ -224,7 +224,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
           runOnTheDay: 'monday',
           runOnDayNumber: 1,
           endDate: '2026-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
         },
       },
@@ -259,7 +259,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
 
     expect(parsed).toEqual({
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['week'],
       frequencyOptions: {
@@ -268,7 +268,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
           end: 'never',
           occurrences: 1,
           endDate: '2022-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           daysOfWeek: [RRule.MO],
         },
       },
@@ -278,7 +278,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
           interval: 1,
           end: 'never',
           endDate: '2022-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
           runOn: 'the',
           runOnDayNumber: 1,

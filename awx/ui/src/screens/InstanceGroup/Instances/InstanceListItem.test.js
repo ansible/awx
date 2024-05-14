@@ -282,7 +282,7 @@ describe('<InstanceListItem/>', () => {
       'Auto'
     );
     expect(wrapper.find('Detail[label="Last Health Check"]').text()).toBe(
-      'Last Health Check9/15/2021, 6:02:07 PM'
+      'Last Health Check2021-09-15, 18:02:07'
     );
   });
 });

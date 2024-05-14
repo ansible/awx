@@ -7,8 +7,8 @@ window.RRule = RRule;
 window.DateTime = DateTime;
 
 const parseTime = (time) => [
-  DateTime.fromFormat(time, 'h:mm a').hour,
-  DateTime.fromFormat(time, 'h:mm a').minute,
+  DateTime.fromFormat(time, 'HH:mm').hour,
+  DateTime.fromFormat(time, 'HH:mm').minute,
 ];
 
 export function buildDtStartObj(values) {

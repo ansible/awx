@@ -52,8 +52,8 @@ describe('<JobDetail />', () => {
     expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
       'Job explanation placeholder'
     );
-    assertDetail('Started', '8/8/2019, 7:24:18 PM');
-    assertDetail('Finished', '8/8/2019, 7:24:50 PM');
+    assertDetail('Started', '2019-08-08, 19:24:18');
+    assertDetail('Finished', '2019-08-08, 19:24:50');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
     assertDetail('Source Workflow Job', `1234 - Test Source Workflow`);
     assertDetail('Job Type', 'Playbook Run');
@@ -541,8 +541,8 @@ describe('<JobDetail />', () => {
     };
     wrapper = mountWithContexts(<JobDetail job={workFlowJob} />);
     assertDetail('Status', 'Successful');
-    assertDetail('Started', '7/6/2021, 7:40:17 PM');
-    assertDetail('Finished', '7/6/2021, 7:40:42 PM');
+    assertDetail('Started', '2021-07-06, 19:40:17');
+    assertDetail('Finished', '2021-07-06, 19:40:42');
     assertDetail('Job Template', 'Sliced Job Template');
     assertDetail('Job Type', 'Workflow Job');
     assertDetail('Inventory', 'Demo Inventory');

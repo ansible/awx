@@ -87,7 +87,7 @@ describe('ScheduleListItem', () => {
     test('Next run correctly shown', () => {
       expect(wrapper.find('Td').at(4).prop('dataLabel')).toBe('Next Run');
       expect(wrapper.find('Td').at(4).text()).toBe(
-        'Next Run2/20/2020, 12:00:00 AM'
+        'Next Run2020-02-20, 00:00:00'
       );
     });
 
@@ -158,7 +158,7 @@ describe('ScheduleListItem', () => {
     test('Next run correctly shown', () => {
       expect(wrapper.find('Td').at(4).prop('dataLabel')).toBe('Next Run');
       expect(wrapper.find('Td').at(4).text()).toBe(
-        'Next Run2/20/2020, 12:00:00 AM'
+        'Next Run2020-02-20, 00:00:00'
       );
     });
     test('Edit button hidden', () => {

@@ -28,8 +28,8 @@ describe('<HostDetail />', () => {
       assertDetail('Name', 'localhost');
       assertDetail('Description', 'a good description');
       assertDetail('Inventory', 'Mikes Inventory');
-      assertDetail('Created', '10/28/2019, 9:26:54 PM');
-      assertDetail('Last Modified', '10/29/2019, 8:18:41 PM');
+      assertDetail('Created', '2019-10-28, 21:26:54');
+      assertDetail('Last Modified', '2019-10-29, 20:18:41');
     });
 
     test('should show edit button for users with edit permission', () => {

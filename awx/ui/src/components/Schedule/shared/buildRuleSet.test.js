@@ -7,7 +7,7 @@ describe('buildRuleSet', () => {
   test('should build minutely recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -26,7 +26,7 @@ describe('buildRuleSet', () => {
   test('should build hourly recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['hour'],
       frequencyOptions: {
         hour: {
@@ -45,7 +45,7 @@ describe('buildRuleSet', () => {
   test('should build daily recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['day'],
       frequencyOptions: {
         day: {
@@ -64,7 +64,7 @@ describe('buildRuleSet', () => {
   test('should build weekly recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['week'],
       frequencyOptions: {
         week: {
@@ -84,7 +84,7 @@ describe('buildRuleSet', () => {
   test('should build monthly by day recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['month'],
       frequencyOptions: {
         month: {
@@ -105,7 +105,7 @@ describe('buildRuleSet', () => {
   test('should build monthly by weekday recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['month'],
       frequencyOptions: {
         month: {
@@ -127,7 +127,7 @@ describe('buildRuleSet', () => {
   test('should build yearly by day recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['year'],
       frequencyOptions: {
         year: {
@@ -149,7 +149,7 @@ describe('buildRuleSet', () => {
   test('should build yearly by weekday recurring rrule', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['year'],
       frequencyOptions: {
         year: {
@@ -172,7 +172,7 @@ describe('buildRuleSet', () => {
   test('should build combined frequencies', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute', 'month'],
       frequencyOptions: {
         minute: {
@@ -198,7 +198,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
   test('should build combined frequencies with end dates', () => {
     const values = {
       startDate: '2022-06-01',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       timezone: 'US/Eastern',
       frequency: ['hour', 'month'],
       frequencyOptions: {
@@ -206,7 +206,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
           interval: 2,
           end: 'onDate',
           endDate: '2026-07-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
         },
         month: {
@@ -217,7 +217,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
           runOnTheDay: 'monday',
           runOnDayNumber: 1,
           endDate: '2026-06-02',
-          endTime: '1:00 PM',
+          endTime: '13:00',
           occurrences: 1,
         },
       },
@@ -234,7 +234,7 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`);
   test('should build single occurence', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: [],
       frequencyOptions: {},
     };
@@ -247,7 +247,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build minutely exception', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -277,7 +277,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build hourly exception', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -307,7 +307,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build daily exception', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -337,7 +337,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build weekly exception', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -368,7 +368,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build monthly exception by day', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -400,7 +400,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build monthly exception by weekday', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -433,7 +433,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build annual exception by day', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {
@@ -466,7 +466,7 @@ RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   test('should build annual exception by weekday', () => {
     const values = {
       startDate: '2022-06-13',
-      startTime: '12:30 PM',
+      startTime: '12:30',
       frequency: ['minute'],
       frequencyOptions: {
         minute: {

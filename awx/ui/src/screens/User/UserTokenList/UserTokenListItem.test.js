@@ -64,7 +64,7 @@ describe('<UserTokenListItem />', () => {
     expect(wrapper.find('Td').at(1).text()).toBe('Foobar app');
     expect(wrapper.find('Td').at(2).text()).toBe('Foobar-token');
     expect(wrapper.find('Td').at(3).text()).toContain('Read');
-    expect(wrapper.find('Td').at(4).text()).toContain('10/25/3019, 3:06:43 PM');
+    expect(wrapper.find('Td').at(4).text()).toContain('3019-10-25, 15:06:43');
   });
 
   test('should render personal access token row properly', async () => {
@@ -92,7 +92,7 @@ describe('<UserTokenListItem />', () => {
     expect(wrapper.find('Td').at(1).text()).toEqual('Personal access token');
     expect(wrapper.find('Td').at(2).text()).toEqual('Foobar-token');
     expect(wrapper.find('Td').at(3).text()).toEqual('Write');
-    expect(wrapper.find('Td').at(4).text()).toContain('10/25/3019, 3:06:43 PM');
+    expect(wrapper.find('Td').at(4).text()).toContain('3019-10-25, 15:06:43');
   });
 
   test('should be checked', async () => {

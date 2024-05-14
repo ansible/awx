@@ -28,7 +28,7 @@ describe('<WorkflowApproval />', () => {
     workflowApproval.approval_expiration = '2020-10-10T17:13:12.067947Z';
 
     expect(getPendingLabel(workflowApproval)).toEqual(
-      `Expires on 10/10/2020, 5:13:12 PM`
+      `Expires on 2020-10-10, 17:13:12`
     );
   });
 
@@ -75,7 +75,7 @@ describe('<WorkflowApproval />', () => {
     workflowApproval.status = 'successful';
     workflowApproval.finished = '2020-10-10T17:13:12.067947Z';
     expect(getTooltip(workflowApproval)).toEqual(
-      'Approved by Foobar - 10/10/2020, 5:13:12 PM'
+      'Approved by Foobar - 2020-10-10, 17:13:12'
     );
   });
   test('shows correct approved tooltip without user', () => {
@@ -86,7 +86,7 @@ describe('<WorkflowApproval />', () => {
     workflowApproval.status = 'successful';
     workflowApproval.finished = '2020-10-10T17:13:12.067947Z';
     expect(getTooltip(workflowApproval)).toEqual(
-      'Approved - 10/10/2020, 5:13:12 PM.  See the Activity Stream for more information.'
+      'Approved - 2020-10-10, 17:13:12.  See the Activity Stream for more information.'
     );
   });
 
@@ -99,7 +99,7 @@ describe('<WorkflowApproval />', () => {
     workflowApproval.finished = '2020-10-10T17:13:12.067947Z';
     workflowApproval.failed = true;
     expect(getTooltip(workflowApproval)).toEqual(
-      'Denied by Foobar - 10/10/2020, 5:13:12 PM'
+      'Denied by Foobar - 2020-10-10, 17:13:12'
     );
   });
   test('shows correct denial tooltip without user', () => {
@@ -111,7 +111,7 @@ describe('<WorkflowApproval />', () => {
     workflowApproval.finished = '2020-10-10T17:13:12.067947Z';
     workflowApproval.failed = true;
     expect(getTooltip(workflowApproval)).toEqual(
-      'Denied - 10/10/2020, 5:13:12 PM.  See the Activity Stream for more information.'
+      'Denied - 2020-10-10, 17:13:12.  See the Activity Stream for more information.'
     );
   });
 });

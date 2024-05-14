@@ -19,9 +19,7 @@ export function required(message) {
 
 export function validateTime() {
   return (value) => {
-    const timeRegex = new RegExp(
-      `^\\s*(\\d\\d?):([0-5])(\\d)\\s*([AaPp][Mm])?\\s*$`
-    );
+    const timeRegex = new RegExp(`^\\s*(\\d\\d?):([0-5])(\\d)\\s*$`);
     let message;
     const timeComponents = value.split(':');
 
