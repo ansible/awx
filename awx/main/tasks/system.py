@@ -688,9 +688,14 @@ def awx_receptor_workunit_reaper():
             receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
             receptor_ctl.simple_command(f"work release {job.work_unit_id}")
         except Exception as e:
-            # force release of work unit
-            logger.error(f"Error on cancel or release {job.work_unit_id} with error {str(e)}.")
-            receptor_ctl.simple_command(f"work force-release {job.work_unit_id}")
+            # force release of work unit. Try/except is required becasue force-release
+            # try to release the job one time and thne delete it from worklist 
+            logger.error(f"Error on cancel or release {job.work_unit_id} with error {str(e)}.Try Force it...")
+            try:
+                receptor_ctl.simple_command(f"work force-release {job.work_unit_id}")
+                logger.debug(f"{job.log_format} is now released")
+            except Exception as e:
+                logger.error(f"Error on force-release {job.work_unit_id} with error {str(e)}. Skip It")
 
     administrative_workunit_reaper(receptor_work_list)
 
