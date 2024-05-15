@@ -7,6 +7,7 @@ import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon, BellIcon } from '@patternfly/react-icons';
 import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { timeOfDay } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { NotificationTemplatesAPI, NotificationsAPI } from 'api';
 import StatusLabel from 'components/StatusLabel';
 import CopyButton from 'components/CopyButton';
@@ -27,6 +28,7 @@ function NotificationTemplateListItem({
   onSelect,
   rowIndex,
 }) {
+  const config = useConfig();
   const recentNotifications = template.summary_fields?.recent_notifications;
   const latestStatus = recentNotifications
     ? recentNotifications[0]?.status
@@ -36,10 +38,10 @@ function NotificationTemplateListItem({
 
   const copyTemplate = useCallback(async () => {
     await NotificationTemplatesAPI.copy(template.id, {
-      name: `${template.name} @ ${timeOfDay()}`,
+      name: `${template.name} @ ${timeOfDay(config)}`,
     });
     await fetchTemplates();
-  }, [template.id, template.name, fetchTemplates]);
+  }, [template.id, template.name, fetchTemplates, config]);
 
   const handleCopyStart = useCallback(() => {
     setIsCopyDisabled(true);

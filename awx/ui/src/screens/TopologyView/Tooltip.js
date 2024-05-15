@@ -130,7 +130,8 @@ function Tooltip({
   isLoading,
   redirectToDetailsPage,
 }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
+  const { me = {} } = config;
 
   const [forks, setForks] = useState(
     computeForks(
@@ -331,14 +332,14 @@ function Tooltip({
               <DescriptionListGroup>
                 <DescriptionListTerm>{t`Last modified`}</DescriptionListTerm>
                 <DescriptionListDescription dataCy="last-modified">
-                  {formatDateString(instanceDetail.modified)}
+                  {formatDateString(instanceDetail.modified, null, config)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t`Last seen`}</DescriptionListTerm>
                 <DescriptionListDescription dataCy="last-seen">
                   {instanceDetail.last_seen
-                    ? formatDateString(instanceDetail.last_seen)
+                    ? formatDateString(instanceDetail.last_seen, null, config)
                     : `not found`}
                 </DescriptionListDescription>
               </DescriptionListGroup>

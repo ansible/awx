@@ -6,6 +6,7 @@ import { Tooltip } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { Job } from 'types';
 import StatusIcon from '../StatusIcon';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
@@ -22,6 +23,7 @@ const Wrapper = styled.div`
 /* eslint-enable react/jsx-pascal-case */
 
 const Sparkline = ({ jobs }) => {
+  const config = useConfig();
   const generateTooltip = (job) => (
     <>
       <div>
@@ -32,7 +34,7 @@ const Sparkline = ({ jobs }) => {
       </div>
       {job.finished && (
         <div>
-          {t`FINISHED:`} {formatDateString(job.finished)}
+          {t`FINISHED:`} {formatDateString(job.finished, null, config)}
         </div>
       )}
     </>

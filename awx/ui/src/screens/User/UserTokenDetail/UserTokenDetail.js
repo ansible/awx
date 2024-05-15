@@ -10,11 +10,13 @@ import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
 import { TokensAPI } from 'api';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
 import getHelptext from '../shared/User.helptext';
 
 function UserTokenDetail({ token }) {
+  const config = useConfig();
   const helptext = getHelptext();
   const { scope, description, created, modified, expires, summary_fields } =
     token;
@@ -54,7 +56,7 @@ function UserTokenDetail({ token }) {
         />
         <Detail
           label={t`Expires`}
-          value={formatDateString(expires)}
+          value={formatDateString(expires, null, config)}
           dataCy="application-token-detail-expires"
         />
         <UserDateDetail

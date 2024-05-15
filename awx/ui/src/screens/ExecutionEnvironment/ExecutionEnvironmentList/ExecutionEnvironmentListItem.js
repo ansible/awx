@@ -12,6 +12,7 @@ import CopyButton from 'components/CopyButton';
 import { ExecutionEnvironment } from 'types';
 import { ExecutionEnvironmentsAPI } from 'api';
 import { timeOfDay } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 
 function ExecutionEnvironmentListItem({
   executionEnvironment,
@@ -22,13 +23,14 @@ function ExecutionEnvironmentListItem({
   rowIndex,
   fetchExecutionEnvironments,
 }) {
+  const config = useConfig();
   const [isDisabled, setIsDisabled] = useState(false);
 
   const copyExecutionEnvironment = useCallback(async () => {
     const response = await ExecutionEnvironmentsAPI.copy(
       executionEnvironment.id,
       {
-        name: `${executionEnvironment.name} @ ${timeOfDay()}`,
+        name: `${executionEnvironment.name} @ ${timeOfDay(config)}`,
       }
     );
     if (response.status === 201) {
@@ -40,6 +42,7 @@ function ExecutionEnvironmentListItem({
     executionEnvironment.name,
     fetchExecutionEnvironments,
     onCopy,
+    config,
   ]);
 
   const handleCopyStart = useCallback(() => {

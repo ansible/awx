@@ -7,6 +7,7 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 import { t, Plural } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import { timeOfDay } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { InventoriesAPI } from 'api';
 import { Inventory } from 'types';
 import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
@@ -27,17 +28,18 @@ function InventoryListItem({
     isSelected: bool.isRequired,
     onSelect: func.isRequired,
   };
+  const config = useConfig();
   const [isCopying, setIsCopying] = useState(false);
 
   const copyInventory = useCallback(async () => {
     const response = await InventoriesAPI.copy(inventory.id, {
-      name: `${inventory.name} @ ${timeOfDay()}`,
+      name: `${inventory.name} @ ${timeOfDay(config)}`,
     });
     if (response.status === 201) {
       onCopy(response.data.id);
     }
     await fetchInventories();
-  }, [inventory.id, inventory.name, fetchInventories, onCopy]);
+  }, [inventory.id, inventory.name, fetchInventories, onCopy, config]);
 
   const handleCopyStart = useCallback(() => {
     setIsCopying(true);

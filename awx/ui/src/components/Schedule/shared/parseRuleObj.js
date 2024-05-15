@@ -10,7 +10,10 @@ export class UnsupportedRRuleError extends Error {
   }
 }
 
-export default function parseRuleObj(schedule) {
+export default function parseRuleObj(
+  schedule,
+  config = { datetime_format: 'am-pm' }
+) {
   let values = {
     frequency: [],
     frequencyOptions: {},
@@ -27,13 +30,13 @@ export default function parseRuleObj(schedule) {
     const type = ruleString.match(/^[A-Z]+/)[0];
     switch (type) {
       case 'DTSTART':
-        values = parseDtstart(schedule, values);
+        values = parseDtstart(schedule, values, config);
         break;
       case 'RRULE':
-        values = parseRrule(ruleString, schedule, values);
+        values = parseRrule(ruleString, schedule, values, config);
         break;
       case 'EXRULE':
-        values = parseExRule(ruleString, schedule, values);
+        values = parseExRule(ruleString, schedule, values, config);
         break;
       default:
         throw new UnsupportedRRuleError(`Unsupported rrule type: ${type}`);
@@ -59,11 +62,12 @@ function isSingleOccurrence(values) {
   return options.end === 'after' && options.occurrences === 1;
 }
 
-function parseDtstart(schedule, values) {
+function parseDtstart(schedule, values, config) {
   // TODO: should this rely on DTSTART in rruleset rather than schedule.dtstart?
   const [startDate, startTime] = dateToInputDateTime(
     schedule.dtstart,
-    schedule.timezone
+    schedule.timezone,
+    config
   );
   return {
     ...values,
@@ -81,8 +85,8 @@ const frequencyTypes = {
   [RRule.YEARLY]: 'year',
 };
 
-function parseRrule(rruleString, schedule, values) {
-  const { frequency, options } = parseRule(rruleString, schedule);
+function parseRrule(rruleString, schedule, values, config) {
+  const { frequency, options } = parseRule(rruleString, schedule, config);
 
   if (values.frequencyOptions[frequency]) {
     throw new UnsupportedRRuleError(
@@ -100,8 +104,8 @@ function parseRrule(rruleString, schedule, values) {
   };
 }
 
-function parseExRule(exruleString, schedule, values) {
-  const { frequency, options } = parseRule(exruleString, schedule);
+function parseExRule(exruleString, schedule, values, config) {
+  const { frequency, options } = parseRule(exruleString, schedule, config);
 
   if (values.exceptionOptions[frequency]) {
     throw new UnsupportedRRuleError(
@@ -121,7 +125,7 @@ function parseExRule(exruleString, schedule, values) {
   };
 }
 
-function parseRule(ruleString, schedule) {
+function parseRule(ruleString, schedule, config) {
   const {
     origOptions: {
       bymonth,
@@ -140,8 +144,12 @@ function parseRule(ruleString, schedule) {
     Math.ceil(now.ts / 900000) * 900000
   );
   const tomorrow = closestQuarterHour.plus({ days: 1 });
-  const [, time] = dateToInputDateTime(closestQuarterHour.toISO());
-  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
+  const [, time] = dateToInputDateTime(
+    closestQuarterHour.toISO(),
+    null,
+    config
+  );
+  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO(), null, config);
 
   const options = {
     endDate: tomorrowDate,
@@ -154,7 +162,11 @@ function parseRule(ruleString, schedule) {
   if (until) {
     options.end = 'onDate';
     const end = DateTime.fromISO(until.toISOString());
-    const [endDate, endTime] = dateToInputDateTime(end, schedule.timezone);
+    const [endDate, endTime] = dateToInputDateTime(
+      end,
+      schedule.timezone,
+      config
+    );
     options.endDate = endDate;
     options.endTime = endTime;
   } else if (count) {

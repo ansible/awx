@@ -4,6 +4,7 @@ import { Trans } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { SummaryFieldUser } from 'types';
 import _Detail from './Detail';
 
@@ -12,7 +13,8 @@ const Detail = styled(_Detail)`
 `;
 
 function UserDateDetail({ label, date, user }) {
-  const dateStr = formatDateString(date);
+  const config = useConfig();
+  const dateStr = formatDateString(date, null, config);
   const username = user ? user.username : '';
   return (
     <Detail

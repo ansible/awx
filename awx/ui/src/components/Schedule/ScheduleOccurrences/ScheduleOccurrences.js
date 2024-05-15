@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { t } from '@lingui/macro';
 import { Split, SplitItem, TextListItemVariants } from '@patternfly/react-core';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { DetailName, DetailValue } from '../../DetailList';
 import MultiButtonToggle from '../../MultiButtonToggle';
 
@@ -23,6 +24,7 @@ const OccurrencesLabel = styled.div`
 `;
 
 function ScheduleOccurrences({ preview = { local: [], utc: [] }, tz }) {
+  const config = useConfig();
   const [mode, setMode] = useState('local');
 
   if (preview.local.length < 2) {
@@ -64,8 +66,8 @@ function ScheduleOccurrences({ preview = { local: [], utc: [] }, tz }) {
         {preview[mode].map((dateStr) => (
           <div key={dateStr}>
             {mode === 'local'
-              ? formatDateString(dateStr, tz)
-              : formatDateString(dateStr, 'UTC')}
+              ? formatDateString(dateStr, tz, config)
+              : formatDateString(dateStr, 'UTC', config)}
           </div>
         ))}
       </DetailValue>

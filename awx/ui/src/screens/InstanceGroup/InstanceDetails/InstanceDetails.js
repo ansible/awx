@@ -157,7 +157,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
 
   const formatHealthCheckTimeStamp = (last) => (
     <>
-      {formatDateString(last)}
+      {formatDateString(last, null, config)}
       {instance.health_check_pending ? (
         <>
           {' '}

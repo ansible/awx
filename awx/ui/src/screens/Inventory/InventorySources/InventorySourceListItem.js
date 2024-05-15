@@ -13,6 +13,7 @@ import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { isJobRunning } from 'util/jobs';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 
@@ -29,6 +30,7 @@ function InventorySourceListItem({
   label,
   rowIndex,
 }) {
+  const config = useConfig();
   const generateLastJobTooltip = (job) => (
     <>
       <div>{t`MOST RECENT SYNC`}</div>
@@ -40,7 +42,7 @@ function InventorySourceListItem({
       </div>
       {job.finished && (
         <div>
-          {t`FINISHED:`} {formatDateString(job.finished)}
+          {t`FINISHED:`} {formatDateString(job.finished, null, config)}
         </div>
       )}
     </>

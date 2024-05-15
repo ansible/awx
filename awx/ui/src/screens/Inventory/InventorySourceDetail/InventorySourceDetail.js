@@ -162,7 +162,7 @@ function InventorySourceDetail({ inventorySource }) {
       </div>
       {job.finished && (
         <div>
-          {t`FINISHED:`} {formatDateString(job.finished)}
+          {t`FINISHED:`} {formatDateString(job.finished, null, config)}
         </div>
       )}
     </>

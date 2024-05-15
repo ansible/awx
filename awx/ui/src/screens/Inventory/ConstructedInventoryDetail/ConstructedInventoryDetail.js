@@ -16,6 +16,7 @@ import {
 import { InventoriesAPI, ConstructedInventoriesAPI } from 'api';
 import { Inventory } from 'types';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
@@ -36,6 +37,7 @@ import useWsInventorySourcesDetails from '../shared/useWsInventorySourcesDetails
 import getHelpText from '../shared/Inventory.helptext';
 
 function JobStatusLabel({ job }) {
+  const config = useConfig();
   if (!job) {
     return null;
   }
@@ -54,7 +56,7 @@ function JobStatusLabel({ job }) {
           </div>
           {job.finished && (
             <div>
-              {t`FINISHED:`} {formatDateString(job.finished)}
+              {t`FINISHED:`} {formatDateString(job.finished, null, config)}
             </div>
           )}
         </>

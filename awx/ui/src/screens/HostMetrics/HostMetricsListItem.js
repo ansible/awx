@@ -5,8 +5,10 @@ import { formatDateString } from 'util/dates';
 import { HostMetrics } from 'types';
 import { t } from '@lingui/macro';
 import { bool, func } from 'prop-types';
+import { useConfig } from 'contexts/Config';
 
 function HostMetricsListItem({ item, isSelected, onSelect, rowIndex }) {
+  const config = useConfig();
   return (
     <Tr
       id={`host_metrics-row-${item.hostname}`}
@@ -15,10 +17,10 @@ function HostMetricsListItem({ item, isSelected, onSelect, rowIndex }) {
       <Td select={{ rowIndex, isSelected, onSelect }} dataLabel={t`Selected`} />
       <Td dataLabel={t`Hostname`}>{item.hostname}</Td>
       <Td dataLabel={t`First automation`}>
-        {formatDateString(item.first_automation)}
+        {formatDateString(item.first_automation, null, config)}
       </Td>
       <Td dataLabel={t`Last automation`}>
-        {formatDateString(item.last_automation)}
+        {formatDateString(item.last_automation, null, config)}
       </Td>
       <Td dataLabel={t`Automation`}>{item.automated_counter}</Td>
       <Td dataLabel={t`Deleted`}>{item.deleted_counter}</Td>

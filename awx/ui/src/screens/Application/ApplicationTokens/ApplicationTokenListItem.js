@@ -7,6 +7,7 @@ import { Tr, Td } from '@patternfly/react-table';
 import { Token } from 'types';
 import { formatDateString } from 'util/dates';
 import { toTitleCase } from 'util/strings';
+import { useConfig } from 'contexts/Config';
 
 function ApplicationTokenListItem({
   token,
@@ -15,6 +16,7 @@ function ApplicationTokenListItem({
   detailUrl,
   rowIndex,
 }) {
+  const config = useConfig();
   return (
     <Tr id={`token-row-${token.id}`} ouiaId={`token-row-${token.id}`}>
       <Td
@@ -31,7 +33,9 @@ function ApplicationTokenListItem({
         </Link>
       </Td>
       <Td dataLabel={t`Scope`}>{toTitleCase(token.scope)}</Td>
-      <Td dataLabel={t`Expires`}>{formatDateString(token.expires)}</Td>
+      <Td dataLabel={t`Expires`}>
+        {formatDateString(token.expires, null, config)}
+      </Td>
     </Tr>
   );
 }

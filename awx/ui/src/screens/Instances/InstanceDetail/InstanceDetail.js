@@ -147,7 +147,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
 
   const formatHealthCheckTimeStamp = (last) => (
     <>
-      {formatDateString(last)}
+      {formatDateString(last, null, config)}
       {instance.health_check_pending ? (
         <>
           {' '}

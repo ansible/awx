@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { formatDateString, timeOfDay } from 'util/dates';
 import { ProjectsAPI } from 'api';
+import { useConfig } from 'contexts/Config';
 import { DetailList, Detail, DeletedDetail } from 'components/DetailList';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import StatusLabel from 'components/StatusLabel';
@@ -45,6 +46,7 @@ function ProjectListItem({
   rowIndex,
   onRefreshRow,
 }) {
+  const config = useConfig();
   const [isDisabled, setIsDisabled] = useState(false);
   ProjectListItem.propTypes = {
     project: Project.isRequired,
@@ -55,13 +57,13 @@ function ProjectListItem({
 
   const copyProject = useCallback(async () => {
     const response = await ProjectsAPI.copy(project.id, {
-      name: `${project.name} @ ${timeOfDay()}`,
+      name: `${project.name} @ ${timeOfDay(config)}`,
     });
     if (response.status === 201) {
       onCopy(response.data.id);
     }
     await fetchProjects();
-  }, [project.id, project.name, fetchProjects, onCopy]);
+  }, [project.id, project.name, fetchProjects, onCopy, config]);
 
   const generateLastJobTooltip = (job) => (
     <>
@@ -74,7 +76,7 @@ function ProjectListItem({
       </div>
       {job.finished && (
         <div>
-          {t`FINISHED:`} {formatDateString(job.finished)}
+          {t`FINISHED:`} {formatDateString(job.finished, null, config)}
         </div>
       )}
     </>
@@ -306,12 +308,12 @@ function ProjectListItem({
               />
               <Detail
                 label={t`Last modified`}
-                value={formatDateString(project.modified)}
+                value={formatDateString(project.modified, null, config)}
                 dataCy={`project-${project.id}-last-modified`}
               />
               <Detail
                 label={t`Last used`}
-                value={formatDateString(project.last_job_run)}
+                value={formatDateString(project.last_job_run, null, config)}
                 dataCy={`project-${project.id}-last-used`}
               />
             </DetailList>

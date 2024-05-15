@@ -39,6 +39,7 @@ const Label = styled.span`
 `;
 
 function ProjectDetail({ project }) {
+  const config = useConfig();
   const projectHelpText = getProjectHelpText();
   const {
     allow_override,
@@ -136,7 +137,7 @@ function ProjectDetail({ project }) {
       </div>
       {job.finished && (
         <div>
-          {t`FINISHED:`} {formatDateString(job.finished)}
+          {t`FINISHED:`} {formatDateString(job.finished, null, config)}
         </div>
       )}
     </>

@@ -922,6 +922,19 @@
               ["detailed", "Detailed"]
             ]
           },
+          "DATETIME_FORMAT": {
+            "type": "choice",
+            "required": false,
+            "label": "Datetime Format",
+            "help_text": "Datetime format across the user interface",
+            "category": "UI",
+            "category_slug": "ui",
+            "default": "am-pm",
+            "choices": [
+              ["am-pm", "9/5/2012, 2:45:55 PM (am-pm)"],
+              ["24-hour", "2012-05-09, 14:45:55 (24-hour)"]
+            ]
+          },
           "ALLOW_METRICS_FOR_ANONYMOUS_USERS": {
               "type": "boolean",
               "required": false,

@@ -103,7 +103,7 @@ function InstanceListItem({
 
   const formatHealthCheckTimeStamp = (last) => (
     <>
-      {formatDateString(last)}
+      {formatDateString(last, null, config)}
       {instance.health_check_pending ? (
         <>
           {' '}
@@ -156,7 +156,9 @@ function InstanceListItem({
                 {t`Last Health Check`}
                 &nbsp;
                 {formatDateString(
-                  instance.last_health_check ?? instance.last_seen
+                  instance.last_health_check ?? instance.last_seen,
+                  null,
+                  config
                 )}
               </div>
             }

@@ -94,11 +94,11 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     timezone,
     verbosity,
   } = schedule;
+  const config = useConfig();
   const helpText = getHelpText();
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
-  const config = useConfig();
 
   const {
     request: deleteSchedule,
@@ -190,7 +190,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   let exceptionOptions = {};
   try {
     ({ frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
-      parseRuleObj(schedule));
+      parseRuleObj(schedule, config));
   } catch (parseRuleError) {
     if (parseRuleError instanceof UnsupportedRRuleError) {
       rruleError = parseRuleError;
@@ -339,15 +339,18 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         />
         <Detail
           label={t`First Run`}
-          value={formatDateString(dtstart, timezone)}
+          value={formatDateString(dtstart, timezone, config)}
           dataCy="schedule-first-run"
         />
         <Detail
           label={t`Next Run`}
-          value={formatDateString(next_run, timezone)}
+          value={formatDateString(next_run, timezone, config)}
           dataCy="schedule-next-run"
         />
-        <Detail label={t`Last Run`} value={formatDateString(dtend, timezone)} />
+        <Detail
+          label={t`Last Run`}
+          value={formatDateString(dtend, timezone, config)}
+        />
         <Detail
           label={t`Local Time Zone`}
           value={timezone}

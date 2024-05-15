@@ -21,6 +21,7 @@ describe('<UIDetail />', () => {
         CUSTOM_LOGIN_INFO: 'mock info',
         CUSTOM_LOGO: 'data:image/png',
         PENDO_TRACKING_STATE: 'off',
+        DATETIME_FORMAT: 'am-pm',
       },
     });
   });

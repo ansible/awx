@@ -659,6 +659,11 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
+
+# Datetime format across the UI
+# Note: This setting may be overridden by database settings.
+DATETIME_FORMAT = "am-pm"
+
 # Enables Insights data collection.
 # Note: This setting may be overridden by database settings.
 INSIGHTS_TRACKING_STATE = False

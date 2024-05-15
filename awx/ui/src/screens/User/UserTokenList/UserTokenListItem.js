@@ -5,8 +5,10 @@ import { t } from '@lingui/macro';
 import { Tr, Td } from '@patternfly/react-table';
 import { toTitleCase } from 'util/strings';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 
 function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
+  const config = useConfig();
   const { id } = useParams();
   return (
     <Tr id={`token-row-${token.id}`} ouiaId={`token-row-${token.id}`}>
@@ -33,7 +35,7 @@ function UserTokenListItem({ token, isSelected, onSelect, rowIndex }) {
         {toTitleCase(token.scope)}
       </Td>
       <Td dataLabel={t`Expires`} id={`token-expires-${token.id}`}>
-        {formatDateString(token.expires)}
+        {formatDateString(token.expires, null, config)}
       </Td>
     </Tr>
   );
