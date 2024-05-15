@@ -1660,7 +1660,7 @@ class terraform(PluginFileInjector):
         credential = inventory_update.get_cloud_credential()
 
         private_data = {'credentials': {}}
-        gce_cred = credential.get_input('gce_credentials')
+        gce_cred = credential.get_input('gce_credentials', default=None)
         if gce_cred:
             private_data['credentials'][credential] = gce_cred
         return private_data
@@ -1669,7 +1669,7 @@ class terraform(PluginFileInjector):
         env = super(terraform, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
         credential = inventory_update.get_cloud_credential()
         cred_data = private_data_files['credentials']
-        if cred_data[credential]:
+        if credential in cred_data:
             env['GOOGLE_BACKEND_CREDENTIALS'] = to_container_path(cred_data[credential], private_data_dir)
         return env
 
