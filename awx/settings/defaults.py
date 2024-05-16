@@ -114,7 +114,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
 MEDIA_URL = '/media/'
 
 LOGIN_URL = '/api/login/'
-LOGOUT_ALLOWED_HOSTS = []
+LOGOUT_ALLOWED_HOSTS = None
 
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should not be web-accessible.
