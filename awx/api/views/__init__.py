@@ -1677,6 +1677,9 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
     model = models.Host
     serializer_class = serializers.HostSerializer
+    rest_filters_reserved_names = [
+        'host_filter',
+    ]
 
     def get_queryset(self):
         qs = super(HostList, self).get_queryset()
