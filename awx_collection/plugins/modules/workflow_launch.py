@@ -164,10 +164,12 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if inventory:
         post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
+
     if labels:
         post_data['labels'] = []
         for label in labels:
             post_data['labels'].append(module.resolve_name_to_id('labels', label))
+
     # Attempt to look up job_template based on the provided name
     lookup_data = {}
     if organization:
