@@ -27,7 +27,10 @@ class WebhookKeyView(GenericAPIView):
 
     def get_queryset(self):
         qs_models = {'job_templates': JobTemplate, 'workflow_job_templates': WorkflowJobTemplate}
-        self.model = qs_models.get(self.kwargs['model_kwarg'])
+        if getattr(self, 'swagger_fake_view', False) and ('model_kwarg' not in self.kwargs):
+            self.model = JobTemplate
+        else:
+            self.model = qs_models.get(self.kwargs['model_kwarg'])
 
         return super().get_queryset()
 
@@ -55,7 +58,10 @@ class WebhookReceiverBase(APIView):
 
     def get_queryset(self):
         qs_models = {'job_templates': JobTemplate, 'workflow_job_templates': WorkflowJobTemplate}
-        model = qs_models.get(self.kwargs['model_kwarg'])
+        if getattr(self, 'swagger_fake_view', False) and ('model_kwarg' not in self.kwargs):
+            model = JobTemplate
+        else:
+            model = qs_models.get(self.kwargs['model_kwarg'])
         if model is None:
             raise PermissionDenied
 

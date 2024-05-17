@@ -6,11 +6,14 @@ from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.functional import Promise
 from django.utils.encoding import force_str
+from django.db.models import ForeignKey
+from django.utils.timezone import now
 
 from drf_yasg.codecs import OpenAPICodecJson
 import pytest
 
 from awx.api.versioning import drf_reverse
+from awx.main import models
 
 
 class i18nEncoder(DjangoJSONEncoder):
@@ -20,6 +23,82 @@ class i18nEncoder(DjangoJSONEncoder):
         if type(obj) == bytes:
             return force_str(obj)
         return super(i18nEncoder, self).default(obj)
+
+
+def create_example_objs():
+    cls_list = [
+        models.User,
+        models.Organization,
+        models.Team,
+        models.Project,
+        models.Inventory,
+        models.Host,
+        models.Group,
+        models.InventorySource,
+        models.CredentialType,
+        models.Credential,
+        models.JobTemplate,
+        models.WorkflowJobTemplate,
+        models.WorkflowJobTemplateNode,
+        models.WorkflowJob,
+        models.WorkflowJobNode,
+        models.SystemJobTemplate,
+        models.SystemJob,
+        models.WorkflowApprovalTemplate,
+        models.NotificationTemplate,
+        models.Schedule,
+        models.Label,
+        models.InstanceGroup,
+        models.Instance,
+        models.OAuth2Application,
+        models.OAuth2AccessToken,
+        models.AdHocCommand,
+        models.Job,
+        models.InventoryUpdate,
+        models.ExecutionEnvironment,
+        models.JobEvent,
+    ]
+    cls_kwargs = {
+        models.Project: {
+            'playbook_files': [
+                'helloworld.yml',
+            ],
+            'scm_revision': '1234567890123456789012345678901234567890',
+            'scm_type': 'git',
+        },
+        models.InventorySource: {'source': 'file'},
+        models.InventoryUpdate: {'source': 'file'},
+        models.NotificationTemplate: {
+            'notification_type': "webhook",
+            'notification_configuration': dict(
+                url="http://localhost",
+                username="",
+                password="",
+                headers={
+                    "Test": "Header",
+                },
+            ),
+        },
+        models.Schedule: {'rrule': 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'},
+        models.OAuth2AccessToken: {'expires': now()},
+    }
+    i = 0
+    saved_objects = {}
+    for cls in cls_list:
+        kwargs = {}
+        if cls in cls_kwargs:
+            kwargs.update(cls_kwargs[cls])
+        for field in cls._meta.concrete_fields:
+            if field.name == 'name':
+                kwargs[field.name] = f'name-{i}'
+                i += 1
+            elif isinstance(field, ForeignKey) and field.name != 'unifiedjobtemplate_ptr':
+                if field.related_model._meta.model_name in saved_objects:
+                    kwargs[field.name] = saved_objects[field.related_model._meta.model_name]
+        obj = cls.objects.create(**kwargs)
+        saved_objects[cls._meta.model_name] = obj
+        if obj._meta.model_name == 'jobtemplate':
+            saved_objects['unifiedjobtemplate'] = obj  # for unified_job_template references
 
 
 @pytest.mark.django_db
@@ -42,6 +121,7 @@ class TestSwaggerGeneration:
 
     @pytest.fixture(autouse=True, scope='function')
     def _prepare(self, get, admin):
+        create_example_objs()
         if not self.__class__.JSON:
             url = drf_reverse('api:schema-swagger-ui') + '?format=openapi'
             response = get(url, user=admin)

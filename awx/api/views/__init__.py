@@ -738,7 +738,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
     search_fields = ('role_field', 'content_type__model')
 
     def get_queryset(self):
-        team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
+        team = self.get_object_or_404(self.parent_model, lookup_field='pk')
         if not self.request.user.can_access(models.Team, 'read', team):
             raise PermissionDenied()
         return models.Role.filter_visible_roles(self.request.user, team.member_role.children.all().exclude(pk=team.read_role.pk))
@@ -758,7 +758,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
+        team = self.get_object_or_404(self.parent_model, lookup_field='pk')
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
             if not role.content_object.organization or role.content_object.organization.id != team.organization.id:
@@ -915,7 +915,7 @@ class ProjectTeamsList(ListAPIView):
     serializer_class = serializers.TeamSerializer
 
     def get_queryset(self):
-        p = get_object_or_404(models.Project, pk=self.kwargs['pk'])
+        p = self.get_object_or_404(models.Project, lookup_field='pk')
         if not self.request.user.can_access(models.Project, 'read', p):
             raise PermissionDenied()
         project_ct = ContentType.objects.get_for_model(models.Project)
@@ -1239,7 +1239,7 @@ class UserTeamsList(SubListAPIView):
     parent_model = models.User
 
     def get_queryset(self):
-        u = get_object_or_404(models.User, pk=self.kwargs['pk'])
+        u = self.get_object_or_404(models.User, lookup_field='pk')
         if not self.request.user.can_access(models.User, 'read', u):
             raise PermissionDenied()
         return models.Team.accessible_objects(self.request.user, 'read_role').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
@@ -1256,7 +1256,7 @@ class UserRolesList(SubListAttachDetachAPIView):
     search_fields = ('role_field', 'content_type__model')
 
     def get_queryset(self):
-        u = get_object_or_404(models.User, pk=self.kwargs['pk'])
+        u = self.get_object_or_404(self.parent_model, lookup_field='pk')
         if not self.request.user.can_access(models.User, 'read', u):
             raise PermissionDenied()
         content_type = ContentType.objects.get_for_model(models.User)
@@ -1437,7 +1437,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
     parent_model = models.Credential
 
     def get_queryset(self):
-        credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        credential = self.get_object_or_404(self.parent_model, lookup_field='pk')
         if not self.request.user.can_access(models.Credential, 'read', credential):
             raise PermissionDenied()
 
@@ -3717,7 +3717,7 @@ class JobJobEventsChildrenSummary(APIView):
 
     def get(self, request, **kwargs):
         resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False, is_tree=True)
-        job = get_object_or_404(models.Job, pk=kwargs['pk'])
+        job = self.get_object_or_404(models.Job, lookup_field='pk')
         if not job.event_processing_finished:
             return Response(resp)
         else:
@@ -4368,7 +4368,7 @@ class RoleParentsList(SubListAPIView):
     search_fields = ('role_field', 'content_type__model')
 
     def get_queryset(self):
-        role = models.Role.objects.get(pk=self.kwargs['pk'])
+        role = self.get_object_or_404(self.model, lookup_field='pk')
         return models.Role.filter_visible_roles(self.request.user, role.parents.all())
 
 
@@ -4382,7 +4382,7 @@ class RoleChildrenList(SubListAPIView):
     search_fields = ('role_field', 'content_type__model')
 
     def get_queryset(self):
-        role = models.Role.objects.get(pk=self.kwargs['pk'])
+        role = self.get_object_or_404(self.model, lookup_field='pk')
         return models.Role.filter_visible_roles(self.request.user, role.children.all())
 
 

@@ -378,6 +378,24 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         else:
             return super(GenericAPIView, self).get_queryset()
 
+    def get_object_or_404(self, model=None, lookup_field=None):
+        """Shortcut as a view-level get_object_or_404
+
+        This can also give a guess in the event it is called for schema generation
+        """
+        if model is None:
+            model = self.model
+        if lookup_field is None:
+            lookup_field = self.lookup_field
+
+        if lookup_field not in self.kwargs and getattr(self, 'swagger_fake_view', False):
+            # here is where we return a best-effort guess for schema generation
+            example_obj = model.objects.first()
+            if example_obj:
+                return example_obj
+        parent_filter = {lookup_field: self.kwargs[lookup_field]}
+        return get_object_or_404(model, **parent_filter)
+
     def get_description_context(self):
         # Set instance attributes needed to get serializer metadata.
         if not hasattr(self, 'request'):
@@ -494,9 +512,7 @@ class ParentMixin(object):
     def get_parent_object(self):
         if self.parent_object is not None:
             return self.parent_object
-        parent_filter = {self.lookup_field: self.kwargs.get(self.lookup_field, None)}
-        self.parent_object = get_object_or_404(self.parent_model, **parent_filter)
-        return self.parent_object
+        return self.get_object_or_404(self.parent_model)
 
     def check_parent_access(self, parent=None):
         parent = parent or self.get_parent_object()
