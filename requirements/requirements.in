@@ -39,6 +39,10 @@ maturin  # pydantic-core build dep
 msgpack<1.0.6  # 1.0.6+ requires cython>=3
 msrestazure
 openshift
+opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
+opentelemetry-sdk~=1.24
+opentelemetry-instrumentation-logging
+opentelemetry-exporter-otlp
 pexpect==4.7.0  # see library notes
 prometheus_client
 psycopg

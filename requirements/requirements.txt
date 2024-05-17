@@ -123,6 +123,11 @@ defusedxml==0.7.1
     # via
     #   python3-openid
     #   social-auth-core
+deprecated==1.2.14
+    # via
+    #   opentelemetry-api
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
 django==4.2.6
@@ -191,6 +196,12 @@ gitpython==3.1.42
     # via -r /awx_devel/requirements/requirements.in
 google-auth==2.28.1
     # via kubernetes
+googleapis-common-protos==1.63.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+grpcio==1.63.0
+    # via opentelemetry-exporter-otlp-proto-grpc
 hiredis==2.0.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -209,6 +220,7 @@ importlib-metadata==6.2.1
     # via
     #   ansible-runner
     #   markdown
+    #   opentelemetry-api
 incremental==22.10.0
     # via twisted
 inflect==7.0.0
@@ -302,6 +314,40 @@ oauthlib==3.2.2
     #   social-auth-core
 openshift==0.13.2
     # via -r /awx_devel/requirements/requirements.in
+opentelemetry-api==1.24.0
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-logging
+    #   opentelemetry-sdk
+opentelemetry-exporter-otlp==1.24.0
+    # via -r /awx_devel/requirements/requirements.in
+opentelemetry-exporter-otlp-proto-common==1.24.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-grpc==1.24.0
+    # via opentelemetry-exporter-otlp
+opentelemetry-exporter-otlp-proto-http==1.24.0
+    # via opentelemetry-exporter-otlp
+opentelemetry-instrumentation==0.45b0
+    # via opentelemetry-instrumentation-logging
+opentelemetry-instrumentation-logging==0.45b0
+    # via -r /awx_devel/requirements/requirements.in
+opentelemetry-proto==1.24.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-sdk==1.24.0
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-semantic-conventions==0.45b0
+    # via opentelemetry-sdk
 packaging==23.2
     # via
     #   ansible-runner
@@ -319,6 +365,10 @@ portalocker==2.8.2
     # via msal-extensions
 prometheus-client==0.20.0
     # via -r /awx_devel/requirements/requirements.in
+protobuf==4.25.3
+    # via
+    #   googleapis-common-protos
+    #   opentelemetry-proto
 psutil==5.9.8
     # via -r /awx_devel/requirements/requirements.in
 psycopg==3.1.18
@@ -414,6 +464,7 @@ requests==2.31.0
     #   kubernetes
     #   msal
     #   msrest
+    #   opentelemetry-exporter-otlp-proto-http
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
@@ -498,6 +549,7 @@ typing-extensions==4.9.0
     #   azure-keyvault-secrets
     #   inflect
     #   jwcrypto
+    #   opentelemetry-sdk
     #   psycopg
     #   pydantic
     #   pydantic-core
@@ -516,6 +568,10 @@ websocket-client==1.7.0
     # via kubernetes
 wheel==0.42.0
     # via -r /awx_devel/requirements/requirements.in
+wrapt==1.16.0
+    # via
+    #   deprecated
+    #   opentelemetry-instrumentation
 xmlsec==1.3.13
     # via python3-saml
 yarl==1.9.4
@@ -533,6 +589,7 @@ setuptools==69.0.2
     #   -r /awx_devel/requirements/requirements.in
     #   asciichartpy
     #   autobahn
+    #   opentelemetry-instrumentation
     #   python-daemon
     #   setuptools-rust
     #   setuptools-scm
