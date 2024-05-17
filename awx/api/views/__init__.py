@@ -68,6 +68,7 @@ from awx.main.tasks.system import send_notifications, update_inventory_computed_
 from awx.main.access import get_user_queryset
 from awx.api.generics import (
     APIView,
+    ParentMixin,
     BaseUsersList,
     CopyAPIView,
     GenericCancelView,
@@ -3711,7 +3712,7 @@ class JobJobEventsList(BaseJobEventsList):
         return job.get_event_queryset().prefetch_related('job__job_template', 'host').order_by('start_line')
 
 
-class JobJobEventsChildrenSummary(APIView):
+class JobJobEventsChildrenSummary(ParentMixin, APIView):
     renderer_classes = [JSONRenderer]
     meta_events = ('debug', 'verbose', 'warning', 'error', 'system_warning', 'deprecated')
 
