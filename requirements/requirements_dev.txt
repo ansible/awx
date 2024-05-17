@@ -31,8 +31,3 @@ debugpy
 remote-pdb
 sdb
 
-# OTEL
-opentelemetry-api==1.24.0
-opentelemetry-sdk==1.24.0
-opentelemetry-instrumentation-logging
-opentelemetry-exporter-otlp
