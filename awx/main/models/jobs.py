@@ -1146,6 +1146,7 @@ class SystemJobOptions(BaseModel):
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
         ('cleanup_sessions', _('Removes expired browser sessions from the database')),
         ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens')),
+        ('cleanup_schedules', _('Removes schedules without next run')),
     ]
 
     class Meta:
@@ -1213,7 +1214,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
             for key in unallowed_vars:
                 rejected[key] = data.pop(key)
 
-        if self.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+        if self.job_type in ('cleanup_jobs', 'cleanup_activitystream', 'cleanup_schedules'):
             if 'days' in data:
                 try:
                     if isinstance(data['days'], (bool, type(None))):

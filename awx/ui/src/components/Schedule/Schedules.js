@@ -23,6 +23,7 @@ function Schedules({
   const hasDaysToKeepField = [
     'cleanup_activitystream',
     'cleanup_jobs',
+    'cleanup_schedules',
   ].includes(resource?.job_type);
 
   return (
