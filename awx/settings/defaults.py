@@ -9,9 +9,10 @@ import tempfile
 import socket
 from datetime import timedelta
 
+from split_settings.tools import include
+
 # python-ldap
 import ldap
-from split_settings.tools import include
 
 
 DEBUG = True
@@ -360,6 +361,7 @@ INSTALLED_APPS = [
     'ansible_base.jwt_consumer',
     'ansible_base.resource_registry',
     'ansible_base.rbac',
+    'ansible_base.authentication',
 ]
 
 
@@ -371,6 +373,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication',
+        'ansible_base.authentication.session.SessionAuthentication',
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
@@ -390,6 +393,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
+    'ansible_base.authentication.backend.AnsibleBaseAuth',
     'awx.sso.backends.LDAPBackend',
     'awx.sso.backends.LDAPBackend1',
     'awx.sso.backends.LDAPBackend2',
@@ -914,6 +918,7 @@ LOGGING = {
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'ansible_base': {'handlers': ['console'], 'level': 'DEBUG'},
     },
 }
 
@@ -1011,6 +1016,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'ansible_base.authentication.middleware.AuthenticatorBackendMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
