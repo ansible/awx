@@ -2,10 +2,21 @@ receivers:
   otlp:
     protocols:
       grpc:
+      http:
 
 exporters:
   debug:
     verbosity: detailed
+
+  file:
+    path: /awx-logs/awx-logs.json.zstd
+    rotation:
+      max_days: 14
+      localtime: false
+      max_megabytes: 300
+      max_backups: 200
+    format: json
+    compression: zstd
 
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
@@ -32,7 +43,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [loki]
+      exporters: [file, loki]
 
   extensions:
     - health_check
