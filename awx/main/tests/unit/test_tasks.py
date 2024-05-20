@@ -137,10 +137,10 @@ def test_send_notifications_not_list():
 
 
 def test_send_notifications_job_id(mocker):
-    with mocker.patch('awx.main.models.UnifiedJob.objects.get'):
-        system.send_notifications([], job_id=1)
-        assert UnifiedJob.objects.get.called
-        assert UnifiedJob.objects.get.called_with(id=1)
+    mocker.patch('awx.main.models.UnifiedJob.objects.get')
+    system.send_notifications([], job_id=1)
+    assert UnifiedJob.objects.get.called
+    assert UnifiedJob.objects.get.called_with(id=1)
 
 
 @mock.patch('awx.main.models.UnifiedJob.objects.get')

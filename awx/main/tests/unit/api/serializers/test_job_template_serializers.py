@@ -107,10 +107,10 @@ class TestJobTemplateSerializerGetSummaryFields:
         view.kwargs = {}
         serializer.context['view'] = view
 
-        with mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie'):
-            with mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar'):
-                with mocker.patch("awx.main.access.JobTemplateAccess.can_copy", return_value='foo'):
-                    response = serializer.get_summary_fields(jt_obj)
+        mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie')
+        mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar')
+        mocker.patch("awx.main.access.JobTemplateAccess.can_copy", return_value='foo')
+        response = serializer.get_summary_fields(jt_obj)
 
         assert response['user_capabilities']['copy'] == 'foo'
         assert response['user_capabilities']['edit'] == 'foobar'
