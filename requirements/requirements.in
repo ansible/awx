@@ -55,6 +55,7 @@ python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
 python-ldap
 pyyaml>=6.0.1
+pyzstd
 receptorctl
 social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
 social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
