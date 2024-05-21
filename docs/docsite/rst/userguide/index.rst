@@ -29,6 +29,7 @@ You can also find lots of AWX discussion and get answers to questions at `forum.
    organizations
    users
    teams
+   rbac
    credentials
    credential_types
    credential_plugins
