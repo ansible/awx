@@ -29,30 +29,28 @@ class AWSSNSBackend(AWXBaseEmailBackend, CustomNotificationBase):
     default_messages = WebhookBackend.default_messages
 
     def __init__(self, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token, fail_silently=False, **kwargs):
-        self.aws_region = aws_region
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
-        self.aws_session_token = aws_session_token
+        session = boto3.session.Session()
+        client_config = {"service_name": 'sns'}
+        if aws_region:
+            client_config["region_name"] = aws_region
+        if aws_secret_access_key:
+            client_config["aws_secret_access_key"] = aws_secret_access_key
+        if aws_access_key_id:
+            client_config["aws_access_key_id"] = aws_access_key_id
+        if aws_session_token:
+            client_config["aws_session_token"] = aws_session_token
+        self.client = session.client(**client_config)
         super(AWSSNSBackend, self).__init__(fail_silently=fail_silently)
+
+    def _sns_publish(self, topic_arn, message):
+        self.client.publish(TopicArn=topic_arn, Message=message, MessageAttributes={})
 
     def send_messages(self, messages):
         sent_messages = 0
-        session = boto3.session.Session()
-        client_config = {"service_name": 'sns'}
-        if self.aws_region:
-            client_config["region_name"] = self.aws_region
-        if self.aws_secret_access_key:
-            client_config["aws_secret_access_key"] = self.aws_secret_access_key
-        if self.aws_access_key_id:
-            client_config["aws_access_key_id"] = self.aws_access_key_id
-        if self.aws_session_token:
-            client_config["aws_session_token"] = self.aws_session_token
-        client = session.client(**client_config)
-
         for message in messages:
             sns_topic_arn = str(message.recipients()[0])
             try:
-                client.publish(TopicArn=sns_topic_arn, Message=json.dumps(message.body), MessageAttributes={})
+                self._sns_publish(topic_arn=sns_topic_arn, message=json.dumps(message.body))
                 sent_messages += 1
             except ClientError as error:
                 if not self.fail_silently:
