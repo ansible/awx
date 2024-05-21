@@ -95,7 +95,7 @@ class WebsocketRelayConnection:
         except asyncio.CancelledError:
             # TODO: Check if connected and disconnect
             # Possibly use run_until_complete() if disconnect is async
-            logger.warning(f"Connection from {self.name} to {self.remote_host} cancelled.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} canceled.")
         except client_exceptions.ClientConnectorError as e:
             logger.warning(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.", exc_info=True)
         except asyncio.TimeoutError:
@@ -283,7 +283,7 @@ class WebSocketRelayManager(object):
             except asyncio.TimeoutError:
                 logger.warning(f"Tried to cancel relay connection for {hostname} but it timed out during cleanup.")
             except asyncio.CancelledError:
-                # Handle the case where the task was already cancelled by the time we got here.
+                # Handle the case where the task was already canceled by the time we got here.
                 pass
 
             del self.relay_connections[hostname]

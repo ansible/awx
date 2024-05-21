@@ -40,7 +40,7 @@ function DraggableSelectedList({ selected, onRemove, onRowDrag }) {
   };
 
   const onDragCancel = () => {
-    setLiveText(t`Dragging cancelled. List is unchanged.`);
+    setLiveText(t`Dragging canceled. List is unchanged.`);
     setIsDragging(false);
   };
 
