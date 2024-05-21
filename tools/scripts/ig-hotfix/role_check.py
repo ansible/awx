@@ -98,8 +98,8 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
             plus.add(p)
 
     if plus:
-        plus = [f"{x.content_type!r} {x.object_id} {x.role_field}" for x in plus]
-        sys.stderr.write(f"Role id={r.id} has cross-linked parents: {plus}\n")
+        plus_repr = [f"{x.content_type!r} {x.object_id} {x.role_field}" for x in plus]
+        sys.stderr.write(f"Role id={r.id} has cross-linked parents: {plus_repr}\n")
         crosslinked_parents[r.id].extend(x.id for x in plus)
 
     try:
