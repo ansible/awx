@@ -605,7 +605,11 @@ class ControllerAPIModule(ControllerModule):
         return {'status_code': status_code, 'json': response_json}
 
     def api_path(self):
-        prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
+
+        default_api_path = "/api/"
+        if self._COLLECTION_TYPE != "awx":
+            default_api_path = "/api/controller/"
+        prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', default_api_path)
         return prefix
 
     def authenticate(self, **kwargs):
