@@ -14,12 +14,14 @@ export default function connectJobSocket({ type, id }, onMessage) {
       .split(';')
       .shift();
     const eventGroup = `${type}_events`;
-    ws.send(
-      JSON.stringify({
-        xrftoken,
-        groups: { jobs: ['summary', 'status_changed'], [eventGroup]: [id] },
-      })
-    );
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          xrftoken,
+          groups: { jobs: ['summary', 'status_changed'], [eventGroup]: [id] },
+        })
+      );
+    }
   };
 
   ws.onmessage = (e) => {
