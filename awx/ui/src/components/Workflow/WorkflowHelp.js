@@ -12,7 +12,7 @@ const Inner = styled.div`
   border-radius: 2px;
   color: white;
   left: 10px;
-  max-width: 300px;
+  max-width: 500px;
   padding: 5px 10px;
   position: absolute;
   top: 10px;
