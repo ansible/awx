@@ -125,16 +125,24 @@ sys.stderr.write('===================================\n')
 
 
 print(f"""\
+from collections import Counter
+
 from django.contrib.contenttypes.models import ContentType
 
 from awx.main.models.rbac import Role
+
+
+delete_counts = Counter()
+update_counts = Counter()
 
 """)
 
 print("# Role objects that are assigned to objects that do not exist")
 for r in orphaned_roles:
-    print(f"Role.objects.filter(id={r}).update(object_id=None)")
-    print(f"Role.objects.filter(id={r}).delete()")
+    print(f"c = Role.objects.filter(id={r}).update(object_id=None)")
+    print("update_counts.update({'main.Role': c})")
+    print(f"_, c = Role.objects.filter(id={r}).delete()")
+    print("delete_counts.update(c)")
 
 
 print("\n")
@@ -145,12 +153,16 @@ print("queue = []\n")
 for ct, objs in crosslinked.items():
     print(f"cls = ContentType.objects.get(id={ct}).model_class()\n")
     for obj, kv in objs.items():
-        print(f"cls.objects.filter(id={obj}).update(**{kv!r})")
+        print(f"c = cls.objects.filter(id={obj}).update(**{kv!r})")
+        print("update_counts.update({repr(cls): c})")
         print(f"queue.append((cls, {obj}))")
 
 for child, parents in crosslinked_parents.items():
     print(f"\n\nr = Role.objects.get(id={child})")
     print(f"r.parents.remove(*Role.objects.filter(id__in={parents!r}))")
+
+print('print("Objects deleted:", delete_counts)')
+print('print("Objects updated:", update_counts)')
 
 print(f"\n\nfor cls, obj_id in queue:")
 print(f"    obj = cls.objects.get(id=obj_id)")
