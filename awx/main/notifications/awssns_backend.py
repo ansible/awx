@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
+from awx.main.notifications.webhook_backend import WebhookBackend
 
 logger = logging.getLogger('awx.main.notifications.awssns_backend')
 WEBSOCKET_TIMEOUT = 30
@@ -25,7 +26,7 @@ class AWSSNSBackend(AWXBaseEmailBackend, CustomNotificationBase):
     sender_parameter = None
 
     DEFAULT_BODY = "{{ job_metadata }}"
-    default_messages = CustomNotificationBase.default_messages
+    default_messages = WebhookBackend.default_messages
 
     def __init__(self, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token, fail_silently=False, **kwargs):
         session = boto3.session.Session()

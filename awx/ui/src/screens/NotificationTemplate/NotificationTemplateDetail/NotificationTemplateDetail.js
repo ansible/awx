@@ -82,9 +82,8 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
       } = await NotificationTemplatesAPI.test(template.id);
 
       async function pollForStatusChange() {
-        const { data: notification } = await NotificationsAPI.readDetail(
-          notificationId
-        );
+        const { data: notification } =
+          await NotificationsAPI.readDetail(notificationId);
         if (notification.status !== 'pending') {
           setTestStatus(notification.status);
           return;
@@ -474,7 +473,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
 }
 
 function CustomMessageDetails({ messages, defaults, type }) {
-  const showMessages =  !(['awssns', 'webhook'].includes(type));
+  const showMessages = !['awssns', 'webhook'].includes(type);
   const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
 
   return (
