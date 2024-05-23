@@ -8,7 +8,6 @@ from botocore.exceptions import ClientError
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
-from awx.main.notifications.webhook_backend import WebhookBackend
 
 logger = logging.getLogger('awx.main.notifications.awssns_backend')
 WEBSOCKET_TIMEOUT = 30
@@ -26,7 +25,7 @@ class AWSSNSBackend(AWXBaseEmailBackend, CustomNotificationBase):
     sender_parameter = None
 
     DEFAULT_BODY = "{{ job_metadata }}"
-    default_messages = WebhookBackend.default_messages
+    default_messages = CustomNotificationBase.job_metadata_messages
 
     def __init__(self, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token, fail_silently=False, **kwargs):
         session = boto3.session.Session()
@@ -45,12 +44,24 @@ class AWSSNSBackend(AWXBaseEmailBackend, CustomNotificationBase):
     def _sns_publish(self, topic_arn, message):
         self.client.publish(TopicArn=topic_arn, Message=message, MessageAttributes={})
 
+    def format_body(self, body):
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                pass
+
+        if isinstance(body, dict):
+            body = json.dumps(body)
+        # convert dict body to json string
+        return body
+
     def send_messages(self, messages):
         sent_messages = 0
         for message in messages:
             sns_topic_arn = str(message.recipients()[0])
             try:
-                self._sns_publish(topic_arn=sns_topic_arn, message=json.dumps(message.body))
+                self._sns_publish(topic_arn=sns_topic_arn, message=message.body)
                 sent_messages += 1
             except ClientError as error:
                 if not self.fail_silently:

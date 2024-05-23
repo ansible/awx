@@ -474,7 +474,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
 
 function CustomMessageDetails({ messages, defaults, type }) {
   const showMessages = !['awssns', 'webhook'].includes(type);
-  const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
+  const showBodies = ['email', 'pagerduty', 'webhook', 'awssns'].includes(type);
 
   return (
     <>

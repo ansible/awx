@@ -11,7 +11,7 @@ from . import page
 
 
 job_results = ('any', 'error', 'success')
-notification_types = ('email', 'irc', 'pagerduty', 'slack', 'twilio', 'webhook', 'mattermost', 'grafana', 'rocketchat')
+notification_types = ('awssns', 'email', 'irc', 'pagerduty', 'slack', 'twilio', 'webhook', 'mattermost', 'grafana', 'rocketchat')
 
 
 class NotificationTemplate(HasCopy, HasCreate, base.Base):
