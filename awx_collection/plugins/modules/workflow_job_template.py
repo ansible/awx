@@ -658,7 +658,7 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
                 )['id']
 
         # Two lookup methods are used based on a fix added in 21.11.0, and the awx export model
-        if 'inventory' in workflow_node:
+        if 'inventory' in workflow_node and workflow_node['inventory'] is None:
             if 'name' in workflow_node['inventory']:
                 inv_lookup_data = {}
                 if 'organization' in workflow_node['inventory']:
