@@ -107,7 +107,7 @@ class ControllerModule(AnsibleModule):
         # Perform magic depending on whether controller_oauthtoken is a string or a dict
         if self.params.get('controller_oauthtoken'):
             token_param = self.params.get('controller_oauthtoken')
-            if type(token_param) is dict:
+            if isinstance(token_param, dict):
                 if 'token' in token_param:
                     self.oauth_token = self.params.get('controller_oauthtoken')['token']
                 else:
@@ -215,7 +215,7 @@ class ControllerModule(AnsibleModule):
                 try:
                     config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
                     # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-                    if type(config_data) is not dict:
+                    if not isinstance(config_data, dict):
                         raise AssertionError("The yaml config file is not properly formatted as a dict.")
                     try_config_parsing = False
 
@@ -257,7 +257,7 @@ class ControllerModule(AnsibleModule):
             if honorred_setting in config_data:
                 # Veriffy SSL must be a boolean
                 if honorred_setting == 'verify_ssl':
-                    if type(config_data[honorred_setting]) is str:
+                    if isinstance(config_data[honorred_setting], str):
                         setattr(self, honorred_setting, strtobool(config_data[honorred_setting]))
                     else:
                         setattr(self, honorred_setting, bool(config_data[honorred_setting]))

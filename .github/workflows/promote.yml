@@ -29,7 +29,7 @@ jobs:
       - name: Set GitHub Env vars if release event
         if: ${{ github.event_name == 'release' }}
         run: |
-          echo "TAG_NAME=${{ env.TAG_NAME }}" >> $GITHUB_ENV
+          echo "TAG_NAME=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
 
       - name: Checkout awx
         uses: actions/checkout@v3

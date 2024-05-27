@@ -22,7 +22,7 @@ Once you have a local copy, run the commands in the following sections from the 
 
 Here are the main `make` targets:
 
-- `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target
+- `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target. You can skip this target if you want to use the latest [ghcr.io/ansible/awx_devel:devel](https://github.com/ansible/awx/pkgs/container/awx_devel) image rather than build a new one.
 - `docker-compose` - make target for development, passes awx_devel image and tag
 
 Notable files:
