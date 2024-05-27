@@ -9,6 +9,7 @@ minikube_container_group: false
 receptor_socket_file: /var/run/awx-receptor/receptor.sock
 receptor_image: quay.io/ansible/receptor:devel
 ingress_path: /
+api_urlpattern_prefix: ''
 
 # Keys for signing work
 receptor_rsa_bits: 4096
@@ -59,3 +60,7 @@ scrape_interval: '5s'
 enable_pgbouncer: false
 pgbouncer_port: 6432
 pgbouncer_max_pool_size: 70
+
+# editable_dependencies
+install_editable_dependencies: false
+editable_dependencies: []

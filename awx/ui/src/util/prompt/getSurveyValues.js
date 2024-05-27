@@ -1,7 +1,7 @@
 export default function getSurveyValues(values) {
   const surveyValues = {};
   Object.keys(values).forEach((key) => {
-    if (key.startsWith('survey_') && values[key] !== []) {
+    if (key.startsWith('survey_')) {
       if (Array.isArray(values[key]) && values[key].length === 0) {
         return;
       }

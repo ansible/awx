@@ -417,7 +417,7 @@ def handle_removed_image(remove_images=None):
 
 @task(queue=get_task_queuename)
 def cleanup_images_and_files():
-    _cleanup_images_and_files()
+    _cleanup_images_and_files(image_prune=True)
 
 
 @task(queue=get_task_queuename)

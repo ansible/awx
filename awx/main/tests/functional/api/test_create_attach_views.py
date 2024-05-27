@@ -9,8 +9,8 @@ def test_user_role_view_access(rando, inventory, mocker, post):
     role_pk = inventory.admin_role.pk
     data = {"id": role_pk}
     mock_access = mocker.MagicMock(can_attach=mocker.MagicMock(return_value=False))
-    with mocker.patch('awx.main.access.RoleAccess', return_value=mock_access):
-        post(url=reverse('api:user_roles_list', kwargs={'pk': rando.pk}), data=data, user=rando, expect=403)
+    mocker.patch('awx.main.access.RoleAccess', return_value=mock_access)
+    post(url=reverse('api:user_roles_list', kwargs={'pk': rando.pk}), data=data, user=rando, expect=403)
     mock_access.can_attach.assert_called_once_with(inventory.admin_role, rando, 'members', data, skip_sub_obj_read_check=False)
 
 
@@ -21,8 +21,8 @@ def test_team_role_view_access(rando, team, inventory, mocker, post):
     role_pk = inventory.admin_role.pk
     data = {"id": role_pk}
     mock_access = mocker.MagicMock(can_attach=mocker.MagicMock(return_value=False))
-    with mocker.patch('awx.main.access.RoleAccess', return_value=mock_access):
-        post(url=reverse('api:team_roles_list', kwargs={'pk': team.pk}), data=data, user=rando, expect=403)
+    mocker.patch('awx.main.access.RoleAccess', return_value=mock_access)
+    post(url=reverse('api:team_roles_list', kwargs={'pk': team.pk}), data=data, user=rando, expect=403)
     mock_access.can_attach.assert_called_once_with(inventory.admin_role, team, 'member_role.parents', data, skip_sub_obj_read_check=False)
 
 
@@ -33,8 +33,8 @@ def test_role_team_view_access(rando, team, inventory, mocker, post):
     role_pk = inventory.admin_role.pk
     data = {"id": team.pk}
     mock_access = mocker.MagicMock(return_value=False, __name__='mocked')
-    with mocker.patch('awx.main.access.RoleAccess.can_attach', mock_access):
-        post(url=reverse('api:role_teams_list', kwargs={'pk': role_pk}), data=data, user=rando, expect=403)
+    mocker.patch('awx.main.access.RoleAccess.can_attach', mock_access)
+    post(url=reverse('api:role_teams_list', kwargs={'pk': role_pk}), data=data, user=rando, expect=403)
     mock_access.assert_called_once_with(inventory.admin_role, team, 'member_role.parents', data, skip_sub_obj_read_check=False)
 
 

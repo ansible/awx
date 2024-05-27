@@ -150,7 +150,7 @@ The easiest and most common way to obtain an OAuth 2 token is to create a person
 
 ::
 
-    curl -XPOST -k -H "Content-type: application/json" -d '{"description":"Personal AWX CLI token", "application":null, "scope":"write"}' https://<USERNAME>:<PASSWORD>@<AWX_SERVER>/api/v2/users/<USER_ID>/personal_tokens/ | python -m json.tool
+    curl -H "Content-type: application/json" -d '{"description":"Personal AWX CLI token", "application":null, "scope":"write"}' https://<USERNAME>:<PASSWORD>@<AWX_SERVER>/api/v2/users/<USER_ID>/personal_tokens/ | python -m json.tool
 
 You could also pipe the JSON output through ``jq``, if installed.
 
@@ -159,7 +159,7 @@ Following is an example of using the personal token to access an API endpoint us
 
 ::
 
-	curl -k -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -X POST  -d '{}' https://awx/api/v2/job_templates/5/launch/
+	curl -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d '{}' https://awx/api/v2/job_templates/5/launch/
 
 
 In AWX, the OAuth 2 system is built on top of the `Django Oauth Toolkit`_, which provides dedicated endpoints for authorizing, revoking, and refreshing tokens. These endpoints can be found under the ``/api/v2/users/<USER_ID>/personal_tokens/`` endpoint, which also provides detailed examples on some typical usage of those endpoints. These special OAuth 2 endpoints only support using the ``x-www-form-urlencoded`` **Content-type**, so none of the ``api/o/*`` endpoints accept ``application/json``. 
@@ -217,7 +217,7 @@ This returns a <token-value> that you can use to authenticate with for future re
 
 ::
 
-    curl -H "Authorization: Bearer <token-value>" -H "Content-Type: application/json" -X GET https://<awx>/api/v2/users/ 
+    curl -H "Authorization: Bearer <token-value>" -H "Content-Type: application/json" https://<awx>/api/v2/users/ 
 
 
 The ``-k`` flag may be needed if you have not set up a CA yet and are using SSL.
@@ -227,14 +227,14 @@ To revoke a token, you can make a DELETE on the detail page for that token, usin
 
 ::
 
-    curl -ku <user>:<password> -X DELETE https://<awx>/api/v2/tokens/<pk>/
+    curl -u <user>:<password> -X DELETE https://<awx>/api/v2/tokens/<pk>/
 
 
 Similarly, using a token:
 
 ::
 
-    curl -H "Authorization: Bearer <token-value>" -X DELETE https://<awx>/api/v2/tokens/<pk>/ -k
+    curl -H "Authorization: Bearer <token-value>" -X DELETE https://<awx>/api/v2/tokens/<pk>/
 
 
 .. _ag_oauth2_token_auth_grant_types:
@@ -336,8 +336,7 @@ Logging in is not required for ``password`` grant type, so you can simply use cu
 
   .. code-block:: text
 
-      curl -k --user <user>:<password> -H "Content-type: application/json" \
-      -X POST \
+      curl --user <user>:<password> -H "Content-type: application/json" \
       --data '{
           "description": "Token for Nagios Monitoring app",
           "application": 1,
@@ -398,7 +397,7 @@ The ``/api/o/token/`` endpoint is used for refreshing the access token:
 
 ::
 
-    curl -X POST \
+    curl \
         -d "grant_type=refresh_token&refresh_token=AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z" \
         -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
         http://<awx>/api/o/token/ -i
@@ -441,7 +440,7 @@ Revoking an access token by this method is the same as deleting the token resour
 
 ::
 
-    curl -X POST -d "token=rQONsve372fQwuc2pn76k3IHDCYpi7" \
+    curl -d "token=rQONsve372fQwuc2pn76k3IHDCYpi7" \
     -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
     http://<awx>/api/o/revoke_token/ -i
 
@@ -455,7 +454,7 @@ Revoking an access token by this method is the same as deleting the token resour
   The **Allow External Users to Create Oauth2 Tokens** (``ALLOW_OAUTH2_FOR_EXTERNAL_USERS`` in the API) setting is disabled by default. External users refer to users authenticated externally with a service like LDAP, or any of the other SSO services. This setting ensures external users cannot *create* their own tokens. If you enable then disable it, any tokens created by external users in the meantime will still exist, and are not automatically revoked.
 
 
-Alternatively, you can use the ``manage`` utility, :ref:`ag_manage_utility_revoke_tokens`, to revoke tokens as described in the the :ref:`ag_token_utility` section. 
+Alternatively, you can use the ``manage`` utility, :ref:`ag_manage_utility_revoke_tokens`, to revoke tokens as described in the :ref:`ag_token_utility` section.
 
 
 This setting can be configured at the system-level in the AWX User Interface: 

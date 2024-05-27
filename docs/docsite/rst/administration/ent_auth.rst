@@ -17,7 +17,7 @@ This section describes setting up authentication for the following enterprise sy
 
    For LDAP authentication, see :ref:`ag_auth_ldap`.
 
-SAML, RADIUS, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
+Azure, RADIUS, SAML, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
 
 - Enterprise users can only be created via the first successful login attempt from remote authentication backend.
 - Enterprise users cannot be created/authenticated if non-enterprise users with the same name has already been created in AWX.
@@ -557,7 +557,7 @@ Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol th
 
 Generic OIDC settings
 ----------------------
-Similar to SAML, OpenID Connect (OIDC) is uses the OAuth 2.0 framework. It allows third-party applications to verify the identity and obtain basic end-user information. The main difference between OIDC and SMAL is that SAML has a service provider (SP)-to-IdP trust relationship, whereas OIDC establishes the trust with the channel (HTTPS) that is used to obtain the security token. To obtain the credentials needed to setup OIDC with AWX, refer to the documentation from the identity provider (IdP) of your choice that has OIDC support.
+Similar to SAML, OpenID Connect (OIDC) is uses the OAuth 2.0 framework. It allows third-party applications to verify the identity and obtain basic end-user information. The main difference between OIDC and SAML is that SAML has a service provider (SP)-to-IdP trust relationship, whereas OIDC establishes the trust with the channel (HTTPS) that is used to obtain the security token. To obtain the credentials needed to setup OIDC with AWX, refer to the documentation from the identity provider (IdP) of your choice that has OIDC support.
 
 To configure OIDC in AWX:
 

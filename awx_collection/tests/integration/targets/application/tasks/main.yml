@@ -103,6 +103,7 @@
     - assert:
         that:
           - "result is changed"
+          - "'client_secret' in result"
 
     - name: Rename an inventory
       application:

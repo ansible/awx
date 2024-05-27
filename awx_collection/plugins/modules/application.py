@@ -121,6 +121,7 @@ def main():
     client_type = module.params.get('client_type')
     organization = module.params.get('organization')
     redirect_uris = module.params.get('redirect_uris')
+    skip_authorization = module.params.get('skip_authorization')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -146,9 +147,15 @@ def main():
         application_fields['description'] = description
     if redirect_uris is not None:
         application_fields['redirect_uris'] = ' '.join(redirect_uris)
+    if skip_authorization is not None:
+        application_fields['skip_authorization'] = skip_authorization
 
-    # If the state was present and we can let the module build or update the existing application, this will return on its own
-    module.create_or_update_if_needed(application, application_fields, endpoint='applications', item_type='application')
+    response = module.create_or_update_if_needed(application, application_fields, endpoint='applications', item_type='application', auto_exit=False)
+    if 'client_id' in response:
+        module.json_output['client_id'] = response['client_id']
+    if 'client_secret' in response:
+        module.json_output['client_secret'] = response['client_secret']
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
