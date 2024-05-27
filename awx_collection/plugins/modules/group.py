@@ -5,7 +5,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-
+import yaml
 __metaclass__ = type
 
 
@@ -148,8 +148,12 @@ def main():
     }
     if description is not None:
         group_fields['description'] = description
+
     if variables is not None:
-        group_fields['variables'] = json.dumps(variables)
+      if variables != {}:
+        group_fields['variables'] = yaml.dump(variables, explicit_start=True)
+      else:
+        group_fields['variables'] = '---'
 
     association_fields = {}
     for resource, relationship in (('hosts', 'hosts'), ('groups', 'children')):

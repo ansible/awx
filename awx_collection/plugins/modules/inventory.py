@@ -5,7 +5,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-
+import yaml
 __metaclass__ = type
 
 
@@ -201,8 +201,12 @@ def main():
         inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
     if description is not None:
         inventory_fields['description'] = description
+
     if variables is not None:
-        inventory_fields['variables'] = json.dumps(variables)
+      if variables != {}:
+        inventory_fields['variables'] = yaml.dump(variables, explicit_start=True)
+      else:
+        inventory_fields['variables'] = '---'
 
     association_fields = {}
 

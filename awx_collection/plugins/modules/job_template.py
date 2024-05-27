@@ -5,7 +5,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-
+import yaml
 __metaclass__ = type
 
 
@@ -549,8 +549,12 @@ def main():
 
     # Special treatment of extra_vars parameter
     extra_vars = module.params.get('extra_vars')
+
     if extra_vars is not None:
-        new_fields['extra_vars'] = json.dumps(extra_vars)
+      if extra_vars != {}:
+        new_fields['extra_vars'] = yaml.dump(extra_vars, explicit_start=True)
+      else:
+        new_fields['extra_vars'] = '---'
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory = module.params.get('inventory')

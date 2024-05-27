@@ -5,7 +5,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-
+import yaml
 __metaclass__ = type
 
 
@@ -295,8 +295,13 @@ def main():
             inventory_source_fields[field_name] = field_val
 
     # Attempt to JSON encode source vars
-    if inventory_source_fields.get('source_vars', None):
-        inventory_source_fields['source_vars'] = dumps(inventory_source_fields['source_vars'])
+    source_vars = inventory_source_fields.get('source_vars', None)
+
+    if source_vars is not None:
+      if source_vars != {}:
+        inventory_source_fields['source_vars'] = yaml.dump(source_vars, explicit_start=True)
+      else:
+        inventory_source_fields['source_vars'] = '---'
 
     # Sanity check on arguments
     if state == 'present' and not inventory_source_object and not inventory_source_fields['source']:
