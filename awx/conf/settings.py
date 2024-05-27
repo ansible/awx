@@ -1,6 +1,7 @@
 # Python
 import contextlib
 import logging
+import psycopg
 import threading
 import time
 import os
@@ -13,7 +14,7 @@ from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured, SynchronousOnlyOperation
 from django.db import transaction, connection
-from django.db.utils import Error as DBError, ProgrammingError
+from django.db.utils import DatabaseError, ProgrammingError
 from django.utils.functional import cached_property
 
 # Django REST Framework
@@ -80,18 +81,26 @@ def _ctit_db_wrapper(trans_safe=False):
                     logger.debug('Obtaining database settings in spite of broken transaction.')
                     transaction.set_rollback(False)
         yield
-    except DBError as exc:
+    except ProgrammingError as e:
+        # Exception raised for programming errors
+        # Examples may be table not found or already exists,
+        # this generally means we can't fetch Tower configuration
+        # because the database hasn't actually finished migrating yet;
+        # this is usually a sign that a service in a container (such as ws_broadcast)
+        # has come up *before* the database has finished migrating, and
+        # especially that the conf.settings table doesn't exist yet
+        # syntax error in the SQL statement, wrong number of parameters specified, etc.
         if trans_safe:
-            level = logger.warning
-            if isinstance(exc, ProgrammingError):
-                if 'relation' in str(exc) and 'does not exist' in str(exc):
-                    # this generally means we can't fetch Tower configuration
-                    # because the database hasn't actually finished migrating yet;
-                    # this is usually a sign that a service in a container (such as ws_broadcast)
-                    # has come up *before* the database has finished migrating, and
-                    # especially that the conf.settings table doesn't exist yet
-                    level = logger.debug
-            level(f'Database settings are not available, using defaults. error: {str(exc)}')
+            logger.debug(f'Database settings are not available, using defaults. error: {str(e)}')
+        else:
+            logger.exception('Error modifying something related to database settings.')
+    except DatabaseError as e:
+        if trans_safe:
+            cause = e.__cause__
+            if cause and hasattr(cause, 'sqlstate'):
+                sqlstate = cause.sqlstate
+                sqlstate_str = psycopg.errors.lookup(sqlstate)
+                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
         else:
             logger.exception('Error modifying something related to database settings.')
     finally:

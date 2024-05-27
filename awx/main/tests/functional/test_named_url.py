@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-from unittest import mock
-
 import pytest
 
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
 from awx.api.versioning import reverse
@@ -23,25 +20,6 @@ from awx.main.models import (  # noqa
     User,
     WorkflowJobTemplate,
 )
-from awx.conf import settings_registry
-
-
-def setup_module(module):
-    # In real-world scenario, named url graph structure is populated by __init__
-    # of URLModificationMiddleware. The way Django bootstraps ensures the initialization
-    # will happen *once and only once*, while the number of initialization is uncontrollable
-    # in unit test environment. So it is wrapped by try-except block to mute any
-    # unwanted exceptions.
-    try:
-        URLModificationMiddleware(mock.Mock())
-    except ImproperlyConfigured:
-        pass
-
-
-def teardown_module(module):
-    # settings_registry will be persistent states unless we explicitly clean them up.
-    settings_registry.unregister('NAMED_URL_FORMATS')
-    settings_registry.unregister('NAMED_URL_GRAPH_NODES')
 
 
 @pytest.mark.django_db

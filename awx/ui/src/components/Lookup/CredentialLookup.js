@@ -32,7 +32,6 @@ const QS_CONFIG = getQSConfig('credentials', {
 function CredentialLookup({
   autoPopulate,
   credentialTypeId,
-  credentialTypeIds,
   credentialTypeKind,
   credentialTypeNamespace,
   fieldName,
@@ -62,9 +61,6 @@ function CredentialLookup({
       const typeIdParams = credentialTypeId
         ? { credential_type: credentialTypeId }
         : {};
-      const typeIdsParams = credentialTypeIds
-        ? { credential_type__in: credentialTypeIds.join() }
-        : {};
       const typeKindParams = credentialTypeKind
         ? { credential_type__kind: credentialTypeKind }
         : {};
@@ -76,7 +72,6 @@ function CredentialLookup({
         CredentialsAPI.read(
           mergeParams(params, {
             ...typeIdParams,
-            ...typeIdsParams,
             ...typeKindParams,
             ...typeNamespaceParams,
           })
@@ -106,7 +101,6 @@ function CredentialLookup({
       autoPopulate,
       autoPopulateLookup,
       credentialTypeId,
-      credentialTypeIds,
       credentialTypeKind,
       credentialTypeNamespace,
       history.location.search,

@@ -12,6 +12,7 @@ const GridDL = styled.dl`
   column-gap: 15px;
   display: grid;
   grid-template-columns: max-content;
+  overflow-wrap: anywhere;
   row-gap: 0px;
   dt {
     grid-column-start: 1;

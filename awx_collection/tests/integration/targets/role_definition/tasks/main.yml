@@ -1,0 +1,30 @@
+---
+- name: Create Role Definition
+  role_definition:
+    name: test_view_jt
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete Role Definition
+  role_definition:
+    name: test_view_jt
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
