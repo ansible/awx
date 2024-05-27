@@ -17,7 +17,9 @@ Administrators use LDAP as a source for account authentication information for A
 
 When so configured, a user who logs in with an LDAP username and password automatically gets an AWX account created for them and they can be automatically placed into organizations as either regular users or organization administrators.
 
-Users created via an LDAP login cannot change their username, first name, last name, or set a local password for themselves. This is also tunable to restrict editing of other field names.
+Users created locally in the user interface, take precedence over those logging into controller for their first time with an alternative authentication solution. You must delete the local user if you want to re-use it with another authentication method, such as LDAP.
+
+Users created through an LDAP login cannot change their username, given name, surname, or set a local password for themselves. You can also configure this to restrict editing of other field names.
 
 To configure LDAP integration for AWX:
 
@@ -84,7 +86,7 @@ Here ``CN=josie,CN=users,DC=website,DC=com`` is the Distinguished Name of the co
   .. _`django-auth-ldap library`: https://django-auth-ldap.readthedocs.io/en/latest/groups.html#types-of-groups
 
 
-7. The **LDAP Start TLS** is disabled by default. To enable TLS when the LDAP connection is not using SSL, click the toggle to **ON**. 
+7. The **LDAP Start TLS** is disabled by default. To enable TLS when the LDAP connection is not using SSL/TLS, click the toggle to **ON**. 
 
 .. image:: ../common/images/configure-awx-auth-ldap-start-tls.png
 

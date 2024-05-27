@@ -107,7 +107,7 @@ class ControllerModule(AnsibleModule):
         # Perform magic depending on whether controller_oauthtoken is a string or a dict
         if self.params.get('controller_oauthtoken'):
             token_param = self.params.get('controller_oauthtoken')
-            if type(token_param) is dict:
+            if isinstance(token_param, dict):
                 if 'token' in token_param:
                     self.oauth_token = self.params.get('controller_oauthtoken')['token']
                 else:
@@ -215,7 +215,7 @@ class ControllerModule(AnsibleModule):
                 try:
                     config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
                     # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-                    if type(config_data) is not dict:
+                    if not isinstance(config_data, dict):
                         raise AssertionError("The yaml config file is not properly formatted as a dict.")
                     try_config_parsing = False
 
@@ -257,7 +257,7 @@ class ControllerModule(AnsibleModule):
             if honorred_setting in config_data:
                 # Veriffy SSL must be a boolean
                 if honorred_setting == 'verify_ssl':
-                    if type(config_data[honorred_setting]) is str:
+                    if isinstance(config_data[honorred_setting], str):
                         setattr(self, honorred_setting, strtobool(config_data[honorred_setting]))
                     else:
                         setattr(self, honorred_setting, bool(config_data[honorred_setting]))
@@ -652,7 +652,7 @@ class ControllerAPIModule(ControllerModule):
         # If we have neither of these, then we can try un-authenticated access
         self.authenticated = True
 
-    def delete_if_needed(self, existing_item, on_delete=None, auto_exit=True):
+    def delete_if_needed(self, existing_item, item_type=None, on_delete=None, auto_exit=True):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,
         #   the on_delete parameter will be called as a method pasing in this object and the json from the response
@@ -664,8 +664,9 @@ class ControllerAPIModule(ControllerModule):
             # If we have an item, we can try to delete it
             try:
                 item_url = existing_item['url']
-                item_type = existing_item['type']
                 item_id = existing_item['id']
+                if not item_type:
+                    item_type = existing_item['type']
                 item_name = self.get_item_name(existing_item, allow_unknown=True)
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
@@ -907,7 +908,7 @@ class ControllerAPIModule(ControllerModule):
                     return True
         return False
 
-    def update_if_needed(self, existing_item, new_item, on_update=None, auto_exit=True, associations=None):
+    def update_if_needed(self, existing_item, new_item, item_type=None, on_update=None, auto_exit=True, associations=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
@@ -921,7 +922,8 @@ class ControllerAPIModule(ControllerModule):
             # If we have an item, we can see if it needs an update
             try:
                 item_url = existing_item['url']
-                item_type = existing_item['type']
+                if not item_type:
+                    item_type = existing_item['type']
                 if item_type == 'user':
                     item_name = existing_item['username']
                 elif item_type == 'workflow_job_template_node':
@@ -990,7 +992,7 @@ class ControllerAPIModule(ControllerModule):
                         new_item.pop(key)
 
         if existing_item:
-            return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations)
+            return self.update_if_needed(existing_item, new_item, item_type=item_type, on_update=on_update, auto_exit=auto_exit, associations=associations)
         else:
             return self.create_if_needed(
                 existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations
@@ -1036,7 +1038,10 @@ class ControllerAPIModule(ControllerModule):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
-        while not result['json']['finished']:
+        wait_on_field = 'event_processing_finished'
+        if wait_on_field not in result['json']:
+            wait_on_field = 'finished'
+        while not result['json'][wait_on_field]:
             # If we are past our time out fail with a message
             if timeout and timeout < time.time() - start:
                 # Account for Legacy messages

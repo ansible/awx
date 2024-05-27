@@ -4,7 +4,7 @@ __metaclass__ = type
 
 import pytest
 
-from awx.main.models import WorkflowJobTemplate, NotificationTemplate
+from awx.main.models import WorkflowJobTemplate, WorkflowJob, NotificationTemplate
 
 
 @pytest.mark.django_db
@@ -133,6 +133,37 @@ def test_associate_only_on_success(run_module, admin_user, organization, project
 
     assert list(wfjt.notification_templates_success.values_list('id', flat=True)) == []
     assert list(wfjt.notification_templates_error.values_list('id', flat=True)) == [nt1.id]
+
+
+@pytest.mark.django_db
+def test_workflow_launch_with_prompting(run_module, admin_user, organization, inventory):
+    WorkflowJobTemplate.objects.create(
+        name='foo-workflow-launch-test',
+        organization=organization,
+        ask_variables_on_launch=True,
+        ask_inventory_on_launch=True,
+        ask_tags_on_launch=True,
+        ask_skip_tags_on_launch=True,
+    )
+    result = run_module(
+        'workflow_launch',
+        dict(
+            name='foo-workflow-launch-test',
+            inventory=inventory.name,
+            wait=False,
+            extra_vars={"var1": "My First Variable", "var2": "My Second Variable", "var3": "My Third Variable"},
+            tags=["my_tag"],
+            skip_tags=["your_tag", "their_tag"],
+        ),
+        admin_user,
+    )
+    assert result.get('changed', True), result
+
+    job = WorkflowJob.objects.get(id=result['id'])
+    assert job.extra_vars == '{"var1": "My First Variable", "var2": "My Second Variable", "var3": "My Third Variable"}'
+    assert job.inventory == inventory
+    assert job.job_tags == "my_tag"
+    assert job.skip_tags == "your_tag,their_tag"
 
 
 @pytest.mark.django_db

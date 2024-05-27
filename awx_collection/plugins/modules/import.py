@@ -56,7 +56,7 @@ import logging
 
 # In this module we don't use EXPORTABLE_RESOURCES, we just want to validate that our installed awxkit has import/export
 try:
-    from awxkit.api.pages.api import EXPORTABLE_RESOURCES  # noqa
+    from awxkit.api.pages.api import EXPORTABLE_RESOURCES  # noqa: F401; pylint: disable=unused-import
 
     HAS_EXPORTABLE_RESOURCES = True
 except ImportError:

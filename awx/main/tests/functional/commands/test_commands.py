@@ -43,9 +43,9 @@ def run_command(name, *args, **options):
     ],
 )
 def test_update_password_command(mocker, username, password, expected, changed):
-    with mocker.patch.object(UpdatePassword, 'update_password', return_value=changed):
-        result, stdout, stderr = run_command('update_password', username=username, password=password)
-        if result is None:
-            assert stdout == expected
-        else:
-            assert str(result) == expected
+    mocker.patch.object(UpdatePassword, 'update_password', return_value=changed)
+    result, stdout, stderr = run_command('update_password', username=username, password=password)
+    if result is None:
+        assert stdout == expected
+    else:
+        assert str(result) == expected

@@ -22,7 +22,7 @@ Once you have a local copy, run the commands in the following sections from the 
 
 Here are the main `make` targets:
 
-- `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target
+- `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target. You can skip this target if you want to use the latest [ghcr.io/ansible/awx_devel:devel](https://github.com/ansible/awx/pkgs/container/awx_devel) image rather than build a new one.
 - `docker-compose` - make target for development, passes awx_devel image and tag
 
 Notable files:
@@ -354,7 +354,7 @@ We are now ready to run two one time commands to build and pre-populate the Keyc
 
 The first one time command will be creating a Keycloak database in your postgres database by running:
 ```bash
-docker exec tools_postgres_1 /usr/bin/psql -U awx --command "create database keycloak with encoding 'UTF8';"
+docker exec tools_postgres_1 /usr/bin/psql -U postgres --command 'CREATE DATABASE keycloak WITH OWNER=awx encoding "UTF8";'
 ```
 
 After running this command the following message should appear and you should be returned to your prompt:
@@ -365,7 +365,7 @@ CREATE DATABASE
 The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
 ```bash
 PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
-docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
+docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=sources_awx \
            -e DB_VENDOR=postgres -e DB_ADDR=postgres -e DB_DATABASE=keycloak -e DB_USER=awx -e DB_PASSWORD=${PG_PASSWORD} \
            quay.io/keycloak/keycloak:15.0.2
 ```
@@ -387,7 +387,7 @@ Now we are ready to configure and plumb Keycloak with AWX. To do this we have pr
 * Backup and configure the SMAL and OIDC adapter in AWX. NOTE: the private key of any existing SAML or OIDC adapters can not be backed up through the API, you need a DB backup to recover this.
 
 Before we can run the playbook we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration and on the AWX side its done through the SAML settings. The playbook requires a variable called `container_reference` to be set. The container_reference variable needs to be how your browser will be able to talk to the running containers.  Here are some examples of how to choose a proper container_reference.
-* If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The the VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.
+* If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.
 * If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container_reference.
 
 In addition, OIDC works similar but slightly differently. OIDC has browser redirection but OIDC will also communicate from the AWX docker instance to the Keycloak docker instance directly. Any hostnames you might have are likely not propagated down into the AWX container. So we need a method for both the browser and AWX container to talk to Keycloak. For this we will likely use your machines IP address. This can be passed in as a variable called `oidc_reference`. If unset this will default to container_reference which may be viable for some configurations.

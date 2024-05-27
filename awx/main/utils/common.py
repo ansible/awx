@@ -1160,14 +1160,13 @@ def create_partition(tblname, start=None):
     except (ProgrammingError, IntegrityError) as e:
         cause = e.__cause__
         if cause and hasattr(cause, 'sqlstate'):
-            # 42P07 = DuplicateTable
             sqlstate = cause.sqlstate
-            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            sqlstate_cls = psycopg.errors.lookup(sqlstate)
 
-            if psycopg.errors.DuplicateTable == sqlstate:
+            if psycopg.errors.DuplicateTable == sqlstate_cls or psycopg.errors.UniqueViolation == sqlstate_cls:
                 logger.info(f'Caught known error due to partition creation race: {e}')
             else:
-                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_cls))
                 raise
     except DatabaseError as e:
         cause = e.__cause__

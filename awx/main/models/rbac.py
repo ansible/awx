@@ -7,14 +7,30 @@ import threading
 import contextlib
 import re
 
+# django-rest-framework
+from rest_framework.serializers import ValidationError
+
+# crum to impersonate users
+from crum import impersonate
+
 # Django
 from django.db import models, transaction, connection
+from django.db.models.signals import m2m_changed
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
+from django.apps import apps
+from django.conf import settings
+
+# Ansible_base app
+from ansible_base.rbac.models import RoleDefinition
+from ansible_base.lib.utils.models import get_type_for_model
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.migrations._dab_rbac import build_role_map, get_permissions_for_role
+from awx.main.constants import role_name_to_perm_mapping, org_role_to_permission
 
 __all__ = [
     'Role',
@@ -75,6 +91,11 @@ role_descriptions = {
 }
 
 
+to_permissions = {}
+for k, v in role_name_to_perm_mapping.items():
+    to_permissions[k] = v[0].strip('_')
+
+
 tls = threading.local()  # thread local storage
 
 
@@ -86,10 +107,8 @@ def check_singleton(func):
     """
 
     def wrapper(*args, **kwargs):
-        sys_admin = Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR)
-        sys_audit = Role.singleton(ROLE_SINGLETON_SYSTEM_AUDITOR)
         user = args[0]
-        if user in sys_admin or user in sys_audit:
+        if user.is_superuser or user.is_system_auditor:
             if len(args) == 2:
                 return args[1]
             return Role.objects.all()
@@ -169,6 +188,24 @@ class Role(models.Model):
 
     def __contains__(self, accessor):
         if accessor._meta.model_name == 'user':
+            if accessor.is_superuser:
+                return True
+            if self.role_field == 'system_administrator':
+                return accessor.is_superuser
+            elif self.role_field == 'system_auditor':
+                return accessor.is_system_auditor
+            elif self.role_field in ('read_role', 'auditor_role') and accessor.is_system_auditor:
+                return True
+
+            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+                if self.content_object and self.content_object._meta.model_name == 'organization' and self.role_field in org_role_to_permission:
+                    codename = org_role_to_permission[self.role_field]
+
+                    return accessor.has_obj_perm(self.content_object, codename)
+
+                if self.role_field not in to_permissions:
+                    raise Exception(f'{self.role_field} evaluated but not a translatable permission')
+                return accessor.has_obj_perm(self.content_object, to_permissions[self.role_field])
             return self.ancestors.filter(members=accessor).exists()
         else:
             raise RuntimeError(f'Role evaluations only valid for users, received {accessor}')
@@ -279,6 +316,9 @@ class Role(models.Model):
         #   updated, and so we can terminate our loop.
         #
         #
+
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            return
 
         if len(additions) == 0 and len(removals) == 0:
             return
@@ -412,6 +452,12 @@ class Role(models.Model):
         in their organization, but some of those roles descend from
         organization admin_role, but not auditor_role.
         """
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            from ansible_base.rbac.models import RoleEvaluation
+
+            q = RoleEvaluation.objects.filter(role__in=user.has_roles.all()).values_list('object_id', 'content_type_id').query
+            return roles_qs.extra(where=[f'(object_id,content_type_id) in ({q})'])
+
         return roles_qs.filter(
             id__in=RoleAncestorEntry.objects.filter(
                 descendent__in=RoleAncestorEntry.objects.filter(ancestor_id__in=list(user.roles.values_list('id', flat=True))).values_list(
@@ -434,6 +480,13 @@ class Role(models.Model):
         return self.singleton_name in [ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]
 
 
+class AncestorManager(models.Manager):
+    def get_queryset(self):
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            raise RuntimeError('The old RBAC system has been disabled, this should never be called')
+        return super(AncestorManager, self).get_queryset()
+
+
 class RoleAncestorEntry(models.Model):
     class Meta:
         app_label = 'main'
@@ -450,6 +503,8 @@ class RoleAncestorEntry(models.Model):
     role_field = models.TextField(null=False)
     content_type_id = models.PositiveIntegerField(null=False)
     object_id = models.PositiveIntegerField(null=False)
+
+    objects = AncestorManager()
 
 
 def role_summary_fields_generator(content_object, role_field):
@@ -479,3 +534,173 @@ def role_summary_fields_generator(content_object, role_field):
     summary['name'] = role_names[role_field]
     summary['id'] = getattr(content_object, '{}_id'.format(role_field))
     return summary
+
+
+# ----------------- Custom Role Compatibility -------------------------
+# The following are methods to connect this (old) RBAC system to the new
+# system which allows custom roles
+# this follows the ORM interface layer documented in docs/rbac.md
+def get_role_codenames(role):
+    obj = role.content_object
+    if obj is None:
+        return
+    f = obj._meta.get_field(role.role_field)
+    parents, children = build_role_map(apps)
+    return [perm.codename for perm in get_permissions_for_role(f, children, apps)]
+
+
+def get_role_definition(role):
+    """Given a old-style role, this gives a role definition in the new RBAC system for it"""
+    obj = role.content_object
+    if obj is None:
+        return
+    f = obj._meta.get_field(role.role_field)
+    action_name = f.name.rsplit("_", 1)[0]
+    model_print = type(obj).__name__
+    rd_name = f'{model_print} {action_name.title()} Compat'
+    perm_list = get_role_codenames(role)
+    defaults = {
+        'content_type_id': role.content_type_id,
+        'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',
+    }
+    with impersonate(None):
+        try:
+            rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+        except ValidationError:
+            # This is a tricky case - practically speaking, users should not be allowed to create team roles
+            # or roles that include the team member permission.
+            # If we need to create this for compatibility purposes then we will create it as a managed non-editable role
+            defaults['managed'] = True
+            rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+    return rd
+
+
+def get_role_from_object_role(object_role):
+    """
+    Given an object role from the new system, return the corresponding role from the old system
+    reverses naming from get_role_definition, and the ANSIBLE_BASE_ROLE_PRECREATE setting.
+    """
+    rd = object_role.role_definition
+    if rd.name.endswith(' Compat'):
+        model_name, role_name, _ = rd.name.split()
+        role_name = role_name.lower()
+        role_name += '_role'
+    elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
+        # cases like "Organization Project Admin"
+        model_name, target_model_name, role_name = rd.name.split()
+        role_name = role_name.lower()
+        model_cls = apps.get_model('main', target_model_name)
+        target_model_name = get_type_for_model(model_cls)
+        if target_model_name == 'notification_template':
+            target_model_name = 'notification'  # total exception
+        role_name = f'{target_model_name}_admin_role'
+    elif rd.name.endswith(' Admin'):
+        # cases like "project-admin"
+        role_name = 'admin_role'
+    else:
+        print(rd.name)
+        model_name, role_name = rd.name.split()
+        role_name = role_name.lower()
+        role_name += '_role'
+    return getattr(object_role.content_object, role_name)
+
+
+def give_or_remove_permission(role, actor, giving=True):
+    obj = role.content_object
+    if obj is None:
+        return
+    rd = get_role_definition(role)
+    rd.give_or_remove_permission(actor, obj, giving=giving)
+
+
+class SyncEnabled(threading.local):
+    def __init__(self):
+        self.enabled = True
+
+
+rbac_sync_enabled = SyncEnabled()
+
+
+@contextlib.contextmanager
+def disable_rbac_sync():
+    try:
+        previous_value = rbac_sync_enabled.enabled
+        rbac_sync_enabled.enabled = False
+        yield
+    finally:
+        rbac_sync_enabled.enabled = previous_value
+
+
+def give_creator_permissions(user, obj):
+    assignment = RoleDefinition.objects.give_creator_permissions(user, obj)
+    if assignment:
+        with disable_rbac_sync():
+            old_role = get_role_from_object_role(assignment.object_role)
+            old_role.members.add(user)
+
+
+def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
+    if action.startswith('pre_'):
+        return
+    if not rbac_sync_enabled.enabled:
+        return
+
+    if action == 'post_add':
+        is_giving = True
+    elif action == 'post_remove':
+        is_giving = False
+    elif action == 'post_clear':
+        raise RuntimeError('Clearing of role members not supported')
+
+    if reverse:
+        user = instance
+    else:
+        role = instance
+
+    for user_or_role_id in pk_set:
+        if reverse:
+            role = Role.objects.get(pk=user_or_role_id)
+        else:
+            user = get_user_model().objects.get(pk=user_or_role_id)
+        give_or_remove_permission(role, user, giving=is_giving)
+
+
+def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
+    if action.startswith('pre_'):
+        return
+
+    if action == 'post_add':
+        is_giving = True
+    elif action == 'post_remove':
+        is_giving = False
+    elif action == 'post_clear':
+        raise RuntimeError('Clearing of role members not supported')
+
+    if reverse:
+        parent_role = instance
+    else:
+        child_role = instance
+
+    for role_id in pk_set:
+        if reverse:
+            child_role = Role.objects.get(id=role_id)
+        else:
+            parent_role = Role.objects.get(id=role_id)
+
+        # To a fault, we want to avoid running this if triggered from implicit_parents management
+        # we only want to do anything if we know for sure this is a non-implicit team role
+        if parent_role.role_field == 'member_role' and parent_role.content_type.model == 'team':
+            # Team internal parents are member_role->read_role and admin_role->member_role
+            # for the same object, this parenting will also be implicit_parents management
+            # do nothing for internal parents, but OTHER teams may still be assigned permissions to a team
+            if (child_role.content_type_id == parent_role.content_type_id) and (child_role.object_id == parent_role.object_id):
+                return
+
+            from awx.main.models.organization import Team
+
+            team = Team.objects.get(pk=parent_role.object_id)
+            give_or_remove_permission(child_role, team, giving=is_giving)
+
+
+m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)
+m2m_changed.connect(sync_parents_to_new_rbac, Role.parents.through)

@@ -78,12 +78,14 @@ function MiscAuthenticationEdit() {
           default: OAUTH2_PROVIDER_OPTIONS.default.ACCESS_TOKEN_EXPIRE_SECONDS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
           label: t`Access Token Expiration`,
+          help_text: t`Access Token Expiration in seconds`,
         },
         REFRESH_TOKEN_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
           default: OAUTH2_PROVIDER_OPTIONS.default.REFRESH_TOKEN_EXPIRE_SECONDS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
           label: t`Refresh Token Expiration`,
+          help_text: t`Refresh Token Expiration in seconds`,
         },
         AUTHORIZATION_CODE_EXPIRE_SECONDS: {
           ...OAUTH2_PROVIDER_OPTIONS,
@@ -91,6 +93,7 @@ function MiscAuthenticationEdit() {
             OAUTH2_PROVIDER_OPTIONS.default.AUTHORIZATION_CODE_EXPIRE_SECONDS,
           type: OAUTH2_PROVIDER_OPTIONS.child.type,
           label: t`Authorization Code Expiration`,
+          help_text: t`Authorization Code Expiration in seconds`,
         },
       };
 

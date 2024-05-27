@@ -16,6 +16,8 @@ from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 
 from django.db.models.signals import post_migrate
 
+from awx.main.migrations._dab_rbac import setup_managed_role_definitions
+
 # AWX
 from awx.main.models.projects import Project
 from awx.main.models.ha import Instance
@@ -32,7 +34,6 @@ from awx.main.models.organization import (
     Organization,
     Team,
 )
-from awx.main.models.rbac import Role
 from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.events import (
     JobEvent,
@@ -89,6 +90,12 @@ def deploy_jobtemplate(project, inventory, credential):
     jt = JobTemplate.objects.create(job_type='run', project=project, inventory=inventory, name='deploy-job-template')
     jt.credentials.add(credential)
     return jt
+
+
+@pytest.fixture
+def setup_managed_roles():
+    "Run the migration script to pre-create managed role definitions"
+    setup_managed_role_definitions(apps, None)
 
 
 @pytest.fixture
@@ -434,7 +441,7 @@ def admin(user):
 @pytest.fixture
 def system_auditor(user):
     u = user('an-auditor', False)
-    Role.singleton('system_auditor').members.add(u)
+    u.is_system_auditor = True
     return u
 
 

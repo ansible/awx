@@ -165,8 +165,8 @@ class TestAccessListCapabilities:
     def test_access_list_direct_access_capability(self, inventory, rando, get, mocker, mock_access_method):
         inventory.admin_role.members.add(rando)
 
-        with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), rando)
+        mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method)
+        response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), rando)
 
         mock_access_method.assert_called_once_with(inventory.admin_role, rando, 'members', **self.extra_kwargs)
         self._assert_one_in_list(response.data)
@@ -174,8 +174,8 @@ class TestAccessListCapabilities:
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
     def test_access_list_indirect_access_capability(self, inventory, organization, org_admin, get, mocker, mock_access_method):
-        with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), org_admin)
+        mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method)
+        response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), org_admin)
 
         mock_access_method.assert_called_once_with(organization.admin_role, org_admin, 'members', **self.extra_kwargs)
         self._assert_one_in_list(response.data, sublist='indirect_access')
@@ -185,8 +185,8 @@ class TestAccessListCapabilities:
     def test_access_list_team_direct_access_capability(self, inventory, team, team_member, get, mocker, mock_access_method):
         team.member_role.children.add(inventory.admin_role)
 
-        with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), team_member)
+        mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method)
+        response = get(reverse('api:inventory_access_list', kwargs={'pk': inventory.id}), team_member)
 
         mock_access_method.assert_called_once_with(inventory.admin_role, team.member_role, 'parents', **self.extra_kwargs)
         self._assert_one_in_list(response.data)
@@ -198,8 +198,8 @@ class TestAccessListCapabilities:
 def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_method, get):
     team.member_role.children.add(inventory.admin_role)
 
-    with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
-        response = get(reverse('api:team_roles_list', kwargs={'pk': team.id}), team_member)
+    mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method)
+    response = get(reverse('api:team_roles_list', kwargs={'pk': team.id}), team_member)
 
     # Did we assess whether team_member can remove team's permission to the inventory?
     mock_access_method.assert_called_once_with(inventory.admin_role, team.member_role, 'parents', skip_sub_obj_read_check=True, data={})
@@ -212,8 +212,8 @@ def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_metho
     organization.member_role.members.add(alice)
     organization.member_role.members.add(bob)
 
-    with mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method):
-        response = get(reverse('api:user_roles_list', kwargs={'pk': alice.id}), bob)
+    mocker.patch.object(access_registry[Role], 'can_unattach', mock_access_method)
+    response = get(reverse('api:user_roles_list', kwargs={'pk': alice.id}), bob)
 
     # Did we assess whether bob can remove alice's permission to the inventory?
     mock_access_method.assert_called_once_with(organization.member_role, alice, 'members', skip_sub_obj_read_check=True, data={})
