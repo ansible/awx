@@ -16,9 +16,9 @@ def test_single_job_scheduler_launch(hybrid_instance, controlplane_instance_grou
     instance = controlplane_instance_group.instances.all()[0]
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
     j = create_job(objects.job_template)
-    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
-        TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
+    mocker.patch("awx.main.scheduler.TaskManager.start_task")
+    TaskManager().schedule()
+    TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db

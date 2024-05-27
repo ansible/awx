@@ -13,12 +13,12 @@
     cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
   tasks:
     - name: Generate certificates for keycloak
-      command: 'openssl req -new -x509 -days 365 -nodes -out {{ public_key_file }} -keyout {{ private_key_file }} -subj "{{ cert_subject }}"'
+      ansible.builtin.command: 'openssl req -new -x509 -days 365 -nodes -out {{ public_key_file }} -keyout {{ private_key_file }} -subj "{{ cert_subject }}"'
       args:
         creates: "{{ public_key_file }}"
 
     - name: Load certs, existing and new SAML settings
-      set_fact:
+      ansible.builtin.set_fact:
         private_key: "{{ private_key_content }}"
         public_key: "{{ public_key_content }}"
         public_key_trimmed: "{{ public_key_content | regex_replace('-----BEGIN CERTIFICATE-----\\\\n', '') | regex_replace('\\\\n-----END CERTIFICATE-----', '') }}"
@@ -32,18 +32,18 @@
         private_key_content: "{{ lookup('file', private_key_file) | regex_replace('\n', '\\\\n') }}"
 
     - name: Displauy existing SAML configuration
-      debug:
+      ansible.builtin.debug:
         msg:
           - "Here is your existing SAML configuration for reference:"
           - "{{ existing_saml }}"
           - "Here is your existing OIDC configuration for reference:"
           - "{{ existing_oidc }}"
 
-    - pause:
+    - ansible.builtin.pause:
         prompt: "Continuing to run this will replace your existing saml and OIDC settings (displayed above). They will all be captured except for your private key. Be sure that is backed up before continuing"
 
     - name: Write out the existing content
-      copy:
+      ansible.builtin.copy:
         dest: "../_sources/{{ item.filename }}"
         content: "{{ item.content }}"
       loop:
@@ -65,7 +65,7 @@
         validate_certs: False
 
     - name: Get a keycloak token
-      uri:
+      ansible.builtin.uri:
         url: "https://localhost:8443/auth/realms/master/protocol/openid-connect/token"
         method: POST
         body_format: form-urlencoded
@@ -78,12 +78,12 @@
       register: keycloak_response
 
     - name: Template the AWX realm
-      template:
+      ansible.builtin.template:
         src: keycloak.awx.realm.json.j2
         dest: "{{ keycloak_realm_template }}"
 
     - name: Create the AWX realm
-      uri:
+      ansible.builtin.uri:
         url: "https://localhost:8443/auth/admin/realms"
         method: POST
         body_format: json

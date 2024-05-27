@@ -498,7 +498,7 @@ class JobNotificationMixin(object):
         # Body should have at least 2 CRLF, some clients will interpret
         # the email incorrectly with blank body.  So we will check that
 
-        if len(body.strip().splitlines()) <= 2:
+        if len(body.strip().splitlines()) < 1:
             # blank body
             body = '\r\n'.join(
                 [

@@ -160,8 +160,8 @@ class ProjectOptions(models.Model):
             if self.scm_type == 'insights':
                 if cred.kind != 'insights':
                     raise ValidationError(_("Credential kind must be 'insights'."))
-            elif cred.kind != 'scm' and cred.kind != 'azure_rm':
-                raise ValidationError(_("Credential kind must be 'scm' or 'azure_rm'." % cred.kind))
+            elif cred.kind != 'scm':
+                raise ValidationError(_("Credential kind must be 'scm'."))
             try:
                 if self.scm_type == 'insights':
                     self.scm_url = settings.INSIGHTS_URL_BASE
@@ -259,6 +259,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     class Meta:
         app_label = 'main'
         ordering = ('id',)
+        permissions = [('update_project', 'Can run a project update'), ('use_project', 'Can use project in a job template')]
 
     default_environment = models.ForeignKey(
         'ExecutionEnvironment',

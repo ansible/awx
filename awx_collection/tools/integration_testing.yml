@@ -10,7 +10,7 @@
     test: ad_hoc_command,host,role
   tasks:
     - name: DEBUG - make sure variables are what we expect
-      debug:
+      ansible.builtin.debug:
         msg: |
           Running tests at location:
               {{ loc_tests }}
@@ -18,7 +18,7 @@
               {{ test | trim | split(',') }}
 
     - name: "Include test targets"
-      include_tasks: "{{ loc_tests }}{{ test_name }}/tasks/main.yml"
+      ansible.builtin.include_tasks: "{{ loc_tests }}{{ test_name }}/tasks/main.yml"
       loop: "{{ test | trim | split(',') }}"
       loop_control:
         loop_var: test_name
