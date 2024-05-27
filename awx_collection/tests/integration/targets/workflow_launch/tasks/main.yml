@@ -150,12 +150,24 @@
         that:
           - result is not failed
 
-    - name: Kick off workflow with labels
+    - name: Prompt the workflow's labels on launch
+      workflow_job_template:
+        name: "{{ wfjt_name1 }}"
+        state: present
+        ask_labels_on_launch: true
+
+    - name: Create a Label
+      label:
+        name: "label_name"
+        organization: Default
+        state: present
+      ignore_errors: true
+
+    - name: Kick off workflow with Label
       workflow_launch:
           workflow_template: "{{ wfjt_name1 }}"
           labels:
-            - My First Label
-            - My Second Label
+            - label_name
       ignore_errors: true
       register: result
 
