@@ -185,7 +185,7 @@ def format_human(output, fmt):
 
     def format_num(v):
         try:
-            return locale.format("%.*f", (0, int(v)), True)
+            return locale.format_string("%.*f", (0, int(v)), True)
         except (ValueError, TypeError):
             if isinstance(v, (list, dict)):
                 return json.dumps(v)

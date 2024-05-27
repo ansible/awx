@@ -11,9 +11,9 @@ pytest!=7.0.0
 pytest-asyncio
 pytest-cov
 pytest-django
-pytest-mock==1.11.1
+pytest-mock
 pytest-timeout
-pytest-xdist==1.34.0 # 2.0.0 broke zuul for some reason
+pytest-xdist
 tox  # for awxkit
 logutils
 jupyter
@@ -21,7 +21,7 @@ jupyter
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
 git+https://github.com/artefactual-labs/mockldap.git@master#egg=mockldap
 gprof2dot
-atomicwrites==1.4.0
+atomicwrites
 flake8
 yamllint
 pip>=21.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)

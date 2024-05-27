@@ -21,13 +21,13 @@ def test_multi_group_basic_job_launch(instance_factory, controlplane_instance_gr
     j2 = create_job(objects2.job_template)
     with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
         mock_task_impact.return_value = 500
-        with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
-            TaskManager().schedule()
-            TaskManager.start_task.assert_has_calls([mock.call(j1, ig1, i1), mock.call(j2, ig2, i2)])
+        mocker.patch("awx.main.scheduler.TaskManager.start_task")
+        TaskManager().schedule()
+        TaskManager.start_task.assert_has_calls([mock.call(j1, ig1, i1), mock.call(j2, ig2, i2)])
 
 
 @pytest.mark.django_db
-def test_multi_group_with_shared_dependency(instance_factory, controlplane_instance_group, mocker, instance_group_factory, job_template_factory):
+def test_multi_group_with_shared_dependency(instance_factory, controlplane_instance_group, instance_group_factory, job_template_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     ig1 = instance_group_factory("ig1", instances=[i1])
@@ -50,7 +50,7 @@ def test_multi_group_with_shared_dependency(instance_factory, controlplane_insta
     objects2 = job_template_factory('jt2', organization=objects1.organization, project=p, inventory='inv2', credential='cred2')
     objects2.job_template.instance_groups.add(ig2)
     j2 = create_job(objects2.job_template, dependencies_processed=False)
-    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         DependencyManager().schedule()
         TaskManager().schedule()
         pu = p.project_updates.first()
@@ -73,10 +73,10 @@ def test_workflow_job_no_instancegroup(workflow_job_template_factory, controlpla
     wfj = wfjt.create_unified_job()
     wfj.status = "pending"
     wfj.save()
-    with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
-        TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(wfj, None, None)
-        assert wfj.instance_group is None
+    mocker.patch("awx.main.scheduler.TaskManager.start_task")
+    TaskManager().schedule()
+    TaskManager.start_task.assert_called_once_with(wfj, None, None)
+    assert wfj.instance_group is None
 
 
 @pytest.mark.django_db

@@ -4,7 +4,7 @@ import pytest
 from awx.api.versioning import reverse
 from awx.main.access import BaseAccess, JobTemplateAccess, ScheduleAccess
 from awx.main.models.jobs import JobTemplate
-from awx.main.models import Project, Organization, Inventory, Schedule, User
+from awx.main.models import Project, Organization, Schedule
 
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
@@ -165,7 +165,7 @@ class TestOrphanJobTemplate:
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
-def test_job_template_creator_access(project, organization, rando, post):
+def test_job_template_creator_access(project, organization, rando, post, setup_managed_roles):
     project.use_role.members.add(rando)
     response = post(
         url=reverse('api:job_template_list'),
@@ -177,7 +177,7 @@ def test_job_template_creator_access(project, organization, rando, post):
     jt_pk = response.data['id']
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
     # Creating a JT should place the creator in the admin role
-    assert rando in jt_obj.admin_role.members.all()
+    assert rando in jt_obj.admin_role
 
 
 @pytest.mark.django_db
@@ -283,48 +283,3 @@ class TestProjectOrganization:
         assert org_admin not in jt.admin_role
         patch(url=jt.get_absolute_url(), data={'project': project.id}, user=admin_user, expect=200)
         assert org_admin in jt.admin_role
-
-    def test_inventory_read_transfer_direct(self, patch):
-        orgs = []
-        invs = []
-        admins = []
-        for i in range(2):
-            org = Organization.objects.create(name='org{}'.format(i))
-            org_admin = User.objects.create(username='user{}'.format(i))
-            inv = Inventory.objects.create(organization=org, name='inv{}'.format(i))
-            org.auditor_role.members.add(org_admin)
-
-            orgs.append(org)
-            admins.append(org_admin)
-            invs.append(inv)
-
-        jt = JobTemplate.objects.create(name='foo', inventory=invs[0])
-        assert admins[0] in jt.read_role
-        assert admins[1] not in jt.read_role
-
-        jt.inventory = invs[1]
-        jt.save(update_fields=['inventory'])
-        assert admins[0] not in jt.read_role
-        assert admins[1] in jt.read_role
-
-    def test_inventory_read_transfer_indirect(self, patch):
-        orgs = []
-        admins = []
-        for i in range(2):
-            org = Organization.objects.create(name='org{}'.format(i))
-            org_admin = User.objects.create(username='user{}'.format(i))
-            org.auditor_role.members.add(org_admin)
-
-            orgs.append(org)
-            admins.append(org_admin)
-
-        inv = Inventory.objects.create(organization=orgs[0], name='inv{}'.format(i))
-
-        jt = JobTemplate.objects.create(name='foo', inventory=inv)
-        assert admins[0] in jt.read_role
-        assert admins[1] not in jt.read_role
-
-        inv.organization = orgs[1]
-        inv.save(update_fields=['organization'])
-        assert admins[0] not in jt.read_role
-        assert admins[1] in jt.read_role

@@ -76,15 +76,15 @@ class TestJobTemplateSerializerGetRelated:
 class TestJobTemplateSerializerGetSummaryFields:
     def test_survey_spec_exists(self, test_get_summary_fields, mocker, job_template):
         job_template.survey_spec = {'name': 'blah', 'description': 'blah blah'}
-        with mocker.patch.object(JobTemplateSerializer, '_recent_jobs') as mock_rj:
-            mock_rj.return_value = []
-            test_get_summary_fields(JobTemplateSerializer, job_template, 'survey')
+        mock_rj = mocker.patch.object(JobTemplateSerializer, '_recent_jobs')
+        mock_rj.return_value = []
+        test_get_summary_fields(JobTemplateSerializer, job_template, 'survey')
 
     def test_survey_spec_absent(self, get_summary_fields_mock_and_run, mocker, job_template):
         job_template.survey_spec = None
-        with mocker.patch.object(JobTemplateSerializer, '_recent_jobs') as mock_rj:
-            mock_rj.return_value = []
-            summary = get_summary_fields_mock_and_run(JobTemplateSerializer, job_template)
+        mock_rj = mocker.patch.object(JobTemplateSerializer, '_recent_jobs')
+        mock_rj.return_value = []
+        summary = get_summary_fields_mock_and_run(JobTemplateSerializer, job_template)
         assert 'survey' not in summary
 
     def test_copy_edit_standard(self, mocker, job_template_factory):
@@ -107,10 +107,10 @@ class TestJobTemplateSerializerGetSummaryFields:
         view.kwargs = {}
         serializer.context['view'] = view
 
-        with mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie'):
-            with mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar'):
-                with mocker.patch("awx.main.access.JobTemplateAccess.can_copy", return_value='foo'):
-                    response = serializer.get_summary_fields(jt_obj)
+        mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie')
+        mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar')
+        mocker.patch("awx.main.access.JobTemplateAccess.can_copy", return_value='foo')
+        response = serializer.get_summary_fields(jt_obj)
 
         assert response['user_capabilities']['copy'] == 'foo'
         assert response['user_capabilities']['edit'] == 'foobar'
