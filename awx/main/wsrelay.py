@@ -285,8 +285,6 @@ class WebSocketRelayManager(object):
             except asyncio.CancelledError:
                 # Handle the case where the task was already cancelled by the time we got here.
                 pass
-            except Exception as e:
-                logger.warning(f"Failed to cancel relay connection for {hostname}: {e}")
 
             del self.relay_connections[hostname]
 
@@ -297,8 +295,6 @@ class WebSocketRelayManager(object):
             self.stats_mgr.delete_remote_host_stats(hostname)
         except KeyError:
             pass
-        except Exception as e:
-            logger.warning(f"Failed to delete stats for {hostname}: {e}")
 
     async def run(self):
         event_loop = asyncio.get_running_loop()
@@ -306,7 +302,6 @@ class WebSocketRelayManager(object):
         self.stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
         self.stats_mgr.start()
 
-        # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
         database_conf = deepcopy(settings.DATABASES['default'])
         database_conf['OPTIONS'] = deepcopy(database_conf.get('OPTIONS', {}))
 
@@ -318,79 +313,54 @@ class WebSocketRelayManager(object):
         if 'PASSWORD' in database_conf:
             database_conf['OPTIONS']['password'] = database_conf.pop('PASSWORD')
 
-        task = None
+        async_conn = await psycopg.AsyncConnection.connect(
+            dbname=database_conf['NAME'],
+            host=database_conf['HOST'],
+            user=database_conf['USER'],
+            port=database_conf['PORT'],
+            **database_conf.get("OPTIONS", {}),
+        )
 
-        # Managing the async_conn here so that we can close it if we need to restart the connection
-        async_conn = None
+        await async_conn.set_autocommit(True)
+        on_ws_heartbeat_task = event_loop.create_task(self.on_ws_heartbeat(async_conn))
 
         # Establishes a websocket connection to /websocket/relay on all API servers
-        try:
-            while True:
-                if not task or task.done():
-                    try:
-                        # Try to close the connection if it's open
-                        if async_conn:
-                            try:
-                                await async_conn.close()
-                            except Exception as e:
-                                logger.warning(f"Failed to close connection to database for pg_notify: {e}")
+        while True:
+            if on_ws_heartbeat_task.done():
+                raise Exception("on_ws_heartbeat_task has exited")
 
-                        # and re-establish the connection
-                        async_conn = await psycopg.AsyncConnection.connect(
-                            dbname=database_conf['NAME'],
-                            host=database_conf['HOST'],
-                            user=database_conf['USER'],
-                            port=database_conf['PORT'],
-                            **database_conf.get("OPTIONS", {}),
-                        )
-                        await async_conn.set_autocommit(True)
+            future_remote_hosts = self.known_hosts.keys()
+            current_remote_hosts = self.relay_connections.keys()
+            deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
+            new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
 
-                        # before creating the task that uses the connection
-                        task = event_loop.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
-                        logger.info("Creating `on_ws_heartbeat` task in event loop.")
+            # This loop handles if we get an advertisement from a host we already know about but
+            # the advertisement has a different IP than we are currently connected to.
+            for hostname, address in self.known_hosts.items():
+                if hostname not in self.relay_connections:
+                    # We've picked up a new hostname that we don't know about yet.
+                    continue
 
-                    except Exception as e:
-                        logger.warning(f"Failed to connect to database for pg_notify: {e}")
+                if address != self.relay_connections[hostname].remote_host:
+                    deleted_remote_hosts.add(hostname)
+                    new_remote_hosts.add(hostname)
 
-                future_remote_hosts = self.known_hosts.keys()
-                current_remote_hosts = self.relay_connections.keys()
-                deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
-                new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
+            # Delete any hosts with closed connections
+            for hostname, relay_conn in self.relay_connections.items():
+                if not relay_conn.connected:
+                    deleted_remote_hosts.add(hostname)
 
-                # This loop handles if we get an advertisement from a host we already know about but
-                # the advertisement has a different IP than we are currently connected to.
-                for hostname, address in self.known_hosts.items():
-                    if hostname not in self.relay_connections:
-                        # We've picked up a new hostname that we don't know about yet.
-                        continue
+            if deleted_remote_hosts:
+                logger.info(f"Removing {deleted_remote_hosts} from websocket broadcast list")
+                await asyncio.gather(*[self.cleanup_offline_host(h) for h in deleted_remote_hosts])
 
-                    if address != self.relay_connections[hostname].remote_host:
-                        deleted_remote_hosts.add(hostname)
-                        new_remote_hosts.add(hostname)
+            if new_remote_hosts:
+                logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")
 
-                # Delete any hosts with closed connections
-                for hostname, relay_conn in self.relay_connections.items():
-                    if not relay_conn.connected:
-                        deleted_remote_hosts.add(hostname)
+            for h in new_remote_hosts:
+                stats = self.stats_mgr.new_remote_host_stats(h)
+                relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
+                relay_connection.start()
+                self.relay_connections[h] = relay_connection
 
-                if deleted_remote_hosts:
-                    logger.info(f"Removing {deleted_remote_hosts} from websocket broadcast list")
-                    await asyncio.gather(*[self.cleanup_offline_host(h) for h in deleted_remote_hosts])
-
-                if new_remote_hosts:
-                    logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")
-
-                for h in new_remote_hosts:
-                    stats = self.stats_mgr.new_remote_host_stats(h)
-                    relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
-                    relay_connection.start()
-                    self.relay_connections[h] = relay_connection
-
-                await asyncio.sleep(settings.BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS)
-        finally:
-            if async_conn:
-                logger.info("Shutting down db connection for wsrelay.")
-                try:
-                    await async_conn.close()
-                except Exception as e:
-                    logger.info(f"Failed to close connection to database for pg_notify: {e}")
+            await asyncio.sleep(settings.BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS)
