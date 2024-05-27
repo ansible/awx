@@ -150,6 +150,19 @@
         that:
           - result is not failed
 
+    - name: Kick off workflow with labels
+      workflow_launch:
+          workflow_template: "{{ wfjt_name1 }}"
+          labels:
+            - My First Label
+            - My Second Label
+      ignore_errors: true
+      register: result
+
+    - assert:
+        that:
+          - result is not failed
+
     - name: Test waiting for an approval node that doesn't exit on the last workflow for failure.
       workflow_approval:
         workflow_job_id: "{{ result.id }}"
