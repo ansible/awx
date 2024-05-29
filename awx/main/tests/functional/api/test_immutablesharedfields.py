@@ -1,9 +1,5 @@
 import pytest
 
-from rest_framework.exceptions import PermissionDenied
-from awx.api.views import TeamDetail
-
-from awx.api.views import immutablesharedfields
 from awx.api.versioning import reverse
 from awx.main.models import Organization
 from django.test import override_settings
@@ -52,14 +48,16 @@ class TestImmutableSharedFields:
 
     @pytest.mark.parametrize(
         'role',
-        [
-            'admin_role',
-            'member_role',
-        ],
+        ['admin_role', 'member_role'],
     )
-    def test_prevent_assigning_member_to_organization(self, admin_user, post, role):
+    @pytest.mark.parametrize('resource', ['organization', 'team'])
+    def test_prevent_assigning_member_to_organization_or_team(self, admin_user, post, resource, role):
         orgA = Organization.objects.create(name='orgA')
-        role = getattr(orgA, role)
+        if resource == 'organization':
+            role = getattr(orgA, role)
+        elif resource == 'team':
+            teamA = orgA.teams.create(name='teamA')
+            role = getattr(teamA, role)
         with override_settings(DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED=False):
             resp = post(
                 url=reverse('api:user_roles_list', kwargs={'pk': admin_user.id}),
@@ -67,4 +65,4 @@ class TestImmutableSharedFields:
                 user=admin_user,
                 expect=403,
             )
-        assert "You cannot assign user to an organization. Must be done via the platform ingress" in resp.data['msg']
+        assert f"Cannot modify user membership to {resource}. Must be done via the platform ingress" in resp.data['msg']

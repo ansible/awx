@@ -1339,10 +1339,12 @@ class UserRolesList(SubListAttachDetachAPIView):
 
         # if content type if organization and DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False, throw 403
         if not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
-            org_content_type = ContentType.objects.get_for_model(models.Organization)
-            if role.content_type == org_content_type and role.role_field in ['member_role', 'admin_role']:
-                data = dict(msg=_("You cannot assign user to an organization. Must be done via the platform ingress."))
-                return Response(data, status=status.HTTP_403_FORBIDDEN)
+            org_ct = ContentType.objects.get_for_model(models.Organization)
+            team_ct = ContentType.objects.get_for_model(models.Team)
+            for ct in [org_ct, team_ct]:
+                if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
+                    data = dict(msg=_(f"Cannot modify user membership to {ct.model}. Must be done via the platform ingress."))
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
 
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
