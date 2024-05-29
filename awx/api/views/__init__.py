@@ -62,6 +62,7 @@ from wsgiref.util import FileWrapper
 
 # django-ansible-base
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
+from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
@@ -127,6 +128,7 @@ from awx.api.views.mixin import (
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
+
 
 logger = logging.getLogger('awx.api.views')
 
@@ -710,16 +712,79 @@ class AuthView(APIView):
         return Response(data)
 
 
+def immutablesharedfields(cls):
+    '''
+    Class decorator to prevent modifying shared resources when gateway is being used.
+
+    DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is the setting to enable/disable this feature.
+
+    Works by overriding these view methods:
+    - create
+    - delete
+    - perform_update
+    create and delete are overridden to raise a PermissionDenied exception.
+    perform_update is overridden to check if any shared fields are being modified,
+    and raise a PermissionDenied exception if so.
+    '''
+    if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+        return cls
+
+    # create instead of perform_create because some of our views
+    # override create instead of perform_create
+    if hasattr(cls, 'create'):
+
+        @functools.wraps(cls.create)
+        def create_wrapper(*args, **kwargs):
+            raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
+
+        cls.create = create_wrapper
+
+    if hasattr(cls, 'delete'):
+
+        @functools.wraps(cls.delete)
+        def delete_wrapper(*args, **kwargs):
+            raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
+
+        cls.delete = delete_wrapper
+
+    if hasattr(cls, 'perform_update'):
+        cls.original_perform_update = cls.perform_update
+
+        @functools.wraps(cls.perform_update)
+        def update_wrapper(*args, **kwargs):
+            view, serializer = args
+            instance = view.get_object()
+            if instance:
+                if isinstance(instance, models.Organization):
+                    shared_fields = OrganizationType._declared_fields.keys()
+                elif isinstance(instance, models.User):
+                    shared_fields = UserType._declared_fields.keys()
+                elif isinstance(instance, models.Team):
+                    shared_fields = TeamType._declared_fields.keys()
+                attrs = serializer.validated_data
+                for field in shared_fields:
+                    if field in attrs and getattr(instance, field) != attrs[field]:
+                        raise PermissionDenied({field: _(f"Cannot change shared field '{field}'. Alter this field via the platform ingress.")})
+            return cls.original_perform_update(*args, **kwargs)
+
+        cls.perform_update = update_wrapper
+
+    return cls
+
+
+@immutablesharedfields
 class TeamList(ListCreateAPIView):
     model = models.Team
     serializer_class = serializers.TeamSerializer
 
 
+@immutablesharedfields
 class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = models.Team
     serializer_class = serializers.TeamSerializer
 
 
+@immutablesharedfields
 class TeamUsersList(BaseUsersList):
     model = models.User
     serializer_class = serializers.UserSerializer
@@ -1101,6 +1166,7 @@ class ProjectCopy(CopyAPIView):
     copy_return_serializer_class = serializers.ProjectSerializer
 
 
+@immutablesharedfields
 class UserList(ListCreateAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
@@ -1271,6 +1337,13 @@ class UserRolesList(SubListAttachDetachAPIView):
         user = get_object_or_400(models.User, pk=self.kwargs['pk'])
         role = get_object_or_400(models.Role, pk=sub_id)
 
+        # if content type if organization and DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False, throw 403
+        if not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            org_content_type = ContentType.objects.get_for_model(models.Organization)
+            if role.content_type == org_content_type and role.role_field in ['member_role', 'admin_role']:
+                data = dict(msg=_("You cannot assign user to an organization. Must be done via the platform ingress."))
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
@@ -1343,6 +1416,7 @@ class UserActivityStreamList(SubListAPIView):
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
 
 
+@immutablesharedfields
 class UserDetail(RetrieveUpdateDestroyAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
