@@ -13,7 +13,7 @@ team_ct = ContentType.objects.get(app_label='main', model='team')
 
 crosslinked = defaultdict(lambda: defaultdict(dict))
 crosslinked_parents = defaultdict(list)
-orphaned_roles = []
+orphaned_roles = set()
 
 
 def resolve(obj, path):
@@ -74,7 +74,7 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
     # Check that the Role's generic foreign key points to a legitimate object
     if not r.content_object:
         sys.stderr.write(f"Role id={r.id} is missing a valid content_object: {r.content_type!r} {r.object_id} {r.role_field}\n")
-        orphaned_roles.append(r.id)
+        orphaned_roles.add(r.id)
         continue
 
     # Check the resource's role field parents for consistency with Role.parents.all().
@@ -111,7 +111,7 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
     if rev is None or r.id != rev.id:
         if rev and (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
             sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is an orphaned duplicate of Role id={rev.id}, which is actually being used by the assigned resource\n")
-            orphaned_roles.append(r.id)
+            orphaned_roles.add(r.id)
         elif not rev:
             sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object currently using no role\n")
             crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
@@ -137,15 +137,7 @@ update_counts = Counter()
 
 """)
 
-print("# Role objects that are assigned to objects that do not exist")
-for r in orphaned_roles:
-    print(f"c = Role.objects.filter(id={r}).update(object_id=None)")
-    print("update_counts.update({'main.Role': c})")
-    print(f"_, c = Role.objects.filter(id={r}).delete()")
-    print("delete_counts.update(c)")
 
-
-print("\n")
 print("# Resource objects that are pointing to the wrong Role.  Some of these")
 print("# do not have corresponding Roles anywhere, so delete the foreign key.")
 print("# For those, new Roles will be constructed upon save.\n")
@@ -157,12 +149,19 @@ for ct, objs in crosslinked.items():
         print("update_counts.update({repr(cls): c})")
         print(f"queue.append((cls, {obj}))")
 
+print("\n# Role objects that are assigned to objects that do not exist")
+for r in orphaned_roles:
+    print(f"c = Role.objects.filter(id={r}).update(object_id=None)")
+    print("update_counts.update({'main.Role': c})")
+    print(f"_, c = Role.objects.filter(id={r}).delete()")
+    print("delete_counts.update(c)")
+
 for child, parents in crosslinked_parents.items():
     print(f"\n\nr = Role.objects.get(id={child})")
     print(f"r.parents.remove(*Role.objects.filter(id__in={parents!r}))")
 
-print('print("Objects deleted:", delete_counts)')
-print('print("Objects updated:", update_counts)')
+print('print("Objects deleted:", dict(delete_counts.most_common()))')
+print('print("Objects updated:", dict(update_counts.most_common()))')
 
 print(f"\n\nfor cls, obj_id in queue:")
 print(f"    obj = cls.objects.get(id=obj_id)")
