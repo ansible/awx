@@ -2,7 +2,7 @@ import pytest
 
 from awx.api.versioning import reverse
 from awx.main.models import Organization
-from django.test import override_settings
+from django.test.utils import override_settings
 
 
 @pytest.mark.django_db
