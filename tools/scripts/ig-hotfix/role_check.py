@@ -61,15 +61,23 @@ for ct in ContentType.objects.order_by('id'):
 sys.stderr.write('===================================\n')
 for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
 
-    # The ancestor list should be a superset of both parents and implicit_parents
+    # The ancestor list should be a superset of both parents and implicit_parents.
+    # Also, parents should be a superset of implicit_parents.
     parents = set(r.parents.values_list('id', flat=True))
     ancestors = set(r.ancestors.values_list('id', flat=True))
     implicit = set(json.loads(r.implicit_parents))
 
+    if not implicit:
+        sys.stderr.write(f"Role id={r.id} has no implicit_parents\n")
     if not parents <= ancestors:
         sys.stderr.write(f"Role id={r.id} has parents that are not in the ancestor list: {parents - ancestors}\n")
+        crosslinked[r.content_type_id][r.object_id]
+    if not implicit <= parents:
+        sys.stderr.write(f"Role id={r.id} has implicit_parents that are not in the parents list: {implicit - parents}\n")
+        crosslinked[r.content_type_id][r.object_id]
     if not implicit <= ancestors:
         sys.stderr.write(f"Role id={r.id} has implicit_parents that are not in the ancestor list: {implicit - ancestors}\n")
+        crosslinked[r.content_type_id][r.object_id]
 
     # Check that the Role's generic foreign key points to a legitimate object
     if not r.content_object:
@@ -129,6 +137,7 @@ from collections import Counter
 
 from django.contrib.contenttypes.models import ContentType
 
+from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import Role
 
 
@@ -141,13 +150,13 @@ update_counts = Counter()
 print("# Resource objects that are pointing to the wrong Role.  Some of these")
 print("# do not have corresponding Roles anywhere, so delete the foreign key.")
 print("# For those, new Roles will be constructed upon save.\n")
-print("queue = []\n")
+print("queue = set()\n")
 for ct, objs in crosslinked.items():
     print(f"cls = ContentType.objects.get(id={ct}).model_class()\n")
     for obj, kv in objs.items():
         print(f"c = cls.objects.filter(id={obj}).update(**{kv!r})")
-        print("update_counts.update({repr(cls): c})")
-        print(f"queue.append((cls, {obj}))")
+        print("update_counts.update({cls._meta.label: c})")
+        print(f"queue.add((cls, {obj}))")
 
 print("\n# Role objects that are assigned to objects that do not exist")
 for r in orphaned_roles:
@@ -156,13 +165,21 @@ for r in orphaned_roles:
     print(f"_, c = Role.objects.filter(id={r}).delete()")
     print("delete_counts.update(c)")
 
+print('\n\n')
 for child, parents in crosslinked_parents.items():
-    print(f"\n\nr = Role.objects.get(id={child})")
+    print(f"r = Role.objects.get(id={child})")
     print(f"r.parents.remove(*Role.objects.filter(id__in={parents!r}))")
+    print(f"queue.add((r.content_object.__class__, r.object_id))")
 
+print('\n\n')
 print('print("Objects deleted:", dict(delete_counts.most_common()))')
 print('print("Objects updated:", dict(update_counts.most_common()))')
 
-print(f"\n\nfor cls, obj_id in queue:")
-print(f"    obj = cls.objects.get(id=obj_id)")
-print(f"    obj.save()")
+print("\n\nfor cls, obj_id in queue:")
+print("    role_fields = [f for f in cls._meta.fields if isinstance(f, ImplicitRoleField)]")
+print("    obj = cls.objects.get(id=obj_id)")
+print("    for f in role_fields:")
+print("        r = getattr(obj, f.name, None)")
+print("        r.implicit_parents = '[]'")
+print("        r.save()")
+print("    obj.save()")
