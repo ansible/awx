@@ -92,10 +92,11 @@ SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER = collections.OrderedDict(
     ]
 )
 
-###############################################################################
-# AUTHENTICATION BACKENDS DYNAMIC SETTING
-###############################################################################
 if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+    ###############################################################################
+    # AUTHENTICATION BACKENDS DYNAMIC SETTING
+    ###############################################################################
+
     register(
         'AUTHENTICATION_BACKENDS',
         field_class=AuthenticationBackendsField,
