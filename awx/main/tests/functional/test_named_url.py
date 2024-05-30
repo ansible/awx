@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from django.conf import settings
-
 from awx.api.versioning import reverse
 from awx.main.middleware import URLModificationMiddleware
 from awx.main.models import (  # noqa
@@ -121,7 +119,7 @@ def test_notification_template(get, admin_user):
 
 
 @pytest.mark.django_db
-def test_instance(get, admin_user):
+def test_instance(get, admin_user, settings):
     test_instance = Instance.objects.create(uuid=settings.SYSTEM_UUID, hostname="localhost", capacity=100)
     url = reverse('api:instance_detail', kwargs={'pk': test_instance.pk})
     response = get(url, user=admin_user, expect=200)
@@ -230,7 +228,7 @@ class TestConvertNamedUrl:
             "/api/foobar/v2/organizations/1/inventories/",
         ),
     )
-    def test_noop(self, url):
+    def test_noop(self, url, settings):
         settings.OPTIONAL_API_URLPATTERN_PREFIX = ''
         assert URLModificationMiddleware._convert_named_url(url) == url
 
