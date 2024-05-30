@@ -726,23 +726,26 @@ def immutablesharedfields(cls):
     perform_update is overridden to check if any shared fields are being modified,
     and raise a PermissionDenied exception if so.
     '''
-    if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
-        return cls
-
     # create instead of perform_create because some of our views
     # override create instead of perform_create
     if hasattr(cls, 'create'):
+        cls.original_create = cls.create
 
         @functools.wraps(cls.create)
         def create_wrapper(*args, **kwargs):
+            if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+                return cls.original_create(*args, **kwargs)
             raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
 
         cls.create = create_wrapper
 
     if hasattr(cls, 'delete'):
+        cls.original_delete = cls.delete
 
         @functools.wraps(cls.delete)
         def delete_wrapper(*args, **kwargs):
+            if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+                return cls.original_delete(*args, **kwargs)
             raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
 
         cls.delete = delete_wrapper
@@ -752,19 +755,20 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.perform_update)
         def update_wrapper(*args, **kwargs):
-            view, serializer = args
-            instance = view.get_object()
-            if instance:
-                if isinstance(instance, models.Organization):
-                    shared_fields = OrganizationType._declared_fields.keys()
-                elif isinstance(instance, models.User):
-                    shared_fields = UserType._declared_fields.keys()
-                elif isinstance(instance, models.Team):
-                    shared_fields = TeamType._declared_fields.keys()
-                attrs = serializer.validated_data
-                for field in shared_fields:
-                    if field in attrs and getattr(instance, field) != attrs[field]:
-                        raise PermissionDenied({field: _(f"Cannot change shared field '{field}'. Alter this field via the platform ingress.")})
+            if not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+                view, serializer = args
+                instance = view.get_object()
+                if instance:
+                    if isinstance(instance, models.Organization):
+                        shared_fields = OrganizationType._declared_fields.keys()
+                    elif isinstance(instance, models.User):
+                        shared_fields = UserType._declared_fields.keys()
+                    elif isinstance(instance, models.Team):
+                        shared_fields = TeamType._declared_fields.keys()
+                    attrs = serializer.validated_data
+                    for field in shared_fields:
+                        if field in attrs and getattr(instance, field) != attrs[field]:
+                            raise PermissionDenied({field: _(f"Cannot change shared field '{field}'. Alter this field via the platform ingress.")})
             return cls.original_perform_update(*args, **kwargs)
 
         cls.perform_update = update_wrapper
