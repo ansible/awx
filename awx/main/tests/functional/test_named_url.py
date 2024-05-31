@@ -3,6 +3,9 @@ import pytest
 
 from awx.api.versioning import reverse
 from awx.main.middleware import URLModificationMiddleware
+
+from django.test.utils import override_settings
+
 from awx.main.models import (  # noqa
     Credential,
     Group,
@@ -228,40 +231,40 @@ class TestConvertNamedUrl:
             "/api/foobar/v2/organizations/1/inventories/",
         ),
     )
-    def test_noop(self, url, settings):
-        settings.OPTIONAL_API_URLPATTERN_PREFIX = ''
-        assert URLModificationMiddleware._convert_named_url(url) == url
+    def test_noop(self, url):
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX=''):
+            assert URLModificationMiddleware._convert_named_url(url) == url
 
-        settings.OPTIONAL_API_URLPATTERN_PREFIX = 'foo'
-        assert URLModificationMiddleware._convert_named_url(url) == url
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX='foo'):
+            assert URLModificationMiddleware._convert_named_url(url) == url
 
     def test_named_org(self):
         test_org = Organization.objects.create(name='test_org')
 
         assert URLModificationMiddleware._convert_named_url('/api/v2/organizations/test_org/') == f'/api/v2/organizations/{test_org.pk}/'
 
-    def test_named_org_optional_api_urlpattern_prefix_interaction(self, settings):
-        settings.OPTIONAL_API_URLPATTERN_PREFIX = 'bar'
-        test_org = Organization.objects.create(name='test_org')
+    def test_named_org_optional_api_urlpattern_prefix_interaction(self):
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX='bar'):
+            test_org = Organization.objects.create(name='test_org')
 
-        assert URLModificationMiddleware._convert_named_url('/api/bar/v2/organizations/test_org/') == f'/api/bar/v2/organizations/{test_org.pk}/'
-
-    @pytest.mark.parametrize("prefix", ['', 'bar'])
-    def test_named_org_not_found(self, prefix, settings):
-        settings.OPTIONAL_API_URLPATTERN_PREFIX = prefix
-        if prefix:
-            prefix += '/'
-
-        assert URLModificationMiddleware._convert_named_url(f'/api/{prefix}v2/organizations/does-not-exist/') == f'/api/{prefix}v2/organizations/0/'
+            assert URLModificationMiddleware._convert_named_url('/api/bar/v2/organizations/test_org/') == f'/api/bar/v2/organizations/{test_org.pk}/'
 
     @pytest.mark.parametrize("prefix", ['', 'bar'])
-    def test_named_sub_resource(self, prefix, settings):
-        settings.OPTIONAL_API_URLPATTERN_PREFIX = prefix
-        test_org = Organization.objects.create(name='test_org')
-        if prefix:
-            prefix += '/'
+    def test_named_org_not_found(self, prefix):
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX=prefix):
+            if prefix:
+                prefix += '/'
 
-        assert (
-            URLModificationMiddleware._convert_named_url(f'/api/{prefix}v2/organizations/test_org/inventories/')
-            == f'/api/{prefix}v2/organizations/{test_org.pk}/inventories/'
-        )
+            assert URLModificationMiddleware._convert_named_url(f'/api/{prefix}v2/organizations/does-not-exist/') == f'/api/{prefix}v2/organizations/0/'
+
+    @pytest.mark.parametrize("prefix", ['', 'bar'])
+    def test_named_sub_resource(self, prefix):
+        with override_settings(OPTIONAL_API_URLPATTERN_PREFIX=prefix):
+            test_org = Organization.objects.create(name='test_org')
+            if prefix:
+                prefix += '/'
+
+            assert (
+                URLModificationMiddleware._convert_named_url(f'/api/{prefix}v2/organizations/test_org/inventories/')
+                == f'/api/{prefix}v2/organizations/{test_org.pk}/inventories/'
+            )
