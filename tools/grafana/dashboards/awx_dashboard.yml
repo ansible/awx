@@ -2,7 +2,9 @@
 apiVersion: 1
 
 providers:
-  - name: awx
+  - name: awx-dashboards
+    type: file
     allowUiUpdates: true
     options:
-      path: /etc/grafana/provisioning/dashboards/demo_dashboard.json
+      foldersFromFilesStructure: true
+      path: /etc/grafana/provisioning/dashboards/
