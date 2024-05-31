@@ -82,8 +82,9 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
       } = await NotificationTemplatesAPI.test(template.id);
 
       async function pollForStatusChange() {
-        const { data: notification } =
-          await NotificationsAPI.readDetail(notificationId);
+        const { data: notification } = await NotificationsAPI.readDetail(
+          notificationId
+        );
         if (notification.status !== 'pending') {
           setTestStatus(notification.status);
           return;
