@@ -8,7 +8,7 @@ from awx.main.models import Organization
 class TestImmutableSharedFields:
     @pytest.fixture(autouse=True)
     def configure_settings(self, settings):
-        settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = False
+        settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = False
 
     def test_create_raises_permission_denied(self, admin_user, post):
         orgA = Organization.objects.create(name='orgA')

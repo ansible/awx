@@ -714,7 +714,7 @@ class AuthView(APIView):
 
 def immutablesharedfields(cls):
     '''
-    Class decorator to prevent modifying shared resources when DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED setting is set to False.
+    Class decorator to prevent modifying shared resources when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED setting is set to False.
 
     Works by overriding these view methods:
     - create
@@ -731,7 +731,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.create)
         def create_wrapper(*args, **kwargs):
-            if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
                 return cls.original_create(*args, **kwargs)
             raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
 
@@ -742,7 +742,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.delete)
         def delete_wrapper(*args, **kwargs):
-            if settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
                 return cls.original_delete(*args, **kwargs)
             raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
 
@@ -753,7 +753,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.perform_update)
         def update_wrapper(*args, **kwargs):
-            if not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
                 view, serializer = args
                 instance = view.get_object()
                 if instance:
@@ -1339,8 +1339,8 @@ class UserRolesList(SubListAttachDetachAPIView):
         user = get_object_or_400(models.User, pk=self.kwargs['pk'])
         role = get_object_or_400(models.Role, pk=sub_id)
 
-        # Prevent user to be associated with team/org when DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
-        if not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+        # Prevent user to be associated with team/org when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
+        if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
             org_ct = ContentType.objects.get_for_model(models.Organization)
             team_ct = ContentType.objects.get_for_model(models.Team)
             for ct in [org_ct, team_ct]:
