@@ -714,9 +714,7 @@ class AuthView(APIView):
 
 def immutablesharedfields(cls):
     '''
-    Class decorator to prevent modifying shared resources when gateway is being used.
-
-    DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is the setting to enable/disable this feature.
+    Class decorator to prevent modifying shared resources when DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED setting is set to False.
 
     Works by overriding these view methods:
     - create
@@ -1341,13 +1339,13 @@ class UserRolesList(SubListAttachDetachAPIView):
         user = get_object_or_400(models.User, pk=self.kwargs['pk'])
         role = get_object_or_400(models.Role, pk=sub_id)
 
-        # if content type if organization and DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False, throw 403
+        # Prevent user to be associated with team/org when DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
         if not settings.DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
             org_ct = ContentType.objects.get_for_model(models.Organization)
             team_ct = ContentType.objects.get_for_model(models.Team)
             for ct in [org_ct, team_ct]:
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
-                    data = dict(msg=_(f"Cannot modify user membership to {ct.model}. Must be done via the platform ingress."))
+                    data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
 
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
