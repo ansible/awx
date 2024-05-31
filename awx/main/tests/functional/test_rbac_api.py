@@ -187,7 +187,7 @@ def test_remove_role_from_user(role, post, admin):
 
 
 @pytest.mark.django_db
-@override_settings(ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN=True)
+@override_settings(ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN=True, ANSIBLE_BASE_ALLOW_TEAM_ORG_MEMBER=True)
 def test_get_teams_roles_list(get, team, organization, admin):
     team.member_role.children.add(organization.admin_role)
     url = reverse('api:team_roles_list', kwargs={'pk': team.id})

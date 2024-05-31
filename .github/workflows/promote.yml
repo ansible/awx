@@ -60,15 +60,18 @@ jobs:
           COLLECTION_VERSION: ${{ env.TAG_NAME }}
           COLLECTION_TEMPLATE_VERSION: true
         run: |
+          sudo apt-get install jq
           make build_collection
-          curl_with_redirects=$(curl --head -sLw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
-          curl_without_redirects=$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
-          if [[ "$curl_with_redirects" == "302" ]] || [[ "$curl_without_redirects" == "302" ]]; then
+          count=$(curl -s https://galaxy.ansible.com/api/v3/plugin/ansible/search/collection-versions/\?namespace\=${COLLECTION_NAMESPACE}\&name\=awx\&version\=${COLLECTION_VERSION} | jq .meta.count)
+          if [[ "$count" == "1" ]]; then
               echo "Galaxy release already done";
-          else
+          elif [[ "$count" == "0" ]]; then
               ansible-galaxy collection publish \
                 --token=${{ secrets.GALAXY_TOKEN }} \
-                awx_collection_build/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz;
+                awx_collection_build/${COLLECTION_NAMESPACE}-awx-${COLLECTION_VERSION}.tar.gz;
+          else
+              echo "Unexpected count from galaxy search: $count";
+              exit 1;
           fi
 
       - name: Set official pypi info
