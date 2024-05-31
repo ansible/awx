@@ -24,5 +24,5 @@ def test_send_messages():
                 message,
             ]
         )
-        sns_publish_mock.assert_called_once_with(topic_arn=sns_topic, message=json.dumps(message.body))
+        sns_publish_mock.assert_called_once_with(topic_arn=sns_topic, message=message.body)
         assert sent_messages == 1
