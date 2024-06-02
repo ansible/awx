@@ -1,5 +1,3 @@
-import json
-
 from unittest import mock
 from django.core.mail.message import EmailMessage
 
