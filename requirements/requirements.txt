@@ -31,10 +31,7 @@ async-timeout==4.0.3
     # via
     #   aiohttp
     #   aioredis
-    #   asyncpg
     #   redis
-asyncpg==0.29.0
-    # via -r /awx_devel/requirements/requirements.in
 attrs==23.2.0
     # via
     #   aiohttp

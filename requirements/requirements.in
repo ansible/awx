@@ -2,7 +2,6 @@ aiohttp>=3.8.6  # CVE-2023-47627
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
-asyncpg
 azure-identity
 azure-keyvault
 boto3
