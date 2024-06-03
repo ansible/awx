@@ -31,10 +31,7 @@ async-timeout==4.0.3
     # via
     #   aiohttp
     #   aioredis
-    #   asyncpg
     #   redis
-asyncpg==0.29.0
-    # via -r /awx_devel/requirements/requirements.in
 attrs==23.2.0
     # via
     #   aiohttp
@@ -200,8 +197,10 @@ googleapis-common-protos==1.63.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-grpcio==1.63.0
-    # via opentelemetry-exporter-otlp-proto-grpc
+grpcio==1.62.2
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   opentelemetry-exporter-otlp-proto-grpc
 hiredis==2.0.0
     # via
     #   -r /awx_devel/requirements/requirements.in
