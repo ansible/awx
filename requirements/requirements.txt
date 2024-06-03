@@ -110,7 +110,7 @@ cryptography==41.0.7
     #   pyopenssl
     #   service-identity
     #   social-auth-core
-cython==3.0.10
+cython==0.29.37
     # via -r /awx_devel/requirements/requirements.in
 daphne==3.0.2
     # via
@@ -197,8 +197,10 @@ googleapis-common-protos==1.63.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-grpcio==1.63.0
-    # via opentelemetry-exporter-otlp-proto-grpc
+grpcio==1.62.2
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   opentelemetry-exporter-otlp-proto-grpc
 hiredis==2.0.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -289,8 +291,10 @@ msal==1.26.0
     #   msal-extensions
 msal-extensions==1.1.0
     # via azure-identity
-msgpack==1.0.8
-    # via channels-redis
+msgpack==1.0.5
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   channels-redis
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4
