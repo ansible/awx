@@ -10,6 +10,7 @@ botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
 cryptography>=41.0.7  # CVE-2023-49083
+Cython # this is needed as a build dependency, one day we may have separated build deps
 daphne
 distro
 django==4.2.6  # CVE-2023-43665
