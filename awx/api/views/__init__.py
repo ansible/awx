@@ -1341,9 +1341,8 @@ class UserRolesList(SubListAttachDetachAPIView):
 
         # Prevent user to be associated with team/org when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
         if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
-            org_ct = ContentType.objects.get_for_model(models.Organization)
-            team_ct = ContentType.objects.get_for_model(models.Team)
-            for ct in [org_ct, team_ct]:
+            ct_org_team = ContentType.objects.get_for_models(models.Organization, models.Team)
+            for ct in ct_org_team.values():
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
                     data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
@@ -4373,7 +4372,14 @@ class RoleUsersList(SubListAttachDetachAPIView):
         user = get_object_or_400(models.User, pk=sub_id)
         role = self.get_parent_object()
 
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
+        if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            ct_org_team = ContentType.objects.get_for_models(models.Organization, models.Team)
+            for ct in ct_org_team.values():
+                if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
+                    data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+        credential_content_type = ContentType.objects.get_for_models(models.Credential)
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))

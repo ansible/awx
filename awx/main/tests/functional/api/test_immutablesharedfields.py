@@ -63,4 +63,4 @@ class TestImmutableSharedFields:
             user=admin_user,
             expect=403,
         )
-        assert f"Cannot modify user membership to {resource}. Must be done via the platform ingress" in resp.data['msg']
+        assert f"Cannot directly modify user membership to {resource}." in resp.data['msg']
