@@ -31,10 +31,7 @@ async-timeout==4.0.3
     # via
     #   aiohttp
     #   aioredis
-    #   asyncpg
     #   redis
-asyncpg==0.29.0
-    # via -r /awx_devel/requirements/requirements.in
 attrs==23.2.0
     # via
     #   aiohttp
@@ -113,7 +110,7 @@ cryptography==41.0.7
     #   pyopenssl
     #   service-identity
     #   social-auth-core
-cython==0.29.37
+cython==3.0.10
     # via -r /awx_devel/requirements/requirements.in
 daphne==3.0.2
     # via
@@ -292,10 +289,8 @@ msal==1.26.0
     #   msal-extensions
 msal-extensions==1.1.0
     # via azure-identity
-msgpack==1.0.5
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   channels-redis
+msgpack==1.0.8
+    # via channels-redis
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4

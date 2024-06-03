@@ -2,7 +2,6 @@ aiohttp>=3.8.6  # CVE-2023-47627
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
-asyncpg
 azure-identity
 azure-keyvault
 boto3
@@ -10,7 +9,7 @@ botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
 cryptography>=41.0.7  # CVE-2023-49083
-Cython<3 # this is needed as a build dependency, one day we may have separated build deps
+Cython # this is needed as a build dependency, one day we may have separated build deps
 daphne
 distro
 django==4.2.6  # CVE-2023-43665
@@ -36,7 +35,6 @@ JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
 maturin  # pydantic-core build dep
-msgpack<1.0.6  # 1.0.6+ requires cython>=3
 msrestazure
 openshift
 opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
