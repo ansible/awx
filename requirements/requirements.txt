@@ -127,7 +127,7 @@ deprecated==1.2.14
     #   opentelemetry-exporter-otlp-proto-http
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.6
+django==4.2.10
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
