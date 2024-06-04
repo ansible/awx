@@ -4379,7 +4379,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
                     data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
 
-        credential_content_type = ContentType.objects.get_for_models(models.Credential)
+        credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
