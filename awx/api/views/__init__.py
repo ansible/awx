@@ -1339,15 +1339,16 @@ class UserRolesList(SubListAttachDetachAPIView):
         user = get_object_or_400(models.User, pk=self.kwargs['pk'])
         role = get_object_or_400(models.Role, pk=sub_id)
 
+        content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
         # Prevent user to be associated with team/org when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
         if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
-            ct_org_team = ContentType.objects.get_for_models(models.Organization, models.Team)
-            for ct in ct_org_team.values():
+            for model in [models.Organization, models.Team]:
+                ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
                     data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
 
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
+        credential_content_type = content_types[models.Credential]
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
@@ -4372,14 +4373,15 @@ class RoleUsersList(SubListAttachDetachAPIView):
         user = get_object_or_400(models.User, pk=sub_id)
         role = self.get_parent_object()
 
+        content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
         if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
-            ct_org_team = ContentType.objects.get_for_models(models.Organization, models.Team)
-            for ct in ct_org_team.values():
+            for model in [models.Organization, models.Team]:
+                ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
                     data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
 
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
+        credential_content_type = content_types[models.Credential]
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
                 data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
