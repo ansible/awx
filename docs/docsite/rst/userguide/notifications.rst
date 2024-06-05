@@ -84,6 +84,7 @@ Notification Types
 
 .. index:: 
    pair: notifications; types
+   triple: notifications; types; AWS SNS
    triple: notifications; types; Email
    triple: notifications; types; Grafana
    triple: notifications; types; IRC
@@ -100,6 +101,18 @@ Notification types supported with AWX:
     :local:
 
 Each of these have their own configuration and behavioral semantics and testing them may need to be approached in different ways. Additionally, you can customize each type of notification down to a specific detail, or a set of criteria to trigger a notification. See :ref:`ug_custom_notifications` for more detail on configuring custom notifications. The following sections will give as much detail as possible on each type of notification.
+
+AWS SNS
+-------
+
+The AWS SNS(https://aws.amazon.com/sns/) notification type supports sending messages into an SNS topic.
+
+You must provide the following details to setup a SNS notification:
+
+- AWS Region
+- AWS Access Key ID
+- AWS Secret Access Key
+- AWS SNS Topic ARN
 
 
 Email

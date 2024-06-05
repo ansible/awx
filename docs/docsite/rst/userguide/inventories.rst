@@ -1096,7 +1096,7 @@ Terraform State
    pair: inventory source; Terraform state
 
 
-This inventory source uses the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/plugins/inventory/terraform_state.py>`_ inventory plugin from the `cloud.terraform <https://github.com/ansible-collections/cloud.terraform>`_ collection. The plugin will parse a terraform state file and add hosts for AWS EC2, GCE, and Azure instances.
+This inventory source uses the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/docs/cloud.terraform.terraform_state_inventory.rst>`_ inventory plugin from the `cloud.terraform <https://github.com/ansible-collections/cloud.terraform>`_ collection. The plugin will parse a terraform state file and add hosts for AWS EC2, GCE, and Azure instances.
 
 1. To configure this type of sourced inventory, select **Terraform State** from the Source field.
 
@@ -1104,7 +1104,7 @@ This inventory source uses the `terraform_state <https://github.com/ansible-coll
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`. For Terraform, enable **Overwrite** and **Update on launch** options.  
 
-4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/plugins/inventory/terraform_state.py>`_ file for detail.
+4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/docs/cloud.terraform.terraform_state_inventory.rst>`_ file for detail.
 
   The ``backend_type`` variable is required by the Terraform state inventory plugin. This should match the remote backend configured in the Terraform backend credential, here is an example for an Amazon S3 backend:
 

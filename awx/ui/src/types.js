@@ -374,6 +374,7 @@ export const CredentialType = shape({
 });
 
 export const NotificationType = oneOf([
+  'awssns',
   'email',
   'grafana',
   'irc',
