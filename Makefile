@@ -53,6 +53,8 @@ OTEL ?= false
 LOKI ?= false
 # If set to true docker-compose will install editable dependencies
 EDITABLE_DEPENDENCIES ?= false
+# If set to true, use tls for postgres connection
+PG_TLS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -542,6 +544,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_otel=$(OTEL) \
 	    -e enable_loki=$(LOKI) \
 	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \
+	    -e pg_tls=$(PG_TLS) \
 	    $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
