@@ -262,7 +262,10 @@ def main():
         search_fields['organization'] = module.resolve_name_to_id('organizations', organization)
     unified_job_template_id = None
     if unified_job_template:
-        search_fields['name'] = unified_job_template
+        if unified_job_template.isdigit():
+            search_fields['id'] = unified_job_template
+        else:
+            search_fields['name'] = unified_job_template
         unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
         sched_search_fields['unified_job_template'] = unified_job_template_id
 
