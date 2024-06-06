@@ -5,7 +5,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
-import yaml
+
 __metaclass__ = type
 
 
@@ -133,7 +133,7 @@ EXAMPLES = '''
 
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
+import yaml
 
 
 def main():
