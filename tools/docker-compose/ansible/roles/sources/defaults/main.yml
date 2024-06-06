@@ -4,6 +4,7 @@ awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
 pg_username: 'awx'
 pg_database: 'awx'
+pg_tls: false
 control_plane_node_count: 1
 minikube_container_group: false
 receptor_socket_file: /var/run/awx-receptor/receptor.sock

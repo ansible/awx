@@ -656,6 +656,10 @@ AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 # Automatically remove nodes that have missed their heartbeats after some time
 AWX_AUTO_DEPROVISION_INSTANCES = False
 
+# If False, do not allow creation of resources that are shared with the platform ingress
+# e.g. organizations, teams, and users
+AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = True
+
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
@@ -880,6 +884,7 @@ LOGGING = {
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
             'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
         },
+        'otel': {'class': 'logging.NullHandler'},
     },
     'loggers': {
         'django': {'handlers': ['console']},

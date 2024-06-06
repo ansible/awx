@@ -1,4 +1,11 @@
 const typeFieldNames = {
+  awssns: [
+    'aws_region',
+    'aws_access_key_id',
+    'aws_secret_access_key',
+    'aws_session_token',
+    'sns_topic_arn',
+  ],
   email: [
     'username',
     'password',

@@ -11,7 +11,7 @@ from . import page
 
 
 job_results = ('any', 'error', 'success')
-notification_types = ('email', 'irc', 'pagerduty', 'slack', 'twilio', 'webhook', 'mattermost', 'grafana', 'rocketchat')
+notification_types = ('awssns', 'email', 'irc', 'pagerduty', 'slack', 'twilio', 'webhook', 'mattermost', 'grafana', 'rocketchat')
 
 
 class NotificationTemplate(HasCopy, HasCreate, base.Base):
@@ -58,7 +58,10 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
         if payload.notification_configuration == {}:
             services = config.credentials.notification_services
 
-            if notification_type == 'email':
+            if notification_type == 'awssns':
+                fields = ('aws_region', 'aws_access_key_id', 'aws_secret_access_key', 'aws_session_token', 'sns_topic_arn')
+                cred = services.awssns
+            elif notification_type == 'email':
                 fields = ('host', 'username', 'password', 'port', 'use_ssl', 'use_tls', 'sender', 'recipients')
                 cred = services.email
             elif notification_type == 'irc':

@@ -1,0 +1,96 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_server_max_recv_msg_size: 524288000 # 500 MB
+  grpc_server_max_send_msg_size: 524288000 # 500 MB, might be too much, be careful
+
+frontend_worker:
+  match_max_concurrent: true
+  grpc_client_config:
+    max_send_msg_size: 524288000 # 500 MB
+
+
+ingester:
+  max_chunk_age: 8766h
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# compactor:
+#   retention_enabled: true
+#   # cmeyers: YOLO. 1s seems wrong but it works so right
+#   compaction_interval: 1s # default 10m
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/boltdb-cache
+
+ruler:
+  alertmanager_url: http://localhost:9093
+
+limits_config:
+  retention_period: 3y
+  # cmeyers: The default of 30m triggers a loop of queries that take a long time
+  # to complete and the UI times out
+  split_queries_by_interval: 1d
+  # cmeyers: Default of 30d1h limits grafana time queries. Can't, for example,
+  # query last 90 days
+  max_query_length: 3y
+  # cmeyers: Made the batch post request succeed.
+  reject_old_samples: false
+  reject_old_samples_max_age: 365d
+
+  ingestion_rate_mb: 32
+  ingestion_burst_size_mb: 32
+  per_stream_rate_limit: 32M
+  per_stream_rate_limit_burst: 32M
+  ingestion_rate_strategy: local # Default: global
+  max_global_streams_per_user: 100000000
+  max_entries_limit_per_query: 100000000
+  max_query_series: 1000000
+  max_query_parallelism: 32 # Old Default: 14
+  max_streams_per_user: 100000000 # Old Default: 10000
+
+# Taken from aap-log-visualizer
+frontend:
+  max_outstanding_per_tenant: 2048
+
+query_scheduler:
+  max_outstanding_requests_per_tenant: 2048
+
+query_range:
+  parallelise_shardable_queries: false
+  split_queries_by_interval: 0
+
+# By default, Loki will send anonymous, but uniquely-identifiable usage and configuration
+# analytics to Grafana Labs. These statistics are sent to https://stats.grafana.org/
+#
+# Statistics help us better understand how Loki is used, and they show us performance
+# levels for most users. This helps us prioritize features and documentation.
+# For more information on what's sent, look at
+# https://github.com/grafana/loki/blob/main/pkg/usagestats/stats.go
+# Refer to the buildReport method to see what goes into a report.
+#
+# If you would like to disable reporting, uncomment the following lines:
+#analytics:
+#  reporting_enabled: false

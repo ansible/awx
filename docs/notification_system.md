@@ -70,6 +70,7 @@ Once a Notification Template has been created, its configuration can be tested b
 
 The currently-defined Notification Types are:
 
+* AWS SNS
 * Email
 * Slack
 * Mattermost
@@ -81,6 +82,10 @@ The currently-defined Notification Types are:
 * Grafana
 
 Each of these have their own configuration and behavioral semantics and testing them may need to be approached in different ways. The following sections will give as much detail as possible.
+
+## AWS SNS
+
+The AWS SNS notification type supports sending messages into an SNS topic.
 
 ## Email
 

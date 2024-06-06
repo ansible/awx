@@ -62,7 +62,7 @@ function CredentialLookup({
         ? { credential_type: credentialTypeId }
         : {};
       const typeKindParams = credentialTypeKind
-        ? { credential_type__kind: credentialTypeKind }
+        ? { credential_type__kind__in: credentialTypeKind }
         : {};
       const typeNamespaceParams = credentialTypeNamespace
         ? { credential_type__namespace: credentialTypeNamespace }
@@ -125,7 +125,7 @@ function CredentialLookup({
           ? { credential_type: credentialTypeId }
           : {};
         const typeKindParams = credentialTypeKind
-          ? { credential_type__kind: credentialTypeKind }
+          ? { credential_type__kind__in: credentialTypeKind }
           : {};
         const typeNamespaceParams = credentialTypeNamespace
           ? { credential_type__namespace: credentialTypeNamespace }

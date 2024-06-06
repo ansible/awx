@@ -237,13 +237,24 @@ services:
     image: quay.io/sclorg/postgresql-15-c9s
     container_name: tools_postgres_1
     # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
-    command: run-postgresql -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
+    command: >
+        bash -c "
+{% if pg_tls|bool %}
+        mkdir -p /opt/app-root/src/certs
+        && openssl genrsa -out /opt/app-root/src/certs/tls.key 2048
+        && openssl req -new -x509 -key /opt/app-root/src/certs/tls.key -out /opt/app-root/src/certs/tls.crt -subj '/CN=postgres'
+        && chmod 600 /opt/app-root/src/certs/tls.crt /opt/app-root/src/certs/tls.key &&
+{% endif %}
+        run-postgresql -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}"
     environment:
       POSTGRESQL_USER: {{ pg_username }}
       POSTGRESQL_DATABASE: {{ pg_database }}
       POSTGRESQL_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db_15:/var/lib/pgsql/data"
+{% if pg_tls|bool %}
+      - "../../docker-compose/pgssl.conf:/opt/app-root/src/postgresql-cfg/pgssl.conf"
+{% endif %}
     networks:
       - awx
     ports:
@@ -269,6 +280,37 @@ services:
       # pg_notify will NOT work in transaction mode.
       PGBOUNCER_POOL_MODE: session
 {% endif %}
+{% if enable_otel|bool %}
+  otel:
+    image: otel/opentelemetry-collector-contrib:0.88.0
+    container_name: tools_otel_1
+    hostname: otel
+    command: ["--config=/etc/otel-collector-config.yaml", ""]
+    networks:
+      - awx
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP http receiver
+      - "55679:55679" # zpages http://localhost:55679/debug/servicez /tracez
+    volumes:
+      - "../../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml"
+      - "../../otel/awx-logs:/awx-logs/"
+{% endif %}
+{% if enable_loki|bool %}
+  loki:
+    image: grafana/loki:2.9.5
+    container_name: tools_loki_1
+    hostname: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - awx
+    volumes:
+      - "loki_storage:/loki:rw"
+      - "../../loki/local-config.yaml:/etc/loki/local-config.yaml"
+{% endif %}
+
 {% if execution_node_count|int > 0 %}
   receptor-hop:
     image: {{ receptor_image }}
@@ -359,6 +401,10 @@ volumes:
 {% if enable_grafana|bool %}
   grafana_storage:
     name: tools_grafana_storage
+{% endif %}
+{% if enable_loki|bool %}
+  loki_storage:
+    name: tools_loki_storage
 {% endif %}
 
 networks:
