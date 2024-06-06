@@ -269,7 +269,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
     def update_computed_fields(self):
         related_schedules = self.schedules.filter(enabled=True, next_run__isnull=False).order_by('-next_run')
-        new_next_schedule = related_schedules.first()
+        # select for update will lock this row until the transaction is committed
+        # prevent race condition where new_next_schedule may be deleted during this transaction
+        new_next_schedule = related_schedules.select_for_update().first()
         if new_next_schedule:
             if new_next_schedule.pk == self.next_schedule_id and new_next_schedule.next_run == self.next_job_run:
                 return  # no-op, common for infrequent schedules
