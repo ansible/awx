@@ -167,22 +167,6 @@ Using execution environments
 See :ref:`ug_execution_environments` in the |atu|.
 
 
-Adding host entries in execution environments
-===============================================
-
-In order to override DNS/host entries, add the following entries in the in the ``/etc/hosts`` file of the pod spec via the ``hostAliases`` attribute:
-
-::
-
-   spec:
-      hostAliases:
-       - ip: "127.0.0.1"
-         hostnames:
-         - "foo.local"
-
-For more information, refer to Kubernetes' documentation on `Adding additional entries with hostAliases <https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/#adding-additional-entries-with-hostaliases>`_.
-
-
 Configuring the ``awxhost`` hostname for notifications
 ===============================================================
 
