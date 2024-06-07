@@ -53,6 +53,8 @@ OTEL ?= false
 LOKI ?= false
 # If set to true docker-compose will install editable dependencies
 EDITABLE_DEPENDENCIES ?= false
+# If set to true, use tls for postgres connection
+PG_TLS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -69,7 +71,7 @@ RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==69.0.2 setuptools_scm[toml]==8.0.4 wheel==0.42.0
+VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==69.0.2 setuptools_scm[toml]==8.0.4 wheel==0.42.0 cython==0.29.37
 
 NAME ?= awx
 
@@ -542,6 +544,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_otel=$(OTEL) \
 	    -e enable_loki=$(LOKI) \
 	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \
+	    -e pg_tls=$(PG_TLS) \
 	    $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
