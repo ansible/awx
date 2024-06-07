@@ -22,7 +22,7 @@ Once you have a local copy, run the commands in the following sections from the 
 
 Here are the main `make` targets:
 
-- `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target
+- `docker-compose-build` - used for building the development image, which is used by the `docker-compose` target. You can skip this target if you want to use the latest [ghcr.io/ansible/awx_devel:devel](https://github.com/ansible/awx/pkgs/container/awx_devel) image rather than build a new one.
 - `docker-compose` - make target for development, passes awx_devel image and tag
 
 Notable files:
@@ -613,3 +613,13 @@ docker exec -it -e VAULT_TOKEN=<token> tools_vault_1 vault kv get --address=http
 ### Prometheus and Grafana integration
 
 See docs at https://github.com/ansible/awx/blob/devel/tools/grafana/README.md
+
+### OpenTelemetry Integration
+
+```bash
+OTEL=true GRAFANA=true LOKI=true PROMETHEUS=true make docker-compose
+```
+
+This will start the sidecar container `tools_otel_1` and configure AWX logging to send to it. The OpenTelemetry Collector is configured to export logs to Loki. Grafana is configured with Loki as a datasource. AWX logs can be viewed in Grafana.
+
+`http://localhost:3001` grafana

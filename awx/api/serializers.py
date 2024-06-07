@@ -5381,7 +5381,7 @@ class NotificationSerializer(BaseSerializer):
         )
 
     def get_body(self, obj):
-        if obj.notification_type in ('webhook', 'pagerduty'):
+        if obj.notification_type in ('webhook', 'pagerduty', 'awssns'):
             if isinstance(obj.body, dict):
                 if 'body' in obj.body:
                     return obj.body['body']
@@ -5403,9 +5403,9 @@ class NotificationSerializer(BaseSerializer):
     def to_representation(self, obj):
         ret = super(NotificationSerializer, self).to_representation(obj)
 
-        if obj.notification_type == 'webhook':
+        if obj.notification_type in ('webhook', 'awssns'):
             ret.pop('subject')
-        if obj.notification_type not in ('email', 'webhook', 'pagerduty'):
+        if obj.notification_type not in ('email', 'webhook', 'pagerduty', 'awssns'):
             ret.pop('body')
         return ret
 

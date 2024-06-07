@@ -22,7 +22,7 @@ const ansibleDocUrls = {
   constructed:
     'https://docs.ansible.com/ansible/latest/collections/ansible/builtin/constructed_inventory.html',
   terraform:
-    'https://github.com/ansible-collections/cloud.terraform/blob/stable-statefile-inventory/plugins/inventory/terraform_state.py',
+    'https://github.com/ansible-collections/cloud.terraform/blob/main/docs/cloud.terraform.terraform_state_inventory.rst',
 };
 
 const getInventoryHelpTextStrings = () => ({

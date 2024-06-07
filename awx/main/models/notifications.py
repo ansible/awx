@@ -31,6 +31,7 @@ from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.grafana_backend import GrafanaBackend
 from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
+from awx.main.notifications.awssns_backend import AWSSNSBackend
 
 
 logger = logging.getLogger('awx.main.models.notifications')
@@ -40,6 +41,7 @@ __all__ = ['NotificationTemplate', 'Notification']
 
 class NotificationTemplate(CommonModelNameNotUnique):
     NOTIFICATION_TYPES = [
+        ('awssns', _('AWS SNS'), AWSSNSBackend),
         ('email', _('Email'), CustomEmailBackend),
         ('slack', _('Slack'), SlackBackend),
         ('twilio', _('Twilio'), TwilioBackend),

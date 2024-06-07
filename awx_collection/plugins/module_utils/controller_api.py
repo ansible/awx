@@ -17,7 +17,7 @@ import time
 import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
-from os import access, R_OK, getcwd, environ
+from os import access, R_OK, getcwd, environ, getenv
 
 
 try:
@@ -107,7 +107,7 @@ class ControllerModule(AnsibleModule):
         # Perform magic depending on whether controller_oauthtoken is a string or a dict
         if self.params.get('controller_oauthtoken'):
             token_param = self.params.get('controller_oauthtoken')
-            if type(token_param) is dict:
+            if isinstance(token_param, dict):
                 if 'token' in token_param:
                     self.oauth_token = self.params.get('controller_oauthtoken')['token']
                 else:
@@ -148,9 +148,10 @@ class ControllerModule(AnsibleModule):
         # Make sure we start with /api/vX
         if not endpoint.startswith("/"):
             endpoint = "/{0}".format(endpoint)
-        prefix = self.url_prefix.rstrip("/")
-        if not endpoint.startswith(prefix + "/api/"):
-            endpoint = prefix + "/api/v2{0}".format(endpoint)
+        hostname_prefix = self.url_prefix.rstrip("/")
+        api_path = self.api_path()
+        if not endpoint.startswith(hostname_prefix + api_path):
+            endpoint = hostname_prefix + f"{api_path}v2{endpoint}"
         if not endpoint.endswith('/') and '?' not in endpoint:
             endpoint = "{0}/".format(endpoint)
 
@@ -215,7 +216,7 @@ class ControllerModule(AnsibleModule):
                 try:
                     config_data = yaml.load(config_string, Loader=yaml.SafeLoader)
                     # If this is an actual ini file, yaml will return the whole thing as a string instead of a dict
-                    if type(config_data) is not dict:
+                    if not isinstance(config_data, dict):
                         raise AssertionError("The yaml config file is not properly formatted as a dict.")
                     try_config_parsing = False
 
@@ -257,7 +258,7 @@ class ControllerModule(AnsibleModule):
             if honorred_setting in config_data:
                 # Veriffy SSL must be a boolean
                 if honorred_setting == 'verify_ssl':
-                    if type(config_data[honorred_setting]) is str:
+                    if isinstance(config_data[honorred_setting], str):
                         setattr(self, honorred_setting, strtobool(config_data[honorred_setting]))
                     else:
                         setattr(self, honorred_setting, bool(config_data[honorred_setting]))
@@ -603,6 +604,14 @@ class ControllerAPIModule(ControllerModule):
             status_code = response.status
         return {'status_code': status_code, 'json': response_json}
 
+    def api_path(self):
+
+        default_api_path = "/api/"
+        if self._COLLECTION_TYPE != "awx":
+            default_api_path = "/api/controller/"
+        prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', default_api_path)
+        return prefix
+
     def authenticate(self, **kwargs):
         if self.username and self.password:
             # Attempt to get a token from /api/v2/tokens/ by giving it our username/password combo
@@ -613,7 +622,7 @@ class ControllerAPIModule(ControllerModule):
                 "scope": "write",
             }
             # Preserve URL prefix
-            endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/'
+            endpoint = self.url_prefix.rstrip('/') + f'{self.api_path()}v2/tokens/'
             # Post to the tokens endpoint with baisc auth to try and get a token
             api_token_url = (self.url._replace(path=endpoint)).geturl()
 
@@ -1002,7 +1011,7 @@ class ControllerAPIModule(ControllerModule):
         if self.authenticated and self.oauth_token_id:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
-            endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/{0}/'.format(self.oauth_token_id)
+            endpoint = self.url_prefix.rstrip('/') + f'{self.api_path()}v2/tokens/{self.oauth_token_id}/'
             api_token_url = (self.url._replace(path=endpoint, query=None)).geturl()  # in error cases, fail_json exists before exception handling
 
             try:
