@@ -71,13 +71,13 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         sys.stderr.write(f"Role id={r.id} has no implicit_parents\n")
     if not parents <= ancestors:
         sys.stderr.write(f"Role id={r.id} has parents that are not in the ancestor list: {parents - ancestors}\n")
-        crosslinked[r.content_type_id][r.object_id]
+        crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
     if not implicit <= parents:
         sys.stderr.write(f"Role id={r.id} has implicit_parents that are not in the parents list: {implicit - parents}\n")
-        crosslinked[r.content_type_id][r.object_id]
+        crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
     if not implicit <= ancestors:
         sys.stderr.write(f"Role id={r.id} has implicit_parents that are not in the ancestor list: {implicit - ancestors}\n")
-        crosslinked[r.content_type_id][r.object_id]
+        crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
 
     # Check that the Role's generic foreign key points to a legitimate object
     if not r.content_object:
@@ -181,6 +181,7 @@ print("    obj = cls.objects.get(id=obj_id)")
 print("    for f in role_fields:")
 print("        r = getattr(obj, f.name, None)")
 print("        if r is not None:")
+print("            print(f'updating implicit parents on Role {r.id}')")
 print("            r.implicit_parents = '[]'")
 print("            r.save()")
 print("    obj.save()")
