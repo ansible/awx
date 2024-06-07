@@ -36,6 +36,7 @@ from ansible_base.lib.utils.models import get_all_field_names
 from ansible_base.lib.utils.requests import get_remote_host
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
+from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
 
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
@@ -153,13 +154,21 @@ class APIView(views.APIView):
         Store the Django REST Framework Request object as an attribute on the
         normal Django request, store time the request started.
         """
+        is_trusted_proxy = False
+
         self.time_started = time.time()
         if getattr(settings, 'SQL_DEBUG', False):
             self.queries_before = len(connection.queries)
 
+        if 'HTTP_X_TRUSTED_PROXY' in request.META:
+            if validate_x_trusted_proxy_header(request.META['HTTP_X_TRUSTED_PROXY']):
+                is_trusted_proxy = True
+            else:
+                logger.warning("Request appeared to be a trusted upstream proxy but failed to provide a matching shared secret.")
+
         # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
         # they respect the allowed proxy list
-        if all(
+        if not is_trusted_proxy and all(
             [
                 settings.PROXY_IP_ALLOWED_LIST,
                 request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_ALLOWED_LIST,
