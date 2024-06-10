@@ -971,13 +971,13 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, p
 
 @task(queue=get_task_queuename)
 def periodic_resource_sync():
+    if not getattr(settings, 'RESOURCE_SERVER', None):
+        logger.debug("Skipping periodic resource_sync, RESOURCE_SERVER not configured")
+        return
+
     with advisory_lock('periodic_resource_sync', wait=False) as acquired:
         if acquired is False:
             logger.debug("Not running periodic_resource_sync, another task holds lock")
             return
 
-        if getattr(settings, 'RESOURCE_SERVER', None):
-            logger.debug("Running periodic resource_sync")
-            SyncExecutor().run()
-        else:
-            logger.debug("Skipping periodic resource_sync, RESOURCE_SERVER not configured")
+        SyncExecutor().run()
