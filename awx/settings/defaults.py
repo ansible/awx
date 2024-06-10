@@ -492,6 +492,7 @@ CELERYBEAT_SCHEDULE = {
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
     'cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
     'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
+    'periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': timedelta(minutes=15)},
 }
 
 # Django Caching Configuration
@@ -655,6 +656,10 @@ AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 
 # Automatically remove nodes that have missed their heartbeats after some time
 AWX_AUTO_DEPROVISION_INSTANCES = False
+
+# If False, do not allow creation of resources that are shared with the platform ingress
+# e.g. organizations, teams, and users
+AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = True
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
