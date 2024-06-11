@@ -659,7 +659,7 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 
 # If False, do not allow creation of resources that are shared with the platform ingress
 # e.g. organizations, teams, and users
-AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = True
+ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
