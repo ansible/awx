@@ -934,7 +934,6 @@ class InventorySourceOptions(BaseModel):
         ('insights', _('Red Hat Insights')),
         ('terraform', _('Terraform State')),
         ('openshift_virtualization', _('OpenShift Virtualization')),
-
     ]
 
     # From the options of the Django management base command

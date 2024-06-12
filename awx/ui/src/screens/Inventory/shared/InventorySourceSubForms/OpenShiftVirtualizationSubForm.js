@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
+
 import { t } from '@lingui/macro';
 import { useConfig } from 'contexts/Config';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
@@ -15,7 +16,7 @@ import {
 } from './SharedFields';
 import getHelpText from '../Inventory.helptext';
 
-const VirtualizationSubForm = ({ autoPopulateCredential }) => {
+const OpenShiftVirtualizationSubForm = ({ autoPopulateCredential }) => {
   const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
@@ -51,7 +52,10 @@ const VirtualizationSubForm = ({ autoPopulateCredential }) => {
       <EnabledValueField />
       <OptionsField />
       <SourceVarsField
-        popoverContent={helpText.sourceVars(docsBaseUrl, 'openshift_virtualization')}
+        popoverContent={helpText.sourceVars(
+          docsBaseUrl,
+          'openshift_virtualization'
+        )}
       />
     </>
   );
