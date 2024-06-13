@@ -1,6 +1,6 @@
 adal==1.2.7
     # via msrestazure
-aiohttp==3.9.3
+aiohttp==3.9.5
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry

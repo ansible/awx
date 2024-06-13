@@ -92,7 +92,7 @@ SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER = collections.OrderedDict(
     ]
 )
 
-if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
     ###############################################################################
     # AUTHENTICATION BACKENDS DYNAMIC SETTING
     ###############################################################################
