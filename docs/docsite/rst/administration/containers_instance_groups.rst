@@ -300,7 +300,7 @@ Container Groups
    single: container groups
    pair: containers; instance groups
 
-AWX supports :term:`Container Groups`, which allow you to execute jobs in AWX regardless of whether AWX is installed as a standalone, in  a virtual environment, or in a container. Container groups act as a pool of resources within a virtual environment. You can create instance groups to point to an OpenShift container, which are job environments that are provisioned on-demand as a pod that exists only for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
+AWX supports :term:`Container Groups`, which allow you to execute jobs in pods on Kubernetes or OpenShift clusters. Container groups act as a pool of resources within a virtual environment. These pods are created on-demand and only exist for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
 
 In some cases, it is desirable to have container groups be "always-on", which is configured through the creation of an instance.
 
