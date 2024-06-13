@@ -15,7 +15,7 @@ Some troubleshooting tools are built in the AWX user interface that may help you
 
 The options available are:
 
-- **Enable or Disable tmp dir cleanup**: choose whether you want to clean up the ``temp`` directory.
+- **Enable or Disable tmp dir cleanup**: choose whether you want to clean up the ``tmp`` directory.
 - **Debug Web Requests**: choose whether you want web requests to log messages for debugging purposes.
 - **Release Receptor Work**: disables cleaning up job pods. If you disable this, the jobs pods will remain in your cluster indefinitely, allowing you to examine them post-run. If you are missing data there, run ``kubectl logs <job-pod-name>`` and provide the logs in a issue report.
 

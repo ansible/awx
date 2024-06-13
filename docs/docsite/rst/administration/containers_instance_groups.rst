@@ -300,13 +300,10 @@ Container Groups
    single: container groups
    pair: containers; instance groups
 
-AWX supports :term:`Container Groups`, which allow you to execute jobs in pods on Kubernetes or OpenShift clusters. Container groups act as a pool of resources within a virtual environment. These pods are created on-demand and only exist for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
+AWX supports :term:`Container Groups`, which allow you to execute jobs in pods on Kubernetes (k8s) or OpenShift clusters. Container groups act as a pool of resources within a virtual environment. These pods are created on-demand and only exist for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
 
 In some cases, it is desirable to have container groups be "always-on", which is configured through the creation of an instance.
 
-.. note::
-
-	Container Groups upgraded from versions prior to |at| 4.0 will revert back to default and completely remove the old pod definition, clearing out all custom pod definitions in the migration.
 
 
 Container groups are different from |ees| in that |ees| are container images and do not use a virtual environment. See :ref:`ug_execution_environments` in the |atu| for further detail.
@@ -385,7 +382,7 @@ Container groups and instance groups are labeled accordingly.
 
 .. note::
 
-	Despite the fact that customers have custom pod specs, upgrades may be difficult if the default ``pod_spec`` changes. Most any manifest can be applied to any namespace, with the namespace specified separately, most likely you will only need to override the namespace. Similarly, pinning a default image for different releases of the platform to different versions of the default job runner container is tricky. If the default image is specified in the pod spec, then upgrades do not pick up the new default changes are made to the default pod spec.
+	Using a custom pod spec may cause issues on upgrades if the default ``pod_spec`` changes. Most any manifest can be applied to any namespace, with the namespace specified separately, most likely you will only need to override the namespace. Similarly, pinning a default image for different releases of the platform to different versions of the default job runner container is tricky. If the default image is specified in the pod spec, then upgrades do not pick up the new default changes are made to the default pod spec.
 
 
 Verify container group functions
