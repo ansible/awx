@@ -358,7 +358,7 @@ Click **Expand** to view the entire customization window.
 
 .. tip::
 
-	In order to override DNS/host entries, add the following entries in the in the ``/etc/hosts`` file of the pod spec via the ``hostAliases`` attribute:
+	In order to override DNS/host entries, use the ``hostAliases`` attribute on the pod spec. When the pod is created, these entries will be added to ``/etc/hosts`` in the container running the job.
 
 	::
 
