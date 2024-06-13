@@ -1697,7 +1697,7 @@ class insights(PluginFileInjector):
 
 
 class openshift_virtualization(PluginFileInjector):
-    plugin_name = 'openshift_virtualization'
+    plugin_name = 'kubevirt'
     base_injector = 'template'
     namespace = 'kubevirt'
     collection = 'core'
