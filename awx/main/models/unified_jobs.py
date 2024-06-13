@@ -17,7 +17,7 @@ from collections import OrderedDict
 
 # Django
 from django.conf import settings
-from django.db import models, connection
+from django.db import models, connection, transaction
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
@@ -273,7 +273,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         if new_next_schedule:
             if new_next_schedule.pk == self.next_schedule_id and new_next_schedule.next_run == self.next_job_run:
                 return  # no-op, common for infrequent schedules
-            self.next_schedule = new_next_schedule
+
+            # If in a transaction, use select_for_update to lock the next schedule row, which
+            # prevents a race condition if new_next_schedule is deleted elsewhere during this transaction
+            if transaction.get_autocommit():
+                self.next_schedule = related_schedules.first()
+            else:
+                self.next_schedule = related_schedules.select_for_update().first()
+
             self.next_job_run = new_next_schedule.next_run
             self.save(update_fields=['next_schedule', 'next_job_run'])
 

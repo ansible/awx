@@ -714,7 +714,7 @@ class AuthView(APIView):
 
 def immutablesharedfields(cls):
     '''
-    Class decorator to prevent modifying shared resources when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED setting is set to False.
+    Class decorator to prevent modifying shared resources when ALLOW_LOCAL_RESOURCE_MANAGEMENT setting is set to False.
 
     Works by overriding these view methods:
     - create
@@ -731,7 +731,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.create)
         def create_wrapper(*args, **kwargs):
-            if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
                 return cls.original_create(*args, **kwargs)
             raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
 
@@ -742,7 +742,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.delete)
         def delete_wrapper(*args, **kwargs):
-            if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
                 return cls.original_delete(*args, **kwargs)
             raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
 
@@ -753,7 +753,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.perform_update)
         def update_wrapper(*args, **kwargs):
-            if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
                 view, serializer = args
                 instance = view.get_object()
                 if instance:
@@ -1340,8 +1340,8 @@ class UserRolesList(SubListAttachDetachAPIView):
         role = get_object_or_400(models.Role, pk=sub_id)
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        # Prevent user to be associated with team/org when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
-        if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+        # Prevent user to be associated with team/org when ALLOW_LOCAL_RESOURCE_MANAGEMENT is False
+        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
             for model in [models.Organization, models.Team]:
                 ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
@@ -4374,7 +4374,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
         role = self.get_parent_object()
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
             for model in [models.Organization, models.Team]:
                 ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
