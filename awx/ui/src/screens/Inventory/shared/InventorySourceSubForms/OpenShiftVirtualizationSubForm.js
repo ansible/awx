@@ -35,7 +35,7 @@ const OpenShiftVirtualizationSubForm = ({ autoPopulateCredential }) => {
   return (
     <>
       <CredentialLookup
-        credentialTypeNamespace="openshift_virtualization"
+        credentialTypeNamespace="kubernetes_bearer_token"
         label={t`Credential`}
         helperTextInvalid={credentialMeta.error}
         isValid={!credentialMeta.touched || !credentialMeta.error}
