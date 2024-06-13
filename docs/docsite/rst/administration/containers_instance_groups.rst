@@ -338,7 +338,7 @@ To create a container group:
 Customize the pod spec
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-AWX provides a simple default pod specification, however, you can provide a custom YAML (or JSON) document that overrides the default pod spec. This field uses any custom fields (i.e. ``ImagePullSecrets``) that can be "serialized" as valid pod JSON or YAML. A full list of options can be found in the `OpenShift documentation <https://docs.openshift.com/online/pro/architecture/core_concepts/pods_and_services.html>`_.
+AWX provides a simple default pod specification, however, you can provide a custom YAML (or JSON) document that overrides the default pod spec. This field uses any custom fields (for example, ``ImagePullSecrets``) that can be "serialized" as valid pod JSON or YAML. A full list of options can be found in the `OpenShift documentation <https://docs.openshift.com/online/pro/architecture/core_concepts/pods_and_services.html>`_.
 
 To customize the pod spec, check the **Customize pod specification** option to enable and expand the **Custom pod spec** field where you specify the namespace and provide additional customizations as needed.
 
