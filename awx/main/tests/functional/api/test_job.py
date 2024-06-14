@@ -222,8 +222,11 @@ def test_job_relaunch_with_job_type(post, inventory, project, machine_credential
     # Create a job template
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
 
+    # Set initial job type
+    init_job_type = 'check' if job_type == 'run' else 'run'
+
     # Create a job instance
-    job = jt.create_unified_job()
+    job = jt.create_unified_job(_eager_fields={'job_type': init_job_type})
 
     # Perform the POST request
     url = reverse('api:job_relaunch', kwargs={'pk': job.pk})
