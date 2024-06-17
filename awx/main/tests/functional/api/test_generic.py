@@ -1,4 +1,5 @@
 import pytest
+from unittest import mock
 
 from awx.api.versioning import reverse
 
@@ -53,21 +54,6 @@ def test_proxy_ip_allowed(get, patch, admin):
 
 
 @pytest.mark.django_db
-def test_x_trusted_proxy(get, patch, admin, rsa_keypair):  # noqa: F811
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'})
-    patch(url, user=admin, data={'REMOTE_HOST_HEADERS': ['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST']})
-
-    # Invalid x_trusted_proxy value SHOULD result in sensitive headers deleted
-    middleware = HeaderTrackingMiddleware()
-    headers = {
-        'HTTP_X_TRUSTED_PROXY': generate_x_trusted_proxy_header(rsa_keypair.private),
-        'HTTP_X_FROM_THE_LOAD_BALANCER': 'some-actual-ip',
-    }
-    get(url, user=admin, middleware=middleware, **headers)
-    assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
-
-
-@pytest.mark.django_db
 class TestTrustedProxyAllowListIntegration:
     @pytest.fixture
     def url(self, patch, admin):
@@ -81,23 +67,25 @@ class TestTrustedProxyAllowListIntegration:
         return HeaderTrackingMiddleware()
 
     def test_x_trusted_proxy_valid_signature(self, get, admin, rsa_keypair, url, middleware):  # noqa: F811
-        # Invalid x_trusted_proxy value SHOULD result in sensitive headers deleted
+        # Headers should NOT get deleted
         headers = {
             'HTTP_X_TRUSTED_PROXY': generate_x_trusted_proxy_header(rsa_keypair.private),
             'HTTP_X_FROM_THE_LOAD_BALANCER': 'some-actual-ip',
         }
-        with override_settings(ANSIBLE_BASE_JWT_KEY=rsa_keypair.public):
-            get(url, user=admin, middleware=middleware, **headers)
+        with mock.patch('ansible_base.jwt_consumer.common.cache.JWTCache.get_key_from_cache', lambda self: None):
+            with override_settings(ANSIBLE_BASE_JWT_KEY=rsa_keypair.public, PROXY_IP_ALLOWED_LIST=[]):
+                get(url, user=admin, middleware=middleware, **headers)
         assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 
-    def test_x_trusted_proxy_invalid_signature(self, get, admin, url, middleware):
-        # Invalid x_trusted_proxy value SHOULD result in sensitive headers deleted
+    def test_x_trusted_proxy_invalid_signature(self, get, admin, url, patch, middleware):
+        # Headers should NOT get deleted
         headers = {
             'HTTP_X_TRUSTED_PROXY': 'DEAD-BEEF',
             'HTTP_X_FROM_THE_LOAD_BALANCER': 'some-actual-ip',
         }
-        get(url, user=admin, middleware=middleware, **headers)
-        assert 'HTTP_X_FROM_THE_LOAD_BALANCER' not in middleware.environ
+        with override_settings(PROXY_IP_ALLOWED_LIST=[]):
+            get(url, user=admin, middleware=middleware, **headers)
+        assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 
     def test_x_trusted_proxy_invalid_signature_valid_proxy(self, get, admin, url, middleware):
         # A valid explicit proxy SHOULD result in sensitive headers NOT being deleted, regardless of the trusted proxy signature results
