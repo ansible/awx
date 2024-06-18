@@ -24,7 +24,7 @@ def is_proxy_in_headers(request: Request, proxy_list: list[str], headers: list[s
     return bool(remote_hosts.intersection(set(proxy_list)))
 
 
-def delete_headers(request: Request, headers: list[str]):
+def delete_headers_starting_with_http(request: Request, headers: list[str]):
     for header in headers:
         if header.startswith('HTTP_'):
             request.environ.pop(header, None)

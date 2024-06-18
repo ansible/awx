@@ -44,7 +44,7 @@ from awx.main.models.rbac import give_creator_permissions
 from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
 from awx.main.utils.licensing import server_product_name
-from awx.main.utils.proxy import is_proxy_in_headers, delete_headers
+from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
@@ -171,7 +171,7 @@ class APIView(views.APIView):
         # they respect the allowed proxy list
         if settings.PROXY_IP_ALLOWED_LIST:
             if not is_proxy_in_headers(self.request, settings.PROXY_IP_ALLOWED_LIST, remote_headers):
-                delete_headers(request, settings.REMOTE_HOST_HEADERS)
+                delete_headers_starting_with_http(request, settings.REMOTE_HOST_HEADERS)
 
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
