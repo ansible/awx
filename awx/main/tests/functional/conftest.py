@@ -20,7 +20,7 @@ from awx.main.migrations._dab_rbac import setup_managed_role_definitions
 
 # AWX
 from awx.main.models.projects import Project
-from awx.main.models.ha import Instance
+from awx.main.models.ha import Instance, InstanceGroup
 
 from rest_framework.test import (
     APIRequestFactory,
@@ -728,6 +728,11 @@ def jt_linked(organization, project, inventory, machine_credential, credential, 
     jt = JobTemplate.objects.create(project=project, inventory=inventory, playbook='helloworld.yml', organization=organization)
     jt.credentials.add(machine_credential, vault_credential, credential, net_credential)
     return jt
+
+
+@pytest.fixture
+def instance_group():
+    return InstanceGroup.objects.create(name="east")
 
 
 @pytest.fixture
