@@ -2649,7 +2649,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.user.has_obj_perm(obj, 'change')
+        return self.user.has_obj_perm(obj, 'change') and self.check_related('organization', Organization, data, obj=obj, role_field='notification_admin_role')
 
     def can_admin(self, obj, data):
         return self.can_change(obj, data)
