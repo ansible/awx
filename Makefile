@@ -58,6 +58,9 @@ DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
 DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
+# Common command to use for running ansible-playbook
+ANSIBLE_PLAYBOOK ?= ansible-playbook -e ansible_python_interpreter=$(PYTHON)
+
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 
 # Python packages to install only from source (not from binary wheels)
@@ -362,7 +365,7 @@ symlink_collection:
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
 awx_collection_build: $(shell find awx_collection -type f)
-	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
+	$(ANSIBLE_PLAYBOOK) -i localhost, awx_collection/tools/template_galaxy.yml \
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
 	  -e collection_version=$(COLLECTION_VERSION) \
@@ -516,10 +519,10 @@ endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
-	    ansible-playbook -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
+	    $(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
 
-	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
+	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
 	    -e receptor_image=$(RECEPTOR_IMAGE) \
@@ -540,7 +543,7 @@ docker-compose-sources: .git/hooks/pre-commit
 
 docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
-	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
+	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_ldap=$(LDAP); \
@@ -583,7 +586,7 @@ docker-compose-container-group-clean:
 .PHONY: Dockerfile.dev
 ## Generate Dockerfile.dev for awx_devel image
 Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
+	$(ANSIBLE_PLAYBOOK) tools/ansible/dockerfile.yml \
 		-e dockerfile_name=Dockerfile.dev \
 		-e build_dev=True \
 		-e receptor_image=$(RECEPTOR_IMAGE)
@@ -658,7 +661,7 @@ version-for-buildyml:
 .PHONY: Dockerfile
 ## Generate Dockerfile for awx image
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
+	$(ANSIBLE_PLAYBOOK) tools/ansible/dockerfile.yml \
 		-e receptor_image=$(RECEPTOR_IMAGE) \
 		-e headless=$(HEADLESS)
 
@@ -688,7 +691,7 @@ awx-kube-buildx: Dockerfile
 .PHONY: Dockerfile.kube-dev
 ## Generate Docker.kube-dev for awx_kube_devel image
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
+	$(ANSIBLE_PLAYBOOK) tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
 	    -e template_dest=_build_kube_dev \
