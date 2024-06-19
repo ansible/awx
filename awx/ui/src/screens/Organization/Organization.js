@@ -23,7 +23,7 @@ import OrganizationEdit from './OrganizationEdit';
 import OrganizationTeams from './OrganizationTeams';
 import OrganizationExecEnvList from './OrganizationExecEnvList';
 
-function Organization({ setBreadcrumb, me }) {
+function Organization({ setBreadcrumb, me, buildActivityStream }) {
   const location = useLocation();
   const { id: organizationId } = useParams();
   const match = useRouteMatch();
@@ -42,11 +42,12 @@ function Organization({ setBreadcrumb, me }) {
       ]);
       data.galaxy_credentials = credentialsRes.data.results;
       setBreadcrumb(data);
+      buildActivityStream(data);
 
       return {
         organization: data,
       };
-    }, [setBreadcrumb, organizationId]),
+    }, [setBreadcrumb, organizationId, buildActivityStream]),
     {
       organization: null,
     }

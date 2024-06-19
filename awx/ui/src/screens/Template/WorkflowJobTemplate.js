@@ -29,7 +29,7 @@ import WorkflowJobTemplateEdit from './WorkflowJobTemplateEdit';
 import TemplateSurvey from './TemplateSurvey';
 import { Visualizer } from './WorkflowJobTemplateVisualizer';
 
-function WorkflowJobTemplate({ setBreadcrumb }) {
+function WorkflowJobTemplate({ setBreadcrumb, buildActivityStream }) {
   const location = useLocation();
   const match = useRouteMatch();
   const { id: templateId } = useParams();
@@ -73,6 +73,7 @@ function WorkflowJobTemplate({ setBreadcrumb }) {
         }
       }
       setBreadcrumb(data);
+      buildActivityStream(data);
 
       return {
         template: data,

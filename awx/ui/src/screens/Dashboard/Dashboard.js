@@ -86,7 +86,7 @@ function Dashboard() {
         </Banner>
       )}
       <ScreenHeader
-        streamType="all"
+        activityStream={{ streamType: 'all' }}
         breadcrumbConfig={{ '/home': t`Dashboard` }}
       />
       <PageSection>

@@ -15,7 +15,7 @@ import {
 import { HistoryIcon } from '@patternfly/react-icons';
 import { Link, Route, useRouteMatch, useLocation } from 'react-router-dom';
 
-const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
+const ScreenHeader = ({ breadcrumbConfig, activityStream = {} }) => {
   const { light } = PageSectionVariants;
   const oneCrumbMatch = useRouteMatch({
     path: Object.keys(breadcrumbConfig)[0],
@@ -32,6 +32,15 @@ const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
   useTitle(pathTitle);
 
   const isOnlyOneCrumb = oneCrumbMatch && oneCrumbMatch.isExact;
+
+  const { streamType, streamId } = activityStream;
+  let streamUrlParams = '';
+  if (streamType !== '') {
+    streamUrlParams += `?type=${streamType}`;
+    if (Number.isInteger(streamId)) {
+      streamUrlParams += `&${streamType}__id=${streamId}`;
+    }
+  }
 
   return (
     <PageSection variant={light}>
@@ -68,9 +77,7 @@ const ScreenHeader = ({ breadcrumbConfig, streamType }) => {
                 aria-label={t`View activity stream`}
                 variant="plain"
                 component={Link}
-                to={`/activity_stream${
-                  streamType ? `?type=${streamType}` : ''
-                }`}
+                to={`/activity_stream${streamUrlParams}`}
               >
                 <HistoryIcon />
               </Button>

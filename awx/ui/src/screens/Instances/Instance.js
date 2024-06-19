@@ -14,7 +14,7 @@ import InstanceDetail from './InstanceDetail';
 import InstancePeerList from './InstancePeers';
 import InstanceListenerAddressList from './InstanceListenerAddressList';
 
-function Instance({ setBreadcrumb }) {
+function Instance({ setBreadcrumb, buildActivityStream }) {
   const { me } = useConfig();
   const canReadSettings = me.is_superuser || me.is_system_auditor;
 
@@ -76,7 +76,11 @@ function Instance({ setBreadcrumb }) {
         <Switch>
           <Redirect from="/instances/:id" to="/instances/:id/details" exact />
           <Route path="/instances/:id/details" key="details">
-            <InstanceDetail isK8s={isK8s} setBreadcrumb={setBreadcrumb} />
+            <InstanceDetail
+              isK8s={isK8s}
+              setBreadcrumb={setBreadcrumb}
+              buildActivityStream={buildActivityStream}
+            />
           </Route>
           {isK8s && (
             <Route

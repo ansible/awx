@@ -150,7 +150,10 @@ function Settings() {
 
   return (
     <SettingsProvider value={result}>
-      <ScreenHeader streamType="setting" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={{ streamType: 'setting' }}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/settings/azure">
           <AzureAD />

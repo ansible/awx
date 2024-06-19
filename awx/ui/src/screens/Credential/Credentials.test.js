@@ -7,7 +7,7 @@ describe('<Credentials />', () => {
     const wrapper = shallow(<Credentials />);
 
     const header = wrapper.find('ScreenHeader');
-    expect(header.prop('streamType')).toEqual('credential');
+    expect(header.prop('activityStream')['streamType']).toEqual('credential');
     expect(header.prop('breadcrumbConfig')).toEqual({
       '/credentials': 'Credentials',
       '/credentials/add': 'Create New Credential',

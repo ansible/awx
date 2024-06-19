@@ -54,7 +54,10 @@ function HostMetrics() {
 
   return (
     <>
-      <ScreenHeader streamType="none" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={{ streamType: 'none' }}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <PageSection>
         <Card>
           <PaginatedTable

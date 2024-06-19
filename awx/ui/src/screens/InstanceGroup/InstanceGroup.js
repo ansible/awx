@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import {
   Link,
   Redirect,
@@ -23,7 +23,7 @@ import InstanceGroupDetails from './InstanceGroupDetails';
 import InstanceGroupEdit from './InstanceGroupEdit';
 import Instances from './Instances/Instances';
 
-function InstanceGroup({ setBreadcrumb }) {
+function InstanceGroup({ setBreadcrumb, buildActivityStream }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -52,6 +52,14 @@ function InstanceGroup({ setBreadcrumb }) {
       setBreadcrumb(instanceGroup);
     }
   }, [instanceGroup, setBreadcrumb]);
+
+  const callback = useRef();
+  callback.current = buildActivityStream;
+  useEffect(() => {
+    if (instanceGroup) {
+      callback.current(instanceGroup);
+    }
+  }, [instanceGroup, callback]);
 
   const tabsArray = [
     {

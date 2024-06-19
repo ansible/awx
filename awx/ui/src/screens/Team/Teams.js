@@ -33,15 +33,29 @@ function Teams() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({ streamType: 'team' });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
-      <ScreenHeader streamType="team" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={activityStream}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/teams/add">
           <TeamAdd />
         </Route>
         <Route path="/teams/:id">
-          <Team setBreadcrumb={buildBreadcrumbConfig} />
+          <Team
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/teams">
           <PersistentFilters pageKey="teams">

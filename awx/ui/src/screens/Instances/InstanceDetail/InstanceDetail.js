@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 
 import { useHistory, useParams, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
@@ -62,7 +62,7 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
   );
 }
 
-function InstanceDetail({ setBreadcrumb, isK8s }) {
+function InstanceDetail({ setBreadcrumb, isK8s, buildActivityStream }) {
   const config = useConfig();
 
   const { id } = useParams();
@@ -116,6 +116,14 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
       setBreadcrumb(instance);
     }
   }, [instance, setBreadcrumb]);
+
+  const callback = useRef();
+  callback.current = buildActivityStream;
+  useEffect(() => {
+    if (instance) {
+      callback.current(instance);
+    }
+  }, [instance, callback]);
 
   const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {

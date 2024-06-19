@@ -28,7 +28,7 @@ function WorkflowApprovals() {
   return (
     <>
       <ScreenHeader
-        streamType="workflow_approval"
+        activityStream={{ streamType: 'workflow_approval' }}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import {
   Link,
   Redirect,
@@ -21,7 +21,7 @@ import ContentLoading from 'components/ContentLoading';
 import CredentialTypeDetails from './CredentialTypeDetails';
 import CredentialTypeEdit from './CredentialTypeEdit';
 
-function CredentialType({ setBreadcrumb }) {
+function CredentialType({ setBreadcrumb, buildActivityStream }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -46,6 +46,14 @@ function CredentialType({ setBreadcrumb }) {
       setBreadcrumb(credentialType);
     }
   }, [credentialType, setBreadcrumb]);
+
+  const callback = useRef();
+  callback.current = buildActivityStream;
+  useEffect(() => {
+    if (credentialType) {
+      callback.current(credentialType);
+    }
+  }, [credentialType, callback]);
 
   const tabsArray = [
     {

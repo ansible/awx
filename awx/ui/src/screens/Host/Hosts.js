@@ -31,9 +31,20 @@ function Hosts() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({ streamType: 'host' });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
-      <ScreenHeader streamType="host" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={activityStream}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/hosts/add">
           <HostAdd />
@@ -41,7 +52,11 @@ function Hosts() {
         <Route path="/hosts/:id">
           <Config>
             {({ me }) => (
-              <Host setBreadcrumb={buildBreadcrumbConfig} me={me || {}} />
+              <Host
+                setBreadcrumb={buildBreadcrumbConfig}
+                me={me || {}}
+                buildActivityStream={buildActivityStream}
+              />
             )}
           </Config>
         </Route>

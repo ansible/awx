@@ -33,7 +33,9 @@ describe('<Credential />', () => {
       data: mockMachineCredential,
     });
     await act(async () => {
-      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <Credential setBreadcrumb={() => {}} buildActivityStream={() => {}} />
+      );
     });
     wrapper.update();
     expect(wrapper.find('Credential').length).toBe(1);
@@ -45,7 +47,9 @@ describe('<Credential />', () => {
       data: mockSCMCredential,
     });
     await act(async () => {
-      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <Credential setBreadcrumb={() => {}} buildActivityStream={() => {}} />
+      );
     });
     wrapper.update();
     expect(wrapper.find('Credential').length).toBe(1);
@@ -60,7 +64,9 @@ describe('<Credential />', () => {
       'Job Templates',
     ];
     await act(async () => {
-      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <Credential setBreadcrumb={() => {}} buildActivityStream={() => {}} />
+      );
     });
     wrapper.find('RoutedTabs li').forEach((tab, index) => {
       expect(tab.text()).toEqual(expectedTabs[index]);
@@ -73,7 +79,9 @@ describe('<Credential />', () => {
     });
     const expectedTabs = ['Back to Credentials', 'Details', 'Access'];
     await act(async () => {
-      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <Credential setBreadcrumb={() => {}} buildActivityStream={() => {}} />
+      );
     });
     wrapper.find('RoutedTabs li').forEach((tab, index) => {
       expect(tab.text()).toEqual(expectedTabs[index]);
@@ -85,21 +93,24 @@ describe('<Credential />', () => {
       initialEntries: ['/credentials/2/foobar'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />, {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: {
-                params: { id: 1 },
-                url: '/credentials/2/foobar',
-                path: '/credentials/2/foobar',
+      wrapper = mountWithContexts(
+        <Credential setBreadcrumb={() => {}} buildActivityStream={() => {}} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/credentials/2/foobar',
+                  path: '/credentials/2/foobar',
+                },
               },
             },
           },
-        },
-      });
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });

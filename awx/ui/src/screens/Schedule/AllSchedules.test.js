@@ -7,7 +7,7 @@ describe('<AllSchedules />', () => {
     const wrapper = shallow(<AllSchedules />);
 
     const header = wrapper.find('ScreenHeader');
-    expect(header.prop('streamType')).toEqual('schedule');
+    expect(header.prop('activityStream')['streamType']).toEqual('schedule');
     expect(header.prop('breadcrumbConfig')).toEqual({
       '/schedules': 'Schedules',
     });

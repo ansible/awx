@@ -54,14 +54,24 @@ describe('<Organization />', () => {
 
   test('initially renders successfully', async () => {
     await act(async () => {
-      mountWithContexts(<Organization setBreadcrumb={() => {}} me={mockMe} />);
+      mountWithContexts(
+        <Organization
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
+      );
     });
   });
 
   test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Organization setBreadcrumb={() => {}} me={mockMe} />
+        <Organization
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
 
@@ -83,7 +93,11 @@ describe('<Organization />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Organization setBreadcrumb={() => {}} me={mockMe} />
+        <Organization
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
 
@@ -101,7 +115,11 @@ describe('<Organization />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Organization setBreadcrumb={() => {}} me={mockMe} />,
+        <Organization
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {

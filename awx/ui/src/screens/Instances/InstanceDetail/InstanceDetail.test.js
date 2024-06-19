@@ -89,7 +89,12 @@ describe('<InstanceDetail/>', () => {
       me: { is_superuser: true },
     }));
     await act(async () => {
-      wrapper = mountWithContexts(<InstanceDetail setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <InstanceDetail
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('InstanceDetail')).toHaveLength(1);
@@ -106,7 +111,12 @@ describe('<InstanceDetail/>', () => {
       me: { is_superuser: true },
     }));
     await act(async () => {
-      wrapper = mountWithContexts(<InstanceDetail setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <InstanceDetail
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
@@ -147,7 +157,12 @@ describe('<InstanceDetail/>', () => {
       me: { is_system_auditor: true },
     }));
     await act(async () => {
-      wrapper = mountWithContexts(<InstanceDetail setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <InstanceDetail
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
 
@@ -161,7 +176,12 @@ describe('<InstanceDetail/>', () => {
       me: { is_system_auditor: true },
     }));
     await act(async () => {
-      wrapper = mountWithContexts(<InstanceDetail setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <InstanceDetail
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('InstanceToggle').length).toBe(1);
@@ -184,7 +204,12 @@ describe('<InstanceDetail/>', () => {
       me: { is_superuser: true },
     }));
     await act(async () => {
-      wrapper = mountWithContexts(<InstanceDetail setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <InstanceDetail
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />
+      );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(

@@ -97,10 +97,20 @@ function Inventories() {
     [inventory, nestedObject, schedule]
   );
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'inventory',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="inventory"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -116,7 +126,11 @@ function Inventories() {
         <Route path="/inventories/inventory/:id">
           <Config>
             {({ me }) => (
-              <Inventory setBreadcrumb={setBreadcrumbConfig} me={me || {}} />
+              <Inventory
+                setBreadcrumb={setBreadcrumbConfig}
+                me={me || {}}
+                buildActivityStream={buildActivityStream}
+              />
             )}
           </Config>
         </Route>

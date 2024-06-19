@@ -69,14 +69,22 @@ describe('<Template />', () => {
   test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
   });
   test('When component mounts API is called and the response is put in state', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     expect(JobTemplatesAPI.readDetail).toBeCalled();
@@ -85,7 +93,11 @@ describe('<Template />', () => {
   test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
 
@@ -108,7 +120,11 @@ describe('<Template />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     const tabs = await waitForElement(
@@ -126,7 +142,11 @@ describe('<Template />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />,
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -153,7 +173,11 @@ describe('<Template />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />,
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -185,7 +209,11 @@ describe('<Template />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Template setBreadcrumb={() => {}} me={mockMe} />,
+        <Template
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {

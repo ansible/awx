@@ -26,10 +26,21 @@ function CredentialTypes() {
       [`/credential_types/${credentialTypes.id}/details`]: t`Details`,
     });
   }, []);
+
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'credential_type',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="credential_type"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -37,7 +48,10 @@ function CredentialTypes() {
           <CredentialTypeAdd />
         </Route>
         <Route path="/credential_types/:id">
-          <CredentialType setBreadcrumb={buildBreadcrumbConfig} />
+          <CredentialType
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/credential_types">
           <PersistentFilters pageKey="credentialTypes">

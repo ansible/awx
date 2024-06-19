@@ -54,12 +54,21 @@ function ActivityStream() {
     };
   }
 
+  let activityStreamId = {};
+  if (activityStreamType !== 'all') {
+    const streamIdKey = `${activityStreamType}__id`;
+    if (urlParams.get(streamIdKey)) {
+      activityStreamId = { [streamIdKey]: urlParams.get(streamIdKey) };
+    }
+  }
+
   const QS_CONFIG = getQSConfig(
     'activity_stream',
     {
       page: 1,
       page_size: 20,
       order_by: '-timestamp',
+      ...activityStreamId,
     },
     ['id', 'page', 'page_size']
   );
