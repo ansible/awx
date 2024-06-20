@@ -17,6 +17,7 @@ def test_roles_to_not_create(setup_managed_roles):
 
 @pytest.mark.django_db
 def test_project_update_role(setup_managed_roles):
+    """Role to allow updating a project on the object-level should exist AAP-24847"""
     assert RoleDefinition.objects.filter(name='Project Update').count() == 1
 
 
