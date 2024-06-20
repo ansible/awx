@@ -5,6 +5,7 @@ from django.urls import reverse as django_reverse
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
+from awx.main.access import JobTemplateAccess
 
 from ansible_base.rbac.models import RoleDefinition
 
@@ -88,3 +89,16 @@ def test_assign_custom_add_role(admin_user, rando, organization, post, setup_man
     inv_id = r.data['id']
     inventory = Inventory.objects.get(id=inv_id)
     assert rando.has_obj_perm(inventory, 'change')
+
+
+@pytest.mark.django_db
+def test_jt_creation_permissions(setup_managed_roles, organization, inventory, project, machine_credential, rando):
+    """This tests that if you assign someone required permissions in the new API
+    using the managed roles, then that works to give permissions to create a job template"""
+    inv_rd = RoleDefinition.objects.get(name='Inventory Admin')
+    proj_rd = RoleDefinition.objects.get(name='Project Admin')
+    inv_rd.give_permission(rando, inventory)
+    proj_rd.give_permission(rando, project)
+
+    access = JobTemplateAccess(rando)
+    assert access.can_add({'inventory': inventory.pk, 'project': project.pk, 'name': 'foo-jt'})
