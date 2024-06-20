@@ -22,7 +22,7 @@ def test_project_update_role(setup_managed_roles):
 
 @pytest.mark.django_db
 def test_org_child_add_permission(setup_managed_roles):
-    for model_name in ('Project', 'NotificationTemplate', 'Inventory'):
+    for model_name in ('Project', 'NotificationTemplate', 'WorkflowJobTemplate', 'Inventory'):
         rd = RoleDefinition.objects.get(name=f'Organization {model_name} Admin')
         assert 'add_' in str(rd.permissions.values_list('codename', flat=True)), f'The {rd.name} role definition expected to not contain add_ permissions'
 
