@@ -12,6 +12,8 @@ __all__ = ['ExecutionEnvironment']
 class ExecutionEnvironment(CommonModel):
     class Meta:
         ordering = ('-created',)
+        # Remove view permission, as a temporary solution, defer to organization read permission
+        default_permissions = ('add', 'change', 'delete')
 
     PULL_CHOICES = [
         ('always', _("Always pull container before running.")),
