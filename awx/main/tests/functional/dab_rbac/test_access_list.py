@@ -113,7 +113,7 @@ def test_team_indirect_access(get, team, admin_user, inventory):
 
 @pytest.mark.django_db
 def test_workflow_access_list(workflow_job_template, alice, bob, setup_managed_roles, get, admin_user):
-    """Basic verification that WFJT access_list is functional AAP-25084"""
+    """Basic verification that WFJT access_list is functional"""
     workflow_job_template.admin_role.members.add(alice)
     workflow_job_template.organization.workflow_admin_role.members.add(bob)
 
