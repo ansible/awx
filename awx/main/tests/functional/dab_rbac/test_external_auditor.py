@@ -71,3 +71,6 @@ class TestExternalAuditorRole:
 
         ext_auditor_rd.give_global_permission(rando)
         r = get(url, user=rando, expect=200)
+
+
+# TODO: test non-RBAC models, jobs, ad hoc commands, etc.
