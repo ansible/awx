@@ -262,11 +262,12 @@ def main():
         search_fields['organization'] = module.resolve_name_to_id('organizations', organization)
     unified_job_template_id = None
     if unified_job_template:
-        unified_job_template_id = module.get_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})['id']
+        unified_job_template_id = module.get_one('unified_job_templates', name_or_id=unified_job_template)['id']
         sched_search_fields['unified_job_template'] = unified_job_template_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('schedules', name_or_id=name, check_exists=(state == 'exists'), **{'data': sched_search_fields})
+    existing_item = module.get_one('schedules', name_or_id=name, check_exists=(state == 'exists'),
+                                   **{'data': sched_search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
