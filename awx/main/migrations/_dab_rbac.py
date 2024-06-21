@@ -292,12 +292,13 @@ def setup_managed_role_definitions(apps, schema_editor):
     org_perms = set()
     for cls in permission_registry.all_registered_models:
         ct = ContentType.objects.get_for_model(cls)
+        cls_name = cls._meta.model_name
         object_perms = set(Permission.objects.filter(content_type=ct))
         # Special case for InstanceGroup which has an organiation field, but is not an organization child object
-        if cls._meta.model_name != 'instancegroup':
+        if cls_name != 'instancegroup':
             org_perms.update(object_perms)
 
-        if 'object_admin' in to_create and cls != Organization:
+        if 'object_admin' in to_create and cls_name != 'organization':
             indiv_perms = object_perms.copy()
             add_perms = [perm for perm in indiv_perms if perm.codename.startswith('add_')]
             if add_perms:
@@ -310,7 +311,7 @@ def setup_managed_role_definitions(apps, schema_editor):
                 )
             )
 
-        if 'org_children' in to_create and cls != Organization:
+        if 'org_children' in to_create and (cls_name not in ('organization', 'instancegroup', 'team')):
             org_child_perms = object_perms.copy()
             org_child_perms.add(Permission.objects.get(codename='view_organization'))
 
@@ -327,7 +328,7 @@ def setup_managed_role_definitions(apps, schema_editor):
         if 'special' in to_create:
             special_perms = []
             for perm in object_perms:
-                if perm.codename.split('_')[0] not in ('add', 'change', 'update', 'delete', 'view'):
+                if perm.codename.split('_')[0] not in ('add', 'change', 'delete', 'view'):
                     special_perms.append(perm)
             for perm in special_perms:
                 action = perm.codename.split('_')[0]
