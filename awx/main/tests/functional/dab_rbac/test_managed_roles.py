@@ -25,7 +25,7 @@ def test_project_update_role(setup_managed_roles):
 def test_org_child_add_permission(setup_managed_roles):
     for model_name in ('Project', 'NotificationTemplate', 'WorkflowJobTemplate', 'Inventory'):
         rd = RoleDefinition.objects.get(name=f'Organization {model_name} Admin')
-        assert 'add_' in str(rd.permissions.values_list('codename', flat=True)), f'The {rd.name} role definition expected to not contain add_ permissions'
+        assert 'add_' in str(rd.permissions.values_list('codename', flat=True)), f'The {rd.name} role definition expected to contain add_ permissions'
 
     # special case for JobTemplate, anyone can create one with use permission to project/inventory
     assert not DABPermission.objects.filter(codename='add_jobtemplate').exists()
