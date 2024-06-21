@@ -36,6 +36,7 @@ from ansible_base.lib.utils.models import get_all_field_names
 from ansible_base.lib.utils.requests import get_remote_host
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
+from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
 
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
@@ -43,6 +44,7 @@ from awx.main.models.rbac import give_creator_permissions
 from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
 from awx.main.utils.licensing import server_product_name
+from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
@@ -153,22 +155,23 @@ class APIView(views.APIView):
         Store the Django REST Framework Request object as an attribute on the
         normal Django request, store time the request started.
         """
+        remote_headers = ['REMOTE_ADDR', 'REMOTE_HOST']
+
         self.time_started = time.time()
         if getattr(settings, 'SQL_DEBUG', False):
             self.queries_before = len(connection.queries)
 
+        if 'HTTP_X_TRUSTED_PROXY' in request.environ:
+            if validate_x_trusted_proxy_header(request.environ['HTTP_X_TRUSTED_PROXY']):
+                remote_headers = settings.REMOTE_HOST_HEADERS
+            else:
+                logger.warning("Request appeared to be a trusted upstream proxy but failed to provide a matching shared secret.")
+
         # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
         # they respect the allowed proxy list
-        if all(
-            [
-                settings.PROXY_IP_ALLOWED_LIST,
-                request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_ALLOWED_LIST,
-                request.environ.get('REMOTE_HOST') not in settings.PROXY_IP_ALLOWED_LIST,
-            ]
-        ):
-            for custom_header in settings.REMOTE_HOST_HEADERS:
-                if custom_header.startswith('HTTP_'):
-                    request.environ.pop(custom_header, None)
+        if settings.PROXY_IP_ALLOWED_LIST:
+            if not is_proxy_in_headers(self.request, settings.PROXY_IP_ALLOWED_LIST, remote_headers):
+                delete_headers_starting_with_http(request, settings.REMOTE_HOST_HEADERS)
 
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request

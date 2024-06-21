@@ -1,4 +1,5 @@
 import pytest
+from unittest import mock
 
 # AWX
 from awx.api.serializers import JobTemplateSerializer
@@ -8,9 +9,14 @@ from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
 from django.apps import apps
+from django.test.utils import override_settings
 
 # DRF
 from rest_framework.exceptions import ValidationError
+
+# DAB
+from ansible_base.jwt_consumer.common.util import generate_x_trusted_proxy_header
+from ansible_base.lib.testing.fixtures import rsa_keypair_factory, rsa_keypair  # noqa: F401; pylint: disable=unused-import
 
 
 @pytest.mark.django_db
@@ -369,3 +375,113 @@ def test_job_template_missing_inventory(project, inventory, admin_user, post):
     )
     assert r.status_code == 400
     assert "Cannot start automatically, an inventory is required." in str(r.data)
+
+
+@pytest.mark.django_db
+class TestJobTemplateCallbackProxyIntegration:
+    """
+    Test the interaction of provision job template callback feature and:
+        settings.PROXY_IP_ALLOWED_LIST
+        x-trusted-proxy http header
+    """
+
+    @pytest.fixture
+    def job_template(self, inventory, project):
+        jt = JobTemplate.objects.create(name='test-jt', inventory=inventory, project=project, playbook='helloworld.yml', host_config_key='abcd')
+        return jt
+
+    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    def test_host_not_found(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811
+        job_template.inventory.hosts.create(name='foobar')
+
+        headers = {
+            'HTTP_X_FROM_THE_LOAD_BALANCER': 'baz',
+            'REMOTE_HOST': 'baz',
+            'REMOTE_ADDR': 'baz',
+        }
+        r = post(
+            url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}), data={'host_config_key': 'abcd'}, user=admin_user, expect=400, **headers
+        )
+        assert r.data['msg'] == 'No matching host could be found!'
+
+    @pytest.mark.parametrize(
+        'headers, expected',
+        (
+            pytest.param(
+                {
+                    'HTTP_X_FROM_THE_LOAD_BALANCER': 'foobar',
+                    'REMOTE_HOST': 'my.proxy.example.org',
+                },
+                201,
+            ),
+            pytest.param(
+                {
+                    'HTTP_X_FROM_THE_LOAD_BALANCER': 'foobar',
+                    'REMOTE_HOST': 'not-my-proxy.org',
+                },
+                400,
+            ),
+        ),
+    )
+    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    def test_proxy_ip_allowed_list(self, job_template, admin_user, post, headers, expected):  # noqa: F811
+        job_template.inventory.hosts.create(name='my.proxy.example.org')
+
+        post(
+            url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
+            data={'host_config_key': 'abcd'},
+            user=admin_user,
+            expect=expected,
+            **headers
+        )
+
+    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=[])
+    def test_no_proxy_trust_all_headers(self, job_template, admin_user, post):
+        job_template.inventory.hosts.create(name='foobar')
+
+        headers = {
+            'HTTP_X_FROM_THE_LOAD_BALANCER': 'foobar',
+            'REMOTE_ADDR': 'bar',
+            'REMOTE_HOST': 'baz',
+        }
+        post(url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}), data={'host_config_key': 'abcd'}, user=admin_user, expect=201, **headers)
+
+    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    def test_trusted_proxy(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811
+        job_template.inventory.hosts.create(name='foobar')
+
+        headers = {
+            'HTTP_X_TRUSTED_PROXY': generate_x_trusted_proxy_header(rsa_keypair.private),
+            'HTTP_X_FROM_THE_LOAD_BALANCER': 'foobar, my.proxy.example.org',
+        }
+
+        with mock.patch('ansible_base.jwt_consumer.common.cache.JWTCache.get_key_from_cache', lambda self: None):
+            with override_settings(ANSIBLE_BASE_JWT_KEY=rsa_keypair.public):
+                post(
+                    url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
+                    data={'host_config_key': 'abcd'},
+                    user=admin_user,
+                    expect=201,
+                    **headers
+                )
+
+    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    def test_trusted_proxy_host_not_found(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811
+        job_template.inventory.hosts.create(name='foobar')
+
+        headers = {
+            'HTTP_X_TRUSTED_PROXY': generate_x_trusted_proxy_header(rsa_keypair.private),
+            'HTTP_X_FROM_THE_LOAD_BALANCER': 'baz, my.proxy.example.org',
+            'REMOTE_ADDR': 'bar',
+            'REMOTE_HOST': 'baz',
+        }
+
+        with mock.patch('ansible_base.jwt_consumer.common.cache.JWTCache.get_key_from_cache', lambda self: None):
+            with override_settings(ANSIBLE_BASE_JWT_KEY=rsa_keypair.public):
+                post(
+                    url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
+                    data={'host_config_key': 'abcd'},
+                    user=admin_user,
+                    expect=400,
+                    **headers
+                )

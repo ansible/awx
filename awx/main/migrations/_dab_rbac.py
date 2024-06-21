@@ -290,7 +290,7 @@ def setup_managed_role_definitions(apps, schema_editor):
     managed_role_definitions = []
 
     org_perms = set()
-    for cls in permission_registry._registry:
+    for cls in permission_registry.all_registered_models:
         ct = ContentType.objects.get_for_model(cls)
         object_perms = set(Permission.objects.filter(content_type=ct))
         # Special case for InstanceGroup which has an organiation field, but is not an organization child object
