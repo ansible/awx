@@ -16,7 +16,16 @@ from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'role_name',
-    ['execution_environment_admin_role', 'project_admin_role', 'admin_role', 'auditor_role', 'read_role', 'execute_role', 'notification_admin_role'],
+    [
+        'execution_environment_admin_role',
+        'workflow_admin_role',
+        'project_admin_role',
+        'admin_role',
+        'auditor_role',
+        'read_role',
+        'execute_role',
+        'notification_admin_role',
+    ],
 )
 def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     """

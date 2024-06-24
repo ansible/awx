@@ -33,13 +33,6 @@ def node_type_instance():
 
 
 @pytest.fixture
-def instance_group(job_factory):
-    ig = InstanceGroup(name="east")
-    ig.save()
-    return ig
-
-
-@pytest.fixture
 def containerized_instance_group(instance_group, kube_credential):
     ig = InstanceGroup(name="container")
     ig.credential = kube_credential

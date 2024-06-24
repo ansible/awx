@@ -85,3 +85,10 @@ class TestMigrationSmoke:
 
         RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
         assert RoleUserAssignment.objects.filter(user=user.id, object_id=org.id).exists()
+
+        # Regression testing for bug that comes from current vs past models mismatch
+        RoleDefinition = new_state.apps.get_model('dab_rbac', 'RoleDefinition')
+        assert not RoleDefinition.objects.filter(name='Organization Organization Admin').exists()
+        # Test special cases in managed role creation
+        assert not RoleDefinition.objects.filter(name='Organization Team Admin').exists()
+        assert not RoleDefinition.objects.filter(name='Organization InstanceGroup Admin').exists()

@@ -598,7 +598,7 @@ class InstanceGroupAccess(BaseAccess):
        - a superuser
        - admin role on the Instance group
     I can add/delete Instance Groups:
-       - a superuser(system administrator)
+       - a superuser(system administrator), because these are not org-scoped
     I can use Instance Groups when I have:
        - use_role on the instance group
     """
@@ -627,7 +627,7 @@ class InstanceGroupAccess(BaseAccess):
     def can_delete(self, obj):
         if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             return False
-        return self.user.is_superuser
+        return self.user.has_obj_perm(obj, 'delete')
 
 
 class UserAccess(BaseAccess):
@@ -2628,7 +2628,7 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
 
 class NotificationTemplateAccess(BaseAccess):
     """
-    I can see/use a notification_template if I have permission to
+    Run standard logic from DAB RBAC
     """
 
     model = NotificationTemplate
@@ -2649,10 +2649,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        if obj.organization is None:
-            # only superusers are allowed to edit orphan notification templates
-            return False
-        return self.check_related('organization', Organization, data, obj=obj, role_field='notification_admin_role', mandatory=True)
+        return self.user.has_obj_perm(obj, 'change') and self.check_related('organization', Organization, data, obj=obj, role_field='notification_admin_role')
 
     def can_admin(self, obj, data):
         return self.can_change(obj, data)
@@ -2662,9 +2659,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_start(self, obj, validate_license=True):
-        if obj.organization is None:
-            return False
-        return self.user in obj.organization.notification_admin_role
+        return self.can_change(obj, None)
 
 
 class NotificationAccess(BaseAccess):

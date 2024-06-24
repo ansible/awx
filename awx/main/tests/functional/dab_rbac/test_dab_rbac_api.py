@@ -5,6 +5,7 @@ from django.urls import reverse as django_reverse
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
+from awx.main.access import JobTemplateAccess, WorkflowJobTemplateAccess
 
 from ansible_base.rbac.models import RoleDefinition
 
@@ -88,3 +89,32 @@ def test_assign_custom_add_role(admin_user, rando, organization, post, setup_man
     inv_id = r.data['id']
     inventory = Inventory.objects.get(id=inv_id)
     assert rando.has_obj_perm(inventory, 'change')
+
+
+@pytest.mark.django_db
+def test_jt_creation_permissions(setup_managed_roles, inventory, project, rando):
+    """This tests that if you assign someone required permissions in the new API
+    using the managed roles, then that works to give permissions to create a job template"""
+    inv_rd = RoleDefinition.objects.get(name='Inventory Admin')
+    proj_rd = RoleDefinition.objects.get(name='Project Admin')
+    # establish prior state
+    access = JobTemplateAccess(rando)
+    assert not access.can_add({'inventory': inventory.pk, 'project': project.pk, 'name': 'foo-jt'})
+
+    inv_rd.give_permission(rando, inventory)
+    proj_rd.give_permission(rando, project)
+
+    assert access.can_add({'inventory': inventory.pk, 'project': project.pk, 'name': 'foo-jt'})
+
+
+@pytest.mark.django_db
+def test_workflow_creation_permissions(setup_managed_roles, organization, workflow_job_template, rando):
+    """Similar to JT, assigning new roles gives creator permissions"""
+    org_wf_rd = RoleDefinition.objects.get(name='Organization WorkflowJobTemplate Admin')
+    assert workflow_job_template.organization == organization  # sanity
+    # establish prior state
+    access = WorkflowJobTemplateAccess(rando)
+    assert not access.can_add({'name': 'foo-flow', 'organization': organization.pk})
+    org_wf_rd.give_permission(rando, organization)
+
+    assert access.can_add({'name': 'foo-flow', 'organization': organization.pk})

@@ -21,7 +21,9 @@ with connection.cursor() as cursor:
     cursor.execute("UPDATE main_instancegroup SET use_role_id = NULL WHERE name = 'red'")
     cursor.execute(f"UPDATE main_instancegroup SET use_role_id = {green.use_role_id} WHERE name = 'yellow'")
 
-    cursor.execute("ALTER TABLE main_instancegroup ADD CONSTRAINT main_instancegroup_use_role_id_48ea7ecc_fk_main_rbac_roles_id FOREIGN KEY (use_role_id) REFERENCES public.main_rbac_roles(id) DEFERRABLE INITIALLY DEFERRED NOT VALID")
+    cursor.execute(
+        "ALTER TABLE main_instancegroup ADD CONSTRAINT main_instancegroup_use_role_id_48ea7ecc_fk_main_rbac_roles_id FOREIGN KEY (use_role_id) REFERENCES public.main_rbac_roles(id) DEFERRABLE INITIALLY DEFERRED NOT VALID"
+    )
 
 print("=====================================")
 for ig in InstanceGroup.objects.all():
