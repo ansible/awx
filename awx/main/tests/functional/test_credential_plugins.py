@@ -1,6 +1,7 @@
 import pytest
 from unittest import mock
 from awx.main.credential_plugins import hashivault
+from awx.main.credential_plugins import aws_assumerole
 
 
 def test_imported_azure_cloud_sdk_vars():
@@ -119,6 +120,32 @@ def test_hashivault_handle_auth_client_cert():
 def test_hashivault_handle_auth_not_enough_args():
     with pytest.raises(Exception):
         hashivault.handle_auth()
+
+
+def test_aws_assumerole_with_accesssecret():
+    kwargs = {
+        'access_key': 'the_access_key',
+        'secret_key': 'the_secret_key',
+        'role_arn': 'the_arn',
+        'identifier': 'the_session_token',
+    }
+    with mock.patch.object(aws_assumerole, 'aws_assumerole_backend') as method_mock:
+        method_mock.return_value = 'the_session_token'
+        token = aws_assumerole.aws_assumerole_backend(**kwargs)
+        method_mock.assert_called_with(**kwargs, auth_param=kwargs)
+        assert token == 'the_session_token'
+
+
+def test_aws_assumerole_with_arnonly():
+    kwargs = {
+        'role_arn': 'the_arn',
+        'identifier': 'the_session_token',
+    }
+    with mock.patch.object(aws_assumerole, 'aws_assumerole_backend') as method_mock:
+        method_mock.return_value = 'the_session_token'
+        token = aws_assumerole.aws_assumerole_backend(**kwargs)
+        method_mock.assert_called_with(**kwargs, auth_param=kwargs)
+        assert token == 'the_session_token'
 
 
 class TestDelineaImports:
