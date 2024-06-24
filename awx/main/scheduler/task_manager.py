@@ -328,17 +328,20 @@ class DependencyManager(TaskBase):
         '''
         if (update is None) or (update.status in ['failed', 'canceled', 'error']):
             return True
-        if update.status in ['waiting', 'pending', 'running']:
+        if update.status in ['new', 'waiting', 'pending', 'running']:
             return False
 
         return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
 
-    def get_or_create_project_update(self, project_id):
+    def get_or_create_project_update(self, project_id, scm_branch=None):
         project = self.all_projects.get(project_id, None)
         if project is not None:
             latest_project_update = project.project_updates.filter(job_type='check').order_by("-created").first()
             if self.should_update_again(latest_project_update, project.scm_update_cache_timeout):
-                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency'))
+                fields = dict(launch_type='dependency')
+                if scm_branch and project.allow_override:
+                    fields['scm_branch'] = scm_branch
+                project_task = project.create_project_update(_eager_fields=fields)
                 project_task.signal_start()
                 return [project_task]
             else:
@@ -346,7 +349,7 @@ class DependencyManager(TaskBase):
         return []
 
     def gen_dep_for_job(self, task):
-        dependencies = self.get_or_create_project_update(task.project_id)
+        dependencies = self.get_or_create_project_update(task.project_id, task.scm_branch)
 
         try:
             start_args = json.loads(decrypt_field(task, field_name="start_args"))
@@ -358,7 +361,10 @@ class DependencyManager(TaskBase):
                 continue
             latest_inventory_update = inventory_source.inventory_updates.order_by("-created").first()
             if self.should_update_again(latest_inventory_update, inventory_source.update_cache_timeout):
-                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency'))
+                fields = dict(launch_type='dependency')
+                if task.scm_branch and task.project.allow_override:
+                    fields['scm_branch'] = task.scm_branch
+                inventory_task = inventory_source.create_inventory_update(_eager_fields=fields)
                 inventory_task.signal_start()
                 dependencies.append(inventory_task)
             else:
@@ -397,7 +403,7 @@ class DependencyManager(TaskBase):
 
     @timeit
     def _schedule(self):
-        self.get_tasks(dict(status__in=["pending"], dependencies_processed=False))
+        self.get_tasks(dict(status__in=["new", "pending"], dependencies_processed=False))
 
         if len(self.all_tasks) > 0:
             deps = self.generate_dependencies(self.all_tasks)
@@ -672,7 +678,7 @@ class TaskManager(TaskBase):
         self.process_running_tasks(running_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_running_processed", len(running_tasks))
 
-        pending_tasks = [t for t in self.all_tasks if t.status == 'pending']
+        pending_tasks = [t for t in self.all_tasks if t.status in ['new', 'pending']]
 
         self.process_pending_tasks(pending_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(pending_tasks))
@@ -704,7 +710,7 @@ class TaskManager(TaskBase):
 
     @timeit
     def _schedule(self):
-        self.get_tasks(dict(status__in=["pending", "waiting", "running"], dependencies_processed=True))
+        self.get_tasks(dict(status__in=["new", "pending", "waiting", "running"], dependencies_processed=True))
 
         self.after_lock_init()
         self.reap_jobs_from_orphaned_instances()

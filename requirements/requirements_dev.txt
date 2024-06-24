@@ -24,6 +24,7 @@ gprof2dot
 atomicwrites
 flake8
 yamllint
+ansible-runner
 pip>=21.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
 
 # python debuggers

@@ -526,3 +526,291 @@ def test_generate_dependencies_only_once(job_template_factory):
         dm.generate_dependencies = mock.MagicMock(return_value=[])
         dm.schedule()
         dm.generate_dependencies.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_project_scm_branch_used_by_default(controlplane_instance_group, job_template_factory, mocker, inventory_source_factory):
+    scm_project_branch = "default-project-branch"
+    instance = controlplane_instance_group.instances.all()[0]
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    jt = objects.job_template
+    jt.allow_simultaneous = True
+    jt.save()
+    p = objects.project
+    p.scm_update_on_launch = True
+    p.scm_update_cache_timeout = 300
+    p.scm_type = "git"
+    p.scm_url = "http://github.com/ansible/ansible.git"
+    p.scm_branch = scm_project_branch
+    p.allow_override = True
+    p.save()
+
+    # close off the project update created by default when a new SCM project is created
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        pu = p.project_updates.first()
+        pu.status = "failed"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    i = objects.inventory
+    ii = inventory_source_factory("scm")
+    ii.source = "scm"
+    ii.update_on_launch = True
+    ii.update_cache_timeout = 300
+    ii.save()
+    i.inventory_sources.add(ii)
+
+    j = create_job(objects.job_template, dependencies_processed=False)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+        TaskManager().schedule()
+        pu = p.project_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        pu.status = "successful"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+
+        DependencyManager().schedule()
+        TaskManager().schedule()
+
+        iu = ii.inventory_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance)], any_order=True)
+
+        iu.status = "successful"
+        iu.finished = iu.created + timedelta(seconds=1)
+        iu.save()
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_has_calls([mock.call(j, controlplane_instance_group, instance)], any_order=True)
+    pu = [x for x in p.project_updates.all()]
+    iu = [x for x in ii.inventory_updates.all()]
+    assert len(pu) == 2
+    assert len(iu) == 1
+    assert pu[1].scm_branch == scm_project_branch
+    assert iu[0].scm_branch == ''
+
+
+@pytest.mark.django_db
+def test_job_template_scm_branch_overrides_project_branch(controlplane_instance_group, job_template_factory, mocker, inventory_source_factory):
+    scm_project_branch = "default-project-branch"
+    scm_job_template_branch = "job-template-branch"
+    instance = controlplane_instance_group.instances.all()[0]
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    jt = objects.job_template
+    jt.allow_simultaneous = True
+    jt.scm_branch = scm_job_template_branch
+    jt.save()
+    p = objects.project
+    p.scm_update_on_launch = True
+    p.scm_update_cache_timeout = 300
+    p.scm_type = "git"
+    p.scm_url = "http://github.com/ansible/ansible.git"
+    p.scm_branch = scm_project_branch
+    p.allow_override = True
+    p.save()
+
+    # close off the project update created by default when a new SCM project is created
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        pu = p.project_updates.first()
+        pu.status = "failed"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    i = objects.inventory
+    ii = inventory_source_factory("scm")
+    ii.source = "scm"
+    ii.update_on_launch = True
+    ii.update_cache_timeout = 300
+    ii.save()
+    i.inventory_sources.add(ii)
+
+    j = create_job(objects.job_template, dependencies_processed=False)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+        TaskManager().schedule()
+        pu = p.project_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        pu.status = "successful"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+
+        DependencyManager().schedule()
+        TaskManager().schedule()
+
+        iu = ii.inventory_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance)], any_order=True)
+
+        iu.status = "successful"
+        iu.finished = iu.created + timedelta(seconds=1)
+        iu.save()
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_has_calls([mock.call(j, controlplane_instance_group, instance)], any_order=True)
+    pu = [x for x in p.project_updates.all()]
+    iu = [x for x in ii.inventory_updates.all()]
+    assert len(pu) == 2
+    assert len(iu) == 1
+    assert pu[1].scm_branch == scm_job_template_branch
+    assert iu[0].scm_branch == scm_job_template_branch
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_overrides_project_and_job_template_branch(controlplane_instance_group, job_template_factory, mocker, inventory_source_factory):
+    scm_project_branch = "default-project-branch"
+    scm_job_template_branch = "job-template-branch"
+    scm_task_branch = "task-branch"
+    instance = controlplane_instance_group.instances.all()[0]
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    jt = objects.job_template
+    jt.allow_simultaneous = True
+    jt.scm_branch = scm_job_template_branch
+    jt.save()
+
+    p = objects.project
+    p.scm_update_on_launch = True
+    p.scm_update_cache_timeout = 300
+    p.scm_type = "git"
+    p.scm_url = "http://github.com/ansible/ansible.git"
+    p.scm_branch = scm_project_branch
+    p.allow_override = True
+    p.save()
+
+    # close off the project update created by default when a new SCM project is created
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        pu = p.project_updates.first()
+        pu.status = "failed"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    i = objects.inventory
+    ii = inventory_source_factory("scm")
+    ii.source = "scm"
+    ii.update_on_launch = True
+    ii.update_cache_timeout = 300
+    ii.save()
+    i.inventory_sources.add(ii)
+
+    j = create_job(objects.job_template, dependencies_processed=False, scm_branch=scm_task_branch)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+        TaskManager().schedule()
+        pu = p.project_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        pu.status = "successful"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+
+        DependencyManager().schedule()
+        TaskManager().schedule()
+
+        iu = ii.inventory_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance)], any_order=True)
+
+        iu.status = "successful"
+        iu.finished = iu.created + timedelta(seconds=1)
+        iu.save()
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_has_calls([mock.call(j, controlplane_instance_group, instance)], any_order=True)
+    pu = [x for x in p.project_updates.all()]
+    iu = [x for x in ii.inventory_updates.all()]
+    assert len(pu) == 2
+    assert len(iu) == 1
+    assert pu[1].scm_branch == scm_task_branch
+    assert iu[0].scm_branch == scm_task_branch
+
+
+@pytest.mark.django_db
+def test_overriding_scm_branch_ignored_when_not_allowed(controlplane_instance_group, job_template_factory, mocker, inventory_source_factory):
+    scm_project_branch = "default-project-branch"
+    scm_job_template_branch = "job-template-branch"
+    instance = controlplane_instance_group.instances.all()[0]
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    jt = objects.job_template
+    jt.allow_simultaneous = True
+    jt.scm_branch = scm_job_template_branch
+    jt.save()
+    p = objects.project
+    p.scm_update_on_launch = True
+    p.scm_update_cache_timeout = 300
+    p.allow_override = False
+    p.scm_type = "git"
+    p.scm_url = "http://github.com/ansible/ansible.git"
+    p.scm_branch = scm_project_branch
+    p.save()
+
+    # close off the project update created by default when a new SCM project is created
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        pu = p.project_updates.first()
+        pu.status = "failed"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    i = objects.inventory
+    ii = inventory_source_factory("scm")
+    ii.source = "scm"
+    ii.update_on_launch = True
+    ii.update_cache_timeout = 300
+    ii.save()
+    i.inventory_sources.add(ii)
+
+    j = create_job(objects.job_template, dependencies_processed=False)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+        TaskManager().schedule()
+        pu = p.project_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(pu, controlplane_instance_group, instance)], any_order=True)
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        pu.status = "successful"
+        pu.finished = pu.created + timedelta(seconds=1)
+        pu.save()
+
+        DependencyManager().schedule()
+        TaskManager().schedule()
+
+        iu = ii.inventory_updates.last()
+
+        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance)], any_order=True)
+
+        iu.status = "successful"
+        iu.finished = iu.created + timedelta(seconds=1)
+        iu.save()
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        TaskManager.start_task.assert_has_calls([mock.call(j, controlplane_instance_group, instance)], any_order=True)
+    pu = [x for x in p.project_updates.all()]
+    iu = [x for x in ii.inventory_updates.all()]
+    assert len(pu) == 2
+    assert len(iu) == 1
+    assert pu[1].scm_branch == scm_project_branch
+    assert iu[0].scm_branch == ''
