@@ -99,8 +99,11 @@ def _ctit_db_wrapper(trans_safe=False):
             cause = e.__cause__
             if cause and hasattr(cause, 'sqlstate'):
                 sqlstate = cause.sqlstate
-                sqlstate_str = psycopg.errors.lookup(sqlstate)
-                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+                if sqlstate:
+                    sqlstate_str = psycopg.errors.lookup(sqlstate)
+                    logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+                else:
+                    logger.error(f'Can not retreive settings because not connected. error: {str(e)}')
         else:
             logger.exception('Error modifying something related to database settings.')
     finally:
