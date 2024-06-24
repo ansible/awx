@@ -382,7 +382,7 @@ Container groups and instance groups are labeled accordingly.
 
 .. note::
 
-	Using a custom pod spec may cause issues on upgrades if the default ``pod_spec`` changes. Most any manifest can be applied to any namespace, with the namespace specified separately, most likely you will only need to override the namespace. Similarly, pinning a default image for different releases of the platform to different versions of the default job runner container is tricky. If the default image is specified in the pod spec, then upgrades do not pick up the new default changes that are made to the default pod spec.
+	Using a custom pod spec may cause issues on upgrades if the default ``pod_spec`` changes. Since any manifest can be applied to any namespace, with the namespace specified separately, most likely you will only need to override the namespace. Similarly, pinning a default image for different releases of the platform to different versions of the default job runner container is tricky. If the default image is specified in the pod spec, then upgrades do not pick up the new default changes that are made to the default pod spec.
 
 
 Verify container group functions
