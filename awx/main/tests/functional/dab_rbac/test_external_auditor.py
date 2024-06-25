@@ -32,8 +32,18 @@ def obj_factory(request):
 
 
 @pytest.mark.django_db
+def test_access_qs_external_auditor(ext_auditor_rd, rando, job_template):
+    ext_auditor_rd.give_global_permission(rando)
+    jt_cls = apps.get_model('main', 'JobTemplate')
+    ujt_cls = apps.get_model('main', 'UnifiedJobTemplate')
+    assert job_template in jt_cls.access_qs(rando)
+    assert job_template.id in jt_cls.access_ids_qs(rando)
+    assert job_template.id in ujt_cls.accessible_pk_qs(rando, 'read_role')
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('model', sorted(permission_registry.all_registered_models, key=lambda cls: cls._meta.model_name))
-class TestExternalAuditorRole:
+class TestExternalAuditorRoleAllModels:
     def test_access_can_read_method(self, obj_factory, model, ext_auditor_rd, rando):
         fixture_name = model._meta.verbose_name.replace(' ', '_')
         obj = obj_factory(fixture_name)

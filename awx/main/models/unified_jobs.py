@@ -215,6 +215,13 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         action = to_permissions[role_field]
 
+        # Special condition for super auditor and other future super permissions
+        role_subclasses = [cls for cls in cls.__subclasses__() if hasattr(cls, 'read_role')]
+        all_codenames = {f'{action}_{cls._meta.model_name}' for cls in role_subclasses}
+        if not (all_codenames - accessor.singleton_permissions()):
+            qs = cls.objects.filter(polymorphic_ctype__in=ContentType.objects.get_for_models(*role_subclasses).values())
+            return qs.values_list('id', flat=True)
+
         return (
             RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__startswith=action, content_type_id__in=cls._submodels_with_roles())
             .values_list('object_id')
