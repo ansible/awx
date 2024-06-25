@@ -224,7 +224,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     def _perform_unique_checks(self, unique_checks):
         # Handle the list of unique fields returned above. Replace with an
         # appropriate error message for the remaining field(s) in the unique
-        # check and cleanup the errors dictionary.
+        # check and cleanup the errors dictionary
         errors = super(UnifiedJobTemplate, self)._perform_unique_checks(unique_checks)
         for key, msgs in errors.items():
             if key != NON_FIELD_ERRORS:
