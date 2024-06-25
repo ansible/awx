@@ -32,7 +32,7 @@ def obj_factory(request):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('model', permission_registry.all_registered_models)
+@pytest.mark.parametrize('model', sorted(permission_registry.all_registered_models, key=lambda cls: cls._meta.model_name))
 class TestExternalAuditorRole:
     def test_access_can_read_method(self, obj_factory, model, ext_auditor_rd, rando):
         fixture_name = model._meta.verbose_name.replace(' ', '_')
