@@ -73,7 +73,7 @@ class TestExternalAuditorRoleAllModels:
         assert r.data['count'] == initial_ct + 1
 
         if fixture_name in ('job_template', 'workflow_job_template'):
-            url = reverse(f'api:unified_job_template_list')
+            url = reverse('api:unified_job_template_list')
             r = get(url, user=rando, expect=200)
             assert r.data['count'] == initial_ct + 1
 
@@ -82,10 +82,10 @@ class TestExternalAuditorRoleAllModels:
         obj = obj_factory(fixture_name)
 
         url = reverse(f'api:{fixture_name}_detail', kwargs={'pk': obj.pk})
-        r = get(url, user=rando, expect=403)  # TODO: should be 401
+        get(url, user=rando, expect=403)  # TODO: should be 401
 
         ext_auditor_rd.give_global_permission(rando)
-        r = get(url, user=rando, expect=200)
+        get(url, user=rando, expect=200)
 
 
 # TODO: test non-RBAC models, jobs, ad hoc commands, etc.
