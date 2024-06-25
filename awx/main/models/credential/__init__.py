@@ -21,6 +21,7 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
+from django.contrib.auth.models import User
 
 # AWX
 from awx.api.versioning import reverse
@@ -41,6 +42,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+from awx.main.models import Team
 from awx.main.utils import encrypt_field
 from . import injectors as builtin_injectors
 
@@ -314,6 +316,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 return input_source.get_input_value()
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
+
+    def validate_role_assignment(self, actor, role_definition):
+        if isinstance(actor, User):
+            if actor.is_superuser or self.organization in actor.organizations:
+                return
+        if isinstance(actor, Team):
+            if actor.organization == self.organization:
+                return
+        return f"You cannot grant credential access to a {actor._meta.object_name} not in the credentials' organization"
 
 
 class CredentialType(CommonModelNameNotUnique):
