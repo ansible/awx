@@ -62,6 +62,11 @@ class TestExternalAuditorRole:
         r = get(url, user=rando, expect=200)
         assert r.data['count'] == initial_ct + 1
 
+        if fixture_name in ('job_template', 'workflow_job_template'):
+            url = reverse(f'api:unified_job_template_list')
+            r = get(url, user=rando, expect=200)
+            assert r.data['count'] == initial_ct + 1
+
     def test_detail_view(self, obj_factory, model, ext_auditor_rd, rando, get):
         fixture_name = model._meta.verbose_name.replace(' ', '_')
         obj = obj_factory(fixture_name)
