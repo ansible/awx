@@ -306,7 +306,8 @@ class WebSocketRelayManager(object):
         database_conf['OPTIONS'] = deepcopy(database_conf.get('OPTIONS', {}))
 
         for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
-            database_conf[k] = v
+            if k != 'OPTIONS':
+                database_conf[k] = v
         for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
             database_conf['OPTIONS'][k] = v
 
