@@ -4,11 +4,6 @@ import os
 
 from django.conf import settings
 
-try:
-    from pip._internal.req import parse_requirements
-except ImportError:
-    from pip.req import parse_requirements
-
 from pip._internal.req.constructors import parse_req_from_line
 
 
@@ -54,8 +49,13 @@ def test_python_and_js_licenses():
         for req_file in ['requirements.txt', 'requirements_git.txt']:
             fname = '%s/%s' % (path, req_file)
 
-            for reqt in parse_requirements(fname, session=''):
-                parsed_requirement = parse_req_from_line(reqt.requirement, None)
+            with open(fname) as f:
+                reqs = f.readlines()
+            for line in reqs:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                parsed_requirement = parse_req_from_line(line, None)
                 name = parsed_requirement.requirement.name
                 version = str(parsed_requirement.requirement.specifier)
                 if version.startswith('=='):
