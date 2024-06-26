@@ -25,7 +25,7 @@ def ee_rd():
 def org_ee_rd():
     return RoleDefinition.objects.create_from_permissions(
         name='EE org admin',
-        permissions=['change_executionenvironment', 'delete_executionenvironment', 'view_organization'],
+        permissions=['add_executionenvironment', 'change_executionenvironment', 'delete_executionenvironment', 'view_organization'],
         content_type=ContentType.objects.get_for_model(Organization),
     )
 
@@ -46,7 +46,7 @@ def org_ee(organization):
 
 
 @pytest.fixture
-def check_user_capabilities(get):
+def check_user_capabilities(get, setup_managed_roles):
     def _rf(user, obj, expected):
         url = reverse('api:execution_environment_list')
         r = get(url, user=user, expect=200)
@@ -91,13 +91,17 @@ def test_give_object_permission_to_ee(org_ee, ee_rd, org_member, check_user_capa
 
 
 @pytest.mark.django_db
-def test_give_org_permission_to_ee(org_ee, organization, org_member, check_user_capabilities):
+@pytest.mark.parametrize('style', ['new', 'old'])
+def test_give_org_permission_to_ee(org_ee, organization, org_member, check_user_capabilities, style, org_ee_rd):
     access = ExecutionEnvironmentAccess(org_member)
     assert not access.can_change(org_ee, {'name': 'new'})
     check_user_capabilities(org_member, org_ee, {'edit': False, 'delete': False, 'copy': False})
 
-    # NOTE: user_capabilities has problem with org_ee_rd.give_permission(org_member, organization)
-    organization.execution_environment_admin_role.members.add(org_member)
+    if style == 'new':
+        org_ee_rd.give_permission(org_member, organization)
+        assert org_member.has_obj_perm(org_ee.organization, 'add_executionenvironment')  # sanity
+    else:
+        organization.execution_environment_admin_role.members.add(org_member)
 
     assert access.can_change(org_ee, {'name': 'new'})
     check_user_capabilities(org_member, org_ee, {'edit': True, 'delete': True, 'copy': True})
