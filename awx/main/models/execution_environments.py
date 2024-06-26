@@ -60,13 +60,13 @@ class ExecutionEnvironment(CommonModel):
 
     def validate_role_assignment(self, actor, role_definition):
         if self.managed:
-            raise ValidationError(_('Can not assign object roles to managed Execution Environments'))
+            raise ValidationError({'object_id': _('Can not assign object roles to managed Execution Environments')})
         if self.organization_id is None:
-            raise ValidationError(_('Can not assign object roles to global Execution Environments'))
+            raise ValidationError({'object_id': _('Can not assign object roles to global Execution Environments')})
 
         if actor._meta.model_name == 'user' and (not actor.has_obj_perm(self.organization, 'view')):
-            raise ValidationError(_('User must have view permission to Execution Environment organization'))
+            raise ValidationError({'user': _('User must have view permission to Execution Environment organization')})
         if actor._meta.model_name == 'team':
             organization_cls = self._meta.get_field('organization').related_model
             if self.orgaanization not in organization_cls.access_qs(actor, 'view'):
-                raise ValidationError(_('Team must have view permission to Execution Environment organization'))
+                raise ValidationError({'team': _('Team must have view permission to Execution Environment organization')})

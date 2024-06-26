@@ -45,20 +45,6 @@ def org_ee(organization):
     return ExecutionEnvironment.objects.create(name='some user ee', organization=organization)
 
 
-@pytest.mark.django_db
-def test_managed_ee_not_assignable(control_plane_execution_environment, ee_rd, rando, admin_user, post):
-    url = django_reverse('roleuserassignment-list')
-    r = post(url, {'role_definition': ee_rd.pk, 'user': rando.id, 'object_id': control_plane_execution_environment.pk}, user=admin_user, expect=400)
-    assert 'foo' in str(r.data)
-
-
-@pytest.mark.django_db
-def test_org_member_required_for_assignment(org_ee, ee_rd, rando, admin_user, post):
-    url = django_reverse('roleuserassignment-list')
-    r = post(url, {'role_definition': ee_rd.pk, 'user': rando.id, 'object_id': org_ee.pk}, user=admin_user, expect=400)
-    assert 'foo' in str(r.data)
-
-
 @pytest.fixture
 def check_user_capabilities(get):
     def _rf(user, obj, expected):
@@ -72,6 +58,23 @@ def check_user_capabilities(get):
             raise RuntimeError(f'Could not find expected object ({obj}) in EE list result: {r.data}')
 
     return _rf
+
+
+# ___ begin tests ___
+
+
+@pytest.mark.django_db
+def test_managed_ee_not_assignable(control_plane_execution_environment, ee_rd, rando, admin_user, post):
+    url = django_reverse('roleuserassignment-list')
+    r = post(url, {'role_definition': ee_rd.pk, 'user': rando.id, 'object_id': control_plane_execution_environment.pk}, user=admin_user, expect=400)
+    assert 'Can not assign object roles to managed Execution Environment' in str(r.data)
+
+
+@pytest.mark.django_db
+def test_org_member_required_for_assignment(org_ee, ee_rd, rando, admin_user, post):
+    url = django_reverse('roleuserassignment-list')
+    r = post(url, {'role_definition': ee_rd.pk, 'user': rando.id, 'object_id': org_ee.pk}, user=admin_user, expect=400)
+    assert 'User must have view permission to Execution Environment organization' in str(r.data)
 
 
 @pytest.mark.django_db
