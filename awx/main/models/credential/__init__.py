@@ -23,6 +23,9 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 
+# DRF
+from rest_framework.serializers import ValidationError as DRFValidationError
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.fields import (
@@ -324,7 +327,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         if isinstance(actor, Team):
             if actor.organization == self.organization:
                 return
-        return f"You cannot grant credential access to a {actor._meta.object_name} not in the credentials' organization"
+        raise DRFValidationError({'detail': _(f"You cannot grant credential access to a {actor._meta.object_name} not in the credentials' organization")})
 
 
 class CredentialType(CommonModelNameNotUnique):
