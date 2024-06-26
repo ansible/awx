@@ -1387,12 +1387,11 @@ class TeamAccess(BaseAccess):
 class ExecutionEnvironmentAccess(BaseAccess):
     """
     I can see an execution environment when:
-     - I'm a superuser
-     - I'm a member of the same organization
-     - it is a global ExecutionEnvironment
+     - I can see its organization
+     - It is a global ExecutionEnvironment
     I can create/change an execution environment when:
      - I'm a superuser
-     - I'm an admin for the organization(s)
+     - I have an organization or object role that gives access
     """
 
     model = ExecutionEnvironment
@@ -1416,7 +1415,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
             raise PermissionDenied
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
             if not self.user.has_obj_perm(obj, 'change'):
-                raise PermissionDenied
+                return False
         else:
             if self.user not in obj.organization.execution_environment_admin_role:
                 raise PermissionDenied
@@ -1424,7 +1423,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
             new_org = get_object_from_data('organization', Organization, data, obj=obj)
             if not new_org or self.user not in new_org.execution_environment_admin_role:
                 return False
-        return self.check_related('organization', Organization, data, obj=obj, mandatory=True, role_field='execution_environment_admin_role')
+        return self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role')
 
     def can_delete(self, obj):
         if obj.managed:
