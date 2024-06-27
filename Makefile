@@ -64,6 +64,7 @@ DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
 DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 IMAGE_KUBE_DEV=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
+IMAGE_KUBE=$(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG)
 
 # Common command to use for running ansible-playbook
 ANSIBLE_PLAYBOOK ?= ansible-playbook -e ansible_python_interpreter=$(PYTHON)
@@ -93,11 +94,13 @@ PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
 # Set up cache variables for image builds, allowing to control whether cache is used or not, ex:
 # DOCKER_CACHE=--no-cache make docker-compose-build
 ifeq ($(DOCKER_CACHE),)
- DOCKER_KUBE_DEV_CACHE_FLAG=--cache-from=$(IMAGE_KUBE_DEV)
  DOCKER_DEVEL_CACHE_FLAG=--cache-from=$(DEVEL_IMAGE_NAME)
+ DOCKER_KUBE_DEV_CACHE_FLAG=--cache-from=$(IMAGE_KUBE_DEV)
+ DOCKER_KUBE_CACHE_FLAG=--cache-from=$(IMAGE_KUBE)
 else
- DOCKER_KUBE_DEV_CACHE_FLAG=$(DOCKER_CACHE)
  DOCKER_DEVEL_CACHE_FLAG=$(DOCKER_CACHE)
+ DOCKER_KUBE_DEV_CACHE_FLAG=$(DOCKER_CACHE)
+ DOCKER_KUBE_CACHE_FLAG=$(DOCKER_CACHE)
 endif
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
@@ -690,7 +693,8 @@ awx-kube-build: Dockerfile
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
-		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
+		$(DOCKER_KUBE_CACHE_FLAG) \
+		-t $(IMAGE_KUBE) .
 
 ## Build multi-arch awx image for deployment on Kubernetes environment.
 awx-kube-buildx: Dockerfile
@@ -702,7 +706,8 @@ awx-kube-buildx: Dockerfile
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
 		--platform=$(PLATFORMS) \
-		--tag $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) \
+		$(DOCKER_KUBE_CACHE_FLAG) \
+		--tag $(IMAGE_KUBE) \
 		-f Dockerfile .
 	- docker buildx rm awx-kube-buildx
 
