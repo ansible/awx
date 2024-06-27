@@ -138,7 +138,8 @@ class TaskBase:
 
         # Lock
         with task_manager_bulk_reschedule():
-            with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
+            lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000  # convert to milliseconds
+            with advisory_lock(f"{self.prefix}_lock", lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
                 with transaction.atomic():
                     if acquired is False:
                         logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")

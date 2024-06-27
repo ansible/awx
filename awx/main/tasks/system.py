@@ -715,7 +715,8 @@ def awx_k8s_reaper():
 
 @task(queue=get_task_queuename)
 def awx_periodic_scheduler():
-    with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
+    lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000
+    with advisory_lock('awx_periodic_scheduler_lock', lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
         if acquired is False:
             logger.debug("Not running periodic scheduler, another task holds lock")
             return
