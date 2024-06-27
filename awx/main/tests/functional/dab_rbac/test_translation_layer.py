@@ -150,3 +150,11 @@ def test_implicit_parents_no_assignments(organization):
     with mock.patch('awx.main.models.rbac.give_or_remove_permission') as mck:
         Team.objects.create(name='random team', organization=organization)
     mck.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_user_auditor_rel(organization, rando, setup_managed_roles):
+    assert rando not in organization.auditor_role
+    audit_rd = RoleDefinition.objects.get(name='Organization Audit')
+    audit_rd.give_permission(rando, organization)
+    assert list(rando.auditor_of_organizations) == [organization]
