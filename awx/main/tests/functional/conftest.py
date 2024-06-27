@@ -92,6 +92,11 @@ def deploy_jobtemplate(project, inventory, credential):
     return jt
 
 
+@pytest.fixture()
+def execution_environment():
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed=True)
+
+
 @pytest.fixture
 def setup_managed_roles():
     "Run the migration script to pre-create managed role definitions"
