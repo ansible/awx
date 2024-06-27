@@ -122,6 +122,23 @@ def test_workflow_creation_permissions(setup_managed_roles, organization, workfl
 
 
 @pytest.mark.django_db
+def test_cannot_assign_credential_to_user_of_another_org(setup_managed_roles, credential, admin_user, rando, organization, post):
+    '''Test that a credential can only be assigned to a user in the same organization'''
+    credential.organization = organization
+    credential.save(update_fields=['organization'])
+    assert credential.organization not in rando.organizations
+
+    rd = RoleDefinition.objects.get(name="Credential Admin")
+    url = django_reverse('roleuserassignment-list')
+    resp = post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=400)
+    assert "You cannot grant credential access to a User not in the credentials' organization" in str(resp.data)
+
+    # superuser can be assigned any credential
+    assert organization not in admin_user.organizations
+    post(url=url, data={"user": admin_user.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=201)
+
+
+@pytest.mark.django_db
 @override_settings(ALLOW_LOCAL_RESOURCE_MANAGEMENT=False)
 def test_team_member_role_not_assignable(team, rando, post, admin_user, setup_managed_roles):
     member_rd = RoleDefinition.objects.get(name='Organization Member')
