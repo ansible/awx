@@ -134,8 +134,7 @@ def get_permissions_for_role(role_field, children_map, apps):
 
     # more special cases for those same above special org-level roles
     if role_field.name == 'auditor_role':
-        for codename in ('view_notificationtemplate', 'view_executionenvironment'):
-            perm_list.append(Permission.objects.get(codename=codename))
+        perm_list.append(Permission.objects.get(codename='view_notificationtemplate'))
 
     return perm_list
 

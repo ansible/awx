@@ -92,3 +92,10 @@ class TestMigrationSmoke:
         # Test special cases in managed role creation
         assert not RoleDefinition.objects.filter(name='Organization Team Admin').exists()
         assert not RoleDefinition.objects.filter(name='Organization InstanceGroup Admin').exists()
+
+        # Test that a removed EE model permission has been deleted
+        new_state = migrator.apply_tested_migration(
+            ('main', '0195_EE_permissions'),
+        )
+        DABPermission = new_state.apps.get_model('dab_rbac', 'DABPermission')
+        assert not DABPermission.objects.filter(codename='view_executionenvironment').exists()
