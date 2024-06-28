@@ -2397,7 +2397,7 @@ class JobTemplateList(ListCreateAPIView):
         if not can_access:
             self.permission_denied(request, message=messages)
 
-        super().check_permissions(request)
+        super(JobTemplateList, self).check_permissions(request)
 
 
 class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
