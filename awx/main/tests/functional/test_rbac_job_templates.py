@@ -192,12 +192,16 @@ def test_job_template_insufficient_creator_permissions(lacking, project, invento
         inventory.use_role.members.add(rando)
     else:
         inventory.read_role.members.add(rando)
-    post(
+    response = post(
         url=reverse('api:job_template_list'),
         data=dict(name='newly-created-jt', inventory=inventory.id, project=project.pk, playbook='helloworld.yml'),
         user=rando,
         expect=403,
     )
+    if lacking == 'project':
+        assert 'You do not have use permission on Project' in response.data['project']
+    if lacking == 'inventory':
+        assert 'You do not have use permission on Inventory' in response.data['inventory']
 
 
 @pytest.mark.django_db
