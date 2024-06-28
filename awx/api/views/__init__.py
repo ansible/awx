@@ -2393,9 +2393,10 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
 
     def check_permissions(self, request):
-        can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
-        if not can_access:
-            self.permission_denied(request, message=messages)
+        if request.method == 'POST':
+            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+            if not can_access:
+                self.permission_denied(request, message=messages)
 
         super(JobTemplateList, self).check_permissions(request)
 
