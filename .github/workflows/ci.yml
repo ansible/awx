@@ -40,13 +40,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install setuptools-scm
+        shell: bash
+        run: |
+          sudo pip install -U setuptools setuptools-scm
+
       - name: Build awx_devel image for running checks
         uses: ./.github/actions/awx_devel_image
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run check ${{ matrix.tests.name }}
-        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make docker-runner
+        run: |
+          AWX_DOCKER_CMD='${{ matrix.tests.command }}' make docker-runner
 
   dev-env:
     runs-on: ubuntu-latest
@@ -80,6 +86,11 @@ jobs:
           repository: ansible/awx-operator
           path: awx-operator
 
+      - name: Install setuptools-scm
+        shell: bash
+        run: |
+          sudo pip install -U setuptools setuptools-scm
+
       - name: Get python version from Makefile
         working-directory: awx
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
@@ -91,7 +102,7 @@ jobs:
 
       - name: Install playbook dependencies
         run: |
-          python3 -m pip install docker
+          python${{ env.py_version }} -m pip install docker setuptools-scm
 
       - name: Build AWX image
         working-directory: awx

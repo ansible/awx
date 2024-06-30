@@ -14,7 +14,7 @@ def get_version():
     else:
         from setuptools_scm import get_version
 
-        version = get_version(root='..', relative_to=__file__)
+        version = get_version(root='..', relative_to=__file__, version_scheme='calver-by-date')
         return version
 
 
@@ -33,12 +33,7 @@ def version_file():
         return version_file
 
 
-try:
-    import pkg_resources
-
-    __version__ = pkg_resources.get_distribution('awx').version
-except pkg_resources.DistributionNotFound:
-    __version__ = get_version()
+__version__ = get_version()
 
 __all__ = ['__version__']
 
