@@ -227,7 +227,10 @@ class APIView(views.APIView):
             if type(response.data) is dict:
                 msg_data['error'] = response.data.get('error', response.status_text)
             elif type(response.data) is list:
-                msg_data['error'] = ", ".join(list(map(lambda x: x.get('error', response.status_text), response.data)))
+                if len(response.data) > 0 and isinstance(response.data[0], str):
+                    msg_data['error'] = str(response.data[0])
+                else:
+                    msg_data['error'] = ", ".join(list(map(lambda x: x.get('error', response.status_text), response.data)))
             else:
                 msg_data['error'] = response.status_text
 
