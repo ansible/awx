@@ -262,6 +262,7 @@ START_TASK_LIMIT = 100
 # We have the grace period so the task manager can bail out before the timeout.
 TASK_MANAGER_TIMEOUT = 300
 TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+TASK_MANAGER_LOCK_TIMEOUT = TASK_MANAGER_TIMEOUT + TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
 # Number of seconds _in addition to_ the task manager timeout a job can stay
 # in waiting without being reaped
