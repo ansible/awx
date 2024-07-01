@@ -30,7 +30,7 @@ generate_requirements() {
     while IFS= read -r line; do
       if [[ $line != \#* ]]; then  # ignore lines which are already comments
         # Add # to the start of any line matched
-        sed -i "s!^.*${line%#*}!# ${line%#*}!g" requirements.txt
+        sed -i "s!^.*${line%#*}!# ${line%#*}  # git requirements installed separately!g" requirements.txt
       fi
     done < "${requirements_git}"
   fi;
