@@ -3111,6 +3111,14 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     serializer_class = serializers.WorkflowJobTemplateSerializer
     always_allow_superuser = False
 
+    def check_permissions(self, request):
+        if request.method == 'POST':
+            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+            if not can_access:
+                self.permission_denied(request, message=messages)
+
+        super(WorkflowJobTemplateList, self).check_permissions(request)
+
 
 class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.WorkflowJobTemplate
