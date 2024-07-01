@@ -137,9 +137,11 @@ def test_assign_credential_to_user_of_another_org(setup_managed_roles, credentia
     assert admin_user.is_superuser
     assert organization not in admin_user.organizations
     post(url=url, data={"user": admin_user.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=201)
+
     # can assign credential to org_member
     assert credential.organization in org_member.organizations
     post(url=url, data={"user": org_member.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=201)
+
 
 @pytest.mark.django_db
 @override_settings(ALLOW_LOCAL_RESOURCE_MANAGEMENT=False)
