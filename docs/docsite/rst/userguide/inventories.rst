@@ -1139,7 +1139,7 @@ This inventory source uses a cluster that is able to deploy OpenShift (OCP) virt
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`. 
 
-4. Use the **Source Variables** field to override variables used by the ``kubernetes`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `Kubernetes (K8s) inventory source <https://github.com/ansible-collections/kubernetes.core/blob/main/docs/kubernetes.core.k8s_inventory.rst#parameters>`_ documentation for detail.
+4. Use the **Source Variables** field to override variables used by the ``kubernetes`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `kubevirt.core.kubevirt inventory source <https://kubevirt.io/kubevirt.core/main/plugins/kubevirt.html#parameters>`_ documentation for detail.
 
   In the example below, the ``connections`` variable is used to specify access to a particular namespace in a cluster. 
 
