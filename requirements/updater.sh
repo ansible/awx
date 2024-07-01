@@ -32,6 +32,7 @@ generate_requirements() {
         sed -i "\!${line%#*}!d" requirements.txt
       fi
     done < "${requirements_git}"
+    sed -i "/ -r \\/awx_devel\\/requirements\\/requirements_git/d" requirements.txt
   fi;
 }
 
