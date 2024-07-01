@@ -1,5 +1,5 @@
 aiohttp>=3.9.4 # CVE-2024-30251
-ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
+ansi2html
 asciichartpy
 asn1
 azure-identity
@@ -7,7 +7,7 @@ azure-keyvault
 boto3
 botocore
 channels
-channels-redis==3.4.1  # see UPGRADE BLOCKERs
+channels-redis
 cryptography>=41.0.7  # CVE-2023-49083
 Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
@@ -17,19 +17,19 @@ django-auth-ldap
 django-cors-headers
 django-crum
 django-extensions
-django-guid==3.2.1
-django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
+django-guid
+django-oauth-toolkit<2.4.0  # UPGRADE BLOCKER: inline with the version used in DAB
 django-polymorphic
 django-pglocks
 django-radius
 django-solo
-django-split-settings==1.0.0    # We hit a strange issue where the release process errored when upgrading past 1.0.0 see UPGRADE BLOCKERS
+django-split-settings
 djangorestframework>=3.15.0
 djangorestframework-yaml
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
 grpcio<1.63.0 # 1.63.0+ requires cython>=3
-hiredis==2.0.0  # see UPGRADE BLOCKERs
+hiredis
 irc
 jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
@@ -43,7 +43,7 @@ opentelemetry-api~=1.24     # new y streams can be drastically different, in a g
 opentelemetry-sdk~=1.24
 opentelemetry-instrumentation-logging
 opentelemetry-exporter-otlp
-pexpect==4.7.0  # see library notes
+pexpect==4.7.0  # see Library Notes
 prometheus_client
 psycopg
 psutil
@@ -51,8 +51,8 @@ pygerduty
 pyopenssl>=23.2.0  # resolve dep conflict from cryptography pin above
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon>3.0.0
-python-dsv-sdk>=1.0.4
-python-tss-sdk>=1.2.1
+python-dsv-sdk>=1.0.4  # UPGRADE BLOCKER breaking changes after this version
+python-tss-sdk>=1.2.1  # UPGRADE BLOCKER breaking changes after this version
 python-ldap
 pyyaml>=6.0.1
 pyzstd  # otel collector log file compression library
