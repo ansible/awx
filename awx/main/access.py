@@ -1595,6 +1595,8 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         inventory = get_value(Inventory, 'inventory')
         if inventory:
             if self.user not in inventory.use_role:
+                if self.save_messages:
+                    self.messages['inventory'] = [_('You do not have use permission on Inventory')]
                 return False
 
         if not self.check_related('execution_environment', ExecutionEnvironment, data, role_field='read_role'):
@@ -1603,10 +1605,15 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         project = get_value(Project, 'project')
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
-        if project:
-            return self.user in project.use_role
-        else:
+        if not project:
             return False
+
+        if self.user not in project.use_role:
+            if self.save_messages:
+                self.messages['project'] = [_('You do not have use permission on Project')]
+            return False
+
+        return True
 
     @check_superuser
     def can_copy_related(self, obj):
