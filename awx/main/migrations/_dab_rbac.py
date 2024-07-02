@@ -356,12 +356,14 @@ def setup_managed_role_definitions(apps, schema_editor):
         )
 
     if 'org_audit' in to_create:
+        audit_permissions = [perm for perm in org_perms if perm.codename.startswith('view_')]
+        audit_permissions.append(Permission.objects.get(codename='audit_organization'))
         managed_role_definitions.append(
             get_or_create_managed(
                 to_create['org_audit'].format(cls=Organization),
                 'Has permission to view all objects inside of a single organization',
                 org_ct,
-                [perm for perm in org_perms if perm.codename.startswith('view_')],
+                audit_permissions,
                 RoleDefinition,
             )
         )

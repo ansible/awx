@@ -34,8 +34,8 @@ def test_organization_auditor_role(rando, setup_managed_roles, organization, inv
     rd = RoleDefinition.objects.get(name='Organization Audit')
     rd.give_permission(rando, organization)
 
-    assert 'view_inventory' in list(rd.permissions.values_list('codename', flat=True))  # sanity
-    assert 'view_jobtemplate' in list(rd.permissions.values_list('codename', flat=True))  # sanity
+    codename_set = set(rd.permissions.values_list('codename', flat=True))
+    assert not ({'view_inventory', 'view_jobtemplate', 'audit_organization'} - codename_set)  # sanity
 
     assert [obj in type(obj).access_qs(rando) for obj in obj_list] == [True for i in range(3)], obj_list
     assert [rando.has_obj_perm(obj, 'view') for obj in obj_list] == [True for i in range(3)], obj_list

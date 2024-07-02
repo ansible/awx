@@ -35,7 +35,6 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     """
     getattr(organization, role_name).members.add(rando)
     assignment = RoleUserAssignment.objects.get(user=rando)
-    print(assignment.role_definition.name)
     old_role = get_role_from_object_role(assignment.object_role)
     assert old_role.id == getattr(organization, role_name).id
 
