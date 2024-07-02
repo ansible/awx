@@ -3,7 +3,7 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 
 from awx.main.access import ExecutionEnvironmentAccess
-from awx.main.models import ExecutionEnvironment, Organization
+from awx.main.models import ExecutionEnvironment, Organization, Team
 from awx.main.models.rbac import get_role_codenames
 
 from awx.api.versioning import reverse
@@ -75,6 +75,26 @@ def test_org_member_required_for_assignment(org_ee, ee_rd, rando, admin_user, po
     url = django_reverse('roleuserassignment-list')
     r = post(url, {'role_definition': ee_rd.pk, 'user': rando.id, 'object_id': org_ee.pk}, user=admin_user, expect=400)
     assert 'User must have view permission to Execution Environment organization' in str(r.data)
+
+
+@pytest.mark.django_db
+def test_team_view_permission_required(org_ee, ee_rd, rando, admin_user, post):
+    org2 = Organization.objects.create(name='a different team')
+    team = Team.objects.create(name='a team', organization=org2)
+    team.member_role.members.add(rando)
+    assert org_ee not in ExecutionEnvironmentAccess(rando).get_queryset()  # user can not view the EE
+    url = django_reverse('roleteamassignment-list')
+    r = post(url, {'role_definition': ee_rd.pk, 'team': team.id, 'object_id': org_ee.pk}, user=admin_user, expect=400)
+    assert 'Team must have view permission to Execution Environment organization' in str(r.data)
+
+    org_view_rd = RoleDefinition.objects.create_from_permissions(
+        name='organization viewer role', permissions=['view_organization'], content_type=ContentType.objects.get_for_model(Organization)
+    )
+    org_view_rd.give_permission(team, org_ee.organization)
+    assert org_ee in ExecutionEnvironmentAccess(rando).get_queryset()  # user can view the EE now
+    # can give object roles to the team now
+    post(url, {'role_definition': ee_rd.pk, 'team': team.id, 'object_id': org_ee.pk}, user=admin_user, expect=201)
+    assert rando.has_obj_perm(org_ee, 'change')
 
 
 @pytest.mark.django_db
