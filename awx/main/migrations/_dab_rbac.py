@@ -386,6 +386,17 @@ def setup_managed_role_definitions(apps, schema_editor):
         )
     )
 
+    org_approval_permissions = {'view_organization', 'view_workflowjobtemplate', 'approve_workflowjobtemplate'}
+    managed_role_definitions.append(
+        get_or_create_managed(
+            'Organization Approval Role',
+            'Has permission to approve any workflow steps within a single organization',
+            org_ct,
+            [perm for perm in org_perms if perm.codename in org_approval_permissions],
+            RoleDefinition,
+        )
+    )
+
     unexpected_role_definitions = RoleDefinition.objects.filter(managed=True).exclude(pk__in=[rd.pk for rd in managed_role_definitions])
     for role_definition in unexpected_role_definitions:
         logger.info(f'Deleting old managed role definition {role_definition.name}, pk={role_definition.pk}')
