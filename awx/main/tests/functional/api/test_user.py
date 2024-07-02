@@ -84,3 +84,19 @@ def test_user_verify_attribute_created(admin, get):
     for op, count in (('gt', 1), ('lt', 0)):
         resp = get(reverse('api:user_list') + f'?created__{op}={past}', admin)
         assert resp.data['count'] == count
+
+
+@pytest.mark.django_db
+def test_org_not_shown_in_admin_user_sublists(admin_user, get, organization):
+    for view_name in ('user_admin_of_organizations_list', 'user_organizations_list'):
+        url = reverse(f'api:{view_name}', kwargs={'pk': admin_user.pk})
+        r = get(url, user=admin_user, expect=200)
+        assert organization.pk not in [org['id'] for org in r.data['results']]
+
+
+@pytest.mark.django_db
+def test_admin_user_not_shown_in_org_users(admin_user, get, organization):
+    for view_name in ('organization_users_list', 'organization_admins_list'):
+        url = reverse(f'api:{view_name}', kwargs={'pk': organization.pk})
+        r = get(url, user=admin_user, expect=200)
+        assert admin_user.pk not in [u['id'] for u in r.data['results']]
