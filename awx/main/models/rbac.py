@@ -602,8 +602,9 @@ def get_role_from_object_role(object_role):
     elif rd.name.endswith(' Admin'):
         # cases like "project-admin"
         role_name = 'admin_role'
+    elif rd.name == 'Organization Audit':
+        role_name = 'auditor_role'
     else:
-        print(rd.name)
         model_name, role_name = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'

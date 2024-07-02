@@ -277,6 +277,7 @@ def setup_managed_role_definitions(apps, schema_editor):
     to_create = {
         'object_admin': '{cls.__name__} Admin',
         'org_admin': 'Organization Admin',
+        'org_audit': 'Organization Audit',
         'org_children': 'Organization {cls.__name__} Admin',
         'special': '{cls.__name__} {action}',
     }
@@ -327,7 +328,8 @@ def setup_managed_role_definitions(apps, schema_editor):
         if 'special' in to_create:
             special_perms = []
             for perm in object_perms:
-                if perm.codename.split('_')[0] not in ('add', 'change', 'delete', 'view'):
+                # Organization auditor is handled separately
+                if perm.codename.split('_')[0] not in ('add', 'change', 'delete', 'view', 'audit'):
                     special_perms.append(perm)
             for perm in special_perms:
                 action = perm.codename.split('_')[0]
@@ -349,6 +351,19 @@ def setup_managed_role_definitions(apps, schema_editor):
                 'Has all permissions to a single organization and all objects inside of it',
                 org_ct,
                 org_perms,
+                RoleDefinition,
+            )
+        )
+
+    if 'org_audit' in to_create:
+        audit_permissions = [perm for perm in org_perms if perm.codename.startswith('view_')]
+        audit_permissions.append(Permission.objects.get(codename='audit_organization'))
+        managed_role_definitions.append(
+            get_or_create_managed(
+                to_create['org_audit'].format(cls=Organization),
+                'Has permission to view all objects inside of a single organization',
+                org_ct,
+                audit_permissions,
                 RoleDefinition,
             )
         )

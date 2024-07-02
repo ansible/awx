@@ -21,3 +21,21 @@ def test_notification_template_object_role_change(rando, notification_template, 
     rd.give_permission(rando, notification_template)
     access = NotificationTemplateAccess(rando)
     assert access.can_change(notification_template, {'name': 'new name'})
+
+
+@pytest.mark.django_db
+def test_organization_auditor_role(rando, setup_managed_roles, organization, inventory, project, jt_linked):
+    obj_list = (inventory, project, jt_linked)
+    for obj in obj_list:
+        assert obj.organization == organization, obj  # sanity
+
+    assert [rando.has_obj_perm(obj, 'view') for obj in obj_list] == [False for i in range(3)], obj_list
+
+    rd = RoleDefinition.objects.get(name='Organization Audit')
+    rd.give_permission(rando, organization)
+
+    codename_set = set(rd.permissions.values_list('codename', flat=True))
+    assert not ({'view_inventory', 'view_jobtemplate', 'audit_organization'} - codename_set)  # sanity
+
+    assert [obj in type(obj).access_qs(rando) for obj in obj_list] == [True for i in range(3)], obj_list
+    assert [rando.has_obj_perm(obj, 'view') for obj in obj_list] == [True for i in range(3)], obj_list
