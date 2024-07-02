@@ -45,7 +45,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.models import Team
+from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
 from . import injectors as builtin_injectors
 
@@ -322,7 +322,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     def validate_role_assignment(self, actor, role_definition):
         if isinstance(actor, User):
-            if actor.is_superuser or self.organization in actor.organizations:
+            if actor.is_superuser or Organization.access_qs(actor, 'change').filter(id=self.organization.id).exists():
                 return
         if isinstance(actor, Team):
             if actor.organization == self.organization:
