@@ -334,12 +334,19 @@ def setup_managed_role_definitions(apps, schema_editor):
             for perm in special_perms:
                 action = perm.codename.split('_')[0]
                 view_perm = Permission.objects.get(content_type=ct, codename__startswith='view_')
+                perm_list = [perm, view_perm]
+                # Handle special-case where adhoc role also listed use permission
+                if action == 'adhoc':
+                    for other_perm in object_perms:
+                        if other_perm.codename == 'use_inventory':
+                            perm_list.append(other_perm)
+                            break
                 managed_role_definitions.append(
                     get_or_create_managed(
                         to_create['special'].format(cls=cls, action=action.title()),
                         f'Has {action} permissions to a single {cls._meta.verbose_name}',
                         ct,
-                        [perm, view_perm],
+                        perm_list,
                         RoleDefinition,
                     )
                 )
@@ -367,6 +374,17 @@ def setup_managed_role_definitions(apps, schema_editor):
                 RoleDefinition,
             )
         )
+
+    org_execute_permissions = {'view_jobtemplate', 'execute_jobtemplate', 'view_workflowjobtemplate', 'execute_workflowjobtemplate', 'view_organization'}
+    managed_role_definitions.append(
+        get_or_create_managed(
+            'Organization Execute Role',
+            'Has permission to execute all runnable objects in the organization',
+            org_ct,
+            [perm for perm in org_perms if perm.codename in org_execute_permissions],
+            RoleDefinition,
+        )
+    )
 
     unexpected_role_definitions = RoleDefinition.objects.filter(managed=True).exclude(pk__in=[rd.pk for rd in managed_role_definitions])
     for role_definition in unexpected_role_definitions:
