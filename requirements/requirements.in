@@ -7,7 +7,7 @@ azure-keyvault
 boto3
 botocore
 channels
-channels-redis==3.4.1  # see UPGRADE BLOCKERs
+channels-redis
 cryptography>=41.0.7  # CVE-2023-49083
 Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
