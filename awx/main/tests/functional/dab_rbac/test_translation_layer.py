@@ -16,7 +16,16 @@ from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'role_name',
-    ['execution_environment_admin_role', 'project_admin_role', 'admin_role', 'auditor_role', 'read_role', 'execute_role', 'notification_admin_role'],
+    [
+        'execution_environment_admin_role',
+        'workflow_admin_role',
+        'project_admin_role',
+        'admin_role',
+        'auditor_role',
+        'read_role',
+        'execute_role',
+        'notification_admin_role',
+    ],
 )
 def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     """
@@ -26,7 +35,6 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     """
     getattr(organization, role_name).members.add(rando)
     assignment = RoleUserAssignment.objects.get(user=rando)
-    print(assignment.role_definition.name)
     old_role = get_role_from_object_role(assignment.object_role)
     assert old_role.id == getattr(organization, role_name).id
 
@@ -141,3 +149,11 @@ def test_implicit_parents_no_assignments(organization):
     with mock.patch('awx.main.models.rbac.give_or_remove_permission') as mck:
         Team.objects.create(name='random team', organization=organization)
     mck.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_user_auditor_rel(organization, rando, setup_managed_roles):
+    assert rando not in organization.auditor_role
+    audit_rd = RoleDefinition.objects.get(name='Organization Audit')
+    audit_rd.give_permission(rando, organization)
+    assert list(rando.auditor_of_organizations) == [organization]

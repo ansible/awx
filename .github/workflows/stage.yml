@@ -136,9 +136,9 @@ jobs:
       - name: Pulling images for test deployment with awx-operator
         # awx operator molecue test expect to kind load image and buildx exports image to registry and not local
         run: |
-          docker pull ${AWX_OPERATOR_TEST_IMAGE}
-          docker pull ${AWX_EE_TEST_IMAGE}
-          docker pull ${AWX_TEST_IMAGE}:${AWX_TEST_VERSION}
+          docker pull -q ${AWX_OPERATOR_TEST_IMAGE}
+          docker pull -q ${AWX_EE_TEST_IMAGE}
+          docker pull -q ${AWX_TEST_IMAGE}:${AWX_TEST_VERSION}
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator

@@ -29,6 +29,7 @@ import Popover from '../../../components/Popover/Popover';
 import getHelpText from './Notifications.helptext';
 
 const TypeFields = {
+  awssns: AWSSNSFields,
   email: EmailFields,
   grafana: GrafanaFields,
   irc: IRCFields,
@@ -57,6 +58,44 @@ TypeInputsSubForm.propTypes = {
 };
 
 export default TypeInputsSubForm;
+
+function AWSSNSFields() {
+  return (
+    <>
+      <FormField
+        id="awssns-aws-region"
+        label={t`AWS Region`}
+        name="notification_configuration.aws_region"
+        type="text"
+        isRequired
+      />
+      <FormField
+        id="awssns-aws-access-key-id"
+        label={t`Access Key ID`}
+        name="notification_configuration.aws_access_key_id"
+        type="text"
+      />
+      <PasswordField
+        id="awssns-aws-secret-access-key"
+        label={t`Secret Access Key`}
+        name="notification_configuration.aws_secret_access_key"
+      />
+      <PasswordField
+        id="awssns-aws-session-token"
+        label={t`Session Token`}
+        name="notification_configuration.aws_session_token"
+      />
+      <FormField
+        id="awssns-sns-topic-arn"
+        label={t`SNS Topic ARN`}
+        name="notification_configuration.sns_topic_arn"
+        type="text"
+        validate={required(null)}
+        isRequired
+      />
+    </>
+  );
+}
 
 function EmailFields() {
   const helpText = getHelpText();

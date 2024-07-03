@@ -262,6 +262,7 @@ START_TASK_LIMIT = 100
 # We have the grace period so the task manager can bail out before the timeout.
 TASK_MANAGER_TIMEOUT = 300
 TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+TASK_MANAGER_LOCK_TIMEOUT = TASK_MANAGER_TIMEOUT + TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
 # Number of seconds _in addition to_ the task manager timeout a job can stay
 # in waiting without being reaped
@@ -492,6 +493,7 @@ CELERYBEAT_SCHEDULE = {
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
     'cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
     'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
+    'periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': timedelta(minutes=15)},
 }
 
 # Django Caching Configuration
@@ -656,6 +658,10 @@ AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 # Automatically remove nodes that have missed their heartbeats after some time
 AWX_AUTO_DEPROVISION_INSTANCES = False
 
+# If False, do not allow creation of resources that are shared with the platform ingress
+# e.g. organizations, teams, and users
+ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
+
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
@@ -777,6 +783,11 @@ INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 # TERRAFORM_ENABLED_VALUE =
 TERRAFORM_INSTANCE_ID_VAR = 'id'
 TERRAFORM_EXCLUDE_EMPTY_GROUPS = True
+
+# ------------------------
+# OpenShift Virtualization
+# ------------------------
+OPENSHIFT_VIRTUALIZATION_EXCLUDE_EMPTY_GROUPS = True
 
 # ---------------------
 # ----- Custom -----

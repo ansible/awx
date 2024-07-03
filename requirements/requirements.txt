@@ -1,6 +1,6 @@
 adal==1.2.7
     # via msrestazure
-aiohttp==3.9.3
+aiohttp==3.9.5
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry
@@ -31,10 +31,7 @@ async-timeout==4.0.3
     # via
     #   aiohttp
     #   aioredis
-    #   asyncpg
     #   redis
-asyncpg==0.29.0
-    # via -r /awx_devel/requirements/requirements.in
 attrs==23.2.0
     # via
     #   aiohttp
@@ -130,7 +127,7 @@ deprecated==1.2.14
     #   opentelemetry-exporter-otlp-proto-http
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.6
+django==4.2.10
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -200,8 +197,10 @@ googleapis-common-protos==1.63.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-grpcio==1.63.0
-    # via opentelemetry-exporter-otlp-proto-grpc
+grpcio==1.62.2
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   opentelemetry-exporter-otlp-proto-grpc
 hiredis==2.0.0
     # via
     #   -r /awx_devel/requirements/requirements.in

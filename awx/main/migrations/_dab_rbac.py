@@ -134,8 +134,7 @@ def get_permissions_for_role(role_field, children_map, apps):
 
     # more special cases for those same above special org-level roles
     if role_field.name == 'auditor_role':
-        for codename in ('view_notificationtemplate', 'view_executionenvironment'):
-            perm_list.append(Permission.objects.get(codename=codename))
+        perm_list.append(Permission.objects.get(codename='view_notificationtemplate'))
 
     return perm_list
 
@@ -278,6 +277,7 @@ def setup_managed_role_definitions(apps, schema_editor):
     to_create = {
         'object_admin': '{cls.__name__} Admin',
         'org_admin': 'Organization Admin',
+        'org_audit': 'Organization Audit',
         'org_children': 'Organization {cls.__name__} Admin',
         'special': '{cls.__name__} {action}',
     }
@@ -290,14 +290,15 @@ def setup_managed_role_definitions(apps, schema_editor):
     managed_role_definitions = []
 
     org_perms = set()
-    for cls in permission_registry._registry:
+    for cls in permission_registry.all_registered_models:
         ct = ContentType.objects.get_for_model(cls)
+        cls_name = cls._meta.model_name
         object_perms = set(Permission.objects.filter(content_type=ct))
         # Special case for InstanceGroup which has an organiation field, but is not an organization child object
-        if cls._meta.model_name != 'instancegroup':
+        if cls_name != 'instancegroup':
             org_perms.update(object_perms)
 
-        if 'object_admin' in to_create and cls != Organization:
+        if 'object_admin' in to_create and cls_name != 'organization':
             indiv_perms = object_perms.copy()
             add_perms = [perm for perm in indiv_perms if perm.codename.startswith('add_')]
             if add_perms:
@@ -310,7 +311,7 @@ def setup_managed_role_definitions(apps, schema_editor):
                 )
             )
 
-        if 'org_children' in to_create and cls != Organization:
+        if 'org_children' in to_create and (cls_name not in ('organization', 'instancegroup', 'team')):
             org_child_perms = object_perms.copy()
             org_child_perms.add(Permission.objects.get(codename='view_organization'))
 
@@ -327,7 +328,8 @@ def setup_managed_role_definitions(apps, schema_editor):
         if 'special' in to_create:
             special_perms = []
             for perm in object_perms:
-                if perm.codename.split('_')[0] not in ('add', 'change', 'update', 'delete', 'view'):
+                # Organization auditor is handled separately
+                if perm.codename.split('_')[0] not in ('add', 'change', 'delete', 'view', 'audit'):
                     special_perms.append(perm)
             for perm in special_perms:
                 action = perm.codename.split('_')[0]
@@ -349,6 +351,19 @@ def setup_managed_role_definitions(apps, schema_editor):
                 'Has all permissions to a single organization and all objects inside of it',
                 org_ct,
                 org_perms,
+                RoleDefinition,
+            )
+        )
+
+    if 'org_audit' in to_create:
+        audit_permissions = [perm for perm in org_perms if perm.codename.startswith('view_')]
+        audit_permissions.append(Permission.objects.get(codename='audit_organization'))
+        managed_role_definitions.append(
+            get_or_create_managed(
+                to_create['org_audit'].format(cls=Organization),
+                'Has permission to view all objects inside of a single organization',
+                org_ct,
+                audit_permissions,
                 RoleDefinition,
             )
         )
