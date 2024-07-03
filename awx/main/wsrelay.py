@@ -8,7 +8,7 @@ import ipaddress
 
 import aiohttp
 from aiohttp import client_exceptions
-import aioredis
+import redis
 
 from channels.layers import get_channel_layer
 
@@ -191,7 +191,7 @@ class WebsocketRelayConnection:
                         return
 
                     continue
-                except aioredis.errors.ConnectionClosedError:
+                except redis.exceptions.ConnectionError:
                     logger.info(f"Producer {name} lost connection to Redis, shutting down.")
                     return
 
