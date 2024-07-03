@@ -2,6 +2,9 @@ import json
 import logging
 import asyncio
 from typing import Dict
+from copy import deepcopy
+
+import ipaddress
 
 import aiohttp
 from aiohttp import client_exceptions
@@ -18,7 +21,6 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStats,
     RelayWebsocketStatsManager,
 )
-import awx.main.analytics.subsystem_metrics as s_metrics
 
 logger = logging.getLogger('awx.main.wsrelay')
 
@@ -52,7 +54,6 @@ class WebsocketRelayConnection:
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
-        self.subsystem_metrics = s_metrics.Metrics(instance_name=name)
         self.producers = dict()
         self.connected = False
 
@@ -71,7 +72,16 @@ class WebsocketRelayConnection:
         if not self.channel_layer:
             self.channel_layer = get_channel_layer()
 
-        uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/relay/"
+        # figure out if what we have is an ipaddress, IPv6 Addresses must have brackets added for uri
+        uri_hostname = self.remote_host
+        try:
+            # Throws ValueError if self.remote_host is a hostname like example.com, not an IPv4 or IPv6 ip address
+            if isinstance(ipaddress.ip_address(uri_hostname), ipaddress.IPv6Address):
+                uri_hostname = f"[{uri_hostname}]"
+        except ValueError:
+            pass
+
+        uri = f"{self.protocol}://{uri_hostname}:{self.remote_port}/websocket/relay/"
         timeout = aiohttp.ClientTimeout(total=10)
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
@@ -216,7 +226,8 @@ class WebSocketRelayManager(object):
                 continue
             try:
                 if not notif.payload or notif.channel != "web_ws_heartbeat":
-                    return
+                    logger.warning(f"Unexpected channel or missing payload. {notif.channel}, {notif.payload}")
+                    continue
 
                 try:
                     payload = json.loads(notif.payload)
@@ -224,13 +235,15 @@ class WebSocketRelayManager(object):
                     logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
                     if logger.isEnabledFor(logging.DEBUG):
                         logmsg = "{} {}".format(logmsg, payload)
-                        logger.warning(logmsg)
-                    return
+                    logger.warning(logmsg)
+                    continue
 
                 # Skip if the message comes from the same host we are running on
                 # In this case, we'll be sharing a redis, no need to relay.
                 if payload.get("hostname") == self.local_hostname:
-                    return
+                    hostname = payload.get("hostname")
+                    logger.debug(f"Received a heartbeat request for {hostname}. Skipping as we use redis for local host.")
+                    continue
 
                 action = payload.get("action")
 
@@ -239,7 +252,7 @@ class WebSocketRelayManager(object):
                     ip = payload.get("ip") or hostname  # try back to hostname if ip isn't supplied
                     if ip is None:
                         logger.warning(f"Received invalid {action} ws_heartbeat, missing hostname and ip: {payload}")
-                        return
+                        continue
                     logger.debug(f"Web host {hostname} ({ip}) {action} heartbeat received.")
 
                 if action == "online":
@@ -289,21 +302,34 @@ class WebSocketRelayManager(object):
         self.stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
         self.stats_mgr.start()
 
-        # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
-        database_conf = settings.DATABASES['default']
+        database_conf = deepcopy(settings.DATABASES['default'])
+        database_conf['OPTIONS'] = deepcopy(database_conf.get('OPTIONS', {}))
+
+        for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
+            if k != 'OPTIONS':
+                database_conf[k] = v
+        for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
+            database_conf['OPTIONS'][k] = v
+
+        if 'PASSWORD' in database_conf:
+            database_conf['OPTIONS']['password'] = database_conf.pop('PASSWORD')
+
         async_conn = await psycopg.AsyncConnection.connect(
             dbname=database_conf['NAME'],
             host=database_conf['HOST'],
             user=database_conf['USER'],
-            password=database_conf['PASSWORD'],
             port=database_conf['PORT'],
             **database_conf.get("OPTIONS", {}),
         )
+
         await async_conn.set_autocommit(True)
-        event_loop.create_task(self.on_ws_heartbeat(async_conn))
+        on_ws_heartbeat_task = event_loop.create_task(self.on_ws_heartbeat(async_conn))
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
+            if on_ws_heartbeat_task.done():
+                raise Exception("on_ws_heartbeat_task has exited")
+
             future_remote_hosts = self.known_hosts.keys()
             current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
@@ -327,7 +353,7 @@ class WebSocketRelayManager(object):
 
             if deleted_remote_hosts:
                 logger.info(f"Removing {deleted_remote_hosts} from websocket broadcast list")
-                await asyncio.gather(self.cleanup_offline_host(h) for h in deleted_remote_hosts)
+                await asyncio.gather(*[self.cleanup_offline_host(h) for h in deleted_remote_hosts])
 
             if new_remote_hosts:
                 logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")

@@ -48,7 +48,7 @@
   vars:
     new_error_page:
       error_code: "{{ item | basename() | regex_replace('custom_(\\d+).html', '\\1') }}"
-      web_path: "{{ item | regex_replace('^.*\/static', '/static') }}"
+      web_path: "{{ item | regex_replace('^.*/static', '/static') }}"
   loop: "{{ lookup('ansible.builtin.fileglob', playbook_dir + '/../../../awx/static/custom_*.html', wantlist=True) }}"
   when: (item | basename()) is regex("custom_\d+\.html")
 
@@ -67,7 +67,7 @@
 
 - name: Get OS info for sdb
   shell: |
-    docker info | grep 'Operating System'
+    docker info 2> /dev/null | awk '/Os:/ { gsub(/Os:/, "Operating System:"); }/Operating System/ { print; }'
   register: os_info
   changed_when: false
 
@@ -100,6 +100,34 @@
 - name: Include LDAP tasks if enabled
   include_tasks: ldap.yml
   when: enable_ldap | bool
+
+- name: Include vault TLS tasks if enabled
+  include_tasks: vault_tls.yml
+  when: enable_vault | bool
+
+- name: Iterate through ../editable_dependencies and get symlinked directories and register the paths
+  find:
+    paths: "{{ playbook_dir }}/../editable_dependencies"
+    file_type: link
+    recurse: no
+  register: _editable_dependencies_links
+  when: install_editable_dependencies | bool
+
+- name: Warn about empty editable_dependnecies
+  fail:
+    msg: "[WARNING] No editable_dependencies found in ../editable_dependencies"
+  when: install_editable_dependencies | bool and not _editable_dependencies_links.files
+  ignore_errors: true
+
+- name: Set fact with editable_dependencies
+  set_fact:
+    editable_dependencies: "{{ _editable_dependencies_links.files | map(attribute='path') | list }}"
+  when: install_editable_dependencies | bool and _editable_dependencies_links.files
+
+- name: Set install_editable_dependnecies to false if no editable_dependencies are found
+  set_fact:
+    install_editable_dependencies: false
+  when: install_editable_dependencies | bool and not _editable_dependencies_links.files
 
 - name: Render Docker-Compose
   template:

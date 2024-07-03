@@ -4,6 +4,8 @@ from urllib.parse import urljoin, quote
 
 from django.utils.translation import gettext_lazy as _
 import requests
+import base64
+import binascii
 
 
 conjur_inputs = {
@@ -50,6 +52,13 @@ conjur_inputs = {
 }
 
 
+def _is_base64(s: str) -> bool:
+    try:
+        return base64.b64encode(base64.b64decode(s.encode("utf-8"))) == s.encode("utf-8")
+    except binascii.Error:
+        return False
+
+
 def conjur_backend(**kwargs):
     url = kwargs['url']
     api_key = kwargs['api_key']
@@ -77,7 +86,7 @@ def conjur_backend(**kwargs):
     token = resp.content.decode('utf-8')
 
     lookup_kwargs = {
-        'headers': {'Authorization': 'Token token="{}"'.format(token)},
+        'headers': {'Authorization': 'Token token="{}"'.format(token if _is_base64(token) else base64.b64encode(token.encode('utf-8')).decode('utf-8'))},
         'allow_redirects': False,
     }
 

@@ -23,9 +23,11 @@ from crum import get_current_user
 from jinja2 import sandbox
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
+from ansible_base.lib.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, UnifiedJob
+from awx.main.models import accepts_json, UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
@@ -465,6 +467,10 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     class Meta:
         app_label = 'main'
+        permissions = [
+            ('execute_workflowjobtemplate', 'Can run this workflow job template'),
+            ('approve_workflowjobtemplate', 'Can approve steps in this workflow job template'),
+        ]
 
     notification_templates_approvals = models.ManyToManyField(
         "NotificationTemplate",

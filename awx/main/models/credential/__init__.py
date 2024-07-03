@@ -17,9 +17,14 @@ from jinja2 import sandbox
 from django.db import models
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
+from django.contrib.auth.models import User
+
+# DRF
+from rest_framework.serializers import ValidationError as DRFValidationError
 
 # AWX
 from awx.api.versioning import reverse
@@ -30,7 +35,7 @@ from awx.main.fields import (
     CredentialTypeInjectorField,
     DynamicCredentialInputField,
 )
-from awx.main.utils import decrypt_field, classproperty
+from awx.main.utils import decrypt_field, classproperty, set_environ
 from awx.main.utils.safe_yaml import safe_dump
 from awx.main.utils.execution_environments import to_container_path
 from awx.main.validators import validate_ssh_private_key
@@ -40,6 +45,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
 from . import injectors as builtin_injectors
 
@@ -82,6 +88,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
         unique_together = ('organization', 'name', 'credential_type')
+        permissions = [('use_credential', 'Can use credential in a job or related resource')]
 
     PASSWORD_FIELDS = ['inputs']
     FIELDS_TO_PRESERVE_AT_COPY = ['input_sources']
@@ -312,6 +319,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 return input_source.get_input_value()
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
+
+    def validate_role_assignment(self, actor, role_definition):
+        if isinstance(actor, User):
+            if actor.is_superuser or Organization.access_qs(actor, 'change').filter(id=self.organization.id).exists():
+                return
+        if isinstance(actor, Team):
+            if actor.organization == self.organization:
+                return
+        raise DRFValidationError({'detail': _(f"You cannot grant credential access to a {actor._meta.object_name} not in the credentials' organization")})
 
 
 class CredentialType(CommonModelNameNotUnique):
@@ -953,6 +969,25 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='bitbucket_dc_token',
+    kind='token',
+    name=gettext_noop('Bitbucket Data Center HTTP Access Token'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'token',
+                'label': gettext_noop('Token'),
+                'type': 'string',
+                'secret': True,
+                'help_text': gettext_noop('This token needs to come from your user settings in Bitbucket'),
+            }
+        ],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=gettext_noop('Insights'),
@@ -1196,6 +1231,34 @@ ManagedCredentialType(
     },
 )
 
+ManagedCredentialType(
+    namespace='terraform',
+    kind='cloud',
+    name=gettext_noop('Terraform backend configuration'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'configuration',
+                'label': gettext_noop('Backend configuration'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('Terraform backend config as Hashicorp configuration language.'),
+            },
+            {
+                'id': 'gce_credentials',
+                'label': gettext_noop('Google Cloud Platform account credentials'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('Google Cloud Platform account credentials in JSON format.'),
+            },
+        ],
+        'required': ['configuration'],
+    },
+)
+
 
 class CredentialInputSource(PrimordialModel):
     class Meta:
@@ -1252,7 +1315,9 @@ class CredentialInputSource(PrimordialModel):
                 backend_kwargs[field_name] = value
 
         backend_kwargs.update(self.metadata)
-        return backend(**backend_kwargs)
+
+        with set_environ(**settings.AWX_TASK_ENV):
+            return backend(**backend_kwargs)
 
     def get_absolute_url(self, request=None):
         view_name = 'api:credential_input_source_detail'

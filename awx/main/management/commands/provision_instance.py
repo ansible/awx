@@ -53,6 +53,7 @@ class Command(BaseCommand):
             print("Successfully registered instance {}".format(hostname))
         else:
             print("Instance already registered {}".format(instance.hostname))
+
         self.changed = changed
 
     @transaction.atomic

@@ -31,7 +31,7 @@
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         wait: true
       register: result
 
@@ -44,7 +44,7 @@
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         wait: true
         state: exists
       register: result
@@ -53,12 +53,29 @@
         that:
           - result is not changed
 
+    - name: Create a git project and wait with short request timeout.
+      project:
+        name: "{{ project_name1 }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples
+        wait: true
+        state: exists
+        request_timeout: .001
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'timed out' in result.msg"
+
     - name: Delete a git project without credentials and wait
       project:
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         wait: true
         state: absent
       register: result
@@ -72,7 +89,7 @@
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         wait: true
         state: exists
       register: result
@@ -86,7 +103,7 @@
         name: "{{ project_name1 }}"
         organization: Default
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         wait: false
       register: result
       ignore_errors: true
@@ -120,7 +137,7 @@
         name: "{{ project_name2 }}"
         organization: "{{ org_name }}"
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         scm_credential: "{{ cred_name }}"
       check_mode: true
 
@@ -145,7 +162,7 @@
         name: "{{ project_name2 }}"
         organization: Non_Existing_Org
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         scm_credential: "{{ cred_name }}"
       register: result
       ignore_errors: true
@@ -162,7 +179,7 @@
         name: "{{ project_name2 }}"
         organization: "{{ org_name }}"
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         scm_credential: Non_Existing_Credential
       register: result
       ignore_errors: true
@@ -174,7 +191,7 @@
           - "'Non_Existing_Credential' in result.msg"
           - "result.total_results == 0"
 
-    - name: Create a git project without credentials without waiting
+    - name: Create a git project using a branch and allowing branch override
       project:
         name: "{{ project_name3 }}"
         organization: Default

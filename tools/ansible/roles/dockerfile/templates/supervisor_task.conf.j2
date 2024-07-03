@@ -31,7 +31,6 @@ command = awx-manage run_wsrelay
 directory = /var/lib/awx
 {% endif %}
 autorestart = true
-startsecs = 30
 stopasgroup=true
 killasgroup=true
 stdout_logfile=/dev/stdout
@@ -58,7 +57,7 @@ stderr_logfile_maxbytes=0
 
 {% if kube_dev | bool %}
 [program:awx-autoreload]
-command = /awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx 'supervisorctl -c /etc/supervisord_task.conf restart tower-processes:*'
+command = /awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx
 autostart = true
 autorestart = true
 stopasgroup=true

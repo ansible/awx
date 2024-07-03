@@ -15,7 +15,7 @@ There are two methods you can use to get the next release version. The manual wa
 Log into your github account, under your user icon go to Settings => Developer Settings => Personal Access Tokens => Tokens (classic).
 Select the Generate new token => Generate new token (classic)
 Fill in the note, select no scopes select "Generate token".
-Copy the token and create a file in your awx repo called `.github_creds`. Enter the token in this file.
+Copy the token and create a file at `~/.github_creds` or in your awx repo as `.github_creds`. Enter the token in this file.
 Run `./tools/scripts/get_next_release.py`
 This will use your token to go query for the PRs in the release and scan their bodies to select X/Y/Z and suggest new versions and spit out notifications.
 
@@ -124,9 +124,13 @@ This workflow will take the generated images and promote them to quay.io in addi
 
 ![Verify release awx.awx collection](img/galaxy.png)
 
-8. Go to awxkit's page on [PiPy](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
+8. Go to awxkit's page on [PyPi](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
 
 ![Verify awxkit](img/pypi.png)
+
+9. While verifying that awxkit was published on Pypi, also validate that the latest version of the [tar](https://pypi.org/project/awxkit/#files) file is there as well.
+
+![Verify awxkit files](img/pypi_files.png)
 
 ### Releasing the AWX operator
 
@@ -145,15 +149,32 @@ This workflow will take the generated images and promote them to quay.io.
 ![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
 
 ## Send notifications
+
 Send notifications to the following groups:
-  * AWX Mailing List
-  * #social:ansible.com IRC (@newsbot for inclusion in bullhorn)
-  * #awx:ansible.com (no @newsbot in this room)
-  * #ansible-controller slack channel 
+
+  * [Ansible Community forum](https://forum.ansible.com/)
+  * [#social:ansible.com](https://matrix.to/#/#social:ansible.com) `@newsbot` for inclusion in The Bullhorn)
+  * [#awx:ansible.com](https://forum.ansible.com/g/AWX/members)
+  * #aap-controller Slack channel
 
 These messages are templated out for you in the output of `get_next_release.yml`.
 
-Note: the slack message is the same as the IRC message.
+Note: The Slack message is the same as the Matrix message.
+
+### Announcements
+
+* Provide enough information for the reader
+* Include:
+  * **What:** What is this, why should someone care
+  * **Why:** Why is this important
+  * **How:** How do I use this (docs, config options)
+  * **Call to action:** What type of feedback are we looking for
+* Link to PR(s) for larger features
+* `@newsbot` supports [Markdown](https://www.markdownguide.org/cheat-sheet/), so use formatted links, bullet points
+* Release Manager posts into social Matrix Channel
+* Appears in next weeks [Bulhorn](https://forum.ansible.com/c/news/bullhorn)
+
+
 
 ## Create operator hub PRs.
 Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX team for the location of the playbooks and instructions on how to run them.
@@ -169,7 +190,7 @@ Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX t
   * [kustomize](https://kustomize.io/)
   * [opm](https://docs.openshift.com/container-platform/4.9/cli_reference/opm/cli-opm-install.html)
 
-3. Download the script from https://gist.github.com/rooftopcellist/0e232f26666dee45be1d8a69270d63c2 into your awx-operator repo as release_operator_hub.sh
+3. Download the script from https://github.com/ansible/awx-operator/blob/devel/hack/publish-to-operator-hub.sh into your awx-operator repo as release_operator_hub.sh
 
 4. Make sure you are logged into quay.io with `docker login quay.io`
 
@@ -181,7 +202,7 @@ Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX t
 
 ## Revert a Release
 
-Decide whether or not you can just fall-forward with a new AWX Release to fix a bad release. If you need to remove published artifacts from publically facing repositories, follow the steps below.
+Decide whether or not you can just fall-forward with a new AWX Release to fix a bad release. If you need to remove published artifacts from publicly facing repositories, follow the steps below.
 
 Here are the steps needed to revert an AWX and an AWX-Operator release. Depending on your use case, follow the steps for reverting just an AWX release, an Operator release or both.
 
@@ -195,7 +216,7 @@ Here are the steps needed to revert an AWX and an AWX-Operator release. Dependin
 ![Tag-Revert-1-Image](img/tag-revert-1.png)
 [comment]: <> (Need an image here for actually deleting an orphaned tag, place here during next release)
 
-3. Navigate to the [AWX Operator Release Page]() and delete the AWX-Operator release that needss to tbe removed.
+3. Navigate to the [AWX Operator Release Page]() and delete the AWX-Operator release that needs to be removed.
 
 ![Revert-2-Image](img/revert-2.png)
 

@@ -36,7 +36,7 @@
     - assert:
         that:
           - result is failed
-          - "'Unable to create schedule {{ sched1 }}' in result.msg"
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Create with options that the JT does not support
       schedule:
@@ -62,7 +62,7 @@
     - assert:
         that:
           - result is failed
-          - "'Unable to create schedule {{ sched1 }}' in result.msg"
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Build a real schedule
       schedule:
@@ -75,6 +75,15 @@
     - assert:
         that:
           - result is changed
+
+    - name: Use lookup to check that schedules was enabled
+      ansible.builtin.set_fact:
+        schedules_enabled_test: "lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled"
+
+    - name: Newly created schedules should have API default value for enabled
+      assert:
+        that:
+          - schedules_enabled_test
 
     - name: Build a real schedule with exists
       schedule:
@@ -225,6 +234,7 @@
       schedule:
         name: "{{ sched2 }}"
         state: present
+        organization: Default
         unified_job_template: "{{ jt1 }}"
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
         description: "This hopefully will work"

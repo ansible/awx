@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from rest_framework.exceptions import ValidationError
+
 from awx.api.versioning import reverse
 from awx.main.models.base import CommonModel
 from awx.main.validators import validate_container_image_name
@@ -12,6 +14,8 @@ __all__ = ['ExecutionEnvironment']
 class ExecutionEnvironment(CommonModel):
     class Meta:
         ordering = ('-created',)
+        # Remove view permission, as a temporary solution, defer to organization read permission
+        default_permissions = ('add', 'change', 'delete')
 
     PULL_CHOICES = [
         ('always', _("Always pull container before running.")),
@@ -53,3 +57,16 @@ class ExecutionEnvironment(CommonModel):
 
     def get_absolute_url(self, request=None):
         return reverse('api:execution_environment_detail', kwargs={'pk': self.pk}, request=request)
+
+    def validate_role_assignment(self, actor, role_definition):
+        if self.managed:
+            raise ValidationError({'object_id': _('Can not assign object roles to managed Execution Environments')})
+        if self.organization_id is None:
+            raise ValidationError({'object_id': _('Can not assign object roles to global Execution Environments')})
+
+        if actor._meta.model_name == 'user' and (not actor.has_obj_perm(self.organization, 'view')):
+            raise ValidationError({'user': _('User must have view permission to Execution Environment organization')})
+        if actor._meta.model_name == 'team':
+            organization_cls = self._meta.get_field('organization').related_model
+            if self.orgaanization not in organization_cls.access_qs(actor, 'view'):
+                raise ValidationError({'team': _('Team must have view permission to Execution Environment organization')})

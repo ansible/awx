@@ -1,25 +1,25 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import functools
 import logging
 import threading
 import time
 import urllib.parse
+from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 from django.contrib.auth import logout
-from django.contrib.auth.models import User
-from django.db.migrations.executor import MigrationExecutor
+from django.db.migrations.recorder import MigrationRecorder
 from django.db import connection
 from django.shortcuts import redirect
-from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, resolve
 
-from awx.main.utils.named_url_graph import generate_graph, GraphNode
-from awx.conf import fields, register
+from awx.main import migrations
 from awx.main.utils.profiling import AWXProfiler
+from awx.main.utils.common import memoize
+from awx.urls import get_urlpatterns
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -97,49 +97,7 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
                 logout(request)
 
 
-def _customize_graph():
-    from awx.main.models import Instance, Schedule, UnifiedJobTemplate
-
-    for model in [Schedule, UnifiedJobTemplate]:
-        if model in settings.NAMED_URL_GRAPH:
-            settings.NAMED_URL_GRAPH[model].remove_bindings()
-            settings.NAMED_URL_GRAPH.pop(model)
-    if User not in settings.NAMED_URL_GRAPH:
-        settings.NAMED_URL_GRAPH[User] = GraphNode(User, ['username'], [])
-        settings.NAMED_URL_GRAPH[User].add_bindings()
-    if Instance not in settings.NAMED_URL_GRAPH:
-        settings.NAMED_URL_GRAPH[Instance] = GraphNode(Instance, ['hostname'], [])
-        settings.NAMED_URL_GRAPH[Instance].add_bindings()
-
-
 class URLModificationMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
-        models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
-        generate_graph(models)
-        _customize_graph()
-        register(
-            'NAMED_URL_FORMATS',
-            field_class=fields.DictField,
-            read_only=True,
-            label=_('Formats of all available named urls'),
-            help_text=_('Read-only list of key-value pairs that shows the standard format of all available named URLs.'),
-            category=_('Named URL'),
-            category_slug='named-url',
-        )
-        register(
-            'NAMED_URL_GRAPH_NODES',
-            field_class=fields.DictField,
-            read_only=True,
-            label=_('List of all named url graph nodes.'),
-            help_text=_(
-                'Read-only list of key-value pairs that exposes named URL graph topology.'
-                ' Use this list to programmatically generate named URLs for resources'
-            ),
-            category=_('Named URL'),
-            category_slug='named-url',
-        )
-        super().__init__(get_response)
-
     @staticmethod
     def _hijack_for_old_jt_name(node, kwargs, named_url):
         try:
@@ -180,14 +138,36 @@ class URLModificationMiddleware(MiddlewareMixin):
 
     @classmethod
     def _convert_named_url(cls, url_path):
-        url_units = url_path.split('/')
-        # If the identifier is an empty string, it is always invalid.
-        if len(url_units) < 6 or url_units[1] != 'api' or url_units[2] not in ['v2'] or not url_units[4]:
-            return url_path
-        resource = url_units[3]
+        default_prefix = PurePosixPath('/api/v2/')
+        optional_prefix = PurePosixPath(f'/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}/v2/')
+
+        url_path_original = url_path
+        url_path = PurePosixPath(url_path)
+
+        if set(optional_prefix.parts).issubset(set(url_path.parts)):
+            url_prefix = optional_prefix
+        elif set(default_prefix.parts).issubset(set(url_path.parts)):
+            url_prefix = default_prefix
+        else:
+            return url_path_original
+
+        # Remove prefix
+        url_path = PurePosixPath(*url_path.parts[len(url_prefix.parts) :])
+        try:
+            resource_path = PurePosixPath(url_path.parts[0])
+            name = url_path.parts[1]
+            url_suffix = PurePosixPath(*url_path.parts[2:])  # remove name and resource
+        except IndexError:
+            return url_path_original
+
+        resource = resource_path.parts[0]
         if resource in settings.NAMED_URL_MAPPINGS:
-            url_units[4] = cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, url_units[4])
-        return '/'.join(url_units)
+            pk = PurePosixPath(cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, name))
+        else:
+            return url_path_original
+
+        parts = url_prefix.parts + resource_path.parts + pk.parts + url_suffix.parts
+        return PurePosixPath(*parts).as_posix() + '/'
 
     def process_request(self, request):
         old_path = request.path_info
@@ -198,9 +178,46 @@ class URLModificationMiddleware(MiddlewareMixin):
             request.path_info = new_path
 
 
+@memoize(ttl=20)
+def is_migrating():
+    latest_number = 0
+    latest_name = ''
+    for migration_path in Path(migrations.__path__[0]).glob('[0-9]*.py'):
+        try:
+            migration_number = int(migration_path.name.split('_', 1)[0])
+        except ValueError:
+            continue
+        if migration_number > latest_number:
+            latest_number = migration_number
+            latest_name = migration_path.name[: -len('.py')]
+    return not MigrationRecorder(connection).migration_qs.filter(app='main', name=latest_name).exists()
+
+
 class MigrationRanCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        executor = MigrationExecutor(connection)
-        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-        if bool(plan) and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
+        if is_migrating() and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))
+
+
+class OptionalURLPrefixPath(MiddlewareMixin):
+    @functools.lru_cache
+    def _url_optional(self, prefix):
+        # Relavant Django code path https://github.com/django/django/blob/stable/4.2.x/django/core/handlers/base.py#L300
+        #
+        # resolve_request(request)
+        #   get_resolver(request.urlconf)
+        #     _get_cached_resolver(request.urlconf) <-- cached via @functools.cache
+        #
+        # Django will attempt to cache the value(s) of request.urlconf
+        # Being hashable is a prerequisit for being cachable.
+        # tuple() is hashable list() is not.
+        # Hence the tuple(list()) wrap.
+        return tuple(get_urlpatterns(prefix=prefix))
+
+    def process_request(self, request):
+        prefix = settings.OPTIONAL_API_URLPATTERN_PREFIX
+
+        if request.path.startswith(f"/api/{prefix}"):
+            request.urlconf = self._url_optional(prefix)
+        else:
+            request.urlconf = 'awx.urls'

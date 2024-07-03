@@ -220,6 +220,7 @@
       user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
+        controller_oauthtoken: false  # Hack for CI where we use oauth in config file
         username: "{{ username }}"
         first_name: Joe
         password: "{{ 65535 | random | to_uuid }}"

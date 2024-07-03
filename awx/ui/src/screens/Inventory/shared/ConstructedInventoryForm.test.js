@@ -1,6 +1,5 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ConstructedInventoriesAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -19,38 +18,35 @@ const mockFormValues = {
   inputInventories: [{ id: 100, name: 'East' }],
 };
 
+const options = {
+  limit: {
+    label: 'Limit',
+    help_text: '',
+  },
+  update_cache_timeout: {
+    label: 'Update cache timeout',
+    help_text: 'help',
+  },
+  verbosity: {
+    label: 'Verbosity',
+    help_text: '',
+  },
+};
+
 describe('<ConstructedInventoryForm />', () => {
   let wrapper;
   const onSubmit = jest.fn();
 
   beforeEach(async () => {
-    ConstructedInventoriesAPI.readOptions.mockResolvedValue({
-      data: {
-        related: {},
-        actions: {
-          POST: {
-            limit: {
-              label: 'Limit',
-              help_text: '',
-            },
-            update_cache_timeout: {
-              label: 'Update cache timeout',
-              help_text: 'help',
-            },
-            verbosity: {
-              label: 'Verbosity',
-              help_text: '',
-            },
-          },
-        },
-      },
-    });
     await act(async () => {
       wrapper = mountWithContexts(
-        <ConstructedInventoryForm onCancel={() => {}} onSubmit={onSubmit} />
+        <ConstructedInventoryForm
+          onCancel={() => {}}
+          onSubmit={onSubmit}
+          options={options}
+        />
       );
     });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {
@@ -103,21 +99,5 @@ describe('<ConstructedInventoryForm />', () => {
     expect(wrapper.find('VariablesField .pf-m-error').text()).toBe(
       'The plugin parameter is required.'
     );
-  });
-
-  test('should throw content error when option request fails', async () => {
-    let newWrapper;
-    ConstructedInventoriesAPI.readOptions.mockImplementationOnce(() =>
-      Promise.reject(new Error())
-    );
-    await act(async () => {
-      newWrapper = mountWithContexts(
-        <ConstructedInventoryForm onCancel={() => {}} onSubmit={() => {}} />
-      );
-    });
-    expect(newWrapper.find('ContentError').length).toBe(0);
-    newWrapper.update();
-    expect(newWrapper.find('ContentError').length).toBe(1);
-    jest.clearAllMocks();
   });
 });

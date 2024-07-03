@@ -115,7 +115,7 @@ EXAMPLES = '''
 - name: Export a job template named "My Template" and all Credentials
   export:
     job_templates: "My Template"
-    credential: 'all'
+    credentials: 'all'
 
 - name: Export a list of inventories
   export:

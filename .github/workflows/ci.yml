@@ -11,6 +11,7 @@ jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       packages: write
       contents: read
@@ -20,6 +21,8 @@ jobs:
         tests:
           - name: api-test
             command: /start_tests.sh
+          - name: api-migrations
+            command: /start_tests.sh test_migrations
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
           - name: api-swagger
@@ -35,29 +38,44 @@ jobs:
           - name: ui-test-general
             command: make ui-test-general
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - name: Build awx_devel image for running checks
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run check ${{ matrix.tests.name }}
-        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make github_ci_runner
+        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make docker-runner
 
   dev-env:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/run_awx_devel
+        id: awx
+        with:
+          build-ui: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run smoke test
-        run: make github_ci_setup && ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
+        run: ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
 
   awx-operator:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DEBUG_OUTPUT_DIR: /tmp/awx_operator_molecule_test
     steps:
       - name: Checkout awx
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: awx
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ansible/awx-operator
           path: awx-operator
@@ -67,7 +85,7 @@ jobs:
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.py_version }}
 
@@ -78,11 +96,11 @@ jobs:
       - name: Build AWX image
         working-directory: awx
         run: |
-          ansible-playbook -v tools/ansible/build.yml \
-            -e headless=yes \
-            -e awx_image=awx \
-            -e awx_image_tag=ci \
-            -e ansible_python_interpreter=$(which python3)
+          VERSION=`make version-for-buildyml` make awx-kube-build
+        env:
+          COMPOSE_TAG: ci
+          DEV_DOCKER_TAG_BASE: local
+          HEADLESS: yes
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
@@ -91,18 +109,28 @@ jobs:
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
           make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind
+          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
         env:
-          AWX_TEST_IMAGE: awx
+          AWX_TEST_IMAGE: local/awx
           AWX_TEST_VERSION: ci
+          AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
+          STORE_DEBUG_OUTPUT: true
+
+      - name: Upload debug output
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: awx-operator-debug-output
+          path: ${{ env.DEBUG_OUTPUT_DIR }}
 
   collection-sanity:
     name: awx_collection sanity
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
       - name: Upgrade ansible-core
@@ -110,7 +138,139 @@ jobs:
 
       - name: Run sanity tests
         run: make test_collection_sanity
+
+  collection-integration:
+    name: awx_collection integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target-regex:
+          - name: a-h
+            regex: ^[a-h]
+          - name: i-p
+            regex: ^[i-p]
+          - name: r-z0-9
+            regex: ^[r-z0-9]
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/run_awx_devel
+        id: awx
+        with:
+          build-ui: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies for running tests
+        run: |
+          python3 -m pip install -e ./awxkit/
+          python3 -m pip install -r awx_collection/requirements.txt
+
+      - name: Run integration tests
+        run: |
+          echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
+          echo '[general]' > ~/.tower_cli.cfg
+          echo 'host = https://${{ steps.awx.outputs.ip }}:8043' >> ~/.tower_cli.cfg
+          echo 'oauth_token = ${{ steps.awx.outputs.admin-token }}' >> ~/.tower_cli.cfg
+          echo 'verify_ssl = false' >> ~/.tower_cli.cfg
+          TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
+          make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--coverage --requirements $TARGETS" test_collection_integration
         env:
-          # needed due to cgroupsv2. This is fixed, but a stable release
-          # with the fix has not been made yet.
           ANSIBLE_TEST_PREFER_PODMAN: 1
+
+      # Upload coverage report as artifact
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage-${{ matrix.target-regex.name }}
+          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+
+      - uses: ./.github/actions/upload_awx_devel_logs
+        if: always()
+        with:
+          log-filename: collection-integration-${{ matrix.target-regex.name }}.log
+
+  collection-integration-coverage-combine:
+    name: combine awx_collection integration coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - collection-integration
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Upgrade ansible-core
+        run: python3 -m pip install --upgrade ansible-core
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: coverage
+
+      - name: Combine coverage
+        run: |
+          make COLLECTION_VERSION=100.100.100-git install_collection
+          mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
+          cd coverage
+          for i in coverage-*; do
+            cp -rv $i/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          done
+          cd ~/.ansible/collections/ansible_collections/awx/awx
+          ansible-test coverage combine --requirements
+          ansible-test coverage html
+          echo '## AWX Collection Integration Coverage' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ansible-test coverage report >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo >> $GITHUB_STEP_SUMMARY
+          echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
+          echo 'Download the HTML artifacts to view the coverage report.' >> $GITHUB_STEP_SUMMARY
+
+      # This is a huge hack, there's no official action for removing artifacts currently.
+      # Also ACTIONS_RUNTIME_URL and ACTIONS_RUNTIME_TOKEN aren't available in normal run
+      # steps, so we have to use github-script to get them.
+      #
+      # The advantage of doing this, though, is that we save on artifact storage space.
+
+      - name: Get secret artifact runtime URL
+        uses: actions/github-script@v6
+        id: get-runtime-url
+        with:
+          result-encoding: string
+          script: |
+            const { ACTIONS_RUNTIME_URL } = process.env;
+            return ACTIONS_RUNTIME_URL;
+
+      - name: Get secret artifact runtime token
+        uses: actions/github-script@v6
+        id: get-runtime-token
+        with:
+          result-encoding: string
+          script: |
+            const { ACTIONS_RUNTIME_TOKEN } = process.env;
+            return ACTIONS_RUNTIME_TOKEN;
+
+      - name: Remove intermediary artifacts
+        env:
+          ACTIONS_RUNTIME_URL: ${{ steps.get-runtime-url.outputs.result }}
+          ACTIONS_RUNTIME_TOKEN: ${{ steps.get-runtime-token.outputs.result }}
+        run: |
+          echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
+          artifacts=$(
+            curl -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" \
+              ${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview \
+            | jq -r '.value | .[] | select(.name | startswith("coverage-")) | .url'
+          )
+
+          for artifact in $artifacts; do
+            curl -i -X DELETE -H "Accept: application/json;api-version=6.0-preview" -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact"
+          done
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: awx-collection-integration-coverage-html
+          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/reports/coverage

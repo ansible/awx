@@ -84,5 +84,6 @@ def test_custom_hostname_regex(post, admin_user):
                 "hostname": value[0],
                 "node_type": "execution",
                 "node_state": "installed",
+                "peers": [],
             }
             post(url=url, user=admin_user, data=data, expect=value[1])

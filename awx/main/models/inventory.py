@@ -10,8 +10,9 @@ import copy
 import os.path
 from urllib.parse import urljoin
 
-import dateutil.relativedelta
 import yaml
+import tempfile
+import stat
 
 # Django
 from django.conf import settings
@@ -26,6 +27,8 @@ from django.db.models import Q
 # REST Framework
 from rest_framework.exceptions import ParseError
 
+from ansible_base.lib.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
@@ -36,7 +39,7 @@ from awx.main.fields import (
     OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
-from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
+from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, accepts_json
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
@@ -88,6 +91,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         verbose_name_plural = _('inventories')
         unique_together = [('name', 'organization')]
         ordering = ('name',)
+        permissions = [
+            ('use_inventory', 'Can use inventory in a job template'),
+            ('adhoc_inventory', 'Can run ad hoc commands'),
+            ('update_inventory', 'Can update inventory sources in inventory'),
+        ]
 
     organization = models.ForeignKey(
         'Organization',
@@ -890,23 +898,6 @@ class HostMetric(models.Model):
             self.deleted = False
             self.save(update_fields=['deleted'])
 
-    @classmethod
-    def cleanup_task(cls, months_ago):
-        try:
-            months_ago = int(months_ago)
-            if months_ago <= 0:
-                raise ValueError()
-
-            last_automation_before = now() - dateutil.relativedelta.relativedelta(months=months_ago)
-
-            logger.info(f'cleanup_host_metrics: soft-deleting records last automated before {last_automation_before}')
-            HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
-                deleted=True, deleted_counter=models.F('deleted_counter') + 1, last_deleted=now()
-            )
-            settings.CLEANUP_HOST_METRICS_LAST_TS = now()
-        except (TypeError, ValueError):
-            logger.error(f"cleanup_host_metrics: months_ago({months_ago}) has to be a positive integer value")
-
 
 class HostMetricSummaryMonthly(models.Model):
     """
@@ -941,6 +932,8 @@ class InventorySourceOptions(BaseModel):
         ('rhv', _('Red Hat Virtualization')),
         ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
+        ('terraform', _('Terraform State')),
+        ('openshift_virtualization', _('OpenShift Virtualization')),
     ]
 
     # From the options of the Django management base command
@@ -1050,7 +1043,7 @@ class InventorySourceOptions(BaseModel):
     def cloud_credential_validation(source, cred):
         if not source:
             return None
-        if cred and source not in ('custom', 'scm'):
+        if cred and source not in ('custom', 'scm', 'openshift_virtualization'):
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
@@ -1059,12 +1052,14 @@ class InventorySourceOptions(BaseModel):
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
-        elif source in CLOUD_PROVIDERS and source != 'ec2':
+        elif source in CLOUD_PROVIDERS and source not in ['ec2', 'openshift_virtualization']:
             return _('Credential is required for a cloud source.')
         elif source == 'custom' and cred and cred.credential_type.kind in ('scm', 'ssh', 'insights', 'vault'):
             return _('Credentials of type machine, source control, insights and vault are disallowed for custom inventory sources.')
         elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
             return _('Credentials of type insights and vault are disallowed for scm inventory sources.')
+        elif source == 'openshift_virtualization' and cred and cred.credential_type.kind != 'kubernetes':
+            return _('Credentials of type kubernetes is requred for openshift_virtualization inventory sources.')
         return None
 
     def get_cloud_credential(self):
@@ -1415,7 +1410,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return selected_groups
 
 
-class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
+class CustomInventoryScript(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         ordering = ('name',)
@@ -1646,6 +1641,42 @@ class satellite6(PluginFileInjector):
         return ret
 
 
+class terraform(PluginFileInjector):
+    plugin_name = 'terraform_state'
+    namespace = 'cloud'
+    collection = 'terraform'
+    use_fqcn = True
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super().inventory_as_dict(inventory_update, private_data_dir)
+        credential = inventory_update.get_cloud_credential()
+        config_cred = credential.get_input('configuration')
+        if config_cred:
+            handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
+            with os.fdopen(handle, 'w') as f:
+                os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+                f.write(config_cred)
+            ret['backend_config_files'] = to_container_path(path, private_data_dir)
+        return ret
+
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
+        credential = inventory_update.get_cloud_credential()
+
+        private_data = {'credentials': {}}
+        gce_cred = credential.get_input('gce_credentials', default=None)
+        if gce_cred:
+            private_data['credentials'][credential] = gce_cred
+        return private_data
+
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        env = super(terraform, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        credential = inventory_update.get_cloud_credential()
+        cred_data = private_data_files['credentials']
+        if credential in cred_data:
+            env['GOOGLE_BACKEND_CREDENTIALS'] = to_container_path(cred_data[credential], private_data_dir)
+        return env
+
+
 class controller(PluginFileInjector):
     plugin_name = 'tower'  # TODO: relying on routing for now, update after EEs pick up revised collection
     base_injector = 'template'
@@ -1662,6 +1693,16 @@ class insights(PluginFileInjector):
     collection = 'insights'
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
+    use_fqcn = True
+
+
+class openshift_virtualization(PluginFileInjector):
+    plugin_name = 'kubevirt'
+    base_injector = 'template'
+    namespace = 'kubevirt'
+    collection = 'core'
+    downstream_namespace = 'redhat'
+    downstream_collection = 'openshift_virtualization'
     use_fqcn = True
 
 

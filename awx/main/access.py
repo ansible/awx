@@ -20,11 +20,15 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # Django OAuth Toolkit
 from awx.main.models.oauth import OAuth2Application, OAuth2AccessToken
 
+# django-ansible-base
+from ansible_base.lib.utils.validation import to_python_boolean
+from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac import permission_registry
+
 # AWX
 from awx.main.utils import (
     get_object_or_400,
     get_pk_from_dict,
-    to_python_boolean,
     get_licenser,
 )
 from awx.main.models import (
@@ -56,6 +60,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     ProjectUpdateEvent,
+    ReceptorAddress,
     Role,
     Schedule,
     SystemJob,
@@ -70,8 +75,6 @@ from awx.main.models import (
     WorkflowJobTemplateNode,
     WorkflowApproval,
     WorkflowApprovalTemplate,
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-    ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.mixins import ResourceMixin
 
@@ -79,7 +82,6 @@ __all__ = [
     'get_user_queryset',
     'check_user_access',
     'check_user_access_with_errors',
-    'user_accessible_objects',
     'consumer_access',
 ]
 
@@ -134,10 +136,6 @@ def vars_are_encrypted(vars):
 
 def register_access(model_class, access_class):
     access_registry[model_class] = access_class
-
-
-def user_accessible_objects(user, role_name):
-    return ResourceMixin._accessible_objects(User, user, role_name)
 
 
 def get_user_queryset(user, model_class):
@@ -267,7 +265,11 @@ class BaseAccess(object):
         return self.can_change(obj, data)
 
     def can_delete(self, obj):
-        return self.user.is_superuser
+        if self.user.is_superuser:
+            return True
+        if obj._meta.model_name in [cls._meta.model_name for cls in permission_registry.all_registered_models]:
+            return self.user.has_obj_perm(obj, 'delete')
+        return False
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
@@ -596,7 +598,7 @@ class InstanceGroupAccess(BaseAccess):
        - a superuser
        - admin role on the Instance group
     I can add/delete Instance Groups:
-       - a superuser(system administrator)
+       - a superuser(system administrator), because these are not org-scoped
     I can use Instance Groups when I have:
        - use_role on the instance group
     """
@@ -625,7 +627,7 @@ class InstanceGroupAccess(BaseAccess):
     def can_delete(self, obj):
         if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             return False
-        return self.user.is_superuser
+        return self.user.has_obj_perm(obj, 'delete')
 
 
 class UserAccess(BaseAccess):
@@ -642,7 +644,10 @@ class UserAccess(BaseAccess):
     """
 
     model = User
-    prefetch_related = ('profile',)
+    prefetch_related = (
+        'profile',
+        'resource',
+    )
 
     def filtered_queryset(self):
         if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
@@ -651,9 +656,7 @@ class UserAccess(BaseAccess):
             qs = (
                 User.objects.filter(pk__in=Organization.accessible_objects(self.user, 'read_role').values('member_role__members'))
                 | User.objects.filter(pk=self.user.id)
-                | User.objects.filter(
-                    pk__in=Role.objects.filter(singleton_name__in=[ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]).values('members')
-                )
+                | User.objects.filter(is_superuser=True)
             ).distinct()
         return qs
 
@@ -711,6 +714,15 @@ class UserAccess(BaseAccess):
             if not allow_orphans:
                 # in these cases only superusers can modify orphan users
                 return False
+            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+                # Permission granted if the user has all permissions that the target user has
+                target_perms = set(
+                    RoleEvaluation.objects.filter(role__in=obj.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                )
+                user_perms = set(
+                    RoleEvaluation.objects.filter(role__in=self.user.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                )
+                return not (target_perms - user_perms)
             return not obj.roles.all().exclude(ancestors__in=self.user.roles.all()).exists()
         else:
             return self.is_all_org_admin(obj)
@@ -838,6 +850,7 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
     prefetch_related = (
         'created_by',
         'modified_by',
+        'resource',  # dab_resource_registry
     )
     # organization admin_role is not a parent of organization auditor_role
     notification_attach_roles = ['admin_role', 'auditor_role']
@@ -947,9 +960,6 @@ class InventoryAccess(BaseAccess):
     @check_superuser
     def can_update(self, obj):
         return self.user in obj.update_role
-
-    def can_delete(self, obj):
-        return self.can_admin(obj, None)
 
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
@@ -1306,6 +1316,7 @@ class TeamAccess(BaseAccess):
         'created_by',
         'modified_by',
         'organization',
+        'resource',  # dab_resource_registry
     )
 
     def filtered_queryset(self):
@@ -1376,12 +1387,11 @@ class TeamAccess(BaseAccess):
 class ExecutionEnvironmentAccess(BaseAccess):
     """
     I can see an execution environment when:
-     - I'm a superuser
-     - I'm a member of the same organization
-     - it is a global ExecutionEnvironment
+     - I can see its organization
+     - It is a global ExecutionEnvironment
     I can create/change an execution environment when:
      - I'm a superuser
-     - I'm an admin for the organization(s)
+     - I have an organization or object role that gives access
     """
 
     model = ExecutionEnvironment
@@ -1403,13 +1413,17 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_change(self, obj, data):
         if obj and obj.organization_id is None:
             raise PermissionDenied
-        if self.user not in obj.organization.execution_environment_admin_role:
-            raise PermissionDenied
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            if not self.user.has_obj_perm(obj, 'change'):
+                return False
+        else:
+            if self.user not in obj.organization.execution_environment_admin_role:
+                raise PermissionDenied
         if data and 'organization' in data:
             new_org = get_object_from_data('organization', Organization, data, obj=obj)
             if not new_org or self.user not in new_org.execution_environment_admin_role:
                 return False
-        return self.check_related('organization', Organization, data, obj=obj, mandatory=True, role_field='execution_environment_admin_role')
+        return self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role')
 
     def can_delete(self, obj):
         if obj.managed:
@@ -1581,6 +1595,8 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         inventory = get_value(Inventory, 'inventory')
         if inventory:
             if self.user not in inventory.use_role:
+                if self.save_messages:
+                    self.messages['inventory'] = [_('You do not have use permission on Inventory')]
                 return False
 
         if not self.check_related('execution_environment', ExecutionEnvironment, data, role_field='read_role'):
@@ -1589,10 +1605,15 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         project = get_value(Project, 'project')
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
-        if project:
-            return self.user in project.use_role
-        else:
+        if not project:
             return False
+
+        if self.user not in project.use_role:
+            if self.save_messages:
+                self.messages['project'] = [_('You do not have use permission on Project')]
+            return False
+
+        return True
 
     @check_superuser
     def can_copy_related(self, obj):
@@ -2077,11 +2098,20 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'workflow_admin_role').exists()
 
-        return bool(
-            self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True)
-            and self.check_related('inventory', Inventory, data, role_field='use_role')
-            and self.check_related('execution_environment', ExecutionEnvironment, data, role_field='read_role')
-        )
+        if not self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True):
+            if data.get('organization', None) is None:
+                self.messages['organization'] = [_('An organization is required to create a workflow job template for normal user')]
+            return False
+
+        if not self.check_related('inventory', Inventory, data, role_field='use_role'):
+            self.messages['inventory'] = [_('You do not have use_role to the inventory')]
+            return False
+
+        if not self.check_related('execution_environment', ExecutionEnvironment, data, role_field='read_role'):
+            self.messages['execution_environment'] = [_('You do not have read_role to the execution environment')]
+            return False
+
+        return True
 
     def can_copy(self, obj):
         if self.save_messages:
@@ -2434,6 +2464,29 @@ class InventoryUpdateEventAccess(BaseAccess):
         return False
 
 
+class ReceptorAddressAccess(BaseAccess):
+    """
+    I can see receptor address records whenever I can access the instance
+    """
+
+    model = ReceptorAddress
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(Q(instance__in=Instance.accessible_pk_qs(self.user, 'read_role')))
+
+    @check_superuser
+    def can_add(self, data):
+        return False
+
+    @check_superuser
+    def can_change(self, obj, data):
+        return False
+
+    @check_superuser
+    def can_delete(self, obj):
+        return False
+
+
 class SystemJobEventAccess(BaseAccess):
     """
     I can only see manage System Jobs events if I'm a super user
@@ -2567,6 +2620,8 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
         if not JobLaunchConfigAccess(self.user).can_add(data):
             return False
         if not data:
+            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+                return self.user.has_roles.filter(permission_partials__codename__in=['execute_jobtemplate', 'update_project', 'update_inventory']).exists()
             return Role.objects.filter(role_field__in=['update_role', 'execute_role'], ancestors__in=self.user.roles.all()).exists()
 
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
@@ -2588,13 +2643,15 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
 
 class NotificationTemplateAccess(BaseAccess):
     """
-    I can see/use a notification_template if I have permission to
+    Run standard logic from DAB RBAC
     """
 
     model = NotificationTemplate
     prefetch_related = ('created_by', 'modified_by', 'organization')
 
     def filtered_queryset(self):
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            return self.model.access_qs(self.user, 'view')
         return self.model.objects.filter(
             Q(organization__in=Organization.accessible_objects(self.user, 'notification_admin_role')) | Q(organization__in=self.user.auditor_of_organizations)
         ).distinct()
@@ -2607,10 +2664,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        if obj.organization is None:
-            # only superusers are allowed to edit orphan notification templates
-            return False
-        return self.check_related('organization', Organization, data, obj=obj, role_field='notification_admin_role', mandatory=True)
+        return self.user.has_obj_perm(obj, 'change') and self.check_related('organization', Organization, data, obj=obj, role_field='notification_admin_role')
 
     def can_admin(self, obj, data):
         return self.can_change(obj, data)
@@ -2620,9 +2674,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     @check_superuser
     def can_start(self, obj, validate_license=True):
-        if obj.organization is None:
-            return False
-        return self.user in obj.organization.notification_admin_role
+        return self.can_change(obj, None)
 
 
 class NotificationAccess(BaseAccess):
@@ -2763,7 +2815,7 @@ class ActivityStreamAccess(BaseAccess):
                 | Q(notification_template__organization__in=auditing_orgs)
                 | Q(notification__notification_template__organization__in=auditing_orgs)
                 | Q(label__organization__in=auditing_orgs)
-                | Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
+                | Q(role__in=Role.visible_roles(self.user) if auditing_orgs else [])
             )
 
         project_set = Project.accessible_pk_qs(self.user, 'read_role')
@@ -2820,13 +2872,10 @@ class RoleAccess(BaseAccess):
 
     def filtered_queryset(self):
         result = Role.visible_roles(self.user)
-        # Sanity check: is the requesting user an orphaned non-admin/auditor?
-        # if yes, make system admin/auditor mandatorily visible.
-        if not self.user.is_superuser and not self.user.is_system_auditor and not self.user.organizations.exists():
-            mandatories = ('system_administrator', 'system_auditor')
-            super_qs = Role.objects.filter(singleton_name__in=mandatories)
-            result = result | super_qs
-        return result
+        # Make system admin/auditor mandatorily visible.
+        mandatories = ('system_administrator', 'system_auditor')
+        super_qs = Role.objects.filter(singleton_name__in=mandatories)
+        return result | super_qs
 
     def can_add(self, obj, data):
         # Unsupported for now

@@ -162,7 +162,7 @@ class ApiV2(base.Base):
                 export_key = 'create_approval_template'
                 rel_option_endpoint = _page.related.get('create_approval_template')
 
-            rel_post_fields = self._cache.get_post_fields(rel_option_endpoint)
+            rel_post_fields = utils.get_post_fields(rel_option_endpoint, self._cache)
             if rel_post_fields is None:
                 log.debug("%s is a read-only endpoint.", rel_endpoint)
                 continue
@@ -199,10 +199,10 @@ class ApiV2(base.Base):
                 return None
             fields['natural_key'] = natural_key
 
-        return utils.remove_encrypted(fields)
+        return fields
 
     def _export_list(self, endpoint):
-        post_fields = self._cache.get_post_fields(endpoint)
+        post_fields = utils.get_post_fields(endpoint, self._cache)
         if post_fields is None:
             return None
 
@@ -234,7 +234,7 @@ class ApiV2(base.Base):
         return endpoint.get(**{identifier: value}, all_pages=True)
 
     def export_assets(self, **kwargs):
-        self._cache = page.PageCache()
+        self._cache = page.PageCache(self.connection)
 
         # If no resource kwargs are explicitly used, export everything.
         all_resources = all(kwargs.get(resource) is None for resource in EXPORTABLE_RESOURCES)
@@ -267,7 +267,7 @@ class ApiV2(base.Base):
 
     def _import_list(self, endpoint, assets):
         log.debug("_import_list -- endpoint: %s, assets: %s", endpoint.endpoint, repr(assets))
-        post_fields = self._cache.get_post_fields(endpoint)
+        post_fields = utils.get_post_fields(endpoint, self._cache)
 
         changed = False
 
@@ -280,7 +280,7 @@ class ApiV2(base.Base):
                     _page = self._cache.get_by_natural_key(value)
                     post_data[field] = _page['id'] if _page is not None else None
                 else:
-                    post_data[field] = value
+                    post_data[field] = utils.remove_encrypted(value)
 
             _page = self._cache.get_by_natural_key(asset['natural_key'])
             try:
@@ -317,7 +317,10 @@ class ApiV2(base.Base):
                     if asset['natural_key']['type'] == 'project' and 'local_path' in post_data and _page['scm_type'] == post_data['scm_type']:
                         del post_data['local_path']
 
-                    _page = _page.put(post_data)
+                    if asset['natural_key']['type'] == 'user':
+                        _page = _page.patch(**post_data)
+                    else:
+                        _page = _page.put(post_data)
                     changed = True
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
@@ -335,7 +338,7 @@ class ApiV2(base.Base):
                 if name == 'roles':
                     indexed_roles = defaultdict(list)
                     for role in S:
-                        if 'content_object' not in role:
+                        if role.get('content_object') is None:
                             continue
                         indexed_roles[role['content_object']['type']].append(role)
                     self._roles.append((_page, indexed_roles))
@@ -411,7 +414,7 @@ class ApiV2(base.Base):
             # FIXME: deal with pruning existing relations that do not match the import set
 
     def import_assets(self, data):
-        self._cache = page.PageCache()
+        self._cache = page.PageCache(self.connection)
         self._related = []
         self._roles = []
 
@@ -420,11 +423,8 @@ class ApiV2(base.Base):
         for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
 
-            # Load up existing objects, so that we can try to update or link to them
-            self._cache.get_page(endpoint)
             imported = self._import_list(endpoint, data.get(resource) or [])
             changed = changed or imported
-            # FIXME: should we delete existing unpatched assets?
 
         self._assign_related()
         self._assign_membership()

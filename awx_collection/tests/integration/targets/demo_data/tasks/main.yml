@@ -33,6 +33,7 @@
     name: "localhost"
     inventory: "Demo Inventory"
     state: present
+    enabled: true
     variables:
       ansible_connection: local
   register: result

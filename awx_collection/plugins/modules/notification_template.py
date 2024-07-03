@@ -50,6 +50,7 @@ options:
       description:
         - The type of notification to be sent.
       choices:
+        - 'awssns'
         - 'email'
         - 'grafana'
         - 'irc'
@@ -219,7 +220,7 @@ def main():
         copy_from=dict(),
         description=dict(),
         organization=dict(),
-        notification_type=dict(choices=['email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
+        notification_type=dict(choices=['awssns', 'email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
         notification_configuration=dict(type='dict'),
         messages=dict(type='dict'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),

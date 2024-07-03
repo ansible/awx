@@ -49,24 +49,6 @@ Make sure to delete the old tarball if it is an upgrade.
 Anything pinned in `*.in` files involves additional manual work in
 order to upgrade. Some information related to that work is outlined here.
 
-### Django
-
-For any upgrade of Django, it must be confirmed that
-we don't regress on FIPS support before merging.
-
-See internal integration test knowledge base article `how_to_test_FIPS`
-for instructions.
-
-If operating in a FIPS environment, `hashlib.md5()` will raise a `ValueError`,
-but will support the `usedforsecurity` keyword on RHEL and Centos systems.
-
-Keep an eye on https://code.djangoproject.com/ticket/28401
-
-The override of `names_digest` could easily be broken in a future version.
-Check that the import remains the same in the desired version.
-
-https://github.com/django/django/blob/af5ec222ccd24e81f9fec6c34836a4e503e7ccf7/django/db/backends/base/schema.py#L7
-
 ### django-split-settings
 
 When we attemed to upgrade past 1.0.0 the build process in GitHub failed on the docker build step with the following error:
@@ -128,16 +110,6 @@ OpenID Connect work that was done in
 https://github.com/jazzband/django-oauth-toolkit/pull/915.  This may
 be fixable by creating a migration on our end?
 
-### azure-keyvault
-
-Upgrading to 4.0.0 causes error because imports changed.
-
-```
-  File "/var/lib/awx/venv/awx/lib64/python3.6/site-packages/awx/main/credential_plugins/azure_kv.py", line 4, in <module>
-  from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
-ImportError: cannot import name 'KeyVaultClient'
-```
-
 ### pip, setuptools and setuptools_scm
 
 If modifying these libraries make sure testing with the offline build is performed to confirm they are functionally working.
@@ -172,4 +144,3 @@ available on PyPi with source distribution.
 
 Version 4.8 makes us a little bit nervous with changes to `searchwindowsize` https://github.com/pexpect/pexpect/pull/579/files
 Pin to `pexpect==4.7.x` until we have more time to move to `4.8` and test.
-

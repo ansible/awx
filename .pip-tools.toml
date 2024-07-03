@@ -1,0 +1,5 @@
+[tool.pip-tools]
+resolver = "backtracking"
+allow-unsafe = true
+strip-extras = true
+quiet = true

@@ -99,7 +99,7 @@
         that:
           - wait_results is failed
           - 'wait_results.status == "canceled"'
-          - "wait_results.msg == 'Job with id {{ job.id }} failed' or 'Job with id={{ job.id }} failed, error: Job failed.'"
+          - "'Job with id ~ job.id failed' or 'Job with id= ~ job.id failed, error: Job failed.' is in wait_results.msg"
 
     # workflow wait test
     - name: Generate a random string for test

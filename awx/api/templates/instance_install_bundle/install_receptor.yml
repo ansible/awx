@@ -1,20 +1,16 @@
-{% verbatim %}
 ---
 - hosts: all
   become: yes
   tasks:
     - name: Create the receptor user
       user:
+{% verbatim %}
         name: "{{ receptor_user }}"
+{% endverbatim %}
         shell: /bin/bash
-    - name: Enable Copr repo for Receptor
-      command: dnf copr enable ansible-awx/receptor -y
+{% if instance.node_type == "execution" %}
     - import_role:
         name: ansible.receptor.podman
+{% endif %}
     - import_role:
         name: ansible.receptor.setup
-    - name: Install ansible-runner
-      pip:
-        name: ansible-runner
-        executable: pip3.9
-{% endverbatim %}

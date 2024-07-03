@@ -42,6 +42,34 @@ base_inputs = {
             'help_text': _('The Secret ID for AppRole Authentication'),
         },
         {
+            'id': 'client_cert_public',
+            'label': _('Client Certificate'),
+            'type': 'string',
+            'multiline': True,
+            'help_text': _(
+                'The PEM-encoded client certificate used for TLS client authentication.'
+                ' This should include the certificate and any intermediate certififcates.'
+            ),
+        },
+        {
+            'id': 'client_cert_private',
+            'label': _('Client Certificate Key'),
+            'type': 'string',
+            'multiline': True,
+            'secret': True,
+            'help_text': _('The certificate private key used for TLS client authentication.'),
+        },
+        {
+            'id': 'client_cert_role',
+            'label': _('TLS Authentication Role'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _(
+                'The role configured in Hashicorp Vault for TLS client authentication.'
+                ' If not provided, Hashicorp Vault may assign roles based on the certificate used.'
+            ),
+        },
+        {
             'id': 'namespace',
             'label': _('Namespace name (Vault Enterprise only)'),
             'type': 'string',
@@ -58,6 +86,20 @@ base_inputs = {
                 ' This is the named role, configured in Vault server, for AWX pod auth policies.'
                 ' see https://www.vaultproject.io/docs/auth/kubernetes#configuration'
             ),
+        },
+        {
+            'id': 'username',
+            'label': _('Username'),
+            'type': 'string',
+            'secret': False,
+            'help_text': _('Username for user authentication.'),
+        },
+        {
+            'id': 'password',
+            'label': _('Password'),
+            'type': 'string',
+            'secret': True,
+            'help_text': _('Password for user authentication.'),
         },
         {
             'id': 'default_auth_path',
@@ -157,17 +199,23 @@ hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 def handle_auth(**kwargs):
     token = None
-
     if kwargs.get('token'):
         token = kwargs['token']
+    elif kwargs.get('username') and kwargs.get('password'):
+        token = method_auth(**kwargs, auth_param=userpass_auth(**kwargs))
     elif kwargs.get('role_id') and kwargs.get('secret_id'):
         token = method_auth(**kwargs, auth_param=approle_auth(**kwargs))
     elif kwargs.get('kubernetes_role'):
         token = method_auth(**kwargs, auth_param=kubernetes_auth(**kwargs))
+    elif kwargs.get('client_cert_public') and kwargs.get('client_cert_private'):
+        token = method_auth(**kwargs, auth_param=client_cert_auth(**kwargs))
     else:
-        raise Exception('Either token or AppRole/Kubernetes authentication parameters must be set')
-
+        raise Exception('Token, Username/Password, AppRole, Kubernetes, or TLS authentication parameters must be set')
     return token
+
+
+def userpass_auth(**kwargs):
+    return {'username': kwargs['username'], 'password': kwargs['password']}
 
 
 def approle_auth(**kwargs):
@@ -179,6 +227,10 @@ def kubernetes_auth(**kwargs):
     with jwt_file.open('r') as jwt_fo:
         jwt = jwt_fo.read().rstrip()
     return {'role': kwargs['kubernetes_role'], 'jwt': jwt}
+
+
+def client_cert_auth(**kwargs):
+    return {'name': kwargs.get('client_cert_role')}
 
 
 def method_auth(**kwargs):
@@ -193,13 +245,25 @@ def method_auth(**kwargs):
     cacert = kwargs.get('cacert', None)
 
     sess = requests.Session()
+    sess.mount(url, requests.adapters.HTTPAdapter(max_retries=5))
+
     # Namespace support
     if kwargs.get('namespace'):
         sess.headers['X-Vault-Namespace'] = kwargs['namespace']
     request_url = '/'.join([url, 'auth', auth_path, 'login']).rstrip('/')
+    if kwargs['auth_param'].get('username'):
+        request_url = request_url + '/' + (kwargs['username'])
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
-        resp = sess.post(request_url, **request_kwargs)
+        # TLS client certificate support
+        if kwargs.get('client_cert_public') and kwargs.get('client_cert_private'):
+            # Add client cert to requests Session before making call
+            with CertFiles(kwargs['client_cert_public'], key=kwargs['client_cert_private']) as client_cert:
+                sess.cert = client_cert
+                resp = sess.post(request_url, **request_kwargs)
+        else:
+            # Make call without client certificate
+            resp = sess.post(request_url, **request_kwargs)
     resp.raise_for_status()
     token = resp.json()['auth']['client_token']
     return token
@@ -220,6 +284,7 @@ def kv_backend(**kwargs):
     }
 
     sess = requests.Session()
+    sess.mount(url, requests.adapters.HTTPAdapter(max_retries=5))
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
     # Compatibility header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
@@ -290,6 +355,7 @@ def ssh_backend(**kwargs):
         request_kwargs['json']['valid_principals'] = kwargs['valid_principals']
 
     sess = requests.Session()
+    sess.mount(url, requests.adapters.HTTPAdapter(max_retries=5))
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
     if kwargs.get('namespace'):
         sess.headers['X-Vault-Namespace'] = kwargs['namespace']

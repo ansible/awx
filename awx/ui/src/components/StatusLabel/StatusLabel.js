@@ -47,7 +47,7 @@ export default function StatusLabel({ status, tooltipContent = '', children }) {
     unreachable: t`Unreachable`,
     running: t`Running`,
     pending: t`Pending`,
-    skipped: t`Skipped'`,
+    skipped: t`Skipped`,
     timedOut: t`Timed out`,
     waiting: t`Waiting`,
     disabled: t`Disabled`,

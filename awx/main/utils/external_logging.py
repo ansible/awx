@@ -17,10 +17,25 @@ def construct_rsyslog_conf_template(settings=settings):
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
-    max_disk_space_main_queue = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_GB', 1)
+    action_queue_size = getattr(settings, 'LOG_AGGREGATOR_ACTION_QUEUE_SIZE', 131072)
     max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
+
+    queue_options = [
+        f'queue.spoolDirectory="{spool_directory}"',
+        'queue.filename="awx-external-logger-action-queue"',
+        f'queue.maxDiskSpace="{max_disk_space_action_queue}g"',  # overall disk space for all queue files
+        'queue.maxFileSize="100m"',  # individual file size
+        'queue.type="LinkedList"',
+        'queue.saveOnShutdown="on"',
+        'queue.syncqueuefiles="on"',  # (f)sync when checkpoint occurs
+        'queue.checkpointInterval="1000"',  # Update disk queue every 1000 messages
+        f'queue.size="{action_queue_size}"',  # max number of messages in queue
+        f'queue.highwaterMark="{int(action_queue_size * 0.75)}"',  # 75% of queue.size
+        f'queue.discardMark="{int(action_queue_size * 0.9)}"',  # 90% of queue.size
+        'queue.discardSeverity="5"',  # Only discard notice, info, debug if we must discard anything
+    ]
 
     if not os.access(spool_directory, os.W_OK):
         spool_directory = '/var/lib/awx'
@@ -33,7 +48,6 @@ def construct_rsyslog_conf_template(settings=settings):
             '$WorkDirectory /var/lib/awx/rsyslog',
             f'$MaxMessageSize {max_bytes}',
             '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
-            f'main_queue(queue.spoolDirectory="{spool_directory}" queue.maxdiskspace="{max_disk_space_main_queue}g" queue.type="Disk" queue.filename="awx-external-logger-backlog")',  # noqa
             'module(load="imuxsock" SysSock.Use="off")',
             'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
             'template(name="awx" type="string" string="%rawmsg-after-pri%")',
@@ -79,12 +93,7 @@ def construct_rsyslog_conf_template(settings=settings):
             'action.resumeRetryCount="-1"',
             'template="awx"',
             f'action.resumeInterval="{timeout}"',
-            f'queue.spoolDirectory="{spool_directory}"',
-            'queue.filename="awx-external-logger-action-queue"',
-            f'queue.maxdiskspace="{max_disk_space_action_queue}g"',
-            'queue.type="LinkedList"',
-            'queue.saveOnShutdown="on"',
-        ]
+        ] + queue_options
         if error_log_file:
             params.append(f'errorfile="{error_log_file}"')
         if parsed.path:
@@ -112,9 +121,18 @@ def construct_rsyslog_conf_template(settings=settings):
         params = ' '.join(params)
         parts.extend(['module(load="omhttp")', f'action({params})'])
     elif protocol and host and port:
-        parts.append(
-            f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" action.resumeInterval="{timeout}" template="awx")'  # noqa
-        )
+        params = [
+            'type="omfwd"',
+            f'target="{host}"',
+            f'port="{port}"',
+            f'protocol="{protocol}"',
+            'action.resumeRetryCount="-1"',
+            f'action.resumeInterval="{timeout}"',
+            'template="awx"',
+        ] + queue_options
+        params = ' '.join(params)
+        parts.append(f'action({params})')
+
     else:
         parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
     tmpl = '\n'.join(parts)

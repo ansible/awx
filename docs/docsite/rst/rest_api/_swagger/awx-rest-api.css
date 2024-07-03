@@ -1,0 +1,97 @@
+.swagger-ui {
+  --blue: #337ab7;
+  --green: #5cb85c;
+  --red: #d9534f;
+  --orange: #f0ad4e;
+  --gray-b7: #b7b7b7;
+  --gray-f6: #f6f6f6;
+}
+
+.swagger-ui .topbar,
+.swagger-ui .information-container hgroup,
+.swagger-ui .topbar .download-url-wrapper,
+.swagger-ui .scheme-container,
+.swagger-ui .auth-wrapper .btn,
+.swagger-ui .opblock-tag .expand-operation,
+.swagger-ui .opblock-body .try-out,
+.swagger-ui .opblock-body ul.tab,
+.swagger-ui .topbar-wrapper a.link span  {
+    display: none !important;
+}
+.swagger-ui .opblock-tag  {
+  display: block;
+  cursor: default;
+}
+.swagger-ui .opblock-tag:hover  {
+  background: transparent;
+}
+.swagger-ui .opblock-tag .markdown p  {
+  font-size: 16px;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+.swagger-ui .opblock-body .markdown pre  {
+    margin: 20px 0;
+}
+.swagger-ui .topbar-wrapper img  {
+    content:'';
+    width: 200px;
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.swagger-ui .opblock-tag a:hover::after  {
+  content: '¶';
+  color: #2980B9;
+  font-size: 16px;
+  padding-left: 5px;
+  position: relative;
+  top: -3px;
+}
+.swagger-ui .opblock-body pre code  {
+  font-size: 100%;
+  color: #FFF;
+  background: transparent;
+  border: 0;
+}
+
+.swagger-ui .opblock.opblock-get {
+  border-color: var(--blue);
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+  background: var(--blue);
+}
+
+.swagger-ui .opblock.opblock-post {
+  border-color: var(--green);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background: var(--green);
+}
+
+.swagger-ui .opblock.opblock-delete {
+  border-color: var(--red);
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+  background-color: var(--red);
+}
+
+.swagger-ui .opblock.opblock-put {
+  border-color: var(--orange);
+}
+
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+  background-color: var(--orange);
+}
+
+.swagger-ui .opblock.opblock-patch {
+  background-color: var(--gray-f6);
+  border-color: var(--gray-b7);
+}
+
+.swagger-ui .opblock.opblock-patch .opblock-summary-method {
+  background-color: var(--gray-b7);
+}

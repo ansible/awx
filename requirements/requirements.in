@@ -1,18 +1,18 @@
-aiohttp
+aiohttp>=3.9.4 # CVE-2024-30251
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
-asyncpg
-azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
+azure-identity
+azure-keyvault
 boto3
 botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography>=39.0.1 ## https://github.com/ansible/awx/security/dependabot/90
-Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
+cryptography>=41.0.7  # CVE-2023-49083
+Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
 distro
-django==4.2.3  # see UPGRADE BLOCKERs CVEs were identified in 4.2, pinning to .3
+django==4.2.10  # CVE-2024-24680
 django-auth-ldap
 django-cors-headers
 django-crum
@@ -21,48 +21,58 @@ django-guid==3.2.1
 django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
 django-pglocks
+django-radius
 django-solo
 django-split-settings==1.0.0    # We hit a strange issue where the release process errored when upgrading past 1.0.0 see UPGRADE BLOCKERS
-djangorestframework
+djangorestframework>=3.15.0
 djangorestframework-yaml
 filelock
-GitPython>=3.1.30  # CVE-2022-24439
+GitPython>=3.1.37  # CVE-2023-41040
+grpcio<1.63.0 # 1.63.0+ requires cython>=3
 hiredis==2.0.0  # see UPGRADE BLOCKERs
 irc
-jinja2
+jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
+maturin  # pydantic-core build dep
+msgpack<1.0.6  # 1.0.6+ requires cython>=3
+msrestazure
 openshift
-pexpect==4.7.0 # see library notes
+opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
+opentelemetry-sdk~=1.24
+opentelemetry-instrumentation-logging
+opentelemetry-exporter-otlp
+pexpect==4.7.0  # see library notes
 prometheus_client
 psycopg
 psutil
 pygerduty
+pyopenssl>=23.2.0  # resolve dep conflict from cryptography pin above
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon>3.0.0
-python-dsv-sdk
-python-tss-sdk==1.0.0
+python-dsv-sdk>=1.0.4
+python-tss-sdk>=1.2.1
 python-ldap
 pyyaml>=6.0.1
-receptorctl==1.3.0
-schedule==0.6.0
-social-auth-core[openidconnect]==4.3.0  # see UPGRADE BLOCKERs
-social-auth-app-django==5.0.0  # see UPGRADE BLOCKERs
-sqlparse >= 0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
+pyzstd  # otel collector log file compression library
+receptorctl
+social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
+social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
+sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
 redis
 requests
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
-twisted[tls]
+twisted[tls]>=23.10.0  # CVE-2023-46137
 uWSGI
 uwsgitop
-wheel>=0.38.1 # CVE-2022-40898
+wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
-setuptools-rust >= 0.11.4 # cryptography build dep
+setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 
 # Temporarily added to use ansible-runner from git branch, to be removed

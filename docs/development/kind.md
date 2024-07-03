@@ -137,12 +137,12 @@ To retrieve your admin password
 
 To tail logs from the task containers
 ```bash
- kubectl logs -f deployment/awx -n awx -c awx-web
+ kubectl logs -f deployment/awx-task -n awx -c awx-task
 ```
 
 To tail logs from the web containers
 ```bash
- kubectl logs -f deployment/awx -n awx -c awx-web
+ kubectl logs -f deployment/awx-web -n awx -c awx-web
 ```
 
 NOTE: If there's multiple replica of the awx deployment you can use `stern` to tail logs from all replicas. For more information about `stern` check out https://github.com/wercker/stern.

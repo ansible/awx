@@ -14,7 +14,7 @@ __all__ = [
     'STANDARD_INVENTORY_UPDATE_ENV',
 ]
 
-CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'controller', 'insights')
+CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'controller', 'insights', 'terraform', 'openshift_virtualization')
 PRIVILEGE_ESCALATION_METHODS = [
     ('sudo', _('Sudo')),
     ('su', _('Su')),
@@ -114,3 +114,28 @@ SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS = 'unique_managed_hosts'
 
 # Shared prefetch to use for creating a queryset for the purpose of writing or saving facts
 HOST_FACTS_FIELDS = ('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id')
+
+# Data for RBAC compatibility layer
+role_name_to_perm_mapping = {
+    'adhoc_role': ['adhoc_'],
+    'approval_role': ['approve_'],
+    'auditor_role': ['audit_'],
+    'admin_role': ['change_', 'add_', 'delete_'],
+    'execute_role': ['execute_'],
+    'read_role': ['view_'],
+    'update_role': ['update_'],
+    'member_role': ['member_'],
+    'use_role': ['use_'],
+}
+
+org_role_to_permission = {
+    'notification_admin_role': 'add_notificationtemplate',
+    'project_admin_role': 'add_project',
+    'execute_role': 'execute_jobtemplate',
+    'inventory_admin_role': 'add_inventory',
+    'credential_admin_role': 'add_credential',
+    'workflow_admin_role': 'add_workflowjobtemplate',
+    'job_template_admin_role': 'change_jobtemplate',  # TODO: this doesnt really work, solution not clear
+    'execution_environment_admin_role': 'add_executionenvironment',
+    'auditor_role': 'view_project',  # TODO: also doesnt really work
+}

@@ -8072,8 +8072,8 @@ msgid "Skipped"
 msgstr "건너뜀"
 
 #: components/StatusLabel/StatusLabel.js:50
-msgid "Skipped'"
-msgstr "건너뜀'"
+msgid "Skipped"
+msgstr "건너뜀"
 
 #: components/NotificationList/NotificationList.js:200
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:141

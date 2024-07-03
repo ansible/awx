@@ -13,6 +13,7 @@ import Tooltip from './Tooltip';
 import ContentLoading from './ContentLoading';
 import {
   renderStateColor,
+  renderLinkStatusColor,
   renderLabelText,
   renderNodeType,
   renderNodeIcon,
@@ -177,7 +178,7 @@ function MeshGraph({
       mesh
         .append('defs')
         .selectAll('marker')
-        .data(['end', 'end-active'])
+        .data(['end', 'end-active', 'end-adding', 'end-removing'])
         .join('marker')
         .attr('id', String)
         .attr('viewBox', '0 -5 10 10')
@@ -187,8 +188,9 @@ function MeshGraph({
         .attr('orient', 'auto')
         .append('path')
         .attr('d', 'M0,-5L10,0L0,5');
-
-      mesh.select('#end').attr('refX', 23).attr('fill', '#ccc');
+      mesh.select('#end').attr('refX', 23).attr('fill', '#6A6E73');
+      mesh.select('#end-removing').attr('refX', 23).attr('fill', '#C9190B');
+      mesh.select('#end-adding').attr('refX', 23).attr('fill', '#3E8635');
       mesh.select('#end-active').attr('refX', 18).attr('fill', '#0066CC');
 
       // Add links
@@ -204,18 +206,24 @@ function MeshGraph({
         .attr('y1', (d) => d.source.y)
         .attr('x2', (d) => d.target.x)
         .attr('y2', (d) => d.target.y)
-        .attr('marker-end', 'url(#end)')
+        .attr('marker-end', (d) => {
+          if (d.link_state === 'adding') {
+            return 'url(#end-adding)';
+          }
+          if (d.link_state === 'removing') {
+            return 'url(#end-removing)';
+          }
+          return 'url(#end)';
+        })
         .attr('class', (_, i) => `link-${i}`)
         .attr('data-cy', (d) => `${d.source.hostname}-${d.target.hostname}`)
         .style('fill', 'none')
-        .style('stroke', (d) =>
-          d.link_state === 'removing' ? '#C9190B' : '#CCC'
-        )
+        .style('stroke', (d) => renderLinkStatusColor(d.link_state))
         .style('stroke-width', '2px')
         .style('stroke-dasharray', (d) => renderLinkState(d.link_state))
         .attr('pointer-events', 'none')
         .on('mouseover', function showPointer() {
-          d3.select(this).transition().style('cursor', 'pointer');
+          d3.select(this).style('cursor', 'pointer');
         });
       // add nodes
       const node = mesh
@@ -228,7 +236,7 @@ function MeshGraph({
         .append('g')
         .attr('data-cy', (d) => `node-${d.id}`)
         .on('mouseenter', function handleNodeHover(_, d) {
-          d3.select(this).transition().style('cursor', 'pointer');
+          d3.select(this).style('cursor', 'pointer');
           highlightSiblings(d);
         })
         .on('mouseleave', (_, d) => {
@@ -239,7 +247,8 @@ function MeshGraph({
         });
 
       // node circles
-      node
+      const nodeCircles = node.append('g');
+      nodeCircles
         .append('circle')
         .attr('r', DEFAULT_RADIUS)
         .attr('cx', (d) => d.x)
@@ -248,7 +257,8 @@ function MeshGraph({
         .attr('class', (d) => `id-${d.id}`)
         .attr('fill', DEFAULT_NODE_COLOR)
         .attr('stroke-dasharray', (d) => (d.enabled ? `1 0` : `5`))
-        .attr('stroke', DEFAULT_NODE_STROKE_COLOR);
+        .attr('stroke', (d) => renderStateColor(d.node_state));
+
       // node type labels
       node
         .append('text')
@@ -259,64 +269,62 @@ function MeshGraph({
         .attr('dominant-baseline', 'central')
         .attr('fill', DEFAULT_NODE_SYMBOL_TEXT_COLOR);
 
-      const placeholder = node.append('g').attr('class', 'placeholder');
-
-      placeholder
-        .append('text')
-        .text((d) => renderLabelText(d.node_state, d.hostname))
-        .attr('x', (d) => d.x)
-        .attr('y', (d) => d.y + 40)
-        .attr('fill', 'black')
-        .attr('font-size', '18px')
-        .attr('text-anchor', 'middle')
-        .each(function calculateLabelWidth() {
-          // eslint-disable-next-line react/no-this-in-sfc
-          const bbox = this.getBBox();
-          // eslint-disable-next-line react/no-this-in-sfc
-          d3.select(this.parentNode)
-            .append('path')
-            .attr('d', (d) => renderLabelIcons(d.node_state))
-            .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
-            .style('fill', 'black');
-        });
-
-      placeholder.each(function calculateLabelWidth() {
-        // eslint-disable-next-line react/no-this-in-sfc
-        const bbox = this.getBBox();
-        // eslint-disable-next-line react/no-this-in-sfc
-        d3.select(this.parentNode)
-          .append('rect')
-          .attr('x', (d) => d.x - bbox.width / 2)
-          .attr('y', bbox.y + 5)
-          .attr('width', bbox.width)
-          .attr('height', bbox.height)
-          .attr('rx', 8)
-          .attr('ry', 8)
-          .style('fill', (d) => renderStateColor(d.node_state));
-      });
-
-      const hostNames = node.append('g');
+      // node hostname labels
+      const hostNames = node.append('g').attr('class', 'node-state-label');
       hostNames
         .append('text')
+        .attr('x', (d) => d.x)
+        .attr('y', (d) => d.y + 40)
         .text((d) => renderLabelText(d.node_state, d.hostname))
-        .attr('x', (d) => d.x + 6)
-        .attr('y', (d) => d.y + 42)
+        .attr('class', 'placeholder')
         .attr('fill', 'white')
-        .attr('font-size', DEFAULT_FONT_SIZE)
         .attr('text-anchor', 'middle')
         .each(function calculateLabelWidth() {
           // eslint-disable-next-line react/no-this-in-sfc
           const bbox = this.getBBox();
+          const padding = 10;
           // eslint-disable-next-line react/no-this-in-sfc
           d3.select(this.parentNode)
-            .append('path')
-            .attr('class', (d) => `icon-${d.node_state}`)
-            .attr('d', (d) => renderLabelIcons(d.node_state))
-            .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
-            .attr('fill', 'white');
+            .append('rect')
+            .attr('x', bbox.x - padding / 2)
+            .attr('y', bbox.y)
+            .attr('width', bbox.width + padding)
+            .attr('height', bbox.height)
+            .style('stroke-width', 1)
+            .attr('rx', 4)
+            .attr('ry', 4)
+            .attr('fill', 'white')
+            .style('stroke', DEFAULT_NODE_STROKE_COLOR);
         });
-      svg.selectAll('g.placeholder').remove();
+      svg.selectAll('text.placeholder').remove();
+      hostNames
+        .append('text')
+        .attr('x', (d) => d.x)
+        .attr('y', (d) => d.y + 38)
+        .text((d) => renderLabelText(d.node_state, d.hostname))
+        .attr('font-size', DEFAULT_FONT_SIZE)
+        .attr('fill', 'black')
+        .attr('text-anchor', 'middle');
 
+      // add badge icons
+      const badges = nodeCircles.append('g').attr('class', 'node-state-badge');
+      badges.each(function drawStateBadge() {
+        // eslint-disable-next-line react/no-this-in-sfc
+        const bbox = this.parentNode.getBBox();
+        // eslint-disable-next-line react/no-this-in-sfc
+        d3.select(this)
+          .append('circle')
+          .attr('r', 9)
+          .attr('cx', bbox.x)
+          .attr('cy', bbox.y)
+          .attr('fill', (d) => renderStateColor(d.node_state));
+        d3.select(this)
+          .append('path')
+          .attr('class', (d) => `icon-${d.node_state}`)
+          .attr('d', (d) => renderLabelIcons(d.node_state))
+          .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
+          .attr('fill', 'white');
+      });
       svg.call(zoom);
 
       function highlightSiblings(n) {
@@ -330,7 +338,6 @@ function MeshGraph({
         immediate.forEach((s) => {
           svg
             .selectAll(`.link-${s.index}`)
-            .transition()
             .style('stroke', '#0066CC')
             .style('stroke-width', '3px')
             .attr('marker-end', 'url(#end-active)');
@@ -346,13 +353,17 @@ function MeshGraph({
         immediate.forEach((s) => {
           svg
             .selectAll(`.link-${s.index}`)
-            .transition()
-            .duration(50)
-            .style('stroke', (d) =>
-              d.link_state === 'removing' ? '#C9190B' : '#CCC'
-            )
+            .style('stroke', (d) => renderLinkStatusColor(d.link_state))
             .style('stroke-width', '2px')
-            .attr('marker-end', 'url(#end)');
+            .attr('marker-end', (d) => {
+              if (d.link_state === 'adding') {
+                return 'url(#end-adding)';
+              }
+              if (d.link_state === 'removing') {
+                return 'url(#end-removing)';
+              }
+              return 'url(#end)';
+            });
         });
       }
 
@@ -361,7 +372,7 @@ function MeshGraph({
           // toggle rings
           svg
             .select(`circle.id-${n.id}`)
-            .attr('stroke', '#ccc')
+            .attr('stroke', (d) => renderStateColor(d.node_state))
             .attr('stroke-width', null);
           // show default empty state of tooltip
           setIsNodeSelected(false);
@@ -370,7 +381,7 @@ function MeshGraph({
         }
         svg
           .selectAll('circle')
-          .attr('stroke', '#ccc')
+          .attr('stroke', (d) => renderStateColor(d.node_state))
           .attr('stroke-width', null);
         svg
           .select(`circle.id-${n.id}`)

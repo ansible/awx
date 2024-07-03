@@ -4,7 +4,7 @@ All jobs use container isolation for environment consistency and security.
 Compliant images are referred to as Execution Environments (EE)s.
 
 For more information about the EE technology as well as how to build and test EEs, see:
-- [Getting started with Execution Environments guide](https://docs.ansible.com/ansible/devel/getting_started_ee/index.html)
+- [Getting started with Execution Environments guide](https://ansible.readthedocs.io/en/latest/getting_started_ee/index.html)
 - [Ansible Builder documentation](https://ansible.readthedocs.io/projects/builder/en/latest/)
 
 The Execution Environment model has an `image` field for the image identifier which will be used by jobs.

@@ -3,7 +3,9 @@ import pytest
 
 from django.db import transaction
 from awx.api.versioning import reverse
-from awx.main.models.rbac import Role, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+from awx.main.models.rbac import Role
+
+from django.test.utils import override_settings
 
 
 @pytest.fixture
@@ -31,8 +33,6 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     'Users can see all roles they have access to, but not all roles'
     this_user = user('user-test_get_roles_list_user')
     organization.member_role.members.add(this_user)
-    custom_role = Role.objects.create(role_field='custom_role-test_get_roles_list_user')
-    organization.member_role.children.add(custom_role)
 
     url = reverse('api:role_list')
     response = get(url, this_user)
@@ -46,10 +46,8 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     for r in roles['results']:
         role_hash[r['id']] = r
 
-    assert Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).id in role_hash
     assert organization.admin_role.id in role_hash
     assert organization.member_role.id in role_hash
-    assert custom_role.id in role_hash
 
     assert inventory.admin_role.id not in role_hash
     assert team.member_role.id not in role_hash
@@ -57,7 +55,8 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
 
 @pytest.mark.django_db
 def test_roles_visibility(get, organization, project, admin, alice, bob):
-    Role.singleton('system_auditor').members.add(alice)
+    alice.is_system_auditor = True
+    alice.save()
     assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
     assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=alice).data['count'] == 1
     assert get(reverse('api:role_list') + '?id=%d' % project.update_role.id, user=bob).data['count'] == 0
@@ -67,7 +66,8 @@ def test_roles_visibility(get, organization, project, admin, alice, bob):
 
 @pytest.mark.django_db
 def test_roles_filter_visibility(get, organization, project, admin, alice, bob):
-    Role.singleton('system_auditor').members.add(alice)
+    alice.is_system_auditor = True
+    alice.save()
     project.update_role.members.add(admin)
 
     assert get(reverse('api:user_roles_list', kwargs={'pk': admin.id}) + '?id=%d' % project.update_role.id, user=admin).data['count'] == 1
@@ -106,15 +106,6 @@ def test_cant_delete_role(delete, admin, inventory):
 
 
 @pytest.mark.django_db
-def test_get_user_roles_list(get, admin):
-    url = reverse('api:user_roles_list', kwargs={'pk': admin.id})
-    response = get(url, admin)
-    assert response.status_code == 200
-    roles = response.data
-    assert roles['count'] > 0  # 'system_administrator' role if nothing else
-
-
-@pytest.mark.django_db
 def test_user_view_other_user_roles(organization, inventory, team, get, alice, bob):
     'Users can see roles for other users, but only the roles that that user has access to see as well'
     organization.member_role.members.add(alice)
@@ -141,7 +132,6 @@ def test_user_view_other_user_roles(organization, inventory, team, get, alice, b
 
     assert organization.admin_role.id in role_hash
     assert custom_role.id not in role_hash  # doesn't show up in the user roles list, not an explicit grant
-    assert Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).id not in role_hash
     assert inventory.admin_role.id not in role_hash
     assert team.member_role.id not in role_hash  # alice can't see this
 
@@ -197,6 +187,7 @@ def test_remove_role_from_user(role, post, admin):
 
 
 @pytest.mark.django_db
+@override_settings(ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN=True, ANSIBLE_BASE_ALLOW_TEAM_ORG_MEMBER=True)
 def test_get_teams_roles_list(get, team, organization, admin):
     team.member_role.children.add(organization.admin_role)
     url = reverse('api:team_roles_list', kwargs={'pk': team.id})

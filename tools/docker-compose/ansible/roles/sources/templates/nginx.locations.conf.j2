@@ -2,11 +2,19 @@ location {{ (ingress_path + '/static').replace('//', '/') }} {
     alias /var/lib/awx/public/static/;
 }
 
+location {{ (ingress_path + '/locales').replace('//', '/') }} {
+    alias /var/lib/awx/public/static/awx/locales;
+}
+
 location {{ (ingress_path + '/favicon.ico').replace('//', '/') }} {
     alias /awx_devel/awx/public/static/favicon.ico;
 }
 
-location {{ (ingress_path + '/websocket').replace('//', '/') }} {
+{% if api_urlpattern_prefix | length > 0 %}
+location ~ ^({{ (ingress_path + '/websocket/').replace('//', '/') }}|{{ (ingress_path + '/api/websocket/').replace('//', '/') }}|{{ (ingress_path + '/api/' + api_urlpattern_prefix + '/v2/websocket/').replace('//', '/') }}) {
+{% else %}
+location ~ ^({{ (ingress_path + '/websocket/').replace('//', '/') }}|{{ (ingress_path + '/api/websocket/').replace('//', '/') }}) {
+{% endif %}
     # Pass request to the upstream alias
     proxy_pass http://daphne;
     # Require http version 1.1 to allow for upgrade requests
@@ -30,8 +38,17 @@ location {{ (ingress_path + '/websocket').replace('//', '/') }} {
 
 location {{ ingress_path }} {
     # Add trailing / if missing
-    rewrite ^(.*[^/])$ $1/ permanent;
+    rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
     uwsgi_read_timeout 120s;
     uwsgi_pass uwsgi;
     include /etc/nginx/uwsgi_params;
+    error_page 502 = @fallback;
+}
+
+# Enable scenario where we shutdown uwsgi and launching runserver for debugging purposes
+location @fallback {
+    # Add trailing / if missing
+    rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
+    proxy_pass http://runserver;
+    proxy_set_header Host $http_host;
 }

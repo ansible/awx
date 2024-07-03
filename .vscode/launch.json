@@ -1,0 +1,113 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "run_ws_heartbeat",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_ws_heartbeat"],
+      "django": true,
+      "preLaunchTask": "stop awx-ws-heartbeat",
+      "postDebugTask": "start awx-ws-heartbeat"
+    },
+    {
+      "name": "run_cache_clear",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_cache_clear"],
+      "django": true,
+      "preLaunchTask": "stop awx-cache-clear",
+      "postDebugTask": "start awx-cache-clear"
+    },
+    {
+      "name": "run_callback_receiver",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_callback_receiver"],
+      "django": true,
+      "preLaunchTask": "stop awx-receiver",
+      "postDebugTask": "start awx-receiver"
+    },
+    {
+      "name": "run_dispatcher",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_dispatcher"],
+      "django": true,
+      "preLaunchTask": "stop awx-dispatcher",
+      "postDebugTask": "start awx-dispatcher"
+    },
+    {
+      "name": "run_rsyslog_configurer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_rsyslog_configurer"],
+      "django": true,
+      "preLaunchTask": "stop awx-rsyslog-configurer",
+      "postDebugTask": "start awx-rsyslog-configurer"
+    },
+    {
+      "name": "run_cache_clear",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_cache_clear"],
+      "django": true,
+      "preLaunchTask": "stop awx-cache-clear",
+      "postDebugTask": "start awx-cache-clear"
+    },
+    {
+      "name": "run_wsrelay",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["run_wsrelay"],
+      "django": true,
+      "preLaunchTask": "stop awx-wsrelay",
+      "postDebugTask": "start awx-wsrelay"
+    },
+    {
+      "name": "daphne",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "/var/lib/awx/venv/awx/bin/daphne",
+      "args": ["-b", "127.0.0.1", "-p", "8051", "awx.asgi:channel_layer"],
+      "django": true,
+      "preLaunchTask": "stop awx-daphne",
+      "postDebugTask": "start awx-daphne"
+    },
+    {
+      "name": "runserver(uwsgi alternative)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["runserver", "127.0.0.1:8052"],
+      "django": true,
+      "preLaunchTask": "stop awx-uwsgi",
+      "postDebugTask": "start awx-uwsgi"
+    },
+    {
+      "name": "runserver_plus(uwsgi alternative)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["runserver_plus", "127.0.0.1:8052"],
+      "django": true,
+      "preLaunchTask": "stop awx-uwsgi and install Werkzeug",
+      "postDebugTask": "start awx-uwsgi"
+    },
+    {
+      "name": "shell_plus",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["shell_plus"],
+      "django": true,
+    },
+  ]
+}

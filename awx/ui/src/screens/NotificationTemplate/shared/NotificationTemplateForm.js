@@ -78,6 +78,7 @@ function NotificationTemplateFormFields({ defaultMessages, template }) {
               label: t`Choose a Notification Type`,
               isDisabled: true,
             },
+            { value: 'awssns', key: 'awssns', label: t`AWS SNS` },
             { value: 'email', key: 'email', label: t`E-mail` },
             { value: 'grafana', key: 'grafana', label: 'Grafana' },
             { value: 'irc', key: 'irc', label: 'IRC' },

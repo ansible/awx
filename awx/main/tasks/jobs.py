@@ -74,6 +74,8 @@ from awx.main.utils.common import (
     extract_ansible_vars,
     get_awx_version,
     create_partition,
+    ScheduleWorkflowManager,
+    ScheduleTaskManager,
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
@@ -112,7 +114,7 @@ class BaseTask(object):
 
     def __init__(self):
         self.cleanup_paths = []
-        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
+        self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
 
     def update_model(self, pk, _attempt=0, **updates):
@@ -449,6 +451,12 @@ class BaseTask(object):
                 ansible_version_info = ee_ansible_info.readline()
                 instance.ansible_version = ansible_version_info
                 instance.save(update_fields=['ansible_version'])
+
+        # Run task manager appropriately for speculative dependencies
+        if instance.unifiedjob_blocked_jobs.exists():
+            ScheduleTaskManager().schedule()
+        if instance.spawned_by_workflow:
+            ScheduleWorkflowManager().schedule()
 
     def should_use_fact_cache(self):
         return False
@@ -1094,7 +1102,7 @@ class RunJob(SourceControlMixin, BaseTask):
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
             return
-        if self.should_use_fact_cache():
+        if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
                 job.get_hosts_for_fact_cache(),
@@ -1873,6 +1881,8 @@ class RunSystemJob(BaseTask):
             if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
                 if 'days' in json_vars:
                     args.extend(['--days', str(json_vars.get('days', 60))])
+                if 'batch_size' in json_vars:
+                    args.extend(['--batch-size', str(json_vars['batch_size'])])
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':

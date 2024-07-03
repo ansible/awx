@@ -302,9 +302,9 @@ function HostsByProcessorTypeExample() {
 
   const hostsByProcessorLimit = `intel_hosts`;
   const hostsByProcessorSourceVars = `plugin: constructed
-  strict: true
-  groups:
-    intel_hosts: "GenuineIntel" in ansible_processor`;
+strict: true
+groups:
+  intel_hosts: "'GenuineIntel' in ansible_processor"`;
 
   return (
     <FormFieldGroupExpandable

@@ -4,11 +4,13 @@ awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
 pg_username: 'awx'
 pg_database: 'awx'
+pg_tls: false
 control_plane_node_count: 1
 minikube_container_group: false
 receptor_socket_file: /var/run/awx-receptor/receptor.sock
 receptor_image: quay.io/ansible/receptor:devel
 ingress_path: /
+api_urlpattern_prefix: ''
 
 # Keys for signing work
 receptor_rsa_bits: 4096
@@ -30,6 +32,25 @@ ldap_public_key_file: '{{ ldap_cert_dir }}/{{ ldap_public_key_file_name }}'
 ldap_private_key_file: '{{ ldap_cert_dir }}/{{ ldap_private_key_file_name }}'
 ldap_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
 
+# Hashicorp Vault
+enable_vault: false
+vault_tls: false
+hashivault_cert_dir: '{{ sources_dest }}/vault_certs'
+hashivault_vars_file: '../vault/defaults/main.yml'
+hashivault_server_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN=tools-vault-1"
+hashivault_server_cert_extensions:
+  - "subjectAltName = DNS:tools_vault_1, DNS:localhost"
+  - "keyUsage = digitalSignature, nonRepudiation"
+  - "extendedKeyUsage = serverAuth"
+hashivault_client_cert_extensions:
+  - "subjectAltName = DNS:awx-vault-client"
+  - "keyUsage = digitalSignature, nonRepudiation"
+  - "extendedKeyUsage = serverAuth, clientAuth"
+hashivault_client_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN=awx-vault-client"
+hashivault_server_public_keyfile: '{{ hashivault_cert_dir }}/server.crt'
+hashivault_server_private_keyfile: '{{ hashivault_cert_dir }}/server.key'
+hashivault_client_public_keyfile: '{{ hashivault_cert_dir }}/client.crt'
+hashivault_client_private_keyfile: '{{ hashivault_cert_dir }}/client.key'
 # Metrics
 enable_splunk: false
 enable_grafana: false
@@ -40,3 +61,7 @@ scrape_interval: '5s'
 enable_pgbouncer: false
 pgbouncer_port: 6432
 pgbouncer_max_pool_size: 70
+
+# editable_dependencies
+install_editable_dependencies: false
+editable_dependencies: []

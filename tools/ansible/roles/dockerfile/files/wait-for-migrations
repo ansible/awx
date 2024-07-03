@@ -7,7 +7,6 @@ readonly CMDNAME=$(basename "$0")
 
 readonly MIN_SLEEP=0.5
 readonly MAX_SLEEP=30
-readonly ATTEMPTS=30
 readonly TIMEOUT=60
 
 log_message() { echo "[${CMDNAME}]" "$@" >&2; }
@@ -25,7 +24,7 @@ wait_for() {
     local check=1
 
     while true; do
-        log_message "Attempt ${attempt} of ${ATTEMPTS}"
+        log_message "Attempt ${attempt}"
 
         timeout "${TIMEOUT}" \
                 /bin/bash -c "awx-manage check" &>/dev/null
@@ -37,8 +36,7 @@ wait_for() {
                 && return || rc=$?
         fi
 
-        (( ++attempt > ATTEMPTS )) && break
-
+        attempt=$((attempt + 1))
         log_message "Waiting ${next_sleep} seconds before next attempt"
         sleep "${next_sleep}"
         next_sleep=$(next_sleep ${next_sleep})

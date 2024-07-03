@@ -119,7 +119,7 @@ function LoggingEdit() {
                     ...logging.LOG_AGGREGATOR_ENABLED,
                     help_text: (
                       <>
-                        {logging.LOG_AGGREGATOR_ENABLED.help_text}
+                        {logging.LOG_AGGREGATOR_ENABLED?.help_text}
                         {!formik.values.LOG_AGGREGATOR_ENABLED &&
                           (!formik.values.LOG_AGGREGATOR_HOST ||
                             !formik.values.LOG_AGGREGATOR_TYPE) && (

@@ -1,0 +1,19 @@
+name: Upload logs
+description: Upload logs from `make docker-compose` devel environment to GitHub as an artifact
+inputs:
+  log-filename:
+    description: "*Unique* name of the log file"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Get AWX logs
+      shell: bash
+      run: |
+        docker logs tools_awx_1 > ${{ inputs.log-filename }}
+
+    - name: Upload AWX logs as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: docker-compose-logs
+        path: ${{ inputs.log-filename }}

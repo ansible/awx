@@ -223,6 +223,10 @@ function Lookup(props) {
 const Item = shape({
   id: number.isRequired,
 });
+const InstanceItem = shape({
+  id: number.isRequired,
+  hostname: string.isRequired,
+});
 
 Lookup.propTypes = {
   id: string,
@@ -230,7 +234,13 @@ Lookup.propTypes = {
   modalDescription: oneOfType([string, node]),
   onChange: func.isRequired,
   onUpdate: func,
-  value: oneOfType([Item, arrayOf(Item), object]),
+  value: oneOfType([
+    Item,
+    arrayOf(Item),
+    object,
+    InstanceItem,
+    arrayOf(InstanceItem),
+  ]),
   multiple: bool,
   required: bool,
   onBlur: func,

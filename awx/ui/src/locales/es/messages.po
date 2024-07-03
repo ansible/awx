@@ -8190,8 +8190,8 @@ msgid "Skipped"
 msgstr "Omitido"
 
 #: components/StatusLabel/StatusLabel.js:50
-msgid "Skipped'"
-msgstr "Omitido'"
+msgid "Skipped"
+msgstr "Omitido"
 
 #: components/NotificationList/NotificationList.js:200
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:141

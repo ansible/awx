@@ -3,18 +3,24 @@ import pytest
 from unittest import mock
 import urllib.parse
 from unittest.mock import PropertyMock
+import importlib
 
 # Django
 from django.urls import resolve
 from django.http import Http404
+from django.apps import apps
 from django.core.handlers.exception import response_for_exception
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 
+from django.db.models.signals import post_migrate
+
+from awx.main.migrations._dab_rbac import setup_managed_role_definitions
+
 # AWX
 from awx.main.models.projects import Project
-from awx.main.models.ha import Instance
+from awx.main.models.ha import Instance, InstanceGroup
 
 from rest_framework.test import (
     APIRequestFactory,
@@ -28,7 +34,6 @@ from awx.main.models.organization import (
     Organization,
     Team,
 )
-from awx.main.models.rbac import Role
 from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.events import (
     JobEvent,
@@ -41,8 +46,17 @@ from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
+from awx.main.utils import is_testing
 
 __SWAGGER_REQUESTS__ = {}
+
+
+# HACK: the dab_resource_registry app required ServiceID in migrations which checks do not run
+dab_rr_initial = importlib.import_module('ansible_base.resource_registry.migrations.0001_initial')
+
+
+if is_testing():
+    post_migrate.connect(lambda **kwargs: dab_rr_initial.create_service_id(apps, None))
 
 
 @pytest.fixture(scope="session")
@@ -76,6 +90,17 @@ def deploy_jobtemplate(project, inventory, credential):
     jt = JobTemplate.objects.create(job_type='run', project=project, inventory=inventory, name='deploy-job-template')
     jt.credentials.add(credential)
     return jt
+
+
+@pytest.fixture()
+def execution_environment():
+    return ExecutionEnvironment.objects.create(name="test-ee", description="test-ee", managed=True)
+
+
+@pytest.fixture
+def setup_managed_roles():
+    "Run the migration script to pre-create managed role definitions"
+    setup_managed_role_definitions(apps, None)
 
 
 @pytest.fixture
@@ -421,7 +446,7 @@ def admin(user):
 @pytest.fixture
 def system_auditor(user):
     u = user('an-auditor', False)
-    Role.singleton('system_auditor').members.add(u)
+    u.is_system_auditor = True
     return u
 
 
@@ -708,6 +733,11 @@ def jt_linked(organization, project, inventory, machine_credential, credential, 
     jt = JobTemplate.objects.create(project=project, inventory=inventory, playbook='helloworld.yml', organization=organization)
     jt.credentials.add(machine_credential, vault_credential, credential, net_credential)
     return jt
+
+
+@pytest.fixture
+def instance_group():
+    return InstanceGroup.objects.create(name="east")
 
 
 @pytest.fixture

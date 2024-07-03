@@ -1,5 +1,7 @@
 from django.db import migrations, models, connection
 
+from ._sqlite_helper import dbawaremigrations
+
 
 def migrate_event_data(apps, schema_editor):
     # see: https://github.com/ansible/awx/issues/9039
@@ -59,6 +61,10 @@ def migrate_event_data(apps, schema_editor):
         cursor.execute('DROP INDEX IF EXISTS main_jobevent_job_id_idx')
 
 
+def migrate_event_data_sqlite(apps, schema_editor):
+    return None
+
+
 class FakeAddField(migrations.AddField):
     def database_forwards(self, *args):
         # this is intentionally left blank, because we're
@@ -72,7 +78,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_event_data),
+        dbawaremigrations.RunPython(migrate_event_data, sqlite_code=migrate_event_data_sqlite),
         FakeAddField(
             model_name='jobevent',
             name='job_created',

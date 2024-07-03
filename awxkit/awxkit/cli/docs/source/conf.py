@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'AWX CLI'
-copyright = '2019, Ansible by Red Hat'
+copyright = '2024, Ansible by Red Hat'
 author = 'Ansible by Red Hat'
 
 

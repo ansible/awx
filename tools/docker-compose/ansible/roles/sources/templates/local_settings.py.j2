@@ -20,6 +20,10 @@
 # The UUID of the system, for HA.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+{% if api_urlpattern_prefix | length > 0 %}
+OPTIONAL_API_URLPATTERN_PREFIX = '{{ api_urlpattern_prefix }}'
+{% endif %}
+
 # If set, use -vvv for project updates instead of -v for more output.
 # PROJECT_UPDATE_VVV=True
 
@@ -41,6 +45,25 @@ SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 # Enable the following lines to turn on LDAP auth logging.
 # LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
 # LOGGING['loggers']['django_auth_ldap']['level'] = 'DEBUG'
+
+{% if enable_otel|bool %}
+LOGGING['handlers']['otel'] |= {
+    'class': 'awx.main.utils.handlers.OTLPHandler',
+    'endpoint': 'http://otel:4317',
+}
+# Add otel log handler to all log handlers where propagate is False
+for name in LOGGING['loggers'].keys():
+    if not LOGGING['loggers'][name].get('propagate', True):
+        handler = LOGGING['loggers'][name].get('handlers', [])
+        if 'otel' not in handler:
+            LOGGING['loggers'][name].get('handlers', []).append('otel')
+
+# Everything without explicit propagate=False ends up logging to 'awx' so add it
+handler = LOGGING['loggers']['awx'].get('handlers', [])
+if 'otel' not in handler:
+    LOGGING['loggers']['awx'].get('handlers', []).append('otel')
+
+{% endif %}
 
 BROADCAST_WEBSOCKET_PORT = 8013
 BROADCAST_WEBSOCKET_VERIFY_CERT = False

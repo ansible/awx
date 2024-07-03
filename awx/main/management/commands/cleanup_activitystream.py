@@ -24,6 +24,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--days', dest='days', type=int, default=90, metavar='N', help='Remove activity stream events more than N days old')
         parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would be removed)')
+        parser.add_argument(
+            '--batch-size', dest='batch_size', type=int, default=500, metavar='X', help='Remove activity stream events in batch of X events. Defaults to 500.'
+        )
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))
@@ -48,7 +51,7 @@ class Command(BaseCommand):
                 else:
                     pks_to_delete.add(asobj.pk)
             # Cleanup objects in batches instead of deleting each one individually.
-            if len(pks_to_delete) >= 500:
+            if len(pks_to_delete) >= self.batch_size:
                 ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
                 n_deleted_items += len(pks_to_delete)
                 pks_to_delete.clear()
@@ -63,4 +66,5 @@ class Command(BaseCommand):
         self.days = int(options.get('days', 30))
         self.cutoff = now() - datetime.timedelta(days=self.days)
         self.dry_run = bool(options.get('dry_run', False))
+        self.batch_size = int(options.get('batch_size', 500))
         self.cleanup_activitystream()

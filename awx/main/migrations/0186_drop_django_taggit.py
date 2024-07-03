@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+from ._sqlite_helper import dbawaremigrations
+
 
 def delete_taggit_contenttypes(apps, schema_editor):
     ContentType = apps.get_model('contenttypes', 'ContentType')
@@ -20,8 +22,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("DROP TABLE IF EXISTS taggit_tag CASCADE;"),
-        migrations.RunSQL("DROP TABLE IF EXISTS taggit_taggeditem CASCADE;"),
+        dbawaremigrations.RunSQL("DROP TABLE IF EXISTS taggit_tag CASCADE;", sqlite_sql="DROP TABLE IF EXISTS taggit_tag;"),
+        dbawaremigrations.RunSQL("DROP TABLE IF EXISTS taggit_taggeditem CASCADE;", sqlite_sql="DROP TABLE IF EXISTS taggit_taggeditem;"),
         migrations.RunPython(delete_taggit_contenttypes),
         migrations.RunPython(delete_taggit_migration_records),
     ]

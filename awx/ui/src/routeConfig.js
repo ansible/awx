@@ -17,6 +17,7 @@ import Organizations from 'screens/Organization';
 import Projects from 'screens/Project';
 import Schedules from 'screens/Schedule';
 import Settings from 'screens/Setting';
+import SubscriptionUsage from 'screens/SubscriptionUsage/SubscriptionUsage';
 import Teams from 'screens/Team';
 import Templates from 'screens/Template';
 import TopologyView from 'screens/TopologyView';
@@ -60,6 +61,11 @@ function getRouteConfig(userProfile = {}) {
           title: <Trans>Host Metrics</Trans>,
           path: '/host_metrics',
           screen: HostMetrics,
+        },
+        {
+          title: <Trans>Subscription Usage</Trans>,
+          path: '/subscription_usage',
+          screen: SubscriptionUsage,
         },
       ],
     },
@@ -189,6 +195,7 @@ function getRouteConfig(userProfile = {}) {
     'unique_managed_hosts'
   ) {
     deleteRoute('host_metrics');
+    deleteRoute('subscription_usage');
   }
   if (userProfile?.isSuperUser || userProfile?.isSystemAuditor)
     return routeConfig;
@@ -197,6 +204,7 @@ function getRouteConfig(userProfile = {}) {
   deleteRoute('management_jobs');
   deleteRoute('topology_view');
   deleteRoute('instances');
+  deleteRoute('subscription_usage');
   if (userProfile?.isOrgAdmin) return routeConfig;
   if (!userProfile?.isNotificationAdmin) deleteRoute('notification_templates');
 

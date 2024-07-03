@@ -29,6 +29,10 @@ http {
         server localhost:8050;
     }
 
+    upstream runserver {
+        server localhost:8052;
+    }
+
     upstream daphne {
         server localhost:8051;
     }

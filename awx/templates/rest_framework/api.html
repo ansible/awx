@@ -39,7 +39,7 @@
           {% else %}
           <li><a href="{% url 'api:login' %}?next={{ request.get_full_path }}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Log in"><span class="glyphicon glyphicon-log-in"></span>Log in</a></li>
           {% endif %}
-          <li><a href="//docs.ansible.com/ansible-tower/{{short_tower_version}}/html/towerapi/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'API Guide' %}"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline">{% trans 'API Guide' %}</span></a></li>
+          <li><a href="//ansible.readthedocs.io/projects/awx/en/latest/rest_api/index.html" target="_blank" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'API Guide' %}"><span class="glyphicon glyphicon-question-sign"></span><span class="visible-xs-inline">{% trans 'API Guide' %}</span></a></li>
           <li><a href="/" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'Back to application' %}"><span class="glyphicon glyphicon-circle-arrow-left"></span><span class="visible-xs-inline">{% trans 'Back to application' %}</span></a></li>
           <li class="hidden-xs"><a href="#" class="resize" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="{% trans 'Resize' %}"><span class="glyphicon glyphicon-resize-full"></span></a></li>
         </ul>

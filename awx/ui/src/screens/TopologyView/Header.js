@@ -16,6 +16,7 @@ import {
   SearchPlusIcon,
   ExpandArrowsAltIcon,
   ExpandIcon,
+  RedoAltIcon,
 } from '@patternfly/react-icons';
 
 const Header = ({
@@ -26,6 +27,7 @@ const Header = ({
   zoomOut,
   resetZoom,
   zoomFit,
+  refresh,
   showZoomControls,
 }) => {
   const { light } = PageSectionVariants;
@@ -48,6 +50,18 @@ const Header = ({
           </Title>
         </div>
         <div>
+          <Tooltip content={t`Refresh`} position="top">
+            <Button
+              ouiaId="refresh-button"
+              aria-label={t`Refresh`}
+              variant="plain"
+              icon={<RedoAltIcon />}
+              onClick={refresh}
+              isDisabled={!showZoomControls}
+            >
+              <RedoAltIcon />
+            </Button>
+          </Tooltip>
           <Tooltip content={t`Zoom in`} position="top">
             <Button
               ouiaId="zoom-in-button"

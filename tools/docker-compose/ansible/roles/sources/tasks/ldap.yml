@@ -7,12 +7,15 @@
     - "{{ ldap_cert_dir }}"
     - "{{ ldap_diff_dir }}"
 
+- name: include vault vars
+  include_vars: "{{ hashivault_vars_file }}"
+
 - name: General LDAP cert
   command: 'openssl req -new -x509 -days 365 -nodes -out {{ ldap_public_key_file }} -keyout {{ ldap_private_key_file }} -subj "{{ ldap_cert_subject }}"'
   args:
     creates: "{{ ldap_public_key_file }}"
 
 - name: Copy ldap.diff
-  copy:
-    src: "ldap.ldif"
+  ansible.builtin.template:
+    src: "ldap.ldif.j2"
     dest: "{{ ldap_diff_dir }}/ldap.ldif"

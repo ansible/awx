@@ -55,6 +55,7 @@ describe('<ConstructedInventoryAdd />', () => {
         context: { router: { history } },
       });
     });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
   });
 
   afterEach(() => {

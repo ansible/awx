@@ -45,7 +45,7 @@ describe('<ConstructedInventoryHint />', () => {
     );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringContaining(
-        'intel_hosts: "GenuineIntel" in ansible_processor'
+        `intel_hosts: \"'GenuineIntel' in ansible_processor\"`
       )
     );
   });

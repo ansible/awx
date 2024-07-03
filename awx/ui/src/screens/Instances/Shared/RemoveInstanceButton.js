@@ -33,7 +33,8 @@ function RemoveInstanceButton({ itemsToRemove, onRemove, isK8s }) {
   const [removeDetails, setRemoveDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const cannotRemove = (item) => item.node_type !== 'execution';
+  const cannotRemove = (item) =>
+    !(item.node_type === 'execution' || item.node_type === 'hop');
 
   const toggleModal = async (isOpen) => {
     setRemoveDetails(null);
@@ -175,7 +176,7 @@ function RemoveInstanceButton({ itemsToRemove, onRemove, isK8s }) {
             </Button>,
           ]}
         >
-          <div>{t`This action will remove the following instances:`}</div>
+          <div>{t`This action will remove the following instance and you may need to rerun the install bundle for any instance that was previously connected to:`}</div>
           {itemsToRemove.map((item) => (
             <span key={item.id} id={`item-to-be-removed-${item.id}`}>
               <strong>{item.hostname}</strong>

@@ -72,6 +72,21 @@
       - "result is changed"
       - "result.status == 'successful'"
 
+- name: Launch an Ad Hoc Command with extra_vars
+  ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "ping"
+    extra_vars:
+      var1: "test var"
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'successful'"
+
 - name: Launch an Ad Hoc Command with Execution Environment specified
   ad_hoc_command:
     inventory: "Demo Inventory"

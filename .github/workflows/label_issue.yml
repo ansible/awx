@@ -13,6 +13,7 @@ permissions:
 jobs:
   triage:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     name: Label Issue
 
     steps:
@@ -26,9 +27,10 @@ jobs:
 
   community:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     name: Label Issue - Community
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
       - name: Install python requests
         run: pip install requests

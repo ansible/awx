@@ -1,0 +1,44 @@
+---
+# Add categories here for generated Swagger docs; order will be respected
+# in the generated document.
+categories:
+    - name: Versioning
+    - name: Authentication
+    - name: Instances
+    - name: Instance Groups
+    - name: System Configuration
+    - name: Settings
+    - name: Dashboard
+    - name: Organizations
+    - name: Users
+    - name: Projects
+    - name: Project Updates
+    - name: Teams
+    - name: Credentials
+    - name: Credential Types
+    - name: Inventories
+    - name: Custom Inventory Scripts
+    - name: Inventory Sources
+    - name: Inventory Updates
+    - name: Groups
+    - name: Hosts
+    - name: Job Templates
+    - name: Jobs
+    - name: Job Events
+    - name: Job Host Summaries
+    - name: Ad Hoc Commands
+    - name: Ad Hoc Command Events
+    - name: System Job Templates
+    - name: System Jobs
+    - name: Schedules
+    - name: Roles
+    - name: Notification Templates
+    - name: Notifications
+    - name: Labels
+    - name: Unified Job Templates
+    - name: Unified Jobs
+    - name: Activity Streams
+    - name: Workflow Job Templates
+    - name: Workflow Jobs
+    - name: Workflow Job Template Nodes
+    - name: Workflow Job Nodes

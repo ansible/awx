@@ -16,6 +16,7 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStatsManager,
     safe_name,
 )
+from awx.main.analytics.subsystem_metrics import WebsocketsMetricsServer
 from awx.main.wsrelay import WebSocketRelayManager
 
 
@@ -100,8 +101,9 @@ class Command(BaseCommand):
             migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
             connection.close()  # Because of async nature, main loop will use new connection, so close this
         except Exception as exc:
-            logger.warning(f'Error on startup of run_wsrelay (error: {exc}), retry in 10s...')
-            time.sleep(10)
+            time.sleep(10)  # Prevent supervisor from restarting the service too quickly and the service to enter FATAL state
+            # sleeping before logging because logging rely on setting which require database connection...
+            logger.warning(f'Error on startup of run_wsrelay (error: {exc}), slept for 10s...')
             return
 
         # In containerized deployments, migrations happen in the task container,
@@ -120,13 +122,14 @@ class Command(BaseCommand):
             return
 
         try:
-            my_hostname = Instance.objects.my_hostname()
+            my_hostname = Instance.objects.my_hostname()  # This relies on settings.CLUSTER_HOST_ID which requires database connection
             logger.info('Active instance with hostname {} is registered.'.format(my_hostname))
         except RuntimeError as e:
             # the CLUSTER_HOST_ID in the task, and web instance must match and
             # ensure network connectivity between the task and web instance
-            logger.info('Unable to return currently active instance: {}, retry in 5s...'.format(e))
-            time.sleep(5)
+            time.sleep(10)  # Prevent supervisor from restarting the service too quickly and the service to enter FATAL state
+            # sleeping before logging because logging rely on setting which require database connection...
+            logger.warning(f"Unable to return currently active instance: {e}, slept for 10s before return.")
             return
 
         if options.get('status'):
@@ -163,8 +166,16 @@ class Command(BaseCommand):
 
             return
 
+        WebsocketsMetricsServer().start()
+
         try:
+            logger.info('Starting Websocket Relayer...')
             websocket_relay_manager = WebSocketRelayManager()
             asyncio.run(websocket_relay_manager.run())
         except KeyboardInterrupt:
             logger.info('Terminating Websocket Relayer')
+        except BaseException as e:  # BaseException is used to catch all exceptions including asyncio.CancelledError
+            time.sleep(10)  # Prevent supervisor from restarting the service too quickly and the service to enter FATAL state
+            # sleeping before logging because logging rely on setting which require database connection...
+            logger.warning(f"Encounter error while running Websocket Relayer {e}, slept for 10s...")
+            return

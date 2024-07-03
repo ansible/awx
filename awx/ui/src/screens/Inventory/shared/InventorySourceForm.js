@@ -23,8 +23,10 @@ import {
   SCMSubForm,
   SatelliteSubForm,
   ControllerSubForm,
+  TerraformSubForm,
   VMwareSubForm,
   VirtualizationSubForm,
+  OpenShiftVirtualizationSubForm,
 } from './InventorySourceSubForms';
 
 const buildSourceChoiceOptions = (options) => {
@@ -214,10 +216,27 @@ const InventorySourceFormFields = ({
                     }
                   />
                 ),
+                terraform: (
+                  <TerraformSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'terraform'
+                    }
+                    sourceOptions={sourceOptions}
+                  />
+                ),
                 vmware: (
                   <VMwareSubForm
                     autoPopulateCredential={
                       !source?.id || source?.source !== 'vmware'
+                    }
+                    sourceOptions={sourceOptions}
+                  />
+                ),
+                openshift_virtualization: (
+                  <OpenShiftVirtualizationSubForm
+                    autoPopulateCredential={
+                      !source?.id ||
+                      source?.source !== 'openshift_virtualization'
                     }
                     sourceOptions={sourceOptions}
                   />

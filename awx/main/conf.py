@@ -2,6 +2,7 @@
 import logging
 
 # Django
+from django.core.checks import Error
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
@@ -92,6 +93,7 @@ register(
     ),
     category=_('System'),
     category_slug='system',
+    required=False,
 )
 
 register(
@@ -694,16 +696,18 @@ register(
     category_slug='logging',
 )
 register(
-    'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
+    'LOG_AGGREGATOR_ACTION_QUEUE_SIZE',
     field_class=fields.IntegerField,
-    default=1,
+    default=131072,
     min_value=1,
-    label=_('Maximum disk persistence for external log aggregation (in GB)'),
+    label=_('Maximum number of messages that can be stored in the log action queue'),
     help_text=_(
-        'Amount of data to store (in gigabytes) during an outage of '
-        'the external log aggregator (defaults to 1). '
-        'Equivalent to the rsyslogd queue.maxdiskspace setting for main_queue. '
-        'Notably, this is used for the rsyslogd main queue (for input messages).'
+        'Defines how large the rsyslog action queue can grow in number of messages '
+        'stored. This can have an impact on memory utilization. When the queue '
+        'reaches 75% of this number, the queue will start writing to disk '
+        '(queue.highWatermark in rsyslog). When it reaches 90%, NOTICE, INFO, and '
+        'DEBUG messages will start to be discarded (queue.discardMark with '
+        'queue.discardSeverity=5).'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -718,8 +722,7 @@ register(
         'Amount of data to store (in gigabytes) if an rsyslog action takes time '
         'to process an incoming message (defaults to 1). '
         'Equivalent to the rsyslogd queue.maxdiskspace setting on the action (e.g. omhttp). '
-        'Like LOG_AGGREGATOR_MAX_DISK_USAGE_GB, it stores files in the directory specified '
-        'by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
+        'It stores files in the directory specified by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -773,6 +776,7 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
+    required=False,
 )
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
@@ -814,6 +818,7 @@ register(
     help_text=_('Max jobs to allow bulk jobs to launch'),
     category=_('Bulk Actions'),
     category_slug='bulk',
+    hidden=True,
 )
 
 register(
@@ -824,6 +829,18 @@ register(
     help_text=_('Max number of hosts to allow to be created in a single bulk action'),
     category=_('Bulk Actions'),
     category_slug='bulk',
+    hidden=True,
+)
+
+register(
+    'BULK_HOST_MAX_DELETE',
+    field_class=fields.IntegerField,
+    default=250,
+    label=_('Max number of hosts to allow to be deleted in a single bulk action'),
+    help_text=_('Max number of hosts to allow to be deleted in a single bulk action'),
+    category=_('Bulk Actions'),
+    category_slug='bulk',
+    hidden=True,
 )
 
 register(
@@ -834,6 +851,7 @@ register(
     help_text=_('Enable preview of new user interface.'),
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(
@@ -937,3 +955,27 @@ def logging_validate(serializer, attrs):
 
 
 register_validate('logging', logging_validate)
+
+
+def csrf_trusted_origins_validate(serializer, attrs):
+    if not serializer.instance or not hasattr(serializer.instance, 'CSRF_TRUSTED_ORIGINS'):
+        return attrs
+    if 'CSRF_TRUSTED_ORIGINS' not in attrs:
+        return attrs
+    errors = []
+    for origin in attrs['CSRF_TRUSTED_ORIGINS']:
+        if "://" not in origin:
+            errors.append(
+                Error(
+                    "As of Django 4.0, the values in the CSRF_TRUSTED_ORIGINS "
+                    "setting must start with a scheme (usually http:// or "
+                    "https://) but found %s. See the release notes for details." % origin,
+                )
+            )
+    if errors:
+        error_messages = [error.msg for error in errors]
+        raise serializers.ValidationError(_('\n'.join(error_messages)))
+    return attrs
+
+
+register_validate('system', csrf_trusted_origins_validate)

@@ -7,6 +7,7 @@ import json
 import yaml
 import logging
 import time
+import psycopg
 import os
 import subprocess
 import re
@@ -23,7 +24,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection, transaction, ProgrammingError
+from django.db import connection, DatabaseError, transaction, ProgrammingError, IntegrityError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -52,12 +53,10 @@ __all__ = [
     'get_awx_http_client_headers',
     'get_awx_version',
     'update_scm_url',
-    'get_type_for_model',
     'get_model_for_type',
     'copy_model_by_class',
     'copy_m2m_relationships',
     'prefetch_page_capabilities',
-    'to_python_boolean',
     'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
@@ -110,18 +109,6 @@ def get_object_or_400(klass, *args, **kwargs):
         raise ParseError(*e.args)
 
 
-def to_python_boolean(value, allow_none=False):
-    value = str(value)
-    if value.lower() in ('true', '1', 't'):
-        return True
-    elif value.lower() in ('false', '0', 'f'):
-        return False
-    elif allow_none and value.lower() in ('none', 'null'):
-        return None
-    else:
-        raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
-
-
 def datetime_hook(d):
     new_d = {}
     for key, value in d.items():
@@ -150,7 +137,7 @@ def underscore_to_camelcase(s):
 @functools.cache
 def is_testing(argv=None):
     '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
+    if os.environ.get('DJANGO_SETTINGS_MODULE') == 'awx.main.tests.settings_for_test':
         return True
     argv = sys.argv if argv is None else argv
     if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
@@ -569,14 +556,6 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
 
 
-def get_type_for_model(model):
-    """
-    Return type name for a given model class.
-    """
-    opts = model._meta.concrete_model._meta
-    return camelcase_to_underscore(opts.object_name)
-
-
 def get_model_for_type(type_name):
     """
     Return model class for a given type name.
@@ -768,14 +747,13 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     return cpu_count  # no correction
 
 
-def get_cpu_effective_capacity(cpu_count):
+def get_cpu_effective_capacity(cpu_count, is_control_node=False):
     from django.conf import settings
-
-    cpu_count = get_corrected_cpu(cpu_count)
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
-
+    if is_control_node:
+        cpu_count = get_corrected_cpu(cpu_count)
     if env_forkcpu:
         forkcpu = int(env_forkcpu)
     elif settings_forkcpu:
@@ -834,6 +812,7 @@ def get_corrected_memory(memory):
 
     # Runner returns memory in bytes
     # so we convert memory from settings to bytes as well.
+
     if env_absmem is not None:
         return convert_mem_str_to_bytes(env_absmem)
     elif settings_absmem is not None:
@@ -842,14 +821,13 @@ def get_corrected_memory(memory):
     return memory
 
 
-def get_mem_effective_capacity(mem_bytes):
+def get_mem_effective_capacity(mem_bytes, is_control_node=False):
     from django.conf import settings
-
-    mem_bytes = get_corrected_memory(mem_bytes)
 
     settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
-
+    if is_control_node:
+        mem_bytes = get_corrected_memory(mem_bytes)
     if env_mem_mb_per_fork:
         mem_mb_per_fork = int(env_mem_mb_per_fork)
     elif settings_mem_mb_per_fork:
@@ -1165,13 +1143,38 @@ def create_partition(tblname, start=None):
     try:
         with transaction.atomic():
             with connection.cursor() as cursor:
+                cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
+                row = cursor.fetchone()
+                if row is not None:
+                    for val in row:  # should only have 1
+                        if val is True:
+                            logger.debug(f'Event partition table {tblname}_{partition_label} already exists')
+                            return
+
                 cursor.execute(
-                    f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
-                    f'PARTITION OF {tblname} '
-                    f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+                    f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
+                    f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
+                    f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
-    except ProgrammingError as e:
-        logger.debug(f'Caught known error due to existing partition: {e}')
+
+    except (ProgrammingError, IntegrityError) as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_cls = psycopg.errors.lookup(sqlstate)
+
+            if psycopg.errors.DuplicateTable == sqlstate_cls or psycopg.errors.UniqueViolation == sqlstate_cls:
+                logger.info(f'Caught known error due to partition creation race: {e}')
+            else:
+                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_cls))
+                raise
+    except DatabaseError as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+        raise
 
 
 def cleanup_new_process(func):

@@ -59,6 +59,7 @@ register(
     help_text=_('Maximum number of job events for the UI to retrieve within a single request.'),
     category=_('UI'),
     category_slug='ui',
+    hidden=True,
 )
 
 register(
@@ -68,4 +69,5 @@ register(
     help_text=_('If disabled, the page will not refresh when events are received. Reloading the page will be required to get the latest details.'),
     category=_('UI'),
     category_slug='ui',
+    hidden=True,
 )
