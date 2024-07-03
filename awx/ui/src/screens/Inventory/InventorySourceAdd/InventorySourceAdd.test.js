@@ -56,10 +56,6 @@ describe('<InventorySourceAdd />', () => {
                 ['satellite6', 'Red Hat Satellite 6'],
                 ['openstack', 'OpenStack'],
                 ['rhv', 'Red Hat Virtualization'],
-                [
-                  'openshift_virtualization',
-                  'Red Hat OpenShift Virtualization',
-                ],
                 ['controller', 'Red Hat Ansible Automation Platform'],
               ],
             },

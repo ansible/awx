@@ -784,11 +784,6 @@ INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 TERRAFORM_INSTANCE_ID_VAR = 'id'
 TERRAFORM_EXCLUDE_EMPTY_GROUPS = True
 
-# ------------------------
-# OpenShift Virtualization
-# ------------------------
-OPENSHIFT_VIRTUALIZATION_EXCLUDE_EMPTY_GROUPS = True
-
 # ---------------------
 # ----- Custom -----
 # ---------------------
