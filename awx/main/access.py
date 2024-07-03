@@ -2100,15 +2100,18 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
 
         if not self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True):
             if data.get('organization', None) is None:
-                self.messages['organization'] = [_('An organization is required to create a workflow job template for normal user')]
+                if self.save_messages:
+                    self.messages['organization'] = [_('An organization is required to create a workflow job template for normal user')]
             return False
 
         if not self.check_related('inventory', Inventory, data, role_field='use_role'):
-            self.messages['inventory'] = [_('You do not have use_role to the inventory')]
+            if self.save_messages:
+                self.messages['inventory'] = [_('You do not have use_role to the inventory')]
             return False
 
         if not self.check_related('execution_environment', ExecutionEnvironment, data, role_field='read_role'):
-            self.messages['execution_environment'] = [_('You do not have read_role to the execution environment')]
+            if self.save_messages:
+                self.messages['execution_environment'] = [_('You do not have read_role to the execution environment')]
             return False
 
         return True
