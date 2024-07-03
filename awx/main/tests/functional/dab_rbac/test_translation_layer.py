@@ -1,4 +1,5 @@
 from unittest import mock
+import json
 
 import pytest
 
@@ -6,11 +7,13 @@ from django.contrib.contenttypes.models import ContentType
 
 from crum import impersonate
 
-from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions
+from awx.main.fields import ImplicitRoleField
+from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions, get_role_codenames, get_role_definition
 from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
+from ansible_base.rbac import permission_registry
 
 
 @pytest.mark.django_db
@@ -24,6 +27,7 @@ from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
         'auditor_role',
         'read_role',
         'execute_role',
+        'approval_role',
         'notification_admin_role',
     ],
 )
@@ -37,6 +41,37 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     assignment = RoleUserAssignment.objects.get(user=rando)
     old_role = get_role_from_object_role(assignment.object_role)
     assert old_role.id == getattr(organization, role_name).id
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('model', sorted(permission_registry.all_registered_models, key=lambda cls: cls._meta.model_name))
+def test_role_migration_matches(request, model, setup_managed_roles):
+    fixture_name = model._meta.verbose_name.replace(' ', '_')
+    obj = request.getfixturevalue(fixture_name)
+    role_ct = 0
+    for field in obj._meta.get_fields():
+        if isinstance(field, ImplicitRoleField):
+            if field.name == 'read_role':
+                continue  # intentionally left as "Compat" roles
+            role_ct += 1
+            old_role = getattr(obj, field.name)
+            old_codenames = set(get_role_codenames(old_role))
+            rd = get_role_definition(old_role)
+            new_codenames = set(rd.permissions.values_list('codename', flat=True))
+            # all the old roles should map to a non-Compat role definition
+            if 'Compat' not in rd.name:
+                model_rds = RoleDefinition.objects.filter(content_type=ContentType.objects.get_for_model(obj))
+                rd_data = {}
+                for rd in model_rds:
+                    rd_data[rd.name] = list(rd.permissions.values_list('codename', flat=True))
+            assert (
+                'Compat' not in rd.name
+            ), f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+            assert new_codenames == set(old_codenames)
+
+    # In the old system these models did not have object-level roles, all others expect some model roles
+    if model._meta.model_name not in ('notificationtemplate', 'executionenvironment'):
+        assert role_ct > 0
 
 
 @pytest.mark.django_db
