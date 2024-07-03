@@ -27,6 +27,7 @@ from ansible_base.rbac import permission_registry
         'auditor_role',
         'read_role',
         'execute_role',
+        'approval_role',
         'notification_admin_role',
     ],
 )

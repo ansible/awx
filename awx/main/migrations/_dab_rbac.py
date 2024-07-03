@@ -277,7 +277,6 @@ def setup_managed_role_definitions(apps, schema_editor):
     to_create = {
         'object_admin': '{cls.__name__} Admin',
         'org_admin': 'Organization Admin',
-        'org_audit': 'Organization Audit',
         'org_children': 'Organization {cls.__name__} Admin',
         'special': '{cls.__name__} {action}',
     }
@@ -362,23 +361,23 @@ def setup_managed_role_definitions(apps, schema_editor):
             )
         )
 
-    if 'org_audit' in to_create:
-        audit_permissions = [perm for perm in org_perms if perm.codename.startswith('view_')]
-        audit_permissions.append(Permission.objects.get(codename='audit_organization'))
-        managed_role_definitions.append(
-            get_or_create_managed(
-                to_create['org_audit'].format(cls=Organization),
-                'Has permission to view all objects inside of a single organization',
-                org_ct,
-                audit_permissions,
-                RoleDefinition,
-            )
+    # Special "organization action" roles
+    audit_permissions = [perm for perm in org_perms if perm.codename.startswith('view_')]
+    audit_permissions.append(Permission.objects.get(codename='audit_organization'))
+    managed_role_definitions.append(
+        get_or_create_managed(
+            'Organization Audit',
+            'Has permission to view all objects inside of a single organization',
+            org_ct,
+            audit_permissions,
+            RoleDefinition,
         )
+    )
 
     org_execute_permissions = {'view_jobtemplate', 'execute_jobtemplate', 'view_workflowjobtemplate', 'execute_workflowjobtemplate', 'view_organization'}
     managed_role_definitions.append(
         get_or_create_managed(
-            'Organization Execute Role',
+            'Organization Execute',
             'Has permission to execute all runnable objects in the organization',
             org_ct,
             [perm for perm in org_perms if perm.codename in org_execute_permissions],
@@ -389,7 +388,7 @@ def setup_managed_role_definitions(apps, schema_editor):
     org_approval_permissions = {'view_organization', 'view_workflowjobtemplate', 'approve_workflowjobtemplate'}
     managed_role_definitions.append(
         get_or_create_managed(
-            'Organization Approval Role',
+            'Organization Approval',
             'Has permission to approve any workflow steps within a single organization',
             org_ct,
             [perm for perm in org_perms if perm.codename in org_approval_permissions],
