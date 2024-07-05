@@ -11,3 +11,4 @@ export const SESSION_TIMEOUT_KEY = 'awx-session-timeout';
 export const SESSION_REDIRECT_URL = 'awx-redirect-url';
 export const PERSISTENT_FILTER_KEY = 'awx-persistent-filter';
 export const SESSION_USER_ID = 'awx-session-user-id';
+export const SESSION_LANG_KEY = 'awx-session-lang-key';

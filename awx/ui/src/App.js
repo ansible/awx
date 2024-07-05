@@ -30,7 +30,7 @@ import SubscriptionEdit from 'screens/Setting/Subscription/SubscriptionEdit';
 import useTitle from 'hooks/useTitle';
 import { dynamicActivate, locales } from './i18nLoader';
 import getRouteConfig from './routeConfig';
-import { SESSION_REDIRECT_URL } from './constants';
+import { SESSION_REDIRECT_URL, SESSION_LANG_KEY } from './constants';
 
 function ErrorFallback({ error }) {
   return (
@@ -142,8 +142,14 @@ function App() {
   const searchParams = Object.fromEntries(new URLSearchParams(search));
   const pseudolocalization =
     searchParams.pseudolocalization === 'true' || false;
+
+  if (searchParams.lang && Object.keys(locales).includes(searchParams.lang)) {
+    window.localStorage.setItem(SESSION_LANG_KEY, searchParams.lang);
+  }
   let language =
-    searchParams.lang || getLanguageWithoutRegionCode(navigator) || 'en';
+    window.localStorage.getItem(SESSION_LANG_KEY) ||
+    getLanguageWithoutRegionCode(navigator) ||
+    'en';
 
   if (!Object.keys(locales).includes(language)) {
     // If there isn't a string catalog available for the browser's

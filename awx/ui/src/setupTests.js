@@ -58,6 +58,9 @@ jest.mock('axios', () => ({
       response: {
         use: () => {},
       },
+      request: {
+        use: () => {},
+      },
     },
   }),
 }));
