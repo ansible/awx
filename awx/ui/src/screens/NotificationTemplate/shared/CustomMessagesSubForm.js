@@ -11,8 +11,8 @@ import getDocsBaseUrl from 'util/getDocsBaseUrl';
 
 function CustomMessagesSubForm({ defaultMessages, type }) {
   const [useCustomField, , useCustomHelpers] = useField('useCustomMessages');
-  const showMessages = type !== 'webhook';
-  const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
+  const showMessages = !['webhook', 'awssns'].includes(type);
+  const showBodies = ['email', 'pagerduty', 'webhook', 'awssns'].includes(type);
 
   const { setFieldValue } = useFormikContext();
   const config = useConfig();

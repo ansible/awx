@@ -99,7 +99,9 @@ def test_notification_template_access_org_user(notification_template, user):
 @pytest.mark.django_db
 def test_notificaiton_template_orphan_access_org_admin(notification_template, organization, org_admin):
     notification_template.organization = None
+    notification_template.save(update_fields=['organization'])
     access = NotificationTemplateAccess(org_admin)
+    assert not org_admin.has_obj_perm(notification_template, 'change')
     assert not access.can_change(notification_template, {'organization': organization.id})
 
 

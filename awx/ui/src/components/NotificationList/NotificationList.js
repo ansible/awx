@@ -190,6 +190,7 @@ function NotificationList({
             name: t`Notification type`,
             key: 'or__notification_type',
             options: [
+              ['awssns', t`AWS SNS`],
               ['email', t`Email`],
               ['grafana', t`Grafana`],
               ['hipchat', t`Hipchat`],

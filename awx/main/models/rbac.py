@@ -591,14 +591,20 @@ def get_role_from_object_role(object_role):
         role_name = role_name.lower()
         model_cls = apps.get_model('main', target_model_name)
         target_model_name = get_type_for_model(model_cls)
+
+        # exception cases completely specific to one model naming convention
         if target_model_name == 'notification_template':
-            target_model_name = 'notification'  # total exception
+            target_model_name = 'notification'
+        elif target_model_name == 'workflow_job_template':
+            target_model_name = 'workflow'
+
         role_name = f'{target_model_name}_admin_role'
     elif rd.name.endswith(' Admin'):
         # cases like "project-admin"
         role_name = 'admin_role'
+    elif rd.name == 'Organization Audit':
+        role_name = 'auditor_role'
     else:
-        print(rd.name)
         model_name, role_name = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
