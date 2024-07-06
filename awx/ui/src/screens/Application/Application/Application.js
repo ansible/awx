@@ -20,7 +20,7 @@ import ApplicationEdit from '../ApplicationEdit';
 import ApplicationDetails from '../ApplicationDetails';
 import ApplicationTokens from '../ApplicationTokens';
 
-function Application({ setBreadcrumb }) {
+function Application({ setBreadcrumb, buildActivityStream }) {
   const { id } = useParams();
   const { pathname } = useLocation();
   const {
@@ -50,6 +50,7 @@ function Application({ setBreadcrumb }) {
         })
       );
       setBreadcrumb(detail.data);
+      buildActivityStream(detail.data);
 
       return {
         application: detail.data,

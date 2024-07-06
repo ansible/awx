@@ -32,21 +32,24 @@ describe('<User />', () => {
       initialEntries: ['/users/1'],
     });
     await act(async () => {
-      mountWithContexts(<User setBreadcrumb={() => {}} />, {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: {
-                params: { id: 1 },
-                url: '/users/1',
-                path: '/users/1',
+      mountWithContexts(
+        <User setBreadcrumb={() => {}} buildActivityStream={() => {}} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/users/1',
+                  path: '/users/1',
+                },
               },
             },
           },
-        },
-      });
+        }
+      );
     });
   });
 
@@ -57,7 +60,11 @@ describe('<User />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <User me={{ id: 1 }} setBreadcrumb={() => {}} />,
+        <User
+          me={{ id: 1 }}
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -88,7 +95,11 @@ describe('<User />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <User me={{ id: 2 }} setBreadcrumb={() => {}} />,
+        <User
+          me={{ id: 2 }}
+          setBreadcrumb={() => {}}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -115,21 +126,24 @@ describe('<User />', () => {
     });
     let wrapper;
     await act(async () => {
-      wrapper = mountWithContexts(<User setBreadcrumb={() => {}} />, {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: {
-                params: { id: 1 },
-                url: '/users/1/foobar',
-                path: '/users/1/foobar',
+      wrapper = mountWithContexts(
+        <User setBreadcrumb={() => {}} buildActivityStream={() => {}} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/users/1/foobar',
+                  path: '/users/1/foobar',
+                },
               },
             },
           },
-        },
-      });
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });

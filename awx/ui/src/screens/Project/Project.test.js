@@ -48,14 +48,24 @@ describe('<Project />', () => {
 
   test('initially renders successfully', async () => {
     await act(async () => {
-      mountWithContexts(<Project setBreadcrumb={() => {}} me={mockMe} />);
+      mountWithContexts(
+        <Project
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
+      );
     });
   });
 
   test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Project setBreadcrumb={() => {}} me={mockMe} />
+        <Project
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     const tabs = await waitForElement(
@@ -75,7 +85,11 @@ describe('<Project />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Project setBreadcrumb={() => {}} me={mockMe} />
+        <Project
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     const tabs = await waitForElement(
@@ -96,7 +110,11 @@ describe('<Project />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Project setBreadcrumb={() => {}} me={mockMe} />
+        <Project
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     const tabs = await waitForElement(
@@ -119,7 +137,11 @@ describe('<Project />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <Project setBreadcrumb={() => {}} me={mockMe} />
+        <Project
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     const tabs = await waitForElement(
@@ -136,7 +158,11 @@ describe('<Project />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Project setBreadcrumb={() => {}} me={mockMe} />,
+        <Project
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {

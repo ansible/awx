@@ -30,7 +30,10 @@ function ManagementJobs() {
 
   return (
     <>
-      <ScreenHeader streamType="none" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={{ streamType: 'none' }}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path={`${basePath}/:id`}>
           <ManagementJob setBreadcrumb={buildBreadcrumbConfig} />

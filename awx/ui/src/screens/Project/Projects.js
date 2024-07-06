@@ -36,15 +36,32 @@ function Projects() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'project',
+  });
+
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
-      <ScreenHeader streamType="project" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        breadcrumbConfig={breadcrumbConfig}
+        activityStream={activityStream}
+      />
       <Switch>
         <Route path="/projects/add">
           <ProjectAdd />
         </Route>
         <Route path="/projects/:id">
-          <Project setBreadcrumb={buildBreadcrumbConfig} />
+          <Project
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/projects">
           <PersistentFilters pageKey="projects">

@@ -36,7 +36,7 @@ function SubscriptionUsage() {
         </Banner>
       )}
       <ScreenHeader
-        streamType="all"
+        activityStream={{ streamType: 'all' }}
         breadcrumbConfig={{ '/subscription_usage': t`Subscription Usage` }}
       />
       <MainPageSection>

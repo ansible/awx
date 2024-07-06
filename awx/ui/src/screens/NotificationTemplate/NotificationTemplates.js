@@ -26,10 +26,20 @@ function NotificationTemplates() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'notification_template',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="notification_template"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -37,7 +47,10 @@ function NotificationTemplates() {
           <NotificationTemplateAdd />
         </Route>
         <Route path={`${match.url}/:id`}>
-          <NotificationTemplate setBreadcrumb={updateBreadcrumbConfig} />
+          <NotificationTemplate
+            setBreadcrumb={updateBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path={`${match.url}`}>
           <PersistentFilters pageKey="notificationTemplates">

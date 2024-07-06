@@ -58,10 +58,24 @@ function Templates() {
     [template, schedule]
   );
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'job_template,workflow_job_template,workflow_job_template_node',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item &&
+        setActivityStream({
+          streamId: item.id,
+          streamType: item.type,
+        });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="job_template,workflow_job_template,workflow_job_template_node"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -72,10 +86,16 @@ function Templates() {
           <WorkflowJobTemplateAdd />
         </Route>
         <Route path="/templates/job_template/:id">
-          <Template setBreadcrumb={setBreadcrumbConfig} />
+          <Template
+            setBreadcrumb={setBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/templates/workflow_job_template/:id">
-          <WorkflowJobTemplate setBreadcrumb={setBreadcrumbConfig} />
+          <WorkflowJobTemplate
+            setBreadcrumb={setBreadcrumbConfig}
+            buildtActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/templates">
           <PageSection>

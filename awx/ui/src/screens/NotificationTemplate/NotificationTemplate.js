@@ -20,7 +20,7 @@ import ContentLoading from 'components/ContentLoading';
 import NotificationTemplateDetail from './NotificationTemplateDetail';
 import NotificationTemplateEdit from './NotificationTemplateEdit';
 
-function NotificationTemplate({ setBreadcrumb }) {
+function NotificationTemplate({ setBreadcrumb, buildActivityStream }) {
   const { id: templateId } = useParams();
   const match = useRouteMatch();
   const location = useLocation();
@@ -36,11 +36,12 @@ function NotificationTemplate({ setBreadcrumb }) {
         NotificationTemplatesAPI.readOptions(),
       ]);
       setBreadcrumb(detail.data);
+      buildActivityStream(detail.data);
       return {
         template: detail.data,
         defaultMessages: options.data.actions?.POST?.messages,
       };
-    }, [templateId, setBreadcrumb]),
+    }, [templateId, setBreadcrumb, buildActivityStream]),
     { template: null, defaultMessages: null }
   );
 

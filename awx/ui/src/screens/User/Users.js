@@ -36,9 +36,21 @@ function Users() {
       [`/users/${user.id}/tokens/${token && token.id}/details`]: t`Details`,
     });
   }, []);
+
+  const [activityStream, setActivityStream] = useState({ streamType: 'user' });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
-      <ScreenHeader streamType="user" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={activityStream}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path={`${match.path}/add`}>
           <UserAdd />
@@ -46,7 +58,11 @@ function Users() {
         <Route path={`${match.path}/:id`}>
           <Config>
             {({ me }) => (
-              <User setBreadcrumb={addUserBreadcrumb} me={me || {}} />
+              <User
+                setBreadcrumb={addUserBreadcrumb}
+                me={me || {}}
+                buildActivityStream={buildActivityStream}
+              />
             )}
           </Config>
         </Route>

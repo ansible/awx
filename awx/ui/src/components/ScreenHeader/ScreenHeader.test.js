@@ -27,7 +27,10 @@ describe('<ScreenHeader />', () => {
   test('initially renders successfully', () => {
     breadcrumbWrapper = mountWithContexts(
       <MemoryRouter initialEntries={['/foo/1/bar']} initialIndex={0}>
-        <ScreenHeader streamType="all_activity" breadcrumbConfig={config} />
+        <ScreenHeader
+          activityStream={{ streamType: 'all_activity' }}
+          breadcrumbConfig={config}
+        />
       </MemoryRouter>
     );
 
@@ -54,7 +57,10 @@ describe('<ScreenHeader />', () => {
     routes.forEach(([location, crumbLength]) => {
       breadcrumbWrapper = mountWithContexts(
         <MemoryRouter initialEntries={[location]}>
-          <ScreenHeader streamType="all_activity" breadcrumbConfig={config} />
+          <ScreenHeader
+            activityStream={{ streamType: 'all_activity' }}
+            breadcrumbConfig={config}
+          />
         </MemoryRouter>
       );
 

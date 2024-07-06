@@ -16,7 +16,7 @@ function AllSchedules() {
   return (
     <>
       <ScreenHeader
-        streamType="schedule"
+        activityStream={{ streamType: 'schedule' }}
         breadcrumbConfig={{
           '/schedules': t`Schedules`,
         }}

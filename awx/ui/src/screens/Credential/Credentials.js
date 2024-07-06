@@ -31,10 +31,20 @@ function Credentials() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'credential',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="credential"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -42,7 +52,10 @@ function Credentials() {
           <Config>{({ me }) => <CredentialAdd me={me || {}} />}</Config>
         </Route>
         <Route path="/credentials/:id">
-          <Credential setBreadcrumb={buildBreadcrumbConfig} />
+          <Credential
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/credentials">
           <PersistentFilters pageKey="credentials">

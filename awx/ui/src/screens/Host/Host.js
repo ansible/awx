@@ -22,7 +22,7 @@ import HostDetail from './HostDetail';
 import HostEdit from './HostEdit';
 import HostGroups from './HostGroups';
 
-function Host({ setBreadcrumb }) {
+function Host({ setBreadcrumb, buildActivityStream }) {
   const location = useLocation();
   const match = useRouteMatch('/hosts/:id');
   const {
@@ -34,6 +34,7 @@ function Host({ setBreadcrumb }) {
     useCallback(async () => {
       const { data } = await HostsAPI.readDetail(match.params.id);
       setBreadcrumb(data);
+      buildActivityStream(data);
       return data;
     }, [match.params.id, setBreadcrumb])
   );

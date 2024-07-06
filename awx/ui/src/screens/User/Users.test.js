@@ -14,7 +14,7 @@ describe('<Users />', () => {
     const wrapper = shallow(<Users />);
 
     const header = wrapper.find('ScreenHeader');
-    expect(header.prop('streamType')).toBe('user');
+    expect(header.prop('activityStream')['streamType']).toBe('user');
     expect(header.prop('breadcrumbConfig')).toEqual({
       '/users': 'Users',
       '/users/add': 'Create New User',

@@ -24,7 +24,7 @@ import { OrganizationsAPI, ProjectsAPI } from 'api';
 import ProjectDetail from './ProjectDetail';
 import ProjectEdit from './ProjectEdit';
 
-function Project({ setBreadcrumb }) {
+function Project({ setBreadcrumb, buildActivityStream }) {
   const { me = {} } = useConfig();
   const { id } = useParams();
   const location = useLocation();
@@ -56,11 +56,12 @@ function Project({ setBreadcrumb }) {
 
         data.summary_fields.credentials = results;
       }
+      buildActivityStream(data);
       return {
         project: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,
       };
-    }, [id]),
+    }, [id, buildActivityStream]),
     {
       project: null,
       notifAdminRes: null,

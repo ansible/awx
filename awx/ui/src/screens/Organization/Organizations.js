@@ -36,10 +36,20 @@ function Organizations() {
     setBreadcrumbConfig(breadcrumb);
   }, []);
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'organization',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="organization"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -49,7 +59,11 @@ function Organizations() {
         <Route path={`${match.path}/:id`}>
           <Config>
             {({ me }) => (
-              <Organization setBreadcrumb={setBreadcrumb} me={me || {}} />
+              <Organization
+                setBreadcrumb={setBreadcrumb}
+                me={me || {}}
+                buildActivityStream={buildActivityStream}
+              />
             )}
           </Config>
         </Route>

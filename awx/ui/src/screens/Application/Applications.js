@@ -41,10 +41,24 @@ function Applications() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'o_auth2_application,o_auth2_access_token',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item &&
+        setActivityStream({
+          streamId: item.id,
+          streamType: item.type,
+        });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="o_auth2_application,o_auth2_access_token"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -54,7 +68,10 @@ function Applications() {
           />
         </Route>
         <Route path="/applications/:id">
-          <Application setBreadcrumb={buildBreadcrumbConfig} />
+          <Application
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/applications">
           <PersistentFilters pageKey="applications">

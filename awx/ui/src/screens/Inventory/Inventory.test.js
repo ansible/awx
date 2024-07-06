@@ -29,7 +29,9 @@ describe('<Inventory />', () => {
 
   test('initially renders successfully', async () => {
     await act(async () => {
-      wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <Inventory setBreadcrumb={() => {}} buildActivityStream={() => {}} />
+      );
     });
     wrapper.update();
     expect(wrapper.find('Inventory').length).toBe(1);
@@ -47,7 +49,9 @@ describe('<Inventory />', () => {
       'Job Templates',
     ];
     await act(async () => {
-      wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />);
+      wrapper = mountWithContexts(
+        <Inventory setBreadcrumb={() => {}} buildActivityStream={() => {}} />
+      );
     });
     wrapper.find('RoutedTabs li').forEach((tab, index) => {
       expect(tab.text()).toEqual(expectedTabs[index]);
@@ -59,21 +63,24 @@ describe('<Inventory />', () => {
       initialEntries: ['/inventories/inventory/1/foobar'],
     });
     await act(async () => {
-      wrapper = mountWithContexts(<Inventory setBreadcrumb={() => {}} />, {
-        context: {
-          router: {
-            history,
-            route: {
-              location: history.location,
-              match: {
-                params: { id: 1 },
-                url: '/inventories/inventory/1/foobar',
-                path: '/inventories/inventory/1/foobar',
+      wrapper = mountWithContexts(
+        <Inventory setBreadcrumb={() => {}} buildActivityStream={() => {}} />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: {
+                  params: { id: 1 },
+                  url: '/inventories/inventory/1/foobar',
+                  path: '/inventories/inventory/1/foobar',
+                },
               },
             },
           },
-        },
-      });
+        }
+      );
     });
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });

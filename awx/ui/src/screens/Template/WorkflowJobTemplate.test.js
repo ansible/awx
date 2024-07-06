@@ -58,7 +58,11 @@ describe('<WorkflowJobTemplate />', () => {
   test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
   });
@@ -66,7 +70,11 @@ describe('<WorkflowJobTemplate />', () => {
   test('When component mounts API is called and the response is put in state', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     expect(WorkflowJobTemplatesAPI.readDetail).toBeCalled();
@@ -76,7 +84,11 @@ describe('<WorkflowJobTemplate />', () => {
   test('notifications tab shown for admins', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
 
@@ -100,7 +112,11 @@ describe('<WorkflowJobTemplate />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     const tabs = await waitForElement(
@@ -118,7 +134,11 @@ describe('<WorkflowJobTemplate />', () => {
 
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />,
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -146,7 +166,11 @@ describe('<WorkflowJobTemplate />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />,
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -181,7 +205,11 @@ describe('<WorkflowJobTemplate />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowJobTemplate setBreadcrumb={() => {}} me={mockMe} />,
+        <WorkflowJobTemplate
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {
@@ -249,6 +277,7 @@ describe('<WorkflowJobTemplate />', () => {
           me={{
             is_system_auditor: true,
           }}
+          buildActivityStream={() => {}}
         />,
         {
           context: { router: { history } },

@@ -38,7 +38,10 @@ function Jobs() {
 
   return (
     <>
-      <ScreenHeader streamType="job" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={{ streamType: 'job' }}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route exact path={match.path}>
           <PageSection>

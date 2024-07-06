@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { t } from '@lingui/macro';
 
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -37,7 +37,7 @@ const unacceptableCredentialTypes = [
   'scm',
 ];
 
-function Credential({ setBreadcrumb }) {
+function Credential({ setBreadcrumb, buildActivityStream }) {
   const { pathname } = useLocation();
 
   const match = useRouteMatch({
@@ -71,6 +71,14 @@ function Credential({ setBreadcrumb }) {
       setBreadcrumb(credential);
     }
   }, [credential, setBreadcrumb]);
+
+  const callback = useRef();
+  callback.current = buildActivityStream;
+  useEffect(() => {
+    if (credential) {
+      callback.current(credential);
+    }
+  }, [credential, callback]);
 
   const tabsArray = [
     {

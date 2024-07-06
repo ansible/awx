@@ -30,9 +30,22 @@ function Instances() {
     });
   }, []);
 
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'instance',
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
-      <ScreenHeader streamType="instance" breadcrumbConfig={breadcrumbConfig} />
+      <ScreenHeader
+        activityStream={activityStream}
+        breadcrumbConfig={breadcrumbConfig}
+      />
       <Switch>
         <Route path="/instances/add">
           <InstanceAdd setBreadcrumb={buildBreadcrumbConfig} />
@@ -41,7 +54,10 @@ function Instances() {
           <InstanceEdit setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/instances/:id">
-          <Instance setBreadcrumb={buildBreadcrumbConfig} />
+          <Instance
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/instances">
           <PersistentFilters pageKey="instances">

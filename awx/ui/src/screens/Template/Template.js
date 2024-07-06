@@ -25,7 +25,7 @@ import JobTemplateDetail from './JobTemplateDetail';
 import JobTemplateEdit from './JobTemplateEdit';
 import TemplateSurvey from './TemplateSurvey';
 
-function Template({ setBreadcrumb }) {
+function Template({ setBreadcrumb, buildActivityStream }) {
   const match = useRouteMatch();
   const location = useLocation();
   const { id: templateId } = useParams();
@@ -84,6 +84,7 @@ function Template({ setBreadcrumb }) {
           data.webhook_key = webhook_key;
         }
       }
+      buildActivityStream(data);
       return {
         template: data,
         isNotifAdmin: notifAdminRes.data.results.length > 0,

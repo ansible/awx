@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 
 import { t } from '@lingui/macro';
 import {
@@ -22,7 +22,7 @@ import UserTeams from './UserTeams';
 import UserTokens from './UserTokens';
 import UserRolesList from './UserRoles/UserRolesList';
 
-function User({ setBreadcrumb, me }) {
+function User({ setBreadcrumb, me, buildActivityStream }) {
   const location = useLocation();
   const match = useRouteMatch('/users/:id');
   const userListUrl = `/users`;
@@ -48,6 +48,14 @@ function User({ setBreadcrumb, me }) {
       setBreadcrumb(user);
     }
   }, [user, setBreadcrumb]);
+
+  const callback = useRef();
+  callback.current = buildActivityStream;
+  useEffect(() => {
+    if (user) {
+      callback.current(user);
+    }
+  }, [user, callback]);
 
   const tabsArray = [
     {

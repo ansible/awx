@@ -21,7 +21,7 @@ import TeamDetail from './TeamDetail';
 import TeamEdit from './TeamEdit';
 import TeamRolesList from './TeamRoles';
 
-function Team({ setBreadcrumb }) {
+function Team({ setBreadcrumb, buildActivityStream }) {
   const [team, setTeam] = useState(null);
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -33,6 +33,7 @@ function Team({ setBreadcrumb }) {
       try {
         const { data } = await TeamsAPI.readDetail(id);
         setBreadcrumb(data);
+        buildActivityStream(data);
         setTeam(data);
       } catch (error) {
         setContentError(error);
@@ -40,7 +41,7 @@ function Team({ setBreadcrumb }) {
         setHasContentLoading(false);
       }
     })();
-  }, [id, setBreadcrumb, location]);
+  }, [id, setBreadcrumb, location, buildActivityStream]);
 
   const tabsArray = [
     {

@@ -7,7 +7,7 @@ describe('<Projects />', () => {
     const wrapper = shallow(<Projects />);
 
     const header = wrapper.find('ScreenHeader');
-    expect(header.prop('streamType')).toBe('project');
+    expect(header.prop('activityStream')['streamType']).toBe('project');
     expect(header.prop('breadcrumbConfig')).toEqual({
       '/projects': 'Projects',
       '/projects/add': 'Create New Project',

@@ -26,10 +26,22 @@ function ExecutionEnvironments() {
       [`/execution_environments/${executionEnvironments.id}/details`]: t`Details`,
     });
   }, []);
+
+  const [activityStream, setActivityStream] = useState({
+    streamType: 'execution_environment',
+  });
+
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
+
   return (
     <>
       <ScreenHeader
-        streamType="execution_environment"
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -37,7 +49,10 @@ function ExecutionEnvironments() {
           <ExecutionEnvironmentAdd />
         </Route>
         <Route path="/execution_environments/:id">
-          <ExecutionEnvironment setBreadcrumb={buildBreadcrumbConfig} />
+          <ExecutionEnvironment
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/execution_environments">
           <PersistentFilters pageKey="executionEnvironments">

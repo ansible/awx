@@ -48,7 +48,11 @@ describe('<Team />', () => {
   test('initially renders successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(
-        <Team setBreadcrumb={() => {}} me={mockMe} />
+        <Team
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />
       );
     });
     expect(wrapper.find('Team').length).toBe(1);
@@ -60,7 +64,11 @@ describe('<Team />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Team setBreadcrumb={() => {}} me={mockMe} />,
+        <Team
+          setBreadcrumb={() => {}}
+          me={mockMe}
+          buildActivityStream={() => {}}
+        />,
         {
           context: {
             router: {

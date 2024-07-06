@@ -14,7 +14,7 @@ describe('<Hosts />', () => {
     const wrapper = shallow(<Hosts />);
 
     const header = wrapper.find('ScreenHeader');
-    expect(header.prop('streamType')).toEqual('host');
+    expect(header.prop('activityStream')['streamType']).toEqual('host');
     expect(header.prop('breadcrumbConfig')).toEqual({
       '/hosts': 'Hosts',
       '/hosts/add': 'Create New Host',

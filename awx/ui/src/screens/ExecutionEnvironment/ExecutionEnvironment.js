@@ -22,7 +22,7 @@ import ExecutionEnvironmentDetails from './ExecutionEnvironmentDetails';
 import ExecutionEnvironmentEdit from './ExecutionEnvironmentEdit';
 import ExecutionEnvironmentTemplateList from './ExecutionEnvironmentTemplate';
 
-function ExecutionEnvironment({ setBreadcrumb }) {
+function ExecutionEnvironment({ setBreadcrumb, buildActivityStream }) {
   const { id } = useParams();
   const { pathname } = useLocation();
 
@@ -34,6 +34,7 @@ function ExecutionEnvironment({ setBreadcrumb }) {
   } = useRequest(
     useCallback(async () => {
       const { data } = await ExecutionEnvironmentsAPI.readDetail(id);
+      buildActivityStream(data);
       return data;
     }, [id]),
     null

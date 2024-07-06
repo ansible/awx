@@ -45,11 +45,20 @@ function InstanceGroups() {
   const streamType = pathname.includes('instances')
     ? 'instance'
     : 'instance_group';
+  const [activityStream, setActivityStream] = useState({
+    streamType: streamType,
+  });
+  const buildActivityStream = useCallback(
+    (item) => {
+      item && setActivityStream({ ...activityStream, streamId: item.id });
+    },
+    [activityStream]
+  );
 
   return (
     <>
       <ScreenHeader
-        streamType={streamType}
+        activityStream={activityStream}
         breadcrumbConfig={breadcrumbConfig}
       />
       <Switch>
@@ -63,7 +72,10 @@ function InstanceGroups() {
           <InstanceGroupAdd />
         </Route>
         <Route path="/instance_groups/:id">
-          <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
+          <InstanceGroup
+            setBreadcrumb={buildBreadcrumbConfig}
+            buildActivityStream={buildActivityStream}
+          />
         </Route>
         <Route path="/instance_groups">
           <PersistentFilters pageKey="instanceGroups">

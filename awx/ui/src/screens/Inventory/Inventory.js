@@ -25,7 +25,7 @@ import InventoryHosts from './InventoryHosts/InventoryHosts';
 import InventorySources from './InventorySources';
 import { getInventoryPath } from './shared/utils';
 
-function Inventory({ setBreadcrumb }) {
+function Inventory({ setBreadcrumb, buildActivityStream }) {
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [inventory, setInventory] = useState(null);
@@ -39,6 +39,7 @@ function Inventory({ setBreadcrumb }) {
       try {
         const { data } = await InventoriesAPI.readDetail(match.params.id);
         setBreadcrumb(data);
+        buildActivityStream(data);
         setInventory(data);
       } catch (error) {
         setContentError(error);
@@ -48,7 +49,7 @@ function Inventory({ setBreadcrumb }) {
     }
 
     fetchData();
-  }, [match.params.id, location.pathname, setBreadcrumb]);
+  }, [match.params.id, location.pathname, setBreadcrumb, buildActivityStream]);
 
   const tabsArray = [
     {
