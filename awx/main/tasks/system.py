@@ -983,4 +983,11 @@ def periodic_resource_sync():
 
         executor = SyncExecutor()
         executor.run()
-        logger.info(f'Periodic resource sync results:\n{executor.results}')
+        for key, item_list in executor.results:
+            if not item_list or key == 'noop':
+                continue
+            # Log creations and conflicts
+            if len(item_list) > 10 and settings.LOG_AGGREGATOR_LEVEL != 'DEBUG':
+                logger.info(f'Periodic resource sync {key}, first 10 items:\n{item_list[:10]}')
+            else:
+                logger.info(f'Periodic resource sync {key}:\n{item_list}')
