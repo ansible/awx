@@ -980,6 +980,7 @@ def periodic_resource_sync():
         if acquired is False:
             logger.debug("Not running periodic_resource_sync, another task holds lock")
             return
+        logger.debug("Running periodic resource sync")
 
         executor = SyncExecutor()
         executor.run()
