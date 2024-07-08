@@ -335,6 +335,7 @@ ROOT_URLCONF = 'awx.urls'
 WSGI_APPLICATION = 'awx.wsgi.application'
 
 INSTALLED_APPS = [
+    'awx.app_overrides',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
