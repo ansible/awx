@@ -321,13 +321,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             raise ValueError('{} is not a dynamic input field'.format(field_name))
 
     def validate_role_assignment(self, actor, role_definition):
-        if isinstance(actor, User):
-            if actor.is_superuser or Organization.access_qs(actor, 'change').filter(id=self.organization.id).exists():
-                return
-        if isinstance(actor, Team):
-            if actor.organization == self.organization:
-                return
-        raise DRFValidationError({'detail': _(f"You cannot grant credential access to a {actor._meta.object_name} not in the credentials' organization")})
+        if self.organization:
+            if isinstance(actor, User):
+                if actor.is_superuser or Organization.access_qs(actor, 'change').filter(id=self.organization.id).exists():
+                    return
+            if isinstance(actor, Team):
+                if actor.organization == self.organization:
+                    return
+            raise DRFValidationError({'detail': _(f"You cannot grant credential access to a {actor._meta.object_name} not in the credentials' organization")})
 
 
 class CredentialType(CommonModelNameNotUnique):
