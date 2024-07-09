@@ -94,7 +94,7 @@ Field lookups may also be used for more advanced queries, by appending the looku
 
 The following field lookups are supported:
 
-- ``exact``: Exact match (default lookup if not specified, see **Note** below).
+- ``exact``: Exact match (default lookup if not specified, refer to the following note for more information).
 - ``iexact``: Case-insensitive version of exact.
 - ``contains``: Field contains value.
 - ``icontains``: Case-insensitive version of contains.
