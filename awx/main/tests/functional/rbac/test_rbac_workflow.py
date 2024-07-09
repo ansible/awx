@@ -7,7 +7,7 @@ from awx.main.access import (
     WorkflowJobAccess,
     # WorkflowJobNodeAccess
 )
-from awx.main.models import JobTemplate, WorkflowJobTemplateNode, WorkflowJob
+from awx.main.models import JobTemplate, WorkflowJobTemplateNode
 
 from rest_framework.exceptions import PermissionDenied
 
