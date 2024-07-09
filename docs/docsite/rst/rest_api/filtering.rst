@@ -125,7 +125,7 @@ Filtering based on the requesting user's level of access by query string paramet
 
 .. note::
 
-    Previous releases of AWX returned queries with **__exact** results by default, but you may find that the latest versions are returning a larger subset instead. As a workaround, set the ``limit`` to ``?limit__exact`` for the default filter. For example, ``/api/v2/jobs/?limit__exact=example.domain.com`` will result in:
+    Previous releases of AWX returned queries with **__exact** results by default, but you may find that the latest versions are returning a larger subset instead. As a workaround, set the ``limit`` to ``?limit__exact`` for the default filter. For example, ``/api/v2/jobs/?limit__exact=example.domain.com`` results in:
 
     ::
 
