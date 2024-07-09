@@ -980,5 +980,15 @@ def periodic_resource_sync():
         if acquired is False:
             logger.debug("Not running periodic_resource_sync, another task holds lock")
             return
+        logger.debug("Running periodic resource sync")
 
-        SyncExecutor().run()
+        executor = SyncExecutor()
+        executor.run()
+        for key, item_list in executor.results:
+            if not item_list or key == 'noop':
+                continue
+            # Log creations and conflicts
+            if len(item_list) > 10 and settings.LOG_AGGREGATOR_LEVEL != 'DEBUG':
+                logger.info(f'Periodic resource sync {key}, first 10 items:\n{item_list[:10]}')
+            else:
+                logger.info(f'Periodic resource sync {key}:\n{item_list}')
