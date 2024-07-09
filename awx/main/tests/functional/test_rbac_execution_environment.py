@@ -114,11 +114,18 @@ def test_give_object_permission_to_ee(org_ee, ee_rd, org_member, check_user_capa
 def test_need_related_organization_access(org_ee, ee_rd, org_member):
     org2 = Organization.objects.create(name='another organization')
     ee_rd.give_permission(org_member, org_ee)
+    org2.member_role.members.add(org_member)
     access = ExecutionEnvironmentAccess(org_member)
     assert access.can_change(org_ee, {'name': 'new', 'organization': org_ee.organization})
     assert access.can_change(org_ee, {'name': 'new', 'organization': org_ee.organization.id})
     assert not access.can_change(org_ee, {'name': 'new', 'organization': org2.id})
     assert not access.can_change(org_ee, {'name': 'new', 'organization': org2})
+
+    # User can make the change if they have relevant permission to the new organization
+    org_ee.organization.execution_environment_admin_role.members.add(org_member)
+    org2.execution_environment_admin_role.members.add(org_member)
+    assert access.can_change(org_ee, {'name': 'new', 'organization': org2.id})
+    assert access.can_change(org_ee, {'name': 'new', 'organization': org2})
 
 
 @pytest.mark.django_db
