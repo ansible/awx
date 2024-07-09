@@ -1090,6 +1090,7 @@ AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 CLUSTER_HOST_ID = socket.gethostname()
 
 UI_NEXT = True
+UI_LEGACY = False
 
 # License compliance for total host count. Possible values:
 # - '': No model - Subscription not counted from Host Metrics

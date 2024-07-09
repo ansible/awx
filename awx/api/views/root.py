@@ -287,6 +287,7 @@ class ApiV2ConfigView(APIView):
 
         # Guarding against settings.UI_NEXT being set to a non-boolean value
         ui_next_state = settings.UI_NEXT if settings.UI_NEXT in (True, False) else False
+        ui_legacy_state = settings.UI_LEGACY if settings.UI_LEGACY in (True, False) else False
 
         data = dict(
             time_zone=settings.TIME_ZONE,
@@ -297,6 +298,7 @@ class ApiV2ConfigView(APIView):
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
             ui_next=ui_next_state,
+            ui_legacy=ui_legacy_state,
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field

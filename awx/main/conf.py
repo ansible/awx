@@ -855,6 +855,17 @@ register(
 )
 
 register(
+    'UI_LEGACY',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable legacy (deprecated) User Interface'),
+    help_text=_('Enable legacy (deprecated) user interface.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
     'SUBSCRIPTION_USAGE_MODEL',
     field_class=fields.ChoiceField,
     choices=[

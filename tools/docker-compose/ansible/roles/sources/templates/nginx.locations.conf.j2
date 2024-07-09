@@ -2,6 +2,18 @@ location {{ (ingress_path + '/static').replace('//', '/') }} {
     alias /var/lib/awx/public/static/;
 }
 
+location {{ (ingress_path + '/ui_legacy/static').replace('//', '/') }}  {
+    alias /var/lib/awx/public/static/;
+}
+
+location {{ (ingress_path + '/ui_legacy/websocket').replace('//', '/') }}  {
+    rewrite ^/ui_legacy/websocket/(.*) /websocket/$1 last;
+}
+
+location {{ (ingress_path + '/ui_legacy/api').replace('//', '/') }}  {
+    rewrite ^/ui_legacy/api/(.*) /api/$1 last;
+}
+
 location {{ (ingress_path + '/locales').replace('//', '/') }} {
     alias /var/lib/awx/public/static/awx/locales;
 }
