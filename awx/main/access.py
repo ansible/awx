@@ -1411,19 +1411,19 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
+        logger.warning(f'EE data {data}')
         if obj and obj.organization_id is None:
             raise PermissionDenied
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
             if not self.user.has_obj_perm(obj, 'change'):
+                logger.warning('does not have EE object access')
                 return False
         else:
             if self.user not in obj.organization.execution_environment_admin_role:
                 raise PermissionDenied
-        if data and 'organization' in data:
-            new_org = get_object_from_data('organization', Organization, data, obj=obj)
-            if not new_org or self.user not in new_org.execution_environment_admin_role:
-                return False
-        return self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role')
+        ret = self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role')
+        logger.warning(f'Org check value {ret}')
+        return ret
 
     def can_delete(self, obj):
         if obj.managed:
