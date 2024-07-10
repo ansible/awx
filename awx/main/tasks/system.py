@@ -984,7 +984,7 @@ def periodic_resource_sync():
 
         executor = SyncExecutor()
         executor.run()
-        for key, item_list in executor.results:
+        for key, item_list in executor.results.items():
             if not item_list or key == 'noop':
                 continue
             # Log creations and conflicts
