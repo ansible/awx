@@ -1,0 +1,48 @@
+---
+name: DAB requirements update
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *' # once an hour
+permissions:
+  pull-requests: write
+  contents: write
+jobs:
+  dab-pin-newest:
+    runs-on: ubuntu-latest
+    steps:
+      - id: dab-release
+        name: Get current django-ansible-base release version
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          owner: ansible
+          repo: django-ansible-base
+          excludes: prerelease, draft
+
+      - name: Check out respository code
+        uses: actions/checkout@v4
+
+      - id: dab-pinned
+        name: Get current django-ansible-base pinned version
+        run:
+          echo "version=$(requirements/django-ansible-base-pinned-version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Update django-ansible-base pinned version to upstream release
+        run:
+          requirements/django-ansible-base-pinned-version.sh -s ${{ steps.dab-release.outputs.release }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: devel
+          branch: bump-django-ansible-base
+          title: Bump django-ansible-base
+          body: |
+            Automated .github/workflows/dab-release.yml
+
+            django-ansible-base upstream released version == ${{ steps.dab-release.outputs.release }}
+            requirements_git.txt django-ansible-base pinned version ==  ${{ steps.dab-pinned.outputs.version }}
+          commit-message: |
+            Update django-ansible-base version to ${{ steps.dab-pinned.outputs.version }}
+          add-paths:
+            requirements/requirements_git.txt
