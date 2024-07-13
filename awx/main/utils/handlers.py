@@ -30,6 +30,10 @@ from opentelemetry.sdk.resources import Resource
 class RSysLogHandler(logging.handlers.SysLogHandler):
     append_nul = False
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.socket.setblocking(False)
+
     def _connect_unixsocket(self, address):
         super(RSysLogHandler, self)._connect_unixsocket(address)
         self.socket.setblocking(False)
