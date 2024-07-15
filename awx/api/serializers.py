@@ -6,6 +6,7 @@ import copy
 import json
 import logging
 import re
+import yaml
 from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
@@ -5914,6 +5915,34 @@ class InstanceGroupSerializer(BaseSerializer):
     def validate_credential(self, value):
         if value and not value.kubernetes:
             raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
+        return value
+
+    def validate_pod_spec_override(self, value):
+        if not value:
+            return value
+
+        # value should be empty for non-container groups
+        if self.instance and not self.instance.is_container_group:
+            raise serializers.ValidationError(_('pod_spec_override is only valid for container groups'))
+
+        pod_spec_override_json = None
+        # defect if the value is yaml or json if yaml convert to json
+        try:
+            # convert yaml to json
+            pod_spec_override_json = yaml.safe_load(value)
+        except yaml.YAMLError:
+            try:
+                pod_spec_override_json = json.loads(value)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError(_('pod_spec_override must be valid yaml or json'))
+
+        # validate the
+        spec = pod_spec_override_json.get('spec', {})
+        automount_service_account_token = spec.get('automountServiceAccountToken', False)
+
+        if automount_service_account_token:
+            raise serializers.ValidationError(_('automountServiceAccountToken is not allowed for security reasons'))
+
         return value
 
     def validate(self, attrs):
