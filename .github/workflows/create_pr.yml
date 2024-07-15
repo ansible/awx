@@ -1,0 +1,24 @@
+name: Create a PR
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    create-pr:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Create PR
+              uses: peter-evans/create-pull-request@v3
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  commit-message: 'Automated PR'
+                  title: 'Automated PR'
+                  body: 'This PR was created automatically by a GitHub Action.'
+                  branch: 'automated-pr-test'
+                  base: 'devel'
