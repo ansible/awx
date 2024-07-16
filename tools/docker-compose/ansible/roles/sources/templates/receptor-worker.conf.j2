@@ -1,25 +1,27 @@
 ---
-- node:
-    id: receptor-{{ item }}
+version: 2
+node:
+  id: receptor-{{ item }}
 
-- log-level: info
+log-level:
+  level: info
 
-- tcp-peer:
-    address: tools_receptor_hop:5555
+tcp-peers:
+  - address: tools_receptor_hop:5555
     redial: true
 
 {% if sign_work|bool %}
-- work-verification:
-    publickey: /etc/receptor/work_public_key.pem
+work-verification:
+  publickey: /etc/receptor/work_public_key.pem
 {% endif %}
 
-- work-command:
-    worktype: ansible-runner
+work-commands:
+  - worktype: ansible-runner
     command: ansible-runner
     params: worker
     allowruntimeparams: true
     verifysignature: {{ sign_work }}
 
-- control-service:
-    service: control
+control-services:
+  - service: control
     filename: {{ receptor_socket_file }}
