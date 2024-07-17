@@ -38,10 +38,18 @@ jobs:
           branch: bump-django-ansible-base
           title: Bump django-ansible-base to ${{ steps.dab-release.outputs.release }}
           body: |
+            ##### SUMMARY
             Automated .github/workflows/dab-release.yml
 
             django-ansible-base upstream released version == ${{ steps.dab-release.outputs.release }}
             requirements_git.txt django-ansible-base pinned version ==  ${{ steps.dab-pinned.outputs.version }}
+
+            ##### ISSUE TYPE
+            - Bug, Docs Fix or other nominal change
+
+            ##### COMPONENT NAME
+            - API
+
           commit-message: |
             Update django-ansible-base version to ${{ steps.dab-pinned.outputs.version }}
           add-paths:
