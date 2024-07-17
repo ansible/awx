@@ -36,7 +36,7 @@ jobs:
         with:
           base: devel
           branch: bump-django-ansible-base
-          title: Bump django-ansible-base
+          title: Bump django-ansible-base to ${{ steps.dab-release.outputs.release }}
           body: |
             Automated .github/workflows/dab-release.yml
 
