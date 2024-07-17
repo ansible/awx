@@ -54,3 +54,6 @@ jobs:
             Update django-ansible-base version to ${{ steps.dab-pinned.outputs.version }}
           add-paths:
             requirements/requirements_git.txt
+
+      - name: Enable Pull Request Automerge
+        run: gh pr merge -squash --auto ${{ steps.create-pr.outputs.pull-request-number }}
