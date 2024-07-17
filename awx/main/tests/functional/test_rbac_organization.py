@@ -53,7 +53,7 @@ def test_org_resource_role(ext_auth, organization, rando, org_admin):
 
 
 @pytest.mark.django_db
-def test_deleting_org_while_workflow_active(workflow_job_template):
+def test_delete_org_while_workflow_active(workflow_job_template):
     '''
     Delete org while workflow job is active (i.e. changing status)
     '''
