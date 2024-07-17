@@ -6,8 +6,6 @@ from awx.main.access import (
     OrganizationAccess,
 )
 
-from awx.main.models import Role
-
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
