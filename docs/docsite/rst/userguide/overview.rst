@@ -240,7 +240,7 @@ Job Distribution
    pair: features; jobs, slicing
    pair: features; jobs, distribution
 
-AWX offer the ability to take a fact gathering or configuration job running across thousands of machines and slice it into individual job slices that can be distributed across your AWX cluster for increased reliability, faster job completion, and better cluster utilization.
+AWX offers the ability to take a fact gathering or configuration job running across thousands of machines and slice it into individual job slices that can be distributed across your AWX cluster for increased reliability, faster job completion, and better cluster utilization.
 If you need to change a parameter across 15,000 switches at scale, or gather information across your multi-thousand-node RHEL estate, you can now do so easily.
 
 
