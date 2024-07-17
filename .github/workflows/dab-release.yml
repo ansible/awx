@@ -13,7 +13,7 @@ jobs:
     steps:
       - id: dab-release
         name: Get current django-ansible-base release version
-        uses: pozetroninc/github-action-get-latest-release@master
+        uses: pozetroninc/github-action-get-latest-release@2a61c339ea7ef0a336d1daa35ef0cb1418e7676c # v0.8.0
         with:
           owner: ansible
           repo: django-ansible-base
@@ -32,7 +32,7 @@ jobs:
           requirements/django-ansible-base-pinned-version.sh -s ${{ steps.dab-release.outputs.release }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6
         with:
           base: devel
           branch: bump-django-ansible-base
