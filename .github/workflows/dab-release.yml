@@ -3,7 +3,7 @@ name: django-ansible-base requirements update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *' # once an hour
+    - cron: '0 6 * * *' # once an day @ 6 AM
 permissions:
   pull-requests: write
   contents: write
