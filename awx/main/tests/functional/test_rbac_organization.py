@@ -6,6 +6,8 @@ from awx.main.access import (
     OrganizationAccess,
 )
 
+from awx.main.models import Role
+
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
@@ -48,3 +50,17 @@ def test_org_resource_role(ext_auth, organization, rando, org_admin):
         assert access.can_attach(organization, rando, 'member_role.members') == ext_auth
         organization.member_role.members.add(rando)
         assert access.can_unattach(organization, rando, 'member_role.members') == ext_auth
+
+
+@pytest.mark.django_db
+def test_deleting_org_while_workflow_active(workflow_job_template):
+    '''
+    Delete org while workflow job is active (i.e. changing status)
+    '''
+    assert workflow_job_template.organization  # sanity check
+    wj = workflow_job_template.create_unified_job()  # status should be new
+    workflow_job_template.organization.delete()
+    wj.refresh_from_db()
+    assert wj.status != 'pending'  # sanity check
+    wj.status = 'pending'  # status needs to change in order to trigger workflow_job_template.save()
+    wj.save(update_fields=['status'])
