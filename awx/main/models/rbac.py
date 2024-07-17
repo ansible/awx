@@ -692,16 +692,16 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
             try:
                 child_role = Role.objects.get(id=role_id)
             except Role.DoesNotExist:
-                child_role = None
+                continue
         else:
             try:
                 parent_role = Role.objects.get(id=role_id)
             except Role.DoesNotExist:
-                parent_role = None
+                continue
 
         # To a fault, we want to avoid running this if triggered from implicit_parents management
         # we only want to do anything if we know for sure this is a non-implicit team role
-        if child_role and parent_role and parent_role.role_field == 'member_role' and parent_role.content_type.model == 'team':
+        if parent_role.role_field == 'member_role' and parent_role.content_type.model == 'team':
             # Team internal parents are member_role->read_role and admin_role->member_role
             # for the same object, this parenting will also be implicit_parents management
             # do nothing for internal parents, but OTHER teams may still be assigned permissions to a team
