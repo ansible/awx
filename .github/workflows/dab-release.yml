@@ -1,5 +1,5 @@
 ---
-name: DAB requirements update
+name: django-ansible-base requirements update
 on:
   workflow_dispatch:
   schedule:
