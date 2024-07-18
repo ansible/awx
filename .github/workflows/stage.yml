@@ -86,17 +86,25 @@ jobs:
         run: |
           cp ../awx-logos/awx/ui/client/assets/* awx/ui/public/static/media/
 
-      - name: Setup node and npm
+      - name: Setup node and npm for old UI build
         uses: actions/setup-node@v2
         with:
-          node-version: '16.13.1'
+          node-version: '16'
 
-      - name: Prebuild UI for awx image (to speed up build process)
+      - name: Prebuild old UI for awx image (to speed up build process)
         working-directory: awx
         run: |
           sudo apt-get install gettext
           make ui-release
-          make ui-next
+
+      - name: Setup node and npm for new UI build
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Prebuild new UI for awx image (to speed up build process)
+        working-directory: awx
+        run: make ui-next
 
       - name: Set build env variables
         run: |
