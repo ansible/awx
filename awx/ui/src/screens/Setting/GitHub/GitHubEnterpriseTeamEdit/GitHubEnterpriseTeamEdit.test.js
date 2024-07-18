@@ -22,7 +22,7 @@ describe('<GitHubEnterpriseTeamEdit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-enterprise-team/',
+          'https://platformhost/sso/complete/github-enterprise-team/',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: '',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: '',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: '',
