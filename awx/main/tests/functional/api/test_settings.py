@@ -19,7 +19,7 @@ TEST_JPEG_LOGO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBkRXhpZgA
 def test_url_base_defaults_to_request(options, admin):
     # If TOWER_URL_BASE is not set, default to the Tower request hostname
     resp = options(reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'}), user=admin, expect=200)
-    assert resp.data['actions']['PUT']['TOWER_URL_BASE']['default'] == 'https://localhost'
+    assert resp.data['actions']['PUT']['TOWER_URL_BASE']['default'] == 'https://testserver'
 
 
 @pytest.mark.django_db
