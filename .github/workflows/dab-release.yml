@@ -9,6 +9,7 @@ permissions:
   contents: write
 jobs:
   dab-pin-newest:
+    if: (github.repository_owner == 'ansible' && endsWith(github.repository, 'awx')) || github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - id: dab-release
