@@ -689,9 +689,15 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 
     for role_id in pk_set:
         if reverse:
-            child_role = Role.objects.get(id=role_id)
+            try:
+                child_role = Role.objects.get(id=role_id)
+            except Role.DoesNotExist:
+                continue
         else:
-            parent_role = Role.objects.get(id=role_id)
+            try:
+                parent_role = Role.objects.get(id=role_id)
+            except Role.DoesNotExist:
+                continue
 
         # To a fault, we want to avoid running this if triggered from implicit_parents management
         # we only want to do anything if we know for sure this is a non-implicit team role
