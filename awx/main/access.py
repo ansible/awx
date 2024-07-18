@@ -1400,7 +1400,9 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     def filtered_queryset(self):
         return ExecutionEnvironment.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role')) | Q(organization__isnull=True)
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role'))
+            | Q(organization__isnull=True)
+            | Q(id__in=ExecutionEnvironment.access_ids_qs(self.user, 'change'))
         ).distinct()
 
     @check_superuser
