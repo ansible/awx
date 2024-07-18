@@ -22,7 +22,7 @@ jest.mock('../../../../api');
 
 const mockDefault = {
   data: {
-    SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://towerhost/sso/complete/github/',
+    SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://platformhost/sso/complete/github/',
     SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
     SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
     SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: null,
@@ -32,7 +32,7 @@ const mockDefault = {
 const mockOrg = {
   data: {
     SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-org/',
+      'https://platformhost/sso/complete/github-org/',
     SOCIAL_AUTH_GITHUB_ORG_KEY: '',
     SOCIAL_AUTH_GITHUB_ORG_SECRET: '$encrypted$',
     SOCIAL_AUTH_GITHUB_ORG_NAME: '',
@@ -43,7 +43,7 @@ const mockOrg = {
 const mockTeam = {
   data: {
     SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-team/',
+      'https://platformhost/sso/complete/github-team/',
     SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
     SOCIAL_AUTH_GITHUB_TEAM_SECRET: '$encrypted$',
     SOCIAL_AUTH_GITHUB_TEAM_ID: 'team_id',
@@ -54,7 +54,7 @@ const mockTeam = {
 const mockEnterprise = {
   data: {
     SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-enterprise/',
+      'https://platformhost/sso/complete/github-enterprise/',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_URL: 'https://localhost/enterpriseurl',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL: 'https://localhost/enterpriseapi',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY: 'foobar',
@@ -66,7 +66,7 @@ const mockEnterprise = {
 const mockEnterpriseOrg = {
   data: {
     SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-enterprise-org/',
+      'https://platformhost/sso/complete/github-enterprise-org/',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL: 'https://localhost/orgurl',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL: 'https://localhost/orgapi',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY: 'foobar',
@@ -79,7 +79,7 @@ const mockEnterpriseOrg = {
 const mockEnterpriseTeam = {
   data: {
     SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
-      'https://towerhost/sso/complete/github-enterprise-team/',
+      'https://platformhost/sso/complete/github-enterprise-team/',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: 'https://localhost/teamurl',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: 'https://localhost/teamapi',
     SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: 'foobar',
@@ -143,7 +143,7 @@ describe('<GitHubDetail />', () => {
       assertDetail(
         wrapper,
         'GitHub OAuth2 Callback URL',
-        'https://towerhost/sso/complete/github/'
+        'https://platformhost/sso/complete/github/'
       );
       assertDetail(wrapper, 'GitHub OAuth2 Key', 'mock github key');
       assertDetail(wrapper, 'GitHub OAuth2 Secret', 'Encrypted');
@@ -218,7 +218,7 @@ describe('<GitHubDetail />', () => {
       assertDetail(
         wrapper,
         'GitHub Organization OAuth2 Callback URL',
-        'https://towerhost/sso/complete/github-org/'
+        'https://platformhost/sso/complete/github-org/'
       );
       assertDetail(wrapper, 'GitHub Organization OAuth2 Key', 'Not configured');
       assertDetail(wrapper, 'GitHub Organization OAuth2 Secret', 'Encrypted');
@@ -269,7 +269,7 @@ describe('<GitHubDetail />', () => {
       assertDetail(
         wrapper,
         'GitHub Team OAuth2 Callback URL',
-        'https://towerhost/sso/complete/github-team/'
+        'https://platformhost/sso/complete/github-team/'
       );
       assertDetail(wrapper, 'GitHub Team OAuth2 Key', 'OAuth2 key (Client ID)');
       assertDetail(wrapper, 'GitHub Team OAuth2 Secret', 'Encrypted');
@@ -316,7 +316,7 @@ describe('<GitHubDetail />', () => {
       assertDetail(
         wrapper,
         'GitHub Enterprise OAuth2 Callback URL',
-        'https://towerhost/sso/complete/github-enterprise/'
+        'https://platformhost/sso/complete/github-enterprise/'
       );
       assertDetail(
         wrapper,
@@ -376,7 +376,7 @@ describe('<GitHubDetail />', () => {
       assertDetail(
         wrapper,
         'GitHub Enterprise Organization OAuth2 Callback URL',
-        'https://towerhost/sso/complete/github-enterprise-org/'
+        'https://platformhost/sso/complete/github-enterprise-org/'
       );
       assertDetail(
         wrapper,
@@ -445,7 +445,7 @@ describe('<GitHubDetail />', () => {
       assertDetail(
         wrapper,
         'GitHub Enterprise Team OAuth2 Callback URL',
-        'https://towerhost/sso/complete/github-enterprise-team/'
+        'https://platformhost/sso/complete/github-enterprise-team/'
       );
       assertDetail(
         wrapper,

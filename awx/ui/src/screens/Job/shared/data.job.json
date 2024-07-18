@@ -164,7 +164,7 @@
       "ANSIBLE_RETRY_FILES_ENABLED": "False",
       "MAX_EVENT_RES": "700000",
       "ANSIBLE_CALLBACK_PLUGINS": "/awx_devel/awx/plugins/callback",
-      "AWX_HOST": "https://towerhost",
+      "AWX_HOST": "https://platformhost",
       "ANSIBLE_SSH_CONTROL_PATH_DIR": "/tmp/awx_2_a4b1afiw/cp",
       "ANSIBLE_STDOUT_CALLBACK": "awx_display"
   },
