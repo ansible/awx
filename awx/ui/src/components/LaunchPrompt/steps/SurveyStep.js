@@ -108,6 +108,18 @@ function MultipleChoiceField({ question }) {
     options = [...question.choices];
   }
 
+  const renderOptions = (opts) =>
+    opts.map((opt) => <SelectOption key={opt} value={opt} />);
+
+  const onFilter = (event) => {
+    if (event) {
+      const str = event.target.value.toLowerCase();
+      const matches = options.filter((o) => o.toLowerCase().includes(str));
+      return renderOptions(matches);
+    }
+    return null;
+  };
+
   return (
     <FormGroup
       fieldId={id}
@@ -127,6 +139,7 @@ function MultipleChoiceField({ question }) {
         variant={SelectVariant.typeahead}
         id={id}
         ouiaId={`single-survey-question-${question.variable}`}
+        onFilter={onFilter}
         isOpen={isOpen}
         placeholderText={t`Select an option`}
         onClear={() => {
@@ -135,9 +148,7 @@ function MultipleChoiceField({ question }) {
         }}
         noResultsFoundText={t`No results found`}
       >
-        {options.map((opt) => (
-          <SelectOption key={opt} value={opt} />
-        ))}
+        {renderOptions(options)}
       </Select>
     </FormGroup>
   );
