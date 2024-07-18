@@ -21,8 +21,10 @@ describe('<SAMLDetail />', () => {
   beforeEach(() => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
-        SOCIAL_AUTH_SAML_CALLBACK_URL: 'https://towerhost/sso/complete/saml/',
-        SOCIAL_AUTH_SAML_METADATA_URL: 'https://towerhost/sso/metadata/saml/',
+        SOCIAL_AUTH_SAML_CALLBACK_URL:
+          'https://platformhost/sso/complete/saml/',
+        SOCIAL_AUTH_SAML_METADATA_URL:
+          'https://platformhost/sso/metadata/saml/',
         SOCIAL_AUTH_SAML_SP_ENTITY_ID: 'mock_id',
         SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: 'mock_cert',
         SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: '',
@@ -71,12 +73,12 @@ describe('<SAMLDetail />', () => {
     assertDetail(
       wrapper,
       'SAML Assertion Consumer Service (ACS) URL',
-      'https://towerhost/sso/complete/saml/'
+      'https://platformhost/sso/complete/saml/'
     );
     assertDetail(
       wrapper,
       'SAML Service Provider Metadata URL',
-      'https://towerhost/sso/metadata/saml/'
+      'https://platformhost/sso/metadata/saml/'
     );
     assertDetail(wrapper, 'SAML Service Provider Entity ID', 'mock_id');
     assertVariableDetail(

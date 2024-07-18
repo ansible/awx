@@ -89,7 +89,7 @@
       "LC_ALL": "en_US.UTF-8",
       "MFLAGS": "-w",
       "OLDPWD": "/awx_devel",
-      "AWX_HOST": "https://towerhost",
+      "AWX_HOST": "https://platformhost",
       "HOSTNAME": "awx",
       "LANGUAGE": "en_US:en",
       "SDB_HOST": "0.0.0.0",

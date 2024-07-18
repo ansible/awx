@@ -22,7 +22,7 @@ describe('<GitHubEnterpriseOrgEdit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-enterprise-org/',
+          'https://platformhost/sso/complete/github-enterprise-org/',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL: '',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL: '',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY: '',
