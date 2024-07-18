@@ -22,7 +22,8 @@ jest.mock('../../../../api');
 
 const mockDefault = {
   data: {
-    SOCIAL_AUTH_GITHUB_CALLBACK_URL: 'https://platformhost/sso/complete/github/',
+    SOCIAL_AUTH_GITHUB_CALLBACK_URL:
+      'https://platformhost/sso/complete/github/',
     SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
     SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
     SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: null,
@@ -318,8 +319,16 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise OAuth2 Callback URL',
         'https://platformhost/sso/complete/github-enterprise/'
       );
-      assertDetail(wrapper, 'GitHub Enterprise URL', 'https://localhost/enterpriseurl');
-      assertDetail(wrapper, 'GitHub Enterprise API URL', 'https://localhost/enterpriseapi');
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise URL',
+        'https://localhost/enterpriseurl'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise API URL',
+        'https://localhost/enterpriseapi'
+      );
       assertDetail(wrapper, 'GitHub Enterprise OAuth2 Key', 'foobar');
       assertDetail(wrapper, 'GitHub Enterprise OAuth2 Secret', 'Encrypted');
       assertVariableDetail(
@@ -370,10 +379,26 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise Organization OAuth2 Callback URL',
         'https://platformhost/sso/complete/github-enterprise-org/'
       );
-      assertDetail(wrapper, 'GitHub Enterprise Organization URL', 'https://localhost/orgurl');
-      assertDetail(wrapper, 'GitHub Enterprise Organization API URL', 'https://localhost/orgapi');
-      assertDetail(wrapper, 'GitHub Enterprise Organization OAuth2 Key', 'foobar');
-      assertDetail(wrapper, 'GitHub Enterprise Organization OAuth2 Secret', 'Encrypted');
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization URL',
+        'https://localhost/orgurl'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization API URL',
+        'https://localhost/orgapi'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Key',
+        'foobar'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Organization OAuth2 Secret',
+        'Encrypted'
+      );
       assertDetail(wrapper, 'GitHub Enterprise Organization Name', 'foo');
       assertVariableDetail(
         wrapper,
@@ -423,10 +448,22 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise Team OAuth2 Callback URL',
         'https://platformhost/sso/complete/github-enterprise-team/'
       );
-      assertDetail(wrapper, 'GitHub Enterprise Team URL', 'https://localhost/teamurl');
-      assertDetail(wrapper, 'GitHub Enterprise Team API URL', 'https://localhost/teamapi');
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team URL',
+        'https://localhost/teamurl'
+      );
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team API URL',
+        'https://localhost/teamapi'
+      );
       assertDetail(wrapper, 'GitHub Enterprise Team OAuth2 Key', 'foobar');
-      assertDetail(wrapper, 'GitHub Enterprise Team OAuth2 Secret', 'Encrypted');
+      assertDetail(
+        wrapper,
+        'GitHub Enterprise Team OAuth2 Secret',
+        'Encrypted'
+      );
       assertDetail(wrapper, 'GitHub Enterprise Team ID', 'foo');
       assertVariableDetail(
         wrapper,
