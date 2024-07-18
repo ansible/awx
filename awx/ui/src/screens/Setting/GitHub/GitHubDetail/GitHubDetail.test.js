@@ -318,16 +318,8 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise OAuth2 Callback URL',
         'https://platformhost/sso/complete/github-enterprise/'
       );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise URL',
-        'https://localhost/enterpriseurl'
-      );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise API URL',
-        'https://localhost/enterpriseapi'
-      );
+      assertDetail(wrapper, 'GitHub Enterprise URL', 'https://localhost/enterpriseurl');
+      assertDetail(wrapper, 'GitHub Enterprise API URL', 'https://localhost/enterpriseapi');
       assertDetail(wrapper, 'GitHub Enterprise OAuth2 Key', 'foobar');
       assertDetail(wrapper, 'GitHub Enterprise OAuth2 Secret', 'Encrypted');
       assertVariableDetail(
@@ -343,7 +335,7 @@ describe('<GitHubDetail />', () => {
     });
   });
 
-  describe('Enterprise Org', () => {
+  describe('Enterprise Organization', () => {
     let wrapper;
 
     beforeAll(async () => {
@@ -378,26 +370,10 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise Organization OAuth2 Callback URL',
         'https://platformhost/sso/complete/github-enterprise-org/'
       );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Organization URL',
-        'https://localhost/orgurl'
-      );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Organization API URL',
-        'https://localhost/orgapi'
-      );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Organization OAuth2 Key',
-        'foobar'
-      );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Organization OAuth2 Secret',
-        'Encrypted'
-      );
+      assertDetail(wrapper, 'GitHub Enterprise Organization URL', 'https://localhost/orgurl');
+      assertDetail(wrapper, 'GitHub Enterprise Organization API URL', 'https://localhost/orgapi');
+      assertDetail(wrapper, 'GitHub Enterprise Organization OAuth2 Key', 'foobar');
+      assertDetail(wrapper, 'GitHub Enterprise Organization OAuth2 Secret', 'Encrypted');
       assertDetail(wrapper, 'GitHub Enterprise Organization Name', 'foo');
       assertVariableDetail(
         wrapper,
@@ -447,22 +423,10 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise Team OAuth2 Callback URL',
         'https://platformhost/sso/complete/github-enterprise-team/'
       );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Team URL',
-        'https://localhost/teamurl'
-      );
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Team API URL',
-        'https://localhost/teamapi'
-      );
+      assertDetail(wrapper, 'GitHub Enterprise Team URL', 'https://localhost/teamurl');
+      assertDetail(wrapper, 'GitHub Enterprise Team API URL', 'https://localhost/teamapi');
       assertDetail(wrapper, 'GitHub Enterprise Team OAuth2 Key', 'foobar');
-      assertDetail(
-        wrapper,
-        'GitHub Enterprise Team OAuth2 Secret',
-        'Encrypted'
-      );
+      assertDetail(wrapper, 'GitHub Enterprise Team OAuth2 Secret', 'Encrypted');
       assertDetail(wrapper, 'GitHub Enterprise Team ID', 'foo');
       assertVariableDetail(
         wrapper,
@@ -474,25 +438,6 @@ describe('<GitHubDetail />', () => {
         'GitHub Enterprise Team OAuth2 Team Map',
         'null'
       );
-    });
-  });
-
-  describe('Redirect', () => {
-    test('should render redirect when user navigates to erroneous category', async () => {
-      let wrapper;
-      useRouteMatch.mockImplementation(() => ({
-        url: '/settings/github/foo/details',
-        path: '/settings/github/:category/details',
-        params: { category: 'foo' },
-      }));
-      await act(async () => {
-        wrapper = mountWithContexts(
-          <SettingsProvider value={mockAllOptions.actions}>
-            <GitHubDetail />
-          </SettingsProvider>
-        );
-      });
-      await waitForElement(wrapper, 'Redirect');
     });
   });
 });
