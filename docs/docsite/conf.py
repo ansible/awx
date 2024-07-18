@@ -71,8 +71,8 @@ rst_epilog = """
 .. |aap| replace:: Ansible Automation Platform
 .. |ab| replace:: ansible-builder
 .. |ap| replace:: Automation Platform
-.. |at| replace:: automation controller
-.. |At| replace:: Automation controller
+.. |at| replace:: AWX
+.. |At| replace:: AWX
 .. |ah| replace:: Automation Hub
 .. |EE| replace:: Execution Environment
 .. |EEs| replace:: Execution Environments
