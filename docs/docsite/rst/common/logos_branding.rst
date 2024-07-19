@@ -18,7 +18,7 @@ For example, if you uploaded a specific logo, and added the following text:
 	:alt: Edit User Interface Settings form populated with custom text and logo.
 
 
-The Tower login dialog would look like this:
+The AWX login dialog would look like this:
 
 .. image:: ../common/images/configure-awx-ui-angry-spud-login.png
 	:alt: AWX login screen with custom text and logo.

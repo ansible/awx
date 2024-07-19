@@ -828,7 +828,7 @@ MANAGE_ORGANIZATION_AUTH = True
 DISABLE_LOCAL_AUTH = False
 
 # Note: This setting may be overridden by database settings.
-TOWER_URL_BASE = "https://towerhost"
+TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
