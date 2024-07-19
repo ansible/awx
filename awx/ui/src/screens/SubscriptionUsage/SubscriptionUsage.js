@@ -27,8 +27,8 @@ function SubscriptionUsage() {
         <Banner variant="info">
           <Trans>
             <p>
-              <InfoCircleIcon /> The new user
-              interface can be found <a href="/">here</a>.
+              <InfoCircleIcon /> The new user interface can be found{' '}
+              <a href="/">here</a>.
             </p>
           </Trans>
         </Banner>
