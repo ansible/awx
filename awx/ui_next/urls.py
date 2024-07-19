@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.http import Http404
 from django.urls import re_path
 from django.views.generic.base import TemplateView
 

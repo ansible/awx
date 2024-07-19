@@ -12,7 +12,6 @@ import {
 } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 
-import { useConfig } from 'contexts/Config';
 import useRequest from 'hooks/useRequest';
 import { DashboardAPI } from 'api';
 import ScreenHeader from 'components/ScreenHeader';
@@ -43,7 +42,6 @@ const MainPageSection = styled(PageSection)`
 `;
 
 function Dashboard() {
-  const config = useConfig();
   const [activeTabId, setActiveTabId] = useState(0);
 
   const {
