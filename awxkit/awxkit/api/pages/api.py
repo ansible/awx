@@ -31,7 +31,17 @@ EXPORTABLE_RESOURCES = [
 ]
 
 
-EXPORTABLE_RELATIONS = ['Roles', 'NotificationTemplates', 'WorkflowJobTemplateNodes', 'Credentials', 'Hosts', 'Groups', 'ExecutionEnvironments', 'Schedules', 'CredentialInputSource']
+EXPORTABLE_RELATIONS = [
+    'Roles',
+    'NotificationTemplates',
+    'WorkflowJobTemplateNodes',
+    'Credentials',
+    'Hosts',
+    'Groups',
+    'ExecutionEnvironments',
+    'Schedules',
+    'CredentialInputSource',
+]
 
 
 # These are special-case related objects, where we want only in this

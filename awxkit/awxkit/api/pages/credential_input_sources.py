@@ -7,7 +7,7 @@ from . import page
 
 class CredentialInputSource(HasCreate, base.Base):
     dependencies = [Credential]
-    NATURAL_KEY=('target_credential', 'input_field_name')
+    NATURAL_KEY = ('target_credential', 'input_field_name')
 
 
 page.register_page(resources.credential_input_source, CredentialInputSource)
