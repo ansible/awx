@@ -47,7 +47,7 @@ services:
 {% if minikube_container_group|bool %}
       MINIKUBE_CONTAINER_GROUP: "true"
 {% endif %}
-    links:
+    depends_on:
       - postgres
       - redis_{{ container_postfix }}
     networks:
@@ -197,10 +197,6 @@ services:
     volumes:
       - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus_storage:/prometheus:rw"
-    links:
-{% for i in range(control_plane_node_count|int) %}
-      - awx_{{ loop.index }}:awx{{ loop.index }} # because underscores are not valid in hostnames
-{% endfor %}
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
@@ -214,8 +210,6 @@ services:
     volumes:
       - "../../grafana:/etc/grafana/provisioning"
       - "grafana_storage:/var/lib/grafana:rw"
-    links:
-      - prometheus
     depends_on:
       - prometheus
 {% endif %}
@@ -318,8 +312,6 @@ services:
     container_name: tools_receptor_hop
     hostname: receptor-hop
     command: 'receptor --config /etc/receptor/receptor.conf'
-    links:
-      - awx_1
     networks:
       - awx
     ports:
@@ -335,8 +327,6 @@ services:
     command: 'receptor --config /etc/receptor/receptor.conf'
     environment:
       RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
-    links:
-      - receptor-hop
     networks:
       - awx
     volumes:
