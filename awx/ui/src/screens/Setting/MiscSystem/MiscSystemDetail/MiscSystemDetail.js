@@ -61,8 +61,7 @@ function MiscSystemDetail() {
         'PROXY_IP_ALLOWED_LIST',
         'CSRF_TRUSTED_ORIGINS',
         'AUTOMATION_ANALYTICS_LAST_GATHER',
-        'AUTOMATION_ANALYTICS_LAST_ENTRIES',
-        'UI_NEXT'
+        'AUTOMATION_ANALYTICS_LAST_ENTRIES'
       );
 
       const mergedData = {};

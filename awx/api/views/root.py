@@ -285,8 +285,7 @@ class ApiV2ConfigView(APIView):
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
-        # Guarding against settings.UI_NEXT being set to a non-boolean value
-        ui_next_state = settings.UI_NEXT if settings.UI_NEXT in (True, False) else False
+        # Guarding against settings.UI_LEGACY being set to a non-boolean value
         ui_legacy_state = settings.UI_LEGACY if settings.UI_LEGACY in (True, False) else False
 
         data = dict(
@@ -297,7 +296,6 @@ class ApiV2ConfigView(APIView):
             analytics_status=pendo_state,
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
-            ui_next=ui_next_state,
             ui_legacy=ui_legacy_state,
         )
 

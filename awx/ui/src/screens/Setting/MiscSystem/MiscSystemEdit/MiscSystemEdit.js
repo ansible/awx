@@ -53,8 +53,7 @@ function MiscSystemEdit() {
         'TOWER_URL_BASE',
         'DEFAULT_EXECUTION_ENVIRONMENT',
         'PROXY_IP_ALLOWED_LIST',
-        'CSRF_TRUSTED_ORIGINS',
-        'UI_NEXT'
+        'CSRF_TRUSTED_ORIGINS'
       );
 
       const mergedData = {};
@@ -225,7 +224,6 @@ function MiscSystemEdit() {
                   type="number"
                   isRequired
                 />
-                <BooleanField name="UI_NEXT" config={system.UI_NEXT} />
                 <ObjectField
                   name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
                   config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}
