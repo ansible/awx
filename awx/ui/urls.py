@@ -1,12 +1,19 @@
 from django.urls import re_path
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
+from django.http import Http404
+from django.conf import settings
 
 from awx.main.utils.licensing import server_product_name
 
 
 class IndexView(TemplateView):
     template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        if not settings.UI_LEGACY:
+            raise Http404()
+        return super().get_context_data(**kwargs)
 
 
 class MigrationsNotran(TemplateView):
