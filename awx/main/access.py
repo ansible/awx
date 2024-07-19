@@ -1421,7 +1421,13 @@ class ExecutionEnvironmentAccess(BaseAccess):
         else:
             if self.user not in obj.organization.execution_environment_admin_role:
                 raise PermissionDenied
-        return self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role')
+        if not self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role'):
+            return False
+        # Special case that check_related does not catch, org users can not remove the organization from the EE
+        if data and ('organization' in data or 'organization_id' in data):
+            if (not data.get('organization')) and (not data.get('organization_id')):
+                return False
+        return True
 
     def can_delete(self, obj):
         if obj.managed:

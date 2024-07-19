@@ -143,3 +143,6 @@ def test_give_org_permission_to_ee(org_ee, organization, org_member, check_user_
 
     assert access.can_change(org_ee, {'name': 'new', 'organization': organization.id})
     check_user_capabilities(org_member, org_ee, {'edit': True, 'delete': True, 'copy': True})
+
+    # Extra check, user can not remove the EE from the organization
+    assert not access.can_change(org_ee, {'name': 'new', 'organization': None})
