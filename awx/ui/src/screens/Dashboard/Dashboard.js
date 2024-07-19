@@ -71,16 +71,14 @@ function Dashboard() {
   }
   return (
     <>
-      {
-        <Banner variant="info">
-          <Trans>
-            <p>
-              <InfoCircleIcon /> You are currently viewing the legacy UI
-              (deprecated). <a href="/">Enable the new user interface</a>.
-            </p>
-          </Trans>
-        </Banner>
-      }
+      <Banner variant="info">
+        <Trans>
+          <p>
+            <InfoCircleIcon /> You are currently viewing the legacy UI
+            (deprecated). <a href="/">Enable the new user interface</a>.
+          </p>
+        </Trans>
+      </Banner>
       <ScreenHeader
         streamType="all"
         breadcrumbConfig={{ '/home': t`Dashboard` }}
