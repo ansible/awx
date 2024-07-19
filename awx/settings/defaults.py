@@ -262,6 +262,7 @@ START_TASK_LIMIT = 100
 # We have the grace period so the task manager can bail out before the timeout.
 TASK_MANAGER_TIMEOUT = 300
 TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+TASK_MANAGER_LOCK_TIMEOUT = TASK_MANAGER_TIMEOUT + TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
 # Number of seconds _in addition to_ the task manager timeout a job can stay
 # in waiting without being reaped
@@ -783,6 +784,11 @@ INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 TERRAFORM_INSTANCE_ID_VAR = 'id'
 TERRAFORM_EXCLUDE_EMPTY_GROUPS = True
 
+# ------------------------
+# OpenShift Virtualization
+# ------------------------
+OPENSHIFT_VIRTUALIZATION_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- Custom -----
 # ---------------------
@@ -822,7 +828,7 @@ MANAGE_ORGANIZATION_AUTH = True
 DISABLE_LOCAL_AUTH = False
 
 # Note: This setting may be overridden by database settings.
-TOWER_URL_BASE = "https://towerhost"
+TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'

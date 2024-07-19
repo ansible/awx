@@ -35,6 +35,13 @@ class TestWorkflowJobTemplateAccess:
         assert org_member in wfjt.execute_role
         assert org_member in wfjt.read_role
 
+    def test_non_super_admin_no_add_without_org(self, wfjt, organization, rando):
+        organization.member_role.members.add(rando)
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateAccess(rando, save_messages=True)
+        assert not access.can_add({'name': 'without org'})
+        assert 'An organization is required to create a workflow job template for normal user' in access.messages['organization']
+
 
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:

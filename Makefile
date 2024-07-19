@@ -63,6 +63,11 @@ DEV_DOCKER_OWNER ?= ansible
 DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
 DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
+IMAGE_KUBE_DEV=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
+IMAGE_KUBE=$(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG)
+
+# Common command to use for running ansible-playbook
+ANSIBLE_PLAYBOOK ?= ansible-playbook -e ansible_python_interpreter=$(PYTHON)
 
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 
@@ -85,6 +90,18 @@ I18N_FLAG_FILE = .i18n_built
 
 ## PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
 PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
+
+# Set up cache variables for image builds, allowing to control whether cache is used or not, ex:
+# DOCKER_CACHE=--no-cache make docker-compose-build
+ifeq ($(DOCKER_CACHE),)
+ DOCKER_DEVEL_CACHE_FLAG=--cache-from=$(DEVEL_IMAGE_NAME)
+ DOCKER_KUBE_DEV_CACHE_FLAG=--cache-from=$(IMAGE_KUBE_DEV)
+ DOCKER_KUBE_CACHE_FLAG=--cache-from=$(IMAGE_KUBE)
+else
+ DOCKER_DEVEL_CACHE_FLAG=$(DOCKER_CACHE)
+ DOCKER_KUBE_DEV_CACHE_FLAG=$(DOCKER_CACHE)
+ DOCKER_KUBE_CACHE_FLAG=$(DOCKER_CACHE)
+endif
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
@@ -368,7 +385,7 @@ symlink_collection:
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
 awx_collection_build: $(shell find awx_collection -type f)
-	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
+	$(ANSIBLE_PLAYBOOK) -i localhost, awx_collection/tools/template_galaxy.yml \
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
 	  -e collection_version=$(COLLECTION_VERSION) \
@@ -522,10 +539,10 @@ endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
-	    ansible-playbook -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
+	    $(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
 
-	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
+	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
 	    -e receptor_image=$(RECEPTOR_IMAGE) \
@@ -549,7 +566,7 @@ docker-compose-sources: .git/hooks/pre-commit
 
 docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
-	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
+	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_ldap=$(LDAP); \
@@ -592,7 +609,7 @@ docker-compose-container-group-clean:
 .PHONY: Dockerfile.dev
 ## Generate Dockerfile.dev for awx_devel image
 Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
+	$(ANSIBLE_PLAYBOOK) tools/ansible/dockerfile.yml \
 		-e dockerfile_name=Dockerfile.dev \
 		-e build_dev=True \
 		-e receptor_image=$(RECEPTOR_IMAGE)
@@ -603,8 +620,7 @@ docker-compose-build: Dockerfile.dev
 		-f Dockerfile.dev \
 		-t $(DEVEL_IMAGE_NAME) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
-
+		$(DOCKER_DEVEL_CACHE_FLAG) .
 
 .PHONY: docker-compose-buildx
 ## Build awx_devel image for docker compose development environment for multiple architectures
@@ -614,7 +630,7 @@ docker-compose-buildx: Dockerfile.dev
 	- docker buildx build \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) \
+		$(DOCKER_DEVEL_CACHE_FLAG) \
 		--platform=$(PLATFORMS) \
 		--tag $(DEVEL_IMAGE_NAME) \
 		-f Dockerfile.dev .
@@ -667,7 +683,7 @@ version-for-buildyml:
 .PHONY: Dockerfile
 ## Generate Dockerfile for awx image
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
+	$(ANSIBLE_PLAYBOOK) tools/ansible/dockerfile.yml \
 		-e receptor_image=$(RECEPTOR_IMAGE) \
 		-e headless=$(HEADLESS)
 
@@ -677,7 +693,8 @@ awx-kube-build: Dockerfile
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
-		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
+		$(DOCKER_KUBE_CACHE_FLAG) \
+		-t $(IMAGE_KUBE) .
 
 ## Build multi-arch awx image for deployment on Kubernetes environment.
 awx-kube-buildx: Dockerfile
@@ -689,7 +706,8 @@ awx-kube-buildx: Dockerfile
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
 		--platform=$(PLATFORMS) \
-		--tag $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) \
+		$(DOCKER_KUBE_CACHE_FLAG) \
+		--tag $(IMAGE_KUBE) \
 		-f Dockerfile .
 	- docker buildx rm awx-kube-buildx
 
@@ -697,7 +715,7 @@ awx-kube-buildx: Dockerfile
 .PHONY: Dockerfile.kube-dev
 ## Generate Docker.kube-dev for awx_kube_devel image
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
+	$(ANSIBLE_PLAYBOOK) tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
 	    -e template_dest=_build_kube_dev \
@@ -707,8 +725,8 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 awx-kube-dev-build: Dockerfile.kube-dev
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
-	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
+	     $(DOCKER_KUBE_DEV_CACHE_FLAG) \
+	    -t $(IMAGE_KUBE_DEV) .
 
 ## Build and push multi-arch awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-buildx: Dockerfile.kube-dev
@@ -717,14 +735,14 @@ awx-kube-dev-buildx: Dockerfile.kube-dev
 	- docker buildx build \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
+		$(DOCKER_KUBE_DEV_CACHE_FLAG) \
 		--platform=$(PLATFORMS) \
-		--tag $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
+		--tag $(IMAGE_KUBE_DEV) \
 		-f Dockerfile.kube-dev .
 	- docker buildx rm awx-kube-dev-buildx
 
 kind-dev-load: awx-kube-dev-build
-	$(KIND_BIN) load docker-image $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
+	$(KIND_BIN) load docker-image $(IMAGE_KUBE_DEV)
 
 # Translation TASKS
 # --------------------------------------

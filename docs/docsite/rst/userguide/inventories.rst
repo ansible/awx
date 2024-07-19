@@ -1,4 +1,4 @@
- .. _ug_inventories:
+.. _ug_inventories:
 
 *******************
 Inventories
@@ -482,6 +482,7 @@ Inventory updates use dynamically-generated YAML files which are parsed by their
 - :ref:`ug_source_rhv`
 - :ref:`ug_source_rhaap`
 - :ref:`ug_source_terraform`
+- :ref:`ug_source_ocpv`
 
 
 Newly created configurations for inventory sources will contain the default plugin configuration values. If you want your newly created inventory sources to match the output of legacy sources, you must apply a specific set of configuration values for that source. To ensure backward compatibility, AWX uses "templates" for each of these sources to force the output of inventory plugins into the legacy format. Refer to :ref:`ir_inv_plugin_templates_reference` section of this guide for each source and their respective templates to help you migrate to the new style inventory plugin output.
@@ -1100,11 +1101,11 @@ This inventory source uses the `terraform_state <https://github.com/ansible-coll
 
 1. To configure this type of sourced inventory, select **Terraform State** from the Source field.
 
-2. The Create new source window expands with the required **Credential** field. Choose from an existing Terraform backend Credential. For more information, refer to :ref:`ug_credentials`.
+2. The Create new source window expands with the required **Credential** field. Choose from an existing Terraform backend credential. For more information, refer to :ref:`ug_credentials_terraform`.
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`. For Terraform, enable **Overwrite** and **Update on launch** options.  
 
-4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/docs/cloud.terraform.terraform_state_inventory.rst>`_ file for detail.
+4. Use the **Source Variables** field to override variables used by the ``terraform`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/docs/cloud.terraform.terraform_state_inventory.rst>`_ file for detail.
 
   The ``backend_type`` variable is required by the Terraform state inventory plugin. This should match the remote backend configured in the Terraform backend credential, here is an example for an Amazon S3 backend:
 
@@ -1118,6 +1119,43 @@ This inventory source uses the `terraform_state <https://github.com/ansible-coll
   .. image:: ../common/images/inventories-create-source-terraform-example.png
 
 6. To add hosts for AWS EC2, GCE, and Azure instances, the Terraform state file in the backend must contain state for resources already deployed to EC2, GCE, or Azure. Refer to each of the Terraform providers' respective documentation to provision instances.
+
+
+.. _ug_source_ocpv:
+
+OpenShift Virtualization
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index::
+   pair: inventories; OpenShift
+   pair: inventories; OCP
+   pair: inventory source; OpenShift virtualization
+
+
+This inventory source uses a cluster that is able to deploy OpenShift (OCP) virtualization. In order to configure an OCP virtualization requires a virtual machine deployed in a specific namespace and an OpenShift or Kubernetes API Bearer Token credential.
+
+1. To configure this type of sourced inventory, select **OpenShift Virtualization** from the Source field.
+2. The Create new source window expands with the required **Credential** field. Choose from an existing Kubernetes API Bearer Token credential. For more information, refer to :ref:`ug_credentials_ocp_k8s`. In this example, the ``cmv2.engineering.redhat.com`` credential is used.
+
+3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`. 
+
+4. Use the **Source Variables** field to override variables used by the ``kubernetes`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `kubevirt.core.kubevirt inventory source <https://kubevirt.io/kubevirt.core/main/plugins/kubevirt.html#parameters>`_ documentation for detail.
+
+  In the example below, the ``connections`` variable is used to specify access to a particular namespace in a cluster. 
+
+  ::
+
+    ---
+    connections:
+    - namespaces:
+      - hao-test
+
+
+  .. image:: ../common/images/inventories-create-source-ocpvirt-example.png
+
+5. Save the configuration and click the **Sync** button to sync the inventory.
+
+
 
 
 .. _ug_customscripts:

@@ -40,6 +40,4 @@ Things to know prior to submitting revisions
 Translations
 -------------
 
-At this time we do not accept PRs for adding additional language translations as we have an automated process for generating our translations. This is because translations require constant care as new strings are added and changed in the code base. Because of this the .po files are overwritten during every translation release cycle. We also can't support a lot of translations on AWX as its an open source project and each language adds time and cost to maintain. If you would like to see AWX translated into a new language please create an issue and ask others you know to upvote the issue. Our translation team will review the needs of the community and see what they can do around supporting additional language.
-
-If you find an issue with an existing translation, please see the `Reporting Issues <https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md#reporting-issues>`_ section to open an issue and our translation team will work with you on a resolution. 
+At this time we do not accept PRs for language translations.

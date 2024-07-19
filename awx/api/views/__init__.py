@@ -61,6 +61,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # django-ansible-base
+from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
 
@@ -2391,6 +2392,14 @@ class JobTemplateList(ListCreateAPIView):
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
 
+    def check_permissions(self, request):
+        if request.method == 'POST':
+            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+            if not can_access:
+                self.permission_denied(request, message=messages)
+
+        super(JobTemplateList, self).check_permissions(request)
+
 
 class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.JobTemplate
@@ -2770,12 +2779,7 @@ class JobTemplateCallback(GenericAPIView):
         host for the current request.
         """
         # Find the list of remote host names/IPs to check.
-        remote_hosts = set()
-        for header in settings.REMOTE_HOST_HEADERS:
-            for value in self.request.META.get(header, '').split(','):
-                value = value.strip()
-                if value:
-                    remote_hosts.add(value)
+        remote_hosts = set(get_remote_hosts(self.request))
         # Add the reverse lookup of IP addresses.
         for rh in list(remote_hosts):
             try:
@@ -3114,6 +3118,14 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     model = models.WorkflowJobTemplate
     serializer_class = serializers.WorkflowJobTemplateSerializer
     always_allow_superuser = False
+
+    def check_permissions(self, request):
+        if request.method == 'POST':
+            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+            if not can_access:
+                self.permission_denied(request, message=messages)
+
+        super(WorkflowJobTemplateList, self).check_permissions(request)
 
 
 class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):

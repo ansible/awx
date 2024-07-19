@@ -22,7 +22,9 @@ def resolve(obj, path):
     if new_obj is None:
         return set()
     if not path:
-        return {new_obj,}
+        return {
+            new_obj,
+        }
 
     if isinstance(new_obj, ManyToManyDescriptor):
         return {x for o in new_obj.all() for x in resolve(o, path)}
@@ -53,7 +55,9 @@ for ct in ContentType.objects.order_by('id'):
                 crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
                 continue
             if r.content_object != obj:
-                sys.stderr.write(f"{cls.__name__} id={obj.id} {f.name} is pointing to a Role that is assigned to a different object: role.id={r.id} {r.content_type!r} {r.object_id} {r.role_field}\n")
+                sys.stderr.write(
+                    f"{cls.__name__} id={obj.id} {f.name} is pointing to a Role that is assigned to a different object: role.id={r.id} {r.content_type!r} {r.object_id} {r.role_field}\n"
+                )
                 crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
                 continue
 
@@ -87,16 +91,23 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
 
     # Check the resource's role field parents for consistency with Role.parents.all().
     f = r.content_object._meta.get_field(r.role_field)
-    f_parent = set(f.parent_role) if isinstance(f.parent_role, list) else {f.parent_role,}
+    f_parent = (
+        set(f.parent_role)
+        if isinstance(f.parent_role, list)
+        else {
+            f.parent_role,
+        }
+    )
     dotted = {x for p in f_parent if '.' in p for x in resolve(r.content_object, p)}
     plus = set()
     for p in r.parents.all():
         if p.singleton_name:
             if f'singleton:{p.singleton_name}' not in f_parent:
                 plus.add(p)
-        elif (p.content_type, p.role_field) == (team_ct, 'member_role'):
+        elif p.content_type == team_ct:
             # Team has been granted this role; probably legitimate.
-            continue
+            if p.role_field in ('admin_role', 'member_role'):
+                continue
         elif (p.content_type, p.object_id) == (r.content_type, r.object_id):
             if p.role_field not in f_parent:
                 plus.add(p)
@@ -118,13 +129,17 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         continue
     if rev is None or r.id != rev.id:
         if rev and (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
-            sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is an orphaned duplicate of Role id={rev.id}, which is actually being used by the assigned resource\n")
+            sys.stderr.write(
+                f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is an orphaned duplicate of Role id={rev.id}, which is actually being used by the assigned resource\n"
+            )
             orphaned_roles.add(r.id)
         elif not rev:
             sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object currently using no role\n")
             crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
         else:
-            sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object using a different role: id={rev.id} {rev.content_type!r} {rev.object_id} {rev.role_field}\n")
+            sys.stderr.write(
+                f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object using a different role: id={rev.id} {rev.content_type!r} {rev.object_id} {rev.role_field}\n"
+            )
             crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
         continue
 
@@ -132,7 +147,8 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
 sys.stderr.write('===================================\n')
 
 
-print(f"""\
+print(
+    f"""\
 from collections import Counter
 
 from django.contrib.contenttypes.models import ContentType
@@ -144,7 +160,8 @@ from awx.main.models.rbac import Role
 delete_counts = Counter()
 update_counts = Counter()
 
-""")
+"""
+)
 
 
 print("# Resource objects that are pointing to the wrong Role.  Some of these")
