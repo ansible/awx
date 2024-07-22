@@ -405,10 +405,11 @@ class AWXReceptorJob:
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
-                try:
-                    receptor_ctl.simple_command(f"work release {self.unit_id}")
-                except Exception:
-                    logger.exception(f"Error releasing work unit {self.unit_id}.")
+                if settings.RECPETOR_KEEP_WORK_ON_ERROR and getattr(res, 'status', 'error') == 'error':
+                    try:
+                        receptor_ctl.simple_command(f"work release {self.unit_id}")
+                    except Exception:
+                        logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
