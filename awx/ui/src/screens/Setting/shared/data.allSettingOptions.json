@@ -751,14 +751,14 @@
               "category_slug": "bulk",
               "default": 100
           },
-          "UI_NEXT": {
+          "UI_LEGACY": {
               "type": "boolean",
               "required": false,
-              "label": "Enable Preview of New User Interface",
-              "help_text": "Enable preview of new user interface.",
+              "label": "Enable legacy (deprecated) User Interface",
+              "help_text": "Enable legacy (deprecated) user interface.",
               "category": "System",
               "category_slug": "system",
-              "default": true
+              "default": false
           },
           "SUBSCRIPTION_USAGE_MODEL": {
               "type": "choice",
@@ -5104,14 +5104,6 @@
               "help_text": "Max number of hosts to allow to be created in a single bulk action",
               "category": "Bulk Actions",
               "category_slug": "bulk",
-              "defined_in_file": false
-          },
-          "UI_NEXT": {
-              "type": "boolean",
-              "label": "Enable Preview of New User Interface",
-              "help_text": "Enable preview of new user interface.",
-              "category": "System",
-              "category_slug": "system",
               "defined_in_file": false
           },
           "SUBSCRIPTION_USAGE_MODEL": {
