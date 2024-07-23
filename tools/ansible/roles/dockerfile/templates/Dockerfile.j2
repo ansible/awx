@@ -162,8 +162,8 @@ RUN dnf -y install \
     vim \
     nmap-ncat \
     libpq-devel \
-    nodejs \
     nss \
+    npm \
     make \
     patch \
     socat \
@@ -171,7 +171,9 @@ RUN dnf -y install \
     wget \
     diffutils \
     unzip && \
-    npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
+    npm install -g n webpack-cli && \
+    n 18.20.4 && \
+    dnf remove -y nodejs
 
 RUN pip3.11 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
 RUN pip3.11 install -vv black setuptools-scm build

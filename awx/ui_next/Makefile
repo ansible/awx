@@ -8,6 +8,7 @@ UI_NEXT_LOCAL ?=
 ## Git repo and branch to the UI_NEXT repo
 UI_NEXT_GIT_REPO ?= https://github.com/ansible/ansible-ui.git
 UI_NEXT_GIT_BRANCH ?= main
+NODE_VERSION=18
 
 ## Product name to display on the UI used in UI_NEXT build process
 PRODUCT ?= AWX
@@ -15,6 +16,12 @@ PRODUCT ?= AWX
 .PHONY: ui-next
 ## Default build target of ui-next Makefile, builds ui-next/build
 ui-next: ui-next/build
+
+.PHONY: ui-next/devel
+ui-devel: ui-next
+
+.PHONY: ui-next/release
+ui-release: ui-next
 
 .PHONY: ui-next/build
 ## Build ui-next/build
@@ -35,7 +42,7 @@ ui-next/src/build: $(UI_NEXT_DIR)/src/build/awx
 ## True target for ui-next/src/build. Build ui_next from source.
 $(UI_NEXT_DIR)/src/build/awx: $(UI_NEXT_DIR)/src $(UI_NEXT_DIR)/src/node_modules/webpack
 	@echo "=== Building ui_next ==="
-	@cd $(UI_NEXT_DIR)/src && PRODUCT="$(PRODUCT)" PUBLIC_PATH=/static/awx/ ROUTE_PREFIX=/ npm run build:awx
+	@cd $(UI_NEXT_DIR)/src && PRODUCT="$(PRODUCT)" PUBLIC_PATH=/static/awx/ ROUTE_PREFIX=/ NODE_VERSION=$(NODE_VERSION) npm run build:awx
 	@mv $(UI_NEXT_DIR)/src/build/awx/index.html $(UI_NEXT_DIR)/src/build/awx/index_awx.html
 
 .PHONY: ui-next/src
@@ -92,6 +99,9 @@ $(UI_NEXT_DIR)/src/node_modules/webpack:
 .PHONY: clean/ui-next
 ## Clean ui_next
 clean/ui-next: clean/ui-next/build clean/ui-next/src
+
+.PHONY: clean/ui-next
+clean-ui: clean/ui-next
 
 .PHONY: clean/ui-next/src
 ## Clean ui_next src

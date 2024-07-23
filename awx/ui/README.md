@@ -22,11 +22,13 @@ environment and do not need to work on the ui code, use these make targets:
 ```shell
 # The ui will be reachable at https://localhost:8043 or
 # http://localhost:8013
-make ui-devel 
+make ui-legacy
 
-# clean up 
-make clean-ui
+# clean up
+make clean-ui-legacy
 ```
+
+UI will be served at `https://localhost:8043/ui_legacy/`
 
 ### Using an External Server
 If you normally run awx on an external host/server (in this example, `awx.local`),
