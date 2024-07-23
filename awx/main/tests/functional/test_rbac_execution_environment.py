@@ -64,6 +64,11 @@ def check_user_capabilities(get, setup_managed_roles):
 
 
 @pytest.mark.django_db
+def test_any_user_can_view_global_ee(control_plane_execution_environment, rando):
+    assert ExecutionEnvironmentAccess(rando).can_read(control_plane_execution_environment)
+
+
+@pytest.mark.django_db
 def test_managed_ee_not_assignable(control_plane_execution_environment, ee_rd, rando, admin_user, post):
     url = django_reverse('roleuserassignment-list')
     r = post(url, {'role_definition': ee_rd.pk, 'user': rando.id, 'object_id': control_plane_execution_environment.pk}, user=admin_user, expect=400)
@@ -78,23 +83,18 @@ def test_org_member_required_for_assignment(org_ee, ee_rd, rando, admin_user, po
 
 
 @pytest.mark.django_db
-def test_team_view_permission_required(org_ee, ee_rd, rando, admin_user, post):
+def test_team_can_have_permission(org_ee, ee_rd, rando, admin_user, post):
     org2 = Organization.objects.create(name='a different team')
     team = Team.objects.create(name='a team', organization=org2)
     team.member_role.members.add(rando)
     assert org_ee not in ExecutionEnvironmentAccess(rando).get_queryset()  # user can not view the EE
-    url = django_reverse('roleteamassignment-list')
-    r = post(url, {'role_definition': ee_rd.pk, 'team': team.id, 'object_id': org_ee.pk}, user=admin_user, expect=400)
-    assert 'Team must have view permission to Execution Environment organization' in str(r.data)
 
-    org_view_rd = RoleDefinition.objects.create_from_permissions(
-        name='organization viewer role', permissions=['view_organization'], content_type=ContentType.objects.get_for_model(Organization)
-    )
-    org_view_rd.give_permission(team, org_ee.organization)
-    assert org_ee in ExecutionEnvironmentAccess(rando).get_queryset()  # user can view the EE now
+    url = django_reverse('roleteamassignment-list')
+
     # can give object roles to the team now
     post(url, {'role_definition': ee_rd.pk, 'team': team.id, 'object_id': org_ee.pk}, user=admin_user, expect=201)
     assert rando.has_obj_perm(org_ee, 'change')
+    assert org_ee in ExecutionEnvironmentAccess(rando).get_queryset()  # user can view the EE now
 
 
 @pytest.mark.django_db
@@ -143,3 +143,6 @@ def test_give_org_permission_to_ee(org_ee, organization, org_member, check_user_
 
     assert access.can_change(org_ee, {'name': 'new', 'organization': organization.id})
     check_user_capabilities(org_member, org_ee, {'edit': True, 'delete': True, 'copy': True})
+
+    # Extra check, user can not remove the EE from the organization
+    assert not access.can_change(org_ee, {'name': 'new', 'organization': None})
