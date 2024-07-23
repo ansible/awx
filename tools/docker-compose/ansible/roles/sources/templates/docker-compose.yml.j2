@@ -47,9 +47,6 @@ services:
 {% if minikube_container_group|bool %}
       MINIKUBE_CONTAINER_GROUP: "true"
 {% endif %}
-    depends_on:
-      - postgres
-      - redis_{{ container_postfix }}
     networks:
       - awx
       - service-mesh
@@ -80,8 +77,12 @@ services:
       - "~/.kube/config:/var/lib/awx/.kube/config"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
-{% if editable_dependencies | length > 0 %}
     depends_on:
+      postgres:
+        condition: service_started
+      redis_{{ container_postfix }}:
+        condition: service_started
+{% if editable_dependencies | length > 0 %}
       init_awx:
         condition: service_completed_successfully
 {% endif %}
