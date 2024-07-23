@@ -11,8 +11,8 @@ short_description: Search the API for objects
 requirements:
   - None
 description:
-  - Returns GET requests from the AWX API. See the AWX API documentation
-    U(https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/index.html) for API usage.
+  - Returns GET requests from the Automation Platform Controller API. See
+    U(https://docs.ansible.com/automation-controller/latest/html/towerapi/) for API usage.
   - For use that is cross-compatible between the awx.awx and ansible.controller collection
     see the controller_meta module
 options:
