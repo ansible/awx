@@ -91,6 +91,7 @@
       "slirp4netns:enable_ipv6=true"
   ],
   "RECEPTOR_RELEASE_WORK": true,
+  "RECEPTOR_KEEP_WORK_ON_ERROR": false,
   "SESSION_COOKIE_AGE": 1800,
   "SESSIONS_PER_USER": -1,
   "DISABLE_LOCAL_AUTH": false,

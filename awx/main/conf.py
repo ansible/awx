@@ -929,6 +929,16 @@ register(
     category_slug='debug',
 )
 
+register(
+    'RECEPTOR_KEEP_WORK_ON_ERROR',
+    field_class=fields.BooleanField,
+    label=_('Keep receptor work on error'),
+    default=False,
+    help_text=_('Prevent receptor work from being released on when error is detected'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
