@@ -189,7 +189,7 @@ Authentication Enhancements
    pair: features; authentication
    pair: features; OAuth 2 token
 
-AWX supports LDAP, SAML, token-based authentication. Enhanced LDAP and SAML support allows you to integrate your enterprise account information in a more flexible manner. Token-based Authentication allows for easily authentication of third-party tools and services with AWX via integrated OAuth 2 token support.
+AWX supports LDAP, SAML, token-based authentication. Enhanced LDAP and SAML support allows you to integrate your account information in a more flexible manner. Token-based Authentication allows for easily authentication of third-party tools and services with AWX via integrated OAuth 2 token support.
 
 Cluster Management
 ~~~~~~~~~~~~~~~~~~~~
@@ -240,9 +240,8 @@ Job Distribution
    pair: features; jobs, slicing
    pair: features; jobs, distribution
 
-As automation moves enterprise-wide, the need to automate at scale grows. AWX offer the ability to take a fact gathering or
-configuration job running across thousands of machines and slice it into individual job slices that can be distributed across your AWX cluster for increased reliability, faster job completion, and better cluster utilization. If you need to change a parameter across 15,000 switches at
-scale, or gather information across your multi-thousand-node RHEL estate, you can now do so easily.
+AWX offers the ability to take a fact gathering or configuration job running across thousands of machines and slice it into individual job slices that can be distributed across your AWX cluster for increased reliability, faster job completion, and better cluster utilization.
+If you need to change a parameter across 15,000 switches at scale, or gather information across your multi-thousand-node RHEL estate, you can now do so easily.
 
 
 Support for deployment in a FIPS-enabled environment

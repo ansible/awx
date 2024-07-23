@@ -54,7 +54,7 @@ from awx.main.models import (
     Job,
     convert_jsonfields,
 )
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, ERROR_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
@@ -685,6 +685,8 @@ def awx_receptor_workunit_reaper():
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
+    if settings.RECEPTOR_KEEP_WORK_ON_ERROR:
+        jobs_with_unreleased_receptor_units = jobs_with_unreleased_receptor_units.exclude(status__in=ERROR_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
         receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
@@ -704,7 +706,10 @@ def awx_k8s_reaper():
         logger.debug("Checking for orphaned k8s pods for {}.".format(group))
         pods = PodManager.list_active_jobs(group)
         time_cutoff = now() - timedelta(seconds=settings.K8S_POD_REAPER_GRACE_PERIOD)
-        for job in UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES):
+        reap_job_candidates = UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES)
+        if settings.RECEPTOR_KEEP_WORK_ON_ERROR:
+            reap_job_candidates = reap_job_candidates.exclude(status__in=ERROR_STATES)
+        for job in reap_job_candidates:
             logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
             try:
                 pm = PodManager(job)
@@ -715,7 +720,8 @@ def awx_k8s_reaper():
 
 @task(queue=get_task_queuename)
 def awx_periodic_scheduler():
-    with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
+    lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000
+    with advisory_lock('awx_periodic_scheduler_lock', lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
         if acquired is False:
             logger.debug("Not running periodic scheduler, another task holds lock")
             return
@@ -979,5 +985,15 @@ def periodic_resource_sync():
         if acquired is False:
             logger.debug("Not running periodic_resource_sync, another task holds lock")
             return
+        logger.debug("Running periodic resource sync")
 
-        SyncExecutor().run()
+        executor = SyncExecutor()
+        executor.run()
+        for key, item_list in executor.results.items():
+            if not item_list or key == 'noop':
+                continue
+            # Log creations and conflicts
+            if len(item_list) > 10 and settings.LOG_AGGREGATOR_LEVEL != 'DEBUG':
+                logger.info(f'Periodic resource sync {key}, first 10 items:\n{item_list[:10]}')
+            else:
+                logger.info(f'Periodic resource sync {key}:\n{item_list}')

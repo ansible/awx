@@ -176,17 +176,17 @@ pre_delete.connect(cleanup_created_modified_by, sender=User)
 
 @property
 def user_get_organizations(user):
-    return Organization.objects.filter(member_role__members=user)
+    return Organization.access_qs(user, 'member')
 
 
 @property
 def user_get_admin_of_organizations(user):
-    return Organization.objects.filter(admin_role__members=user)
+    return Organization.access_qs(user, 'change')
 
 
 @property
 def user_get_auditor_of_organizations(user):
-    return Organization.objects.filter(auditor_role__members=user)
+    return Organization.access_qs(user, 'audit')
 
 
 @property

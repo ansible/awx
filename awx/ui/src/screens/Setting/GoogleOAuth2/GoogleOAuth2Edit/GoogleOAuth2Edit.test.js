@@ -22,7 +22,7 @@ describe('<GoogleOAuth2Edit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL:
-          'https://towerhost/sso/complete/google-oauth2/',
+          'https://platformhost/sso/complete/google-oauth2/',
         SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: 'mock key',
         SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: '$encrypted$',
         SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: [

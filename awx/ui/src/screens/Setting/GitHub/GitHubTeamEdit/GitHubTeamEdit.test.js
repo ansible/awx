@@ -22,7 +22,7 @@ describe('<GitHubTeamEdit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-team/',
+          'https://platformhost/sso/complete/github-team/',
         SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
         SOCIAL_AUTH_GITHUB_TEAM_SECRET: '$encrypted$',
         SOCIAL_AUTH_GITHUB_TEAM_ID: 'team_id',

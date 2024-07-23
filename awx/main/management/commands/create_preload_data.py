@@ -2,6 +2,7 @@
 # All Rights Reserved
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from crum import impersonate
 from awx.main.models import User, Organization, Project, Inventory, CredentialType, Credential, Host, JobTemplate
 from awx.main.signals import disable_computed_fields
@@ -13,6 +14,12 @@ class Command(BaseCommand):
     help = 'Creates a preload tower data if there is none.'
 
     def handle(self, *args, **kwargs):
+        # Wrap the operation in an atomic block, so we do not on accident
+        # create the organization but not create the project, etc.
+        with transaction.atomic():
+            self._handle()
+
+    def _handle(self):
         changed = False
 
         # Create a default organization as the first superuser found.
@@ -43,10 +50,11 @@ class Command(BaseCommand):
 
                     ssh_type = CredentialType.objects.filter(namespace='ssh').first()
                     c, _ = Credential.objects.get_or_create(
-                        credential_type=ssh_type, name='Demo Credential', inputs={'username': superuser.username}, created_by=superuser
+                        credential_type=ssh_type, name='Demo Credential', inputs={'username': getattr(superuser, 'username', 'null')}, created_by=superuser
                     )
 
-                    c.admin_role.members.add(superuser)
+                    if superuser:
+                        c.admin_role.members.add(superuser)
 
                     public_galaxy_credential, _ = Credential.objects.get_or_create(
                         name='Ansible Galaxy',
