@@ -32,7 +32,7 @@ Installing the `tar.gz` involves no special instructions.
 ## Running
 
 Non-deprecated modules in this collection have no Python requirements, but
-may require the official [AWX CLI](https://docs.ansible.com/automation-controller/latest/html/controllercli/index.html)
+may require the official [AWX CLI](https://pypi.org/project/awxkit/)
 in the future. The `DOCUMENTATION` for each module will report this.
 
 You can specify authentication by a combination of either:

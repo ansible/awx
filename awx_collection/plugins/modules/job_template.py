@@ -320,7 +320,7 @@ extends_documentation_fragment: awx.awx.auth
 
 notes:
   - JSON for survey_spec can be found in the API Documentation. See
-    U(https://developers.redhat.com/api-catalog/api/ansible-automation-controller) and search for 'survey' for information on job template survey creation
+    U(https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_list) and search for 'survey' for information on job template survey creation
     and POST operation payload example.
 '''
 
