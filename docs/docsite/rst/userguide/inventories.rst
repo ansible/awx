@@ -734,7 +734,7 @@ This opens the Details tab of the selected host.
 
 .. note::
 
-  You may create hosts in bulk using the newly added endpoint in the API, ``/api/v2/bulk/host_create``. This endpoint accepts JSON and you can specify the target inventory and a list of hosts to add to the inventory. These hosts must be unique within the inventory. Either all hosts are added, or an error is returned indicating why the operation was not able to complete. Use the **OPTIONS** request to return relevant schema. For more information, see the `Bulk endpoint <https://docs.ansible.com/automation-controller/latest/html/controllerapi/api_ref.html#/Bulk>`_ of the *Reference* section of the |atapi|.
+  You may create hosts in bulk using the newly added endpoint in the API, ``/api/v2/bulk/host_create``. This endpoint accepts JSON and you can specify the target inventory and a list of hosts to add to the inventory. These hosts must be unique within the inventory. Either all hosts are added, or an error is returned indicating why the operation was not able to complete. Use the **OPTIONS** request to return relevant schema. For more information, see the `Bulk endpoint <https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/api_ref.html#/Bulk>`_ of the *Reference* section of the |atapi|.
 
 .. _ug_inventories_add_source:
 
