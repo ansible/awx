@@ -3,7 +3,7 @@ Security Assertion Markup Language, or SAML, is an open standard for exchanging 
 
 
 # Configure SAML Authentication
-Please see the [Tower documentation](https://docs.ansible.com/ansible-tower/latest/html/administration/ent_auth.html#saml-authentication-settings) as well as the [Ansible blog post](https://www.ansible.com/blog/using-saml-with-red-hat-ansible-tower) for basic SAML configuration. Note that AWX's SAML implementation relies on `python-social-auth` which uses `python-saml`. AWX exposes three fields which are directly passed to the lower libraries:
+Please see the [AWX documentation](https://ansible.readthedocs.io/projects/awx/en/latest/administration/ent_auth.html#saml-settings) for basic SAML configuration. Note that AWX's SAML implementation relies on `python-social-auth` which uses `python-saml`. AWX exposes three fields which are directly passed to the lower libraries:
 * `SOCIAL_AUTH_SAML_SP_EXTRA` is passed to the `python-saml` library configuration's `sp` setting.  
 * `SOCIAL_AUTH_SAML_SECURITY_CONFIG` is passed to the `python-saml` library configuration's `security` setting.
 * `SOCIAL_AUTH_SAML_EXTRA_DATA`
