@@ -198,8 +198,6 @@ grpcio==1.62.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
-hiredis==2.0.0
-    # via -r /awx_devel/requirements/requirements.in
 hyperlink==21.0.0
     # via
     #   autobahn
