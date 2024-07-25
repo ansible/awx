@@ -53,7 +53,8 @@ function MiscSystemEdit() {
         'TOWER_URL_BASE',
         'DEFAULT_EXECUTION_ENVIRONMENT',
         'PROXY_IP_ALLOWED_LIST',
-        'CSRF_TRUSTED_ORIGINS'
+        'CSRF_TRUSTED_ORIGINS',
+        'UI_LEGACY',
       );
 
       const mergedData = {};

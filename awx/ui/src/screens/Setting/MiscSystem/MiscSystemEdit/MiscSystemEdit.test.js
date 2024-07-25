@@ -40,6 +40,7 @@ const systemData = {
   TOWER_URL_BASE: 'https://localhost:3000',
   PROXY_IP_ALLOWED_LIST: [],
   CSRF_TRUSTED_ORIGINS: [],
+  UI_LEGACY: false,
 };
 
 describe('<MiscSystemEdit />', () => {
