@@ -20,8 +20,9 @@ ui-next: ui-next/build
 .PHONY: ui-next/devel
 ui-devel: ui-next
 
-.PHONY: ui-next/release
-ui-release: ui-next
+# TODO uncomment after downstream changes ui-release to ui-legacy-release
+# .PHONY: ui-next/release
+# ui-release: ui-next
 
 .PHONY: ui-next/build
 ## Build ui-next/build

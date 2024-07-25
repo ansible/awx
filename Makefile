@@ -465,6 +465,9 @@ $(UI_BUILD_FLAG_FILE):
 	NODE_VERSION=$(NODE_VERSION) $(NPM_BIN) --prefix awx/ui --loglevel warn run build
 	touch $@
 
+# TODO drop this after downstream updates their process to use make ui-legacy-release
+ui-release: $(UI_BUILD_FLAG_FILE)
+
 ui-legacy-release: $(UI_BUILD_FLAG_FILE)
 
 ui-legacy: awx/ui/node_modules

@@ -208,13 +208,25 @@ awx_1        |   Applying auth.0001_initial... OK
 
 ##### Clean and build the UI
 
+Prerequisites (on your local machine)
+- npm
+- nodejs
+
+Required versions listed here https://github.com/ansible/ansible-ui/blob/main/README.md
+
+On your local machine (not in awx container)
+
 ```bash
-$ docker exec tools_awx_1 make clean-ui ui-devel
+make clean-ui ui-devel
 ```
 
-See [the ui development documentation](../../awx/ui/README.md) for more information on using the frontend development, build, and test tooling.
+This will clone the ansible-ui into the `awx/ui_next/src` directory and build the static files. Then when the containers come up, awx-manage collectstatic will copy those files into the proper place.
 
-Once migrations are completed and the UI is built, you can begin using AWX. The UI can be reached in your browser at `https://localhost:8043/#/home`, and the API can be found at `https://localhost:8043/api/v2`.
+You can also use `UI_NEXT_LOCAL` to build from a locally cloned ansible-ui repo.
+
+See [the ui development documentation](https://github.com/ansible/ansible-ui/blob/main/CONTRIBUTING.md) for more information on using the frontend development, build, and test tooling.
+
+Once migrations are completed and the UI is built, you can begin using AWX. The UI can be reached in your browser at `https://localhost:8043/`, and the API can be found at `https://localhost:8043/api/v2`.
 
 ##### Create an admin user
 
@@ -627,6 +639,14 @@ This will start the sidecar container `tools_otel_1` and configure AWX logging t
 
 ### Install legacy UI
 
+##### Build inside of containers
+
+After starting awx containers, run
+
+`docker exec tools_awx_1 make ui-legacy`
+
+##### Alternatively, build outside of the containers
+
 Prerequisites (on your local machine)
 - npm 8.5
 - nodejs 16
@@ -639,6 +659,8 @@ n 16
 Run outside of the container (on your local machine)
  `make ui-legacy`
 
+
+##### After building
 Restart docker containers to pick up the changes, or run `awx-manage collectstatic` from inside the `tools_awx_1` container
 
 Add `UI_LEGACY=True` to django settings (can also be set via API)
