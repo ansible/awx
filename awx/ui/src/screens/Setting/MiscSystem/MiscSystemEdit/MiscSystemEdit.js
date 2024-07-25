@@ -225,6 +225,7 @@ function MiscSystemEdit() {
                   type="number"
                   isRequired
                 />
+                <BooleanField name="UI_LEGACY" config={system.UI_LEGACY} />
                 <ObjectField
                   name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
                   config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}

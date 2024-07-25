@@ -1089,7 +1089,7 @@ AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()
 
-UI_LEGACY = True
+UI_LEGACY = False
 
 # License compliance for total host count. Possible values:
 # - '': No model - Subscription not counted from Host Metrics

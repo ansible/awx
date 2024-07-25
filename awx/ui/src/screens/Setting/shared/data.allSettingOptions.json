@@ -5106,6 +5106,14 @@
               "category_slug": "bulk",
               "defined_in_file": false
           },
+          "UI_LEGACY": {
+            "type": "boolean",
+            "label": "Enable legacy (deprecated) User Interface",
+            "help_text": "Enable legacy (deprecated) user interface.",
+            "category": "System",
+            "category_slug": "system",
+            "defined_in_file": false
+          },
           "SUBSCRIPTION_USAGE_MODEL": {
               "type": "choice",
               "label": "Defines subscription usage model and shows Host Metrics",
