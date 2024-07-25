@@ -198,6 +198,8 @@ grpcio==1.62.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
+hiredis==3.0.0
+    # via redis
 hyperlink==21.0.0
     # via
     #   autobahn
@@ -442,7 +444,7 @@ pyzstd==0.15.10
     # via -r /awx_devel/requirements/requirements.in
 receptorctl==1.4.4
     # via -r /awx_devel/requirements/requirements.in
-redis==5.0.1
+redis[hiredis]==5.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels-redis
