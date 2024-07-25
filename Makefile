@@ -5,7 +5,6 @@ SHELL := bash
 DOCKER_COMPOSE ?= docker compose
 OFFICIAL ?= no
 NODE ?= node
-NODE_VERSION=16
 NPM_BIN ?= npm
 KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
@@ -461,8 +460,8 @@ awx/ui/node_modules:
 $(UI_BUILD_FLAG_FILE):
 	$(MAKE) awx/ui/node_modules
 	$(PYTHON) tools/scripts/compilemessages.py
-	NODE_VERSION=$(NODE_VERSION) $(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
-	NODE_VERSION=$(NODE_VERSION) $(NPM_BIN) --prefix awx/ui --loglevel warn run build
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
+	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
 	touch $@
 
 # TODO drop this after downstream updates their process to use make ui-legacy-release

@@ -62,7 +62,7 @@ function MiscSystemDetail() {
         'CSRF_TRUSTED_ORIGINS',
         'AUTOMATION_ANALYTICS_LAST_GATHER',
         'AUTOMATION_ANALYTICS_LAST_ENTRIES',
-        'UI_LEGACY',
+        'UI_LEGACY'
       );
 
       const mergedData = {};
