@@ -103,8 +103,6 @@ RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 {% endif %}
 
-{% endif %}
-
 # Final container(s)
 FROM quay.io/centos/centos:stream9
 
