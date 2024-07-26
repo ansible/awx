@@ -91,7 +91,6 @@ USE_L10N = True
 USE_TZ = True
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
     os.path.join(BASE_DIR, 'ui_next', 'build'),
     os.path.join(BASE_DIR, 'static'),
 ]
@@ -323,8 +322,6 @@ TEMPLATES = [
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'ui', 'build'),
-            os.path.join(BASE_DIR, 'ui', 'public'),
             os.path.join(BASE_DIR, 'ui_next', 'build', 'awx'),
         ],
     },
@@ -1089,8 +1086,6 @@ AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()
-
-UI_NEXT = True
 
 # License compliance for total host count. Possible values:
 # - '': No model - Subscription not counted from Host Metrics
