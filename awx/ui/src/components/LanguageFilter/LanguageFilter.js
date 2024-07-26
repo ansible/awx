@@ -60,7 +60,7 @@ export default function LanguageFilter() {
             key={key}
             component="button"
             isDisabled={key === i18n.locale}
-            onClick={(e) => handleSelect(key, e)}
+            onClick={() => handleSelect(key)}
             ouiaId={`lang-dropdown-${key}`}
           >
             {locales[key]}
