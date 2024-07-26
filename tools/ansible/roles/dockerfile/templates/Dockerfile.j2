@@ -8,7 +8,7 @@
 # UI_next build contaienr
 FROM quay.io/centos/centos:stream9 AS ui-next-builder
 USER root
-RUN dnf -y update && dnf install -y nodejs make
+RUN dnf -y update && dnf install -y nodejs make git
 RUN npm install -g n && n 18
 
 COPY . /tmp/src/
