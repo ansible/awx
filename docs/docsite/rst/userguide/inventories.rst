@@ -211,7 +211,7 @@ The Details tab of the new Smart Inventory opens and displays the specified ansi
 5. From the Details view, you can edit the **Smart host filter** field by clicking **Edit** and delete existing filter(s), clear all existing filters, or add new ones.
 
 .. image:: ../common/images/inventories-smart-define-host-filter-facts-group.png
-   :alt: Specified search criteria consisting of host filter ansible facts and groups listed below search field
+   :alt: Specified search criteria consisting of host filter Ansible facts and groups listed below search field
 
 
 .. _ug_inventories_constructed:
