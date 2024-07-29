@@ -1195,7 +1195,7 @@ This inventory source uses a cluster that is able to deploy OpenShift (OCP) virt
 
 
   .. image:: ../common/images/inventories-create-source-ocpvirt-example.png
-   :alt: Inventories create source Openshift virtualization example
+   :alt: Inventories create source OpenShift virtualization example
 
 5. Save the configuration and click the **Sync** button to sync the inventory.
 
