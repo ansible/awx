@@ -1340,7 +1340,7 @@ The Run command window opens.
 4. Click **Next** to choose the |ee| you want the ad-hoc command to be run against.
 
 .. image:: ../common/images/ad-hoc-commands-inventory-run-command-ee.png
-   :alt: Ad Hoc Run command dialog prompting for Execution Environments with two listed to choose from
+   :alt: Ad hoc run command dialog prompting for Execution Environments with two listed to choose from
 
 5. Click **Next** to choose the credential you want to use and click the **Launch** button.
 
