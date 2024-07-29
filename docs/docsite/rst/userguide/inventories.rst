@@ -199,7 +199,7 @@ The resulting search criteria for the specified ansible fact populates in the lo
 3. Click **Select** to add it to the **Smart host filter** field.
 
 .. image:: ../common/images/inventories-smart-create-filter-added.png
-   :alt: Specified search criteria for host filter ansible facts shown in the Smart host filter field of the Create new smart inventory window
+   :alt: Specified search criteria for host filter Ansible facts shown in the Smart host filter field of the Create new smart inventory window
 
 4. Click **Save** to save the new Smart Inventory.
 
