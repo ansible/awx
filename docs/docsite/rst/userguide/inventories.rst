@@ -194,7 +194,7 @@ In the search field, enter ``ansible_processor[]="GenuineIntel"`` (no extra spac
 The resulting search criteria for the specified ansible fact populates in the lower part of the window.
 
 .. image:: ../common/images/inventories-smart-define-host-filter-facts2.png
-   :alt: Selected search criteria for host filter ansible facts listed below search field
+   :alt: Selected search criteria for host filter Ansible facts listed below search field
 
 3. Click **Select** to add it to the **Smart host filter** field.
 
