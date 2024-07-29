@@ -126,7 +126,7 @@ If it has someone assigned to it then that person is the person responsible for 
 
 > If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
-> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](./awx/ui/README.md).
+> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](https://github.com/ansible/ansible-ui/blob/main/CONTRIBUTING.md).
 
 ### Translations
 
