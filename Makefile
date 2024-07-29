@@ -129,7 +129,7 @@ clean-languages:
 	find ./awx/locale/ -type f -regex '.*\.mo$$' -delete
 
 ## Remove temporary build files, compiled Python files.
-clean: clean-ui clean-api clean-awxkit clean-dist
+clean: clean-api clean-awxkit clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf awx/job_status
