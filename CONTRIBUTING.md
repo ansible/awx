@@ -143,10 +143,8 @@ Here are a few things you can do to help the visibility of your change, and incr
 
 - No issues when running linters/code checkers
   - Python: black: `(container)/awx_devel$ make black`
-  - Javascript: `(container)/awx_devel$ make ui-lint`
 - No issues from unit tests
   - Python: py.test: `(container)/awx_devel$ make test`
-  - JavaScript: `(container)/awx_devel$ make ui-test`
 - Write tests for new functionality, update/add tests for bug fixes
 - Make the smallest change possible
 - Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
