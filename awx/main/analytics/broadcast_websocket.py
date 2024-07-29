@@ -66,10 +66,8 @@ class FixedSlidingWindow:
 
 
 class RelayWebsocketStatsManager:
-    def __init__(self, event_loop, local_hostname):
+    def __init__(self, local_hostname):
         self._local_hostname = local_hostname
-
-        self._event_loop = event_loop
         self._stats = dict()
         self._redis_key = BROADCAST_WEBSOCKET_REDIS_KEY_NAME
 
@@ -94,7 +92,10 @@ class RelayWebsocketStatsManager:
             self.start()
 
     def start(self):
-        self.async_task = self._event_loop.create_task(self.run_loop())
+        self.async_task = asyncio.get_running_loop().create_task(
+            self.run_loop(),
+            name='RelayWebsocketStatsManager.run_loop',
+        )
         return self.async_task
 
     @classmethod
