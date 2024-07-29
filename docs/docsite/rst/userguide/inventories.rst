@@ -206,7 +206,7 @@ The resulting search criteria for the specified ansible fact populates in the lo
 The Details tab of the new Smart Inventory opens and displays the specified ansible facts in the **Smart host filter** field.
 
 .. image:: ../common/images/inventories-smart-create-details.png
-   :alt: Details tab of the new Smart Inventory displaying the specified ansible facts in the Smart host filter field
+   :alt: Details tab of the new Smart Inventory displaying the specified Ansible facts in the Smart host filter field
 
 5. From the Details view, you can edit the **Smart host filter** field by clicking **Edit** and delete existing filter(s), clear all existing filters, or add new ones.
 
