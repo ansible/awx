@@ -502,13 +502,7 @@ ui-test-general:
 	$(NPM_BIN) run --prefix awx/ui pretest
 	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
-# NOTE: The make target ui-next is imported from awx/ui_next/Makefile
-HEADLESS ?= no
-ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
-else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
-endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
 

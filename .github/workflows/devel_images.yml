@@ -62,18 +62,6 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Setup node and npm for old UI build
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-        if: matrix.build-targets.image-name == 'awx'
-
-      - name: Prebuild old-UI for awx image (to speed up build process)
-        run: |
-          sudo apt-get install gettext
-          make ui-release
-        if: matrix.build-targets.image-name == 'awx'
-
       - name: Setup node and npm for the new UI build
         uses: actions/setup-node@v2
         with:

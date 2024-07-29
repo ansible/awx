@@ -23,8 +23,6 @@ else
     wait-for-migrations
 fi
 
-# Make sure that the UI static file directory exists, Django complains otherwise.
-mkdir -p /awx_devel/awx/ui/build/static
 
 # Make sure that the UI_NEXT statifc file directory exists, if UI_NEXT is not built yet put a placeholder file in it.
 if [ ! -d "/awx_devel/awx/ui_next/build/awx" ]; then

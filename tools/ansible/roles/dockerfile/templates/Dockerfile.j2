@@ -4,6 +4,18 @@
 ### DO NOT EDIT
 ###
 
+{% if not headless|bool %}
+# UI_next build contaienr
+FROM quay.io/centos/centos:stream9 AS ui-next-builder
+USER root
+RUN dnf -y update && dnf install -y nodejs make git
+RUN npm install -g n && n 18
+
+COPY . /tmp/src/
+WORKDIR /tmp/src/
+RUN make ui-next
+{% endif %}
+
 # Build container
 FROM quay.io/centos/centos:stream9 AS builder
 
@@ -31,9 +43,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     libffi-devel \
     libtool-ltdl-devel \
     make \
-{% if not headless|bool %}
-    nodejs \
-{% endif %}
     nss \
     openldap-devel \
     # pin to older openssl, see jira AAP-23449
@@ -74,21 +83,20 @@ RUN cd /tmp && make requirements_awx
 
 ARG VERSION
 ARG SETUPTOOLS_SCM_PRETEND_VERSION
-ARG HEADLESS
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev
 {% else %}
-# Use the distro provided npm to bootstrap our required version of node
-
-{% if not headless|bool %}
-RUN npm install -g n && n 16.13.1
-{% endif %}
 
 # Copy source into builder, build sdist, install it into awx venv
 COPY . /tmp/src/
 WORKDIR /tmp/src/
+
+{% if not headless|bool %}
+COPY --from=ui-next-builder /tmp/src/awx/ui_next/build /tmp/src/awx/ui_next/build
+{% endif %}
+
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
@@ -189,7 +197,7 @@ COPY --from=builder /var/lib/awx /var/lib/awx
 
 RUN ln -s /var/lib/awx/venv/awx/bin/awx-manage /usr/bin/awx-manage
 
-{%if build_dev|bool %}
+{% if build_dev|bool %}
 COPY --from={{ receptor_image }} /usr/bin/receptor /usr/bin/receptor
 
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr \
