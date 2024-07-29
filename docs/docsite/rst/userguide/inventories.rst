@@ -189,7 +189,7 @@ If you wanted to add an ansible fact of
 In the search field, enter ``ansible_processor[]="GenuineIntel"`` (no extra spaces or ``__`` before the value) and press **[Enter]**.
 
 .. image:: ../common/images/inventories-smart-define-host-filter-facts.png
-   :alt: Example of an advanced search for host filter ansible facts
+   :alt: Example of an advanced search for host filter Ansible facts
 
 The resulting search criteria for the specified ansible fact populates in the lower part of the window.
 
