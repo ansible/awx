@@ -217,7 +217,7 @@ Required versions listed here https://github.com/ansible/ansible-ui/blob/main/RE
 On your local machine (not in awx container)
 
 ```bash
-make clean-ui ui-devel
+make clean/ui-next ui-next
 ```
 
 This will clone the ansible-ui into the `awx/ui_next/src` directory and build the static files. Then when the containers come up, awx-manage collectstatic will copy those files into the proper place.
