@@ -87,7 +87,7 @@ ARG SETUPTOOLS_SCM_PRETEND_VERSION
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD requirements/requirements_dev.txt /tmp/requirements
 RUN cd /tmp && make requirements_awx_dev
-{% endif %}
+{% else %}
 
 # Copy source into builder, build sdist, install it into awx venv
 COPY . /tmp/src/
@@ -101,6 +101,8 @@ RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
 RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+{% endif %}
+
 {% endif %}
 
 # Final container(s)
