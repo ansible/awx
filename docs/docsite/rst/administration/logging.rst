@@ -320,6 +320,43 @@ Items surrounded by ``{}`` will be substituted when the log error is generated. 
 - **error**: The error message returned by the API or, if no error is specified, the HTTP status as text
 
 
+.. _logging-api-otel:
+
+OTel configuration with AWX
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can integrate OTel with AWX by configuring logging manually to point to your OTel collector. To do this, add the following codeblock in your `settings file <https://github.com/ansible/awx/blob/devel/tools/docker-compose/ansible/roles/sources/templates/local_settings.py.j2#L50>`_ (``local_settings.py.j2``):
+
+.. code-block:: python
+
+    LOGGING['handlers']['otel'] |= {
+      'class': 'awx.main.utils.handlers.OTLPHandler',
+      'endpoint': 'http://otel:4317',
+    }
+    # Add otel log handler to all log handlers where propagate is False
+    for name in LOGGING['loggers'].keys():
+      if not LOGGING['loggers'][name].get('propagate', True):
+        handler = LOGGING['loggers'][name].get('handlers', [])
+        if 'otel' not in handler:
+            LOGGING['loggers'][name].get('handlers', []).append('otel')
+
+    # Everything without explicit propagate=False ends up logging to 'awx' so add it
+    handler = LOGGING['loggers']['awx'].get('handlers', [])
+    if 'otel' not in handler:
+      LOGGING['loggers']['awx'].get('handlers', []).append('otel')
+
+Edit ``'endpoint': 'http://otel:4317',`` to point to your OTel collector. 
+
+To see it working in the dev environment, set the following:
+
+::
+
+  OTEL=true GRAFANA=true LOKI=true PROMETHEUS=true make docker-compose
+
+Then go to `http://localhost:3001 <http://localhost:3001>`_ to access Grafana and see the logs.
+
+
+
 Troubleshoot Logging
 ---------------------
 
