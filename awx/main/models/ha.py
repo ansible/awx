@@ -160,7 +160,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=100,
         editable=False,
     )
-    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
+    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(Decimal(0.0))])
     enabled = models.BooleanField(default=True)
     managed_by_policy = models.BooleanField(default=True)
 
