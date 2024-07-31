@@ -1,0 +1,49 @@
+<!-- There's multiple layers of templating in this file:
+
+  * "< ... >" with % symbols are ejs templates used by react-scripts at build time. These
+     templates are mainly used to check whether or not we're building a ui for production
+     versus one that will be sent from the ui dev server.  Since this type of template is
+     applied at build time, it can be used to conditionally render the others.
+
+  * "% ... %" are templates used by the react-scripts dev server when serving the ui from
+    port 3001. These are applied at runtime and only work for development mode.
+
+  * "{ ... }" with % symbols and "{{ ... }}" are django templates that only run for
+    production builds (e.g port 8043) when serving the ui from a webserver.
+
+-->
+<% if (process.env.NODE_ENV === 'production') { %>
+  {% load static %}
+<% } %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% if (process.env.NODE_ENV === 'production') { %>
+      <script nonce="{{ csp_nonce }}" type="text/javascript">
+        window.NONCE_ID = '{{ csp_nonce }}';
+      </script>
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:; worker-src 'self' blob: ;"
+      />
+      <link rel="shortcut icon" href="{% static 'media/favicon.ico' %}" />
+    <% } else { %>
+      <link rel="shortcut icon" href="%PUBLIC_URL%/static/media/favicon.ico" />
+    <% } %>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="AWX"
+    />
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <% if (process.env.NODE_ENV === 'production') { %>
+      <style nonce="{{ csp_nonce }}">.app{height: 100%;}</style><div id="app" class="app"></div>
+    <% } else { %>
+      <div id="app" style="height: 100%"></div>
+    <% } %>
+  </body>
+</html>

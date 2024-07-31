@@ -20,7 +20,7 @@ $ ansible-playbook  -i tools/docker-compose/inventory tools/docker-compose/ansib
 ```bash
 $ make docker-compose-build
 $ make docker-compose
-$ make ui-next
+$ make ui
 ```
 
 3. After ensuring your data has been successfully migrated, you may delete your old data directory (typically stored at `~/.awx/pgdocker`).

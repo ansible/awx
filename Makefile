@@ -1,4 +1,4 @@
--include awx/ui_next/Makefile
+-include awx/ui/Makefile
 
 PYTHON := $(notdir $(shell for i in python3.11 python3; do command -v $$i; done|sed 1q))
 SHELL := bash
@@ -723,6 +723,6 @@ help/generate:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
 
-## Display help for ui-next targets
-help/ui-next:
-	@$(MAKE) -s help MAKEFILE_LIST="awx/ui_next/Makefile"
+## Display help for ui targets
+help/ui:
+	@$(MAKE) -s help MAKEFILE_LIST="awx/ui/Makefile"

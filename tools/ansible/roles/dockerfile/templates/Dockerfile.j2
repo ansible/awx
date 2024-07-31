@@ -6,14 +6,14 @@
 
 {% if not headless|bool %}
 # UI_next build contaienr
-FROM quay.io/centos/centos:stream9 AS ui-next-builder
+FROM quay.io/centos/centos:stream9 AS ui-builder
 USER root
 RUN dnf -y update && dnf install -y nodejs make git
 RUN npm install -g n && n 18
 
 COPY . /tmp/src/
 WORKDIR /tmp/src/
-RUN make ui-next
+RUN make ui
 {% endif %}
 
 # Build container
@@ -94,7 +94,7 @@ COPY . /tmp/src/
 WORKDIR /tmp/src/
 
 {% if not headless|bool %}
-COPY --from=ui-next-builder /tmp/src/awx/ui_next/build /tmp/src/awx/ui_next/build
+COPY --from=ui-builder /tmp/src/awx/ui_next/build /tmp/src/awx/ui_next/build
 {% endif %}
 
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
