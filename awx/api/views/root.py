@@ -293,7 +293,6 @@ class ApiV2ConfigView(APIView):
             analytics_status=pendo_state,
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
-            ui_next=ui_next_state,
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field

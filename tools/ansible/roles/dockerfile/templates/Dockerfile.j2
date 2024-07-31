@@ -94,7 +94,7 @@ COPY . /tmp/src/
 WORKDIR /tmp/src/
 
 {% if not headless|bool %}
-COPY --from=ui-builder /tmp/src/awx/ui_next/build /tmp/src/awx/ui_next/build
+COPY --from=ui-builder /tmp/src/awx/ui/build /tmp/src/awx/ui/build
 {% endif %}
 
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz

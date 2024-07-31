@@ -32,9 +32,9 @@ $(UI_DIR)/build:
 ## Build ui/src/build
 ui/src/build: $(UI_DIR)/src/build/awx
 
-## True target for ui/src/build. Build ui_next from source.
+## True target for ui/src/build. Build ui from source.
 $(UI_DIR)/src/build/awx: $(UI_DIR)/src $(UI_DIR)/src/node_modules/webpack
-	@echo "=== Building ui_next ==="
+	@echo "=== Building ui ==="
 	@cd $(UI_DIR)/src && PRODUCT="$(PRODUCT)" PUBLIC_PATH=/static/awx/ ROUTE_PREFIX=/ npm run build:awx
 	@mv $(UI_DIR)/src/build/awx/index.html $(UI_DIR)/src/build/awx/index_awx.html
 
@@ -90,27 +90,27 @@ $(UI_DIR)/src/node_modules/webpack:
 	@cd $(UI_DIR)/src && npm install webpack
 
 .PHONY: clean/ui
-## Clean ui_next
+## Clean ui
 clean/ui: clean/ui/build clean/ui/src
 
 .PHONY: clean/ui/src
-## Clean ui_next src
+## Clean ui src
 clean/ui/src:
 	rm -rf $(UI_DIR)/src
 
 .PHONY: clean/ui/build
-## Clean ui_next build
+## Clean ui build
 clean/ui/build:
 	rm -rf $(UI_DIR)/build
 
 .PHONY: $(UI_DIR)/clean
-## Alias for clean/ui, so we can run `make clean` directly in ui_next
+## Alias for clean/ui, so we can run `make clean` directly in ui
 $(UI_DIR)/clean: clean/ui
 
 .PHONY: $(UI_DIR)/clean/src
-## Alias for clean/ui/src, so we can run `make clean/src` directly in ui_next
+## Alias for clean/ui/src, so we can run `make clean/src` directly in ui
 $(UI_DIR)/clean/src: clean/ui/src
 
 .PHONY: $(UI_DIR)/clean/build
-## Alias for clean/ui/build, so we can run `make clean/build` directly in ui_next
+## Alias for clean/ui/build, so we can run `make clean/build` directly in ui
 $(UI_DIR)/clean/build: clean/ui/build

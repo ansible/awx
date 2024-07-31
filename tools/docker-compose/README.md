@@ -220,7 +220,7 @@ On your local machine (not in awx container)
 make clean/ui ui
 ```
 
-This will clone the ansible-ui into the `awx/ui_next/src` directory and build the static files. Then when the containers come up, awx-manage collectstatic will copy those files into the proper place.
+This will clone the ansible-ui into the `awx/ui/src` directory and build the static files. Then when the containers come up, awx-manage collectstatic will copy those files into the proper place.
 
 You can also use `UI_LOCAL` to build from a locally cloned ansible-ui repo.
 
