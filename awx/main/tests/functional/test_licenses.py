@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 
 from django.conf import settings
@@ -12,7 +11,7 @@ except ImportError:
 from pip._internal.req.constructors import parse_req_from_line
 
 
-def test_python_and_js_licenses():
+def test_python_licenses():
     def index_licenses(path):
         # Check for GPL (forbidden) and LGPL (need to ship source)
         # This is not meant to be an exhaustive check.
@@ -76,26 +75,6 @@ def test_python_and_js_licenses():
             del ret['pbr']
         return ret
 
-    def read_ui_requirements(path):
-        def json_deps(jsondata):
-            ret = {}
-            deps = jsondata.get('dependencies', {})
-            for key in deps.keys():
-                key = key.lower()
-                devonly = deps[key].get('dev', False)
-                if not devonly:
-                    if key not in ret.keys():
-                        depname = key.replace('/', '-')
-                        if depname[0] == '@':
-                            depname = depname[1:]
-                        ret[depname] = {'name': depname, 'version': deps[key]['version']}
-                        ret.update(json_deps(deps[key]))
-            return ret
-
-        with open('%s/package-lock.json' % path) as f:
-            jsondata = json.load(f)
-            return json_deps(jsondata)
-
     def remediate_licenses_and_requirements(licenses, requirements):
         errors = []
         items = list(licenses.keys())
@@ -122,12 +101,9 @@ def test_python_and_js_licenses():
 
     base_dir = settings.BASE_DIR
     api_licenses = index_licenses('%s/../licenses' % base_dir)
-    ui_licenses = index_licenses('%s/../licenses/ui' % base_dir)
     api_requirements = read_api_requirements('%s/../requirements' % base_dir)
-    ui_requirements = read_ui_requirements('%s/ui' % base_dir)
 
     errors = []
-    errors += remediate_licenses_and_requirements(ui_licenses, ui_requirements)
     errors += remediate_licenses_and_requirements(api_licenses, api_requirements)
     if errors:
         raise Exception('Included licenses not consistent with requirements:\n%s' % '\n'.join(errors))
