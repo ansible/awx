@@ -1,15 +1,12 @@
 import boto3
-import collections
 import hashlib
 import datetime
-from botocore.exceptions import ClientError
 
 from .plugin import CredentialPlugin
 from django.utils.translation import gettext_lazy as _
 
 try:
     from botocore.exceptions import ClientError
-    from botocore.exceptions import ParamValidationError
 except ImportError:
     pass  # caught by AnsibleAWSModule
 
