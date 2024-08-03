@@ -1,4 +1,3 @@
-import io
 import json
 import os
 import os.path
@@ -15,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version, camelcase_to_underscore, datetime_hook
 from awx.main import models
-from awx.main.analytics import register
+from insights_analytics_collector import CsvFileSplitter, register
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 
 """
@@ -35,7 +34,8 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 """
 
 
-def trivial_slicing(key, since, until, last_gather, **kwargs):
+def trivial_slicing(key, last_gather, **kwargs):
+    since, until = kwargs.get('since', None), kwargs.get('until', now())
     if since is not None:
         return [(since, until)]
 
@@ -48,7 +48,8 @@ def trivial_slicing(key, since, until, last_gather, **kwargs):
     return [(last_entry, until)]
 
 
-def four_hour_slicing(key, since, until, last_gather, **kwargs):
+def four_hour_slicing(key, last_gather, **kwargs):
+    since, until = kwargs.get('since', None), kwargs.get('until', now())
     if since is not None:
         last_entry = since
     else:
@@ -69,12 +70,13 @@ def four_hour_slicing(key, since, until, last_gather, **kwargs):
         start = end
 
 
-def host_metric_slicing(key, since, until, last_gather, **kwargs):
+def host_metric_slicing(key, last_gather, **kwargs):
     """
     Slicing doesn't start 4 weeks ago, but sends whole table monthly or first time
     """
     from awx.main.models.inventory import HostMetric
 
+    since, until = kwargs.get('since', None), kwargs.get('until', now())
     if since is not None:
         return [(since, until)]
 
@@ -131,7 +133,7 @@ def _identify_lower(key, since, until, last_gather):
     return lower, last_entries
 
 
-@register('config', '1.6', description=_('General platform configuration.'))
+@register('config', '1.6', description=_('General platform configuration.'), config=True)
 def config(since, **kwargs):
     license_info = get_license()
     install_type = 'traditional'
@@ -346,58 +348,9 @@ def query_info(since, collection_type, until, **kwargs):
     return query_info
 
 
-'''
-The event table can be *very* large, and we have a 100MB upload limit.
-
-Split large table dumps at dump time into a series of files.
-'''
-MAX_TABLE_SIZE = 200 * 1048576
-
-
-class FileSplitter(io.StringIO):
-    def __init__(self, filespec=None, *args, **kwargs):
-        self.filespec = filespec
-        self.files = []
-        self.currentfile = None
-        self.header = None
-        self.counter = 0
-        self.cycle_file()
-
-    def cycle_file(self):
-        if self.currentfile:
-            self.currentfile.close()
-        self.counter = 0
-        fname = '{}_split{}'.format(self.filespec, len(self.files))
-        self.currentfile = open(fname, 'w', encoding='utf-8')
-        self.files.append(fname)
-        if self.header:
-            self.currentfile.write('{}\n'.format(self.header))
-
-    def file_list(self):
-        self.currentfile.close()
-        # Check for an empty dump
-        if len(self.header) + 1 == self.counter:
-            os.remove(self.files[-1])
-            self.files = self.files[:-1]
-        # If we only have one file, remove the suffix
-        if len(self.files) == 1:
-            filename = self.files.pop()
-            new_filename = filename.replace('_split0', '')
-            os.rename(filename, new_filename)
-            self.files.append(new_filename)
-        return self.files
-
-    def write(self, s):
-        if not self.header:
-            self.header = s[: s.index('\n')]
-        self.counter += self.currentfile.write(s)
-        if self.counter >= MAX_TABLE_SIZE:
-            self.cycle_file()
-
-
 def _copy_table(table, query, path):
     file_path = os.path.join(path, table + '_table.csv')
-    file = FileSplitter(filespec=file_path)
+    file = CsvFileSplitter(filespec=file_path)
     with connection.cursor() as cursor:
         with cursor.copy(query) as copy:
             while data := copy.read():
@@ -444,17 +397,17 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
     return _copy_table(table='events', query=query(fr"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
 
 
-@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.5', format='csv', description=_('Automation task records'), fnc_slicing=four_hour_slicing)
 def events_table_unpartitioned(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', 'created', **kwargs)
 
 
-@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
+@register('events_table', '1.5', format='csv', description=_('Automation task records'), fnc_slicing=four_hour_slicing)
 def events_table_partitioned_modified(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
 
-@register('unified_jobs_table', '1.4', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
+@register('unified_jobs_table', '1.4', format='csv', description=_('Data on jobs run'), fnc_slicing=four_hour_slicing)
 def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
@@ -523,7 +476,7 @@ def unified_job_template_table(since, full_path, **kwargs):
     return _copy_table(table='unified_job_template', query=unified_job_template_query, path=full_path)
 
 
-@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), expensive=four_hour_slicing)
+@register('workflow_job_node_table', '1.0', format='csv', description=_('Data on workflow runs'), fnc_slicing=four_hour_slicing)
 def workflow_job_node_table(since, full_path, until, **kwargs):
     workflow_job_node_query = '''COPY (SELECT main_workflowjobnode.id,
                                  main_workflowjobnode.created,
@@ -594,7 +547,12 @@ def workflow_job_template_node_table(since, full_path, **kwargs):
 
 
 @register(
-    'host_metric_table', '1.0', format='csv', description=_('Host Metric data, incremental/full sync'), expensive=host_metric_slicing, full_sync_interval=30
+    'host_metric_table',
+    '1.0',
+    format='csv',
+    description=_('Host Metric data, incremental/full sync'),
+    fnc_slicing=host_metric_slicing,
+    full_sync_interval_days=30,
 )
 def host_metric_table(since, full_path, until, **kwargs):
     host_metric_query = '''COPY (SELECT main_hostmetric.id,
@@ -615,7 +573,7 @@ def host_metric_table(since, full_path, until, **kwargs):
     return _copy_table(table='host_metric', query=host_metric_query, path=full_path)
 
 
-@register('host_metric_summary_monthly_table', '1.0', format='csv', description=_('HostMetricSummaryMonthly export, full sync'), expensive=trivial_slicing)
+@register('host_metric_summary_monthly_table', '1.0', format='csv', description=_('HostMetricSummaryMonthly export, full sync'), fnc_slicing=trivial_slicing)
 def host_metric_summary_monthly_table(since, full_path, **kwargs):
     query = '''
     COPY (SELECT main_hostmetricsummarymonthly.id,
