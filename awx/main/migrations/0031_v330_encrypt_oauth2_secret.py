@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import awx.main.fields
 from django.db import migrations
-import oauth2_provider.generators
 
 
 class Migration(migrations.Migration):
@@ -16,8 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2application',
             name='client_secret',
-            field=awx.main.fields.OAuth2ClientSecretField(
-                blank=True, db_index=True, default=oauth2_provider.generators.generate_client_secret, max_length=1024
-            ),
+            field=awx.main.fields.OAuth2ClientSecretField(blank=True, db_index=True, default=lambda: "", max_length=1024),
         ),
     ]

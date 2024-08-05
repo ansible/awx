@@ -64,10 +64,7 @@ The same window opens whether you click on the user's name, or the Edit (|edit-b
    .. image:: ../common/images/users-last-login-info.png
       :alt: User details with last login information
 
-When you log in as yourself, and view the details of your own user profile, you can manage tokens from your user profile. See :ref:`ug_users_tokens` for more detail.
-
-.. image:: ../common/images/user-with-token-button.png
-   :alt: User details with Tokens tab highlighted
+When you log in as yourself, and view the details of your own user profile.
 
 .. _ug_users_delete:
     
@@ -170,14 +167,3 @@ To remove Permissions for a particular resource, click the disassociate (x) butt
 .. note:: 
 
    You can also add teams, individual, or multiple users and assign them permissions at the object level (templates, credentials, inventories, projects, organizations, or instance groups) as well. This feature reduces the time for an organization to onboard many users at one time. 
-
-.. _ug_users_tokens:
-
-Users - Tokens
-~~~~~~~~~~~~~~~
-
-The **Tokens** tab will only be present for your user (yourself). Before you add a token for your user, you may want to :ref:`create an application <ug_applications_auth_create>` if you want to associate your token to it. You may also create a personal access token (PAT) without associating it with any application. To create a token for your user:
-
-1. If not already selected, click on your user from the Users list view to configure your OAuth 2 tokens.
-
-.. include:: ../common/add-token.rst

@@ -372,5 +372,3 @@ For workloads with high levels of API interaction, best practices include:
 - Set max connections per node to 100
 - Use dynamic inventory sources instead of individually creating inventory hosts via the API
 - Use webhook notifications instead of polling for job status
-
-Since the published blog, additional observations have been made in the field regarding authentication methods. For automation clients that will make many requests in rapid succession, using tokens is a best practice, because depending on the type of user, there may be additional overhead when using basic authentication. Refer to :ref:`ag_oauth2_token_auth` for detail on how to generate and use tokens.
