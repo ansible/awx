@@ -361,7 +361,7 @@ def get_allowed_fields(obj, serializer_mapping):
     else:
         allowed_fields = [x.name for x in obj._meta.fields]
 
-    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login'], 'oauth2accesstoken': ['last_used'], 'oauth2application': ['client_secret']}
+    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login']}
     model_name = obj._meta.model_name
     fields_excluded = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(model_name, [])
     # see definition of from_db for CredentialType

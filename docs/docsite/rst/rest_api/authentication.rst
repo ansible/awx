@@ -11,7 +11,7 @@ This chapter describes basic and session authentication methods, the best use ca
 .. contents::
     :local:
 
-AWX is designed for organizations to centralize and control their automation with a visual dashboard for out-of-the box control while providing a REST API to integrate with your other tooling on a deeper level. AWX supports a number of authentication methods to make it easy to embed AWX into existing tools and processes to help ensure the right people can access AWX resources. 
+AWX is designed for organizations to centralize and control their automation with a visual dashboard for out-of-the box control while providing a REST API to integrate with your other tooling on a deeper level. AWX supports a number of authentication methods to make it easy to embed AWX into existing tools and processes to help ensure the right people can access AWX resources.
 
 .. _api_session_auth:
 
@@ -44,7 +44,7 @@ Using the curl tool, you can see the activity that occurs when you log into AWX.
   	--cookie 'csrftoken=K580zVVm0rWX8pmNylz5ygTPamgUJxifrdJY0UDtMMoOis5Q1UOxRmV9918BUBIN' \
   	https://<awx-host>/api/login/ -k -D - -o /dev/null
 
-All of this is done by the AWX when you log in to the UI or API in the browser, and should only be used when authenticating in the browser. 
+All of this is done by the AWX when you log in to the UI or API in the browser, and should only be used when authenticating in the browser.
 
 A typical response might look like:
 
@@ -92,11 +92,11 @@ Setting a session limit allows administrators to limit the number of simultaneou
 
 A session is created for each browser that a user uses to log in, which forces the user to log out any extra sessions after they exceed the administrator-defined maximum.
 
-Session limits may be important, depending on your particular setup. For example, perhaps you only want a single user on your system with a single login per device (where the user could log in on his work laptop, phone, or home computer). In such a case, you would want to create a session limit equal to 1 (one). If the user logs in on his laptop, for example, then logs in using his phone, his laptop session expires (times out) and only the login on the phone persists. Proactive session limits will kick the user out when the session is idle. The default value is **-1**, which disables the maximum sessions allowed altogether, meaning you can have as many sessions without an imposed limit. 
+Session limits may be important, depending on your particular setup. For example, perhaps you only want a single user on your system with a single login per device (where the user could log in on his work laptop, phone, or home computer). In such a case, you would want to create a session limit equal to 1 (one). If the user logs in on his laptop, for example, then logs in using his phone, his laptop session expires (times out) and only the login on the phone persists. Proactive session limits will kick the user out when the session is idle. The default value is **-1**, which disables the maximum sessions allowed altogether, meaning you can have as many sessions without an imposed limit.
 
-While session counts can be very limited, they can also be expanded to cover as many session logins as are needed by your organization. 
+While session counts can be very limited, they can also be expanded to cover as many session logins as are needed by your organization.
 
-When a user logs in and their login results in other users being logged out, the session limit has been reached and those users who are logged out are notified as to why the logout occurred. 
+When a user logs in and their login results in other users being logged out, the session limit has been reached and those users who are logged out are notified as to why the logout occurred.
 
 .. note::
   To make the best use of session limits, disable ``AUTH_BASIC_ENABLED`` by changing the value to ``False``, as it falls outside of the scope of session limit enforcement.
@@ -105,7 +105,7 @@ When a user logs in and their login results in other users being logged out, the
 Basic Authentication
 ====================
 
-Basic Authentication (Basic Auth) is stateless, thus the base64-encoded ``username`` and ``password`` must be sent along with each request via the Authorization header. This can be used for API calls from curl requests, python scripts, or individual requests to the API. 
+Basic Authentication (Basic Auth) is stateless, thus the base64-encoded ``username`` and ``password`` must be sent along with each request via the Authorization header. This can be used for API calls from curl requests, python scripts, or individual requests to the API.
 Example with curl:
 
 .. code-block:: text
