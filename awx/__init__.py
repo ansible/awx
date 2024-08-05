@@ -60,25 +60,6 @@ else:
     from django.db import connection
 
 
-def oauth2_getattribute(self, attr):
-    # Custom method to override
-    # oauth2_provider.settings.OAuth2ProviderSettings.__getattribute__
-    from django.conf import settings
-    from oauth2_provider.settings import DEFAULTS
-
-    val = None
-    if (isinstance(attr, str)) and (attr in DEFAULTS) and (not attr.startswith('_')):
-        # certain Django OAuth Toolkit migrations actually reference
-        # setting lookups for references to model classes (e.g.,
-        # oauth2_settings.REFRESH_TOKEN_MODEL)
-        # If we're doing an OAuth2 setting lookup *while running* a migration,
-        # don't do our usual database settings lookup
-        val = settings.OAUTH2_PROVIDER.get(attr)
-    if val is None:
-        val = object.__getattribute__(self, attr)
-    return val
-
-
 def prepare_env():
     # Update the default settings environment variable based on current mode.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
@@ -88,12 +69,6 @@ def prepare_env():
 
     if not settings.DEBUG:  # pragma: no cover
         warnings.simplefilter('ignore', DeprecationWarning)
-
-    # Monkeypatch Oauth2 toolkit settings class to check for settings
-    # in django.conf settings each time, not just once during import
-    import oauth2_provider.settings
-
-    oauth2_provider.settings.OAuth2ProviderSettings.__getattribute__ = oauth2_getattribute
 
 
 def manage():

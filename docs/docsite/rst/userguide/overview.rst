@@ -187,8 +187,6 @@ Authentication Enhancements
 
 .. index::
    pair: features; authentication
-   pair: features; OAuth 2 token
-
 
 Cluster Management
 ~~~~~~~~~~~~~~~~~~~~

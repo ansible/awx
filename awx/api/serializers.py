@@ -10,10 +10,6 @@ from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
 
-# OAuth2
-from oauthlib import oauth2
-from oauthlib.common import generate_token
-
 # Jinja
 from jinja2 import sandbox, StrictUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
@@ -79,14 +75,11 @@ from awx.main.models import (
     Label,
     Notification,
     NotificationTemplate,
-    OAuth2AccessToken,
-    OAuth2Application,
     Organization,
     Project,
     ProjectUpdate,
     ProjectUpdateEvent,
     ReceptorAddress,
-    RefreshToken,
     Role,
     Schedule,
     SystemJob,
@@ -1060,9 +1053,6 @@ class UserSerializer(BaseSerializer):
                 roles=self.reverse('api:user_roles_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:user_activity_stream_list', kwargs={'pk': obj.pk}),
                 access_list=self.reverse('api:user_access_list', kwargs={'pk': obj.pk}),
-                tokens=self.reverse('api:o_auth2_token_list', kwargs={'pk': obj.pk}),
-                authorized_tokens=self.reverse('api:user_authorized_token_list', kwargs={'pk': obj.pk}),
-                personal_tokens=self.reverse('api:user_personal_token_list', kwargs={'pk': obj.pk}),
             )
         )
         return res
@@ -1077,199 +1067,6 @@ class UserActivityStreamSerializer(UserSerializer):
     class Meta:
         model = User
         fields = ('*', '-is_system_auditor')
-
-
-class BaseOAuth2TokenSerializer(BaseSerializer):
-    refresh_token = serializers.SerializerMethodField()
-    token = serializers.SerializerMethodField()
-    ALLOWED_SCOPES = ['read', 'write']
-
-    class Meta:
-        model = OAuth2AccessToken
-        fields = ('*', '-name', 'description', 'user', 'token', 'refresh_token', 'application', 'expires', 'scope')
-        read_only_fields = ('user', 'token', 'expires', 'refresh_token')
-        extra_kwargs = {'scope': {'allow_null': False, 'required': False}, 'user': {'allow_null': False, 'required': True}}
-
-    def get_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if request.method == 'POST':
-                return obj.token
-            else:
-                return CENSOR_VALUE
-        except ObjectDoesNotExist:
-            return ''
-
-    def get_refresh_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if not obj.refresh_token:
-                return None
-            elif request.method == 'POST':
-                return getattr(obj.refresh_token, 'token', '')
-            else:
-                return CENSOR_VALUE
-        except ObjectDoesNotExist:
-            return None
-
-    def get_related(self, obj):
-        ret = super(BaseOAuth2TokenSerializer, self).get_related(obj)
-        if obj.user:
-            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
-        if obj.application:
-            ret['application'] = self.reverse('api:o_auth2_application_detail', kwargs={'pk': obj.application.pk})
-        ret['activity_stream'] = self.reverse('api:o_auth2_token_activity_stream_list', kwargs={'pk': obj.pk})
-        return ret
-
-    def _is_valid_scope(self, value):
-        if not value or (not isinstance(value, str)):
-            return False
-        words = value.split()
-        for word in words:
-            if words.count(word) > 1:
-                return False  # do not allow duplicates
-            if word not in self.ALLOWED_SCOPES:
-                return False
-        return True
-
-    def validate_scope(self, value):
-        if not self._is_valid_scope(value):
-            raise serializers.ValidationError(_('Must be a simple space-separated string with allowed scopes {}.').format(self.ALLOWED_SCOPES))
-        return value
-
-    def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
-        try:
-            return super(BaseOAuth2TokenSerializer, self).create(validated_data)
-        except oauth2.AccessDeniedError as e:
-            raise PermissionDenied(str(e))
-
-
-class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
-    class Meta:
-        extra_kwargs = {
-            'scope': {'allow_null': False, 'required': False},
-            'user': {'allow_null': False, 'required': True},
-            'application': {'allow_null': False, 'required': True},
-        }
-
-    def create(self, validated_data):
-        current_user = self.context['request'].user
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS'])
-        obj = super(UserAuthorizedTokenSerializer, self).create(validated_data)
-        obj.save()
-        if obj.application:
-            RefreshToken.objects.create(user=current_user, token=generate_token(), application=obj.application, access_token=obj)
-        return obj
-
-
-class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
-    def create(self, validated_data):
-        current_user = self.context['request'].user
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS'])
-        obj = super(OAuth2TokenSerializer, self).create(validated_data)
-        if obj.application and obj.application.user:
-            obj.user = obj.application.user
-        obj.save()
-        if obj.application:
-            RefreshToken.objects.create(user=current_user, token=generate_token(), application=obj.application, access_token=obj)
-        return obj
-
-
-class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
-    class Meta:
-        read_only_fields = ('*', 'user', 'application')
-
-
-class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
-    class Meta:
-        read_only_fields = ('user', 'token', 'expires', 'application')
-
-    def create(self, validated_data):
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS'])
-        validated_data['application'] = None
-        obj = super(UserPersonalTokenSerializer, self).create(validated_data)
-        obj.save()
-        return obj
-
-
-class OAuth2ApplicationSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete']
-
-    class Meta:
-        model = OAuth2Application
-        fields = (
-            '*',
-            'description',
-            '-user',
-            'client_id',
-            'client_secret',
-            'client_type',
-            'redirect_uris',
-            'authorization_grant_type',
-            'skip_authorization',
-            'organization',
-        )
-        read_only_fields = ('client_id', 'client_secret')
-        read_only_on_update_fields = ('user', 'authorization_grant_type')
-        extra_kwargs = {
-            'user': {'allow_null': True, 'required': False},
-            'organization': {'allow_null': False},
-            'authorization_grant_type': {'allow_null': False, 'label': _('Authorization Grant Type')},
-            'client_secret': {'label': _('Client Secret')},
-            'client_type': {'label': _('Client Type')},
-            'redirect_uris': {'label': _('Redirect URIs')},
-            'skip_authorization': {'label': _('Skip Authorization')},
-        }
-
-    def to_representation(self, obj):
-        ret = super(OAuth2ApplicationSerializer, self).to_representation(obj)
-        request = self.context.get('request', None)
-        if request.method != 'POST' and obj.client_type == 'confidential':
-            ret['client_secret'] = CENSOR_VALUE
-        if obj.client_type == 'public':
-            ret.pop('client_secret', None)
-        return ret
-
-    def get_related(self, obj):
-        res = super(OAuth2ApplicationSerializer, self).get_related(obj)
-        res.update(
-            dict(
-                tokens=self.reverse('api:o_auth2_application_token_list', kwargs={'pk': obj.pk}),
-                activity_stream=self.reverse('api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}),
-            )
-        )
-        if obj.organization_id:
-            res.update(
-                dict(
-                    organization=self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id}),
-                )
-            )
-        return res
-
-    def get_modified(self, obj):
-        if obj is None:
-            return None
-        return obj.updated
-
-    def _summary_field_tokens(self, obj):
-        token_list = [{'id': x.pk, 'token': CENSOR_VALUE, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
-        if has_model_field_prefetched(obj, 'oauth2accesstoken_set'):
-            token_count = len(obj.oauth2accesstoken_set.all())
-        else:
-            if len(token_list) < 10:
-                token_count = len(token_list)
-            else:
-                token_count = obj.oauth2accesstoken_set.count()
-        return {'count': token_count, 'results': token_list}
-
-    def get_summary_fields(self, obj):
-        ret = super(OAuth2ApplicationSerializer, self).get_summary_fields(obj)
-        ret['tokens'] = self._summary_field_tokens(obj)
-        return ret
 
 
 class OrganizationSerializer(BaseSerializer):
@@ -1292,7 +1089,6 @@ class OrganizationSerializer(BaseSerializer):
             admins=self.reverse('api:organization_admins_list', kwargs={'pk': obj.pk}),
             teams=self.reverse('api:organization_teams_list', kwargs={'pk': obj.pk}),
             credentials=self.reverse('api:organization_credential_list', kwargs={'pk': obj.pk}),
-            applications=self.reverse('api:organization_applications_list', kwargs={'pk': obj.pk}),
             activity_stream=self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates=self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
             notification_templates_started=self.reverse('api:organization_notification_templates_started_list', kwargs={'pk': obj.pk}),
@@ -6081,8 +5877,6 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
-            ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
-            ('o_auth2_application', ('id', 'name', 'description')),
             ('credential_type', ('id', 'name', 'description', 'kind', 'managed')),
             ('ad_hoc_command', ('id', 'name', 'status', 'limit')),
             ('workflow_approval', ('id', 'name', 'unified_job_id')),

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import oauth2_provider
 import re
 
 
@@ -13,19 +12,13 @@ class Migration(migrations.Migration):
     dependencies = [
         ('main', '0024_v330_create_user_session_membership'),
     ]
-    run_before = [
-        # As of this migration, OAuth2Application and OAuth2AccessToken are models in main app
-        # Grant and RefreshToken models are still in the oauth2_provider app and reference
-        # the app and token models, so these must be created before the oauth2_provider models
-        ('oauth2_provider', '0001_initial')
-    ]
 
     operations = [
         migrations.CreateModel(
             name='OAuth2Application',
             fields=[
                 ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('client_id', models.CharField(db_index=True, default=oauth2_provider.generators.generate_client_id, max_length=100, unique=True)),
+                ('client_id', models.CharField(db_index=True, default=lambda: "", max_length=100, unique=True)),
                 (
                     'redirect_uris',
                     models.TextField(blank=True, help_text='Allowed URIs list, space separated'),
@@ -43,7 +36,7 @@ class Migration(migrations.Migration):
                         max_length=32,
                     ),
                 ),
-                ('client_secret', models.CharField(blank=True, db_index=True, default=oauth2_provider.generators.generate_client_secret, max_length=255)),
+                ('client_secret', models.CharField(blank=True, db_index=True, default=lambda: "", max_length=255)),
                 ('name', models.CharField(blank=True, max_length=255)),
                 ('skip_authorization', models.BooleanField(default=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -72,10 +65,6 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('description', models.CharField(blank=True, default='', max_length=200)),
                 ('last_used', models.DateTimeField(default=None, editable=False, null=True)),
-                (
-                    'application',
-                    models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL),
-                ),
                 (
                     'user',
                     models.ForeignKey(

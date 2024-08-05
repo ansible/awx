@@ -25,7 +25,7 @@ from awx.api.views.organization import (
     OrganizationObjectRolesList,
     OrganizationAccessList,
 )
-from awx.api.views import OrganizationCredentialList, OrganizationApplicationList
+from awx.api.views import OrganizationCredentialList
 
 
 urls = [
@@ -66,7 +66,6 @@ urls = [
     re_path(r'^(?P<pk>[0-9]+)/galaxy_credentials/$', OrganizationGalaxyCredentialsList.as_view(), name='organization_galaxy_credentials_list'),
     re_path(r'^(?P<pk>[0-9]+)/object_roles/$', OrganizationObjectRolesList.as_view(), name='organization_object_roles_list'),
     re_path(r'^(?P<pk>[0-9]+)/access_list/$', OrganizationAccessList.as_view(), name='organization_access_list'),
-    re_path(r'^(?P<pk>[0-9]+)/applications/$', OrganizationApplicationList.as_view(), name='organization_applications_list'),
 ]
 
 __all__ = ['urls']

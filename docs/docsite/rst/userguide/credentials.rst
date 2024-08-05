@@ -521,7 +521,6 @@ The Red Hat Ansible Automation Platform credentials have the following inputs th
 -  **Red Hat Ansible Automation Platform**: The base URL or IP address of the other instance to connect to.
 -  **Username**: The username to use to connect to it.
 -  **Password**: The password to use to connect to it.
--  **Oauth Token**: If username and password is not used, provide an OAuth token to use to authenticate.
 
 
 Red Hat Satellite 6

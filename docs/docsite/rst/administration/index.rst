@@ -38,7 +38,6 @@ Need help or want to discuss AWX including the documentation? See the :ref:`Comm
   awx-manage
   configure_awx
   isolation_variables
-  oauth2_token_auth
   authentication_timeout
   session_limits
   custom_rebranding
