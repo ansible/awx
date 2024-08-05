@@ -6,8 +6,6 @@ from rest_framework import serializers
 
 # AWX
 from awx.conf import fields, register, register_validate
-from awx.api.fields import OAuth2ProviderField
-from oauth2_provider.settings import oauth2_settings
 
 
 register(
@@ -45,27 +43,6 @@ register(
     help_text=_('Enable HTTP Basic Auth for the API Browser.'),
     category=_('Authentication'),
     category_slug='authentication',
-)
-register(
-    'OAUTH2_PROVIDER',
-    field_class=OAuth2ProviderField,
-    default={
-        'ACCESS_TOKEN_EXPIRE_SECONDS': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
-        'AUTHORIZATION_CODE_EXPIRE_SECONDS': oauth2_settings.AUTHORIZATION_CODE_EXPIRE_SECONDS,
-        'REFRESH_TOKEN_EXPIRE_SECONDS': oauth2_settings.REFRESH_TOKEN_EXPIRE_SECONDS,
-    },
-    label=_('OAuth 2 Timeout Settings'),
-    help_text=_(
-        'Dictionary for customizing OAuth 2 timeouts, available items are '
-        '`ACCESS_TOKEN_EXPIRE_SECONDS`, the duration of access tokens in the number '
-        'of seconds, `AUTHORIZATION_CODE_EXPIRE_SECONDS`, the duration of '
-        'authorization codes in the number of seconds, and `REFRESH_TOKEN_EXPIRE_SECONDS`, '
-        'the duration of refresh tokens, after expired access tokens, '
-        'in the number of seconds.'
-    ),
-    category=_('Authentication'),
-    category_slug='authentication',
-    unit=_('seconds'),
 )
 register(
     'LOGIN_REDIRECT_OVERRIDE',

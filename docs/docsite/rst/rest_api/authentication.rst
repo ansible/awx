@@ -5,7 +5,6 @@ Authentication Methods Using the API
 .. index::
    pair: session; authentication
    pair: basic; authentication
-   pair: OAuth 2 Token; authentication
    pair: SSO; authentication
 
 This chapter describes different authentication methods, the best use case for each, and examples:
@@ -46,7 +45,7 @@ Using the curl tool, you can see the activity that occurs when you log into AWX.
   	--cookie 'csrftoken=K580zVVm0rWX8pmNylz5ygTPamgUJxifrdJY0UDtMMoOis5Q1UOxRmV9918BUBIN' \
   	https://<awx-host>/api/login/ -k -D - -o /dev/null
 
-All of this is done by the AWX when you log in to the UI or API in the browser, and should only be used when authenticating in the browser. For programmatic integration with AWX, see :ref:`api_oauth2_auth`.
+All of this is done by the AWX when you log in to the UI or API in the browser, and should only be used when authenticating in the browser.
 
 A typical response might look like:
 
@@ -83,7 +82,7 @@ When a user is successfully authenticated with this method, the server will resp
 Basic Authentication
 ---------------------
 
-Basic Authentication (Basic Auth) is stateless, thus the base64-encoded ``username`` and ``password`` must be sent along with each request via the Authorization header. This can be used for API calls from curl requests, python scripts, or individual requests to the API. :ref:`api_oauth2_auth` is recommended for accessing the API when at all possible.  
+Basic Authentication (Basic Auth) is stateless, thus the base64-encoded ``username`` and ``password`` must be sent along with each request via the Authorization header. This can be used for API calls from curl requests, python scripts, or individual requests to the API.
 
 Example with curl:
 
@@ -99,89 +98,3 @@ For more information about the Basic HTTP Authentication scheme, see `RFC 7617 <
 	You can disable the Basic Auth for security purposes from the Miscellaneous Authentication settings of the AWX UI Settings menu:
 
 	.. image:: ../common/images/configure-awx-auth-basic-off.png
-
-.. _api_oauth2_auth:
-
-OAuth 2 Token Authentication
------------------------------
-
-OAuth (Open Authorization) is an open standard for token-based authentication and authorization. OAuth 2 authentication is commonly used when interacting with the AWX API programmatically. Like Basic Auth, an OAuth 2 token is supplied with each API request via the Authorization header. Unlike Basic Auth, OAuth 2 tokens have a configurable timeout and are scopable. Tokens have a configurable expiration time and can be easily revoked for one user or for the entire AWX system by an admin if needed. This can be done with the :ref:`ag_manage_utility_revoke_tokens` management command, which is covered in more detail in |ata| or by using the API as explained in :ref:`ag_oauth2_token_revoke`.
-
-.. note::
-
-	By default, external users such as those created by SSO are not allowed to generate OAuth tokens for security purposes. This can be changed from the Miscellaneous Authentication settings of the AWX UI Settings menu:
-
-	.. image:: ../common/images/configure-awx-external-tokens-off.png 
-
-The different methods for obtaining OAuth 2 Access Tokens in AWX are:
-
-- Personal access tokens (PAT)
-- Application Token: Password grant type
-- Application Token: Implicit grant type
-- Application Token: Authorization Code grant type
-
-For more information on the above methods, see :ref:`ag_oauth2_token_auth` in the |ata|.
-
-
-First, a user needs to create an OAuth 2 Access Token in the API or in their User’s **Tokens** tab in the UI. For further detail on creating them through the UI, see :ref:`ug_users_tokens`. For the purposes of this example, use the PAT method for creating a token in the API. Upon token creation, the user can set the scope. 
-
-.. note::
-
-	The expiration time of the token can be configured system-wide. See :ref:`ag_use_oauth_pat` for more detail.
-
-Token authentication is best used for any programmatic use of the AWX API, such as Python scripts or tools like curl, as in the example for creating a PAT (without an associated application) below.
-
-**Curl Example**
-
-.. code-block:: text
-
-   curl -u user:password -k -X POST https://<awx-host>/api/v2/tokens/
-
-
-This call will return JSON data like:
-
-.. image:: ../common/images/api_oauth2_json_returned_token_value.png
-
-The value of the ``token`` property is what you can now use to perform a GET request for an AWX resource, e.g., Hosts.
-
-.. code-block:: text
-
-	curl -k -X POST \
-  	  -H “Content-Type: application/json”
-  	  -H “Authorization: Bearer <oauth2-token-value>” \
-  	  https://<awx-host>/api/v2/hosts/ 
-
-Similarly, you can launch a job by making a POST to the job template that you want to launch.
-
-.. code-block:: text
-
-	curl -k -X POST \
-  	  -H "Authorization: Bearer <oauth2-token-value>" \
-  	  -H "Content-Type: application/json" \
-  	  --data '{"limit" : "ansible"}' \
-  	  https://<awx-host>/api/v2/job_templates/14/launch/ 
-
-
-**Python Example**
-
-`awxkit <https://pypi.org/project/awxkit/>`_ is an open source tool that makes it easy to use HTTP requests to access the AWX API. 
-You can have awxkit acquire a PAT on your behalf by using the ``awxkit login`` command. Refer to the :ref:`api_start` for more detail.
-
-For more information on how to use OAuth 2 in AWX in the context of integrating external applications, see :ref:`ag_oauth2_token_auth` in the |ata|. 
-
-If you need to write custom requests, you can write a Python script using `Python library requests <https://pypi.org/project/requests/>`_, like in this example:
-
-.. code-block:: text
-
-	import requests
-	oauth2_token_value = 'y1Q8ye4hPvT61aQq63Da6N1C25jiA'   # your token value from AWX
-	url = 'https://<awx-host>/api/v2/users/'
-	payload = {}
-	headers = {'Authorization': 'Bearer ' + oauth2_token_value,}
-
-	# makes request to awx user endpoint
-	response = requests.request('GET', url, headers=headers, data=payload,
-	allow_redirects=False, verify=False)
-
-	# prints json returned from awx with formatting
-	print(json.dumps(response.json(), indent=4, sort_keys=True))

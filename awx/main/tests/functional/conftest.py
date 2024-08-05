@@ -44,7 +44,6 @@ from awx.main.models.events import (
 )
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
-from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.utils import is_testing
 
@@ -810,11 +809,6 @@ def get_db_prep_save(self, value, connection, **kwargs):
         value = dumps(value)
 
     return value
-
-
-@pytest.fixture
-def oauth_application(admin):
-    return Application.objects.create(name='test app', user=admin, client_type='confidential', authorization_grant_type='password')
 
 
 class MockCopy:

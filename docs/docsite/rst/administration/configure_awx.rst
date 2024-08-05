@@ -68,10 +68,6 @@ The System tab allows you to define the base URL for the AWX host, configure ale
 .. image:: ../common/images/configure-awx-system.png
    :alt: Miscellaneous System settings window showing all possible configurable options.
 
-.. note::
-
-  The **Allow External Users to Create Oauth2 Tokens** setting is disabled by default. This ensures external users cannot *create* their own tokens. If you enable then disable it, any tokens created by external users in the meantime will still exist, and are not automatically revoked.
-
 4. Click **Save** to apply the settings or **Cancel** to abandon the changes.
 
 .. _configure_awx_ui:

@@ -25,10 +25,6 @@ from awx.api.views import (
     JobTemplateCredentialsList,
     SchedulePreview,
     ScheduleZoneInfo,
-    OAuth2ApplicationList,
-    OAuth2TokenList,
-    ApplicationOAuth2TokenList,
-    OAuth2ApplicationDetail,
     HostMetricSummaryMonthlyList,
 )
 
@@ -79,8 +75,6 @@ from .schedule import urls as schedule_urls
 from .activity_stream import urls as activity_stream_urls
 from .instance import urls as instance_urls
 from .instance_group import urls as instance_group_urls
-from .oauth2 import urls as oauth2_urls
-from .oauth2_root import urls as oauth2_root_urls
 from .workflow_approval_template import urls as workflow_approval_template_urls
 from .workflow_approval import urls as workflow_approval_urls
 from .analytics import urls as analytics_urls
@@ -95,11 +89,6 @@ v2_urls = [
     re_path(r'^job_templates/(?P<pk>[0-9]+)/credentials/$', JobTemplateCredentialsList.as_view(), name='job_template_credentials_list'),
     re_path(r'^schedules/preview/$', SchedulePreview.as_view(), name='schedule_rrule'),
     re_path(r'^schedules/zoneinfo/$', ScheduleZoneInfo.as_view(), name='schedule_zoneinfo'),
-    re_path(r'^applications/$', OAuth2ApplicationList.as_view(), name='o_auth2_application_list'),
-    re_path(r'^applications/(?P<pk>[0-9]+)/$', OAuth2ApplicationDetail.as_view(), name='o_auth2_application_detail'),
-    re_path(r'^applications/(?P<pk>[0-9]+)/tokens/$', ApplicationOAuth2TokenList.as_view(), name='application_o_auth2_token_list'),
-    re_path(r'^tokens/$', OAuth2TokenList.as_view(), name='o_auth2_token_list'),
-    re_path(r'^', include(oauth2_urls)),
     re_path(r'^metrics/$', MetricsView.as_view(), name='metrics_view'),
     re_path(r'^ping/$', ApiV2PingView.as_view(), name='api_v2_ping_view'),
     re_path(r'^config/$', ApiV2ConfigView.as_view(), name='api_v2_config_view'),
@@ -164,7 +153,6 @@ urlpatterns = [
     re_path(r'^(?P<version>(v2))/', include(v2_urls)),
     re_path(r'^login/$', LoggedLoginView.as_view(template_name='rest_framework/login.html', extra_context={'inside_login_context': True}), name='login'),
     re_path(r'^logout/$', LoggedLogoutView.as_view(next_page='/api/', redirect_field_name='next'), name='logout'),
-    re_path(r'^o/', include(oauth2_root_urls)),
 ]
 if MODE == 'development':
     # Only include these if we are in the development environment

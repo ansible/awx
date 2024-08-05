@@ -9,20 +9,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        migrations.swappable_dependency(settings.OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL),
         ('main', '0040_v330_unifiedjob_controller_node'),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name='oauth2accesstoken',
-            name='source_refresh_token',
-            field=models.OneToOneField(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name='refreshed_access_token',
-                to=settings.OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL,
-            ),
-        ),
-    ]
+    operations = []

@@ -79,19 +79,6 @@ class VerbatimField(serializers.Field):
         return value
 
 
-class OAuth2ProviderField(fields.DictField):
-    default_error_messages = {'invalid_key_names': _('Invalid key names: {invalid_key_names}')}
-    valid_key_names = {'ACCESS_TOKEN_EXPIRE_SECONDS', 'AUTHORIZATION_CODE_EXPIRE_SECONDS', 'REFRESH_TOKEN_EXPIRE_SECONDS'}
-    child = fields.IntegerField(min_value=1)
-
-    def to_internal_value(self, data):
-        data = super(OAuth2ProviderField, self).to_internal_value(data)
-        invalid_flags = set(data.keys()) - self.valid_key_names
-        if invalid_flags:
-            self.fail('invalid_key_names', invalid_key_names=', '.join(list(invalid_flags)))
-        return data
-
-
 class DeprecatedCredentialField(serializers.IntegerField):
     def __init__(self, **kwargs):
         kwargs['allow_null'] = True
