@@ -312,7 +312,7 @@ services:
     user: root
     container_name: tools_receptor_hop
     hostname: receptor-hop
-    command: 'receptor --config /etc/receptor/receptor.conf'
+    command: 'receptor --legacy --config /etc/receptor/receptor.conf'
     networks:
       - awx
     ports:
@@ -325,7 +325,7 @@ services:
     user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_{{ loop.index }}
     hostname: receptor-{{ loop.index }}
-    command: 'receptor --config /etc/receptor/receptor.conf'
+    command: 'receptor --legacy --config /etc/receptor/receptor.conf'
     environment:
       RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
     networks:
