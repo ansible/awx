@@ -8,6 +8,19 @@ from requests.exceptions import HTTPError
 CredentialPlugin = namedtuple('CredentialPlugin', ['name', 'inputs', 'backend'])
 
 
+try:
+    from django.utils.translation import gettext_lazy as translate_function
+except ModuleNotFoundError:
+    translate_function = lambda *args, **kwargs: None
+
+
+class Settings():
+    DEBUG = False
+
+
+settings = Settings()
+
+
 def raise_for_status(resp):
     resp.raise_for_status()
     if resp.status_code >= 300:

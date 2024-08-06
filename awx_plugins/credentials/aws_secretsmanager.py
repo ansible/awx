@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from .plugin import CredentialPlugin
-from django.utils.translation import gettext_lazy as _
+from .plugin import translate_function as _
 
 
 secrets_manager_inputs = {
