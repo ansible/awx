@@ -1,7 +1,7 @@
 from .plugin import CredentialPlugin
 
-from django.conf import settings
-from django.utils.translation import gettext_lazy as _
+from .plugin import settings
+from .plugin import translate_function as _
 from delinea.secrets.vault import PasswordGrantAuthorizer, SecretsVault
 from base64 import b64decode
 

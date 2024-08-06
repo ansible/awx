@@ -1,10 +1,10 @@
 import pytest
 from unittest import mock
-from awx.main.credential_plugins import hashivault
+from awx_plugins.credentials import hashivault
 
 
 def test_imported_azure_cloud_sdk_vars():
-    from awx.main.credential_plugins import azure_kv
+    from awx_plugins.credentials import azure_kv
 
     assert len(azure_kv.clouds) > 0
     assert all([hasattr(c, 'name') for c in azure_kv.clouds])
@@ -129,13 +129,13 @@ class TestDelineaImports:
     """
 
     def test_dsv_import(self):
-        from awx.main.credential_plugins.dsv import SecretsVault  # noqa
+        from awx_plugins.credentials.dsv import SecretsVault  # noqa
 
         # assert this module as opposed to older thycotic.secrets.vault
         assert SecretsVault.__module__ == 'delinea.secrets.vault'
 
     def test_tss_import(self):
-        from awx.main.credential_plugins.tss import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret  # noqa
+        from awx_plugins.credentials.tss import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret  # noqa
 
         for cls in (DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret):
             # assert this module as opposed to older thycotic.secrets.server

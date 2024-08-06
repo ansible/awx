@@ -4,7 +4,7 @@ from msrestazure import azure_cloud
 
 from .plugin import CredentialPlugin
 
-from django.utils.translation import gettext_lazy as _
+from .plugin import translate_function as _
 
 
 # https://github.com/Azure/msrestazure-for-python/blob/master/msrestazure/azure_cloud.py
