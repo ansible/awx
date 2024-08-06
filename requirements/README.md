@@ -120,15 +120,6 @@ in the top-level Makefile.
 
 If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.
 
-### hiredis
-
-The hiredis 2.1.0 release doesn't provide source distribution on PyPI which prevents users to build that python package from the
-sources.
-Downgrading to 2.0.0 (which provides source distribution) until the channels-redis issue is fixed or a newer hiredis version is
-available on PyPi with source distribution.
-
-* https://github.com/redis/hiredis-py/issues/138
-
 ## Library Notes
 
 ### pexpect
