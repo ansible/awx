@@ -15,7 +15,7 @@ Examine the AWX Dashboard
    pair: settings menu; help about
 
 
-The Dashboard offers a friendly graphical framework for your IT orchestration needs. Along the left side of the Dashboard is the navigation menu, where you can quickly display different views, navigate to your resources, grant access, and administer certain AWX features in the UI. 
+The Dashboard offers a friendly graphical framework for your Ansible needs. Along the left side of the Dashboard is the navigation menu, where you can quickly display different views, navigate to your resources, grant access, and administer certain AWX features in the UI. 
 
 .. note::
 
@@ -40,7 +40,7 @@ On the main Dashboard view, a summary appears listing your current **Job Status*
 
 The very last item in the navigation bar is **Settings**, which provides access to the AWX configuration Settings. 
 
-The Settings page allows administrators to configure authentication, jobs, system-level attributes, customize the user interface, and product license information. Refer to :ref:`ag_configure_awx` section for more detail.
+The Settings page allows administrators to configure authentication, jobs, system-level attributes, and customize the user interface. Refer to :ref:`ag_configure_awx` section for more detail.
 
 .. image:: ../common/images/ug-settings-menu-screen.png
 
@@ -50,4 +50,4 @@ Regardless of the window or action you're performing, the very top of each page 
 .. |about| image:: ../common/images/help-about-icon.png
 
 .. note::
-	Keep in mind that the goal of this Quick Start is to launch a simple playbook. To do this, a number of configuration options must be setup. Completing the quick start configuration tasks now ensures that tAWX is configured properly and allows for easier executions of more involved playbooks later on. 
+	Keep in mind that the goal of this Quick Start is to launch a simple playbook. To do this, a number of configuration options must be setup. Completing the quick start configuration tasks now ensures that AWX is configured properly and allows for easier executions of more involved playbooks later on. 

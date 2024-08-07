@@ -22,7 +22,7 @@ describe('<GitHubOrgEdit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-org/',
+          'https://platformhost/sso/complete/github-org/',
         SOCIAL_AUTH_GITHUB_ORG_KEY: '',
         SOCIAL_AUTH_GITHUB_ORG_SECRET: '$encrypted$',
         SOCIAL_AUTH_GITHUB_ORG_NAME: '',

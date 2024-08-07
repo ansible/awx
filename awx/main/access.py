@@ -1400,7 +1400,9 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     def filtered_queryset(self):
         return ExecutionEnvironment.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role')) | Q(organization__isnull=True)
+            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role'))
+            | Q(organization__isnull=True)
+            | Q(id__in=ExecutionEnvironment.access_ids_qs(self.user, 'change'))
         ).distinct()
 
     @check_superuser
@@ -1419,11 +1421,13 @@ class ExecutionEnvironmentAccess(BaseAccess):
         else:
             if self.user not in obj.organization.execution_environment_admin_role:
                 raise PermissionDenied
-        if data and 'organization' in data:
-            new_org = get_object_from_data('organization', Organization, data, obj=obj)
-            if not new_org or self.user not in new_org.execution_environment_admin_role:
+        if not self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role'):
+            return False
+        # Special case that check_related does not catch, org users can not remove the organization from the EE
+        if data and ('organization' in data or 'organization_id' in data):
+            if (not data.get('organization')) and (not data.get('organization_id')):
                 return False
-        return self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role')
+        return True
 
     def can_delete(self, obj):
         if obj.managed:
@@ -2100,15 +2104,18 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
 
         if not self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True):
             if data.get('organization', None) is None:
-                self.messages['organization'] = [_('An organization is required to create a workflow job template for normal user')]
+                if self.save_messages:
+                    self.messages['organization'] = [_('An organization is required to create a workflow job template for normal user')]
             return False
 
         if not self.check_related('inventory', Inventory, data, role_field='use_role'):
-            self.messages['inventory'] = [_('You do not have use_role to the inventory')]
+            if self.save_messages:
+                self.messages['inventory'] = [_('You do not have use_role to the inventory')]
             return False
 
         if not self.check_related('execution_environment', ExecutionEnvironment, data, role_field='read_role'):
-            self.messages['execution_environment'] = [_('You do not have read_role to the execution environment')]
+            if self.save_messages:
+                self.messages['execution_environment'] = [_('You do not have read_role to the execution environment')]
             return False
 
         return True

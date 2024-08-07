@@ -828,7 +828,7 @@ MANAGE_ORGANIZATION_AUTH = True
 DISABLE_LOCAL_AUTH = False
 
 # Note: This setting may be overridden by database settings.
-TOWER_URL_BASE = "https://towerhost"
+TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
@@ -1009,6 +1009,7 @@ AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
+RECPETOR_KEEP_WORK_ON_ERROR = False
 
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'

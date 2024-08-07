@@ -22,7 +22,7 @@ describe('<AzureADEdit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
-          'https://towerhost/sso/complete/azuread-oauth2/',
+          'https://platformhost/sso/complete/azuread-oauth2/',
         SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
         SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
         SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},

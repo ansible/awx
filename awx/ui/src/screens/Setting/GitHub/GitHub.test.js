@@ -19,7 +19,7 @@ describe('<GitHub />', () => {
     SettingsAPI.readCategory.mockResolvedValueOnce({
       data: {
         SOCIAL_AUTH_GITHUB_CALLBACK_URL:
-          'https://towerhost/sso/complete/github/',
+          'https://platformhost/sso/complete/github/',
         SOCIAL_AUTH_GITHUB_KEY: 'mock github key',
         SOCIAL_AUTH_GITHUB_SECRET: '$encrypted$',
         SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: null,
@@ -29,7 +29,7 @@ describe('<GitHub />', () => {
     SettingsAPI.readCategory.mockResolvedValueOnce({
       data: {
         SOCIAL_AUTH_GITHUB_ORG_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-org/',
+          'https://platformhost/sso/complete/github-org/',
         SOCIAL_AUTH_GITHUB_ORG_KEY: '',
         SOCIAL_AUTH_GITHUB_ORG_SECRET: '$encrypted$',
         SOCIAL_AUTH_GITHUB_ORG_NAME: '',
@@ -40,7 +40,7 @@ describe('<GitHub />', () => {
     SettingsAPI.readCategory.mockResolvedValueOnce({
       data: {
         SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-team/',
+          'https://platformhost/sso/complete/github-team/',
         SOCIAL_AUTH_GITHUB_TEAM_KEY: 'OAuth2 key (Client ID)',
         SOCIAL_AUTH_GITHUB_TEAM_SECRET: '$encrypted$',
         SOCIAL_AUTH_GITHUB_TEAM_ID: 'team_id',
@@ -51,7 +51,7 @@ describe('<GitHub />', () => {
     SettingsAPI.readCategory.mockResolvedValueOnce({
       data: {
         SOCIAL_AUTH_GITHUB_ENTERPRISE_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-enterprise/',
+          'https://platformhost/sso/complete/github-enterprise/',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_URL: 'https://localhost/url',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL: 'https://localhost/apiurl',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY: 'ent_key',
@@ -63,7 +63,7 @@ describe('<GitHub />', () => {
     SettingsAPI.readCategory.mockResolvedValueOnce({
       data: {
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-enterprise-org/',
+          'https://platformhost/sso/complete/github-enterprise-org/',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL: 'https://localhost/url',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL: 'https://localhost/apiurl',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY: 'ent_org_key',
@@ -76,7 +76,7 @@ describe('<GitHub />', () => {
     SettingsAPI.readCategory.mockResolvedValueOnce({
       data: {
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_CALLBACK_URL:
-          'https://towerhost/sso/complete/github-enterprise-team/',
+          'https://platformhost/sso/complete/github-enterprise-team/',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL: 'https://localhost/url',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL: 'https://localhost/apiurl',
         SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY: 'ent_team_key',

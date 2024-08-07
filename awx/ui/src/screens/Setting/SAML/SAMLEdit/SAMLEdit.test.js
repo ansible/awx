@@ -22,8 +22,10 @@ describe('<SAMLEdit />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SAML_AUTO_CREATE_OBJECTS: true,
-        SOCIAL_AUTH_SAML_CALLBACK_URL: 'https://towerhost/sso/complete/saml/',
-        SOCIAL_AUTH_SAML_METADATA_URL: 'https://towerhost/sso/metadata/saml/',
+        SOCIAL_AUTH_SAML_CALLBACK_URL:
+          'https://platformhost/sso/complete/saml/',
+        SOCIAL_AUTH_SAML_METADATA_URL:
+          'https://platformhost/sso/metadata/saml/',
         SOCIAL_AUTH_SAML_SP_ENTITY_ID: 'mock_id',
         SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: 'mock_cert',
         SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: '$encrypted$',
