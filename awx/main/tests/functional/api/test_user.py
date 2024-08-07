@@ -38,8 +38,8 @@ def test_creating_user_retains_session(post, admin):
     '''
     Creating a new user should not refresh a new session id for the current user.
     '''
-    with mock.patch('awx.main.models.User.update_session_auth_hash') as update_session_auth_hash:
-        response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware(mock.Mock()))
+    with mock.patch('awx.api.serializers.update_session_auth_hash') as update_session_auth_hash:
+        response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin)
         assert response.status_code == 201
         assert not update_session_auth_hash.called
 
@@ -49,8 +49,8 @@ def test_updating_own_password_refreshes_session(patch, admin):
     '''
     Updating your own password should refresh the session id.
     '''
-    with mock.patch('awx.main.models.User.update_session_auth_hash') as update_session_auth_hash:
-        patch(reverse('api:user_detail', kwargs={'pk': admin.pk}), {'password': 'r$TyKiOCb#ED'}, admin, middleware=SessionMiddleware(mock.Mock()))
+    with mock.patch('awx.api.serializers.update_session_auth_hash') as update_session_auth_hash:
+        patch(reverse('api:user_detail', kwargs={'pk': admin.pk}), {'password': 'newpassword'}, admin, middleware=SessionMiddleware(mock.Mock()))
         assert update_session_auth_hash.called
 
 
