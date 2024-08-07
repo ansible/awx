@@ -50,7 +50,7 @@ def test_updating_own_password_refreshes_session(patch, admin):
     Updating your own password should refresh the session id.
     '''
     with mock.patch('awx.main.models.User.update_session_auth_hash') as update_session_auth_hash:
-        patch(reverse('api:user_detail', kwargs={'pk': admin.pk}), {'password': 'r$TyKiOCb#ED'}, admin)
+        patch(reverse('api:user_detail', kwargs={'pk': admin.pk}), {'password': 'r$TyKiOCb#ED'}, admin, middleware=SessionMiddleware(mock.Mock()))
         assert update_session_auth_hash.called
 
 
