@@ -56,12 +56,12 @@ def aws_assumerole_backend(**kwargs):
     external_id = kwargs.get('external_id')
     identifier = kwargs.get('identifier')
 
-    # Generate a hash unique MD5 for combo of user access key and ARN
+    # Generate a unique SHA256 hash for combo of user access key and ARN
     # This should allow two users requesting the same ARN role to have
     # separate credentials, and should allow the same user to request
     # multiple roles.
     #
-    credential_key_hash = hashlib.md5((access_key + role_arn).encode('utf-8'))
+    credential_key_hash = hashlib.sha256((access_key + role_arn).encode('utf-8'))
     credential_key = credential_key_hash.hexdigest()
 
     credentials = _aws_cred_cache.get(credential_key, None)
