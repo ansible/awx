@@ -131,7 +131,7 @@ def test_aws_assumerole_with_accesssecret():
     }
     with mock.patch.object(aws_assumerole, 'aws_assumerole_backend') as method_mock:
         method_mock.return_value = 'the_session_token'
-        token = aws_assumerole.aws_assumerole_backend(**kwargs)
+        token = aws_assumerole.backend(**kwargs)
         method_mock.assert_called_with(**kwargs, auth_param=kwargs)
         assert token == 'the_session_token'
 
@@ -143,7 +143,7 @@ def test_aws_assumerole_with_arnonly():
     }
     with mock.patch.object(aws_assumerole, 'aws_assumerole_backend') as method_mock:
         method_mock.return_value = 'the_session_token'
-        token = aws_assumerole.aws_assumerole_backend(**kwargs)
+        token = aws_assumerole.backend(**kwargs)
         method_mock.assert_called_with(**kwargs, auth_param=kwargs)
         assert token == 'the_session_token'
 
