@@ -340,7 +340,6 @@ class TestCommonFunctions:
             # Set the hard coded settings
             ('AUTH_LDAP_SERVER_URI', True),
             ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
-            ('RADIUS_SERVER', True),
             ('TACACSPLUS_HOST', True),
             # Set some SOCIAL_SOCIAL_AUTH_OIDC_KEYAUTH_*_KEY settings
             ('SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True),

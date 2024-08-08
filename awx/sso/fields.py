@@ -145,7 +145,6 @@ class AuthenticationBackendsField(fields.StringListField):
             ('awx.sso.backends.LDAPBackend3', ['AUTH_LDAP_3_SERVER_URI']),
             ('awx.sso.backends.LDAPBackend4', ['AUTH_LDAP_4_SERVER_URI']),
             ('awx.sso.backends.LDAPBackend5', ['AUTH_LDAP_5_SERVER_URI']),
-            ('awx.sso.backends.RADIUSBackend', ['RADIUS_SERVER']),
             ('social_core.backends.google.GoogleOAuth2', ['SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET']),
             ('social_core.backends.github.GithubOAuth2', ['SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_GITHUB_SECRET']),
             ('social_core.backends.open_id_connect.OpenIdConnectAuth', ['SOCIAL_AUTH_OIDC_KEY', 'SOCIAL_AUTH_OIDC_SECRET', 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT']),

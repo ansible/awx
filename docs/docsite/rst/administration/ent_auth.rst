@@ -17,7 +17,7 @@ This section describes setting up authentication for the following enterprise sy
 
    For LDAP authentication, see :ref:`ag_auth_ldap`.
 
-Azure, RADIUS, SAML, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
+Azure, SAML, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
 
 - Enterprise users can only be created via the first successful login attempt from remote authentication backend.
 - Enterprise users cannot be created/authenticated if non-enterprise users with the same name has already been created in AWX.
@@ -67,28 +67,6 @@ LDAP Authentication
 ---------------------
 
 Refer to the :ref:`ag_auth_ldap` section.
-
-
-.. _ag_auth_radius:
-
-RADIUS settings
-------------------
-
-.. index::
-    pair: authentication; RADIUS Authentication Settings
-
-
-AWX can be configured to centrally use RADIUS as a source for authentication information.
-
-1. Click **Settings** from the left navigation bar.
-
-2. On the left side of the Settings window, click **RADIUS settings** from the list of Authentication options. 
-
-3. Click **Edit** and enter the Host or IP of the Radius server in the **Radius Server** field. If this field is left blank, Radius authentication is disabled.
-
-4. Enter the port and secret information in the next two fields.
-
-5. Click **Save** when done.
 
 
 .. _ag_auth_saml:

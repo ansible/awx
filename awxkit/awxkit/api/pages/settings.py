@@ -19,7 +19,6 @@ page.register_page(
         resources.settings_google_oauth2,
         resources.settings_jobs,
         resources.settings_ldap,
-        resources.settings_radius,
         resources.settings_saml,
         resources.settings_system,
         resources.settings_tacacsplus,
