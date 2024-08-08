@@ -1,17 +1,18 @@
-import pytest
-from unittest import mock
-import os
 import json
+import os
 import re
 from collections import namedtuple
+from unittest import mock
 
-from awx.main.tasks.jobs import RunInventoryUpdate
-from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
+import pytest
+from django.conf import settings
+
 from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
+from awx.main.models import (Credential, CredentialType, ExecutionEnvironment,
+                             InventorySource, UnifiedJob)
+from awx.main.tasks.jobs import RunInventoryUpdate
 from awx.main.tests import data
 from awx.main.utils.execution_environments import to_container_path
-
-from django.conf import settings
 
 DATA = os.path.join(os.path.dirname(data.__file__), 'inventory')
 

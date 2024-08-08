@@ -664,6 +664,7 @@ class CredentialInputSource(PrimordialModel):
         view_name = 'api:credential_input_source_detail'
         return reverse(view_name, kwargs={'pk': self.pk}, request=request)
 
+
 from awx_plugins.credentials.plugins import *
 
 for ns, plugin in credential_plugins.items():
