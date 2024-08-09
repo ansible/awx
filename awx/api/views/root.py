@@ -28,7 +28,7 @@ from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import URLPathVersioning, is_optional_api_urlpattern_prefix_request, reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ

@@ -9,7 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 # AWX
-from awx.conf import fields
 from awx.main.models import Credential
 
 __all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'VerbatimField']
