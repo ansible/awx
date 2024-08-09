@@ -869,6 +869,7 @@ register(
     label=_('Defines subscription usage model and shows Host Metrics'),
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(
