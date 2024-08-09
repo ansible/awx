@@ -9,7 +9,6 @@ from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldL
 
 from awx.main.models import (
     AdHocCommand,
-    ActivityStream,
     Job,
     JobTemplate,
     SystemJob,
