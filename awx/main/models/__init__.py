@@ -93,7 +93,6 @@ from awx.main.models.workflow import (  # noqa
     WorkflowApproval,
     WorkflowApprovalTemplate,
 )
-from awx.api.versioning import reverse
 
 
 # Add custom methods to User model for permissions checks.

@@ -46,7 +46,7 @@ from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE, org_role_to_permission
+from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
