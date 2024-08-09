@@ -4,49 +4,40 @@ import functools
 import inspect
 import logging
 import os
-from pkg_resources import iter_entry_points
 import re
 import stat
 import tempfile
 from types import SimpleNamespace
 
-# Jinja2
-from jinja2 import sandbox
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 # Django
 from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
-from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
+
+# Jinja2
+from jinja2 import sandbox
+from pkg_resources import iter_entry_points
 
 # DRF
 from rest_framework.serializers import ValidationError as DRFValidationError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import (
-    ImplicitRoleField,
-    CredentialInputField,
-    CredentialTypeInputField,
-    CredentialTypeInjectorField,
-    DynamicCredentialInputField,
-)
-from awx.main.utils import decrypt_field, classproperty, set_environ
-from awx.main.utils.safe_yaml import safe_dump
-from awx.main.utils.execution_environments import to_container_path
-from awx.main.validators import validate_ssh_private_key
+from awx.main.fields import CredentialInputField, CredentialTypeInjectorField, CredentialTypeInputField, DynamicCredentialInputField, ImplicitRoleField
+from awx.main.models import Organization, Team
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
 from awx.main.models.mixins import ResourceMixin
-from awx.main.models.rbac import (
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-    ROLE_SINGLETON_SYSTEM_AUDITOR,
-)
-from awx.main.models import Team, Organization
-from awx.main.utils import encrypt_field
+from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
+from awx.main.utils import classproperty, decrypt_field, encrypt_field, set_environ
+from awx.main.utils.execution_environments import to_container_path
+from awx.main.utils.safe_yaml import safe_dump
+from awx.main.validators import validate_ssh_private_key
 from awx_plugins.credentials import injectors as builtin_injectors
 
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
