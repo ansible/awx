@@ -17,7 +17,7 @@ This section describes setting up authentication for the following enterprise sy
 
    For LDAP authentication, see :ref:`ag_auth_ldap`.
 
-Azure, RADIUS, SAML, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
+Azure, RADIUS and SAML users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
 
 - Enterprise users can only be created via the first successful login attempt from remote authentication backend.
 - Enterprise users cannot be created/authenticated if non-enterprise users with the same name has already been created in AWX.
@@ -518,40 +518,6 @@ Enabling Logging for SAML
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can enable logging messages for the SAML adapter the same way you can enable logging for LDAP. Refer to the :ref:`ldap_logging` section.
-
-
-.. _ag_auth_tacacs:
-
-TACACS+ settings
------------------
-
-.. index::
-    pair: authentication; TACACS+ Authentication Settings
-
-
-Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol that handles remote authentication and related services for networked access control through a centralized server. In particular, TACACS+ provides authentication, authorization and accounting (AAA) services, in which you can configure AWX to use as a source for authentication.
-
-.. note::
-
-    This feature is deprecated and will be removed in a future release.
-
-1. Click **Settings** from the left navigation bar.
-
-2. On the left side of the Settings window, click **TACACs+ settings** from the list of Authentication options. 
-
-3. Click **Edit** and enter information in the following fields:
-
-- **TACACS+ Server**: Provide the hostname or IP address of the TACACS+ server with which to authenticate. If this field is left blank, TACACS+ authentication is disabled.
-- **TACACS+ Port**: TACACS+ uses port 49 by default, which is already pre-populated.
-- **TACACS+ Secret**: Secret key for TACACS+ authentication server.
-- **TACACS+ Auth Session Timeout**: Session timeout value in seconds. The default is 5 seconds.
-- **TACACS+ Authentication Protocol**: The protocol used by TACACS+ client. Options are **ascii** or **pap**.
-
-.. image:: ../common/images/configure-awx-auth-tacacs.png
-    :alt: TACACS+ configuration details in AWX settings.
-
-4. Click **Save** when done.
-
 
 .. _ag_auth_oidc:
 

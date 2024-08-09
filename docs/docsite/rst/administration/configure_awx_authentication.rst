@@ -10,7 +10,6 @@ Through the AWX user interface, you can set up a simplified login through variou
 - :ref:`LDAP settings <ag_auth_ldap>` 
 - :ref:`ag_auth_radius` 
 - :ref:`ag_auth_saml` 
-- :ref:`ag_auth_tacacs`
 - :ref:`ag_auth_oidc`
 
 

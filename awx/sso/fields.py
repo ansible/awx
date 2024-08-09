@@ -32,7 +32,6 @@ from awx.sso.validators import (  # noqa
     validate_ldap_dn_with_user,
     validate_ldap_filter,
     validate_ldap_filter_with_user,
-    validate_tacacsplus_disallow_nonascii,
 )
 
 

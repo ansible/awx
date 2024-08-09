@@ -396,7 +396,6 @@ AUTHENTICATION_BACKENDS = (
     'awx.sso.backends.LDAPBackend4',
     'awx.sso.backends.LDAPBackend5',
     'awx.sso.backends.RADIUSBackend',
-    'awx.sso.backends.TACACSPlusBackend',
     'social_core.backends.google.GoogleOAuth2',
     'social_core.backends.github.GithubOAuth2',
     'social_core.backends.github.GithubOrganizationOAuth2',
@@ -434,15 +433,6 @@ AUTH_LDAP_CONNECTION_OPTIONS = {ldap.OPT_REFERRALS: 0, ldap.OPT_NETWORK_TIMEOUT:
 RADIUS_SERVER = ''
 RADIUS_PORT = 1812
 RADIUS_SECRET = ''
-
-# TACACS+ settings (default host to empty string to skip using TACACS+ auth).
-# Note: These settings may be overridden by database settings.
-TACACSPLUS_HOST = ''
-TACACSPLUS_PORT = 49
-TACACSPLUS_SECRET = ''
-TACACSPLUS_SESSION_TIMEOUT = 5
-TACACSPLUS_AUTH_PROTOCOL = 'ascii'
-TACACSPLUS_REM_ADDR = False
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
