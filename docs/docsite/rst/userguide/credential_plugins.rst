@@ -150,6 +150,28 @@ This example shows the Metadata prompt for HashiVault Secret Lookup.
 
 8. Click **Save** when done.
 
+.. _ug_credentials_aws_assume_role:
+
+AWS Assume Role Lookup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. index::
+   pair: credential types; AWS
+
+This plugin allows AWS credential details to assume an AWS IAM role to be used as a credential source.
+
+When **AWS Assume Role lookup** is selected for **Credential Type**, provide the following attributes to properly configure your lookup:
+
+- **AWS Access Key** : provide the access key used for communicating with AWS' IAM role assumption API
+- **AWS Secret Key** : provide the secret key used for communicating with AWS' IAM role assumption API
+- **External ID** : provide an optional app-specific identifier used for auditing and securing the IAM role assumption
+- **AWS ARN Role Name** (required): provide the ARN of the IAM role that should be assumed
+
+Below shows an example of a configured AWS Assume Role credential.
+
+.. image:: ../common/images/credentials-create-aws-assume-role-credential.png
+   :width: 1400px
+   :alt: Example new AWS Assume Role credential lookup dialog
+
 
 .. _ug_credentials_aws_lookup:
 
