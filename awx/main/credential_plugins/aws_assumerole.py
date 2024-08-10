@@ -19,6 +19,7 @@ assume_role_inputs = {
             'id': 'access_key',
             'label': _('AWS Access Key'),
             'type': 'string',
+            'secret': True,
             'help_text': _('The optional AWS access key for the user who will assume the role'),
         },
         {
@@ -34,7 +35,7 @@ assume_role_inputs = {
             'type': 'string',
             'help_text': _('The optional External ID which will be provided to the assume role API'),
         },
-        {'id': 'role_arn', 'label': 'AWS ARN Role Name', 'type': 'string', 'help_text': _('The ARN Role Name to be assumed in AWS')},
+        {'id': 'role_arn', 'label': 'AWS ARN Role Name', 'type': 'string', 'secret': True, 'help_text': _('The ARN Role Name to be assumed in AWS')},
     ],
     'metadata': [
         {
@@ -46,6 +47,23 @@ assume_role_inputs = {
     ],
     'required': ['role_arn'],
 }
+
+
+def aws_assumerole_getcreds(access_key, secret_key, role_arn, external_id):
+    if (access_key is None or len(access_key) == 0) and (secret_key is None or len(secret_key) == 0):
+        # Connect using credentials in the EE
+        connection = boto3.client(service_name="sts")
+    else:
+        # Connect to AWS using provided credentials
+        connection = boto3.client(service_name="sts", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    try:
+        response = connection.assume_role(RoleArn=role_arn, RoleSessionName='AAP_AWS_Role_Session1', ExternalId=external_id)
+    except ClientError as ce:
+        raise ValueError(f'Got a bad client response from AWS: {ce.msg}.')
+
+    credentials = response.get("Credentials", {})
+
+    return credentials
 
 
 def aws_assumerole_backend(**kwargs):
@@ -61,7 +79,7 @@ def aws_assumerole_backend(**kwargs):
     # separate credentials, and should allow the same user to request
     # multiple roles.
     #
-    credential_key_hash = hashlib.sha256((access_key + role_arn).encode('utf-8'))
+    credential_key_hash = hashlib.sha256((str(access_key or '') + role_arn).encode('utf-8'))
     credential_key = credential_key_hash.hexdigest()
 
     credentials = _aws_cred_cache.get(credential_key, None)
@@ -71,18 +89,7 @@ def aws_assumerole_backend(**kwargs):
     #
     if (credentials is None) or (credentials['Expiration'] < datetime.datetime.now(credentials['Expiration'].tzinfo)):
 
-        if (access_key is None or len(access_key) == 0) and (secret_key is None or len(secret_key) == 0):
-            # Connect using credentials in the EE
-            connection = boto3.client(service_name="sts")
-        else:
-            # Connect to AWS using provided credentials
-            connection = boto3.client(service_name="sts", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-        try:
-            response = connection.assume_role(RoleArn=role_arn, RoleSessionName='AAP_AWS_Role_Session1', ExternalId=external_id)
-        except ClientError as ce:
-            raise ValueError(f'Got a bad client response from AWS: {ce.msg}.')
-
-        credentials = response.get("Credentials", {})
+        credentials = aws_assumerole_getcreds(access_key, secret_key, role_arn, external_id)
 
         _aws_cred_cache[credential_key] = credentials
 
