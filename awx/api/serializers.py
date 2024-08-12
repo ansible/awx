@@ -1038,7 +1038,9 @@ class UserSerializer(BaseSerializer):
             # as the modified user then inject a session key derived from
             # the updated user to prevent logout. This is the logic used by
             # the Django admin's own user_change_password view.
-            update_session_auth_hash(self.context['request'], obj)
+            if self.instance and self.context['request'].user.username == obj.username:
+                update_session_auth_hash(self.context['request'], obj)
+
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])

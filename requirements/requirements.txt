@@ -7,8 +7,6 @@ aiohttp==3.9.5
     #   twilio
 aiohttp-retry==2.8.3
     # via twilio
-aioredis==1.3.1
-    # via channels-redis
 aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.6.0
@@ -30,7 +28,6 @@ asn1==2.7.0
 async-timeout==4.0.3
     # via
     #   aiohttp
-    #   aioredis
     #   redis
 attrs==23.2.0
     # via
@@ -88,7 +85,7 @@ channels==3.0.5
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels-redis
-channels-redis==3.4.1
+channels-redis==4.2.0
     # via -r /awx_devel/requirements/requirements.in
 charset-normalizer==3.3.2
     # via requests
@@ -201,10 +198,8 @@ grpcio==1.62.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
-hiredis==2.0.0
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   aioredis
+hiredis==3.0.0
+    # via redis
 hyperlink==21.0.0
     # via
     #   autobahn
@@ -449,8 +444,10 @@ pyzstd==0.15.10
     # via -r /awx_devel/requirements/requirements.in
 receptorctl==1.4.4
     # via -r /awx_devel/requirements/requirements.in
-redis==5.0.1
-    # via -r /awx_devel/requirements/requirements.in
+redis[hiredis]==5.0.1
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   channels-redis
 referencing==0.33.0
     # via
     #   jsonschema

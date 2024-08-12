@@ -7,7 +7,7 @@ azure-keyvault
 boto3
 botocore
 channels
-channels-redis==3.4.1  # see UPGRADE BLOCKERs
+channels-redis
 cryptography>=41.0.7  # CVE-2023-49083
 Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
@@ -29,7 +29,6 @@ djangorestframework-yaml
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
 grpcio<1.63.0 # 1.63.0+ requires cython>=3
-hiredis==2.0.0  # see UPGRADE BLOCKERs
 irc
 jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
@@ -60,7 +59,7 @@ receptorctl
 social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
 social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
-redis
+redis[hiredis]
 requests
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions

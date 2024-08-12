@@ -858,7 +858,7 @@ register(
     'SUBSCRIPTION_USAGE_MODEL',
     field_class=fields.ChoiceField,
     choices=[
-        ('', _('Default model for AWX - no subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
+        ('', _('No subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
         (
             SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS,
             _('Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes'),
