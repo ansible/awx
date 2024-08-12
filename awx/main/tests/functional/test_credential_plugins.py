@@ -130,7 +130,6 @@ def test_aws_assumerole_with_accesssecret():
         'role_arn': 'the_arn',
         'identifier': 'access_token',
     }
-    method_call_with = [kwargs.get('access_key'), kwargs.get('secret_key'), kwargs.get('role_arn'), None]
     with mock.patch.object(aws_assumerole, 'aws_assumerole_getcreds') as method_mock:
         method_mock.return_value = {
             'access_key': 'the_access_key',
