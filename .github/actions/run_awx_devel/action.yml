@@ -57,16 +57,6 @@ runs:
           awx-manage update_password --username=admin --password=password
         EOSH
 
-    - name: Build UI
-      # This must be a string comparison in composite actions:
-      # https://github.com/actions/runner/issues/2238
-      if: ${{ inputs.build-ui == 'true' }}
-      shell: bash
-      run: |
-        docker exec -i tools_awx_1 sh <<-EOSH
-          make ui-devel
-        EOSH
-
     - name: Get instance data
       id: data
       shell: bash

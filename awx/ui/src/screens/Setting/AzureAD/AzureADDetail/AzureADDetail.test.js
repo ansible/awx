@@ -22,7 +22,7 @@ describe('<AzureADDetail />', () => {
     SettingsAPI.readCategory.mockResolvedValue({
       data: {
         SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL:
-          'https://towerhost/sso/complete/azuread-oauth2/',
+          'https://platformhost/sso/complete/azuread-oauth2/',
         SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: 'mock key',
         SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '$encrypted$',
         SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {},
@@ -62,7 +62,7 @@ describe('<AzureADDetail />', () => {
     assertDetail(
       wrapper,
       'Azure AD OAuth2 Callback URL',
-      'https://towerhost/sso/complete/azuread-oauth2/'
+      'https://platformhost/sso/complete/azuread-oauth2/'
     );
     assertDetail(wrapper, 'Azure AD OAuth2 Key', 'mock key');
     assertDetail(wrapper, 'Azure AD OAuth2 Secret', 'Encrypted');

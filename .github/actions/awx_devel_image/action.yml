@@ -24,7 +24,7 @@ runs:
 
     - name: Pre-pull latest devel image to warm cache
       shell: bash
-      run: docker pull ghcr.io/${OWNER_LC}/awx_devel:${{ github.base_ref }}
+      run: docker pull -q ghcr.io/${OWNER_LC}/awx_devel:${{ github.base_ref }}
 
     - name: Build image for current source checkout
       shell: bash
