@@ -42,7 +42,8 @@ options:
     source:
       description:
         - The source to use for this group.
-      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "controller", "insights" ]
+      choices: [ "scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "controller", "insights", "terraform",
+                 "openshift_virtualization" ]
       type: str
     source_path:
       description:
@@ -170,7 +171,22 @@ def main():
         #
         # How do we handle manual and file? The controller does not seem to be able to activate them
         #
-        source=dict(choices=["scm", "ec2", "gce", "azure_rm", "vmware", "satellite6", "openstack", "rhv", "controller", "insights"]),
+        source=dict(
+            choices=[
+                "scm",
+                "ec2",
+                "gce",
+                "azure_rm",
+                "vmware",
+                "satellite6",
+                "openstack",
+                "rhv",
+                "controller",
+                "insights",
+                "terraform",
+                "openshift_virtualization",
+            ]
+        ),
         source_path=dict(),
         source_vars=dict(type='dict'),
         enabled_var=dict(),

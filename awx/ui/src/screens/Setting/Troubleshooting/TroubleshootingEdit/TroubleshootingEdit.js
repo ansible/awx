@@ -117,6 +117,10 @@ function TroubleshootingEdit() {
                   name="RECEPTOR_RELEASE_WORK"
                   config={debug.RECEPTOR_RELEASE_WORK}
                 />
+                <BooleanField
+                  name="RECEPTOR_KEEP_WORK_ON_ERROR"
+                  config={debug.RECEPTOR_KEEP_WORK_ON_ERROR}
+                />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             model_name='organization',
             name='member_role',
             field=awx.main.fields.ImplicitRoleField(
-                editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['admin_role'], related_name='+', to='main.Role'
+                editable=False, null='True', on_delete=django.db.models.deletion.SET_NULL, parent_role=['admin_role'], related_name='+', to='main.Role'
             ),
         ),
         migrations.AlterField(
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(
                 editable=False,
                 null='True',
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 parent_role=[
                     'member_role',
                     'auditor_role',

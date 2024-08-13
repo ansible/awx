@@ -4,7 +4,7 @@ The Lightweight Directory Access Protocol (LDAP) is an open, vendor-neutral, ind
 
 # Configure LDAP Authentication
 
-Please see the [Tower documentation](https://docs.ansible.com/ansible-tower/latest/html/administration/ldap_auth.html) as well as [Ansible blog post](https://www.ansible.com/blog/getting-started-ldap-authentication-in-ansible-tower) for basic LDAP configuration.
+Please see the [AWX documentation](https://ansible.readthedocs.io/projects/awx/en/latest/administration/ldap_auth.html) for basic LDAP configuration.
 
 LDAP Authentication provides duplicate sets of configuration fields for authentication with up to six different LDAP servers.
 The default set of configuration fields take the form `AUTH_LDAP_<field name>`. Configuration fields for additional LDAP servers are numbered `AUTH_LDAP_<n>_<field name>`.

@@ -18,7 +18,7 @@ X-API-Query-Time: 0.004s
 X-API-Time: 0.026s
 
 {
-    "SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL": "https://towerhost/sso/complete/github-team/",
+    "SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL": "https://platformhost/sso/complete/github-team/",
     "SOCIAL_AUTH_GITHUB_TEAM_KEY": "",
     "SOCIAL_AUTH_GITHUB_TEAM_SECRET": "",
     "SOCIAL_AUTH_GITHUB_TEAM_ID": "",

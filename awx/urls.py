@@ -18,8 +18,6 @@ def get_urlpatterns(prefix=None):
         prefix = f'/{prefix}/'
 
     urlpatterns = [
-        re_path(r'', include('awx.ui.urls', namespace='ui')),
-        re_path(r'^ui_next/.*', include('awx.ui_next.urls', namespace='ui_next')),
         path(f'api{prefix}', include('awx.api.urls', namespace='api')),
     ]
 
@@ -36,6 +34,9 @@ def get_urlpatterns(prefix=None):
         re_path(r'^(?:api/)?500.html$', handle_500),
         re_path(r'^csp-violation/', handle_csp_violation),
         re_path(r'^login/', handle_login_redirect),
+        # want api/v2/doesnotexist to return a 404, not match the ui_next urls,
+        # so use a negative lookahead assertion here
+        re_path(r'^(?!api/|sso/).*', include('awx.ui_next.urls', namespace='ui_next')),
     ]
 
     if settings.SETTINGS_MODULE == 'awx.settings.development':

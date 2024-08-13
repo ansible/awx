@@ -1,0 +1,50 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  debug:
+    verbosity: detailed
+
+  file:
+    path: /awx-logs/awx-logs.json.zstd
+    rotation:
+      max_days: 14
+      localtime: false
+      max_megabytes: 300
+      max_backups: 200
+    format: json
+    compression: zstd
+
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+    headers:
+      "X-Scope-OrgID": "1"
+    default_labels_enabled:
+      exporter: true
+      job: true
+      instance: true
+      level: true
+
+processors:
+  batch:
+
+extensions:
+  health_check:
+  zpages:
+    endpoint: ":55679"
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file, loki]
+
+  extensions:
+    - health_check
+    - zpages
