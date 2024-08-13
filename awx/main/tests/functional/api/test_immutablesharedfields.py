@@ -8,7 +8,7 @@ from awx.main.models import Organization
 class TestImmutableSharedFields:
     @pytest.fixture(autouse=True)
     def configure_settings(self, settings):
-        settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED = False
+        settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT = False
 
     def test_create_raises_permission_denied(self, admin_user, post):
         orgA = Organization.objects.create(name='orgA')
@@ -32,18 +32,16 @@ class TestImmutableSharedFields:
 
     def test_perform_update(self, admin_user, patch):
         orgA = Organization.objects.create(name='orgA')
-        team = orgA.teams.create(name='teamA')
         # allow patching non-shared fields
         patch(
-            url=reverse('api:team_detail', kwargs={'pk': team.id}),
-            data={"description": "can change this field"},
+            url=reverse('api:organization_detail', kwargs={'pk': orgA.id}),
+            data={"max_hosts": 76},
             user=admin_user,
             expect=200,
         )
-        orgB = Organization.objects.create(name='orgB')
         # prevent patching shared fields
-        resp = patch(url=reverse('api:team_detail', kwargs={'pk': team.id}), data={"organization": orgB.id}, user=admin_user, expect=403)
-        assert "Cannot change shared field" in resp.data['organization']
+        resp = patch(url=reverse('api:organization_detail', kwargs={'pk': orgA.id}), data={"name": "orgB"}, user=admin_user, expect=403)
+        assert "Cannot change shared field" in resp.data['name']
 
     @pytest.mark.parametrize(
         'role',

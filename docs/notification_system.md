@@ -264,7 +264,7 @@ This will create an `httpbin` service reachable from the AWX container at `http:
 The Grafana notification type allows you to create Grafana annotations. Details about this feature of Grafana are available at http://docs.grafana.org/reference/annotations/. In order to allow AWX to add annotations, an API Key needs to be created in Grafana. Note that the created annotations are region events with start and endtime of the associated AWX Job. The annotation description is also provided by the subject of the associated AWX Job, for example:
 
 ```
-Job #1 'Ping Macbook' succeeded: https://towerhost/#/jobs/playbook/1
+Job #1 'Ping Macbook' succeeded: https://platformhost/#/jobs/playbook/1
 ```
 
 The configurable options of the Grafana notification type are:

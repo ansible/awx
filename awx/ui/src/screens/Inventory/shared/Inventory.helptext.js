@@ -23,6 +23,8 @@ const ansibleDocUrls = {
     'https://docs.ansible.com/ansible/latest/collections/ansible/builtin/constructed_inventory.html',
   terraform:
     'https://github.com/ansible-collections/cloud.terraform/blob/main/docs/cloud.terraform.terraform_state_inventory.rst',
+  openshift_virtualization:
+    'https://kubevirt.io/kubevirt.core/latest/plugins/kubevirt.html',
 };
 
 const getInventoryHelpTextStrings = () => ({
@@ -121,7 +123,7 @@ const getInventoryHelpTextStrings = () => ({
         <br />
         {value && (
           <div>
-            {t`If you want the Inventory Source to update on launch , click on Update on Launch, 
+            {t`If you want the Inventory Source to update on launch , click on Update on Launch,
             and also go to `}
             <Link to={`/projects/${value.id}/details`}> {value.name} </Link>
             {t`and click on Update Revision on Launch.`}
@@ -140,7 +142,7 @@ const getInventoryHelpTextStrings = () => ({
         <br />
         {value && (
           <div>
-            {t`If you want the Inventory Source to update on launch , click on Update on Launch, 
+            {t`If you want the Inventory Source to update on launch , click on Update on Launch,
             and also go to `}
             <Link to={`/projects/${value.id}/details`}> {value.name} </Link>
             {t`and click on Update Revision on Launch`}

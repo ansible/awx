@@ -300,13 +300,10 @@ Container Groups
    single: container groups
    pair: containers; instance groups
 
-AWX supports :term:`Container Groups`, which allow you to execute jobs in AWX regardless of whether AWX is installed as a standalone, in  a virtual environment, or in a container. Container groups act as a pool of resources within a virtual environment. You can create instance groups to point to an OpenShift container, which are job environments that are provisioned on-demand as a Pod that exists only for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
+AWX supports :term:`Container Groups`, which allow you to execute jobs in pods on Kubernetes (k8s) or OpenShift clusters. Container groups act as a pool of resources within a virtual environment. These pods are created on-demand and only exist for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
 
 In some cases, it is desirable to have container groups be "always-on", which is configured through the creation of an instance.
 
-.. note::
-
-	Container Groups upgraded from versions prior to |at| 4.0 will revert back to default and completely remove the old pod definition, clearing out all custom pod definitions in the migration.
 
 
 Container groups are different from |ees| in that |ees| are container images and do not use a virtual environment. See :ref:`ug_execution_environments` in the |atu| for further detail.
@@ -335,19 +332,19 @@ To create a container group:
 
 .. _ag_customize_pod_spec:
 
-Customize the Pod spec
+Customize the pod spec
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-AWX provides a simple default Pod specification, however, you can provide a custom YAML (or JSON) document that overrides the default Pod spec. This field uses any custom fields (i.e. ``ImagePullSecrets``) that can be "serialized" as valid Pod JSON or YAML. A full list of options can be found in the `OpenShift documentation <https://docs.openshift.com/online/pro/architecture/core_concepts/pods_and_services.html>`_.
+AWX provides a simple default pod specification, however, you can provide a custom YAML (or JSON) document that overrides the default pod spec. This field uses any custom fields (for example, ``ImagePullSecrets``) that can be "serialized" as valid pod JSON or YAML. A full list of options can be found in the `OpenShift documentation <https://docs.openshift.com/online/pro/architecture/core_concepts/pods_and_services.html>`_.
 
-To customize the Pod spec, specify the namespace in the **Pod Spec Override** field by using the toggle to enable and expand the **Pod Spec Override** field and click **Save** when done.
+To customize the pod spec, check the **Customize pod specification** option to enable and expand the **Custom pod spec** field where you specify the namespace and provide additional customizations as needed.
 
 |IG - CG customize pod|
 
 .. |IG - CG customize pod| image:: ../common/images/instance-group-customize-cg-pod.png
 		:alt: Create new container group form with the option to custom the pod spec.
 
-You may provide additional customizations, if needed. Click **Expand** to view the entire customization window.
+Click **Expand** to view the entire customization window.
 
 .. image:: ../common/images/instance-group-customize-cg-pod-expanded.png
 	:alt: The expanded view for customizing the pod spec.
@@ -355,6 +352,21 @@ You may provide additional customizations, if needed. Click **Expand** to view t
 .. note::
 
 	The image used at job launch time is determined by which |ee| is associated with the job. If a Container Registry credential is associated with the |ee|, then AWX will attempt to make a ``ImagePullSecret`` to pull the image. If you prefer not to give the service account permission to manage secrets, you must pre-create the ``ImagePullSecret`` and specify it on the pod spec, and omit any credential from the |ee| used.
+
+.. tip::
+
+	In order to override DNS/host entries, use the ``hostAliases`` attribute on the pod spec. When the pod is created, these entries will be added to ``/etc/hosts`` in the container running the job.
+
+	::
+
+		spec:
+		  hostAliases:
+		  - ip: "127.0.0.1"
+		    hostnames:
+		    - "foo.local"
+
+	For more information, refer to Kubernetes' documentation on `Adding additional entries with hostAliases <https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/#adding-additional-entries-with-hostaliases>`_.
+
 
 Once the container group is successfully created, the **Details** tab of the newly created container group remains, which allows you to review and edit your container group information. This is the same menu that is opened if the Edit (|edit-button|) button is clicked from the **Instance Group** link. You can also edit **Instances** and review **Jobs** associated with this instance group.
 
@@ -370,7 +382,7 @@ Container groups and instance groups are labeled accordingly.
 
 .. note::
 
-	Despite the fact that customers have custom Pod specs, upgrades may be difficult if the default ``pod_spec`` changes. Most any manifest can be applied to any namespace, with the namespace specified separately, most likely you will only need to override the namespace. Similarly, pinning a default image for different releases of the platform to different versions of the default job runner container is tricky. If the default image is specified in the Pod spec, then upgrades do not pick up the new default changes are made to the default Pod spec.
+	Using a custom pod spec may cause issues on upgrades if the default ``pod_spec`` changes. Since any manifest can be applied to any namespace, with the namespace specified separately, most likely you will only need to override the namespace. Similarly, pinning a default image for different releases of the platform to different versions of the default job runner container is tricky. If the default image is specified in the pod spec, then upgrades do not pick up the new default changes that are made to the default pod spec.
 
 
 Verify container group functions
@@ -411,7 +423,7 @@ You can see in the jobs detail view the container was reached successfully using
 .. |Inventory with localhost ping success| image:: ../common/images/inventories-launch-adhoc-cg-test-localhost-success.png
 	:alt: Jobs output view showing a successfully ran adhoc job.
 
-If you have an OpenShift UI, you can see Pods appear and disappear as they deploy and terminate. Alternatively, you can use the CLI to perform a ``get pod`` operation on your namespace to watch these same events occurring in real-time.
+If you have an OpenShift UI, you can see pods appear and disappear as they deploy and terminate. Alternatively, you can use the CLI to perform a ``get pod`` operation on your namespace to watch these same events occurring in real-time.
 
 
 View container group jobs

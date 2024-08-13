@@ -61,6 +61,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # django-ansible-base
+from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
 
@@ -714,7 +715,7 @@ class AuthView(APIView):
 
 def immutablesharedfields(cls):
     '''
-    Class decorator to prevent modifying shared resources when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED setting is set to False.
+    Class decorator to prevent modifying shared resources when ALLOW_LOCAL_RESOURCE_MANAGEMENT setting is set to False.
 
     Works by overriding these view methods:
     - create
@@ -731,7 +732,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.create)
         def create_wrapper(*args, **kwargs):
-            if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
                 return cls.original_create(*args, **kwargs)
             raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
 
@@ -742,7 +743,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.delete)
         def delete_wrapper(*args, **kwargs):
-            if settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
                 return cls.original_delete(*args, **kwargs)
             raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
 
@@ -753,7 +754,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.perform_update)
         def update_wrapper(*args, **kwargs):
-            if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+            if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
                 view, serializer = args
                 instance = view.get_object()
                 if instance:
@@ -1340,8 +1341,8 @@ class UserRolesList(SubListAttachDetachAPIView):
         role = get_object_or_400(models.Role, pk=sub_id)
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        # Prevent user to be associated with team/org when AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED is False
-        if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+        # Prevent user to be associated with team/org when ALLOW_LOCAL_RESOURCE_MANAGEMENT is False
+        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
             for model in [models.Organization, models.Team]:
                 ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
@@ -2391,6 +2392,14 @@ class JobTemplateList(ListCreateAPIView):
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
 
+    def check_permissions(self, request):
+        if request.method == 'POST':
+            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+            if not can_access:
+                self.permission_denied(request, message=messages)
+
+        super(JobTemplateList, self).check_permissions(request)
+
 
 class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.JobTemplate
@@ -2770,12 +2779,7 @@ class JobTemplateCallback(GenericAPIView):
         host for the current request.
         """
         # Find the list of remote host names/IPs to check.
-        remote_hosts = set()
-        for header in settings.REMOTE_HOST_HEADERS:
-            for value in self.request.META.get(header, '').split(','):
-                value = value.strip()
-                if value:
-                    remote_hosts.add(value)
+        remote_hosts = set(get_remote_hosts(self.request))
         # Add the reverse lookup of IP addresses.
         for rh in list(remote_hosts):
             try:
@@ -3114,6 +3118,14 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     model = models.WorkflowJobTemplate
     serializer_class = serializers.WorkflowJobTemplateSerializer
     always_allow_superuser = False
+
+    def check_permissions(self, request):
+        if request.method == 'POST':
+            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+            if not can_access:
+                self.permission_denied(request, message=messages)
+
+        super(WorkflowJobTemplateList, self).check_permissions(request)
 
 
 class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -4374,7 +4386,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
         role = self.get_parent_object()
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        if not settings.AWX_DIRECT_SHARED_RESOURCE_MANAGEMENT_ENABLED:
+        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
             for model in [models.Organization, models.Team]:
                 ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:

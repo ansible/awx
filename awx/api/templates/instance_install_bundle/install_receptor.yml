@@ -2,6 +2,12 @@
 - hosts: all
   become: yes
   tasks:
+    - name: Create the receptor group
+      group:
+{% verbatim %}
+        name: "{{ receptor_group }}"
+{% endverbatim %}
+        state: present
     - name: Create the receptor user
       user:
 {% verbatim %}
