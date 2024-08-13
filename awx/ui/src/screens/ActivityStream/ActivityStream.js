@@ -59,7 +59,7 @@ function ActivityStream() {
     {
       page: 1,
       page_size: 20,
-      order_by: '-timestamp',
+      order_by: '-id',
     },
     ['id', 'page', 'page_size']
   );

@@ -933,6 +933,7 @@ class InventorySourceOptions(BaseModel):
         ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
         ('terraform', _('Terraform State')),
+        ('openshift_virtualization', _('OpenShift Virtualization')),
     ]
 
     # From the options of the Django management base command
@@ -1042,7 +1043,7 @@ class InventorySourceOptions(BaseModel):
     def cloud_credential_validation(source, cred):
         if not source:
             return None
-        if cred and source not in ('custom', 'scm'):
+        if cred and source not in ('custom', 'scm', 'openshift_virtualization'):
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
@@ -1051,12 +1052,14 @@ class InventorySourceOptions(BaseModel):
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
-        elif source in CLOUD_PROVIDERS and source != 'ec2':
+        elif source in CLOUD_PROVIDERS and source not in ['ec2', 'openshift_virtualization']:
             return _('Credential is required for a cloud source.')
         elif source == 'custom' and cred and cred.credential_type.kind in ('scm', 'ssh', 'insights', 'vault'):
             return _('Credentials of type machine, source control, insights and vault are disallowed for custom inventory sources.')
         elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
             return _('Credentials of type insights and vault are disallowed for scm inventory sources.')
+        elif source == 'openshift_virtualization' and cred and cred.credential_type.kind != 'kubernetes':
+            return _('Credentials of type kubernetes is requred for openshift_virtualization inventory sources.')
         return None
 
     def get_cloud_credential(self):
@@ -1690,6 +1693,16 @@ class insights(PluginFileInjector):
     collection = 'insights'
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
+    use_fqcn = True
+
+
+class openshift_virtualization(PluginFileInjector):
+    plugin_name = 'kubevirt'
+    base_injector = 'template'
+    namespace = 'kubevirt'
+    collection = 'core'
+    downstream_namespace = 'redhat'
+    downstream_collection = 'openshift_virtualization'
     use_fqcn = True
 
 

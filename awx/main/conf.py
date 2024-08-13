@@ -858,7 +858,7 @@ register(
     'SUBSCRIPTION_USAGE_MODEL',
     field_class=fields.ChoiceField,
     choices=[
-        ('', _('Default model for AWX - no subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
+        ('', _('No subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
         (
             SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS,
             _('Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes'),
@@ -925,6 +925,16 @@ register(
     label=_('Release Receptor Work'),
     default=True,
     help_text=_('Release receptor work'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'RECEPTOR_KEEP_WORK_ON_ERROR',
+    field_class=fields.BooleanField,
+    label=_('Keep receptor work on error'),
+    default=False,
+    help_text=_('Prevent receptor work from being released on when error is detected'),
     category=('Debug'),
     category_slug='debug',
 )

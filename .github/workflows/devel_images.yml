@@ -2,6 +2,7 @@
 name: Build/Push Development Images
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+  DOCKER_CACHE: "--no-cache" # using the cache will not rebuild git requirements and other things
 on:
   workflow_dispatch:
   push:
@@ -34,7 +35,9 @@ jobs:
           exit 0
         if: matrix.build-targets.image-name == 'awx' && !endsWith(github.repository, '/awx')
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -59,16 +62,14 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Setup node and npm
+      - name: Setup node and npm for the new UI build
         uses: actions/setup-node@v2
         with:
-          node-version: '16.13.1'
+          node-version: '18'
         if: matrix.build-targets.image-name == 'awx'
 
-      - name: Prebuild UI for awx image (to speed up build process)
+      - name: Prebuild new UI for awx image (to speed up build process)
         run: |
-          sudo apt-get install gettext
-          make ui-release
           make ui-next
         if: matrix.build-targets.image-name == 'awx'
 

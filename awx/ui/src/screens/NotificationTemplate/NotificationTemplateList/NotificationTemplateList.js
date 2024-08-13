@@ -120,7 +120,7 @@ function NotificationTemplatesList() {
             toolbarSearchColumns={[
               {
                 name: t`Name`,
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
@@ -131,6 +131,7 @@ function NotificationTemplatesList() {
                 name: t`Notification type`,
                 key: 'or__notification_type',
                 options: [
+                  ['awssns', t`AWS SNS`],
                   ['email', t`Email`],
                   ['grafana', t`Grafana`],
                   ['hipchat', t`Hipchat`],
