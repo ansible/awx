@@ -26,7 +26,7 @@ describe('<MiscSystemDetail />', () => {
         ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC: false,
         ORG_ADMINS_CAN_SEE_ALL_USERS: true,
         MANAGE_ORGANIZATION_AUTH: true,
-        TOWER_URL_BASE: 'https://towerhost',
+        TOWER_URL_BASE: 'https://platformhost',
         REMOTE_HOST_HEADERS: [],
         PROXY_IP_ALLOWED_LIST: [],
         CSRF_TRUSTED_ORIGINS: [],
@@ -94,7 +94,7 @@ describe('<MiscSystemDetail />', () => {
       'Automation Analytics upload URL',
       'https://example.com'
     );
-    assertDetail(wrapper, 'Base URL of the service', 'https://towerhost');
+    assertDetail(wrapper, 'Base URL of the service', 'https://platformhost');
     assertDetail(wrapper, 'Gather data for Automation Analytics', 'Off');
     assertDetail(
       wrapper,

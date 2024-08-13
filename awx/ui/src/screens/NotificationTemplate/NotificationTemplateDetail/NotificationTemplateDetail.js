@@ -138,6 +138,25 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           }
           dataCy="nt-detail-type"
         />
+        {template.notification_type === 'awssns' && (
+          <>
+            <Detail
+              label={t`AWS Region`}
+              value={configuration.aws_region}
+              dataCy="nt-detail-aws-region"
+            />
+            <Detail
+              label={t`Access Key ID`}
+              value={configuration.aws_access_key_id}
+              dataCy="nt-detail-aws-access-key-id"
+            />
+            <Detail
+              label={t`SNS Topic ARN`}
+              value={configuration.sns_topic_arn}
+              dataCy="nt-detail-sns-topic-arn"
+            />
+          </>
+        )}
         {template.notification_type === 'email' && (
           <>
             <Detail
@@ -455,8 +474,8 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
 }
 
 function CustomMessageDetails({ messages, defaults, type }) {
-  const showMessages = type !== 'webhook';
-  const showBodies = ['email', 'pagerduty', 'webhook'].includes(type);
+  const showMessages = !['awssns', 'webhook'].includes(type);
+  const showBodies = ['email', 'pagerduty', 'webhook', 'awssns'].includes(type);
 
   return (
     <>

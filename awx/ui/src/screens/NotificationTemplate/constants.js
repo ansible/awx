@@ -1,5 +1,6 @@
 /* eslint-disable-next-line import/prefer-default-export */
 export const NOTIFICATION_TYPES = {
+  awssns: 'AWS SNS',
   email: 'Email',
   grafana: 'Grafana',
   irc: 'IRC',

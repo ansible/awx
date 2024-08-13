@@ -32,7 +32,7 @@ Installing the `tar.gz` involves no special instructions.
 ## Running
 
 Non-deprecated modules in this collection have no Python requirements, but
-may require the official [AWX CLI](https://docs.ansible.com/ansible-tower/latest/html/towercli/index.html)
+may require the official [AWX CLI](https://pypi.org/project/awxkit/)
 in the future. The `DOCUMENTATION` for each module will report this.
 
 You can specify authentication by a combination of either:
@@ -41,8 +41,7 @@ You can specify authentication by a combination of either:
  - host, OAuth2 token
 
 The OAuth2 token is the preferred method. You can obtain a token via the
-AWX CLI [login](https://docs.ansible.com/ansible-tower/latest/html/towercli/reference.html#awx-login)
-command.
+``login`` command with the AWX CLI.
 
 These can be specified via (from highest to lowest precedence):
 

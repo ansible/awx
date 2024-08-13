@@ -17,7 +17,7 @@ from collections import OrderedDict
 
 # Django
 from django.conf import settings
-from django.db import models, connection
+from django.db import models, connection, transaction
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
@@ -31,6 +31,7 @@ from rest_framework.exceptions import ParseError
 from polymorphic.models import PolymorphicModel
 
 from ansible_base.lib.utils.models import prevent_search, get_type_for_model
+from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
@@ -197,9 +198,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
     @classmethod
     def _submodels_with_roles(cls):
-        ujt_classes = [c for c in cls.__subclasses__() if c._meta.model_name not in ['inventorysource', 'systemjobtemplate']]
-        ct_dict = ContentType.objects.get_for_models(*ujt_classes)
-        return [ct.id for ct in ct_dict.values()]
+        return [c for c in cls.__subclasses__() if permission_registry.is_registered(c)]
 
     @classmethod
     def accessible_pk_qs(cls, accessor, role_field):
@@ -215,8 +214,16 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         action = to_permissions[role_field]
 
+        # Special condition for super auditor
+        role_subclasses = cls._submodels_with_roles()
+        role_cts = ContentType.objects.get_for_models(*role_subclasses).values()
+        all_codenames = {f'{action}_{cls._meta.model_name}' for cls in role_subclasses}
+        if not (all_codenames - accessor.singleton_permissions()):
+            qs = cls.objects.filter(polymorphic_ctype__in=role_cts)
+            return qs.values_list('id', flat=True)
+
         return (
-            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__startswith=action, content_type_id__in=cls._submodels_with_roles())
+            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in role_cts])
             .values_list('object_id')
             .distinct()
         )
@@ -273,7 +280,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         if new_next_schedule:
             if new_next_schedule.pk == self.next_schedule_id and new_next_schedule.next_run == self.next_job_run:
                 return  # no-op, common for infrequent schedules
-            self.next_schedule = new_next_schedule
+
+            # If in a transaction, use select_for_update to lock the next schedule row, which
+            # prevents a race condition if new_next_schedule is deleted elsewhere during this transaction
+            if transaction.get_autocommit():
+                self.next_schedule = related_schedules.first()
+            else:
+                self.next_schedule = related_schedules.select_for_update().first()
+
             self.next_job_run = new_next_schedule.next_run
             self.save(update_fields=['next_schedule', 'next_job_run'])
 

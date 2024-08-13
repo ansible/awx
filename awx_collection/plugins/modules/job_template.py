@@ -16,9 +16,9 @@ DOCUMENTATION = '''
 ---
 module: job_template
 author: "Wayne Witzel III (@wwitzel3)"
-short_description: create, update, or destroy Automation Platform Controller job templates.
+short_description: create, update, or destroy job templates.
 description:
-    - Create, update, or destroy Automation Platform Controller job templates. See
+    - Create, update, or destroy job templates. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     name:
@@ -320,8 +320,8 @@ extends_documentation_fragment: awx.awx.auth
 
 notes:
   - JSON for survey_spec can be found in the API Documentation. See
-    U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/api_ref.html#/Job_Templates/Job_Templates_job_templates_survey_spec_create)
-    for POST operation payload example.
+    U(https://docs.ansible.com/automation-controller/latest/html/towerapi)
+    for job template survey creation and POST operation payload example.
 '''
 
 

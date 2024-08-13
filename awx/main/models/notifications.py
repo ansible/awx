@@ -31,6 +31,7 @@ from awx.main.notifications.mattermost_backend import MattermostBackend
 from awx.main.notifications.grafana_backend import GrafanaBackend
 from awx.main.notifications.rocketchat_backend import RocketChatBackend
 from awx.main.notifications.irc_backend import IrcBackend
+from awx.main.notifications.awssns_backend import AWSSNSBackend
 
 
 logger = logging.getLogger('awx.main.models.notifications')
@@ -40,6 +41,7 @@ __all__ = ['NotificationTemplate', 'Notification']
 
 class NotificationTemplate(CommonModelNameNotUnique):
     NOTIFICATION_TYPES = [
+        ('awssns', _('AWS SNS'), AWSSNSBackend),
         ('email', _('Email'), CustomEmailBackend),
         ('slack', _('Slack'), SlackBackend),
         ('twilio', _('Twilio'), TwilioBackend),
@@ -394,11 +396,11 @@ class JobNotificationMixin(object):
                 'verbosity': 0,
             },
             'job_friendly_name': 'Job',
-            'url': 'https://towerhost/#/jobs/playbook/1010',
+            'url': 'https://platformhost/#/jobs/playbook/1010',
             'approval_status': 'approved',
             'approval_node_name': 'Approve Me',
-            'workflow_url': 'https://towerhost/#/jobs/workflow/1010',
-            'job_metadata': """{'url': 'https://towerhost/$/jobs/playbook/13',
+            'workflow_url': 'https://platformhost/#/jobs/workflow/1010',
+            'job_metadata': """{'url': 'https://platformhost/$/jobs/playbook/13',
  'traceback': '',
  'status': 'running',
  'started': '2019-08-07T21:46:38.362630+00:00',

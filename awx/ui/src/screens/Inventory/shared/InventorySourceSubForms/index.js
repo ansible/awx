@@ -9,3 +9,4 @@ export { default as ControllerSubForm } from './ControllerSubForm';
 export { default as TerraformSubForm } from './TerraformSubForm';
 export { default as VMwareSubForm } from './VMwareSubForm';
 export { default as VirtualizationSubForm } from './VirtualizationSubForm';
+export { default as OpenShiftVirtualizationSubForm } from './OpenShiftVirtualizationSubForm';

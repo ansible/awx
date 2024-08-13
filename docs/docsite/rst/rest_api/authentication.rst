@@ -8,7 +8,7 @@ Authentication Methods Using the API
    pair: OAuth 2 Token; authentication
    pair: SSO; authentication
 
-This chapter describes the numerous enterprise authentication methods, the best use case for each, and examples:
+This chapter describes different authentication methods, the best use case for each, and examples:
 
 .. contents::
     :local:
