@@ -33,7 +33,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
-
 # Django REST Framework
 from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
 from rest_framework.parsers import FormParser
@@ -129,7 +128,6 @@ from awx.api.views.mixin import (
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
-
 
 logger = logging.getLogger('awx.api.views')
 
@@ -2394,9 +2392,12 @@ class JobTemplateList(ListCreateAPIView):
 
     def check_permissions(self, request):
         if request.method == 'POST':
-            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
-            if not can_access:
-                self.permission_denied(request, message=messages)
+            if request.user.is_anonymous:
+                self.permission_denied(request)
+            else:
+                can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+                if not can_access:
+                    self.permission_denied(request, message=messages)
 
         super(JobTemplateList, self).check_permissions(request)
 
@@ -3121,9 +3122,12 @@ class WorkflowJobTemplateList(ListCreateAPIView):
 
     def check_permissions(self, request):
         if request.method == 'POST':
-            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
-            if not can_access:
-                self.permission_denied(request, message=messages)
+            if request.user.is_anonymous:
+                self.permission_denied(request)
+            else:
+                can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+                if not can_access:
+                    self.permission_denied(request, message=messages)
 
         super(WorkflowJobTemplateList, self).check_permissions(request)
 
