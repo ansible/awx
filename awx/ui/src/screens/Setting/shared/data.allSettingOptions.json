@@ -830,6 +830,15 @@
               "category_slug": "debug",
               "default": true
           },
+          "RECEPTOR_KEEP_WORK_ON_ERROR": {
+            "type": "boolean",
+            "required": false,
+            "label": "Keep receptor work on error",
+            "help_text": "Prevent receptor work from being released on when error is detected",
+            "category": "Debug",
+            "category_slug": "debug",
+            "default": false
+          },
           "SESSION_COOKIE_AGE": {
               "type": "integer",
               "required": true,
@@ -5169,6 +5178,14 @@
               "type": "boolean",
               "label": "Release Receptor Work",
               "help_text": "Release receptor work",
+              "category": "Debug",
+              "category_slug": "debug",
+              "defined_in_file": false
+          },
+          "RECEPTOR_KEEP_WORK_ON_ERROR": {
+              "type": "boolean",
+              "label": "Keep receptor work on error",
+              "help_text": "Prevent receptor work from being released on when error is detected",
               "category": "Debug",
               "category_slug": "debug",
               "defined_in_file": false

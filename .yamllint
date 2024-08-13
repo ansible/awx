@@ -11,6 +11,8 @@ ignore: |
   # django template files
   awx/api/templates/instance_install_bundle/**
   .readthedocs.yaml
+  tools/loki
+  tools/otel
 
 extends: default
 

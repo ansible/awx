@@ -1,19 +1,18 @@
-aiohttp>=3.8.6  # CVE-2023-47627
+aiohttp>=3.9.4 # CVE-2024-30251
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
-asyncpg
 azure-identity
 azure-keyvault
 boto3
 botocore
 channels
-channels-redis==3.4.1  # see UPGRADE BLOCKERs
+channels-redis
 cryptography>=41.0.7  # CVE-2023-49083
-Cython<3 # this is needed as a build dependency, one day we may have separated build deps
+Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
 distro
-django==4.2.6  # CVE-2023-43665
+django==4.2.10  # CVE-2024-24680
 django-auth-ldap
 django-cors-headers
 django-crum
@@ -29,7 +28,7 @@ djangorestframework>=3.15.0
 djangorestframework-yaml
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
-hiredis==2.0.0  # see UPGRADE BLOCKERs
+grpcio<1.63.0 # 1.63.0+ requires cython>=3
 irc
 jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
@@ -39,6 +38,10 @@ maturin  # pydantic-core build dep
 msgpack<1.0.6  # 1.0.6+ requires cython>=3
 msrestazure
 openshift
+opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
+opentelemetry-sdk~=1.24
+opentelemetry-instrumentation-logging
+opentelemetry-exporter-otlp
 pexpect==4.7.0  # see library notes
 prometheus_client
 psycopg
@@ -51,11 +54,12 @@ python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
 python-ldap
 pyyaml>=6.0.1
+pyzstd  # otel collector log file compression library
 receptorctl
 social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
 social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
-redis
+redis[hiredis]
 requests
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions

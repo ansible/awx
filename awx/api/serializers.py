@@ -1038,7 +1038,9 @@ class UserSerializer(BaseSerializer):
             # as the modified user then inject a session key derived from
             # the updated user to prevent logout. This is the logic used by
             # the Django admin's own user_change_password view.
-            update_session_auth_hash(self.context['request'], obj)
+            if self.instance and self.context['request'].user.username == obj.username:
+                update_session_auth_hash(self.context['request'], obj)
+
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
@@ -5381,7 +5383,7 @@ class NotificationSerializer(BaseSerializer):
         )
 
     def get_body(self, obj):
-        if obj.notification_type in ('webhook', 'pagerduty'):
+        if obj.notification_type in ('webhook', 'pagerduty', 'awssns'):
             if isinstance(obj.body, dict):
                 if 'body' in obj.body:
                     return obj.body['body']
@@ -5403,9 +5405,9 @@ class NotificationSerializer(BaseSerializer):
     def to_representation(self, obj):
         ret = super(NotificationSerializer, self).to_representation(obj)
 
-        if obj.notification_type == 'webhook':
+        if obj.notification_type in ('webhook', 'awssns'):
             ret.pop('subject')
-        if obj.notification_type not in ('email', 'webhook', 'pagerduty'):
+        if obj.notification_type not in ('email', 'webhook', 'pagerduty', 'awssns'):
             ret.pop('body')
         return ret
 
