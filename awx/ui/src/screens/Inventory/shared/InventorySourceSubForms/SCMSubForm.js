@@ -87,7 +87,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
         />
       )}
       <CredentialLookup
-        credentialTypeKind="cloud"
+        credentialTypeKind="cloud,kubernetes"
         label={t`Credential`}
         value={credentialField.value}
         onChange={handleCredentialUpdate}

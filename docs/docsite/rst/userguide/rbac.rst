@@ -21,7 +21,7 @@ DAB RBAC
    single: roles   
    pair: DAB; RBAC
 
-This section describes the latest changes to RBAC, involving use of the ``django-ansible-base`` (DAB) library, to enhance existing roles, provide a uniformed model that is compatible with platform (enterprise) components, and allow creation of custom roles. However, the internals of the system in the backend have changes implemented, but they are not reflected yet in the AWX UI. The change to the backend maintains a compatibility layer so the “old” roles in the API still exists temporarily, until a fully-functional compatible UI replaces the existing roles. 
+This section describes the latest changes to RBAC, involving use of the ``django-ansible-base`` (DAB) library, to enhance existing roles, and allow creation of custom roles. However, the internals of the system in the backend have changes implemented, but they are not reflected yet in the AWX UI. The change to the backend maintains a compatibility layer so the “old” roles in the API still exists temporarily, until a fully-functional compatible UI replaces the existing roles. 
 
 New functionality, specifically custom roles, are possible through direct API clients or the API browser, but the presentation in the AWX UI might not reflect the changes made in the API.
 

@@ -30,13 +30,13 @@ Request server configuration from Ansible Tower
 
 Usage:
     Execution using positional parameters:
-    $($MyInvocation.MyCommand.Name) https://example.towerhost.net 44d7507f2ead49af5fca80aa18fd24bc 38
+    $($MyInvocation.MyCommand.Name) https://example.platformhost.net 44d7507f2ead49af5fca80aa18fd24bc 38
 
     Ignore self-signed certificates using named parameters:
-    $($MyInvocation.MyCommand.Name) -k -s https://example.towerhost.local -c 44d7507f2ead49af5fca80aa18fd24bc -t 38
+    $($MyInvocation.MyCommand.Name) -k -s https://example.platformhost.local -c 44d7507f2ead49af5fca80aa18fd24bc -t 38
 
     Execution using optional extra_vars:
-    $($MyInvocation.MyCommand.Name) https://example.towerhost.net 44d7507f2ead49af5fca80aa18fd24bc 38 '{ key: value, dict: { key: value }}'
+    $($MyInvocation.MyCommand.Name) https://example.platformhost.net 44d7507f2ead49af5fca80aa18fd24bc 38 '{ key: value, dict: { key: value }}'
 
 Options:
     -help, -h                                Show this message

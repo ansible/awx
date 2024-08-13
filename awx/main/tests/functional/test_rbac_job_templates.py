@@ -182,8 +182,14 @@ def test_job_template_creator_access(project, organization, rando, post, setup_m
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
-@pytest.mark.parametrize('lacking', ['project', 'inventory'])
-def test_job_template_insufficient_creator_permissions(lacking, project, inventory, organization, rando, post):
+@pytest.mark.parametrize(
+    'lacking,reason',
+    [
+        ('project', 'You do not have use permission on Project'),
+        ('inventory', 'You do not have use permission on Inventory'),
+    ],
+)
+def test_job_template_insufficient_creator_permissions(lacking, reason, project, inventory, organization, rando, post):
     if lacking != 'project':
         project.use_role.members.add(rando)
     else:
@@ -192,12 +198,13 @@ def test_job_template_insufficient_creator_permissions(lacking, project, invento
         inventory.use_role.members.add(rando)
     else:
         inventory.read_role.members.add(rando)
-    post(
+    response = post(
         url=reverse('api:job_template_list'),
         data=dict(name='newly-created-jt', inventory=inventory.id, project=project.pk, playbook='helloworld.yml'),
         user=rando,
         expect=403,
     )
+    assert reason in response.data[lacking]
 
 
 @pytest.mark.django_db

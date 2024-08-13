@@ -1,0 +1,7 @@
+*~
+customer-backup.tar.*
+*.db
+*.log
+*.dot
+*.png
+*.tar.*

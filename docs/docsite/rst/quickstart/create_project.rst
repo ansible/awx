@@ -11,7 +11,7 @@ You can manage playbooks and playbook directories by either placing them manuall
 
 .. note::
 
-  It is recommended that, whenever possible, you use source control to manage your playbooks. This type of best practice provides the ability to treat your infrastructure as code and is in line with DevOps ideals. While this Quick Start Guide uses lightweight examples to get you up and running, we suggest using source control to manage playbook for production purposes.
+  It is recommended that, whenever possible, you use source control to manage your playbooks. This type of best practice provides the ability to treat your infrastructure as code and is in line with DevOps ideals. While this Quick Start Guide uses lightweight examples to get you up and running, we suggest using source control to manage your actual playbooks.
 
 To review existing projects, click **Projects** from the left navigation bar. 
 
