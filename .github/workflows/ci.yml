@@ -38,7 +38,9 @@ jobs:
           - name: ui-test-general
             command: make ui-test-general
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - name: Build awx_devel image for running checks
         uses: ./.github/actions/awx_devel_image
@@ -52,7 +54,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - uses: ./.github/actions/run_awx_devel
         id: awx
@@ -70,13 +74,15 @@ jobs:
       DEBUG_OUTPUT_DIR: /tmp/awx_operator_molecule_test
     steps:
       - name: Checkout awx
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           path: awx
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false\
           repository: ansible/awx-operator
           path: awx-operator
 
@@ -130,7 +136,9 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
       - name: Upgrade ansible-core
@@ -154,7 +162,9 @@ jobs:
           - name: r-z0-9
             regex: ^[r-z0-9]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - uses: ./.github/actions/run_awx_devel
         id: awx
@@ -200,7 +210,9 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core

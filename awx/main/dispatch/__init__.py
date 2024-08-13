@@ -102,7 +102,8 @@ def create_listener_connection():
 
     # Apply overrides specifically for the listener connection
     for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
-        conf[k] = v
+        if k != 'OPTIONS':
+            conf[k] = v
     for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
         conf['OPTIONS'][k] = v
 

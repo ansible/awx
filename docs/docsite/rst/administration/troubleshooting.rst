@@ -8,6 +8,21 @@ Troubleshooting AWX
    single: troubleshooting
    single: help
   
+
+Some troubleshooting tools are built in the AWX user interface that may help you address some issues you might encounter. To access these tools, navigate to **Settings** and select **Troubleshooting**.
+
+.. image:: ../common/images/settings_troubleshooting_highlighted.png
+
+The options available are:
+
+- **Enable or Disable tmp dir cleanup**: choose whether you want to clean up the ``tmp`` directory.
+- **Debug Web Requests**: choose whether you want web requests to log messages for debugging purposes.
+- **Release Receptor Work**: disables cleaning up job pods. If you disable this, the jobs pods will remain in your cluster indefinitely, allowing you to examine them post-run. If you are missing data there, run ``kubectl logs <job-pod-name>`` and provide the logs in a issue report.
+
+.. image:: ../common/images/troubleshooting_options.png
+
+Click **Edit** to modify the settings. Use the toggle to enable and disable the appropriate settings.
+
 .. _admin_troubleshooting_extra_settings:
 
 Error logging and extra settings
@@ -220,3 +235,4 @@ If you receive the message "Skipping: No Hosts Matched" when you are trying to r
 - Make sure that if you have specified a Limit in the Job Template that it is a valid limit value and still matches something in your inventory. The Limit field takes a pattern argument, described here: http://docs.ansible.com/intro_patterns.html
 
 Please file a support ticket if you still run into issues after checking these options.
+
