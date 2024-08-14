@@ -52,7 +52,7 @@ from awx_plugins.credentials import injectors as builtin_injectors
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
-credential_plugins = dict((ep.name, ep.load()) for ep in iter_entry_points('awx.plugins'))
+credential_plugins = dict((ep.name, ep.load()) for ep in iter_entry_points('awx_plugins.credentials'))
 
 HIDDEN_PASSWORD = '**********'
 
