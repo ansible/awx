@@ -305,7 +305,14 @@ function JobTemplateDetail({ template }) {
         {webhook_service && (
           <Detail
             label={t`Webhook Service`}
-            value={webhook_service === 'github' ? t`GitHub` : t`GitLab`}
+            value={(() => {
+              const serviceNames = {
+                bitbucket_dc: 'Bitbucket Server',
+                github: 'GitHub',
+                gitlab: 'GitLab',
+              };
+              return serviceNames[webhook_service] || '';
+            })()}
             dataCy="jt-detail-webhook-service"
             helpText={helpText.webhookService}
           />
