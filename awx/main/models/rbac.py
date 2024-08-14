@@ -557,8 +557,15 @@ def get_role_definition(role):
     f = obj._meta.get_field(role.role_field)
     action_name = f.name.rsplit("_", 1)[0]
     model_print = type(obj).__name__
-    rd_name = f'{model_print} {action_name.title()} Compat'
-    perm_list = get_role_codenames(role)
+    # use Controller-specific role definitions for Team/Organization and member/admin
+    # instead of platform role definitions
+    # these should exist in the system already, so just do a lookup by role definition name
+    if model_print in ['Team', 'Organization'] and action_name in ['member', 'admin']:
+        perm_list = None
+        rd_name = f'Controller {model_print} {action_name.title()}'
+    else:
+        rd_name = f'{model_print} {action_name.title()} Compat'
+        perm_list = get_role_codenames(role)
     defaults = {
         'content_type_id': role.content_type_id,
         'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',

@@ -309,6 +309,16 @@ def setup_managed_role_definitions(apps, schema_editor):
                     to_create['object_admin'].format(cls=cls), f'Has all permissions to a single {cls._meta.verbose_name}', ct, indiv_perms, RoleDefinition
                 )
             )
+            if cls_name == 'team':
+                managed_role_definitions.append(
+                    get_or_create_managed(
+                        'Controller Team Admin',
+                        f'Has all permissions to a single {cls._meta.verbose_name}',
+                        ct,
+                        indiv_perms,
+                        RoleDefinition,
+                    )
+                )
 
         if 'org_children' in to_create and (cls_name not in ('organization', 'instancegroup', 'team')):
             org_child_perms = object_perms.copy()
@@ -349,11 +359,32 @@ def setup_managed_role_definitions(apps, schema_editor):
                         RoleDefinition,
                     )
                 )
+                if action == 'member' and cls_name in ('organization', 'team'):
+                    suffix = to_create['special'].format(cls=cls, action=action.title())
+                    rd_name = f'Controller {suffix}'
+                    managed_role_definitions.append(
+                        get_or_create_managed(
+                            rd_name,
+                            f'Has {action} permissions to a single {cls._meta.verbose_name}',
+                            ct,
+                            perm_list,
+                            RoleDefinition,
+                        )
+                    )
 
     if 'org_admin' in to_create:
         managed_role_definitions.append(
             get_or_create_managed(
                 to_create['org_admin'].format(cls=Organization),
+                'Has all permissions to a single organization and all objects inside of it',
+                org_ct,
+                org_perms,
+                RoleDefinition,
+            )
+        )
+        managed_role_definitions.append(
+            get_or_create_managed(
+                'Controller Organization Admin',
                 'Has all permissions to a single organization and all objects inside of it',
                 org_ct,
                 org_perms,
