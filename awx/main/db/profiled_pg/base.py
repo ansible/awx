@@ -1,9 +1,9 @@
 import os
-import pkg_resources
 import sqlite3
 import sys
 import traceback
 import uuid
+from importlib.metadata import version as _get_version
 
 from django.core.cache import cache
 from django.core.cache.backends.locmem import LocMemCache
@@ -70,7 +70,7 @@ class RecordedQueryLog(object):
             else:
                 progname = os.path.basename(sys.argv[0])
             filepath = os.path.join(self.dest, '{}.sqlite'.format(progname))
-            version = pkg_resources.get_distribution('awx').version
+            version = _get_version('awx')
             log = sqlite3.connect(filepath, timeout=3)
             log.execute(
                 'CREATE TABLE IF NOT EXISTS queries ('

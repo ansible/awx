@@ -18,6 +18,7 @@ import threading
 import contextlib
 import tempfile
 import functools
+from importlib.metadata import version as _get_version
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -230,9 +231,7 @@ def get_awx_version():
     from awx import __version__
 
     try:
-        import pkg_resources
-
-        return pkg_resources.require('awx')[0].version
+        return _get_version('awx')
     except Exception:
         return __version__
 
