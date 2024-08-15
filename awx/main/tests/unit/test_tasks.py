@@ -1259,7 +1259,6 @@ class TestJobCredentials(TestJobExecution):
         extra_vars = parse_extra_vars(args, private_data_dir)
 
         assert extra_vars["turbo_button"] == "True"
-        return ['successful', 0]
 
     def test_custom_environment_injectors_with_nested_extra_vars(self, private_data_dir, job, mock_me):
         task = jobs.RunJob()
