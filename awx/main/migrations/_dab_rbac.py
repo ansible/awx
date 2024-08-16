@@ -167,7 +167,7 @@ def migrate_to_new_rbac(apps, schema_editor):
             perm.delete()
 
     managed_definitions = dict()
-    for role_definition in RoleDefinition.objects.filter(managed=True):
+    for role_definition in RoleDefinition.objects.filter(managed=True).exclude(name__in=(settings.ANSIBLE_BASE_JWT_MANAGED_ROLES)):
         permissions = frozenset(role_definition.permissions.values_list('id', flat=True))
         managed_definitions[permissions] = role_definition
 
