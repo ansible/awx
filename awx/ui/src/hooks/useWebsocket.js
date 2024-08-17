@@ -5,51 +5,56 @@ export default function useWebsocket(subscribeGroups) {
   const ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket(
-      `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
-        window.location.host
-      }${window.location.pathname}websocket/`
-    );
-
     const connect = () => {
-      const xrftoken = `; ${document.cookie}`
-        .split('; csrftoken=')
-        .pop()
-        .split(';')
-        .shift();
-      ws.current.send(
-        JSON.stringify({
-          xrftoken,
-          groups: subscribeGroups,
-        })
+      ws.current = new WebSocket(
+        `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
+          window.location.host
+        }${window.location.pathname}websocket/`
       );
-    };
-    ws.current.onopen = connect;
 
-    ws.current.onmessage = (e) => {
-      setLastMessage(JSON.parse(e.data));
-    };
+      ws.current.onopen = () => {
+        const xrftoken = `; ${document.cookie}`
+          .split('; csrftoken=')
+          .pop()
+          .split(';')
+          .shift();
+        if (ws.current.readyState === WebSocket.OPEN) {
+          ws.current.send(
+            JSON.stringify({
+              xrftoken,
+              groups: subscribeGroups,
+            })
+          );
+        }
+      };
 
-    ws.current.onclose = (e) => {
-      if (e.code !== 1000) {
+      ws.current.onmessage = (e) => {
+        setLastMessage(JSON.parse(e.data));
+      };
+
+      ws.current.onclose = (e) => {
+        if (e.code !== 1000) {
+          // eslint-disable-next-line no-console
+          console.debug('Socket closed. Reconnecting...', e);
+          setTimeout(connect, 1000);
+        }
+      };
+
+      ws.current.onerror = (err) => {
         // eslint-disable-next-line no-console
-        console.debug('Socket closed. Reconnecting...', e);
-        setTimeout(() => {
-          connect();
-        }, 1000);
-      }
+        console.debug('Socket error: ', err, 'Disconnecting...');
+        ws.current.close();
+      };
     };
 
-    ws.current.onerror = (err) => {
-      // eslint-disable-next-line no-console
-      console.debug('Socket error: ', err, 'Disconnecting...');
-      ws.current.close();
-    };
+    connect();
 
     return () => {
-      ws.current.close();
+      if (ws.current) {
+        ws.current.close();
+      }
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [subscribeGroups]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return lastMessage;
 }
