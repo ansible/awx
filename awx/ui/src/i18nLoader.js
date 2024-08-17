@@ -10,6 +10,7 @@ export const locales = {
   ko: 'Korean',
   zh: 'Chinese',
   nl: 'Dutch',
+  it: 'Italian',
 };
 
 i18n.loadLocaleData({
@@ -21,6 +22,7 @@ i18n.loadLocaleData({
   ja: { plurals: ja },
   zh: { plurals: zh },
   zu: { plurals: zu },
+  it: { plurals: it },
 });
 
 /**
