@@ -1,10 +1,11 @@
 import re
 from functools import reduce
 from pyparsing import (
-    infixNotation,
-    opAssoc,
+    infix_notation,
+    OpAssoc,
     Optional,
     Literal,
+    Keyword,
     CharsNotIn,
     ParseException,
 )
@@ -108,7 +109,7 @@ class ExternalLoggerEnabled(Filter):
 class DynamicLevelFilter(Filter):
     def filter(self, record):
         """Filters out logs that have a level below the threshold defined
-        by the databse setting LOG_AGGREGATOR_LEVEL
+        by the database setting LOG_AGGREGATOR_LEVEL
         """
         if record_is_blocked(record):
             # Fine to write denied loggers to file, apply default filtering level
@@ -341,18 +342,19 @@ class SmartFilter(object):
         EQUAL = Literal('=')
 
         grammar = (atom_quoted | atom) + EQUAL + Optional((atom_quoted | atom))
-        grammar.setParseAction(cls.BoolOperand)
+        grammar.set_parse_action(cls.BoolOperand)
+        grammar.ignore_whitespace()
 
-        boolExpr = infixNotation(
+        boolExpr = infix_notation(
             grammar,
             [
-                ("and", 2, opAssoc.LEFT, cls.BoolAnd),
-                ("or", 2, opAssoc.LEFT, cls.BoolOr),
+                (Keyword("and"), 2, OpAssoc.LEFT, cls.BoolAnd),
+                (Keyword("or"), 2, OpAssoc.LEFT, cls.BoolOr),
             ],
         )
 
         try:
-            res = boolExpr.parseString('(' + filter_string + ')')
+            res = boolExpr.parse_string('(' + filter_string + ')')
         except ParseException:
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
