@@ -5,6 +5,7 @@ import 'styled-components/macro';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { formatDateString } from 'util/dates';
 import { Detail, DetailList } from 'components/DetailList';
+import { useConfig } from 'contexts/Config';
 
 function InstancePeerListItem({
   peerInstance,
@@ -14,6 +15,7 @@ function InstancePeerListItem({
   onExpand,
   rowIndex,
 }) {
+  const config = useConfig();
   const labelId = `check-action-${peerInstance.id}`;
   const isHopNode = peerInstance.node_type === 'hop';
   return (
@@ -89,7 +91,11 @@ function InstancePeerListItem({
                 <Detail
                   data-cy="last-health-check"
                   label={t`Last Health Check`}
-                  value={formatDateString(peerInstance.last_health_check)}
+                  value={formatDateString(
+                    peerInstance.last_health_check,
+                    null,
+                    config
+                  )}
                 />
               </DetailList>
             </ExpandableRowContent>

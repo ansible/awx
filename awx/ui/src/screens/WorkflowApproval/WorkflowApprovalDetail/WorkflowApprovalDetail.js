@@ -17,6 +17,7 @@ import { CardBody, CardActionsRow } from 'components/Card';
 import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import { VariablesDetail } from 'components/CodeEditor';
 import { formatDateString, secondsToHHMMSS } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { WorkflowApprovalsAPI, WorkflowJobsAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { WorkflowApproval } from 'types';
@@ -45,6 +46,7 @@ const WFDetailList = styled(DetailList)`
 `;
 
 function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
+  const config = useConfig();
   const { id: workflowApprovalId } = useParams();
   const history = useHistory();
   const { addToast, Toast, toastProps } = useToast();
@@ -182,15 +184,15 @@ function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
         />
         <Detail
           label={t`Last Modified`}
-          value={formatDateString(workflowApproval.modified)}
+          value={formatDateString(workflowApproval.modified, null, config)}
         />
         <Detail
           label={t`Finished`}
-          value={formatDateString(workflowApproval.finished)}
+          value={formatDateString(workflowApproval.finished, null, config)}
         />
         <Detail
           label={t`Canceled`}
-          value={formatDateString(workflowApproval.canceled_on)}
+          value={formatDateString(workflowApproval.canceled_on, null, config)}
         />
         <Detail
           label={t`Elapsed`}

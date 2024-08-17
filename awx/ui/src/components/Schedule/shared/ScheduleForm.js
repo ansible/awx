@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { RRule } from 'rrule';
 import { Button, Form, ActionGroup } from '@patternfly/react-core';
-import { Config } from 'contexts/Config';
+import { useConfig, Config } from 'contexts/Config';
 import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { dateToInputDateTime } from 'util/dates';
 import useRequest from 'hooks/useRequest';
@@ -39,6 +39,7 @@ function ScheduleForm({
   surveyConfig,
   resourceDefaultCredentials,
 }) {
+  const config = useConfig();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isPromptTouched, setIsPromptTouched] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
@@ -283,9 +284,13 @@ function ScheduleForm({
   ) {
     showPromptButton = true;
   }
-  const [currentDate, time] = dateToInputDateTime(closestQuarterHour.toISO());
+  const [currentDate, time] = dateToInputDateTime(
+    closestQuarterHour.toISO(),
+    null,
+    config
+  );
 
-  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
+  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO(), null, config);
   const initialFrequencyOptions = {
     minute: {
       interval: 1,
@@ -379,7 +384,7 @@ function ScheduleForm({
   let overriddenValues = {};
   if (schedule.rrule) {
     try {
-      overriddenValues = parseRuleObj(schedule);
+      overriddenValues = parseRuleObj(schedule, config);
     } catch (error) {
       if (error instanceof UnsupportedRRuleError) {
         return (

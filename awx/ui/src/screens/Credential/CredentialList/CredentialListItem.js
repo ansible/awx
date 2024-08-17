@@ -8,6 +8,7 @@ import { Tr, Td } from '@patternfly/react-table';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { timeOfDay } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 
 import { Credential } from 'types';
 import { CredentialsAPI } from 'api';
@@ -22,6 +23,7 @@ function CredentialListItem({
   fetchCredentials,
   rowIndex,
 }) {
+  const config = useConfig();
   const [isDisabled, setIsDisabled] = useState(false);
 
   const labelId = `check-action-${credential.id}`;
@@ -29,13 +31,13 @@ function CredentialListItem({
 
   const copyCredential = useCallback(async () => {
     const response = await CredentialsAPI.copy(credential.id, {
-      name: `${credential.name} @ ${timeOfDay()}`,
+      name: `${credential.name} @ ${timeOfDay(config)}`,
     });
     if (response.status === 201) {
       onCopy(response.data.id);
     }
     await fetchCredentials();
-  }, [credential.id, credential.name, fetchCredentials, onCopy]);
+  }, [credential.id, credential.name, fetchCredentials, onCopy, config]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);

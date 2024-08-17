@@ -40,7 +40,14 @@ export const ConfigProvider = ({ children }) => {
             results: [me],
           },
         },
-      ] = await Promise.all([ConfigAPI.read(), MeAPI.read()]);
+        {
+          data: { DATETIME_FORMAT: datetime_format },
+        },
+      ] = await Promise.all([
+        ConfigAPI.read(),
+        MeAPI.read(),
+        SettingsAPI.readCategory('ui'),
+      ]);
       let systemConfig = {};
       if (me?.is_superuser || me?.is_system_auditor) {
         const { data: systemConfigResults } = await SettingsAPI.readSystem();
@@ -70,6 +77,7 @@ export const ConfigProvider = ({ children }) => {
       ]);
       return {
         ...data,
+        datetime_format,
         me,
         adminOrgCount,
         notifAdminCount,

@@ -56,18 +56,25 @@ function TemplateListItem({
     let response;
     if (template.type === 'job_template') {
       response = await JobTemplatesAPI.copy(template.id, {
-        name: `${template.name} @ ${timeOfDay()}`,
+        name: `${template.name} @ ${timeOfDay(config)}`,
       });
     } else {
       response = await WorkflowJobTemplatesAPI.copy(template.id, {
-        name: `${template.name} @ ${timeOfDay()}`,
+        name: `${template.name} @ ${timeOfDay(config)}`,
       });
     }
     if (response.status === 201) {
       onCopy(response.data.id);
     }
     await fetchTemplates();
-  }, [fetchTemplates, template.id, template.name, template.type, onCopy]);
+  }, [
+    fetchTemplates,
+    template.id,
+    template.name,
+    template.type,
+    onCopy,
+    config,
+  ]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);
@@ -114,7 +121,7 @@ function TemplateListItem({
     : null;
   if (mostRecentJob) {
     lastRun = mostRecentJob.finished
-      ? formatDateString(mostRecentJob.finished)
+      ? formatDateString(mostRecentJob.finished, null, config)
       : t`Running`;
   }
 
@@ -314,7 +321,7 @@ function TemplateListItem({
               )}
               <Detail
                 label={t`Last Modified`}
-                value={formatDateString(template.modified)}
+                value={formatDateString(template.modified, null, config)}
                 dataCy={`template-${template.id}-last-modified`}
               />
               {summaryFields.credentials ? (

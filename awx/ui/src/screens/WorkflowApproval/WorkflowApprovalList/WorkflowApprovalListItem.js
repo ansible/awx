@@ -5,6 +5,7 @@ import { Tr, Td } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { WorkflowApproval } from 'types';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import { ActionItem, ActionsTd } from 'components/PaginatedTable';
@@ -23,6 +24,7 @@ function WorkflowApprovalListItem({
   detailUrl,
   rowIndex,
 }) {
+  const config = useConfig();
   const hasBeenActedOn =
     workflowApproval.status === 'successful' ||
     workflowApproval.status === 'failed' ||
@@ -61,7 +63,7 @@ function WorkflowApprovalListItem({
         )}
       </Td>
       <Td dataLabel={t`Started`}>
-        {formatDateString(workflowApproval.started)}
+        {formatDateString(workflowApproval.started, null, config)}
       </Td>
       <Td dataLabel={t`Status`}>
         {workflowApproval.status === 'pending' ? (

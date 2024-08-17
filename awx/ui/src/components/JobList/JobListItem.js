@@ -7,6 +7,7 @@ import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { isJobRunning } from 'util/jobs';
 import getScheduleUrl from 'util/getScheduleUrl';
 import { ActionsTd, ActionItem, TdBreakWord } from '../PaginatedTable';
@@ -36,6 +37,7 @@ function JobListItem({
   isSuperUser = false,
   inventorySourceLabels,
 }) {
+  const config = useConfig();
   const labelId = `check-action-${job.id}`;
 
   const jobTypes = {
@@ -96,9 +98,11 @@ function JobListItem({
           {job.status && <StatusLabel status={job.status} />}
         </Td>
         {showTypeColumn && <Td dataLabel={t`Type`}>{jobTypes[job.type]}</Td>}
-        <Td dataLabel={t`Start Time`}>{formatDateString(job.started)}</Td>
+        <Td dataLabel={t`Start Time`}>
+          {formatDateString(job.started, null, config)}
+        </Td>
         <Td dataLabel={t`Finish Time`}>
-          {job.finished ? formatDateString(job.finished) : ''}
+          {job.finished ? formatDateString(job.finished, null, config) : ''}
         </Td>
         <ActionsTd dataLabel={t`Actions`}>
           <ActionItem

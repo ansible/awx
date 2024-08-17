@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { t, Plural, SelectOrdinal } from '@lingui/macro';
-import { DateTime } from 'luxon';
-import { formatDateString } from 'util/dates';
+import { makeDateTime, formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { DetailList, Detail } from '../../DetailList';
 
 const Label = styled.div`
@@ -17,6 +17,7 @@ export default function FrequencyDetails({
   timezone,
   isException,
 }) {
+  const config = useConfig();
   const getRunEveryLabel = () => {
     const { interval } = options;
     switch (type) {
@@ -107,7 +108,7 @@ export default function FrequencyDetails({
         <RunOnDetail type={type} options={options} prefix={prefix} />
         <Detail
           label={t`End`}
-          value={getEndValue(type, options, timezone)}
+          value={getEndValue(type, options, timezone, config)}
           dataCy={`${prefix}-end`}
         />
       </DetailList>
@@ -216,7 +217,7 @@ function RunOnDetail({ type, options, prefix }) {
   return null;
 }
 
-function getEndValue(type, options, timezone) {
+function getEndValue(type, options, timezone, config) {
   if (options.end === 'never') {
     return t`Never`;
   }
@@ -231,12 +232,6 @@ function getEndValue(type, options, timezone) {
     );
   }
 
-  const date = DateTime.fromFormat(
-    `${options.endDate} ${options.endTime}`,
-    'yyyy-MM-dd h:mm a',
-    {
-      zone: timezone,
-    }
-  );
-  return formatDateString(date, timezone);
+  const date = makeDateTime(options.endDate, options.endTime, timezone, config);
+  return formatDateString(date, timezone, config);
 }

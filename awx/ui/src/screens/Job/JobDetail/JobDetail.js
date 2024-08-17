@@ -40,7 +40,8 @@ const StatusDetailValue = styled.div`
 
 function JobDetail({ job, inventorySourceLabels }) {
   const jobHelpText = getJobHelpText();
-  const { me } = useConfig();
+  const config = useConfig();
+  const { me } = config;
   const {
     created_by,
     credential,
@@ -218,13 +219,13 @@ function JobDetail({ job, inventorySourceLabels }) {
         <Detail
           dataCy="job-started-date"
           label={t`Started`}
-          value={formatDateString(job.started)}
+          value={formatDateString(job.started, null, config)}
         />
         {job?.finished && (
           <Detail
             dataCy="job-finished-date"
             label={t`Finished`}
-            value={formatDateString(job.finished)}
+            value={formatDateString(job.finished, null, config)}
           />
         )}
         {jobTemplate && (

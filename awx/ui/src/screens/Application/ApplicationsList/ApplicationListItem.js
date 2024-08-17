@@ -8,6 +8,7 @@ import { PencilAltIcon } from '@patternfly/react-icons';
 import { ActionsTd, ActionItem, TdBreakWord } from 'components/PaginatedTable';
 import { formatDateString } from 'util/dates';
 import { Application } from 'types';
+import { useConfig } from 'contexts/Config';
 
 function ApplicationListItem({
   application,
@@ -16,6 +17,7 @@ function ApplicationListItem({
   detailUrl,
   rowIndex,
 }) {
+  const config = useConfig();
   const labelId = `check-action-${application.id}`;
   return (
     <Tr
@@ -43,7 +45,7 @@ function ApplicationListItem({
         </Link>
       </TdBreakWord>
       <Td dataLabel={t`Last Modified`}>
-        {formatDateString(application.modified)}
+        {formatDateString(application.modified, null, config)}
       </Td>
       <ActionsTd dataLabel={t`Actions`}>
         <ActionItem

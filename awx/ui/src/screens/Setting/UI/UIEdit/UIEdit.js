@@ -106,6 +106,7 @@ function UIEdit() {
             PENDO_TRACKING_STATE: uiData?.PENDO_TRACKING_STATE?.value ?? 'off',
             CUSTOM_LOGIN_INFO: uiData?.CUSTOM_LOGIN_INFO?.value ?? '',
             CUSTOM_LOGO: uiData?.CUSTOM_LOGO?.value ?? '',
+            DATETIME_FORMAT: uiData?.DATETIME_FORMAT?.value ?? '',
           }}
           onSubmit={handleSubmit}
         >
@@ -126,6 +127,10 @@ function UIEdit() {
                   name="CUSTOM_LOGO"
                   config={uiData.CUSTOM_LOGO}
                   type="dataURL"
+                />
+                <ChoiceField
+                  name="DATETIME_FORMAT"
+                  config={uiData.DATETIME_FORMAT}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}

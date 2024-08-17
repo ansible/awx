@@ -6,12 +6,14 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 
 import ActivityStreamDetailButton from './ActivityStreamDetailButton';
 import ActivityStreamDescription from './ActivityStreamDescription';
 
 function ActivityStreamListItem({ streamItem }) {
+  const config = useConfig();
   ActivityStreamListItem.propTypes = {
     streamItem: shape({}).isRequired,
   };
@@ -40,7 +42,9 @@ function ActivityStreamListItem({ streamItem }) {
     <Tr id={streamItem.id} ouiaId={streamItem.id} aria-labelledby={labelId}>
       <Td />
       <Td dataLabel={t`Time`}>
-        {streamItem.timestamp ? formatDateString(streamItem.timestamp) : ''}
+        {streamItem.timestamp
+          ? formatDateString(streamItem.timestamp, null, config)
+          : ''}
       </Td>
       <Td dataLabel={t`Initiated By`}>{user}</Td>
       <Td id={labelId} dataLabel={t`Event`}>

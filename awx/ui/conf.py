@@ -71,3 +71,15 @@ register(
     category_slug='ui',
     hidden=True,
 )
+
+register(
+    'DATETIME_FORMAT',
+    field_class=fields.ChoiceField,
+    choices=[('24-hour', _('2012-05-09, 14:45:55 (24-hour)')), ('am-pm', _('9/5/2012, 2:45:55 PM (am-pm)'))],
+    allow_null=False,
+    default='am-pm',
+    label=_('Datetime Format'),
+    help_text=_('Datetime format across the user interface.'),
+    category=_('UI'),
+    category_slug='ui',
+)

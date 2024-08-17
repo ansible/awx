@@ -8,6 +8,7 @@ import {
   TimePicker,
   FormGroup,
 } from '@patternfly/react-core';
+import { useConfig } from 'contexts/Config';
 import styled from 'styled-components';
 import { required, validateTime, combine } from 'util/validators';
 
@@ -15,6 +16,7 @@ const DateTimeGroup = styled.span`
   display: flex;
 `;
 function DateTimePicker({ dateFieldName, timeFieldName, label }) {
+  const config = useConfig();
   const [dateField, dateMeta, dateHelpers] = useField({
     name: dateFieldName,
     validate: combine([required(null), isValidDate]),
@@ -55,13 +57,16 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
           onChange={onDateChange}
         />
         <TimePicker
-          placeholder="hh:mm AM/PM"
+          placeholder={
+            config.datetime_format === 'am-pm' ? 'hh:mm AM/PM' : 'HH:mm'
+          }
           stepMinutes={15}
           aria-label={
             timeFieldName.startsWith('start') ? t`Start time` : t`End time`
           }
           time={timeField.value}
           {...timeField}
+          is24Hour={config.datetime_format === '24-hour'}
           onChange={(_, time) => timeHelpers.setValue(time)}
         />
       </DateTimeGroup>

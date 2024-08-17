@@ -24,7 +24,8 @@ const HelperText = styled(PFHelperText)`
 `;
 
 function SubscriptionDetail() {
-  const { me = {}, license_info, version, systemConfig } = useConfig();
+  const config = useConfig();
+  const { me = {}, license_info, version, systemConfig } = config;
   const baseURL = '/settings/subscription';
   const tabsArray = [
     {
@@ -48,7 +49,11 @@ function SubscriptionDetail() {
     license_info;
 
   const automatedInstancesSinceDateTime = automated_since
-    ? formatDateString(new Date(automated_since * 1000).toISOString())
+    ? formatDateString(
+        new Date(automated_since * 1000).toISOString(),
+        null,
+        config
+      )
     : null;
 
   return (
@@ -175,7 +180,9 @@ function SubscriptionDetail() {
             value={
               license_info.license_date &&
               formatDateString(
-                new Date(license_info.license_date * 1000).toISOString()
+                new Date(license_info.license_date * 1000).toISOString(),
+                null,
+                config
               )
             }
           />
@@ -186,7 +193,8 @@ function SubscriptionDetail() {
               license_info.license_date &&
               formatDateString(
                 new Date(license_info.license_date * 1000).toISOString(),
-                'UTC'
+                'UTC',
+                config
               )
             }
           />

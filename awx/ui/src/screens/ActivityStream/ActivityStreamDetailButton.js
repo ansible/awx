@@ -5,11 +5,13 @@ import { Button, Modal } from '@patternfly/react-core';
 import { SearchPlusIcon } from '@patternfly/react-icons';
 
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 
 import { DetailList, Detail } from 'components/DetailList';
 import { VariablesDetail } from 'components/CodeEditor';
 
 function ActivityStreamDetailButton({ streamItem, user, description }) {
+  const config = useConfig();
   const [isOpen, setIsOpen] = useState(false);
 
   const setting = streamItem?.summary_fields?.setting;
@@ -39,7 +41,7 @@ function ActivityStreamDetailButton({ streamItem, user, description }) {
         <DetailList gutter="sm">
           <Detail
             label={t`Time`}
-            value={formatDateString(streamItem.timestamp)}
+            value={formatDateString(streamItem.timestamp, null, config)}
           />
           <Detail label={t`Initiated by`} value={user} />
           <Detail

@@ -12,8 +12,10 @@ import ErrorDetail from 'components/ErrorDetail';
 import { formatDateString } from 'util/dates';
 import { UsersAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import { useConfig } from 'contexts/Config';
 
 function UserDetail({ user }) {
+  const config = useConfig();
   const {
     id,
     username,
@@ -77,11 +79,20 @@ function UserDetail({ user }) {
           />
         )}
         {last_login && (
-          <Detail label={t`Last Login`} value={formatDateString(last_login)} />
+          <Detail
+            label={t`Last Login`}
+            value={formatDateString(last_login, null, config)}
+          />
         )}
-        <Detail label={t`Created`} value={formatDateString(created)} />
+        <Detail
+          label={t`Created`}
+          value={formatDateString(created, null, config)}
+        />
         {modified && (
-          <Detail label={t`Last Modified`} value={formatDateString(modified)} />
+          <Detail
+            label={t`Last Modified`}
+            value={formatDateString(modified, null, config)}
+          />
         )}
       </DetailList>
       <CardActionsRow>

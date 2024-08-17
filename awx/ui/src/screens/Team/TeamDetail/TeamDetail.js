@@ -12,8 +12,10 @@ import ErrorDetail from 'components/ErrorDetail';
 import { formatDateString } from 'util/dates';
 import { TeamsAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import { useConfig } from 'contexts/Config';
 
 function TeamDetail({ team }) {
+  const config = useConfig();
   const { name, description, created, modified, summary_fields } = team;
   const history = useHistory();
   const { id } = useParams();
@@ -44,8 +46,14 @@ function TeamDetail({ team }) {
             </Link>
           }
         />
-        <Detail label={t`Created`} value={formatDateString(created)} />
-        <Detail label={t`Last Modified`} value={formatDateString(modified)} />
+        <Detail
+          label={t`Created`}
+          value={formatDateString(created, null, config)}
+        />
+        <Detail
+          label={t`Last Modified`}
+          value={formatDateString(modified, null, config)}
+        />
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities &&

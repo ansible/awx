@@ -13,6 +13,7 @@ import {
 import styled from 'styled-components';
 import { Schedule } from 'types';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { DetailList, Detail } from '../../DetailList';
 import { ActionsTd, ActionItem, TdBreakWord } from '../../PaginatedTable';
 import { ScheduleToggle } from '..';
@@ -30,6 +31,7 @@ function ScheduleListItem({
   isMissingInventory,
   isMissingSurvey,
 }) {
+  const config = useConfig();
   const labelId = `check-action-${schedule.id}`;
 
   const jobTypeLabels = {
@@ -120,7 +122,11 @@ function ScheduleListItem({
           <DetailList stacked>
             <Detail
               label={t`Next Run`}
-              value={formatDateString(schedule.next_run, schedule.timezone)}
+              value={formatDateString(
+                schedule.next_run,
+                schedule.timezone,
+                config
+              )}
             />
           </DetailList>
         )}

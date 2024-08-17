@@ -10,6 +10,7 @@ import {
   Modal,
 } from '@patternfly/react-core';
 import { formatDateString } from 'util/dates';
+import { useConfig } from 'contexts/Config';
 import { Detail, DetailList } from 'components/DetailList';
 import UserTokenAdd from '../UserTokenAdd';
 import UserTokenList from '../UserTokenList';
@@ -20,6 +21,7 @@ const TokenAlert = styled(Alert)`
 `;
 
 function UserTokens({ setBreadcrumb, user }) {
+  const config = useConfig();
   const [tokenModalSource, setTokenModalSource] = useState(null);
   const { id } = useParams();
 
@@ -87,7 +89,7 @@ function UserTokens({ setBreadcrumb, user }) {
             )}
             <Detail
               label={t`Expires`}
-              value={formatDateString(tokenModalSource.expires)}
+              value={formatDateString(tokenModalSource.expires, null, config)}
             />
           </DetailList>
         </Modal>

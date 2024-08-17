@@ -26,6 +26,7 @@ import useSelected from 'hooks/useSelected';
 import ErrorDetail from 'components/ErrorDetail';
 import ContentEmpty from 'components/ContentEmpty';
 import ContentLoading from 'components/ContentLoading';
+import { useConfig } from 'contexts/Config';
 
 function SubscriptionModal({
   subscriptionCreds = {},
@@ -33,6 +34,7 @@ function SubscriptionModal({
   onClose,
   onConfirm,
 }) {
+  const config = useConfig();
   const {
     isLoading,
     error,
@@ -172,7 +174,8 @@ function SubscriptionModal({
                 <Td dataLabel={t`Expires`} modifier="nowrap">
                   {formatDateString(
                     new Date(subscription.license_date * 1000).toISOString(),
-                    'UTC'
+                    'UTC',
+                    config
                   )}
                 </Td>
               </Tr>
