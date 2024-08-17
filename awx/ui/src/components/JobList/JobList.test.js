@@ -448,7 +448,7 @@ describe('<JobList />', () => {
     jest.restoreAllMocks();
   });
 
-  test('error is shown when job not successfully cancelled', async () => {
+  test('error is shown when job not successfully canceled', async () => {
     JobsAPI.cancel.mockImplementation(() => {
       throw new Error({
         response: {
