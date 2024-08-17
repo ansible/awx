@@ -203,6 +203,19 @@ function LoggingEdit() {
                     config={logging.API_400_ERROR_LOG_FORMAT}
                   />
                 </FormFullWidthLayout>
+                <BooleanField
+                  name="LOG_AGGREGATOR_OMHTTP_BATCH_ENABLED"
+                  config={logging.LOG_AGGREGATOR_OMHTTP_BATCH_ENABLED}
+                />
+                <InputField
+                  name="LOG_AGGREGATOR_OMHTTP_BATCH_MAXSIZE"
+                  config={logging.LOG_AGGREGATOR_OMHTTP_BATCH_MAXSIZE}
+                  type="number"
+                />
+                <ChoiceField
+                  name="LOG_AGGREGATOR_OMHTTP_BATCH_FORMAT"
+                  config={logging.LOG_AGGREGATOR_OMHTTP_BATCH_FORMAT}
+                />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
                 <RevertFormActionGroup
