@@ -91,7 +91,7 @@ function HostDetail({ host }) {
         />
         <VariablesDetail
           label={t`Variables`}
-          rows={4}
+          rows={12}
           value={variables}
           name="variables"
           dataCy="host-detail-variables"
