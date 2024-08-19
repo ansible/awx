@@ -4,10 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    dependencies = [
-        ('main', '0190_alter_inventorysource_source_and_more'),
-        ('dab_rbac', '__first__'),
-    ]
+    dependencies = [('main', '0190_alter_inventorysource_source_and_more')]
+    # This run_before list is the same as dependencies for 192
+    # so this enforces a very strict ordering, which is good, so DAB post_migrate logic
+    # will never run before these model Meta changes
+    # This also zeros out these DAB apps in the case that you migrate to 190, before DAB RBAC
+    run_before = [('dab_rbac', '__first__'), ('dab_resource_registry', '__first__')]
 
     operations = [
         # Add custom permissions for all special actions, like update, use, adhoc, and so on

@@ -6,10 +6,7 @@ from awx.main.migrations._dab_rbac import migrate_to_new_rbac, create_permission
 
 
 class Migration(migrations.Migration):
-    dependencies = [
-        ('main', '0191_add_django_permissions'),
-        ('dab_rbac', '__first__'),
-    ]
+    dependencies = [('main', '0191_add_django_permissions'), ('dab_rbac', '__first__'), ('dab_resource_registry', '__first__')]
 
     operations = [
         # make sure permissions and content types have been created by now
