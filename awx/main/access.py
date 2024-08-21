@@ -242,9 +242,14 @@ class BaseAccess(object):
         return qs
 
     def filtered_queryset(self):
-        # Override in subclasses
-        # filter objects according to user's read access
-        return self.model.objects.none()
+        if permission_registry.is_registered(self.model):
+            return self.model.access_qs(self.user, 'view')
+        elif self.user.is_superuser:
+            return self.model.objects.all()
+        else:
+            # models not tracked in DAB RBAC - Override in subclasses
+            # filter objects according to user's read access
+            return self.model.none()
 
     def can_read(self, obj):
         return bool(obj and self.get_queryset().filter(pk=obj.pk).exists())
