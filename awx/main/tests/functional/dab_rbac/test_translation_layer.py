@@ -192,3 +192,24 @@ def test_user_auditor_rel(organization, rando, setup_managed_roles):
     audit_rd = RoleDefinition.objects.get(name='Organization Audit')
     audit_rd.give_permission(rando, organization)
     assert list(rando.auditor_of_organizations) == [organization]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('resource_name', ['Organization', 'Team'])
+@pytest.mark.parametrize('role_name', ['Member', 'Admin'])
+def test_role_from_controller_organization_and_team_roles(organization, team, rando, role_name, resource_name, setup_managed_roles):
+    """
+    ensure mappings for controller roles are correct
+    e.g.
+    Controller Organization Member > organizaiton.member_role
+    Controller Organization Admin > organizaiton.admin_role
+    Controller Team Member > team.member_role
+    Controller Team Admin > team.admin_role
+    """
+    resource = organization if resource_name == 'Organization' else team
+    old_role_name = f"{role_name.lower()}_role"
+    getattr(resource, old_role_name).members.add(rando)
+    assignment = RoleUserAssignment.objects.get(user=rando)
+    assert assignment.role_definition.name == f'Controller {resource_name} {role_name}'
+    old_role = get_role_from_object_role(assignment.object_role)
+    assert old_role.id == getattr(resource, old_role_name).id

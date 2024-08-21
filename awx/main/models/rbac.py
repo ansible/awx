@@ -598,6 +598,12 @@ def get_role_from_object_role(object_role):
         model_name, role_name, _ = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
+    elif rd.name.startswith('Controller') and rd.name.endswith(' Admin'):
+        # Controller Organization Admin and Controller Team Admin
+        role_name = 'admin_role'
+    elif rd.name.startswith('Controller') and rd.name.endswith(' Member'):
+        # Controller Organization Member and Controller Team Member
+        role_name = 'member_role'
     elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
         # cases like "Organization Project Admin"
         model_name, target_model_name, role_name = rd.name.split()
