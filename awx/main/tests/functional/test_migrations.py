@@ -73,11 +73,16 @@ class TestMigrationSmoke:
     def test_migrate_DAB_RBAC(self, migrator):
         old_state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
         Organization = old_state.apps.get_model('main', 'Organization')
+        Team = old_state.apps.get_model('main', 'Team')
         User = old_state.apps.get_model('auth', 'User')
 
         org = Organization.objects.create(name='arbitrary-org', created=now(), modified=now())
         user = User.objects.create(username='random-user')
         org.read_role.members.add(user)
+        org.member_role.members.add(user)
+
+        team = Team.objects.create(name='arbitrary-team', organization=org)
+        team.member_role.members.add(user)
 
         new_state = migrator.apply_tested_migration(
             ('main', '0192_custom_roles'),
@@ -85,6 +90,8 @@ class TestMigrationSmoke:
 
         RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
         assert RoleUserAssignment.objects.filter(user=user.id, object_id=org.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Controller Organization Member', object_id=org.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Controller Team Member', object_id=team.id).exists()
 
         # Regression testing for bug that comes from current vs past models mismatch
         RoleDefinition = new_state.apps.get_model('dab_rbac', 'RoleDefinition')
