@@ -46,9 +46,9 @@ def test_controller_specific_roles_have_correct_permissions(setup_managed_roles)
 @pytest.mark.django_db
 @pytest.mark.parametrize('resource_name', ['Team', 'Organization'])
 @pytest.mark.parametrize('action', ['Member', 'Admin'])
-def test_old_RBAC_uses_controller_specific_roles(setup_managed_roles, resource_name, action, team, bob, organization):
+def test_legacy_RBAC_uses_controller_specific_roles(setup_managed_roles, resource_name, action, team, bob, organization):
     '''
-    Assignment to old RBAC roles should use controller specific role definitions
+    Assignment to legacy RBAC roles should use controller specific role definitions
     e.g. Controller Team Admin, Controller Team Member, Controller Organization Member, Controller Organization Admin
     '''
     if resource_name == 'Team':

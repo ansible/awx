@@ -10,6 +10,9 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
+# DRF
+from rest_framework.serializers import ValidationError as DRFValidationError
+
 # django-ansible-base
 from ansible_base.resource_registry.fields import AnsibleResourceField
 
@@ -123,6 +126,10 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(organization=self)
 
+    def validate_role_assignment(self, actor, role_definition):
+        if role_definition.name in ['Organization Admin', 'Organization Member']:
+            raise DRFValidationError({'detail': _(f"Assignment must use the Controller {role_definition.name} role.")})
+
 
 class OrganizationGalaxyCredentialMembership(models.Model):
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
@@ -165,6 +172,10 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self, request=None):
         return reverse('api:team_detail', kwargs={'pk': self.pk}, request=request)
+
+    def validate_role_assignment(self, actor, role_definition):
+        if role_definition.name in ['Team Admin', 'Team Member']:
+            raise DRFValidationError({'detail': _(f"Assignment must use the Controller {role_definition.name} role.")})
 
 
 class Profile(CreatedModifiedModel):

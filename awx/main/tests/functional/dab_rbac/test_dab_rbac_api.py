@@ -1,4 +1,5 @@
 import pytest
+from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse as django_reverse
@@ -150,7 +151,70 @@ def test_assign_credential_to_user_of_another_org(setup_managed_roles, credentia
 @pytest.mark.django_db
 @override_settings(ALLOW_LOCAL_RESOURCE_MANAGEMENT=False)
 def test_team_member_role_not_assignable(team, rando, post, admin_user, setup_managed_roles):
-    member_rd = RoleDefinition.objects.get(name='Organization Member')
+    with mock.patch('awx.main.models.organization.Organization.validate_role_assignment') as mock_validate:
+        member_rd = RoleDefinition.objects.get(name='Organization Member')
+        url = django_reverse('roleuserassignment-list')
+        r = post(url, data={'object_id': team.id, 'role_definition': member_rd.id, 'user': rando.id}, user=admin_user, expect=400)
+        assert 'Not managed locally' in str(r.data)
+
+
+@pytest.mark.django_db
+def test_adding_user_to_org_member_role(setup_managed_roles, organization, admin, bob, post, get):
+    '''
+    Adding user to organization member role via the legacy RBAC endpoints
+    should give them access to the organization detail
+    '''
+    url_org_detail = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    get(url_org_detail, user=bob, expect=403)
+
+    role = organization.member_role
+    url = reverse('api:role_users_list', kwargs={'pk': role.id})
+    post(url, data={'id': bob.id}, user=admin, expect=204)
+
+    get(url_org_detail, user=bob, expect=200)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('actor', ['user', 'team'])
+@pytest.mark.parametrize('role_name', ['Organization Admin', 'Organization Member', 'Team Admin', 'Team Member'])
+def test_prevent_adding_actor_to_platform_roles(setup_managed_roles, role_name, actor, organization, team, admin, bob, post):
+    '''
+    Prevent user or team from being added to platform-level roles
+    '''
+    rd = RoleDefinition.objects.get(name=role_name)
+    endpoint = 'roleuserassignment-list' if actor == 'user' else 'roleteamassignment-list'
+    url = django_reverse(endpoint)
+    object_id = team.id if 'Team' in role_name else organization.id
+    data = {'object_id': object_id, 'role_definition': rd.id}
+    actor_id = bob.id if actor == 'user' else team.id
+    data[actor] = actor_id
+    r = post(url, data=data, user=admin, expect=400)
+    assert f'Assignment must use the Controller {role_name} role' in str(r.data)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('role_name', ['Controller Team Admin', 'Controller Team Member'])
+def test_adding_user_to_controller_team_roles(setup_managed_roles, role_name, team, admin, bob, post, get):
+    '''
+    Allow user to be added to Controller Team Admin or Controller Team Member
+    '''
+    rd = RoleDefinition.objects.get(name=role_name)
     url = django_reverse('roleuserassignment-list')
-    r = post(url, data={'object_id': team.id, 'role_definition': member_rd.id, 'user': rando.id}, user=admin_user, expect=400)
-    assert 'Not managed locally' in str(r.data)
+    post(url, data={'object_id': team.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
+
+    url = reverse('api:team_detail', kwargs={'pk': team.id})
+    get(url, user=bob, expect=200)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('role_name', ['Controller Organization Admin', 'Controller Organization Member'])
+def test_adding_user_to_controller_organization_roles(setup_managed_roles, role_name, organization, admin, bob, post, get):
+    '''
+    Allow user to be added to Controller Organization Admin or Controller Organization Member
+    '''
+    rd = RoleDefinition.objects.get(name=role_name)
+    url = django_reverse('roleuserassignment-list')
+    post(url, data={'object_id': organization.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
+
+    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    get(url, user=bob, expect=200)
