@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
 from django.utils.encoding import force_str
+from django.http import HttpResponse
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -316,7 +317,13 @@ class SAMLAuth(BaseSAMLAuth):
             ]
         ):
             return None
-        user = super(SAMLAuth, self).authenticate(request, *args, **kwargs)
+        pipeline_result = super(SAMLAuth, self).authenticate(request, *args, **kwargs)
+
+        if isinstance(pipeline_result, HttpResponse):
+            return pipeline_result
+        else:
+            user = pipeline_result
+
         # Comes from https://github.com/omab/python-social-auth/blob/v0.2.21/social/backends/base.py#L91
         if getattr(user, 'is_new', False):
             enterprise_auth = _decorate_enterprise_user(user, 'saml')
