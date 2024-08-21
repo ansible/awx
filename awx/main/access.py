@@ -1389,7 +1389,7 @@ class ExecutionEnvironmentAccess(BaseAccess):
 
     def filtered_queryset(self):
         return ExecutionEnvironment.objects.filter(
-            Q(organization__in=Organization.access_qs(self.user, 'view'))
+            Q(organization__in=Organization.access_ids_qs(self.user, 'view'))
             | Q(organization__isnull=True)
             | Q(id__in=ExecutionEnvironment.access_ids_qs(self.user, 'change'))
         ).distinct()
