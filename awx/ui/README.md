@@ -1,6 +1,6 @@
-# Instruction to build ui_next directly from this directory
+# Instruction to build ui directly from this directory
 
-## Set src of the ui_next repo
+## Set src of the ui repo
 
 ### Via GIT
 
@@ -25,7 +25,7 @@ export UI_GIT_BRANCH=main
 NOTE: UI_LOCAL have higher precedence than UI_GIT_REPO, if UI_LOCAL is set, UI_GIT_REPO will be ignored.
 
 ```bash
-export UI_LOCAL = /path/to/your/ui_next
+export UI_LOCAL = /path/to/your/ui
 ```
 
 ## Build
