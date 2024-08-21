@@ -162,14 +162,14 @@ def test_adding_user_to_org_member_role(setup_managed_roles, organization, admin
     Adding user to organization member role via the legacy RBAC endpoints
     should give them access to the organization detail
     '''
-    url_org_detail = reverse('api:organization_detail', kwargs={'pk': organization.id})
-    get(url_org_detail, user=bob, expect=403)
+    url_detail = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    get(url_detail, user=bob, expect=403)
 
     role = organization.member_role
     url = reverse('api:role_users_list', kwargs={'pk': role.id})
     post(url, data={'id': bob.id}, user=admin, expect=204)
 
-    get(url_org_detail, user=bob, expect=200)
+    get(url_detail, user=bob, expect=200)
 
 
 @pytest.mark.django_db
@@ -196,12 +196,14 @@ def test_adding_user_to_controller_team_roles(setup_managed_roles, role_name, te
     '''
     Allow user to be added to Controller Team Admin or Controller Team Member
     '''
+    url_detail = reverse('api:team_detail', kwargs={'pk': team.id})
+    get(url_detail, user=bob, expect=403)
+
     rd = RoleDefinition.objects.get(name=role_name)
     url = django_reverse('roleuserassignment-list')
     post(url, data={'object_id': team.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
 
-    url = reverse('api:team_detail', kwargs={'pk': team.id})
-    get(url, user=bob, expect=200)
+    get(url_detail, user=bob, expect=200)
 
 
 @pytest.mark.django_db
@@ -210,9 +212,11 @@ def test_adding_user_to_controller_organization_roles(setup_managed_roles, role_
     '''
     Allow user to be added to Controller Organization Admin or Controller Organization Member
     '''
+    url_detail = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    get(url_detail, user=bob, expect=403)
+
     rd = RoleDefinition.objects.get(name=role_name)
     url = django_reverse('roleuserassignment-list')
     post(url, data={'object_id': organization.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
 
-    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     get(url, user=bob, expect=200)
