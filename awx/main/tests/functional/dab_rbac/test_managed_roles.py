@@ -51,10 +51,7 @@ def test_legacy_RBAC_uses_controller_specific_roles(setup_managed_roles, resourc
     Assignment to legacy RBAC roles should use controller specific role definitions
     e.g. Controller Team Admin, Controller Team Member, Controller Organization Member, Controller Organization Admin
     '''
-    if resource_name == 'Team':
-        resource = team
-    else:
-        resource = organization
+    resource = team if resource_name == 'Team' else organization
     if action == 'Member':
         resource.member_role.members.add(bob)
     else:
