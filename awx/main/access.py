@@ -245,7 +245,7 @@ class BaseAccess(object):
         if permission_registry.is_registered(self.model):
             return self.model.access_qs(self.user, 'view')
         else:
-            raise NotImplemented('Filtered queryset for model is not written')
+            raise NotImplementedError('Filtered queryset for model is not written')
 
     def can_read(self, obj):
         return bool(obj and self.get_queryset().filter(pk=obj.pk).exists())
@@ -606,9 +606,6 @@ class InstanceGroupAccess(BaseAccess):
 
     model = InstanceGroup
     prefetch_related = ('instances',)
-
-    def filtered_queryset(self):
-        return self.model.access_qs(self.user, 'view')
 
     @check_superuser
     def can_use(self, obj):
@@ -1449,9 +1446,6 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
     prefetch_related = ('modified_by', 'created_by', 'organization', 'last_job', 'current_job')
     notification_attach_roles = ['admin_role']
 
-    def filtered_queryset(self):
-        return self.model.access_qs(self.user, 'view')
-
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
@@ -2075,9 +2069,6 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
         'execute_role',
         'read_role',
     )
-
-    def filtered_queryset(self):
-        return self.model.access_qs(self.user, 'view')
 
     @check_superuser
     def can_add(self, data):
