@@ -45,7 +45,7 @@ function ReLaunchDropDown({
       }}
       isDisabled={isLaunching}
     >
-      {t`All`}
+      {t`All hosts`}
     </DropdownItem>,
 
     <DropdownItem
