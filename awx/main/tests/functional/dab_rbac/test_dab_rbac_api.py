@@ -148,6 +148,7 @@ def test_assign_credential_to_user_of_another_org(setup_managed_roles, credentia
 
 
 @pytest.mark.django_db
+@pytest.mark.skip(reason='The pattern for disabling JWT role assignments will change in https://github.com/ansible/django-ansible-base/pull/562')
 @override_settings(ALLOW_LOCAL_RESOURCE_MANAGEMENT=False)
 def test_team_member_role_not_assignable(team, rando, post, admin_user, setup_managed_roles):
     member_rd = RoleDefinition.objects.get(name='Organization Member')
