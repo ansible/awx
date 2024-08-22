@@ -3,13 +3,13 @@ import { en, fr, es, ko, nl, ja, zh, zu } from 'make-plural/plurals';
 
 export const locales = {
   en: 'English',
-  ja: 'Japanese',
+  ja: '日本語',
   zu: 'Zulu',
-  fr: 'French',
-  es: 'Spanish',
-  ko: 'Korean',
-  zh: 'Chinese',
-  nl: 'Dutch',
+  fr: 'Français',
+  es: 'Español',
+  ko: '한국어',
+  zh: '中文',
+  nl: 'Nederlands',
 };
 
 i18n.loadLocaleData({

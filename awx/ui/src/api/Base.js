@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { encodeQueryString } from 'util/qs';
 import debounce from 'util/debounce';
-import { SESSION_TIMEOUT_KEY } from '../constants';
+import { SESSION_TIMEOUT_KEY, SESSION_LANG_KEY } from '../constants';
 
 const updateStorage = debounce((key, val) => {
   window.localStorage.setItem(key, val);
@@ -15,6 +15,14 @@ const defaultHttp = axios.create({
   paramsSerializer(params) {
     return encodeQueryString(params);
   },
+});
+
+defaultHttp.interceptors.request.use((config) => {
+  const language = window.localStorage.getItem(SESSION_LANG_KEY);
+  if (language) {
+    config.headers['Accept-Language'] = language;
+  }
+  return config;
 });
 
 defaultHttp.interceptors.response.use((response) => {

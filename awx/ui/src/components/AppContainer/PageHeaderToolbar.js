@@ -22,6 +22,7 @@ import useRequest from 'hooks/useRequest';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { useConfig } from 'contexts/Config';
 import useWsPendingApprovalCount from './useWsPendingApprovalCount';
+import LanguageFilter from '../LanguageFilter/LanguageFilter';
 
 const PendingWorkflowApprovals = styled.div`
   display: flex;
@@ -90,6 +91,9 @@ function PageHeaderToolbar({
             </Link>
           </PageHeaderToolsItem>
         </Tooltip>
+        <PageHeaderToolsItem>
+          <LanguageFilter />
+        </PageHeaderToolsItem>
         <PageHeaderToolsItem>
           <Dropdown
             isPlain
