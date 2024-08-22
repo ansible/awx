@@ -70,7 +70,7 @@ jobs:
 
       - name: Prebuild new UI for awx image (to speed up build process)
         run: |
-          make ui-next
+          make ui
         if: matrix.build-targets.image-name == 'awx'
 
       - name: Build and push AWX devel images

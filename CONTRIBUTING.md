@@ -126,7 +126,7 @@ If it has someone assigned to it then that person is the person responsible for 
 
 > If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
-> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](./awx/ui/README.md).
+> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](https://github.com/ansible/ansible-ui/blob/main/CONTRIBUTING.md).
 
 ### Translations
 
@@ -143,10 +143,8 @@ Here are a few things you can do to help the visibility of your change, and incr
 
 - No issues when running linters/code checkers
   - Python: black: `(container)/awx_devel$ make black`
-  - Javascript: `(container)/awx_devel$ make ui-lint`
 - No issues from unit tests
   - Python: py.test: `(container)/awx_devel$ make test`
-  - JavaScript: `(container)/awx_devel$ make ui-test`
 - Write tests for new functionality, update/add tests for bug fixes
 - Make the smallest change possible
 - Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
