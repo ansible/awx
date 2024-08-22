@@ -11,9 +11,9 @@ aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.6.0
     # via pydantic
-    # via -r /awx_devel/requirements/requirements_git.txt
-ansiconv==1.0.0
+ansi2html==1.9.2
     # via -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements_git.txt
 asciichartpy==1.5.25
     # via -r /awx_devel/requirements/requirements.in
 asgiref==3.7.2
