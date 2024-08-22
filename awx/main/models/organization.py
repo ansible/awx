@@ -126,10 +126,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(organization=self)
 
-    def validate_role_assignment(self, actor, role_definition):
-        if role_definition.name in ['Organization Admin', 'Organization Member']:
-            raise DRFValidationError({'detail': _(f"Assignment must use the Controller {role_definition.name} role.")})
-
 
 class OrganizationGalaxyCredentialMembership(models.Model):
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
@@ -172,10 +168,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self, request=None):
         return reverse('api:team_detail', kwargs={'pk': self.pk}, request=request)
-
-    def validate_role_assignment(self, actor, role_definition):
-        if role_definition.name in ['Team Admin', 'Team Member']:
-            raise DRFValidationError({'detail': _(f"Assignment must use the Controller {role_definition.name} role.")})
 
 
 class Profile(CreatedModifiedModel):
