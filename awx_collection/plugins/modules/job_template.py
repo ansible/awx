@@ -315,6 +315,10 @@ options:
       description:
         - Prevent falling back to instance groups set on the associated inventory or organization
       type: bool
+    job_name_template:
+      description:
+        - A Jinja2 template to be used as a the name of the job when launching the template
+      type: str
 
 extends_documentation_fragment: awx.awx.auth
 
@@ -443,6 +447,7 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type="bool"),
+        job_name_template=dict(),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
@@ -542,6 +547,7 @@ def main():
         'job_slice_count',
         'webhook_service',
         'prevent_instance_group_fallback',
+        'job_name_template',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

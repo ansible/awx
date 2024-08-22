@@ -58,6 +58,7 @@ describe('<JobTemplateForm />', () => {
     webhook_service: 'github',
     webhook_credential: 7,
     host_config_key: '',
+    job_name_template: 'This is a test for {{ job.id }}',
   };
   const mockInstanceGroups = [
     {
@@ -212,6 +213,12 @@ describe('<JobTemplateForm />', () => {
         name: 'project',
         allow_override: true,
       });
+      wrapper.find('input#template-job_name_template').simulate('change', {
+        target: {
+          value: 'New Job Name {{ job.id }}',
+          name: 'job_name_template',
+        },
+      });
     });
     wrapper.update();
     await act(async () => {
@@ -274,6 +281,9 @@ describe('<JobTemplateForm />', () => {
         name: 'Bar',
       },
     ]);
+    expect(
+      wrapper.find('input#template-job_name_template').prop('value')
+    ).toEqual('New Job Name {{ job.id }}');
   });
 
   test('webhooks and enable concurrent jobs functions properly', async () => {

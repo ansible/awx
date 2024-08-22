@@ -54,6 +54,7 @@ from awx.main.utils.common import (
     get_capacity_type,
 )
 from awx.main.utils.encryption import encrypt_dict, decrypt_field
+from awx.main.utils.formatters import Jinja2UndefinedFormatter
 from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -180,6 +181,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     )
     labels = models.ManyToManyField("Label", blank=True, related_name='%(class)s_labels')
     instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='UnifiedJobTemplateInstanceGroupMembership')
+    job_name_template = models.TextField(
+        blank=True,
+        null=True,
+        editable=True,
+        help_text=_('Jinja template for the name of the job launched from the template.'),
+    )
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
@@ -450,6 +457,25 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         if unified_job.__class__ in activity_stream_registrar.models:
             activity_stream_create(None, unified_job, True)
         unified_job.log_lifecycle("created")
+
+        if parent_field_name:
+            job_name_template = getattr(getattr(unified_job, parent_field_name), 'job_name_template', None)
+            if job_name_template:
+                from jinja2 import Environment
+                from jinja2.exceptions import TemplateSyntaxError
+
+                j2_environment = Environment(undefined=Jinja2UndefinedFormatter)
+                extra_vars = json.loads(getattr(unified_job, 'extra_vars', {}))
+                try:
+                    j2_template = j2_environment.from_string(job_name_template)
+                    unified_job.name = j2_template.render({'job': unified_job, 'extra_vars': extra_vars})
+                    unified_job.save()
+                except TemplateSyntaxError:
+                    # The serializer should prevent this from happening so this is a CYA
+                    logger.error(f'Invalid job_name_template for job {unified_job.id}: {job_name_template}, using default name')
+                # We should figure out if this is a valid condition, a missing variable renders as "" by default.
+                except Exception as e:
+                    logger.error(f'Unable to render job name for job {unified_job.id} with template: {job_name_template}: {e}')
 
         return unified_job
 

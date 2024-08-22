@@ -188,6 +188,13 @@ function WorkflowJobTemplateForm({
             aria-label={t`source control branch`}
           />
         </FieldWithPrompt>
+        <FormField
+          id="wfjt-job_name_template"
+          name="job_name_template"
+          type="text"
+          label={t`Job Name Template`}
+          tooltip={helpText.jobNameTemplate}
+        />
       </FormColumnLayout>
       <FormFullWidthLayout>
         <FieldWithPrompt
@@ -296,6 +303,7 @@ WorkflowJobTemplateForm.defaultProps = {
     description: '',
     inventory: undefined,
     project: undefined,
+    job_name_template: '',
   },
   isOrgAdmin: false,
   isInventoryDisabled: false,
@@ -328,6 +336,7 @@ const FormikApp = withFormik({
         ? `${urlOrigin}${template.related.webhook_receiver}`
         : '',
       webhook_key: template.webhook_key || '',
+      job_name_template: template.job_name_template || '',
     };
   },
   handleSubmit: async (values, { props, setErrors }) => {

@@ -13,6 +13,9 @@ from django.utils.timezone import now
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 
+from jinja2 import Undefined
+from jinja2.utils import missing, object_type_repr
+
 
 class TimeFormatter(logging.Formatter):
     """
@@ -277,3 +280,23 @@ class LogstashFormatter(LogstashFormatterBase):
             # The event receiver wont scan an event for a timestamp field therefore a time field must also be supplied containing epoch timestamp
             message = {'time': record.created, 'event': message}
         return self.serialize(message)
+
+
+class Jinja2UndefinedFormatter(Undefined):
+    """
+    When used as the undefined class for a j2 environment this will replace how J2 handles undefined variables
+    By default it attempts to just use empty string
+    With this class it will attempt to inject a message about the missing variable like:
+       ('asdf' is undefined)
+       or
+       ('dict object' has no attribute 'thing')
+
+    This is done by simply overriding the __str__ method from the default Undefined class
+    """
+
+    def __str__(self) -> str:
+        if self._undefined_obj is missing:
+            return f"({self._undefined_name!r} is undefined)"
+        if not isinstance(self._undefined_name, str):
+            return f"({object_type_repr(self._undefined_obj)} has no" f" element {self._undefined_name!r})"
+        return f"({object_type_repr(self._undefined_obj)!r} has no" f" attribute {self._undefined_name!r})"
