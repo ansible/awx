@@ -197,12 +197,12 @@ def test_user_auditor_rel(organization, rando, setup_managed_roles):
 @pytest.mark.django_db
 @pytest.mark.parametrize('resource_name', ['Organization', 'Team'])
 @pytest.mark.parametrize('role_name', ['Member', 'Admin'])
-def test_role_from_controller_organization_and_team_roles(organization, team, rando, role_name, resource_name, setup_managed_roles):
+def test_mapping_from_controller_role_definitions_to_roles(organization, team, rando, role_name, resource_name, setup_managed_roles):
     """
     ensure mappings for controller roles are correct
     e.g.
-    Controller Organization Member > organizaiton.member_role
-    Controller Organization Admin > organizaiton.admin_role
+    Controller Organization Member > organization.member_role
+    Controller Organization Admin > organization.admin_role
     Controller Team Member > team.member_role
     Controller Team Admin > team.admin_role
     """
