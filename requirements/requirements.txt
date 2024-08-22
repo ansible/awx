@@ -150,7 +150,7 @@ django-crum==0.7.9
     #   django-ansible-base
 django-extensions==3.2.3
     # via -r /awx_devel/requirements/requirements.in
-django-guid==3.2.1
+django-guid==3.5.0
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.7.1
     # via -r /awx_devel/requirements/requirements.in
@@ -162,7 +162,7 @@ django-radius==1.5.1
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.2.0
     # via -r /awx_devel/requirements/requirements.in
-django-split-settings==1.0.0
+django-split-settings==1.3.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base

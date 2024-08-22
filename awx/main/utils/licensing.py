@@ -450,7 +450,12 @@ class Licenser(object):
         if first_host:
             automated_since = int(first_host.first_automation.timestamp())
         else:
-            automated_since = int(Instance.objects.order_by('id').first().created.timestamp())
+            try:
+                automated_since = int(Instance.objects.order_by('id').first().created.timestamp())
+            except AttributeError:
+                # In the odd scenario that create_preload_data was not run, there are no hosts
+                # Then we CAN end up here before any instance has registered
+                automated_since = int(time.time())
         instance_count = int(attrs.get('instance_count', 0))
         attrs['current_instances'] = current_instances
         attrs['automated_instances'] = automated_instances
