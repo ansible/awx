@@ -81,7 +81,7 @@ class TestMigrationSmoke:
         org.read_role.members.add(user)
         org.member_role.members.add(user)
 
-        team = Team.objects.create(name='arbitrary-team', organization=org)
+        team = Team.objects.create(name='arbitrary-team', organization=org, created=now(), modified=now())
         team.member_role.members.add(user)
 
         new_state = migrator.apply_tested_migration(
