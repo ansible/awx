@@ -10,9 +10,6 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
-# DRF
-from rest_framework.serializers import ValidationError as DRFValidationError
-
 # django-ansible-base
 from ansible_base.resource_registry.fields import AnsibleResourceField
 
