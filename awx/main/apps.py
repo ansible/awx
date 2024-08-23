@@ -1,12 +1,21 @@
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
+from django.core.management.base import CommandError
+from django.db.models.signals import pre_migrate
+
 from awx.main.utils.named_url_graph import _customize_graph, generate_graph
+from awx.main.utils.db import db_requirement_violations
 from awx.conf import register, fields
 
 
 class MainConfig(AppConfig):
     name = 'awx.main'
     verbose_name = _('Main')
+
+    def check_db_requirement(self, *args, **kwargs):
+        violations = db_requirement_violations()
+        if violations:
+            raise CommandError(violations)
 
     def load_named_url_feature(self):
         models = [m for m in self.get_models() if hasattr(m, 'get_absolute_url')]
@@ -38,3 +47,4 @@ class MainConfig(AppConfig):
         super().ready()
 
         self.load_named_url_feature()
+        pre_migrate.connect(self.check_db_requirement, sender=self)
