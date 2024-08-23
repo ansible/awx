@@ -38,7 +38,6 @@ from awx.main.models import (
     InventorySource,
     Job,
     JobHostSummary,
-    JobTemplate,
     OAuth2AccessToken,
     Organization,
     Project,
@@ -58,10 +57,7 @@ from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
-from awx.main.fields import (
-    is_implicit_parent,
-    update_role_parentage_for_instance,
-)
+from awx.main.fields import is_implicit_parent
 
 from awx.main import consumers
 
@@ -194,31 +190,6 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
             label.delete()
 
 
-def save_related_job_templates(sender, instance, **kwargs):
-    """save_related_job_templates loops through all of the
-    job templates that use an Inventory that have had their
-    Organization updated. This triggers the rebuilding of the RBAC hierarchy
-    and ensures the proper access restrictions.
-    """
-    if sender is not Inventory:
-        raise ValueError('This signal callback is only intended for use with Project or Inventory')
-
-    update_fields = kwargs.get('update_fields', None)
-    if (update_fields and not ('organization' in update_fields or 'organization_id' in update_fields)) or kwargs.get('created', False):
-        return
-
-    if instance._prior_values_store.get('organization_id') != instance.organization_id:
-        jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
-        for jt in jtq:
-            parents_added, parents_removed = update_role_parentage_for_instance(jt)
-            if parents_added or parents_removed:
-                logger.info(
-                    'Permissions on JT {} changed due to inventory {} organization change from {} to {}.'.format(
-                        jt.pk, instance.pk, instance._prior_values_store.get('organization_id'), instance.organization_id
-                    )
-                )
-
-
 def connect_computed_field_signals():
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -232,7 +203,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-post_save.connect(save_related_job_templates, sender=Inventory)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
