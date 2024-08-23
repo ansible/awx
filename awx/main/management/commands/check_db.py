@@ -11,7 +11,7 @@ class Command(BaseCommand):
     """Checks connection to the database, and prints out connection info if not connected"""
 
     def handle(self, *args, **options):
-        if connection.vendor == 'postgres':
+        if connection.vendor == 'postgresql':
 
             with connection.cursor() as cursor:
                 cursor.execute("SELECT version()")
