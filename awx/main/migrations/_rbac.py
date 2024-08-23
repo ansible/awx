@@ -238,9 +238,9 @@ def restore_inventory_admins_backward(apps, schema_editor):
 
 def rebuild_role_hierarchy(apps, schema_editor):
     """Not used after DAB RBAC migration"""
-    return
+    pass
 
 
 def rebuild_role_parentage(apps, schema_editor, models=None):
     """Not used after DAB RBAC migration"""
-    return
+    pass
