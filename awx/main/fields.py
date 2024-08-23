@@ -214,28 +214,24 @@ class ImplicitRoleField(models.ForeignKey):
         Model = utils.get_current_apps().get_model('main', instance.__class__.__name__)
         latest_instance = Model.objects.get(pk=instance.pk)
 
-        # Avoid circular import
-        from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+        # Create any missing role objects
+        missing_roles = []
+        for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
+            cur_role = getattr(latest_instance, implicit_role_field.name, None)
+            if cur_role is None:
+                missing_roles.append(Role_(role_field=implicit_role_field.name, content_type_id=ct_id, object_id=latest_instance.id))
 
-        with batch_role_ancestor_rebuilding():
-            # Create any missing role objects
-            missing_roles = []
-            for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
-                cur_role = getattr(latest_instance, implicit_role_field.name, None)
-                if cur_role is None:
-                    missing_roles.append(Role_(role_field=implicit_role_field.name, content_type_id=ct_id, object_id=latest_instance.id))
+        if len(missing_roles) > 0:
+            Role_.objects.bulk_create(missing_roles)
+            updates = {}
+            role_ids = []
+            for role in Role_.objects.filter(content_type_id=ct_id, object_id=latest_instance.id):
+                setattr(latest_instance, role.role_field, role)
+                updates[role.role_field] = role.id
+                role_ids.append(role.id)
+            type(latest_instance).objects.filter(pk=latest_instance.pk).update(**updates)
 
-            if len(missing_roles) > 0:
-                Role_.objects.bulk_create(missing_roles)
-                updates = {}
-                role_ids = []
-                for role in Role_.objects.filter(content_type_id=ct_id, object_id=latest_instance.id):
-                    setattr(latest_instance, role.role_field, role)
-                    updates[role.role_field] = role.id
-                    role_ids.append(role.id)
-                type(latest_instance).objects.filter(pk=latest_instance.pk).update(**updates)
-
-            instance.refresh_from_db()
+        instance.refresh_from_db()
 
 
 class SmartFilterField(models.TextField):
