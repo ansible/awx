@@ -98,7 +98,7 @@ def test_team_can_have_permission(org_ee, ee_rd, rando, admin_user, post):
 
 
 @pytest.mark.django_db
-def test_give_object_permission_to_ee(org_ee, ee_rd, org_member, check_user_capabilities):
+def test_give_object_permission_to_ee(setup_managed_roles, org_ee, ee_rd, org_member, check_user_capabilities):
     access = ExecutionEnvironmentAccess(org_member)
     assert access.can_read(org_ee)  # by virtue of being an org member
     assert not access.can_change(org_ee, {'name': 'new'})
@@ -130,7 +130,7 @@ def test_need_related_organization_access(org_ee, ee_rd, org_member):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('style', ['new', 'old'])
-def test_give_org_permission_to_ee(org_ee, organization, org_member, check_user_capabilities, style, org_ee_rd):
+def test_give_org_permission_to_ee(setup_managed_roles, org_ee, organization, org_member, check_user_capabilities, style, org_ee_rd):
     access = ExecutionEnvironmentAccess(org_member)
     assert not access.can_change(org_ee, {'name': 'new'})
     check_user_capabilities(org_member, org_ee, {'edit': False, 'delete': False, 'copy': False})

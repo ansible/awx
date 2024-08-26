@@ -96,7 +96,7 @@ jobs:
 
       - name: Prebuild new UI for awx image (to speed up build process)
         working-directory: awx
-        run: make ui-next
+        run: make ui
 
       - name: Set build env variables
         run: |
