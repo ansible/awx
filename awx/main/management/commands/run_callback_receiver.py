@@ -2,9 +2,11 @@
 # All Rights Reserved.
 
 from django.conf import settings
-from django.core.management.base import BaseCommand
-from awx.main.analytics.subsystem_metrics import CallbackReceiverMetricsServer
+from django.core.management.base import BaseCommand, CommandError
 
+from redis.exceptions import ConnectionError
+
+from awx.main.analytics.subsystem_metrics import CallbackReceiverMetricsServer
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
 
@@ -27,7 +29,10 @@ class Command(BaseCommand):
             return
         consumer = None
 
-        CallbackReceiverMetricsServer().start()
+        try:
+            CallbackReceiverMetricsServer().start()
+        except ConnectionError as exc:
+            raise CommandError(f'Could not connect to redis, error:\n{exc}\n')
 
         try:
             consumer = AWXConsumerRedis(
