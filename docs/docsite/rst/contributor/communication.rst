@@ -31,7 +31,7 @@ For more information on the forum navigation, see `Navigating the Ansible forum 
 Matrix
 ------
 
-For real-time interactions, conversations in the Ansible AWX community happen over the Matrix protocol in the following channels:
+For real-time interactions, conversations in the AWX community happen over the Matrix protocol in the following channels:
 
 * `#awx:ansible.com <https://matrix.to/#/#awx:ansible.com>`_: AWX project-related discussions.
 * `#docs:ansible.im <https://matrix.to/#/#docs:ansible.im>`_: Ansible and AWX documentation-related discussions.
