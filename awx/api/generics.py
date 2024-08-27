@@ -826,7 +826,7 @@ class ResourceAccessList(ParentMixin, ListAPIView):
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
             ancestors = set(RoleEvaluation.objects.filter(content_type_id=content_type.id, object_id=obj.id).values_list('role_id', flat=True))
             qs = User.objects.filter(has_roles__in=ancestors) | User.objects.filter(is_superuser=True)
-            auditor_role = RoleDefinition.objects.filter(name="System Auditor").first()
+            auditor_role = RoleDefinition.objects.filter(name="Controller System Auditor").first()
             if auditor_role:
                 qs |= User.objects.filter(role_assignments__role_definition=auditor_role)
             return qs.distinct()

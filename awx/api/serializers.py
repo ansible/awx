@@ -2907,7 +2907,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     {
                         "role": {
                             "id": None,
-                            "name": _("System Auditor"),
+                            "name": _("Controller System Auditor"),
                             "description": _("Can view all aspects of the system"),
                             "user_capabilities": {"unattach": False},
                         },

@@ -2,7 +2,6 @@ import pytest
 
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse as django_reverse
-from django.test.utils import override_settings
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
@@ -148,7 +147,6 @@ def test_assign_credential_to_user_of_another_org(setup_managed_roles, credentia
 
 
 @pytest.mark.django_db
-@override_settings(ALLOW_LOCAL_ASSIGNING_JWT_ROLES=False)
 def test_team_member_role_not_assignable(team, rando, post, admin_user, setup_managed_roles):
     member_rd = RoleDefinition.objects.get(name='Organization Member')
     url = django_reverse('roleuserassignment-list')
