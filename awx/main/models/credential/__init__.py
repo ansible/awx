@@ -645,6 +645,9 @@ ManagedCredentialType(
             {'id': 'password', 'label': gettext_noop('Password'), 'type': 'string', 'secret': True},
             {'id': 'ssh_key_data', 'label': gettext_noop('SCM Private Key'), 'type': 'string', 'format': 'ssh_private_key', 'secret': True, 'multiline': True},
             {'id': 'ssh_key_unlock', 'label': gettext_noop('Private Key Passphrase'), 'type': 'string', 'secret': True},
+            {'id': 'github_app_id', 'label': gettext_noop('GitHub App ID'), 'type': 'string'},
+            {'id': 'github_app_installation_id', 'label': gettext_noop('GitHub App Installation ID'), 'type': 'string'},
+            {'id': 'github_api_url', 'label': gettext_noop('GitHub API URL'), 'type': 'string'},
         ],
     },
 )
