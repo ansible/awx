@@ -2,7 +2,6 @@ import pytest
 
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse as django_reverse
-from django.test.utils import override_settings
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
