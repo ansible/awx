@@ -33,8 +33,6 @@ MAIN_NODE_TYPE ?= hybrid
 PGBOUNCER ?= false
 # If set to true docker-compose will also start a keycloak instance
 KEYCLOAK ?= false
-# If set to true docker-compose will also start an ldap instance
-LDAP ?= false
 # If set to true docker-compose will also start a splunk instance
 SPLUNK ?= false
 # If set to true docker-compose will also start a prometheus instance
@@ -508,7 +506,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
 	    -e enable_pgbouncer=$(PGBOUNCER) \
 	    -e enable_keycloak=$(KEYCLOAK) \
-	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) \
@@ -525,8 +522,7 @@ docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
 	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
 	    -e enable_vault=$(VAULT) \
-	    -e vault_tls=$(VAULT_TLS) \
-	    -e enable_ldap=$(LDAP); \
+	    -e vault_tls=$(VAULT_TLS); \
 	$(MAKE) docker-compose-up
 
 docker-compose-up:
@@ -598,7 +594,7 @@ docker-clean:
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_var_lib_awx tools_awx_db tools_awx_db_15 tools_vault_1 tools_ldap_1 tools_grafana_storage tools_prometheus_storage $(shell docker volume ls --filter name=tools_redis_socket_ -q)
+	docker volume rm -f tools_var_lib_awx tools_awx_db tools_awx_db_15 tools_vault_1 tools_grafana_storage tools_prometheus_storage $(shell docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 

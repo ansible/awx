@@ -295,15 +295,6 @@ class ApiV2ConfigView(APIView):
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 
-        # If LDAP is enabled, user_ldap_fields will return a list of field
-        # names that are managed by LDAP and should be read-only for users with
-        # a non-empty ldap_dn attribute.
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            user_ldap_fields = ['username', 'password']
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            data['user_ldap_fields'] = user_ldap_fields
-
         if (
             request.user.is_superuser
             or request.user.is_system_auditor

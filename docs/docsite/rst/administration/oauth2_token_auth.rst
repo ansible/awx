@@ -451,7 +451,7 @@ Revoking an access token by this method is the same as deleting the token resour
 
 .. note::
 
-  The **Allow External Users to Create Oauth2 Tokens** (``ALLOW_OAUTH2_FOR_EXTERNAL_USERS`` in the API) setting is disabled by default. External users refer to users authenticated externally with a service like LDAP, or any of the other SSO services. This setting ensures external users cannot *create* their own tokens. If you enable then disable it, any tokens created by external users in the meantime will still exist, and are not automatically revoked.
+  The **Allow External Users to Create Oauth2 Tokens** (``ALLOW_OAUTH2_FOR_EXTERNAL_USERS`` in the API) setting is disabled by default. External users refer to users authenticated externally with services like SSO services. This setting ensures external users cannot *create* their own tokens. If you enable then disable it, any tokens created by external users in the meantime will still exist, and are not automatically revoked.
 
 
 Alternatively, you can use the ``manage`` utility, :ref:`ag_manage_utility_revoke_tokens`, to revoke tokens as described in the :ref:`ag_token_utility` section.

@@ -13,10 +13,6 @@ This section describes setting up authentication for the following enterprise sy
 .. contents::
     :local:
 
-.. note::
-
-   For LDAP authentication, see :ref:`ag_auth_ldap`.
-
 Azure, RADIUS, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
 
 - Enterprise users can only be created via the first successful login attempt from remote authentication backend.
@@ -61,13 +57,6 @@ To set up enterprise authentication for Microsoft Azure Active Directory (AD), y
 For application registering basics in Azure AD, refer to the `Azure AD Identity Platform (v2)`_ overview. 
 
 .. _`Azure AD Identity Platform (v2)`: https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-overview
-
-
-LDAP Authentication
----------------------
-
-Refer to the :ref:`ag_auth_ldap` section.
-
 
 .. _ag_auth_radius:
 

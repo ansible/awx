@@ -9,8 +9,6 @@ import tempfile
 import socket
 from datetime import timedelta
 
-# python-ldap
-import ldap
 from split_settings.tools import include
 
 
@@ -389,12 +387,6 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'awx.sso.backends.LDAPBackend',
-    'awx.sso.backends.LDAPBackend1',
-    'awx.sso.backends.LDAPBackend2',
-    'awx.sso.backends.LDAPBackend3',
-    'awx.sso.backends.LDAPBackend4',
-    'awx.sso.backends.LDAPBackend5',
     'awx.sso.backends.RADIUSBackend',
     'awx.sso.backends.TACACSPlusBackend',
     'social_core.backends.google.GoogleOAuth2',
@@ -420,14 +412,6 @@ OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
 
-# LDAP server (default to None to skip using LDAP authentication).
-# Note: This setting may be overridden by database settings.
-AUTH_LDAP_SERVER_URI = None
-
-# Disable LDAP referrals by default (to prevent certain LDAP queries from
-# hanging with AD).
-# Note: This setting may be overridden by database settings.
-AUTH_LDAP_CONNECTION_OPTIONS = {ldap.OPT_REFERRALS: 0, ldap.OPT_NETWORK_TIMEOUT: 30}
 
 # Radius server settings (default to empty string to skip using Radius auth).
 # Note: These settings may be overridden by database settings.
@@ -927,7 +911,6 @@ LOGGING = {
         'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
         'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
-        'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},

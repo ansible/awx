@@ -14,7 +14,6 @@ Known Issues
    pair: known issues; live event statuses
    pair: live event statuses; green dot
    pair: live event statuses; red dot
-   pair: known issues; LDAP authentication
    pair: known issues; lost isolated jobs
    pair: known issues; sosreport 
    pair: known issues; local management
@@ -96,13 +95,6 @@ Misuse of job slicing can cause errors in job scheduling
 ============================================================
 
 .. include:: ../common/job-slicing-rule.rst
-
-
-Default LDAP directory must be configured to use LDAP Authentication
-======================================================================
-
-The ability to configure up to six LDAP directories for authentication requires a value. On the settings page for LDAP, there is a "Default" LDAP configuration followed by five-numbered configuration slots. If the "Default" is not populated, AWX will not try to authenticate using the other directory configurations.
-
 
 Potential security issue using ``X_FORWARDED_FOR`` in ``REMOTE_HOST_HEADERS``
 =================================================================================
