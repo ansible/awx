@@ -10,7 +10,7 @@ We welcome your feedback, questions and ideas. Here's how to reach the community
 Code of Conduct
 ---------------
 
-All communication and interactions in the Ansible Community are governed by our :ref:`code_of_conduct`. Please read and understand it!
+All communication and interactions in the Ansible Community are governed by our :ref:`code_of_conduct`. Please read and abide by it!
 Reach out to our community team at `codeofconduct@ansible.com <mailto:codeofconduct@ansible.com>`_ if you have any questions or need assistance.
 
 .. _forum:
