@@ -89,6 +89,11 @@ options:
         - server (the IRC server address)
         - nickname (the IRC nickname)
         - targets (the destination channels or users)
+        - sns_topic_arn (The AWS SNS topic ARN)
+        - aws_region (The AWS region SNS topic is created in)
+        - aws_access_key_id (Optional AWS access key ID)
+        - aws_secret_access_key (Optional AWS access secret)
+        - aws_session_token (Optional AWS session token)
       type: dict
     messages:
       description:
@@ -192,6 +197,28 @@ EXAMPLES = '''
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
+- name: Add AWS SNS notification using default authentication chain
+  notification_template:
+    name: aws sns notification
+    notification_type: awssns
+    notification_configuration:
+      sns_topic_arn: arn:aws:sns:eu-west-1:000000000000:awx
+      aws_region: eu-west-1
+    state: present
+    controller_config_file: "~/tower_cli.cfg"
+
+- name: Add AWS SNS notification using AWS IAM user access keys
+  notification_template:
+    name: aws sns notification
+    notification_type: awssns
+    notification_configuration:
+      sns_topic_arn: arn:aws:sns:eu-west-1:000000000000:awx
+      aws_region: eu-west-1
+      aws_access_key_id: an_access_key_id
+      aws_secret_access_key: an_access_key_secret
+    state: present
+    controller_config_file: "~/tower_cli.cfg"
+    
 - name: Delete notification
   notification_template:
     name: old notification
