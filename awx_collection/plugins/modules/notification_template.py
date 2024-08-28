@@ -91,9 +91,9 @@ options:
         - targets (the destination channels or users)
         - sns_topic_arn (The AWS SNS topic ARN)
         - aws_region (The AWS region SNS topic is created in)
-        - aws_access_key_id (Optional AWS access key ID)
-        - aws_secret_access_key (Optional AWS access secret)
-        - aws_session_token (Optional AWS session token)
+        - aws_access_key_id (The access key id for AWS access)
+        - aws_secret_access_key (The access key for AWS access)
+        - aws_session_token (The session token for AWS access)
       type: dict
     messages:
       description:
