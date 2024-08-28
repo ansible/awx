@@ -202,7 +202,7 @@ User.add_to_class('created', created)
 
 def get_system_auditor_role():
     rd, created = RoleDefinition.objects.get_or_create(
-        name='System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
+        name='Controller System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
     )
     if created:
         rd.permissions.add(*list(permission_registry.permission_qs.filter(codename__startswith='view')))

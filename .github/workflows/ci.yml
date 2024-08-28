@@ -31,12 +31,7 @@ jobs:
             command: /start_tests.sh test_collection_all
           - name: api-schema
             command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
-          - name: ui-lint
-            command: make ui-lint
-          - name: ui-test-screens
-            command: make ui-test-screens
-          - name: ui-test-general
-            command: make ui-test-general
+
     steps:
       - uses: actions/checkout@v4
         with:

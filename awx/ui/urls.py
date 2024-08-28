@@ -6,7 +6,7 @@ from awx.main.utils.licensing import server_product_name
 
 
 class IndexView(TemplateView):
-    template_name = 'index.html'
+    template_name = 'index_awx.html'
 
 
 class MigrationsNotran(TemplateView):

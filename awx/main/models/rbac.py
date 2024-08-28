@@ -557,12 +557,25 @@ def get_role_definition(role):
     f = obj._meta.get_field(role.role_field)
     action_name = f.name.rsplit("_", 1)[0]
     model_print = type(obj).__name__
-    rd_name = f'{model_print} {action_name.title()} Compat'
     perm_list = get_role_codenames(role)
     defaults = {
         'content_type_id': role.content_type_id,
         'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',
     }
+    # use Controller-specific role definitions for Team/Organization and member/admin
+    # instead of platform role definitions
+    # these should exist in the system already, so just do a lookup by role definition name
+    if model_print in ['Team', 'Organization'] and action_name in ['member', 'admin']:
+        rd_name = f'Controller {model_print} {action_name.title()}'
+        rd = RoleDefinition.objects.filter(name=rd_name).first()
+        if rd:
+            return rd
+        else:
+            return RoleDefinition.objects.create_from_permissions(permissions=perm_list, name=rd_name, managed=True, **defaults)
+
+    else:
+        rd_name = f'{model_print} {action_name.title()} Compat'
+
     with impersonate(None):
         try:
             rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
@@ -585,6 +598,12 @@ def get_role_from_object_role(object_role):
         model_name, role_name, _ = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
+    elif rd.name.startswith('Controller') and rd.name.endswith(' Admin'):
+        # Controller Organization Admin and Controller Team Admin
+        role_name = 'admin_role'
+    elif rd.name.startswith('Controller') and rd.name.endswith(' Member'):
+        # Controller Organization Member and Controller Team Member
+        role_name = 'member_role'
     elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
         # cases like "Organization Project Admin"
         model_name, target_model_name, role_name = rd.name.split()

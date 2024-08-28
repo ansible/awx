@@ -91,8 +91,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
-    os.path.join(BASE_DIR, 'ui_next', 'build'),
+    os.path.join(BASE_DIR, 'ui', 'build'),
     os.path.join(BASE_DIR, 'static'),
 ]
 
@@ -323,9 +322,8 @@ TEMPLATES = [
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'ui', 'build'),
             os.path.join(BASE_DIR, 'ui', 'public'),
-            os.path.join(BASE_DIR, 'ui_next', 'build', 'awx'),
+            os.path.join(BASE_DIR, 'ui', 'build', 'awx'),
         ],
     },
 ]
@@ -661,6 +659,9 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 # If False, do not allow creation of resources that are shared with the platform ingress
 # e.g. organizations, teams, and users
 ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
+
+# If True, allow users to be assigned to roles that were created via JWT
+ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
@@ -1089,8 +1090,6 @@ AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()
-
-UI_NEXT = True
 
 # License compliance for total host count. Possible values:
 # - '': No model - Subscription not counted from Host Metrics

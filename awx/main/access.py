@@ -1843,6 +1843,11 @@ class SystemJobTemplateAccess(BaseAccess):
 
     model = SystemJobTemplate
 
+    def filtered_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+        return self.model.objects.none()
+
     @check_superuser
     def can_start(self, obj, validate_license=True):
         '''Only a superuser can start a job from a SystemJobTemplate'''
