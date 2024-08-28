@@ -1,10 +1,11 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import redis
+
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-
-from redis.exceptions import ConnectionError
+import redis.exceptions
 
 from awx.main.analytics.subsystem_metrics import CallbackReceiverMetricsServer
 from awx.main.dispatch.control import Control
@@ -31,8 +32,8 @@ class Command(BaseCommand):
 
         try:
             CallbackReceiverMetricsServer().start()
-        except ConnectionError as exc:
-            raise CommandError(f'Could not connect to redis, error:\n{exc}\n')
+        except redis.exceptions.ConnectionError as exc:
+            raise CommandError(f'Callback receiver could not connect to redis, error: {exc}')
 
         try:
             consumer = AWXConsumerRedis(

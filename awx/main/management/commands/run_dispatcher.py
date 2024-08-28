@@ -3,8 +3,10 @@
 import logging
 import yaml
 
+import redis
+
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control
@@ -63,7 +65,10 @@ class Command(BaseCommand):
 
         consumer = None
 
-        DispatcherMetricsServer().start()
+        try:
+            DispatcherMetricsServer().start()
+        except redis.exceptions.ConnectionError as exc:
+            raise CommandError(f'Dispatcher could not connect to redis, error: {exc}')
 
         try:
             queues = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]
