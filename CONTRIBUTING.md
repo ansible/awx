@@ -2,7 +2,7 @@
 
 Hi there! We're excited to have you as a contributor.
 
-Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on irc.libera.chat, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+Have questions about this document or anything not covered here? Create a topic using the [AWX tag on the Ansible Forum](https://forum.ansible.com/tag/awx).
 
 ## Table of contents
 
@@ -124,7 +124,7 @@ If it has someone assigned to it then that person is the person responsible for 
 > Issue assignment will only be done for maintainers of the project. If you decide to work on an issue, please feel free to add a comment in the issue to let others know that you are working on it; but know that we will accept the first pull request from whomever is able to fix an issue. Once your PR is accepted we can add you as an assignee to an issue upon request.
 
 
-> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
 > If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](https://github.com/ansible/ansible-ui/blob/main/CONTRIBUTING.md).
 
@@ -149,7 +149,7 @@ Here are a few things you can do to help the visibility of your change, and incr
 - Make the smallest change possible
 - Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
 
-It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+It's generally a good idea to discuss features with us first by engaging on the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
 We like to keep our commit history clean, and will require resubmission of pull requests that contain merge commits. Use `git pull --rebase`, rather than
 `git pull`, and `git rebase`, rather than `git merge`.
@@ -164,6 +164,6 @@ We welcome your feedback, and encourage you to file an issue when you run into a
 
 ## Getting Help
 
-If you require additional assistance, please reach out to us at `#ansible-awx` on irc.libera.chat, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+If you require additional assistance, please reach out to us at `#ansible-awx` on irc.libera.chat, or submit your question to the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
 For extra information on debugging tools, see [Debugging](./docs/debugging/).
