@@ -185,8 +185,12 @@ class AnalyticsGenericView(APIView):
 
             self._get_setting('INSIGHTS_TRACKING_STATE', False, ERROR_UPLOAD_NOT_ENABLED)
             url = self._get_analytics_url(request.path)
-            rh_user = self._get_setting('REDHAT_USERNAME', None, ERROR_MISSING_USER)
-            rh_password = self._get_setting('REDHAT_PASSWORD', None, ERROR_MISSING_PASSWORD)
+            try:
+                rh_user = self._get_setting('REDHAT_USERNAME', None, ERROR_MISSING_USER)
+                rh_password = self._get_setting('REDHAT_PASSWORD', None, ERROR_MISSING_PASSWORD)
+            except MissingSettings:
+                rh_user = self._get_setting('SUBSCRIPTIONS_USERNAME', None, ERROR_MISSING_USER)
+                rh_password = self._get_setting('SUBSCRIPTIONS_PASSWORD', None, ERROR_MISSING_PASSWORD)
 
             if method not in ["GET", "POST", "OPTIONS"]:
                 return self._error_response(ERROR_UNSUPPORTED_METHOD, method, remote=False, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
