@@ -23,7 +23,6 @@ Authentication
 .. index::
     single: social authentication
     single: authentication
-    single: enterprise authentication
     pair: configuration; authentication
 
 .. include:: ./configure_awx_authentication.rst

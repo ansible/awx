@@ -473,7 +473,7 @@ When slice jobs are running, job lists display the workflow and job slices, as w
 
 .. note::
 
-  You may launch jobs in bulk using the newly added endpoint in the API, ``/api/v2/bulk/job_launch``. This endpoint accepts JSON and you can specify a list of unified job templates (such as job templates, project updates, etc) to launch. The user must have the appropriate permission to launch all the jobs. Either all jobs are launched, or an error is returned indicating why the operation was not able to complete. Use the **OPTIONS** request to return relevant schema. For more information, see the `Bulk endpoint <https://docs.ansible.com/automation-controller/latest/html/controllerapi/api_ref.html#/Bulk>`_ of the *Reference* section of the |atapi|.
+  You may launch jobs in bulk using the newly added endpoint in the API, ``/api/v2/bulk/job_launch``. This endpoint accepts JSON and you can specify a list of unified job templates (such as job templates, project updates, etc) to launch. The user must have the appropriate permission to launch all the jobs. Either all jobs are launched, or an error is returned indicating why the operation was not able to complete. Use the **OPTIONS** request to return relevant schema. For more information, see the `Bulk endpoint <https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/api_ref.html#/Bulk>`_ of the *Reference* section of the |atapi|.
 
 
 Copy a Job Template
