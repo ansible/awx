@@ -106,6 +106,7 @@ def test_default_cred_types():
             'thycotic_tss',
             'vault',
             'vmware',
+            'scm_github_app',
         ]
     )
 

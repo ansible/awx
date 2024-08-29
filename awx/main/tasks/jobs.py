@@ -1155,21 +1155,21 @@ class RunProjectUpdate(BaseTask):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
         return private_data
 
-    def _get_github_app_installation_access_token(self, project_update):
+    def _get_github_app_installation_access_token(self, credential):
         jwt_token = jwt.encode(
             {
                 'iat': int(time.time()),  # Issued at time
                 'exp': int(time.time()) + (10 * 60),  # JWT expiration time (10 minute maximum)
-                'iss': project_update.credential.get_input('github_app_id', default=''),  # GitHub App's identifier
+                'iss': credential.get_input('github_app_id', default=''),  # GitHub App's identifier
             },
-            project_update.credential.get_input('ssh_key_data', default=''),
+            credential.get_input('ssh_key_data', default=''),
             algorithm='RS256',
         )
 
         headers = {'Authorization': f'Bearer {jwt_token}', 'Accept': 'application/vnd.github.v3+json'}
 
-        github_api_url = project_update.credential.get_input('github_api_url', default='https://api.github.com')
-        installation_id = project_update.credential.get_input('github_app_installation_id', default='')
+        github_api_url = credential.get_input('github_api_url', default='https://api.github.com')
+        installation_id = credential.get_input('github_app_installation_id', default='')
         url = f'{github_api_url}/app/installations/{installation_id}/access_tokens'
         response = requests.post(url, headers=headers)
 
@@ -1186,13 +1186,12 @@ class RunProjectUpdate(BaseTask):
         """
         passwords = super(RunProjectUpdate, self).build_passwords(project_update, runtime_passwords)
         if project_update.credential:
-            passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
-            passwords['scm_key_data'] = project_update.credential.get_input('ssh_key_data', default='')
-            if project_update.credential.get_input('github_app_id', default=''):
-                github_installation_access_token = self._get_github_app_installation_access_token(project_update)
+            if project_update.credential.credential_type.namespace == 'github_app':
                 passwords['scm_username'] = 'x-access-token'
-                passwords['scm_password'] = github_installation_access_token
+                passwords['scm_password'] = self._get_github_app_installation_access_token(project_update.credential)
             else:
+                passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
+                passwords['scm_key_data'] = project_update.credential.get_input('ssh_key_data', default='')
                 passwords['scm_username'] = project_update.credential.get_input('username', default='')
                 passwords['scm_password'] = project_update.credential.get_input('password', default='')
 
