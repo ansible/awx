@@ -23,13 +23,11 @@ else
     wait-for-migrations
 fi
 
-# Make sure that the UI static file directory exists, Django complains otherwise.
-mkdir -p /awx_devel/awx/ui/build/static
 
-# Make sure that the UI_NEXT statifc file directory exists, if UI_NEXT is not built yet put a placeholder file in it.
-if [ ! -d "/awx_devel/awx/ui_next/build/awx" ]; then
-    mkdir -p /awx_devel/awx/ui_next/build/awx
-    cp /awx_devel/awx/ui_next/placeholder_index_awx.html /awx_devel/awx/ui_next/build/awx/index_awx.html
+# Make sure that the UI statifc file directory exists, if UI is not built yet put a placeholder file in it.
+if [ ! -d "/awx_devel/awx/ui/build/awx" ]; then
+    mkdir -p /awx_devel/awx/ui/build/awx
+    cp /awx_devel/awx/ui/placeholder_index_awx.html /awx_devel/awx/ui/build/awx/index_awx.html
 fi
 
 if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then

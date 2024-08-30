@@ -7,15 +7,13 @@ aiohttp==3.9.5
     #   twilio
 aiohttp-retry==2.8.3
     # via twilio
-aioredis==1.3.1
-    # via channels-redis
 aiosignal==1.3.1
     # via aiohttp
 annotated-types==0.6.0
     # via pydantic
-    # via -r /awx_devel/requirements/requirements_git.txt
-ansiconv==1.0.0
+ansi2html==1.9.2
     # via -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements_git.txt
 asciichartpy==1.5.25
     # via -r /awx_devel/requirements/requirements.in
 asgiref==3.7.2
@@ -30,7 +28,6 @@ asn1==2.7.0
 async-timeout==4.0.3
     # via
     #   aiohttp
-    #   aioredis
     #   redis
 attrs==23.2.0
     # via
@@ -88,7 +85,7 @@ channels==3.0.5
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels-redis
-channels-redis==3.4.1
+channels-redis==4.2.0
     # via -r /awx_devel/requirements/requirements.in
 charset-normalizer==3.3.2
     # via requests
@@ -153,7 +150,7 @@ django-crum==0.7.9
     #   django-ansible-base
 django-extensions==3.2.3
     # via -r /awx_devel/requirements/requirements.in
-django-guid==3.2.1
+django-guid==3.5.0
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.7.1
     # via -r /awx_devel/requirements/requirements.in
@@ -165,7 +162,7 @@ django-radius==1.5.1
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.2.0
     # via -r /awx_devel/requirements/requirements.in
-django-split-settings==1.0.0
+django-split-settings==1.3.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
@@ -201,10 +198,8 @@ grpcio==1.62.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
-hiredis==2.0.0
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   aioredis
+hiredis==3.0.0
+    # via redis
 hyperlink==21.0.0
     # via
     #   autobahn
@@ -449,8 +444,10 @@ pyzstd==0.15.10
     # via -r /awx_devel/requirements/requirements.in
 receptorctl==1.4.4
     # via -r /awx_devel/requirements/requirements.in
-redis==5.0.1
-    # via -r /awx_devel/requirements/requirements.in
+redis[hiredis]==5.0.1
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   channels-redis
 referencing==0.33.0
     # via
     #   jsonschema

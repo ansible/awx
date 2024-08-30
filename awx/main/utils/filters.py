@@ -1,5 +1,7 @@
 import re
 from functools import reduce
+
+from django.core.exceptions import FieldDoesNotExist
 from pyparsing import (
     infixNotation,
     opAssoc,
@@ -353,7 +355,7 @@ class SmartFilter(object):
 
         try:
             res = boolExpr.parseString('(' + filter_string + ')')
-        except ParseException:
+        except (ParseException, FieldDoesNotExist):
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
         if len(res) > 0:

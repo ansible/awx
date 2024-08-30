@@ -66,7 +66,3 @@ class ExecutionEnvironment(CommonModel):
 
         if actor._meta.model_name == 'user' and (not actor.has_obj_perm(self.organization, 'view')):
             raise ValidationError({'user': _('User must have view permission to Execution Environment organization')})
-        if actor._meta.model_name == 'team':
-            organization_cls = self._meta.get_field('organization').related_model
-            if self.organization not in organization_cls.access_qs(actor, 'view'):
-                raise ValidationError({'team': _('Team must have view permission to Execution Environment organization')})

@@ -45,19 +45,22 @@ jobs:
           exit 0
 
       - name: Checkout awx
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           path: awx
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           repository: ${{ github.repository_owner }}/awx-operator
           path: awx-operator
 
       - name: Checkout awx-logos
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           repository: ansible/awx-logos
           path: awx-logos
 
@@ -86,17 +89,6 @@ jobs:
         run: |
           cp ../awx-logos/awx/ui/client/assets/* awx/ui/public/static/media/
 
-      - name: Setup node and npm for old UI build
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Prebuild old UI for awx image (to speed up build process)
-        working-directory: awx
-        run: |
-          sudo apt-get install gettext
-          make ui-release
-
       - name: Setup node and npm for new UI build
         uses: actions/setup-node@v2
         with:
@@ -104,7 +96,7 @@ jobs:
 
       - name: Prebuild new UI for awx image (to speed up build process)
         working-directory: awx
-        run: make ui-next
+        run: make ui
 
       - name: Set build env variables
         run: |

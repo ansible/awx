@@ -2,7 +2,7 @@ import pytest
 
 from rest_framework.exceptions import PermissionDenied
 
-from awx.main.access import JobAccess, JobLaunchConfigAccess, AdHocCommandAccess, InventoryUpdateAccess, ProjectUpdateAccess
+from awx.main.access import JobAccess, JobLaunchConfigAccess, AdHocCommandAccess, InventoryUpdateAccess, ProjectUpdateAccess, SystemJobTemplateAccess
 from awx.main.models import (
     Job,
     JobLaunchConfig,
@@ -350,3 +350,21 @@ class TestLaunchConfigAccess:
 
         assert access.can_use(config)
         assert rando.can_access(JobLaunchConfig, 'use', config)
+
+
+@pytest.mark.django_db
+class TestSystemJobTemplateAccess:
+    def test_system_job_template_auditor(self, system_auditor, system_job_template):
+        access = SystemJobTemplateAccess(system_auditor)
+        assert access.can_read(system_job_template)
+        assert not access.can_start(system_job_template)
+
+    def test_system_job_template_rando(self, rando, system_job_template):
+        access = SystemJobTemplateAccess(rando)
+        assert not access.can_read(system_job_template)
+        assert not access.can_start(system_job_template)
+
+    def test_system_job_template_superuser(self, admin_user, system_job_template):
+        access = SystemJobTemplateAccess(admin_user)
+        assert access.can_read(system_job_template)
+        assert access.can_start(system_job_template)
