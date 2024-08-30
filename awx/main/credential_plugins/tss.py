@@ -2,9 +2,9 @@ from .plugin import CredentialPlugin
 from django.utils.translation import gettext_lazy as _
 
 try:
-    from delinea.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
+    from delinea.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, SecretServerCloud, ServerSecret
 except ImportError:
-    from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
+    from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, SecretServerCloud, ServerSecret
 
 tss_inputs = {
     'fields': [
@@ -23,7 +23,7 @@ tss_inputs = {
         {
             'id': 'domain',
             'label': _('Domain'),
-            'help_text': _('The (Application) user domain'),
+            'help_text': _('The (Application) user domain - leave blank for Secret Server Cloud'),
             'type': 'string',
         },
         {
@@ -59,7 +59,13 @@ def tss_backend(**kwargs):
         )
     else:
         authorizer = PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])
-    secret_server = SecretServer(kwargs['server_url'], authorizer)
+    if "secretservercloud" in kwargs['server_url'].lower():
+        # Secret Server Cloud format: https://<tenant>.secretservercloud.com
+        # Extracts tenant based on format rather then requiring additional field
+        sscloud_tenant = kwargs['server_url'].split("https://")[1].split(".")[0]
+        secret_server = SecretServerCloud(sscloud_tenant, authorizer)
+    else:
+        secret_server = SecretServer(kwargs['server_url'], authorizer)
     secret_dict = secret_server.get_secret(kwargs['secret_id'])
     secret = ServerSecret(**secret_dict)
 
