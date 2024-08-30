@@ -1638,6 +1638,7 @@ class satellite6(PluginFileInjector):
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+            ret['FOREMAN_VALIDATE_CERTS'] = credential.get_input('verify_ssl', default=False)
         return ret
 
 

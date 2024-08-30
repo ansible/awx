@@ -842,15 +842,35 @@ ManagedCredentialType(
                 'type': 'string',
                 'help_text': gettext_noop('Enter the URL that corresponds to your Red Hat Satellite 6 server. For example, https://satellite.example.org'),
             },
-            {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
+            {'id': 'username',
+             'label': gettext_noop('Username'),
+             'type': 'string'},
             {
                 'id': 'password',
                 'label': gettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             },
+            {
+              'id': 'verify_ssl',
+              'label': gettext_noop('Verify SSL'),
+              'type': 'boolean',
+              'default': False,
+            },
         ],
         'required': ['host', 'username', 'password'],
+    },
+   injectors={
+        'env': {
+            'SATELLITE_SERVER_URL':     '{{host}}',
+            'SATELLITE_USERNAME':       '{{username}}',
+            'SATELLITE_PASSWORD':       '{{password}}',
+            'SATELLITE_VALIDATE_CERTS': '{{verify_ssl}}',
+            'FOREMAN_SERVER_URL':       '{{host}}',
+            'FOREMAN_USERNAME':         '{{username}}',
+            'FOREMAN_PASSWORD':         '{{password}}',
+            'FOREMAN_VALIDATE_CERTS':   '{{verify_ssl}}',
+        }
     },
 )
 
