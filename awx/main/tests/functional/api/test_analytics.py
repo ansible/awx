@@ -96,7 +96,7 @@ class TestAnalyticsGenericView:
                 {
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': 'redhat_user',
-                    'REDHAT_PASSWORD': 'redhat_pass',
+                    'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
                     'SUBSCRIPTIONS_USERNAME': '',
                     'SUBSCRIPTIONS_PASSWORD': '',
                 },
@@ -110,7 +110,7 @@ class TestAnalyticsGenericView:
                     'REDHAT_USERNAME': '',
                     'REDHAT_PASSWORD': '',
                     'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',
+                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
                 },
                 ('subs_user', 'subs_pass'),
                 None,
@@ -132,9 +132,9 @@ class TestAnalyticsGenericView:
                 {
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': 'redhat_user',
-                    'REDHAT_PASSWORD': 'redhat_pass',
+                    'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
                     'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',
+                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
                 },
                 ('redhat_user', 'redhat_pass'),
                 None,
@@ -145,7 +145,7 @@ class TestAnalyticsGenericView:
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': '',
                     'REDHAT_PASSWORD': '',
-                    'SUBSCRIPTIONS_USERNAME': 'subs_user',
+                    'SUBSCRIPTIONS_USERNAME': 'subs_user',  # NOSONAR
                     'SUBSCRIPTIONS_PASSWORD': '',
                 },
                 None,
