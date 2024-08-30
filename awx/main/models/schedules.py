@@ -79,7 +79,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     enabled = models.BooleanField(default=True, help_text=_("Enables processing of this schedule."))
     dtstart = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The first occurrence of the schedule occurs on or after this time."))
     dtend = models.DateTimeField(
-        null=True, default=None, editable=False, help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires.")
+        null=True, default=None, editable=False, help_text=_("The last occurrence of the schedule occurs before this time, afterwards the schedule expires.")
     )
     rrule = models.TextField(help_text=_("A value representing the schedules iCal recurrence rule."))
     next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
