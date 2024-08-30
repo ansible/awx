@@ -200,9 +200,9 @@ class AnalyticsGenericView(APIView):
                     url,
                     auth=(rh_user, rh_password),
                     verify=settings.INSIGHTS_CERT_PATH,
-                    params=request.query_params,
+                    params=getattr(request, 'query_params', {}),
                     headers=headers,
-                    json=request.data,
+                    json=getattr(request, 'data', {}),
                     timeout=(31, 31),
                 )
             #
