@@ -374,10 +374,10 @@ def ship(path):
         rh_password = getattr(settings, 'SUBSCRIPTION_PASSWORD', None)
 
     if not rh_user:
-        logger.error('Either REDHAT_USERNAME nor SUBSCRIPTIONS_USERNAME are set')
+        logger.error('REDHAT_USERNAME and SUBSCRIPTIONS_USERNAME are not set')
         return False
     if not rh_password:
-        logger.error('Either REDHAT_PASSWORD nor SUBSCRIPTIONS_USERNAME are set')
+        logger.error('REDHAT_PASSWORD and SUBSCRIPTIONS_USERNAME are not set')
         return False
 
     with open(path, 'rb') as f:
