@@ -635,6 +635,28 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='scm_github_app',
+    kind='scm',
+    name=gettext_noop('GitHub App'),
+    managed=True,
+    inputs={
+        'fields': [
+            {'id': 'github_app_id', 'label': gettext_noop('GitHub App ID'), 'type': 'string'},
+            {'id': 'github_app_installation_id', 'label': gettext_noop('GitHub App Installation ID'), 'type': 'string'},
+            {
+                'id': 'ssh_key_data',
+                'label': gettext_noop('GitHub App Private Key'),
+                'type': 'string',
+                'format': 'ssh_private_key',
+                'secret': True,
+                'multiline': True,
+            },
+            {'id': 'github_api_url', 'label': gettext_noop('GitHub API URL'), 'type': 'string'},
+        ],
+    },
+)
+
+ManagedCredentialType(
     namespace='scm',
     kind='scm',
     name=gettext_noop('Source Control'),

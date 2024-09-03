@@ -14,6 +14,8 @@ import tempfile
 import traceback
 import time
 import urllib.parse as urlparse
+import jwt
+import requests
 
 # Django
 from django.conf import settings
@@ -1153,6 +1155,30 @@ class RunProjectUpdate(BaseTask):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
         return private_data
 
+    def _get_github_app_installation_access_token(self, credential):
+        jwt_token = jwt.encode(
+            {
+                'iat': int(time.time()),  # Issued at time
+                'exp': int(time.time()) + (10 * 60),  # JWT expiration time (10 minute maximum)
+                'iss': credential.get_input('github_app_id', default=''),  # GitHub App's identifier
+            },
+            credential.get_input('ssh_key_data', default=''),
+            algorithm='RS256',
+        )
+
+        headers = {'Authorization': f'Bearer {jwt_token}', 'Accept': 'application/vnd.github.v3+json'}
+
+        github_api_url = credential.get_input('github_api_url', default='https://api.github.com')
+        installation_id = credential.get_input('github_app_installation_id', default='')
+        url = f'{github_api_url}/app/installations/{installation_id}/access_tokens'
+        response = requests.post(url, headers=headers)
+
+        if response.status_code == 201:
+            access_token = response.json()['token']
+            return access_token
+        else:
+            raise Exception(f"Failed to get access token: {response.status_code} {response.text}")
+
     def build_passwords(self, project_update, runtime_passwords):
         """
         Build a dictionary of passwords for SSH private key unlock and SCM
@@ -1160,9 +1186,15 @@ class RunProjectUpdate(BaseTask):
         """
         passwords = super(RunProjectUpdate, self).build_passwords(project_update, runtime_passwords)
         if project_update.credential:
-            passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
-            passwords['scm_username'] = project_update.credential.get_input('username', default='')
-            passwords['scm_password'] = project_update.credential.get_input('password', default='')
+            if project_update.credential.credential_type.namespace == 'github_app':
+                passwords['scm_username'] = 'x-access-token'
+                passwords['scm_password'] = self._get_github_app_installation_access_token(project_update.credential)
+            else:
+                passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
+                passwords['scm_key_data'] = project_update.credential.get_input('ssh_key_data', default='')
+                passwords['scm_username'] = project_update.credential.get_input('username', default='')
+                passwords['scm_password'] = project_update.credential.get_input('password', default='')
+
         return passwords
 
     def build_env(self, project_update, private_data_dir, private_data_files=None):

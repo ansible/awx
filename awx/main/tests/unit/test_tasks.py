@@ -1595,6 +1595,10 @@ class TestProjectUpdateCredentials(TestJobExecution):
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
         assert 'bob' in expect_passwords.values()
 
+    def test_github_app_auth(self, project_update, mock_me):
+        # TODO: Implement me
+        pass
+
     def test_awx_task_env(self, project_update, settings, private_data_dir, scm_type, execution_environment, mock_me):
         project_update.execution_environment = execution_environment
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
