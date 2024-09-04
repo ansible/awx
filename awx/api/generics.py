@@ -667,6 +667,9 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         return (sub_id, res)
 
     def attach(self, request, *args, **kwargs):
+        import sdb
+
+        sdb.set_trace()
         created = False
         parent = self.get_parent_object()
         relationship = getattrd(parent, self.relationship)
