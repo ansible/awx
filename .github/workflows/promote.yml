@@ -36,6 +36,11 @@ jobs:
         with:
           show-progress: false
 
+      - name: Install setuptools-scm
+        shell: bash
+        run: |
+          sudo pip install -U setuptools setuptools-scm
+
       - name: Get python version from Makefile
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 

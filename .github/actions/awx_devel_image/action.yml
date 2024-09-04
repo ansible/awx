@@ -7,9 +7,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Get python version from Makefile
+    - name: Install setuptools-scm
       shell: bash
-      run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+      run: |
+        sudo pip install -U setuptools setuptools-scm
 
     - name: Set lower case owner name
       shell: bash

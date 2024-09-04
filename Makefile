@@ -10,10 +10,10 @@ KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
+VERSION ?= $(shell $(PYTHON) -m awx.version)
 
 # ansible-test requires semver compatable version, so we allow overrides to hack it
-COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
+COLLECTION_VERSION ?= $(shell $(PYTHON) -m awx.version | cut -d . -f 1-3)
 # args for the ansible-test sanity command
 COLLECTION_SANITY_ARGS ?= --docker
 # collection unit testing directories

@@ -4,6 +4,8 @@ build-backend = "setuptools.build_meta"
 
 # Do not uncomment the line below. We need to be able to override the version via a file, and this
 # causes the "version" key in setup.cfg to be ignored.
+# Instead, we use `version = attr: awx.get_version` in setup.cfg which calls a function
+# that ultimately calls setuptools-scm via its python interface.
 # [tool.setuptools_scm]
 
 [tool.black]
