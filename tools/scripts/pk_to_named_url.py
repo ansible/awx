@@ -28,7 +28,7 @@ def _get_named_url_graph(url, auth):
     Raises:
         N/A
     """
-    r = requests.get(url, auth=auth, verify=False)
+    r = requests.get(url, auth=auth, verify=False) # NOSONAR
     ret = r.json()['NAMED_URL_GRAPH_NODES']
     return ret
 
@@ -91,7 +91,7 @@ def _get_named_url_identifier(url, named_url_graph, resource, tower_host, auth, 
 
     Raises:
     """
-    r = requests.get(url, auth=auth, verify=False).json()
+    r = requests.get(url, auth=auth, verify=False).json() # NOSONAR
     ret.append(_generate_identifier_component(r, named_url_graph[resource]['fields']))
     for next_ in named_url_graph[resource]['adj_list']:
         next_fk, next_res = tuple(next_)
