@@ -523,6 +523,7 @@ _SOCIAL_AUTH_PIPELINE_BASE = (
     'awx.sso.social_base_pipeline.set_is_active_for_new_user',
     'social_core.pipeline.user.user_details',
     'awx.sso.social_base_pipeline.prevent_inactive_login',
+    'ansible_base.resource_registry.utils.service_backed_sso_pipeline.redirect_to_resource_server',
 )
 SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.social_pipeline.update_user_orgs', 'awx.sso.social_pipeline.update_user_teams')
 SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.saml_pipeline.populate_user', 'awx.sso.saml_pipeline.update_user_flags')
@@ -1159,6 +1160,9 @@ OPTIONAL_API_URLPATTERN_PREFIX = ''
 
 # Use AWX base view, to give 401 on unauthenticated requests
 ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
+
+# If we have a resource server defined, apply local changes to that server
+RESOURCE_SERVER_SYNC_ENABLED = True
 
 # Settings for the ansible_base RBAC system
 
