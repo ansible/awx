@@ -7,9 +7,6 @@ from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
 from awx.main.access import JobTemplateAccess, WorkflowJobTemplateAccess
 
-from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
-from ansible_base.lib.utils.response import get_relative_url
-
 
 @pytest.mark.django_db
 def test_managed_roles_created(setup_managed_roles):
