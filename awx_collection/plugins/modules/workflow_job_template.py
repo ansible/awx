@@ -317,6 +317,7 @@ options:
               description:
                 - Name of unified job template to run in the workflow.
                 - Can be a job template, project, inventory source, etc.
+              required: True
               type: str
             description:
               description:
@@ -326,6 +327,7 @@ options:
               description:
                 - Name of unified job template type to run in the workflow.
                 - Can be a job_template, project, inventory_source, system_job_template, workflow_approval, workflow_job_template.
+              required: True
               type: str
             timeout:
               description:
