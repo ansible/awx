@@ -339,3 +339,25 @@ def test_credential_get_input(organization_factory):
     # verify return values for encrypted secret fields are decrypted
     assert cred.inputs['vault_password'].startswith('$encrypted$')
     assert cred.get_input('vault_password') == 'testing321'
+
+
+@pytest.mark.django_db
+def test_idempotent_credential_type_setup():
+    """
+    awx main app ready() calls `setup_tower_managed_defaults()` to register CredentialType(s).
+    This is problematic in our testing system. pytest_django deviates from the production ready() call path. pytest_django calls our apps ready() function
+    before migrations run. This is a problem since we interact with tables in the database that do not yet exist.
+
+    Now forget about what you just read because we do not _actually_ want to register CredentialType(s) in our test at all. So then
+    you would expect this bit of code to spy on `setup_tower_managed_defaults` and assert it was not called BUT registering a spy early
+    enough is hard. The call to ready() from pytest_django happens via pytest hooks very early https://github.com/pytest-dev/pytest-django/blob/1157a7c5c74f4b4e0f4aca8312f3fe67eb00568e/pytest_django/plugin.py#L266C5-L266C34
+
+    Instead of ensuring that `setup_tower_managed_defaults()` is explicitly not called, we check it _implicitly_ by observing that no credential type records are created.
+    """
+    assert CredentialType.objects.count() == 0
+    CredentialType.setup_tower_managed_defaults()
+    total = CredentialType.objects.count()
+    assert total > 0
+
+    CredentialType.setup_tower_managed_defaults()
+    assert CredentialType.objects.count() == total

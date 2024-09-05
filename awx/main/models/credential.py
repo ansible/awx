@@ -1,5 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
+from contextlib import nullcontext
 import functools
 import inspect
 import logging
@@ -14,6 +15,8 @@ from types import SimpleNamespace
 from jinja2 import sandbox
 
 # Django
+from django.apps.config import AppConfig
+from django.apps.registry import Apps
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -24,6 +27,7 @@ from django.utils.timezone import now
 from django.contrib.auth.models import User
 
 # DRF
+from awx.main.utils.pglock import advisory_lock
 from rest_framework.serializers import ValidationError as DRFValidationError
 
 # AWX
@@ -332,6 +336,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
 
 class CredentialType(CommonModelNameNotUnique):
+    CREDENTIAL_REGISTRATION_ADVISORY_LOCK_NAME = 'setup_tower_managed_defaults'
+
     """
     A reusable schema for a credential.
 
@@ -414,11 +420,29 @@ class CredentialType(CommonModelNameNotUnique):
         return dict((k, functools.partial(v.create)) for k, v in ManagedCredentialType.registry.items())
 
     @classmethod
-    def setup_tower_managed_defaults(cls, apps=None):
-        if apps is not None:
-            ct_class = apps.get_model('main', 'CredentialType')
-        else:
-            ct_class = CredentialType
+    def _get_credential_type_class(cls, apps: Apps = None, app_config: AppConfig = None):
+        """
+        Legacy code passing in apps while newer code should pass only the specific 'main' app config.
+        """
+        if apps and app_config:
+            raise ValueError('Expected only apps or app_config to be defined, not both')
+
+        if not any(
+            (
+                apps,
+                app_config,
+            )
+        ):
+            return CredentialType
+
+        if apps:
+            app_config = apps.get_app_config('main')
+
+        return app_config.get_model('CredentialType')
+
+    @classmethod
+    def _setup_tower_managed_defaults(cls, apps: Apps = None, app_config: AppConfig = None):
+        ct_class = cls._get_credential_type_class(apps=apps, app_config=app_config)
         for default in ManagedCredentialType.registry.values():
             existing = ct_class.objects.filter(name=default.name, kind=default.kind).first()
             if existing is not None:
@@ -435,6 +459,29 @@ class CredentialType(CommonModelNameNotUnique):
             created = ct_class(**params)
             created.inputs = created.injectors = {}
             created.save()
+
+    @classmethod
+    def setup_tower_managed_defaults(cls, apps: Apps = None, app_config: AppConfig = None, lock: bool = True, wait_for_lock: bool = False):
+        """
+        Create a CredentialType for discovered credential plugins.
+
+        By default, this function will attempt to acquire the globally distributed lock (postgres advisory lock).
+        If the lock is acquired the method will call the underlying method.
+        If the lock is NOT acquired the method will NOT call the underlying method.
+
+        lock=False will set acquired to True and appear to acquire the lock.
+        lock=True, wait_for_lock=False will attempt to acquire the lock and NOT block.
+        lock=True, wait_for_lock=True will attempt to acquire the lock and will block until the exclusive lock is acquired.
+
+        :param lock(optional[bool]):          Attempt to acquire the postgres advisory lock.
+        :param wait_for_lock(optional[bool]): Block and wait forever for the postgres advisory lock.
+        """
+        if apps and not apps.ready:
+            return
+
+        with advisory_lock(cls.CREDENTIAL_REGISTRATION_ADVISORY_LOCK_NAME, wait=wait_for_lock) if lock else nullcontext(True) as acquired:
+            if acquired:
+                cls._setup_tower_managed_defaults(apps=apps, app_config=app_config)
 
     @classmethod
     def load_plugin(cls, ns, plugin):
