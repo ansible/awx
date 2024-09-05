@@ -1169,7 +1169,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'organization', 'job_type', 'extra_vars']
+        return ['name', 'description', 'organization', 'job_type', 'extra_vars', 'created_by']
 
     def get_absolute_url(self, request=None):
         return reverse('api:system_job_template_detail', kwargs={'pk': self.pk}, request=request)
