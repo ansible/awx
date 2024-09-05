@@ -76,3 +76,36 @@ def create_cleartokens_jt(apps, schema_editor):
         )
         sched.unified_job_template = sjt
         sched.save()
+
+
+def create_clearoldschedules(apps, schema_editor):
+
+    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    Schedule = apps.get_model('main', 'Schedule')
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+    sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
+    now_dt = now()
+    schedule_time = now_dt.strftime('%Y%m%dT%H%M%SZ')
+
+    sjt, created = SystemJobTemplate.objects.get_or_create(
+        job_type='cleanup_schedules',
+        defaults=dict(
+            name='Cleanup Old Schedules',
+            description='Cleanup old shedules',
+            polymorphic_ctype=sjt_ct,
+            created=now_dt,
+            modified=now_dt,
+        ),
+    )
+    if created:
+        sched = Schedule(
+            name='Cleanup Old Schedules',
+            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;' % schedule_time,
+            description='Removes old schedules',
+            enabled=True,
+            created=now_dt,
+            modified=now_dt,
+            extra_data={},
+        )
+        sched.unified_job_template = sjt
+        sched.save()
