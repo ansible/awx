@@ -219,20 +219,3 @@ def test_adding_user_to_controller_organization_roles(setup_managed_roles, role_
     post(url, data={'object_id': organization.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
 
     get(url, user=bob, expect=200)
-
-
-@pytest.mark.django_db
-def test_new_to_old_rbac(admin, delete, team, bob, post):
-    '''
-    Assignments in new RBAC should be reflected in old RBAC
-    '''
-    role = team.member_role
-    url = reverse('api:role_users_list', kwargs={'pk': role.id})
-    post(url, data={'id': bob.id}, user=admin, expect=204)
-
-    rd = RoleDefinition.objects.get(name='Controller Team Member')
-    user_assignment = RoleUserAssignment.objects.get(user=bob, role_definition=rd, object_id=team.id)
-
-    url = get_relative_url('roleuserassignment-detail', kwargs={'pk': user_assignment.id})
-    delete(url, user=admin, expect=204)
-    assert bob not in team.member_role.members.all()

@@ -744,7 +744,6 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
     'WorkflowJobTemplate Approve': 'approval_role',
     'InstanceGroup Admin': 'admin_role',
     'InstanceGroup Use': 'use_role',
-    #  'ExecutionEnvironment Admin': '',
     'Organization ExecutionEnvironment Admin': 'execution_environment_admin_role',
     'Project Admin': 'admin_role',
     'Organization Project Admin': 'project_admin_role',
@@ -758,7 +757,6 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
     'Inventory Use': 'use_role',
     'Inventory Adhoc': 'adhoc_role',
     'Inventory Update': 'update_role',
-    # 'NotificationTemplate Admin': 'admin_role',
     'Organization NotificationTemplate Admin': 'notification_admin_role',
     'Credential Admin': 'admin_role',
     'Organization Credential Admin': 'credential_admin_role',
@@ -776,29 +774,32 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
 
 
 def _sync_assignments_to_old_rbac(instance, delete=True):
-    with disable_rbac_sync():
-        field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
-        if not field_name:
-            return
-        try:
-            role = getattr(instance.object_role.content_object, field_name)
-        # in the case RoleUserAssignment is being cascade deleted, then
-        # object_role might not exist. In which case the object is about to be removed
-        # anyways so just return
-        except ObjectDoesNotExist:
-            return
-        if isinstance(instance.actor, get_user_model()):
-            # user
-            if delete:
-                role.members.remove(instance.actor)
+    from awx.main.signals import disable_activity_stream
+
+    with disable_activity_stream():
+        with disable_rbac_sync():
+            field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
+            if not field_name:
+                return
+            try:
+                role = getattr(instance.object_role.content_object, field_name)
+            # in the case RoleUserAssignment is being cascade deleted, then
+            # object_role might not exist. In which case the object is about to be removed
+            # anyways so just return
+            except ObjectDoesNotExist:
+                return
+            if isinstance(instance.actor, get_user_model()):
+                # user
+                if delete:
+                    role.members.remove(instance.actor)
+                else:
+                    role.members.add(instance.actor)
             else:
-                role.members.add(instance.actor)
-        else:
-            # team
-            if delete:
-                instance.team.member_role.children.remove(role)
-            else:
-                instance.team.member_role.children.add(role)
+                # team
+                if delete:
+                    instance.team.member_role.children.remove(role)
+                else:
+                    instance.team.member_role.children.add(role)
 
 
 @receiver(post_delete, sender=RoleUserAssignment)
