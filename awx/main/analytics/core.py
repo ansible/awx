@@ -183,7 +183,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
         if not (
             settings.AUTOMATION_ANALYTICS_URL
-            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTION_USERNAME and settings.SUBSCRIPTION_PASSWORD))
+            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_USERNAME and settings.SUBSCRIPTIONS_PASSWORD))
         ):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
@@ -369,9 +369,9 @@ def ship(path):
     rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
 
     if rh_user is None or rh_password is None:
-        logger.info('REDHAT_USERNAME and REDHAT_PASSWORD are not set, using SUBSCRIPTION_USERNAME and SUBSCRIPTION_PASSWORD')
-        rh_user = getattr(settings, 'SUBSCRIPTION_USERNAME', None)
-        rh_password = getattr(settings, 'SUBSCRIPTION_PASSWORD', None)
+        logger.info('REDHAT_USERNAME and REDHAT_PASSWORD are not set, using SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD')
+        rh_user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+        rh_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
 
     if not rh_user:
         logger.error('REDHAT_USERNAME and SUBSCRIPTIONS_USERNAME are not set')
