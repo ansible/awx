@@ -87,8 +87,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': 'redhat_user',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTION_USERNAME': None,
-                'SUBSCRIPTION_PASSWORD': None,
+                'SUBSCRIPTIONS_USERNAME': None,
+                'SUBSCRIPTIONS_PASSWORD': None,
             },
             True,
             ('redhat_user', 'redhat_pass'),
@@ -98,8 +98,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': None,
                 'REDHAT_PASSWORD': None,
-                'SUBSCRIPTION_USERNAME': 'subs_user',
-                'SUBSCRIPTION_PASSWORD': 'subs_pass',  # NOSONAR
+                'SUBSCRIPTIONS_USERNAME': 'subs_user',
+                'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
             },
             True,
             ('subs_user', 'subs_pass'),
@@ -109,8 +109,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': None,
                 'REDHAT_PASSWORD': None,
-                'SUBSCRIPTION_USERNAME': None,
-                'SUBSCRIPTION_PASSWORD': None,
+                'SUBSCRIPTIONS_USERNAME': None,
+                'SUBSCRIPTIONS_PASSWORD': None,
             },
             False,
             None,  # No request should be made
@@ -120,8 +120,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': None,
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTION_USERNAME': 'subs_user',
-                'SUBSCRIPTION_PASSWORD': None,
+                'SUBSCRIPTIONS_USERNAME': 'subs_user',
+                'SUBSCRIPTIONS_PASSWORD': None,
             },
             False,
             None,  # Invalid, no request should be made
