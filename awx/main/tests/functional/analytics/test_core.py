@@ -82,18 +82,18 @@ def mock_analytic_post():
 @pytest.mark.parametrize(
     "setting_map, expected_result, expected_auth",
     [
-        # Test case 1: Valid Red Hat credentials
+        # Valid Red Hat credentials
         (
             {
                 'REDHAT_USERNAME': 'redhat_user',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTIONS_USERNAME': None,
-                'SUBSCRIPTIONS_PASSWORD': None,
+                'SUBSCRIPTIONS_USERNAME': '',
+                'SUBSCRIPTIONS_PASSWORD': '',
             },
             True,
             ('redhat_user', 'redhat_pass'),
         ),
-        # Test case 2: Valid Subscription credentials
+        # Valid Subscription credentials with no Red Hat credentials
         (
             {
                 'REDHAT_USERNAME': None,
@@ -104,24 +104,35 @@ def mock_analytic_post():
             True,
             ('subs_user', 'subs_pass'),
         ),
-        # Test case 3: No credentials
+        # Valid Subscription credentials with empty Red Hat credentials
         (
             {
-                'REDHAT_USERNAME': None,
-                'REDHAT_PASSWORD': None,
-                'SUBSCRIPTIONS_USERNAME': None,
-                'SUBSCRIPTIONS_PASSWORD': None,
+                'REDHAT_USERNAME': '',
+                'REDHAT_PASSWORD': '',
+                'SUBSCRIPTIONS_USERNAME': 'subs_user',
+                'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+            },
+            True,
+            ('subs_user', 'subs_pass'),
+        ),
+        # No credentials
+        (
+            {
+                'REDHAT_USERNAME': '',
+                'REDHAT_PASSWORD': '',
+                'SUBSCRIPTIONS_USERNAME': '',
+                'SUBSCRIPTIONS_PASSWORD': '',
             },
             False,
             None,  # No request should be made
         ),
-        # Test case 4: Mixed credentials
+        # Mixed credentials
         (
             {
-                'REDHAT_USERNAME': None,
+                'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
                 'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': None,
+                'SUBSCRIPTIONS_PASSWORD': '',
             },
             False,
             None,  # Invalid, no request should be made
