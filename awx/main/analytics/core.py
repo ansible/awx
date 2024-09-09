@@ -368,7 +368,7 @@ def ship(path):
     rh_user = getattr(settings, 'REDHAT_USERNAME', None)
     rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
 
-    if rh_user is None or rh_password is None:
+    if not rh_user or not rh_password:
         logger.info('REDHAT_USERNAME and REDHAT_PASSWORD are not set, using SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD')
         rh_user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
         rh_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
