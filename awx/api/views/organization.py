@@ -52,7 +52,7 @@ from awx.api.serializers import (
     WorkflowJobTemplateSerializer,
     CredentialSerializer,
 )
-from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, OrganizationCountsMixin
+from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, OrganizationCountsMixin, OrganizationInstanceGroupMembershipMixin
 from awx.api.views import immutablesharedfields
 
 logger = logging.getLogger('awx.api.views.organization')
@@ -202,7 +202,7 @@ class OrganizationNotificationTemplatesApprovalList(OrganizationNotificationTemp
     relationship = 'notification_templates_approvals'
 
 
-class OrganizationInstanceGroupsList(SubListAttachDetachAPIView):
+class OrganizationInstanceGroupsList(OrganizationInstanceGroupMembershipMixin, SubListAttachDetachAPIView):
     model = InstanceGroup
     serializer_class = InstanceGroupSerializer
     parent_model = Organization
