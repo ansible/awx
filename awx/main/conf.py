@@ -777,6 +777,7 @@ register(
     category=_('System'),
     category_slug='system',
     required=False,
+    hidden=True,
 )
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
