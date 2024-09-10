@@ -1,5 +1,4 @@
 ## General
-- For the roundup of all the different mailing lists available from AWX, Ansible, and beyond visit: https://docs.ansible.com/ansible/latest/community/communication.html
 - Hello, we think your question is answered in our FAQ. Does this: https://www.ansible.com/products/awx-project/faq cover your question?
 - You can find the latest documentation here: https://ansible.readthedocs.io/projects/awx/en/latest/userguide/index.html
 
