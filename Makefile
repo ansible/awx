@@ -351,6 +351,15 @@ test:
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
+## Run all API unit tests with coverage enabled.
+test_coverage:
+	$(MAKE) test PYTEST_ARGS="--create-db --cov=awx --cov-report=xml --junitxml=reports/junit.xml"
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo 'cov-report-files=coverage.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
+	fi
+
 test_migrations:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -359,7 +368,7 @@ test_migrations:
 
 ## Runs AWX_DOCKER_CMD inside a new docker container.
 docker-runner:
-	docker run -u $(shell id -u) --rm -v $(shell pwd):/awx_devel/:Z --workdir=/awx_devel $(DEVEL_IMAGE_NAME) $(AWX_DOCKER_CMD)
+	docker run -u $(shell id -u) --rm -v $(shell pwd):/awx_devel/:Z $(AWX_DOCKER_ARGS) --workdir=/awx_devel $(DEVEL_IMAGE_NAME) $(AWX_DOCKER_CMD)
 
 test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
@@ -413,13 +422,6 @@ test_unit:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
-
-## Run all API unit tests with coverage enabled.
-test_coverage:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
 ## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
