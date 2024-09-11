@@ -12,6 +12,7 @@ from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode, quote
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
+from base64 import b64encode
 from socket import getaddrinfo, IPPROTO_TCP
 import time
 import re
@@ -34,6 +35,8 @@ try:
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
+
+CONTROLLER_BASE_PATH_ENV_VAR = "CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX"
 
 
 class ConfigFileException(Exception):
@@ -79,6 +82,10 @@ class ControllerModule(AnsibleModule):
     version_checked = False
     error_callback = None
     warn_callback = None
+    apps_api_versions = {
+        "awx": "v2",
+        "gateway": "v1",
+    }
 
     def __init__(self, argument_spec=None, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         full_argspec = {}
@@ -144,14 +151,15 @@ class ControllerModule(AnsibleModule):
         except Exception as e:
             self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
 
-    def build_url(self, endpoint, query_params=None):
+    def build_url(self, endpoint, query_params=None, app_key=None):
         # Make sure we start with /api/vX
         if not endpoint.startswith("/"):
             endpoint = "/{0}".format(endpoint)
         hostname_prefix = self.url_prefix.rstrip("/")
-        api_path = self.api_path()
+        api_path = self.api_path(app_key=app_key)
+        api_version = self.apps_api_versions.get(app_key, self.apps_api_versions.get("awx", "v2"))
         if not endpoint.startswith(hostname_prefix + api_path):
-            endpoint = hostname_prefix + f"{api_path}v2{endpoint}"
+            endpoint = hostname_prefix + f"{api_path}{api_version}{endpoint}"
         if not endpoint.endswith('/') and '?' not in endpoint:
             endpoint = "{0}/".format(endpoint)
 
@@ -303,6 +311,9 @@ class ControllerAPIModule(ControllerModule):
     session = None
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
     ENCRYPTED_STRING = "$encrypted$"
+
+    # which app was used to create the oauth_token
+    oauth_token_app_key = None
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
@@ -489,11 +500,13 @@ class ControllerAPIModule(ControllerModule):
 
         # Authenticate to AWX (if we don't have a token and if not already done so)
         if not self.oauth_token and not self.authenticated:
-            # This method will set a cookie in the cookie jar for us and also an oauth_token
+            # This method will set a cookie in the cookie jar for us and also an oauth_token when possible
             self.authenticate(**kwargs)
         if self.oauth_token:
             # If we have a oauth token, we just use a bearer header
             headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
+        elif self.username and self.password:
+            headers['Authorization'] = self._get_basic_authorization_header()
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -604,28 +617,65 @@ class ControllerAPIModule(ControllerModule):
             status_code = response.status
         return {'status_code': status_code, 'json': response_json}
 
-    def api_path(self):
+    def api_path(self, app_key=None):
 
         default_api_path = "/api/"
-        if self._COLLECTION_TYPE != "awx":
-            default_api_path = "/api/controller/"
-        prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', default_api_path)
+        if self._COLLECTION_TYPE != "awx" or app_key is not None:
+            if app_key is None:
+                app_key = "controller"
+
+            default_api_path = "/api/{0}/".format(app_key)
+
+        prefix = default_api_path
+        if app_key is None or app_key == "controller":
+            # if the env variable exists use it only when app is not defined or controller
+            controller_base_path = getenv(CONTROLLER_BASE_PATH_ENV_VAR)
+            if controller_base_path:
+                self.warn(
+                    "using controller base path from environment variable:"
+                    " {0} = {1}".format(CONTROLLER_BASE_PATH_ENV_VAR, controller_base_path)
+                )
+                prefix = controller_base_path
+
+        if not prefix.startswith('/'):
+            prefix = "/{0}".format(prefix)
+
+        if not prefix.endswith('/'):
+            prefix = "{0}/".format(prefix)
+
         return prefix
 
-    def authenticate(self, **kwargs):
+    def _get_basic_authorization_header(self):
+        basic_credentials = b64encode("{0}:{1}".format(self.username, self.password).encode()).decode()
+        return "Basic {0}".format(basic_credentials)
+
+    def _authenticate_with_basic_auth(self):
         if self.username and self.password:
-            # Attempt to get a token from /api/v2/tokens/ by giving it our username/password combo
-            # If we have a username and password, we need to get a session cookie
+            # use api url /api/v2/me to get current user info as a testing request
+            me_url = self.build_url("me").geturl()
+            self.session.open(
+                "GET",
+                me_url,
+                validate_certs=self.verify_ssl,
+                timeout=self.request_timeout,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": self._get_basic_authorization_header(),
+                },
+            )
+
+    def _authenticate_create_token(self, app_key=None):
+        # in case of failure and to give a chance to authenticate via other means, should not raise exceptions
+        # but only warnings
+        if self.username and self.password:
             login_data = {
                 "description": "Automation Platform Controller Module Token",
                 "application": None,
                 "scope": "write",
             }
-            # Preserve URL prefix
-            endpoint = self.url_prefix.rstrip('/') + f'{self.api_path()}v2/tokens/'
-            # Post to the tokens endpoint with baisc auth to try and get a token
-            api_token_url = (self.url._replace(path=endpoint)).geturl()
 
+            api_token_url = self.build_url("tokens", app_key=app_key).geturl()
             try:
                 response = self.session.open(
                     'POST',
@@ -633,21 +683,16 @@ class ControllerAPIModule(ControllerModule):
                     validate_certs=self.verify_ssl,
                     timeout=self.request_timeout,
                     follow_redirects=True,
-                    force_basic_auth=True,
-                    url_username=self.username,
-                    url_password=self.password,
                     data=dumps(login_data),
-                    headers={'Content-Type': 'application/json'},
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": self._get_basic_authorization_header(),
+                    },
                 )
-            except HTTPError as he:
-                try:
-                    resp = he.read()
-                except Exception as e:
-                    resp = 'unknown {0}'.format(e)
-                self.fail_json(msg='Failed to get token: {0}'.format(he), response=resp)
-            except (Exception) as e:
-                # Sanity check: Did the server send back some kind of internal error?
-                self.fail_json(msg='Failed to get token: {0}'.format(e))
+
+            except Exception as exp:
+                self.warn("url: {0} - Failed to get token: {1}".format(api_token_url, exp))
+                return
 
             token_response = None
             try:
@@ -655,10 +700,37 @@ class ControllerAPIModule(ControllerModule):
                 response_json = loads(token_response)
                 self.oauth_token_id = response_json['id']
                 self.oauth_token = response_json['token']
-            except (Exception) as e:
-                self.fail_json(msg="Failed to extract token information from login response: {0}".format(e), **{'response': token_response})
+                # set the app that received the token create request, this is needed when removing the token at logout
+                self.oauth_token_app_key = app_key
+            except Exception as exp:
+                self.warn(
+                    "url: {0} - Failed to extract token information from login response: {1}, response: {2}".format(
+                        api_token_url, exp, token_response,
+                    )
+                )
+                return
 
-        # If we have neither of these, then we can try un-authenticated access
+        return None
+
+    def authenticate(self, **kwargs):
+        # As a temporary solution for version 4.6 try to get a token by using basic authentication from:
+        #  /api/gateway/v1/tokens/ when app_key is gateway
+        #  /api/v2/tokens/ when app_key is None and _COLLECTION_TYPE = "awx"
+        #  /api/controller/v2/tokens/ when app_key is None and _COLLECTION_TYPE != "awx"
+        for app_key in ["gateway", None]:
+            # to give a chance to authenticate via basic authentication in case of failure,
+            # _authenticate_create_token,  should not raise exception but only warnings,
+            self._authenticate_create_token(app_key=app_key)
+            if self.oauth_token:
+                break
+
+        if not self.oauth_token:
+            # if not having an oauth_token and when collection_type is awx try to login with basic authentication
+            try:
+                self._authenticate_with_basic_auth()
+            except Exception as exp:
+                self.fail_json(msg='Failed to get user info: {0}'.format(exp))
+
         self.authenticated = True
 
     def delete_if_needed(self, existing_item, item_type=None, on_delete=None, auto_exit=True):
@@ -1011,8 +1083,10 @@ class ControllerAPIModule(ControllerModule):
         if self.authenticated and self.oauth_token_id:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
-            endpoint = self.url_prefix.rstrip('/') + f'{self.api_path()}v2/tokens/{self.oauth_token_id}/'
-            api_token_url = (self.url._replace(path=endpoint, query=None)).geturl()  # in error cases, fail_json exists before exception handling
+            api_token_url = self.build_url(
+                "tokens/{0}/".format(self.oauth_token_id),
+                app_key=self.oauth_token_app_key,
+            ).geturl()
 
             try:
                 self.session.open(
@@ -1021,11 +1095,12 @@ class ControllerAPIModule(ControllerModule):
                     validate_certs=self.verify_ssl,
                     timeout=self.request_timeout,
                     follow_redirects=True,
-                    force_basic_auth=True,
-                    url_username=self.username,
-                    url_password=self.password,
+                    headers={
+                        "Authorization": self._get_basic_authorization_header(),
+                    }
                 )
                 self.oauth_token_id = None
+                self.oauth_token = None
                 self.authenticated = False
             except HTTPError as he:
                 try:
