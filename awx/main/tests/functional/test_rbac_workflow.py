@@ -1,6 +1,7 @@
 import pytest
 
 from awx.main.access import (
+    UnifiedJobAccess,
     WorkflowJobTemplateAccess,
     WorkflowJobTemplateNodeAccess,
     WorkflowJobAccess,
@@ -244,6 +245,30 @@ class TestWorkflowJobAccess:
             WorkflowJobAccess(rando).can_start(workflow_job)
         inventory.use_role.members.add(rando)
         assert WorkflowJobAccess(rando).can_start(workflow_job)
+
+    @pytest.mark.parametrize('org_role', ['admin_role', 'auditor_role'])
+    def test_workflow_job_org_audit_access(self, workflow_job_template, rando, org_role):
+        assert workflow_job_template.organization  # sanity
+        workflow_job = workflow_job_template.create_unified_job()
+        assert workflow_job.organization  # sanity
+
+        assert not UnifiedJobAccess(rando).can_read(workflow_job)
+        assert not WorkflowJobAccess(rando).can_read(workflow_job)
+        assert workflow_job not in WorkflowJobAccess(rando).filtered_queryset()
+
+        org = workflow_job.organization
+        role = getattr(org, org_role)
+        role.members.add(rando)
+
+        assert UnifiedJobAccess(rando).can_read(workflow_job)
+        assert WorkflowJobAccess(rando).can_read(workflow_job)
+        assert workflow_job in WorkflowJobAccess(rando).filtered_queryset()
+
+        # Organization-level permissions should persist after deleting the WFJT
+        workflow_job_template.delete()
+        assert UnifiedJobAccess(rando).can_read(workflow_job)
+        assert WorkflowJobAccess(rando).can_read(workflow_job)
+        assert workflow_job in WorkflowJobAccess(rando).filtered_queryset()
 
 
 @pytest.mark.django_db
