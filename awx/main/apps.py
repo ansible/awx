@@ -1,5 +1,7 @@
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
+from awx.main.utils.common import bypass_in_test
+from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.named_url_graph import _customize_graph, generate_graph
 from awx.conf import register, fields
 
@@ -34,7 +36,30 @@ class MainConfig(AppConfig):
             category_slug='named-url',
         )
 
+    def _load_credential_types_feature(self):
+        """
+        Create CredentialType records for any discovered credentials.
+
+        Note that Django docs advise _against_ interacting with the database using
+        the ORM models in the ready() path. Specifically, during testing.
+        However, we explicitly use the @bypass_in_test decorator to avoid calling this
+        method during testing.
+
+        Django also advises against running pattern because it runs everywhere i.e.
+        every management command. We use an advisory lock to ensure correctness and
+        we will deal performance if it becomes an issue.
+        """
+        from awx.main.models.credential import CredentialType
+
+        if is_database_synchronized():
+            CredentialType.setup_tower_managed_defaults(app_config=self)
+
+    @bypass_in_test
+    def load_credential_types_feature(self):
+        return self._load_credential_types_feature()
+
     def ready(self):
         super().ready()
 
+        self.load_credential_types_feature()
         self.load_named_url_feature()
