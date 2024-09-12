@@ -147,6 +147,14 @@ def is_testing(argv=None):
     return False
 
 
+def bypass_in_test(func):
+    def fn(*args, **kwargs):
+        if not is_testing():
+            return func(*args, **kwargs)
+
+    return fn
+
+
 class RequireDebugTrueOrTest(logging.Filter):
     """
     Logging filter to output when in DEBUG mode or running tests.
