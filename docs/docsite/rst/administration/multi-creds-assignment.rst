@@ -104,8 +104,4 @@ Passwords for Vault credentials that are marked with "Prompt on launch", the lau
       }
 
 
-Linked credentials
-^^^^^^^^^^^^^^^^^^^
-
-Instead of uploading sensitive credential information into AWX, you can link credential fields to external systems and using them to run your playbooks. Refer to the :ref:`Secret Management System <ug_credential_plugins>` section of the |atu|.
 
