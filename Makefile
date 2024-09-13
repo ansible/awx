@@ -356,8 +356,8 @@ test_coverage:
 	$(MAKE) test PYTEST_ARGS="--create-db --cov=awx --cov-report=xml --junitxml=reports/junit.xml"
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
-	  echo 'cov-report-files=coverage.xml' >> "${GITHUB_OUTPUT}"; \
-	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'test-result-files=awxkit/report.xml,reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
 	fi
 
 test_migrations:
