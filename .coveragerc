@@ -21,7 +21,6 @@ ignore_errors = True
 branch = True
 omit =
     awx/main/migrations/*
-    awx/lib/site-packages/*
 source =
     .
 source_pkgs =
