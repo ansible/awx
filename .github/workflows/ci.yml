@@ -5,8 +5,12 @@ env:
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DEV_DOCKER_OWNER: ${{ github.repository_owner }}
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
+  UPSTREAM_REPOSITORY_ID: 91594105
 on:
   pull_request:
+  push:
+    branches:
+      - devel  # needed to publish code coverage post-merge
 jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
@@ -20,7 +24,7 @@ jobs:
       matrix:
         tests:
           - name: api-test
-            command: /start_tests.sh
+            command: /start_tests.sh test_coverage
           - name: api-migrations
             command: /start_tests.sh test_migrations
           - name: api-lint
@@ -43,7 +47,48 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run check ${{ matrix.tests.name }}
-        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make docker-runner
+        id: make-run
+        run: >-
+          AWX_DOCKER_ARGS='-e GITHUB_ACTIONS -e GITHUB_OUTPUT -v "${GITHUB_OUTPUT}:${GITHUB_OUTPUT}:rw,Z"'
+          AWX_DOCKER_CMD='${{ matrix.tests.command }}'
+          make docker-runner
+
+      - name: Upload test coverage to Codecov
+        if: >-
+          !cancelled()
+          && matrix.tests.name == 'api-test'
+          && steps.make-run.outputs.cov-report-files != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          flags: >-
+            CI-GHA,
+            pytest,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: >-
+          !cancelled()
+          && matrix.tests.name == 'api-test'
+          && steps.make-run.outputs.test-result-files != ''
+        uses: codecov/test-results-action@v1
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          flags: >-
+            CI-GHA,
+            pytest,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   dev-env:
     runs-on: ubuntu-latest
