@@ -53,6 +53,11 @@ from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
 from awx_plugins.credentials import injectors as builtin_injectors
 
+# DAB
+from ansible_base.resource_registry.tasks.sync import get_resource_server_client
+from ansible_base.resource_registry.utils.settings import resource_server_defined
+
+
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
@@ -81,10 +86,7 @@ def build_safe_env(env):
     return safe_env
 
 
-def check_gateway_for_user_in_organization(user, organization, requesting_user):
-    from ansible_base.resource_registry.tasks.sync import get_resource_server_client
-    from ansible_base.resource_registry.utils.settings import resource_server_defined
-
+def check_resource_server_for_user_in_organization(user, organization, requesting_user):
     if not resource_server_defined():
         return False
 
@@ -92,11 +94,11 @@ def check_gateway_for_user_in_organization(user, organization, requesting_user):
         return False
 
     client = get_resource_server_client(settings.RESOURCE_SERVICE_PATH, jwt_user_id=str(requesting_user.resource.ansible_id), raise_if_bad_request=True)
-    # need to get the organization object_id in gateway, by querying with ansible_id
+    # need to get the organization object_id in resource server, by querying with ansible_id
     response = client._make_request(path=f'resources/?ansible_id={str(organization.resource.ansible_id)}', method='GET').json()
     if response.get('count', 0) == 0:
         return False
-    org_id_in_gateway = response['results'][0]['object_id']
+    org_id_in_resource_server = response['results'][0]['object_id']
 
     client.base_url = client.base_url.replace('/api/gateway/v1/service-index/', '/api/gateway/v1/')
     # find role assignments with:
@@ -104,7 +106,7 @@ def check_gateway_for_user_in_organization(user, organization, requesting_user):
     # - user ansible id
     # - organization object id
     response = client._make_request(
-        path=f'role_user_assignments/?role_definition__name__in=Organization Member,Organization Admin&user__resource__ansible_id={str(user.resource.ansible_id)}&object_id={org_id_in_gateway}',
+        path=f'role_user_assignments/?role_definition__name__in=Organization Member,Organization Admin&user__resource__ansible_id={str(user.resource.ansible_id)}&object_id={org_id_in_resource_server}',
         method='GET',
     ).json()
     if response.get('count', 0) > 0:
@@ -365,7 +367,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                     return
 
                 requesting_user = kwargs.get('requesting_user', None)
-                if check_gateway_for_user_in_organization(actor, self.organization, requesting_user):
+                if check_resource_server_for_user_in_organization(actor, self.organization, requesting_user):
                     return
             if isinstance(actor, Team):
                 if actor.organization == self.organization:
