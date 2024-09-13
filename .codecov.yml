@@ -33,13 +33,21 @@ coverage:
         flags:
           - pytest
         paths:
-          - src/
+          - awx/
         target: 100%
       tests:
         flags:
           - pytest
         paths:
           - tests/
+          - >-
+            **/test/
+          - >-
+            **/tests/
+          - >-
+            **/test/**
+          - >-
+            **/tests/**
         target: 100%
       typing:
         flags:
