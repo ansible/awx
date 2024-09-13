@@ -34,7 +34,10 @@ jobs:
           - name: awx-collection
             command: /start_tests.sh test_collection_all
           - name: api-schema
-            command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+            command: >-
+              /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{
+                github.event.pull_request.base.ref || github.ref_name
+              }}
 
     steps:
       - uses: actions/checkout@v4
