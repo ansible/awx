@@ -81,6 +81,38 @@ def build_safe_env(env):
     return safe_env
 
 
+def check_gateway_for_user_in_organization(user, organization, requesting_user):
+    from ansible_base.resource_registry.tasks.sync import get_resource_server_client
+    from ansible_base.resource_registry.utils.settings import resource_server_defined
+
+    if not resource_server_defined():
+        return False
+
+    if not requesting_user:
+        return False
+
+    client = get_resource_server_client(settings.RESOURCE_SERVICE_PATH, jwt_user_id=str(requesting_user.resource.ansible_id), raise_if_bad_request=True)
+    # need to get the organization object_id in gateway, by querying with ansible_id
+    response = client._make_request(path=f'resources/?ansible_id={str(organization.resource.ansible_id)}', method='GET').json()
+    if response.get('count', 0) == 0:
+        return False
+    org_id_in_gateway = response['results'][0]['object_id']
+
+    client.base_url = client.base_url.replace('/api/gateway/v1/service-index/', '/api/gateway/v1/')
+    # find role assignments with:
+    # - roles Organization Member or Organization Admin
+    # - user ansible id
+    # - organization object id
+    response = client._make_request(
+        path=f'role_user_assignments/?role_definition__name__in=Organization Member,Organization Admin&user__resource__ansible_id={str(user.resource.ansible_id)}&object_id={org_id_in_gateway}',
+        method='GET',
+    ).json()
+    if response.get('count', 0) > 0:
+        return True
+
+    return False
+
+
 class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     """
     A credential contains information about how to talk to a remote resource
@@ -324,10 +356,16 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
 
-    def validate_role_assignment(self, actor, role_definition):
+    def validate_role_assignment(self, actor, role_definition, **kwargs):
         if self.organization:
             if isinstance(actor, User):
-                if actor.is_superuser or Organization.access_qs(actor, 'member').filter(id=self.organization.id).exists():
+                if actor.is_superuser:
+                    return
+                if Organization.access_qs(actor, 'member').filter(id=self.organization.id).exists():
+                    return
+
+                requesting_user = kwargs.get('requesting_user', None)
+                if check_gateway_for_user_in_organization(actor, self.organization, requesting_user):
                     return
             if isinstance(actor, Team):
                 if actor.organization == self.organization:
