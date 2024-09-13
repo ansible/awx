@@ -63,7 +63,7 @@ class AWXInstance:
     def instance_pretty(self):
         instance = (
             self.instance.hostname,
-            urljoin(settings.TOWER_URL_BASE, f"/#/instances/{self.instance.pk}/details"),
+            urljoin(settings.TOWER_URL_BASE, f"{settings.OPTIONAL_UI_URL_PREFIX}/infrastructure/instances/{self.instance.pk}/details"),
         )
         return f"[\"{instance[0]}\"]({instance[1]})"
 
