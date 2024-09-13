@@ -23,6 +23,8 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 
+    ^\s*@pytest\.mark\.xfail
+
 ignore_errors = True
 
 [xml]
