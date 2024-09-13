@@ -8,6 +8,9 @@ env:
   UPSTREAM_REPOSITORY_ID: 91594105
 on:
   pull_request:
+  push:
+    branches:
+      - devel  # needed to publish code coverage post-merge
 jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
