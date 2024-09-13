@@ -22,7 +22,10 @@ branch = True
 omit =
     awx/main/migrations/*
     awx/lib/site-packages/*
-source = awx
+source =
+    .
+source_pkgs =
+    awx
 
 [xml]
 output = ./reports/coverage.xml
