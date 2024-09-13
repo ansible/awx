@@ -1275,7 +1275,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return reverse('api:system_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/system/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/management/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     @property
     def event_class(self):
