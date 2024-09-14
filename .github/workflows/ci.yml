@@ -67,6 +67,8 @@ jobs:
             ${{
               toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
             }}
+          files: >-
+            ${{ steps.make-run.outputs.cov-report-files }}
           flags: >-
             CI-GHA,
             pytest,
@@ -85,6 +87,8 @@ jobs:
             ${{
               toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
             }}
+          files: >-
+            ${{ steps.make-run.outputs.test-result-files }}
           flags: >-
             CI-GHA,
             pytest,
