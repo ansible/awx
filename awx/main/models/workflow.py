@@ -690,7 +690,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         return reverse('api:workflow_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, '/#/jobs/workflow/{}'.format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/workflow/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def notification_data(self):
         result = super(WorkflowJob, self).notification_data()
