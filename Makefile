@@ -327,7 +327,12 @@ swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
+	(set -o pipefail && py.test --cov --cov-report=xml --junitxml=reports/junit.xml $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
+	fi
 
 check: black
 
@@ -361,10 +366,12 @@ test_coverage:
 	fi
 
 test_migrations:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test $(PYTEST_ARGS) $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test --create-db --cov=awx --cov-report=xml --junitxml=reports/junit.xml $(PYTEST_ARGS) $(TEST_DIRS)
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
+	fi
 
 ## Runs AWX_DOCKER_CMD inside a new docker container.
 docker-runner:
@@ -377,7 +384,12 @@ test_collection:
 	fi && \
 	if ! [ -x "$(shell command -v ansible-playbook)" ]; then pip install ansible-core; fi
 	ansible --version
-	py.test $(COLLECTION_TEST_DIRS) -v
+	py.test $(COLLECTION_TEST_DIRS) --cov --cov-report=xml --junitxml=reports/junit.xml -v
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
+	fi
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
 	# Second we will load any libraries out of the virtualenv (if it's unspecified that should be ok because python should not load out of an empty directory)

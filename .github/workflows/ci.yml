@@ -59,7 +59,6 @@ jobs:
       - name: Upload test coverage to Codecov
         if: >-
           !cancelled()
-          && matrix.tests.name == 'api-test'
           && steps.make-run.outputs.cov-report-files != ''
         uses: codecov/codecov-action@v4
         with:
@@ -79,7 +78,6 @@ jobs:
       - name: Upload test results to Codecov
         if: >-
           !cancelled()
-          && matrix.tests.name == 'api-test'
           && steps.make-run.outputs.test-result-files != ''
         uses: codecov/test-results-action@v1
         with:
