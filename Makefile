@@ -23,7 +23,7 @@ COLLECTION_TEST_TARGET ?=
 # args for collection install
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
-COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
+COLLECTION_INSTALL = $(HOME)/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
 COLLECTION_TEMPLATE_VERSION ?= false
 
 # NOTE: This defaults the container image version to the branch that's active
@@ -424,10 +424,23 @@ test_collection_sanity:
 	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
 	COLLECTION_VERSION=1.0.0 $(MAKE) install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test sanity $(COLLECTION_SANITY_ARGS)
+	cd $(COLLECTION_INSTALL) && \
+		ansible-test sanity $(COLLECTION_SANITY_ARGS) --coverage --junit && \
+		ansible-test coverage xml --requirements --group-by command --group-by version
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=sanity*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
+	  echo test-result-files="$$(find "$(COLLECTION_INSTALL)/tests/output/junit/" -type f -name '*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
+	fi
 
 test_collection_integration: install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test integration -vvv $(COLLECTION_TEST_TARGET)
+	cd $(COLLECTION_INSTALL) && \
+		ansible-test integration --coverage -vvv $(COLLECTION_TEST_TARGET) && \
+		ansible-test coverage xml --requirements --group-by command --group-by version
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=integration*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
+	fi
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \

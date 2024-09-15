@@ -190,7 +190,49 @@ jobs:
         run: python3 -m pip install --upgrade ansible-core
 
       - name: Run sanity tests
+        id: make-run
         run: make test_collection_sanity
+
+      - name: Upload test coverage to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.cov-report-files != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.cov-report-files }}
+          flags: >-
+            CI-GHA,
+            ansible-test,
+            sanity,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.test-result-files != ''
+        uses: codecov/test-results-action@v1
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.test-result-files }}
+          flags: >-
+            CI-GHA,
+            ansible-test,
+            sanity,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   collection-integration:
     name: awx_collection integration
@@ -223,6 +265,7 @@ jobs:
           python3 -m pip install -r awx_collection/requirements.txt
 
       - name: Run integration tests
+        id: make-run
         run: |
           echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
           echo '[general]' > ~/.tower_cli.cfg
@@ -230,9 +273,30 @@ jobs:
           echo 'oauth_token = ${{ steps.awx.outputs.admin-token }}' >> ~/.tower_cli.cfg
           echo 'verify_ssl = false' >> ~/.tower_cli.cfg
           TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
-          make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--coverage --requirements $TARGETS" test_collection_integration
+          make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
         env:
           ANSIBLE_TEST_PREFER_PODMAN: 1
+
+      - name: Upload test coverage to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.cov-report-files != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.cov-report-files }}
+          flags: >-
+            CI-GHA,
+            ansible-test,
+            integration,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Upload coverage report as artifact
       - uses: actions/upload-artifact@v3
