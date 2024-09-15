@@ -353,7 +353,7 @@ test:
 
 ## Run all API unit tests with coverage enabled.
 test_coverage:
-	$(MAKE) test PYTEST_ARGS="--create-db --cov=awx --cov-report=xml --junitxml=reports/junit.xml"
+	$(MAKE) test PYTEST_ARGS="--create-db --cov --cov-report=xml --junitxml=reports/junit.xml"
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
