@@ -128,8 +128,6 @@ The following credential types are supported with AWX:
 .. contents::
     :local:
 
-The credential types associated with AWS Secrets Manager, Centrify, CyberArk, HashiCorp Vault, Microsoft Azure Key Management System (KMS), and Thycotic are part of the credential plugins capability that allows an external system to lookup your secrets information. See the :ref:`ug_credential_plugins` section for further detail.
-
 
 .. _ug_credentials_aws:
 
@@ -166,10 +164,6 @@ AWX provides support for EC2 STS tokens (sometimes referred to as IAM STS creden
 
   To use implicit IAM role credentials, do not attach AWS cloud credentials in AWX when relying on IAM roles to access the AWS API.  While it may seem to make sense to attach your AWS cloud credential to your job template, doing so will force the use of your AWS credentials and will not "fall through" to use your IAM role credentials (this is due to the use of the boto library.)
 
-AWS Secrets Manager 
-^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_aws_lookup` for more detail.
-
 
 Ansible Galaxy/Automation Hub API Token
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -190,11 +184,6 @@ To populate the **Galaxy Server URL** and the **Auth Server URL** fields, look f
     :alt: Hub console tokens page
 
 
-Centrify Vault Credential Provider Lookup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_centrify` for more detail.
-
-
 Container Registry
 ^^^^^^^^^^^^^^^^^^^
 .. index::
@@ -208,16 +197,6 @@ Aside from specifying a name, the **Authentication URL** is the only required fi
 
 .. |Credentials - create container credential| image:: ../common/images/credentials-create-container-credential.png
     :alt: Credentials - create container credential form
-
-
-CyberArk Central Credential Provider Lookup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_cyberarkccp` for more detail.
-
-
-CyberArk Conjur Secrets Manager Lookup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_cyberarkconjur` for more detail.
 
 
 .. _ug_credentials_github:
@@ -305,17 +284,6 @@ Selecting this credential type allows you to create a credential that gives AWX 
 
 See :ref:`ug_content_signing` for detailed information on how to generate a valid keypair, use the CLI tool to sign content, and how to add the public key to AWX.
 
-
-HashiCorp Vault Secret Lookup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_hashivault` for more detail.
-
-
-HashiCorp Vault Signed SSH
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_hashivaultssh` for more detail.
-
-
 Insights
 ^^^^^^^^^^^
 
@@ -385,11 +353,6 @@ Machine credentials have several attributes that may be configured:
 
 .. warning::
    Credentials which are used in *Scheduled Jobs* must not be configured as "**Prompt on launch**".
-
-
-Microsoft Azure Key Vault
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_azurekeyvault` for more detail.
 
 
 Microsoft Azure Resource Manager
@@ -646,47 +609,6 @@ Source Control credentials have several attributes that may be configured:
     If you are using a GitHub account for a Source Control credential and you have 2FA (Two Factor Authentication) enabled on your account, you will need to use your Personal Access Token in the password field rather than your account password. 
 
 
-.. _ug_credentials_terraform:
-
-Terraform backend configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. index::
-   pair: credential types; Terraform
-   pair: backend configuration; Terraform
-
-
-Terraform is a HashiCorp tool used to automate various infrastructure tasks. Select this credential type to enable synchronization with the Terraform inventory source.
-
-The Terraform credential requires the **Backend configuration** attribute which should contain the data from a `Terraform backend block <https://developer.hashicorp.com/terraform/language/settings/backends/configuration>`_. You can paste, drag a file, browse to upload a file, or click the (|key icon|) button to populate the field from an external :ref:`ug_credential_plugins`. An example configuration for an S3 backend:
-
-.. |key icon| image:: ../common/images/key-mgmt-button.png
-    :alt: Credentials - create Terraform backend configuration credential form
-
-::
-
-    bucket = "my-terraform-state-bucket"
-    key = "path/to/terraform-state-file"
-    region = "us-east-1"
-    access_key = "my-aws-access-key"
-    secret_key = "my-aws-secret-access-key"
-
-|Credentials - create terraform credential|
-
-.. |Credentials - create terraform credential| image:: ../common/images/credentials-create-terraform-credential.png
-    :alt: Credentials - create Terraform backend configuration credential form
-
-Saving it stores the file path to the backend configuration in an environment variable ``TF_BACKEND_CONFIG_FILE`` that is made available to any job with the credential attached.
-
-
-Thycotic DevOps Secrets Vault
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_thycoticvault` for more detail.
-
-
-Thycotic Secret Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This is considered part of the secret management capability. See :ref:`ug_credentials_thycoticserver` for more detail.
 
 
 Vault
