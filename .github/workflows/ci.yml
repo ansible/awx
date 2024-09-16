@@ -248,6 +248,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        ansible:
+          - stable-2.17
+          # - devel
+        python:
+          - 3.12
+          - 3.11
+          - >-
+            3.10
         target-regex:
           - name: a-h
             regex: ^[a-h]
@@ -266,51 +274,58 @@ jobs:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies for running tests
-        run: |
-          python3 -m pip install -e ./awxkit/
-          python3 -m pip install -r awx_collection/requirements.txt
+      - name: Compute testing targets
+        id: targets-computation
+        run: >-
+          echo "integration-test-targets=$(
+          ls awx_collection/tests/integration/targets
+          | grep '${{ matrix.target-regex.regex }}'
+          | tr '\n' ' '
+          )" >> "${GITHUB_OUTPUT}"
 
-      - name: Run integration tests
-        id: make-run
-        run: |
-          echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
-          echo '[general]' > ~/.tower_cli.cfg
-          echo 'host = https://${{ steps.awx.outputs.ip }}:8043' >> ~/.tower_cli.cfg
-          echo 'oauth_token = ${{ steps.awx.outputs.admin-token }}' >> ~/.tower_cli.cfg
-          echo 'verify_ssl = false' >> ~/.tower_cli.cfg
-          TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
-          make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
+      - name: >-
+          Perform integration testing against
+          Ansible version ${{ matrix.ansible }}
+          under Python ${{ matrix.python }}
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        id: ansible-test
         env:
           ANSIBLE_TEST_PREFER_PODMAN: 1
-
-      - name: Upload test coverage to Codecov
-        if: >-
-          !cancelled()
-          && steps.make-run.outputs.cov-report-files != ''
-        uses: codecov/codecov-action@v4
         with:
-          fail_ci_if_error: >-
-            ${{
-              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
-            }}
-          files: >-
-            ${{ steps.make-run.outputs.cov-report-files }}
-          flags: >-
-            CI-GHA,
-            ansible-test,
-            integration,
-            OS-${{
-              runner.os
-            }}
-          token: ${{ secrets.CODECOV_TOKEN }}
+          ansible-core-version: ${{ matrix.ansible }}
+          codecov-token: ${{ secrets.CODECOV_TOKEN }}
+          collection-root: awx_collection
+          pre-test-cmd: >-
+            ansible-playbook
+            -i localhost,
+            tools/template_galaxy.yml
+            -e collection_package=awx
+            -e collection_namespace=awx
+            -e collection_version=100.100.100-git
+            -e '{"awx_template_version": false}'
+            ;
+            sed -i 's|^awxkit|awxkit @ file://'"$(readlink -f $(pwd)/../../..)"'/awxkit|' requirements.txt
+            ;
+            echo '::remove-matcher owner=python::'
+            ;
+            echo '[general]' > ~/.tower_cli.cfg
+            ;
+            echo 'host = https://awx:8043' >> ~/.tower_cli.cfg
+            ;
+            echo 'oauth_token = ${{ steps.awx.outputs.admin-token }}' >> ~/.tower_cli.cfg
+            ;
+            echo 'verify_ssl = false' >> ~/.tower_cli.cfg
+          target: >-
+            ${{ steps.targets-computation.outputs.integration-test-targets }}
+          target-python-version: ${{ matrix.python }}
+          testing-type: integration
 
       # Upload coverage report as artifact
       - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: coverage-${{ matrix.target-regex.name }}
-          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          path: ${{ steps.ansible-test.outputs.checkout-directory }}/tests/output/coverage/
 
       - uses: ./.github/actions/upload_awx_devel_logs
         if: always()
