@@ -97,6 +97,22 @@ jobs:
             }}
           token: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Upload awx jUnit test reports
+        if: >-
+          matrix.test.name == 'api-test'
+          && steps.make-run.outputs.test-result-files != ''
+          && github.event_name == 'push'
+          && github.repository == 'ansible/awx'
+          && github.ref_name == 'devel'
+        continue-on-error: true
+        run: >-
+          curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}"
+          --form "xunit_xml=${{ steps.make-run.outputs.test-result-files }}"
+          --form "component_name=awx"
+          --form "git_commit_sha=${{ github.sha }}"
+          --form "git_repository_url=https://github.com/${{ github.repository }}"
+          "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"
+
   dev-env:
     runs-on: ubuntu-latest
     timeout-minutes: 60
