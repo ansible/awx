@@ -30,14 +30,12 @@ Need help or want to discuss AWX including the documentation? See the :ref:`Comm
    rbac
    credentials
    credential_types
-   credential_plugins
    applications_auth
    execution_environments
    ee_reference
    projects
    project-sign
    inventories
-   inventory_plugins_templates
    job_templates
    job_slices
    workflows

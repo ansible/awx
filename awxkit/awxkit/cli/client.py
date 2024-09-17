@@ -2,8 +2,8 @@ from __future__ import print_function
 
 import logging
 import os
-import pkg_resources
 import sys
+from importlib.metadata import version as _get_version
 
 from requests.exceptions import RequestException
 
@@ -16,7 +16,7 @@ from awxkit.cli.utils import HelpfulArgumentParser, cprint, disable_color, color
 from awxkit.awx.utils import uses_sessions  # noqa
 
 
-__version__ = pkg_resources.get_distribution('awxkit').version
+__version__ = _get_version('awxkit')
 
 
 class CLI(object):
