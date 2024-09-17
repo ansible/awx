@@ -102,7 +102,7 @@ jobs:
           matrix.test.name == 'api-test'
           && steps.make-run.outputs.test-result-files != ''
           && github.event_name == 'push'
-          && github.repository == 'ansible/awx'
+          && env.UPSTREAM_REPOSITORY_ID == github.repository_id
           && github.ref_name == 'devel'
         continue-on-error: true
         run: >-
