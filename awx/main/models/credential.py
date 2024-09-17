@@ -1,10 +1,11 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
+from contextlib import nullcontext
 import functools
 import inspect
 import logging
 import os
-from pkg_resources import iter_entry_points
+from importlib.metadata import entry_points
 import re
 import stat
 import tempfile
@@ -14,6 +15,8 @@ from types import SimpleNamespace
 from jinja2 import sandbox
 
 # Django
+from django.apps.config import AppConfig
+from django.apps.registry import Apps
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -24,6 +27,7 @@ from django.utils.timezone import now
 from django.contrib.auth.models import User
 
 # DRF
+from awx.main.utils.pglock import advisory_lock
 from rest_framework.serializers import ValidationError as DRFValidationError
 
 # AWX
@@ -49,10 +53,15 @@ from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
 from awx_plugins.credentials import injectors as builtin_injectors
 
+# DAB
+from ansible_base.resource_registry.tasks.sync import get_resource_server_client
+from ansible_base.resource_registry.utils.settings import resource_server_defined
+
+
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
-credential_plugins = dict((ep.name, ep.load()) for ep in iter_entry_points('awx_plugins.credentials'))
+credential_plugins = {entry_point.name: entry_point.load() for entry_point in entry_points(group='awx_plugins.credentials')}
 
 HIDDEN_PASSWORD = '**********'
 
@@ -75,6 +84,46 @@ def build_safe_env(env):
         elif type(v) == str and urlpass_re.match(v):
             safe_env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
     return safe_env
+
+
+def check_resource_server_for_user_in_organization(user, organization, requesting_user):
+    if not resource_server_defined():
+        return False
+
+    if not requesting_user:
+        return False
+
+    client = get_resource_server_client(settings.RESOURCE_SERVICE_PATH, jwt_user_id=str(requesting_user.resource.ansible_id), raise_if_bad_request=False)
+    # need to get the organization object_id in resource server, by querying with ansible_id
+    response = client._make_request(path=f'resources/?ansible_id={str(organization.resource.ansible_id)}', method='GET')
+    response_json = response.json()
+    if response.status_code != 200:
+        logger.error(f'Failed to get organization object_id in resource server: {response_json.get("detail", "")}')
+        return False
+
+    if response_json.get('count', 0) == 0:
+        return False
+    org_id_in_resource_server = response_json['results'][0]['object_id']
+
+    client.base_url = client.base_url.replace('/api/gateway/v1/service-index/', '/api/gateway/v1/')
+    # find role assignments with:
+    # - roles Organization Member or Organization Admin
+    # - user ansible id
+    # - organization object id
+
+    response = client._make_request(
+        path=f'role_user_assignments/?role_definition__name__in=Organization Member,Organization Admin&user__resource__ansible_id={str(user.resource.ansible_id)}&object_id={org_id_in_resource_server}',
+        method='GET',
+    )
+    response_json = response.json()
+    if response.status_code != 200:
+        logger.error(f'Failed to get role user assignments in resource server: {response_json.get("detail", "")}')
+        return False
+
+    if response_json.get('count', 0) > 0:
+        return True
+
+    return False
 
 
 class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
@@ -320,10 +369,16 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
 
-    def validate_role_assignment(self, actor, role_definition):
+    def validate_role_assignment(self, actor, role_definition, **kwargs):
         if self.organization:
             if isinstance(actor, User):
-                if actor.is_superuser or Organization.access_qs(actor, 'member').filter(id=self.organization.id).exists():
+                if actor.is_superuser:
+                    return
+                if Organization.access_qs(actor, 'member').filter(id=self.organization.id).exists():
+                    return
+
+                requesting_user = kwargs.get('requesting_user', None)
+                if check_resource_server_for_user_in_organization(actor, self.organization, requesting_user):
                     return
             if isinstance(actor, Team):
                 if actor.organization == self.organization:
@@ -332,6 +387,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
 
 class CredentialType(CommonModelNameNotUnique):
+    CREDENTIAL_REGISTRATION_ADVISORY_LOCK_NAME = 'setup_tower_managed_defaults'
+
     """
     A reusable schema for a credential.
 
@@ -414,11 +471,29 @@ class CredentialType(CommonModelNameNotUnique):
         return dict((k, functools.partial(v.create)) for k, v in ManagedCredentialType.registry.items())
 
     @classmethod
-    def setup_tower_managed_defaults(cls, apps=None):
-        if apps is not None:
-            ct_class = apps.get_model('main', 'CredentialType')
-        else:
-            ct_class = CredentialType
+    def _get_credential_type_class(cls, apps: Apps = None, app_config: AppConfig = None):
+        """
+        Legacy code passing in apps while newer code should pass only the specific 'main' app config.
+        """
+        if apps and app_config:
+            raise ValueError('Expected only apps or app_config to be defined, not both')
+
+        if not any(
+            (
+                apps,
+                app_config,
+            )
+        ):
+            return CredentialType
+
+        if apps:
+            app_config = apps.get_app_config('main')
+
+        return app_config.get_model('CredentialType')
+
+    @classmethod
+    def _setup_tower_managed_defaults(cls, apps: Apps = None, app_config: AppConfig = None):
+        ct_class = cls._get_credential_type_class(apps=apps, app_config=app_config)
         for default in ManagedCredentialType.registry.values():
             existing = ct_class.objects.filter(name=default.name, kind=default.kind).first()
             if existing is not None:
@@ -435,6 +510,29 @@ class CredentialType(CommonModelNameNotUnique):
             created = ct_class(**params)
             created.inputs = created.injectors = {}
             created.save()
+
+    @classmethod
+    def setup_tower_managed_defaults(cls, apps: Apps = None, app_config: AppConfig = None, lock: bool = True, wait_for_lock: bool = False):
+        """
+        Create a CredentialType for discovered credential plugins.
+
+        By default, this function will attempt to acquire the globally distributed lock (postgres advisory lock).
+        If the lock is acquired the method will call the underlying method.
+        If the lock is NOT acquired the method will NOT call the underlying method.
+
+        lock=False will set acquired to True and appear to acquire the lock.
+        lock=True, wait_for_lock=False will attempt to acquire the lock and NOT block.
+        lock=True, wait_for_lock=True will attempt to acquire the lock and will block until the exclusive lock is acquired.
+
+        :param lock(optional[bool]):          Attempt to acquire the postgres advisory lock.
+        :param wait_for_lock(optional[bool]): Block and wait forever for the postgres advisory lock.
+        """
+        if apps and not apps.ready:
+            return
+
+        with advisory_lock(cls.CREDENTIAL_REGISTRATION_ADVISORY_LOCK_NAME, wait=wait_for_lock) if lock else nullcontext(True) as acquired:
+            if acquired:
+                cls._setup_tower_managed_defaults(apps=apps, app_config=app_config)
 
     @classmethod
     def load_plugin(cls, ns, plugin):

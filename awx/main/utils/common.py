@@ -18,6 +18,7 @@ import threading
 import contextlib
 import tempfile
 import functools
+from importlib.metadata import version as _get_version
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -147,6 +148,14 @@ def is_testing(argv=None):
     return False
 
 
+def bypass_in_test(func):
+    def fn(*args, **kwargs):
+        if not is_testing():
+            return func(*args, **kwargs)
+
+    return fn
+
+
 class RequireDebugTrueOrTest(logging.Filter):
     """
     Logging filter to output when in DEBUG mode or running tests.
@@ -222,9 +231,7 @@ def get_awx_version():
     from awx import __version__
 
     try:
-        import pkg_resources
-
-        return pkg_resources.require('awx')[0].version
+        return _get_version('awx')
     except Exception:
         return __version__
 

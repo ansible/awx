@@ -1,16 +1,6 @@
-[run]
-source = awx
-branch = True
-omit =
-    awx/main/migrations/*
-    awx/lib/site-packages/*
-
 [report]
 # Regexes for lines to exclude from consideration
-exclude_lines =
-    # Have to re-enable the standard pragma
-    pragma: no cover
-
+exclude_also =
     # Don't complain about missing debug-only code:
     def __repr__
     if self\.debug
@@ -23,7 +13,19 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 
+    ^\s*@pytest\.mark\.xfail
+
 ignore_errors = True
+
+[run]
+branch = True
+omit =
+    awx/main/migrations/*
+    awx/lib/site-packages/*
+source =
+    .
+source_pkgs =
+    awx
 
 [xml]
 output = ./reports/coverage.xml
