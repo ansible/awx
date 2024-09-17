@@ -15,8 +15,6 @@ exclude_also =
 
     ^\s*@pytest\.mark\.xfail
 
-ignore_errors = True
-
 [run]
 branch = True
 omit =
