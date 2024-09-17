@@ -103,7 +103,7 @@ jobs:
           && steps.make-run.outputs.test-result-files != ''
           && github.event_name == 'push'
           && env.UPSTREAM_REPOSITORY_ID == github.repository_id
-          && github.ref_name == 'devel'
+          && github.ref_name == github.event.repository.default_branch
         continue-on-error: true
         run: >-
           curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}"
