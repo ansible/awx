@@ -200,59 +200,46 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
+      matrix:
+        ansible:
+          - stable-2.17
+          # - devel
     steps:
-      - uses: actions/checkout@v4
+      - name: Perform sanity testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
         with:
-          show-progress: false
+          ansible-core-version: ${{ matrix.ansible }}
+          codecov-token: ${{ secrets.CODECOV_TOKEN }}
+          collection-root: awx_collection
+          pre-test-cmd: >-
+            ansible-playbook
+            -i localhost,
+            tools/template_galaxy.yml
+            -e collection_package=awx
+            -e collection_namespace=awx
+            -e collection_version=1.0.0
+            -e '{"awx_template_version": false}'
+          testing-type: sanity
 
-      # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
-      - name: Upgrade ansible-core
-        run: python3 -m pip install --upgrade ansible-core
-
-      - name: Run sanity tests
-        id: make-run
-        run: make test_collection_sanity
-
-      - name: Upload test coverage to Codecov
-        if: >-
-          !cancelled()
-          && steps.make-run.outputs.cov-report-files != ''
-        uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: >-
-            ${{
-              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
-            }}
-          files: >-
-            ${{ steps.make-run.outputs.cov-report-files }}
-          flags: >-
-            CI-GHA,
-            ansible-test,
-            sanity,
-            OS-${{
-              runner.os
-            }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Upload test results to Codecov
+      - name: Upload awx jUnit test reports to the unified dashboard
         if: >-
           !cancelled()
           && steps.make-run.outputs.test-result-files != ''
-        uses: codecov/test-results-action@v1
-        with:
-          fail_ci_if_error: >-
-            ${{
-              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
-            }}
-          files: >-
-            ${{ steps.make-run.outputs.test-result-files }}
-          flags: >-
-            CI-GHA,
-            ansible-test,
-            sanity,
-            OS-${{
-              runner.os
-            }}
-          token: ${{ secrets.CODECOV_TOKEN }}
+          && github.event_name == 'push'
+          && env.UPSTREAM_REPOSITORY_ID == github.repository_id
+          && github.ref_name == github.event.repository.default_branch
+        run: |
+          for junit_file in $(echo '${{ steps.make-run.outputs.test-result-files }}' | sed 's/,/ /')
+          do
+              curl \
+                -v \
+                --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
+                --form "xunit_xml=@${junit_file}" \
+                --form "component_name=awx" \
+                --form "git_commit_sha=${{ github.sha }}" \
+                --form "git_repository_url=https://github.com/${{ github.repository }}" \
+                "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"
+          done
 
   collection-integration:
     name: awx_collection integration
