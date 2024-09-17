@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload awx jUnit test reports
         if: >-
-          matrix.test.name == 'api-test'
+          !cancelled()
           && steps.make-run.outputs.test-result-files != ''
           && github.event_name == 'push'
           && env.UPSTREAM_REPOSITORY_ID == github.repository_id
