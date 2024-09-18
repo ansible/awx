@@ -93,8 +93,8 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
             user = request.user
             if not user.pk:
                 return
-            if not (user.social_auth.exists() or user.enterprise_auth.exists()):
-                logout(request)
+
+            logout(request)
 
 
 class URLModificationMiddleware(MiddlewareMixin):

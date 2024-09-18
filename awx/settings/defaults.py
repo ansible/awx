@@ -313,8 +313,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'awx.ui.context_processors.csp',
                 'awx.ui.context_processors.version',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
             ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
@@ -344,14 +342,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'polymorphic',
-    'social_django',
     'django_guid',
     'corsheaders',
     'awx.conf',
     'awx.main',
     'awx.api',
     'awx.ui',
-    'awx.sso',
     'solo',
     'ansible_base.rest_filters',
     'ansible_base.jwt_consumer',
@@ -386,9 +382,7 @@ REST_FRAMEWORK = {
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
-AUTHENTICATION_BACKENDS = (
-    'awx.main.backends.AWXModelBackend',
-)
+AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 
 
 # Django OAuth Toolkit settings
@@ -455,51 +449,12 @@ CELERYBEAT_SCHEDULE = {
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
 
-# Social Auth configuration.
-SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
-SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
-SOCIAL_AUTH_USER_MODEL = 'auth.User'
 ROLE_SINGLETON_USER_RELATIONSHIP = ''
 ROLE_SINGLETON_TEAM_RELATIONSHIP = ''
 
 # We want to short-circuit RBAC methods to get permission to system admins and auditors
 ROLE_BYPASS_SUPERUSER_FLAGS = ['is_superuser']
 ROLE_BYPASS_ACTION_FLAGS = {'view': 'is_system_auditor'}
-
-_SOCIAL_AUTH_PIPELINE_BASE = (
-    'social_core.pipeline.social_auth.social_details',
-    'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.auth_allowed',
-    'social_core.pipeline.social_auth.social_user',
-    'social_core.pipeline.user.get_username',
-    'social_core.pipeline.social_auth.associate_by_email',
-    'social_core.pipeline.user.create_user',
-    'awx.sso.social_base_pipeline.check_user_found_or_created',
-    'social_core.pipeline.social_auth.associate_user',
-    'social_core.pipeline.social_auth.load_extra_data',
-    'awx.sso.social_base_pipeline.set_is_active_for_new_user',
-    'social_core.pipeline.user.user_details',
-    'awx.sso.social_base_pipeline.prevent_inactive_login',
-)
-
-SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
-    'awx.sso.social_pipeline.update_user_orgs',
-    'awx.sso.social_pipeline.update_user_teams',
-    'ansible_base.resource_registry.utils.service_backed_sso_pipeline.redirect_to_resource_server',
-)
-
-SOCIAL_AUTH_LOGIN_URL = '/'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
-SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
-SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
-
-SOCIAL_AUTH_RAISE_EXCEPTIONS = False
-SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
-# SOCIAL_AUTH_SLUGIFY_USERNAMES = True
-SOCIAL_AUTH_CLEAN_USERNAMES = True
-
-SOCIAL_AUTH_SANITIZE_REDIRECTS = True
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment
@@ -941,7 +896,6 @@ MIDDLEWARE = [
     'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'awx.main.middleware.OptionalURLPrefixPath',
-    'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',

@@ -8,7 +8,6 @@ from rest_framework import serializers
 from awx.conf import fields, register, register_validate
 from awx.api.fields import OAuth2ProviderField
 from oauth2_provider.settings import oauth2_settings
-from awx.sso.common import is_remote_auth_enabled
 
 
 register(
@@ -109,7 +108,7 @@ register(
 
 
 def authentication_validate(serializer, attrs):
-    if attrs.get('DISABLE_LOCAL_AUTH', False) and not is_remote_auth_enabled():
+    if attrs.get('DISABLE_LOCAL_AUTH', False):
         raise serializers.ValidationError(_("There are no remote authentication systems configured."))
     return attrs
 

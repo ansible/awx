@@ -339,7 +339,7 @@ api-lint:
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/tools/scripts/egg_info_dev
 
-TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
+TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 PYTEST_ARGS ?= -n auto
 ## Run all API unit tests.
 test:
@@ -440,7 +440,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit
 
 ## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
