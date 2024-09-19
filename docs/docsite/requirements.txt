@@ -35,7 +35,7 @@ pygments==2.16.1
     # via
     #   ansible-pygments
     #   sphinx
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via -r requirements.in
 requests==2.31.0
     # via sphinx
