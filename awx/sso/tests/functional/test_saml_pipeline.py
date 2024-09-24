@@ -45,6 +45,8 @@ class TestSAMLSimpleMaps:
                         'remove': True,
                         'admins': 'foobar',
                         'remove_admins': True,
+                        "auditors": "bar",
+                        "remove_auditors": True,
                         'users': 'foo',
                         'remove_users': True,
                         'organization_alias': '',
@@ -63,6 +65,7 @@ class TestSAMLSimpleMaps:
 
         # Test user membership logic with regular expressions
         backend.setting('ORGANIZATION_MAP')['Default']['admins'] = re.compile('.*')
+        backend.setting('ORGANIZATION_MAP')['Default']['auditors'] = re.compile('.*')
         backend.setting('ORGANIZATION_MAP')['Default']['users'] = re.compile('.*')
 
         desired_org_state = {}
@@ -71,13 +74,15 @@ class TestSAMLSimpleMaps:
         _update_user_orgs(backend, desired_org_state, orgs_to_create, u2)
         _update_user_orgs(backend, desired_org_state, orgs_to_create, u3)
 
-        assert desired_org_state == {'Default': {'member_role': True, 'admin_role': True, 'auditor_role': False}}
+        assert desired_org_state == {'Default': {'member_role': True, 'admin_role': True, 'auditor_role': True}}
         assert orgs_to_create == ['Default']
 
         # Test remove feature enabled
         backend.setting('ORGANIZATION_MAP')['Default']['admins'] = ''
+        backend.setting('ORGANIZATION_MAP')['Default']['auditors'] = ''
         backend.setting('ORGANIZATION_MAP')['Default']['users'] = ''
         backend.setting('ORGANIZATION_MAP')['Default']['remove_admins'] = True
+        backend.setting('ORGANIZATION_MAP')['Default']['remove_auditors'] = True
         backend.setting('ORGANIZATION_MAP')['Default']['remove_users'] = True
         desired_org_state = {}
         orgs_to_create = []
@@ -87,12 +92,13 @@ class TestSAMLSimpleMaps:
 
         # Test remove feature disabled
         backend.setting('ORGANIZATION_MAP')['Default']['remove_admins'] = False
+        backend.setting('ORGANIZATION_MAP')['Default']['remove_auditors'] = False
         backend.setting('ORGANIZATION_MAP')['Default']['remove_users'] = False
         desired_org_state = {}
         orgs_to_create = []
         _update_user_orgs(backend, desired_org_state, orgs_to_create, u2)
 
-        assert desired_org_state == {'Default': {'member_role': None, 'admin_role': None, 'auditor_role': False}}
+        assert desired_org_state == {'Default': {'member_role': None, 'admin_role': None, 'auditor_role': None}}
         assert orgs_to_create == ['Default']
 
         # Test organization alias feature
