@@ -662,7 +662,8 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 
 # If False, do not allow creation of resources that are shared with the platform ingress
 # e.g. organizations, teams, and users
-ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
+# This setting is ignored if RESOURCE_SERVER is not set, implying standalone config
+ALLOW_LOCAL_RESOURCE_MANAGEMENT = False
 
 # If True, allow users to be assigned to roles that were created via JWT
 ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
