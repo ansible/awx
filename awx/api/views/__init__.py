@@ -132,6 +132,14 @@ from awx.main.utils import set_environ
 logger = logging.getLogger('awx.api.views')
 
 
+def allow_local_edits() -> bool:
+    # Borrowed logic from django-ansible-base resource_server_defined
+    if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+        return True
+    # Regardless of prior setting, local modifications are allowed if no resource server defined
+    return not bool(getattr(settings, 'RESOURCE_SERVER', {}).get('URL', ''))
+
+
 def unpartitioned_event_horizon(cls):
     with connection.cursor() as cursor:
         cursor.execute(f"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '_unpartitioned_{cls._meta.db_table}';")
@@ -730,7 +738,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.create)
         def create_wrapper(*args, **kwargs):
-            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+            if allow_local_edits():
                 return cls.original_create(*args, **kwargs)
             raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
 
@@ -741,7 +749,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.delete)
         def delete_wrapper(*args, **kwargs):
-            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+            if allow_local_edits():
                 return cls.original_delete(*args, **kwargs)
             raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
 
@@ -752,7 +760,7 @@ def immutablesharedfields(cls):
 
         @functools.wraps(cls.perform_update)
         def update_wrapper(*args, **kwargs):
-            if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+            if not allow_local_edits():
                 view, serializer = args
                 instance = view.get_object()
                 if instance:
@@ -1340,7 +1348,7 @@ class UserRolesList(SubListAttachDetachAPIView):
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
         # Prevent user to be associated with team/org when ALLOW_LOCAL_RESOURCE_MANAGEMENT is False
-        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+        if not allow_local_edits():
             for model in [models.Organization, models.Team]:
                 ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
@@ -4391,7 +4399,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
         role = self.get_parent_object()
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+        if not allow_local_edits():
             for model in [models.Organization, models.Team]:
                 ct = content_types[model]
                 if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
