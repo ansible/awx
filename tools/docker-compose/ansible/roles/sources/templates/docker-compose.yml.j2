@@ -1,10 +1,9 @@
 #jinja2: lstrip_blocks: True
 ---
-version: '2.1'
 services:
 {% if editable_dependencies | length > 0 %}
   init_awx:
-    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    image: ${DEVEL_IMAGE_NAME:-ghcr.io/ansible/awx_devel:devel}
     container_name: tools_init_awx
     command: /awx_devel/tools/docker-compose/editable_dependencies/install.sh
     user: root
@@ -25,7 +24,7 @@ services:
   # Primary AWX Development Container
   awx_{{ container_postfix }}:
     user: "{{ ansible_user_uid }}"
-    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    image: ${DEVEL_IMAGE_NAME:-ghcr.io/ansible/awx_devel:devel}
     container_name: tools_awx_{{ container_postfix }}
     hostname: awx-{{ container_postfix }}
     command: launch_awx.sh
@@ -308,7 +307,7 @@ services:
 
 {% if execution_node_count|int > 0 %}
   receptor-hop:
-    image: {{ receptor_image }}
+    image: ${RECEPTOR_IMAGE:-quay.io/ansible/receptor:devel}
     user: root
     container_name: tools_receptor_hop
     hostname: receptor-hop
@@ -321,7 +320,7 @@ services:
       - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
   {% for i in range(execution_node_count|int) %}
   receptor-{{ loop.index }}:
-    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    image: ${DEVEL_IMAGE_NAME:-ghcr.io/ansible/awx_devel:devel}
     user: "{{ ansible_user_uid }}"
     container_name: tools_receptor_{{ loop.index }}
     hostname: receptor-{{ loop.index }}
