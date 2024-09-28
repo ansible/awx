@@ -12,6 +12,8 @@ import pytest
 import yaml
 import jinja2
 
+from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT
+
 from django.conf import settings
 
 from awx.main.models import (
@@ -37,7 +39,6 @@ from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
 from awx.main.tasks import jobs, system, receptor
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
-from awx.main.utils.execution_environments import CONTAINER_ROOT
 
 from awx.main.utils.licensing import Licenser
 from awx.main.constants import JOB_VARIABLE_PREFIXES

@@ -18,6 +18,9 @@ import urllib.parse as urlparse
 # Django
 from django.conf import settings
 
+# Shared code for the AWX platform
+from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
+
 
 # Runner
 import ansible_runner
@@ -67,7 +70,6 @@ from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.execution_environments import CONTAINER_ROOT, to_container_path
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.common import (
     update_scm_url,
@@ -909,7 +911,7 @@ class RunJob(SourceControlMixin, BaseTask):
         cred_files = private_data_files.get('credentials', {})
         for cloud_cred in job.cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
-                env['OS_CLIENT_CONFIG_FILE'] = to_container_path(cred_files.get(cloud_cred, ''), private_data_dir)
+                env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
@@ -1552,7 +1554,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                 args.append('-i')
                 script_params = dict(hostvars=True, towervars=True)
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
-                args.append(to_container_path(source_inv_path, private_data_dir))
+                args.append(get_incontainer_path(source_inv_path, private_data_dir))
                 # Include any facts from input inventories so they can be used in filters
                 start_fact_cache(
                     input_inventory.hosts.only(*HOST_FACTS_FIELDS),
