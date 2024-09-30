@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 from django.contrib.auth.models import AnonymousUser
 
 from ansible_base.lib.utils.response import get_relative_url
-from ansible_base.lib.testing.fixtures import settings_override_mutable
+from ansible_base.lib.testing.fixtures import settings_override_mutable  # NOQA: F401 imported to be a pytest fixture
 
 from awx.main.models import User
 from awx.api.versioning import reverse
@@ -22,7 +22,7 @@ EXAMPLE_USER_DATA = {"username": "affable", "first_name": "a", "last_name": "a",
 
 
 @pytest.mark.django_db
-def test_validate_local_user(post, admin_user, settings, settings_override_mutable):
+def test_validate_local_user(post, admin_user, settings, settings_override_mutable):  # NOQA: F811 this is how you use a pytest fixture
     "Copy of the test by same name in django-ansible-base for integration and compatibility testing"
     url = get_relative_url('validate-local-account')
     admin_user.set_password('password')
