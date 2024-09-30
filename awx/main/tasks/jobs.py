@@ -299,7 +299,7 @@ class BaseTask(object):
         env = {}
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
-            if attr == attr.upper() and attr.startswith('ANSIBLE_'):
+            if attr == attr.upper() and attr.startswith('ANSIBLE_') and not attr.startswith('ANSIBLE_BASE_'):
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
