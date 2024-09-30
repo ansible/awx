@@ -291,7 +291,8 @@ jobs:
           echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
           echo '[general]' > ~/.tower_cli.cfg
           echo 'host = https://${{ steps.awx.outputs.ip }}:8043' >> ~/.tower_cli.cfg
-          echo 'oauth_token = ${{ steps.awx.outputs.admin-token }}' >> ~/.tower_cli.cfg
+          echo 'username = admin' >> ~/.tower_cli.cfg
+          echo 'password = password' >> ~/.tower_cli.cfg
           echo 'verify_ssl = false' >> ~/.tower_cli.cfg
           TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
           make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
