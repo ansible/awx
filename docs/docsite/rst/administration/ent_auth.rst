@@ -552,39 +552,3 @@ Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol th
 
 4. Click **Save** when done.
 
-
-.. _ag_auth_oidc:
-
-Generic OIDC settings
-----------------------
-Similar to SAML, OpenID Connect (OIDC) is uses the OAuth 2.0 framework. It allows third-party applications to verify the identity and obtain basic end-user information. The main difference between OIDC and SAML is that SAML has a service provider (SP)-to-IdP trust relationship, whereas OIDC establishes the trust with the channel (HTTPS) that is used to obtain the security token. To obtain the credentials needed to setup OIDC with AWX, refer to the documentation from the identity provider (IdP) of your choice that has OIDC support.
-
-To configure OIDC in AWX:
-
-1. Click **Settings** from the left navigation bar.
-
-2. On the left side of the Settings window, click **Generic OIDC settings** from the list of Authentication options. 
-
-3. Click **Edit** and enter information in the following fields:
-
-- **OIDC Key**: Client ID from your 3rd-party IdP.
-- **OIDC Secret**: Client Secret from your IdP.
-- **OIDC Provider URL**: URL for your OIDC provider.
-- **Verify OIDC Provider Certificate**: Use the toggle to enable/disable the OIDC provider SSL certificate verification.
-
-The example below shows specific values associated to GitHub as the generic IdP:
-
- .. image:: ../common/images/configure-awx-auth-oidc.png
-    :alt: OpenID Connect (OIDC) configuration details in AWX settings.
-
-4. Click **Save** when done.
-
-
-.. note::
-
-    There is currently no support for team and organization mappings for OIDC at this time. The OIDC adapter does authentication only and not authorization. In other words, it is only capable of authenticating whether this user is who they say they are, not authorizing what this user is allowed to do. Configuring generic OIDC creates the UserID appended with an ID/key to differentiate the same user ID originating from two different sources and therefore, considered different users. So one will get an ID of just the user name and the second will be the ``username-<random number>``.
-
-5. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the OIDC logo to indicate it as a alternate method of logging into AWX.
-
- .. image:: ../common/images/configure-awx-auth-oidc-logo.png
-    :alt: AWX login screen displaying the OpenID Connect (OIDC) logo for authentication.

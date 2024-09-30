@@ -11,8 +11,6 @@ Through the AWX user interface, you can set up a simplified login through variou
 - :ref:`ag_auth_radius` 
 - :ref:`ag_auth_saml` 
 - :ref:`ag_auth_tacacs`
-- :ref:`ag_auth_oidc`
-
 
 Different authentication types require you to enter different information. Be sure to include all the information as required.
 
