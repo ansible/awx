@@ -31,8 +31,6 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
 # If set to true docker-compose will also start a pgbouncer instance and use it
 PGBOUNCER ?= false
-# If set to true docker-compose will also start a keycloak instance
-KEYCLOAK ?= false
 # If set to true docker-compose will also start an ldap instance
 LDAP ?= false
 # If set to true docker-compose will also start a splunk instance
@@ -507,7 +505,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
 	    -e enable_pgbouncer=$(PGBOUNCER) \
-	    -e enable_keycloak=$(KEYCLOAK) \
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
