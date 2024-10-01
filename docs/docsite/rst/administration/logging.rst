@@ -368,6 +368,3 @@ LDAP
 ~~~~~~
 You can enable logging messages for the LDAP adapter. Refer to the :ref:`ldap_logging` section for more detail.
 
-SAML
-~~~~~~~
-You can enable logging messages for the SAML adapter the same way you can enable logging for LDAP. Refer to the :ref:`ldap_logging` section for more detail.
