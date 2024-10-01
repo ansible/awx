@@ -339,7 +339,6 @@ class TestCommonFunctions:
             ('JUNK_SETTING', False),
             # Set the hard coded settings
             ('AUTH_LDAP_SERVER_URI', True),
-            ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
             ('RADIUS_SERVER', True),
             ('TACACSPLUS_HOST', True),
             # Set some SOCIAL_SOCIAL_AUTH_OIDC_KEYAUTH_*_KEY settings
@@ -354,8 +353,6 @@ class TestCommonFunctions:
             ('SOCIAL_AUTH_OIDC_KEY', True),
             # Try a hypothetical future one
             ('SOCIAL_AUTH_GIBBERISH_KEY', True),
-            # Do a SAML one
-            ('SOCIAL_AUTH_SAML_SP_PRIVATE_KEY', False),
         ],
     )
     def test_is_remote_auth_enabled(self, setting, expected):

@@ -20,7 +20,6 @@ page.register_page(
         resources.settings_jobs,
         resources.settings_ldap,
         resources.settings_radius,
-        resources.settings_saml,
         resources.settings_system,
         resources.settings_tacacsplus,
         resources.settings_ui,

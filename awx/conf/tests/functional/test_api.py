@@ -104,24 +104,6 @@ def test_setting_singleton_update(api_request, dummy_setting):
 
 
 @pytest.mark.django_db
-def test_setting_singleton_update_hybriddictfield_with_forbidden(api_request, dummy_setting):
-    # Some HybridDictField subclasses have a child of _Forbidden,
-    # indicating that only the defined fields can be filled in.  Make
-    # sure that the _Forbidden validator doesn't get used for the
-    # fields.  See also https://github.com/ansible/awx/issues/4099.
-    with dummy_setting('FOO_BAR', field_class=sso_fields.SAMLOrgAttrField, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.clear_setting_cache'
-    ):
-        api_request(
-            'patch',
-            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
-            data={'FOO_BAR': {'saml_admin_attr': 'Admins', 'saml_attr': 'Orgs'}},
-        )
-        response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
-        assert response.data['FOO_BAR'] == {'saml_admin_attr': 'Admins', 'saml_attr': 'Orgs'}
-
-
-@pytest.mark.django_db
 def test_setting_singleton_update_dont_change_readonly_fields(api_request, dummy_setting):
     with dummy_setting('FOO_BAR', field_class=fields.IntegerField, read_only=True, default=4, category='FooBar', category_slug='foobar'), mock.patch(
         'awx.conf.views.clear_setting_cache'

@@ -406,7 +406,6 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.open_id_connect.OpenIdConnectAuth',
     'social_core.backends.azuread.AzureADOAuth2',
-    'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',
 )
 
@@ -525,8 +524,6 @@ _SOCIAL_AUTH_PIPELINE_BASE = (
     'awx.sso.social_base_pipeline.prevent_inactive_login',
 )
 SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.social_pipeline.update_user_orgs', 'awx.sso.social_pipeline.update_user_teams')
-SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.saml_pipeline.populate_user', 'awx.sso.saml_pipeline.update_user_flags')
-SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
@@ -576,18 +573,6 @@ SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SCOPE = ['user:email', 'read:org']
 
 SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
 SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
-
-SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
-SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
-SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
-SOCIAL_AUTH_SAML_ORG_INFO = {}
-SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
-SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
-SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
-
-SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
-SOCIAL_AUTH_SAML_TEAM_ATTR = {}
-SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR = {}
 
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment

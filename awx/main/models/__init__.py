@@ -250,8 +250,6 @@ def user_is_in_enterprise_category(user, category):
     # log in. Remove it in a future release
     if category == 'radius':
         ret = ret or not user.has_usable_password()
-    elif category == 'saml':
-        ret = ret or user.social_auth.all()
     return ret
 
 

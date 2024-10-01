@@ -198,16 +198,15 @@ def get_external_account(user):
 def is_remote_auth_enabled():
     from django.conf import settings
 
-    # Append LDAP, Radius, TACACS+ and SAML options
+    # Append LDAP, Radius, and TACACS+ options
     settings_that_turn_on_remote_auth = [
         'AUTH_LDAP_SERVER_URI',
-        'SOCIAL_AUTH_SAML_ENABLED_IDPS',
         'RADIUS_SERVER',
         'TACACSPLUS_HOST',
     ]
-    # Also include any SOCAIL_AUTH_*KEY (except SAML)
+    # Also include any SOCAIL_AUTH_*KEY
     for social_auth_key in dir(settings):
-        if social_auth_key.startswith('SOCIAL_AUTH_') and social_auth_key.endswith('_KEY') and 'SAML' not in social_auth_key:
+        if social_auth_key.startswith('SOCIAL_AUTH_') and social_auth_key.endswith('_KEY'):
             settings_that_turn_on_remote_auth.append(social_auth_key)
 
     return any(getattr(settings, s, None) for s in settings_that_turn_on_remote_auth)
