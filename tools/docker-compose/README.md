@@ -271,7 +271,6 @@ $ make docker-compose
 - [Using Logstash](./docs/logstash.md)
 - [Start a Cluster](#start-a-cluster)
 - [Start with Minikube](#start-with-minikube)
-- [SAML and OIDC Integration](#saml-and-oidc-integration)
 - [Splunk Integration](#splunk-integration)
 
 ### Start a Shell
@@ -351,7 +350,6 @@ If you want to clean all things once your are done, you can do:
 ```bash
 (host)$ make docker-compose-container-group-clean
 ```
-
 
 ### Splunk Integration
 
