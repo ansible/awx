@@ -1,4 +1,4 @@
-from django.db import migrations, connection
+from django.db import migrations
 
 
 class Migration(migrations.Migration):

@@ -29,7 +29,6 @@ from awx.sso.fields import (
     SocialOrganizationMapField,
     SocialTeamMapField,
 )
-from awx.main.validators import validate_private_key, validate_certificate
 from awx.sso.validators import validate_ldap_bind_dn, validate_tacacsplus_disallow_nonascii  # noqa
 
 

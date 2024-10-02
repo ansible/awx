@@ -8,7 +8,6 @@ from awx.main.utils.encryption import decrypt_field
 from awx.conf import fields
 from awx.conf.registry import settings_registry
 from awx.conf.models import Setting
-from awx.sso import fields as sso_fields
 
 
 @pytest.fixture

@@ -14,7 +14,6 @@ from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
 from django.utils.encoding import force_str
-from django.http import HttpResponse
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings

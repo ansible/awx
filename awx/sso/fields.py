@@ -25,7 +25,6 @@ from awx.sso.ldap_group_types import PosixUIDGroupType  # noqa
 
 # AWX
 from awx.conf import fields
-from awx.main.validators import validate_certificate
 from awx.sso.validators import (  # noqa
     validate_ldap_dn,
     validate_ldap_bind_dn,
