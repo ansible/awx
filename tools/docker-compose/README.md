@@ -272,7 +272,6 @@ $ make docker-compose
 - [Start a Cluster](#start-a-cluster)
 - [Start with Minikube](#start-with-minikube)
 - [SAML and OIDC Integration](#saml-and-oidc-integration)
-- [OpenLDAP Integration](#openldap-integration)
 - [Splunk Integration](#splunk-integration)
 - [tacacs+ Integration](#tacacs+-integration)
 
@@ -436,41 +435,6 @@ Note: The OIDC adapter performs authentication only, not authorization. So any u
 
 If you Keycloak configuration is not working and you need to rerun the playbook to try a different `container_reference` or `oidc_reference` you can log into the Keycloak admin console on port 8443 and select the AWX realm in the upper left drop down. Then make sure you are on "Ream Settings" in the Configure menu option and click the trash can next to AWX in the main page window pane. This will completely remove the AWX ream (which has both SAML and OIDC settings) enabling you to re-run the plumb playbook.
 
-### OpenLDAP Integration
-
-OpenLDAP is an LDAP provider that can be used to test AWX with LDAP integration. This section describes how to build a reference OpenLDAP instance and plumb it with your AWX for testing purposes.
-
-First, be sure that you have the awx.awx collection installed by running `make install_collection`.
-
-Anytime you want to run an OpenLDAP instance alongside AWX we can start docker-compose with the LDAP option to get an LDAP instance with the command:
-```bash
-LDAP=true make docker-compose
-```
-
-Once the containers come up two new ports (389, 636) should be exposed and the LDAP server should be running on those ports. The first port (389) is non-SSL and the second port (636) is SSL enabled.
-
-Now we are ready to configure and plumb OpenLDAP with AWX. To do this we have provided a playbook which will:
-* Backup and configure the LDAP adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backed up through the API, you need a DB backup to recover this.
-
-Note: The default configuration will utilize the non-tls connection. If you want to use the tls configuration you will need to work through TLS negotiation issues because the LDAP server is using a self signed certificate.
-
-You can run the playbook like:
-```bash
-export CONTROLLER_USERNAME=<your username>
-export CONTROLLER_PASSWORD=<your password>
-ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml
-```
-
-
-Once the playbook is done running LDAP should now be setup in your development environment. This realm has four users with the following username/passwords:
-1. awx_ldap_unpriv:unpriv123
-2. awx_ldap_admin:admin123
-3. awx_ldap_auditor:audit123
-4. awx_ldap_org_admin:orgadmin123
-
-The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users go to the AWX login screen enter the username/password.
-
-
 ### Splunk Integration
 
 Splunk is a log aggregation tool that can be used to test AWX with external logging integration. This section describes how to build a reference Splunk instance and plumb it with your AWX for testing purposes.
@@ -550,7 +514,7 @@ To create a secret connected to this vault in AWX you can run the following play
 ```bash
 export CONTROLLER_USERNAME=<your username>
 export CONTROLLER_PASSWORD=<your password>
-ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=false
+ansible-playbook tools/docker-compose/ansible/plumb_vault.yml
 ```
 
 This will create the following items in your AWX instance:
@@ -574,53 +538,6 @@ If you have a playbook like:
 ```
 
 And run it through AWX with the credential `Credential From Vault via Token Auth` tied to it, the debug should result in `this_is_the_secret_value`. If you run it through AWX with the credential `Credential From Vault via Userpass Auth`, the debug should result in `this_is_the_userpass_secret_value`.
-
-### HashiVault with LDAP
-
-If you wish to have your OpenLDAP container connected to the Vault container, you will first need to have the OpenLDAP container running alongside AWX and Vault.
-
-
-```bash
-
-VAULT=true LDAP=true make docker-compose
-
-```
-
-Similar to the above, you will need to unseal the vault before we can run the other needed playbooks.
-
-```bash
-
-ansible-playbook tools/docker-compose/ansible/unseal_vault.yml
-
-```
-
-Now that the vault is unsealed, we can plumb the vault container now while passing true to enable_ldap extra var.
-
-
-```bash
-
-export CONTROLLER_USERNAME=<your username>
-
-export CONTROLLER_PASSWORD=<your password>
-
-ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=true
-
-```
-
-This will populate your AWX instance with LDAP specific items.
-
-- A vault LDAP Lookup Cred tied to the LDAP `awx_ldap_vault` user called `Vault LDAP Lookup Cred`
-- A credential called `Credential From HashiCorp Vault via LDAP Auth`  which is of the created type using the `Vault LDAP Lookup Cred` to get the secret.
-
-And run it through AWX with the credential `Credential From HashiCorp Vault via LDAP Auth` tied to it, the debug should result in `this_is_the_ldap_secret_value`.
-
-The extremely non-obvious input is the fact that the fact prefixes "data/" unexpectedly.
-This was discovered by inspecting the secret with the vault CLI, which may help with future troubleshooting.
-
-```
-docker exec -it -e VAULT_TOKEN=<token> tools_vault_1 vault kv get --address=http://127.0.0.1:1234 my_engine/my_root/my_folder
-```
-
 
 ### Prometheus and Grafana integration
 

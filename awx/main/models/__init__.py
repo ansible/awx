@@ -18,7 +18,7 @@ from ansible_base.lib.utils.models import user_summary_fields
 # AWX
 from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
-from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
+from awx.main.models.organization import Organization, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
 from awx.main.models.receptor_address import ReceptorAddress  # noqa
@@ -292,7 +292,6 @@ activity_stream_registrar.connect(Job)
 activity_stream_registrar.connect(AdHocCommand)
 # activity_stream_registrar.connect(JobHostSummary)
 # activity_stream_registrar.connect(JobEvent)
-# activity_stream_registrar.connect(Profile)
 activity_stream_registrar.connect(Schedule)
 activity_stream_registrar.connect(NotificationTemplate)
 activity_stream_registrar.connect(Notification)
