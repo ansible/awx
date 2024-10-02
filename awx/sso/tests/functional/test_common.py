@@ -293,18 +293,17 @@ class TestCommonFunctions:
             assert o.galaxy_credentials.count() == 0
 
     @pytest.mark.parametrize(
-        "enable_ldap, enable_social, enable_enterprise, expected_results",
+        "enable_social, enable_enterprise, expected_results",
         [
-            (False, False, False, None),
-            (True, False, False, 'ldap'),
-            (True, True, False, 'social'),
-            (True, True, True, 'enterprise'),
-            (False, True, True, 'enterprise'),
-            (False, False, True, 'enterprise'),
-            (False, True, False, 'social'),
+            (False, False, None),
+            (True, False, 'social'),
+            (True, True, 'enterprise'),
+            (True, True, 'enterprise'),
+            (False, True, 'enterprise'),
+            (True, False, 'social'),
         ],
     )
-    def test_get_external_account(self, enable_ldap, enable_social, enable_enterprise, expected_results):
+    def test_get_external_account(self, enable_social, enable_enterprise, expected_results):
         try:
             user = User.objects.get(username="external_tester")
         except User.DoesNotExist:
@@ -312,8 +311,6 @@ class TestCommonFunctions:
             user.set_unusable_password()
             user.save()
 
-        if enable_ldap:
-            user.profile.ldap_dn = 'test.dn'
         if enable_social:
             from social_django.models import UserSocialAuth
 
@@ -337,8 +334,6 @@ class TestCommonFunctions:
         [
             # Set none of the social auth settings
             ('JUNK_SETTING', False),
-            # Set the hard coded settings
-            ('AUTH_LDAP_SERVER_URI', True),
             ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
             ('RADIUS_SERVER', True),
             ('TACACSPLUS_HOST', True),
@@ -366,9 +361,8 @@ class TestCommonFunctions:
         "key_one, key_one_value, key_two, key_two_value, expected",
         [
             ('JUNK_SETTING', True, 'JUNK2_SETTING', True, False),
-            ('AUTH_LDAP_SERVER_URI', True, 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True, True),
             ('JUNK_SETTING', True, 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True, True),
-            ('AUTH_LDAP_SERVER_URI', False, 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', False, False),
+            ('JUNK_SETTING', True, 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', False, False),
         ],
     )
     def test_is_remote_auth_enabled_multiple_keys(self, key_one, key_one_value, key_two, key_two_value, expected):

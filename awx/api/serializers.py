@@ -961,7 +961,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
-    ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
     external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
@@ -979,7 +978,6 @@ class UserSerializer(BaseSerializer):
             'is_superuser',
             'is_system_auditor',
             'password',
-            'ldap_dn',
             'last_login',
             'external_account',
         )
@@ -1028,8 +1026,10 @@ class UserSerializer(BaseSerializer):
 
     def _update_password(self, obj, new_password):
         # For now we're not raising an error, just not saving password for
-        # users managed by LDAP who already have an unusable password set.
-        # Get external password will return something like ldap or enterprise or None if the user isn't external. We only want to allow a password update for a None option
+        # users managed by external authentication services (who already have an unusable password set).
+        # get_external_account function will return something like social or enterprise when the user is external,
+        # and return None when the user isn't external.
+        # We want to allow a password update only for non-external accounts.
         if new_password and new_password != '$encrypted$' and not self.get_external_account(obj):
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
@@ -1084,37 +1084,6 @@ class UserSerializer(BaseSerializer):
             )
         )
         return res
-
-    def _validate_ldap_managed_field(self, value, field_name):
-        if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            return value
-        try:
-            is_ldap_user = bool(self.instance and self.instance.profile.ldap_dn)
-        except AttributeError:
-            is_ldap_user = False
-        if is_ldap_user:
-            ldap_managed_fields = ['username']
-            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            if field_name in ldap_managed_fields:
-                if value != getattr(self.instance, field_name):
-                    raise serializers.ValidationError(_('Unable to change %s on user managed by LDAP.') % field_name)
-        return value
-
-    def validate_username(self, value):
-        return self._validate_ldap_managed_field(value, 'username')
-
-    def validate_first_name(self, value):
-        return self._validate_ldap_managed_field(value, 'first_name')
-
-    def validate_last_name(self, value):
-        return self._validate_ldap_managed_field(value, 'last_name')
-
-    def validate_email(self, value):
-        return self._validate_ldap_managed_field(value, 'email')
-
-    def validate_is_superuser(self, value):
-        return self._validate_ldap_managed_field(value, 'is_superuser')
 
 
 class UserActivityStreamSerializer(UserSerializer):

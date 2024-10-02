@@ -82,7 +82,7 @@ Do not disable SELinux, and do not disable AWX’s existing multi-tenant contain
 External account stores
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Maintaining a full set of users just in AWX can be a time-consuming task in a large organization, prone to error. AWX supports connecting to external account sources via :ref:`LDAP <ag_auth_ldap>` and certain :ref:`OAuth providers <ag_social_auth>`. Using this eliminates a source of error when working with permissions.
+Maintaining a full set of users just in AWX can be a time-consuming task in a large organization, prone to error. AWX supports connecting to external account sources via certain :ref:`OAuth providers <ag_social_auth>`. Using this eliminates a source of error when working with permissions.
 
 
 .. _ag_security_django_password:

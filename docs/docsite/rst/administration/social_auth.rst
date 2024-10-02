@@ -11,7 +11,7 @@ Authentication methods help simplify logins for end users--offering single sign-
 
 Account authentication can be configured in the AWX User Interface and saved to the PostgreSQL database. For instructions, refer to the :ref:`ag_configure_awx` section. 
 
-Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for :ref:`Azure <ag_auth_azure>`, :ref:`RADIUS <ag_auth_radius>`, or even :ref:`LDAP <ag_auth_ldap>` as a source for authentication information. See :ref:`ag_ent_auth` for more detail.
+Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for :ref:`Azure <ag_auth_azure>`, :ref:`RADIUS <ag_auth_radius>` as a source for authentication information. See :ref:`ag_ent_auth` for more detail.
 
 For websites, such as Microsoft Azure, Google or GitHub, that provide account information, account information is often implemented using the OAuth standard. OAuth is a secure authorization protocol which is commonly used in conjunction with account authentication to grant 3rd party applications a "session token" allowing them to make API calls to providers on the user’s behalf.
 
