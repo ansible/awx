@@ -7,7 +7,6 @@ import pytest
 
 # AWX
 from awx.api.versioning import reverse
-from awx.conf.models import Setting
 from awx.conf.registry import settings_registry
 
 TEST_GIF_LOGO = 'data:image/gif;base64,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'  # NOQA
@@ -64,38 +63,6 @@ def test_awx_task_env_validity(get, patch, admin, value, expected):
         assert resp.data['AWX_TASK_ENV'] == dict((k, str(v)) for k, v in value.items())
     else:
         assert resp.data['AWX_TASK_ENV'] == dict()
-
-
-@pytest.mark.django_db
-def test_radius_settings(get, put, patch, delete, admin, settings):
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'radius'})
-    response = get(url, user=admin, expect=200)
-    put(url, user=admin, data=response.data, expect=200)
-    # Set secret via the API.
-    patch(url, user=admin, data={'RADIUS_SECRET': 'mysecret'}, expect=200)
-    response = get(url, user=admin, expect=200)
-    assert response.data['RADIUS_SECRET'] == '$encrypted$'
-    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
-    assert settings.RADIUS_SECRET == 'mysecret'
-    # Set secret via settings wrapper.
-    settings_wrapper = settings._awx_conf_settings
-    settings_wrapper.RADIUS_SECRET = 'mysecret2'
-    response = get(url, user=admin, expect=200)
-    assert response.data['RADIUS_SECRET'] == '$encrypted$'
-    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
-    assert settings.RADIUS_SECRET == 'mysecret2'
-    # If we send back $encrypted$, the setting is not updated.
-    patch(url, user=admin, data={'RADIUS_SECRET': '$encrypted$'}, expect=200)
-    response = get(url, user=admin, expect=200)
-    assert response.data['RADIUS_SECRET'] == '$encrypted$'
-    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
-    assert settings.RADIUS_SECRET == 'mysecret2'
-    # If we send an empty string, the setting is also set to an empty string.
-    patch(url, user=admin, data={'RADIUS_SECRET': ''}, expect=200)
-    response = get(url, user=admin, expect=200)
-    assert response.data['RADIUS_SECRET'] == ''
-    assert Setting.objects.filter(key='RADIUS_SECRET').first().value == ''
-    assert settings.RADIUS_SECRET == ''
 
 
 @pytest.mark.django_db

@@ -155,8 +155,6 @@ django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
-django-radius==1.5.1
-    # via -r /awx_devel/requirements/requirements.in
 django-solo==2.2.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.3.2
@@ -397,8 +395,6 @@ pyopenssl==24.0.0
     #   twisted
 pyparsing==2.4.6
     # via -r /awx_devel/requirements/requirements.in
-pyrad==2.4
-    # via django-radius
 python-daemon==3.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in

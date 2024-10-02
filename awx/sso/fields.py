@@ -107,7 +107,6 @@ class AuthenticationBackendsField(fields.StringListField):
     # authentication backend.
     REQUIRED_BACKEND_SETTINGS = collections.OrderedDict(
         [
-            ('awx.sso.backends.RADIUSBackend', ['RADIUS_SERVER']),
             ('social_core.backends.google.GoogleOAuth2', ['SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET']),
             ('social_core.backends.github.GithubOAuth2', ['SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_GITHUB_SECRET']),
             ('social_core.backends.open_id_connect.OpenIdConnectAuth', ['SOCIAL_AUTH_OIDC_KEY', 'SOCIAL_AUTH_OIDC_SECRET', 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT']),

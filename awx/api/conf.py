@@ -78,7 +78,7 @@ register(
     label=_('Allow External Users to Create OAuth2 Tokens'),
     help_text=_(
         'For security reasons, users from external auth providers (LDAP, SAML, '
-        'SSO, Radius, and others) are not allowed to create OAuth2 tokens. '
+        'SSO, and others) are not allowed to create OAuth2 tokens. '
         'To change this behavior, enable this setting. Existing tokens will '
         'not be deleted when this setting is toggled off.'
     ),
