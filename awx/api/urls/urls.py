@@ -15,7 +15,6 @@ from awx.api.views.root import (
     ApiV2AttachView,
 )
 from awx.api.views import (
-    AuthView,
     UserMeList,
     DashboardView,
     DashboardJobsGraphView,
@@ -106,7 +105,6 @@ v2_urls = [
     re_path(r'^config/$', ApiV2ConfigView.as_view(), name='api_v2_config_view'),
     re_path(r'^config/subscriptions/$', ApiV2SubscriptionView.as_view(), name='api_v2_subscription_view'),
     re_path(r'^config/attach/$', ApiV2AttachView.as_view(), name='api_v2_attach_view'),
-    re_path(r'^auth/$', AuthView.as_view()),
     re_path(r'^me/$', UserMeList.as_view(), name='user_me_list'),
     re_path(r'^dashboard/$', DashboardView.as_view(), name='dashboard_view'),
     re_path(r'^dashboard/graphs/jobs/$', DashboardJobsGraphView.as_view(), name='dashboard_jobs_graph_view'),

@@ -79,12 +79,6 @@ Existing security functionality
 Do not disable SELinux, and do not disable AWX’s existing multi-tenant containment. Use AWX’s role-based access control (RBAC) to delegate the minimum level of privileges required to run automation. Use Teams in AWX to assign permissions to groups of users rather than to users individually. See :ref:`rbac-ug` in the |atu|.
 
 
-External account stores
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Maintaining a full set of users just in AWX can be a time-consuming task in a large organization, prone to error. AWX supports connecting to external account sources via certain :ref:`OAuth providers <ag_social_auth>`. Using this eliminates a source of error when working with permissions.
-
-
 .. _ag_security_django_password:
 
 Django password policies

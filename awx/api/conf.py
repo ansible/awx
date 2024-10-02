@@ -34,10 +34,7 @@ register(
     'DISABLE_LOCAL_AUTH',
     field_class=fields.BooleanField,
     label=_('Disable the built-in authentication system'),
-    help_text=_(
-        "Controls whether users are prevented from using the built-in authentication system. "
-        "You probably want to do this if you are using an LDAP integration."
-    ),
+    help_text=_("Controls whether users are prevented from using the built-in authentication system. "),
     category=_('Authentication'),
     category_slug='authentication',
 )
@@ -69,20 +66,6 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
     unit=_('seconds'),
-)
-register(
-    'ALLOW_OAUTH2_FOR_EXTERNAL_USERS',
-    field_class=fields.BooleanField,
-    default=False,
-    label=_('Allow External Users to Create OAuth2 Tokens'),
-    help_text=_(
-        'For security reasons, users from external auth providers (LDAP, SSO, '
-        ' and others) are not allowed to create OAuth2 tokens. '
-        'To change this behavior, enable this setting. Existing tokens will '
-        'not be deleted when this setting is toggled off.'
-    ),
-    category=_('Authentication'),
-    category_slug='authentication',
 )
 register(
     'LOGIN_REDIRECT_OVERRIDE',

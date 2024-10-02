@@ -27,8 +27,6 @@ Known Issues
    pair: known issues; Ansible Azure dependencies
    pair: known issues; authentication (reactive user)
    pair: known issues; user cannot log in using authentication
-   pair: known issues; login problems with social authentication
-   pair: known issues; OAuth account recreation
    pair: known issues; login via http
    pair: known issues; web sockets in safari
    pair: known issues; browser auto-complete
@@ -171,12 +169,6 @@ Database server installed on nodes
 ====================================
 
 All nodes in the cluster get a database server even if the nodes do not have a database. This is unexpected and may take up space. 
-
-
-Reactivating OAuth authentication accounts which have been deleted
-===================================================================
-
-Once a user who logs in using social authentication has been deleted, the user will not be able to login again or be recreated until the system administrator runs a ``cleanup_deleted`` action with ``days=0`` to allow users to login again. Once ``cleanup_deleted`` has been run, AWX must be restarted. Accounts which have been deleted prior to having the ``cleanup_deleted`` action run will receive a "Your account is inactive" message upon trying to login.
 
 
 Using vaulted variables in inventory sourced from a project

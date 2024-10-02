@@ -42,9 +42,6 @@ The very last item in the navigation bar is **Settings**, which provides access 
 
 The Settings page allows administrators to configure authentication, jobs, system-level attributes, and customize the user interface. Refer to :ref:`ag_configure_awx` section for more detail.
 
-.. image:: ../common/images/ug-settings-menu-screen.png
-
-
 Regardless of the window or action you're performing, the very top of each page next to the your user icon is the About (|about|) icon, which provides you the versions of AWX and Ansible you are currently running.
 
 .. |about| image:: ../common/images/help-about-icon.png

@@ -473,7 +473,7 @@ Before AWX can use |ah| as the default source for collections content, you need 
 
   - **Galaxy Server URL** = ``https://cloud.redhat.com/api/automation-hub/``
 
-  - **AUTH SEVER URL** = ``https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token``
+  - **AUTH SERVER URL** = ``https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token``
 
 4. To use a private |ah|, create an |ah| credential using a token retrieved from the Repo Management dashboard of your local |ah| and pointing to the published repo URL as shown:
 

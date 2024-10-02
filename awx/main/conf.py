@@ -46,10 +46,7 @@ register(
     'MANAGE_ORGANIZATION_AUTH',
     field_class=fields.BooleanField,
     label=_('Organization Admins Can Manage Users and Teams'),
-    help_text=_(
-        'Controls whether any Organization Admin has the privileges to create and manage users and teams. '
-        'You may want to disable this ability if you are using an LDAP integration.'
-    ),
+    help_text=_('Controls whether any Organization Admin has the privileges to create and manage users and teams.'),
     category=_('System'),
     category_slug='system',
 )

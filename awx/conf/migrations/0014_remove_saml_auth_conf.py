@@ -30,9 +30,8 @@ def remove_saml_auth_conf(apps, scheme_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('conf', '0010_change_to_JSONField'),
+        ('conf', '0013_remove_radius_auth_conf'),
     ]
 
     operations = [

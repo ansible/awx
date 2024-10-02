@@ -5,26 +5,6 @@ AWX configuration gives AWX users the ability to adjust multiple runtime paramet
 #### To Use:
 The REST endpoint for CRUD operations against AWX configurations can be found at `/api/v2/settings/`. GETing to that endpoint will return a list of available AWX configuration categories and their URLs, such as `"system": "/api/v2/settings/system/"`. The URL given to each category is the endpoint for CRUD operations against individual settings under that category.
 
-Here is a typical AWX configuration category GET response:
-```
-GET /api/v2/settings/oidc/
-HTTP 200 OK
-Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
-Content-Type: application/json
-Vary: Accept
-X-API-Node: tower
-X-API-Query-Count: 6
-X-API-Query-Time: 0.004s
-X-API-Time: 0.026s
-
-{
-    "SOCIAL_AUTH_OIDC_KEY": null,
-    "SOCIAL_AUTH_OIDC_SECRET": "",
-    "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": "",
-    "SOCIAL_AUTH_OIDC_VERIFY_SSL": true
-}
-```
-
 The returned body is a JSON of key-value pairs, where the key is the name of the AWX configuration setting, and the value is the value of that setting. To update the settings, simply update setting values and PUT/PATCH to the same endpoint.
 
 #### To Develop:
