@@ -185,14 +185,3 @@ If you need to write custom requests, you can write a Python script using `Pytho
 
 	# prints json returned from awx with formatting
 	print(json.dumps(response.json(), indent=4, sort_keys=True))
-
-
-.. _api_sso_auth:
-
-SSO Authentication
--------------------
-
-Single sign-on (SSO) authentication methods are fundamentally different from other methods because the authentication of the user happens external to AWX, like SAML.
-
-For the various types of supported SSO authentication methods, see :ref:`ag_social_auth` and :ref:`ag_ent_auth` in the |ata|.
-
