@@ -1,5 +1,3 @@
-Through the AWX user interface, you can set up a simplified login through various authentication types: GitHub, Google, and RADIUS. After you create and register your developer application with the appropriate service, you can set up authorizations for them.
-
 1. From the left navigation bar, click **Settings**. 
 
 2. The left side of the Settings window is a set of configurable Authentication settings. Select from the following options:

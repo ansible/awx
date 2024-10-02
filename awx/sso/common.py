@@ -188,7 +188,6 @@ def is_remote_auth_enabled():
 
     settings_that_turn_on_remote_auth = [
         'SOCIAL_AUTH_SAML_ENABLED_IDPS',
-        'RADIUS_SERVER',
     ]
     # Also include any SOCAIL_AUTH_*KEY (except SAML)
     for social_auth_key in dir(settings):

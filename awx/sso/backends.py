@@ -7,11 +7,6 @@ import logging
 # Django
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
-from django.utils.encoding import force_str
-from django.http import HttpResponse
-
-# radiusauth
-from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
 
 # social
 from social_core.backends.saml import OID_USERID
@@ -43,27 +38,6 @@ def _get_or_set_enterprise_user(username, password, provider):
     if created or user.is_in_enterprise_category(provider):
         return user
     logger.warning("Enterprise user %s already defined in Tower." % username)
-
-
-class RADIUSBackend(BaseRADIUSBackend):
-    """
-    Custom Radius backend to verify license status
-    """
-
-    def authenticate(self, request, username, password):
-        if not django_settings.RADIUS_SERVER:
-            return None
-        return super(RADIUSBackend, self).authenticate(request, username, password)
-
-    def get_user(self, user_id):
-        if not django_settings.RADIUS_SERVER:
-            return None
-        user = super(RADIUSBackend, self).get_user(user_id)
-        if not user.has_usable_password():
-            return user
-
-    def get_django_user(self, username, password=None, groups=[], is_staff=False, is_superuser=False):
-        return _get_or_set_enterprise_user(force_str(username), force_str(password), 'radius')
 
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
