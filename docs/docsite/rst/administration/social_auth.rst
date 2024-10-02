@@ -11,11 +11,9 @@ Authentication methods help simplify logins for end users--offering single sign-
 
 Account authentication can be configured in the AWX User Interface and saved to the PostgreSQL database. For instructions, refer to the :ref:`ag_configure_awx` section. 
 
-Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for :ref:`Azure <ag_auth_azure>`, :ref:`RADIUS <ag_auth_radius>`, :ref:`SAML <ag_auth_saml>`, or even :ref:`LDAP <ag_auth_ldap>` as a source for authentication information. See :ref:`ag_ent_auth` for more detail.
+Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for :ref:`Azure <ag_auth_azure>`, :ref:`RADIUS <ag_auth_radius>` as a source for authentication information. See :ref:`ag_ent_auth` for more detail.
 
 For websites, such as Microsoft Azure, Google or GitHub, that provide account information, account information is often implemented using the OAuth standard. OAuth is a secure authorization protocol which is commonly used in conjunction with account authentication to grant 3rd party applications a "session token" allowing them to make API calls to providers on the user’s behalf.
-
-Security Assertion Markup Language (:ref:`SAML <ag_auth_saml>`) is an XML-based, open-standard data format for exchanging account authentication and authorization data between  an identity provider and a service provider. 
 
 The :ref:`RADIUS <ag_auth_radius>` distributed client/server system allows you to secure networks against unauthorized access and can be implemented in network environments requiring high levels of security while maintaining network access for remote users.
 
@@ -341,7 +339,6 @@ Organization mappings may be specified separately for each account authenticatio
     SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP = {}
     SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP = {}
     SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP = {}
-    SOCIAL_AUTH_SAML_ORGANIZATION_MAP = {}
 
 
 Team mapping
@@ -387,7 +384,6 @@ Team mappings may be specified separately for each account authentication backen
     SOCIAL_AUTH_GITHUB_TEAM_MAP = {}
     SOCIAL_AUTH_GITHUB_ORG_TEAM_MAP = {}
     SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP = {}
-    SOCIAL_AUTH_SAML_TEAM_MAP = {}
 
 Uncomment the line below (i.e. set ``SOCIAL_AUTH_USER_FIELDS`` to an empty list) to prevent new user accounts from being created.  Only users who have previously logged in to AWX using social or enterprise-level authentication or have a user account with a matching email address will be able to login.
 

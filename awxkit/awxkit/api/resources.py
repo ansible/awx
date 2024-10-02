@@ -215,7 +215,6 @@ class Resources(object):
     _settings_github_team = 'settings/github-team/'
     _settings_google_oauth2 = 'settings/google-oauth2/'
     _settings_jobs = 'settings/jobs/'
-    _settings_ldap = 'settings/ldap/'
     _settings_logging = 'settings/logging/'
     _settings_named_url = 'settings/named-url/'
     _settings_radius = 'settings/radius/'

@@ -73,6 +73,6 @@ def disable_local_auth(**kwargs):
 
         logger.warning("Triggering token invalidation for local users.")
 
-        qs = User.objects.filter(profile__ldap_dn='', enterprise_auth__isnull=True, social_auth__isnull=True)
+        qs = User.objects.filter(enterprise_auth__isnull=True, social_auth__isnull=True)
         revoke_tokens(RefreshToken.objects.filter(revoked=None, user__in=qs))
         revoke_tokens(OAuth2AccessToken.objects.filter(user__in=qs))

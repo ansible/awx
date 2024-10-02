@@ -13,7 +13,6 @@ Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
 distro
 django==4.2.10  # CVE-2024-24680
-django-auth-ldap
 django-cors-headers
 django-crum
 django-extensions
@@ -52,7 +51,6 @@ pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host 
 python-daemon>3.0.0
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
-python-ldap
 pyyaml>=6.0.1
 pyzstd  # otel collector log file compression library
 receptorctl
