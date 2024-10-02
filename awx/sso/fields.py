@@ -107,44 +107,7 @@ class AuthenticationBackendsField(fields.StringListField):
     # authentication backend.
     REQUIRED_BACKEND_SETTINGS = collections.OrderedDict(
         [
-            ('social_core.backends.google.GoogleOAuth2', ['SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET']),
-            ('social_core.backends.github.GithubOAuth2', ['SOCIAL_AUTH_GITHUB_KEY', 'SOCIAL_AUTH_GITHUB_SECRET']),
             ('social_core.backends.open_id_connect.OpenIdConnectAuth', ['SOCIAL_AUTH_OIDC_KEY', 'SOCIAL_AUTH_OIDC_SECRET', 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT']),
-            (
-                'social_core.backends.github.GithubOrganizationOAuth2',
-                ['SOCIAL_AUTH_GITHUB_ORG_KEY', 'SOCIAL_AUTH_GITHUB_ORG_SECRET', 'SOCIAL_AUTH_GITHUB_ORG_NAME'],
-            ),
-            ('social_core.backends.github.GithubTeamOAuth2', ['SOCIAL_AUTH_GITHUB_TEAM_KEY', 'SOCIAL_AUTH_GITHUB_TEAM_SECRET', 'SOCIAL_AUTH_GITHUB_TEAM_ID']),
-            (
-                'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
-                [
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_URL',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET',
-                ],
-            ),
-            (
-                'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
-                [
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_URL',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_API_URL',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME',
-                ],
-            ),
-            (
-                'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
-                [
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_URL',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_API_URL',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET',
-                    'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID',
-                ],
-            ),
-            ('social_core.backends.azuread.AzureADOAuth2', ['SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', 'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET']),
             (
                 'awx.sso.backends.SAMLAuth',
                 [

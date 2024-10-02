@@ -336,14 +336,6 @@ class TestCommonFunctions:
             ('JUNK_SETTING', False),
             ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
             # Set some SOCIAL_SOCIAL_AUTH_OIDC_KEYAUTH_*_KEY settings
-            ('SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True),
-            ('SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY', True),
-            ('SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY', True),
-            ('SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY', True),
-            ('SOCIAL_AUTH_GITHUB_KEY', True),
-            ('SOCIAL_AUTH_GITHUB_ORG_KEY', True),
-            ('SOCIAL_AUTH_GITHUB_TEAM_KEY', True),
-            ('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', True),
             ('SOCIAL_AUTH_OIDC_KEY', True),
             # Try a hypothetical future one
             ('SOCIAL_AUTH_GIBBERISH_KEY', True),
@@ -359,8 +351,6 @@ class TestCommonFunctions:
         "key_one, key_one_value, key_two, key_two_value, expected",
         [
             ('JUNK_SETTING', True, 'JUNK2_SETTING', True, False),
-            ('JUNK_SETTING', True, 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True, True),
-            ('JUNK_SETTING', True, 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', False, False),
         ],
     )
     def test_is_remote_auth_enabled_multiple_keys(self, key_one, key_one_value, key_two, key_two_value, expected):

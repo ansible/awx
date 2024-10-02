@@ -387,15 +387,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.github.GithubOAuth2',
-    'social_core.backends.github.GithubOrganizationOAuth2',
-    'social_core.backends.github.GithubTeamOAuth2',
-    'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
-    'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
-    'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
     'social_core.backends.open_id_connect.OpenIdConnectAuth',
-    'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',
 )
@@ -513,41 +505,6 @@ SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
 # Note: These settings may be overridden by database settings.
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
-
-SOCIAL_AUTH_GITHUB_KEY = ''
-SOCIAL_AUTH_GITHUB_SECRET = ''
-SOCIAL_AUTH_GITHUB_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ORG_KEY = ''
-SOCIAL_AUTH_GITHUB_ORG_SECRET = ''
-SOCIAL_AUTH_GITHUB_ORG_NAME = ''
-SOCIAL_AUTH_GITHUB_ORG_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
-SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
-SOCIAL_AUTH_GITHUB_TEAM_ID = ''
-SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
-SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
-
 SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
 SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
 SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
