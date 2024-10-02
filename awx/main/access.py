@@ -642,10 +642,7 @@ class UserAccess(BaseAccess):
     """
 
     model = User
-    prefetch_related = (
-        'profile',
-        'resource',
-    )
+    prefetch_related = ('resource',)
 
     def filtered_queryset(self):
         if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
