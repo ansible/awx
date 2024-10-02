@@ -12,7 +12,7 @@ def remove_oidc_auth_conf(apps, scheme_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('conf', '0010_change_to_JSONField'),
+        ('conf', '0011_remove_ldap_auth_conf'),
     ]
 
     operations = [

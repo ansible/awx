@@ -10,23 +10,9 @@ AWX Configuration
 
 You can configure various AWX settings within the Settings screen in the following tabs:
 
-.. image:: ../common/images/ug-settings-menu-screen.png
-   :alt: Screenshot of the AWX settings menu screen.
-
 Each tab contains fields with a **Reset** button, allowing you to revert any value entered back to the default value. **Reset All** allows you to revert all the values to their factory default values.
 
 **Save** applies changes you make, but it does not exit the edit dialog. To return to the Settings screen, click **Settings** from the left navigation bar or use the breadcrumbs at the top of the current view.
-
-
-Authentication
-=================
-.. index::
-    single: social authentication
-    single: authentication
-    pair: configuration; authentication
-
-.. include:: ./configure_awx_authentication.rst
-
 
 .. _configure_awx_jobs:
 
@@ -66,7 +52,7 @@ The System tab allows you to define the base URL for the AWX host, configure ale
 2. The right side of the Settings window is a set of configurable System settings. Select from the following options:
 
   - **Miscellaneous System settings**: enable activity streams, specify the default execution environment, define the base URL for the AWX host, enable AWX administration alerts, set user visibility, define analytics, specify usernames and passwords, and configure proxies.
-  - **Miscellaneous Authentication settings**: configure options associated with authentication methods (built-in or SSO), sessions (timeout, number of sessions logged in, tokens), and social authentication mapping.
+  - **Miscellaneous Authentication settings**: configure options associated with authentication methods and sessions (timeout, number of sessions logged in, tokens).
   - **Logging settings**: configure logging options based on the type you choose:
 
     .. image:: ../common/images/configure-awx-system-logging-types.png

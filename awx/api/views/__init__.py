@@ -36,7 +36,7 @@ from django.utils.translation import gettext_lazy as _
 # Django REST Framework
 from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
 from rest_framework.parsers import FormParser
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -125,9 +125,6 @@ from awx.api.views.mixin import (
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
-
-if 'ansible_base.authentication' in getattr(settings, "INSTALLED_APPS", []):
-    from ansible_base.authentication.models.authenticator import Authenticator as AnsibleBaseAuthenticator
 
 logger = logging.getLogger('awx.api.views')
 
@@ -674,29 +671,6 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     parent_model = models.Schedule
     relationship = 'unifiedjob_set'
     name = _('Schedule Jobs List')
-
-
-class AuthView(APIView):
-    '''List enabled single-sign-on endpoints'''
-
-    authentication_classes = []
-    permission_classes = (AllowAny,)
-    swagger_topic = 'System Configuration'
-
-    def get(self, request):
-        data = OrderedDict()
-        if 'ansible_base.authentication' in getattr(settings, "INSTALLED_APPS", []):
-            # app is using ansible_base authentication
-            # add ansible_base authenticators
-            authenticators = AnsibleBaseAuthenticator.objects.filter(enabled=True, category="sso")
-            for authenticator in authenticators:
-                login_url = authenticator.get_login_url()
-                data[authenticator.name] = {
-                    'login_url': login_url,
-                    'name': authenticator.name,
-                }
-
-        return Response(data)
 
 
 def immutablesharedfields(cls):

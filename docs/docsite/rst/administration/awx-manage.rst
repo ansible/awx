@@ -146,7 +146,7 @@ Use this command to clear tokens which have already been revoked. Refer to `Djan
 ``expire_sessions``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use this command to terminate all sessions or all sessions for a specific user. Consider using this command when a user changes role in an organization, is removed from assorted groups in LDAP/AD, or the administrator wants to ensure the user can no longer execute jobs due to membership in these groups.
+Use this command to terminate all sessions or all sessions for a specific user. Consider using this command when a user changes role in an organization, is removed from assorted groups in AD, or the administrator wants to ensure the user can no longer execute jobs due to membership in these groups.
 
 ::
 

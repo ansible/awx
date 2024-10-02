@@ -115,7 +115,6 @@ class LoggedLoginView(auth_views.LoginView):
 
 
 class LoggedLogoutView(auth_views.LogoutView):
-
     success_url_allowed_hosts = set(settings.LOGOUT_ALLOWED_HOSTS.split(",")) if settings.LOGOUT_ALLOWED_HOSTS else set()
 
     def dispatch(self, request, *args, **kwargs):

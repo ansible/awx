@@ -25,10 +25,6 @@ asgiref==3.7.2
     #   django-cors-headers
 asn1==2.7.0
     # via -r /awx_devel/requirements/requirements.in
-async-timeout==4.0.3
-    # via
-    #   aiohttp
-    #   redis
 attrs==23.2.0
     # via
     #   aiohttp
@@ -43,6 +39,11 @@ autocommand==2.2.2
     # via jaraco-text
 automat==22.10.0
     # via twisted
+    # via -r /awx_devel/requirements/requirements_git.txt
+awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
+    # via
+    #   -r /awx_devel/requirements/requirements_git.txt
+    #   awx-plugins-core
 azure-common==1.1.28
     # via
     #   azure-keyvault-certificates
@@ -56,9 +57,13 @@ azure-core==1.30.0
     #   azure-keyvault-secrets
     #   msrest
 azure-identity==1.15.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 azure-keyvault==4.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 azure-keyvault-certificates==4.7.0
     # via azure-keyvault
 azure-keyvault-keys==4.8.0
@@ -66,7 +71,9 @@ azure-keyvault-keys==4.8.0
 azure-keyvault-secrets==4.7.0
     # via azure-keyvault
 boto3==1.34.47
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 botocore==1.34.47
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -163,8 +170,6 @@ djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.20.1
     # via python-daemon
-ecdsa==0.18.0
-    # via python-jose
 enum-compat==0.0.3
     # via asn1
 filelock==3.13.1
@@ -200,10 +205,7 @@ idna==3.6
     #   twisted
     #   yarl
 importlib-metadata==6.2.1
-    # via
-    #   ansible-runner
-    #   markdown
-    #   opentelemetry-api
+    # via opentelemetry-api
 incremental==22.10.0
     # via twisted
 inflect==7.0.0
@@ -277,13 +279,13 @@ msgpack==1.0.5
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-netaddr==1.2.1
-    # via pyrad
 oauthlib==3.2.2
     # via
     #   django-oauth-toolkit
@@ -355,7 +357,6 @@ ptyprocess==0.7.0
 pyasn1==0.5.1
     # via
     #   pyasn1-modules
-    #   python-jose
     #   rsa
     #   service-identity
 pyasn1-modules==0.3.0
@@ -393,13 +394,15 @@ python-dateutil==2.8.2
     #   kubernetes
     #   receptorctl
 python-dsv-sdk==1.0.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 python-string-utils==1.0.0
     # via openshift
 python-tss-sdk==1.2.2
-    # via -r /awx_devel/requirements/requirements.in
-python3-openid==3.2.0
-    # via -r /awx_devel/requirements/requirements_git.txt
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 pytz==2024.1
     # via
     #   irc
@@ -408,6 +411,7 @@ pyyaml==6.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
+    #   awx-plugins-core
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
@@ -427,6 +431,7 @@ requests==2.31.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
+    #   awx-plugins-core
     #   azure-core
     #   django-ansible-base
     #   django-oauth-toolkit
@@ -447,9 +452,7 @@ rpds-py==0.18.0
     #   jsonschema
     #   referencing
 rsa==4.9
-    # via
-    #   google-auth
-    #   python-jose
+    # via google-auth
 s3transfer==0.10.0
     # via boto3
 semantic-version==2.10.0
@@ -465,13 +468,11 @@ six==1.16.0
     #   automat
     #   azure-core
     #   django-pglocks
-    #   ecdsa
     #   isodate
     #   kubernetes
     #   msrestazure
     #   openshift
     #   pygerduty
-    #   pyrad
     #   python-dateutil
 slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
@@ -481,16 +482,10 @@ sqlparse==0.4.4
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
-    # via -r /awx_devel/requirements/requirements.in
 tempora==5.5.1
     # via
     #   irc
     #   jaraco-logging
-tomli==2.0.1
-    # via
-    #   maturin
-    #   setuptools-rust
-    #   setuptools-scm
 twilio==8.13.0
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==23.10.0
@@ -501,7 +496,6 @@ txaio==23.1.1
     # via autobahn
 typing-extensions==4.9.0
     # via
-    #   asgiref
     #   azure-core
     #   azure-keyvault-certificates
     #   azure-keyvault-keys
