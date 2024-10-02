@@ -189,7 +189,6 @@ Authentication Enhancements
    pair: features; authentication
    pair: features; OAuth 2 token
 
-AWX supports SAML, token-based authentication. Enhanced SAML support allows you to integrate your account information in a more flexible manner. Token-based Authentication allows for easily authentication of third-party tools and services with AWX via integrated OAuth 2 token support.
 
 Cluster Management
 ~~~~~~~~~~~~~~~~~~~~
