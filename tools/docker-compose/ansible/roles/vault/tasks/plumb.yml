@@ -78,56 +78,6 @@
       secret_path: "/my_root/my_folder"
       secret_version: ""
 
-- name: Create a HashiCorp Vault Credential for LDAP
-  awx.awx.credential:
-    credential_type: HashiCorp Vault Secret Lookup
-    name: Vault LDAP Lookup Cred
-    organization: Default
-    controller_host: "{{ awx_host }}"
-    controller_username: admin
-    controller_password: "{{ admin_password }}"
-    validate_certs: false
-    inputs:
-      api_version: "v1"
-      default_auth_path: "ldap"
-      kubernetes_role: ""
-      namespace: ""
-      url: "{{ vault_addr_from_container }}"
-      username: "{{ vault_ldap_username }}"
-      password: "{{ vault_ldap_password }}"
-  register: vault_ldap_cred
-  when: enable_ldap | bool
-
-- name: Create a credential from the Vault LDAP Custom Cred Type
-  awx.awx.credential:
-    credential_type: "{{ custom_vault_cred_type.id }}"
-    controller_host: "{{ awx_host }}"
-    controller_username: admin
-    controller_password: "{{ admin_password }}"
-    validate_certs: false
-    name: Credential From HashiCorp Vault via LDAP Auth
-    inputs: {}
-    organization: Default
-  register: custom_credential_via_ldap
-  when: enable_ldap | bool
-
-- name: Use the Vault LDAP Credential  the new credential
-  awx.awx.credential_input_source:
-    input_field_name: password
-    target_credential: "{{ custom_credential_via_ldap.id }}"
-    source_credential: "{{ vault_ldap_cred.id }}"
-    controller_host: "{{ awx_host }}"
-    controller_username: admin
-    controller_password: "{{ admin_password }}"
-    validate_certs: false
-    metadata:
-      auth_path: ""
-      secret_backend: "ldap_engine"
-      secret_key: "my_key"
-      secret_path: "ldaps_root/ldap_secret"
-      secret_version: ""
-  when: enable_ldap | bool
-
 - name: Create a HashiCorp Vault Credential for UserPass
   awx.awx.credential:
     credential_type: HashiCorp Vault Secret Lookup

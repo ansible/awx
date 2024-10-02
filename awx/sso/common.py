@@ -113,7 +113,7 @@ def create_org_and_teams(org_list, team_map, adapter, can_create=True):
         logger.debug(f"Adapter {adapter} is not allowed to create orgs/teams")
         return
 
-    # Get all of the IDs and names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
+    # Get all of the IDs and names of orgs in the DB and create any new org defined in org_list that does not exist in the DB
     existing_orgs = get_orgs_by_ids()
 
     # Parse through orgs and teams provided and create a list of unique items we care about creating
@@ -174,18 +174,6 @@ def get_or_create_org_with_default_galaxy_cred(**kwargs):
 def get_external_account(user):
     account_type = None
 
-    # Previously this method also checked for active configuration which meant that if a user logged in from LDAP
-    #    and then LDAP was no longer configured it would "convert" the user from an LDAP account_type to none.
-    #    This did have one benefit that if a login type was removed intentionally the user could be given a username password.
-    #    But it had a limitation that the user would have to have an active session (or an admin would have to go set a temp password).
-    #    It also lead to the side affect that if LDAP was ever reconfigured the user would convert back to LDAP but still have a local password.
-    #    That local password could then be used to bypass LDAP authentication.
-    try:
-        if user.pk and user.profile.ldap_dn and not user.has_usable_password():
-            account_type = "ldap"
-    except AttributeError:
-        pass
-
     if user.social_auth.all():
         account_type = "social"
 
@@ -198,9 +186,8 @@ def get_external_account(user):
 def is_remote_auth_enabled():
     from django.conf import settings
 
-    # Append LDAP, Radius, TACACS+ and SAML options
+    # Append Radius, TACACS+ and SAML options
     settings_that_turn_on_remote_auth = [
-        'AUTH_LDAP_SERVER_URI',
         'SOCIAL_AUTH_SAML_ENABLED_IDPS',
         'RADIUS_SERVER',
         'TACACSPLUS_HOST',
