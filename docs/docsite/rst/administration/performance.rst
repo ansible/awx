@@ -80,15 +80,6 @@ Metrics added in this release to track:
 
 - **callback_receiver_event_processing_avg_seconds** - Proxy for “how far behind the callback receiver workers are in processing output". If this number stays large, consider horizontally scaling the control plane and reducing the ``capacity_adjustment`` value on the node.
 
-LDAP login and basic authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. index::
-   pair: improvements; LDAP
-   pair: improvements; basic auth
-
-Enhancements were made to the authentication backend that syncs LDAP configuration with the organizations and teams in the AWX. Logging in with large mappings between LDAP groups and organizations and teams is now up to 10 times faster than in previous versions.
-
-
 Capacity Planning
 ------------------
 .. index::
@@ -382,4 +373,4 @@ For workloads with high levels of API interaction, best practices include:
 - Use dynamic inventory sources instead of individually creating inventory hosts via the API
 - Use webhook notifications instead of polling for job status
 
-Since the published blog, additional observations have been made in the field regarding authentication methods. For automation clients that will make many requests in rapid succession, using tokens is a best practice, because depending on the type of user, there may be additional overhead when using basic authentication. For example, LDAP users using basic authentication trigger a process to reconcile if the LDAP user is correctly mapped to particular organizations, teams and roles. Refer to :ref:`ag_oauth2_token_auth` for detail on how to generate and use tokens.
+Since the published blog, additional observations have been made in the field regarding authentication methods. For automation clients that will make many requests in rapid succession, using tokens is a best practice, because depending on the type of user, there may be additional overhead when using basic authentication. Refer to :ref:`ag_oauth2_token_auth` for detail on how to generate and use tokens.

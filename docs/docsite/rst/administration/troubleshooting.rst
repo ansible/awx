@@ -52,9 +52,6 @@ Example configuration of ``extra_settings`` parameter:
        - setting: MAX_PAGE_SIZE
          value: "500"
         
-       - setting: AUTH_LDAP_BIND_DN
-         value: "cn=admin,dc=example,dc=com"
-      
        - setting: LOG_AGGREGATOR_LEVEL
          value: "'DEBUG'"
 
