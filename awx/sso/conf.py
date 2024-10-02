@@ -144,46 +144,6 @@ if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
     )
 
     ###############################################################################
-    # RADIUS AUTHENTICATION SETTINGS
-    ###############################################################################
-
-    register(
-        'RADIUS_SERVER',
-        field_class=fields.CharField,
-        allow_blank=True,
-        default='',
-        label=_('RADIUS Server'),
-        help_text=_('Hostname/IP of RADIUS server. RADIUS authentication is disabled if this setting is empty.'),
-        category=_('RADIUS'),
-        category_slug='radius',
-        placeholder='radius.example.com',
-    )
-
-    register(
-        'RADIUS_PORT',
-        field_class=fields.IntegerField,
-        min_value=1,
-        max_value=65535,
-        default=1812,
-        label=_('RADIUS Port'),
-        help_text=_('Port of RADIUS server.'),
-        category=_('RADIUS'),
-        category_slug='radius',
-    )
-
-    register(
-        'RADIUS_SECRET',
-        field_class=fields.CharField,
-        allow_blank=True,
-        default='',
-        label=_('RADIUS Secret'),
-        help_text=_('Shared secret for authenticating to RADIUS server.'),
-        category=_('RADIUS'),
-        category_slug='radius',
-        encrypted=True,
-    )
-
-    ###############################################################################
     # GOOGLE OAUTH2 AUTHENTICATION SETTINGS
     ###############################################################################
 

@@ -56,23 +56,3 @@ For application registering basics in Azure AD, refer to the `Azure AD Identity 
 
 .. _`Azure AD Identity Platform (v2)`: https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-overview
 
-.. _ag_auth_radius:
-
-RADIUS settings
-------------------
-
-.. index::
-    pair: authentication; RADIUS Authentication Settings
-
-
-AWX can be configured to centrally use RADIUS as a source for authentication information.
-
-1. Click **Settings** from the left navigation bar.
-
-2. On the left side of the Settings window, click **RADIUS settings** from the list of Authentication options. 
-
-3. Click **Edit** and enter the Host or IP of the Radius server in the **Radius Server** field. If this field is left blank, Radius authentication is disabled.
-
-4. Enter the port and secret information in the next two fields.
-
-5. Click **Save** when done.

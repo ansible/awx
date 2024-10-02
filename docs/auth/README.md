@@ -11,12 +11,9 @@ When a user wants to log into AWX, she can explicitly choose some of the support
 * Microsoft Azure Active Directory (AD) OAuth2
 
 On the other hand, the other authentication methods use the same types of login info (username and password), but authenticate using external auth systems rather than AWX's own database. If some of these methods are enabled, AWX will try authenticating using the enabled methods *before AWX's own authentication method*. The order of precedence is:
-* RADIUS
 * SAML
 
 ## Notes:
-SAML users and RADIUS users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
-
   * Enterprise users can only be created via the first successful login attempt from remote authentication backend.
   * Enterprise users cannot be created/authenticated if non-enterprise users with the same name has already been created in AWX.
   * AWX passwords of Enterprise users should always be empty and cannot be set by any user if there are enterprise backends enabled.

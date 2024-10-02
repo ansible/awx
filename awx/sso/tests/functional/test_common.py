@@ -335,7 +335,6 @@ class TestCommonFunctions:
             # Set none of the social auth settings
             ('JUNK_SETTING', False),
             ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
-            ('RADIUS_SERVER', True),
             # Set some SOCIAL_SOCIAL_AUTH_OIDC_KEYAUTH_*_KEY settings
             ('SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True),
             ('SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY', True),
