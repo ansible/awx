@@ -13,7 +13,6 @@ from rest_framework.fields import empty, Field, SkipField
 
 # AWX
 from awx.conf import fields
-from awx.main.validators import validate_certificate
 
 
 def get_subclasses(cls):
@@ -108,18 +107,6 @@ class AuthenticationBackendsField(fields.StringListField):
     REQUIRED_BACKEND_SETTINGS = collections.OrderedDict(
         [
             ('social_core.backends.open_id_connect.OpenIdConnectAuth', ['SOCIAL_AUTH_OIDC_KEY', 'SOCIAL_AUTH_OIDC_SECRET', 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT']),
-            (
-                'awx.sso.backends.SAMLAuth',
-                [
-                    'SOCIAL_AUTH_SAML_SP_ENTITY_ID',
-                    'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT',
-                    'SOCIAL_AUTH_SAML_SP_PRIVATE_KEY',
-                    'SOCIAL_AUTH_SAML_ORG_INFO',
-                    'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT',
-                    'SOCIAL_AUTH_SAML_SUPPORT_CONTACT',
-                    'SOCIAL_AUTH_SAML_ENABLED_IDPS',
-                ],
-            ),
             ('django.contrib.auth.backends.ModelBackend', []),
             ('awx.main.backends.AWXModelBackend', []),
         ]
@@ -240,106 +227,3 @@ class SocialSingleTeamMapField(HybridDictField):
 
 class SocialTeamMapField(fields.DictField):
     child = SocialSingleTeamMapField()
-
-
-class SAMLOrgInfoValueField(HybridDictField):
-    name = fields.CharField()
-    displayname = fields.CharField()
-    url = fields.URLField()
-
-
-class SAMLOrgInfoField(fields.DictField):
-    default_error_messages = {'invalid_lang_code': _('Invalid language code(s) for org info: {invalid_lang_codes}.')}
-    child = SAMLOrgInfoValueField()
-
-    def to_internal_value(self, data):
-        data = super(SAMLOrgInfoField, self).to_internal_value(data)
-        invalid_keys = set()
-        for key in data.keys():
-            if not re.match(r'^[a-z]{2}(?:-[a-z]{2})??$', key, re.I):
-                invalid_keys.add(key)
-        if invalid_keys:
-            invalid_keys = sorted(list(invalid_keys))
-            keys_display = json.dumps(invalid_keys).lstrip('[').rstrip(']')
-            self.fail('invalid_lang_code', invalid_lang_codes=keys_display)
-        return data
-
-
-class SAMLContactField(HybridDictField):
-    givenName = fields.CharField()
-    emailAddress = fields.EmailField()
-
-
-class SAMLIdPField(HybridDictField):
-    entity_id = fields.CharField()
-    url = fields.URLField()
-    x509cert = fields.CharField(validators=[validate_certificate])
-    attr_user_permanent_id = fields.CharField(required=False)
-    attr_first_name = fields.CharField(required=False)
-    attr_last_name = fields.CharField(required=False)
-    attr_username = fields.CharField(required=False)
-    attr_email = fields.CharField(required=False)
-
-
-class SAMLEnabledIdPsField(fields.DictField):
-    child = SAMLIdPField()
-
-
-class SAMLSecurityField(HybridDictField):
-    nameIdEncrypted = fields.BooleanField(required=False)
-    authnRequestsSigned = fields.BooleanField(required=False)
-    logoutRequestSigned = fields.BooleanField(required=False)
-    logoutResponseSigned = fields.BooleanField(required=False)
-    signMetadata = fields.BooleanField(required=False)
-    wantMessagesSigned = fields.BooleanField(required=False)
-    wantAssertionsSigned = fields.BooleanField(required=False)
-    wantAssertionsEncrypted = fields.BooleanField(required=False)
-    wantNameId = fields.BooleanField(required=False)
-    wantNameIdEncrypted = fields.BooleanField(required=False)
-    wantAttributeStatement = fields.BooleanField(required=False)
-    requestedAuthnContext = fields.StringListBooleanField(required=False)
-    requestedAuthnContextComparison = fields.CharField(required=False)
-    metadataValidUntil = fields.CharField(allow_null=True, required=False)
-    metadataCacheDuration = fields.CharField(allow_null=True, required=False)
-    signatureAlgorithm = fields.CharField(allow_null=True, required=False)
-    digestAlgorithm = fields.CharField(allow_null=True, required=False)
-
-
-class SAMLOrgAttrField(HybridDictField):
-    remove = fields.BooleanField(required=False)
-    saml_attr = fields.CharField(required=False, allow_null=True)
-    remove_admins = fields.BooleanField(required=False)
-    saml_admin_attr = fields.CharField(required=False, allow_null=True)
-    remove_auditors = fields.BooleanField(required=False)
-    saml_auditor_attr = fields.CharField(required=False, allow_null=True)
-
-    child = _Forbidden()
-
-
-class SAMLTeamAttrTeamOrgMapField(HybridDictField):
-    team = fields.CharField(required=True, allow_null=False)
-    team_alias = fields.CharField(required=False, allow_null=True)
-    organization = fields.CharField(required=True, allow_null=False)
-
-    child = _Forbidden()
-
-
-class SAMLTeamAttrField(HybridDictField):
-    team_org_map = fields.ListField(required=False, child=SAMLTeamAttrTeamOrgMapField(), allow_null=True)
-    remove = fields.BooleanField(required=False)
-    saml_attr = fields.CharField(required=False, allow_null=True)
-
-    child = _Forbidden()
-
-
-class SAMLUserFlagsAttrField(HybridDictField):
-    is_superuser_attr = fields.CharField(required=False, allow_null=True)
-    is_superuser_value = fields.StringListField(required=False, allow_null=True)
-    is_superuser_role = fields.StringListField(required=False, allow_null=True)
-    remove_superusers = fields.BooleanField(required=False, allow_null=True)
-    is_system_auditor_attr = fields.CharField(required=False, allow_null=True)
-    is_system_auditor_value = fields.StringListField(required=False, allow_null=True)
-    is_system_auditor_role = fields.StringListField(required=False, allow_null=True)
-    remove_system_auditors = fields.BooleanField(required=False, allow_null=True)
-
-    child = _Forbidden()

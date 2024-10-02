@@ -37,7 +37,7 @@ register(
     label=_('Disable the built-in authentication system'),
     help_text=_(
         "Controls whether users are prevented from using the built-in authentication system. "
-        "You probably want to do this if you are using an LDAP or SAML integration."
+        "You probably want to do this if you are using an LDAP integration."
     ),
     category=_('Authentication'),
     category_slug='authentication',
@@ -77,8 +77,8 @@ register(
     default=False,
     label=_('Allow External Users to Create OAuth2 Tokens'),
     help_text=_(
-        'For security reasons, users from external auth providers (LDAP, SAML, '
-        'SSO, and others) are not allowed to create OAuth2 tokens. '
+        'For security reasons, users from external auth providers (LDAP, SSO, '
+        ' and others) are not allowed to create OAuth2 tokens. '
         'To change this behavior, enable this setting. Existing tokens will '
         'not be deleted when this setting is toggled off.'
     ),

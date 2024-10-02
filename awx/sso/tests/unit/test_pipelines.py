@@ -4,7 +4,6 @@ import pytest
 @pytest.mark.parametrize(
     "lib",
     [
-        ("saml_pipeline"),
         ("social_pipeline"),
     ],
 )
