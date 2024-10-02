@@ -7,8 +7,6 @@ import logging
 
 # Django
 from django.urls import reverse
-from django.http import HttpResponse
-from django.views.generic import View
 from django.views.generic.base import RedirectView
 from django.utils.encoding import smart_str
 from django.conf import settings
@@ -46,23 +44,3 @@ class CompleteView(BaseRedirectView):
 
 
 sso_complete = CompleteView.as_view()
-
-
-class MetadataView(View):
-    def get(self, request, *args, **kwargs):
-        from social_django.utils import load_backend, load_strategy
-
-        complete_url = reverse('social:complete', args=('saml',))
-        try:
-            saml_backend = load_backend(load_strategy(request), 'saml', redirect_uri=complete_url)
-            metadata, errors = saml_backend.generate_metadata_xml()
-        except Exception as e:
-            logger.exception('unable to generate SAML metadata')
-            errors = e
-        if not errors:
-            return HttpResponse(content=metadata, content_type='text/xml')
-        else:
-            return HttpResponse(content=str(errors), content_type='text/plain')
-
-
-saml_metadata = MetadataView.as_view()

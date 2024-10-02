@@ -193,31 +193,3 @@ def test_logging_aggregator_connection_test_valid(put, post, admin):
     # "Test" the logger
     url = reverse('api:setting_logging_test')
     post(url, {}, user=admin, expect=202)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('headers', [True, False])
-def test_saml_x509cert_validation(patch, get, admin, headers):
-    cert = "MIIEogIBAAKCAQEA1T4za6qBbHxFpN5f9eFvA74MFjrsjcp1uvzOaE23AYKMDEJghJ6dqQ7GwHLNIeIeumqDFmODauIzrgSDJTT5+NG30Rr+rRi0zDkrkBAj/AtA+SaVhbzqB6ZSd7LaMly9XAc+82OKlNpuWS9hPmFaSShzDTXRu5RRyvm4NDCAOGDu5hyVR2pV/ffKDNfNkChnqzvRRW9laQcVmliZhlTGn7nPZ+JbjpwEy0nwW+4zoAiEvwnT52N4xTqIcYOnXtGiaf13dh7FkUfYmS0tzF3+h8QRKwtIm4y+sq84R/kr79/0t5aRUpJynNrECajzmArpL4IjXKTPIyUpTKirJgGnCwIDAQABAoIBAC6bbbm2hpsjfkVOpUKkhxMWUqX5MwK6oYjBAIwjkEAwPFPhnh7eXC87H42oidVCCt1LsmMOVQbjcdAzBEb5kTkk/Twi3k8O+1U3maHfJT5NZ2INYNjeNXh+jb/Dw5UGWAzpOIUR2JQ4Oa4cgPCVbppW0O6uOKz6+fWXJv+hKiUoBCC0TiY52iseHJdUOaKNxYRD2IyIzCAxFSd5tZRaARIYDsugXp3E/TdbsVWA7bmjIBOXq+SquTrlB8x7j3B7+Pi09nAJ2U/uV4PHE+/2Fl009ywfmqancvnhwnz+GQ5jjP+gTfghJfbO+Z6M346rS0Vw+osrPgfyudNHlCswHOECgYEA/Cfq25gDP07wo6+wYWbx6LIzj/SSZy/Ux9P8zghQfoZiPoaq7BQBPAzwLNt7JWST8U11LZA8/wo6ch+HSTMk+m5ieVuru2cHxTDqeNlh94eCrNwPJ5ayA5U6LxAuSCTAzp+rv6KQUx1JcKSEHuh+nRYTKvUDE6iA6YtPLO96lLUCgYEA2H5rOPX2M4w1Q9zjol77lplbPRdczXNd0PIzhy8Z2ID65qvmr1nxBG4f2H96ykW8CKLXNvSXreNZ1BhOXc/3Hv+3mm46iitB33gDX4mlV4Jyo/w5IWhUKRyoW6qXquFFsScxRzTrx/9M+aZeRRLdsBk27HavFEg6jrbQ0SleZL8CgYAaM6Op8d/UgkVrHOR9Go9kmK/W85kK8+NuaE7Ksf57R0eKK8AzC9kc/lMuthfTyOG+n0ff1i8gaVWtai1Ko+/hvfqplacAsDIUgYK70AroB8LCZ5ODj5sr2CPVpB7LDFakod7c6O2KVW6+L7oy5AHUHOkc+5y4PDg5DGrLxo68SQKBgAlGoWF3aG0c/MtDk51JZI43U+lyLs++ua5SMlMAeaMFI7rucpvgxqrh7Qthqukvw7a7A22fXUBeFWM5B2KNnpD9c+hyAKAa6l+gzMQzKZpuRGsyS2BbEAAS8kO7M3Rm4o2MmFfstI2FKs8nibJ79HOvIONQ0n+T+K5Utu2/UAQRAoGAFB4fiIyQ0nYzCf18Z4Wvi/qeIOW+UoBonIN3y1h4wruBywINHxFMHx4aVImJ6R09hoJ9D3Mxli3xF/8JIjfTG5fBSGrGnuofl14d/XtRDXbT2uhVXrIkeLL/ojODwwEx0VhxIRUEjPTvEl6AFSRRcBp3KKzQ/cu7ENDY6GTlOUI="  # noqa
-    if headers:
-        cert = '-----BEGIN CERTIFICATE-----\n' + cert + '\n-----END CERTIFICATE-----'
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'saml'})
-    resp = patch(
-        url,
-        user=admin,
-        data={
-            'SOCIAL_AUTH_SAML_ENABLED_IDPS': {
-                "okta": {
-                    "attr_last_name": "LastName",
-                    "attr_username": "login",
-                    "entity_id": "http://www.okta.com/abc123",
-                    "attr_user_permanent_id": "login",
-                    "url": "https://example.okta.com/app/abc123/xyz123/sso/saml",
-                    "attr_email": "Email",
-                    "x509cert": cert,
-                    "attr_first_name": "FirstName",
-                }
-            }
-        },
-    )
-    assert resp.status_code == 200

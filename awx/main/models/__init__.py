@@ -248,8 +248,6 @@ def user_is_in_enterprise_category(user, category):
     ret = (category,) in user.enterprise_auth.values_list('provider') and not user.has_usable_password()
     # NOTE: this if block ensures existing enterprise users are still able to
     # log in. Remove it in a future release
-    if category == 'saml':
-        ret = ret or user.social_auth.all()
     return ret
 
 

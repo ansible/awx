@@ -1,7 +1,6 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
 # Remove pbr from requirements.in when moving ansible-runner to requirements.in
 git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
-git+https://github.com/ansible/python3-saml.git@devel#egg=python3-saml
 django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest_filters,jwt_consumer,resource_registry,rbac]
 awx-plugins-core @ git+https://git@github.com/ansible/awx-plugins.git@devel#egg=awx-plugins-core
 awx_plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git

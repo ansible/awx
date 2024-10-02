@@ -212,7 +212,6 @@ class Resources(object):
     _settings_jobs = 'settings/jobs/'
     _settings_logging = 'settings/logging/'
     _settings_named_url = 'settings/named-url/'
-    _settings_saml = 'settings/saml/'
     _settings_system = 'settings/system/'
     _settings_ui = 'settings/ui/'
     _settings_user = 'settings/user/'
