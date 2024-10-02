@@ -324,11 +324,8 @@ class TestCommonFunctions:
         [
             # Set none of the social auth settings
             ('JUNK_SETTING', False),
-            ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
             # Try a hypothetical future one
             ('SOCIAL_AUTH_GIBBERISH_KEY', True),
-            # Do a SAML one
-            ('SOCIAL_AUTH_SAML_SP_PRIVATE_KEY', False),
         ],
     )
     def test_is_remote_auth_enabled(self, setting, expected):

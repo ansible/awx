@@ -387,8 +387,6 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.open_id_connect.OpenIdConnectAuth',
-    'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',
 )
 
@@ -483,13 +481,12 @@ _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.user.user_details',
     'awx.sso.social_base_pipeline.prevent_inactive_login',
 )
+
 SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
     'awx.sso.social_pipeline.update_user_orgs',
     'awx.sso.social_pipeline.update_user_teams',
     'ansible_base.resource_registry.utils.service_backed_sso_pipeline.redirect_to_resource_server',
 )
-SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.saml_pipeline.populate_user', 'awx.sso.saml_pipeline.update_user_flags')
-SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
@@ -503,19 +500,6 @@ SOCIAL_AUTH_CLEAN_USERNAMES = True
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-
-# Note: These settings may be overridden by database settings.
-SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
-SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
-SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
-SOCIAL_AUTH_SAML_ORG_INFO = {}
-SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
-SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
-SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
-
-SOCIAL_AUTH_SAML_ORGANIZATION_ATTR = {}
-SOCIAL_AUTH_SAML_TEAM_ATTR = {}
-SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR = {}
 
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment

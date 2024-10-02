@@ -224,7 +224,6 @@ isodate==0.6.1
     #   azure-keyvault-keys
     #   azure-keyvault-secrets
     #   msrest
-    #   python3-saml
 jaraco-collections==5.0.0
     # via irc
 jaraco-context==4.3.0
@@ -260,10 +259,6 @@ kubernetes==29.0.0
     # via openshift
 lockfile==0.12.2
     # via python-daemon
-lxml==4.9.4
-    # via
-    #   python3-saml
-    #   xmlsec
 markdown==3.5.2
     # via -r /awx_devel/requirements/requirements.in
 markupsafe==2.1.5
@@ -555,8 +550,6 @@ wrapt==1.16.0
     # via
     #   deprecated
     #   opentelemetry-instrumentation
-xmlsec==1.3.13
-    # via python3-saml
 yarl==1.9.4
     # via aiohttp
 zipp==3.17.0

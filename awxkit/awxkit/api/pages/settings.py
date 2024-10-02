@@ -14,7 +14,6 @@ page.register_page(
         resources.settings_authentication,
         resources.settings_changed,
         resources.settings_jobs,
-        resources.settings_saml,
         resources.settings_system,
         resources.settings_ui,
         resources.settings_user,
