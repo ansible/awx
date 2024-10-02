@@ -43,8 +43,6 @@ GRAFANA ?= false
 VAULT ?= false
 # If set to true docker-compose will also start a hashicorp vault instance with TLS enabled
 VAULT_TLS ?= false
-# If set to true docker-compose will also start a tacacs+ instance
-TACACS ?= false
 # If set to true docker-compose will also start an OpenTelemetry Collector instance
 OTEL ?= false
 # If set to true docker-compose will also start a Loki instance
@@ -511,7 +509,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_grafana=$(GRAFANA) \
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
-	    -e enable_tacacs=$(TACACS) \
 	    -e enable_otel=$(OTEL) \
 	    -e enable_loki=$(LOKI) \
 	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \

@@ -220,7 +220,6 @@ class Resources(object):
     _settings_radius = 'settings/radius/'
     _settings_saml = 'settings/saml/'
     _settings_system = 'settings/system/'
-    _settings_tacacsplus = 'settings/tacacsplus/'
     _settings_ui = 'settings/ui/'
     _settings_user = 'settings/user/'
     _settings_user_defaults = 'settings/user-defaults/'
