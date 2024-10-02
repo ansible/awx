@@ -303,24 +303,14 @@ class TestCommonFunctions:
             (True, False, 'social'),
         ],
     )
-    def test_get_external_account(self, enable_social, enable_enterprise, expected_results):
+
+    def test_get_external_account(self, enable_enterprise, expected_results):
         try:
             user = User.objects.get(username="external_tester")
         except User.DoesNotExist:
             user = User(username="external_tester")
             user.set_unusable_password()
             user.save()
-
-        if enable_social:
-            from social_django.models import UserSocialAuth
-
-            social_auth, _ = UserSocialAuth.objects.get_or_create(
-                uid='667ec049-cdf3-45d0-a4dc-0465f7505954',
-                provider='oidc',
-                extra_data={},
-                user_id=user.id,
-            )
-            user.social_auth.set([social_auth])
         if enable_enterprise:
             from awx.sso.models import UserEnterpriseAuth
 
@@ -335,8 +325,6 @@ class TestCommonFunctions:
             # Set none of the social auth settings
             ('JUNK_SETTING', False),
             ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
-            # Set some SOCIAL_SOCIAL_AUTH_OIDC_KEYAUTH_*_KEY settings
-            ('SOCIAL_AUTH_OIDC_KEY', True),
             # Try a hypothetical future one
             ('SOCIAL_AUTH_GIBBERISH_KEY', True),
             # Do a SAML one
