@@ -14,7 +14,6 @@ Known Issues
    pair: known issues; live event statuses
    pair: live event statuses; green dot
    pair: live event statuses; red dot
-   pair: known issues; LDAP authentication
    pair: known issues; lost isolated jobs
    pair: known issues; sosreport 
    pair: known issues; local management
@@ -27,7 +26,6 @@ Known Issues
    pair: known issues; session limit
    pair: known issues; Ansible Azure dependencies
    pair: known issues; authentication (reactive user)
-   pair: known issues; SAML issues   
    pair: known issues; user cannot log in using authentication
    pair: known issues; login problems with social authentication
    pair: known issues; OAuth account recreation
@@ -98,31 +96,10 @@ Misuse of job slicing can cause errors in job scheduling
 
 .. include:: ../common/job-slicing-rule.rst
 
-
-Default LDAP directory must be configured to use LDAP Authentication
-======================================================================
-
-The ability to configure up to six LDAP directories for authentication requires a value. On the settings page for LDAP, there is a "Default" LDAP configuration followed by five-numbered configuration slots. If the "Default" is not populated, AWX will not try to authenticate using the other directory configurations.
-
-
 Potential security issue using ``X_FORWARDED_FOR`` in ``REMOTE_HOST_HEADERS``
 =================================================================================
 
 If placing AWX nodes behind some sort of proxy, this may pose a security issue. This approach assumes traffic is always flowing exclusively through your load balancer, and that traffic that circumvents the load balancer is suspect to ``X-Forwarded-For`` header spoofing. 
-
-
-Server error when accessing SAML metadata via hostname
-=========================================================
-
-When AWX is accessed via hostname only (e.g. https://my-little-awx), trying to read the SAML metadata from /sso/metadata/saml/ generates a ``sp_acs_url_invalid`` server error.
-
-A configuration in which uses SAML when accessing AWX via hostname only instead of an FQDN, is not supported. Doing so will generate an error that is captured in the browser with full traceback information.
-
-
-SAML authentication revokes admin role upon login
-==================================================
-
-Older versions of AWX, the SAML adapter did not evaluate the System Auditor or System Admin roles for a user logging in. Because of this, the login process would not change a user's system roles that were granted through the User Interface. The adapter now has a setting called **SAML User Flags Attribute Mapping** to grant users logging in these roles based on either SAML attributes or roles, and the adapter defaults to removing these roles if unspecified akin to the LDAP adapter. Refer to the :ref:`logic table <ag_auth_saml_user_flags_attr_map>` that shows the relationship between how the role, attribute, and attribute value settings are configured and whether or not a user will be granted the System Admin/Auditor roles.
 
 
 Live events status indicators
