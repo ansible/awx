@@ -15,8 +15,8 @@ from ansible_base.resource_registry.fields import AnsibleResourceField
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import AutoOneToOneField, ImplicitRoleField, OrderedManyToManyField
-from awx.main.models.base import BaseModel, CommonModel, CommonModelNameNotUnique, CreatedModifiedModel, NotificationFieldsModel
+from awx.main.fields import ImplicitRoleField, OrderedManyToManyField
+from awx.main.models.base import BaseModel, CommonModel, CommonModelNameNotUnique, NotificationFieldsModel
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -24,7 +24,7 @@ from awx.main.models.rbac import (
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 
-__all__ = ['Organization', 'Team', 'Profile', 'UserSessionMembership']
+__all__ = ['Organization', 'Team', 'UserSessionMembership']
 
 
 class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
@@ -165,22 +165,6 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self, request=None):
         return reverse('api:team_detail', kwargs={'pk': self.pk}, request=request)
-
-
-class Profile(CreatedModifiedModel):
-    """
-    Profile model related to User object. Currently stores LDAP DN for users
-    loaded from LDAP.
-    """
-
-    class Meta:
-        app_label = 'main'
-
-    user = AutoOneToOneField('auth.User', related_name='profile', editable=False, on_delete=models.CASCADE)
-    ldap_dn = models.CharField(
-        max_length=1024,
-        default='',
-    )
 
 
 class UserSessionMembership(BaseModel):

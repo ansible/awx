@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 
+# todo: this model to be removed as part of sso removal issue AAP-28380
 class UserEnterpriseAuth(models.Model):
     """Enterprise Auth association model"""
 

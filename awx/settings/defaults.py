@@ -9,8 +9,6 @@ import tempfile
 import socket
 from datetime import timedelta
 
-# python-ldap
-import ldap
 from split_settings.tools import include
 
 
@@ -389,23 +387,6 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'awx.sso.backends.LDAPBackend',
-    'awx.sso.backends.LDAPBackend1',
-    'awx.sso.backends.LDAPBackend2',
-    'awx.sso.backends.LDAPBackend3',
-    'awx.sso.backends.LDAPBackend4',
-    'awx.sso.backends.LDAPBackend5',
-    'awx.sso.backends.RADIUSBackend',
-    'awx.sso.backends.TACACSPlusBackend',
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.github.GithubOAuth2',
-    'social_core.backends.github.GithubOrganizationOAuth2',
-    'social_core.backends.github.GithubTeamOAuth2',
-    'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
-    'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
-    'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
-    'social_core.backends.open_id_connect.OpenIdConnectAuth',
-    'social_core.backends.azuread.AzureADOAuth2',
     'awx.main.backends.AWXModelBackend',
 )
 
@@ -419,29 +400,6 @@ OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
 
-# LDAP server (default to None to skip using LDAP authentication).
-# Note: This setting may be overridden by database settings.
-AUTH_LDAP_SERVER_URI = None
-
-# Disable LDAP referrals by default (to prevent certain LDAP queries from
-# hanging with AD).
-# Note: This setting may be overridden by database settings.
-AUTH_LDAP_CONNECTION_OPTIONS = {ldap.OPT_REFERRALS: 0, ldap.OPT_NETWORK_TIMEOUT: 30}
-
-# Radius server settings (default to empty string to skip using Radius auth).
-# Note: These settings may be overridden by database settings.
-RADIUS_SERVER = ''
-RADIUS_PORT = 1812
-RADIUS_SECRET = ''
-
-# TACACS+ settings (default host to empty string to skip using TACACS+ auth).
-# Note: These settings may be overridden by database settings.
-TACACSPLUS_HOST = ''
-TACACSPLUS_PORT = 49
-TACACSPLUS_SECRET = ''
-TACACSPLUS_SESSION_TIMEOUT = 5
-TACACSPLUS_AUTH_PROTOCOL = 'ascii'
-TACACSPLUS_REM_ADDR = False
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
@@ -542,42 +500,6 @@ SOCIAL_AUTH_CLEAN_USERNAMES = True
 
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-
-# Note: These settings may be overridden by database settings.
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
-
-SOCIAL_AUTH_GITHUB_KEY = ''
-SOCIAL_AUTH_GITHUB_SECRET = ''
-SOCIAL_AUTH_GITHUB_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ORG_KEY = ''
-SOCIAL_AUTH_GITHUB_ORG_SECRET = ''
-SOCIAL_AUTH_GITHUB_ORG_NAME = ''
-SOCIAL_AUTH_GITHUB_ORG_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_TEAM_KEY = ''
-SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
-SOCIAL_AUTH_GITHUB_TEAM_ID = ''
-SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SECRET = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_NAME = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SECRET = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ID = ''
-SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_SCOPE = ['user:email', 'read:org']
-
-SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
-SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
 
 # Any ANSIBLE_* settings will be passed to the task runner subprocess
 # environment
@@ -913,7 +835,6 @@ LOGGING = {
         'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
         'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
-        'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
