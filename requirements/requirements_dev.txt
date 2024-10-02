@@ -19,7 +19,6 @@ logutils
 jupyter
 # matplotlib - Caused issues when bumping to setuptools 58
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
-git+https://github.com/artefactual-labs/mockldap.git@master#egg=mockldap
 gprof2dot
 atomicwrites
 flake8

@@ -7,7 +7,7 @@ The REST endpoint for CRUD operations against AWX configurations can be found at
 
 Here is a typical AWX configuration category GET response:
 ```
-GET /api/v2/settings/github-team/
+GET /api/v2/settings/oidc/
 HTTP 200 OK
 Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
 Content-Type: application/json
@@ -18,12 +18,10 @@ X-API-Query-Time: 0.004s
 X-API-Time: 0.026s
 
 {
-    "SOCIAL_AUTH_GITHUB_TEAM_CALLBACK_URL": "https://platformhost/sso/complete/github-team/",
-    "SOCIAL_AUTH_GITHUB_TEAM_KEY": "",
-    "SOCIAL_AUTH_GITHUB_TEAM_SECRET": "",
-    "SOCIAL_AUTH_GITHUB_TEAM_ID": "",
-    "SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP": null,
-    "SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP": null
+    "SOCIAL_AUTH_OIDC_KEY": null,
+    "SOCIAL_AUTH_OIDC_SECRET": "",
+    "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": "",
+    "SOCIAL_AUTH_OIDC_VERIFY_SSL": true
 }
 ```
 
