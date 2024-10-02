@@ -61,18 +61,3 @@ def on_post_delete_setting(sender, **kwargs):
     key = getattr(instance, '_saved_key_', None)
     if key:
         handle_setting_change(key, True)
-
-
-@receiver(setting_changed)
-def disable_local_auth(**kwargs):
-    if (kwargs['setting'], kwargs['value']) == ('DISABLE_LOCAL_AUTH', True):
-        from django.contrib.auth.models import User
-        from oauth2_provider.models import RefreshToken
-        from awx.main.models.oauth import OAuth2AccessToken
-        from awx.main.management.commands.revoke_oauth2_tokens import revoke_tokens
-
-        logger.warning("Triggering token invalidation for local users.")
-
-        qs = User.objects.filter(enterprise_auth__isnull=True, social_auth__isnull=True)
-        revoke_tokens(RefreshToken.objects.filter(revoked=None, user__in=qs))
-        revoke_tokens(OAuth2AccessToken.objects.filter(user__in=qs))

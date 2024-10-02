@@ -106,17 +106,12 @@ cryptography==41.0.7
     #   pyjwt
     #   pyopenssl
     #   service-identity
-    #   social-auth-core
 cython==0.29.37
     # via -r /awx_devel/requirements/requirements.in
 daphne==3.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
-defusedxml==0.7.1
-    # via
-    #   python3-openid
-    #   social-auth-core
 deprecated==1.2.14
     # via
     #   opentelemetry-api
@@ -137,7 +132,6 @@ django==4.2.10
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
-    #   social-auth-app-django
     # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.3.1
     # via -r /awx_devel/requirements/requirements.in
@@ -295,7 +289,6 @@ oauthlib==3.2.2
     #   django-oauth-toolkit
     #   kubernetes
     #   requests-oauthlib
-    #   social-auth-core
 openshift==0.13.2
     # via -r /awx_devel/requirements/requirements.in
 opentelemetry-api==1.24.0
@@ -382,7 +375,6 @@ pyjwt[crypto]==2.8.0
     #   adal
     #   django-ansible-base
     #   msal
-    #   social-auth-core
     #   twilio
 pyopenssl==24.0.0
     # via
@@ -402,14 +394,11 @@ python-dateutil==2.8.2
     #   receptorctl
 python-dsv-sdk==1.0.4
     # via -r /awx_devel/requirements/requirements.in
-python-jose==3.3.0
-    # via social-auth-core
 python-string-utils==1.0.0
     # via openshift
 python-tss-sdk==1.2.2
     # via -r /awx_devel/requirements/requirements.in
 python3-openid==3.2.0
-    # via social-auth-core
     # via -r /awx_devel/requirements/requirements_git.txt
 pytz==2024.1
     # via
@@ -448,13 +437,11 @@ requests==2.31.0
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
-    #   social-auth-core
     #   twilio
 requests-oauthlib==1.3.1
     # via
     #   kubernetes
     #   msrest
-    #   social-auth-core
 rpds-py==0.18.0
     # via
     #   jsonschema
@@ -490,12 +477,6 @@ slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.1
     # via gitdb
-social-auth-app-django==5.4.0
-    # via -r /awx_devel/requirements/requirements.in
-social-auth-core[openidconnect]==4.4.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   social-auth-app-django
 sqlparse==0.4.4
     # via
     #   -r /awx_devel/requirements/requirements.in

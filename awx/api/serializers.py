@@ -134,8 +134,6 @@ from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, Ver
 # AWX Utils
 from awx.api.validators import HostnameRegexValidator
 
-from awx.sso.common import get_external_account
-
 logger = logging.getLogger('awx.api.serializers')
 
 # Fields that should be summarized regardless of object type.
@@ -961,7 +959,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
-    external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -979,20 +976,12 @@ class UserSerializer(BaseSerializer):
             'is_system_auditor',
             'password',
             'last_login',
-            'external_account',
         )
         extra_kwargs = {'last_login': {'read_only': True}}
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
-        if self.get_external_account(obj):
-            # If this is an external account it shouldn't have a password field
-            ret.pop('password', None)
-        else:
-            # If its an internal account lets assume there is a password and return $encrypted$ to the user
-            ret['password'] = '$encrypted$'
-        if obj and type(self) is UserSerializer:
-            ret['auth'] = obj.social_auth.values('provider', 'uid')
+        ret['password'] = '$encrypted$'
         return ret
 
     def get_validation_exclusions(self, obj=None):
@@ -1025,12 +1014,7 @@ class UserSerializer(BaseSerializer):
         return value
 
     def _update_password(self, obj, new_password):
-        # For now we're not raising an error, just not saving password for
-        # users managed by external authentication services (who already have an unusable password set).
-        # get_external_account function will return something like social or enterprise when the user is external,
-        # and return None when the user isn't external.
-        # We want to allow a password update only for non-external accounts.
-        if new_password and new_password != '$encrypted$' and not self.get_external_account(obj):
+        if new_password and new_password != '$encrypted$':
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
 
@@ -1044,9 +1028,6 @@ class UserSerializer(BaseSerializer):
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
-
-    def get_external_account(self, obj):
-        return get_external_account(obj)
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)

@@ -244,16 +244,6 @@ def user_is_system_auditor(user, tf):
 User.add_to_class('is_system_auditor', user_is_system_auditor)
 
 
-def user_is_in_enterprise_category(user, category):
-    ret = (category,) in user.enterprise_auth.values_list('provider') and not user.has_usable_password()
-    # NOTE: this if block ensures existing enterprise users are still able to
-    # log in. Remove it in a future release
-    return ret
-
-
-User.add_to_class('is_in_enterprise_category', user_is_in_enterprise_category)
-
-
 def o_auth2_application_get_absolute_url(self, request=None):
     return reverse('api:o_auth2_application_detail', kwargs={'pk': self.pk}, request=request)
 
