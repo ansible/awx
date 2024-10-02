@@ -21,7 +21,6 @@ page.register_page(
         resources.settings_radius,
         resources.settings_saml,
         resources.settings_system,
-        resources.settings_tacacsplus,
         resources.settings_ui,
         resources.settings_user,
         resources.settings_user_defaults,

@@ -7,8 +7,6 @@ Through the AWX user interface, you can set up a simplified login through variou
 - :ref:`ag_auth_azure` 
 - :ref:`ag_auth_github`
 - :ref:`ag_auth_google_oauth2` 
-- :ref:`ag_auth_radius`
-- :ref:`ag_auth_tacacs`
 
 Different authentication types require you to enter different information. Be sure to include all the information as required.
 
