@@ -314,16 +314,6 @@ class TestCommonFunctions:
 
         if enable_ldap:
             user.profile.ldap_dn = 'test.dn'
-        if enable_social:
-            from social_django.models import UserSocialAuth
-
-            social_auth, _ = UserSocialAuth.objects.get_or_create(
-                uid='667ec049-cdf3-45d0-a4dc-0465f7505954',
-                provider='oidc',
-                extra_data={},
-                user_id=user.id,
-            )
-            user.social_auth.set([social_auth])
         if enable_enterprise:
             from awx.sso.models import UserEnterpriseAuth
 
