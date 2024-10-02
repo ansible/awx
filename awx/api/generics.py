@@ -30,6 +30,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
+# Shared code for the AWX platform
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
+
 # django-ansible-base
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
@@ -43,7 +46,6 @@ from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credenti
 from awx.main.models.rbac import give_creator_permissions
 from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
-from awx.main.utils.licensing import server_product_name
 from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
@@ -254,7 +256,7 @@ class APIView(views.APIView):
         time_started = getattr(self, 'time_started', None)
         if request.user.is_authenticated:
             response['X-API-Product-Version'] = get_awx_version()
-        response['X-API-Product-Name'] = server_product_name()
+        response['X-API-Product-Name'] = detect_server_product_name()
 
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:

@@ -26,6 +26,9 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 
+# Shared code for the AWX platform
+from awx_plugins.interfaces._temporary_private_container_api import get_incontainer_path
+
 # DRF
 from awx.main.utils.pglock import advisory_lock
 from rest_framework.serializers import ValidationError as DRFValidationError
@@ -41,7 +44,6 @@ from awx.main.fields import (
 )
 from awx.main.utils import decrypt_field, classproperty, set_environ
 from awx.main.utils.safe_yaml import safe_dump
-from awx.main.utils.execution_environments import to_container_path
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
 from awx.main.models.mixins import ResourceMixin
@@ -623,7 +625,7 @@ class CredentialType(CommonModelNameNotUnique):
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            container_path = to_container_path(path, private_data_dir)
+            container_path = get_incontainer_path(path, private_data_dir)
 
             # determine if filename indicates single file or many
             if file_label.find('.') == -1:
@@ -665,7 +667,7 @@ class CredentialType(CommonModelNameNotUnique):
             extra_vars = build_extra_vars(self.injectors.get('extra_vars', {}))
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
-                container_path = to_container_path(path, private_data_dir)
+                container_path = get_incontainer_path(path, private_data_dir)
                 args.extend(['-e', '@%s' % container_path])
 
 
