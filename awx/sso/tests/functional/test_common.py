@@ -303,6 +303,7 @@ class TestCommonFunctions:
             (True, False, 'social'),
         ],
     )
+
     def test_get_external_account(self, enable_enterprise, expected_results):
         try:
             user = User.objects.get(username="external_tester")
