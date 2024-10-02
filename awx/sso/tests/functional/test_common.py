@@ -304,7 +304,7 @@ class TestCommonFunctions:
             (False, True, False, 'social'),
         ],
     )
-    def test_get_external_account(self, enable_ldap, enable_social, enable_enterprise, expected_results):
+    def test_get_external_account(self, enable_ldap, enable_enterprise, expected_results):
         try:
             user = User.objects.get(username="external_tester")
         except User.DoesNotExist:
@@ -332,7 +332,6 @@ class TestCommonFunctions:
             ('SOCIAL_AUTH_SAML_ENABLED_IDPS', True),
             ('RADIUS_SERVER', True),
             ('TACACSPLUS_HOST', True),
-            # Set some SOCIAL_SOCIAL_AUTH_OIDC_KEYAUTH_*_KEY settings
             ('SOCIAL_AUTH_AZUREAD_OAUTH2_KEY', True),
             ('SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY', True),
             ('SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY', True),
@@ -341,7 +340,6 @@ class TestCommonFunctions:
             ('SOCIAL_AUTH_GITHUB_ORG_KEY', True),
             ('SOCIAL_AUTH_GITHUB_TEAM_KEY', True),
             ('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', True),
-            ('SOCIAL_AUTH_OIDC_KEY', True),
             # Try a hypothetical future one
             ('SOCIAL_AUTH_GIBBERISH_KEY', True),
             # Do a SAML one

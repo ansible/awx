@@ -2,12 +2,7 @@
 
 from django.db import migrations
 
-OIDC_AUTH_CONF_KEYS = [
-    'SOCIAL_AUTH_OIDC_KEY',
-    'SOCIAL_AUTH_OIDC_SECRET',
-    'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT',
-    'SOCIAL_AUTH_OIDC_VERIFY_SSL'
-]
+OIDC_AUTH_CONF_KEYS = ['SOCIAL_AUTH_OIDC_KEY', 'SOCIAL_AUTH_OIDC_SECRET', 'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT', 'SOCIAL_AUTH_OIDC_VERIFY_SSL']
 
 
 def remove_oidc_auth_conf(apps, scheme_editor):
@@ -16,7 +11,6 @@ def remove_oidc_auth_conf(apps, scheme_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('conf', '0010_change_to_JSONField'),
     ]
