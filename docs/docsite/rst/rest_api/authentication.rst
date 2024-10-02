@@ -192,9 +192,7 @@ If you need to write custom requests, you can write a Python script using `Pytho
 SSO Authentication
 -------------------
 
-Single sign-on (SSO) authentication methods are fundamentally different from other methods because the authentication of the user happens external to AWX, like Google SSO, Azure SSO, SAML, or GitHub. For example, with GitHub SSO, GitHub is the single source of truth, which verifies your identity based on the username and password you gave AWX.
-
-You can configure SSO authentication using AWX inside a large organization with a central Identity Provider. Once you have configured an SSO method in AWX, a button for that SSO will be present on the login screen. If you click that button, it will redirect you to the Identity Provider, in this case GitHub, where you will present your credentials. If the Identity Provider verifies you successfully, then AWX will make a user linked to your GitHub user (if this is your first time logging in via this SSO method), and log you in.
+Single sign-on (SSO) authentication methods are fundamentally different from other methods because the authentication of the user happens external to AWX, like SAML.
 
 For the various types of supported SSO authentication methods, see :ref:`ag_social_auth` and :ref:`ag_ent_auth` in the |ata|.
 

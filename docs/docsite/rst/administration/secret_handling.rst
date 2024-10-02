@@ -24,7 +24,7 @@ User passwords for local users
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 AWX hashes local AWX user passwords with the PBKDF2 algorithm using a SHA256 hash. Users who authenticate via external
-account mechanisms (LDAP, SAML, OAuth, and others) do not have any password or secret stored.
+account mechanisms (SAML, OAuth, and others) do not have any password or secret stored.
 
 Secret handling for operational use
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
