@@ -25,19 +25,25 @@ jobs:
         tests:
           - name: api-test
             command: /start_tests.sh test_coverage
+            coverage-upload-name: ""
           - name: api-migrations
             command: /start_tests.sh test_migrations
+            coverage-upload-name: ""
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
+            coverage-upload-name: ""
           - name: api-swagger
             command: /start_tests.sh swagger
+            coverage-upload-name: ""
           - name: awx-collection
             command: /start_tests.sh test_collection_all
+            coverage-upload-name: "awx-collection"
           - name: api-schema
             command: >-
               /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{
                 github.event.pull_request.base.ref || github.ref_name
               }}
+            coverage-upload-name: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -109,7 +115,7 @@ jobs:
                 -v \
                 --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
                 --form "xunit_xml=@${junit_file}" \
-                --form "component_name=awx" \
+                --form "component_name=${{ matrix.tests.coverage-upload-name || 'awx' }}" \
                 --form "git_commit_sha=${{ github.sha }}" \
                 --form "git_repository_url=https://github.com/${{ github.repository }}" \
                 "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"
