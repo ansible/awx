@@ -12,9 +12,7 @@ from django.conf import settings
 # Django OAuth Toolkit
 from oauth2_provider.models import AbstractApplication, AbstractAccessToken
 from oauth2_provider.generators import generate_client_secret
-from oauthlib import oauth2
 
-from awx.sso.common import get_external_account
 from awx.main.fields import OAuth2ClientSecretField
 
 
@@ -123,15 +121,5 @@ class OAuth2AccessToken(AbstractAccessToken):
             connection.on_commit(_update_last_used)
         return valid
 
-    def validate_external_users(self):
-        if self.user and settings.ALLOW_OAUTH2_FOR_EXTERNAL_USERS is False:
-            external_account = get_external_account(self.user)
-            if external_account is not None:
-                raise oauth2.AccessDeniedError(
-                    _('OAuth2 Tokens cannot be created by users associated with an external authentication provider ({})').format(external_account)
-                )
-
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.validate_external_users()
         super(OAuth2AccessToken, self).save(*args, **kwargs)

@@ -26,8 +26,6 @@ def get_urlpatterns(prefix=None):
         path(f'api{prefix}v2/', include(api_version_urls)),
         path(f'api{prefix}', include(api_urls)),
         path('', include(root_urls)),
-        re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
-        re_path(r'^sso/', include('social_django.urls', namespace='social')),
         re_path(r'^(?:api/)?400.html$', handle_400),
         re_path(r'^(?:api/)?403.html$', handle_403),
         re_path(r'^(?:api/)?404.html$', handle_404),
@@ -36,7 +34,7 @@ def get_urlpatterns(prefix=None):
         re_path(r'^login/', handle_login_redirect),
         # want api/v2/doesnotexist to return a 404, not match the ui urls,
         # so use a negative lookahead assertion here
-        re_path(r'^(?!api/|sso/).*', include('awx.ui.urls', namespace='ui')),
+        re_path(r'^(?!api/).*', include('awx.ui.urls', namespace='ui')),
     ]
 
     if settings.SETTINGS_MODULE == 'awx.settings.development':

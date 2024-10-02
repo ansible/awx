@@ -50,9 +50,6 @@ from rest_framework_yaml.renderers import YAMLRenderer
 # ansi2html
 from ansi2html import Ansi2HTMLConverter
 
-# Python Social Auth
-from social_core.backends.utils import load_backends
-
 # Django OAuth Toolkit
 from oauth2_provider.models import get_access_token_model
 
@@ -128,6 +125,9 @@ from awx.api.views.mixin import (
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
+
+if 'ansible_base.authentication' in getattr(settings, "INSTALLED_APPS", []):
+    from ansible_base.authentication.models.authenticator import Authenticator as AnsibleBaseAuthenticator
 
 logger = logging.getLogger('awx.api.views')
 
@@ -684,20 +684,18 @@ class AuthView(APIView):
     swagger_topic = 'System Configuration'
 
     def get(self, request):
-        from rest_framework.reverse import reverse
-
         data = OrderedDict()
-        err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        auth_backends = list(load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items())
-        # Return auth backends in consistent order: oidc.
-        auth_backends.sort(key=lambda x: x[0])
-        for name, backend in auth_backends:
-            login_url = reverse('social:begin', args=(name,))
-            complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
-            backend_data = {'login_url': login_url, 'complete_url': complete_url}
-            if err_backend == name and err_message:
-                backend_data['error'] = err_message
-            data[name] = backend_data
+        if 'ansible_base.authentication' in getattr(settings, "INSTALLED_APPS", []):
+            # app is using ansible_base authentication
+            # add ansible_base authenticators
+            authenticators = AnsibleBaseAuthenticator.objects.filter(enabled=True, category="sso")
+            for authenticator in authenticators:
+                login_url = authenticator.get_login_url()
+                data[authenticator.name] = {
+                    'login_url': login_url,
+                    'name': authenticator.name,
+                }
+
         return Response(data)
 
 
