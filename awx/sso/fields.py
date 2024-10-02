@@ -14,7 +14,6 @@ from rest_framework.fields import empty, Field, SkipField
 # AWX
 from awx.conf import fields
 from awx.main.validators import validate_certificate
-from awx.sso.validators import validate_tacacsplus_disallow_nonascii  # noqa
 
 
 def get_subclasses(cls):

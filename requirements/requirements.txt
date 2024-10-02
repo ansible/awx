@@ -495,7 +495,6 @@ six==1.16.0
     #   pygerduty
     #   pyrad
     #   python-dateutil
-    #   tacacs-plus
 slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.1
@@ -510,7 +509,6 @@ sqlparse==0.4.4
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
-tacacs-plus==1.0
     # via -r /awx_devel/requirements/requirements.in
 tempora==5.5.1
     # via

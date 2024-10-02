@@ -7,11 +7,8 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-# Django REST Framework
-from rest_framework import serializers
-
 # AWX
-from awx.conf import register, register_validate, fields
+from awx.conf import register, fields
 from awx.sso.fields import (
     AuthenticationBackendsField,
     SAMLContactField,
@@ -25,7 +22,6 @@ from awx.sso.fields import (
     SocialTeamMapField,
 )
 from awx.main.validators import validate_private_key, validate_certificate
-from awx.sso.validators import validate_tacacsplus_disallow_nonascii  # noqa
 
 
 class SocialAuthCallbackURL(object):
@@ -185,79 +181,6 @@ if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
         category=_('RADIUS'),
         category_slug='radius',
         encrypted=True,
-    )
-
-    ###############################################################################
-    # TACACSPLUS AUTHENTICATION SETTINGS
-    ###############################################################################
-
-    register(
-        'TACACSPLUS_HOST',
-        field_class=fields.CharField,
-        allow_blank=True,
-        default='',
-        label=_('TACACS+ Server'),
-        help_text=_('Hostname of TACACS+ server.'),
-        category=_('TACACS+'),
-        category_slug='tacacsplus',
-    )
-
-    register(
-        'TACACSPLUS_PORT',
-        field_class=fields.IntegerField,
-        min_value=1,
-        max_value=65535,
-        default=49,
-        label=_('TACACS+ Port'),
-        help_text=_('Port number of TACACS+ server.'),
-        category=_('TACACS+'),
-        category_slug='tacacsplus',
-    )
-
-    register(
-        'TACACSPLUS_SECRET',
-        field_class=fields.CharField,
-        allow_blank=True,
-        default='',
-        validators=[validate_tacacsplus_disallow_nonascii],
-        label=_('TACACS+ Secret'),
-        help_text=_('Shared secret for authenticating to TACACS+ server.'),
-        category=_('TACACS+'),
-        category_slug='tacacsplus',
-        encrypted=True,
-    )
-
-    register(
-        'TACACSPLUS_SESSION_TIMEOUT',
-        field_class=fields.IntegerField,
-        min_value=0,
-        default=5,
-        label=_('TACACS+ Auth Session Timeout'),
-        help_text=_('TACACS+ session timeout value in seconds, 0 disables timeout.'),
-        category=_('TACACS+'),
-        category_slug='tacacsplus',
-        unit=_('seconds'),
-    )
-
-    register(
-        'TACACSPLUS_AUTH_PROTOCOL',
-        field_class=fields.ChoiceField,
-        choices=['ascii', 'pap'],
-        default='ascii',
-        label=_('TACACS+ Authentication Protocol'),
-        help_text=_('Choose the authentication protocol used by TACACS+ client.'),
-        category=_('TACACS+'),
-        category_slug='tacacsplus',
-    )
-
-    register(
-        'TACACSPLUS_REM_ADDR',
-        field_class=fields.BooleanField,
-        default=True,
-        label=_('TACACS+ client address sending enabled'),
-        help_text=_('Enable the client address sending by TACACS+ client.'),
-        category=_('TACACS+'),
-        category_slug='tacacsplus',
     )
 
     ###############################################################################
@@ -1344,21 +1267,3 @@ if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
         category=_('Authentication'),
         category_slug='authentication',
     )
-
-    def tacacs_validate(serializer, attrs):
-        if not serializer.instance or not hasattr(serializer.instance, 'TACACSPLUS_HOST') or not hasattr(serializer.instance, 'TACACSPLUS_SECRET'):
-            return attrs
-        errors = []
-        host = serializer.instance.TACACSPLUS_HOST
-        if 'TACACSPLUS_HOST' in attrs:
-            host = attrs['TACACSPLUS_HOST']
-        secret = serializer.instance.TACACSPLUS_SECRET
-        if 'TACACSPLUS_SECRET' in attrs:
-            secret = attrs['TACACSPLUS_SECRET']
-        if host and not secret:
-            errors.append('TACACSPLUS_SECRET is required when TACACSPLUS_HOST is provided.')
-        if errors:
-            raise serializers.ValidationError(_('\n'.join(errors)))
-        return attrs
-
-    register_validate('tacacsplus', tacacs_validate)

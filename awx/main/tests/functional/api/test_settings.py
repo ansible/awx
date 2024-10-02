@@ -99,21 +99,6 @@ def test_radius_settings(get, put, patch, delete, admin, settings):
 
 
 @pytest.mark.django_db
-def test_tacacsplus_settings(get, put, patch, admin):
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'tacacsplus'})
-    response = get(url, user=admin, expect=200)
-    put(url, user=admin, data=response.data, expect=200)
-    patch(url, user=admin, data={'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
-    patch(url, user=admin, data={'TACACSPLUS_SECRET': ''}, expect=200)
-    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost'}, expect=400)
-    patch(url, user=admin, data={'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
-    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost'}, expect=200)
-    patch(url, user=admin, data={'TACACSPLUS_HOST': '', 'TACACSPLUS_SECRET': ''}, expect=200)
-    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost', 'TACACSPLUS_SECRET': ''}, expect=400)
-    patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost', 'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
-
-
-@pytest.mark.django_db
 def test_ui_settings(get, put, patch, delete, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'})
     response = get(url, user=admin, expect=200)
