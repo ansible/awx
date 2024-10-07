@@ -141,30 +141,27 @@ class Base(Page):
 
     load_default_authtoken = load_authtoken
 
-    def get_oauth2_token(self, username='', password='', client_id=None, description='AWX CLI', client_secret=None, scope='write'):
-        default_cred = config.credentials.default
-        username = username or default_cred.username
-        password = password or default_cred.password
+    def _request_token(self, auth_urls, username, password, client_id, description, client_secret, scope):
         req = collections.namedtuple('req', 'headers')({})
         if client_id and client_secret:
             HTTPBasicAuth(client_id, client_secret)(req)
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                f"{config.api_base_path}o/token/",
+                auth_urls.access_token,
                 data={"grant_type": "password", "username": username, "password": password, "scope": scope},
                 headers=req.headers,
             )
         elif client_id:
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                f"{config.api_base_path}o/token/",
+                auth_urls.access_token,
                 data={"grant_type": "password", "username": username, "password": password, "client_id": client_id, "scope": scope},
                 headers=req.headers,
             )
         else:
             HTTPBasicAuth(username, password)(req)
             resp = self.connection.post(
-                '{0}v2/users/{1}/personal_tokens/'.format(config.api_base_path, username),
+                f"{auth_urls.personal_token}{username}/personal_tokens/",
                 json={"description": description, "application": None, "scope": scope},
                 headers=req.headers,
             )
@@ -176,6 +173,19 @@ class Base(Page):
                 return result.pop('token', None)
         else:
             raise exception_from_status_code(resp.status_code)
+
+    def get_oauth2_token(self, username='', password='', client_id=None, description='AWX CLI', client_secret=None, scope='write'):
+        default_cred = config.credentials.default
+        username = username or default_cred.username
+        password = password or default_cred.password
+        AuthUrls = collections.namedtuple("AuthUrls", ["access_token", "personal_token"])
+        # Try gateway first, fallback to controller
+        try:
+            urls = AuthUrls(access_token="/o/token/", personal_token=f"{config.gateway_base_path}v1/users/")
+            return self._request_token(urls, username, password, client_id, description, client_secret, scope)
+        except exc.NotFound:
+            urls = AuthUrls(access_token=f"{config.api_base_path}o/token/", personal_token=f"{config.api_base_path}v2/users/")
+            return self._request_token(urls, username, password, client_id, description, client_secret, scope)
 
     def load_session(self, username='', password=''):
         default_cred = config.credentials.default
