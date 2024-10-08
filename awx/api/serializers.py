@@ -816,8 +816,10 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = self.reverse('api:project_update_stdout', kwargs={'pk': obj.pk})
         elif isinstance(obj, InventoryUpdate):
             res['stdout'] = self.reverse('api:inventory_update_stdout', kwargs={'pk': obj.pk})
+            res['dependent_jobs'] = self.reverse('api:inventory_update_dependent_jobs_list', kwargs={'pk': obj.pk})
         elif isinstance(obj, Job):
             res['stdout'] = self.reverse('api:job_stdout', kwargs={'pk': obj.pk})
+            res['dependent_jobs'] = self.reverse('api:job_dependent_jobs_list', kwargs={'pk': obj.pk})
         elif isinstance(obj, AdHocCommand):
             res['stdout'] = self.reverse('api:ad_hoc_command_stdout', kwargs={'pk': obj.pk})
         if obj.workflow_job_id:
