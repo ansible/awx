@@ -191,7 +191,7 @@ def test_user_auditor_rel(organization, rando, setup_managed_roles):
     assert rando not in organization.auditor_role
     audit_rd = RoleDefinition.objects.get(name='Organization Audit')
     audit_rd.give_permission(rando, organization)
-    assert list(rando.auditor_of_organizations) == [organization]
+    assert list(Organization.access_qs(rando, 'audit')) == [organization]
 
 
 @pytest.mark.django_db
