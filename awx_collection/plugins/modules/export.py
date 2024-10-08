@@ -124,7 +124,7 @@ EXAMPLES = '''
 
 import logging
 from ansible.module_utils.six.moves import StringIO
-from ..module_utils.awxkit import ControllerAWXKitModule
+from ansible_collections.awx.awx.plugins.module_utils.awxkit import ControllerAWXKitModule
 
 try:
     from awxkit.api.pages.api import EXPORTABLE_RESOURCES

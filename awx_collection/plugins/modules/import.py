@@ -48,7 +48,7 @@ EXAMPLES = '''
     assets: "{{ lookup('file', 'org.json') | from_json() }}"
 '''
 
-from ..module_utils.awxkit import ControllerAWXKitModule
+from ansible_collections.awx.awx.plugins.module_utils.awxkit import ControllerAWXKitModule
 
 # These two lines are not needed if awxkit changes to do programatic notifications on issues
 from ansible.module_utils.six.moves import StringIO
