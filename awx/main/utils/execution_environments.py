@@ -28,6 +28,7 @@ def get_default_execution_environment():
 
 
 def get_default_pod_spec():
+    job_label: str = settings.AWX_CONTAINER_GROUP_DEFAULT_JOB_LABEL
     ee = get_default_execution_environment()
     if ee is None:
         raise RuntimeError("Unable to find an execution environment.")
@@ -35,10 +36,30 @@ def get_default_pod_spec():
     return {
         "apiVersion": "v1",
         "kind": "Pod",
-        "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
+        "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE, "labels": {job_label: ""}},
         "spec": {
             "serviceAccountName": "default",
             "automountServiceAccountToken": False,
+            "affinity": {
+                "podAntiAffinity": {
+                    "preferredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "weight": 100,
+                            "podAffinityTerm": {
+                                "labelSelector": {
+                                    "matchExpressions": [
+                                        {
+                                            "key": job_label,
+                                            "operator": "Exists",
+                                        }
+                                    ]
+                                },
+                                "topologyKey": "kubernetes.io/hostname",
+                            },
+                        }
+                    ]
+                }
+            },
             "containers": [
                 {
                     "image": ee.image,
