@@ -41,6 +41,12 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    DAB_RADIUS_AUTHENTICATOR_KEYS = {
+        "SERVER": True,
+        "PORT": False,
+        "SECRET": False,
+    }
+
     def is_enabled(self, settings, keys):
         missing_fields = []
         for key, required in keys.items():
@@ -91,6 +97,13 @@ class Command(BaseCommand):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
         return awx_saml_settings
+
+    def get_awx_radius_settings(self) -> dict[str, Any]:
+        awx_radius_settings = {}
+        for awx_radius_setting in settings_registry.get_registered_settings(category_slug='radius'):
+            awx_radius_settings[awx_radius_setting.removeprefix("RADIUS_")] = getattr(settings, awx_radius_setting, None)
+
+        return awx_radius_settings
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
@@ -173,6 +186,22 @@ class Command(BaseCommand):
                     )
                 else:
                     data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
+
+            # dump RADIUS settings
+            awx_radius_settings = self.get_awx_radius_settings()
+            awx_radius_enabled, radius_missing_fields = self.is_enabled(awx_radius_settings, self.DAB_RADIUS_AUTHENTICATOR_KEYS)
+            if awx_radius_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_radius_enabled,
+                        awx_radius_settings,
+                        "RADIUS",
+                        self.DAB_RADIUS_AUTHENTICATOR_KEYS,
+                        "RADIUS",
+                    )
+                )
+            else:
+                data.append({"RADIUS_missing_fields": radius_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
