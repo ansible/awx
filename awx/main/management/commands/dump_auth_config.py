@@ -41,6 +41,13 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    DAB_OIDC_AUTHENTICATOR_KEYS = {
+        "KEY": True,
+        "SECRET": False,
+        "OIDC_ENDPOINT": True,
+        "VERIFY_SSL": False,
+    }
+
     def is_enabled(self, settings, keys):
         missing_fields = []
         for key, required in keys.items():
@@ -91,6 +98,13 @@ class Command(BaseCommand):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
         return awx_saml_settings
+
+    def get_awx_oidc_settings(self) -> dict[str, Any]:
+        awx_oidc_settings = {}
+        for awx_oidc_setting in settings_registry.get_registered_settings(category_slug='oidc'):
+            awx_oidc_settings[awx_oidc_setting.removeprefix("SOCIAL_AUTH_OIDC_")] = getattr(settings, awx_oidc_setting, None)
+
+        return awx_oidc_settings
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
@@ -173,6 +187,22 @@ class Command(BaseCommand):
                     )
                 else:
                     data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
+
+            # dump OIDC settings
+            awx_oidc_settings = self.get_awx_oidc_settings()
+            awx_oidc_enabled, oidc_missing_fields = self.is_enabled(awx_oidc_settings, self.DAB_OIDC_AUTHENTICATOR_KEYS)
+            if awx_oidc_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_oidc_enabled,
+                        awx_oidc_settings,
+                        "open_id_connect",
+                        self.DAB_OIDC_AUTHENTICATOR_KEYS,
+                        "OIDC",
+                    )
+                )
+            else:
+                data.append({"OIDC_missing_fields": oidc_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
