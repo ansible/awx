@@ -33,6 +33,8 @@ def setup_requires():
 extra_setup_args = {}
 if not version_file():
     extra_setup_args.update(dict(use_scm_version=dict(root="..", relative_to=__file__), setup_requires=setup_requires()))
+else:
+    extra_setup_args['version'] = get_version_from_file()
 
 
 class CleanCommand(Command):
@@ -77,7 +79,6 @@ class CleanCommand(Command):
 
 setup(
     name='awxkit',
-    version=get_version_from_file(),
     description='The official command line interface for Ansible AWX',
     author='Red Hat, Inc.',
     author_email='info@ansible.com',
