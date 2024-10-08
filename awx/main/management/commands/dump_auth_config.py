@@ -41,6 +41,15 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    DAB_TACACS_AUTHENTICATOR_KEYS = {
+        "HOST": True,
+        "PORT": False,
+        "AUTH_PROTOCOL": False,
+        "REM_ADDR": False,
+        "SECRET": True,
+        "SESSION_TIMEOUT": False,
+    }
+
     def is_enabled(self, settings, keys):
         missing_fields = []
         for key, required in keys.items():
@@ -91,6 +100,13 @@ class Command(BaseCommand):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
         return awx_saml_settings
+
+    def get_awx_tacacs_settings(self) -> dict[str, Any]:
+        awx_tacacs_settings = {}
+        for awx_tacacs_setting in settings_registry.get_registered_settings(category_slug='tacacsplus'):
+            awx_tacacs_settings[awx_tacacs_setting.removeprefix("TACACSPLUS_")] = getattr(settings, awx_tacacs_setting, None)
+
+        return awx_tacacs_settings
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
@@ -173,6 +189,22 @@ class Command(BaseCommand):
                     )
                 else:
                     data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
+
+            # dump TACACS settings
+            awx_tacacs_settings = self.get_awx_tacacs_settings()
+            awx_tacacs_enabled, tacacs_missing_fields = self.is_enabled(awx_tacacs_settings, self.DAB_TACACS_AUTHENTICATOR_KEYS)
+            if awx_tacacs_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_tacacs_enabled,
+                        awx_tacacs_settings,
+                        "tacacs",
+                        self.DAB_TACACS_AUTHENTICATOR_KEYS,
+                        "TACACS",
+                    )
+                )
+            else:
+                data.append({"TACACS_missing_fields": tacacs_missing_fields})
 
             # write to file if requested
             if options["output_file"]:

@@ -130,3 +130,7 @@ class TestDumpAuthConfigCommand(TestCase):
         # check unconfigured LDAP return
         assert "LDAP_0_missing_fields" in cmmd_output[1]
         assert cmmd_output[1]["LDAP_0_missing_fields"] == ['SERVER_URI', 'GROUP_TYPE', 'GROUP_TYPE_PARAMS', 'USER_DN_TEMPLATE', 'USER_ATTR_MAP']
+
+        # check unconfigured TACACS return
+        assert "TACACS_missing_fields" in cmmd_output[7]
+        assert cmmd_output[7]["TACACS_missing_fields"] == ["HOST", "SECRET"]
