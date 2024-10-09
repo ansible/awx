@@ -320,6 +320,10 @@ TEMPLATES = [
                 'social_django.context_processors.login_redirect',
             ],
             'builtins': ['awx.main.templatetags.swagger'],
+            'libraries': {
+                "ansible_base.lib.templatetags.requests": "ansible_base.lib.templatetags.requests",
+                "ansible_base.lib.templatetags.util": "ansible_base.lib.templatetags.util",
+            },
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
