@@ -52,7 +52,7 @@ sphinx==7.2.6
     #   sphinxcontrib-jquery
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
-sphinx-ansible-theme==0.10.2
+sphinx-ansible-theme==0.10.3
     # via -r requirements.in
 sphinx-rtd-theme==1.3.0
     # via sphinx-ansible-theme
