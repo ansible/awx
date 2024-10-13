@@ -47,4 +47,4 @@
 
 - ansible.builtin.assert:
     that:
-      - result.msg == 'DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MINUTELY;COUNT=2;INTERVAL=1'
+      - result.msg == ['DTSTART;TZID=America/New_York:20200416T034507 RRULE:FREQ=MINUTELY;COUNT=2;INTERVAL=1']

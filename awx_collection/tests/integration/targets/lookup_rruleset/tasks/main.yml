@@ -109,7 +109,7 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO;INTERVAL=1' == complex_rule"
+      - "['DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO;INTERVAL=1'] == complex_rule"
 
 
 - name: call rruleset with an invalid byweekday
@@ -264,7 +264,7 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;INTERVAL=1 EXRULE:FREQ=DAILY;BYDAY=SU;INTERVAL=1' == complex_rule"
+      - "['DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;INTERVAL=1 EXRULE:FREQ=DAILY;BYDAY=SU;INTERVAL=1'] == complex_rule"
 
 
 - name: Every day except for April 30th
@@ -285,7 +285,7 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20230428T170000 RRULE:FREQ=DAILY;INTERVAL=1 EXRULE:FREQ=DAILY;BYMONTH=4;BYMONTHDAY=30;INTERVAL=1' == complex_rule"
+      - "['DTSTART;TZID=UTC:20230428T170000 RRULE:FREQ=DAILY;INTERVAL=1 EXRULE:FREQ=DAILY;BYMONTH=4;BYMONTHDAY=30;INTERVAL=1'] == complex_rule"
 
 
 - name: Every 5 minutes but not on Mondays from 5-7pm
@@ -308,7 +308,7 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MINUTELY;INTERVAL=5 EXRULE:FREQ=MINUTELY;INTERVAL=5;BYDAY=MO;BYHOUR=17,18' == complex_rule"
+      - "['DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MINUTELY;INTERVAL=5 EXRULE:FREQ=MINUTELY;INTERVAL=5;BYDAY=MO;BYHOUR=17,18'] == complex_rule"
 
 
 - name: Every 15 minutes Monday to Friday from 10:01am to 6:02pm (inclusive)
@@ -337,7 +337,7 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MINUTELY;INTERVAL=15;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10,11,12,13,14,15,16,17,18 EXRULE:FREQ=MINUTELY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=18;BYMINUTE=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59;INTERVAL=1' == complex_rule"
+      - "['DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MINUTELY;INTERVAL=15;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10,11,12,13,14,15,16,17,18 EXRULE:FREQ=MINUTELY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=18;BYMINUTE=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59;INTERVAL=1'] == complex_rule"
 
 
 - name: Any Saturday whose month day is between 12 and 18
@@ -355,7 +355,7 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MONTHLY;BYMONTHDAY=12,13,14,15,16,17,18;BYDAY=SA;INTERVAL=1' == complex_rule"
+      - "['DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MONTHLY;BYMONTHDAY=12,13,14,15,16,17,18;BYDAY=SA;INTERVAL=1'] == complex_rule"
 
 - name: mondays, Tuesdays, and WEDNESDAY with case-insensitivity
   set_fact:
@@ -371,4 +371,4 @@
 - assert:
     that:
       - results is success
-      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO,TU,WE;INTERVAL=1' == complex_rule"
+      - "['DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO,TU,WE;INTERVAL=1'] == complex_rule"

@@ -79,10 +79,13 @@ EXAMPLES = """
 """
 
 RETURN = """
-_raw:
+_list:
   description:
-    - String in the rrule format
-  type: string
+    - A list with one element which is a string in the rrule format
+  type: list
+  elements: str
+  example:
+    - DTSTART;TZID=GMT:20220101T000000 RRULE:FREQ=HOURLY;INTERVAL=1
 """
 import re
 
@@ -147,10 +150,10 @@ class LookupModule(LookupBase):
 
         frequency = terms[0].lower()
 
-        return self.get_rrule(frequency, kwargs)
+        # all lookup plugins are expected to return a list
+        return [self.get_rrule(frequency, kwargs)]
 
     def get_rrule(self, frequency, kwargs):
-
         if frequency not in self.frequencies:
             raise AnsibleError('Frequency of {0} is invalid'.format(frequency))
 
