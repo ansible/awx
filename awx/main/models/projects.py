@@ -409,19 +409,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         else:
             return 'ok'
 
-    def _get_last_job_run(self):
-        if self.scm_type and self.last_job:
-            return self.last_job.finished
-        else:
-            project_path = self.get_project_path()
-            if project_path:
-                try:
-                    mtime = os.path.getmtime(smart_str(project_path))
-                    dt = datetime.datetime.fromtimestamp(mtime)
-                    return make_aware(dt, get_default_timezone())
-                except os.error:
-                    pass
-
     def _can_update(self):
         return bool(self.scm_type)
 
@@ -660,6 +647,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
                 job_tags.append('validation_checksum_manifest')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
+
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':
             self.job_tags = ','.join([self.job_tags, 'delete'])
             added_update_fields.append('job_tags')
@@ -668,6 +656,24 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
             job_tags.remove('delete')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
+
+        if self.scm_type == '':
+            # only for manual projects, set last_job_run to folder timestamp if possible
+            project_path = self.get_project_path()
+            if project_path:
+                try:
+                    mtime = os.path.getmtime(smart_str(project_path))
+                    dt = datetime.datetime.fromtimestamp(mtime)
+                    last_job_run = make_aware(dt, get_default_timezone())
+                    if last_job_run != self.last_job_run:
+                        self.last_job_run = last_job_run
+                        added_update_fields.append('last_job_run')
+                except os.error:
+                    pass
+
         if 'update_fields' in kwargs:
-            kwargs['update_fields'].extend(added_update_fields)
+            for field_name in added_update_fields:
+                if field_name not in kwargs['update_fields']:
+                    kwargs['update_fields'].append(field_name)
+
         return super(ProjectUpdate, self).save(*args, **kwargs)

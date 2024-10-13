@@ -43,7 +43,6 @@ from awx.main.models.rbac import to_permissions
 from awx.main.utils.common import (
     camelcase_to_underscore,
     get_model_for_type,
-    _inventory_updates,
     copy_model_by_class,
     copy_m2m_relationships,
     parse_yaml_or_json,
@@ -163,7 +162,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     status = models.CharField(
         max_length=32,
         choices=ALL_STATUS_CHOICES,
-        default='ok',
+        default='never updated',
         editable=False,
     )
     organization = models.ForeignKey(
@@ -291,21 +290,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             self.next_job_run = new_next_schedule.next_run
             self.save(update_fields=['next_schedule', 'next_job_run'])
 
-    def save(self, *args, **kwargs):
-        # If update_fields has been specified, add our field names to it,
-        # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
-        # Update status and last_updated fields.
-        if not getattr(_inventory_updates, 'is_updating', False):
-            updated_fields = self._set_status_and_last_job_run(save=False)
-            for field in updated_fields:
-                if field not in update_fields:
-                    update_fields.append(field)
-        # Do the actual save.
-        super(UnifiedJobTemplate, self).save(*args, **kwargs)
-
     def _get_current_status(self):
         # Override in subclasses as needed.
+        # should return a UJT status option given unsaved last_job and current_job
         if self.current_job and self.current_job.status:
             return self.current_job.status
         elif not self.last_job:
@@ -314,16 +301,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             return 'failed'
         else:
             return 'successful'
-
-    def _get_last_job_run(self):
-        # Override in subclasses as needed.
-        if self.last_job:
-            return self.last_job.finished
-
-    def _set_status_and_last_job_run(self, save=True):
-        status = self._get_current_status()
-        last_job_run = self._get_last_job_run()
-        return self.update_fields(status=status, last_job_run=last_job_run, save=save)
 
     def _can_update(self):
         # Override in subclasses as needed.
@@ -840,14 +817,17 @@ class UnifiedJob(
             if self.status in ('pending', 'running'):
                 if parent_instance.current_job != self:
                     parent_instance_set('current_job', self)
-                # Update parent with all the 'good' states of it's child
-                if parent_instance.status != self.status:
-                    parent_instance_set('status', self.status)
             elif self.status in ('successful', 'failed', 'error', 'canceled'):
                 if parent_instance.current_job == self:
                     parent_instance_set('current_job', None)
                 parent_instance_set('last_job', self)
-                parent_instance_set('last_job_failed', self.failed)
+                parent_instance_set('last_job_failed', bool(self.status != 'successful'))
+                parent_instance_set('last_job_run', self.finished)
+
+            # _get_current_status should return a UJT status option given unsaved last_job and current_job
+            parent_status = parent_instance._get_current_status()
+            if parent_instance.status != parent_status:
+                parent_instance_set('status', parent_status)
 
         return update_fields
 
