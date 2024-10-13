@@ -1,0 +1,23 @@
+---
+- name: Add Credential Input Sources on Controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    controller_validate_certs: false
+    controller_hostname: controller.example.com
+    controller_username: admin
+    controller_password: changeme
+
+  collections:
+    - awx.awx
+
+  pre_tasks:
+    - name: Include vars from controller_configs directory
+      ansible.builtin.include_vars:
+        dir: ./configs
+        extensions: ["yml"]
+
+  roles:
+    - {role: ../.., when: controller_credential_input_sources is defined}
+...

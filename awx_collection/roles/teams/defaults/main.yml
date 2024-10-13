@@ -1,0 +1,8 @@
+---
+# These are the default variables specific to the teams role
+controller_teams: []
+controller_configuration_teams_secure_logging: "{{ controller_configuration_secure_logging | default('false') }}"
+controller_configuration_teams_async_retries: "{{ controller_configuration_async_retries | default(30) }}"
+controller_configuration_teams_async_delay: "{{ controller_configuration_async_delay | default(1) }}"
+controller_configuration_teams_enforce_defaults: "{{ controller_configuration_enforce_defaults | default('false') }}"
+...

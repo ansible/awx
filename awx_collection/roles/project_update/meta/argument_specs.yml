@@ -1,0 +1,186 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to update projects on Ansible Controller.
+    options:
+      controller_projects:
+        description: Data structure describing your project_updates
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name of group
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization the project belongs to.
+        #   wait:
+        #     required: false
+        #     type: bool
+        #     description: Wait for the job to complete.
+        #   interval:
+        #     default: "{{ controller_configuration_project_update_async_delay }}"
+        #     required: false
+        #     type: float
+        #     description: The interval to request an update from controller.
+        #   timeout:
+        #     required: false
+        #     type: int
+        #     description: If waiting for the update to complete this will abort after this amount of seconds.
+        #   update_project:
+        #     default: false
+        #     required: false
+        #     type: bool
+        #     description: If defined and true, the project update will be executed, otherwise it won't.
+        #   copy_from:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   description:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   scm_type:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   scm_url:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   default_environment:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   local_path:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   scm_branch:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   scm_refspec:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   credential:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   signature_validation_credential:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   scm_clean:
+        #     required: false
+        #     type: bool
+        #     description: Unused in this role
+        #   scm_delete_on_update:
+        #     required: false
+        #     type: bool
+        #     description: Unused in this role
+        #   scm_track_submodules:
+        #     required: false
+        #     type: bool
+        #     description: Unused in this role
+        #   scm_update_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Unused in this role
+        #   scm_update_cache_timeout:
+        #     required: false
+        #     type: int
+        #     description: Unused in this role
+        #   allow_override:
+        #     required: false
+        #     type: bool
+        #     description: Unused in this role
+        #   custom_virtualenv:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+        #   notification_templates_started:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: Unused in this role
+        #   notification_templates_success:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: Unused in this role
+        #   notification_templates_error:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: Unused in this role
+        #   state:
+        #     required: false
+        #     type: str
+        #     description: Unused in this role
+
+      # Async variables
+      controller_configuration_project_update_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_project_update_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+      # No_log variables
+      controller_configuration_groups_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

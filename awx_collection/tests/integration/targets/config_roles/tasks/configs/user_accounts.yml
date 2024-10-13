@@ -1,0 +1,6 @@
+---
+controller_user_accounts:
+  - user: controller_user
+    is_superuser: false
+    password: controller_password
+...

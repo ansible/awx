@@ -1,0 +1,10 @@
+---
+temp_controller_bulk_hosts:
+  - inventory: localhost
+    hosts:
+      - name: 10.0.0.1
+      - name: 10.0.0.2
+    variables:
+      some_var: some_val
+      ansible_connection: local
+...

@@ -1,0 +1,313 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create job templates on Ansible Controller.
+    options:
+      controller_job_templates:
+        description: Data structure describing your job_templates
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name of job_template
+        #   new_name:
+        #     type: str
+        #     required: false
+        #     description: Setting this option will change the existing name (looked up via the name field).
+        #   copy_from:
+        #     required: false
+        #     type: str
+        #     description: Name or id to copy the job_template from. This will copy an existing job_template and change any parameters supplied.
+        #   description:
+        #     required: false
+        #     type: str
+        #     description: Description to use for the job_template.
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization this job_template belongs to.
+        #   execution_environment:
+        #     required: false
+        #     type: str
+        #     description: Execution Environment to use for the job template.
+        #   job_type:
+        #     default: run
+        #     required: false
+        #     type: str
+        #     description: The job type to use for the job template(run, check).
+        #   inventory:
+        #     required: false
+        #     type: str
+        #     description: Name of the inventory to use for the job template.
+        #   project:
+        #     required: false
+        #     type: str
+        #     description: Name of the project to use for the job template.
+        #   playbook:
+        #     required: false
+        #     type: str
+        #     description: Path to the playbook to use for the job template within the project provided.
+        #   credentials:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: List of credentials to use for the job template.
+        #   forks:
+        #     required: false
+        #     type: int
+        #     description: The number of parallel or simultaneous processes to use while executing the playbook.
+        #   limit:
+        #     required: false
+        #     type: str
+        #     description: A host pattern to further constrain the list of hosts managed or affected by the playbook
+        #   verbosity:
+        #     required: false
+        #     type: int
+        #     description: Control the output level Ansible produces as the playbook runs.
+        #     choices:
+        #       - 0
+        #       - 1
+        #       - 2
+        #       - 3
+        #       - 4
+        #       - 5
+        #   extra_vars:
+        #     required: false
+        #     type: dict
+        #     description: Specify extra_vars for the template.
+        #   job_tags:
+        #     required: false
+        #     type: str
+        #     description: Comma separated list of the tags to use for the job template.
+        #   force_handlers:
+        #     required: false
+        #     type: bool
+        #     description: Enable forcing playbook handlers to run even if a task fails.
+        #   skip_tags:
+        #     required: false
+        #     type: str
+        #     description: Comma separated list of the tags to skip for the job template.
+        #   start_at_task:
+        #     required: false
+        #     type: str
+        #     description: Start the playbook at the task matching this name.
+        #   diff_mode:
+        #     required: false
+        #     type: bool
+        #     description: Enable diff mode for the job template
+        #   use_fact_cache:
+        #     required: false
+        #     type: bool
+        #     description: Enable use of fact caching for the job template.
+        #   host_config_key:
+        #     required: false
+        #     type: str
+        #     description: Allow provisioning callbacks using this host config key.
+        #   ask_scm_branch_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for scm branch on launch.
+        #   ask_diff_mode_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user to enable diff mode show changes to files when supported by modules.
+        #   ask_variables_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for extra_vars on launch.
+        #   ask_limit_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for a limit on launch.
+        #   ask_tags_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for job tags on launch.
+        #   ask_skip_tags_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for job tags to skip on launch.
+        #   ask_job_type_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for job type on launch.
+        #   ask_verbosity_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user to choose a verbosity level on launch.
+        #   ask_inventory_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for inventory on launch.
+        #   ask_credential_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for credential on launch.
+        #   ask_execution_environment_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for execution environment on launch.
+        #   ask_forks_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for forks on launch.
+        #   ask_instance_groups_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for instance groups on launch.
+        #   ask_job_slice_count_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for job slice count on launch.
+        #   ask_labels_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for labels on launch.
+        #   ask_timeout_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for timeout on launch.
+        #   prevent_instance_group_fallback:
+        #     required: false
+        #     type: bool
+        #     description: Prevent falling back to instance groups set on the associated inventory or organization.
+        #   survey_enabled:
+        #     required: false
+        #     type: bool
+        #     description: Enable a survey on the job template.
+        #   survey_spec:
+        #     required: false
+        #     type: dict
+        #     description: JSON/YAML dict formatted survey definition.
+        #   survey:
+        #     required: false
+        #     type: dict
+        #     description: JSON/YAML dict formatted survey definition. Alias of survey_spec
+        #   become_enabled:
+        #     required: false
+        #     type: bool
+        #     description: Activate privilege escalation.
+        #   allow_simultaneous:
+        #     required: false
+        #     type: bool
+        #     description: Allow simultaneous runs of the job template.
+        #   timeout:
+        #     required: false
+        #     type: int
+        #     description: Maximum time in seconds to wait for a job to finish (server-side).
+        #   instance_groups:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: list of Instance Groups for this Job Template to run on.
+        #   job_slice_count:
+        #     required: false
+        #     type: int
+        #     description: The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
+        #   webhook_service:
+        #     required: false
+        #     type: str
+        #     description: Service that webhook requests will be accepted from (github, gitlab)
+        #   webhook_credential:
+        #     required: false
+        #     type: str
+        #     description: Personal Access Token for posting back the status to the service API
+        #   scm_branch:
+        #     required: false
+        #     type: str
+        #     description: Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
+        #   labels:
+        #     required: false
+        #     type:  list
+        #     elements: str
+        #     description: The labels applied to this job template.
+        #   custom_virtualenv:
+        #     required: false
+        #     type: str
+        #     description: Local absolute file path containing a custom Python virtualenv to use.
+        #   notification_templates_started:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on started to use for this organization in a list.
+        #   notification_templates_success:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on success to use for this organization in a list.
+        #   notification_templates_error:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on error to use for this organization in a list.
+        #   state:
+        #     default: "{{ controller_state | default('present') }}"
+        #     required: false
+        #     type: str
+        #     description: Desired state of the resource.
+
+      # Async variables
+      controller_configuration_job_templates_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_job_templates_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_job_templates_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

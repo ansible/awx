@@ -1,0 +1,198 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create inventory sources on Ansible Controller.
+    options:
+      controller_inventory_sources:
+        description: Data structure describing your inventory_sources
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name of inventory_source
+        #   new_name:
+        #     required: false
+        #     type: str
+        #     description: Name of inventory_source, used in updating
+        #   description:
+        #     required: false
+        #     type: str
+        #     description: Description to use for the inventory_source.
+        #   inventory:
+        #     required: true
+        #     type: str
+        #     description: Name of inventory the inventory_source should be made a member of.
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization the inventory belongs to.
+        #   source:
+        #     required: false
+        #     type: str
+        #     choices:
+        #       - scm
+        #       - ec2
+        #       - gce
+        #       - azure_rm
+        #       - vmware
+        #       - satellite6
+        #       - openstack
+        #       - rhv
+        #       - controller
+        #       - insights
+        #     description: The source to use for this group.
+        #   source_path:
+        #     required: false
+        #     type: str
+        #     description: For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.
+        #   source_vars:
+        #     required: false
+        #     type: dict
+        #     description: The variables or environment fields to apply to this source type.
+        #   enabled_var:
+        #     required: false
+        #     type: str
+        #     description: The variable to use to determine enabled state e.g., "status.power_state".
+        #   enabled_value:
+        #     required: false
+        #     type: str
+        #     description: Value when the host is considered enabled, e.g., "powered_on".
+        #   host_filter:
+        #     required: false
+        #     type: str
+        #     description: If specified, controller will only import hosts that match this regular expression.
+        #   credential:
+        #     required: false
+        #     type: str
+        #     description: Credential to use for the source.
+        #   execution_environment:
+        #     required: false
+        #     type: str
+        #     description: Execution Environment to use for the source.
+        #   overwrite:
+        #     required: false
+        #     type: bool
+        #     description: Delete child groups and hosts not found in source.
+        #   overwrite_vars:
+        #     required: false
+        #     type: bool
+        #     description: Override vars in child groups and hosts with those from external source.
+        #   custom_virtualenv:
+        #     required: false
+        #     type: str
+        #     description: Local absolute file path containing a custom Python virtualenv to use.
+        #   timeout:
+        #     required: false
+        #     type: int
+        #     description: The amount of time (in seconds) to run before the task is canceled.
+        #   verbosity:
+        #     required: false
+        #     type: int
+        #     choices:
+        #       - 0
+        #       - 1
+        #       - 2
+        #     description: The verbosity level to run this inventory source under.
+        #   update_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Refresh inventory data from its source each time a job is run.
+        #   update_cache_timeout:
+        #     required: false
+        #     type: bool
+        #     description: Time in seconds to consider an inventory sync to be current.
+        #   source_project:
+        #     required: false
+        #     type: str
+        #     description: Project to use as source with scm option
+        #   notification_templates_started:
+        #     required: false
+        #     type: bool
+        #     description: The notifications on started to use for this inventory source in a list.
+        #   notification_templates_success:
+        #     required: false
+        #     type: str
+        #     description: The notifications on success to use for this inventory source in a list.
+        #   notification_templates_error:
+        #     required: false
+        #     type: str
+        #     description: The notifications on error to use for this inventory source in a list.
+        #   wait:
+        #     required: false
+        #     type: bool
+        #     description: Unused for this role
+        #   interval:
+        #     required: false
+        #     type: int
+        #     description: Unused for this role
+        #   state:
+        #     default: "{{ controller_state | default('present') }}"
+        #     required: false
+        #     type: str
+        #     description: Desired state of the resource.
+
+      # Async variables
+      controller_configuration_inventory_sources_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_inventory_sources_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_inventory_sources_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

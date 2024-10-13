@@ -1,0 +1,43 @@
+---
+controller_configuration_projects_async_retries: 60
+controller_configuration_projects_async_delay: 5
+controller_projects:
+  - name: Test Project
+    scm_type: git
+    scm_url: https://github.com/ansible/tower-example.git
+    scm_branch: master
+    scm_clean: true
+    description: Test Project 1
+    organization: Default
+    wait: true
+    update_project: true
+  - name: Demo Project
+    scm_type: git
+    scm_url: https://github.com/ansible/tower-example.git
+    scm_branch: master
+    scm_clean: true
+    description: Test Project 1
+    organization: Default
+    wait: true
+    update_project: true
+  - name: Test Project 2
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-examples.git
+    description: Test Project 2
+    organization: Default
+  - name: Test Inventory source project
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-examples.git
+    description: ansible-examples
+    organization: Satellite
+  - name: Test Inventory source project with credential
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-examples.git
+    description: ansible-examples
+    organization: Satellite
+    credential: gitlab-personal-access-token for satqe_auto_droid
+    wait: false
+  - name: Test Project 3
+    organization: Default
+    state: absent
+...

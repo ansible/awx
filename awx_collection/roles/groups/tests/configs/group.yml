@@ -1,0 +1,7 @@
+---
+controller_groups:
+  - name: localhost_group
+    inventory: localhost
+    variables:
+      my_var: true
+...

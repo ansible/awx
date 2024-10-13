@@ -1,0 +1,4 @@
+---
+controller_launch_jobs:
+  - name: test-template-1
+...

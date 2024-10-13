@@ -1,0 +1,44 @@
+---
+controller_configuration_inventory_source_update_async_retries: 60
+controller_configuration_inventory_source_update_async_delay: 2
+controller_inventory_sources:
+  - name: RHVM-01
+    source: scm
+    source_project: Test Inventory source project
+    source_path: phillips_hue/hosts
+    inventory: RHVM-01
+    organization: Satellite
+    credential: admin@internal-RHVM-01
+    overwrite: true
+    update_on_launch: true
+    update_cache_timeout: 0
+    wait: true
+  - name: RHVM-02
+    source: scm
+    source_project: Test Project 2
+    source_path: phillips_hue/hosts
+    inventory: satlab-admin-inventory
+    organization: Default
+    credential: admin@internal-RHVM-01
+    overwrite: true
+    update_on_launch: true
+    update_cache_timeout: 0
+    wait: true
+  - name: RHVM-01-Default
+    source: scm
+    source_project: Test Project 2
+    source_path: phillips_hue/hosts
+    inventory: satlab-admin-inventory
+    organization: Default
+    credential: admin@internal-RHVM-01
+    overwrite: true
+    update_on_launch: true
+    update_cache_timeout: 0
+    wait: true
+  - name: RHVM-02
+    inventory: RHVM-01
+    organization: Satellite
+    source: scm
+    state: absent
+    # more options can be provided but for scm source we are using, we need only this much.
+...

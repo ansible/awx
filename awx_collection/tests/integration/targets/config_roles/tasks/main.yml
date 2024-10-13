@@ -1,0 +1,207 @@
+---
+- name: Playbook to configure ansible Controller post installation
+  hosts: localhost
+  connection: local
+  vars:
+    controller_validate_certs: false
+    controller_configuration_secure_logging: false
+  # Define following vars here, or in configs/controller_auth.yml
+  # controller_hostname: controller.example.com
+  # controller_username: admin
+  # controller_password: changeme
+  collections:
+    - awx.awx
+    - infra.controller_configuration
+
+  pre_tasks:
+
+    - name: "Determine collection (block)"
+      block:
+        - name: "Check if the collection ansible.controller is installed"
+          ansible.builtin.set_fact:
+            ansible_controller_collection_installed: "{{ lookup('ansible.builtin.pipe', 'ansible-galaxy collection list | grep -i ansible.controller || echo NOTINSTALLED') }}"
+          failed_when: ansible_controller_collection_installed is match('NOTINSTALLED')
+      rescue:
+        - name: "Check if the collection awx.awx is installed"
+          ansible.builtin.set_fact:
+            awx_awx_collection_installed: "{{ lookup('ansible.builtin.pipe', 'ansible-galaxy collection list | grep -i awx.awx || echo NOTINSTALLED') }}"
+          failed_when: awx_awx_collection_installed is match('NOTINSTALLED')
+      always:
+        - name: "Set the collection providing the controller_api lookup plugin"
+          ansible.builtin.set_fact:
+            controller_api_plugin: "{{ ('ansible.controller.controller_api' if ansible_controller_collection_installed is defined) | default('awx.awx.controller_api' if awx_awx_collection_installed is defined) | default('NONE') }}"
+        - name: "Fail if no collection is detected"
+          ansible.builtin.fail:
+            msg: "One of the following collections is required to be installed: 'ansible.controller' or 'awx.awx'."
+          when: controller_api_plugin is match('NONE')
+        - name: "Show the plugin we are using"
+          ansible.builtin.debug:
+            msg: "Using the 'controller_api' plugin from: {{ controller_api_plugin }}"
+
+    - name: Include vars from configs directory
+      ansible.builtin.include_vars:
+        dir: ./configs
+        ignore_files: [controller_config.yml.template]
+        extensions: ["yml"]
+      tags:
+        - always
+
+    - name: Wait for Controller to come up
+      ansible.builtin.uri:
+        url: "https://{{ controller_hostname }}/api/v2/ping"
+        status_code: 200
+        validate_certs: "{{ controller_validate_certs }}"
+      register: result
+      until: result.status == 200
+      retries: 10
+      delay: 30
+      ignore_errors: true
+
+    - name: Wait for the controller node to be up
+      ansible.builtin.uri:
+        url: "https://{{ controller_hostname }}/api/v2/mesh_visualizer/"
+        user: "{{ controller_username }}"
+        password: "{{ controller_password }}"
+        method: GET
+        validate_certs: false
+        force_basic_auth: true
+        status_code: 200
+        body_format: json
+      register: mesh_data
+      until: mesh_data.json is defined
+      retries: 80
+      delay: 5
+
+    - name: "Show result of mesh_visualizer"
+      ansible.builtin.debug:
+        var: mesh_data
+
+    - name: Sleep for 60 seconds and allow awx to come up.
+      ansible.builtin.wait_for:
+        timeout: 60
+      delegate_to: localhost
+
+  roles:
+    - dispatch  # The dispatch role calls all of the other roles.
+
+  tasks:
+
+    - name: Add Controller Settings Individually
+      ansible.builtin.include_role:
+        name: settings
+      vars:
+        controller_settings: "{{ controller_settings_individuale }}"
+
+    - name: Run ad hoc commands
+      ansible.builtin.include_role:
+        name: ad_hoc_command
+      when: controller_ad_hoc_commands is defined
+
+    - name: Cancel Ad hoc commands
+      ansible.builtin.include_tasks: "./tasks/ad_hoc_cancel.yml"
+      when: controller_ad_hoc_commands is defined
+
+    - name: Launch Controller Bulk Hosts
+      ansible.builtin.include_role:
+        name: bulk_host_create
+      vars:
+        controller_bulk_hosts: "{{ temp_controller_bulk_hosts }}"
+      when:
+        - controller_bulk_launch_jobs is defined
+        - awx_version == "21.14.0" or awx_version == "devel"
+
+    - name: Launch Controller Jobs
+      ansible.builtin.include_role:
+        name: job_launch
+      when: controller_launch_jobs is defined
+
+    - name: Show launched Controller jobs
+      ansible.builtin.debug:
+        var: launched_controller_jobs
+
+    - name: Combine id output with defaults temp
+      ansible.builtin.set_fact:
+        tmp_job: "{{ {'id': item.id} }}"
+      with_items: "{{ launched_controller_jobs.results }}"
+      register: tmp_jobs
+
+    - name: Cancel Controller Jobs
+      ansible.builtin.include_role:
+        name: jobs_cancel
+      vars:
+        controller_cancel_jobs: "{{ tmp_jobs.results | map(attribute='ansible_facts.tmp_job') | list }}"
+      when: launched_controller_jobs is defined
+
+    - name: Find Job ID's
+      ansible.builtin.debug:
+        var: __job_templates_job_async_result
+
+    - name: Launch Controller Bulk Jobs
+      ansible.builtin.include_role:
+        name: bulk_job_launch
+      vars:
+        controller_bulk_hosts: "{{ temp_controller_bulk_hosts }}"
+        controller_bulk_launch_jobs:
+          - name: My Bulk Job Launch
+            jobs:
+              - unified_job_template: "{{ __job_templates_job_async_result.results[0].id }}"
+              - unified_job_template: "{{ __job_templates_job_async_result.results[1].id }}"
+            organization: Default
+            wait: false
+      when:
+        - controller_bulk_launch_jobs is defined
+        - awx_version == "21.14.0" or awx_version == "22.0.0" or awx_version == "22.1.0" or awx_version == "devel"
+
+    - name: Launch Controller workflows
+      ansible.builtin.include_role:
+        name: workflow_launch
+      when: controller_workflow_launch_jobs is defined
+
+    - name: Launched Workflows
+      ansible.builtin.debug:
+        var: launched_controller_workflows
+
+    - name: Wait for workflow to finish
+      job_wait:
+        job_id: "{{ launched_controller_workflows.results[0].id }}"
+        job_type: workflow_jobs
+        timeout: 180
+        controller_username: "{{ controller_username }}"
+        controller_password: "{{ controller_password }}"
+        controller_host: "{{ controller_hostname }}"
+        validate_certs: "{{ controller_validate_certs }}"
+      ignore_errors: true  ## noqa ignore-errors
+
+    - name: Get the organization ID
+      ansible.builtin.set_fact:
+        controller_organization_id: "{{ lookup(controller_api_plugin, 'organizations', query_params={'name': 'Default'}, host=controller_hostname, username=controller_username, password=controller_password, verify_ssl=false) }}"
+
+    - name: "Set empty lists for testing"
+      ansible.builtin.set_fact:
+        controller_api_results: []
+        differential_test_items: []
+
+    - name: "Error out on empty list"
+      ansible.builtin.set_fact:
+        error_empty_diff: "{{ lookup('controller_object_diff', api_list=controller_api_results, compare_list=differential_test_items, warn_on_empty_api=false) }}"
+      ignore_errors: true
+      register: error_results
+
+    - name: "Warn out on empty list"
+      ansible.builtin.set_fact:
+        warn_empty_diff: "{{ lookup('controller_object_diff', api_list=controller_api_results, compare_list=differential_test_items) }}"
+      register: warn_results
+
+    - name: "Assert that the empty list error correctly"
+      ansible.builtin.assert:
+        that:
+          - error_empty_diff is not defined
+          - warn_empty_diff | length == 0
+          - "'Unable to find items in api_list' in error_results.msg"
+
+    - name: Differential Testing
+      ansible.builtin.include_tasks: "./tasks/differential.yml"
+      loop: "{{ differential_items }}"
+      loop_control:
+        loop_var: differential_item
+...

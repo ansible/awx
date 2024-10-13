@@ -1,0 +1,42 @@
+---
+controller_settings:
+  settings:
+    AUTH_LDAP_BIND_PASSWORD: "password"
+    AWX_TASK_ENV: {'GIT_SSL_NO_VERIFY': 'True'}
+    AUTH_LDAP_SERVER_URI: "ldap://ldap.example.com"
+    AUTH_LDAP_USER_DN_TEMPLATE: "uid=%(user)s,ou=Users,dc=example,dc=com"
+    AUTH_LDAP_GROUP_SEARCH:
+      - dc=example,dc=com
+      - SCOPE_SUBTREE
+      - "(objectClass=person)"
+    AUTH_LDAP_GROUP_TYPE: "GroupOfUniqueNamesType"
+    AUTH_LDAP_USER_SEARCH:
+      - OU=Users,DC=example,DC=com
+      - SCOPE_SUBTREE
+      - "(cn=%(user)s)"
+    AUTH_LDAP_START_TLS: true
+    AUTH_LDAP_GROUP_TYPE_PARAMS: {}
+    AUTH_LDAP_REQUIRE_GROUP: "cn=satellite-qe,ou=adhoc,ou=managedGroups,dc=example,dc=com"
+    # Next name helps fetch Email addr and name from LDAP and save it in tower user.
+    AUTH_LDAP_USER_ATTR_MAP:
+      first_name: displayName
+      last_name: sn
+      email: examplePrimaryMail
+    # Next name helps each sat-qe-infra group to become superuser in tower as soon as they login
+    AUTH_LDAP_USER_FLAGS_BY_GROUP:
+      is_superuser:
+        - cn=sat-qe-infra,ou=adhoc,ou=managedGroups,dc=example,dc=com
+    # This maps all users to satellite-qe org and makes sure they are not part of satlab-admin
+    AUTH_LDAP_ORGANIZATION_MAP:
+      Satellite:
+        users: true
+    # This maps all users to satellite-qe team and we need to add this team to all resources we create for them
+    # that way users can access the things that their team has permissions for
+    AUTH_LDAP_TEAM_MAP:
+      satellite-qe:
+        organization: Satellite
+        users: true
+      satlab-admin:
+        organization: Satellite
+        users: cn=sat-qe-infra,ou=adhoc,ou=managedGroups,dc=example,dc=com
+...

@@ -1,0 +1,6 @@
+---
+controller_instances:
+  - hostname: my-instance.prod.example.com
+    capacity_adjustment: 0.4
+    listener_port: 31337
+...

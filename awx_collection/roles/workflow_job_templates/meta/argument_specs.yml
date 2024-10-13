@@ -1,0 +1,341 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create workflow job templates on Ansible Controller.
+    options:
+      controller_workflow_job_templates:
+        description: Data structure describing your workflow_job_templates
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name of workflow_job_template
+        #   new_name:
+        #     type: str
+        #     required: false
+        #     description: Setting this option will change the existing name (looked up via the name field).
+        #   copy_from:
+        #     required: false
+        #     type: str
+        #     description: Name or id to copy the workflow_job_template from. This will copy an existing workflow_job_template and change any parameters supplied.
+        #   description:
+        #     required: false
+        #     type: str
+        #     description: Description to use for the workflow_job_template.
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization this workflow_job_template belongs to.
+        #   inventory:
+        #     required: false
+        #     type: str
+        #     description: Name of the inventory to use for the job template.
+        #   limit:
+        #     required: false
+        #     type: str
+        #     description: A host pattern to further constrain the list of hosts managed or affected by the playbook
+        #   extra_vars:
+        #     required: false
+        #     type: dict
+        #     description: Specify extra_vars for the template.
+        #   job_tags:
+        #     required: false
+        #     type: str
+        #     description: Comma separated list of the tags to use for the job template.
+        #   ask_variables_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for extra_vars on launch.
+        #   ask_limit_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for a limit on launch.
+        #   ask_tags_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for job tags on launch.
+        #   ask_skip_tags_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for job tags to skip on launch.
+        #   ask_inventory_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for inventory on launch.
+        #   ask_labels_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for labels on launch.
+        #   ask_scm_branch_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Prompt user for scm branch on launch.
+        #   survey_enabled:
+        #     required: false
+        #     type: bool
+        #     description: Enable a survey on the job template.
+        #   survey_spec:
+        #     required: false
+        #     type: dict
+        #     description: JSON/YAML dict formatted survey definition.
+        #   survey:
+        #     required: false
+        #     type: dict
+        #     description: JSON/YAML dict formatted survey definition. Alias of survey_spec
+        #   allow_simultaneous:
+        #     required: false
+        #     type: bool
+        #     description: Allow simultaneous runs of the job template.
+        #   webhook_service:
+        #     required: false
+        #     type: str
+        #     description: Service that webhook requests will be accepted from (github, gitlab)
+        #   webhook_credential:
+        #     required: false
+        #     type: str
+        #     description: Personal Access Token for posting back the status to the service API
+        #   scm_branch:
+        #     required: false
+        #     type: str
+        #     description: Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
+        #   labels:
+        #     required: false
+        #     type:  list
+        #     elements: str
+        #     description: The labels applied to this job template.
+        #   notification_templates_approvals:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on approval to use for this organization in a list.
+        #   notification_templates_started:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on started to use for this organization in a list.
+        #   notification_templates_success:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on success to use for this organization in a list.
+        #   notification_templates_error:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on error to use for this organization in a list.
+        #   state:
+        #     default: "{{ controller_state | default('present') }}"
+        #     required: false
+        #     type: str
+        #     description: Desired state of the resource.
+        #   simplified_workflow_nodes:
+        #     required: false
+        #     type: list
+        #     elements: dict
+        #     description: List of workflow nodes to apply
+        #     options:
+        #       workflow_job_template:
+        #         default: None
+        #         required: true
+        #         type: str
+        #         description: The workflow job template the node exists in. Used for looking up the node, cannot be modified after creation.
+        #       identifier:
+        #         default: None
+        #         required: true
+        #         type: str
+        #         description: An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node. This functions the same as the name field for other resources, however if it is not set, it will be set to a random UUID4 value. Recommended to use Column and row numbers for identifiers such as Node401. [Refer to this documentation for more](https://github.com/ansible/awx/blob/devel/docs/workflow.md)
+        #       unified_job_template:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Name of unified job template to run in the workflow. Can be a job template, project, inventory source, etc. This parameter is mutually exclusive with approval_node.
+        #       lookup_organization:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Organization the inventories, job templates, projects, or workflows the items exists in. Used to help lookup the object, for organization roles see organization. If not provided, will lookup by name only, which does not work with duplicates.
+        #       execution_environment:
+        #         default: job_template_default
+        #         required: false
+        #         type: str
+        #         description: Execution Environment applied as a prompt. Job Template default used if not set. Only allowed if `ask_execution_environment_on_launch` set to true on Job Template
+        #       forks:
+        #         default: job_template_default
+        #         required: false
+        #         type: str
+        #         description: Forks applied as a prompt. Job Template default used if not set. Only allowed if `ask_forks_on_launch` set to true on Job Template
+        #       instance_groups:
+        #         default: job_template_default
+        #         required: false
+        #         type: str
+        #         description:  List of Instance Groups applied as a prompt. Job Template default used if not set. Only allowed if `ask_instance_groups_on_launch` set to true on Job Template
+        #       job_slice_count:
+        #         default: job_template_default
+        #         required: false
+        #         type: str
+        #         description: Job Slice Count to use in the job run. Job Template default used if not set. Only allowed if `ask_job_slice_count_on_launch` set to true on Job Template
+        #       labels:
+        #         default: job_template_default
+        #         required: false
+        #         type: list
+        #         elements: str
+        #         description: List of labels to use in the job run. Job Template default used if not set. Only allowed if `ask_labels_on_launch` set to true on Job Template.
+        #       timeout:
+        #         default: job_template_default
+        #         required: false
+        #         type: str
+        #         description: Timeout to use in the job run. Job Template default used if not set. Only allowed if `ask_timeout_on_launch` set to true on Job Template
+        #       approval_node:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: A dictionary of Name, description, and timeout values for the approval node. This parameter is mutually exclusive with unified_job_template.
+        #       organization:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: The organization of the workflow job template the node exists in. Used for looking up the workflow, not a direct model field.
+        #       all_parents_must_converge:
+        #         default: None
+        #         required: false
+        #         type: bool
+        #         description: If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node
+        #       always_nodes:
+        #         default: None
+        #         required: false
+        #         type: list
+        #         elements: str
+        #         description: Nodes that will run after this node completes.
+        #       failure_nodes:
+        #         default: None
+        #         required: false
+        #         type: list
+        #         elements: str
+        #         description: Nodes that will run after this node completes.
+        #       success_nodes:
+        #         default: None
+        #         required: false
+        #         type: list
+        #         elements: str
+        #         description: Nodes that will run after this node completes.
+        #       verbosity:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Verbosity applied as a prompt, if job template prompts for verbosity
+        #       state:
+        #         default: "{{ controller_state | default('present') }}"
+        #         required: false
+        #         type: str
+        #         description: Desired state of the resource
+        #       credentials:
+        #         default: None
+        #         required: false
+        #         type: list
+        #         description: Credentials to be applied to job as launch-time prompts.
+        #       diff_mode:
+        #         default: None
+        #         required: false
+        #         type: bool
+        #         description: Run diff mode, applied as a prompt, if job template prompts for diff mode
+        #       extra_data:
+        #         default: None
+        #         required: false
+        #         type: dict
+        #         description: Variables to apply at launch time. Will only be accepted if job template prompts for vars or has a survey asking for those vars. extra_data are extra_vars at the node level and named so to match the module and the API. These are only for "ask extra vars on prompt" on a given job template.
+        #       inventory:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Inventory applied as a prompt, if job template prompts for inventory
+        #       job_tags:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: NJob tags applied as a prompt, if job template prompts for job tags
+        #       job_type:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Job type applied as a prompt, if job template prompts for job type
+        #       limit:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Limit to act on, applied as a prompt, if job template prompts for limit
+        #       scm_branch:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: SCM branch applied as a prompt, if job template prompts for SCM branch
+        #       skip_tags:
+        #         default: None
+        #         required: false
+        #         type: str
+        #         description: Tags to skip, applied as a prompt, if job template prompts for job tags
+
+      # Async variables
+      controller_configuration_workflow_job_templates_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_workflow_job_templates_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_workflow_job_templates_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

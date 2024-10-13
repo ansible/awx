@@ -1,0 +1,20 @@
+---
+controller_applications:
+  - name: controller_application-app1
+    organization: Satellite
+    authorization_grant_type: password
+    client_type: public
+  - name: controller_application-app2
+    organization: Default
+    authorization_grant_type: authorization-code
+    client_type: confidential
+    description: Another application
+    redirect_uris:
+      - http://tower.com/api/v2/
+      - http://tower.com/api/v2/teams
+  - name: controller_application-app3
+    organization: Default
+    authorization_grant_type: password
+    client_type: confidential
+    skip_authorization: true
+...

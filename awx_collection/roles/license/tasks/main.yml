@@ -1,0 +1,13 @@
+---
+# tasks file for license role
+
+- name: Use manifest file
+  ansible.builtin.include_tasks: "manifest.yml"
+  when:
+    - controller_license.manifest_file is defined or controller_license.manifest is defined
+
+- name: Use subscription pool id or subscription lookup
+  ansible.builtin.include_tasks: "subscription.yml"
+  when:
+    - (redhat_subscription_username is defined and redhat_subscription_password is defined) or controller_license.pool_id is defined
+...

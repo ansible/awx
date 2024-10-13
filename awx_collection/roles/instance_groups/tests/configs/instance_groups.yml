@@ -1,0 +1,4 @@
+---
+controller_instance_groups:
+  - name: test1
+...

@@ -1,0 +1,45 @@
+---
+controller_settings_individuale:
+  - name: AWX_TASK_ENV
+    value: {'GIT_SSL_NO_VERIFY': 'True'}
+  - name: AUTH_LDAP_SERVER_URI
+    value: "ldap://ldap.example.com"
+  - name: AUTH_LDAP_USER_DN_TEMPLATE
+    value: "uid=%(user)s,ou=Users,dc=example,dc=com"
+  - name: AUTH_LDAP_GROUP_SEARCH
+    value: "['dc=example,dc=com', 'SCOPE_SUBTREE', '(objectClass=person)']"
+  - name: AUTH_LDAP_GROUP_TYPE
+    value: "GroupOfUniqueNamesType"
+  - name: AUTH_LDAP_USER_SEARCH
+    value: "['OU=Users,DC=example,DC=com', 'SCOPE_SUBTREE', '(cn=%(user)s)']"
+  - name: AUTH_LDAP_START_TLS
+    value: true
+  - name: AUTH_LDAP_REQUIRE_GROUP
+    value: "cn=satellite-qe,ou=adhoc,ou=managedGroups,dc=example,dc=com"
+  # Next name helps fetch Email addr and name from LDAP and save it in tower user.
+  - name: AUTH_LDAP_USER_ATTR_MAP
+    value: '{"first_name": "displayName","last_name": "sn","email": "examplePrimaryMail"}'
+  # Next name helps each sat-qe-infra group to become superuser in tower as soon as they login
+  - name: AUTH_LDAP_USER_FLAGS_BY_GROUP
+    value: "{u'is_superuser': ['cn=sat-qe-infra,ou=adhoc,ou=managedGroups,dc=example,dc=com']}"
+  # This maps all users to satellite-qe org and makes sure they are not part of satlab-admin
+  - name: AUTH_LDAP_ORGANIZATION_MAP
+    value: '{
+     "Satellite": {
+      "users": true
+     }
+    }'
+  # This maps all users to satellite-qe team and we need to add this team to all resources we create for them
+  # that way users can access the things that their team has permissions for
+  - name: AUTH_LDAP_TEAM_MAP
+    value: '{
+     "satellite-qe": {
+      "organization": "Satellite",
+      "users": true
+     },
+     "satlab-admin": {
+      "organization": "Satellite",
+      "users": "cn=sat-qe-infra,ou=adhoc,ou=managedGroups,dc=example,dc=com"
+     }
+    }'
+...

@@ -1,0 +1,7 @@
+---
+controller_schedules:
+  - name: Demo Schedule
+    description: A demonstration
+    unified_job_template: Demo Job Template
+    rrule: DTSTART:20191219T130551Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1
+...

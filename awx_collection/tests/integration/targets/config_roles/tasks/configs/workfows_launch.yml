@@ -1,0 +1,5 @@
+---
+controller_workflow_launch_jobs:
+  - name: Simple workflow schema
+    wait: false
+...

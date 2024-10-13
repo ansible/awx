@@ -1,0 +1,79 @@
+---
+# Only Job name, type, project and playbook are required
+# Survey spec can be exported from existing job template querying the API.
+# Find the ID of the job template and use the following URL:
+# https://<controller_url>/api/v2/job_templates/<ID>/survey_spec/
+controller_templates:
+  - name: test-template-1
+    description: created by Ansible Playbook
+    job_type: run
+    inventory: RHVM-01
+    labels:
+      - Prod
+    credentials: admin@internal-RHVM-01
+    project: Test Project
+    playbook: helloworld.yml
+    verbosity: 2
+    extra_vars:
+      target_hosts: infra-ansible-tower-01.example.com
+    ask_execution_environment_on_launch: true
+    ask_forks_on_launch: true
+    ask_instance_groups_on_launch: true
+    ask_job_slice_count_on_launch: true
+    ask_labels_on_launch: true
+    ask_timeout_on_launch: true
+    prevent_instance_group_fallback: true
+  - name: Demo Job Template
+    project: Test Project
+    job_type: run
+    playbook: helloworld.yml
+    ask_extra_vars: false
+    concurrent_jobs_enabled: false
+    credentials: Demo Credential
+    verbosity: 0
+    inventory: localhost
+    execution_environment: "My EE"
+    ask_inventory_on_launch: true
+    ask_execution_environment_on_launch: true
+    ask_forks_on_launch: true
+    ask_instance_groups_on_launch: true
+    ask_job_slice_count_on_launch: true
+    ask_labels_on_launch: true
+    ask_timeout_on_launch: true
+    ask_limit_on_launch: true
+    prevent_instance_group_fallback: true
+    survey_spec:
+      name: ''
+      description: ''
+      spec:
+        - question_name: Target Host
+          question_description: target host is required for playbook to work, this host
+            needs to exist in the inventory
+          required: true
+          type: text
+          variable: target_hosts
+          min: 0
+          max: 1024
+          default: infra-ansible-tower-testing.infra.sat.rdu2.redhat.com
+          choices: ''
+          new_question: true
+
+# You can retrieve a job along with its survey spec using tower cli as follows:
+# tower-cli receive --job_template <Name> --user admin --format yaml
+# If you need to add Survey, Survey spec would look like given below:
+# survey_spec:
+#   name: ''
+#   description: ''
+#   spec:
+#     - question_name: Target Host
+#       question_description: target host is required for playbook to work, this host
+#         needs to exist in the inventory
+#       required: true
+#       type: text
+#       variable: target_hosts
+#       min: 0
+#       max: 1024
+#       default: infra-ansible-tower-testing.infra.sat.rdu2.redhat.com
+#       choices: ''
+#       new_question: true
+...

@@ -1,0 +1,4 @@
+---
+# These are the default variables specific to the ad_hoc_command_cancel role
+controller_configuration_ad_hoc_command_cancel_secure_logging: "{{ controller_configuration_secure_logging | default('false') }}"
+...

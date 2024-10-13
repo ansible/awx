@@ -1,0 +1,24 @@
+---
+controller_templates:
+  - name: test-template-1
+    description: created by Ansible Playbook
+    job_type: run
+    inventory: RHVM-01
+    labels:
+      - Prod
+    credentials: admin@internal-RHVM-01
+    project: Test Project
+    playbook: helloworld.yml
+    verbosity: 2
+    extra_vars:
+      target_hosts: infra-ansible-tower-01.example.com
+  - name: Demo Job Template
+    project: Test Project
+    job_type: run
+    playbook: helloworld.yml
+    ask_extra_vars: false
+    concurrent_jobs_enabled: false
+    credentials: Demo Credential
+    verbosity: 0
+    inventory: localhost
+...

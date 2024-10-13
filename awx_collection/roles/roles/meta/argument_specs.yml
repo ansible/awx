@@ -1,0 +1,158 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create roles on Ansible Controller.
+    options:
+      controller_roles:
+        description: Data structure describing your roles
+        type: list
+        elements: dict
+        # options:
+        #   user:
+        #     required: false
+        #     type: str
+        #     description: The user for which the role applies
+        #   team:
+        #     required: false
+        #     type: str
+        #     description: The team for which the role applies
+        #   role:
+        #     required: false
+        #     type: str
+        #     description: The role which is applied to one of {`target_team`, `inventory`, `job_template`, `target_team`, `inventory`, `job_template`} for either `user` or `team`
+        #   target_team:
+        #     required: false
+        #     type: str
+        #     description: The team the role applies against
+        #   target_teams:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The teams the role applies against
+        #   inventory:
+        #     required: false
+        #     type: str
+        #     description: The inventory the role applies against
+        #   inventories:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The inventories the role applies against
+        #   job_template:
+        #     required: false
+        #     type: str
+        #     description: The job template the role applies against
+        #   job_templates:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The job templates the role applies against
+        #   workflow:
+        #     required: false
+        #     type: str
+        #     description: The workflow the role applies against
+        #   workflows:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The workflows the role applies against
+        #   credential:
+        #     required: false
+        #     type: str
+        #     description: The credential the role applies against
+        #   credentials:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The credentials the role applies against
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: The organization the role applies against
+        #   organizations:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The organizations the role applies against
+        #   lookup_organization:
+        #     required: false
+        #     type: str
+        #     description: Organization the inventories, job templates, projects, or workflows the items exists in. Used to help lookup the object, for organization roles see organization. If not provided, will lookup by name only, which does not work with duplicates.
+        #   project:
+        #     required: false
+        #     type: str
+        #     description: The project the role applies against
+        #   projects:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The project the role applies against
+        #   state:
+        #     default: "{{ controller_state | default('present') }}"
+        #     required: false
+        #     type: str
+        #     description: Desired state of the resource.
+
+      # Async variables
+      controller_configuration_roles_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_roles_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_roles_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

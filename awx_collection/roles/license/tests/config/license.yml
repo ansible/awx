@@ -1,0 +1,6 @@
+---
+controller_license:
+  manifest_file: "/tmp/my_tower.zip"
+  # manifest_url: https://www.ansible.com/hubfs/Logo-Red_Hat-Ansible-A-Reverse-SVG.svg
+  # manifest_content: "aGVsbG8gd29ybGQ="
+...

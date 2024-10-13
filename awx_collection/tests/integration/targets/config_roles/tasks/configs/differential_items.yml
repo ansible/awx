@@ -1,0 +1,144 @@
+---
+differential_items:
+  - name: applications
+    with_present: false
+    differential_test_items:
+      - name: controller_application-app3
+        organization: Default
+        authorization_grant_type: password
+        client_type: confidential
+        skip_authorization: true
+    expected_test_result:
+      - name: controller_application-app2
+        organization: Default
+        state: absent
+  - name: projects
+    with_present: true
+    differential_test_items:
+      - name: Test Project 2
+        scm_type: git
+        scm_url: https://github.com/ansible/tower-example.git
+        description: Test Project 2
+        organization: Default
+      - name: Test Inventory source project
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-examples.git
+        description: ansible-examples
+        organization: Default
+      - name: Test Inventory source project with credential
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-examples.git
+        description: ansible-examples
+        organization: Default
+        credential: gitlab-personal-access-token for satqe_auto_droid
+        wait: false
+      - name: Test Project
+        scm_type: git
+        scm_url: https://github.com/ansible/tower-example.git
+        scm_branch: master
+        scm_clean: true
+        description: Test Project 1
+        organization: Default
+    expected_test_result:
+      - description: Test Project 2
+        name: Test Project 2
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/tower-example.git
+      - description: ansible-examples
+        name: Test Inventory source project
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-examples.git
+      - credential: gitlab-personal-access-token for satqe_auto_droid
+        description: ansible-examples
+        name: Test Inventory source project with credential
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-examples.git
+        wait: false
+      - description: Test Project 1
+        name: Test Project
+        organization: Default
+        scm_branch: master
+        scm_clean: true
+        scm_type: git
+        scm_url: https://github.com/ansible/tower-example.git
+      - name: Demo Project
+        organization: Default
+        state: absent
+  - name: credentials
+    with_present: false
+    differential_test_items:
+      - name: "cyberark"
+        credential_type: CyberArk Central Credential Provider Lookup
+        organization: Default
+    expected_test_result:
+      - name: gitlab
+        organization: Default
+        credential_type: "Source Control"
+        state: absent
+  #  - name: inventory_sources
+  #    with_present: false
+  #    differential_test_items:
+  #      - name:  RHVM-02
+  #        organization: Default
+  #        inventory: 3
+  #        state: absent
+  #    expected_test_result:
+  #      - name: RHVM-01-Default
+  #        organization: Default
+  #        inventory: 3
+  #        state: absent
+  - name: inventories
+    with_present: false
+    differential_test_items:
+      - name: Demo Inventory
+        organization: Default
+    expected_test_result:
+      - name: satlab-admin-inventory
+        organization: Default
+        state: absent
+      - name: Test Inventory - Smart
+        organization: Default
+        state: absent
+  - name: teams
+    with_present: false
+    differential_test_items:
+      - name: differential-1
+        organization: Default
+    expected_test_result:
+      - name: differential-2
+        organization: Default
+        state: absent
+  - name: notification_templates
+    with_present: false
+    differential_test_items:
+      - name: Email notification
+        organization: Default
+    expected_test_result:
+      - name: Email notification differential
+        organization: Default
+        state: absent
+  - name: job_templates
+    with_present: false
+    differential_test_items:
+      - name: Demo Job Template
+        organization: Default
+    expected_test_result:
+      - name: test-template-1
+        organization: Default
+        state: absent
+  - name: workflow_job_templates
+    with_present: false
+    differential_test_items:
+      - name: Simple workflow schema
+        organization: Default
+    expected_test_result:
+      - name: Simple workflow schema2
+        organization: Default
+        state: absent
+      - name: Simple workflow schema no state defined
+        organization: Default
+        state: absent
+...

@@ -1,0 +1,104 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create instances on Ansible Controller.
+    options:
+      controller_instances:
+        description: Data structure describing your instances
+        type: list
+        elements: dict
+        # options:
+        #   hostname:
+        #     required: true
+        #     type: str
+        #     description: Hostname of this instance.
+        #   capacity_adjustment:
+        #     required: false
+        #     type: float
+        #     description: Capacity adjustment between 0 and 1.
+        #   enabled:
+        #     default: false
+        #     required: false
+        #     type: bool
+        #     description: If true, the instance will be enabled and used.
+        #   managed_by_policy:
+        #     default: false
+        #     required: false
+        #     type: bool
+        #     description: If true, will be managed by instance group policy.
+        #   node_type:
+        #     required: false
+        #     type: str
+        #     description: Role that this node plays in the mesh. Most likely Execution. Current options are 'execution'.
+        #   node_state:
+        #     required: false
+        #     type: str
+        #     description: Indicates the current life cycle stage of this instance. Current options are 'installed' and 'deprovisioning'.
+        #   listener_port:
+        #     required: false
+        #     type: int
+        #     description: Port that Receptor will listen for incoming connections on.
+
+      # Async variables
+      controller_configuration_instances_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_instances_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_instances_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

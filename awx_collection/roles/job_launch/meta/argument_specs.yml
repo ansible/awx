@@ -1,0 +1,147 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to launch jobs on Ansible Controller.
+    options:
+      controller_launch_jobs:
+        description: Data structure describing your job_launches
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name or ID of job to launch
+        #   job_type:
+        #     required: false
+        #     type: str
+        #     description: Job_type to use for the job, only used if prompt for job_type is set. Run or Check are the options.
+        #     choices:
+        #       - run
+        #       - check
+        #   inventory:
+        #     required: false
+        #     type: str
+        #     description: Inventory to use for the job, only used if prompt for inventory is set.
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization the inventory belongs to.
+        #   credentials:
+        #     required: false
+        #     type: list
+        #     description: TCredential to use for job, only used if prompt for credential is set.
+        #   extra_vars:
+        #     required: false
+        #     type: dict
+        #     description: extra_vars to use for the Job Template. ask_extra_vars needs to be set to True via controller_job_template module.
+        #   limit:
+        #     required: false
+        #     type: str
+        #     description: Limit to use for the job_template.
+        #   tags:
+        #     required: false
+        #     type: str
+        #     description: Specific tags to use for from playbook.
+        #   scm_branch:
+        #     required: false
+        #     type: str
+        #     description: A specific of the SCM project to run the template on.
+        #   skip_tags:
+        #     required: false
+        #     type: str
+        #     description: Specific tags to skip from the playbook.
+        #   verbosity:
+        #     required: false
+        #     type: int
+        #     description: Verbosity level for this job run.
+        #   diff_mode:
+        #     required: false
+        #     type: bool
+        #     description: Show the changes made by Ansible tasks where supported.
+        #   credential_passwords:
+        #     required: false
+        #     type: str
+        #     description: Passwords for credentials which are set to prompt on launch.
+        #   execution_environment:
+        #     required: false
+        #     type: str
+        #     description: Execution Environment applied as a prompt. Job Template default used if not set. Only allowed if `ask_execution_environment_on_launch` set to true on Job Template
+        #   forks:
+        #     required: false
+        #     type: int
+        #     description: Forks applied as a prompt. Job Template default used if not set. Only allowed if `ask_forks_on_launch` set to true on Job Template
+        #   instance_groups:
+        #     required: false
+        #     type: str
+        #     description:  List of Instance Groups applied as a prompt. Job Template default used if not set. Only allowed if `ask_instance_groups_on_launch` set to true on Job Template
+        #   job_slice_count:
+        #     required: false
+        #     type: int
+        #     description: Job Slice Count to use in the job run. Job Template default used if not set. Only allowed if `ask_job_slice_count_on_launch` set to true on Job Template
+        #   labels:
+        #     required: false
+        #     type: list
+        #     description: List of labels to use in the job run. Job Template default used if not set. Only allowed if `ask_labels_on_launch` set to true on Job Template
+        #   job_timeout:
+        #     required: false
+        #     type: int
+        #     description: Timeout to use in the job run. Job Template default used if not set. Only allowed if `ask_timeout_on_launch` set to true on Job Template
+        #   wait:
+        #     required: false
+        #     type: bool
+        #     description: Wait for the job to complete.
+        #   interval:
+        #     default: 2
+        #     required: false
+        #     type: float
+        #     description: The interval to request an update from controller.
+        #   timeout:
+        #     required: false
+        #     type: int
+        #     description: If waiting for the job to complete this will abort after this amount of seconds.
+
+      # No_log variables
+      controller_configuration_groups_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

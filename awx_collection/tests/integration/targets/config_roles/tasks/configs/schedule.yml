@@ -1,0 +1,20 @@
+---
+controller_schedules:
+  - name: Demo Schedule
+    description: A demonstration
+    unified_job_template: test-template-1
+    rrule: "DTSTART:20191219T130551Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1"
+  - name: Demo Schedule 2
+    description: Another demonstration
+    unified_job_template: Demo Job Template
+    rrule: "DTSTART:20200101T000000Z RRULE:FREQ=HOURLY;INTERVAL=3"
+    execution_environment: My EE
+    forks: 2
+    limit: all
+    instance_groups:
+      - test_instance_group
+    labels:
+      - differential
+      - differential2
+    timeout: 165
+...

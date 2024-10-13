@@ -1,0 +1,119 @@
+---
+controller_workflows:
+  - name: Simple workflow schema
+    description: a basic workflow
+    extra_vars: {}
+    survey_enabled: false
+    allow_simultaneous: false
+    ask_variables_on_launch: false
+    inventory:
+    state: present
+    limit:
+    job_tags:
+      - stuff
+      - stuff2
+    skip_tags:
+      - stuff3
+    ask_labels_on_launch: true
+    ask_skip_tags_on_launch: true
+    labels:
+      - Prod
+    scm_branch:
+    ask_inventory_on_launch: false
+    ask_scm_branch_on_launch: false
+    ask_limit_on_launch: false
+    organization: Default
+    schedules: []
+    simplified_workflow_nodes:
+      - all_parents_must_converge: false
+        identifier: node101
+        unified_job_template: RHVM-01
+        success_nodes:
+          - node201
+      - all_parents_must_converge: false
+        identifier: node201
+        unified_job_template: test-template-1
+        instance_groups:
+          - default
+        labels:
+          - differential
+          - differential2
+        timeout: 165
+    notification_templates_started: []
+    notification_templates_success: []
+    notification_templates_error: []
+    notification_templates_approvals: []
+    survey_spec: {}
+  - name: Simple workflow schema2
+    description: a basic workflow
+    extra_vars: {}
+    state: present
+    allow_simultaneous: false
+    ask_variables_on_launch: false
+    inventory:
+    limit:
+    labels:
+      - Prod
+    scm_branch:
+    ask_inventory_on_launch: false
+    ask_scm_branch_on_launch: false
+    ask_limit_on_launch: false
+    organization: Default
+    schedules: []
+    simplified_workflow_nodes:
+      - all_parents_must_converge: false
+        identifier: node101
+        unified_job_template: RHVM-01
+        success_nodes:
+          - node201
+      - all_parents_must_converge: false
+        identifier: node201
+        unified_job_template: test-template-1
+    notification_templates_started: []
+    notification_templates_success: []
+    notification_templates_error: []
+    notification_templates_approvals: []
+  - name: Simple workflow schema no state defined
+    description: a basic workflow
+    extra_vars: {}
+    survey_enabled: false
+    allow_simultaneous: false
+    ask_variables_on_launch: false
+    inventory:
+    limit:
+    job_tags:
+      - stuff
+      - stuff2
+    skip_tags:
+      - stuff3
+    ask_labels_on_launch: true
+    ask_skip_tags_on_launch: true
+    labels:
+      - Prod
+    scm_branch:
+    ask_inventory_on_launch: false
+    ask_scm_branch_on_launch: false
+    ask_limit_on_launch: false
+    organization: Default
+    schedules: []
+    simplified_workflow_nodes:
+      - all_parents_must_converge: false
+        identifier: node101
+        unified_job_template: RHVM-01
+        success_nodes:
+          - node201
+      - all_parents_must_converge: false
+        identifier: node201
+        unified_job_template: test-template-1
+        instance_groups:
+          - default
+        labels:
+          - differential
+          - differential2
+        timeout: 165
+    notification_templates_started: []
+    notification_templates_success: []
+    notification_templates_error: []
+    notification_templates_approvals: []
+    survey_spec: {}
+...
