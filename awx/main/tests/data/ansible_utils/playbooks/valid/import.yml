@@ -1,2 +1,2 @@
 ---
-- import_playbook: foo
+- import_playbook: hello_world.yml
