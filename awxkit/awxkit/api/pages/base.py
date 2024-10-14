@@ -1,5 +1,6 @@
 import collections
 import logging
+import typing
 
 from requests.auth import HTTPBasicAuth
 
@@ -10,6 +11,11 @@ import awxkit.exceptions as exc
 
 
 log = logging.getLogger(__name__)
+
+
+class AuthUrls(typing.TypedDict):
+    access_token: str
+    personal_token: str
 
 
 class Base(Page):
@@ -147,21 +153,21 @@ class Base(Page):
             HTTPBasicAuth(client_id, client_secret)(req)
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                auth_urls.access_token,
+                auth_urls["access_token"],
                 data={"grant_type": "password", "username": username, "password": password, "scope": scope},
                 headers=req.headers,
             )
         elif client_id:
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                auth_urls.access_token,
+                auth_urls["access_token"],
                 data={"grant_type": "password", "username": username, "password": password, "client_id": client_id, "scope": scope},
                 headers=req.headers,
             )
         else:
             HTTPBasicAuth(username, password)(req)
             resp = self.connection.post(
-                f"{auth_urls.personal_token}{username}/personal_tokens/",
+                auth_urls['personal_token'],
                 json={"description": description, "application": None, "scope": scope},
                 headers=req.headers,
             )
@@ -178,13 +184,15 @@ class Base(Page):
         default_cred = config.credentials.default
         username = username or default_cred.username
         password = password or default_cred.password
-        AuthUrls = collections.namedtuple("AuthUrls", ["access_token", "personal_token"])
         # Try gateway first, fallback to controller
+        urls: AuthUrls = {"access_token": "/o/token/", "personal_token": f"{config.gateway_base_path}v1/tokens/"}
         try:
-            urls = AuthUrls(access_token="/o/token/", personal_token=f"{config.gateway_base_path}v1/users/")
             return self._request_token(urls, username, password, client_id, description, client_secret, scope)
         except exc.NotFound:
-            urls = AuthUrls(access_token=f"{config.api_base_path}o/token/", personal_token=f"{config.api_base_path}v2/users/")
+            urls: AuthUrls = {
+                "access_token": f"{config.api_base_path}o/token/",
+                "personal_token": f"{config.api_base_path}v2/users/{username}/personal_tokens/",
+            }
             return self._request_token(urls, username, password, client_id, description, client_secret, scope)
 
     def load_session(self, username='', password=''):
