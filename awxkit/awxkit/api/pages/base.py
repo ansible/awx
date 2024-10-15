@@ -189,7 +189,7 @@ class Base(Page):
         try:
             return self._request_token(urls, username, password, client_id, description, client_secret, scope)
         except exc.NotFound:
-            urls: AuthUrls = {
+            urls = {
                 "access_token": f"{config.api_base_path}o/token/",
                 "personal_token": f"{config.api_base_path}v2/users/{username}/personal_tokens/",
             }
