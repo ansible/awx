@@ -1062,7 +1062,10 @@ class InventorySourceOptions(BaseModel):
         credential = None
         for cred in self.credentials.all():
             if self.source in CLOUD_PROVIDERS:
-                if cred.kind == self.source.replace('ec2', 'aws'):
+                source = self.source.replace('ec2', 'aws')
+                if source.endswith('_supported'):
+                    source = source[:-10]
+                if cred.kind == source:
                     credential = cred
                     break
             else:
