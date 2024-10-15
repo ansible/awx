@@ -92,7 +92,7 @@ SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER = collections.OrderedDict(
     ]
 )
 
-if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
+if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT or (not bool(getattr(settings, 'RESOURCE_SERVER', {}).get('URL', ''))):
     ###############################################################################
     # AUTHENTICATION BACKENDS DYNAMIC SETTING
     ###############################################################################
