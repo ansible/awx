@@ -137,7 +137,7 @@ class LoggedLogoutView(auth_views.LogoutView):
         if is_proxied_request():
             # 1) We intentionally don't obey ?next= here, just always redirect to platform login
             # 2) Hack to prevent rewrites of Location header
-            qs = f"?__gateway_no_rewrite__=1&next=/"
+            qs = "?__gateway_no_rewrite__=1&next=/"
             return redirect(f"/api/gateway/v1/logout/{qs}")
 
         original_user = getattr(request, 'user', None)
