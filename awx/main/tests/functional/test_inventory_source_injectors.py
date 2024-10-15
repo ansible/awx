@@ -47,8 +47,12 @@ def generate_fake_var(element):
 
 def credential_kind(source):
     """Given the inventory source kind, return expected credential kind"""
+    if source.endswith('_supported'):
+        source = source[:-10]
+
     if source == 'openshift_virtualization':
         return 'kubernetes_bearer_token'
+
     return source.replace('ec2', 'aws')
 
 
