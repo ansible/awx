@@ -14,7 +14,7 @@ from django.core.exceptions import FieldDoesNotExist
 from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -36,7 +36,7 @@ from awx_plugins.interfaces._temporary_private_licensing_api import detect_serve
 # django-ansible-base
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
-from ansible_base.lib.utils.requests import get_remote_host
+from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
 from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
@@ -82,6 +82,12 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 class LoggedLoginView(auth_views.LoginView):
     def get(self, request, *args, **kwargs):
+        if is_proxied_request():
+            next = request.GET.get('next', "")
+            if next:
+                next = f"?next={next}"
+            return redirect(f"/{next}")
+
         # The django.auth.contrib login form doesn't perform the content
         # negotiation we've come to expect from DRF; add in code to catch
         # situations where Accept != text/html (or */*) and reply with
@@ -97,6 +103,15 @@ class LoggedLoginView(auth_views.LoginView):
         return super(LoggedLoginView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        if is_proxied_request():
+            # Give a message, saying to login via AAP
+            return Response(
+                {
+                    'detail': _('Please log in via Platform Authentication.'),
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
         if request.user.is_authenticated:
@@ -119,6 +134,12 @@ class LoggedLogoutView(auth_views.LogoutView):
     success_url_allowed_hosts = set(settings.LOGOUT_ALLOWED_HOSTS.split(",")) if settings.LOGOUT_ALLOWED_HOSTS else set()
 
     def dispatch(self, request, *args, **kwargs):
+        if is_proxied_request():
+            # 1) We intentionally don't obey ?next= here, just always redirect to platform login
+            # 2) Hack to prevent rewrites of Location header
+            qs = "?__gateway_no_rewrite__=1&next=/"
+            return redirect(f"/api/gateway/v1/logout/{qs}")
+
         original_user = getattr(request, 'user', None)
         ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
