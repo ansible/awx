@@ -47,9 +47,6 @@ def generate_fake_var(element):
 
 def credential_kind(source):
     """Given the inventory source kind, return expected credential kind"""
-    if source.endswith('_supported'):
-        source = source[:-10]
-
     if source == 'openshift_virtualization':
         return 'kubernetes_bearer_token'
 
@@ -198,6 +195,9 @@ def create_reference_data(source_dir, env, content):
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
 def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory, mock_me):
+    if this_kind.endswith('_supported'):
+        this_kind = this_kind[:-10]
+
     ExecutionEnvironment.objects.create(name='Control Plane EE', managed=True)
     ExecutionEnvironment.objects.create(name='Default Job EE', managed=False)
 
