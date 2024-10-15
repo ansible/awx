@@ -5,7 +5,7 @@ import pytest
 from django.conf import settings
 
 
-@pytest.mark.skip(reason="This test needs some love")
+@pytest.mark.xfail(reason="This test needs some love")
 def test_env_matches_requirements_txt():
     from pip.operations import freeze
 

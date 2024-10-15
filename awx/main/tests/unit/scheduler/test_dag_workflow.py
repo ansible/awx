@@ -561,7 +561,7 @@ class TestBFSNodesToRun:
         assert set([nodes[1], nodes[2]]) == set(g.bfs_nodes_to_run())
 
 
-@pytest.mark.skip(reason="Run manually to re-generate doc images")
+@pytest.mark.xfail(reason="Run manually to re-generate doc images")
 class TestDocsExample:
     @pytest.fixture
     def complex_dag(self, wf_node_generator):
