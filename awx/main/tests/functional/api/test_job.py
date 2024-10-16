@@ -210,6 +210,39 @@ def test_disallowed_http_update_methods(put, patch, post, inventory, project, ad
     patch(url=reverse('api:job_detail', kwargs={'pk': job.pk}), data={}, user=admin_user, expect=405)
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "job_type",
+    [
+        'run',
+        'check',
+    ],
+)
+def test_job_relaunch_with_job_type(post, inventory, project, machine_credential, admin_user, job_type):
+    # Create a job template
+    jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
+
+    # Set initial job type
+    init_job_type = 'check' if job_type == 'run' else 'run'
+
+    # Create a job instance
+    job = jt.create_unified_job(_eager_fields={'job_type': init_job_type})
+
+    # Perform the POST request
+    url = reverse('api:job_relaunch', kwargs={'pk': job.pk})
+    r = post(url=url, data={'job_type': job_type}, user=admin_user, expect=201)
+
+    # Assert that the response status code is 201 (Created)
+    assert r.status_code == 201
+
+    # Retrieve the newly created job from the response
+    new_job_id = r.data.get('id')
+    new_job = Job.objects.get(id=new_job_id)
+
+    # Assert that the new job has the correct job type
+    assert new_job.job_type == job_type
+
+
 class TestControllerNode:
     @pytest.fixture
     def project_update(self, project):
