@@ -3,7 +3,6 @@ from time import time
 
 from django.db.models import Subquery, OuterRef, F
 
-from awx.main.fields import update_role_parentage_for_instance
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
 logger = logging.getLogger('rbac_migrations')
@@ -238,85 +237,10 @@ def restore_inventory_admins_backward(apps, schema_editor):
 
 
 def rebuild_role_hierarchy(apps, schema_editor):
-    """
-    This should be called in any migration when ownerships are changed.
-    Ex. I remove a user from the admin_role of a credential.
-    Ancestors are cached from parents for performance, this re-computes ancestors.
-    """
-    logger.info('Computing role roots..')
-    start = time()
-    roots = Role.objects.all().values_list('id', flat=True)
-    stop = time()
-    logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
-    start = time()
-    Role.rebuild_role_ancestor_list(roots, [])
-    stop = time()
-    logger.info('Rebuild ancestors completed in %f seconds' % (stop - start))
-    logger.info('Done.')
+    """Not used after DAB RBAC migration"""
+    pass
 
 
 def rebuild_role_parentage(apps, schema_editor, models=None):
-    """
-    This should be called in any migration when any parent_role entry
-    is modified so that the cached parent fields will be updated. Ex:
-        foo_role = ImplicitRoleField(
-            parent_role=['bar_role']  # change to parent_role=['admin_role']
-        )
-
-    This is like rebuild_role_hierarchy, but that method updates ancestors,
-    whereas this method updates parents.
-    """
-    start = time()
-    seen_models = set()
-    model_ct = 0
-    noop_ct = 0
-    ContentType = apps.get_model('contenttypes', "ContentType")
-    additions = set()
-    removals = set()
-
-    role_qs = Role.objects
-    if models:
-        # update_role_parentage_for_instance is expensive
-        # if the models have been downselected, ignore those which are not in the list
-        ct_ids = list(ContentType.objects.filter(model__in=[name.lower() for name in models]).values_list('id', flat=True))
-        role_qs = role_qs.filter(content_type__in=ct_ids)
-
-    for role in role_qs.iterator():
-        if not role.object_id:
-            continue
-        model_tuple = (role.content_type_id, role.object_id)
-        if model_tuple in seen_models:
-            continue
-        seen_models.add(model_tuple)
-
-        # The GenericForeignKey does not work right in migrations
-        # with the usage as role.content_object
-        # so we do the lookup ourselves with current migration models
-        ct = role.content_type
-        app = ct.app_label
-        ct_model = apps.get_model(app, ct.model)
-        content_object = ct_model.objects.get(pk=role.object_id)
-
-        parents_added, parents_removed = update_role_parentage_for_instance(content_object)
-        additions.update(parents_added)
-        removals.update(parents_removed)
-        if parents_added:
-            model_ct += 1
-            logger.debug('Added to parents of roles {} of {}'.format(parents_added, content_object))
-        if parents_removed:
-            model_ct += 1
-            logger.debug('Removed from parents of roles {} of {}'.format(parents_removed, content_object))
-        else:
-            noop_ct += 1
-
-    logger.debug('No changes to role parents for {} resources'.format(noop_ct))
-    logger.debug('Added parents to {} roles'.format(len(additions)))
-    logger.debug('Removed parents from {} roles'.format(len(removals)))
-    if model_ct:
-        logger.info('Updated implicit parents of {} resources'.format(model_ct))
-
-    logger.info('Rebuild parentage completed in %f seconds' % (time() - start))
-
-    # this is ran because the ordinary signals for
-    # Role.parents.add and Role.parents.remove not called in migration
-    Role.rebuild_role_ancestor_list(list(additions), list(removals))
+    """Not used after DAB RBAC migration"""
+    pass
