@@ -9,6 +9,7 @@ from prometheus_client.core import GaugeMetricFamily, HistogramMetricFamily
 from prometheus_client.registry import CollectorRegistry
 from django.conf import settings
 from django.http import HttpRequest
+import redis.exceptions
 from rest_framework.request import Request
 
 from awx.main.consumers import emit_channel_notification
@@ -290,8 +291,12 @@ class Metrics(MetricsNamespace):
     def send_metrics(self):
         # more than one thread could be calling this at the same time, so should
         # acquire redis lock before sending metrics
-        lock = self.conn.lock(root_key + '-' + self._namespace + '_lock')
-        if not lock.acquire(blocking=False):
+        try:
+            lock = self.conn.lock(root_key + '-' + self._namespace + '_lock')
+            if not lock.acquire(blocking=False):
+                return
+        except redis.exceptions.ConnectionError as exc:
+            logger.warning(f'Connection error in send_metrics: {exc}')
             return
         try:
             current_time = time.time()
