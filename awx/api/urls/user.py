@@ -14,10 +14,6 @@ from awx.api.views import (
     UserRolesList,
     UserActivityStreamList,
     UserAccessList,
-    OAuth2ApplicationList,
-    OAuth2UserTokenList,
-    UserPersonalTokenList,
-    UserAuthorizedTokenList,
 )
 
 urls = [
@@ -31,10 +27,6 @@ urls = [
     re_path(r'^(?P<pk>[0-9]+)/roles/$', UserRolesList.as_view(), name='user_roles_list'),
     re_path(r'^(?P<pk>[0-9]+)/activity_stream/$', UserActivityStreamList.as_view(), name='user_activity_stream_list'),
     re_path(r'^(?P<pk>[0-9]+)/access_list/$', UserAccessList.as_view(), name='user_access_list'),
-    re_path(r'^(?P<pk>[0-9]+)/applications/$', OAuth2ApplicationList.as_view(), name='o_auth2_application_list'),
-    re_path(r'^(?P<pk>[0-9]+)/tokens/$', OAuth2UserTokenList.as_view(), name='o_auth2_token_list'),
-    re_path(r'^(?P<pk>[0-9]+)/authorized_tokens/$', UserAuthorizedTokenList.as_view(), name='user_authorized_token_list'),
-    re_path(r'^(?P<pk>[0-9]+)/personal_tokens/$', UserPersonalTokenList.as_view(), name='user_personal_token_list'),
 ]
 
 __all__ = ['urls']

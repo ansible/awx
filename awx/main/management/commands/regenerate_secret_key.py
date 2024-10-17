@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.signals import on_post_save_setting
-from awx.main.models import UnifiedJob, Credential, NotificationTemplate, Job, JobTemplate, WorkflowJob, WorkflowJobTemplate, OAuth2Application
+from awx.main.models import UnifiedJob, Credential, NotificationTemplate, Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value, decrypt_value, get_encryption_key
 
 
@@ -45,7 +45,6 @@ class Command(BaseCommand):
         self._notification_templates()
         self._credentials()
         self._unified_jobs()
-        self._oauth2_app_secrets()
         self._settings()
         self._survey_passwords()
         return self.new_key
@@ -73,13 +72,6 @@ class Command(BaseCommand):
                 uj.start_args = decrypt_field(uj, 'start_args', secret_key=self.old_key)
                 uj.start_args = encrypt_field(uj, 'start_args', secret_key=self.new_key)
                 uj.save()
-
-    def _oauth2_app_secrets(self):
-        for app in OAuth2Application.objects.iterator():
-            raw = app.client_secret
-            app.client_secret = raw
-            encrypted = encrypt_value(raw, secret_key=self.new_key)
-            OAuth2Application.objects.filter(pk=app.pk).update(client_secret=encrypted)
 
     def _settings(self):
         # don't update the cache, the *actual* value isn't changing

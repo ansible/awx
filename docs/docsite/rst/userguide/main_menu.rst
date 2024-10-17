@@ -172,7 +172,6 @@ The **Administration** menu provides access to the various administrative option
 - :ref:`ag_management_jobs` 
 - :ref:`ug_instance_groups`
 - :ref:`Instances <ag_instances>`
-- :ref:`ug_applications_auth`
 - :ref:`ug_execution_environments`
 - :ref:`ag_topology_viewer`
 

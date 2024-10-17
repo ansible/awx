@@ -18,7 +18,6 @@ Management Jobs
 Several job types are available for you to schedule and launch: 
 
 - **Cleanup Activity Stream**: Remove activity stream history older than a specified number of days   
-- **Cleanup Expired OAuth 2 Tokens**:  Remove expired OAuth 2 access tokens and refresh tokens
 - **Cleanup Expired Sessions**:   Remove expired browser sessions from the database
 - **Cleanup Job Details**: Remove job history older than a specified number of days 
 
@@ -88,20 +87,6 @@ If none exist, see :ref:`ug_notifications` for more information.
 An example of a notifications with details specified:
 
 .. image:: ../common/images/management-job-add-notification-details.png
-
-
-Cleanup Expired OAuth2 Tokens
-====================================
-
-.. index::
-   pair: management jobs; cleanup expired OAuth2 tokens
-   single: expired OAuth2 tokens cleanup management job
-
-To remove expired OAuth2 tokens, click on the launch (|launch|) button beside **Cleanup Expired OAuth2 Tokens**.
-
-You can review or set a schedule for cleaning up expired OAuth2 tokens by performing the same procedure described for activity stream management jobs. See :ref:`ag_mgmt_job_schedule` for detail.
-
-You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` for more detail.
 
 
 Cleanup Expired Sessions

@@ -93,9 +93,6 @@ from awx.main.models.workflow import (  # noqa
     WorkflowApproval,
     WorkflowApprovalTemplate,
 )
-from awx.api.versioning import reverse
-from awx.main.models.oauth import OAuth2AccessToken, OAuth2Application  # noqa
-from oauth2_provider.models import Grant, RefreshToken  # noqa -- needed django-oauth-toolkit model migrations
 
 
 # Add custom methods to User model for permissions checks.
@@ -244,19 +241,6 @@ def user_is_system_auditor(user, tf):
 User.add_to_class('is_system_auditor', user_is_system_auditor)
 
 
-def o_auth2_application_get_absolute_url(self, request=None):
-    return reverse('api:o_auth2_application_detail', kwargs={'pk': self.pk}, request=request)
-
-
-OAuth2Application.add_to_class('get_absolute_url', o_auth2_application_get_absolute_url)
-
-
-def o_auth2_token_get_absolute_url(self, request=None):
-    return reverse('api:o_auth2_token_detail', kwargs={'pk': self.pk}, request=request)
-
-
-OAuth2AccessToken.add_to_class('get_absolute_url', o_auth2_token_get_absolute_url)
-
 from awx.main.registrar import activity_stream_registrar  # noqa
 
 activity_stream_registrar.connect(Organization)
@@ -288,8 +272,6 @@ activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
 activity_stream_registrar.connect(WorkflowApproval)
 activity_stream_registrar.connect(WorkflowApprovalTemplate)
-activity_stream_registrar.connect(OAuth2Application)
-activity_stream_registrar.connect(OAuth2AccessToken)
 
 # Register models
 permission_registry.register(Project, Team, WorkflowJobTemplate, JobTemplate, Inventory, Organization, Credential, NotificationTemplate, ExecutionEnvironment)
@@ -297,8 +279,3 @@ permission_registry.register(InstanceGroup, parent_field_name=None)  # Not part 
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))
-prevent_search(OAuth2AccessToken._meta.get_field('token'))
-prevent_search(RefreshToken._meta.get_field('token'))
-prevent_search(OAuth2Application._meta.get_field('client_secret'))
-prevent_search(OAuth2Application._meta.get_field('client_id'))
-prevent_search(Grant._meta.get_field('code'))
