@@ -5,8 +5,8 @@ from unittest import mock
 
 # AWX
 from awx.main.models import Host, Inventory, InventorySource, InventoryUpdate, CredentialType, Credential, Job
-from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names
 
 
 @pytest.mark.django_db
@@ -166,11 +166,11 @@ class TestInventorySourceInjectors:
 
     def test_all_cloud_sources_covered(self):
         """Code in several places relies on the fact that the older
-        CLOUD_PROVIDERS constant contains the same names as what are
+        discover_cloud_provider_plugin_names returns the same names as what are
         defined within the injectors
         """
         # slight exception case for constructed, because it has a FQCN but is not a cloud source
-        assert set(CLOUD_PROVIDERS) | set(['constructed']) == set(InventorySource.injectors.keys())
+        assert set(discover_available_cloud_provider_plugin_names()) | set(['constructed']) == set(InventorySource.injectors.keys())
 
     @pytest.mark.parametrize('source,filename', [('ec2', 'aws_ec2.yml'), ('openstack', 'openstack.yml'), ('gce', 'gcp_compute.yml')])
     def test_plugin_filenames(self, source, filename):

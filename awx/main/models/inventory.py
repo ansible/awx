@@ -28,7 +28,7 @@ from awx_plugins.inventory.plugins import PluginFileInjector
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names, compute_cloud_inventory_sources
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
@@ -36,7 +36,7 @@ from awx.main.fields import (
     OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
-from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, accepts_json
+from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, accepts_json
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
@@ -394,7 +394,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         if self.kind == 'smart':
             active_inventory_sources = self.inventory_sources.none()
         else:
-            active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
+            active_inventory_sources = self.inventory_sources.filter(source__in=compute_cloud_inventory_sources())
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         total_hosts = active_hosts.count()
         # if total_hosts has changed, set update_task_impact to True
@@ -914,23 +914,6 @@ class InventorySourceOptions(BaseModel):
 
     injectors = dict()
 
-    SOURCE_CHOICES = [
-        ('file', _('File, Directory or Script')),
-        ('constructed', _('Template additional groups and hostvars at runtime')),
-        ('scm', _('Sourced from a Project')),
-        ('ec2', _('Amazon EC2')),
-        ('gce', _('Google Compute Engine')),
-        ('azure_rm', _('Microsoft Azure Resource Manager')),
-        ('vmware', _('VMware vCenter')),
-        ('satellite6', _('Red Hat Satellite 6')),
-        ('openstack', _('OpenStack')),
-        ('rhv', _('Red Hat Virtualization')),
-        ('controller', _('Red Hat Ansible Automation Platform')),
-        ('insights', _('Red Hat Insights')),
-        ('terraform', _('Terraform State')),
-        ('openshift_virtualization', _('OpenShift Virtualization')),
-    ]
-
     # From the options of the Django management base command
     INVENTORY_UPDATE_VERBOSITY_CHOICES = [
         (0, '0 (WARNING)'),
@@ -943,7 +926,6 @@ class InventorySourceOptions(BaseModel):
 
     source = models.CharField(
         max_length=32,
-        choices=SOURCE_CHOICES,
         blank=False,
         default=None,
     )
@@ -1047,7 +1029,7 @@ class InventorySourceOptions(BaseModel):
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
-        elif source in CLOUD_PROVIDERS and source not in ['ec2', 'openshift_virtualization']:
+        elif source in discover_available_cloud_provider_plugin_names() and source not in ['ec2', 'openshift_virtualization']:
             return _('Credential is required for a cloud source.')
         elif source == 'custom' and cred and cred.credential_type.kind in ('scm', 'ssh', 'insights', 'vault'):
             return _('Credentials of type machine, source control, insights and vault are disallowed for custom inventory sources.')
@@ -1061,11 +1043,8 @@ class InventorySourceOptions(BaseModel):
         """Return the credential which is directly tied to the inventory source type."""
         credential = None
         for cred in self.credentials.all():
-            if self.source in CLOUD_PROVIDERS:
-                source = self.source.replace('ec2', 'aws')
-                if source.endswith('_supported'):
-                    source = source[:-10]
-                if cred.kind == source:
+            if self.source in discover_available_cloud_provider_plugin_names():
+                if cred.kind == self.source.replace('ec2', 'aws'):
                     credential = cred
                     break
             else:
@@ -1080,7 +1059,7 @@ class InventorySourceOptions(BaseModel):
         These are all credentials that should run their own inject_credential logic.
         """
         special_cred = None
-        if self.source in CLOUD_PROVIDERS:
+        if self.source in discover_available_cloud_provider_plugin_names():
             # these have special injection logic associated with them
             special_cred = self.get_cloud_credential()
         extra_creds = []

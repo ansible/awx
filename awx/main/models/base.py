@@ -15,7 +15,6 @@ from crum import get_current_user
 
 # AWX
 from awx.main.utils import encrypt_field, parse_yaml_or_json
-from awx.main.constants import CLOUD_PROVIDERS
 
 __all__ = [
     'VarsDictProperty',
@@ -32,7 +31,6 @@ __all__ = [
     'JOB_TYPE_CHOICES',
     'AD_HOC_JOB_TYPE_CHOICES',
     'PROJECT_UPDATE_JOB_TYPE_CHOICES',
-    'CLOUD_INVENTORY_SOURCES',
     'VERBOSITY_CHOICES',
 ]
 
@@ -61,7 +59,6 @@ PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-CLOUD_INVENTORY_SOURCES = list(CLOUD_PROVIDERS) + ['scm']
 
 VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),

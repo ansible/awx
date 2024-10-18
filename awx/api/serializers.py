@@ -102,7 +102,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
     StdoutMaxBytesExceeded,
-    CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import role_summary_fields_generator, give_creator_permissions, get_role_codenames, to_permissions, get_role_from_object_role
@@ -119,7 +118,9 @@ from awx.main.utils import (
     truncate_stdout,
     get_licenser,
 )
+
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.plugins import compute_cloud_inventory_sources
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -2300,6 +2301,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
+    source = serializers.ChoiceField(choices=[])
 
     class Meta:
         fields = (
@@ -2320,6 +2322,11 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'limit',
         )
         read_only_fields = ('*', 'custom_virtualenv')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'source' in self.fields:
+            self.fields['source'].choices = compute_cloud_inventory_sources() or {}
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -5500,7 +5507,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return summary_fields
 
     def validate_unified_job_template(self, value):
-        if type(value) == InventorySource and value.source not in CLOUD_INVENTORY_SOURCES:
+        if type(value) == InventorySource and value.source not in compute_cloud_inventory_sources():
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))
