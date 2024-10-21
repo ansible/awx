@@ -90,7 +90,7 @@ extends_documentation_fragment: awx.awx.auth
 EXAMPLES = '''
 '''
 
-from ..module_utils.controller_api import ControllerAPIModule
+from ansible_collections.awx.awx.plugins.module_utils.controller_api import ControllerAPIModule
 
 
 def main():

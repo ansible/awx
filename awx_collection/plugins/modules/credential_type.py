@@ -84,7 +84,7 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.controller_api import ControllerAPIModule
+from ansible_collections.awx.awx.plugins.module_utils.controller_api import ControllerAPIModule
 
 KIND_CHOICES = {'ssh': 'Machine', 'vault': 'Ansible Vault', 'net': 'Network', 'scm': 'Source Control', 'cloud': 'Lots of others', 'insights': 'Insights'}
 

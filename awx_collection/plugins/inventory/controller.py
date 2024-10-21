@@ -72,7 +72,7 @@ from ansible.plugins.inventory import BaseInventoryPlugin
 from ansible.config.manager import ensure_type
 
 from ansible.module_utils.six import raise_from
-from ..module_utils.controller_api import ControllerAPIModule
+from ansible_collections.awx.awx.plugins.module_utils.controller_api import ControllerAPIModule
 
 
 def handle_error(**kwargs):
