@@ -962,16 +962,17 @@ class ControllerAPIModule(ControllerModule):
         depending on the unknown $encrypted$ value or sub-values
         """
         if isinstance(old_field, dict) and isinstance(new_field, dict):
-            if set(old_field.keys()) != set(new_field.keys()):
-                return False
             for key in new_field.keys():
-                if not ControllerAPIModule.fields_could_be_same(old_field[key], new_field[key]):
-                    return False
+                if key in old_field:
+                    if not ControllerAPIModule.fields_could_be_same(old_field[key], new_field[key]):
+                        return False
             return True  # all sub-fields are either equal or could be equal
         else:
-            if old_field == ControllerAPIModule.ENCRYPTED_STRING:
-                return True
-            return bool(new_field == old_field)
+            if old_field is not None:
+                if old_field == ControllerAPIModule.ENCRYPTED_STRING:
+                    return True
+                return bool(new_field == old_field)
+            return True
 
     def objects_could_be_different(self, old, new, field_set=None, warning=False):
         if field_set is None:
