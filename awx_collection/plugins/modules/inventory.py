@@ -133,7 +133,7 @@ EXAMPLES = '''
 
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
+import yaml
 
 
 def main():
@@ -201,8 +201,12 @@ def main():
         inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
     if description is not None:
         inventory_fields['description'] = description
+
     if variables is not None:
-        inventory_fields['variables'] = json.dumps(variables)
+      if variables != {}:
+        inventory_fields['variables'] = yaml.dump(variables, explicit_start=True)
+      else:
+        inventory_fields['variables'] = '---'
 
     association_fields = {}
 

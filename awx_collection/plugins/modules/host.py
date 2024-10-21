@@ -71,7 +71,7 @@ EXAMPLES = '''
 
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
+import yaml
 
 
 def main():
@@ -116,8 +116,12 @@ def main():
     }
     if description is not None:
         host_fields['description'] = description
+
     if variables is not None:
-        host_fields['variables'] = json.dumps(variables)
+      if variables != {}:
+        host_fields['variables'] = yaml.dump(variables, explicit_start=True)
+      else:
+        host_fields['variables'] = '---'
 
     # If the state was present and we can let the module build or update the existing host, this will return on its own
     module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')

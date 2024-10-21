@@ -367,7 +367,7 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
+import yaml
 
 
 def update_survey(module, last_request):
@@ -549,8 +549,12 @@ def main():
 
     # Special treatment of extra_vars parameter
     extra_vars = module.params.get('extra_vars')
+
     if extra_vars is not None:
-        new_fields['extra_vars'] = json.dumps(extra_vars)
+      if extra_vars != {}:
+        new_fields['extra_vars'] = yaml.dump(extra_vars, explicit_start=True)
+      else:
+        new_fields['extra_vars'] = '---'
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory = module.params.get('inventory')
