@@ -1343,7 +1343,6 @@ class UserOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     model = models.Organization
     serializer_class = serializers.OrganizationSerializer
     parent_model = models.User
-    relationship = 'organizations'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1357,7 +1356,6 @@ class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     model = models.Organization
     serializer_class = serializers.OrganizationSerializer
     parent_model = models.User
-    relationship = 'admin_of_organizations'
 
     def get_queryset(self):
         parent = self.get_parent_object()
