@@ -16,6 +16,21 @@ For `cleanup_activitystream` and `cleanup_jobs` commands, providing
 `"dry_run": true` inside of `extra_vars` will show items that will be
 removed without deleting them.
 
+Specific resources can be optionally listed for `cleanup_jobs` by sending
+an array named "resources" containing the resources to be cleaned.  For
+example.
+
+`{"extra_vars": {"resources":["notifications", "project-updates"]}}`
+
+The resources correspond to the available "awx-manage cleanup" arguments
+and are listed below.
+
+"jobs", "project-updates", "inventory-updates","management-jobs",
+ "ad-hoc-commands", "workflow-jobs", "notifications"
+
+If "resources" is omitted, all resources are cleaned up.
+
+
 Each individual system job task has its own default values, which are
 applicable either when running it from the command line or launching its
 system job template with empty `extra_vars`.
