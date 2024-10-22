@@ -10,7 +10,8 @@ from functools import cache
 
 @cache
 def discover_available_cloud_provider_plugin_names() -> list[str]:
-    """Return a list of cloud plugin names available in runtime.
+    """
+    Return a list of cloud plugin names available in runtime.
 
     The discovery result is cached since it does not change throughout
     the life cycle of the server run.
@@ -29,7 +30,8 @@ def discover_available_cloud_provider_plugin_names() -> list[str]:
 
 @cache
 def compute_cloud_inventory_sources() -> dict[str, str]:
-    """Return a dictionary of cloud provider plugin names
+    """
+    Return a dictionary of cloud provider plugin names
     available plus source control management and constructed.
 
     :returns: Dictionary of plugin cloud names plus source control.
@@ -42,14 +44,16 @@ def compute_cloud_inventory_sources() -> dict[str, str]:
 
 
 @cache
-def return_inventory_source_options() -> dict[str, str]:
-    """Return a dictionary of cloud provider plugin names
-    plus file. File needed to be separate since it is needs to be consumed directly
-    by the serializer.
+def load_combined_inventory_source_options() -> dict[str, str]:
+    """
+    Return a dictionary of cloud provider plugin names and 'file'.
 
-    :returns: Dictionary of plugin cloud names plus source control.
+    The 'file' entry is included separately since it needs to be consumed directly by the serializer.
+
+    :returns: A dictionary of cloud provider plugin names (as both keys and values) plus the 'file' entry.
     :rtype: dict[str, str]
     """
+
     plugins = compute_cloud_inventory_sources()
 
-    return dict(zip(plugins, plugins)) | dict(file='file')
+    return dict(zip(plugins, plugins), file='file')
