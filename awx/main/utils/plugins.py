@@ -30,7 +30,7 @@ def discover_available_cloud_provider_plugin_names() -> list[str]:
 @cache
 def compute_cloud_inventory_sources() -> dict[str, str]:
     """Return a dictionary of cloud provider plugin names
-    available plus source control management.
+    available plus source control management and constructed.
 
     :returns: Dictionary of plugin cloud names plus source control.
     :rtype: dict[str, str]
@@ -38,4 +38,18 @@ def compute_cloud_inventory_sources() -> dict[str, str]:
 
     plugins = discover_available_cloud_provider_plugin_names()
 
-    return dict(zip(plugins, plugins), file='file', scm='scm', constructed='constructed')
+    return dict(zip(plugins, plugins), scm='scm', constructed='constructed')
+
+
+@cache
+def return_inventory_source_options() -> dict[str, str]:
+    """Return a dictionary of cloud provider plugin names
+    plus file. File needed to be separate since it is needs to be consumed directly
+    by the serializer.
+
+    :returns: Dictionary of plugin cloud names plus source control.
+    :rtype: dict[str, str]
+    """
+    plugins = compute_cloud_inventory_sources()
+
+    return dict(zip(plugins, plugins)) | dict(file='file')

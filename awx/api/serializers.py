@@ -120,7 +120,7 @@ from awx.main.utils import (
 )
 
 from awx.main.utils.filters import SmartFilter
-from awx.main.utils.plugins import compute_cloud_inventory_sources
+from awx.main.utils.plugins import return_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -2326,7 +2326,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'source' in self.fields:
-            self.fields['source'].choices = compute_cloud_inventory_sources() or {}
+            self.fields['source'].choices = return_inventory_source_options() or {}
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -5507,7 +5507,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return summary_fields
 
     def validate_unified_job_template(self, value):
-        if type(value) == InventorySource and value.source not in compute_cloud_inventory_sources():
+        if type(value) == InventorySource and value.source not in return_inventory_source_options():
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))
