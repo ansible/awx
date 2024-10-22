@@ -126,7 +126,7 @@ deprecated==1.2.14
     #   opentelemetry-exporter-otlp-proto-http
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.10
+django==4.2.16
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -478,10 +478,11 @@ slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.1
     # via gitdb
-sqlparse==0.4.4
+sqlparse==0.5.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
+    #   django-ansible-base
 tempora==5.5.1
     # via
     #   irc
