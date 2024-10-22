@@ -28,6 +28,7 @@ from django.contrib.auth.models import User
 
 # Shared code for the AWX platform
 from awx_plugins.interfaces._temporary_private_container_api import get_incontainer_path
+from awx_plugins.interfaces._temporary_private_injector_api import load_injector_callable
 
 # DRF
 from awx.main.utils.pglock import advisory_lock
@@ -53,7 +54,6 @@ from awx.main.models.rbac import (
 )
 from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
-from awx_plugins.credentials import injectors as builtin_injectors
 
 # DAB
 from ansible_base.resource_registry.tasks.sync import get_resource_server_client
@@ -566,11 +566,22 @@ class CredentialType(CommonModelNameNotUnique):
                                  files)
         """
         if not self.injectors:
-            if self.managed and credential.credential_type.namespace in dir(builtin_injectors):
-                injected_env = {}
-                getattr(builtin_injectors, credential.credential_type.namespace)(credential, injected_env, private_data_dir)
-                env.update(injected_env)
-                safe_env.update(build_safe_env(injected_env))
+            if self.managed:
+                try:
+                    inject_credential_into_env = load_injector_callable(
+                        credential.credential_type.namespace,
+                    )
+                except LookupError:
+                    pass  # noqa: WPS420
+                else:
+                    injected_env = {}
+                    inject_credential_into_env(
+                        credential,
+                        injected_env,
+                        private_data_dir,
+                    )
+                    env.update(injected_env)
+                    safe_env.update(build_safe_env(injected_env))
             return
 
         class TowerNamespace:
