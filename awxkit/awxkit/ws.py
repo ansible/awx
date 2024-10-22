@@ -205,8 +205,8 @@ class WSClient(object):
         else:
             self._send(json.dumps(dict(groups={}, xrftoken=self.csrftoken)))
 
-    def _on_message(self, message):
-        message = json.loads(message)
+    def _on_message(self, *args):
+        message = json.loads(args[1])
         log.debug('received message: {}'.format(message))
         if self._add_received_time:
             message['received_time'] = datetime.datetime.utcnow()
@@ -230,13 +230,13 @@ class WSClient(object):
         self.subscribe(**subscription)
         self._should_subscribe_to_pending_job = False
 
-    def _on_open(self):
+    def _on_open(self, *args):
         self._ws_connected_flag.set()
 
-    def _on_error(self, error):
-        log.info('Error received: {}'.format(error))
+    def _on_error(self, *args):
+        log.info('Error received: {}'.format(args[1]))
 
-    def _on_close(self):
+    def _on_close(self, *args):
         log.info('Successfully closed ws.')
         self._ws_closed = True
 
