@@ -9,9 +9,9 @@ from awx_plugins.interfaces._temporary_private_container_api import get_incontai
 
 from awx.main.tasks.jobs import RunInventoryUpdate
 from awx.main.models import InventorySource, Credential, CredentialType, UnifiedJob, ExecutionEnvironment
-from awx.main.constants import CLOUD_PROVIDERS, STANDARD_INVENTORY_UPDATE_ENV
+from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.tests import data
-
+from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names
 from django.conf import settings
 
 DATA = os.path.join(os.path.dirname(data.__file__), 'inventory')
@@ -193,7 +193,7 @@ def create_reference_data(source_dir, env, content):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('this_kind', CLOUD_PROVIDERS)
+@pytest.mark.parametrize('this_kind', discover_available_cloud_provider_plugin_names())
 def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory, mock_me):
     if this_kind.endswith('_supported'):
         this_kind = this_kind[:-10]
@@ -202,8 +202,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
     ExecutionEnvironment.objects.create(name='Default Job EE', managed=False)
 
     injector = InventorySource.injectors[this_kind]
-    if injector.plugin_name is None:
-        pytest.skip('Use of inventory plugin is not enabled for this source')
 
     src_vars = dict(base_source_var='value_of_var')
     src_vars['plugin'] = injector.get_proper_name()
