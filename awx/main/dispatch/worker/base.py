@@ -15,6 +15,7 @@ from datetime import timedelta
 
 from django import db
 from django.conf import settings
+import redis.exceptions
 
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch.periodic import Scheduler
@@ -129,10 +130,13 @@ class AWXConsumerBase(object):
     @log_excess_runtime(logger)
     def record_statistics(self):
         if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
+            save_data = self.pool.debug()
             try:
-                self.redis.set(f'awx_{self.name}_statistics', self.pool.debug())
+                self.redis.set(f'awx_{self.name}_statistics', save_data)
+            except redis.exceptions.ConnectionError as exc:
+                logger.warning(f'Redis connection error saving {self.name} status data:\n{exc}\nmissed data:\n{save_data}')
             except Exception:
-                logger.exception(f"encountered an error communicating with redis to store {self.name} statistics")
+                logger.exception(f"Unknown redis error saving {self.name} status data:\nmissed data:\n{save_data}")
             self.last_stats = time.time()
 
     def run(self, *args, **kwargs):
@@ -187,7 +191,10 @@ class AWXConsumerPG(AWXConsumerBase):
         current_time = time.time()
         self.pool.produce_subsystem_metrics(self.subsystem_metrics)
         self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
-        self.subsystem_metrics.pipe_execute()
+        try:
+            self.subsystem_metrics.pipe_execute()
+        except redis.exceptions.ConnectionError as exc:
+            logger.warning(f'Redis connection error saving dispatcher metrics, error:\n{exc}')
         self.listen_cumulative_time = 0.0
         self.last_metrics_gather = current_time
 
