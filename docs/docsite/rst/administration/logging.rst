@@ -363,11 +363,3 @@ Troubleshoot Logging
 API 4XX Errors
 ~~~~~~~~~~~~~~~~~~~~
 You can include the API error message for 4XX errors by modifying the log format for those messages. Refer to the :ref:`logging-api-400-error-config` section for more detail.
-
-LDAP
-~~~~~~
-You can enable logging messages for the LDAP adapter. Refer to the :ref:`ldap_logging` section for more detail.
-
-SAML
-~~~~~~~
-You can enable logging messages for the SAML adapter the same way you can enable logging for LDAP. Refer to the :ref:`ldap_logging` section for more detail.

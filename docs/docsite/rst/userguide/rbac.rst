@@ -248,7 +248,7 @@ Often, you will have many Roles in a system and you will want some roles to incl
 
 .. |rbac-heirarchy-morecomplex| image:: ../common/images/rbac-heirarchy-morecomplex.png
 
-RBAC controls also give you the capability to explicitly permit User and Teams of Users to run playbooks against certain sets of hosts. Users and teams are restricted to just the sets of playbooks and hosts to which they are granted capabilities. And, with AWX, you can create or import as many Users and Teams as you require--create users and teams manually or import them from LDAP or Active Directory.
+RBAC controls also give you the capability to explicitly permit User and Teams of Users to run playbooks against certain sets of hosts. Users and teams are restricted to just the sets of playbooks and hosts to which they are granted capabilities. And, with AWX, you can create or import as many Users and Teams as you require--create users and teams manually or import them from Active Directory.
 
 RBACs are easiest to think of in terms of who or what can see, change, or delete an "object" for which a specific capability is being determined.
 

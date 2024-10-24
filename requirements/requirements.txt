@@ -25,10 +25,6 @@ asgiref==3.7.2
     #   django-cors-headers
 asn1==2.7.0
     # via -r /awx_devel/requirements/requirements.in
-async-timeout==4.0.3
-    # via
-    #   aiohttp
-    #   redis
 attrs==23.2.0
     # via
     #   aiohttp
@@ -43,6 +39,11 @@ autocommand==2.2.2
     # via jaraco-text
 automat==22.10.0
     # via twisted
+    # via -r /awx_devel/requirements/requirements_git.txt
+awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
+    # via
+    #   -r /awx_devel/requirements/requirements_git.txt
+    #   awx-plugins-core
 azure-common==1.1.28
     # via
     #   azure-keyvault-certificates
@@ -56,9 +57,13 @@ azure-core==1.30.0
     #   azure-keyvault-secrets
     #   msrest
 azure-identity==1.15.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 azure-keyvault==4.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 azure-keyvault-certificates==4.7.0
     # via azure-keyvault
 azure-keyvault-keys==4.8.0
@@ -66,7 +71,9 @@ azure-keyvault-keys==4.8.0
 azure-keyvault-secrets==4.7.0
     # via azure-keyvault
 boto3==1.34.47
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 botocore==1.34.47
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -106,17 +113,12 @@ cryptography==41.0.7
     #   pyjwt
     #   pyopenssl
     #   service-identity
-    #   social-auth-core
 cython==0.29.37
     # via -r /awx_devel/requirements/requirements.in
 daphne==3.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
-defusedxml==0.7.1
-    # via
-    #   python3-openid
-    #   social-auth-core
 deprecated==1.2.14
     # via
     #   opentelemetry-api
@@ -124,12 +126,11 @@ deprecated==1.2.14
     #   opentelemetry-exporter-otlp-proto-http
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.10
+django==4.2.16
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
     #   django-ansible-base
-    #   django-auth-ldap
     #   django-cors-headers
     #   django-crum
     #   django-extensions
@@ -138,10 +139,7 @@ django==4.2.10
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
-    #   social-auth-app-django
     # via -r /awx_devel/requirements/requirements_git.txt
-django-auth-ldap==4.6.0
-    # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==4.3.1
     # via -r /awx_devel/requirements/requirements.in
 django-crum==0.7.9
@@ -158,8 +156,6 @@ django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
-django-radius==1.5.1
-    # via -r /awx_devel/requirements/requirements.in
 django-solo==2.2.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.3.2
@@ -174,8 +170,6 @@ djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.20.1
     # via python-daemon
-ecdsa==0.18.0
-    # via python-jose
 enum-compat==0.0.3
     # via asn1
 filelock==3.13.1
@@ -211,10 +205,7 @@ idna==3.6
     #   twisted
     #   yarl
 importlib-metadata==6.2.1
-    # via
-    #   ansible-runner
-    #   markdown
-    #   opentelemetry-api
+    # via opentelemetry-api
 incremental==22.10.0
     # via twisted
 inflect==7.0.0
@@ -229,7 +220,6 @@ isodate==0.6.1
     #   azure-keyvault-keys
     #   azure-keyvault-secrets
     #   msrest
-    #   python3-saml
 jaraco-collections==5.0.0
     # via irc
 jaraco-context==4.3.0
@@ -265,10 +255,6 @@ kubernetes==29.0.0
     # via openshift
 lockfile==0.12.2
     # via python-daemon
-lxml==4.9.4
-    # via
-    #   python3-saml
-    #   xmlsec
 markdown==3.5.2
     # via -r /awx_devel/requirements/requirements.in
 markupsafe==2.1.5
@@ -293,19 +279,18 @@ msgpack==1.0.5
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-netaddr==1.2.1
-    # via pyrad
 oauthlib==3.2.2
     # via
     #   django-oauth-toolkit
     #   kubernetes
     #   requests-oauthlib
-    #   social-auth-core
 openshift==0.13.2
     # via -r /awx_devel/requirements/requirements.in
 opentelemetry-api==1.24.0
@@ -372,14 +357,11 @@ ptyprocess==0.7.0
 pyasn1==0.5.1
     # via
     #   pyasn1-modules
-    #   python-jose
-    #   python-ldap
     #   rsa
     #   service-identity
 pyasn1-modules==0.3.0
     # via
     #   google-auth
-    #   python-ldap
     #   service-identity
 pycparser==2.21
     # via cffi
@@ -394,7 +376,6 @@ pyjwt[crypto]==2.8.0
     #   adal
     #   django-ansible-base
     #   msal
-    #   social-auth-core
     #   twilio
 pyopenssl==24.0.0
     # via
@@ -402,8 +383,6 @@ pyopenssl==24.0.0
     #   twisted
 pyparsing==2.4.6
     # via -r /awx_devel/requirements/requirements.in
-pyrad==2.4
-    # via django-radius
 python-daemon==3.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -415,20 +394,15 @@ python-dateutil==2.8.2
     #   kubernetes
     #   receptorctl
 python-dsv-sdk==1.0.4
-    # via -r /awx_devel/requirements/requirements.in
-python-jose==3.3.0
-    # via social-auth-core
-python-ldap==3.4.4
     # via
     #   -r /awx_devel/requirements/requirements.in
-    #   django-auth-ldap
+    #   awx-plugins-core
 python-string-utils==1.0.0
     # via openshift
 python-tss-sdk==1.2.2
-    # via -r /awx_devel/requirements/requirements.in
-python3-openid==3.2.0
-    # via social-auth-core
-    # via -r /awx_devel/requirements/requirements_git.txt
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   awx-plugins-core
 pytz==2024.1
     # via
     #   irc
@@ -437,6 +411,7 @@ pyyaml==6.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
+    #   awx-plugins-core
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
@@ -456,6 +431,7 @@ requests==2.31.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
+    #   awx-plugins-core
     #   azure-core
     #   django-ansible-base
     #   django-oauth-toolkit
@@ -466,21 +442,17 @@ requests==2.31.0
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
-    #   social-auth-core
     #   twilio
 requests-oauthlib==1.3.1
     # via
     #   kubernetes
     #   msrest
-    #   social-auth-core
 rpds-py==0.18.0
     # via
     #   jsonschema
     #   referencing
 rsa==4.9
-    # via
-    #   google-auth
-    #   python-jose
+    # via google-auth
 s3transfer==0.10.0
     # via boto3
 semantic-version==2.10.0
@@ -496,40 +468,25 @@ six==1.16.0
     #   automat
     #   azure-core
     #   django-pglocks
-    #   ecdsa
     #   isodate
     #   kubernetes
     #   msrestazure
     #   openshift
     #   pygerduty
-    #   pyrad
     #   python-dateutil
-    #   tacacs-plus
 slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.1
     # via gitdb
-social-auth-app-django==5.4.0
-    # via -r /awx_devel/requirements/requirements.in
-social-auth-core[openidconnect]==4.4.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   social-auth-app-django
-sqlparse==0.4.4
+sqlparse==0.5.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
-tacacs-plus==1.0
-    # via -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 tempora==5.5.1
     # via
     #   irc
     #   jaraco-logging
-tomli==2.0.1
-    # via
-    #   maturin
-    #   setuptools-rust
-    #   setuptools-scm
 twilio==8.13.0
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==23.10.0
@@ -540,7 +497,6 @@ txaio==23.1.1
     # via autobahn
 typing-extensions==4.9.0
     # via
-    #   asgiref
     #   azure-core
     #   azure-keyvault-certificates
     #   azure-keyvault-keys
@@ -570,8 +526,6 @@ wrapt==1.16.0
     # via
     #   deprecated
     #   opentelemetry-instrumentation
-xmlsec==1.3.13
-    # via python3-saml
 yarl==1.9.4
     # via aiohttp
 zipp==3.17.0

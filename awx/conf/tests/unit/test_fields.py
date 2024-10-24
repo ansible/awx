@@ -111,7 +111,6 @@ class TestURLField:
     @pytest.mark.parametrize(
         "url,schemes,regex, allow_numbers_in_top_level_domain, expect_no_error",
         [
-            ("ldap://www.example.org42", "ldap", None, True, True),
             ("https://www.example.org42", "https", None, False, False),
             ("https://www.example.org", None, regex, None, True),
             ("https://www.example3.org", None, regex, None, False),

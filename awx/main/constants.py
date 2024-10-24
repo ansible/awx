@@ -6,7 +6,6 @@ import re
 from django.utils.translation import gettext_lazy as _
 
 __all__ = [
-    'CLOUD_PROVIDERS',
     'PRIVILEGE_ESCALATION_METHODS',
     'ANSI_SGR_PATTERN',
     'CAN_CANCEL',
@@ -14,7 +13,6 @@ __all__ = [
     'STANDARD_INVENTORY_UPDATE_ENV',
 ]
 
-CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'controller', 'insights', 'terraform', 'openshift_virtualization')
 PRIVILEGE_ESCALATION_METHODS = [
     ('sudo', _('Sudo')),
     ('su', _('Su')),

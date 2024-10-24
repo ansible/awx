@@ -33,3 +33,4 @@ config.client_connection_attempts = int(os.getenv('AWXKIT_CLIENT_CONNECTION_ATTE
 config.prevent_teardown = to_bool(os.getenv('AWXKIT_PREVENT_TEARDOWN', False))
 config.use_sessions = to_bool(os.getenv('AWXKIT_SESSIONS', False))
 config.api_base_path = os.getenv('AWXKIT_API_BASE_PATH', '/api/')
+config.gateway_base_path = os.getenv('AWXKIT_GATEWAY_BASE_PATH', '/api/gateway/')

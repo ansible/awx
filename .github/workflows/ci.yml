@@ -129,6 +129,10 @@ jobs:
         with:
           show-progress: false
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - uses: ./.github/actions/run_awx_devel
         id: awx
         with:
@@ -266,6 +270,10 @@ jobs:
         with:
           show-progress: false
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - uses: ./.github/actions/run_awx_devel
         id: awx
         with:
@@ -283,7 +291,8 @@ jobs:
           echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
           echo '[general]' > ~/.tower_cli.cfg
           echo 'host = https://${{ steps.awx.outputs.ip }}:8043' >> ~/.tower_cli.cfg
-          echo 'oauth_token = ${{ steps.awx.outputs.admin-token }}' >> ~/.tower_cli.cfg
+          echo 'username = admin' >> ~/.tower_cli.cfg
+          echo 'password = password' >> ~/.tower_cli.cfg
           echo 'verify_ssl = false' >> ~/.tower_cli.cfg
           TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
           make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
@@ -335,6 +344,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           show-progress: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core

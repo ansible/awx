@@ -102,7 +102,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
     StdoutMaxBytesExceeded,
-    CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import role_summary_fields_generator, give_creator_permissions, get_role_codenames, to_permissions, get_role_from_object_role
@@ -119,7 +118,9 @@ from awx.main.utils import (
     truncate_stdout,
     get_licenser,
 )
+
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
@@ -133,8 +134,6 @@ from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, Ver
 
 # AWX Utils
 from awx.api.validators import HostnameRegexValidator
-
-from awx.sso.common import get_external_account
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -961,8 +960,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
-    ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
-    external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -979,22 +976,13 @@ class UserSerializer(BaseSerializer):
             'is_superuser',
             'is_system_auditor',
             'password',
-            'ldap_dn',
             'last_login',
-            'external_account',
         )
         extra_kwargs = {'last_login': {'read_only': True}}
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
-        if self.get_external_account(obj):
-            # If this is an external account it shouldn't have a password field
-            ret.pop('password', None)
-        else:
-            # If its an internal account lets assume there is a password and return $encrypted$ to the user
-            ret['password'] = '$encrypted$'
-        if obj and type(self) is UserSerializer:
-            ret['auth'] = obj.social_auth.values('provider', 'uid')
+        ret['password'] = '$encrypted$'
         return ret
 
     def get_validation_exclusions(self, obj=None):
@@ -1027,10 +1015,7 @@ class UserSerializer(BaseSerializer):
         return value
 
     def _update_password(self, obj, new_password):
-        # For now we're not raising an error, just not saving password for
-        # users managed by LDAP who already have an unusable password set.
-        # Get external password will return something like ldap or enterprise or None if the user isn't external. We only want to allow a password update for a None option
-        if new_password and new_password != '$encrypted$' and not self.get_external_account(obj):
+        if new_password and new_password != '$encrypted$':
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
 
@@ -1044,9 +1029,6 @@ class UserSerializer(BaseSerializer):
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
-
-    def get_external_account(self, obj):
-        return get_external_account(obj)
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
@@ -1084,37 +1066,6 @@ class UserSerializer(BaseSerializer):
             )
         )
         return res
-
-    def _validate_ldap_managed_field(self, value, field_name):
-        if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            return value
-        try:
-            is_ldap_user = bool(self.instance and self.instance.profile.ldap_dn)
-        except AttributeError:
-            is_ldap_user = False
-        if is_ldap_user:
-            ldap_managed_fields = ['username']
-            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            if field_name in ldap_managed_fields:
-                if value != getattr(self.instance, field_name):
-                    raise serializers.ValidationError(_('Unable to change %s on user managed by LDAP.') % field_name)
-        return value
-
-    def validate_username(self, value):
-        return self._validate_ldap_managed_field(value, 'username')
-
-    def validate_first_name(self, value):
-        return self._validate_ldap_managed_field(value, 'first_name')
-
-    def validate_last_name(self, value):
-        return self._validate_ldap_managed_field(value, 'last_name')
-
-    def validate_email(self, value):
-        return self._validate_ldap_managed_field(value, 'email')
-
-    def validate_is_superuser(self, value):
-        return self._validate_ldap_managed_field(value, 'is_superuser')
 
 
 class UserActivityStreamSerializer(UserSerializer):
@@ -2350,6 +2301,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
+    source = serializers.ChoiceField(choices=[])
 
     class Meta:
         fields = (
@@ -2370,6 +2322,11 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'limit',
         )
         read_only_fields = ('*', 'custom_virtualenv')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'source' in self.fields:
+            self.fields['source'].choices = load_combined_inventory_source_options()
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -5550,7 +5507,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return summary_fields
 
     def validate_unified_job_template(self, value):
-        if type(value) == InventorySource and value.source not in CLOUD_INVENTORY_SOURCES:
+        if type(value) == InventorySource and value.source not in load_combined_inventory_source_options():
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))

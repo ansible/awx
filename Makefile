@@ -31,10 +31,6 @@ COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
 # If set to true docker-compose will also start a pgbouncer instance and use it
 PGBOUNCER ?= false
-# If set to true docker-compose will also start a keycloak instance
-KEYCLOAK ?= false
-# If set to true docker-compose will also start an ldap instance
-LDAP ?= false
 # If set to true docker-compose will also start a splunk instance
 SPLUNK ?= false
 # If set to true docker-compose will also start a prometheus instance
@@ -45,8 +41,6 @@ GRAFANA ?= false
 VAULT ?= false
 # If set to true docker-compose will also start a hashicorp vault instance with TLS enabled
 VAULT_TLS ?= false
-# If set to true docker-compose will also start a tacacs+ instance
-TACACS ?= false
 # If set to true docker-compose will also start an OpenTelemetry Collector instance
 OTEL ?= false
 # If set to true docker-compose will also start a Loki instance
@@ -345,7 +339,7 @@ api-lint:
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/tools/scripts/egg_info_dev
 
-TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
+TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 PYTEST_ARGS ?= -n auto
 ## Run all API unit tests.
 test:
@@ -446,7 +440,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit
 
 ## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
@@ -507,14 +501,11 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
 	    -e enable_pgbouncer=$(PGBOUNCER) \
-	    -e enable_keycloak=$(KEYCLOAK) \
-	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) \
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
-	    -e enable_tacacs=$(TACACS) \
 	    -e enable_otel=$(OTEL) \
 	    -e enable_loki=$(LOKI) \
 	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \
@@ -525,8 +516,7 @@ docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
 	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
 	    -e enable_vault=$(VAULT) \
-	    -e vault_tls=$(VAULT_TLS) \
-	    -e enable_ldap=$(LDAP); \
+	    -e vault_tls=$(VAULT_TLS); \
 	$(MAKE) docker-compose-up
 
 docker-compose-up:
@@ -598,7 +588,7 @@ docker-clean:
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_var_lib_awx tools_awx_db tools_awx_db_15 tools_vault_1 tools_ldap_1 tools_grafana_storage tools_prometheus_storage $(shell docker volume ls --filter name=tools_redis_socket_ -q)
+	docker volume rm -f tools_var_lib_awx tools_awx_db tools_awx_db_15 tools_vault_1 tools_grafana_storage tools_prometheus_storage $(shell docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 

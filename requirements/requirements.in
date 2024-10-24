@@ -12,8 +12,7 @@ cryptography>=41.0.7  # CVE-2023-49083
 Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
 daphne
 distro
-django==4.2.10  # CVE-2024-24680
-django-auth-ldap
+django==4.2.16  # CVE-2024-24680
 django-cors-headers
 django-crum
 django-extensions
@@ -21,7 +20,6 @@ django-guid
 django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
 django-pglocks
-django-radius
 django-solo
 django-split-settings
 djangorestframework>=3.15.0
@@ -52,17 +50,13 @@ pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host 
 python-daemon>3.0.0
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
-python-ldap
 pyyaml>=6.0.1
 pyzstd  # otel collector log file compression library
 receptorctl
-social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
-social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
 redis[hiredis]
 requests
 slack-sdk
-tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
 twisted[tls]>=23.10.0  # CVE-2023-46137
 uWSGI
