@@ -268,7 +268,7 @@ def main():
         for resource in value:
             # Attempt to look up project based on the provided name, ID, or named URL and lookup data
             lookup_key = key
-            if key == 'organizations' or key == 'users':
+            if key == 'organizations' or key == 'users' or key == 'teams':
                 lookup_data_populated = {}
             else:
                 lookup_data_populated = lookup_data

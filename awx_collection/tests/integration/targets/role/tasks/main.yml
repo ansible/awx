@@ -13,6 +13,7 @@
     wfjt_name: "AWX-Collection-tests-role-project-wfjt-{{ test_id }}"
     team_name: "AWX-Collection-tests-team-team-{{ test_id }}"
     team2_name: "AWX-Collection-tests-team-team-{{ test_id }}2"
+    org2_name: "AWX-Collection-tests-organization-{{ test_id }}2"
 
 - block:
     - name: Create a User
@@ -209,6 +210,40 @@
         that:
           - "result is changed"
 
+    - name: Create a 2nd organization
+      organization:
+        name: "{{ org2_name }}"
+
+    - name: Create a project in 2nd Organization
+      project:
+        name: "{{ project_name }}"
+        organization: "{{ org2_name }}"
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+      register: project_info
+
+    - name: Add Joe and teams to the update role of the default Project with lookup from the 2nd Organization
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        teams:
+          - "{{ team_name }}"
+          - "{{ team2_name }}"
+        role: update
+        lookup_organization: "{{ org2_name }}"
+        project: "{{ project_name }}"
+        state: "{{ item }}"
+      register: result
+      with_items:
+        - "present"
+        - "absent"
+
+    - assert:
+        that:
+          - "result is changed"
+
   always:
     - name: Delete a User
       user:
@@ -250,5 +285,18 @@
       project:
         name: "{{ project_name }}"
         organization: Default
+        state: absent
+      register: result
+
+    - name: Delete the 2nd project
+      project:
+        name: "{{ project_name }}"
+        organization: "{{ org2_name }}"
+        state: absent
+      register: result
+
+    - name: Delete the 2nd organization
+      organization:
+        name: "{{ org2_name }}"
         state: absent
       register: result
