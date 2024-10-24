@@ -30,7 +30,6 @@ Need help or want to discuss AWX including the documentation? See the :ref:`Comm
    rbac
    credentials
    credential_types
-   applications_auth
    execution_environments
    ee_reference
    projects

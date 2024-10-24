@@ -28,7 +28,7 @@ from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import URLPathVersioning, is_optional_api_urlpattern_prefix_request, reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
@@ -51,27 +51,11 @@ class ApiRootView(APIView):
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
         data['available_versions'] = dict(v2=v2)
-        if not is_optional_api_urlpattern_prefix_request(request):
-            data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
         if MODE == 'development':
             data['swagger'] = drf_reverse('api:schema-swagger-ui')
-        return Response(data)
-
-
-class ApiOAuthAuthorizationRootView(APIView):
-    permission_classes = (AllowAny,)
-    name = _("API OAuth 2 Authorization Root")
-    versioning_class = None
-    swagger_topic = 'Authentication'
-
-    def get(self, request, format=None):
-        data = OrderedDict()
-        data['authorize'] = drf_reverse('api:authorize')
-        data['token'] = drf_reverse('api:token')
-        data['revoke_token'] = drf_reverse('api:revoke-token')
         return Response(data)
 
 
@@ -99,8 +83,6 @@ class ApiVersionRootView(APIView):
         data['credentials'] = reverse('api:credential_list', request=request)
         data['credential_types'] = reverse('api:credential_type_list', request=request)
         data['credential_input_sources'] = reverse('api:credential_input_source_list', request=request)
-        data['applications'] = reverse('api:o_auth2_application_list', request=request)
-        data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['constructed_inventory'] = reverse('api:constructed_inventory_list', request=request)

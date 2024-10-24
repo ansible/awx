@@ -343,7 +343,6 @@ INSTALLED_APPS = [
     # According to channels 4.0 docs you install daphne instead of channels now
     'daphne',
     'django.contrib.staticfiles',
-    'oauth2_provider',
     'rest_framework',
     'django_extensions',
     'polymorphic',
@@ -369,7 +368,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication',
-        'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
     ),
@@ -388,16 +386,6 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
-
-
-# Django OAuth Toolkit settings
-OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
-OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
-
-OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
-
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
