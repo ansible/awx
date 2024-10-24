@@ -5,7 +5,6 @@ action_groups:
     - ad_hoc_command
     - ad_hoc_command_cancel
     - ad_hoc_command_wait
-    - application
     - bulk_job_launch
     - bulk_host_create
     - bulk_host_delete
@@ -42,7 +41,6 @@ action_groups:
     - settings
     - subscriptions
     - team
-    - token
     - user
     - workflow_approval
     - workflow_job_template_node
