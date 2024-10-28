@@ -16,7 +16,7 @@ from ansible_base.lib.utils.models import prevent_search
 from ansible_base.lib.utils.models import user_summary_fields
 
 # AWX
-from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
+from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, VERBOSITY_CHOICES  # noqa
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
 from awx.main.models.organization import Organization, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa

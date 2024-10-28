@@ -100,6 +100,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.plugins import compute_cloud_inventory_sources
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
@@ -2196,9 +2197,9 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
 
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
-        if parent.source not in models.CLOUD_INVENTORY_SOURCES:
+        if parent.source not in compute_cloud_inventory_sources():
             return Response(
-                dict(msg=_("Notification Templates can only be assigned when source is one of {}.").format(models.CLOUD_INVENTORY_SOURCES, parent.source)),
+                dict(msg=_("Notification Templates can only be assigned when source is one of {}.").format(compute_cloud_inventory_sources(), parent.source)),
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return super(InventorySourceNotificationTemplatesAnyList, self).post(request, *args, **kwargs)
