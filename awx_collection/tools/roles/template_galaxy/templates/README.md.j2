@@ -40,30 +40,8 @@ Non-deprecated modules in this collection have no Python requirements, but
 may require the AWX CLI
 in the future. The `DOCUMENTATION` for each module will report this.
 
-You can specify authentication by a combination of either:
+You can specify authentication by host, username, and password.
 
- - host, username, password
- - host, OAuth2 token
-
-The OAuth2 token is the preferred method. You can obtain a token via the
-``login`` command with the AWX CLI.
-
-These can be specified via (from highest to lowest precedence):
-
- - direct module parameters
- - environment variables (most useful when running against localhost)
- - a config file path specified by the `tower_config_file` parameter
- - a config file at `~/.tower_cli.cfg`
- - a config file at `/etc/tower/tower_cli.cfg`
-
-Config file syntax looks like this:
-
-```
-[general]
-host = https://localhost:8043
-verify_ssl = true
-oauth_token = LEdCpKVKc4znzffcpQL5vLG8oyeku6
-```
 
 ## Release and Upgrade Notes
 
