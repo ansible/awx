@@ -1765,7 +1765,7 @@ class ConstructedInventorySerializer(InventorySerializer):
         required=False,
         allow_null=True,
         min_value=0,
-        max_value=2,
+        max_value=5,
         default=None,
         help_text=_('The verbosity level for the related auto-created inventory source, special to constructed inventory'),
     )
