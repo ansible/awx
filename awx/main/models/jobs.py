@@ -818,6 +818,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 r['{}_project_scm_branch'.format(name)] = self.project.scm_branch
         if self.scm_branch:
             for name in JOB_VARIABLE_PREFIXES:
+                r['{}_job_revision'.format(name)] = self.scm_revision
                 r['{}_job_scm_branch'.format(name)] = self.scm_branch
         if self.job_template:
             for name in JOB_VARIABLE_PREFIXES:

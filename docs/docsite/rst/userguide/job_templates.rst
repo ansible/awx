@@ -441,8 +441,9 @@ Along with any extra variables set in the job template and survey, AWX automatic
 - ``awx_job_template_id``: The Job Template ID that this job run uses
 - ``awx_job_template_name``: The Job Template name that this job uses
 - ``awx_execution_node``: The Execution Node name that launched this job
-- ``awx_project_revision``: The revision identifier for the source tree that this particular job uses (it is also the same as the job's field ``scm_revision``)
+- ``awx_project_revision``: The revision identifier for the source tree that this particular job uses (it is the same as ``awx_job_revision`` unless the job uses another branch)
 - ``awx_project_scm_branch``: The configured default project SCM branch for the project the job template uses
+- ``awx_job_revision``: The revision identifier for the source tree that this particular job uses.
 - ``awx_job_scm_branch`` If the SCM Branch is overwritten by the job, the value is shown here
 - ``awx_user_email``: The user email of the AWX user that started this job. This is not available for callback or scheduled jobs.
 - ``awx_user_first_name``: The user's first name of the AWX user that started this job. This is not available for callback or scheduled jobs.
