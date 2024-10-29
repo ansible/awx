@@ -43,7 +43,7 @@ automat==22.10.0
     # via twisted
 # awx-plugins-core @ git+https://git@github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
-awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
+# awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git  # git requirements installed separately
     # via
     #   -r /awx_devel/requirements/requirements_git.txt
     #   awx-plugins-core
