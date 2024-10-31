@@ -3,7 +3,7 @@
 Authentication
 ==============
 
-The only way to authenticate AWX is with username and password by specifying them on every invocation as shown in the following example:
+To authenticate to AWX, include your username and password in each command invocation as shown in the following examples:
 
 .. code:: bash
 
