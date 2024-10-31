@@ -13,7 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldDoesNotExist
 from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
-from django.http import QueryDict
+from django.http import QueryDict, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
@@ -81,6 +81,7 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):
+
     def get(self, request, *args, **kwargs):
         if is_proxied_request():
             next = request.GET.get('next', "")
@@ -105,7 +106,7 @@ class LoggedLoginView(auth_views.LoginView):
     def post(self, request, *args, **kwargs):
         if is_proxied_request():
             # Give a message, saying to login via AAP
-            return Response(
+            return JsonResponse(
                 {
                     'detail': _('Please log in via Platform Authentication.'),
                 },
