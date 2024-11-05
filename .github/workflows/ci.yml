@@ -187,6 +187,8 @@ jobs:
         working-directory: awx-operator
         run: |
           python3 -m pip install -r molecule/requirements.txt
+          python3 -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
+          $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
           make kustomize
