@@ -8,6 +8,12 @@ from awx.main.models import Instance
 from django.test.utils import override_settings
 
 
+@pytest.mark.filterwarnings(
+    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: The suppression should be made more specific or the cause fixed.
+    # Ref: https://github.com/ansible/awx/pull/15620
+    "ignore::RuntimeWarning",
+)
 @pytest.mark.django_db
 def test_peers_adding_and_removing(run_module, admin_user):
     with override_settings(IS_K8S=True):
