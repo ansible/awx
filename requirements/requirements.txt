@@ -495,10 +495,10 @@ slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.1
     # via gitdb
-social-auth-app-django==5.4.2
-    # via django-ansible-base
-social-auth-core==4.5.4
-    # via social-auth-app-django
+# social-auth-app-django==5.4.2
+#     # via django-ansible-base
+# social-auth-core==4.5.4
+#     # via social-auth-app-django
 sqlparse==0.5.1
     # via
     #   -r /awx_devel/requirements/requirements.in
