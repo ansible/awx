@@ -352,4 +352,4 @@ class LookupModule(LookupBase):
             raise_from(AnsibleError("Failed to parse generated rule set via rruleset {0}".format(e)), e)
 
         # return self.get_rrule(frequency, kwargs)
-        return rruleset_str
+        return [rruleset_str]
