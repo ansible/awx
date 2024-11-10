@@ -50,15 +50,41 @@ class ItemNotDefined(Exception):
 class ControllerModule(AnsibleModule):
     url = None
     AUTH_ARGSPEC = dict(
-        controller_host=dict(required=False, aliases=['tower_host'], fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
-        controller_username=dict(required=False, aliases=['tower_username'], fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
-        controller_password=dict(no_log=True, aliases=['tower_password'], required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
-        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
-        request_timeout=dict(type='float', required=False, fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT'])),
+        controller_host=dict(
+            required=False,
+            aliases=['tower_host', 'aap_hostname'],
+            fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST', 'AAP_HOSTNAME'])),
+        controller_username=dict(
+            required=False,
+            aliases=['tower_username', 'aap_username'],
+            fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME', 'AAP_USERNAME'])),
+        controller_password=dict(
+            no_log=True,
+            aliases=['tower_password', 'aap_password'],
+            required=False,
+            fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD', 'AAP_PASSWORD'])),
+        validate_certs=dict(
+            type='bool',
+            aliases=['tower_verify_ssl', 'aap_validate_certs'],
+            required=False,
+            fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL', 'AAP_VALIDATE_CERTS'])),
+        request_timeout=dict(
+            type='float',
+            aliases=['aap_request_timeout'],
+            required=False,
+            fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT', 'AAP_REQUEST_TIMEOUT'])),
         controller_oauthtoken=dict(
-            type='raw', no_log=True, aliases=['tower_oauthtoken'], required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])
+            type='raw',
+            no_log=True,
+            aliases=['tower_oauthtoken', 'aap_token'],
+             required=False,
+             fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
         ),
-        controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
+        controller_config_file=dict(
+            type='path',
+            aliases=['tower_config_file'],
+            required=False,
+            default=None),
     )
     # Associations of these types are ordered and have special consideration in the modified associations function
     ordered_associations = ['instance_groups', 'galaxy_credentials']
