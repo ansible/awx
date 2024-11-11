@@ -1096,7 +1096,11 @@ def create_temporary_fifo(data):
     path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
     os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
 
-    threading.Thread(target=lambda p, d: open(p, 'wb').write(d), args=(path, data)).start()
+    def tmp_write(path, data):
+        with open(path, 'wb') as f:
+            f.write(data)
+
+    threading.Thread(target=tmp_write, args=(path, data)).start()
     return path
 
 

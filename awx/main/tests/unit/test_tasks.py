@@ -374,8 +374,8 @@ class TestExtraVarSanitation(TestJobExecution):
         task = jobs.RunJob()
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
         for name in JOB_VARIABLE_PREFIXES:
@@ -393,8 +393,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -404,8 +404,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == {'a': [self.UNSAFE]}
         assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
 
@@ -415,8 +415,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert not hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -427,8 +427,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
         assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
 
@@ -441,8 +441,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == 'other-value'
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -456,8 +456,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -885,7 +885,8 @@ class TestJobCredentials(TestJobExecution):
         if verify:
             assert env['K8S_AUTH_VERIFY_SSL'] == 'True'
             local_path = to_host_path(env['K8S_AUTH_SSL_CA_CERT'], private_data_dir)
-            cert = open(local_path, 'r').read()
+            with open(local_path, 'r') as f:
+                cert = f.read()
             assert cert == 'CERTDATA'
         else:
             assert env['K8S_AUTH_VERIFY_SSL'] == 'False'
@@ -936,7 +937,8 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
         runner_path = env[cred_env_var]
         local_path = to_host_path(runner_path, private_data_dir)
-        json_data = json.load(open(local_path, 'rb'))
+        with open(local_path, 'rb') as f_host:
+            json_data = json.load(f_host)
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -1008,7 +1010,8 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         config_loc = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
-        shade_config = open(config_loc, 'r').read()
+        with open(config_loc, 'r') as f:
+            shade_config = f.read()
         assert shade_config == '\n'.join(
             [
                 'clouds:',
@@ -1083,7 +1086,8 @@ class TestJobCredentials(TestJobExecution):
         assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
         if authorize:
             assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
-        assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
+        with open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r') as f:
+            assert f.read() == self.EXAMPLE_PRIVATE_KEY
         assert safe_env['ANSIBLE_NET_PASSWORD'] == HIDDEN_PASSWORD
 
     def test_terraform_cloud_credentials(self, job, private_data_dir, mock_me):
@@ -1104,7 +1108,8 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
-        config = open(local_path, 'r').read()
+        with open(local_path, 'r') as f:
+            config = f.read()
         assert config == hcl_config
 
     def test_terraform_gcs_backend_credentials(self, job, private_data_dir, mock_me):
@@ -1138,11 +1143,13 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
         local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
-        config = open(local_path, 'r').read()
+        with open(local_path, 'r') as f:
+            config = f.read()
         assert config == hcl_config
 
         credentials_path = to_host_path(env['GOOGLE_BACKEND_CREDENTIALS'], private_data_dir)
-        credentials = open(credentials_path, 'r').read()
+        with open(credentials_path, 'r') as f:
+            credentials = f.read()
         assert credentials == gce_backend_credentials
 
     def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir, mock_me):
@@ -1351,7 +1358,8 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         path = to_host_path(env['MY_CLOUD_INI_FILE'], private_data_dir)
-        assert open(path, 'r').read() == '[mycloud]\nABC123'
+        with open(path, 'r') as f:
+            assert f.read() == '[mycloud]\nABC123'
 
     def test_custom_environment_injectors_with_unicode_content(self, private_data_dir, mock_me):
         value = 'Iñtërnâtiônàlizætiøn'
@@ -1371,7 +1379,8 @@ class TestJobCredentials(TestJobExecution):
         credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
 
         path = to_host_path(env['MY_CLOUD_INI_FILE'], private_data_dir)
-        assert open(path, 'r').read() == value
+        with open(path, 'r') as f:
+            assert f.read() == value
 
     def test_custom_environment_injectors_with_files(self, private_data_dir, mock_me):
         some_cloud = CredentialType(
@@ -1391,8 +1400,10 @@ class TestJobCredentials(TestJobExecution):
 
         cert_path = to_host_path(env['MY_CERT_INI_FILE'], private_data_dir)
         key_path = to_host_path(env['MY_KEY_INI_FILE'], private_data_dir)
-        assert open(cert_path, 'r').read() == '[mycert]\nCERT123'
-        assert open(key_path, 'r').read() == '[mykey]\nKEY123'
+        with open(cert_path, 'r') as f:
+            assert f.read() == '[mycert]\nCERT123'
+        with open(key_path, 'r') as f:
+            assert f.read() == '[mykey]\nKEY123'
 
     def test_multi_cloud(self, private_data_dir, mock_me):
         gce = CredentialType.defaults['gce']()
@@ -1415,7 +1426,8 @@ class TestJobCredentials(TestJobExecution):
 
         # Because this is testing a mix of multiple cloud creds, we are not going to test the GOOGLE_APPLICATION_CREDENTIALS here
         path = to_host_path(env['GCE_CREDENTIALS_FILE_PATH'], private_data_dir)
-        json_data = json.load(open(path, 'rb'))
+        with open(path, 'rb') as f:
+            json_data = json.load(f)
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -1768,7 +1780,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
             assert env['GCE_ZONE'] == expected_gce_zone
-            json_data = json.load(open(env[cred_env_var], 'rb'))
+            with open(env[cred_env_var], 'rb') as f:
+                json_data = json.load(f)
             assert json_data['type'] == 'service_account'
             assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
             assert json_data['client_email'] == 'bob'
@@ -1797,7 +1810,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         path = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
-        shade_config = open(path, 'r').read()
+        with open(path, 'r') as f:
+            shade_config = f.read()
         assert (
             '\n'.join(
                 [
