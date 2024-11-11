@@ -66,44 +66,6 @@ class CustomCommand(metaclass=CustomRegistryMeta):
         raise NotImplementedError()
 
 
-class Login(CustomCommand):
-    name = 'login'
-    help_text = 'authenticate and retrieve an OAuth2 token'
-
-    def print_help(self, parser):
-        add_authentication_arguments(parser, os.environ)
-        parser.print_help()
-
-    def handle(self, client, parser):
-        auth = parser.add_argument_group('OAuth2.0 Options')
-        auth.add_argument('--description', help='description of the generated OAuth2.0 token', metavar='TEXT')
-        auth.add_argument('--conf.client_id', metavar='TEXT')
-        auth.add_argument('--conf.client_secret', metavar='TEXT')
-        auth.add_argument('--conf.scope', choices=['read', 'write'], default='write')
-        if client.help:
-            self.print_help(parser)
-            raise SystemExit()
-        parsed = parser.parse_known_args()[0]
-        kwargs = {
-            'client_id': getattr(parsed, 'conf.client_id', None),
-            'client_secret': getattr(parsed, 'conf.client_secret', None),
-            'scope': getattr(parsed, 'conf.scope', None),
-        }
-        if getattr(parsed, 'description', None):
-            kwargs['description'] = parsed.description
-        try:
-            token = api.Api().get_oauth2_token(**kwargs)
-        except Exception as e:
-            self.print_help(parser)
-            cprint('Error retrieving an OAuth2.0 token ({}).'.format(e.__class__), 'red')
-        else:
-            fmt = client.get_config('format')
-            if fmt == 'human':
-                print('export CONTROLLER_OAUTH_TOKEN={}'.format(token))
-            else:
-                print(to_str(FORMATTERS[fmt]({'token': token}, '.')).strip())
-
-
 class Config(CustomCommand):
     name = 'config'
     help_text = 'print current configuration values'

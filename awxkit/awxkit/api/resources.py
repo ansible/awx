@@ -277,12 +277,7 @@ class Resources(object):
     def __getattr__(self, resource):
         if resource[:3] == '___':
             raise AttributeError('No existing resource: {}'.format(resource))
-        # Currently we don't handle anything under:
-        # /api/o/
-        # /api/login/
-        # /api/logout/
-        # If/when we do we will probably need to modify this __getattr__ method
-        # Also, if we add another API version, this would be handled here
+        # If/when we add another API version, this would be handled here
         prefix = 'v2'
         resource = '_' + resource
         return '{0}{1}'.format(getattr(self, prefix), getattr(self, resource))
