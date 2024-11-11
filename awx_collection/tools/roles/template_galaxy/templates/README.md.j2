@@ -90,6 +90,7 @@ The following notes are changes that may require changes to playbooks:
  - The `notification_configuration` parameter of `tower_notification_template` has changed from a string to a dict. Please use the `lookup` plugin to read an existing file into a dict.
  - `tower_credential` no longer supports passing a file name to `ssh_key_data`.
  - The HipChat `notification_type` has been removed and can no longer be created using the `tower_notification_template` module.
+ - Lookup plugins now always reutrn a list, and if you want a scalar value use `lookup` as opposed to `query`
 
 {% if collection_package | lower() == "awx" %}
 ## Running Unit Tests

@@ -32,33 +32,11 @@ Installing the `tar.gz` involves no special instructions.
 ## Running
 
 Non-deprecated modules in this collection have no Python requirements, but
-may require the official [AWX CLI](https://pypi.org/project/awxkit/)
+may require the AWX CLI
 in the future. The `DOCUMENTATION` for each module will report this.
 
-You can specify authentication by a combination of either:
+You can specify authentication by host, username, and password.
 
- - host, username, password
- - host, OAuth2 token
-
-The OAuth2 token is the preferred method. You can obtain a token via the
-``login`` command with the AWX CLI.
-
-These can be specified via (from highest to lowest precedence):
-
- - direct module parameters
- - environment variables (most useful when running against localhost)
- - a config file path specified by the `tower_config_file` parameter
- - a config file at `~/.tower_cli.cfg`
- - a config file at `/etc/tower/tower_cli.cfg`
-
-Config file syntax looks like this:
-
-```
-[general]
-host = https://localhost:8043
-verify_ssl = true
-oauth_token = LEdCpKVKc4znzffcpQL5vLG8oyeku6
-```
 
 ## Release and Upgrade Notes
 
@@ -101,6 +79,7 @@ The following notes are changes that may require changes to playbooks:
  - The `notification_configuration` parameter of `tower_notification_template` has changed from a string to a dict. Please use the `lookup` plugin to read an existing file into a dict.
  - `tower_credential` no longer supports passing a file name to `ssh_key_data`.
  - The HipChat `notification_type` has been removed and can no longer be created using the `tower_notification_template` module.
+ - Lookup plugins now always reutrn a list, and if you want a scalar value use `lookup` as opposed to `query`
 
 ## Running Unit Tests
 

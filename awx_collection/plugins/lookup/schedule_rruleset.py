@@ -109,7 +109,7 @@ DOCUMENTATION = """
 EXAMPLES = """
     - name: Create a ruleset for everyday except Sundays
       set_fact:
-        complex_rule: "{{ query(awx.awx.schedule_rruleset, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+        complex_rule: "{{ lookup(awx.awx.schedule_rruleset, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
       vars:
         rrules:
           - frequency: 'day'
