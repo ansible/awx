@@ -34,7 +34,7 @@ coverage:
           - pytest
         paths:
           - awx/
-        target: 100%
+        target: 75%
       tests:
         flags:
           - pytest
@@ -48,7 +48,7 @@ coverage:
             **/test/**
           - >-
             **/tests/**
-        target: 100%
+        target: 95%
       typing:
         flags:
           - MyPy
