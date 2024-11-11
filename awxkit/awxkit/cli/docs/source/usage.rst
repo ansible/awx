@@ -88,6 +88,3 @@ A few of the most important ones are:
 
 ``--conf.password, CONTROLLER_PASSWORD``
     the AWX password to use for authentication
-
-``--conf.token, CONTROLLER_OAUTH_TOKEN``
-    an OAuth2.0 token to use for authentication
