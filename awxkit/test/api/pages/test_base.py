@@ -1,9 +1,6 @@
 from http.client import NOT_FOUND
 import pytest
-from pytest_mock import MockerFixture
-from requests import Response
 
-from awxkit.api.pages import Base
 from awxkit.config import config
 
 

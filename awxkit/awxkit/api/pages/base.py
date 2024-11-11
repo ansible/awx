@@ -1,10 +1,7 @@
-import collections
 import logging
 import typing
 
-from requests.auth import HTTPBasicAuth
-
-from awxkit.api.pages import Page, get_registered_page, exception_from_status_code
+from awxkit.api.pages import Page, get_registered_page
 from awxkit.config import config
 from awxkit.api.resources import resources
 import awxkit.exceptions as exc
