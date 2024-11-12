@@ -58,6 +58,11 @@ options:
       description:
         - Any extra vars required to launch the job.
       type: dict
+    labels:
+      description:
+        - Labels to use for the job, only used if prompt for labels is set.
+      type: list
+      elements: str
     wait:
       description:
         - Wait for the workflow to complete.
@@ -114,6 +119,7 @@ def main():
         skip_tags=dict(type='list', elements='str'),
         scm_branch=dict(),
         extra_vars=dict(type='dict'),
+        labels=dict(type='list', elements='str'),
         wait=dict(required=False, default=True, type='bool'),
         interval=dict(required=False, default=2.0, type='float'),
         timeout=dict(required=False, type='int'),
@@ -127,6 +133,7 @@ def main():
     name = module.params.get('name')
     organization = module.params.get('organization')
     inventory = module.params.get('inventory')
+    labels = module.params.get('labels')
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
@@ -157,6 +164,11 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if inventory:
         post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
+
+    if labels:
+        post_data['labels'] = []
+        for label in labels:
+            post_data['labels'].append(module.resolve_name_to_id('labels', label))
 
     # Attempt to look up job_template based on the provided name
     lookup_data = {}

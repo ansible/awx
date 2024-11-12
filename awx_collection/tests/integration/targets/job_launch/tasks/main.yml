@@ -152,6 +152,31 @@
     that:
       - result is not failed
 
+- name: Prompt the job template's labels on launch
+  job_template:
+    name: "{{ jt_name2 }}"
+    state: present
+    ask_labels_on_launch: true
+
+- name: Create a Label
+  label:
+    name: "label_name"
+    organization: Default
+    state: present
+  ignore_errors: true
+
+- name: Kick off job template with labels
+  job_launch:
+      job_template: "{{ jt_name2 }}"
+      labels:
+        - label_name
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
 - name: Create a Job Template for testing extra_vars
   job_template:
     name: "{{ jt_name2 }}"
