@@ -74,7 +74,6 @@ class Config(CustomCommand):
             raise SystemExit()
         return {
             'base_url': config.base_url,
-            'token': client.get_config('token'),
             'use_sessions': config.use_sessions,
             'credentials': config.credentials,
         }
