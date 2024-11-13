@@ -34,7 +34,8 @@ class ControllerAWXKitModule(ControllerModule):
     def authenticate(self):
         try:
             if self.oauth_token:
-                self.connection.login(None, None, token=self.oauth_token)
+                # MERGE: fix conflicts with removal of OAuth2 token from collection branch
+                self.connection.login(None, None)
                 self.authenticated = True
             elif self.username:
                 self.connection.login(username=self.username, password=self.password)

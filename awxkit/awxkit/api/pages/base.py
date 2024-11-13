@@ -1,18 +1,11 @@
 import logging
-import typing
 
-from awxkit.api.pages import Page, get_registered_page
+from awxkit.api.pages import Page
 from awxkit.config import config
-from awxkit.api.resources import resources
 import awxkit.exceptions as exc
 
 
 log = logging.getLogger(__name__)
-
-
-class AuthUrls(typing.TypedDict):
-    access_token: str
-    personal_token: str
 
 
 class Base(Page):
@@ -131,18 +124,6 @@ class Base(Page):
         url = self.get().json.related.object_roles
         for obj_role in Roles(self.connection, endpoint=url).get().json.results:
             yield Role(self.connection, endpoint=obj_role.url).get()
-
-    def get_authtoken(self, username='', password=''):
-        default_cred = config.credentials.default
-        payload = dict(username=username or default_cred.username, password=password or default_cred.password)
-        auth_url = resources.authtoken
-        return get_registered_page(auth_url)(self.connection, endpoint=auth_url).post(payload).token
-
-    def load_authtoken(self, username='', password=''):
-        self.connection.login(token=self.get_authtoken(username, password))
-        return self
-
-    load_default_authtoken = load_authtoken
 
     def load_session(self, username='', password=''):
         default_cred = config.credentials.default
