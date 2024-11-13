@@ -6,7 +6,7 @@ from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
-from ansible.module_utils.six import raise_from, string_types
+from ansible.module_utils.six import raise_from
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
@@ -55,9 +55,6 @@ class ControllerModule(AnsibleModule):
         controller_password=dict(no_log=True, aliases=['tower_password'], required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
         validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
         request_timeout=dict(type='float', required=False, fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT'])),
-        controller_oauthtoken=dict(
-            type='raw', no_log=True, aliases=['tower_oauthtoken'], required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])
-        ),
         controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
     )
     # Associations of these types are ordered and have special consideration in the modified associations function
@@ -68,15 +65,12 @@ class ControllerModule(AnsibleModule):
         'password': 'controller_password',
         'verify_ssl': 'validate_certs',
         'request_timeout': 'request_timeout',
-        'oauth_token': 'controller_oauthtoken',
     }
     host = '127.0.0.1'
     username = None
     password = None
     verify_ssl = True
     request_timeout = 10
-    oauth_token = None
-    oauth_token_id = None
     authenticated = False
     config_name = 'tower_cli.cfg'
     version_checked = False
@@ -110,20 +104,6 @@ class ControllerModule(AnsibleModule):
             direct_value = self.params.get(long_param)
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
-
-        # Perform magic depending on whether controller_oauthtoken is a string or a dict
-        if self.params.get('controller_oauthtoken'):
-            token_param = self.params.get('controller_oauthtoken')
-            if isinstance(token_param, dict):
-                if 'token' in token_param:
-                    self.oauth_token = self.params.get('controller_oauthtoken')['token']
-                else:
-                    self.fail_json(msg="The provided dict in controller_oauthtoken did not properly contain the token entry")
-            elif isinstance(token_param, string_types):
-                self.oauth_token = self.params.get('controller_oauthtoken')
-            else:
-                error_msg = "The provided controller_oauthtoken type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
-                self.fail_json(msg=error_msg)
 
         # Perform some basic validation
         if not re.match('^https{0,1}://', self.host):
@@ -312,9 +292,6 @@ class ControllerAPIModule(ControllerModule):
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
     ENCRYPTED_STRING = "$encrypted$"
 
-    # which app was used to create the oauth_token
-    oauth_token_app_key = None
-
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
@@ -338,8 +315,7 @@ class ControllerAPIModule(ControllerModule):
             for field_name in ControllerAPIModule.IDENTITY_FIELDS.values():
                 if field_name in item:
                     return item[field_name]
-
-            if item.get('type', None) in ('o_auth2_access_token', 'credential_input_source'):
+            if item.get('type', None) == 'credential_input_source':
                 return item['id']
 
         if allow_unknown:
@@ -498,15 +474,12 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to AWX (if we don't have a token and if not already done so)
-        if not self.oauth_token and not self.authenticated:
-            # This method will set a cookie in the cookie jar for us and also an oauth_token when possible
+        # Authenticate to AWX (if not already done so)
+        if not self.authenticated:
+            # This method will set a cookie in the cookie jar for us
             self.authenticate(**kwargs)
-        if self.oauth_token:
-            # If we have a oauth token, we just use a bearer header
-            headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
-        elif self.username and self.password:
-            headers['Authorization'] = self._get_basic_authorization_header()
+
+        headers['Authorization'] = self._get_basic_authorization_header()
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -665,71 +638,11 @@ class ControllerAPIModule(ControllerModule):
                 },
             )
 
-    def _authenticate_create_token(self, app_key=None):
-        # in case of failure and to give a chance to authenticate via other means, should not raise exceptions
-        # but only warnings
-        if self.username and self.password:
-            login_data = {
-                "description": "Automation Platform Controller Module Token",
-                "application": None,
-                "scope": "write",
-            }
-
-            api_token_url = self.build_url("tokens", app_key=app_key).geturl()
-            try:
-                response = self.session.open(
-                    'POST',
-                    api_token_url,
-                    validate_certs=self.verify_ssl,
-                    timeout=self.request_timeout,
-                    follow_redirects=True,
-                    data=dumps(login_data),
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": self._get_basic_authorization_header(),
-                    },
-                )
-
-            except Exception as exp:
-                self.warn("url: {0} - Failed to get token: {1}".format(api_token_url, exp))
-                return
-
-            token_response = None
-            try:
-                token_response = response.read()
-                response_json = loads(token_response)
-                self.oauth_token_id = response_json['id']
-                self.oauth_token = response_json['token']
-                # set the app that received the token create request, this is needed when removing the token at logout
-                self.oauth_token_app_key = app_key
-            except Exception as exp:
-                self.warn(
-                    "url: {0} - Failed to extract token information from login response: {1}, response: {2}".format(
-                        api_token_url, exp, token_response,
-                    )
-                )
-                return
-
-        return None
-
     def authenticate(self, **kwargs):
-        # As a temporary solution for version 4.6 try to get a token by using basic authentication from:
-        #  /api/gateway/v1/tokens/ when app_key is gateway
-        #  /api/v2/tokens/ when app_key is None and _COLLECTION_TYPE = "awx"
-        #  /api/controller/v2/tokens/ when app_key is None and _COLLECTION_TYPE != "awx"
-        for app_key in ["gateway", None]:
-            # to give a chance to authenticate via basic authentication in case of failure,
-            # _authenticate_create_token,  should not raise exception but only warnings,
-            self._authenticate_create_token(app_key=app_key)
-            if self.oauth_token:
-                break
-
-        if not self.oauth_token:
-            # if not having an oauth_token and when collection_type is awx try to login with basic authentication
-            try:
-                self._authenticate_with_basic_auth()
-            except Exception as exp:
-                self.fail_json(msg='Failed to get user info: {0}'.format(exp))
+        try:
+            self._authenticate_with_basic_auth()
+        except Exception as exp:
+            self.fail_json(msg='Failed to get user info: {0}'.format(exp))
 
         self.authenticated = True
 
@@ -1080,37 +993,7 @@ class ControllerAPIModule(ControllerModule):
             )
 
     def logout(self):
-        if self.authenticated and self.oauth_token_id:
-            # Attempt to delete our current token from /api/v2/tokens/
-            # Post to the tokens endpoint with baisc auth to try and get a token
-            api_token_url = self.build_url(
-                "tokens/{0}/".format(self.oauth_token_id),
-                app_key=self.oauth_token_app_key,
-            ).geturl()
-
-            try:
-                self.session.open(
-                    'DELETE',
-                    api_token_url,
-                    validate_certs=self.verify_ssl,
-                    timeout=self.request_timeout,
-                    follow_redirects=True,
-                    headers={
-                        "Authorization": self._get_basic_authorization_header(),
-                    }
-                )
-                self.oauth_token_id = None
-                self.oauth_token = None
-                self.authenticated = False
-            except HTTPError as he:
-                try:
-                    resp = he.read()
-                except Exception as e:
-                    resp = 'unknown {0}'.format(e)
-                self.warn('Failed to release token: {0}, response: {1}'.format(he, resp))
-            except (Exception) as e:
-                # Sanity check: Did the server send back some kind of internal error?
-                self.warn('Failed to release token {0}: {1}'.format(self.oauth_token_id, e))
+        self.authenticated = False
 
     def is_job_done(self, job_status):
         if job_status in ['new', 'pending', 'waiting', 'running']:
