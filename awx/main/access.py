@@ -1858,6 +1858,11 @@ class SystemJobAccess(BaseAccess):
 
     model = SystemJob
 
+    def filtered_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+        return self.model.objects.none()
+
     def can_start(self, obj, validate_license=True):
         return False  # no relaunching of system jobs
 
