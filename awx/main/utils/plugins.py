@@ -56,4 +56,31 @@ def load_combined_inventory_source_options() -> dict[str, str]:
 
     plugins = compute_cloud_inventory_sources()
 
-    return dict(zip(plugins, plugins), file='file')
+    plugin_descriptions = {
+        'azure_rm': 'Microsoft Azure Resource Manager',
+        'ec2': 'Amazon EC2',
+        'gce': 'Google Compute Engine',
+        'vmware': 'VMware vCenter',
+        'satellite6': 'Red Hat Satellite 6',
+        'satellite6_supported': 'Supported Red Hat Satellite 6',
+        'openstack': 'OpenStack',
+        'rhv': 'Red Hat Virtualization',
+        'rhv_supported': 'Supported Red Hat Virtualization',
+        'foreman': 'Red Hat Satellite 6',
+        'terraform': 'Terraform',
+        'controller': 'Red Hat Ansible Automation Platform',
+        'controller_supported': 'Supported Red Hat Ansible Automation Platform',
+        'openshift_virtualization': 'OpenShift Virtualization',
+        'openshift_virtualization_supported': 'Supported OpenShift Virtualization',
+        'scm': 'Sourced from a Project',
+        'insights': 'Red Hat Insights',
+        'insights_supported': 'Red Hat Insights',
+        'kubevirt': 'OpenShift Virtualization',
+        'constructed': 'Template additional groups and hostvars at runtime',
+    }
+
+    result = {plugin: plugin_descriptions.get(plugin, plugin) for plugin in plugins}
+
+    result['file'] = 'File-based inventory source'
+
+    return result
