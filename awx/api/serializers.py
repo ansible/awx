@@ -2325,8 +2325,11 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         if 'source' in self.fields:
-            self.fields['source'].choices = load_combined_inventory_source_options()
+            source_options = load_combined_inventory_source_options()
+
+            self.fields['source'].choices = [(plugin, description) for plugin, description in source_options.items()]
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
