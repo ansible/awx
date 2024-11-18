@@ -192,9 +192,10 @@ def create_reference_data(source_dir, env, content):
             json.dump(env, f, indent=4, sort_keys=True)
 
 
+@mock.patch('awx_plugins.interfaces._temporary_private_licensing_api.detect_server_product_name', return_value='NOT-AWX')
 @pytest.mark.django_db
 @pytest.mark.parametrize('this_kind', discover_available_cloud_provider_plugin_names())
-def test_inventory_update_injected_content(this_kind, inventory, fake_credential_factory, mock_me):
+def test_inventory_update_injected_content(product_name, this_kind, inventory, fake_credential_factory, mock_me):
     if this_kind.endswith('_supported'):
         this_kind = this_kind[:-10]
 
