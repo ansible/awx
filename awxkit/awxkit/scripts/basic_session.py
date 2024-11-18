@@ -5,7 +5,7 @@ import sys
 import os
 
 from awxkit import api, config, utils, exceptions, WSClient  # noqa
-from awxkit.awx.utils import check_related, delete_all, get_all  # noqa
+from awxkit.awx.utils import check_related, delete_all, get_all, uses_sessions  # noqa
 from awxkit.awx.utils import as_user as _as_user
 
 if str(os.getenv('AWXKIT_DEBUG', 'false')).lower() in ['true', '1']:
@@ -59,8 +59,11 @@ def main():
 
         global root
         root = api.Api()
-        config.use_sessions = True
-        root.load_session().get()
+        if uses_sessions(root.connection):
+            config.use_sessions = True
+            root.load_session().get()
+        else:
+            root.load_authtoken().get()
 
         if 'v2' in root.available_versions:
             global v2
