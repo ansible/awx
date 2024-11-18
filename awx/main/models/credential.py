@@ -438,7 +438,7 @@ class CredentialType(CommonModelNameNotUnique):
         default=dict,
         help_text=_('Enter injectors using either JSON or YAML syntax. Refer to the documentation for example syntax.'),
     )
-    post_injectors = None
+    custom_injectors = None
 
     @classmethod
     def from_db(cls, db, field_names, values):
@@ -447,7 +447,7 @@ class CredentialType(CommonModelNameNotUnique):
             native = ManagedCredentialType.registry[instance.namespace]
             instance.inputs = native.inputs
             instance.injectors = native.injectors
-            instance.post_injectors = native.post_injectors
+            instance.custom_injectors = native.custom_injectors
         return instance
 
     def get_absolute_url(self, request=None):
@@ -549,7 +549,7 @@ class CredentialType(CommonModelNameNotUnique):
 
     @classmethod
     def load_plugin(cls, ns, plugin):
-        # TODO: User "side-loaded" credential post_injectors isn't supported
+        # TODO: User "side-loaded" credential custom_injectors isn't supported
         ManagedCredentialType(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs)
 
     def inject_credential(self, credential, env, safe_env, args, private_data_dir):
@@ -578,9 +578,9 @@ class CredentialType(CommonModelNameNotUnique):
                                  files)
         """
         if not self.injectors:
-            if self.managed and credential.credential_type.post_injectors:
+            if self.managed and credential.credential_type.custom_injectors:
                 injected_env = {}
-                credential.credential_type.post_injectors(credential, injected_env, private_data_dir)
+                credential.credential_type.custom_injectors(credential, injected_env, private_data_dir)
                 env.update(injected_env)
                 safe_env.update(build_safe_env(injected_env))
             return
@@ -689,7 +689,7 @@ class ManagedCredentialType(SimpleNamespace):
         for k in ('inputs', 'injectors'):
             if k not in kwargs:
                 kwargs[k] = {}
-        kwargs.setdefault('post_injectors', None)
+        kwargs.setdefault('custom_injectors', None)
         super(ManagedCredentialType, self).__init__(namespace=namespace, **kwargs)
         if namespace in ManagedCredentialType.registry:
             raise ValueError(
