@@ -35,18 +35,18 @@ __all__ = ['Schedule']
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
-SECONDS_IN_WEEK = 7 * 24 * 60 * 60
-
-
 def fast_forward_date(rrule):
     '''
     Utility to fast forward an rrule, maintaining consistency in the resulting
     occurrences
-    Fast forwards the rrule to 7 days ago
-    Returns a datetime object
+
+    Returns a new rrule with a new dtstart
     '''
     if not rrule._freq in (dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY):
         raise RuntimeError("Cannot fast forward rrule, frequency must be HOURLY or MINUTELY")
+
+    if rrule._dtstart > now():
+        return rrule
 
     interval = rrule._interval if rrule._interval else 1
     if rrule._freq == dateutil.rrule.HOURLY:
@@ -59,19 +59,13 @@ def fast_forward_date(rrule):
 
     seconds_since_dtstart = (now() - rrule._dtstart).total_seconds()
 
-    # fast forward to 7 days ago
-    fast_forward_seconds = seconds_since_dtstart - SECONDS_IN_WEEK
-
-    # make sure at least one chunk of interval can fit inside the time period we are trying to fast forward
-    if interval > fast_forward_seconds:
-        raise RuntimeError(f"Cannot fast forward rrule {rrule}, interval is greater than the fast forward amount of {fast_forward_seconds} seconds")
-
     # it is important to fast forward by a number that is divisible by
     # interval. For example, if interval is 7 hours, we fast forward by 7, 14, 21, etc. hours.
     # Otherwise, the occurrences after the fast forward might not match the ones before.
     # x // y is integer division, lopping off any remainder, so that we get the outcome we want.
-    new_start = rrule._dtstart + datetime.timedelta(seconds=(fast_forward_seconds // interval) * interval)
-    return new_start
+    new_start = rrule._dtstart + datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
+    new_rrule = rrule.replace(dtstart=new_start)
+    return new_rrule
 
 
 class ScheduleFilterMethods(object):
@@ -233,7 +227,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return " ".join(rules)
 
     @classmethod
-    def rrulestr(cls, rrule, fast_forward=True, **kwargs):
+    def rrulestr(cls, rrule, **kwargs):
         """
         Apply our own custom rrule parsing requirements
         """
@@ -247,35 +241,21 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
 
         # Fast forward is a way for us to limit the number of events in the rruleset
         # If we are fast forwarding and we don't have a count limited rule that is minutely or hourly
-        # We will modify the start date of the rule to last week to prevent a large number of entries
-        if fast_forward:
-            try:
-                # All rules in a ruleset will have the same dtstart value
-                # so lets compare the first event to now to see if its > 30 days old
-                # we choose > 30 days because if rrule has FREQ=HOURLY and INTERVAL=23, it will take
-                # at least 23 days before we can fast forward reliably and retain stable occurrences.
-                # since we are fast forwarding to 7 days ago, we check fo rrrules older than (23+7) days
-                first_event = x[0]
-                if (now() - first_event).days > 30:
-                    for rule in x._rrule:
-                        # If any rule has a minutely or hourly rule without a count...
-                        if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
-                            # hourly/minutely rrules with far-past DTSTART values
-                            # are *really* slow to precompute
-                            # start *from* one week ago to speed things up drastically
-                            try:
-                                new_start = fast_forward_date(rule)
-                            except RuntimeError as e:
-                                logger.warning(e)
-                                # fallback to setting dtstart to 7 days ago, but this has the consequence of
-                                # occurrences not matching the old occurrences.
-                                new_start = now() - datetime.timedelta(days=7)
-                            new_start_fmt = new_start.strftime('%Y%m%d')
-                            # Now we want to replace the DTSTART:<value>T with the new date (which includes the T)
-                            new_rrule = re.sub('(DTSTART[^:]*):[^T]+T', r'\1:{0}T'.format(new_start_fmt), rrule)
-                            return Schedule.rrulestr(new_rrule, fast_forward=False)
-            except IndexError:
-                pass
+        # We will modify the start date of the rule to bring as close to the current date as possible
+        # Even though the API restricts each rrule to have the same dtstart, each rrule in the rruleset
+        # can fast forward to a difference dtstart. This is required in order to get stable occurrences.
+        try:
+            for i, rule in enumerate(x._rrule):
+                # If any rule has a minutely or hourly rule without a count...
+                if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
+                    try:
+                        new_rrule = fast_forward_date(rule)
+                    except RuntimeError as e:
+                        logger.warning(e)
+                        new_rrule = rule
+                    x._rrule[i] = new_rrule
+        except IndexError:
+            pass
 
         return x
 
