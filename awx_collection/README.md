@@ -32,11 +32,28 @@ Installing the `tar.gz` involves no special instructions.
 ## Running
 
 Non-deprecated modules in this collection have no Python requirements, but
-may require the AWX CLI
+may require the official [AWX CLI](https://pypi.org/project/awxkit/)
 in the future. The `DOCUMENTATION` for each module will report this.
 
 You can specify authentication by host, username, and password.
 
+These can be specified via (from highest to lowest precedence):
+
+ - direct module parameters
+ - environment variables (most useful when running against localhost)
+ - a config file path specified by the `tower_config_file` parameter
+ - a config file at `~/.tower_cli.cfg`
+ - a config file at `/etc/tower/tower_cli.cfg`
+
+Config file syntax looks like this:
+
+```
+[general]
+host = https://localhost:8043
+verify_ssl = true
+username = foo
+password = bar
+```
 
 ## Release and Upgrade Notes
 
@@ -46,6 +63,7 @@ Notable releases of the `awx.awx` collection:
  - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/).
  - 19.2.1 large renaming purged "tower" names (like options and module names), adding redirects for old names
  - 21.11.0 "tower" modules deprecated and symlinks removed.
+ - 25.0.0 "token" and "application" modules have been removed as oauth is no longer supported, use basic auth instead
  - X.X.X added support of named URLs to all modules. Anywhere that previously accepted name or id can also support named URLs
  - 0.0.1-devel is the version you should see if installing from source, which is intended for development and expected to be unstable.
 
