@@ -47,7 +47,7 @@ def fast_forward_rrule(rrule):
     Returns a new rrule with a new dtstart
     '''
     if not rrule._freq in (dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY):
-        raise RuntimeError("Cannot fast forward rrule, frequency must be HOURLY or MINUTELY")
+        raise ValueError(f"Cannot fast forward rrule, frequency must be HOURLY or MINUTELY, but got {rrule._freq !r}")
 
     n = now()
     if rrule._dtstart > n:
