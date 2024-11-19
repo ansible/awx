@@ -35,17 +35,22 @@ __all__ = ['Schedule']
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
-def fast_forward_date(rrule):
+def fast_forward_rrule(rrule):
     '''
     Utility to fast forward an rrule, maintaining consistency in the resulting
-    occurrences
+    occurrences.
+
+    Uses the .replace() method to update the rrule with a newer dtstart
+    The operation ensures that the original occurrences (based on the original dtstart)
+    will match the occurrences after changing the dtstart.
 
     Returns a new rrule with a new dtstart
     '''
     if not rrule._freq in (dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY):
         raise RuntimeError("Cannot fast forward rrule, frequency must be HOURLY or MINUTELY")
 
-    if rrule._dtstart > now():
+    n = now()
+    if rrule._dtstart > n:
         return rrule
 
     interval = rrule._interval if rrule._interval else 1
@@ -57,7 +62,7 @@ def fast_forward_date(rrule):
     if type(interval) == float and not interval.is_integer():
         raise RuntimeError("Cannot fast forward rule, interval is a fraction of a second")
 
-    seconds_since_dtstart = (now() - rrule._dtstart).total_seconds()
+    seconds_since_dtstart = (n - rrule._dtstart).total_seconds()
 
     # it is important to fast forward by a number that is divisible by
     # interval. For example, if interval is 7 hours, we fast forward by 7, 14, 21, etc. hours.
@@ -249,11 +254,21 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 # If any rule has a minutely or hourly rule without a count...
                 if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
                     try:
-                        new_rrule = fast_forward_date(rule)
+                        new_rrule = fast_forward_rrule(rule)
                     except RuntimeError as e:
                         logger.warning(e)
                         new_rrule = rule
                     x._rrule[i] = new_rrule
+
+            for i, rule in enumerate(x._exrule):
+                # If any rule has a minutely or hourly rule without a count...
+                if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
+                    try:
+                        new_rrule = fast_forward_rrule(rule)
+                    except RuntimeError as e:
+                        logger.warning(e)
+                        new_rrule = rule
+                    x._exrule[i] = new_rrule
         except IndexError:
             pass
 
