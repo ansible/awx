@@ -710,7 +710,9 @@ class ManagedCredentialType(SimpleNamespace):
         )
 
     def create(self):
-        return CredentialType(**self.get_creation_params())
+        res = CredentialType(**self.get_creation_params())
+        res.custom_injectors = self.custom_injectors
+        return res
 
 
 class CredentialInputSource(PrimordialModel):
