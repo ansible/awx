@@ -30,12 +30,6 @@ def add_authentication_arguments(parser, env):
         default=env.get('CONTROLLER_HOST', env.get('TOWER_HOST', 'https://127.0.0.1:443')),
         metavar='https://example.awx.org',
     )
-    auth.add_argument(
-        '--conf.token',
-        default=env.get('CONTROLLER_OAUTH_TOKEN', env.get('CONTROLLER_TOKEN', env.get('TOWER_OAUTH_TOKEN', env.get('TOWER_TOKEN', '')))),
-        help='an OAuth2.0 token (get one by using `awx login`)',
-        metavar='TEXT',
-    )
 
     config_username, config_password = get_config_credentials()
     # options configured via cli args take higher precedence than those from the config
