@@ -4,8 +4,10 @@ import dateutil
 
 from django.utils.timezone import now
 
-from awx.main.models.schedules import fast_forward_rrule, Schedule
+from awx.main.models.schedules import _fast_forward_rrule, Schedule
 from dateutil.rrule import HOURLY, MINUTELY, MONTHLY
+
+REF_DT = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
 
 
 @pytest.mark.parametrize(
@@ -23,19 +25,19 @@ def test_fast_forwarded_rrule_matches_original_occurrence(rrulestr):
     Assert that the resulting fast forwarded date is included in the original rrule
     occurrence list
     '''
-    rruleset = Schedule.rrulestr(rrulestr)
-    n = now()
-    gen = rruleset.xafter(n, count=200)
+    rruleset = Schedule.rrulestr(rrulestr, ref_dt=REF_DT)
+
+    gen = rruleset.xafter(REF_DT, count=200)
     occurrences = [i for i in gen]
 
     orig_rruleset = dateutil.rrule.rrulestr(rrulestr, forceset=True)
-    gen = orig_rruleset.xafter(n, count=200)
+    gen = orig_rruleset.xafter(REF_DT, count=200)
     orig_occurrences = [i for i in gen]
 
     assert occurrences == orig_occurrences
 
 
-def test_fast_forward_rrule_all_hours():
+def test_fast_forward_rrule_hours():
     '''
     Generate an rrule for each hour of the day
 
@@ -45,79 +47,80 @@ def test_fast_forward_rrule_all_hours():
     rrulestr_prefix = 'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=HOURLY;'
     for interval in range(1, 24):
         rrulestr = f"{rrulestr_prefix}INTERVAL={interval}"
-        rruleset = Schedule.rrulestr(rrulestr)
-        n = now()
-        gen = rruleset.xafter(n, count=200)
+        rruleset = Schedule.rrulestr(rrulestr, ref_dt=REF_DT)
+
+        gen = rruleset.xafter(REF_DT, count=200)
         occurrences = [i for i in gen]
 
         orig_rruleset = dateutil.rrule.rrulestr(rrulestr, forceset=True)
-        gen = orig_rruleset.xafter(n, count=200)
+        gen = orig_rruleset.xafter(REF_DT, count=200)
         orig_occurrences = [i for i in gen]
 
         assert occurrences == orig_occurrences
 
 
-def test_multiple_rrule():
+def test_multiple_rrules():
     '''
     Create an rruleset that contains multiple rrules and an exrule
-    - freq HOURLY interval 5, dtstart should be fast forwarded
-    - freq HOURLY interval 7, dtstart should be fast forwarded
-    - freq MONTHLY interval 1, dtstart should not be fast forwarded
-    - exrule freq HOURLY interval 5, dtstart should be fast forwarded
+    rruleA: freq HOURLY interval 5, dtstart should be fast forwarded
+    rruleB: freq HOURLY interval 7, dtstart should be fast forwarded
+    rruleC: freq MONTHLY interval 1, dtstart should not be fast forwarded
+    exruleA: freq HOURLY interval 5, dtstart should be fast forwarded
     '''
     rrulestr = '''DTSTART;TZID=America/New_York:20201118T200000
                 RRULE:FREQ=HOURLY;INTERVAL=5
                 RRULE:FREQ=HOURLY;INTERVAL=7
                 RRULE:FREQ=MONTHLY
                 EXRULE:FREQ=HOURLY;INTERVAL=5;BYDAY=MO,TU,WE'''
-    rruleset = Schedule.rrulestr(rrulestr)
-    n = now()
+    rruleset = Schedule.rrulestr(rrulestr, ref_dt=REF_DT)
+
+    rruleA, rruleB, rruleC = rruleset._rrule
+    exruleA = rruleset._exrule[0]
 
     # assert that each rrule has its own dtstart
-    assert rruleset._rrule[0]._dtstart != rruleset._rrule[1]._dtstart != rruleset._rrule[2]._dtstart != rruleset._exrule[0]._dtstart
+    assert rruleA._dtstart != rruleB._dtstart
+    assert rruleA._dtstart != rruleC._dtstart
 
-    # the new dtstart should be within INTERVAL amount of hours from now()
-    assert n - rruleset._rrule[0]._dtstart < datetime.timedelta(hours=6)
-    assert n - rruleset._rrule[1]._dtstart < datetime.timedelta(hours=8)
-    assert n - rruleset._exrule[0]._dtstart < datetime.timedelta(hours=6)
+    assert exruleA._dtstart == rruleA._dtstart
+
+    # the new dtstart should be within INTERVAL amount of hours from REF_DT
+    assert REF_DT - rruleA._dtstart < datetime.timedelta(hours=6)
+    assert REF_DT - rruleB._dtstart < datetime.timedelta(hours=8)
+    assert REF_DT - exruleA._dtstart < datetime.timedelta(hours=6)
 
     # the freq=monthly rrule's dtstart should not have changed
     dateutil_rruleset = dateutil.rrule.rrulestr(rrulestr, forceset=True)
-    assert rruleset._rrule[2]._dtstart == dateutil_rruleset._rrule[2]._dtstart
+    assert rruleC._dtstart == dateutil_rruleset._rrule[2]._dtstart
 
-    gen = rruleset.xafter(n, count=200)
+    gen = rruleset.xafter(REF_DT, count=200)
     occurrences = [i for i in gen]
 
     orig_rruleset = dateutil.rrule.rrulestr(rrulestr, forceset=True)
-    gen = orig_rruleset.xafter(n, count=200)
+    gen = orig_rruleset.xafter(REF_DT, count=200)
     orig_occurrences = [i for i in gen]
 
     assert occurrences == orig_occurrences
 
 
-def test_future_data_not_fast_forwarded():
+def test_future_date_does_not_fast_forward():
     dtstart = now() + datetime.timedelta(days=30)
     rrule = dateutil.rrule.rrule(freq=HOURLY, interval=7, dtstart=dtstart)
-    new_rrule = fast_forward_rrule(rrule)
+    new_rrule = _fast_forward_rrule(rrule, ref_dt=REF_DT)
     assert new_rrule == rrule
 
 
 @pytest.mark.parametrize(
-    'freq, interval, error',
+    'freq, interval',
     [
-        (MINUTELY, 15.5555, "interval is a fraction of a second"),
-        (MONTHLY, 1, "frequency must be HOURLY or MINUTELY"),
+        (MINUTELY, 15.5555),
+        (MONTHLY, 1),
     ],
 )
-def test_error_fast_forward_rrule(freq, interval, error):
+def test_does_not_fast_forward(freq, interval):
     '''
-    Assert a couple of error states if attempting to fast forward a date that does
-    not need to be fast forwarded
+    Assert a couple of rrules that should not be fast forwarded
     '''
-    dtstart = now() - datetime.timedelta(days=30)
+    dtstart = REF_DT - datetime.timedelta(days=30)
     rrule = dateutil.rrule.rrule(freq=freq, interval=interval, dtstart=dtstart)
-    if error:
-        with pytest.raises(Exception) as e_info:
-            fast_forward_rrule(rrule)
 
-        assert error in e_info.value.args[0]
+    assert rrule == _fast_forward_rrule(rrule, ref_dt=REF_DT)

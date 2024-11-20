@@ -35,7 +35,19 @@ __all__ = ['Schedule']
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
-def fast_forward_rrule(rrule):
+def _check_valid_tzid(rrules):
+    for r in rrules:
+        if r._dtstart and r._dtstart.tzinfo is None:
+            raise ValueError('A valid TZID must be provided (e.g., America/New_York)')
+
+
+def _fast_forward_rrules(rrules, ref_dt=None):
+    for i, rule in enumerate(rrules):
+        rrules[i] = _fast_forward_rrule(rule, ref_dt=ref_dt)
+    return rrules
+
+
+def _fast_forward_rrule(rrule, ref_dt=None):
     '''
     Utility to fast forward an rrule, maintaining consistency in the resulting
     occurrences.
@@ -47,10 +59,12 @@ def fast_forward_rrule(rrule):
     Returns a new rrule with a new dtstart
     '''
     if rrule._freq not in {dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY}:
-        raise ValueError(f"Cannot fast forward rrule, frequency must be HOURLY or MINUTELY, but got {rrule._freq !r}")
+        return rrule
 
-    n = now()
-    if rrule._dtstart > n:
+    if ref_dt is None:
+        ref_dt = now()
+
+    if rrule._dtstart > ref_dt:
         return rrule
 
     interval = rrule._interval if rrule._interval else 1
@@ -59,16 +73,19 @@ def fast_forward_rrule(rrule):
     elif rrule._freq == dateutil.rrule.MINUTELY:
         interval *= 60
 
-    if type(interval) == float and not interval.is_integer():
-        raise RuntimeError("Cannot fast forward rule, interval is a fraction of a second")
+    # if after converting to seconds the interval is still a fraction,
+    # just return original rrule
+    if isinstance(interval, float) and not interval.is_integer():
+        return rrule
 
-    seconds_since_dtstart = (n - rrule._dtstart).total_seconds()
+    seconds_since_dtstart = (ref_dt - rrule._dtstart).total_seconds()
 
     # it is important to fast forward by a number that is divisible by
     # interval. For example, if interval is 7 hours, we fast forward by 7, 14, 21, etc. hours.
     # Otherwise, the occurrences after the fast forward might not match the ones before.
     # x // y is integer division, lopping off any remainder, so that we get the outcome we want.
-    new_start = rrule._dtstart + datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
+    interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
+    new_start = rrule._dtstart + interval_aligned_offset
     new_rrule = rrule.replace(dtstart=new_start)
     return new_rrule
 
@@ -232,47 +249,26 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return " ".join(rules)
 
     @classmethod
-    def rrulestr(cls, rrule, **kwargs):
+    def rrulestr(cls, rrule, ref_dt=None, **kwargs):
         """
         Apply our own custom rrule parsing requirements
         """
         rrule = Schedule.coerce_naive_until(rrule)
         kwargs['forceset'] = True
-        x = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
+        rruleset = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
 
-        for r in x._rrule:
-            if r._dtstart and r._dtstart.tzinfo is None:
-                raise ValueError('A valid TZID must be provided (e.g., America/New_York)')
+        _check_valid_tzid(rruleset._rrule)
+        _check_valid_tzid(rruleset._exrule)
 
         # Fast forward is a way for us to limit the number of events in the rruleset
         # If we are fast forwarding and we don't have a count limited rule that is minutely or hourly
         # We will modify the start date of the rule to bring as close to the current date as possible
         # Even though the API restricts each rrule to have the same dtstart, each rrule in the rruleset
         # can fast forward to a difference dtstart. This is required in order to get stable occurrences.
-        try:
-            for i, rule in enumerate(x._rrule):
-                # If any rule has a minutely or hourly rule without a count...
-                if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
-                    try:
-                        new_rrule = fast_forward_rrule(rule)
-                    except RuntimeError as e:
-                        logger.warning(e)
-                        new_rrule = rule
-                    x._rrule[i] = new_rrule
+        rruleset._rrule = _fast_forward_rrules(rruleset._rrule, ref_dt=ref_dt)
+        rruleset._exrule = _fast_forward_rrules(rruleset._exrule, ref_dt=ref_dt)
 
-            for i, rule in enumerate(x._exrule):
-                # If any rule has a minutely or hourly rule without a count...
-                if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
-                    try:
-                        new_rrule = fast_forward_rrule(rule)
-                    except RuntimeError as e:
-                        logger.warning(e)
-                        new_rrule = rule
-                    x._exrule[i] = new_rrule
-        except IndexError:
-            pass
-
-        return x
+        return rruleset
 
     def __str__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
