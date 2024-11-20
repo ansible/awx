@@ -35,10 +35,18 @@ __all__ = ['Schedule']
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
-def _check_valid_tzid(rrules):
-    for r in rrules:
-        if r._dtstart and r._dtstart.tzinfo is None:
-            raise ValueError('A valid TZID must be provided (e.g., America/New_York)')
+def _assert_timezone_id_is_valid(rrules) -> None:
+    broken_rrules = [
+        rrule for rrule in rrules
+        if r._dtstart and r._dtstart.tzinfo is None
+    ]
+    if not broken_rrules:
+        return
+    raise ValueError(
+        'The following rrules do not a timezone set: '
+        f'{broken_rrules}. Please, set it for each '
+        '(e.g., America/New_York).',
+    ) from None
 
 
 def _fast_forward_rrules(rrules, ref_dt=None):
