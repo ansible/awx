@@ -319,10 +319,11 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             next_run_actual = None
 
         self.next_run = next_run_actual
-        try:
-            self.dtstart = future_rs[0].astimezone(pytz.utc)
-        except IndexError:
-            self.dtstart = None
+        if not self.dtstart:
+            try:
+                self.dtstart = future_rs[0].astimezone(pytz.utc)
+            except IndexError:
+                self.dtstart = None
         self.dtend = Schedule.get_end_date(future_rs)
 
         changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
