@@ -84,9 +84,9 @@ def test_multiple_rrules():
     assert exruleA._dtstart == rruleA._dtstart
 
     # the new dtstart should be within INTERVAL amount of hours from REF_DT
-    assert REF_DT - rruleA._dtstart < datetime.timedelta(hours=6)
-    assert REF_DT - rruleB._dtstart < datetime.timedelta(hours=8)
-    assert REF_DT - exruleA._dtstart < datetime.timedelta(hours=6)
+    assert (REF_DT - rruleA._dtstart) < datetime.timedelta(hours=6)
+    assert (REF_DT - rruleB._dtstart) < datetime.timedelta(hours=8)
+    assert (REF_DT - exruleA._dtstart) < datetime.timedelta(hours=6)
 
     # the freq=monthly rrule's dtstart should not have changed
     dateutil_rruleset = dateutil.rrule.rrulestr(rrulestr, forceset=True)
@@ -110,10 +110,10 @@ def test_future_date_does_not_fast_forward():
 
 
 @pytest.mark.parametrize(
-    'freq, interval',
+    ('freq', 'interval'),
     [
-        (MINUTELY, 15.5555),
-        (MONTHLY, 1),
+        pytest.param(MINUTELY, 15.5555, id="freq-MINUTELY-interval-15.5555"),
+        pytest.param(MONTHLY, 1, id="freq-MONTHLY-interval-1"),
     ],
 )
 def test_does_not_fast_forward(freq, interval):
