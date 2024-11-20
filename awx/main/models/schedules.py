@@ -40,7 +40,7 @@ def _assert_timezone_id_is_valid(rrules) -> None:
     if not broken_rrules:
         return
     raise ValueError(
-        'The following rrules do not have a valid timezone: ' f'{broken_rrules}. Set a valid timezone ' '(e.g., America/New_York).',
+        f'The following rrules do not have a valid timezone: {broken_rrules}. Set a valid timezone (e.g., America/New_York).',
     ) from None
 
 
