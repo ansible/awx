@@ -36,16 +36,11 @@ UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
 def _assert_timezone_id_is_valid(rrules) -> None:
-    broken_rrules = [
-        rrule for rrule in rrules
-        if r._dtstart and r._dtstart.tzinfo is None
-    ]
+    broken_rrules = [str(rrule) for rrule in rrules if rrule._dtstart and rrule._dtstart.tzinfo is None]
     if not broken_rrules:
         return
     raise ValueError(
-        'The following rrules do not a timezone set: '
-        f'{broken_rrules}. Please, set it for each '
-        '(e.g., America/New_York).',
+        'The following rrules do not have a valid timezone: ' f'{broken_rrules}. Set a valid timezone ' '(e.g., America/New_York).',
     ) from None
 
 
@@ -265,8 +260,8 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         kwargs['forceset'] = True
         rruleset = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
 
-        _check_valid_tzid(rruleset._rrule)
-        _check_valid_tzid(rruleset._exrule)
+        _assert_timezone_id_is_valid(rruleset._rrule)
+        _assert_timezone_id_is_valid(rruleset._exrule)
 
         # Fast forward is a way for us to limit the number of events in the rruleset
         # If we are fast forwarding and we don't have a count limited rule that is minutely or hourly

@@ -167,7 +167,7 @@ def test_survey_password_default(post, patch, admin_user, project, inventory, su
         # Multiple errors, first condition should be returned
         ("DTSTART:NONSENSE RRULE:NONSENSE RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=3,4", "Valid DTSTART required in rrule"),
         # Parsing Tests
-        ("DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5", "A valid TZID must be provided"),  # noqa
+        ("DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5", "The following rrules do not have a valid timezone"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation: invalid 'FREQ': REGULARLY"),  # noqa
         ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
     ],
