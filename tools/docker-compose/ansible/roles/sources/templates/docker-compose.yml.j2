@@ -170,12 +170,6 @@ services:
     depends_on:
       - prometheus
 {% endif %}
-  # A useful container that simply passes through log messages to the console
-  # helpful for testing awx/tower logging
-  # logstash:
-  #   build:
-  #     context: ../../docker-compose
-  #     dockerfile: Dockerfile-logstash
   postgres:
     image: quay.io/sclorg/postgresql-15-c9s
     container_name: tools_postgres_1
