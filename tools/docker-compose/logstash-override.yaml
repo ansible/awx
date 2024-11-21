@@ -1,3 +1,4 @@
+---
 services:
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
