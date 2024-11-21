@@ -16,8 +16,14 @@ REF_DT = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
         pytest.param('DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=MINUTELY;INTERVAL=5', id='every-5-min'),
         pytest.param('DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=HOURLY;INTERVAL=5', id='every-5-hours'),
         pytest.param('DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=YEARLY;INTERVAL=5', id='every-5-years'),
-        pytest.param('DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=MINUTELY;INTERVAL=5;WKST=SU;BYMONTH=2,3;BYMONTHDAY=18;BYHOUR=5;BYMINUTE=35;BYSECOND=0', id='every-5-minutes-at-5:35:00-am-on-the-18th-day-of-feb-or-march-with-week-starting-on-sundays'),
-        pytest.param('DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=HOURLY;INTERVAL=5;WKST=SU;BYMONTH=2,3;BYHOUR=5', id='every-5-hours-at-5-am-in-feb-or-march-with-week-starting-on-sundays'),
+        pytest.param(
+            'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=MINUTELY;INTERVAL=5;WKST=SU;BYMONTH=2,3;BYMONTHDAY=18;BYHOUR=5;BYMINUTE=35;BYSECOND=0',
+            id='every-5-minutes-at-5:35:00-am-on-the-18th-day-of-feb-or-march-with-week-starting-on-sundays',
+        ),
+        pytest.param(
+            'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=HOURLY;INTERVAL=5;WKST=SU;BYMONTH=2,3;BYHOUR=5',
+            id='every-5-hours-at-5-am-in-feb-or-march-with-week-starting-on-sundays',
+        ),
     ],
 )
 def test_fast_forwarded_rrule_matches_original_occurrence(rrulestr):
