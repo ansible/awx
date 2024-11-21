@@ -2,6 +2,7 @@
 # All Rights Reserved.
 from contextlib import nullcontext
 import functools
+
 import inspect
 import logging
 from importlib.metadata import entry_points
@@ -47,6 +48,9 @@ from awx.main.models.rbac import (
 )
 from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
+from awx_plugins.credentials import injectors as builtin_injectors
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
+
 
 # DAB
 from ansible_base.resource_registry.tasks.sync import get_resource_server_client
@@ -647,7 +651,21 @@ class CredentialInputSource(PrimordialModel):
         return reverse(view_name, kwargs={'pk': self.pk}, request=request)
 
 
-from awx_plugins.credentials.plugins import *  # noqa
+awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
+supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
+entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
+
+for ns, ep in entry_points.items():
+    cred_plugin = ep.load()
+    if not hasattr(cred_plugin, 'inputs'):
+        setattr(cred_plugin, 'inputs', {})
+    if not hasattr(cred_plugin, 'injectors'):
+        setattr(cred_plugin, 'injectors', {})
+    if ns in ManagedCredentialType.registry:
+        raise ValueError(
+            'a ManagedCredentialType with namespace={} is already defined in {}'.format(ns, inspect.getsourcefile(ManagedCredentialType.registry[ns].__class__))
+        )
+    ManagedCredentialType.registry[ns] = cred_plugin
 
 for ns, plugin in credential_plugins.items():
     CredentialType.load_plugin(ns, plugin)
