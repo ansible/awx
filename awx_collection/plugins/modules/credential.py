@@ -257,6 +257,8 @@ def main():
     copy_lookup_data = lookup_data
     if organization:
         lookup_data['organization'] = org_id
+    if user:
+        lookup_data['organization'] = None
 
     credential = module.get_one('credentials', name_or_id=name, check_exists=(state == 'exists'), **{'data': lookup_data})
 
