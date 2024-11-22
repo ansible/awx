@@ -76,9 +76,11 @@ def load_combined_inventory_source_options() -> dict[str, str]:
 
     plugin_description = discover_available_cloud_provider_descriptions()
 
-    plugin_description['scm'] = 'Sourced from a Project'
+    if 'scm' in plugins:
+        plugin_description['scm'] = 'Sourced from a Project'
 
-    plugin_description['file'] = 'File-based inventory source'
+    if 'file' in plugins:
+        plugin_description['file'] = 'File-based inventory source'
 
     result = {plugin: plugin_description.get(plugin, plugin) for plugin in plugins}
 
