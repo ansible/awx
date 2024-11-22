@@ -9,6 +9,7 @@ import re
 import copy
 import os.path
 from urllib.parse import urljoin
+from importlib.metadata import entry_points
 
 # Django
 from django.conf import settings
@@ -25,6 +26,7 @@ from rest_framework.exceptions import ParseError
 
 from ansible_base.lib.utils.models import prevent_search
 from awx_plugins.inventory.plugins import PluginFileInjector
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 # AWX
 from awx.api.versioning import reverse
@@ -1404,5 +1406,11 @@ class CustomInventoryScript(CommonModelNameNotUnique):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
 
 
-for cls in PluginFileInjector.__subclasses__():
-    InventorySourceOptions.injectors[cls.__name__] = cls
+awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.inventory')}
+supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.inventory.supported')}
+entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
+logger.info(entry_points)
+
+for entry_point_name, entry_point in entry_points.items():
+    cls = entry_point.load()
+    InventorySourceOptions.injectors[entry_point_name] = cls
