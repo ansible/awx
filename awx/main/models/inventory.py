@@ -25,7 +25,6 @@ from django.db.models import Q
 from rest_framework.exceptions import ParseError
 
 from ansible_base.lib.utils.models import prevent_search
-from awx_plugins.inventory.plugins import PluginFileInjector
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 # AWX
@@ -1409,7 +1408,6 @@ class CustomInventoryScript(CommonModelNameNotUnique):
 awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.inventory')}
 supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.inventory.supported')}
 entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
-logger.info(entry_points)
 
 for entry_point_name, entry_point in entry_points.items():
     cls = entry_point.load()
