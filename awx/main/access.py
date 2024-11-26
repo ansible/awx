@@ -438,10 +438,7 @@ class BaseAccess(object):
 
             # Actions not possible for reason unrelated to RBAC
             # Cannot copy with validation errors, or update a manual group/project
-            if 'write' not in getattr(self.user, 'oauth_scopes', ['write']):
-                user_capabilities[display_method] = False  # Read tokens cannot take any actions
-                continue
-            elif display_method in ['copy', 'start', 'schedule'] and isinstance(obj, JobTemplate):
+            if display_method in ['copy', 'start', 'schedule'] and isinstance(obj, JobTemplate):
                 if obj.validation_errors:
                     user_capabilities[display_method] = False
                     continue

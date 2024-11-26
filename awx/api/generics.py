@@ -374,12 +374,6 @@ class APIView(views.APIView):
                 kwargs.pop('version')
         return super(APIView, self).dispatch(request, *args, **kwargs)
 
-    def check_permissions(self, request):
-        if request.method not in ('GET', 'OPTIONS', 'HEAD'):
-            if 'write' not in getattr(request.user, 'oauth_scopes', ['write']):
-                raise PermissionDenied()
-        return super(APIView, self).check_permissions(request)
-
 
 class GenericAPIView(generics.GenericAPIView, APIView):
     # Base class for all model-based views.
