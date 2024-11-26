@@ -212,7 +212,11 @@ class AWXConsumerPG(AWXConsumerBase):
         except Exception as exc:
             logger.warning(f'Failed to save dispatcher statistics {exc}')
 
-        for job in self.scheduler.get_and_mark_pending():
+        # Everything benchmarks to the same original time, so that skews due to
+        # runtime of the actions, themselves, do not mess up scheduling expectations
+        reftime = time.time()
+
+        for job in self.scheduler.get_and_mark_pending(reftime=reftime):
             if 'control' in job.data:
                 try:
                     job.data['control']()
@@ -229,7 +233,7 @@ class AWXConsumerPG(AWXConsumerBase):
 
         self.listen_start = time.time()
 
-        return self.scheduler.time_until_next_run()
+        return self.scheduler.time_until_next_run(reftime=reftime)
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)

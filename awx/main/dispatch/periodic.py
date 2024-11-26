@@ -88,8 +88,10 @@ class Scheduler:
         # internally times are all referenced relative to startup time, add grace period
         self.global_start = time.time() + 2.0
 
-    def get_and_mark_pending(self):
-        relative_time = time.time() - self.global_start
+    def get_and_mark_pending(self, reftime=None):
+        if reftime is None:
+            reftime = time.time()  # mostly for tests
+        relative_time = reftime - self.global_start
         to_run = []
         for job in self.jobs:
             if job.due_to_run(relative_time):
@@ -98,8 +100,10 @@ class Scheduler:
                 job.mark_run(relative_time)
         return to_run
 
-    def time_until_next_run(self):
-        relative_time = time.time() - self.global_start
+    def time_until_next_run(self, reftime=None):
+        if reftime is None:
+            reftime = time.time()  # mostly for tests
+        relative_time = reftime - self.global_start
         next_job = min(self.jobs, key=lambda j: j.next_run)
         delta = next_job.next_run - relative_time
         if delta <= 0.1:
@@ -115,10 +119,11 @@ class Scheduler:
     def debug(self, *args, **kwargs):
         data = dict()
         data['title'] = 'Scheduler status'
+        reftime = time.time()
 
-        now = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S UTC')
+        now = datetime.fromtimestamp(reftime).strftime('%Y-%m-%d %H:%M:%S UTC')
         start_time = datetime.fromtimestamp(self.global_start).strftime('%Y-%m-%d %H:%M:%S UTC')
-        relative_time = time.time() - self.global_start
+        relative_time = reftime - self.global_start
         data['started_time'] = start_time
         data['current_time'] = now
         data['current_time_relative'] = round(relative_time, 3)
