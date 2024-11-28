@@ -74,6 +74,7 @@ RUN mkdir /tmp/requirements
 ADD requirements/requirements.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
+    requirements/git-constraints.txt \
     /tmp/requirements/
 
 RUN cd /tmp && make requirements_awx

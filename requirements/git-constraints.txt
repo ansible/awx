@@ -1,0 +1,2 @@
+awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git
+awx_plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
