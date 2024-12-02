@@ -38,6 +38,7 @@ from dateutil.parser import parse as parse_date
 
 # django-ansible-base
 from ansible_base.resource_registry.tasks.sync import SyncExecutor
+from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -60,7 +61,6 @@ from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 
 from awx.main.utils.reload import stop_local_services
-from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification

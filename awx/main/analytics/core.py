@@ -16,10 +16,12 @@ from rest_framework.exceptions import PermissionDenied
 import requests
 
 from awx.conf.license import get_license
+
+from ansible_base.lib.utils.db import advisory_lock
+
 from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
-from awx.main.utils.pglock import advisory_lock
 
 __all__ = ['register', 'gather', 'ship']
 

@@ -23,8 +23,10 @@ from django.contrib.auth.models import User
 
 
 # DRF
-from awx.main.utils.pglock import advisory_lock
 from rest_framework.serializers import ValidationError as DRFValidationError
+
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
 from awx.api.versioning import reverse

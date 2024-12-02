@@ -4,8 +4,9 @@
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
+from ansible_base.lib.utils.db import advisory_lock
+
 from awx.main.models import Instance
-from awx.main.utils.pglock import advisory_lock
 
 
 class Command(BaseCommand):

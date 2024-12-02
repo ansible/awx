@@ -17,6 +17,9 @@ from django.db import connections
 # Runner
 import ansible_runner
 
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
+
 # AWX
 from awx.main.utils.execution_environments import get_default_pod_spec
 from awx.main.exceptions import ReceptorNodeNotFound
@@ -30,7 +33,6 @@ from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
-from awx.main.utils.pglock import advisory_lock
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
