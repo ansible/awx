@@ -11,8 +11,10 @@ from django.utils.encoding import smart_str
 from django.utils.timezone import now
 from django.db import OperationalError
 
+# django-ansible-base
+from ansible_base.lib.logging.runtime import log_excess_runtime
+
 # AWX
-from awx.main.utils.common import log_excess_runtime
 from awx.main.models.inventory import Host
 
 
