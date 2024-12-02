@@ -403,13 +403,40 @@ class AWXReceptorJob:
             res = self._run_internal(receptor_ctl)
             return res
         finally:
-            # Make sure to always release the work unit if we established it
-            if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
-                if settings.RECPETOR_KEEP_WORK_ON_ERROR and getattr(res, 'status', 'error') == 'error':
-                    try:
-                        receptor_ctl.simple_command(f"work release {self.unit_id}")
-                    except Exception:
-                        logger.exception(f"Error releasing work unit {self.unit_id}.")
+            status = getattr(res, 'status', 'error')
+            self._receptor_release_work(receptor_ctl, status)
+
+    def _receptor_release_work(self, receptor_ctl: ReceptorControl, status: str) -> None:
+        """
+        Releases the work unit from Receptor if certain conditions are met.
+        This method checks several conditions before attempting to release the work unit:
+        - If `self.unit_id` is `None`, the method returns immediately.
+        - If the `RECEPTOR_RELEASE_WORK` setting is `False`, the method returns immediately.
+        - If the `RECEPTOR_KEEP_WORK_ON_ERROR` setting is `True` and the status is 'error', the method returns immediately.
+        If none of the above conditions are met, the method attempts to release the work unit using the Receptor control command.
+        If an exception occurs during the release process, it logs an error message.
+        Args:
+            receptor_ctl (ReceptorControl): The Receptor control object used to issue commands.
+            status (str): The status of the work unit, which may affect whether it is released.
+        """
+
+        if self.unit_id is None:
+            logger.debug("No work unit ID to release.")
+            return
+
+        if settings.RECEPTOR_RELEASE_WORK is False:
+            logger.debug(f"RECEPTOR_RELEASE_WORK is False, not releasing work unit {self.unit_id}.")
+            return
+
+        if settings.RECEPTOR_KEEP_WORK_ON_ERROR and status == 'error':
+            logger.debug(f"RECEPTOR_KEEP_WORK_ON_ERROR is True and status is 'error', not releasing work unit {self.unit_id}.")
+            return
+
+        try:
+            logger.debug(f"Released work unit {self.unit_id}.")
+            receptor_ctl.simple_command(f"work release {self.unit_id}")
+        except Exception:
+            logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
