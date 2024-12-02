@@ -19,7 +19,6 @@ django-extensions
 django-guid
 django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
-django-pglocks
 django-solo
 django-split-settings
 djangorestframework>=3.15.0

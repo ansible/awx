@@ -23,7 +23,6 @@ asgiref==3.8.1
     #   channels-redis
     #   daphne
     #   django
-    #   django-ansible-base
     #   django-cors-headers
 asn1==2.7.1
     # via -r /awx_devel/requirements/requirements.in
@@ -131,7 +130,7 @@ django==4.2.16
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
-# django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
+# django-ansible-base @ git+https://github.com/alancoding/django-ansible-base@advisory_lock  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.6.0
     # via -r /awx_devel/requirements/requirements.in
@@ -146,8 +145,6 @@ django-flags==5.0.13
 django-guid==3.5.0
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.7.1
-    # via -r /awx_devel/requirements/requirements.in
-django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
@@ -371,7 +368,6 @@ pygerduty==0.38.3
 pyjwt[crypto]==2.10.1
     # via
     #   adal
-    #   django-ansible-base
     #   msal
     #   twilio
 pyopenssl==24.3.0
@@ -423,7 +419,6 @@ requests==2.32.3
     #   -r /awx_devel/requirements/requirements.in
     #   adal
     #   azure-core
-    #   django-ansible-base
     #   django-oauth-toolkit
     #   kubernetes
     #   msal
@@ -456,7 +451,7 @@ setuptools-scm[toml]==8.1.0
 six==1.17.0
     # via
     #   azure-core
-    #   django-pglocks
+    #   isodate
     #   kubernetes
     #   msrestazure
     #   openshift
@@ -497,7 +492,6 @@ typing-extensions==4.12.2
 urllib3==2.3.0
     # via
     #   botocore
-    #   django-ansible-base
     #   kubernetes
     #   requests
 uwsgi==2.0.28
