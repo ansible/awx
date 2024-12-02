@@ -364,6 +364,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 raise ValueError('{} is not an input field'.format(name))
         return True
 
+    def get_input_keys(self) -> list[str]:
+        """
+        Return a unique list of both static and dynamic credential input keys.
+
+        :returns: List of input field names
+        :rtype: list[str]
+        """
+        return list(set(self.inputs.keys()) | set(self.dynamic_input_fields))
+
     def _get_dynamic_input(self, field_name):
         for input_source in self.input_sources.all():
             if input_source.input_field_name == field_name:
@@ -587,8 +596,7 @@ class CredentialType(CommonModelNameNotUnique):
         # build a normal namespace with secret values decrypted (for
         # ansible-playbook) and a safe namespace with secret values hidden (for
         # DB storage)
-        injectable_fields = list(credential.inputs.keys()) + credential.dynamic_input_fields
-        for field_name in list(set(injectable_fields)):
+        for field_name in credential.get_input_keys():
             value = credential.get_input(field_name)
 
             if type(value) is bool:
