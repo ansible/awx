@@ -6,7 +6,6 @@ from datetime import timedelta
 import json
 import yaml
 import logging
-import time
 import psycopg
 import os
 import subprocess
