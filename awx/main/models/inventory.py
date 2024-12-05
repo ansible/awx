@@ -9,7 +9,7 @@ import re
 import copy
 import os.path
 from urllib.parse import urljoin
-from importlib.metadata import entry_points
+from importlib.metadata import entry_points, EntryPoint
 
 # Django
 from django.conf import settings
@@ -1405,10 +1405,10 @@ class CustomInventoryScript(CommonModelNameNotUnique):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
 
 
-awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.inventory')}
-supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.inventory.supported')}
-entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
+def _load_all_entry_points_for(entry_point_subsections: list[str], /) -> dict[str, EntryPoint]:
+    return {ep.name: ep for entry_point_category in entry_point_subsections for ep in entry_points(group=f'awx_plugins.{entry_point_category}')}
 
-for entry_point_name, entry_point in entry_points.items():
-    cls = entry_point.load()
-    InventorySourceOptions.injectors[entry_point_name] = cls
+
+is_awx = detect_server_product_name() == 'AWX'
+extra_entry_point_groups = () if is_awx else ('inventory.supported',)
+entry_points = _load_all_entry_points_for(['inventory', *extra_entry_point_groups])
