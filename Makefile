@@ -351,7 +351,7 @@ test:
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
 live_test:
-	cd tools/live_tests && PYTHONPATH=PYTHONPATH:. py.test -p no:django -p pytest_django_config tests/
+	cd awx/main/tests/live && py.test tests/
 
 ## Run all API unit tests with coverage enabled.
 test_coverage:
