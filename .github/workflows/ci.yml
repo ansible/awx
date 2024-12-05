@@ -140,7 +140,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run live dev env tests
-        run: docker exec -it tools_awx_1 /bin/bash -c "make live_test"
+        run: docker exec tools_awx_1 /bin/bash -c "make live_test"
 
   awx-operator:
     runs-on: ubuntu-latest
