@@ -19,12 +19,12 @@ def wait_to_leave_status(job, status, timeout=25):
     raise RuntimeError(f'Job failed to exit {status} in {timeout} seconds. job_explanation={job.job_explanation} tb={job.result_traceback}')
 
 
-def test_launch_demo_jt(post, admin_user):
+def test_launch_demo_jt(post, admin):
     jt = JobTemplate.objects.get(name='Demo Job Template')
 
     url = reverse('api:job_template_launch', kwargs={'pk': jt.id})
 
-    r = post(url=url, data={}, user=admin_user, expect=201)
+    r = post(url=url, data={}, user=admin, expect=201)
     job = Job.objects.get(pk=r.data['id'])
 
     wait_to_leave_status(job, 'pending')

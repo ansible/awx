@@ -1,11 +1,5 @@
 import pytest
 
-from awx.main.tests.functional.conftest import post, get, put, patch, delete, head, options  # noqa
-
-from awx.main.models import User
-
-
-@pytest.fixture
-def admin_user():
-    user, _ = User.objects.get_or_create(username='admin', is_superuser=True)
-    return user
+# These tests are invoked from the awx/main/tests/live/ subfolder
+# so any fixtures from higher-up conftest files must be explicitly included
+from awx.main.tests.functional.conftest import *  # noqa
