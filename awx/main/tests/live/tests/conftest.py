@@ -5,7 +5,7 @@ import time
 from awx.main.tests.functional.conftest import *  # noqa
 
 
-def wait_to_leave_status(job, status, timeout=25):
+def wait_to_leave_status(job, status, timeout=25, sleep_time=0.1):
     """Wait until the job does NOT have the specified status with some timeout
 
     the default timeout of 25 if chosen because the task manager runs on a 20 second
@@ -16,6 +16,7 @@ def wait_to_leave_status(job, status, timeout=25):
         job.refresh_from_db()
         if job.status != status:
             return
+        time.sleep(sleep_time)
     raise RuntimeError(f'Job failed to exit {status} in {timeout} seconds. job_explanation={job.job_explanation} tb={job.result_traceback}')
 
 
