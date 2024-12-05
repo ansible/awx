@@ -5,6 +5,8 @@
 import datetime
 import os
 import urllib.parse as urlparse
+from uuid import uuid4
+import logging
 
 # Django
 from django.conf import settings
@@ -38,6 +40,8 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+
+logger = logging.getLogger('awx.main.models.projects')
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -447,7 +451,25 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     @property
     def cache_id(self):
-        return str(self.last_job_id)
+        """This gives the folder name where collections and roles will be saved to so it does not re-download
+
+        Normally we want this to track with the last update, because every update should pull new content.
+        This does not count sync jobs, but sync jobs do not update last_job or current_job anyway.
+        If cleanup_jobs deletes the last jobs, then we can fallback to using any given heuristic related
+        to the last job ran.
+        """
+        if self.current_job_id:
+            return str(self.current_job_id)
+        elif self.last_job_id:
+            return str(self.last_job_id)
+        elif self.last_job_run:
+            return self.last_job_run.isoformat()
+        else:
+            logger.warning(f'No info about last update for project {self.id}, content cache may misbehave')
+            if self.modified:
+                return self.modified.isoformat()
+            else:
+                return str(uuid4())
 
     @property
     def notification_templates(self):
@@ -618,7 +640,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     @property
     def cache_id(self):
         if self.branch_override or self.job_type == 'check' or (not self.project):
-            return str(self.id)
+            return str(self.id)  # causes it to not use the cache, basically
         return self.project.cache_id
 
     def result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True):

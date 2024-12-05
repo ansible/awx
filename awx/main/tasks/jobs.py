@@ -700,6 +700,7 @@ class SourceControlMixin(BaseTask):
             logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
             sync_needs.append(source_update_tag)
 
+        # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
         # Galaxy requirements are not supported for manual projects
         if project.scm_type and ((not has_cache) or branch_override):
