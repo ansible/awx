@@ -59,9 +59,10 @@ class MainConfig(AppConfig):
     @bypass_in_test
     def load_credential_types_feature(self):
         return self._load_credential_types_feature()
-    
+
     def load_entry_points(self):
         from awx.main.models.inventory import InventorySourceOptions, entry_points
+
         for entry_point_name, entry_point in entry_points.items():
             cls = entry_point.load()
             InventorySourceOptions.injectors[entry_point_name] = cls
