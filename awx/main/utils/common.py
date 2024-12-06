@@ -361,7 +361,7 @@ def get_allowed_fields(obj, serializer_mapping):
     else:
         allowed_fields = [x.name for x in obj._meta.fields]
 
-    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login'], 'oauth2accesstoken': ['last_used'], 'oauth2application': ['client_secret']}
+    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login']}
     model_name = obj._meta.model_name
     fields_excluded = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(model_name, [])
     # see definition of from_db for CredentialType
@@ -1096,7 +1096,11 @@ def create_temporary_fifo(data):
     path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
     os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
 
-    threading.Thread(target=lambda p, d: open(p, 'wb').write(d), args=(path, data)).start()
+    def tmp_write(path, data):
+        with open(path, 'wb') as f:
+            f.write(data)
+
+    threading.Thread(target=tmp_write, args=(path, data)).start()
     return path
 
 

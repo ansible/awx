@@ -1,3 +1,5 @@
+import os
+
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 from awx.main.utils.common import bypass_in_test
@@ -61,5 +63,11 @@ class MainConfig(AppConfig):
     def ready(self):
         super().ready()
 
-        self.load_credential_types_feature()
+        """
+        Credential loading triggers database operations. There are cases we want to call
+        awx-manage collectstatic without a database. All management commands invoke the ready() code
+        path. Using settings.AWX_SKIP_CREDENTIAL_TYPES_DISCOVER _could_ invoke a database operation.
+        """
+        if not os.environ.get('AWX_SKIP_CREDENTIAL_TYPES_DISCOVER', None):
+            self.load_credential_types_feature()
         self.load_named_url_feature()

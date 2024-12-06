@@ -32,7 +32,7 @@ options:
     - If value not set, will try environment variable C(CONTROLLER_PASSWORD) and then config files
     type: str
     aliases: [ tower_password , aap_password ]
-  controller_oauthtoken:
+  aap_token:
     description:
     - The OAuth token to use.
     - This value can be in one of two formats.
@@ -41,7 +41,7 @@ options:
     - If value not set, will try environment variable C(CONTROLLER_OAUTH_TOKEN) and then config files
     type: raw
     version_added: "3.7.0"
-    aliases: [ tower_oauthtoken, aap_token ]
+    aliases: [ tower_oauthtoken, controller_oauthtoken]
   validate_certs:
     description:
     - Whether to allow insecure connections to AWX.

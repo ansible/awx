@@ -265,3 +265,14 @@ class TestConvertNamedUrl:
             URLModificationMiddleware._convert_named_url(f'/api/{prefix}v2/organizations/test_org/inventories/')
             == f'/api/{prefix}v2/organizations/{test_org.pk}/inventories/'
         )
+
+    def test_named_job_template(self):
+        org = Organization.objects.create(name='test_org')
+        tpl = JobTemplate.objects.create(name='test_tpl', organization=org)
+
+        # first, cause a '404' - we want to verify that no state from previous requests is carried over when named
+        # urls are resolved
+        assert URLModificationMiddleware._convert_named_url('/api/v2/job_templates/test/tpl++test_org/') == '/api/v2/job_templates/test/tpl++test_org/'
+
+        # try to resolve a valid url - it should succeed
+        assert URLModificationMiddleware._convert_named_url('/api/v2/job_templates/test_tpl++test_org/') == f'/api/v2/job_templates/{tpl.pk}/'

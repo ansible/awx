@@ -312,6 +312,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
                 'awx.ui.context_processors.csp',
                 'awx.ui.context_processors.version',
             ],
@@ -343,7 +344,6 @@ INSTALLED_APPS = [
     # According to channels 4.0 docs you install daphne instead of channels now
     'daphne',
     'django.contrib.staticfiles',
-    'oauth2_provider',
     'rest_framework',
     'django_extensions',
     'polymorphic',
@@ -358,6 +358,7 @@ INSTALLED_APPS = [
     'ansible_base.jwt_consumer',
     'ansible_base.resource_registry',
     'ansible_base.rbac',
+    'flags',
 ]
 
 
@@ -369,7 +370,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication',
-        'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
     ),
@@ -388,16 +388,6 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
-
-
-# Django OAuth Toolkit settings
-OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
-OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
-
-OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
-
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
@@ -880,7 +870,7 @@ AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
-RECPETOR_KEEP_WORK_ON_ERROR = False
+RECEPTOR_KEEP_WORK_ON_ERROR = False
 
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
@@ -1064,3 +1054,6 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
+
+# feature flags
+FLAGS = {}

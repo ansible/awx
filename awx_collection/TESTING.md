@@ -109,7 +109,7 @@ rootdir: /home/student1/awx, configfile: pytest.ini
 plugins: cov-2.10.1, django-3.10.0, pythonpath-0.7.3, mock-1.11.1, timeout-1.4.2, forked-1.3.0, xdist-1.34.0
 collected 116 items
 
-awx_collection/test/awx/test_application.py::test_create_application PASSED                [  0%]
+awx_collection/test/awx/test_ad_hoc_wait.py::test_ad_hoc_wait_successful PASSED            [  0%]
 awx_collection/test/awx/test_completeness.py::test_completeness PASSED                     [  1%]
 
 ...
@@ -124,18 +124,18 @@ FAILED awx_collection/test/awx/test_module_utils.py::test_type_warning - SystemE
 make: *** [Makefile:382: test_collection] Error 1
 ```
 
-In addition to running all of the tests, you can also specify specific tests to run. This is useful when developing a single module. In this example, we will run the tests for the `token` module:
+In addition to running all of the tests, you can also specify specific tests to run. This is useful when developing a single module. In this example, we will run the tests for the `project` module:
 
 ```
-$ pytest awx_collection/test/awx/test_token.py
+$ pytest awx_collection/test/awx/test_project.py
 ============================ test session starts ============================
 platform darwin -- Python 3.7.0, pytest-3.6.0, py-1.8.1, pluggy-0.6.0
 django: settings: awx.settings.development (from ini)
 rootdir: /Users/jowestco/junk/awx, inifile: pytest.ini
 plugins: xdist-1.27.0, timeout-1.3.4, pythonpath-0.7.3, mock-1.11.1, forked-1.1.3, django-3.9.0, cov-2.8.1
-collected 1 item                                                                                                                                                  
+collected 1 item
 
-awx_collection/test/awx/test_token.py .                               [100%]
+awx_collection/test/awx/test_project.py .                               [100%]
 
 ========================= 1 passed in 1.72 seconds =========================
 ```

@@ -75,7 +75,7 @@ DOCUMENTATION = """
 EXAMPLES = """
     - name: Create a string for a schedule
       debug:
-        msg: "{{ query('awx.awx.schedule_rrule', 'none', start_date='1979-09-13 03:45:07') }}"
+        msg: "{{ lookup('awx.awx.schedule_rrule', 'none', start_date='1979-09-13 03:45:07') }}"
 """
 
 RETURN = """
@@ -237,4 +237,4 @@ class LookupModule(LookupBase):
         if kwargs.get('every', 1) == 1:
             return_rrule = "{0};INTERVAL=1".format(return_rrule)
 
-        return return_rrule
+        return [return_rrule]

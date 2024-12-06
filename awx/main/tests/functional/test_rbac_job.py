@@ -2,7 +2,15 @@ import pytest
 
 from rest_framework.exceptions import PermissionDenied
 
-from awx.main.access import JobAccess, JobLaunchConfigAccess, AdHocCommandAccess, InventoryUpdateAccess, ProjectUpdateAccess, SystemJobTemplateAccess
+from awx.main.access import (
+    JobAccess,
+    JobLaunchConfigAccess,
+    AdHocCommandAccess,
+    InventoryUpdateAccess,
+    ProjectUpdateAccess,
+    SystemJobTemplateAccess,
+    SystemJobAccess,
+)
 from awx.main.models import (
     Job,
     JobLaunchConfig,
@@ -368,3 +376,8 @@ class TestSystemJobTemplateAccess:
         access = SystemJobTemplateAccess(admin_user)
         assert access.can_read(system_job_template)
         assert access.can_start(system_job_template)
+
+    def test_org_auditor_view_system_job(self, system_job_template, org_auditor):
+        system_job = system_job_template.create_unified_job()
+        access = SystemJobAccess(org_auditor)
+        assert not access.can_read(system_job)
