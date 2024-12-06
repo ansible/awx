@@ -3,4 +3,4 @@ git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
 git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
 django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest-filters,jwt_consumer,resource-registry,rbac]
 awx-plugins-core @ git+https://git@github.com/ansible/awx-plugins.git@devel#egg=awx-plugins-core
-awx_plugins.interfaces @ git+https://github.com/chrismeyersfsu/awx_plugins.interfaces.git@AAP-35749-move-inject-credential-actual
+awx_plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
