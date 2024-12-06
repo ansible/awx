@@ -1411,4 +1411,4 @@ def _load_all_entry_points_for(entry_point_subsections: list[str], /) -> dict[st
 
 is_awx = detect_server_product_name() == 'AWX'
 extra_entry_point_groups = () if is_awx else ('inventory.supported',)
-entry_points = _load_all_entry_points_for(['inventory', *extra_entry_point_groups])
+inv_entry_points = _load_all_entry_points_for(['inventory', *extra_entry_point_groups])

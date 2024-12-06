@@ -60,10 +60,10 @@ class MainConfig(AppConfig):
     def load_credential_types_feature(self):
         return self._load_credential_types_feature()
 
-    def load_entry_points(self):
-        from awx.main.models.inventory import InventorySourceOptions, entry_points
+    def load_inventory_plugins(self):
+        from awx.main.models.inventory import InventorySourceOptions, inv_entry_points
 
-        for entry_point_name, entry_point in entry_points.items():
+        for entry_point_name, entry_point in inv_entry_points.items():
             cls = entry_point.load()
             InventorySourceOptions.injectors[entry_point_name] = cls
 
@@ -78,4 +78,4 @@ class MainConfig(AppConfig):
         if not os.environ.get('AWX_SKIP_CREDENTIAL_TYPES_DISCOVER', None):
             self.load_credential_types_feature()
         self.load_named_url_feature()
-        self.load_entry_points()
+        self.load_inventory_plugins()
