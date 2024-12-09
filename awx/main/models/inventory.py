@@ -24,7 +24,6 @@ from django.db.models import Q
 from rest_framework.exceptions import ParseError
 
 from ansible_base.lib.utils.models import prevent_search
-from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 # AWX
 from awx.api.versioning import reverse
@@ -1402,7 +1401,3 @@ class CustomInventoryScript(CommonModelNameNotUnique):
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
-
-is_awx = detect_server_product_name() == 'AWX'
-extra_entry_point_groups = () if is_awx else ('inventory.supported',)
-inv_entry_points = _load_all_entry_points_for(['inventory', *extra_entry_point_groups])
