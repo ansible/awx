@@ -9,7 +9,6 @@ import re
 import copy
 import os.path
 from urllib.parse import urljoin
-from importlib.metadata import entry_points, EntryPoint
 
 # Django
 from django.conf import settings
@@ -1403,11 +1402,6 @@ class CustomInventoryScript(CommonModelNameNotUnique):
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
-
-
-def _load_all_entry_points_for(entry_point_subsections: list[str], /) -> dict[str, EntryPoint]:
-    return {ep.name: ep for entry_point_category in entry_point_subsections for ep in entry_points(group=f'awx_plugins.{entry_point_category}')}
-
 
 is_awx = detect_server_product_name() == 'AWX'
 extra_entry_point_groups = () if is_awx else ('inventory.supported',)
