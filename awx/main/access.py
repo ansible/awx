@@ -17,9 +17,6 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 
-# Django OAuth Toolkit
-from awx.main.models.oauth import OAuth2Application, OAuth2AccessToken
-
 # django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
 from ansible_base.rbac.models import RoleEvaluation
@@ -441,10 +438,7 @@ class BaseAccess(object):
 
             # Actions not possible for reason unrelated to RBAC
             # Cannot copy with validation errors, or update a manual group/project
-            if 'write' not in getattr(self.user, 'oauth_scopes', ['write']):
-                user_capabilities[display_method] = False  # Read tokens cannot take any actions
-                continue
-            elif display_method in ['copy', 'start', 'schedule'] and isinstance(obj, JobTemplate):
+            if display_method in ['copy', 'start', 'schedule'] and isinstance(obj, JobTemplate):
                 if obj.validation_errors:
                     user_capabilities[display_method] = False
                     continue
@@ -751,82 +745,6 @@ class UserAccess(BaseAccess):
 
         logger.error('Unexpected attempt to de-associate {} from a user.'.format(sub_obj))
         return False
-
-
-class OAuth2ApplicationAccess(BaseAccess):
-    """
-    I can read, change or delete OAuth 2 applications when:
-     - I am a superuser.
-     - I am the admin of the organization of the user of the application.
-     - I am a user in the organization of the application.
-    I can create OAuth 2 applications when:
-     - I am a superuser.
-     - I am the admin of the organization of the application.
-    """
-
-    model = OAuth2Application
-    select_related = ('user',)
-    prefetch_related = ('organization', 'oauth2accesstoken_set')
-
-    def filtered_queryset(self):
-        org_access_qs = Organization.access_qs(self.user, 'member')
-        return self.model.objects.filter(organization__in=org_access_qs)
-
-    def can_change(self, obj, data):
-        return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj, role_field='admin_role', mandatory=True)
-
-    def can_delete(self, obj):
-        return self.user.is_superuser or obj.organization in self.user.admin_of_organizations
-
-    def can_add(self, data):
-        if self.user.is_superuser:
-            return True
-        if not data:
-            return Organization.access_qs(self.user, 'change').exists()
-        return self.check_related('organization', Organization, data, role_field='admin_role', mandatory=True)
-
-
-class OAuth2TokenAccess(BaseAccess):
-    """
-    I can read, change or delete an app token when:
-     - I am a superuser.
-     - I am the admin of the organization of the application of the token.
-     - I am the user of the token.
-    I can create an OAuth2 app token when:
-     - I have the read permission of the related application.
-    I can read, change or delete a personal token when:
-     - I am the user of the token
-     - I am the superuser
-    I can create an OAuth2 Personal Access Token when:
-     - I am a user.  But I can only create a PAT for myself.
-    """
-
-    model = OAuth2AccessToken
-
-    select_related = ('user', 'application')
-    prefetch_related = ('refresh_token',)
-
-    def filtered_queryset(self):
-        org_access_qs = Organization.objects.filter(Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
-        return self.model.objects.filter(application__organization__in=org_access_qs) | self.model.objects.filter(user__id=self.user.pk)
-
-    def can_delete(self, obj):
-        if (self.user.is_superuser) | (obj.user == self.user):
-            return True
-        elif not obj.application:
-            return False
-        return self.user in obj.application.organization.admin_role
-
-    def can_change(self, obj, data):
-        return self.can_delete(obj)
-
-    def can_add(self, data):
-        if 'application' in data:
-            app = get_object_from_data('application', OAuth2Application, data)
-            if app is None:
-                return True
-            return OAuth2ApplicationAccess(self.user).can_read(app)
-        return True
 
 
 class OrganizationAccess(NotificationAttachMixin, BaseAccess):
@@ -2741,8 +2659,6 @@ class ActivityStreamAccess(BaseAccess):
         'credential_type',
         'team',
         'ad_hoc_command',
-        'o_auth2_application',
-        'o_auth2_access_token',
         'notification_template',
         'notification',
         'label',
@@ -2827,14 +2743,6 @@ class ActivityStreamAccess(BaseAccess):
         team_set = Team.accessible_pk_qs(self.user, 'read_role')
         if team_set:
             q |= Q(team__in=team_set)
-
-        app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
-        if app_set:
-            q |= Q(o_auth2_application__in=app_set)
-
-        token_set = OAuth2TokenAccess(self.user).filtered_queryset()
-        if token_set:
-            q |= Q(o_auth2_access_token__in=token_set)
 
         return qs.filter(q).distinct()
 

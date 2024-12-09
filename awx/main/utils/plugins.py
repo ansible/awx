@@ -44,6 +44,24 @@ def compute_cloud_inventory_sources() -> dict[str, str]:
 
 
 @cache
+def discover_available_cloud_provider_descriptions() -> dict[str, str]:
+    """
+    Return a dictionary of cloud provider plugin descriptions
+    available.
+
+    :returns: Dictionary of plugin cloud descriptions.
+    :rtype: dict[str, str]
+    """
+    from awx.main.models.inventory import InventorySourceOptions
+
+    plugin_description_list = [(plugin_name, plugin.plugin_description) for plugin_name, plugin in InventorySourceOptions.injectors.items()]
+
+    plugin_description = dict(plugin_description_list)
+
+    return plugin_description
+
+
+@cache
 def load_combined_inventory_source_options() -> dict[str, str]:
     """
     Return a dictionary of cloud provider plugin names and 'file'.
@@ -56,4 +74,14 @@ def load_combined_inventory_source_options() -> dict[str, str]:
 
     plugins = compute_cloud_inventory_sources()
 
-    return dict(zip(plugins, plugins), file='file')
+    plugin_description = discover_available_cloud_provider_descriptions()
+
+    if 'scm' in plugins:
+        plugin_description['scm'] = 'Sourced from a Project'
+
+    if 'file' in plugins:
+        plugin_description['file'] = 'File-based inventory source'
+
+    result = {plugin: plugin_description.get(plugin, plugin) for plugin in plugins}
+
+    return result

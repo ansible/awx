@@ -7,6 +7,12 @@ import pytest
 from awx.main.models import InstanceGroup, Instance
 
 
+@pytest.mark.filterwarnings(
+    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: The suppression should be made more specific or the cause fixed.
+    # Ref: https://github.com/ansible/awx/pull/15620
+    "ignore::RuntimeWarning",
+)
 @pytest.mark.django_db
 def test_instance_group_create(run_module, admin_user):
     result = run_module(
@@ -36,6 +42,12 @@ def test_instance_group_create(run_module, admin_user):
     assert len(all_instance_names) == 1, 'Too many instances in group {0}'.format(','.join(all_instance_names))
 
 
+@pytest.mark.filterwarnings(
+    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: The suppression should be made more specific or the cause fixed.
+    # Ref: https://github.com/ansible/awx/pull/15620
+    "ignore::RuntimeWarning",
+)
 @pytest.mark.django_db
 def test_container_group_create(run_module, admin_user, kube_credential):
     pod_spec = "{ 'Nothing': True }"

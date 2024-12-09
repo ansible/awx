@@ -35,8 +35,12 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
+    'notfound.extension',
     'swagger',
 ]
+
+notfound_urls_prefix = "/projects/awx/en/latest/"
+notfound_template = "404.rst"
 
 html_theme = 'sphinx_ansible_theme'
 html_theme_path = ["_static"]

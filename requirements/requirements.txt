@@ -130,6 +130,7 @@ django==4.2.16
     #   django-cors-headers
     #   django-crum
     #   django-extensions
+    #   django-flags
     #   django-guid
     #   django-oauth-toolkit
     #   django-polymorphic
@@ -144,6 +145,8 @@ django-crum==0.7.9
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
 django-extensions==3.2.3
+    # via -r /awx_devel/requirements/requirements.in
+django-flags==5.0.13
     # via -r /awx_devel/requirements/requirements.in
 django-guid==3.5.0
     # via -r /awx_devel/requirements/requirements.in

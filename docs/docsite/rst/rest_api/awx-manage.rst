@@ -70,74 +70,11 @@ Cluster management
 
 .. _ag_token_utility:
 
-Token and session management
+Session management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. index:: 
-   single: awx-manage; token management
    single: awx-manage; session management
-
-AWX supports the following commands for OAuth2 token management:
-
-.. contents::
-    :local:
-
-
-``create_oauth2_token``
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use this command to create OAuth2 tokens (specify actual username for ``example_user`` below):
-
-::
-
-	$ awx-manage create_oauth2_token --user example_user
-
-	New OAuth2 token for example_user: j89ia8OO79te6IAZ97L7E8bMgXCON2
-
-Make sure you provide a valid user when creating tokens. Otherwise, you will get an error message that you tried to issue the command without specifying a user, or supplying a username that does not exist.
-
-
-.. _ag_manage_utility_revoke_tokens:
- 
-
-``revoke_oauth2_tokens``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use this command to revoke OAuth2 tokens (both application tokens and personal access tokens (PAT)). By default, it revokes all application tokens (but not their associated refresh tokens), and revokes all personal access tokens. However, you can also specify a user for whom to revoke all tokens.
-
-To revoke all existing OAuth2 tokens: 
-
-::
-
-	$ awx-manage revoke_oauth2_tokens
-
-To revoke all OAuth2 tokens & their refresh tokens: 
-
-::
-
-	$ awx-manage revoke_oauth2_tokens --revoke_refresh
-
-To revoke all OAuth2 tokens for the user with ``id=example_user`` (specify actual username for ``example_user`` below):
-
-::
-
-	$ awx-manage revoke_oauth2_tokens --user example_user
-
-To revoke all OAuth2 tokens and refresh token for the user with ``id=example_user``:
-
-::
-
-	$ awx-manage revoke_oauth2_tokens --user example_user --revoke_refresh
-
-
-
-``cleartokens``
-^^^^^^^^^^^^^^^^^^^
-
-Use this command to clear tokens which have already been revoked. Refer to `Django's Oauth Toolkit documentation on cleartokens`_ for more detail.
-
-	.. _`Django's Oauth Toolkit documentation on cleartokens`: https://django-oauth-toolkit.readthedocs.io/en/latest/management_commands.html
-
 
 ``expire_sessions``
 ^^^^^^^^^^^^^^^^^^^^^^^^
