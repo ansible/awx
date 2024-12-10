@@ -470,7 +470,7 @@ slack-sdk==3.27.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.1
     # via gitdb
-sqlparse==0.5.1
+sqlparse==0.5.3
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
