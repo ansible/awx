@@ -350,6 +350,9 @@ test:
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
+live_test:
+	cd awx/main/tests/live && py.test tests/
+
 ## Run all API unit tests with coverage enabled.
 test_coverage:
 	$(MAKE) test PYTEST_ARGS="--create-db --cov --cov-report=xml --junitxml=reports/junit.xml"

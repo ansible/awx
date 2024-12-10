@@ -1138,6 +1138,17 @@ def deepmerge(a, b):
         return b
 
 
+def table_exists(cursor, table_name):
+    cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{table_name}');")
+    row = cursor.fetchone()
+    if row is not None:
+        for val in row:  # should only have 1
+            if val is True:
+                logger.debug(f'Event partition table {table_name} already exists')
+                return True
+    return False
+
+
 def create_partition(tblname, start=None):
     """Creates new partition table for events.  By default it covers the current hour."""
     if start is None:
@@ -1154,13 +1165,8 @@ def create_partition(tblname, start=None):
     try:
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
-                row = cursor.fetchone()
-                if row is not None:
-                    for val in row:  # should only have 1
-                        if val is True:
-                            logger.debug(f'Event partition table {tblname}_{partition_label} already exists')
-                            return
+                if table_exists(cursor, f"{tblname}_{partition_label}"):
+                    return
 
                 cursor.execute(
                     f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
@@ -1172,9 +1178,11 @@ def create_partition(tblname, start=None):
         cause = e.__cause__
         if cause and hasattr(cause, 'sqlstate'):
             sqlstate = cause.sqlstate
+            if sqlstate is None:
+                raise
             sqlstate_cls = psycopg.errors.lookup(sqlstate)
 
-            if psycopg.errors.DuplicateTable == sqlstate_cls or psycopg.errors.UniqueViolation == sqlstate_cls:
+            if sqlstate_cls in (psycopg.errors.DuplicateTable, psycopg.errors.DuplicateObject, psycopg.errors.UniqueViolation):
                 logger.info(f'Caught known error due to partition creation race: {e}')
             else:
                 logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_cls))
@@ -1183,6 +1191,8 @@ def create_partition(tblname, start=None):
         cause = e.__cause__
         if cause and hasattr(cause, 'sqlstate'):
             sqlstate = cause.sqlstate
+            if sqlstate is None:
+                raise
             sqlstate_str = psycopg.errors.lookup(sqlstate)
             logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
         raise
