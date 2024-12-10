@@ -64,6 +64,9 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     if rrule._freq not in {dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY}:
         return rrule
 
+    if rrule._count:
+        return rrule
+
     if ref_dt is None:
         ref_dt = now()
 

@@ -115,6 +115,12 @@ def test_future_date_does_not_fast_forward():
     assert new_rrule == rrule
 
 
+def test_rrule_with_count_does_not_fast_forward():
+    rrule = dateutil.rrule.rrule(freq=MINUTELY, interval=5, count=1, dtstart=REF_DT)
+
+    assert rrule == _fast_forward_rrule(rrule, ref_dt=REF_DT)
+
+
 @pytest.mark.parametrize(
     ('freq', 'interval'),
     [
