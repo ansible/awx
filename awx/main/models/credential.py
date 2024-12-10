@@ -53,7 +53,6 @@ from awx.main.models.rbac import (
 )
 from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
-from awx_plugins.credentials import injectors as builtin_injectors
 
 # DAB
 from ansible_base.resource_registry.tasks.sync import get_resource_server_client
