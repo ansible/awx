@@ -37,7 +37,7 @@ def get_urlpatterns(prefix=None):
         re_path(r'^(?!api/).*', include('awx.ui.urls', namespace='ui')),
     ]
 
-    if settings.SETTINGS_MODULE == 'awx.settings.development':
+    if settings.DYNACONF.is_development_mode:
         try:
             import debug_toolbar
 
