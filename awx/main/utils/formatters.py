@@ -160,6 +160,7 @@ class LogstashFormatter(LogstashFormatterBase):
             data = json.loads(data)
         data_for_log = {}
 
+        # For the job_lifecycle logger
         if 'lifecycle_data' in raw_data:
             data_for_log['lifecycle_data'] = raw_data['lifecycle_data']
 
