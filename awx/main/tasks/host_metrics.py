@@ -229,6 +229,8 @@ class HostMetricSummaryMonthlyTask:
         summary = None
         while not summary and self.existing_summaries_idx < self.existing_summaries_cnt:
             tmp = self.existing_summaries[self.existing_summaries_idx]
+            if isinstance(tmp, datetime):
+                tmp = tmp.date()
             if tmp.date < month:
                 self.existing_summaries_idx += 1
             elif tmp.date == month:
