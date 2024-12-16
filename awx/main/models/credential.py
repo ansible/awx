@@ -558,19 +558,6 @@ class CredentialType(CommonModelNameNotUnique):
 class ManagedCredentialType(SimpleNamespace):
     registry = {}
 
-    def __init__(self, namespace, **kwargs):
-        for k in ('inputs', 'injectors'):
-            if k not in kwargs:
-                kwargs[k] = {}
-        super(ManagedCredentialType, self).__init__(namespace=namespace, **kwargs)
-        if namespace in ManagedCredentialType.registry:
-            raise ValueError(
-                'a ManagedCredentialType with namespace={} is already defined in {}'.format(
-                    namespace, inspect.getsourcefile(ManagedCredentialType.registry[namespace].__class__)
-                )
-            )
-        ManagedCredentialType.registry[namespace] = self
-
     def get_creation_params(self):
         return dict(
             namespace=self.namespace,
