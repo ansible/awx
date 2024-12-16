@@ -22,7 +22,8 @@ authentication set up inside of the logstash configuration file).
         "awx",
         "activity_stream",
         "job_events",
-        "system_tracking"
+        "system_tracking",
+        "job_lifecycle"
     ],
     "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
     "LOG_AGGREGATOR_TOWER_UUID": "991ac7e9-6d68-48c8-bbde-7ca1096653c6",
