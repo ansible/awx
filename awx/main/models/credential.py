@@ -48,7 +48,6 @@ from awx.main.models.rbac import (
 )
 from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
-from awx_plugins.credentials import injectors as builtin_injectors
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 
