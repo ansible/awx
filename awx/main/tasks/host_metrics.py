@@ -93,8 +93,10 @@ class HostMetricTask:
 
 class HostMetricSummaryMonthlyTask:
     LOCK_KEY = 'host_metric_summary_monthly'
-    LOCK_SESSION_TIMEOUT = 30000
+    
+    LOCK_SESSION_TIMEOUT = 300000  # 5 minutes. 
     """
+    Task runs every four hours, longer lock timeout avoids premature termination due to high db load or other latency.
     This task computes last [threshold] months of HostMetricSummaryMonthly table
     [threshold] is setting CLEANUP_HOST_METRICS_HARD_THRESHOLD
     Each record in the table represents changes in HostMetric table in one month
