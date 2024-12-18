@@ -11,6 +11,8 @@ from awx.main.dispatch.publish import task
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
+from awx.main.utils.pglock import advisory_lock
+
 
 logger = logging.getLogger('awx.main.tasks.host_metrics')
 
@@ -90,6 +92,8 @@ class HostMetricTask:
 
 
 class HostMetricSummaryMonthlyTask:
+    LOCK_KEY = 'host_metric_summary_monthly'
+    LOCK_SESSION_TIMEOUT = 30000
     """
     This task computes last [threshold] months of HostMetricSummaryMonthly table
     [threshold] is setting CLEANUP_HOST_METRICS_HARD_THRESHOLD
@@ -115,29 +119,37 @@ class HostMetricSummaryMonthlyTask:
         self.records_to_update = []
 
     def execute(self):
-        self._load_existing_summaries()
-        self._load_hosts_added()
-        self._load_hosts_deleted()
 
-        # Get first month after last hard delete
-        month = self._get_first_month()
-        license_consumed = self._get_license_consumed_before(month)
+        with advisory_lock(
+            HostMetricSummaryMonthlyTask.LOCK_KEY, lock_session_timeout_milliseconds=HostMetricSummaryMonthlyTask.LOCK_SESSION_TIMEOUT, wait=False
+        ) as acquired:
+            if not acquired:
+                logger.info("Another instance of host_metric_summary_monthly is already running. Exiting.")
+                return
 
-        # Fill record for each month
-        while month <= datetime.date.today().replace(day=1):
-            summary = self._find_or_create_summary(month)
-            # Update summary and update license_consumed by hosts added/removed this month
-            self._update_summary(summary, month, license_consumed)
-            license_consumed = summary.license_consumed
+            self._load_existing_summaries()
+            self._load_hosts_added()
+            self._load_hosts_deleted()
 
-            month = month + relativedelta(months=1)
+            # Get first month after last hard delete
+            month = self._get_first_month()
+            license_consumed = self._get_license_consumed_before(month)
 
-        # Create/Update stats
-        HostMetricSummaryMonthly.objects.bulk_create(self.records_to_create, batch_size=1000)
-        HostMetricSummaryMonthly.objects.bulk_update(self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'], batch_size=1000)
+            # Fill record for each month
+            while month <= datetime.date.today().replace(day=1):
+                summary = self._find_or_create_summary(month)
+                # Update summary and update license_consumed by hosts added/removed this month
+                self._update_summary(summary, month, license_consumed)
+                license_consumed = summary.license_consumed
 
-        # Set timestamp of last run
-        settings.HOST_METRIC_SUMMARY_TASK_LAST_TS = now()
+                month = month + relativedelta(months=1)
+
+            # Create/Update stats
+            HostMetricSummaryMonthly.objects.bulk_create(self.records_to_create, batch_size=1000)
+            HostMetricSummaryMonthly.objects.bulk_update(self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'], batch_size=1000)
+
+            # Set timestamp of last run
+            settings.HOST_METRIC_SUMMARY_TASK_LAST_TS = now()
 
     def _get_license_consumed_before(self, month):
         license_consumed = 0
