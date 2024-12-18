@@ -145,7 +145,7 @@ jobs:
       - uses: ./.github/actions/upload_awx_devel_logs
         if: always()
         with:
-          log-filename: live-tests-${{ matrix.target-regex.name }}.log
+          log-filename: live-tests.log
 
   awx-operator:
     runs-on: ubuntu-latest
