@@ -131,7 +131,7 @@ django==4.2.16
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
-# django-ansible-base @ git+https://github.com/alancoding/django-ansible-base@advisory_lock  # git requirements installed separately
+# django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.6.0
     # via -r /awx_devel/requirements/requirements.in
