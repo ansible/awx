@@ -677,6 +677,7 @@ class CredentialType(CommonModelNameNotUnique):
                 args.extend(['-e', '@%s' % container_path])
 
 
+
 class CredentialTypeHelper:
     @classmethod
     def get_creation_params(cls, cred_type):
