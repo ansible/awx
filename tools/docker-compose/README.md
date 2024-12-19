@@ -50,12 +50,16 @@ Use on other platforms is untested, and may require local changes.
 
 ### How to Disable Color?
 
-There are 2 layers that might apply color - docker and supervisord.
-Both of these can have color turned off by adding things to the
+There are several layers that might apply color:
+ - docker compose coloring based on what container log comes from
+ - supervisord coloring based on what server it comes from
+ - general coloration from Django management commands
+
+These can have color turned off by adding things to the
 environment variable to modify the call options.
 
 ```
-COMPOSE_UP_OPTS="--no-color" SUPERVISOR_ARGS="-n -t" make docker-compose
+DJANGO_COLORS=nocolor COMPOSE_UP_OPTS="--no-color" SUPERVISOR_ARGS="-n -t" make docker-compose
 ```
 
 This can be useful if this is ran in CI in any context.
