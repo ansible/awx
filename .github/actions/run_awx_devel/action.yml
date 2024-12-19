@@ -16,6 +16,12 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Disable apparmor for rsyslogd, first step
+      run: sudo ln -s /etc/apparmor.d/usr.sbin.rsyslogd /etc/apparmor.d/disable/
+
+    - name: Disable apparmor for rsyslogd, second step
+      run: sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.rsyslogd
+
     - name: Build awx_devel image for running checks
       uses: ./.github/actions/awx_devel_image
       with:
