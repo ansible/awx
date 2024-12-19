@@ -229,3 +229,12 @@ def me_inst():
     me_mock = mock.MagicMock(return_value=inst)
     with mock.patch.object(Instance.objects, 'me', me_mock):
         yield inst
+
+
+@pytest.fixture(scope="session", autouse=True)
+def load_all_credentials():
+    with mock.patch('awx.main.models.credential.detect_server_product_name', return_value='NOT_AWX'):
+        from awx.main.models.credential import load_credentials
+
+        load_credentials()
+        yield

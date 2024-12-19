@@ -37,16 +37,24 @@ def cleanup_cloudforms():
     assert 'cloudforms' not in CredentialType.defaults
 
 
-@pytest.mark.django_db
-def test_cloudforms_inventory_removal(request, inventory):
-    request.addfinalizer(cleanup_cloudforms)
-    ManagedCredentialType(
+@pytest.fixture
+def cloudforms_mct():
+    ManagedCredentialType.registry['cloudforms'] = ManagedCredentialType(
         name='Red Hat CloudForms',
         namespace='cloudforms',
         kind='cloud',
         managed=True,
         inputs={},
+        injectors={},
     )
+    yield
+    ManagedCredentialType.registry.pop('cloudforms', None)
+
+
+@pytest.mark.django_db
+def test_cloudforms_inventory_removal(request, inventory, cloudforms_mct):
+    request.addfinalizer(cleanup_cloudforms)
+
     CredentialType.defaults['cloudforms']().save()
     cloudforms = CredentialType.objects.get(namespace='cloudforms')
     Credential.objects.create(

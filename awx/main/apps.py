@@ -60,6 +60,9 @@ class MainConfig(AppConfig):
 
     @bypass_in_test
     def load_credential_types_feature(self):
+        from awx.main.models.credential import load_credentials
+
+        load_credentials()
         return self._load_credential_types_feature()
 
     def load_inventory_plugins(self):

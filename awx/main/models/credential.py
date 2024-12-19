@@ -640,26 +640,30 @@ class CredentialInputSource(PrimordialModel):
         return reverse(view_name, kwargs={'pk': self.pk}, request=request)
 
 
-awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
-supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
-plugin_entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
+def load_credentials():
 
-for ns, ep in plugin_entry_points.items():
-    cred_plugin = ep.load()
-    if not hasattr(cred_plugin, 'inputs'):
-        setattr(cred_plugin, 'inputs', {})
-    if not hasattr(cred_plugin, 'injectors'):
-        setattr(cred_plugin, 'injectors', {})
-    if ns in ManagedCredentialType.registry:
-        raise ValueError(
-            'a ManagedCredentialType with namespace={} is already defined in {}'.format(ns, inspect.getsourcefile(ManagedCredentialType.registry[ns].__class__))
-        )
-    ManagedCredentialType.registry[ns] = cred_plugin
+    awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
+    supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
+    plugin_entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
 
-credential_plugins = {ep.name: ep for ep in entry_points(group='awx_plugins.credentials')}
-if detect_server_product_name() == 'AWX':
-    credential_plugins = {}
+    for ns, ep in plugin_entry_points.items():
+        cred_plugin = ep.load()
+        if not hasattr(cred_plugin, 'inputs'):
+            setattr(cred_plugin, 'inputs', {})
+        if not hasattr(cred_plugin, 'injectors'):
+            setattr(cred_plugin, 'injectors', {})
+        if ns in ManagedCredentialType.registry:
+            raise ValueError(
+                'a ManagedCredentialType with namespace={} is already defined in {}'.format(
+                    ns, inspect.getsourcefile(ManagedCredentialType.registry[ns].__class__)
+                )
+            )
+        ManagedCredentialType.registry[ns] = cred_plugin
 
-for ns, ep in credential_plugins.items():
-    plugin = ep.load()
-    CredentialType.load_plugin(ns, plugin)
+    credential_plugins = {ep.name: ep for ep in entry_points(group='awx_plugins.credentials')}
+    if detect_server_product_name() == 'AWX':
+        credential_plugins = {}
+
+    for ns, ep in credential_plugins.items():
+        plugin = ep.load()
+        CredentialType.load_plugin(ns, plugin)
