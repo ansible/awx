@@ -139,6 +139,9 @@ jobs:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: get info on apparmor
+        run: sudo dmesg
+
       - name: Run live dev env tests
         run: docker exec tools_awx_1 /bin/bash -c "make live_test"
 
