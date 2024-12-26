@@ -387,6 +387,10 @@ REST_FRAMEWORK = {
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
+SWAGGER_SETTINGS = {
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'awx.api.swagger.CustomSwaggerAutoSchema',
+}
+
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
