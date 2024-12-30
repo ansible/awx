@@ -26,6 +26,7 @@ system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=None):
     log_data['inventory_id'] = inventory_id
     log_data['written_ct'] = 0
+    hosts_cached = list()
     try:
         os.makedirs(destination, mode=0o700)
     except FileExistsError:
@@ -36,7 +37,6 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
 
     if isinstance(hosts, QuerySet):
         hosts = hosts.iterator()
-
     last_filepath_written = None
     for host in hosts:
         if (not host.ansible_facts_modified) or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
@@ -51,13 +51,14 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
                 json.dump(host.ansible_facts, f)
                 log_data['written_ct'] += 1
                 last_filepath_written = filepath
+            hosts_cached.append(host.name)
         except IOError:
             system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
             continue
     # make note of the time we wrote the last file so we can check if any file changed later
     if last_filepath_written:
-        return os.path.getmtime(last_filepath_written)
-    return None
+        return os.path.getmtime(last_filepath_written), hosts_cached
+    return None, hosts_cached
 
 
 def raw_update_hosts(host_list):
@@ -88,7 +89,7 @@ def update_hosts(host_list, max_tries=5):
     msg='Inventory {inventory_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
     add_log_data=True,
 )
-def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=None, inventory_id=None):
+def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=None, inventory_id=None, hosts_cached=None):
     log_data['inventory_id'] = inventory_id
     log_data['updated_ct'] = 0
     log_data['unmodified_ct'] = 0
@@ -130,6 +131,9 @@ def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=Non
                 log_data['unmodified_ct'] += 1
         else:
             # if the file goes missing, ansible removed it (likely via clear_facts)
+            # if the file goes missing, but the host hasnot started facts, then we should not clear the facts
+            if hosts_cached and host.name not in hosts_cached:
+                continue
             host.ansible_facts = {}
             host.ansible_facts_modified = now()
             hosts_to_update.append(host)
