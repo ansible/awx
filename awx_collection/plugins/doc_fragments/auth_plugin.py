@@ -71,7 +71,12 @@ options:
     type: float
     env:
     - name: CONTROLLER_REQUEST_TIMEOUT
-      alternatives: 'AAP_REQUEST_TIMEOUT'
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Support for AAP variables
+        alternatives: 'AAP_REQUEST_TIMEOUT'
+    aliases: [ aap_request_timeout ]
 
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library
