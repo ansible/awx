@@ -72,8 +72,8 @@ class PubSub(object):
                 ns = conn.wait(psycopg.generators.notifies(conn.pgconn))
             except psycopg.errors._NO_TRACEBACK as ex:
                 raise ex.with_traceback(None)
-        enc = psycopg._encodings.pgconn_encoding(conn.pgconn)
         for pgn in ns:
+            enc = conn.pgconn._encoding
             n = psycopg.connection.Notify(pgn.relname.decode(enc), pgn.extra.decode(enc), pgn.be_pid)
             yield n
 
