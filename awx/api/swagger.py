@@ -8,10 +8,14 @@ from drf_yasg.views import get_schema_view
 
 class CustomSwaggerAutoSchema(SwaggerAutoSchema):
     """Custom SwaggerAutoSchema to add swagger_topic to tags."""
+
     def get_tags(self, operation_keys=None):
         tags = []
         try:
-            serializer = self.view.get_serializer()
+            if hasattr(self.view, 'get_serializer'):
+                serializer = self.view.get_serializer()
+            else:
+                serializer = None
         except Exception:
             serializer = None
             warnings.warn(
