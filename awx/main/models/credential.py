@@ -464,8 +464,7 @@ class CredentialType(CommonModelNameNotUnique):
     def plugin(self):
         if self.kind != 'external':
             raise AttributeError('plugin')
-        [plugin] = [plugin for ns, plugin in credential_plugins.items() if ns == self.namespace]
-        return plugin
+        return ManagedCredentialType.registry.get(self.namespace, None)
 
     def default_for_field(self, field_id):
         for field in self.inputs.get('fields', []):
