@@ -11,7 +11,7 @@ from awx.main.dispatch.publish import task
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
-from awx.main.utils.pglock import advisory_lock
+from ansible_base.lib.utils.db import advisory_lock
 
 
 logger = logging.getLogger('awx.main.tasks.host_metrics')
