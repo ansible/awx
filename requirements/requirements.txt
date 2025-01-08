@@ -454,7 +454,6 @@ setuptools-scm[toml]==8.1.0
 six==1.17.0
     # via
     #   azure-core
-    #   isodate
     #   kubernetes
     #   msrestazure
     #   openshift
