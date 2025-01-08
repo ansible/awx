@@ -21,6 +21,7 @@ def test_bootstrap_consistent():
     with open('requirements/requirements.txt', 'r') as f:
         req_data = f.read()
 
+    different_requirements = []
     for req in bootstrap_reqs:
         boot_req_name, _ = req.split('=', 1)
         for line in req_data.split('\n'):
@@ -28,8 +29,10 @@ def test_bootstrap_consistent():
                 continue
             req_name, _ = line.split('=', 1)
             if req_name == boot_req_name:
-                assert req == line
+                different_requirements.append((req, line))
                 break
+
+    assert not different_requirements
 
 
 @pytest.mark.skip(reason="This test needs some love")
