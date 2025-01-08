@@ -18,7 +18,7 @@ import pytest
 from ansible.module_utils.six import raise_from
 
 from ansible_base.rbac.models import RoleDefinition, DABPermission
-from awx.main.tests.conftest import load_all_credentials
+from awx.main.tests.conftest import load_all_credentials # noqa: F401
 from awx.main.tests.functional.conftest import _request
 from awx.main.tests.functional.conftest import credentialtype_scm, credentialtype_ssh  # noqa: F401; pylint: disable=unused-import
 from awx.main.models import (
@@ -364,6 +364,3 @@ def rrule():
 @pytest.fixture
 def schedule(job_template, rrule):
     return Schedule.objects.create(unified_job_template=job_template, name='test-sched', rrule=rrule)
-
-# has autouse on for the fixture but calling to satisfy linting
-oad_all_credentials()
