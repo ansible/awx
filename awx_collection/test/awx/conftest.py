@@ -364,3 +364,6 @@ def rrule():
 @pytest.fixture
 def schedule(job_template, rrule):
     return Schedule.objects.create(unified_job_template=job_template, name='test-sched', rrule=rrule)
+
+# has autouse on for the fixture but calling to satisfy linting
+oad_all_credentials()
