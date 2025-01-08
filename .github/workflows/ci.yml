@@ -142,6 +142,11 @@ jobs:
       - name: Run live dev env tests
         run: docker exec tools_awx_1 /bin/bash -c "make live_test"
 
+      - uses: ./.github/actions/upload_awx_devel_logs
+        if: always()
+        with:
+          log-filename: live-tests.log
+
   awx-operator:
     runs-on: ubuntu-latest
     timeout-minutes: 60

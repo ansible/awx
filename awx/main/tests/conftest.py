@@ -216,6 +216,16 @@ def mock_get_event_queryset_no_job_created():
 
 @pytest.fixture
 def mock_me():
+    "Allows Instance.objects.me() to work without touching the database"
     me_mock = mock.MagicMock(return_value=Instance(id=1, hostname=settings.CLUSTER_HOST_ID, uuid='00000000-0000-0000-0000-000000000000'))
     with mock.patch.object(Instance.objects, 'me', me_mock):
         yield
+
+
+@pytest.fixture
+def me_inst():
+    "Inserts an instance to the database for Instance.objects.me(), and goes ahead and mocks it in"
+    inst = Instance.objects.create(hostname='local_node', uuid='00000000-0000-0000-0000-000000000000')
+    me_mock = mock.MagicMock(return_value=inst)
+    with mock.patch.object(Instance.objects, 'me', me_mock):
+        yield inst

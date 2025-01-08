@@ -28,7 +28,7 @@ services:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     container_name: tools_awx_{{ container_postfix }}
     hostname: awx-{{ container_postfix }}
-    command: launch_awx.sh
+    command: launch_awx.sh supervisord --pidfile=/tmp/supervisor_pid ${SUPERVISOR_ARGS:--n}
     environment:
       OS: "{{ os_info.stdout }}"
       SDB_HOST: 0.0.0.0
@@ -41,6 +41,7 @@ services:
       AWX_LOGGING_MODE: stdout
       DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
       UWSGI_MOUNT_PATH: {{ ingress_path }}
+      DJANGO_COLORS: "${DJANGO_COLORS:-}"
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}

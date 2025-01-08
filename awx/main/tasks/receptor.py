@@ -360,7 +360,7 @@ def _convert_args_to_cli(vargs):
     args = ['cleanup']
     for option in ('exclude_strings', 'remove_images'):
         if vargs.get(option):
-            args.append('--{}="{}"'.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
+            args.append('--{} {}'.format(option.replace('_', '-'), ' '.join(f'"{item}"' for item in vargs.get(option))))
     for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))

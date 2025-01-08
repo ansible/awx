@@ -31,8 +31,15 @@ def test_apply_new_instance_id(inventory_source):
     assert host2.instance_id == 'bad_user'
 
 
+def cleanup_cloudforms():
+    if 'cloudforms' in ManagedCredentialType.registry:
+        del ManagedCredentialType.registry['cloudforms']
+    assert 'cloudforms' not in CredentialType.defaults
+
+
 @pytest.mark.django_db
-def test_cloudforms_inventory_removal(inventory):
+def test_cloudforms_inventory_removal(request, inventory):
+    request.addfinalizer(cleanup_cloudforms)
     ManagedCredentialType(
         name='Red Hat CloudForms',
         namespace='cloudforms',

@@ -162,9 +162,9 @@ def get_view_description(view, html=False):
 
 def get_default_schema():
     if settings.SETTINGS_MODULE == 'awx.settings.development':
-        from awx.api.swagger import AutoSchema
+        from awx.api.swagger import schema_view
 
-        return AutoSchema()
+        return schema_view
     else:
         return views.APIView.schema
 
