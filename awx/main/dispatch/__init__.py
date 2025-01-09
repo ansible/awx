@@ -9,6 +9,7 @@ from awx.settings.application_name import get_application_name
 
 from django.conf import settings
 from django.db import connection as pg_connection
+from django.db.backends.postgresql.base import DatabaseWrapper as PsycopgDatabaseWrapper
 
 NOT_READY = ([], [], [])
 
@@ -95,24 +96,25 @@ class PubSub(object):
 
 
 def create_listener_connection():
-    conf = deepcopy(settings.DATABASES['default'])
-    conf['OPTIONS'] = deepcopy(conf.get('OPTIONS', {}))
+    # Variable is called settings_dict to correspond to internal use in Django itself
+    settings_dict = deepcopy(settings.DATABASES['default'])
+    settings_dict['OPTIONS'] = deepcopy(settings_dict.get('OPTIONS', {}))
+
     # Modify the application name to distinguish from other connections the process might use
-    conf['OPTIONS']['application_name'] = get_application_name(settings.CLUSTER_HOST_ID, function='listener')
+    settings_dict['OPTIONS']['application_name'] = get_application_name(settings.CLUSTER_HOST_ID, function='listener')
 
     # Apply overrides specifically for the listener connection
     for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
         if k != 'OPTIONS':
-            conf[k] = v
+            settings_dict[k] = v
     for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
-        conf['OPTIONS'][k] = v
+        settings_dict['OPTIONS'][k] = v
 
-    # Allow password-less authentication
-    if 'PASSWORD' in conf:
-        conf['OPTIONS']['password'] = conf.pop('PASSWORD')
+    # Reuse the Django postgres DB backend to create params for the psycopg library
+    psycopg_conn_params = PsycopgDatabaseWrapper(settings_dict).get_connection_params()
+    psycopg_conn_params['autocommit'] = True
 
-    connection_data = f"dbname={conf['NAME']} host={conf['HOST']} user={conf['USER']} port={conf['PORT']}"
-    return psycopg.connect(connection_data, autocommit=True, **conf['OPTIONS'])
+    return psycopg.connect(**psycopg_conn_params)
 
 
 @contextmanager
