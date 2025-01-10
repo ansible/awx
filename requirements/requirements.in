@@ -63,7 +63,7 @@ uWSGI
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
-setuptools  # see UPGRADE BLOCKERs
+setuptools<71.0.0  # see UPGRADE BLOCKERs, path hack in v71 breaks irc deps
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
