@@ -8,7 +8,7 @@ boto3
 botocore
 channels
 channels-redis
-cryptography>=41.0.7  # CVE-2023-49083
+cryptography<42.0.0  # next version requires OPENSSL 3
 Cython
 daphne
 distro

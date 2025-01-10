@@ -92,7 +92,7 @@ click==8.1.8
     # via receptorctl
 constantly==23.10.4
     # via twisted
-cryptography==44.0.0
+cryptography==41.0.7
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
