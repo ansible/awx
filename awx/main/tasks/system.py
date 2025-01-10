@@ -45,6 +45,7 @@ from flags.state import flag_enabled
 from rest_framework.exceptions import PermissionDenied
 
 # AWX
+from awx.conf import db_settings
 from awx import __version__ as awx_application_version
 from awx.conf import settings_registry
 from awx.main import analytics
@@ -275,7 +276,7 @@ def apply_cluster_membership_policies():
         actual_instances = [Node(obj=i, groups=[]) for i in all_instances if i.managed_by_policy]
         logger.debug("Total instances: {}, available for policy: {}".format(total_instances, len(actual_instances)))
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
-            exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
+            exclude_type = 'execution' if g.obj.name == db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
             policy_min_added = []
             for i in sorted(actual_instances, key=lambda x: len(x.groups)):
                 if i.obj.node_type == exclude_type:
@@ -294,7 +295,7 @@ def apply_cluster_membership_policies():
 
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
-            exclude_type = 'execution' if g.obj.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
+            exclude_type = 'execution' if g.obj.name == db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
             candidate_pool_ct = sum(1 for i in actual_instances if i.obj.node_type != exclude_type)
             if not candidate_pool_ct:
                 continue
@@ -430,7 +431,7 @@ def events_processed_hook(unified_job):
 
 @task_awx(queue=get_task_queuename)
 def gather_analytics():
-    if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if is_run_threshold_reached(getattr(db_settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), db_settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
@@ -870,7 +871,7 @@ def awx_receptor_workunit_reaper():
     Since we are cleaning up jobs that controller considers to be inactive, we take the added
     precaution of calling "work cancel" in case the work unit is still active.
     """
-    if not settings.RECEPTOR_RELEASE_WORK:
+    if not db_settings.RECEPTOR_RELEASE_WORK:
         return
     logger.debug("Checking for unreleased receptor work units")
     try:
@@ -886,7 +887,7 @@ def awx_receptor_workunit_reaper():
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
-    if settings.RECEPTOR_KEEP_WORK_ON_ERROR:
+    if db_settings.RECEPTOR_KEEP_WORK_ON_ERROR:
         jobs_with_unreleased_receptor_units = jobs_with_unreleased_receptor_units.exclude(status__in=ERROR_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
@@ -898,7 +899,7 @@ def awx_receptor_workunit_reaper():
 
 @task_awx(queue=get_task_queuename)
 def awx_k8s_reaper():
-    if not settings.RECEPTOR_RELEASE_WORK:
+    if not db_settings.RECEPTOR_RELEASE_WORK:
         return
 
     from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
@@ -908,7 +909,7 @@ def awx_k8s_reaper():
         pods = PodManager.list_active_jobs(group)
         time_cutoff = now() - timedelta(seconds=settings.K8S_POD_REAPER_GRACE_PERIOD)
         reap_job_candidates = UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES)
-        if settings.RECEPTOR_KEEP_WORK_ON_ERROR:
+        if db_settings.RECEPTOR_KEEP_WORK_ON_ERROR:
             reap_job_candidates = reap_job_candidates.exclude(status__in=ERROR_STATES)
         for job in reap_job_candidates:
             logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))

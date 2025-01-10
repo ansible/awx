@@ -11,7 +11,6 @@ from socket import SHUT_RDWR
 
 # Django
 from django.db import connection
-from django.conf import settings
 from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 
@@ -31,6 +30,7 @@ from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry
 from awx.main.utils.external_logging import reconfigure_rsyslog
+from awx.conf import db_settings
 
 
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
@@ -146,8 +146,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         # used to make the request as a default.
         if hasattr(instance, 'TOWER_URL_BASE'):
             url = '{}://{}'.format(self.request.scheme, self.request.get_host())
-            if settings.TOWER_URL_BASE != url:
-                settings.TOWER_URL_BASE = url
+            if db_settings.TOWER_URL_BASE != url:
+                db_settings.TOWER_URL_BASE = url
 
 
 class SettingLoggingTest(GenericAPIView):
@@ -159,21 +159,21 @@ class SettingLoggingTest(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         # Error if logging is not enabled
-        enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED', False)
+        enabled = getattr(db_settings, 'LOG_AGGREGATOR_ENABLED', False)
         if not enabled:
             return Response({'error': 'Logging not enabled'}, status=status.HTTP_409_CONFLICT)
 
         # Send test message to configured logger based on db settings
         try:
-            default_logger = settings.LOG_AGGREGATOR_LOGGERS[0]
+            default_logger = db_settings.LOG_AGGREGATOR_LOGGERS[0]
             if default_logger != 'awx':
                 default_logger = f'awx.analytics.{default_logger}'
         except IndexError:
             default_logger = 'awx'
         logging.getLogger(default_logger).error('AWX Connection Test Message')
 
-        hostname = getattr(settings, 'LOG_AGGREGATOR_HOST', None)
-        protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', None)
+        hostname = getattr(db_settings, 'LOG_AGGREGATOR_HOST', None)
+        protocol = getattr(db_settings, 'LOG_AGGREGATOR_PROTOCOL', None)
 
         try:
             subprocess.check_output(['rsyslogd', '-N1', '-f', '/var/lib/awx/rsyslog/rsyslog.conf'], stderr=subprocess.STDOUT)
@@ -182,7 +182,7 @@ class SettingLoggingTest(GenericAPIView):
 
         # Check to ensure port is open at host
         if protocol in ['udp', 'tcp']:
-            port = getattr(settings, 'LOG_AGGREGATOR_PORT', None)
+            port = getattr(db_settings, 'LOG_AGGREGATOR_PORT', None)
             # Error if port is not set when using UDP/TCP
             if not port:
                 return Response({'error': 'Port required for ' + protocol}, status=status.HTTP_400_BAD_REQUEST)

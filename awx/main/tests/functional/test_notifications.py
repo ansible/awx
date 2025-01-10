@@ -10,7 +10,7 @@ from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.inventory import Inventory, InventorySource
 from awx.main.models.jobs import JobTemplate
 
-from django.test.utils import override_settings
+from awx.conf.testing import override_db_settings
 
 
 @pytest.mark.django_db
@@ -163,7 +163,7 @@ def test_custom_environment_injection(post, user, organization):
         expect=201,
     )
     template = NotificationTemplate.objects.get(pk=response.data['id'])
-    with pytest.raises(ConnectionError), override_settings(AWX_TASK_ENV={'HTTPS_PROXY': '192.168.50.100:1234'}), mock.patch.object(
+    with pytest.raises(ConnectionError), override_db_settings(AWX_TASK_ENV={'HTTPS_PROXY': '192.168.50.100:1234'}), mock.patch.object(
         HTTPAdapter, 'send'
     ) as fake_send:
 

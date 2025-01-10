@@ -8,7 +8,6 @@ import json
 import traceback
 
 from django.db import models
-from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.db import connection
 from django.utils.translation import gettext_lazy as _
@@ -17,6 +16,8 @@ from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 from ansible_base.lib.utils.models import prevent_search
+
+from awx.conf import db_settings
 
 # AWX
 from awx.api.versioning import reverse
@@ -184,7 +185,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
                     notification_configuration[field] = params['default']
         backend_obj = self.notification_class(**notification_configuration)
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
-        with set_environ(**settings.AWX_TASK_ENV):
+        with set_environ(**db_settings.AWX_TASK_ENV):
             return backend_obj.send_messages([notification_obj])
 
     def display_notification_configuration(self):

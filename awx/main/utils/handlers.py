@@ -17,6 +17,7 @@ from django.utils.encoding import force_str
 
 # AWX
 from awx.main.exceptions import PostRunError
+from awx.conf import db_settings
 
 # OTEL
 from opentelemetry._logs import set_logger_provider
@@ -61,7 +62,7 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
         sys.stderr.write(msg)
 
     def emit(self, msg):
-        if not settings.LOG_AGGREGATOR_ENABLED:
+        if not db_settings.LOG_AGGREGATOR_ENABLED:
             return
         return super(RSysLogHandler, self).emit(msg)
 

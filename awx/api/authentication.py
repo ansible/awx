@@ -5,18 +5,19 @@
 import logging
 
 # Django
-from django.conf import settings
 from django.utils.encoding import smart_str
 
 # Django REST Framework
 from rest_framework import authentication
+
+from awx.conf import db_settings
 
 logger = logging.getLogger('awx.api.authentication')
 
 
 class LoggedBasicAuthentication(authentication.BasicAuthentication):
     def authenticate(self, request):
-        if not settings.AUTH_BASIC_ENABLED:
+        if not db_settings.AUTH_BASIC_ENABLED:
             return
         ret = super(LoggedBasicAuthentication, self).authenticate(request)
         if ret:
@@ -25,7 +26,7 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
         return ret
 
     def authenticate_header(self, request):
-        if not settings.AUTH_BASIC_ENABLED:
+        if not db_settings.AUTH_BASIC_ENABLED:
             return
         return super(LoggedBasicAuthentication, self).authenticate_header(request)
 

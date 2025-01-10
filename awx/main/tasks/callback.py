@@ -20,6 +20,9 @@ from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSA
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
+# dynamic settings
+from awx.conf import db_settings
+
 from flags.state import flag_enabled
 
 logger = logging.getLogger('awx.main.tasks.callback')
@@ -85,7 +88,7 @@ class RunnerCallback:
         self.host_map = {}
         self.guid = get_guid()
         self.job_created = None
-        self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
+        self.recent_event_timings = deque(maxlen=db_settings.MAX_WEBSOCKET_EVENT_RATE)
         self.dispatcher = CallbackQueueDispatcher()
         self.safe_env = {}
         self.event_ct = 0

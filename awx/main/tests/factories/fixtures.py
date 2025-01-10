@@ -24,6 +24,7 @@ from awx.main.models import (
     WorkflowJobTemplateNode,
 )
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
+from awx.conf import db_settings
 
 # mk methods should create only a single object of a single type.
 # they should also have the option of being persisted or not.
@@ -39,7 +40,7 @@ def mk_instance(persisted=True, hostname='instance.example.org', node_type='hybr
 
     instance = Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname, node_type=node_type, capacity=capacity)[0]
     if node_type in ('control', 'hybrid'):
-        mk_instance_group(name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, instance=instance)
+        mk_instance_group(name=db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, instance=instance)
     return instance
 
 

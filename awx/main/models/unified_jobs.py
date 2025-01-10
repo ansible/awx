@@ -62,6 +62,7 @@ from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import AskForField, OrderedManyToManyField
+from awx.conf import db_settings
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -1115,14 +1116,14 @@ class UnifiedJob(
         all stdout for the UnifiedJob.
 
         If the size of the file is greater than
-        `settings.STDOUT_MAX_BYTES_DISPLAY`, a StdoutMaxBytesExceeded exception
+        `db_settings.STDOUT_MAX_BYTES_DISPLAY`, a StdoutMaxBytesExceeded exception
         will be raised.
         """
-        max_supported = settings.STDOUT_MAX_BYTES_DISPLAY
+        max_supported = db_settings.STDOUT_MAX_BYTES_DISPLAY
 
         if enforce_max_bytes:
             # If enforce_max_bytes is True, we're not grabbing the whole file,
-            # just the first <settings.STDOUT_MAX_BYTES_DISPLAY> bytes;
+            # just the first <db_settings.STDOUT_MAX_BYTES_DISPLAY> bytes;
             # in this scenario, it's probably safe to use a StringIO.
             fd = StringIO()
         else:
@@ -1167,7 +1168,7 @@ class UnifiedJob(
             with connection.cursor() as cursor:
                 if enforce_max_bytes:
                     # detect the length of all stdout for this UnifiedJob, and
-                    # if it exceeds settings.STDOUT_MAX_BYTES_DISPLAY bytes,
+                    # if it exceeds db_settings.STDOUT_MAX_BYTES_DISPLAY bytes,
                     # don't bother actually fetching the data
                     total = self.get_event_queryset().aggregate(total=models.Sum(models.Func(models.F('stdout'), function='LENGTH')))['total'] or 0
                     if total > max_supported:
@@ -1585,7 +1586,7 @@ class UnifiedJob(
     def control_plane_instance_group(self):
         from awx.main.models.ha import InstanceGroup
 
-        control_plane_instance_group = InstanceGroup.objects.filter(name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+        control_plane_instance_group = InstanceGroup.objects.filter(name=db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
 
         return list(control_plane_instance_group)
 
@@ -1593,15 +1594,15 @@ class UnifiedJob(
     def global_instance_groups(self):
         from awx.main.models.ha import InstanceGroup
 
-        default_instance_group_names = [settings.DEFAULT_EXECUTION_QUEUE_NAME]
+        default_instance_group_names = [db_settings.DEFAULT_EXECUTION_QUEUE_NAME]
 
         if not settings.IS_K8S:
-            default_instance_group_names.append(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+            default_instance_group_names.append(db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
 
         default_instance_groups = list(InstanceGroup.objects.filter(name__in=default_instance_group_names))
 
         # assure deterministic precedence by making sure the default group is first
-        if (not settings.IS_K8S) and default_instance_groups and default_instance_groups[0].name != settings.DEFAULT_EXECUTION_QUEUE_NAME:
+        if (not settings.IS_K8S) and default_instance_groups and default_instance_groups[0].name != db_settings.DEFAULT_EXECUTION_QUEUE_NAME:
             default_instance_groups.reverse()
 
         return default_instance_groups

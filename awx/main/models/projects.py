@@ -17,7 +17,6 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
 
-
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import PROJECT_UPDATE_JOB_TYPE_CHOICES, PERM_INVENTORY_DEPLOY
@@ -40,6 +39,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+from awx.conf import db_settings
 
 logger = logging.getLogger('awx.main.models.projects')
 
@@ -210,7 +210,7 @@ class ProjectOptions(models.Model):
         results = []
         project_path = self.get_project_path()
         if project_path:
-            for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=settings.AWX_SHOW_PLAYBOOK_LINKS):
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=db_settings.AWX_SHOW_PLAYBOOK_LINKS):
                 if skip_directory(dirpath):
                     continue
                 for filename in filenames:
@@ -653,7 +653,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         return reverse('api:project_update_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urlparse.urljoin(settings.TOWER_URL_BASE, "{}/jobs/project/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urlparse.urljoin(db_settings.TOWER_URL_BASE, "{}/jobs/project/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def cancel(self, job_explanation=None, is_chain=False):
         res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)

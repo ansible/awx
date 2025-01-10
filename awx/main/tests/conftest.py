@@ -16,6 +16,7 @@ from awx.main.tests.factories import (
 
 from django.core.cache import cache
 from django.conf import settings
+from awx.conf import db_settings
 
 
 def pytest_addoption(parser):
@@ -83,7 +84,7 @@ def instance_group_factory():
 @pytest.fixture
 def controlplane_instance_group(instance_factory, instance_group_factory):
     """There always has to be a controlplane instancegroup and at least one instance in it"""
-    return create_instance_group(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, create_instance('hybrid-1', node_type='hybrid', capacity=500))
+    return create_instance_group(db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, create_instance('hybrid-1', node_type='hybrid', capacity=500))
 
 
 @pytest.fixture

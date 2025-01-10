@@ -6,6 +6,8 @@ from awx.main.access import (
     OrganizationAccess,
 )
 
+from awx.conf.testing import override_db_settings
+
 
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
@@ -41,8 +43,7 @@ def test_organization_access_user(cl, organization, user):
 @pytest.mark.django_db
 @pytest.mark.parametrize('ext_auth', [True, False])
 def test_org_resource_role(ext_auth, organization, rando, org_admin):
-    with mock.patch('awx.main.access.settings') as settings_mock:
-        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+    with override_db_settings(MANAGE_ORGANIZATION_AUTH=ext_auth):
         access = OrganizationAccess(org_admin)
 
         assert access.can_attach(organization, rando, 'member_role.members') == ext_auth

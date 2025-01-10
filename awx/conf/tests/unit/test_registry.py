@@ -130,26 +130,6 @@ def test_field_with_custom_mixin(reg):
     assert field.is_great() is True
 
 
-@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
-def test_default_value_from_settings(reg):
-    reg.register('AWX_SOME_SETTING', field_class=fields.CharField, category=_('System'), category_slug='system')
-
-    field = reg.get_setting_field('AWX_SOME_SETTING')
-    assert field.default == 'DEFAULT'
-
-
-@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
-def test_default_value_from_settings_with_custom_representation(reg):
-    class LowercaseCharField(fields.CharField):
-        def to_representation(self, value):
-            return value.lower()
-
-    reg.register('AWX_SOME_SETTING', field_class=LowercaseCharField, category=_('System'), category_slug='system')
-
-    field = reg.get_setting_field('AWX_SOME_SETTING')
-    assert field.default == 'default'
-
-
 def test_validate_registry(reg):
     validate_func = lambda x: None
     reg.register_validate('FOO_BAR', validate_func)

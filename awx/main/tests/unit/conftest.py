@@ -1,10 +1,9 @@
 import pytest
 import logging
 
-from unittest.mock import PropertyMock
-
 from awx.api.urls import urlpatterns as api_patterns
 from awx.main.models import ExecutionEnvironment
+from awx.conf.lazy import settings as db_settings
 
 # Django
 from django.urls import URLResolver, URLPattern
@@ -17,8 +16,7 @@ def execution_environment():
 
 @pytest.fixture(autouse=True)
 def _disable_database_settings(mocker):
-    m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=PropertyMock)
-    m.return_value = []
+    mocker.patch('awx.conf.settings.SettingsWrapper._get_local_with_cache', side_effect=db_settings._wrapped._get_default)
 
 
 @pytest.fixture()

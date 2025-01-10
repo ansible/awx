@@ -16,6 +16,7 @@ from rest_framework.exceptions import PermissionDenied
 import requests
 
 from awx.conf.license import get_license
+from awx.conf import db_settings
 
 from ansible_base.lib.utils.db import advisory_lock
 
@@ -157,7 +158,7 @@ def calculate_collection_interval(since, until):
         since = horizon
         logger.warning(f"Start of the collection interval is more than 4 weeks prior to {until}, setting to {horizon}.")
 
-    last_gather = settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon
+    last_gather = db_settings.AUTOMATION_ANALYTICS_LAST_GATHER or horizon
     if last_gather < horizon:
         last_gather = horizon
         logger.warning(f"Last analytics run was more than 4 weeks prior to {until}, using {horizon} instead.")
@@ -180,13 +181,16 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         return None
 
     if collection_type != 'dry-run':
-        if not settings.INSIGHTS_TRACKING_STATE:
+        if not db_settings.INSIGHTS_TRACKING_STATE:
             logger.log(log_level, "Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
             return None
 
         if not (
-            settings.AUTOMATION_ANALYTICS_URL
-            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_CLIENT_ID and settings.SUBSCRIPTIONS_CLIENT_SECRET))
+            db_settings.AUTOMATION_ANALYTICS_URL
+            and (
+                (db_settings.REDHAT_USERNAME and db_settings.REDHAT_PASSWORD)
+                or (db_settings.SUBSCRIPTIONS_CLIENT_ID and db_settings.SUBSCRIPTIONS_CLIENT_SECRET)
+            )
         ):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
@@ -200,7 +204,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         from awx.main.analytics import collectors
         from awx.main.signals import disable_activity_stream
 
-        logger.debug("Last analytics run was: {}".format(settings.AUTOMATION_ANALYTICS_LAST_GATHER))
+        logger.debug("Last analytics run was: {}".format(db_settings.AUTOMATION_ANALYTICS_LAST_GATHER))
 
         try:
             since, until, last_gather = calculate_collection_interval(since, until)
@@ -329,7 +333,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     os.remove(fpath)
 
             with disable_activity_stream():
-                if not settings.AUTOMATION_ANALYTICS_LAST_GATHER or until > settings.AUTOMATION_ANALYTICS_LAST_GATHER:
+                if not db_settings.AUTOMATION_ANALYTICS_LAST_GATHER or until > db_settings.AUTOMATION_ANALYTICS_LAST_GATHER:
                     # `AUTOMATION_ANALYTICS_LAST_GATHER` is set whether collection succeeds or fails;
                     # if collection fails because of a persistent, underlying issue and we do not set last_gather,
                     # we risk the collectors hitting an increasingly greater workload while the underlying issue
@@ -338,7 +342,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     # All that said, `AUTOMATION_ANALYTICS_LAST_GATHER` plays a much smaller role in determining
                     # what is actually collected than it used to; collectors now mostly rely on their respective entry
                     # under `last_entries` to determine what should be collected.
-                    settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
+                    db_settings.AUTOMATION_ANALYTICS_LAST_GATHER = until
 
         shutil.rmtree(dest, ignore_errors=True)  # clean up individual artifact files
         if not tarfiles:
@@ -363,17 +367,17 @@ def ship(path):
         return False
 
     logger.debug('shipping analytics file: {}'.format(path))
-    url = getattr(settings, 'AUTOMATION_ANALYTICS_URL', None)
+    url = getattr(db_settings, 'AUTOMATION_ANALYTICS_URL', None)
     if not url:
         logger.error('AUTOMATION_ANALYTICS_URL is not set')
         return False
 
-    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
-    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
+    rh_id = getattr(db_settings, 'REDHAT_USERNAME', None)
+    rh_secret = getattr(db_settings, 'REDHAT_PASSWORD', None)
 
     if not (rh_id and rh_secret):
-        rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-        rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        rh_id = getattr(db_settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        rh_secret = getattr(db_settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
 
     if not rh_id:
         logger.error('Neither REDHAT_USERNAME nor SUBSCRIPTIONS_CLIENT_ID are set')
@@ -388,7 +392,7 @@ def ship(path):
         s = requests.Session()
         s.headers = get_awx_http_client_headers()
         s.headers.pop('Content-Type')
-        with set_environ(**settings.AWX_TASK_ENV):
+        with set_environ(**db_settings.AWX_TASK_ENV):
             try:
                 client = OIDCClient(rh_id, rh_secret)
                 response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))

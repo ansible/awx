@@ -9,6 +9,7 @@ from awx.main.models import WorkflowJobTemplate, JobTemplate, Job, Project, Inve
 from awx.main.models.ha import Instance
 from . import create_job
 from django.conf import settings
+from awx.conf import db_settings
 
 
 @pytest.mark.django_db
@@ -185,7 +186,7 @@ class TestJobLifeCycle:
         assert expected_task_impact == hybrid_instance.consumed_capacity
         # The hybrid node is in both instance groups, but the project update should
         # always get assigned to the controlplane
-        assert pu.instance_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME
+        assert pu.instance_group.name == db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME
         pu.status = 'successful'
         pu.save()
         assert hybrid_instance.consumed_capacity == 0

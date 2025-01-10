@@ -2,12 +2,13 @@ import pytest
 import requests
 from unittest import mock
 from awx.api.views.analytics import AnalyticsGenericView, MissingSettings, AUTOMATION_ANALYTICS_API_URL_PATH, ERROR_MISSING_USER, ERROR_MISSING_PASSWORD
-from django.test.utils import override_settings
 from django.test import RequestFactory
 from rest_framework import status
 
 from awx.main.utils import get_awx_version
 from django.utils import translation
+
+from awx.conf.testing import override_db_settings
 
 
 class TestAnalyticsGenericView:
@@ -46,7 +47,7 @@ class TestAnalyticsGenericView:
 
     @pytest.mark.django_db
     def test__get_analytics_url_no_url(self):
-        with override_settings(AUTOMATION_ANALYTICS_URL=None):
+        with override_db_settings(AUTOMATION_ANALYTICS_URL=None):
             with pytest.raises(MissingSettings):
                 agw = AnalyticsGenericView()
                 agw._get_analytics_url('A')
@@ -64,7 +65,7 @@ class TestAnalyticsGenericView:
     @pytest.mark.django_db
     def test__get_analytics_url(self, request_path, ending_url):
         base_url = 'http://testing'
-        with override_settings(AUTOMATION_ANALYTICS_URL=base_url):
+        with override_db_settings(AUTOMATION_ANALYTICS_URL=base_url):
             agw = AnalyticsGenericView()
             assert agw._get_analytics_url(request_path) == f'{base_url}{AUTOMATION_ANALYTICS_API_URL_PATH}/{ending_url}'
 
@@ -81,7 +82,7 @@ class TestAnalyticsGenericView:
     )
     @pytest.mark.django_db
     def test__get_setting(self, setting_name, setting_value, raises):
-        with override_settings(**{setting_name: setting_value}):
+        with override_db_settings(**{setting_name: setting_value}):
             if raises:
                 with pytest.raises(MissingSettings):
                     AnalyticsGenericView._get_setting(setting_name, False, None)
@@ -158,7 +159,7 @@ class TestAnalyticsGenericView:
         """
         Test _send_to_analytics with various combinations of credentials.
         """
-        with override_settings(**settings_map):
+        with override_db_settings(**settings_map):
             request = RequestFactory().post('/some/path')
             view = AnalyticsGenericView()
 
@@ -229,7 +230,7 @@ class TestAnalyticsGenericView:
         """
         Test _send_to_analytics with basic auth fallback.
         """
-        with override_settings(**settings_map):
+        with override_db_settings(**settings_map):
             request = RequestFactory().post('/some/path')
             view = AnalyticsGenericView()
 

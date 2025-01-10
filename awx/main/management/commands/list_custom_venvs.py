@@ -5,6 +5,7 @@ import sys
 from awx.main.utils.common import get_custom_venv_choices
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from awx.conf import db_settings
 
 
 class Command(BaseCommand):
@@ -37,7 +38,7 @@ class Command(BaseCommand):
         else:
             msg = ["No custom virtual environments detected in:", settings.BASE_VENV_PATH]
 
-            for path in settings.CUSTOM_VENV_PATHS:
+            for path in db_settings.CUSTOM_VENV_PATHS:
                 msg.append(path)
 
             print('\n'.join(msg), file=sys.stderr)

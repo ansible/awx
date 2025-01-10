@@ -74,6 +74,7 @@ from awx.main.models import (
     WorkflowApprovalTemplate,
 )
 from awx.main.models.mixins import ResourceMixin
+from awx.conf import db_settings
 
 __all__ = [
     'get_user_queryset',
@@ -432,7 +433,7 @@ class BaseAccess(object):
             if display_method not in method_list:
                 continue
 
-            if not settings.MANAGE_ORGANIZATION_AUTH and isinstance(obj, (Team, User)):
+            if not db_settings.MANAGE_ORGANIZATION_AUTH and isinstance(obj, (Team, User)):
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
 
@@ -617,7 +618,7 @@ class InstanceGroupAccess(BaseAccess):
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
-        if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+        if obj.name in [db_settings.DEFAULT_EXECUTION_QUEUE_NAME, db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             return False
         return self.user.has_obj_perm(obj, 'delete')
 
@@ -639,7 +640,7 @@ class UserAccess(BaseAccess):
     prefetch_related = ('resource',)
 
     def filtered_queryset(self):
-        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (
+        if db_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             qs = User.objects.all()
@@ -660,7 +661,7 @@ class UserAccess(BaseAccess):
                 return False
         if self.user.is_superuser:
             return True
-        if not settings.MANAGE_ORGANIZATION_AUTH:
+        if not db_settings.MANAGE_ORGANIZATION_AUTH:
             return False
         return Organization.access_qs(self.user, 'change').exists()
 
@@ -673,7 +674,7 @@ class UserAccess(BaseAccess):
         # A user can be changed if they are themselves, or by org admins or
         # superusers.  Change permission implies changing only certain fields
         # that a user should be able to edit for themselves.
-        if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
+        if not db_settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
             return False
         return bool(self.user == obj or self.can_admin(obj, data))
 
@@ -696,7 +697,7 @@ class UserAccess(BaseAccess):
 
     @check_superuser
     def can_admin(self, obj, data, allow_orphans=False, check_setting=True):
-        if check_setting and (not settings.MANAGE_ORGANIZATION_AUTH):
+        if check_setting and (not db_settings.MANAGE_ORGANIZATION_AUTH):
             return False
         if obj.is_superuser or obj.is_system_auditor:
             # must be superuser to admin users with system roles
@@ -1226,7 +1227,7 @@ class TeamAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (
+        if db_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             return self.model.objects.all()
@@ -1238,7 +1239,7 @@ class TeamAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.access_qs(self.user, 'view').exists()
-        if not settings.MANAGE_ORGANIZATION_AUTH:
+        if not db_settings.MANAGE_ORGANIZATION_AUTH:
             return False
         return self.check_related('organization', Organization, data)
 
@@ -1249,7 +1250,7 @@ class TeamAccess(BaseAccess):
             raise PermissionDenied(_('Unable to change organization on a team.'))
         if self.user.is_superuser:
             return True
-        if not settings.MANAGE_ORGANIZATION_AUTH:
+        if not db_settings.MANAGE_ORGANIZATION_AUTH:
             return False
         return self.user in obj.admin_role
 
@@ -2804,13 +2805,13 @@ class RoleAccess(BaseAccess):
             if not isinstance(sub_obj, User):
                 logger.error('Unexpected attempt to associate {} with organization role.'.format(sub_obj))
                 return False
-            if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
+            if not db_settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
                 return False
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
 
         if isinstance(obj.content_object, Team) and obj.role_field in ['admin_role', 'member_role']:
-            if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
+            if not db_settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
                 return False
 
         if isinstance(obj.content_object, ResourceMixin) and self.user in obj.content_object.admin_role:

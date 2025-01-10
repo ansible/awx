@@ -20,6 +20,7 @@ from awx.main.models.base import AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, Var
 from awx.main.models.events import AdHocCommandEvent, UnpartitionedAdHocCommandEvent
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
+from awx.conf import db_settings
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
@@ -118,7 +119,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         if type(self.module_name) is not str:
             raise ValidationError(_("Invalid type for ad hoc command"))
         module_name = self.module_name.strip() or 'command'
-        if module_name not in settings.AD_HOC_COMMANDS:
+        if module_name not in db_settings.AD_HOC_COMMANDS:
             raise ValidationError(_('Unsupported module for ad hoc commands.'))
         return module_name
 
@@ -161,7 +162,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return reverse('api:ad_hoc_command_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/command/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(db_settings.TOWER_URL_BASE, "{}/jobs/command/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     @property
     def notification_templates(self):

@@ -64,6 +64,7 @@ from awx.main.fields import (
 from awx.main import consumers
 
 from awx.conf.utils import conf_to_dict
+from awx.conf import db_settings
 
 __all__ = []
 
@@ -331,7 +332,7 @@ class ActivityStreamEnabled(threading.local):
         self.enabled = True
 
     def __bool__(self):
-        return bool(self.enabled and getattr(settings, 'ACTIVITY_STREAM_ENABLED', True))
+        return bool(self.enabled and getattr(db_settings, 'ACTIVITY_STREAM_ENABLED', True))
 
 
 activity_stream_enabled = ActivityStreamEnabled()
@@ -628,8 +629,8 @@ def _handle_image_cleanup(removed_image, pk):
 
 @receiver(pre_delete, sender=ExecutionEnvironment)
 def remove_default_ee(sender, instance, **kwargs):
-    if instance.id == getattr(settings.DEFAULT_EXECUTION_ENVIRONMENT, 'id', None):
-        settings.DEFAULT_EXECUTION_ENVIRONMENT = None
+    if instance.id == getattr(db_settings.DEFAULT_EXECUTION_ENVIRONMENT, 'id', None):
+        db_settings.DEFAULT_EXECUTION_ENVIRONMENT = None
     _handle_image_cleanup(instance.image, instance.pk)
 
 

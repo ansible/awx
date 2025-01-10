@@ -40,6 +40,8 @@ from awx_plugins.interfaces._temporary_private_licensing_api import detect_serve
 from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 from awx.main.utils.analytics_proxy import OIDCClient
 
+from awx.conf import db_settings
+
 MAX_INSTANCES = 9999999
 
 logger = logging.getLogger(__name__)
@@ -208,7 +210,7 @@ class Licenser(object):
         if not license:
             logger.error("No valid subscriptions found in manifest")
         self._attrs.update(license)
-        settings.LICENSE = self._attrs
+        db_settings.LICENSE = self._attrs
         return self._attrs
 
     def update(self, **kwargs):

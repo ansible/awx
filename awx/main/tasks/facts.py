@@ -5,9 +5,10 @@ import json
 import logging
 
 # Django
-from django.conf import settings
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
+
+from awx.conf import db_settings
 
 # django-ansible-base
 from ansible_base.lib.logging.runtime import log_excess_runtime
@@ -33,7 +34,7 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     os.makedirs(fact_cache_dir, mode=0o700, exist_ok=True)
 
     if timeout is None:
-        timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
+        timeout = db_settings.ANSIBLE_FACT_CACHE_TIMEOUT
 
     last_write_time = None
 

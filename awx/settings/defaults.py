@@ -5,7 +5,6 @@
 import base64
 import os
 import re  # noqa
-import tempfile
 import socket
 from datetime import timedelta
 
@@ -125,20 +124,6 @@ LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 # Graph of resources that can have named-url
 NAMED_URL_GRAPH = {}
 
-# Maximum number of the same job that can be waiting to run when launching from scheduler
-# Note: This setting may be overridden by database settings.
-SCHEDULE_MAX_JOBS = 10
-
-# Bulk API related settings
-# Maximum number of jobs that can be launched in 1 bulk job
-BULK_JOB_MAX_LAUNCH = 100
-
-# Maximum number of host that can be created in 1 bulk host create
-BULK_HOST_MAX_CREATE = 100
-
-# Maximum number of host that can be deleted in 1 bulk host delete
-BULK_HOST_MAX_DELETE = 250
-
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
@@ -152,31 +137,6 @@ else:
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
-# HTTP headers and meta keys to search to determine remote host name or IP. Add
-# additional items to this list, such as "HTTP_X_FORWARDED_FOR", if behind a
-# reverse proxy.
-REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
-
-# If we are behind a reverse proxy/load balancer, use this setting to
-# allow the proxy IP addresses from which Tower should trust custom
-# REMOTE_HOST_HEADERS header values
-# REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', 'REMOTE_HOST']
-# PROXY_IP_ALLOWED_LIST = ['10.0.1.100', '10.0.1.101']
-# If this setting is an empty list (the default), the headers specified by
-# REMOTE_HOST_HEADERS will be trusted unconditionally')
-PROXY_IP_ALLOWED_LIST = []
-
-# If we are behind a reverse proxy/load balancer, use this setting to
-# allow the scheme://addresses from which Tower should trust csrf requests from
-# If this setting is an empty list (the default), we will only trust ourself
-CSRF_TRUSTED_ORIGINS = []
-
-CUSTOM_VENV_PATHS = []
-
-# Warning: this is a placeholder for a database setting
-# This should not be set via a file.
-DEFAULT_EXECUTION_ENVIRONMENT = None
-
 # This list is used for creating default EEs when running awx-manage create_preload_data.
 # Should be ordered from highest to lowest precedence.
 # The awx-manage register_default_execution_environments command reads this setting and registers the EE(s)
@@ -189,24 +149,9 @@ GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE (latest)', 'image': 'quay.
 # If a registry credential is needed to pull the image, that can be provided to the awx-manage command
 CONTROL_PLANE_EXECUTION_ENVIRONMENT = 'quay.io/ansible/awx-ee:latest'
 
-# Note: This setting may be overridden by database settings.
-STDOUT_MAX_BYTES_DISPLAY = 1048576
-
-# Returned in the header on event api lists as a recommendation to the UI
-# on how many events to display before truncating/hiding
-MAX_UI_JOB_EVENTS = 4000
-
-# Returned in index.html, tells the UI if it should make requests
-# to update job data in response to status changes websocket events
-UI_LIVE_UPDATES_ENABLED = True
-
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
 MAX_EVENT_RES_DATA = 700000
-
-# Note: These settings may be overridden by database settings.
-EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
-MAX_WEBSOCKET_EVENT_RATE = 30
 
 # The amount of time before a stdout file is expired and removed locally
 # Note that this can be recreated if the stdout is downloaded
@@ -265,10 +210,6 @@ K8S_POD_REAPER_GRACE_PERIOD = 60
 
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
-
-# Seconds before sessions expire.
-# Note: This setting may be overridden by database settings.
-SESSION_COOKIE_AGE = 1800
 
 # Option to change userLoggedIn cookie SameSite policy.
 USER_COOKIE_SAMESITE = 'Lax'
@@ -387,18 +328,6 @@ SWAGGER_SETTINGS = {
 
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 
-# Enable / Disable HTTP Basic Authentication used in the API browser
-# Note: Session limits are not enforced when using HTTP Basic Authentication.
-# Note: This setting may be overridden by database settings.
-AUTH_BASIC_ENABLED = True
-
-# If set, specifies a URL that unauthenticated users will be redirected to
-# when trying to access a UI page that requries authentication.
-LOGIN_REDIRECT_OVERRIDE = ''
-
-# Note: This setting may be overridden by database settings.
-ALLOW_METRICS_FOR_ANONYMOUS_USERS = False
-
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
@@ -489,51 +418,8 @@ ANSIBLE_FORCE_COLOR = True
 # If tmp generated inventory parsing fails (error state), fail playbook fast
 ANSIBLE_INVENTORY_UNPARSED_FAILED = True
 
-# Additional environment variables to be passed to the ansible subprocesses
-AWX_TASK_ENV = {}
-
-# Additional environment variables to apply when running ansible-galaxy commands
-# to fetch Ansible content - roles and collections
-GALAXY_TASK_ENV = {'ANSIBLE_FORCE_COLOR': 'false', 'GIT_SSH_COMMAND': "ssh -o StrictHostKeyChecking=no"}
-
 # Rebuild Host Smart Inventory memberships.
 AWX_REBUILD_SMART_MEMBERSHIP = False
-
-# By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
-ALLOW_JINJA_IN_EXTRA_VARS = 'template'
-
-# Run project updates with extra verbosity
-PROJECT_UPDATE_VVV = False
-
-# Enable dynamically pulling roles from a requirement.yml file
-# when updating SCM projects
-# Note: This setting may be overridden by database settings.
-AWX_ROLES_ENABLED = True
-
-# Enable dynamically pulling collections from a requirement.yml file
-# when updating SCM projects
-# Note: This setting may be overridden by database settings.
-AWX_COLLECTIONS_ENABLED = True
-
-# Follow symlinks when scanning for playbooks
-AWX_SHOW_PLAYBOOK_LINKS = False
-
-# Applies to any galaxy server
-GALAXY_IGNORE_CERTS = False
-
-# Additional paths to show for jobs using process isolation.
-# Note: This setting may be overridden by database settings.
-AWX_ISOLATION_SHOW_PATHS = []
-
-# The directory in which the service will create new temporary directories for job
-# execution and isolation (such as credential files and custom
-# inventory scripts).
-# Note: This setting may be overridden by database settings.
-AWX_ISOLATION_BASE_PATH = tempfile.gettempdir()
-
-# User definable ansible callback plugins
-# Note: This setting may be overridden by database settings.
-AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 
 # Automatically remove nodes that have missed their heartbeats after some time
 AWX_AUTO_DEPROVISION_INSTANCES = False
@@ -541,43 +427,6 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 
 # If True, allow users to be assigned to roles that were created via JWT
 ALLOW_LOCAL_ASSIGNING_JWT_ROLES = True
-
-# Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
-# Note: This setting may be overridden by database settings.
-PENDO_TRACKING_STATE = "off"
-
-# Enables Insights data collection.
-# Note: This setting may be overridden by database settings.
-INSIGHTS_TRACKING_STATE = False
-
-# Last gather date for Analytics
-AUTOMATION_ANALYTICS_LAST_GATHER = None
-# Last gathered entries for expensive Analytics
-AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
-
-# Default list of modules allowed for ad hoc commands.
-# Note: This setting may be overridden by database settings.
-AD_HOC_COMMANDS = [
-    'command',
-    'shell',
-    'yum',
-    'apt',
-    'apt_key',
-    'apt_repository',
-    'apt_rpm',
-    'service',
-    'group',
-    'user',
-    'mount',
-    'ping',
-    'selinux',
-    'setup',
-    'win_ping',
-    'win_service',
-    'win_updates',
-    'win_group',
-    'win_user',
-]
 
 INV_ENV_VARIABLE_BLOCKED = ("HOME", "USER", "_", "TERM", "PATH")
 
@@ -698,23 +547,7 @@ CONSTRUCTED_INSTANCE_ID_VAR = 'remote_tower_id'
 
 CONSTRUCTED_EXCLUDE_EMPTY_GROUPS = False
 
-# ---------------------
-# -- Activity Stream --
-# ---------------------
-# Defaults for enabling/disabling activity stream.
-# Note: These settings may be overridden by database settings.
-ACTIVITY_STREAM_ENABLED = True
-ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
-
 CALLBACK_QUEUE = "callback_tasks"
-
-# Note: This setting may be overridden by database settings.
-ORG_ADMINS_CAN_SEE_ALL_USERS = True
-MANAGE_ORGANIZATION_AUTH = True
-DISABLE_LOCAL_AUTH = False
-
-# Note: This setting may be overridden by database settings.
-TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_OIDC_ENDPOINT = "https://sso.example.org/"
@@ -724,16 +557,7 @@ INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
 INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
 # Settings related to external logger configuration
-LOG_AGGREGATOR_ENABLED = False
-LOG_AGGREGATOR_TCP_TIMEOUT = 5
-LOG_AGGREGATOR_VERIFY_CERT = True
-LOG_AGGREGATOR_LEVEL = 'INFO'
-LOG_AGGREGATOR_ACTION_QUEUE_SIZE = 131072
-LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB = 1  # Action queue
-LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
-LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
-API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
@@ -860,9 +684,6 @@ COLOR_LOGS = False
 # FIXME: Disabling models.E006 warning until we can renamed Project and InventorySource
 SILENCED_SYSTEM_CHECKS = ['models.E006']
 
-# Use middleware to get request statistics
-AWX_REQUEST_PROFILE = False
-
 #
 # Optionally, AWX can generate DOT graphs
 # (http://www.graphviz.org/doc/info/lang.html) for per-request profiling
@@ -879,24 +700,12 @@ AWX_REQUEST_PROFILE_WITH_DOT = False
 # Allow profiling callback workers via SIGUSR1
 AWX_CALLBACK_PROFILE = False
 
-# Delete temporary directories created to store playbook run-time
-AWX_CLEANUP_PATHS = True
-
 # Allow ansible-runner to store env folder (may contain sensitive information)
 AWX_RUNNER_OMIT_ENV_FILES = True
 
 # Allow ansible-runner to save ansible output
 # (changing to False may cause performance issues)
 AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
-
-# https://github.com/ansible/ansible-runner/pull/1191/files
-# Interval in seconds between the last message and keep-alive messages that
-# ansible-runner will send
-AWX_RUNNER_KEEPALIVE_SECONDS = 0
-
-# Delete completed work units in receptor
-RECEPTOR_RELEASE_WORK = True
-RECEPTOR_KEEP_WORK_ON_ERROR = False
 
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
@@ -952,8 +761,6 @@ BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
 
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
-# Name of the default task queue
-DEFAULT_EXECUTION_QUEUE_NAME = 'default'
 # pod spec used when the default execution queue is a container group, e.g. when deploying on k8s/ocp with the operator
 DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE = ''
 # Max number of concurrently consumed forks for the default execution queue
@@ -963,30 +770,12 @@ DEFAULT_EXECUTION_QUEUE_MAX_FORKS = 0
 # Zero means no limit
 DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS = 0
 
-# Name of the default controlplane queue
-DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
-
-# Extend container runtime attributes.
-# For example, to disable SELinux in containers for podman
-# DEFAULT_CONTAINER_RUN_OPTIONS = ['--security-opt', 'label=disable']
-DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
-
-# Mount exposed paths as hostPath resource in k8s/ocp
-AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
-
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()
-
-# License compliance for total host count. Possible values:
-# - '': No model - Subscription not counted from Host Metrics
-# - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
-SUBSCRIPTION_USAGE_MODEL = ''
 
 # Default URL and query params for obtaining valid AAP subscriptions
 SUBSCRIPTIONS_RHSM_URL = 'https://console.redhat.com/api/rhsm/v2/products?include=providedProducts&oids=480&status=Active'
 
-# Host metrics cleanup - last time of the task/command run
-CLEANUP_HOST_METRICS_LAST_TS = None
 # Host metrics cleanup - minimal interval between two cleanups in days
 CLEANUP_HOST_METRICS_INTERVAL = 30  # days
 # Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
@@ -1098,19 +887,6 @@ INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
 
 # setting for Policy as Code feature
 FEATURE_POLICY_AS_CODE_ENABLED = False
-
-OPA_HOST = ''  # The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.
-OPA_PORT = 8181  # The port used to connect to the OPA server. Defaults to 8181.
-OPA_SSL = False  # Enable or disable the use of SSL to connect to the OPA server. Defaults to false.
-
-OPA_AUTH_TYPE = 'None'  # The authentication type that will be used to connect to the OPA server: "None", "Token", or "Certificate".
-OPA_AUTH_TOKEN = ''  # The token for authentication to the OPA server. Required when OPA_AUTH_TYPE is "Token". If an authorization header is defined in OPA_AUTH_CUSTOM_HEADERS, it will be overridden by OPA_AUTH_TOKEN.
-OPA_AUTH_CLIENT_CERT = ''  # The content of the client certificate file for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
-OPA_AUTH_CLIENT_KEY = ''  # The content of the client key for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
-OPA_AUTH_CA_CERT = ''  # The content of the CA certificate for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
-OPA_AUTH_CUSTOM_HEADERS = {}  # Optional custom headers included in requests to the OPA server. Defaults to empty dictionary ({}).
-OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to the OPA server will time out. Defaults to 1.5 seconds.
-OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
 
 # feature flags
 FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)

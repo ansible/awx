@@ -52,6 +52,7 @@ from awx.api.serializers import ResourceAccessListElementSerializer, CopySeriali
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 from awx.conf import settings_registry
+from awx.conf import db_settings
 
 __all__ = [
     'APIView',
@@ -186,15 +187,15 @@ class APIView(views.APIView):
 
         if 'HTTP_X_TRUSTED_PROXY' in request.environ:
             if validate_x_trusted_proxy_header(request.environ['HTTP_X_TRUSTED_PROXY']):
-                remote_headers = settings.REMOTE_HOST_HEADERS
+                remote_headers = db_settings.REMOTE_HOST_HEADERS
             else:
                 logger.warning("Request appeared to be a trusted upstream proxy but failed to provide a matching shared secret.")
 
         # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
         # they respect the allowed proxy list
-        if settings.PROXY_IP_ALLOWED_LIST:
-            if not is_proxy_in_headers(self.request, settings.PROXY_IP_ALLOWED_LIST, remote_headers):
-                delete_headers_starting_with_http(request, settings.REMOTE_HOST_HEADERS)
+        if db_settings.PROXY_IP_ALLOWED_LIST:
+            if not is_proxy_in_headers(self.request, db_settings.PROXY_IP_ALLOWED_LIST, remote_headers):
+                delete_headers_starting_with_http(request, db_settings.REMOTE_HOST_HEADERS)
 
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
@@ -426,6 +427,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             for method, key in [('GET', 'serializer_fields'), ('POST', 'serializer_create_fields'), ('PUT', 'serializer_update_fields')]:
                 d[key] = metadata.get_serializer_info(serializer, method=method)
         d['settings'] = settings
+        d['db_settings'] = db_settings
         return d
 
 

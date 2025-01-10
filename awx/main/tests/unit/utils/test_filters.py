@@ -14,8 +14,8 @@ from django.db.models import Q
     [
         # skip all records if enabled_flag = False
         ({'enabled_flag': False}, 'awx.main', False),
-        # skip all records if the host is undefined
-        ({'enabled_flag': True}, 'awx.main', False),
+        # skip all records if no loggers are specified
+        ({'enabled_flag': True, 'enabled_loggers': []}, 'awx.main', False),
         # skip all records if underlying logger is used by handlers themselves
         ({'enabled_flag': True}, 'awx.main.utils.handlers', False),
         ({'enabled_flag': True, 'enabled_loggers': ['awx']}, 'awx.main', True),

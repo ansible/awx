@@ -154,7 +154,7 @@ the job model.
 In addition to the common fields, this will contain a `msg` field with
 the log message. Errors contain a separate `traceback` field.
 These logs can be enabled or disabled in CTiT by adding or removing
-it to the setting `LOG_AGGREGATOR_LOGGERS`.
+it to the database setting `LOG_AGGREGATOR_LOGGERS`.
 
 
 # Configuring Inside of AWX

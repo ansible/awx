@@ -6,8 +6,10 @@ import tempfile
 from unittest import mock
 import pytest
 
-from django.conf import settings
-from django.test.utils import override_settings
+from awx.conf.testing import override_db_settings
+
+from awx.conf import db_settings
+
 from awx.main.analytics import gather, register, ship
 
 
@@ -39,7 +41,7 @@ def mock_valid_license():
 
 @pytest.mark.django_db
 def test_gather(mock_valid_license):
-    settings.INSIGHTS_TRACKING_STATE = True
+    db_settings.INSIGHTS_TRACKING_STATE = True
 
     tgzfiles = gather(module=importlib.import_module(__name__), collection_type='dry-run')
     files = {}
@@ -141,7 +143,7 @@ def mock_analytic_post():
 )
 @pytest.mark.django_db
 def test_ship_credential(setting_map, expected_result, expected_auth, temp_analytic_tar, mock_analytic_post):
-    with override_settings(**setting_map):
+    with override_db_settings(**setting_map):
         result = ship(temp_analytic_tar)
 
         assert result == expected_result
@@ -154,10 +156,10 @@ def test_ship_credential(setting_map, expected_result, expected_auth, temp_analy
 
 @pytest.mark.django_db
 def test_gather_cleanup_on_auth_failure(mock_valid_license, temp_analytic_tar):
-    settings.INSIGHTS_TRACKING_STATE = True
-    settings.AUTOMATION_ANALYTICS_URL = 'https://example.com/api'
-    settings.REDHAT_USERNAME = 'test_user'
-    settings.REDHAT_PASSWORD = 'test_password'
+    db_settings.INSIGHTS_TRACKING_STATE = True
+    db_settings.AUTOMATION_ANALYTICS_URL = 'https://example.com/api'
+    db_settings.REDHAT_USERNAME = 'test_user'
+    db_settings.REDHAT_PASSWORD = 'test_password'
 
     with tempfile.NamedTemporaryFile(delete=False, suffix='.tar.gz') as temp_file:
         temp_file_path = temp_file.name

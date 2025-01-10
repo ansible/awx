@@ -1,10 +1,11 @@
 import pytest
-from unittest import mock
 
 from django.test import TransactionTestCase
 
 from awx.main.access import UserAccess, RoleAccess, TeamAccess
 from awx.main.models import User, Organization, Inventory, get_system_auditor_role
+
+from awx.conf.testing import override_db_settings
 
 
 class TestSysAuditorTransactional(TransactionTestCase):
@@ -76,8 +77,7 @@ def test_manage_org_auth_setting(ext_auth, superuser, expect, organization, rand
     if not superuser:
         organization.admin_role.members.add(u)
 
-    with mock.patch('awx.main.access.settings') as settings_mock:
-        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+    with override_db_settings(MANAGE_ORGANIZATION_AUTH=ext_auth):
         assert [
             # use via /api/v2/users/N/roles/
             UserAccess(u).can_attach(rando, organization.admin_role, 'roles'),
@@ -107,8 +107,7 @@ def test_manage_org_auth_setting(ext_auth, superuser, expect, organization, rand
 @pytest.mark.django_db
 @pytest.mark.parametrize('ext_auth', [True, False])
 def test_team_org_resource_role(ext_auth, organization, rando, org_admin, team):
-    with mock.patch('awx.main.access.settings') as settings_mock:
-        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+    with override_db_settings(MANAGE_ORGANIZATION_AUTH=ext_auth):
         assert [
             # use via /api/v2/teams/N/roles/
             TeamAccess(org_admin).can_attach(team, organization.workflow_admin_role, 'roles'),

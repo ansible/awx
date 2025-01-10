@@ -93,6 +93,9 @@ from awx.main.utils.update_model import update_model
 # Django flags
 from flags.state import flag_enabled
 
+# AWX conf
+from awx.conf import db_settings
+
 logger = logging.getLogger('awx.main.tasks.jobs')
 
 
@@ -179,8 +182,8 @@ class BaseTask(object):
             "container_options": ['--user=root'],
         }
 
-        if settings.DEFAULT_CONTAINER_RUN_OPTIONS:
-            params['container_options'].extend(settings.DEFAULT_CONTAINER_RUN_OPTIONS)
+        if db_settings.DEFAULT_CONTAINER_RUN_OPTIONS:
+            params['container_options'].extend(db_settings.DEFAULT_CONTAINER_RUN_OPTIONS)
 
         if instance.execution_environment.credential:
             cred = instance.execution_environment.credential
@@ -197,9 +200,9 @@ class BaseTask(object):
         if pull:
             params['container_options'].append(f'--pull={pull}')
 
-        if settings.AWX_ISOLATION_SHOW_PATHS:
+        if db_settings.AWX_ISOLATION_SHOW_PATHS:
             params['container_volume_mounts'] = []
-            for this_path in settings.AWX_ISOLATION_SHOW_PATHS:
+            for this_path in db_settings.AWX_ISOLATION_SHOW_PATHS:
                 # Verify if a mount path and SELinux context has been passed
                 # Using z allows the dir to be mounted by multiple containers
                 # Uppercase Z restricts access (in weird ways) to 1 container at a time
@@ -229,9 +232,9 @@ class BaseTask(object):
         """
         Create a temporary directory for job-related files.
         """
-        path = tempfile.mkdtemp(prefix=JOB_FOLDER_PREFIX % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
+        path = tempfile.mkdtemp(prefix=JOB_FOLDER_PREFIX % instance.pk, dir=db_settings.AWX_ISOLATION_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-        if settings.AWX_CLEANUP_PATHS:
+        if db_settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(path)
         # We will write files in these folders later
         for subfolder in ('inventory', 'env'):
@@ -305,7 +308,7 @@ class BaseTask(object):
         """
 
     def _write_extra_vars_file(self, private_data_dir, vars, safe_dict={}):
-        if settings.ALLOW_JINJA_IN_EXTRA_VARS == 'always':
+        if db_settings.ALLOW_JINJA_IN_EXTRA_VARS == 'always':
             content = yaml.safe_dump(vars)
         else:
             content = safe_dump(vars, safe_dict)
@@ -323,7 +326,7 @@ class BaseTask(object):
                     continue  # special case intended only for dynaconf use
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
-        for key, value in settings.AWX_TASK_ENV.items():
+        for key, value in db_settings.AWX_TASK_ENV.items():
             env[key] = str(value)
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
@@ -545,8 +548,8 @@ class BaseTask(object):
                 status = self.instance.status
                 raise RuntimeError('not starting %s task' % self.instance.status)
 
-            if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
-                raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
+            if not os.path.exists(db_settings.AWX_ISOLATION_BASE_PATH):
+                raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % db_settings.AWX_ISOLATION_BASE_PATH)
 
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
@@ -938,9 +941,9 @@ class RunJob(SourceControlMixin, BaseTask):
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
-        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            env['ANSIBLE_CALLBACK_PLUGINS'] = ':'.join(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
-        env['AWX_HOST'] = settings.TOWER_URL_BASE
+        if hasattr(db_settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and db_settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            env['ANSIBLE_CALLBACK_PLUGINS'] = ':'.join(db_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        env['AWX_HOST'] = db_settings.TOWER_URL_BASE
 
         # Create a directory for ControlPath sockets that is unique to each job
         cp_dir = os.path.join(private_data_dir, 'cp')
@@ -1089,7 +1092,7 @@ class RunJob(SourceControlMixin, BaseTask):
         # higher levels of privilege - those that have the ability create and
         # edit Job Templates)
         safe_dict = {}
-        if job.job_template and settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
+        if job.job_template and db_settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
             safe_dict = job.job_template.extra_vars_dict
 
         return self._write_extra_vars_file(private_data_dir, extra_vars, safe_dict)
@@ -1227,9 +1230,9 @@ class RunProjectUpdate(BaseTask):
         env['DISPLAY'] = ''  # Prevent stupid password popup when running tests.
         # give ansible a hint about the intended tmpdir to work around issues
         # like https://github.com/ansible/ansible/issues/30064
-        env['TMP'] = settings.AWX_ISOLATION_BASE_PATH
+        env['TMP'] = db_settings.AWX_ISOLATION_BASE_PATH
         env['PROJECT_UPDATE_ID'] = str(project_update.pk)
-        if settings.GALAXY_IGNORE_CERTS:
+        if db_settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = str(True)
 
         # build out env vars for Galaxy credentials (in order)
@@ -1299,7 +1302,7 @@ class RunProjectUpdate(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         """
         args = []
-        if getattr(settings, 'PROJECT_UPDATE_VVV', False):
+        if getattr(db_settings, 'PROJECT_UPDATE_VVV', False):
             args.append('-vvv')
         if project_update.job_tags:
             args.extend(['-t', project_update.job_tags])
@@ -1320,7 +1323,7 @@ class RunProjectUpdate(BaseTask):
             scm_branch = 'HEAD'
 
         galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
-        if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
+        if not galaxy_creds_are_defined and (db_settings.AWX_ROLES_ENABLED or db_settings.AWX_COLLECTIONS_ENABLED):
             logger.warning('Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
 
         extra_vars.update(
@@ -1336,9 +1339,9 @@ class RunProjectUpdate(BaseTask):
                 'scm_branch': scm_branch,
                 'scm_clean': project_update.scm_clean,
                 'scm_track_submodules': project_update.scm_track_submodules,
-                'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
-                'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
-                'galaxy_task_env': settings.GALAXY_TASK_ENV,
+                'roles_enabled': galaxy_creds_are_defined and db_settings.AWX_ROLES_ENABLED,
+                'collections_enabled': galaxy_creds_are_defined and db_settings.AWX_COLLECTIONS_ENABLED,
+                'galaxy_task_env': db_settings.GALAXY_TASK_ENV,
             }
         )
         # apply custom refspec from user for PR refs and the like
@@ -1425,9 +1428,9 @@ class RunProjectUpdate(BaseTask):
         # copy over the roles and collection cache to job folder
         cache_path = os.path.join(project.get_cache_path(), project.cache_id)
         subfolders = []
-        if settings.AWX_COLLECTIONS_ENABLED:
+        if db_settings.AWX_COLLECTIONS_ENABLED:
             subfolders.append('requirements_collections')
-        if settings.AWX_ROLES_ENABLED:
+        if db_settings.AWX_ROLES_ENABLED:
             subfolders.append('requirements_roles')
         for subfolder in subfolders:
             cache_subpath = os.path.join(cache_path, subfolder)
@@ -1909,7 +1912,7 @@ class RunAdHocCommand(BaseTask):
 
     def build_module_args(self, ad_hoc_command):
         module_args = ad_hoc_command.module_args
-        if settings.ALLOW_JINJA_IN_EXTRA_VARS != 'always':
+        if db_settings.ALLOW_JINJA_IN_EXTRA_VARS != 'always':
             module_args = sanitize_jinja(module_args)
         return module_args
 

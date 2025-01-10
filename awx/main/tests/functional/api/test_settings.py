@@ -7,7 +7,7 @@ import pytest
 
 # AWX
 from awx.api.versioning import reverse
-from awx.conf.registry import settings_registry
+from awx.conf.testing import override_db_settings
 
 TEST_GIF_LOGO = 'data:image/gif;base64,R0lGODlhIQAjAPIAAP//////AP8AAMzMAJmZADNmAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAHACwAAAAAIQAjAAADo3i63P4wykmrvTjrzZsxXfR94WMQBFh6RECuixHMLyzPQ13ewZCvow9OpzEAjIBj79cJJmU+FceIVEZ3QRozxBttmyOBwPBtisdX4Bha3oxmS+llFIPHQXQKkiSEXz9PeklHBzx3hYNyEHt4fmmAhHp8Nz45KgV5FgWFOFEGmwWbGqEfniChohmoQZ+oqRiZDZhEgk81I4mwg4EKVbxzrDHBEAkAIfkECQoABwAsAAAAACEAIwAAA6V4utz+MMpJq724GpP15p1kEAQYQmOwnWjgrmxjuMEAx8rsDjZ+fJvdLWQAFAHGWo8FRM54JqIRmYTigDrDMqZTbbbMj0CgjTLHZKvPQH6CTx+a2vKR0XbbOsoZ7SphG057gjl+c0dGgzeGNiaBiSgbBQUHBV08NpOVlkMSk0FKjZuURHiiOJxQnSGfQJuoEKREejK0dFRGjoiQt7iOuLx0rgxYEQkAIfkECQoABwAsAAAAACEAIwAAA7h4utxnxslJDSGR6nrz/owxYB64QUEwlGaVqlB7vrAJscsd3Lhy+wBArGEICo3DUFH4QDqK0GMy51xOgcGlEAfJ+iAFie62chR+jYKaSAuQGOqwJp7jGQRDuol+F/jxZWsyCmoQfwYwgoM5Oyg1i2w0A2WQIW2TPYOIkleQmy+UlYygoaIPnJmapKmqKiusMmSdpjxypnALtrcHioq3ury7hGm3dnVosVpMWFmwREZbddDOSsjVswcJACH5BAkKAAcALAAAAAAhACMAAAOxeLrc/jDKSZUxNS9DCNYV54HURQwfGRlDEFwqdLVuGjOsW9/Odb0wnsUAKBKNwsMFQGwyNUHckVl8bqI4o43lA26PNkv1S9DtNuOeVirw+aTI3qWAQwnud1vhLSnQLS0GeFF+GoVKNF0fh4Z+LDQ6Bn5/MTNmL0mAl2E3j2aclTmRmYCQoKEDiaRDKFhJez6UmbKyQowHtzy1uEl8DLCnEktrQ2PBD1NxSlXKIW5hz6cJACH5BAkKAAcALAAAAAAhACMAAAOkeLrc/jDKSau9OOvNlTFd9H3hYxAEWDJfkK5LGwTq+g0zDR/GgM+10A04Cm56OANgqTRmkDTmSOiLMgFOTM9AnFJHuexzYBAIijZf2SweJ8ttbbXLmd5+wBiJosSCoGF/fXEeS1g8gHl9hxODKkh4gkwVIwUekESIhA4FlgV3PyCWG52WI2oGnR2lnUWpqhqVEF4Xi7QjhpsshpOFvLosrnpoEAkAIfkECQoABwAsAAAAACEAIwAAA6l4utz+MMpJq71YGpPr3t1kEAQXQltQnk8aBCa7bMMLy4wx1G8s072PL6SrGQDI4zBThCU/v50zCVhidIYgNPqxWZkDg0AgxB2K4vEXbBSvr1JtZ3uOext0x7FqovF6OXtfe1UzdjAxhINPM013ChtJER8FBQeVRX8GlpggFZWWfjwblTiigGZnfqRmpUKbljKxDrNMeY2eF4R8jUiSur6/Z8GFV2WBtwwJACH5BAkKAAcALAAAAAAhACMAAAO6eLrcZi3KyQwhkGpq8f6ONWQgaAxB8JTfg6YkO50pzD5xhaurhCsGAKCnEw6NucNDCAkyI8ugdAhFKpnJJdMaeiofBejowUseCr9GYa0j1GyMdVgjBxoEuPSZXWKf7gKBeHtzMms0gHgGfDIVLztmjScvNZEyk28qjT40b5aXlHCbDgOhnzedoqOOlKeopaqrCy56sgtotbYKhYW6e7e9tsHBssO6eSTIm1peV0iuFUZDyU7NJnmcuQsJACH5BAkKAAcALAAAAAAhACMAAAOteLrc/jDKSZsxNS9DCNYV54Hh4H0kdAXBgKaOwbYX/Miza1vrVe8KA2AoJL5gwiQgeZz4GMXlcHl8xozQ3kW3KTajL9zsBJ1+sV2fQfALem+XAlRApxu4ioI1UpC76zJ4fRqDBzI+LFyFhH1iiS59fkgziW07jjRAG5QDeECOLk2Tj6KjnZafW6hAej6Smgevr6yysza2tiCuMasUF2Yov2gZUUQbU8YaaqjLpQkAOw=='  # NOQA
 TEST_PNG_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAjCAYAAAAaLGNkAAAAAXNSR0IB2cksfwAAAdVpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpDb21wcmVzc2lvbj4xPC90aWZmOkNvbXByZXNzaW9uPgogICAgICAgICA8dGlmZjpQaG90b21ldHJpY0ludGVycHJldGF0aW9uPjI8L3RpZmY6UGhvdG9tZXRyaWNJbnRlcnByZXRhdGlvbj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjl0tmoAAAHVSURBVFgJ7VZRsoMgDNTOu5E9U+/Ud6Z6JssGNg2oNKD90xkHCNnNkgTbYbieKwNXBn6bgSXQ4+16xi5UDiqDN3Pecr6+1fM5DHh7n1NEIPjjoRLKzOjG3qQ5dRtEy2LCjh/Gz2wDZE2nZYKkrxdn/kY9XQQkGCGqqDY5IgJFkEKgBCzDNGXhTKEye7boFRH6IPJj5EshiNCSjV4R4eSx7zhmR2tcdIuwmWiMeao7e0JHViZEWUI5aP8a9O+rx74D6sGEiJftiX3YeueIiFXg2KrhpqzjVC3dPZFYJZ7NOwwtNwM8R0UkLfH0sT5qck+OlkMq0BucKr0iWG7gpAQksD9esM1z3Lnf6SHjLh67nnKEGxC/iomWhByTeXOQJGHHcKxwHhHKnt1HIdYtmexkIb/HOURWTSJqn2gKMDG0bDUc/D0iAseovxUBoylmQCug6IVhSv+4DIeKI94jAr4AjiSEgQ25JYB+YWT9BZ94AM8erwgFkRifaArA6U0G5KT0m//z26REZuK9okgrT6VwE1jTHjbVzyNAyRwTEPOtuiex9FVBNZCkruaA4PZqFp1u8Rpww9/6rcK5y0EkAxRiZJt79PWOVYWGRE9pbJhavMengMflGyumk0akMsQnAAAAAElFTkSuQmCC'  # NOQA
@@ -111,21 +111,6 @@ def test_logging_aggregator_connection_test_not_enabled(post, admin):
     assert 'Logging not enabled' in resp.data.get('error')
 
 
-def _mock_logging_defaults():
-    # Pre-populate settings obj with defaults
-    class MockSettings:
-        pass
-
-    mock_settings_obj = MockSettings()
-    mock_settings_json = dict()
-    for key in settings_registry.get_registered_settings(category_slug='logging'):
-        value = settings_registry.get_setting_field(key).get_default()
-        setattr(mock_settings_obj, key, value)
-        mock_settings_json[key] = value
-    setattr(mock_settings_obj, 'MAX_EVENT_RES_DATA', 700000)
-    return mock_settings_obj, mock_settings_json
-
-
 @pytest.mark.parametrize(
     'key, value, error',
     [
@@ -135,16 +120,15 @@ def _mock_logging_defaults():
 )
 @pytest.mark.django_db
 def test_logging_aggregator_missing_settings(put, post, admin, key, value, error):
-    _, mock_settings = _mock_logging_defaults()
-    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
-    mock_settings[key] = value
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
-    response = put(url, data=mock_settings, user=admin, expect=400)
-    assert error in str(response.data)
+    mock_settings = {"LOG_AGGREGATOR_ENABLED": True, key: value}
+    with override_db_settings(**mock_settings):
+        url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+        response = put(url, data=mock_settings, user=admin, expect=400)
+        assert error in str(response.data)
 
 
 @pytest.mark.parametrize(
-    'type, host, port, username, password',
+    'log_type, host, port, username, password',
     [
         ['logstash', 'localhost', 8080, 'logger', 'mcstash'],
         ['loggly', 'http://logs-01.loggly.com/inputs/1fd38090-hash-h4a$h-8d80-t0k3n71/tag/http/', None, None, None],
@@ -154,42 +138,35 @@ def test_logging_aggregator_missing_settings(put, post, admin, key, value, error
     ],
 )
 @pytest.mark.django_db
-def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, username, password):
-    _, mock_settings = _mock_logging_defaults()
-    # type = 'splunk'
-    # host = 'https://yoursplunk:8088/services/collector/event'
-    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
-    mock_settings['LOG_AGGREGATOR_TYPE'] = type
-    mock_settings['LOG_AGGREGATOR_HOST'] = host
+def test_logging_aggregator_valid_settings(put, post, admin, log_type, host, port, username, password):
+    mock_settings = {"LOG_AGGREGATOR_ENABLED": True, "LOG_AGGREGATOR_TYPE": log_type, "LOG_AGGREGATOR_HOST": host}
     if port:
         mock_settings['LOG_AGGREGATOR_PORT'] = port
     if username:
         mock_settings['LOG_AGGREGATOR_USERNAME'] = username
     if password:
         mock_settings['LOG_AGGREGATOR_PASSWORD'] = password
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
-    response = put(url, data=mock_settings, user=admin, expect=200)
-    assert type in response.data.get('LOG_AGGREGATOR_TYPE')
-    assert host in response.data.get('LOG_AGGREGATOR_HOST')
-    if port:
-        assert port == response.data.get('LOG_AGGREGATOR_PORT')
-    if username:
-        assert username in response.data.get('LOG_AGGREGATOR_USERNAME')
-    if password:  # Note: password should be encrypted
-        assert '$encrypted$' in response.data.get('LOG_AGGREGATOR_PASSWORD')
+
+    with override_db_settings(**mock_settings):
+        url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+        response = put(url, data=mock_settings, user=admin, expect=200)
+        assert log_type in response.data.get('LOG_AGGREGATOR_TYPE')
+        assert host in response.data.get('LOG_AGGREGATOR_HOST')
+        if port:
+            assert port == response.data.get('LOG_AGGREGATOR_PORT')
+        if username:
+            assert username in response.data.get('LOG_AGGREGATOR_USERNAME')
+        if password:  # Note: password should be encrypted
+            assert '$encrypted$' in response.data.get('LOG_AGGREGATOR_PASSWORD')
 
 
 @pytest.mark.django_db
 def test_logging_aggregator_connection_test_valid(put, post, admin):
-    _, mock_settings = _mock_logging_defaults()
-    type = 'other'
-    host = 'https://localhost'
-    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
-    mock_settings['LOG_AGGREGATOR_TYPE'] = type
-    mock_settings['LOG_AGGREGATOR_HOST'] = host
-    # POST to save these mock settings
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
-    put(url, data=mock_settings, user=admin, expect=200)
-    # "Test" the logger
-    url = reverse('api:setting_logging_test')
-    post(url, {}, user=admin, expect=202)
+    mock_settings = dict(LOG_AGGREGATOR_ENABLED=True, LOG_AGGREGATOR_TYPE='other', LOG_AGGREGATOR_HOST='https://localhost')
+    with override_db_settings(**mock_settings):
+        # POST to save these mock settings
+        url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+        put(url, data=mock_settings, user=admin, expect=200)
+        # "Test" the logger
+        url = reverse('api:setting_logging_test')
+        post(url, {}, user=admin, expect=202)

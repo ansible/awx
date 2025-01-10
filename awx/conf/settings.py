@@ -9,8 +9,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 # Django
-from django.conf import LazySettings
-from django.conf import settings, UserSettingsHolder
+from django.conf import UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured, SynchronousOnlyOperation
 from django.db import transaction, connection
@@ -27,6 +26,7 @@ from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
 from awx.conf.fields import PrimaryKeyRelatedField
 from awx.conf.models import Setting
+from awx.conf.lazy import settings
 
 # FIXME: Gracefully handle when settings are accessed before the database is
 # ready (or during migrations).
@@ -254,7 +254,6 @@ class SettingsWrapper(UserSettingsHolder):
         self.__dict__['_awx_conf_settings'] = self
         self.__dict__['_awx_conf_preload_expires'] = None
         self.__dict__['_awx_conf_preload_lock'] = threading.RLock()
-        self.__dict__['_awx_conf_init_readonly'] = False
         self.__dict__['cache'] = EncryptedCacheProxy(cache, registry)
         self.__dict__['registry'] = registry
         self.__dict__['_awx_conf_memoizedcache'] = cachetools.TTLCache(maxsize=2048, ttl=SETTING_MEMORY_TTL)
@@ -292,21 +291,6 @@ class SettingsWrapper(UserSettingsHolder):
                 return
             # Otherwise update local preload timeout.
             self.__dict__['_awx_conf_preload_expires'] = time.time() + SETTING_CACHE_TIMEOUT
-            # Check for any settings that have been defined in Python files and
-            # make those read-only to avoid overriding in the database.
-            if not self._awx_conf_init_readonly:
-                defaults_snapshot = self._get_default('DEFAULTS_SNAPSHOT')
-                for key in get_writeable_settings(self.registry):
-                    init_default = defaults_snapshot.get(key, None)
-                    try:
-                        file_default = self._get_default(key)
-                    except AttributeError:
-                        file_default = None
-                    if file_default != init_default and file_default is not None:
-                        logger.debug('Setting %s has been marked read-only!', key)
-                        self.registry._registry[key]['read_only'] = True
-                        self.registry._registry[key]['defined_in_file'] = True
-                    self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.
         if self.cache.get('_awx_conf_preload_expires', default=empty) is not empty:
@@ -415,7 +399,17 @@ class SettingsWrapper(UserSettingsHolder):
         return empty
 
     def _get_default(self, name):
-        return getattr(self.default_settings, name)
+        """Changelog note - after moving DB settings to their own module, the typical default is the field default
+
+        This field default must be usable even when the database is not available, like for unit tests.
+        However, we will still respect a default settings module for user-defined values in files.
+        """
+        field = self.registry.get_setting_field(name)
+        try:
+            return field.get_default()
+        except SkipField:
+            pass
+        raise AttributeError(f'Could not find {name} in field default or user settings, field: {field}')
 
     @property
     def SETTINGS_MODULE(self):
@@ -438,10 +432,19 @@ class SettingsWrapper(UserSettingsHolder):
     def __getattr__(self, name):
         value = empty
         if name in self.all_supported_settings:
+            # If user defined the setting in a file that should take precedence over DB
+            try:
+                return getattr(self.default_settings, name)
+            except AttributeError:
+                pass
+
             value = self._get_local_with_cache(name)
-        if value is not empty:
-            return value
-        return self._get_default(name)
+            if value is not empty:
+                return value
+            return self._get_default(name)
+        # For most any keys not a registered setting we prefer AttributeError
+        # but some internal attributes may be used by Django parent classes
+        return super().__getattr__(name)
 
     def _set_local(self, name, value):
         field = self.registry.get_setting_field(name)
@@ -528,19 +531,3 @@ class SettingsWrapper(UserSettingsHolder):
         for safety sake we are ensuring the key schema does not change.
         """
         return cachetools.keys.hashkey(f"<{cls.__name__}>", *args, **kwargs)
-
-
-def __getattr_without_cache__(self, name):
-    # Django 1.10 added an optimization to settings lookup:
-    # https://code.djangoproject.com/ticket/27625
-    # https://github.com/django/django/commit/c1b221a9b913315998a1bcec2f29a9361a74d1ac
-    # This change caches settings lookups on the __dict__ of the LazySettings
-    # object, which is not okay to do in an environment where settings can
-    # change in-process (the entire point of awx's custom settings implementation)
-    # This restores the original behavior that *does not* cache.
-    if self._wrapped is empty:
-        self._setup(name)
-    return getattr(self._wrapped, name)
-
-
-LazySettings.__getattr__ = __getattr_without_cache__

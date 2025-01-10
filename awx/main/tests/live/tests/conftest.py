@@ -7,7 +7,7 @@ import logging
 
 import pytest
 
-from django.conf import settings
+from awx.conf import db_settings
 
 from awx.api.versioning import reverse
 
@@ -58,8 +58,8 @@ def live_tmp_folder():
     for dirname in os.listdir(path):
         source_dir = os.path.join(path, dirname)
         subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
-    if path not in settings.AWX_ISOLATION_SHOW_PATHS:
-        settings.AWX_ISOLATION_SHOW_PATHS = settings.AWX_ISOLATION_SHOW_PATHS + [path]
+    if path not in db_settings.AWX_ISOLATION_SHOW_PATHS:
+        db_settings.AWX_ISOLATION_SHOW_PATHS = db_settings.AWX_ISOLATION_SHOW_PATHS + [path]
     return path
 
 

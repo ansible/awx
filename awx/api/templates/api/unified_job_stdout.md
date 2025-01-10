@@ -22,6 +22,6 @@ to specify a range of line numbers to retrieve.
 Use `dark=1` or `dark=0` as a query string parameter to force or disable a
 dark background.
 
-Files over {{ settings.STDOUT_MAX_BYTES_DISPLAY|filesizeformat }} (configurable)
+Files over {{ db_settings.STDOUT_MAX_BYTES_DISPLAY|filesizeformat }} (configurable)
 will not display in the browser. Use the `txt_download` or `ansi_download`
 formats to download the file directly to view it.
