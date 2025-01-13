@@ -589,23 +589,8 @@ docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 
 docker-refresh: docker-clean docker-compose
 
-## Docker Development Environment with Elastic Stack Connected
-docker-compose-elk: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
-docker-compose-cluster-elk: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
 docker-compose-container-group:
 	MINIKUBE_CONTAINER_GROUP=true $(MAKE) docker-compose
-
-clean-elk:
-	docker stop tools_kibana_1
-	docker stop tools_logstash_1
-	docker stop tools_elasticsearch_1
-	docker rm tools_logstash_1
-	docker rm tools_elasticsearch_1
-	docker rm tools_kibana_1
 
 VERSION:
 	@echo "awx: $(VERSION)"
