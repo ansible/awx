@@ -29,7 +29,8 @@ def test_bootstrap_consistent():
                 continue
             req_name, _ = line.split('=', 1)
             if req_name == boot_req_name:
-                different_requirements.append((req, line))
+                if req != line:
+                    different_requirements.append((req, line))
                 break
 
     assert not different_requirements
