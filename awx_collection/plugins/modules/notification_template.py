@@ -147,8 +147,8 @@ EXAMPLES = '''
         - user1@example.com
       host: smtp.example.com
       port: 25
-      use_tls: no
-      use_ssl: no
+      use_tls: false
+      use_ssl: false
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
@@ -188,7 +188,7 @@ EXAMPLES = '''
         - user1
       port: 8080
       server: irc.example.com
-      use_ssl: no
+      use_ssl: false
     state: present
     controller_config_file: "~/tower_cli.cfg"
 

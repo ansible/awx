@@ -95,8 +95,8 @@ EXAMPLES = '''
       - fda
     children:
       - NewYork
-    preserve_existing_hosts: True
-    preserve_existing_children: True
+    preserve_existing_hosts: true
+    preserve_existing_children: true
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

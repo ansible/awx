@@ -117,7 +117,7 @@ EXAMPLES = """
       - frequency: 'day'
         interval: 1
         byweekday: 'sunday'
-        include: False
+        include: false
 """
 
 RETURN = """
