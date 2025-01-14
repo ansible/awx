@@ -9,7 +9,17 @@
     src_cred_name: "AWX-Collection-tests-credential_input_source-src_cred-{{ test_id }}"
     target_cred_name: "AWX-Collection-tests-credential_input_source-target_cred-{{ test_id }}"
 
-- block:
+- name: detect credential types
+  ansible.builtin.set_fact:
+    credentials: "{{ lookup('awx.awx.controller_api', 'credential_types') }}"
+
+- name: Register Credentials found
+  set_fact:
+    cyberark_found: "{{ 'CyberArk Central Credential Provider Lookup' in credentials | map(attribute='name') | list }}"
+
+- name: Test credential lookup workflow
+  when: cyberark_found
+  block:
     - name: Add credential Lookup
       credential:
         description: Credential for Testing Source
@@ -121,7 +131,9 @@
         that:
           - "result is changed"
 
-  always:
+- name: Clean up if previous block ran
+  when: cyberark_found
+  block:
     - name: Remove a credential source
       credential_input_source:
         input_field_name: password
