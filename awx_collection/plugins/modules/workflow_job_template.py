@@ -574,7 +574,6 @@ EXAMPLES = '''
         unified_job_template:
           name: Cleanup Activity Stream
           type: system_job_template
-
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
