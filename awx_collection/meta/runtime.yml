@@ -1,5 +1,5 @@
 ---
-requires_ansible: '>=2.9.10'
+requires_ansible: '>=2.15.0'
 action_groups:
   controller:
     - ad_hoc_command
