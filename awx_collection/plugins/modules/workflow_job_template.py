@@ -548,25 +548,25 @@ EXAMPLES = '''
           success_nodes:
             - identifier: node401
           failure_nodes:
-          -   identifier: node301
+            - identifier: node301
           always_nodes: []
           credentials:
-              - name: cyberark
-                organization:
-                    name: Default
+            - name: cyberark
+              organization:
+                name: Default
           instance_groups:
-              - name: SunCavanaugh Cloud
+            - name: SunCavanaugh Cloud
           labels:
-              - name: Custom Label
-                organization:
-                    name: Default
+            - name: Custom Label
+              organization:
+                name: Default
       - all_parents_must_converge: false
         identifier: node301
         unified_job_template:
-            description: Approval node for example
-            timeout: 900
-            type: workflow_approval
-            name: Approval Node for Demo
+          description: Approval node for example
+          timeout: 900
+          type: workflow_approval
+          name: Approval Node for Demo
         related:
           success_nodes:
             - identifier: node401
