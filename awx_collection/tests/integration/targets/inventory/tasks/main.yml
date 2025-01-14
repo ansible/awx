@@ -211,4 +211,3 @@
       instance_group:
         name: "{{ group_name1 }}"
         state: absent
-
