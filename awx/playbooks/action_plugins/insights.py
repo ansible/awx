@@ -6,6 +6,7 @@ import os
 import re
 
 import requests
+from urllib.parse import urljoin
 
 from ansible.plugins.action import ActionBase
 
@@ -34,27 +35,73 @@ class ActionModule(ActionBase):
         with open(file_path, 'w') as f:
             f.write(etag)
 
+    def _obtain_auth_token(self, oidc_endpoint, client_id, client_secret):
+        main_url = urljoin(oidc_endpoint, '/.well-known/openid-configuration')
+        response = requests.get(url=main_url, headers={'Accept': 'application/json'})
+        data = {}
+        if response.status_code != 200:
+            data['failed'] = True
+            data['msg'] = 'Expected {} to return a status code of 200 but returned status code "{}" instead with content "{}".'.format(
+                main_url, response.status_code, response.content
+            )
+            return data
+
+        auth_url = response.json().get('token_endpoint', None)
+        data = {
+            'grant_type': 'client_credentials',
+            'scope': 'api.console',
+            'client_id': client_id,
+            'client_secret': client_secret,
+        }
+        response = requests.post(url=auth_url, data=data)
+
+        if response.status_code != 200:
+            data['failed'] = True
+            data['msg'] = 'Expected {} to return a status code of 200 but returned status code "{}" instead with content "{}".'.format(
+                auth_url, response.status_code, response.content
+            )
+        else:
+            data['token'] = response.json().get('access_token', None)
+            data['token_type'] = response.json().get('token_type', None)
+        return data
+
     def run(self, tmp=None, task_vars=None):
         self._supports_check_mode = False
 
+        session = requests.Session()
         result = super(ActionModule, self).run(tmp, task_vars)
 
         insights_url = self._task.args.get('insights_url', None)
-        username = self._task.args.get('username', None)
-        password = self._task.args.get('password', None)
         proj_path = self._task.args.get('project_path', None)
         license = self._task.args.get('awx_license_type', None)
         awx_version = self._task.args.get('awx_version', None)
+        authentication = self._task.args.get('authentication', None)
+        username = self._task.args.get('username', None)
+        password = self._task.args.get('password', None)
+        client_id = self._task.args.get('client_id', None)
+        client_secret = self._task.args.get('client_secret', None)
+        oidc_endpoint = self._task.args.get('oidc_endpoint', None)
 
-        session = requests.Session()
-        session.auth = requests.auth.HTTPBasicAuth(username, password)
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Automation Platform', awx_version, license),
-        }
+        session.headers.update(
+            {
+                'Content-Type': 'application/json',
+                'User-Agent': '{} {} ({})'.format('AWX' if license == 'open' else 'Red Hat Ansible Automation Platform', awx_version, license),
+            }
+        )
+
+        if authentication == 'service_account' or (client_id and client_secret):
+            data = self._obtain_auth_token(oidc_endpoint, client_id, client_secret)
+            if 'token' not in data:
+                result['failed'] = data['failed']
+                result['msg'] = data['msg']
+                return result
+            session.headers.update({'Authorization': f'{result['token_type']} {result['token']}'})
+        elif authentication == 'basic' or (username and password):
+            session.auth = requests.auth.HTTPBasicAuth(username, password)
+
         url = '/api/remediations/v1/remediations'
         while url:
-            res = session.get('{}{}'.format(insights_url, url), headers=headers, timeout=120)
+            res = session.get('{}{}'.format(insights_url, url), timeout=120)
 
             if res.status_code != 200:
                 result['failed'] = True

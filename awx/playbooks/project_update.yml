@@ -19,6 +19,9 @@
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 # gpg_pubkey: the GPG public key to use for validation, when enabled
+# client_id: Red Hat service account client ID; required for the 'service_account' authentication method used against the Insights API
+# client_secret: Red Hat service account client secret; required for the 'service_account' authentication method used against the Insights API
+# oidc_endpoint: OpenID Connect URL for 'service_account' authentication method.
 
 - hosts: localhost
   gather_facts: false
@@ -95,11 +98,14 @@
         - name: Fetch Insights Playbook(s)
           insights:
             insights_url: "{{ insights_url }}"
-            username: "{{ scm_username }}"
-            password: "{{ scm_password }}"
+            username: "{{ scm_username | default(omit) }}"
+            password: "{{ scm_password | default(omit) }}"
             project_path: "{{ project_path }}"
             awx_license_type: "{{ awx_license_type }}"
             awx_version: "{{ awx_version }}"
+            client_id: "{{ client_id | default(omit) }}"
+            client_secret: "{{ client_secret | default(omit) }}"
+            authentication: "{{ authentication | default(omit) }}"
           register: results
 
         - name: Save Insights Version
