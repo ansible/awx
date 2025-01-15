@@ -2,7 +2,6 @@ import json
 import logging
 import asyncio
 from typing import Dict
-from copy import deepcopy
 
 import ipaddress
 
@@ -21,6 +20,7 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStats,
     RelayWebsocketStatsManager,
 )
+from awx.main.utils.db import get_listener_params
 
 logger = logging.getLogger('awx.main.wsrelay')
 
@@ -308,27 +308,10 @@ class WebSocketRelayManager(object):
         self.stats_mgr = RelayWebsocketStatsManager(self.local_hostname)
         self.stats_mgr.start()
 
-        database_conf = deepcopy(settings.DATABASES['default'])
-        database_conf['OPTIONS'] = deepcopy(database_conf.get('OPTIONS', {}))
+        psycopg_params = get_listener_params()
 
-        for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
-            if k != 'OPTIONS':
-                database_conf[k] = v
-        for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
-            database_conf['OPTIONS'][k] = v
+        async_conn = await psycopg.AsyncConnection.connect(**psycopg_params)
 
-        if 'PASSWORD' in database_conf:
-            database_conf['OPTIONS']['password'] = database_conf.pop('PASSWORD')
-
-        async_conn = await psycopg.AsyncConnection.connect(
-            dbname=database_conf['NAME'],
-            host=database_conf['HOST'],
-            user=database_conf['USER'],
-            port=database_conf['PORT'],
-            **database_conf.get("OPTIONS", {}),
-        )
-
-        await async_conn.set_autocommit(True)
         on_ws_heartbeat_task = asyncio.get_running_loop().create_task(
             self.on_ws_heartbeat(async_conn),
             name="WebSocketRelayManager.on_ws_heartbeat",
