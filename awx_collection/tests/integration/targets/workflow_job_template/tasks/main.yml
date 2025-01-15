@@ -54,7 +54,7 @@
     - assert:
         that:
           - "result is changed"
-    
+
     - name: Create Github PAT Credential
       credential:
         name: "{{ github_webhook_credential_name }}"
@@ -892,6 +892,7 @@
         that:
           - result is failed
           - "'Must match the selected webhook service' in result['msg']"
+      when: github_found and gitlab_found
 
     - name: Create a workflow job template with a GitHub webhook and a GitHub credential
       workflow_job_template:
