@@ -72,12 +72,6 @@ class Command(BaseCommand):
         exit_if_redis_down(logger)
         DispatcherMetricsServer().start()
 
-        # TODO: move to a common database checker in DAB
-        try:
-            connection.ensure_connection()
-        except Exception as e:
-            print(type(e))
-
         if not os.path.exists(RECEPTOR_SOCK_FILE):
             logger.info(f'Receptor sock file does not exist at {RECEPTOR_SOCK_FILE}')
             time.sleep(1)  # Patience to avoid log spam
