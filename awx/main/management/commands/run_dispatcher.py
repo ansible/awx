@@ -2,15 +2,21 @@
 # All Rights Reserved.
 import logging
 import yaml
+import os
+import sys
+import time
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.db import connection
 
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
 from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
 from awx.main.analytics.subsystem_metrics import DispatcherMetricsServer
+from awx.main.utils.redis import exit_if_redis_down
+from awx.main.tasks.receptor import RECEPTOR_SOCK_FILE
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -63,7 +69,19 @@ class Command(BaseCommand):
 
         consumer = None
 
+        exit_if_redis_down(logger)
         DispatcherMetricsServer().start()
+
+        # TODO: move to a common database checker in DAB
+        try:
+            connection.ensure_connection()
+        except Exception as e:
+            print(type(e))
+
+        if not os.path.exists(RECEPTOR_SOCK_FILE):
+            logger.info(f'Receptor sock file does not exist at {RECEPTOR_SOCK_FILE}')
+            time.sleep(1)  # Patience to avoid log spam
+            sys.exit(1)
 
         try:
             queues = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]
