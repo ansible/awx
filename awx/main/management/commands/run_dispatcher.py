@@ -8,7 +8,6 @@ import time
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import connection
 
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control
