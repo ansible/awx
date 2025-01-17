@@ -210,20 +210,13 @@ class ProjectOptions(models.Model):
         results = []
         project_path = self.get_project_path()
         if project_path:
-            print('walk output')
-            print([s for s in os.walk(smart_str(project_path))])
             for dirpath, dirnames, filenames in os.walk(smart_str(project_path), followlinks=settings.AWX_SHOW_PLAYBOOK_LINKS):
                 if skip_directory(dirpath):
-                    raise Exception(f'dir skipped {dirpath}')
                     continue
                 for filename in filenames:
                     playbook = could_be_playbook(project_path, dirpath, filename)
                     if playbook is not None:
                         results.append(smart_str(playbook))
-                    else:
-                        raise Exception('playbook is None')
-        else:
-            raise Exception('pp is None')
         return sorted(results, key=lambda x: smart_str(x).lower())
 
     @property
