@@ -1,6 +1,8 @@
 import pytest
 import os
 import shutil
+import tempfile
+import subprocess
 
 from django.conf import settings
 
@@ -10,48 +12,115 @@ from awx.main.models import Project, JobTemplate, Inventory
 
 from awx.main.tests.live.tests.conftest import wait_for_job
 
-DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
+PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
 
 
-@pytest.fixture
-def copy_project_folders():
-    proj_root = settings.PROJECTS_ROOT
-    for dirname in os.listdir(DATA):
-        source_dir = os.path.join(DATA, dirname)
-        expected_dir = os.path.join(proj_root, dirname)
+def _copy_folders(source_path, dest_path):
+    "folder-by-folder, copy dirs in the source root dir to the destination root dir"
+    for dirname in os.listdir(source_path):
+        source_dir = os.path.join(source_path, dirname)
+        expected_dir = os.path.join(dest_path, dirname)
         if (not os.path.isdir(source_dir)) or os.path.exists(expected_dir):
             continue
         shutil.copytree(source_dir, expected_dir)
 
 
-def test_manual_project(copy_project_folders, default_org, post, admin):
-    old_proj = Project.objects.filter(name='Manual Project - debug').first()
-    if old_proj:
-        old_proj.delete()
+@pytest.fixture(scope='session')
+def copy_project_folders():
+    proj_root = settings.PROJECTS_ROOT
+    if not os.path.exists(proj_root):
+        os.mkdir(proj_root)
+    _copy_folders(PROJ_DATA, proj_root)
 
-    old_jt = JobTemplate.objects.filter(name='debug from Manual Project').first()
-    if old_jt:
-        old_jt.delete()
 
-    result = post(
-        reverse('api:project_list'),
-        {'name': 'Manual Project - debug', 'organization': default_org.id, 'scm_type': '', 'local_path': 'debug'},  # manual
-        admin,
-        expect=201,
-    )
-    proj = Project.objects.get(id=result.data['id'])
-    assert proj.get_project_path()
-    assert 'debug.yml' in proj.playbooks
-    inventory, _ = Inventory.objects.get_or_create(name='Demo Inventory', defaults={'organization': default_org})
-    result = post(
-        reverse('api:job_template_list'),
-        {'name': 'debug from Manual Project', 'project': proj.id, 'playbook': 'debug.yml', 'inventory': inventory.id},
-        admin,
-        expect=201,
-    )
-    jt = JobTemplate.objects.get(id=result.data['id'])
-    job = jt.create_unified_job()
-    job.signal_start()
+GIT_COMMANDS = (
+    'git config --global init.defaultBranch main; '
+    'git init; '
+    'git config user.email jenkins@ansible.com; '
+    'git config user.name DoneByTest; '
+    'git add .; '
+    'git commit -m "initial commit"'
+)
 
-    wait_for_job(job)
-    assert job.status == 'successful'
+
+@pytest.fixture(scope='session')
+def live_tmp_folder():
+    path = os.path.join(tempfile.gettempdir(), 'live_tests')
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    os.mkdir(path)
+    _copy_folders(PROJ_DATA, path)
+    for dirname in os.listdir(path):
+        source_dir = os.path.join(path, dirname)
+        print('')
+        print(f'setting up git in {source_dir}')
+        for cmd in GIT_COMMANDS.split(';'):
+            print(f'Running {cmd}')
+            subprocess.run(cmd.strip(), cwd=source_dir, shell=True)
+        # subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
+    if path not in settings.AWX_ISOLATION_SHOW_PATHS:
+        settings.AWX_ISOLATION_SHOW_PATHS = settings.AWX_ISOLATION_SHOW_PATHS + [path]
+    return path
+
+
+@pytest.fixture
+def run_job_from_playbook(default_org, demo_inv, post, admin):
+    def _rf(test_name, playbook, local_path=None, scm_url=None):
+        project_name = f'{test_name} project'
+        jt_name = f'{test_name} JT: {playbook}'
+
+        old_proj = Project.objects.filter(name=project_name).first()
+        if old_proj:
+            old_proj.delete()
+
+        old_jt = JobTemplate.objects.filter(name=jt_name).first()
+        if old_jt:
+            old_jt.delete()
+
+        proj_kwargs = {'name': project_name, 'organization': default_org.id}
+        if local_path:
+            # manual path
+            proj_kwargs['scm_type'] = ''
+            proj_kwargs['local_path'] = local_path
+        elif scm_url:
+            proj_kwargs['scm_type'] = 'git'
+            proj_kwargs['scm_url'] = scm_url
+        else:
+            raise RuntimeError('Need to provide scm_url or local_path')
+
+        result = post(
+            reverse('api:project_list'),
+            proj_kwargs,
+            admin,
+            expect=201,
+        )
+        proj = Project.objects.get(id=result.data['id'])
+
+        if proj.current_job:
+            wait_for_job(proj.current_job)
+
+        assert proj.get_project_path()
+        assert playbook in proj.playbooks
+
+        result = post(
+            reverse('api:job_template_list'),
+            {'name': jt_name, 'project': proj.id, 'playbook': playbook, 'inventory': demo_inv.id},
+            admin,
+            expect=201,
+        )
+        jt = JobTemplate.objects.get(id=result.data['id'])
+        job = jt.create_unified_job()
+        job.signal_start()
+
+        wait_for_job(job)
+        assert job.status == 'successful'
+
+    return _rf
+
+
+def test_manual_project(copy_project_folders, run_job_from_playbook):
+    run_job_from_playbook('test_manual_project', 'debug.yml', local_path='debug')
+
+
+def test_git_file_project(live_tmp_folder, run_job_from_playbook):
+    run_job_from_playbook('test_git_file_project', 'debug.yml', scm_url=f'file://{live_tmp_folder}/debug')

@@ -39,3 +39,9 @@ def default_org():
     if org is None:
         raise Exception('Tests expect Default org to already be created and it is not')
     return org
+
+
+@pytest.fixture(scope='session')
+def demo_inv(default_org):
+    inventory, _ = Inventory.objects.get_or_create(name='Demo Inventory', defaults={'organization': default_org})
+    return inventory
