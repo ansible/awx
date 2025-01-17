@@ -114,7 +114,7 @@ def team_member(user, team):
     return ret
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture
 def project_playbooks():
     """
     Return playbook_files as playbooks for manual projects when testing.
