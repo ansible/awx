@@ -8,7 +8,7 @@ from django.conf import settings
 
 from awx.api.versioning import reverse
 from awx.main.tests import data
-from awx.main.models import Project, JobTemplate, Inventory
+from awx.main.models import Project, JobTemplate
 
 from awx.main.tests.live.tests.conftest import wait_for_job
 

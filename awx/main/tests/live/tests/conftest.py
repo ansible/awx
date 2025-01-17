@@ -7,7 +7,7 @@ import pytest
 from awx.main.tests.functional.conftest import *  # noqa
 from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
 
-from awx.main.models import Organization
+from awx.main.models import Organization, Inventory
 
 
 def wait_to_leave_status(job, status, timeout=30, sleep_time=0.1):
