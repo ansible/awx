@@ -8,7 +8,6 @@ from unittest import mock
 from awx.main.models import (
     Organization,
     Project,
-    ProjectUpdate,
     Team,
     Instance,
     InstanceGroup,
