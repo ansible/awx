@@ -1,4 +1,4 @@
-## Project data for live tests
+# Project data for live tests
 
 Each folder in this directory is usable as source for a project or role or collection,
 which is used in tests, particularly the "awx/main/tests/live" tests.
@@ -12,21 +12,21 @@ git repos. This is done in the locations
 
 These can then be referenced for manual projects or git via the `file://` protocol.
 
-### debug
+## debug
 
 This is the simplest possible case with 1 playbook with 1 debug task.
 
-### with_requirements
+## with_requirements
 
 This has a playbook that runs a task that uses a role.
 
 The role project is referenced in the `roles/requirements.yml` file.
 
-#### role_requirement
+### role_requirement
 
 This is the source for the role that the `with_requirements` project uses.
 
-### test_host_query
+## test_host_query
 
 This has a playbook that runs a task from a custom collection module which
 is registered for the host query feature.
