@@ -5,15 +5,15 @@ galaxy_info:
   license: MIT
   min_ansible_version: 1.4
   platforms:
-   - name: EL
-     versions:
-      - 8
-      - 9
-   - name: Fedora
-     versions:
-      - 39
-      - 40
-      - 41
+    - name: EL
+      versions:
+        - 8
+        - 9
+    - name: Fedora
+      versions:
+        - 39
+        - 40
+        - 41
   categories:
-   - stuff
+    - stuff
 dependencies: []
