@@ -21,7 +21,9 @@
 # gpg_pubkey: the GPG public key to use for validation, when enabled
 # client_id: Red Hat service account client ID; required for the 'service_account' authentication method used against the Insights API
 # client_secret: Red Hat service account client secret; required for the 'service_account' authentication method used against the Insights API
-# oidc_endpoint: OpenID Connect URL for 'service_account' authentication method.
+# authentication: The authentication method to use against the Insights API
+# client_id and client_secret are required for the 'service_account' authentication method
+# scm_username and scm_password are required for the 'basic' authentication method
 
 - hosts: localhost
   gather_facts: false

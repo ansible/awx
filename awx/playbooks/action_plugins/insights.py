@@ -6,9 +6,10 @@ import os
 import re
 
 import requests
-from urllib.parse import urljoin
 
 from ansible.plugins.action import ActionBase
+
+DEFAULT_OIDC_ENDPOINT = 'https://sso.redhat.com/auth/realms/redhat-external'
 
 
 class ActionModule(ActionBase):
@@ -36,7 +37,9 @@ class ActionModule(ActionBase):
             f.write(etag)
 
     def _obtain_auth_token(self, oidc_endpoint, client_id, client_secret):
-        main_url = urljoin(oidc_endpoint, '/.well-known/openid-configuration')
+        if oidc_endpoint.endswith('/'):
+            oidc_endpoint = oidc_endpoint.rstrip('/')
+        main_url = oidc_endpoint + '/.well-known/openid-configuration'
         response = requests.get(url=main_url, headers={'Accept': 'application/json'})
         data = {}
         if response.status_code != 200:
@@ -80,7 +83,7 @@ class ActionModule(ActionBase):
         password = self._task.args.get('password', None)
         client_id = self._task.args.get('client_id', None)
         client_secret = self._task.args.get('client_secret', None)
-        oidc_endpoint = self._task.args.get('oidc_endpoint', None)
+        oidc_endpoint = self._task.args.get('oidc_endpoint', DEFAULT_OIDC_ENDPOINT)
 
         session.headers.update(
             {
@@ -95,7 +98,7 @@ class ActionModule(ActionBase):
                 result['failed'] = data['failed']
                 result['msg'] = data['msg']
                 return result
-            session.headers.update({'Authorization': f'{result['token_type']} {result['token']}'})
+            session.headers.update({'Authorization': f'{data["token_type"]} {data["token"]}'})
         elif authentication == 'basic' or (username and password):
             session.auth = requests.auth.HTTPBasicAuth(username, password)
 
