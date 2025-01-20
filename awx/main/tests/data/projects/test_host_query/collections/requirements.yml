@@ -1,2 +1,5 @@
 ---
-- src: 'file:///tmp/live_tests/host_query'
+collections:
+  - name: 'file:///tmp/live_tests/host_query'
+    type: git
+    version: devel

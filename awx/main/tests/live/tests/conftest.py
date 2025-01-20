@@ -25,12 +25,26 @@ def wait_to_leave_status(job, status, timeout=30, sleep_time=0.1):
     raise RuntimeError(f'Job failed to exit {status} in {timeout} seconds. job_explanation={job.job_explanation} tb={job.result_traceback}')
 
 
+def wait_for_events(uj, timeout=2):
+    start = time.time()
+    while uj.event_processing_finished is False:
+        time.sleep(0.2)
+        uj.refresh_from_db()
+        if time.time() - start > timeout:
+            break
+
+
+def unified_job_stdout(uj):
+    wait_for_events(uj)
+    return '\n'.join([event.stdout for event in uj.get_event_queryset().order_by('created')])
+
+
 def wait_for_job(job, final_status='successful', running_timeout=800):
     wait_to_leave_status(job, 'pending')
     wait_to_leave_status(job, 'waiting')
     wait_to_leave_status(job, 'running', timeout=running_timeout)
 
-    assert job.status == final_status, f'Job was not successful id={job.id} status={job.status}'
+    assert job.status == final_status, f'Job was not successful id={job.id} status={job.status} tb={job.result_traceback} output=\n{unified_job_stdout(job)}'
 
 
 @pytest.fixture(scope='session')

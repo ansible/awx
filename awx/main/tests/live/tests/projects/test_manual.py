@@ -36,7 +36,7 @@ def copy_project_folders():
 
 
 GIT_COMMANDS = (
-    'git config --global init.defaultBranch main; '
+    'git config --global init.defaultBranch devel; '
     'git init; '
     'git config user.email jenkins@ansible.com; '
     'git config user.name DoneByTest; '
@@ -124,4 +124,4 @@ def test_git_file_project(live_tmp_folder, run_job_from_playbook):
 
 
 def test_git_file_collection_requirement(live_tmp_folder, run_job_from_playbook):
-    run_job_from_playbook('test_git_file_collection_requirement', 'debug.yml', scm_url=f'file://{live_tmp_folder}/test_host_query')
+    run_job_from_playbook('test_git_file_collection_requirement', 'run_task.yml', scm_url=f'file://{live_tmp_folder}/test_host_query')
