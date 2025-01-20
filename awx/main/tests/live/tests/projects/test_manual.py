@@ -15,11 +15,13 @@ from awx.main.tests.live.tests.conftest import wait_for_job
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
 
 
-def _copy_folders(source_path, dest_path):
+def _copy_folders(source_path, dest_path, clear=False):
     "folder-by-folder, copy dirs in the source root dir to the destination root dir"
     for dirname in os.listdir(source_path):
         source_dir = os.path.join(source_path, dirname)
         expected_dir = os.path.join(dest_path, dirname)
+        if clear and os.path.exists(expected_dir):
+            shutil.rmtree(expected_dir)
         if (not os.path.isdir(source_dir)) or os.path.exists(expected_dir):
             continue
         shutil.copytree(source_dir, expected_dir)
@@ -30,7 +32,7 @@ def copy_project_folders():
     proj_root = settings.PROJECTS_ROOT
     if not os.path.exists(proj_root):
         os.mkdir(proj_root)
-    _copy_folders(PROJ_DATA, proj_root)
+    _copy_folders(PROJ_DATA, proj_root, clear=True)
 
 
 GIT_COMMANDS = (
@@ -52,12 +54,7 @@ def live_tmp_folder():
     _copy_folders(PROJ_DATA, path)
     for dirname in os.listdir(path):
         source_dir = os.path.join(path, dirname)
-        print('')
-        print(f'setting up git in {source_dir}')
-        for cmd in GIT_COMMANDS.split(';'):
-            print(f'Running {cmd}')
-            subprocess.run(cmd.strip(), cwd=source_dir, shell=True)
-        # subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
+        subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
     if path not in settings.AWX_ISOLATION_SHOW_PATHS:
         settings.AWX_ISOLATION_SHOW_PATHS = settings.AWX_ISOLATION_SHOW_PATHS + [path]
     return path
@@ -124,3 +121,7 @@ def test_manual_project(copy_project_folders, run_job_from_playbook):
 
 def test_git_file_project(live_tmp_folder, run_job_from_playbook):
     run_job_from_playbook('test_git_file_project', 'debug.yml', scm_url=f'file://{live_tmp_folder}/debug')
+
+
+def test_git_file_collection_requirement(live_tmp_folder, run_job_from_playbook):
+    run_job_from_playbook('test_git_file_collection_requirement', 'debug.yml', scm_url=f'file://{live_tmp_folder}/test_host_query')
