@@ -62,6 +62,8 @@ If modifying these libraries make sure testing with the offline build is perform
 Versions need to match the versions used in the pip bootstrapping step
 in the top-level Makefile.
 
+Verify ansible-runner's build dependency doesn't conflict with the changes made.
+
 ### cryptography
 
 If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.

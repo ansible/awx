@@ -24,7 +24,6 @@ from django.db.models import Q
 from rest_framework.exceptions import ParseError
 
 from ansible_base.lib.utils.models import prevent_search
-from awx_plugins.inventory.plugins import PluginFileInjector
 
 # AWX
 from awx.api.versioning import reverse
@@ -1402,7 +1401,3 @@ class CustomInventoryScript(CommonModelNameNotUnique):
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
-
-
-for cls in PluginFileInjector.__subclasses__():
-    InventorySourceOptions.injectors[cls.__name__] = cls

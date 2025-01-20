@@ -30,12 +30,12 @@ if [ ! -d "/awx_devel/awx/ui/build/awx" ]; then
     cp /awx_devel/awx/ui/placeholder_index_awx.html /awx_devel/awx/ui/build/awx/index_awx.html
 fi
 
-if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
+if output=$(ANSIBLE_REVERSE_RESOURCE_SYNC=false awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
     echo $output
 fi
 echo "Admin password: ${DJANGO_SUPERUSER_PASSWORD}"
 
-awx-manage create_preload_data
+ANSIBLE_REVERSE_RESOURCE_SYNC=false awx-manage create_preload_data
 awx-manage register_default_execution_environments
 
 awx-manage provision_instance --hostname="$(hostname)" --node_type="$MAIN_NODE_TYPE"

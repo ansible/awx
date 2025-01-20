@@ -82,17 +82,9 @@ class CLI(object):
         return '--help' in self.argv or '-h' in self.argv
 
     def authenticate(self):
-        """Configure the current session (or OAuth2.0 token)"""
-        token = self.get_config('token')
-        if token:
-            self.root.connection.login(
-                None,
-                None,
-                token=token,
-            )
-        else:
-            config.use_sessions = True
-            self.root.load_session().get()
+        """Configure the current session for basic auth"""
+        config.use_sessions = True
+        self.root.load_session().get()
 
     def connect(self):
         """Fetch top-level resources from /api/v2"""
@@ -141,7 +133,7 @@ class CLI(object):
         """Attempt to parse the <resource> (e.g., jobs) specified on the CLI
 
         If a valid resource is discovered, the user will be authenticated
-        (either via an OAuth2.0 token or session-based auth) and the remaining
+        (via session-based auth) and the remaining
         CLI arguments will be processed (to determine the requested action
         e.g., list, create, delete)
 

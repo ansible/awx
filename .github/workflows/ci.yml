@@ -139,8 +139,13 @@ jobs:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run smoke test
-        run: ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
+      - name: Run live dev env tests
+        run: docker exec tools_awx_1 /bin/bash -c "make live_test"
+
+      - uses: ./.github/actions/upload_awx_devel_logs
+        if: always()
+        with:
+          log-filename: live-tests.log
 
   awx-operator:
     runs-on: ubuntu-latest
@@ -187,6 +192,8 @@ jobs:
         working-directory: awx-operator
         run: |
           python3 -m pip install -r molecule/requirements.txt
+          python3 -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
+          $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
           make kustomize

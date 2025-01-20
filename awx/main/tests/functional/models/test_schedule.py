@@ -123,28 +123,14 @@ class TestComputedFields:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('freq, delta', (('MINUTELY', 1), ('HOURLY', 1)))
-def test_past_week_rrule(job_template, freq, delta):
-    # see: https://github.com/ansible/awx/issues/8071
-    recent = datetime.utcnow() - timedelta(days=3)
-    recent = recent.replace(hour=0, minute=0, second=0, microsecond=0)
-    recent_dt = recent.strftime('%Y%m%d')
-    rrule = f'DTSTART;TZID=America/New_York:{recent_dt}T000000 RRULE:FREQ={freq};INTERVAL={delta};COUNT=5'  # noqa
-    sched = Schedule.objects.create(name='example schedule', rrule=rrule, unified_job_template=job_template)
-    first_event = sched.rrulestr(sched.rrule)[0]
-    assert first_event.replace(tzinfo=None) == recent
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('freq, delta', (('MINUTELY', 1), ('HOURLY', 1)))
 def test_really_old_dtstart(job_template, freq, delta):
     # see: https://github.com/ansible/awx/issues/8071
     # If an event is per-minute/per-hour and was created a *really long*
-    # time ago, we should just bump forward to start counting "in the last week"
+    # time ago, we should just bump forward the dtstart
     rrule = f'DTSTART;TZID=America/New_York:20150101T000000 RRULE:FREQ={freq};INTERVAL={delta}'  # noqa
     sched = Schedule.objects.create(name='example schedule', rrule=rrule, unified_job_template=job_template)
-    last_week = (datetime.utcnow() - timedelta(days=7)).date()
     first_event = sched.rrulestr(sched.rrule)[0]
-    assert last_week == first_event.date()
+    assert now() - first_event < timedelta(days=1)
 
     # the next few scheduled events should be the next minute/hour incremented
     next_five_events = list(sched.rrulestr(sched.rrule).xafter(now(), count=5))

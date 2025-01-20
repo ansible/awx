@@ -31,6 +31,8 @@ credential_input_fields = (
     'become_password',
     'become_username',
     'client',
+    'client_id',
+    'client_secret',
     'cloud_environment',
     'domain',
     'host',

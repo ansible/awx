@@ -2,17 +2,13 @@
 # All Rights Reserved.
 from contextlib import nullcontext
 import functools
+
 import inspect
 import logging
-import os
 from importlib.metadata import entry_points
 import re
-import stat
-import tempfile
 from types import SimpleNamespace
 
-# Jinja2
-from jinja2 import sandbox
 
 # Django
 from django.apps.config import AppConfig
@@ -26,12 +22,12 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 
-# Shared code for the AWX platform
-from awx_plugins.interfaces._temporary_private_container_api import get_incontainer_path
 
 # DRF
-from awx.main.utils.pglock import advisory_lock
 from rest_framework.serializers import ValidationError as DRFValidationError
+
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
 from awx.api.versioning import reverse
@@ -43,7 +39,6 @@ from awx.main.fields import (
     DynamicCredentialInputField,
 )
 from awx.main.utils import decrypt_field, classproperty, set_environ
-from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
 from awx.main.models.mixins import ResourceMixin
@@ -53,7 +48,8 @@ from awx.main.models.rbac import (
 )
 from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
-from awx_plugins.credentials import injectors as builtin_injectors
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
+
 
 # DAB
 from ansible_base.resource_registry.tasks.sync import get_resource_server_client
@@ -63,7 +59,6 @@ from ansible_base.resource_registry.utils.settings import resource_server_define
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
-credential_plugins = {entry_point.name: entry_point.load() for entry_point in entry_points(group='awx_plugins.credentials')}
 
 HIDDEN_PASSWORD = '**********'
 
@@ -364,6 +359,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 raise ValueError('{} is not an input field'.format(name))
         return True
 
+    def get_input_keys(self) -> list[str]:
+        """
+        Return a unique list of both static and dynamic credential input keys.
+
+        :returns: List of input field names
+        :rtype: list[str]
+        """
+        return list(set(self.inputs.keys()) | set(self.dynamic_input_fields))
+
     def _get_dynamic_input(self, field_name):
         for input_source in self.input_sources.all():
             if input_source.input_field_name == field_name:
@@ -429,6 +433,7 @@ class CredentialType(CommonModelNameNotUnique):
         default=dict,
         help_text=_('Enter injectors using either JSON or YAML syntax. Refer to the documentation for example syntax.'),
     )
+    custom_injectors = None
 
     @classmethod
     def from_db(cls, db, field_names, values):
@@ -437,6 +442,7 @@ class CredentialType(CommonModelNameNotUnique):
             native = ManagedCredentialType.registry[instance.namespace]
             instance.inputs = native.inputs
             instance.injectors = native.injectors
+            instance.custom_injectors = getattr(native, 'custom_injectors', None)
         return instance
 
     def get_absolute_url(self, request=None):
@@ -458,8 +464,7 @@ class CredentialType(CommonModelNameNotUnique):
     def plugin(self):
         if self.kind != 'external':
             raise AttributeError('plugin')
-        [plugin] = [plugin for ns, plugin in credential_plugins.items() if ns == self.namespace]
-        return plugin
+        return ManagedCredentialType.registry.get(self.namespace, None)
 
     def default_for_field(self, field_id):
         for field in self.inputs.get('fields', []):
@@ -470,7 +475,7 @@ class CredentialType(CommonModelNameNotUnique):
 
     @classproperty
     def defaults(cls):
-        return dict((k, functools.partial(v.create)) for k, v in ManagedCredentialType.registry.items())
+        return dict((k, functools.partial(CredentialTypeHelper.create, v)) for k, v in ManagedCredentialType.registry.items())
 
     @classmethod
     def _get_credential_type_class(cls, apps: Apps = None, app_config: AppConfig = None):
@@ -505,7 +510,7 @@ class CredentialType(CommonModelNameNotUnique):
                 existing.save()
                 continue
             logger.debug(_("adding %s credential type" % default.name))
-            params = default.get_creation_params()
+            params = CredentialTypeHelper.get_creation_params(default)
             if 'managed' not in [f.name for f in ct_class._meta.get_fields()]:
                 params['managed_by_tower'] = params.pop('managed')
             params['created'] = params['modified'] = now()  # CreatedModifiedModel service
@@ -538,167 +543,36 @@ class CredentialType(CommonModelNameNotUnique):
 
     @classmethod
     def load_plugin(cls, ns, plugin):
-        ManagedCredentialType(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs)
+        # TODO: User "side-loaded" credential custom_injectors isn't supported
+        ManagedCredentialType.registry[ns] = ManagedCredentialType(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs, injectors={})
 
     def inject_credential(self, credential, env, safe_env, args, private_data_dir):
-        """
-        Inject credential data into the environment variables and arguments
-        passed to `ansible-playbook`
+        from awx_plugins.interfaces._temporary_private_inject_api import inject_credential
 
-        :param credential:       a :class:`awx.main.models.Credential` instance
-        :param env:              a dictionary of environment variables used in
-                                 the `ansible-playbook` call.  This method adds
-                                 additional environment variables based on
-                                 custom `env` injectors defined on this
-                                 CredentialType.
-        :param safe_env:         a dictionary of environment variables stored
-                                 in the database for the job run
-                                 (`UnifiedJob.job_env`); secret values should
-                                 be stripped
-        :param args:             a list of arguments passed to
-                                 `ansible-playbook` in the style of
-                                 `subprocess.call(args)`.  This method appends
-                                 additional arguments based on custom
-                                 `extra_vars` injectors defined on this
-                                 CredentialType.
-        :param private_data_dir: a temporary directory to store files generated
-                                 by `file` injectors (like config files or key
-                                 files)
-        """
-        if not self.injectors:
-            if self.managed and credential.credential_type.namespace in dir(builtin_injectors):
-                injected_env = {}
-                getattr(builtin_injectors, credential.credential_type.namespace)(credential, injected_env, private_data_dir)
-                env.update(injected_env)
-                safe_env.update(build_safe_env(injected_env))
-            return
+        inject_credential(self, credential, env, safe_env, args, private_data_dir)
 
-        class TowerNamespace:
-            pass
 
-        tower_namespace = TowerNamespace()
+class CredentialTypeHelper:
+    @classmethod
+    def get_creation_params(cls, cred_type):
+        return dict(
+            namespace=cred_type.namespace,
+            kind=cred_type.kind,
+            name=cred_type.name,
+            managed=True,
+            inputs=cred_type.inputs,
+            injectors=cred_type.injectors,
+        )
 
-        # maintain a normal namespace for building the ansible-playbook arguments (env and args)
-        namespace = {'tower': tower_namespace}
-
-        # maintain a sanitized namespace for building the DB-stored arguments (safe_env)
-        safe_namespace = {'tower': tower_namespace}
-
-        # build a normal namespace with secret values decrypted (for
-        # ansible-playbook) and a safe namespace with secret values hidden (for
-        # DB storage)
-        injectable_fields = list(credential.inputs.keys()) + credential.dynamic_input_fields
-        for field_name in list(set(injectable_fields)):
-            value = credential.get_input(field_name)
-
-            if type(value) is bool:
-                # boolean values can't be secret/encrypted/external
-                safe_namespace[field_name] = namespace[field_name] = value
-                continue
-
-            if field_name in self.secret_fields:
-                safe_namespace[field_name] = '**********'
-            elif len(value):
-                safe_namespace[field_name] = value
-            if len(value):
-                namespace[field_name] = value
-
-        for field in self.inputs.get('fields', []):
-            # default missing boolean fields to False
-            if field['type'] == 'boolean' and field['id'] not in credential.inputs.keys():
-                namespace[field['id']] = safe_namespace[field['id']] = False
-            # make sure private keys end with a \n
-            if field.get('format') == 'ssh_private_key':
-                if field['id'] in namespace and not namespace[field['id']].endswith('\n'):
-                    namespace[field['id']] += '\n'
-
-        file_tmpls = self.injectors.get('file', {})
-        # If any file templates are provided, render the files and update the
-        # special `tower` template namespace so the filename can be
-        # referenced in other injectors
-
-        sandbox_env = sandbox.ImmutableSandboxedEnvironment()
-
-        for file_label, file_tmpl in file_tmpls.items():
-            data = sandbox_env.from_string(file_tmpl).render(**namespace)
-            _, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
-            with open(path, 'w') as f:
-                f.write(data)
-            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            container_path = get_incontainer_path(path, private_data_dir)
-
-            # determine if filename indicates single file or many
-            if file_label.find('.') == -1:
-                tower_namespace.filename = container_path
-            else:
-                if not hasattr(tower_namespace, 'filename'):
-                    tower_namespace.filename = TowerNamespace()
-                file_label = file_label.split('.')[1]
-                setattr(tower_namespace.filename, file_label, container_path)
-
-        injector_field = self._meta.get_field('injectors')
-        for env_var, tmpl in self.injectors.get('env', {}).items():
-            try:
-                injector_field.validate_env_var_allowed(env_var)
-            except ValidationError as e:
-                logger.error('Ignoring prohibited env var {}, reason: {}'.format(env_var, e))
-                continue
-            env[env_var] = sandbox_env.from_string(tmpl).render(**namespace)
-            safe_env[env_var] = sandbox_env.from_string(tmpl).render(**safe_namespace)
-
-        if 'INVENTORY_UPDATE_ID' not in env:
-            # awx-manage inventory_update does not support extra_vars via -e
-            def build_extra_vars(node):
-                if isinstance(node, dict):
-                    return {build_extra_vars(k): build_extra_vars(v) for k, v in node.items()}
-                elif isinstance(node, list):
-                    return [build_extra_vars(x) for x in node]
-                else:
-                    return sandbox_env.from_string(node).render(**namespace)
-
-            def build_extra_vars_file(vars, private_dir):
-                handle, path = tempfile.mkstemp(dir=os.path.join(private_dir, 'env'))
-                f = os.fdopen(handle, 'w')
-                f.write(safe_dump(vars))
-                f.close()
-                os.chmod(path, stat.S_IRUSR)
-                return path
-
-            extra_vars = build_extra_vars(self.injectors.get('extra_vars', {}))
-            if extra_vars:
-                path = build_extra_vars_file(extra_vars, private_data_dir)
-                container_path = get_incontainer_path(path, private_data_dir)
-                args.extend(['-e', '@%s' % container_path])
+    @classmethod
+    def create(cls, cred_type):
+        res = CredentialType(**CredentialTypeHelper.get_creation_params(cred_type))
+        res.custom_injectors = getattr(cred_type, "custom_injectors", None)
+        return res
 
 
 class ManagedCredentialType(SimpleNamespace):
     registry = {}
-
-    def __init__(self, namespace, **kwargs):
-        for k in ('inputs', 'injectors'):
-            if k not in kwargs:
-                kwargs[k] = {}
-        super(ManagedCredentialType, self).__init__(namespace=namespace, **kwargs)
-        if namespace in ManagedCredentialType.registry:
-            raise ValueError(
-                'a ManagedCredentialType with namespace={} is already defined in {}'.format(
-                    namespace, inspect.getsourcefile(ManagedCredentialType.registry[namespace].__class__)
-                )
-            )
-        ManagedCredentialType.registry[namespace] = self
-
-    def get_creation_params(self):
-        return dict(
-            namespace=self.namespace,
-            kind=self.kind,
-            name=self.name,
-            managed=True,
-            inputs=self.inputs,
-            injectors=self.injectors,
-        )
-
-    def create(self):
-        return CredentialType(**self.get_creation_params())
 
 
 class CredentialInputSource(PrimordialModel):
@@ -765,7 +639,30 @@ class CredentialInputSource(PrimordialModel):
         return reverse(view_name, kwargs={'pk': self.pk}, request=request)
 
 
-from awx_plugins.credentials.plugins import *  # noqa
+def load_credentials():
 
-for ns, plugin in credential_plugins.items():
-    CredentialType.load_plugin(ns, plugin)
+    awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
+    supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
+    plugin_entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
+
+    for ns, ep in plugin_entry_points.items():
+        cred_plugin = ep.load()
+        if not hasattr(cred_plugin, 'inputs'):
+            setattr(cred_plugin, 'inputs', {})
+        if not hasattr(cred_plugin, 'injectors'):
+            setattr(cred_plugin, 'injectors', {})
+        if ns in ManagedCredentialType.registry:
+            raise ValueError(
+                'a ManagedCredentialType with namespace={} is already defined in {}'.format(
+                    ns, inspect.getsourcefile(ManagedCredentialType.registry[ns].__class__)
+                )
+            )
+        ManagedCredentialType.registry[ns] = cred_plugin
+
+    credential_plugins = {ep.name: ep for ep in entry_points(group='awx_plugins.credentials')}
+    if detect_server_product_name() == 'AWX':
+        credential_plugins = {}
+
+    for ns, ep in credential_plugins.items():
+        plugin = ep.load()
+        CredentialType.load_plugin(ns, plugin)

@@ -29,6 +29,7 @@ Need help or want to discuss AWX including the documentation? See the :ref:`Comm
    access_resources
    read_only_fields
    authentication
+   awx-manage
    api_ref
 
 ..  intro

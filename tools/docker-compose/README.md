@@ -48,13 +48,21 @@ The docker-compose development environment is regularly used and should work on 
 
 Use on other platforms is untested, and may require local changes.
 
-## Configuration
+### How to Disable Color?
 
-In the [`inventory` file](./inventory), set your `pg_password`, `broadcast_websocket_secret`, `secret_key`, and any other settings you need for your deployment.
+There are several layers that might apply color:
+ - docker compose coloring based on what container log comes from
+ - supervisord coloring based on what server it comes from
+ - general coloration from Django management commands
 
-AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a container, and data will be persisted to a docker volume. When the container is stopped, the database files will still exist in the docker volume. An external database can be used by setting the `pg_host`, `pg_hostname`, and `pg_username`.
+These can have color turned off by adding things to the
+environment variable to modify the call options.
 
-> If you are coming from a Local Docker installation of AWX, consider migrating your data first, see the [data migration section](#migrating-data-from-local-docker) below.
+```
+DJANGO_COLORS=nocolor COMPOSE_UP_OPTS="--no-color" SUPERVISOR_ARGS="-n -t" make docker-compose
+```
+
+This can be useful if this is ran in CI in any context.
 
 ## Starting the Development Environment
 

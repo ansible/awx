@@ -25,11 +25,12 @@ generate_requirements() {
 
   ${pip_compile} $1 --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps
-  # Then remove any git+ lines from requirements.txt
+  # Then comment out any git+ lines from requirements.txt
   if [[ "$sanitize_git" == "1" ]] ; then
     while IFS= read -r line; do
-      if [[ $line != \#* ]]; then  # ignore comments
-        sed -i "\!${line%#*}!d" requirements.txt
+      if [[ $line != \#* ]]; then  # ignore lines which are already comments
+        # Add # to the start of any line matched
+        sed -i "s!^.*${line%#*}!# ${line%#*}  # git requirements installed separately!g" requirements.txt
       fi
     done < "${requirements_git}"
   fi;

@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 from awx.main.utils import encrypt_field
-from awx.main.models import WorkflowJobTemplate, JobTemplate, Job
+from awx.main.models import WorkflowJobTemplate, JobTemplate, Job, Project, InventorySource, Inventory
 from awx.main.models.ha import Instance
 from . import create_job
 from django.conf import settings
@@ -371,7 +371,7 @@ def test_single_job_dependencies_inventory_update_launch(controlplane_instance_g
 
 
 @pytest.mark.django_db
-def test_inventory_update_launches_project_update(controlplane_instance_group, scm_inventory_source):
+def test_inventory_update_launches_project_update(scm_inventory_source):
     ii = scm_inventory_source
     project = scm_inventory_source.source_project
     project.scm_update_on_launch = True
@@ -384,6 +384,46 @@ def test_inventory_update_launches_project_update(controlplane_instance_group, s
         dm = DependencyManager()
         dm.schedule()
     assert project.project_updates.count() == 1
+
+
+@pytest.mark.django_db
+def test_dependency_isolation(organization):
+    """Spawning both a job project update dependency, and an inventory update project dependency
+
+    this should keep dependencies isolated"""
+    with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+        updating_projects = [
+            Project.objects.create(name='iso-proj', organization=organization, scm_url='https://foo.invalid', scm_type='git', scm_update_on_launch=True)
+            for i in range(2)
+        ]
+
+        inv_src = InventorySource.objects.create(
+            name='iso-inv',
+            organization=organization,
+            source_project=updating_projects[0],
+            source='scm',
+            inventory=Inventory.objects.create(name='for-inv-src', organization=organization),
+        )
+
+        inv_update = inv_src.create_unified_job()
+        inv_update.signal_start()
+        assert not inv_update.dependent_jobs.exists()
+
+        jt = JobTemplate.objects.create(
+            project=updating_projects[1],
+            inventory=Inventory.objects.create(name='one-off', organization=organization),  # non-updating inventory source
+        )
+        job = jt.create_unified_job()
+        job.signal_start()
+        assert not job.dependent_jobs.exists()
+
+        dm = DependencyManager()
+        dm.schedule()
+
+        # in a single run, the completely unrelated inventory and jobs are linked to their own dependencies
+        assert (inv_update.dependent_jobs.count(), job.dependent_jobs.count()) == (1, 1)
+        assert inv_update.dependent_jobs.first().project == updating_projects[0]
+        assert job.dependent_jobs.first().project == updating_projects[1]
 
 
 @pytest.mark.django_db

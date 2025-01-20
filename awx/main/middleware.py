@@ -20,6 +20,7 @@ from awx.main import migrations
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
 from awx.urls import get_urlpatterns
+from awx.main.utils.named_url_graph import reset_counters
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -112,6 +113,7 @@ class URLModificationMiddleware(MiddlewareMixin):
     @classmethod
     def _named_url_to_pk(cls, node, resource, named_url):
         kwargs = {}
+        reset_counters()
         if node.populate_named_url_query_kwargs(kwargs, named_url):
             match = node.model.objects.filter(**kwargs).first()
             if match:
