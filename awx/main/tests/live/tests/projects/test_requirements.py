@@ -5,9 +5,9 @@ import pytest
 
 from django.conf import settings
 
-from awx.main.tests.live.tests.conftest import wait_for_job
+from awx.main.tests.live.tests.conftest import wait_for_job, wait_for_events
 
-from awx.main.models import Project, SystemJobTemplate
+from awx.main.models import Project, SystemJobTemplate, Job
 
 
 @pytest.fixture(scope='session')
@@ -54,3 +54,11 @@ def test_cache_is_populated_after_cleanup_job(project_with_requirements):
 
     # Now, we still have a populated cache
     assert project_cache_is_populated(project_with_requirements)
+
+
+def test_git_file_collection_requirement(live_tmp_folder, copy_project_folders, run_job_from_playbook):
+    # this behaves differently, as use_requirements.yml references only the folder, does not include the github name
+    run_job_from_playbook('test_git_file_collection_requirement', 'use_requirement.yml', scm_url=f'file://{live_tmp_folder}/with_requirements')
+    job = Job.objects.filter(name__icontains='test_git_file_collection_requirement').order_by('-created').first()
+    wait_for_events(job)
+    assert '1234567890' in job.job_events.filter(task='debug variable', event='runner_on_ok').first().stdout
