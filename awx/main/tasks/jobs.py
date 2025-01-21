@@ -86,6 +86,9 @@ from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
 
+# Django flags
+from flags.state import flag_enabled
+
 logger = logging.getLogger('awx.main.tasks.jobs')
 
 
@@ -439,20 +442,17 @@ class BaseTask(object):
         Hook for any steps to run after job/task is marked as complete.
         """
         instance.log_lifecycle("finalize_run")
-        artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
-        collections_info = os.path.join(artifact_dir, 'collections.json')
-        ansible_version_file = os.path.join(artifact_dir, 'ansible_version.txt')
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
+            data_file_path = os.path.join(artifact_dir, 'ansible_data.json')
 
-        if os.path.exists(collections_info):
-            with open(collections_info) as ee_json_info:
-                ee_collections_info = json.loads(ee_json_info.read())
-                instance.installed_collections = ee_collections_info
-                instance.save(update_fields=['installed_collections'])
-        if os.path.exists(ansible_version_file):
-            with open(ansible_version_file) as ee_ansible_info:
-                ansible_version_info = ee_ansible_info.readline()
-                instance.ansible_version = ansible_version_info
-                instance.save(update_fields=['ansible_version'])
+            if os.path.exists(data_file_path):
+                with open(data_file_path) as f:
+                    collected_data = json.loads(f.read())
+
+                instance.installed_collections = collected_data['installed_collections']
+                instance.ansible_version = collected_data['ansible_version']
+                instance.save(update_fields=['installed_collections', 'ansible_version'])
 
         # Run task manager appropriately for speculative dependencies
         if instance.unifiedjob_blocked_jobs.exists():
@@ -927,11 +927,16 @@ class RunJob(SourceControlMixin, BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
-        path_vars = (
+        path_vars = [
             ('ANSIBLE_COLLECTIONS_PATHS', 'collections_paths', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
             ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'),
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
-        )
+        ]
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            path_vars.append(
+                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+            )
 
         config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
 
@@ -947,6 +952,11 @@ class RunJob(SourceControlMixin, BaseTask):
                         paths = [config_values[config_setting]] + paths
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+            if 'callbacks_enabled' in config_values:
+                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
 
         return env
 
@@ -1387,6 +1397,17 @@ class RunProjectUpdate(BaseTask):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            # copy the special callback (not stdout type) plugin to get list of collections
+            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+            if not os.path.exists(pdd_plugins_path):
+                os.mkdir(pdd_plugins_path)
+            from awx.playbooks import library
+
+            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
+            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+            shutil.copyfile(plugin_file_source, plugin_file_dest)
 
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)

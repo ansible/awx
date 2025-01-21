@@ -1,3 +1,5 @@
+import yaml
+
 from awx.main.tasks.host_indirect import build_indirect_host_data
 from awx.main.models import Job
 
@@ -18,3 +20,12 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
     # Asserts on data that will match to the input jq string from above
     assert host_audit_entry.canonical_facts == {'host_name': 'foo_host_default'}
     assert host_audit_entry.facts == {'device_type': 'Fake Host'}
+
+    # Test collection of data
+    assert 'demo.query' in job.installed_collections
+    assert 'host_query' in job.installed_collections['demo.query']
+    hq_text = job.installed_collections['demo.query']['host_query']
+    hq_data = yaml.safe_load(hq_text)
+    assert hq_data == {"demo.query.example": "direct_host_name"}
+
+    assert job.ansible_version
