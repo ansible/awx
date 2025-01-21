@@ -4,7 +4,7 @@ import tempfile
 import shutil
 
 from awx.main.tasks.jobs import RunJob
-from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files
+from awx.main.tasks.system import CleanupImagesAndFiles, execution_node_health_check
 from awx.main.models import Instance, Job
 
 
@@ -48,22 +48,22 @@ def mock_job_folder(job_folder_factory):
 
 @pytest.mark.django_db
 def test_folder_cleanup_stale_file(mock_job_folder, mock_me):
-    _cleanup_images_and_files()
+    CleanupImagesAndFiles.run()
     assert os.path.exists(mock_job_folder)  # grace period should protect folder from deletion
 
-    _cleanup_images_and_files(grace_period=0)
+    CleanupImagesAndFiles.run(grace_period=0)
     assert not os.path.exists(mock_job_folder)  # should be deleted
 
 
 @pytest.mark.django_db
 def test_folder_cleanup_running_job(mock_job_folder, me_inst):
     job = Job.objects.create(id=1234, controller_node=me_inst.hostname, status='running')
-    _cleanup_images_and_files(grace_period=0)
+    CleanupImagesAndFiles.run(grace_period=0)
     assert os.path.exists(mock_job_folder)  # running job should prevent folder from getting deleted
 
     job.status = 'failed'
     job.save(update_fields=['status'])
-    _cleanup_images_and_files(grace_period=0)
+    CleanupImagesAndFiles.run(grace_period=0)
     assert not os.path.exists(mock_job_folder)  # job is finished and no grace period, should delete
 
 
@@ -78,7 +78,7 @@ def test_folder_cleanup_multiple_running_jobs(job_folder_factory, me_inst):
         dirs.append(job_folder_factory(job.id))
         jobs.append(job)
 
-    _cleanup_images_and_files(grace_period=0)
+    CleanupImagesAndFiles.run(grace_period=0)
 
     assert [os.path.exists(d) for d in dirs] == [True for i in range(num_jobs)]
 

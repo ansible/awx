@@ -1,3 +1,4 @@
+import subprocess
 import time
 
 import pytest
@@ -59,3 +60,20 @@ def default_org():
 def demo_inv(default_org):
     inventory, _ = Inventory.objects.get_or_create(name='Demo Inventory', defaults={'organization': default_org})
     return inventory
+
+
+@pytest.fixture
+def podman_image_generator():
+    """
+    Generate a tagless podman image from awx base EE
+    """
+
+    def fn():
+        dockerfile = """
+        FROM quay.io/ansible/awx-ee:latest
+        RUN echo "Hello, Podman!" > /tmp/hello.txt
+        """
+        cmd = ['podman', 'build', '-f', '-']  # Create an image without a tag
+        subprocess.run(cmd, capture_output=True, input=dockerfile, text=True, check=True)
+
+    return fn
