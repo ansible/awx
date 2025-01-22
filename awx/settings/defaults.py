@@ -1061,4 +1061,5 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 SYSTEM_USERNAME = None
 
 # feature flags
-FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
+INDIRECT_NODE_COUNTING_ENABLED = False
+FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': INDIRECT_NODE_COUNTING_ENABLED}]}
