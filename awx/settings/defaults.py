@@ -1062,3 +1062,21 @@ SYSTEM_USERNAME = None
 
 # feature flags
 FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
+
+
+# Policy as code feature configurations
+FEATURE_POLICY_AS_CODE_ENABLED = False
+
+OPA_POLICY_EVALUATION_DEFAULT_RESULT = {'allowed': True}  # Default policy enforcement decision if policy evaluation fail for any reason.
+OPA_HOST = 'opa'  # Host to connect to OPA service, defaults to 'localhost'.
+OPA_PORT = 8181  # Port to connect to OPA service, defaults to 8181.
+OPA_SSL = True  # Use SSL to connect to OPA service, defaults to False.
+OPA_REST_API_VERSION = 'v1'  # REST API version provided by OPA, defaults to 'v1'.
+
+
+OPA_AUTH_TYPE = 'Certificate'  # 'None', 'Token', 'Certificate', 'Custom Header'
+OPA_AUTH_TOKEN = ''  # Token for OPA authentication, defaults to '', required when OPA_AUTH_TYPE = 'Token'.
+OPA_AUTH_CERT = '/tmp/client.pem'  # Path to certificate file for mTLS authentication, defaults to '', required when OPA_AUTH_TYPE = 'Certificate'.
+OPA_AUTH_CUSTOM_HEADER = ''  # Custom header for OPA authentication, defaults to '', required when OPA_AUTH_TYPE = 'Custom Header'.
+OPA_REQUEST_TIMEOUT = 1.5  # Connection timeout in seconds, defaults to 1.5 seconds.
+OPA_REQUEST_RETRY = 2  # Number of retries to connect to OPA service, defaults to 2.

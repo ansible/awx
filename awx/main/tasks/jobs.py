@@ -14,6 +14,8 @@ import tempfile
 import traceback
 import time
 import urllib.parse as urlparse
+import requests
+from opa_client.opa import OpaClient
 
 # Django
 from django.conf import settings
@@ -68,7 +70,7 @@ from awx.main.tasks.callback import (
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
-from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
+from awx.main.exceptions import AwxTaskError, PreRunError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.common import (
@@ -425,7 +427,24 @@ class BaseTask(object):
         """
         instance.log_lifecycle("pre_run")
 
-        # Before task is started, ensure that job_event partitions exist
+        opa_input_data = {
+            'created': instance.created.isoformat(),
+            'created_by': {
+                "username": instance.created_by.username,
+                "is_superuser": instance.created_by.is_superuser,
+            },
+        }
+
+        with OpaClient(host=settings.OPA_HOST, port=settings.OPA_PORT, ssl=settings.OPA_SSL, cert=settings.OPA_AUTH_CERT) as opa_client:
+            try:
+                opa_query_response = opa_client.query_rule(input_data=opa_input_data, package_path='job_template', rule_name='response')
+            except Exception as e:
+                raise PreRunError(_('Call to OPA failed, Exception: {}').format(e))
+
+            opa_query_result = opa_query_response.get('result', {})
+            if opa_query_result.get('allowed', False) == False:
+                raise PreRunError(_('OPA policy denied the request, Violations: {}').format(opa_query_result.get('violations', [])))
+
         create_partition(instance.event_class._meta.db_table, start=instance.created)
 
     def post_run_hook(self, instance, status):
@@ -626,6 +645,8 @@ class BaseTask(object):
                 elif cancel_flag_value is False:
                     self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="The running ansible process received a shutdown signal.")
                     status = 'failed'
+        except PreRunError as exc:
+            self.runner_callback.delay_update(job_explanation=str(exc), result_traceback=str(exc))
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
