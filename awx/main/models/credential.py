@@ -438,11 +438,15 @@ class CredentialType(CommonModelNameNotUnique):
     @classmethod
     def from_db(cls, db, field_names, values):
         instance = super(CredentialType, cls).from_db(db, field_names, values)
-        if instance.managed and instance.namespace:
+        if instance.managed and instance.namespace and instance.kind != "external":
             native = ManagedCredentialType.registry[instance.namespace]
             instance.inputs = native.inputs
             instance.injectors = native.injectors
             instance.custom_injectors = getattr(native, 'custom_injectors', None)
+        elif instance.kind == "external":
+            native = ManagedCredentialType.registry[instance.namespace]
+            instance.inputs = native.inputs
+
         return instance
 
     def get_absolute_url(self, request=None):
@@ -544,7 +548,7 @@ class CredentialType(CommonModelNameNotUnique):
     @classmethod
     def load_plugin(cls, ns, plugin):
         # TODO: User "side-loaded" credential custom_injectors isn't supported
-        ManagedCredentialType.registry[ns] = ManagedCredentialType(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs, injectors={})
+        ManagedCredentialType.registry[ns] = SimpleNamespace(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs, backend=plugin.backend)
 
     def inject_credential(self, credential, env, safe_env, args, private_data_dir):
         from awx_plugins.interfaces._temporary_private_inject_api import inject_credential
