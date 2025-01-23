@@ -40,7 +40,7 @@ autocommand==2.2.2
     # via jaraco-text
 automat==24.8.1
     # via twisted
-# awx-plugins-core @ git+https://git@github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
+# awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
     # via -r /awx_devel/requirements/requirements_git.txt
@@ -236,6 +236,8 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
+jq==1.8.0
+    # via -r /awx_devel/requirements/requirements.in
 json-log-formatter==1.1
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==4.23.0
@@ -528,4 +530,3 @@ setuptools==70.3.0
     #   setuptools-rust
     #   setuptools-scm
     #   zope-interface
-
