@@ -381,11 +381,7 @@ jobs:
         run: |
           make COLLECTION_VERSION=100.100.100-git install_collection
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
-          cd coverage
-          ls -la
-          cp -rv coverage-a-h/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
-          cp -rv coverage-i-p/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
-          cp -rv coverage-r-z0-9/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          cp -rv coverage/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cd ~/.ansible/collections/ansible_collections/awx/awx
           ansible-test coverage combine --requirements
           ansible-test coverage html
