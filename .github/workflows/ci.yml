@@ -363,21 +363,26 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-a-h
+          path: coverage
 
       - name: Download coverage artifacts I to P
         uses: actions/download-artifact@v4
         with:
           name: coverage-i-p
+          path: coverage
 
       - name: Download coverage artifacts Z to Z
         uses: actions/download-artifact@v4
         with:
           name: coverage-r-z0-9
+          path: coverage
 
       - name: Combine coverage
         run: |
           make COLLECTION_VERSION=100.100.100-git install_collection
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
+          cd coverage
+          ls -la
           cp -rv coverage-a-h/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cp -rv coverage-i-p/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cp -rv coverage-r-z0-9/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
