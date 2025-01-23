@@ -359,19 +359,28 @@ jobs:
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core
 
-      - name: Download coverage artifacts
-        uses: actions/download-artifact@v3
+      - name: Download coverage artifacts A to H
+        uses: actions/download-artifact@v4
         with:
-          path: coverage
+          name: coverage-a-h
+
+      - name: Download coverage artifacts I to P
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-i-p
+
+      - name: Download coverage artifacts Z to Z
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-r-z0-9
 
       - name: Combine coverage
         run: |
           make COLLECTION_VERSION=100.100.100-git install_collection
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
-          cd coverage
-          for i in coverage-*; do
-            cp -rv $i/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
-          done
+          cp -rv coverage-a-h/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          cp -rv coverage-i-p/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          cp -rv coverage-r-z0-9/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cd ~/.ansible/collections/ansible_collections/awx/awx
           ansible-test coverage combine --requirements
           ansible-test coverage html
