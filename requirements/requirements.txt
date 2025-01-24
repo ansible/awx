@@ -243,6 +243,8 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
+jq==1.8.0
+    # via -r /awx_devel/requirements/requirements.in
 json-log-formatter==1.1
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==4.23.0
