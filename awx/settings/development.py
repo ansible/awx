@@ -67,6 +67,9 @@ CLUSTER_HOST_ID = socket.gethostname()
 
 AWX_CALLBACK_PROFILE = True
 
+# this modifies FLAGS set by defaults
+FLAGS['FEATURE_INDIRECT_NODE_COUNTING_ENABLED'] = [{'condition': 'boolean', 'value': True}]  # noqa
+
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 # Disable normal scheduled/triggered task managers (DependencyManager, TaskManager, WorkflowManager).
 # Allows user to trigger task managers directly for debugging and profiling purposes.
