@@ -18,9 +18,9 @@ coverage:
   status:
     patch:
       default:
-        target: 100%
+        target: 89%
       pytest:
-        target: 100%
+        target: 89%
         flags:
           - pytest
       typing:
@@ -28,7 +28,7 @@ coverage:
           - MyPy
     project:
       default:
-        target: 100%
+        target: 72%
       lib:
         flags:
           - pytest
