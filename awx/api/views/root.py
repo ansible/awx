@@ -56,6 +56,24 @@ class ApiRootView(APIView):
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
+
+        # Dynamically fetch `enabled_idps` and `AWX_SAML_IdP_NAME`
+        try:
+            from awx.api.authentication import fetch_enabled_idps, fetch_saml_idp_name, update_sso_authentication_method
+
+            enabled_idps = fetch_enabled_idps()
+            saml_idp_name = fetch_saml_idp_name()
+            current_sso_method = update_sso_authentication_method()
+        except Exception as e:
+            logger.error(f"Error fetching authentication details: {e}")
+            enabled_idps = None
+            saml_idp_name = None
+            current_sso_method = None
+
+        data['enabled_idps'] = enabled_idps if enabled_idps else None
+        data['saml_idp_name'] = saml_idp_name if saml_idp_name else None
+        data['sso_authentication_method'] = current_sso_method if current_sso_method else None
+
         if MODE == 'development':
             data['swagger'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
@@ -135,6 +153,24 @@ class ApiVersionRootView(APIView):
         data['role_definitions'] = django_reverse('roledefinition-list')
         data['role_user_assignments'] = django_reverse('roleuserassignment-list')
         data['role_team_assignments'] = django_reverse('roleteamassignment-list')
+
+        # Dynamically fetch `enabled_idps` and `AWX_SAML_IdP_NAME`
+        try:
+            from awx.api.authentication import fetch_enabled_idps, fetch_saml_idp_name, update_sso_authentication_method
+
+            enabled_idps = fetch_enabled_idps()
+            saml_idp_name = fetch_saml_idp_name()
+            current_sso_method = update_sso_authentication_method()
+        except Exception as e:
+            logger.error(f"Error fetching authentication details: {e}")
+            enabled_idps = None
+            saml_idp_name = None
+            current_sso_method = None
+
+        data['enabled_idps'] = enabled_idps if enabled_idps else None
+        data['saml_idp_name'] = saml_idp_name if saml_idp_name else None
+        data['sso_authentication_method'] = current_sso_method if current_sso_method else None
+
         return Response(data)
 
 

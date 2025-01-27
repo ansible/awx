@@ -19,7 +19,7 @@
           <input type="text" name="username" maxlength="100"
               autocapitalize="off"
               autocorrect="off" class="form-control textinput textInput"
-              id="id_username"  autocomplete="off" required autofocus
+              id="id_username" autocomplete="off" required autofocus
               {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
             {% if form.username.errors %}
             <p class="text-error">{{ form.username.errors|striptags }}</p>
@@ -48,6 +48,12 @@
       </div>
     </form>
 
+    <!-- Placeholder for dynamically created SSO Button -->
+    <div id="sso-container" class="form-actions-no-box" style="margin-top: 20px;"></div>
+
+    <!-- Debug Section -->
+    <div id="debug_samlIdpName" style="display:none;">uconn</div>
   </div><!-- /.row-fluid -->
 </div><!-- /.well -->
 {% endblock %}
+
