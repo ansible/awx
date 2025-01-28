@@ -560,7 +560,7 @@ class CredentialTypeHelper:
     @classmethod
     def get_creation_params(cls, cred_type):
         if cred_type.kind == 'external':
-            return dict(namespace=cred_type.namespace, kind=cred_type.kind, name=cred_type.name, managed=False)
+            return dict(namespace=cred_type.namespace, kind=cred_type.kind, name=cred_type.name, managed=True)
         return dict(
             namespace=cred_type.namespace,
             kind=cred_type.kind,
