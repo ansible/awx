@@ -443,7 +443,7 @@ class CredentialType(CommonModelNameNotUnique):
             instance.inputs = native.inputs
             instance.injectors = native.injectors
             instance.custom_injectors = getattr(native, 'custom_injectors', None)
-        elif instance.kind == "external":
+        elif instance.namespace and instance.kind == "external":
             native = ManagedCredentialType.registry[instance.namespace]
             instance.inputs = native.inputs
 
@@ -559,6 +559,8 @@ class CredentialType(CommonModelNameNotUnique):
 class CredentialTypeHelper:
     @classmethod
     def get_creation_params(cls, cred_type):
+        if cred_type.kind == 'external':
+            return dict(namespace=cred_type.namespace, kind=cred_type.kind, name=cred_type.name, managed=False)
         return dict(
             namespace=cred_type.namespace,
             kind=cred_type.kind,
