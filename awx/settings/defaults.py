@@ -358,6 +358,7 @@ INSTALLED_APPS = [
     'ansible_base.jwt_consumer',
     'ansible_base.resource_registry',
     'ansible_base.rbac',
+    'ansible_base.feature_flags',
     'flags',
 ]
 
