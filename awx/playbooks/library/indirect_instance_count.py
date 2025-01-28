@@ -78,7 +78,7 @@ class CallbackModule(CallbackBase):
                 'version': candidate.ver,
             }
 
-            query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'meta' / 'event_query.yml'
+            query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
             if query_file.exists():
                 with query_file.open('r') as f:
                     collection_print['host_query'] = f.read()
