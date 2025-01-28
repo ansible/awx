@@ -653,8 +653,8 @@ def load_credentials():
             setattr(cred_plugin, 'injectors', {})
         if ns in ManagedCredentialType.registry:
             raise ValueError(
-                'a ManagedCredentialType with namespace={} is already defined in {}'.format(
-                    ns, inspect.getsourcefile(ManagedCredentialType.registry[ns].__class__)
+                'a ManagedCredentialType with namespace={} was defined in {}, but also defined in {}'.format(
+                    ns, ep.value, inspect.getsourcefile(ManagedCredentialType.registry[ns].__class__)
                 )
             )
         ManagedCredentialType.registry[ns] = cred_plugin
