@@ -141,11 +141,6 @@ def job_template_with_survey_passwords_factory(job_template_factory):
 
 
 @pytest.fixture
-def job_with_secret_key_unit(job_with_secret_key_factory):
-    return job_with_secret_key_factory(persisted=False)
-
-
-@pytest.fixture
 def workflow_job_template_factory():
     return create_workflow_job_template
 

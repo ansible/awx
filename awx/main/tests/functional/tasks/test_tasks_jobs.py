@@ -1,17 +1,7 @@
 import pytest
-import os
 
 from awx.main.tasks.jobs import RunJob
 from awx.main.models import Job
-
-
-@pytest.fixture
-def scm_revision_file(tmpdir_factory):
-    # Returns path to temporary testing revision file
-    revision_file = tmpdir_factory.mktemp('revisions').join('revision.txt')
-    with open(str(revision_file), 'w') as f:
-        f.write('1234567890123456789012345678901234567890')
-    return os.path.join(revision_file.dirname, 'revision.txt')
 
 
 @pytest.mark.django_db
