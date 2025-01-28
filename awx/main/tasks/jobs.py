@@ -442,17 +442,6 @@ class BaseTask(object):
         Hook for any steps to run after job/task is marked as complete.
         """
         instance.log_lifecycle("finalize_run")
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
-            data_file_path = os.path.join(artifact_dir, 'ansible_data.json')
-
-            if os.path.exists(data_file_path):
-                with open(data_file_path) as f:
-                    collected_data = json.loads(f.read())
-
-                instance.installed_collections = collected_data['installed_collections']
-                instance.ansible_version = collected_data['ansible_version']
-                instance.save(update_fields=['installed_collections', 'ansible_version'])
 
         # Run task manager appropriately for speculative dependencies
         if instance.unifiedjob_blocked_jobs.exists():
