@@ -424,6 +424,11 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 
+# If you set this, nothing will ever be sent to pg_notify
+# this is not practical to use, although periodic schedules may still run slugish but functional tasks
+# sqlite3 based tests will use this
+DISPATCHER_MOCK_PUBLISH = False
+
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
