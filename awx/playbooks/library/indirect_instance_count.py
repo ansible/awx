@@ -21,6 +21,7 @@ DOCUMENTATION = '''
 
 import os
 import json
+from importlib.resources import files
 
 from ansible.plugins.callback import CallbackBase
 
@@ -40,8 +41,6 @@ from ansible.release import __version__
 from ansible.galaxy.collection import find_existing_collections
 from ansible.utils.collection_loader import AnsibleCollectionConfig
 import ansible.constants as C
-
-from ansible.module_utils.common.text.converters import to_text
 
 
 @with_collection_artifacts_manager
@@ -73,15 +72,18 @@ class CallbackModule(CallbackBase):
             raise RuntimeError('Only suitable in AWX, did not find private_data_dir')
 
         collections_print = {}
-        for collection_obj in list_collections():
+        # Loop over collections, from ansible-core these are Candidate objects
+        for candidate in list_collections():
             collection_print = {
-                'version': collection_obj.ver,
+                'version': candidate.ver,
             }
-            host_query_path = os.path.join(to_text(collection_obj.src), 'meta', 'event_query.yml')
-            if os.path.exists(host_query_path):
-                with open(host_query_path, 'r') as f:
+
+            query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
+            if query_file.exists():
+                with query_file.open('r') as f:
                     collection_print['host_query'] = f.read()
-            collections_print[collection_obj.fqcn] = collection_print
+
+            collections_print[candidate.fqcn] = collection_print
 
         ansible_data = {'installed_collections': collections_print, 'ansible_version': __version__}
 
