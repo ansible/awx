@@ -8,7 +8,6 @@ from awx.main.models.event_query import EventQuery
 
 # Django
 from django.conf import settings
-from django.contrib.messages.api import error
 from django.core.exceptions import ValidationError
 from django_guid import get_guid
 from django.utils.functional import cached_property
