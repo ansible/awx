@@ -44,6 +44,9 @@ def collect_queries(query_file_contents) -> dict:
     return result
 
 
+COLLECTION_FILENAME = "ansible_data.json"
+
+
 def try_load_query_file(artifact_dir) -> (bool, dict):
     """
     try_load_query_file checks the artifact directory after job completion and
@@ -53,7 +56,7 @@ def try_load_query_file(artifact_dir) -> (bool, dict):
     if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
         return False, None
 
-    queries_path = os.path.join(artifact_dir, "ansible_data.json")
+    queries_path = os.path.join(artifact_dir, COLLECTION_FILENAME)
     if not os.path.isfile(queries_path):
         logger.info(f"no query file found: {queries_path}")
         return False, None
@@ -285,6 +288,16 @@ class RunnerCallback:
                     logger.info(f"eventy query for collection {collection}, version {version} created")
                 except ValidationError as e:
                     logger.info(e)
+
+            if 'installed_collections' in query_file_contents:
+                self.delay_update(installed_collections=query_file_contents['installed_collections'])
+            else:
+                logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain installed_collections')
+
+            if 'ansible_version' in query_file_contents:
+                self.delay_update(ansible_version=query_file_contents['ansible_version'])
+            else:
+                logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
 
         self.artifacts_processed = True
 
