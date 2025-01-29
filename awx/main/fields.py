@@ -832,7 +832,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                             'type': 'string',
                             # The environment variable _value_ can be any ascii,
                             # but pexpect will choke on any unicode
-                            'pattern': '^[\x00-\x7F]*$',
+                            'pattern': '^[\x00-\x7f]*$',
                         },
                     },
                     'additionalProperties': False,
