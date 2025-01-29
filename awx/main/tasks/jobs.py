@@ -68,6 +68,7 @@ from awx.main.tasks.callback import (
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
+from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields, events_processed_hook
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
@@ -81,7 +82,6 @@ from awx.main.utils.common import (
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields
 from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
@@ -641,7 +641,7 @@ class BaseTask(object):
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
         if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
+            events_processed_hook(self.instance)
 
         try:
             self.final_run_hook(self.instance, status, private_data_dir)
