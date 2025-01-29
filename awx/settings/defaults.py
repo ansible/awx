@@ -1062,3 +1062,5 @@ SYSTEM_USERNAME = None
 
 # feature flags
 FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
+
+FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
