@@ -179,6 +179,7 @@ class TestHashableForm:
     def test_nested_lists_same(self):
         assert get_hashable_form({'a': ['b', 'c']}) == get_hashable_form({'a': ['b', 'c']})
         assert get_hashable_form({'a': ('b', 'c')}) == get_hashable_form({'a': ('b', 'c')})
+        assert hash(get_hashable_form({'a': ['b', 'c']})) == hash(get_hashable_form({'a': ['b', 'c']}))
 
     def test_list_nested_lists_different(self):
         assert get_hashable_form(['a', ['b', 'c']]) != get_hashable_form(['a', ['b', 'd']])
@@ -187,3 +188,12 @@ class TestHashableForm:
     def test_list_nested_lists_same(self):
         assert get_hashable_form(['a', ['b', 'c']]) == get_hashable_form(['a', ['b', 'c']])
         assert get_hashable_form(['a', ('b', 'c')]) == get_hashable_form(['a', ('b', 'c')])
+        assert hash(get_hashable_form(['a', ('b', 'c')])) == hash(get_hashable_form(['a', ('b', 'c')]))
+
+    def test_list_nested_dicts_different(self):
+        assert get_hashable_form(['a', {'b': 'c'}]) != get_hashable_form(['a', {'b': 'd'}])
+        assert hash(get_hashable_form(['a', {'b': 'c'}])) != hash(get_hashable_form(['a', {'b': 'd'}]))
+
+    def test_list_nested_dicts_same(self):
+        assert get_hashable_form(['a', {'b': 'c'}]) == get_hashable_form(['a', {'b': 'c'}])
+        assert hash(get_hashable_form(['a', {'b': 'c'}])) == hash(get_hashable_form(['a', {'b': 'c'}]))

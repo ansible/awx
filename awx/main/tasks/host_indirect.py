@@ -18,16 +18,18 @@ class UnhashableFacts(RuntimeError):
     pass
 
 
-def get_hashable_form(python_dict: Union[dict, list, int, float, str, bool]) -> Tuple[Union[Tuple, dict, int, float]]:
+def get_hashable_form(input_data: Union[dict, list, int, float, str, bool]) -> Tuple[Union[Tuple, dict, int, float]]:
     "Given a dictionary of JSON types, return something that can be hashed and is the same data"
-    if isinstance(python_dict, (int, float, str, bool)):
-        return python_dict  # return scalars as-is
-    if isinstance(python_dict, dict):
-        # Can't hash? Make it a tuple. Can't hash the tuples in the tuple? We'll make tuples out of them too.
-        return tuple(sorted(((get_hashable_form(k), get_hashable_form(v)) for k, v in python_dict.items())))
-    elif isinstance(python_dict, (list, tuple)):
-        return tuple(python_dict)
-    raise UnhashableFacts(f'Cannonical facts contains a {type(python_dict)} type which can not be hashed.')
+    if isinstance(input_data, (int, float, str, bool)):
+        return input_data  # return scalars as-is
+    if isinstance(input_data, dict):
+        # Can't hash because we got a dict? Make the dict a tuple of tuples.
+        # Can't hash the data in the tuple in the tuple? We'll make tuples out of them too.
+        return tuple(sorted(((get_hashable_form(k), get_hashable_form(v)) for k, v in input_data.items())))
+    elif isinstance(input_data, (list, tuple)):
+        # Nested list data might not be hashable, and lists were never hashable in the first place
+        return tuple(get_hashable_form(item) for item in input_data)
+    raise UnhashableFacts(f'Cannonical facts contains a {type(input_data)} type which can not be hashed.')
 
 
 def build_indirect_host_data(job, job_event_queries: dict[str, str]) -> list[IndirectManagedNodeAudit]:
@@ -35,18 +37,18 @@ def build_indirect_host_data(job, job_event_queries: dict[str, str]) -> list[Ind
     compiled_jq_expressions = {}  # Cache for compiled jq expressions
     facts_missing_logged = False
     unhashable_facts_logged = False
-    print(f'using event queries {job_event_queries}')
     for event in job.job_events.filter(task__in=job_event_queries.keys()).iterator():
-        print(f'inspecting event {event}')
         if 'res' not in event.event_data:
             continue
+
+        # Recall from cache, or process the jq expression, and loop over the jq results
         jq_str_for_event = job_event_queries[event.task]
         if jq_str_for_event not in compiled_jq_expressions:
             compiled_jq_expressions[event.task] = jq.compile(jq_str_for_event)
         compiled_jq = compiled_jq_expressions[event.task]
         for data in compiled_jq.input(event.event_data['res']).all():
 
-            # From the JQ result, get index information about this record
+            # From this jq result (specific to a single Ansible module), get index information about this host record
             if not data.get('canonical_facts'):
                 if not facts_missing_logged:
                     logger.error(f'jq output missing canonical_facts for module {event.task} on event {event.id} using jq:{jq_str_for_event}')
