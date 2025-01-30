@@ -28,7 +28,7 @@ coverage:
           - MyPy
     project:
       default:
-        target: 72%
+        target: 75%
       lib:
         flags:
           - pytest
@@ -48,7 +48,7 @@ coverage:
             **/test/**
           - >-
             **/tests/**
-        target: 90%
+        target: 95%
       typing:
         flags:
           - MyPy
