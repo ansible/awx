@@ -1,8 +1,11 @@
 import yaml
+from unittest import mock
 
 import pytest
 
-from awx.main.tasks.host_indirect import build_indirect_host_data, fetch_job_event_query, save_indirect_host_entries, get_hashable_form
+from django.utils.timezone import now, timedelta
+
+from awx.main.tasks.host_indirect import build_indirect_host_data, fetch_job_event_query, save_indirect_host_entries, save_indirect_host_entries_fallback
 from awx.main.models.event_query import EventQuery
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 
@@ -148,52 +151,42 @@ def test_multiple_registered_modules_same_collection(bare_job):
     assert set(host_audit.events) == {'demo.query.example', 'demo.query.example2'}
 
 
-class TestHashableForm:
-    def test_same_dict(self):
-        assert get_hashable_form({'a': 'b'}) == get_hashable_form({'a': 'b'})
+@pytest.mark.django_db
+def test_events_not_fully_processed_no_op(bare_job):
+    # I have a job that produced 12 events, but those are not saved
+    bare_job.emitted_events = 12
+    bare_job.finished = now()
+    bare_job.save(update_fields=['emitted_events', 'finished'])
 
-    def test_same_list(self):
-        assert get_hashable_form(['a', 'b']) == get_hashable_form(['a', 'b'])
-        assert get_hashable_form(('a', 'b')) == get_hashable_form(('a', 'b'))
+    # Running the normal post-run task will do nothing at this point
+    assert bare_job.event_queries_processed is False
+    with mock.patch('time.sleep'):  # for test speedup
+        save_indirect_host_entries(bare_job.id)
+    bare_job.refresh_from_db()
+    assert bare_job.event_queries_processed is False
 
-    def test_different_list(self):
-        assert get_hashable_form(['a', 'b']) != get_hashable_form(['a', 'c'])
-        assert get_hashable_form(('a', 'b')) != get_hashable_form(('a', 'c'))
+    # Right away, the fallback processing will not run either
+    with mock.patch.object(save_indirect_host_entries, 'delay') as mock_delay:
+        save_indirect_host_entries_fallback()
+    mock_delay.assert_not_called()
+    bare_job.refresh_from_db()
+    assert bare_job.event_queries_processed is False
 
-    def test_values_different(self):
-        assert get_hashable_form({'a': 'b'}) != get_hashable_form({'a': 'c'})
+    # After 3 hours have passed...
+    bare_job.finished = now() - timedelta(hours=3)
+    bare_job.save(update_fields=['finished'])
 
-    def test_has_extra_key(self):
-        assert get_hashable_form({'a': 'b'}) != get_hashable_form({'a': 'b', 'c': 'd'})
+    # The fallback task will now process indirect host query data for this job
+    with mock.patch.object(save_indirect_host_entries, 'delay') as mock_delay:
+        save_indirect_host_entries_fallback()
+    mock_delay.assert_called_once_with(bare_job.id, wait_for_events=True)
 
-    def test_nested_dictionaries_different(self):
-        assert get_hashable_form({'a': {'b': 'c'}}) != get_hashable_form({'a': {'b': 'd'}})
+    # Test code to process anyway, events collected or not
+    save_indirect_host_entries(bare_job.id, wait_for_events=False)
+    bare_job.refresh_from_db()
+    assert bare_job.event_queries_processed is True
 
-    def test_nested_dictionaries_same(self):
-        assert get_hashable_form({'a': {'b': 'c'}}) == get_hashable_form({'a': {'b': 'c'}})
 
-    def test_nested_lists_different(self):
-        assert get_hashable_form({'a': ['b', 'c']}) != get_hashable_form({'a': ['b', 'd']})
-        assert get_hashable_form({'a': ('b', 'c')}) != get_hashable_form({'a': ('b', 'd')})
-
-    def test_nested_lists_same(self):
-        assert get_hashable_form({'a': ['b', 'c']}) == get_hashable_form({'a': ['b', 'c']})
-        assert get_hashable_form({'a': ('b', 'c')}) == get_hashable_form({'a': ('b', 'c')})
-        assert hash(get_hashable_form({'a': ['b', 'c']})) == hash(get_hashable_form({'a': ['b', 'c']}))
-
-    def test_list_nested_lists_different(self):
-        assert get_hashable_form(['a', ['b', 'c']]) != get_hashable_form(['a', ['b', 'd']])
-        assert get_hashable_form(['a', ('b', 'c')]) != get_hashable_form(['a', ('b', 'd')])
-
-    def test_list_nested_lists_same(self):
-        assert get_hashable_form(['a', ['b', 'c']]) == get_hashable_form(['a', ['b', 'c']])
-        assert get_hashable_form(['a', ('b', 'c')]) == get_hashable_form(['a', ('b', 'c')])
-        assert hash(get_hashable_form(['a', ('b', 'c')])) == hash(get_hashable_form(['a', ('b', 'c')]))
-
-    def test_list_nested_dicts_different(self):
-        assert get_hashable_form(['a', {'b': 'c'}]) != get_hashable_form(['a', {'b': 'd'}])
-        assert hash(get_hashable_form(['a', {'b': 'c'}])) != hash(get_hashable_form(['a', {'b': 'd'}]))
-
-    def test_list_nested_dicts_same(self):
-        assert get_hashable_form(['a', {'b': 'c'}]) == get_hashable_form(['a', {'b': 'c'}])
-        assert hash(get_hashable_form(['a', {'b': 'c'}])) == hash(get_hashable_form(['a', {'b': 'c'}]))
+@pytest.mark.django_db
+def test_job_id_does_not_exist():
+    save_indirect_host_entries(10000001)
