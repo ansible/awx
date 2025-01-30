@@ -25,6 +25,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.query import QuerySet
 
 # Django-CRUM
 from crum import impersonate
@@ -379,48 +380,68 @@ def purge_old_stdout_files():
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
 
 
-def _cleanup_images_and_files(**kwargs):
-    if settings.IS_K8S:
-        return
-    this_inst = Instance.objects.me()
-    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    if runner_cleanup_kwargs:
-        stdout = ''
-        with StringIO() as buffer:
-            with redirect_stdout(buffer):
-                ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
-                stdout = buffer.getvalue()
-        if '(changed: True)' in stdout:
-            logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+class CleanupImagesAndFiles:
+    @classmethod
+    def get_first_control_instance(cls) -> Instance | None:
+        return (
+            Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+            .order_by('-hostname')
+            .first()
+        )
 
-    # if we are the first instance alphabetically, then run cleanup on execution nodes
-    checker_instance = (
-        Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
-        .order_by('-hostname')
-        .first()
-    )
-    if checker_instance and this_inst.hostname == checker_instance.hostname:
-        for inst in Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0):
-            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
-            if not runner_cleanup_kwargs:
-                continue
-            try:
-                stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
-                if '(changed: True)' in stdout:
-                    logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
-            except RuntimeError:
-                logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+    @classmethod
+    def get_execution_instances(cls) -> QuerySet[Instance]:
+        return Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+
+    @classmethod
+    def run_local(cls, this_inst: Instance, **kwargs):
+        if settings.IS_K8S:
+            return
+        runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
+        if runner_cleanup_kwargs:
+            stdout = ''
+            with StringIO() as buffer:
+                with redirect_stdout(buffer):
+                    ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+                    stdout = buffer.getvalue()
+            if '(changed: True)' in stdout:
+                logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+
+    @classmethod
+    def run_remote(cls, this_inst: Instance, **kwargs):
+        # if we are the first instance alphabetically, then run cleanup on execution nodes
+        checker_instance = cls.get_first_control_instance()
+
+        if checker_instance and this_inst.hostname == checker_instance.hostname:
+            for inst in cls.get_execution_instances():
+                runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+                if not runner_cleanup_kwargs:
+                    continue
+                try:
+                    stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+                    if '(changed: True)' in stdout:
+                        logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
+                except RuntimeError:
+                    logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+
+    @classmethod
+    def run(cls, **kwargs):
+        if settings.IS_K8S:
+            return
+        this_inst = Instance.objects.me()
+        cls.run_local(this_inst, **kwargs)
+        cls.run_remote(this_inst, **kwargs)
 
 
 @task(queue='tower_broadcast_all')
 def handle_removed_image(remove_images=None):
     """Special broadcast invocation of this method to handle case of deleted EE"""
-    _cleanup_images_and_files(remove_images=remove_images, file_pattern='')
+    CleanupImagesAndFiles.run(remove_images=remove_images, file_pattern='')
 
 
 @task(queue=get_task_queuename)
 def cleanup_images_and_files():
-    _cleanup_images_and_files(image_prune=True)
+    CleanupImagesAndFiles.run(image_prune=True)
 
 
 @task(queue=get_task_queuename)

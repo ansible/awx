@@ -1,0 +1,8 @@
+---
+- hosts: all
+  gather_facts: false
+  connection: local
+  tasks:
+    - demo.query.example:
+      register: result
+    - debug: var=result

@@ -118,8 +118,8 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
-            (u'(a=abc\u1F5E3def)', Q(**{u"a": u"abc\u1F5E3def"})),
-            (u'(ansible_facts__a=abc\u1F5E3def)', Q(**{u"ansible_facts__contains": {u"a": u"abc\u1F5E3def"}})),
+            (u'(a=abc\u1f5e3def)', Q(**{u"a": u"abc\u1f5e3def"})),
+            (u'(ansible_facts__a=abc\u1f5e3def)', Q(**{u"ansible_facts__contains": {u"a": u"abc\u1f5e3def"}})),
         ],
     )
     def test_unicode(self, mock_get_host_model, filter_string, q_expected):

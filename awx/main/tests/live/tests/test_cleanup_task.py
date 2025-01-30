@@ -1,9 +1,19 @@
 import os
+import json
+import pytest
 import tempfile
 import subprocess
 
-from awx.main.tasks.receptor import _convert_args_to_cli
+from unittest import mock
+
+from awx.main.tasks.receptor import _convert_args_to_cli, run_until_complete
+from awx.main.tasks.system import CleanupImagesAndFiles
 from awx.main.models import Instance, JobTemplate
+
+
+def get_podman_images():
+    cmd = ['podman', 'images', '--format', 'json']
+    return json.loads((subprocess.run(cmd, capture_output=True, text=True, check=True)).stdout)
 
 
 def test_folder_cleanup_multiple_running_jobs_execution_node(request):
@@ -37,3 +47,36 @@ def test_folder_cleanup_multiple_running_jobs_execution_node(request):
     print('ansible-runner worker ' + remote_command)
 
     assert [os.path.exists(job_dir) for job_dir in job_dirs] == [True for i in range(3)]
+
+
+@pytest.mark.parametrize(
+    'worktype',
+    ('remote', 'local'),
+)
+def test_tagless_image(podman_image_generator, worktype: str):
+    """
+    Ensure podman images on Control and Hybrid nodes are deleted during cleanup.
+    """
+    podman_image_generator()
+
+    dangling_image = next((image for image in get_podman_images() if image.get('Dangling', False)), None)
+    assert dangling_image
+
+    instance_me = Instance.objects.me()
+
+    match worktype:
+        case 'local':
+            CleanupImagesAndFiles.run_local(instance_me, image_prune=True)
+        case 'remote':
+            with (
+                mock.patch(
+                    'awx.main.tasks.receptor.run_until_complete', lambda *args, **kwargs: run_until_complete(*args, worktype='local', ttl=None, **kwargs)
+                ),
+                mock.patch('awx.main.tasks.system.CleanupImagesAndFiles.get_execution_instances', lambda: [Instance.objects.me()]),
+            ):
+                CleanupImagesAndFiles.run_remote(instance_me, image_prune=True)
+        case _:
+            raise ValueError(f'worktype "{worktype}" not supported.')
+
+    for image in get_podman_images():
+        assert image['Id'] != dangling_image['Id']
