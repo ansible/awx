@@ -9,6 +9,9 @@ import jq
 from django.utils.timezone import now, timedelta
 from django.conf import settings
 
+# Django flags
+from flags.state import flag_enabled
+
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
@@ -146,6 +149,9 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
 
 @task(queue=get_task_queuename)
 def save_indirect_host_entries_fallback() -> None:
+    if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        return
+
     job_ct = 0
     right_now_time = now()
     window_end = right_now_time - timedelta(seconds=settings.INDIRECT_HOST_QUERY_FALLBACK_MINUTES)
