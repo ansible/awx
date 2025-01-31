@@ -13,7 +13,6 @@ from awx.main.tasks.host_indirect import (
 )
 from awx.main.models.event_query import EventQuery
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
-from awx.main.tests.functional.conftest import organization
 
 """These are unit tests, similar to test_indirect_host_counting in the live tests"""
 
