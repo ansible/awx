@@ -277,6 +277,7 @@ class RunnerCallback:
     def artifacts_handler(self, artifact_dir):
         success, query_file_contents = try_load_query_file(artifact_dir)
         if success:
+            self.delay_update(event_queries_processed=False)
             collections_info = collect_queries(query_file_contents)
             for collection, data in collections_info.items():
                 version = data['version']
