@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
 import pytest
 from django.test import override_settings
 
-from awx.main.models import (  # noqa
-    User,
-)
+from awx.main.models import User
 
 
 @pytest.mark.django_db
