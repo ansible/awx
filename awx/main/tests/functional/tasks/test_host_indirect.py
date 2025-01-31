@@ -51,6 +51,13 @@ def create_audit_record(name, job, organization, created=now()):
     return record
 
 
+def create_audit_record(name, job, organization, created=now()):
+    record = IndirectManagedNodeAudit.objects.create(name=name, job=job, organization=organization)
+    record.created = created
+    record.save()
+    return record
+
+
 @pytest.fixture
 def event_query():
     "This is ordinarily created by the artifacts callback"
