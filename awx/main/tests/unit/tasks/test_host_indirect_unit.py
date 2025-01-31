@@ -47,7 +47,7 @@ class TestHashableForm:
             [['a', {'b': 'c'}], ['a', {'b': 'd'}]],
         ],
     )
-    def test_compar_different_data(self, data, other_data):
+    def test_compare_different_data(self, data, other_data):
         assert data != other_data  # sanity, otherwise why test this?
         assert get_hashable_form(data) != get_hashable_form(other_data)
         assert hash(get_hashable_form(data)) != hash(get_hashable_form(other_data))
