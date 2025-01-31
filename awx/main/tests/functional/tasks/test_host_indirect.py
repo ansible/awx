@@ -5,10 +5,15 @@ import pytest
 
 from django.utils.timezone import now, timedelta
 
-from awx.main.tasks.host_indirect import build_indirect_host_data, fetch_job_event_query, save_indirect_host_entries, save_indirect_host_entries_fallback
+from awx.main.tasks.host_indirect import (
+    build_indirect_host_data,
+    fetch_job_event_query,
+    save_indirect_host_entries,
+    cleanup_and_save_indirect_host_entries_fallback,
+)
 from awx.main.models.event_query import EventQuery
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
-
+from awx.main.tests.functional.conftest import organization
 
 """These are unit tests, similar to test_indirect_host_counting in the live tests"""
 
@@ -39,10 +44,28 @@ def create_event_query(fqcn='demo.query'):
     return EventQuery.objects.create(fqcn=fqcn, collection_version='1.0.1', event_query=yaml.dump({module_name: TEST_JQ}, default_flow_style=False))
 
 
+def create_audit_record(name, job, organization, created=now()):
+    record = IndirectManagedNodeAudit.objects.create(name=name, job=job, organization=organization)
+    record.created = created
+    record.save()
+    return record
+
+
 @pytest.fixture
 def event_query():
     "This is ordinarily created by the artifacts callback"
     return create_event_query()
+
+
+@pytest.fixture
+def old_audit_record(bare_job, organization):
+    created_at = now() - timedelta(days=10)
+    return create_audit_record(name="old_job", job=bare_job, organization=organization, created=created_at)
+
+
+@pytest.fixture
+def new_audit_record(bare_job, organization):
+    return IndirectManagedNodeAudit.objects.create(name="new_job", job=bare_job, organization=organization)
 
 
 # ---- end fixtures ----
@@ -167,7 +190,7 @@ def test_events_not_fully_processed_no_op(bare_job):
 
     # Right away, the fallback processing will not run either
     with mock.patch.object(save_indirect_host_entries, 'delay') as mock_delay:
-        save_indirect_host_entries_fallback()
+        cleanup_and_save_indirect_host_entries_fallback()
     mock_delay.assert_not_called()
     bare_job.refresh_from_db()
     assert bare_job.event_queries_processed is False
@@ -178,7 +201,7 @@ def test_events_not_fully_processed_no_op(bare_job):
 
     # The fallback task will now process indirect host query data for this job
     with mock.patch.object(save_indirect_host_entries, 'delay') as mock_delay:
-        save_indirect_host_entries_fallback()
+        cleanup_and_save_indirect_host_entries_fallback()
     mock_delay.assert_called_once_with(bare_job.id, wait_for_events=True)
 
     # Test code to process anyway, events collected or not
@@ -190,3 +213,12 @@ def test_events_not_fully_processed_no_op(bare_job):
 @pytest.mark.django_db
 def test_job_id_does_not_exist():
     save_indirect_host_entries(10000001)
+
+
+@pytest.mark.django_db
+def test_cleanup_old_audit_records(old_audit_record, new_audit_record):
+    count_before_cleanup = IndirectManagedNodeAudit.objects.count()
+    assert count_before_cleanup == 2
+    cleanup_and_save_indirect_host_entries_fallback()
+    count_after_cleanup = IndirectManagedNodeAudit.objects.count()
+    assert count_after_cleanup == 1

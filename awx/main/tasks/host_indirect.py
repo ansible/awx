@@ -117,6 +117,15 @@ def save_indirect_host_entries_of_job(job: Job) -> None:
     job.event_queries_processed = True
 
 
+def cleanup_old_indirect_host_entries() -> None:
+    """
+    We assume that indirect host audit results older than one week have already been collected for analysis
+    and can be cleaned up
+    """
+    limit = now() - timedelta(days=settings.INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS)
+    IndirectManagedNodeAudit.objects.filter(created__lt=limit).delete()
+
+
 @task(queue=get_task_queuename)
 def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> None:
     try:
@@ -148,9 +157,14 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
 
 
 @task(queue=get_task_queuename)
-def save_indirect_host_entries_fallback() -> None:
+def cleanup_and_save_indirect_host_entries_fallback() -> None:
     if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
         return
+
+    try:
+        cleanup_old_indirect_host_entries()
+    except Exception as e:
+        logger.error(f"error cleaning up indirect host audit records: {e}")
 
     job_ct = 0
     right_now_time = now()

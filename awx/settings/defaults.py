@@ -441,7 +441,10 @@ CELERYBEAT_SCHEDULE = {
     'cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
     'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
     'periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': timedelta(minutes=15)},
-    'save_indirect_host_entries_fallback': {'task': 'awx.main.tasks.host_indirect.save_indirect_host_entries_fallback', 'schedule': timedelta(minutes=60)},
+    'cleanup_and_save_indirect_host_entries_fallback': {
+        'task': 'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback',
+        'schedule': timedelta(minutes=60),
+    },
 }
 
 # Django Caching Configuration
@@ -1068,6 +1071,11 @@ INDIRECT_HOST_QUERY_FALLBACK_MINUTES = 60
 
 # If an error happens in event collection, give up after this time
 INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS = 3
+
+# Maximum age for indirect host audit records
+# Older records will be cleaned up
+INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
+
 
 # feature flags
 FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
