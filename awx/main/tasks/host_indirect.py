@@ -1,9 +1,16 @@
 import logging
 from typing import Tuple, Union
+import time
 
 import yaml
 
 import jq
+
+from django.utils.timezone import now, timedelta
+from django.conf import settings
+
+# Django flags
+from flags.state import flag_enabled
 
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_task_queuename
@@ -18,7 +25,7 @@ class UnhashableFacts(RuntimeError):
     pass
 
 
-def get_hashable_form(input_data: Union[dict, list, int, float, str, bool]) -> Tuple[Union[Tuple, dict, int, float]]:
+def get_hashable_form(input_data: Union[dict, list, Tuple, int, float, str, bool]) -> Tuple[Union[Tuple, int, float, str, bool]]:
     "Given a dictionary of JSON types, return something that can be hashed and is the same data"
     if isinstance(input_data, (int, float, str, bool)):
         return input_data  # return scalars as-is
@@ -32,7 +39,7 @@ def get_hashable_form(input_data: Union[dict, list, int, float, str, bool]) -> T
     raise UnhashableFacts(f'Cannonical facts contains a {type(input_data)} type which can not be hashed.')
 
 
-def build_indirect_host_data(job, job_event_queries: dict[str, str]) -> list[IndirectManagedNodeAudit]:
+def build_indirect_host_data(job: Job, job_event_queries: dict[str, str]) -> list[IndirectManagedNodeAudit]:
     results = {}
     compiled_jq_expressions = {}  # Cache for compiled jq expressions
     facts_missing_logged = False
@@ -84,7 +91,7 @@ def build_indirect_host_data(job, job_event_queries: dict[str, str]) -> list[Ind
     return list(results.values())
 
 
-def fetch_job_event_query(job) -> dict[str, str]:
+def fetch_job_event_query(job: Job) -> dict[str, str]:
     """Returns the following data structure
     {
         "demo.query.example": "{canonical_facts: {host_name: .direct_host_name}}"
@@ -102,11 +109,55 @@ def fetch_job_event_query(job) -> dict[str, str]:
     return net_job_data
 
 
-@task(queue=get_task_queuename)
-def save_indirect_host_entries(job_id):
-    job = Job.objects.get(id=job_id)
+def save_indirect_host_entries_of_job(job: Job) -> None:
+    "Once we have a job and we know that we want to do indirect host processing, this is called"
     job_event_queries = fetch_job_event_query(job)
     records = build_indirect_host_data(job, job_event_queries)
     IndirectManagedNodeAudit.objects.bulk_create(records)
     job.event_queries_processed = True
+
+
+@task(queue=get_task_queuename)
+def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> None:
+    try:
+        job = Job.objects.get(id=job_id)
+    except Job.DoesNotExist:
+        logger.debug(f'Job {job_id} seems to be deleted, bailing from save_indirect_host_entries')
+        return
+
+    if wait_for_events:
+        # Gate running this task on the job having all events processed, not just EOF or playbook_on_stats
+        current_events = 0
+        for _ in range(10):
+            current_events = job.job_events.count()
+            if current_events >= job.emitted_events:
+                break
+            logger.debug(f'Waiting for job_id={job_id} to finish processing events, currently {current_events} < {job.emitted_events}')
+            time.sleep(0.2)
+        else:
+            logger.warning(f'Event count {current_events} < {job.emitted_events} for job_id={job_id}, delaying processing of indirect host tracking')
+            return
+
+    try:
+        save_indirect_host_entries_of_job(job)
+    except Exception:
+        logger.traceback(f'Error processing indirect host data for job_id={job_id}')
+
+    # Mark job as processed, even if the processing failed
     job.save(update_fields=['event_queries_processed'])
+
+
+@task(queue=get_task_queuename)
+def save_indirect_host_entries_fallback() -> None:
+    if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        return
+
+    job_ct = 0
+    right_now_time = now()
+    window_end = right_now_time - timedelta(seconds=settings.INDIRECT_HOST_QUERY_FALLBACK_MINUTES)
+    window_start = right_now_time - timedelta(days=settings.INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS)
+    for job in Job.objects.filter(event_queries_processed=False, finished__lte=window_end, finished__gte=window_start).iterator():
+        save_indirect_host_entries.delay(job.id, wait_for_events=True)
+        job_ct += 1
+    if job_ct:
+        logger.info(f'Restarted event processing for {job_ct} jobs')

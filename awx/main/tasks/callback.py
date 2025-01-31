@@ -3,6 +3,7 @@ import os.path
 import time
 import logging
 from collections import deque
+from typing import Tuple, Optional
 
 from awx.main.models.event_query import EventQuery
 
@@ -47,7 +48,7 @@ def collect_queries(query_file_contents) -> dict:
 COLLECTION_FILENAME = "ansible_data.json"
 
 
-def try_load_query_file(artifact_dir) -> (bool, dict):
+def try_load_query_file(artifact_dir) -> Tuple[bool, Optional[dict]]:
     """
     try_load_query_file checks the artifact directory after job completion and
     returns the contents of ansible_data.json if present
