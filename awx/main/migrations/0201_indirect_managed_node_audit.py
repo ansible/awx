@@ -11,10 +11,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        migrations.AlterField(
             model_name='job',
             name='event_queries_processed',
-            field=models.BooleanField(default=False, help_text='Events of this job have been queried for indirect host information'),
+            field=models.BooleanField(default=True, help_text='Events of this job have been queried for indirect host information, or do not need processing.'),
         ),
         migrations.CreateModel(
             name='EventQuery',

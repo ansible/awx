@@ -25,7 +25,8 @@ TEST_JQ = "{canonical_facts: {host_name: .direct_host_name}, facts: {another_hos
 def bare_job(job_factory):
     job = job_factory()
     job.installed_collections = {'demo.query': {'version': '1.0.1'}, 'demo2.query': {'version': '1.0.1'}}
-    job.save(update_fields=['installed_collections'])
+    job.event_queries_processed = False
+    job.save(update_fields=['installed_collections', 'event_queries_processed'])
     return job
 
 
@@ -72,11 +73,9 @@ def new_audit_record(bare_job, organization):
 
 
 @pytest.mark.django_db
-def test_build_with_no_results(job_factory):
+def test_build_with_no_results(bare_job):
     # never filled in events, should do nothing
-    job = job_factory()
-    assert job.event_queries_processed is False
-    assert build_indirect_host_data(job, {}) == []
+    assert build_indirect_host_data(bare_job, {}) == []
 
 
 @pytest.mark.django_db

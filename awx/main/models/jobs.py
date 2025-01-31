@@ -608,8 +608,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         help_text=_("If ran as part of sliced jobs, the total number of slices. If 1, job is not part of a sliced job."),
     )
     event_queries_processed = models.BooleanField(
-        default=False,
-        help_text=_("Events of this job have been queried for indirect host information"),
+        default=True,
+        help_text=_("Events of this job have been queried for indirect host information, or do not need processing."),
     )
 
     def _get_parent_field_name(self):
