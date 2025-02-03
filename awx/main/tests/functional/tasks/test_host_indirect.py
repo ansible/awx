@@ -187,20 +187,21 @@ def test_events_not_fully_processed_no_op(bare_job):
     assert bare_job.event_queries_processed is False
 
     # Right away, the fallback processing will not run either
-    with mock.patch.object(save_indirect_host_entries, 'delay') as mock_delay:
-        cleanup_and_save_indirect_host_entries_fallback()
-    mock_delay.assert_not_called()
+    cleanup_and_save_indirect_host_entries_fallback()
     bare_job.refresh_from_db()
     assert bare_job.event_queries_processed is False
 
     # After 3 hours have passed...
     bare_job.finished = now() - timedelta(hours=3)
+
+    # Create the expected job events
+    for _ in range(12):
+        create_registered_event(bare_job)
+
     bare_job.save(update_fields=['finished'])
 
     # The fallback task will now process indirect host query data for this job
-    with mock.patch.object(save_indirect_host_entries, 'delay') as mock_delay:
-        cleanup_and_save_indirect_host_entries_fallback()
-    mock_delay.assert_called_once_with(bare_job.id, wait_for_events=True)
+    cleanup_and_save_indirect_host_entries_fallback()
 
     # Test code to process anyway, events collected or not
     save_indirect_host_entries(bare_job.id, wait_for_events=False)

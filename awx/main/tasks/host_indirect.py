@@ -8,6 +8,7 @@ import jq
 
 from django.utils.timezone import now, timedelta
 from django.conf import settings
+from django.db import transaction
 
 # Django flags
 from flags.state import flag_enabled
@@ -147,13 +148,30 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
             logger.warning(f'Event count {current_events} < {job.emitted_events} for job_id={job_id}, delaying processing of indirect host tracking')
             return
 
+    with transaction.atomic():
+        """
+        Pre-emptively set the job marker to 'events processed'. This prevents other instances from running the
+        same task.
+        """
+        try:
+            job = Job.objects.select_for_update().get(id=job_id)
+        except job.DoesNotExist:
+            logger.debug(f'Job {job_id} seems to be deleted, bailing from save_indirect_host_entries')
+            return
+
+        if job.event_queries_processed is True:
+            # this can mean one of two things:
+            # 1. another instance has already processed the events of this job
+            # 2. the artifacts_handler has not yet been called for this job
+            return
+
+        job.event_queries_processed = True
+        job.save(update_fields=['event_queries_processed'])
+
     try:
         save_indirect_host_entries_of_job(job)
     except Exception:
         logger.traceback(f'Error processing indirect host data for job_id={job_id}')
-
-    # Mark job as processed, even if the processing failed
-    job.save(update_fields=['event_queries_processed'])
 
 
 @task(queue=get_task_queuename)
@@ -171,7 +189,7 @@ def cleanup_and_save_indirect_host_entries_fallback() -> None:
     window_end = right_now_time - timedelta(seconds=settings.INDIRECT_HOST_QUERY_FALLBACK_MINUTES)
     window_start = right_now_time - timedelta(days=settings.INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS)
     for job in Job.objects.filter(event_queries_processed=False, finished__lte=window_end, finished__gte=window_start).iterator():
-        save_indirect_host_entries.delay(job.id, wait_for_events=True)
+        save_indirect_host_entries(job.id, wait_for_events=True)
         job_ct += 1
     if job_ct:
         logger.info(f'Restarted event processing for {job_ct} jobs')
