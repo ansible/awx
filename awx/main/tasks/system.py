@@ -373,7 +373,7 @@ def events_processed_hook(unified_job):
     after the playbook_on_stats/EOF event is processed and final status is saved
     Either one of these events could happen before the other, or there may be no events"""
     unified_job.send_notification_templates('succeeded' if unified_job.status == 'successful' else 'failed')
-    if isinstance(unified_job, Job) and flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+    if isinstance(unified_job, Job) and flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED") and (unified_job.event_queries_processed is False):
         save_indirect_host_entries.delay(unified_job.id)
 
 

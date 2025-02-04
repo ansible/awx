@@ -2,7 +2,7 @@ import yaml
 import time
 
 from awx.main.tests.live.tests.conftest import wait_for_events
-from awx.main.tasks.host_indirect import build_indirect_host_data
+from awx.main.tasks.host_indirect import build_indirect_host_data, save_indirect_host_entries
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 from awx.main.models import Job
 
@@ -38,13 +38,25 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
 
     assert job.ansible_version
 
-    # This will poll, because it depends on the background task finishing
+    # Poll for events finishing processing, because background task requires this
     for _ in range(10):
-        if IndirectManagedNodeAudit.objects.filter(job=job).exists():
+        if job.job_events.count() >= job.emitted_events:
             break
         time.sleep(0.2)
     else:
-        raise RuntimeError(f'No IndirectManagedNodeAudit records ever populated for job_id={job.id}')
+        raise RuntimeError(f'job id={job.id} never processed events')
+
+    # Task might not run due to race condition, so make it run here
+    job.refresh_from_db()
+    if job.event_queries_processed is False:
+        save_indirect_host_entries.delay(job.id, wait_for_events=False)
+        # This will poll for the background task to finish
+        for _ in range(10):
+            if IndirectManagedNodeAudit.objects.filter(job=job).exists():
+                break
+            time.sleep(0.2)
+        else:
+            raise RuntimeError(f'No IndirectManagedNodeAudit records ever populated for job_id={job.id}')
 
     assert IndirectManagedNodeAudit.objects.filter(job=job).count() == 1
     host_audit = IndirectManagedNodeAudit.objects.filter(job=job).first()
