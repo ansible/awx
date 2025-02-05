@@ -60,6 +60,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, str]) -> lis
             if not data.get('canonical_facts'):
                 if not facts_missing_logged:
                     logger.error(f'jq output missing canonical_facts for module {event.task} on event {event.id} using jq:{jq_str_for_event}')
+                    facts_missing_logged = True
                 continue
             canonical_facts = data['canonical_facts']
             try:
@@ -171,7 +172,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
     try:
         save_indirect_host_entries_of_job(job)
     except Exception:
-        logger.traceback(f'Error processing indirect host data for job_id={job_id}')
+        logger.exception(f'Error processing indirect host data for job_id={job_id}')
 
 
 @task(queue=get_task_queuename)
@@ -186,7 +187,7 @@ def cleanup_and_save_indirect_host_entries_fallback() -> None:
 
     job_ct = 0
     right_now_time = now()
-    window_end = right_now_time - timedelta(seconds=settings.INDIRECT_HOST_QUERY_FALLBACK_MINUTES)
+    window_end = right_now_time - timedelta(minutes=settings.INDIRECT_HOST_QUERY_FALLBACK_MINUTES)
     window_start = right_now_time - timedelta(days=settings.INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS)
     for job in Job.objects.filter(event_queries_processed=False, finished__lte=window_end, finished__gte=window_start).iterator():
         save_indirect_host_entries(job.id, wait_for_events=True)
