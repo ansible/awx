@@ -83,7 +83,7 @@ class ActionModule(ActionBase):
         password = self._task.args.get('password', None)
         client_id = self._task.args.get('client_id', None)
         client_secret = self._task.args.get('client_secret', None)
-        oidc_endpoint = self._task.args.get('oidc_endpoint', DEFAULT_OIDC_ENDPOINT)
+        oidc_endpoint = DEFAULT_OIDC_ENDPOINT
 
         session.headers.update(
             {
