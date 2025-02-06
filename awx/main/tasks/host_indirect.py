@@ -40,26 +40,36 @@ def get_hashable_form(input_data: Union[dict, list, Tuple, int, float, str, bool
     raise UnhashableFacts(f'Cannonical facts contains a {type(input_data)} type which can not be hashed.')
 
 
-def build_indirect_host_data(job: Job, job_event_queries: dict[str, str]) -> list[IndirectManagedNodeAudit]:
+def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, str]]) -> list[IndirectManagedNodeAudit]:
     results = {}
     compiled_jq_expressions = {}  # Cache for compiled jq expressions
     facts_missing_logged = False
     unhashable_facts_logged = False
-    for event in job.job_events.filter(task__in=job_event_queries.keys()).iterator():
+
+    for event in job.job_events.filter(event_data__isnull=False).iterator():
         if 'res' not in event.event_data:
             continue
 
-        # Recall from cache, or process the jq expression, and loop over the jq results
-        jq_str_for_event = job_event_queries[event.task]
-        if jq_str_for_event not in compiled_jq_expressions:
-            compiled_jq_expressions[event.task] = jq.compile(jq_str_for_event)
-        compiled_jq = compiled_jq_expressions[event.task]
-        for data in compiled_jq.input(event.event_data['res']).all():
+        if 'resolved_action' not in event.event_data or event.event_data['resolved_action'] not in job_event_queries.keys():
+            continue
 
+        resolved_action = event.event_data['resolved_action']
+
+        # We expect a dict with a 'query' key for the resolved_action
+        if 'query' not in job_event_queries[resolved_action]:
+            continue
+
+        # Recall from cache, or process the jq expression, and loop over the jq results
+        jq_str_for_event = job_event_queries[resolved_action]['query']
+
+        if jq_str_for_event not in compiled_jq_expressions:
+            compiled_jq_expressions[resolved_action] = jq.compile(jq_str_for_event)
+        compiled_jq = compiled_jq_expressions[resolved_action]
+        for data in compiled_jq.input(event.event_data['res']).all():
             # From this jq result (specific to a single Ansible module), get index information about this host record
             if not data.get('canonical_facts'):
                 if not facts_missing_logged:
-                    logger.error(f'jq output missing canonical_facts for module {event.task} on event {event.id} using jq:{jq_str_for_event}')
+                    logger.error(f'jq output missing canonical_facts for module {resolved_action} on event {event.id} using jq:{jq_str_for_event}')
                     facts_missing_logged = True
                 continue
             canonical_facts = data['canonical_facts']
@@ -86,19 +96,19 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, str]) -> lis
                 results[hashable_facts] = audit_record
 
             # Increment rolling count fields
-            if event.task not in audit_record.events:
-                audit_record.events.append(event.task)
+            if resolved_action not in audit_record.events:
+                audit_record.events.append(resolved_action)
             audit_record.count += 1
 
     return list(results.values())
 
 
-def fetch_job_event_query(job: Job) -> dict[str, str]:
+def fetch_job_event_query(job: Job) -> dict[str, dict[str, str]]:
     """Returns the following data structure
     {
-        "demo.query.example": "{canonical_facts: {host_name: .direct_host_name}}"
+        "demo.query.example": {"query": {canonical_facts: {host_name: .direct_host_name}}}
     }
-    The keys are fully-qualified Ansible module names, and the values are strings which are jq expressions.
+    The keys are fully-qualified Ansible module names, and the values are dicts containing jq expressions.
 
     This contains all event query expressions that pertain to the given job
     """
