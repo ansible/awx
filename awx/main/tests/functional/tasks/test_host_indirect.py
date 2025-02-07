@@ -30,7 +30,7 @@ def bare_job(job_factory):
 
 
 def create_registered_event(job, task_name='demo.query.example'):
-    return job.job_events.create(task=task_name, event_data={'res': {'direct_host_name': 'foo_host'}})
+    return job.job_events.create(event_data={'resolved_action': task_name, 'res': {'direct_host_name': 'foo_host'}})
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def job_with_counted_event(bare_job):
 
 def create_event_query(fqcn='demo.query'):
     module_name = f'{fqcn}.example'
-    return EventQuery.objects.create(fqcn=fqcn, collection_version='1.0.1', event_query=yaml.dump({module_name: TEST_JQ}, default_flow_style=False))
+    return EventQuery.objects.create(fqcn=fqcn, collection_version='1.0.1', event_query=yaml.dump({module_name: {'query': TEST_JQ}}, default_flow_style=False))
 
 
 def create_audit_record(name, job, organization, created=now()):
@@ -79,20 +79,20 @@ def test_build_with_no_results(bare_job):
 
 @pytest.mark.django_db
 def test_collect_an_event(job_with_counted_event):
-    records = build_indirect_host_data(job_with_counted_event, {'demo.query.example': TEST_JQ})
+    records = build_indirect_host_data(job_with_counted_event, {'demo.query.example': {'query': TEST_JQ}})
     assert len(records) == 1
 
 
 @pytest.mark.django_db
 def test_fetch_job_event_query(bare_job, event_query):
-    assert fetch_job_event_query(bare_job) == {'demo.query.example': TEST_JQ}
+    assert fetch_job_event_query(bare_job) == {'demo.query.example': {'query': TEST_JQ}}
 
 
 @pytest.mark.django_db
 def test_fetch_multiple_job_event_query(bare_job):
     create_event_query(fqcn='demo.query')
     create_event_query(fqcn='demo2.query')
-    assert fetch_job_event_query(bare_job) == {'demo.query.example': TEST_JQ, 'demo2.query.example': TEST_JQ}
+    assert fetch_job_event_query(bare_job) == {'demo.query.example': {'query': TEST_JQ}, 'demo2.query.example': {'query': TEST_JQ}}
 
 
 @pytest.mark.django_db
@@ -156,8 +156,8 @@ def test_multiple_registered_modules_same_collection(bare_job):
         collection_version='1.0.1',
         event_query=yaml.dump(
             {
-                'demo.query.example': TEST_JQ,
-                'demo.query.example2': TEST_JQ,
+                'demo.query.example': {'query': TEST_JQ},
+                'demo.query.example2': {'query': TEST_JQ},
             },
             default_flow_style=False,
         ),
