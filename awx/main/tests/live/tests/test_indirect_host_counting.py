@@ -12,10 +12,10 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
     job = Job.objects.filter(name__icontains='test_indirect_host_counting').order_by('-created').first()
     wait_for_events(job)  # We must wait for events because system tasks iterate on job.job_events.filter(...)
 
-    # Data matches to awx/main/tests/data/projects/host_query/meta/event_query.yml
+    # Data matches to awx/main/tests/data/projects/host_query/extensions/audit/event_query.yml
     # this just does things in-line to be a more localized test for the immediate testing
     module_jq_str = '{canonical_facts: {host_name: .direct_host_name}, facts: {device_type: .device_type}}'
-    event_query = {'demo.query.example': module_jq_str}
+    event_query = {'demo.query.example': {'query': module_jq_str}}
 
     # Run the task logic directly with local data
     results = build_indirect_host_data(job, event_query)
@@ -34,7 +34,7 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
     assert 'host_query' in job.installed_collections['demo.query']
     hq_text = job.installed_collections['demo.query']['host_query']
     hq_data = yaml.safe_load(hq_text)
-    assert hq_data == {'demo.query.example': module_jq_str}
+    assert hq_data == {'demo.query.example': {'query': module_jq_str}}
 
     assert job.ansible_version
 
