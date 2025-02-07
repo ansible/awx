@@ -30,7 +30,7 @@ def bare_job(job_factory):
 
 
 def create_registered_event(job, task_name='demo.query.example'):
-    return job.job_events.create(task=task_name, event_data={'res': {'direct_host_name': 'foo_host'}})
+    return job.job_events.create(event_data={'resolved_action': task_name, 'res': {'direct_host_name': 'foo_host'}})
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def test_build_with_no_results(bare_job):
 
 @pytest.mark.django_db
 def test_collect_an_event(job_with_counted_event):
-    records = build_indirect_host_data(job_with_counted_event, {'demo.query.example': TEST_JQ})
+    records = build_indirect_host_data(job_with_counted_event, {'demo.query.example': {'query': TEST_JQ}})
     assert len(records) == 1
 
 
