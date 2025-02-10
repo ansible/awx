@@ -1,6 +1,5 @@
 import logging
 from typing import Tuple, Union
-import time
 
 import yaml
 
@@ -148,16 +147,11 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
 
     if wait_for_events:
         # Gate running this task on the job having all events processed, not just EOF or playbook_on_stats
-        current_events = 0
-        for _ in range(10):
-            current_events = job.job_events.count()
-            if current_events >= job.emitted_events:
-                break
-            logger.debug(f'Waiting for job_id={job_id} to finish processing events, currently {current_events} < {job.emitted_events}')
-            time.sleep(0.2)
-        else:
-            logger.warning(f'Event count {current_events} < {job.emitted_events} for job_id={job_id}, delaying processing of indirect host tracking')
+        current_events = job.job_events.count()
+        if current_events < job.emitted_events:
+            logger.info(f'Event count {current_events} < {job.emitted_events} for job_id={job_id}, delaying processing of indirect host tracking')
             return
+        job.log_lifecycle(f'finished processing {current_events} events, running save_indirect_host_entries')
 
     with transaction.atomic():
         """
