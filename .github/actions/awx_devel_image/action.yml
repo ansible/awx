@@ -26,7 +26,7 @@ runs:
       shell: bash
       run: |
         DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-        COMPOSE_TAG=${{ github.base_ref }} \
+        COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
         docker pull -q `make print-DEVEL_IMAGE_NAME`
 
     - name: Build image for current source checkout
