@@ -29,4 +29,4 @@ pip>=21.3,<=24.0 # PEP 660 – Editable installs for pyproject.toml based builds
 debugpy
 remote-pdb
 sdb
-test
+
