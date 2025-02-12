@@ -4,6 +4,10 @@ inputs:
   github-token:
     description: GitHub Token for registry access
     required: true
+  private-github-token:
+    description: GitHub Token for private repositories
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -21,6 +25,11 @@ runs:
       shell: bash
       run: |
         echo "${{ inputs.github-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Add Private github token to requirements_git.credentials.txt
+      shell: bash
+      run: echo "https://x-access-token:${{ inputs.private-github-token }}@github.com" >> requirements/requirements_git.credentials.txt
+      if: ${{ inputs.private-github-token != '' }}
 
     - name: Pre-pull latest devel image to warm cache
       shell: bash

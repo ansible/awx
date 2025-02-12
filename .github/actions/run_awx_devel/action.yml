@@ -9,6 +9,10 @@ inputs:
     required: false
     default: false
     type: boolean
+  private-github-token:
+    description: GitHub Token for private repositories
+    required: false
+    default: ''
 outputs:
   ip:
     description: The IP of the tools_awx_1 container
@@ -28,6 +32,7 @@ runs:
       uses: ./.github/actions/awx_devel_image
       with:
         github-token: ${{ inputs.github-token }}
+        private-github-token: ${{ inputs.private-github-token}}
 
     - name: Upgrade ansible-core
       shell: bash

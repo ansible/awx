@@ -3,6 +3,7 @@ name: CI
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CI_PRIVATE_GITHUB_TOKEN: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
   DEV_DOCKER_OWNER: ${{ github.repository_owner }}
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
   UPSTREAM_REPOSITORY_ID: 91594105
@@ -54,6 +55,7 @@ jobs:
         uses: ./.github/actions/awx_devel_image
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
 
       - name: Run check ${{ matrix.tests.name }}
         id: make-run
@@ -138,6 +140,7 @@ jobs:
         with:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
 
       - name: Run live dev env tests
         run: docker exec tools_awx_1 /bin/bash -c "make live_test"
@@ -178,6 +181,12 @@ jobs:
       - name: Install playbook dependencies
         run: |
           python3 -m pip install docker
+
+      - name: Add Private github token to requirements_git.credentials.txt
+        shell: bash
+        working-directory: awx
+        run: echo "https://x-access-token:${{ env.CI_PRIVATE_GITHUB_TOKEN }}@github.com" >> requirements/requirements_git.credentials.txt
+        if: ${{ env.CI_PRIVATE_GITHUB_TOKEN != '' }}
 
       - name: Build AWX image
         working-directory: awx
@@ -286,6 +295,7 @@ jobs:
         with:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-token: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
 
       - name: Install dependencies for running tests
         run: |
