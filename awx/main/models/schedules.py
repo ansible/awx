@@ -59,8 +59,13 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     The operation ensures that the original occurrences (based on the original dtstart)
     will match the occurrences after changing the dtstart.
 
+    All datetime operations (subtracting dates and adding timedeltas) should be
+    in UTC to avoid DST issues. As such, the rrule dtstart is converted to UTC
+    then back to the original timezone at the end.
+
     Returns a new rrule with a new dtstart
     '''
+
     if rrule._freq not in {dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY}:
         return rrule
 
@@ -70,7 +75,10 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     if ref_dt is None:
         ref_dt = now()
 
-    if rrule._dtstart > ref_dt:
+    ref_dt = ref_dt.astimezone(datetime.timezone.utc)
+
+    rrule_dtstart_utc = rrule._dtstart.astimezone(datetime.timezone.utc)
+    if rrule_dtstart_utc > ref_dt:
         return rrule
 
     interval = rrule._interval if rrule._interval else 1
@@ -84,15 +92,15 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     if isinstance(interval, float) and not interval.is_integer():
         return rrule
 
-    seconds_since_dtstart = (ref_dt - rrule._dtstart).total_seconds()
+    seconds_since_dtstart = (ref_dt - rrule_dtstart_utc).total_seconds()
 
     # it is important to fast forward by a number that is divisible by
     # interval. For example, if interval is 7 hours, we fast forward by 7, 14, 21, etc. hours.
     # Otherwise, the occurrences after the fast forward might not match the ones before.
     # x // y is integer division, lopping off any remainder, so that we get the outcome we want.
     interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
-    new_start = rrule._dtstart + interval_aligned_offset
-    new_rrule = rrule.replace(dtstart=new_start)
+    new_start = rrule_dtstart_utc + interval_aligned_offset
+    new_rrule = rrule.replace(dtstart=new_start.astimezone(rrule._dtstart.tzinfo))
     return new_rrule
 
 

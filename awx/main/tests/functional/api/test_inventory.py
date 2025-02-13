@@ -17,15 +17,6 @@ def scm_inventory(inventory, project):
     return inventory
 
 
-@pytest.fixture
-def factory_scm_inventory(inventory, project):
-    def fn(**kwargs):
-        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
-            return inventory.inventory_sources.create(source_project=project, overwrite_vars=True, source='scm', **kwargs)
-
-    return fn
-
-
 @pytest.mark.django_db
 def test_inventory_source_notification_on_cloud_only(get, post, inventory_source_factory, user, notification_template):
     u = user('admin', True)

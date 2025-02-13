@@ -1,0 +1,3 @@
+---
+- name: role_requirement
+  src: git+file:///tmp/live_tests/role_requirement

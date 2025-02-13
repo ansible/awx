@@ -104,3 +104,8 @@ from .application_name import set_application_name
 set_application_name(DATABASES, CLUSTER_HOST_ID)  # NOQA
 
 del set_application_name
+
+# Set the value of any feature flags that are defined in the local settings
+for feature in list(FLAGS.keys()):  # noqa: F405
+    if feature in locals():
+        FLAGS[feature][0]['value'] = locals()[feature]  # noqa: F405

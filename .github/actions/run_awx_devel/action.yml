@@ -9,6 +9,10 @@ inputs:
     required: false
     default: false
     type: boolean
+  private-github-token:
+    description: GitHub Token for private repositories
+    required: false
+    default: ''
 outputs:
   ip:
     description: The IP of the tools_awx_1 container
@@ -16,10 +20,19 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Disable apparmor for rsyslogd, first step
+      shell: bash
+      run: sudo ln -s /etc/apparmor.d/usr.sbin.rsyslogd /etc/apparmor.d/disable/
+
+    - name: Disable apparmor for rsyslogd, second step
+      shell: bash
+      run: sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.rsyslogd
+
     - name: Build awx_devel image for running checks
       uses: ./.github/actions/awx_devel_image
       with:
         github-token: ${{ inputs.github-token }}
+        private-github-token: ${{ inputs.private-github-token}}
 
     - name: Upgrade ansible-core
       shell: bash

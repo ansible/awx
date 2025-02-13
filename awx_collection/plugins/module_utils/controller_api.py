@@ -87,7 +87,7 @@ class ControllerModule(AnsibleModule):
             default=None),
     )
     # Associations of these types are ordered and have special consideration in the modified associations function
-    ordered_associations = ['instance_groups', 'galaxy_credentials']
+    ordered_associations = ['instance_groups', 'galaxy_credentials', 'input_inventories']
     short_params = {
         'host': 'controller_host',
         'username': 'controller_username',

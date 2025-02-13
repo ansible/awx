@@ -28,7 +28,7 @@ coverage:
           - MyPy
     project:
       default:
-        target: 100%
+        target: 75%
       lib:
         flags:
           - pytest

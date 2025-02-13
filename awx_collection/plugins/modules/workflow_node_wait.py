@@ -54,7 +54,7 @@ EXAMPLES = """
 - name: Launch a workflow with a timeout of 10 seconds
   workflow_launch:
     workflow_template: "Test Workflow"
-    wait: False
+    wait: false
   register: workflow
 
 - name: Wait for a workflow node to finish

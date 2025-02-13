@@ -85,6 +85,8 @@ options:
         - vault_id (the vault identifier; this parameter is only valid if C(kind) is specified as C(vault).)
         - ssh_key_unlock (unlock password for ssh_key; use "ASK" and launch job to be prompted)
         - gpg_public_key (GPG Public Key used for signature validation)
+        - client_id (client ID insights type service account)
+        - client_secret (client secret insights type service account)
       type: dict
     update_secrets:
       description:

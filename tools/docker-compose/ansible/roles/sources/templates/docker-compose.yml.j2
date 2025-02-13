@@ -100,7 +100,7 @@ services:
       - "3000:3001"  # used by the UI dev env
 {% endif %}
   redis_{{ container_postfix }}:
-    image: redis:latest
+    image: mirror.gcr.io/library/redis:latest
     container_name: tools_redis_{{ container_postfix }}
     volumes:
       - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
@@ -112,7 +112,7 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
-    image: haproxy:2.3
+    image: mirror.gcr.io/library/haproxy:2.3
     user: "{{ ansible_user_uid }}"
     volumes:
       - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:Z"
@@ -130,7 +130,7 @@ services:
 {% endif %}
 {% if enable_splunk|bool %}
   splunk:
-    image: splunk/splunk:latest
+    image: mirror.gcr.io/splunk/splunk:latest
     container_name: tools_splunk_1
     hostname: splunk
     networks:
@@ -145,7 +145,7 @@ services:
 {% endif %}
 {% if enable_prometheus|bool %}
   prometheus:
-    image: prom/prometheus:latest
+    image: mirror.gcr.io/prom/prometheus:latest
     container_name: tools_prometheus_1
     hostname: prometheus
     networks:
@@ -158,7 +158,7 @@ services:
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
-    image: grafana/grafana-enterprise:latest
+    image: mirror.gcr.io/grafana/grafana-enterprise:latest
     container_name: tools_grafana_1
     hostname: grafana
     networks:
@@ -199,7 +199,7 @@ services:
        - "${AWX_PG_PORT:-5441}:5432"
 {% if enable_pgbouncer|bool %}
   pgbouncer:
-    image: bitnami/pgbouncer:latest
+    image: mirror.gcr.io/bitnami/pgbouncer:latest
     container_name: tools_pgbouncer_1
     hostname: pgbouncer
     networks:
@@ -220,7 +220,7 @@ services:
 {% endif %}
 {% if enable_otel|bool %}
   otel:
-    image: otel/opentelemetry-collector-contrib:0.88.0
+    image: mirror.gcr.io/otel/opentelemetry-collector-contrib:0.88.0
     container_name: tools_otel_1
     hostname: otel
     command: ["--config=/etc/otel-collector-config.yaml", ""]
@@ -236,7 +236,7 @@ services:
 {% endif %}
 {% if enable_loki|bool %}
   loki:
-    image: grafana/loki:2.9.5
+    image: mirror.gcr.io/grafana/loki:2.9.5
     container_name: tools_loki_1
     hostname: loki
     ports:

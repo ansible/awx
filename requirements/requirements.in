@@ -8,7 +8,7 @@ boto3
 botocore
 channels
 channels-redis
-cryptography>=41.0.7  # CVE-2023-49083
+cryptography<42.0.0  # investigation is needed for 42+ to work with OpenSSL v3.0.x (RHEL 9.4) and v3.2.x (RHEL 9.5)
 Cython
 daphne
 distro
@@ -19,7 +19,6 @@ django-extensions
 django-guid
 django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
-django-pglocks
 django-solo
 django-split-settings
 djangorestframework>=3.15.0
@@ -33,7 +32,7 @@ JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
 maturin  # pydantic-core build dep
-msgpack<1.0.6  # 1.0.6+ requires cython>=3
+msgpack
 msrestazure
 openshift
 opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
@@ -63,7 +62,7 @@ uWSGI
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
-setuptools  # see UPGRADE BLOCKERs
+setuptools<71.0.0  # see UPGRADE BLOCKERs, path hack in v71 breaks irc deps
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build

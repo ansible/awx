@@ -17,6 +17,9 @@ from django.db import connections
 # Runner
 import ansible_runner
 
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
+
 # AWX
 from awx.main.utils.execution_environments import get_default_pod_spec
 from awx.main.exceptions import ReceptorNodeNotFound
@@ -30,7 +33,6 @@ from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
-from awx.main.utils.pglock import advisory_lock
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -226,22 +228,24 @@ class RemoteJobError(RuntimeError):
     pass
 
 
-def run_until_complete(node, timing_data=None, **kwargs):
+def run_until_complete(node, timing_data=None, worktype='ansible-runner', ttl='20s', **kwargs):
     """
     Runs an ansible-runner work_type on remote node, waits until it completes, then returns stdout.
     """
+
     config_data = read_receptor_config()
     receptor_ctl = get_receptor_ctl(config_data)
 
     use_stream_tls = getattr(get_conn_type(node, receptor_ctl), 'name', None) == "STREAMTLS"
     kwargs.setdefault('tlsclient', get_tls_client(config_data, use_stream_tls))
-    kwargs.setdefault('ttl', '20s')
+    if ttl is not None:
+        kwargs['ttl'] = ttl
     kwargs.setdefault('payload', '')
     if work_signing_enabled(config_data):
         kwargs['signwork'] = True
 
     transmit_start = time.time()
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, **kwargs)
+    result = receptor_ctl.submit_work(worktype=worktype, node=node, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -369,7 +373,7 @@ def _convert_args_to_cli(vargs):
     return args
 
 
-def worker_cleanup(node_name, vargs, timeout=300.0):
+def worker_cleanup(node_name, vargs):
     args = _convert_args_to_cli(vargs)
 
     remote_command = ' '.join(args)

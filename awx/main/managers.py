@@ -6,8 +6,10 @@ import uuid
 from django.db import models
 from django.conf import settings
 from django.db.models.functions import Lower
+
+from ansible_base.lib.utils.db import advisory_lock
+
 from awx.main.utils.filters import SmartFilter
-from awx.main.utils.pglock import advisory_lock
 from awx.main.constants import RECEPTOR_PENDING
 
 ___all__ = ['HostManager', 'InstanceManager', 'DeferJobCreatedManager', 'UUID_DEFAULT']

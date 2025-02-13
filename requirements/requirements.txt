@@ -2,7 +2,7 @@ adal==1.2.7
     # via msrestazure
 aiohappyeyeballs==2.4.4
     # via aiohttp
-aiohttp==3.11.10
+aiohttp==3.11.11
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry
@@ -63,9 +63,9 @@ azure-keyvault-secrets==4.9.0
     # via azure-keyvault
 backports-tarfile==1.2.0
     # via jaraco-context
-boto3==1.35.82
+boto3==1.35.96
     # via -r /awx_devel/requirements/requirements.in
-botocore==1.35.82
+botocore==1.35.96
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   boto3
@@ -86,13 +86,13 @@ channels==4.2.0
     #   channels-redis
 channels-redis==4.2.1
     # via -r /awx_devel/requirements/requirements.in
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
-click==8.1.7
+click==8.1.8
     # via receptorctl
 constantly==23.10.4
     # via twisted
-cryptography==44.0.0
+cryptography==41.0.7
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
@@ -147,8 +147,6 @@ django-guid==3.5.0
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.7.1
     # via -r /awx_devel/requirements/requirements.in
-django-pglocks==1.0.4
-    # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.4.0
@@ -173,9 +171,9 @@ frozenlist==1.5.0
     # via
     #   aiohttp
     #   aiosignal
-gitdb==4.0.11
+gitdb==4.0.12
     # via gitpython
-gitpython==3.1.43
+gitpython==3.1.44
     # via -r /awx_devel/requirements/requirements.in
 google-auth==2.37.0
     # via kubernetes
@@ -183,7 +181,7 @@ googleapis-common-protos==1.66.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-grpcio==1.68.1
+grpcio==1.69.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
@@ -201,7 +199,7 @@ idna==3.10
     #   yarl
 importlib-metadata==8.5.0
     # via opentelemetry-api
-importlib-resources==6.4.5
+importlib-resources==6.5.2
     # via irc
 incremental==24.7.2
     # via twisted
@@ -232,7 +230,7 @@ jaraco-text==4.0.0
     # via
     #   irc
     #   jaraco-collections
-jinja2==3.1.4
+jinja2==3.1.5
     # via -r /awx_devel/requirements/requirements.in
 jmespath==1.0.1
     # via
@@ -254,7 +252,7 @@ markdown==3.7
     # via -r /awx_devel/requirements/requirements.in
 markupsafe==3.0.2
     # via jinja2
-maturin==1.7.8
+maturin==1.8.1
     # via -r /awx_devel/requirements/requirements.in
 more-itertools==10.5.0
     # via
@@ -268,7 +266,7 @@ msal==1.31.1
     #   msal-extensions
 msal-extensions==1.2.0
     # via azure-identity
-msgpack==1.0.5
+msgpack==1.1.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels-redis
@@ -345,11 +343,11 @@ propcache==0.2.1
     # via
     #   aiohttp
     #   yarl
-protobuf==5.29.1
+protobuf==5.29.3
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
-psutil==6.1.0
+psutil==6.1.1
     # via -r /awx_devel/requirements/requirements.in
 psycopg==3.2.3
     # via -r /awx_devel/requirements/requirements.in
@@ -456,26 +454,25 @@ setuptools-scm[toml]==8.1.0
 six==1.17.0
     # via
     #   azure-core
-    #   django-pglocks
     #   kubernetes
     #   msrestazure
     #   openshift
     #   pygerduty
     #   python-dateutil
-slack-sdk==3.33.5
+slack-sdk==3.34.0
     # via -r /awx_devel/requirements/requirements.in
-smmap==5.0.1
+smmap==5.0.2
     # via gitdb
 sqlparse==0.5.3
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
     #   django-ansible-base
-tempora==5.7.0
+tempora==5.8.0
     # via
     #   irc
     #   jaraco-logging
-twilio==9.4.1
+twilio==9.4.2
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==24.11.0
     # via
@@ -494,7 +491,7 @@ typing-extensions==4.12.2
     #   opentelemetry-sdk
     #   psycopg
     #   twisted
-urllib3==2.2.3
+urllib3==2.3.0
     # via
     #   botocore
     #   django-ansible-base
@@ -522,7 +519,7 @@ zope-interface==7.2
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
     # via -r /awx_devel/requirements/requirements.in
-setuptools==75.6.0
+setuptools==70.3.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   asciichartpy
@@ -531,3 +528,4 @@ setuptools==75.6.0
     #   setuptools-rust
     #   setuptools-scm
     #   zope-interface
+

@@ -11,6 +11,7 @@ LOCAL_SETTINGS = (
     'CACHES',
     'DEBUG',
     'NAMED_URL_GRAPH',
+    'DISPATCHER_MOCK_PUBLISH',
 )
 
 

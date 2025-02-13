@@ -122,6 +122,7 @@ reports
 local/
 *.mo
 requirements/vendor
+requirements/requirements_git.credentials.txt
 .i18n_built
 .idea/*
 *credentials*.y*ml*

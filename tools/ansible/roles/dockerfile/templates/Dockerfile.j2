@@ -74,8 +74,10 @@ RUN mkdir /tmp/requirements
 ADD requirements/requirements.txt \
     requirements/requirements_tower_uninstall.txt \
     requirements/requirements_git.txt \
+    requirements/requirements_git.credentials.txt \
     /tmp/requirements/
 
+RUN git config --global credential.helper "store --file=/tmp/requirements/requirements_git.credentials.txt"
 RUN cd /tmp && make requirements_awx
 
 ARG VERSION
@@ -101,6 +103,8 @@ RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_
 {% endif %}
 
 {% endif %}
+
+RUN rm /tmp/requirements/requirements_git.credentials.txt
 
 # Final container(s)
 FROM quay.io/centos/centos:stream9

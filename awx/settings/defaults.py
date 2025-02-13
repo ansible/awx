@@ -358,6 +358,7 @@ INSTALLED_APPS = [
     'ansible_base.jwt_consumer',
     'ansible_base.resource_registry',
     'ansible_base.rbac',
+    'ansible_base.feature_flags',
     'flags',
 ]
 
@@ -422,6 +423,11 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
+
+# If you set this, nothing will ever be sent to pg_notify
+# this is not practical to use, although periodic schedules may still run slugish but functional tasks
+# sqlite3 based tests will use this
+DISPATCHER_MOCK_PUBLISH = False
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
@@ -697,6 +703,7 @@ DISABLE_LOCAL_AUTH = False
 TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
+INSIGHTS_OIDC_ENDPOINT = "https://sso.example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
@@ -1060,4 +1067,4 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 SYSTEM_USERNAME = None
 
 # feature flags
-FLAGS = {}
+FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}

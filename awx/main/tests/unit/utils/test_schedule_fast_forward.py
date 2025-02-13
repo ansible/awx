@@ -43,6 +43,44 @@ def test_fast_forwarded_rrule_matches_original_occurrence(rrulestr):
     assert occurrences == orig_occurrences
 
 
+@pytest.mark.parametrize(
+    'ref_dt',
+    [
+        pytest.param(datetime.datetime(2024, 12, 1, 0, 0, tzinfo=datetime.timezone.utc), id='ref-dt-out-of-dst'),
+        pytest.param(datetime.datetime(2024, 6, 1, 0, 0, tzinfo=datetime.timezone.utc), id='ref-dt-in-dst'),
+    ],
+)
+@pytest.mark.parametrize(
+    'rrulestr',
+    [
+        pytest.param('DTSTART;TZID=America/New_York:20240118T200000 RRULE:FREQ=MINUTELY;INTERVAL=10', id='rrule-out-of-dst'),
+        pytest.param('DTSTART;TZID=America/New_York:20240318T000000 RRULE:FREQ=MINUTELY;INTERVAL=10', id='rrule-in-dst'),
+        pytest.param(
+            'DTSTART;TZID=Europe/Lisbon:20230703T005800 RRULE:INTERVAL=10;FREQ=MINUTELY;BYHOUR=9,10,11,12,13,14,15,16,17,18,19,20,21', id='rrule-in-dst-by-hour'
+        ),
+    ],
+)
+def test_fast_forward_across_dst(rrulestr, ref_dt):
+    '''
+    Ensure fast forward works across daylight savings boundaries
+    "in dst" means between March and November
+    "out of dst" means between November and March the following year
+
+    Assert that the resulting fast forwarded date is included in the original rrule
+    occurrence list
+    '''
+    rruleset = Schedule.rrulestr(rrulestr, ref_dt=ref_dt)
+
+    gen = rruleset.xafter(ref_dt, count=200)
+    occurrences = [i for i in gen]
+
+    orig_rruleset = dateutil.rrule.rrulestr(rrulestr, forceset=True)
+    gen = orig_rruleset.xafter(ref_dt, count=200)
+    orig_occurrences = [i for i in gen]
+
+    assert occurrences == orig_occurrences
+
+
 def test_fast_forward_rrule_hours():
     '''
     Generate an rrule for each hour of the day

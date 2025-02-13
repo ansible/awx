@@ -3,6 +3,7 @@ name: Build/Push Development Images
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   DOCKER_CACHE: "--no-cache" # using the cache will not rebuild git requirements and other things
+  CI_PRIVATE_GITHUB_TOKEN: ${{ secrets.PRIVATE_GITHUB_TOKEN }}
 on:
   workflow_dispatch:
   push:
@@ -72,6 +73,11 @@ jobs:
         run: |
           make ui
         if: matrix.build-targets.image-name == 'awx'
+
+      - name: Add private GitHub token to requirements_git.credentials.txt
+        shell: bash
+        run: echo "https://x-access-token:${{ secrets.PRIVATE_GITHUB_TOKEN }}@github.com"" >> requirements/requirements_git.credentials.txt
+        if: ${{ env.CI_PRIVATE_GITHUB_TOKEN != '' }}
 
       - name: Build and push AWX devel images
         run: |

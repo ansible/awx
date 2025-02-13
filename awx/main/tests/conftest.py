@@ -141,11 +141,6 @@ def job_template_with_survey_passwords_factory(job_template_factory):
 
 
 @pytest.fixture
-def job_with_secret_key_unit(job_with_secret_key_factory):
-    return job_with_secret_key_factory(persisted=False)
-
-
-@pytest.fixture
 def workflow_job_template_factory():
     return create_workflow_job_template
 
@@ -229,3 +224,12 @@ def me_inst():
     me_mock = mock.MagicMock(return_value=inst)
     with mock.patch.object(Instance.objects, 'me', me_mock):
         yield inst
+
+
+@pytest.fixture(scope="session", autouse=True)
+def load_all_credentials():
+    with mock.patch('awx.main.models.credential.detect_server_product_name', return_value='NOT_AWX'):
+        from awx.main.models.credential import load_credentials
+
+        load_credentials()
+        yield

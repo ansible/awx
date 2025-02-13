@@ -19,6 +19,9 @@ from django.contrib.contenttypes.models import ContentType
 
 from ansible_base.lib.utils.models import get_type_for_model
 
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
+
 # AWX
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
@@ -34,7 +37,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
-from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import (
     ScheduleTaskManager,
     ScheduleWorkflowManager,
