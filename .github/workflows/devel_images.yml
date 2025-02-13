@@ -76,7 +76,7 @@ jobs:
 
       - name: Add private GitHub token to requirements_git.credentials.txt
         shell: bash
-        run: echo "https://x-access-token:${{ secrets.PRIVATE_GITHUB_TOKEN }}@github.com"" >> requirements/requirements_git.credentials.txt
+        run: echo "https://x-access-token:${{ secrets.PRIVATE_GITHUB_TOKEN }}@github.com" >> requirements/requirements_git.credentials.txt
         if: ${{ env.CI_PRIVATE_GITHUB_TOKEN != '' }}
 
       - name: Build and push AWX devel images
