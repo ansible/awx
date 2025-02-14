@@ -329,12 +329,19 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
 
     # Special handling for github/bitbucket SSH URLs.
     if check_special_cases:
-        special_git_hosts = ('github.com', 'bitbucket.org', 'altssh.bitbucket.org')
-        if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_username != 'git':
-            raise ValueError(_('Username must be "git" for SSH access to %s.') % parts.hostname)
-        if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_password:
-            # raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
-            netloc_password = ''
+        special_hosts = ('github.com', 'bitbucket.org', 'altssh.bitbucket.org')
+        allowed_git_usernames = {'git', 'x-access-token'}
+
+        if scm_type == 'git' and parts.scheme.endswith('ssh'):
+            is_github_host = parts.hostname in special_hosts or parts.hostname.endswith('.github.com')
+            is_bitbucket_host = parts.hostname in special_hosts or parts.hostname.endswith('.bitbucket.com') or 'bitbucket' in parts.hostname
+
+            if is_github_host and netloc_username not in allowed_git_usernames:
+                raise ValueError(_('Username must be "git" or "x-access-token" (for github app) for SSH access to %s.') % parts.hostname)
+
+            if (is_github_host or is_bitbucket_host) and netloc_password:
+                # raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
+                netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
         netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
