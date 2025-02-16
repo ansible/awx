@@ -6,6 +6,7 @@ on:
     branches:
 jobs:
   tag:
+    environment: CALVER
     permissions:
       contents: write
     runs-on: ubuntu-latest
