@@ -14,3 +14,5 @@ jobs:
       - name: Create git tag
         uses: Digital-Udvikling/actions-calver@v0.4.0
         with: ${{ secrets.SUPERSECRET }}
+
+
