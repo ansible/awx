@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: write
     runs-on: 
-      group: ubuntu-runners
+      group: linux
     steps:
       - name: Create git tag
         uses: Digital-Udvikling/actions-calver@v0.4.0
