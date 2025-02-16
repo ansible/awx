@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Create git tag
         uses: Digital-Udvikling/actions-calver@v0.4.0
-        with: ${{ secrets.GITHUB_TOKEN }}
+        with: ${{ secrets.TOKEN }}
