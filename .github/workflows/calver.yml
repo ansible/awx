@@ -1,0 +1,14 @@
+---
+name: CalVer Tagging
+on:
+  workflow_dispatch:
+  push:
+    branches:
+jobs:
+  tag:
+    permissions:
+      contents: write
+    steps:
+      - name: Create git tag
+        uses: Digital-Udvikling/actions-calver@v0.4.0
+        with: ${{ secrets.GITHUB_TOKEN }}
