@@ -1227,9 +1227,6 @@ class RunProjectUpdate(BaseTask):
                 scm_password = False
                 if scm_url_parts.scheme != 'svn+ssh':
                     scm_username = False
-            elif scm_type == 'git':
-                extra_vars['scm_username'] = scm_username
-                extra_vars['scm_password'] = scm_password
             elif scm_url_parts.scheme.endswith('ssh'):
                 scm_password = False
             elif scm_type in ('insights', 'archive'):
