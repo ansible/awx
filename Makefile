@@ -562,6 +562,7 @@ Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ## Build awx_devel image for docker compose development environment
 docker-compose-build: Dockerfile.dev
 	DOCKER_BUILDKIT=1 docker build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		-f Dockerfile.dev \
 		-t $(DEVEL_IMAGE_NAME) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -573,6 +574,7 @@ docker-compose-buildx: Dockerfile.dev
 	- docker buildx create --name docker-compose-buildx
 	docker buildx use docker-compose-buildx
 	- docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK)
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		$(DOCKER_DEVEL_CACHE_FLAG) \
@@ -620,6 +622,7 @@ Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ## Build awx image for deployment on Kubernetes environment.
 awx-kube-build: Dockerfile
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
@@ -631,6 +634,7 @@ awx-kube-buildx: Dockerfile
 	- docker buildx create --name awx-kube-buildx
 	docker buildx use awx-kube-buildx
 	- docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
@@ -654,6 +658,7 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ## Build awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-build: Dockerfile.kube-dev
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
+		--ssh default=$(SSH_AUTH_SOCK) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	     $(DOCKER_KUBE_DEV_CACHE_FLAG) \
 	    -t $(IMAGE_KUBE_DEV) .
@@ -663,6 +668,7 @@ awx-kube-dev-buildx: Dockerfile.kube-dev
 	- docker buildx create --name awx-kube-dev-buildx
 	docker buildx use awx-kube-dev-buildx
 	- docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		$(DOCKER_KUBE_DEV_CACHE_FLAG) \

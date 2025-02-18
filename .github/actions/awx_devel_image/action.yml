@@ -4,8 +4,8 @@ inputs:
   github-token:
     description: GitHub Token for registry access
     required: true
-  private-github-token:
-    description: GitHub Token for private repositories
+  private-github-key:
+    description: GitHub private key for private repositories
     required: false
     default: ''
 runs:
@@ -26,10 +26,26 @@ runs:
       run: |
         echo "${{ inputs.github-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Add Private github token to requirements_git.credentials.txt
+    - name: Generate placeholder SSH private key if SSH auth for private repos is not needed
+      id: generate_key
       shell: bash
-      run: echo "https://x-access-token:${{ inputs.private-github-token }}@github.com" >> requirements/requirements_git.credentials.txt
-      if: ${{ inputs.private-github-token != '' }}
+      run: |
+        if [[ -z "${{ inputs.private-github-key }}" ]]; then
+          ssh-keygen -t ed25519 -C "github-actions" -N "" -f ~/.ssh/id_ed25519
+          echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
+          cat ~/.ssh/id_ed25519 >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ inputs.private-github-key }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Add private GitHub key to SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ steps.generate_key.outputs.SSH_PRIVATE_KEY }}
+
 
     - name: Pre-pull latest devel image to warm cache
       shell: bash
