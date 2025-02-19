@@ -240,7 +240,15 @@ def test_extract_ansible_vars():
         ('git', 'https://example.com/bar.git', 'user', 'pw', True, False, 'https://user:pw@example.com/bar.git'),
         ('git', 'https://example@example.com/bar.git', False, 'something', True, False, 'https://example.com/bar.git'),
         # Special github/bitbucket cases
-        ('git', 'notgit@github.com:ansible/awx.git', True, True, True, False, ValueError('Username must be "git" or "x-access-token" (for github app) for SSH access to github.com.')),
+        (
+            'git',
+            'notgit@github.com:ansible/awx.git',
+            True,
+            True,
+            True,
+            False,
+            ValueError('Username must be "git" or "x-access-token" (for github app) for SSH access to github.com.'),
+        ),
         (
             'git',
             'notgit@bitbucket.org:does-not-exist/example.git',
