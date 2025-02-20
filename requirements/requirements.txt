@@ -40,7 +40,7 @@ autocommand==2.2.2
     # via jaraco-text
 automat==24.8.1
     # via twisted
-# awx-plugins-core @ git+https://git@github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
+# awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
     # via -r /awx_devel/requirements/requirements_git.txt
@@ -79,7 +79,9 @@ cachetools==5.5.0
     #   msrest
     #   requests
 cffi==1.17.1
-    # via cryptography
+    # via
+    #   cryptography
+    #   pynacl
 channels==4.2.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -115,6 +117,7 @@ deprecated==1.2.15
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-semantic-conventions
+    #   pygithub
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
 django==4.2.16
@@ -142,7 +145,9 @@ django-crum==0.7.9
 django-extensions==3.2.3
     # via -r /awx_devel/requirements/requirements.in
 django-flags==5.0.13
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 django-guid==3.5.0
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.7.1
@@ -366,12 +371,17 @@ pycparser==2.22
     # via cffi
 pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
+pygithub==2.6.0
+    # via -r /awx_devel/requirements/requirements.in
 pyjwt[crypto]==2.10.1
     # via
     #   adal
     #   django-ansible-base
     #   msal
+    #   pygithub
     #   twilio
+pynacl==1.5.0
+    # via pygithub
 pyopenssl==24.3.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -427,6 +437,7 @@ requests==2.32.3
     #   msal
     #   msrest
     #   opentelemetry-exporter-otlp-proto-http
+    #   pygithub
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
@@ -490,12 +501,14 @@ typing-extensions==4.12.2
     #   jwcrypto
     #   opentelemetry-sdk
     #   psycopg
+    #   pygithub
     #   twisted
 urllib3==2.3.0
     # via
     #   botocore
     #   django-ansible-base
     #   kubernetes
+    #   pygithub
     #   requests
 uwsgi==2.0.28
     # via -r /awx_devel/requirements/requirements.in
