@@ -292,8 +292,11 @@ def main():
 
     if inputs:
         credential_fields['inputs'] = inputs
-    if description:
-        credential_fields['description'] = description
+    if description is not None:
+        if description == '':
+            credential_fields['description'] = ''
+        else:
+            credential_fields['description'] = description
     if organization:
         credential_fields['organization'] = org_id
 
