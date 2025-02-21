@@ -247,7 +247,7 @@ def test_extract_ansible_vars():
             True,
             True,
             False,
-            ValueError('Username must be "git" or "x-access-token" (for github app) for SSH access to github.com.'),
+            ValueError('Username must be "git" for SSH access to github.com.'),
         ),
         (
             'git',
@@ -256,7 +256,7 @@ def test_extract_ansible_vars():
             True,
             True,
             False,
-            ValueError('Username must be "git" or "x-access-token" (for github app) for SSH access to bitbucket.org.'),
+            ValueError('Username must be "git" for SSH access to bitbucket.org.'),
         ),
         (
             'git',
@@ -265,7 +265,7 @@ def test_extract_ansible_vars():
             True,
             True,
             False,
-            ValueError('Username must be "git" or "x-access-token" (for github app) for SSH access to altssh.bitbucket.org.'),
+            ValueError('Username must be "git" for SSH access to altssh.bitbucket.org.'),
         ),
         ('git', 'git:password@github.com:ansible/awx.git', True, True, True, False, 'git+ssh://git@github.com/ansible/awx.git'),
         # Disabling the special handling should not raise an error
