@@ -107,8 +107,11 @@ def main():
         'name': new_name if new_name else (module.get_item_name(existing_item) if existing_item else name),
         'image': image,
     }
-    if description:
-        new_fields['description'] = description
+    if description is not None:
+        if description == '':
+            new_fields['description'] = ''
+        else:
+            new_fields['description'] = description
 
     if pull:
         new_fields['pull'] = pull
