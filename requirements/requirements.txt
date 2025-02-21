@@ -43,7 +43,9 @@ automat==24.8.1
 # awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
-    # via -r /awx_devel/requirements/requirements_git.txt
+    # via
+    #   -r /awx_devel/requirements/requirements_git.txt
+    #   awx-plugins-core
 azure-core==1.32.0
     # via
     #   azure-identity
@@ -371,8 +373,8 @@ pycparser==2.22
     # via cffi
 pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
-pygithub==2.6.0
-    # via -r /awx_devel/requirements/requirements.in
+pygithub==2.6.1
+    # via awx-plugins-core
 pyjwt[crypto]==2.10.1
     # via
     #   adal
