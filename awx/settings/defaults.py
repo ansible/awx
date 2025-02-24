@@ -1078,7 +1078,25 @@ INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS = 3
 INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
 
 
-# feature flags
-FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
+# setting for Policy as Code feature
+FEATURE_POLICY_AS_CODE_ENABLED = False
 
+OPA_HOST = ''  # The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.
+OPA_PORT = 8181  # The port used to connect to the OPA server. Defaults to 8181.
+OPA_SSL = False  # Enable or disable the use of SSL to connect to the OPA server. Defaults to false.
+
+OPA_AUTH_TYPE = 'None'  # The authentication type that will be used to connect to the OPA server: "None", "Token", or "Certificate".
+OPA_AUTH_TOKEN = ''  # The token for authentication to the OPA server. Required when OPA_AUTH_TYPE is "Token". If an authorization header is defined in OPA_AUTH_CUSTOM_HEADERS, it will be overridden by OPA_AUTH_TOKEN.
+OPA_AUTH_CLIENT_CERT = ''  # The content of the client certificate file for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
+OPA_AUTH_CLIENT_KEY = ''  # The content of the client key for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
+OPA_AUTH_CA_CERT = ''  # The content of the CA certificate for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
+OPA_AUTH_CUSTOM_HEADERS = {}  # Optional custom headers included in requests to the OPA server. Defaults to empty dictionary ({}).
+OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to the OPA server will time out. Defaults to 1.5 seconds.
+OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
+
+# feature flags
 FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
+FLAGS = {
+    'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
+    'FEATURE_POLICY_AS_CODE_ENABLED': [{'condition': 'boolean', 'value': False}],
+}

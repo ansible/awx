@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import yaml
+import urllib.parse
 from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
@@ -44,6 +45,9 @@ from polymorphic.models import PolymorphicModel
 from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
+
+# django-flags
+from flags.state import flag_enabled
 
 # AWX
 from awx.main.access import get_user_capabilities
@@ -732,7 +736,25 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
-class UnifiedJobTemplateSerializer(BaseSerializer):
+class OpaQueryPathEnabledMixin(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not flag_enabled("FEATURE_POLICY_AS_CODE_ENABLED") and 'opa_query_path' in self.fields:
+            self.fields.pop('opa_query_path')
+
+    def validate_opa_query_path(self, value):
+        # Decode the URL and re-encode it
+        decoded_value = urllib.parse.unquote(value)
+        re_encoded_value = urllib.parse.quote(decoded_value, safe='/')
+
+        if value != re_encoded_value:
+            raise serializers.ValidationError(_("The URL must be properly encoded."))
+
+        return value
+
+
+class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathEnabledMixin):
     # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
@@ -1165,12 +1187,12 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
-class OrganizationSerializer(BaseSerializer):
+class OrganizationSerializer(BaseSerializer, OpaQueryPathEnabledMixin):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Organization
-        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment')
+        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment', 'opa_query_path')
         read_only_fields = ('*', 'custom_virtualenv')
 
     def get_related(self, obj):
@@ -1524,7 +1546,7 @@ class LabelsListMixin(object):
         return res
 
 
-class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathEnabledMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1545,6 +1567,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
             'inventory_sources_with_failures',
             'pending_deletion',
             'prevent_instance_group_fallback',
+            'opa_query_path',
         )
 
     def get_related(self, obj):
@@ -3247,6 +3270,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'webhook_service',
             'webhook_credential',
             'prevent_instance_group_fallback',
+            'opa_query_path',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 
