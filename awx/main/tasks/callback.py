@@ -7,8 +7,6 @@ from typing import Tuple, Optional
 
 from awx.main.models.event_query import EventQuery
 
-from awx.main.models.event_query import EventQuery
-
 # Django
 from django.conf import settings
 from django.core.exceptions import ValidationError

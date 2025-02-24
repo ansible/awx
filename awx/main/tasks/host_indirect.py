@@ -3,8 +3,6 @@ from typing import Tuple, Union
 
 import yaml
 
-import yaml
-
 import jq
 
 from django.utils.timezone import now, timedelta
@@ -154,26 +152,6 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
             logger.info(f'Event count {current_events} < {job.emitted_events} for job_id={job_id}, delaying processing of indirect host tracking')
             return
         job.log_lifecycle(f'finished processing {current_events} events, running save_indirect_host_entries')
-
-    with transaction.atomic():
-        """
-        Pre-emptively set the job marker to 'events processed'. This prevents other instances from running the
-        same task.
-        """
-        try:
-            job = Job.objects.select_for_update().get(id=job_id)
-        except job.DoesNotExist:
-            logger.debug(f'Job {job_id} seems to be deleted, bailing from save_indirect_host_entries')
-            return
-
-        if job.event_queries_processed is True:
-            # this can mean one of two things:
-            # 1. another instance has already processed the events of this job
-            # 2. the artifacts_handler has not yet been called for this job
-            return
-
-        job.event_queries_processed = True
-        job.save(update_fields=['event_queries_processed'])
 
     with transaction.atomic():
         """
