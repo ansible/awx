@@ -574,7 +574,7 @@ docker-compose-buildx: Dockerfile.dev
 	- docker buildx create --name docker-compose-buildx
 	docker buildx use docker-compose-buildx
 	- docker buildx build \
-		--ssh default=$(SSH_AUTH_SOCK)
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		$(DOCKER_DEVEL_CACHE_FLAG) \
