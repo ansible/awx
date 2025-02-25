@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0196_indirect_managed_node_audit'),
+        ('main', '0197_add_opa_query_path'),
     ]
 
     operations = [

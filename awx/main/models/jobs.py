@@ -51,6 +51,7 @@ from awx.main.models.mixins import (
     RelatedJobsMixin,
     WebhookMixin,
     WebhookTemplateMixin,
+    OpaQueryPathMixin,
 )
 from awx.main.constants import JOB_VARIABLE_PREFIXES
 
@@ -192,7 +193,9 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin):
+class JobTemplate(
+    UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin
+):
     """
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.

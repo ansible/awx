@@ -8,7 +8,7 @@ from awx.main.migrations._create_system_jobs import delete_clear_tokens_sjt
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0200_alter_oauth2application_unique_together_and_more'),
+        ('main', '0201_alter_oauth2application_unique_together_and_more'),
     ]
 
     operations = [

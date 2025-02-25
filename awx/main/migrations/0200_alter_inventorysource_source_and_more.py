@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0198_remove_sso_app_content'),
+        ('main', '0199_remove_sso_app_content'),
     ]
 
     operations = [

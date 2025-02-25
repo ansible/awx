@@ -43,6 +43,7 @@ from awx.main.models.mixins import (
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
     CustomVirtualEnvMixin,
+    OpaQueryPathMixin,
 )
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -68,7 +69,7 @@ class InventoryConstructedInventoryMembership(models.Model):
     )
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
+class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin):
     """
     an inventory source contains lists and hosts.
     """

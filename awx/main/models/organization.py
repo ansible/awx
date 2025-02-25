@@ -22,12 +22,12 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.unified_jobs import UnifiedJob
-from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin
+from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, OpaQueryPathMixin
 
 __all__ = ['Organization', 'Team', 'UserSessionMembership']
 
 
-class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
+class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, OpaQueryPathMixin):
     """
     An organization is the basic unit of multi-tenancy divisions
     """
