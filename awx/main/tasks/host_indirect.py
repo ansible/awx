@@ -82,6 +82,8 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
 
             # Obtain the record based on the hashable canonical_facts now determined
             facts = data.get('facts')
+            name = data.get('name')
+
             if hashable_facts in results:
                 audit_record = results[hashable_facts]
             else:
@@ -90,7 +92,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
                     facts=facts,
                     job=job,
                     organization=job.organization,
-                    name=event.host_name,
+                    name=name,
                 )
                 results[hashable_facts] = audit_record
 
