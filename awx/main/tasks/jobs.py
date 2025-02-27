@@ -31,7 +31,7 @@ from gitdb.exc import BadName as BadGitName
 
 
 # AWX
-from awx.main.dispatch.publish import task
+from dispatcher.publish import task
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
