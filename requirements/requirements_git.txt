@@ -4,3 +4,4 @@ git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
 django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest-filters,jwt_consumer,resource-registry,rbac,feature-flags]
 awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel#egg=awx-plugins-core[credentials-github-app]
 awx_plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
+git+https://github.com/ansible/dispatcher.git

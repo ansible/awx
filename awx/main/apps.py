@@ -1,5 +1,7 @@
 import os
 
+from dispatcher.config import setup as dispatcher_setup
+
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 from awx.main.utils.common import bypass_in_test, load_all_entry_points_for
@@ -78,6 +80,30 @@ class MainConfig(AppConfig):
 
     def ready(self):
         super().ready()
+
+        from django.conf import settings
+        from awx.main.utils.db import get_pg_notify_params
+        from awx.main.dispatch import get_task_queuename
+
+        dispatcher_setup(
+            {
+                "version": 2,
+                "service": {"pool_kwargs": {"max_workers": 4}, "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID}},
+                "brokers": {
+                    "pg_notify": {
+                        "config": get_pg_notify_params(),
+                        "sync_connection_factory": "awx.main.utils.db.psycopg_connection_from_django",
+                        "channels": ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()],
+                        # "default_publish_channel": "tower_broadcast_all"
+                    }
+                },
+                "producers": {
+                    "ScheduledProducer": {"task_schedule": settings.DISPATCHER_SCHEDULE},
+                    "OnStartProducer": {"task_list": {"awx.main.tasks.system.dispatch_startup": {}}},
+                },
+                "publish": {"default_broker": "pg_notify"},
+            }
+        )
 
         """
         Credential loading triggers database operations. There are cases we want to call
