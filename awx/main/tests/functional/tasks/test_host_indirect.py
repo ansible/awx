@@ -17,7 +17,7 @@ from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 """These are unit tests, similar to test_indirect_host_counting in the live tests"""
 
 
-TEST_JQ = "{canonical_facts: {host_name: .direct_host_name}, facts: {another_host_name: .direct_host_name}}"
+TEST_JQ = "{name: .name, canonical_facts: {host_name: .direct_host_name}, facts: {another_host_name: .direct_host_name}}"
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def bare_job(job_factory):
 
 
 def create_registered_event(job, task_name='demo.query.example'):
-    return job.job_events.create(event_data={'resolved_action': task_name, 'res': {'direct_host_name': 'foo_host'}})
+    return job.job_events.create(event_data={'resolved_action': task_name, 'res': {'direct_host_name': 'foo_host', 'name': 'vm-foo'}})
 
 
 @pytest.fixture
@@ -107,6 +107,7 @@ def test_save_indirect_host_entries(job_with_counted_event, event_query):
     assert host_audit.canonical_facts == {'host_name': 'foo_host'}
     assert host_audit.facts == {'another_host_name': 'foo_host'}
     assert host_audit.organization == job_with_counted_event.organization
+    assert host_audit.name == 'vm-foo'
 
 
 @pytest.mark.django_db
