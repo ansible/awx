@@ -6,7 +6,7 @@ import urllib.parse as urlparse
 from django.conf import settings
 
 from awx.main.utils.reload import supervisor_service_command
-from awx.main.dispatch.publish import task
+from dispatcher.publish import task
 
 
 def construct_rsyslog_conf_template(settings=settings):
