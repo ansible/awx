@@ -446,6 +446,12 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
+DISPATCHER_SCHEDULE = {}
+for options in CELERYBEAT_SCHEDULE.values():
+    task_name = options['task']
+    DISPATCHER_SCHEDULE[task_name] = options
+    DISPATCHER_SCHEDULE[task_name]['schedule'] = options['schedule'].total_seconds()
+
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
@@ -775,7 +781,6 @@ LOGGING = {
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
         'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver'], 'level': 'INFO'},  # very noisey debug-level logs
-        'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
         'awx.main.cache_clear': {'handlers': ['cache_clear']},
@@ -795,6 +800,7 @@ LOGGING = {
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'dispatcher': {'handlers': ['console'], 'level': 'INFO'},
     },
 }
 
@@ -1099,4 +1105,5 @@ FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
 FLAGS = {
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
     'FEATURE_POLICY_AS_CODE_ENABLED': [{'condition': 'boolean', 'value': False}],
+    'FEATURE_NEW_DISPATCHER': [{'condition': 'boolean', 'value': True}],
 }

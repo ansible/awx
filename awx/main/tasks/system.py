@@ -59,7 +59,7 @@ from awx.main.models import (
     convert_jsonfields,
 )
 from awx.main.constants import ACTIVE_STATES, ERROR_STATES
-from awx.main.dispatch.publish import task
+from dispatcher.publish import task
 from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 
@@ -597,7 +597,10 @@ def inspect_execution_and_hop_nodes(instance_list):
                     execution_node_health_check.apply_async([hostname])
 
 
-@task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
+# @task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
+# TODO: replacement for bind_kwargs, https://github.com/ansible/dispatcher/issues/71
+@task(queue=get_task_queuename)
+# def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
 def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
@@ -685,14 +688,19 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             else:
                 logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
 
-    # Run local reaper
-    if worker_tasks is not None:
-        active_task_ids = []
-        for task_list in worker_tasks.values():
-            active_task_ids.extend(task_list)
-        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
-        if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
-            reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
+    # # general sketch with new dispatcher
+    # if flag_enabled('FEATURE_NEW_DISPATCHER'):
+    #     running_data = bind.control('running')
+    #     active_task_ids = [message['uuid'] for message in running_data.values()]
+
+    # # Run local reaper
+    # if worker_tasks is not None:
+    #     active_task_ids = []
+    #     for task_list in worker_tasks.values():
+    #         active_task_ids.extend(task_list)
+    #     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
+    #     if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
+    #         reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
 
 
 @task(queue=get_task_queuename)
