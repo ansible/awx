@@ -25,6 +25,7 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
+from awx.main.dispatch.config import get_max_workers
 from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
 
 if 'run_callback_receiver' in sys.argv:
@@ -319,23 +320,7 @@ class AutoscalePool(WorkerPool):
         self.max_workers = kwargs.pop('max_workers', None)
         super(AutoscalePool, self).__init__(*args, **kwargs)
 
-        if self.max_workers is None:
-            settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
-            if settings_absmem is not None:
-                # There are 1073741824 bytes in a gigabyte. Convert bytes to gigabytes by dividing by 2**30
-                total_memory_gb = convert_mem_str_to_bytes(settings_absmem) // 2**30
-            else:
-                total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
-
-            # Get same number as max forks based on memory, this function takes memory as bytes
-            self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
-
-            # add magic prime number of extra workers to ensure
-            # we have a few extra workers to run the heartbeat
-            self.max_workers += 7
-
-        # max workers can't be less than min_workers
-        self.max_workers = max(self.min_workers, self.max_workers)
+        self.max_workers = get_max_workers(**kwargs)
 
         # the task manager enforces settings.TASK_MANAGER_TIMEOUT on its own
         # but if the task takes longer than the time defined here, we will force it to stop here
