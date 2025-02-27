@@ -8,6 +8,11 @@ import redis
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from flags.state import flag_enabled
+
+from dispatcher.factories import get_control_from_settings
+from dispatcher import run_service
+
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
@@ -42,39 +47,68 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            print(Control('dispatcher').status())
-            return
+            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                ctl = get_control_from_settings()
+                running_data = ctl.control_with_reply('workers')
+                print(yaml.dump(running_data, default_flow_style=False))
+                return
+            else:
+                print(Control('dispatcher').status())
+                return
         if options.get('schedule'):
-            print(Control('dispatcher').schedule())
+            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                print('NOT YET IMPLEMENTED')
+                return
+            else:
+                print(Control('dispatcher').schedule())
             return
         if options.get('running'):
-            print(Control('dispatcher').running())
-            return
+            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                ctl = get_control_from_settings()
+                running_data = ctl.control_with_reply('running')
+                print(yaml.dump(running_data, default_flow_style=False))
+                return
+            else:
+                print(Control('dispatcher').running())
+                return
         if options.get('reload'):
-            return Control('dispatcher').control({'control': 'reload'})
+            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                print('NOT YET IMPLEMENTED')
+                return
+            else:
+                return Control('dispatcher').control({'control': 'reload'})
         if options.get('cancel'):
-            cancel_str = options.get('cancel')
+            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                ctl = get_control_from_settings()
+                running_data = ctl.control_with_reply('running')
+                print(yaml.dump(running_data, default_flow_style=False))
+                return
+            else:
+                cancel_str = options.get('cancel')
+                try:
+                    cancel_data = yaml.safe_load(cancel_str)
+                except Exception:
+                    cancel_data = [cancel_str]
+                if not isinstance(cancel_data, list):
+                    cancel_data = [cancel_str]
+                print(Control('dispatcher').cancel(cancel_data))
+                return
+
+        if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            run_service()
+        else:
+            consumer = None
+
             try:
-                cancel_data = yaml.safe_load(cancel_str)
-            except Exception:
-                cancel_data = [cancel_str]
-            if not isinstance(cancel_data, list):
-                cancel_data = [cancel_str]
-            print(Control('dispatcher').cancel(cancel_data))
-            return
+                DispatcherMetricsServer().start()
+            except redis.exceptions.ConnectionError as exc:
+                raise CommandError(f'Dispatcher could not connect to redis, error: {exc}')
 
-        consumer = None
-
-        try:
-            DispatcherMetricsServer().start()
-        except redis.exceptions.ConnectionError as exc:
-            raise CommandError(f'Dispatcher could not connect to redis, error: {exc}')
-
-        try:
-            queues = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]
-            consumer = AWXConsumerPG('dispatcher', TaskWorker(), queues, AutoscalePool(min_workers=4), schedule=settings.CELERYBEAT_SCHEDULE)
-            consumer.run()
-        except KeyboardInterrupt:
-            logger.debug('Terminating Task Dispatcher')
-            if consumer:
-                consumer.stop()
+            try:
+                queues = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]
+                consumer = AWXConsumerPG('dispatcher', TaskWorker(), queues, AutoscalePool(min_workers=4), schedule=settings.CELERYBEAT_SCHEDULE)
+                consumer.run()
+            except KeyboardInterrupt:
+                logger.debug('Terminating Task Dispatcher')
+                if consumer:
+                    consumer.stop()

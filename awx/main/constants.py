@@ -77,6 +77,8 @@ LOGGER_BLOCKLIST = (
     'awx.main.utils.log',
     # loggers that may be called getting logging settings
     'awx.conf',
+    # dispatcher should only use 1 connection
+    'dispatcher',
 )
 
 # Reported version for node seen in receptor mesh but for which capacity check
