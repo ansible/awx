@@ -10,7 +10,7 @@ from awx.api.generics import APIView, Response
 from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
 from awx.main.utils import get_awx_version
-from awx.main.utils.analytics_proxy import OIDCClient, DEFAULT_OIDC_ENDPOINT
+from awx.main.utils.analytics_proxy import OIDCClient, DEFAULT_OIDC_TOKEN_ENDPOINT
 from rest_framework import status
 
 from collections import OrderedDict
@@ -205,7 +205,7 @@ class AnalyticsGenericView(APIView):
             try:
                 rh_user = self._get_setting('REDHAT_USERNAME', None, ERROR_MISSING_USER)
                 rh_password = self._get_setting('REDHAT_PASSWORD', None, ERROR_MISSING_PASSWORD)
-                client = OIDCClient(rh_user, rh_password, DEFAULT_OIDC_ENDPOINT, ['api.console'])
+                client = OIDCClient(rh_user, rh_password, DEFAULT_OIDC_TOKEN_ENDPOINT, ['api.console'])
                 response = client.make_request(
                     method,
                     url,

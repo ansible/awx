@@ -10,7 +10,7 @@ from typing import Optional, Any
 
 import requests
 
-DEFAULT_OIDC_ENDPOINT = 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token'
+DEFAULT_OIDC_TOKEN_ENDPOINT = 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token'
 
 
 class TokenError(requests.RequestException):
