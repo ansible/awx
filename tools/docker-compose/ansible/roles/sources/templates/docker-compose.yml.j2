@@ -30,6 +30,7 @@ services:
     hostname: awx-{{ container_postfix }}
     command: launch_awx.sh supervisord --pidfile=/tmp/supervisor_pid ${SUPERVISOR_ARGS:--n}
     environment:
+      SSH_AUTH_SOCK: /ssh-agent
       OS: "{{ os_info.stdout }}"
       SDB_HOST: 0.0.0.0
       SDB_PORT: {{ awx_sdb_port_start }}
@@ -54,6 +55,9 @@ services:
       - service-mesh
     working_dir: "/awx_devel"
     volumes:
+      - type: bind
+        source: /ssh-agent
+        target: /ssh-agent
 {% if editable_dependencies | length > 0 %}
       - "var_lib_awx:/var/lib/awx"
 {% for editable_dependency in editable_dependencies %}
