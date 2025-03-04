@@ -49,7 +49,15 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
     # Task might not run due to race condition, so make it run here
     job.refresh_from_db()
     if job.event_queries_processed is False:
-        save_indirect_host_entries.delay(job.id, wait_for_events=False)
+        for _ in range(10):
+            save_indirect_host_entries.delay(job.id, wait_for_events=True)
+            job.refresh_from_db()
+            if job.event_queries_processed is True:
+                break
+            time.sleep(0.5)
+        else:
+            raise RuntimeError(f'Job events not received for job_id={job.id}')
+
         # This will poll for the background task to finish
         for _ in range(10):
             if IndirectManagedNodeAudit.objects.filter(job=job).exists():
