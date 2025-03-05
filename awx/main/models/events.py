@@ -585,7 +585,7 @@ class JobEvent(BasePlaybookEvent):
                 if not bool(summary.dark):
                     updated_hosts_list.append(host.lower())
                 else:
-                    logger.error(f'host {host.lower()} is dark / unreachable, not marking it as updated')
+                    logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
             JobHostSummary.objects.bulk_create(summaries.values())
 

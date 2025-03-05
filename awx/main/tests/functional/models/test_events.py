@@ -165,7 +165,9 @@ class TestEvents:
             skipped=dict((hostname, len(hostname)) for hostname in self.hostnames[10:12]),
         )
         assert len(HostMetric.objects.filter(Q(deleted=False) & Q(deleted_counter=0) & Q(last_deleted__isnull=True))) == 6
-        assert len(HostMetric.objects.filter(Q(deleted=False) & Q(deleted_counter=1) & Q(last_deleted__isnull=False))) == 6
+
+        # one of those 6 hosts is dark, so will not be counted
+        assert len(HostMetric.objects.filter(Q(deleted=False) & Q(deleted_counter=1) & Q(last_deleted__isnull=False))) == 5
 
     def _generate_hosts(self, cnt, id_from=0):
         self.hostnames = [f'Host {i}' for i in range(id_from, id_from + cnt)]
