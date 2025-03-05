@@ -7,6 +7,7 @@ import time
 import traceback
 from datetime import datetime
 from uuid import uuid4
+import json
 
 import collections
 from multiprocessing import Process
@@ -346,6 +347,9 @@ class AutoscalePool(WorkerPool):
         self.scale_up_ct = 0
         self.worker_count_max = 0
 
+        # last time we wrote current tasks, to avoid too much log spam
+        self.last_task_list_log = time.monotonic()
+
     def produce_subsystem_metrics(self, metrics_object):
         metrics_object.set('dispatcher_pool_scale_up_events', self.scale_up_ct)
         metrics_object.set('dispatcher_pool_active_task_count', sum(len(w.managed_tasks) for w in self.workers))
@@ -463,6 +467,14 @@ class AutoscalePool(WorkerPool):
                 self.worker_count_max = new_worker_ct
             return ret
 
+    @staticmethod
+    def fast_task_serialization(current_task):
+        try:
+            return str(current_task.get('task')) + ' - ' + str(sorted(current_task.get('args', []))) + ' - ' + str(sorted(current_task.get('kwargs', {})))
+        except Exception:
+            # just make sure this does not make things worse
+            return str(current_task)
+
     def write(self, preferred_queue, body):
         if 'guid' in body:
             set_guid(body['guid'])
@@ -484,6 +496,15 @@ class AutoscalePool(WorkerPool):
                 if isinstance(body, dict):
                     task_name = body.get('task')
                 logger.warning(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
+                # Once every 10 seconds write out task list for debugging
+                if time.monotonic() - self.last_task_list_log >= 10.0:
+                    task_counts = {}
+                    for worker in self.workers:
+                        task_slug = self.fast_task_serialization(worker.current_task)
+                        task_counts.setdefault(task_slug, 0)
+                        task_counts[task_slug] += 1
+                    logger.info(f'Running tasks by count:\n{json.dumps(task_counts, indent=2)}')
+                    self.last_task_list_log = time.monotonic()
                 return super(AutoscalePool, self).write(preferred_queue, body)
         except Exception:
             for conn in connections.all():
