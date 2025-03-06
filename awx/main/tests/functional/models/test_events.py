@@ -135,8 +135,9 @@ class TestEvents:
 
         self._create_job_event(ok=dict((hostname, len(hostname)) for hostname in self.hostnames))
 
-        # Soft delete 6 host metrics
-        for hm in HostMetric.objects.filter(id__in=[1, 3, 5, 7, 9, 11]):
+        # Soft delete 6 of the 12 host metrics, every even host like "Host 2" or "Host 4"
+        for host_name in self.hostnames[::2]:
+            hm = HostMetric.objects.get(hostname=host_name.lower())
             hm.soft_delete()
 
         assert len(HostMetric.objects.filter(Q(deleted=False) & Q(deleted_counter=0) & Q(last_deleted__isnull=True))) == 6
