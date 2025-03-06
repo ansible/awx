@@ -522,7 +522,7 @@ class BaseTask(object):
 
             credentials = self.build_credentials_list(self.instance)
 
-            container_root = ''
+            container_root = None
             if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
                 container_root = private_data_dir
 
