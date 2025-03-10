@@ -75,7 +75,7 @@ DOCUMENTATION = """
 EXAMPLES = """
 - name: Create a string for a schedule
   debug:
-    msg: "{{ lookup('ansible.controller.schedule_rrule', 'none', start_date='1979-09-13 03:45:07') }}"
+    msg: "{{ lookup('awx.awx.schedule_rrule', 'none', start_date='1979-09-13 03:45:07') }}"
 """
 
 RETURN = """
