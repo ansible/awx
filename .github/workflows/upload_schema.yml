@@ -28,11 +28,31 @@ jobs:
       - name: Install python ${{ env.py_version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.py_version }}       
+          python-version: ${{ env.py_version }}
 
       - name: Log in to registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Generate placeholder SSH private key if SSH auth for private repos is not needed
+        id: generate_key
+        shell: bash
+        run: |
+          if [[ -z "${{ secrets.PRIVATE_GITHUB_KEY }}" ]]; then
+            ssh-keygen -t ed25519 -C "github-actions" -N "" -f ~/.ssh/id_ed25519
+            echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
+            cat ~/.ssh/id_ed25519 >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ secrets.PRIVATE_GITHUB_KEY }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add private GitHub key to SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ steps.generate_key.outputs.SSH_PRIVATE_KEY }}
 
       - name: Pre-pull image to warm build cache
         run: |
@@ -56,5 +76,3 @@ jobs:
           ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
           ansible localhost -c local -m aws_s3 \
             -a "src=${{ github.workspace }}/schema.json bucket=awx-public-ci-files object=${GITHUB_REF##*/}/schema.json mode=put permission=public-read"
-
-
