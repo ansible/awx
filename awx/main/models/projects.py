@@ -354,7 +354,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return set(f.name for f in ProjectOptions._meta.fields) | set(['name', 'description', 'organization'])
+        return set(f.name for f in ProjectOptions._meta.fields) | set(['name', 'description', 'priority', 'organization'])
 
     def clean_organization(self):
         if self.pk:
