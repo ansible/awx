@@ -22,9 +22,9 @@ django-guid
 django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
 django-solo
-django-split-settings
 djangorestframework>=3.15.0
 djangorestframework-yaml
+dynaconf<4
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
 grpcio

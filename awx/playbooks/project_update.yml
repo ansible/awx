@@ -201,7 +201,7 @@
     # additional_galaxy_env contains environment variables are used for installing roles and collections and will take precedence over items in galaxy_task_env
     additional_galaxy_env:
       # These paths control where ansible-galaxy installs collections and roles on top the filesystem
-      ANSIBLE_COLLECTIONS_PATHS: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_collections"
+      ANSIBLE_COLLECTIONS_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_collections"
       ANSIBLE_ROLES_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_roles"
       # Put the local tmp directory in same volume as collection destination
       # otherwise, files cannot be moved accross volumes and will cause error

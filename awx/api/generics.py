@@ -161,7 +161,7 @@ def get_view_description(view, html=False):
 
 
 def get_default_schema():
-    if settings.SETTINGS_MODULE == 'awx.settings.development':
+    if settings.DYNACONF.is_development_mode:
         from awx.api.swagger import schema_view
 
         return schema_view
