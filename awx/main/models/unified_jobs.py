@@ -593,7 +593,9 @@ class UnifiedJob(
     priority = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_("Relative priority to other jobs. The higher the number, the higher the priority. Jobs with equivalent prioirty are started based on available capacity and launch time."),
+        help_text=_(
+            "Relative priority to other jobs. The higher the number, the higher the priority. Jobs with equivalent prioirty are started based on available capacity and launch time."
+        ),
     )
     emitted_events = models.PositiveIntegerField(
         default=0,

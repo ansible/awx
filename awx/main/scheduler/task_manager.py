@@ -97,7 +97,7 @@ class TaskBase:
             UnifiedJob.objects.filter(**filter_args)
             .exclude(launch_type='sync')
             .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
-            .order_by('-priority','created')
+            .order_by('-priority', 'created')
             .prefetch_related('dependent_jobs')
         )
         self.all_tasks = [t for t in qs]
