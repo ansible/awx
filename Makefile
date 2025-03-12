@@ -8,6 +8,7 @@ NODE ?= node
 NPM_BIN ?= npm
 KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
+GIT_REPO_NAME ?= $(shell basename `git rev-parse --show-toplevel`)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
@@ -56,9 +57,9 @@ DEV_DOCKER_OWNER ?= ansible
 # Docker will only accept lowercase, so github names like Paul need to be paul
 DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
 DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
-DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-IMAGE_KUBE_DEV=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
-IMAGE_KUBE=$(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG)
+DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_devel:$(COMPOSE_TAG)
+IMAGE_KUBE_DEV=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_kube_devel:$(COMPOSE_TAG)
+IMAGE_KUBE=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME):$(COMPOSE_TAG)
 
 # Common command to use for running ansible-playbook
 ANSIBLE_PLAYBOOK ?= ansible-playbook -e ansible_python_interpreter=$(PYTHON)
@@ -491,7 +492,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	fi;
 
 	$(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
-	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
+	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
 	    -e receptor_image=$(RECEPTOR_IMAGE) \
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
@@ -561,6 +562,7 @@ Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ## Build awx_devel image for docker compose development environment
 docker-compose-build: Dockerfile.dev
 	DOCKER_BUILDKIT=1 docker build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		-f Dockerfile.dev \
 		-t $(DEVEL_IMAGE_NAME) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -572,6 +574,7 @@ docker-compose-buildx: Dockerfile.dev
 	- docker buildx create --name docker-compose-buildx
 	docker buildx use docker-compose-buildx
 	- docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		$(DOCKER_DEVEL_CACHE_FLAG) \
@@ -619,6 +622,7 @@ Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ## Build awx image for deployment on Kubernetes environment.
 awx-kube-build: Dockerfile
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
@@ -630,6 +634,7 @@ awx-kube-buildx: Dockerfile
 	- docker buildx create --name awx-kube-buildx
 	docker buildx use awx-kube-buildx
 	- docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
@@ -653,6 +658,7 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ## Build awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-build: Dockerfile.kube-dev
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
+		--ssh default=$(SSH_AUTH_SOCK) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	     $(DOCKER_KUBE_DEV_CACHE_FLAG) \
 	    -t $(IMAGE_KUBE_DEV) .
@@ -662,6 +668,7 @@ awx-kube-dev-buildx: Dockerfile.kube-dev
 	- docker buildx create --name awx-kube-dev-buildx
 	docker buildx use awx-kube-dev-buildx
 	- docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		$(DOCKER_KUBE_DEV_CACHE_FLAG) \

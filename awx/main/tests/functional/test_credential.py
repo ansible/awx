@@ -88,6 +88,7 @@ def test_default_cred_types():
             'galaxy_api_token',
             'gce',
             'github_token',
+            'github_app_lookup',
             'gitlab_token',
             'gpg_public_key',
             'hashivault_kv',

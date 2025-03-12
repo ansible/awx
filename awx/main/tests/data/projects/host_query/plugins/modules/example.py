@@ -62,6 +62,10 @@ def run_module():
 
     result['direct_host_name'] = module.params['host_name']
     result['nested_host_name'] = {'host_name': module.params['host_name']}
+    result['name'] = 'vm-foo'
+
+    # non-cononical facts
+    result['device_type'] = 'Fake Host'
 
     module.exit_json(**result)
 

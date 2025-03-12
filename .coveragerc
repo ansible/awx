@@ -19,6 +19,8 @@ exclude_also =
 branch = True
 omit =
     awx/main/migrations/*
+    awx/settings/defaults.py
+    awx/settings/*_defaults.py
 source =
     .
 source_pkgs =

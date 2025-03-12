@@ -30,6 +30,8 @@ from django.db.models.query import QuerySet
 # Django-CRUM
 from crum import impersonate
 
+# Django flags
+from flags.state import flag_enabled
 
 # Runner
 import ansible_runner.cleanup
@@ -63,6 +65,7 @@ from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inven
 
 from awx.main.utils.reload import stop_local_services
 from awx.main.tasks.helpers import is_run_threshold_reached
+from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
@@ -363,6 +366,20 @@ def send_notifications(notification_list, job_id=None):
                 notification.save(update_fields=update_fields)
             except Exception:
                 logger.exception('Error saving notification {} result.'.format(notification.id))
+
+
+def events_processed_hook(unified_job):
+    """This method is intended to be called for every unified job
+    after the playbook_on_stats/EOF event is processed and final status is saved
+    Either one of these events could happen before the other, or there may be no events"""
+    unified_job.send_notification_templates('succeeded' if unified_job.status == 'successful' else 'failed')
+    if isinstance(unified_job, Job) and flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        if unified_job.event_queries_processed is True:
+            # If this is called from callback receiver, it likely does not have updated model data
+            # a refresh now is formally robust
+            unified_job.refresh_from_db(fields=['event_queries_processed'])
+        if unified_job.event_queries_processed is False:
+            save_indirect_host_entries.delay(unified_job.id)
 
 
 @task(queue=get_task_queuename)
