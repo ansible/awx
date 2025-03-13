@@ -49,18 +49,19 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
         if 'res' not in event.event_data:
             continue
 
-        if 'resolved_action' not in event.event_data or event.event_data['resolved_action'] not in job_event_queries.keys():
+        if not (resolved_action := event.event_data.get('resolved_action', None)):
             continue
 
-        resolved_action = event.event_data['resolved_action']
+        resolved_action_no_module = resolved_action.rsplit('.', 1)[0]
 
-        # We expect a dict with a 'query' key for the resolved_action
-        if 'query' not in job_event_queries[resolved_action]:
+        # a.b.c --> a.b
+        # e.f.* --> e.f
+        job_event_queries_no_module = {k.rsplit('.', 1)[0]: v for k, v in job_event_queries.items()}
+
+        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_no_module.get(resolved_action_no_module, {})).get('query')):
             continue
 
         # Recall from cache, or process the jq expression, and loop over the jq results
-        jq_str_for_event = job_event_queries[resolved_action]['query']
-
         if jq_str_for_event not in compiled_jq_expressions:
             compiled_jq_expressions[resolved_action] = jq.compile(jq_str_for_event)
         compiled_jq = compiled_jq_expressions[resolved_action]
