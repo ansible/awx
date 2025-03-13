@@ -23,4 +23,4 @@ The scripts looks first for a github personal access token to use to avoid havin
 
 
 # For internal spreadsheet usage
-AWX engineers will need to import the data generated from the script into a spreadshet manager. Please make sure that you do not replace the existing sheets but make a new one or create a new sheet 
+AWX engineers will need to import the data generated from the script into a spreadshet manager. Please make sure that you do not replace the existing sheets but make a new one or create a new sheet inside the existing spreadsheet upon import. 
