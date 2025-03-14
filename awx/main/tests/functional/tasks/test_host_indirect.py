@@ -1,4 +1,5 @@
 import yaml
+from functools import reduce
 from unittest import mock
 
 import pytest
@@ -20,6 +21,45 @@ from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 TEST_JQ = "{name: .name, canonical_facts: {host_name: .direct_host_name}, facts: {another_host_name: .direct_host_name}}"
 
 
+class Query(dict):
+    def __init__(self, resolved_action: str, query_jq: dict):
+        self._collection_ns, self._collection_name, self._module_name = resolved_action.split('.')
+
+        super().__init__({self.resolve_key: {'query': query_jq}})
+
+    def get_fqcn(self):
+        return f'{self._collection_ns}.{self._collection_name}'
+
+    @property
+    def resolve_value(self):
+        return self[self.resolve_key]
+
+    @property
+    def resolve_key(self):
+        return f'{self.get_fqcn()}.{self._module_name}'
+
+    def resolve(self, module_name=None):
+        return {f'{self.get_fqcn()}.{module_name or self._module_name}': self.resolve_value}
+
+    def create_event_query(self, module_name=None):
+        if (module_name := module_name or self._module_name) == '*':
+            raise ValueError('Invalid module name *')
+        return self.create_event_queries([module_name])
+
+    def create_event_queries(self, module_names):
+        queries = {}
+        for name in module_names:
+            queries |= self.resolve(name)
+        return EventQuery.objects.create(
+            fqcn=self.get_fqcn(),
+            collection_version='1.0.1',
+            event_query=yaml.dump(queries, default_flow_style=False),
+        )
+
+    def create_registered_event(self, job, module_name):
+        job.job_events.create(event_data={'resolved_action': f'{self.get_fqcn()}.{module_name}', 'res': {'direct_host_name': 'foo_host', 'name': 'vm-foo'}})
+
+
 @pytest.fixture
 def bare_job(job_factory):
     job = job_factory()
@@ -39,11 +79,6 @@ def job_with_counted_event(bare_job):
     return bare_job
 
 
-def create_event_query(fqcn='demo.query'):
-    module_name = f'{fqcn}.example'
-    return EventQuery.objects.create(fqcn=fqcn, collection_version='1.0.1', event_query=yaml.dump({module_name: {'query': TEST_JQ}}, default_flow_style=False))
-
-
 def create_audit_record(name, job, organization, created=now()):
     record = IndirectManagedNodeAudit.objects.create(name=name, job=job, organization=organization)
     record.created = created
@@ -54,7 +89,7 @@ def create_audit_record(name, job, organization, created=now()):
 @pytest.fixture
 def event_query():
     "This is ordinarily created by the artifacts callback"
-    return create_event_query()
+    return Query('demo.query.example', TEST_JQ).create_event_query()
 
 
 @pytest.fixture
@@ -72,105 +107,138 @@ def new_audit_record(bare_job, organization):
 
 
 @pytest.mark.django_db
-def test_build_with_no_results(bare_job):
-    # never filled in events, should do nothing
-    assert build_indirect_host_data(bare_job, {}) == []
+@pytest.mark.parametrize(
+    'query',
+    (
+        pytest.param(
+            {},
+            id='no_results',
+        ),
+        pytest.param(
+            Query('demo.query.example', TEST_JQ),
+            id='fully_qualified',
+        ),
+        pytest.param(
+            Query('demo.query.*', TEST_JQ),
+            id='wildcard',
+        ),
+    ),
+)
+def test_build_indirect_host_data(job_with_counted_event, query: Query):
+    data = build_indirect_host_data(job_with_counted_event, query)
+    if len(query):
+        assert len(data) == 1
+    else:
+        assert data == []
 
 
 @pytest.mark.django_db
-def test_collect_an_event(job_with_counted_event):
-    records = build_indirect_host_data(job_with_counted_event, {'demo.query.example': {'query': TEST_JQ}})
-    assert len(records) == 1
+@pytest.mark.parametrize(
+    'query',
+    (
+        pytest.param(
+            Query('demo.query.example', TEST_JQ),
+            id='fully_qualified',
+        ),
+        pytest.param(
+            Query('demo.query.*', TEST_JQ),
+            id='wildcard',
+        ),
+    ),
+)
+def test_fetch_job_event_query(bare_job, query: Query):
+    query.create_event_query(module_name='example')
+    assert fetch_job_event_query(bare_job) == query.resolve('example')
 
 
 @pytest.mark.django_db
-def test_fetch_job_event_query(bare_job, event_query):
-    assert fetch_job_event_query(bare_job) == {'demo.query.example': {'query': TEST_JQ}}
+@pytest.mark.parametrize(
+    'queries',
+    (
+        [
+            Query('demo.query.example', TEST_JQ),
+            Query('demo2.query.example', TEST_JQ),
+        ],
+        [
+            Query('demo.query.*', TEST_JQ),
+            Query('demo2.query.example', TEST_JQ),
+        ],
+    ),
+)
+def test_fetch_multiple_job_event_query(bare_job, queries: list[Query]):
+    for q in queries:
+        q.create_event_query(module_name='example')
+    assert fetch_job_event_query(bare_job) == reduce(lambda acc, q: acc | q.resolve('example'), queries, {})
 
 
 @pytest.mark.django_db
-def test_fetch_multiple_job_event_query(bare_job):
-    create_event_query(fqcn='demo.query')
-    create_event_query(fqcn='demo2.query')
-    assert fetch_job_event_query(bare_job) == {'demo.query.example': {'query': TEST_JQ}, 'demo2.query.example': {'query': TEST_JQ}}
+@pytest.mark.parametrize(
+    ('state',),
+    (
+        pytest.param(
+            [
+                (
+                    Query('demo.query.example', TEST_JQ),
+                    ['example'],
+                ),
+            ],
+            id='fully_qualified',
+        ),
+        pytest.param(
+            [
+                (
+                    Query('demo.query.example', TEST_JQ),
+                    ['example'] * 3,
+                ),
+            ],
+            id='multiple_events_same_module_same_host',
+        ),
+        pytest.param(
+            [
+                (
+                    Query('demo.query.example', TEST_JQ),
+                    ['example'],
+                ),
+                (
+                    Query('demo2.query.example', TEST_JQ),
+                    ['example'],
+                ),
+            ],
+            id='multiple_modules',
+        ),
+        pytest.param(
+            [
+                (
+                    Query('demo.query.*', TEST_JQ),
+                    ['example', 'example2'],
+                ),
+            ],
+            id='multiple_modules_same_collection',
+        ),
+    ),
+)
+def test_save_indirect_host_entries(bare_job, state):
+    all_task_names = []
+    for entry in state:
+        query, module_names = entry
+        all_task_names.extend([f'{query.get_fqcn()}.{module_name}' for module_name in module_names])
+        query.create_event_queries(module_names)
+        [query.create_registered_event(bare_job, n) for n in module_names]
 
+    save_indirect_host_entries(bare_job.id)
+    bare_job.refresh_from_db()
 
-@pytest.mark.django_db
-def test_save_indirect_host_entries(job_with_counted_event, event_query):
-    assert job_with_counted_event.event_queries_processed is False
-    save_indirect_host_entries(job_with_counted_event.id)
-    job_with_counted_event.refresh_from_db()
-    assert job_with_counted_event.event_queries_processed is True
-    assert IndirectManagedNodeAudit.objects.filter(job=job_with_counted_event).count() == 1
-    host_audit = IndirectManagedNodeAudit.objects.filter(job=job_with_counted_event).first()
-    assert host_audit.count == 1
+    assert bare_job.event_queries_processed is True
+
+    assert IndirectManagedNodeAudit.objects.filter(job=bare_job).count() == 1
+    host_audit = IndirectManagedNodeAudit.objects.filter(job=bare_job).first()
+
+    assert host_audit.count == len(all_task_names)
     assert host_audit.canonical_facts == {'host_name': 'foo_host'}
     assert host_audit.facts == {'another_host_name': 'foo_host'}
-    assert host_audit.organization == job_with_counted_event.organization
+    assert host_audit.organization == bare_job.organization
     assert host_audit.name == 'vm-foo'
-
-
-@pytest.mark.django_db
-def test_multiple_events_same_module_same_host(bare_job, event_query):
-    "This tests that the count field gives correct answers"
-    create_registered_event(bare_job)
-    create_registered_event(bare_job)
-    create_registered_event(bare_job)
-
-    save_indirect_host_entries(bare_job.id)
-
-    assert IndirectManagedNodeAudit.objects.filter(job=bare_job).count() == 1
-    host_audit = IndirectManagedNodeAudit.objects.filter(job=bare_job).first()
-
-    assert host_audit.count == 3
-    assert host_audit.events == ['demo.query.example']
-
-
-@pytest.mark.django_db
-def test_multiple_registered_modules(bare_job):
-    "This tests that the events will list multiple modules if more than 1 module from different collections is registered and used"
-    create_registered_event(bare_job, task_name='demo.query.example')
-    create_registered_event(bare_job, task_name='demo2.query.example')
-
-    # These take the place of using the event_query fixture
-    create_event_query(fqcn='demo.query')
-    create_event_query(fqcn='demo2.query')
-
-    save_indirect_host_entries(bare_job.id)
-
-    assert IndirectManagedNodeAudit.objects.filter(job=bare_job).count() == 1
-    host_audit = IndirectManagedNodeAudit.objects.filter(job=bare_job).first()
-
-    assert host_audit.count == 2
-    assert set(host_audit.events) == {'demo.query.example', 'demo2.query.example'}
-
-
-@pytest.mark.django_db
-def test_multiple_registered_modules_same_collection(bare_job):
-    "This tests that the events will list multiple modules if more than 1 module in same collection is registered and used"
-    create_registered_event(bare_job, task_name='demo.query.example')
-    create_registered_event(bare_job, task_name='demo.query.example2')
-
-    # Takes place of event_query fixture, doing manually here
-    EventQuery.objects.create(
-        fqcn='demo.query',
-        collection_version='1.0.1',
-        event_query=yaml.dump(
-            {
-                'demo.query.example': {'query': TEST_JQ},
-                'demo.query.example2': {'query': TEST_JQ},
-            },
-            default_flow_style=False,
-        ),
-    )
-
-    save_indirect_host_entries(bare_job.id)
-
-    assert IndirectManagedNodeAudit.objects.filter(job=bare_job).count() == 1
-    host_audit = IndirectManagedNodeAudit.objects.filter(job=bare_job).first()
-
-    assert host_audit.count == 2
-    assert set(host_audit.events) == {'demo.query.example', 'demo.query.example2'}
+    assert set(host_audit.events) == set(all_task_names)
 
 
 @pytest.mark.django_db
