@@ -45,6 +45,13 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
     facts_missing_logged = False
     unhashable_facts_logged = False
 
+    job_event_queries_no_module = {}
+    for query_k, query_v in job_event_queries.items():
+        if len(parts := query_k.split('.')) != 3:
+            logger.info(f"Skiping malformed query '{query_k}'. Expected to be of the form 'a.b.c'")
+            continue
+        job_event_queries_no_module['.'.join(parts[0:2])] = query_v
+
     for event in job.job_events.filter(event_data__isnull=False).iterator():
         if 'res' not in event.event_data:
             continue
@@ -53,14 +60,10 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
             continue
 
         if len(resolved_action_no_module := resolved_action.split('.')) != 3:
-            logger.info(f"Malformed query '{resolved_action}'. Expected to be of the form 'a.b.c'")
+            logger.info(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
             continue
 
         resolved_action_no_module = '.'.join(resolved_action_no_module[0:2])
-
-        # a.b.c --> a.b
-        # e.f.* --> e.f
-        job_event_queries_no_module = {k.rsplit('.', 1)[0]: v for k, v in job_event_queries.items()}
 
         if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_no_module.get(resolved_action_no_module, {})).get('query')):
             continue

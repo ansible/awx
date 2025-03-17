@@ -23,7 +23,8 @@ TEST_JQ = "{name: .name, canonical_facts: {host_name: .direct_host_name}, facts:
 
 class Query(dict):
     def __init__(self, resolved_action: str, query_jq: dict):
-        self._collection_ns, self._collection_name, self._module_name = resolved_action.split('.')
+        self._resolved_action = resolved_action.split('.')
+        self._collection_ns, self._collection_name, self._module_name = self._resolved_action
 
         super().__init__({self.resolve_key: {'query': query_jq}})
 
@@ -151,10 +152,34 @@ def test_build_indirect_host_data(job_with_counted_event, query: Query):
         ),
     ),
 )
-def test_build_indirect_host_data_invalid_queries(mock_logger_info, bare_job, task_name: str):
+def test_build_indirect_host_data_malformed_module_name(mock_logger_info, bare_job, task_name: str):
     create_registered_event(bare_job, task_name)
     assert build_indirect_host_data(bare_job, Query('demo.query.example', TEST_JQ)) == []
-    mock_logger_info.assert_called_once_with(f"Malformed query '{task_name}'. Expected to be of the form 'a.b.c'")
+    mock_logger_info.assert_called_once_with(f"Malformed invocation module name '{task_name}'. Expected to be of the form 'a.b.c'")
+
+
+@mock.patch('awx.main.tasks.host_indirect.logger.info')
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'query',
+    (
+        pytest.param(
+            'demo.query',
+            id='no_results',
+        ),
+        pytest.param(
+            'demo',
+            id='no_results',
+        ),
+        pytest.param(
+            'a.b.c.d',
+            id='no_results',
+        ),
+    ),
+)
+def test_build_indirect_host_data_malformed_query(mock_logger_info, job_with_counted_event, query: str):
+    assert build_indirect_host_data(job_with_counted_event, {query: {'query': TEST_JQ}}) == []
+    mock_logger_info.assert_called_once_with(f"Skiping malformed query '{query}'. Expected to be of the form 'a.b.c'")
 
 
 @pytest.mark.django_db
