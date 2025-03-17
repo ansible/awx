@@ -52,7 +52,11 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
         if not (resolved_action := event.event_data.get('resolved_action', None)):
             continue
 
-        resolved_action_no_module = resolved_action.rsplit('.', 1)[0]
+        if len(resolved_action_no_module := resolved_action.split('.')) != 3:
+            logger.info(f"Malformed query '{resolved_action}'. Expected to be of the form 'a.b.c'")
+            continue
+
+        resolved_action_no_module = '.'.join(resolved_action_no_module[0:2])
 
         # a.b.c --> a.b
         # e.f.* --> e.f

@@ -132,6 +132,31 @@ def test_build_indirect_host_data(job_with_counted_event, query: Query):
         assert data == []
 
 
+@mock.patch('awx.main.tasks.host_indirect.logger.info')
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'task_name',
+    (
+        pytest.param(
+            'demo.query',
+            id='no_results',
+        ),
+        pytest.param(
+            'demo',
+            id='no_results',
+        ),
+        pytest.param(
+            'a.b.c.d',
+            id='no_results',
+        ),
+    ),
+)
+def test_build_indirect_host_data_invalid_queries(mock_logger_info, bare_job, task_name: str):
+    create_registered_event(bare_job, task_name)
+    assert build_indirect_host_data(bare_job, Query('demo.query.example', TEST_JQ)) == []
+    mock_logger_info.assert_called_once_with(f"Malformed query '{task_name}'. Expected to be of the form 'a.b.c'")
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'query',
