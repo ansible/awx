@@ -59,13 +59,13 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
         if not (resolved_action := event.event_data.get('resolved_action', None)):
             continue
 
-        if len(resolved_action_no_module := resolved_action.split('.')) != 3:
+        if len(resolved_action_parts := resolved_action.split('.')) != 3:
             logger.info(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
             continue
 
-        resolved_action_no_module = '.'.join(resolved_action_no_module[0:2])
+        resolved_action_fqcn = '.'.join(resolved_action_parts[0:2])
 
-        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_no_module.get(resolved_action_no_module, {})).get('query')):
+        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_no_module.get(resolved_action_fqcn, {})).get('query')):
             continue
 
         # Recall from cache, or process the jq expression, and loop over the jq results
