@@ -42,7 +42,6 @@ services:
       DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
       UWSGI_MOUNT_PATH: {{ ingress_path }}
       DJANGO_COLORS: "${DJANGO_COLORS:-}"
-      DJANGO_SETTINGS_MODULE: "awx.settings"
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
