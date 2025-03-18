@@ -56,7 +56,7 @@ services:
     working_dir: "/awx_devel"
     volumes:
       - type: bind
-        source: /ssh-agent
+        source: /run/user/1000/keyring/ssh
         target: /ssh-agent
 {% if editable_dependencies | length > 0 %}
       - "var_lib_awx:/var/lib/awx"
