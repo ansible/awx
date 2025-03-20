@@ -45,12 +45,14 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
     facts_missing_logged = False
     unhashable_facts_logged = False
 
-    job_event_queries_no_module = {}
+    job_event_queries_fqcn = {}
     for query_k, query_v in job_event_queries.items():
         if len(parts := query_k.split('.')) != 3:
             logger.info(f"Skiping malformed query '{query_k}'. Expected to be of the form 'a.b.c'")
             continue
-        job_event_queries_no_module['.'.join(parts[0:2])] = query_v
+        if parts[2] != '*':
+            continue
+        job_event_queries_fqcn['.'.join(parts[0:2])] = query_v
 
     for event in job.job_events.filter(event_data__isnull=False).iterator():
         if 'res' not in event.event_data:
@@ -65,7 +67,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
 
         resolved_action_fqcn = '.'.join(resolved_action_parts[0:2])
 
-        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_no_module.get(resolved_action_fqcn, {})).get('query')):
+        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_fqcn.get(resolved_action_fqcn, {})).get('query')):
             continue
 
         # Recall from cache, or process the jq expression, and loop over the jq results

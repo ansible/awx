@@ -109,28 +109,52 @@ def new_audit_record(bare_job, organization):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    'query',
+    'queries,expected_matches',
     (
         pytest.param(
-            {},
+            [],
+            0,
             id='no_results',
         ),
         pytest.param(
-            Query('demo.query.example', TEST_JQ),
+            [Query('demo.query.example', TEST_JQ)],
+            1,
             id='fully_qualified',
         ),
         pytest.param(
-            Query('demo.query.*', TEST_JQ),
+            [Query('demo.query.*', TEST_JQ)],
+            1,
             id='wildcard',
+        ),
+        pytest.param(
+            [
+                Query('demo.query.*', TEST_JQ),
+                Query('demo.query.example', TEST_JQ),
+            ],
+            1,
+            id='wildcard_and_fully_qualified',
+        ),
+        pytest.param(
+            [
+                Query('demo.query.*', TEST_JQ),
+                Query('demo.query.example', {}),
+            ],
+            0,
+            id='wildcard_and_fully_qualified',
+        ),
+        pytest.param(
+            [
+                Query('demo.query.example', {}),
+                Query('demo.query.*', TEST_JQ),
+            ],
+            0,
+            id='ordering_should_not_matter',
         ),
     ),
 )
-def test_build_indirect_host_data(job_with_counted_event, query: Query):
-    data = build_indirect_host_data(job_with_counted_event, query)
-    if len(query):
-        assert len(data) == 1
-    else:
-        assert data == []
+def test_build_indirect_host_data(job_with_counted_event, queries: Query, expected_matches: int):
+    data = build_indirect_host_data(job_with_counted_event, {k: v for d in queries for k, v in d.items()})
+    assert len(data) == expected_matches
 
 
 @mock.patch('awx.main.tasks.host_indirect.logger.info')
