@@ -1012,7 +1012,6 @@ class UserSerializer(BaseSerializer):
         return ret
 
     def validate_password(self, value):
-        logger.error(f"validate_password(): {value=}")  # DJDEBUG
         if not self.instance and value in (None, ''):
             raise serializers.ValidationError(_('Password required for new User.'))
 
@@ -1036,7 +1035,6 @@ class UserSerializer(BaseSerializer):
         return value
 
     def _update_password(self, obj, new_password):
-        logger.error(f"_update_password(): {new_password=} {obj.password=}")  # DJDEBUG
         if new_password and new_password != '$encrypted$':
             # django_validate_password(new_password, user=obj)
             obj.set_password(new_password)
@@ -1055,7 +1053,6 @@ class UserSerializer(BaseSerializer):
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
-        logger.error(f"create(): {new_password=}")  # DJDEBUG
         is_system_auditor = validated_data.pop('is_system_auditor', None)
         obj = super(UserSerializer, self).create(validated_data)
         self._update_password(obj, new_password)
@@ -1065,7 +1062,6 @@ class UserSerializer(BaseSerializer):
 
     def update(self, obj, validated_data):
         new_password = validated_data.pop('password', None)
-        logger.error(f"update(): {new_password=}")  # DJDEBUG
         is_system_auditor = validated_data.pop('is_system_auditor', None)
         obj = super(UserSerializer, self).update(obj, validated_data)
         self._update_password(obj, new_password)
