@@ -88,7 +88,7 @@ def test_user_create_with_django_password_validation_basic(post, admin):
         # This user should fail the UserAttrSimilarity, MinLength and CommonPassword validators.
         user_attrs = (
             {
-                "password": "Password",
+                "password": "Password",  # NOSONAR
                 "username": "Password",
                 "is_superuser": False,
             },
@@ -98,7 +98,7 @@ def test_user_create_with_django_password_validation_basic(post, admin):
         assert response.status_code == 400
         # This user should pass all Django validators.
         user_attrs = {
-            "password": "r$TyKiOCb#ED",
+            "password": "r$TyKiOCb#ED",  # NOSONAR
             "username": "TestUser",
             "is_superuser": False,
         }
@@ -122,7 +122,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         # Keys in `fixtures` override `default_fixtures` if they exist and their
         # value is not 'None'.
         "user_attrs": {
-            "password": "r$TyKiOCb#ED",
+            "password": "r$TyKiOCb#ED",  # NOSONAR
             "username": "DefaultUser",
             "is_superuser": False,
         },
@@ -149,7 +149,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         # Test password similarity with username.
         {
             "user_attrs": {
-                "password": "TestUser1",
+                "password": "TestUser1",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -160,7 +160,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         },
         {
             "user_attrs": {
-                "password": "abc",
+                "password": "abc",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -172,7 +172,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         # Test password min length criterion.
         {
             "user_attrs": {
-                "password": "TooShort",
+                "password": "TooShort",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -183,7 +183,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         },
         {
             "user_attrs": {
-                "password": "LongEnough",
+                "password": "LongEnough",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -195,7 +195,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         # Test password is too common criterion.
         {
             "user_attrs": {
-                "password": "Password",
+                "password": "Password",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -206,7 +206,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         },
         {
             "user_attrs": {
-                "password": "Password",
+                "password": "Password",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -216,7 +216,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         # Test if password is only numeric.
         {
             "user_attrs": {
-                "password": "1234567890",
+                "password": "1234567890",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
@@ -227,7 +227,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         },
         {
             "user_attrs": {
-                "password": "1234567890",
+                "password": "1234567890",  # NOSONAR
                 "username": "TestUser1",
                 "is_superuser": False,
             },
