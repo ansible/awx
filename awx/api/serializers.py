@@ -625,6 +625,30 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         exclusions.extend([field.name for field in opts.many_to_many])
         return exclusions
 
+    def full_clean(self, obj, attrs):
+        """
+        This is called after the HTML form has been submitted, but before the
+        model instance is saved to the database.
+
+        Extend this method of you need the model instance for validation.
+        Otherwise you may consider directly extending `validate`.
+
+        :param obj: The Meta model instance.
+        :param attrs: The names and values of the filled form fields.
+        :return: None.
+        :raise ValidationError: if the validation fails.
+        """
+        # The purpose of this method is kind of overlapping with the purpose of
+        # `Model.full_clean`. But since we have most of our validation logic in
+        # the serializers, utilizing this method allows for keeping related code
+        # in the same module.
+        #
+        # See also the [Django REST Framework
+        # docs](https://www.django-rest-framework.org/community/3.0-announcement/#differences-between-modelserializer-validation-and-modelform)
+        # on this, and also [this
+        # discussion](https://stackoverflow.com/q/32834026).
+        return
+
     def validate(self, attrs):
         attrs = super(BaseSerializer, self).validate(attrs)
         try:
@@ -641,6 +665,10 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             for k in attrs.keys():
                 if k not in exclusions:
                     attrs[k] = getattr(obj, k)
+            # After the model instance is available, run the serializers
+            # full_clean() method to apply validations which are not implemented
+            # at model level.
+            self.full_clean(obj, attrs)
         except DjangoValidationError as exc:
             # DjangoValidationError may contain a list or dict; normalize into a
             # dict where the keys are the field name and the values are a list
@@ -984,7 +1012,7 @@ class UserSerializer(BaseSerializer):
         return ret
 
     def validate_password(self, value):
-        django_validate_password(value)
+        logger.error(f"validate_password(): {value=}")  # DJDEBUG
         if not self.instance and value in (None, ''):
             raise serializers.ValidationError(_('Password required for new User.'))
 
@@ -1008,6 +1036,7 @@ class UserSerializer(BaseSerializer):
         return value
 
     def _update_password(self, obj, new_password):
+        logger.error(f"_update_password(): {new_password=} {obj.password=}")  # DJDEBUG
         if new_password and new_password != '$encrypted$':
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
@@ -1025,6 +1054,7 @@ class UserSerializer(BaseSerializer):
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
+        logger.error(f"create(): {new_password=}")  # DJDEBUG
         is_system_auditor = validated_data.pop('is_system_auditor', None)
         obj = super(UserSerializer, self).create(validated_data)
         self._update_password(obj, new_password)
@@ -1034,12 +1064,54 @@ class UserSerializer(BaseSerializer):
 
     def update(self, obj, validated_data):
         new_password = validated_data.pop('password', None)
+        logger.error(f"update(): {new_password=}")  # DJDEBUG
         is_system_auditor = validated_data.pop('is_system_auditor', None)
         obj = super(UserSerializer, self).update(obj, validated_data)
         self._update_password(obj, new_password)
         if is_system_auditor is not None:
             obj.is_system_auditor = is_system_auditor
         return obj
+
+    def full_clean(self, obj, attrs):
+        """
+        Called after the HTML form for creating a new user or editing an
+        existing user has been submitted.
+
+        Password validation according to settings.AUTH_PASSWORD_VALIDATORS
+        happens here.
+
+        :param obj: The User model instance.
+        :param attrs: The names and values of the filled form fields.
+        :return: None.
+        :raise ValidationError: if at least on of the configured validators
+            failed.
+        """
+        # We validate the password here, because some validators may need the
+        # User object which is neither available in `validate_password` nor in
+        # `validate` which otherwise would be logical places for this operation.
+        #
+        # If we try to instantiate a User object in `validate` for passing it to
+        # the validators, as recommended in the [Django REST Framework
+        # documentation](https://www.django-rest-framework.org/community/3.0-announcement/#differences-between-modelserializer-validation-and-modelform),
+        # ValidationError is raised, but the user is saved into the database
+        # anyways!
+        #
+        # Another seemingly good location to apply password validation would be
+        # `_update_password`, covering `create` and `update`, but this would
+        # actually be too late because on these calls the Django Rest Framework
+        # has already saved the User instance and no longer catches
+        # ValidationError, thereby reporting an internal server error in the
+        # HTML GUI.
+        #
+        # Since the HTML form allows for saving a user with empty password field
+        # to indicate that the existing password is untouched, we have to skip
+        # password validation for that case.
+        password = attrs.get("password")
+        if password and password != '$encrypted$':
+            # Apply validators from settings.AUTH_PASSWORD_VALIDATORS.
+            django_validate_password(password, user=obj)
+        #
+        super(UserSerializer, self).full_clean(obj, attrs)
 
     def get_related(self, obj):
         res = super(UserSerializer, self).get_related(obj)
