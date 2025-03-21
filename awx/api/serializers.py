@@ -1038,6 +1038,7 @@ class UserSerializer(BaseSerializer):
     def _update_password(self, obj, new_password):
         logger.error(f"_update_password(): {new_password=} {obj.password=}")  # DJDEBUG
         if new_password and new_password != '$encrypted$':
+            # django_validate_password(new_password, user=obj)
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
 
