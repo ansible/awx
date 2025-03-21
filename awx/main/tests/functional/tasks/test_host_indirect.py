@@ -157,7 +157,7 @@ def test_build_indirect_host_data(job_with_counted_event, queries: Query, expect
     assert len(data) == expected_matches
 
 
-@mock.patch('awx.main.tasks.host_indirect.logger.info')
+@mock.patch('awx.main.tasks.host_indirect.logger.debug')
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'task_name',
@@ -176,10 +176,10 @@ def test_build_indirect_host_data(job_with_counted_event, queries: Query, expect
         ),
     ),
 )
-def test_build_indirect_host_data_malformed_module_name(mock_logger_info, bare_job, task_name: str):
+def test_build_indirect_host_data_malformed_module_name(mock_logger_debug, bare_job, task_name: str):
     create_registered_event(bare_job, task_name)
     assert build_indirect_host_data(bare_job, Query('demo.query.example', TEST_JQ)) == []
-    mock_logger_info.assert_called_once_with(f"Malformed invocation module name '{task_name}'. Expected to be of the form 'a.b.c'")
+    mock_logger_debug.assert_called_once_with(f"Malformed invocation module name '{task_name}'. Expected to be of the form 'a.b.c'")
 
 
 @mock.patch('awx.main.tasks.host_indirect.logger.info')

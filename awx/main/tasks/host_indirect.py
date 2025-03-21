@@ -62,11 +62,14 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
             continue
 
         if len(resolved_action_parts := resolved_action.split('.')) != 3:
-            logger.info(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
+            logger.debug(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
             continue
 
         resolved_action_fqcn = '.'.join(resolved_action_parts[0:2])
 
+        # Match module invocation to collection queries
+        # First match against fully qualified query names i.e. a.b.c
+        # Then try and match against wildcard queries i.e. a.b.*
         if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_fqcn.get(resolved_action_fqcn, {})).get('query')):
             continue
 
