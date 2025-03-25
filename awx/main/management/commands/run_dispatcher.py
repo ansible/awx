@@ -10,8 +10,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 from flags.state import flag_enabled
 
-from dispatcher.factories import get_control_from_settings
-from dispatcher import run_service
+from dispatcherd.factories import get_control_from_settings
+from dispatcherd import run_service
 
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control

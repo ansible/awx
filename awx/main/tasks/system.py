@@ -59,7 +59,7 @@ from awx.main.models import (
     convert_jsonfields,
 )
 from awx.main.constants import ACTIVE_STATES, ERROR_STATES
-from dispatcher.publish import task
+from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 
