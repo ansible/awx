@@ -1,6 +1,6 @@
 import os
 
-from dispatcher.config import setup as dispatcher_setup
+from dispatcherd.config import setup as dispatcher_setup
 
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
