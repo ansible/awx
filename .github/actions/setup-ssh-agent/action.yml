@@ -1,0 +1,29 @@
+name: 'Setup SSH for GitHub'
+description: 'Configure SSH for private repository access'
+inputs:
+  ssh-private-key:
+    description: 'SSH private key for repository access'
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Generate placeholder SSH private key if SSH auth for private repos is not needed
+      id: generate_key
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.ssh-private-key }}" ]]; then
+          ssh-keygen -t ed25519 -C "github-actions" -N "" -f ~/.ssh/id_ed25519
+          echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
+          cat ~/.ssh/id_ed25519 >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ inputs.ssh-private-key }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Add private GitHub key to SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ steps.generate_key.outputs.SSH_PRIVATE_KEY }}
