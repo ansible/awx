@@ -746,7 +746,7 @@ LOGGING = {
         'simple': {'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s %(message)s'},
         'json': {'()': 'awx.main.utils.formatters.LogstashFormatter'},
         'timed_import': {'()': 'awx.main.utils.formatters.TimeFormatter', 'format': '%(relativeSeconds)9.3f %(levelname)-8s %(message)s'},
-        'dispatcher': {'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s'},
+        'dispatcherd': {'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s'},
     },
     # Extended below based on install scenario. You probably don't want to add something directly here.
     # See 'handler_config' below.
@@ -800,7 +800,7 @@ LOGGING = {
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
-        'dispatcher': {'handlers': ['console'], 'level': 'INFO'},
+        'dispatcherd': {'handlers': ['console'], 'level': 'INFO'},
     },
 }
 

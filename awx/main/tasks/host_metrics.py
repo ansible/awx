@@ -7,7 +7,7 @@ from django.db.models import Count, F
 from django.db.models.functions import TruncMonth
 from django.utils.timezone import now
 from awx.main.dispatch import get_task_queuename
-from dispatcher.publish import task
+from dispatcherd.publish import task
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
