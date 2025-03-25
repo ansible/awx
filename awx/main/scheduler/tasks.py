@@ -7,7 +7,7 @@ from django.conf import settings
 # AWX
 from awx import MODE
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
-from dispatcher.publish import task
+from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename
 
 logger = logging.getLogger('awx.main.scheduler')

@@ -60,7 +60,7 @@ Defining and Running Tasks
 Tasks are defined in AWX's source code, and generally live in the
 `awx.main.tasks` module.  Tasks can be defined as simple functions:
 
-    from dispatcher.publish import task
+    from dispatcherd.publish import task
 
     @task()
     def add(a, b):

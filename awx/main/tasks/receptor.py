@@ -32,7 +32,7 @@ from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
-from dispatcher.publish import task
+from dispatcherd.publish import task
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
