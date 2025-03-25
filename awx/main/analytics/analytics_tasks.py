@@ -3,7 +3,7 @@ import logging
 
 # AWX
 from awx.main.analytics.subsystem_metrics import DispatcherMetrics, CallbackReceiverMetrics
-from dispatcher.publish import task
+from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename
 
 logger = logging.getLogger('awx.main.scheduler')
