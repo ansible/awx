@@ -130,7 +130,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
@@ -168,14 +168,9 @@ jobs:
           repository: ansible/awx-operator
           path: awx-operator
 
-      - name: Get python version from Makefile
-        working-directory: awx
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - uses: ./awx/.github/actions/setup-python
         with:
-          python-version: ${{ env.py_version }}
+          working-directory: awx
 
       - name: Install playbook dependencies
         run: |
@@ -299,7 +294,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
@@ -375,7 +370,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 

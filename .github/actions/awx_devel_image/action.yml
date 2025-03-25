@@ -11,9 +11,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Get python version from Makefile
-      shell: bash
-      run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+    - uses: ./.github/actions/setup-python
 
     - name: Set lower case owner name
       shell: bash
