@@ -127,9 +127,9 @@ ordered fields for that type:
 
             "type": ("string" | "boolean")   # defaults to 'string'
 
-            "format": "ssh_private_key"      # optional, can be used to enforce data
-                                             # format validity for SSH private key
-                                             # data (only applicable to `type=string`)
+            "format": ("ssh_private_key" | "url") # optional, can be used to enforce data
+                                                  # format validity for SSH private key
+                                                  # data or for URL format (only applicable to `type=string`)
 
             "secret": true,                  # if true, the field value will be encrypted
 
