@@ -93,6 +93,23 @@ class task:
 
             @classmethod
             def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, **kw):
+                try:
+                    from flags.state import flag_enabled
+
+                    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                        # Check if we're dealing with the heartbeat task
+                        if cls.name == 'awx.main.tasks.system.cluster_node_heartbeat':
+                            # Import the function to access its _new_method attribute
+                            from awx.main.tasks.system import cluster_node_heartbeat
+
+                            # Use the special dispatcherd implementation if available
+                            if hasattr(cluster_node_heartbeat, '_new_method'):
+                                return cluster_node_heartbeat._new_method.apply_async(args, kwargs, queue, uuid, **kw)
+                except Exception:
+                    # If anything goes wrong, continue with original implementation
+                    pass
+
+                # Original implementation follows
                 queue = queue or getattr(cls.queue, 'im_func', cls.queue)
                 if not queue:
                     msg = f'{cls.name}: Queue value required and may not be None'
