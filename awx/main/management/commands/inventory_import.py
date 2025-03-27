@@ -36,7 +36,8 @@ from awx.main.utils.execution_environments import get_default_execution_environm
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
-logger = logging.getLogger('awx.main.commands.inventory_import')
+# logger = logging.getLogger('awx.main.commands.inventory_import')
+logger = logging.getLogger('awx.api.inventory_import')  # DJDEBUG logger above doesn't show up in docker-compose awx...
 
 LICENSE_EXPIRED_MESSAGE = '''\
 Subscription expired.
@@ -467,15 +468,19 @@ class Command(BaseCommand):
             # to make constructed inventory coherent
             db_variables = self.all_group.variables
         else:
-            db_variables = self.inventory.variables_dict
-            db_variables.update(self.all_group.variables)
-
+            logger.error(f"_update_inventory(): {self.inventory.variables_dict=}")
+            logger.error(f"_update_inventory(): {self.all_group.variables=}")
+            if self.overwrite_vars:
+                db_variables = self.all_group.variables
+            else:
+                db_variables = self.inventory.variables_dict
+                db_variables.update(self.all_group.variables)
         if db_variables != self.inventory.variables_dict:
             self.inventory.variables = json.dumps(db_variables)
             self.inventory.save(update_fields=['variables'])
-            logger.debug('Inventory variables updated from "all" group')
+            logger.error('Inventory variables updated from "all" group')
         else:
-            logger.debug('Inventory variables unmodified')
+            logger.error('Inventory variables unmodified')
 
     def _create_update_groups(self):
         """
@@ -499,6 +504,8 @@ class Command(BaseCommand):
             for group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[group.name]
                 db_variables = group.variables_dict
+                logger.error(f"_create_update_groups(): {group.name} {group.variables_dict=}")
+                logger.error(f"_create_update_groups(): {group.name} {mem_group.variables=}")
                 if self.overwrite_vars:
                     db_variables = mem_group.variables
                 else:
@@ -769,6 +776,7 @@ class Command(BaseCommand):
         Load inventory from in-memory groups to the database, overwriting or
         merging as appropriate.
         """
+        logger.error(">>>> load_into_database()")
         # FIXME: Attribute changes to superuser?
         # Perform __in queries in batches (mainly for unit tests using SQLite).
         self._batch_size = 500
@@ -784,6 +792,7 @@ class Command(BaseCommand):
         self._create_update_hosts(pk_mem_host_map)
         self._create_update_group_children()
         self._create_update_group_hosts()
+        logger.error("<<<< load_into_database()")
 
     def remote_tower_license_compare(self, local_license_type):
         # this requires https://github.com/ansible/ansible/pull/52747
