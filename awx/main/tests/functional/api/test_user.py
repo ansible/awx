@@ -242,11 +242,18 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
         print(f"Testing fixtures {i}: {expected_status_code=} {user_attrs=}")
         with override_settings(AUTH_PASSWORD_VALIDATORS=password_validators):
             response = post(reverse('api:user_list'), user_attrs, admin, middleware=SessionMiddleware(mock.Mock()))
-            assert response.status_code == expected_status_code
+            assert response.status_code == expected_status_code, (i, fixtures)
             # Delete user if it was created succesfully.
             if response.status_code == 201:
                 response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin, middleware=SessionMiddleware(mock.Mock()))
                 assert response.status_code == 204
+            else:
+                # Catch the unexpected behavour that sometimes the user is
+                # written into the database before the validation fails. This
+                # actually can happen if UserSerializer.validate instantiates
+                # User(**attrs)!
+                username = fixtures['user_attrs']['username']
+                assert not User.objects.filter(username=username)
 
 
 @pytest.mark.django_db
@@ -275,6 +282,10 @@ def test_updating_own_password_refreshes_session(patch, admin):
     Updating your own password should refresh the session id.
     '''
     with mock.patch('awx.api.serializers.update_session_auth_hash') as update_session_auth_hash:
+        # Attention: If the Django password validator `CommonPasswordValidator`
+        # is active, this test case will fail because this validator raises on
+        # password 'newpassword'. Consider changing the hard-coded password to
+        # something uncommon.
         patch(reverse('api:user_detail', kwargs={'pk': admin.pk}), {'password': 'newpassword'}, admin, middleware=SessionMiddleware(mock.Mock()))
         assert update_session_auth_hash.called
 
