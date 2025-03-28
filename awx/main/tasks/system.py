@@ -23,7 +23,6 @@ from ansible_base.resource_registry.tasks.sync import SyncExecutor
 from crum import impersonate
 # dateutil
 from dateutil.parser import parse as parse_date
-from dispatcherd.publish import task
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -62,6 +61,7 @@ from awx.main.tasks.receptor import (administrative_workunit_reaper,
 from awx.main.utils.common import (ignore_inventory_computed_fields,
                                    ignore_inventory_group_removal)
 from awx.main.utils.reload import stop_local_services
+from dispatcherd.publish import task
 
 logger = logging.getLogger('awx.main.tasks.system')
 
@@ -636,6 +636,25 @@ def adispatch_cluster_node_heartbeat(binder):
     _heartbeat_handle_lost_instances(lost_instances, this_inst)
 
     # Get running tasks using dispatcherd API
+    active_task_ids = _get_active_task_ids_from_dispatcherd()
+    if active_task_ids is None:
+        return  # Failed to get task IDs, don't attempt reaping
+
+    # Run local reaper using tasks from dispatcherd
+    ref_time = datetime.now()  # No dispatch_time in dispatcherd version
+    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    # Always reap waiting tasks in the dispatcherd implementation
+    reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+
+
+def _get_active_task_ids_from_dispatcherd():
+    """
+    Retrieve active task IDs from the dispatcherd control API.
+
+    Returns:
+        list: List of active task UUIDs
+        None: If there was an error retrieving the data
+    """
     active_task_ids = []
     try:
         from dispatcherd.factories import get_control_from_settings
@@ -658,16 +677,10 @@ def adispatch_cluster_node_heartbeat(binder):
                     active_task_ids.append(task_key)
 
         logger.debug(f"Retrieved {len(active_task_ids)} active task IDs from dispatcherd")
+        return active_task_ids
     except Exception:
         logger.exception("Failed to get running tasks from dispatcherd")
-        # If we can't get tasks, don't try to reap anything
-        return
-
-    # Run local reaper using tasks from dispatcherd
-    ref_time = datetime.now()  # No dispatch_time in dispatcherd version
-    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
-    # Always reap waiting tasks in the dispatcherd implementation
-    reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+        return None
 
 
 # Attach the dispatcherd-compatible method to the original
