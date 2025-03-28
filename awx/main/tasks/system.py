@@ -17,12 +17,16 @@ from io import StringIO
 import ansible_runner.cleanup
 import psycopg
 from ansible_base.lib.utils.db import advisory_lock
+
 # django-ansible-base
 from ansible_base.resource_registry.tasks.sync import SyncExecutor
+
 # Django-CRUM
 from crum import impersonate
+
 # dateutil
 from dateutil.parser import parse as parse_date
+
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -35,6 +39,7 @@ from django.utils.encoding import smart_str
 from django.utils.timezone import now, timedelta
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_noop
+
 # Django flags
 from flags.state import flag_enabled
 from rest_framework.exceptions import PermissionDenied
@@ -49,17 +54,22 @@ from awx.main.constants import ACTIVE_STATES, ERROR_STATES
 from awx.main.consumers import emit_channel_notification
 from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.dispatch.publish import task as task_awx
-from awx.main.models import (Instance, InstanceGroup, Inventory, Job,
-                             Notification, Schedule, SmartInventoryMembership,
-                             TowerScheduleState, UnifiedJob,
-                             convert_jsonfields)
+from awx.main.models import (
+    Instance,
+    InstanceGroup,
+    Inventory,
+    Job,
+    Notification,
+    Schedule,
+    SmartInventoryMembership,
+    TowerScheduleState,
+    UnifiedJob,
+    convert_jsonfields,
+)
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
-from awx.main.tasks.receptor import (administrative_workunit_reaper,
-                                     get_receptor_ctl, worker_cleanup,
-                                     worker_info, write_receptor_config)
-from awx.main.utils.common import (ignore_inventory_computed_fields,
-                                   ignore_inventory_group_removal)
+from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
+from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.main.utils.reload import stop_local_services
 from dispatcherd.publish import task
 
@@ -683,8 +693,8 @@ def _get_active_task_ids_from_dispatcherd():
         return None
 
 
-# Attach the dispatcherd-compatible method to the original
-cluster_node_heartbeat._new_method = adispatch_cluster_node_heartbeat
+# Make this attribute available to the apply_async check in awx/main/dispatch/publish.py
+cluster_node_heartbeat.apply_async._new_method = adispatch_cluster_node_heartbeat.apply_async
 
 
 def _heartbeat_instance_management():
@@ -827,8 +837,7 @@ def awx_k8s_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
 
-    from awx.main.scheduler.kubernetes import \
-        PodManager  # prevent circular import
+    from awx.main.scheduler.kubernetes import PodManager  # prevent circular import
 
     for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
         logger.debug("Checking for orphaned k8s pods for {}.".format(group))

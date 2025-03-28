@@ -97,16 +97,12 @@ class task:
                     from flags.state import flag_enabled
 
                     if flag_enabled('FEATURE_NEW_DISPATCHER'):
-                        # Check if we're dealing with the heartbeat task
-                        if cls.name == 'awx.main.tasks.system.cluster_node_heartbeat':
-                            # Import the function to access its _new_method attribute
-                            from awx.main.tasks.system import cluster_node_heartbeat
-
-                            # Use the special dispatcherd implementation if available
-                            if hasattr(cluster_node_heartbeat, '_new_method'):
-                                return cluster_node_heartbeat._new_method.apply_async(args, kwargs, queue, uuid, **kw)
+                        # Check if this specific apply_async method has a _new_method attribute
+                        if hasattr(apply_async, '_new_method'):
+                            # Use the alternative implementation
+                            return apply_async._new_method(args, kwargs, queue, uuid, **kw)
                 except Exception:
-                    # If anything goes wrong, continue with original implementation
+                    # Continue with original implementation if anything fails
                     pass
 
                 # Original implementation follows
