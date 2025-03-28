@@ -701,15 +701,26 @@ def _get_active_task_ids_from_dispatcherd():
         return None
 
 
-# NOTE: This approach of attaching new dispatcher implementations is a targeted solution
-# for specific functions (currently only cluster_node_heartbeat) and is not a general
-# solution for all tasks. Each task that needs special handling with the new dispatcher
-# must be individually modified in this way.
+## After defining both functions and register code
+logger.info(f"Module initialization with task name: {cluster_node_heartbeat.name}")
+
 try:
-    cluster_node_heartbeat.apply_async._new_method = adispatch_cluster_node_heartbeat.apply_async
-    logger.debug("Successfully attached dispatcherd method to cluster_node_heartbeat.apply_async")
-except Exception:
-    logger.exception("Failed to attach dispatcherd method to cluster_node_heartbeat.apply_async")
+    # Already have this - import registry
+    from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS, _debug_registry
+
+    # Add call to debug function
+    _debug_registry()
+
+    # Register with exact string literal for easier debugging
+    task_name = cluster_node_heartbeat.name
+    logger.info(f"Registering task with name: {task_name!r}")
+    ALTERNATIVE_TASK_IMPLEMENTATIONS[task_name] = adispatch_cluster_node_heartbeat
+    logger.info(f"Successfully registered dispatcherd method for {task_name}")
+
+    # Call debug function again
+    _debug_registry()
+except Exception as e:
+    logger.exception(f"Failed to register dispatcherd method: {str(e)}")
 
 
 def _heartbeat_instance_management():
