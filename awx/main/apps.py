@@ -104,13 +104,17 @@ class MainConfig(AppConfig):
                         "sync_connection_factory": "awx.main.utils.db.psycopg_connection_from_django",
                         "channels": ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()],
                         "default_publish_channel": settings.CLUSTER_HOST_ID,  # used for debugging commands
-                    }
+                    },
+                    "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
                 },
                 "producers": {
                     "ScheduledProducer": {"task_schedule": settings.DISPATCHER_SCHEDULE},
                     "OnStartProducer": {"task_list": {"awx.main.tasks.system.dispatch_startup": {}}},
                 },
-                "publish": {"default_broker": "pg_notify"},
+                "publish": {
+                    "default_control_broker": "socket",
+                    "default_broker": "pg_notify",
+                },
             }
         )
 
