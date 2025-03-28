@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import os
 import tempfile
 import shutil
@@ -15,22 +14,8 @@ from awx.main.models import (
 from django.utils.timezone import now
 from django.db.models.query import QuerySet
 
-from datetime import timedelta
-
 from awx.main.models import (
-    Instance,
-    InventorySource,
     Job,
-    AdHocCommand,
-    ProjectUpdate,
-    InventoryUpdate,
-    SystemJob,
-    JobEvent,
-    ProjectUpdateEvent,
-    InventoryUpdateEvent,
-    AdHocCommandEvent,
-    SystemJobEvent,
-    build_safe_env,
     Organization,
     Project,
 )
