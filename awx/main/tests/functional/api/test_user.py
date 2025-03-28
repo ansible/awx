@@ -56,7 +56,6 @@ def test_user_create(post, admin):
     assert not response.data['is_system_auditor']
 
 
-@pytest.mark.django_db
 # Disable local password checks to ensure that any ValidationError originates from the Django validators.
 @override_settings(
     LOCAL_PASSWORD_MIN_LENGTH=1,
@@ -64,6 +63,7 @@ def test_user_create(post, admin):
     LOCAL_PASSWORD_MIN_UPPER=0,
     LOCAL_PASSWORD_MIN_SPECIAL=0,
 )
+@pytest.mark.django_db
 def test_user_create_with_django_password_validation_basic(post, admin):
     """Test if the Django password validators are applied correctly."""
     with override_settings(
@@ -107,7 +107,71 @@ def test_user_create_with_django_password_validation_basic(post, admin):
         assert response.status_code == 201
 
 
-@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "user_attrs,validators,expected_status_code",
+    [
+        # Test password similarity with username.
+        (
+            {"password": "TestUser1", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+            ],
+            400,
+        ),
+        (
+            {"password": "abc", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+            ],
+            201,
+        ),
+        # Test password min length criterion.
+        (
+            {"password": "TooShort", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 9}},
+            ],
+            400,
+        ),
+        (
+            {"password": "LongEnough", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 9}},
+            ],
+            201,
+        ),
+        # Test password is too common criterion.
+        (
+            {"password": "Password", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+            ],
+            400,
+        ),
+        (
+            {"password": "aEArV$5Vkdw", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+            ],
+            201,
+        ),
+        # Test if password is only numeric.
+        (
+            {"password": "1234567890", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+            ],
+            400,
+        ),
+        (
+            {"password": "abc4567890", "username": "TestUser1", "is_superuser": False},  # NOSONAR
+            [
+                {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+            ],
+            201,
+        ),
+    ],
+)
 # Disable local password checks to ensure that any ValidationError originates from the Django validators.
 @override_settings(
     LOCAL_PASSWORD_MIN_LENGTH=1,
@@ -115,18 +179,18 @@ def test_user_create_with_django_password_validation_basic(post, admin):
     LOCAL_PASSWORD_MIN_UPPER=0,
     LOCAL_PASSWORD_MIN_SPECIAL=0,
 )
-def test_user_create_with_django_password_validation_ext(post, delete, admin):
+@pytest.mark.django_db
+def test_user_create_with_django_password_validation_ext(post, delete, admin, user_attrs, validators, expected_status_code):
     """Test the functionality of the single Django password validators."""
     #
-    default_fixtures = {
-        # Keys in `fixtures` override `default_fixtures` if they exist and their
-        # value is not 'None'.
+    default_parameters = {
+        # Default values for input parameters which are None.
         "user_attrs": {
             "password": "r$TyKiOCb#ED",  # NOSONAR
             "username": "DefaultUser",
             "is_superuser": False,
         },
-        "password_validators": [
+        "validators": [
             {
                 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
             },
@@ -144,116 +208,21 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin):
             },
         ],
     }
-    # The list of fixture dicts which constitute the test cases.
-    fixtures_list = [
-        # Test password similarity with username.
-        {
-            "user_attrs": {
-                "password": "TestUser1",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [
-                {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-            ],
-            "expected_status_code": 400,
-        },
-        {
-            "user_attrs": {
-                "password": "abc",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [
-                {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-            ],
-            "expected_status_code": 201,
-        },
-        # Test password min length criterion.
-        {
-            "user_attrs": {
-                "password": "TooShort",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [
-                {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 9}},
-            ],
-            "expected_status_code": 400,
-        },
-        {
-            "user_attrs": {
-                "password": "LongEnough",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [
-                {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 9}},
-            ],
-            "expected_status_code": 201,
-        },
-        # Test password is too common criterion.
-        {
-            "user_attrs": {
-                "password": "Password",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [
-                {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-            ],
-            "expected_status_code": 400,
-        },
-        {
-            "user_attrs": {
-                "password": "Password",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [],
-            "expected_status_code": 201,
-        },
-        # Test if password is only numeric.
-        {
-            "user_attrs": {
-                "password": "1234567890",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [
-                {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-            ],
-            "expected_status_code": 400,
-        },
-        {
-            "user_attrs": {
-                "password": "1234567890",  # NOSONAR
-                "username": "TestUser1",
-                "is_superuser": False,
-            },
-            "password_validators": [],
-            "expected_status_code": 201,
-        },
-    ]
-    for i, fixtures in enumerate(fixtures_list):
-        user_attrs = fixtures.setdefault("user_attrs", default_fixtures["user_attrs"])
-        password_validators = fixtures.setdefault("password_validators", default_fixtures["password_validators"])
-        expected_status_code = fixtures["expected_status_code"]
-        print(f"Testing fixtures {i}: {expected_status_code=} {user_attrs=}")
-        with override_settings(AUTH_PASSWORD_VALIDATORS=password_validators):
-            response = post(reverse('api:user_list'), user_attrs, admin, middleware=SessionMiddleware(mock.Mock()))
-            assert response.status_code == expected_status_code, (i, fixtures)
-            # Delete user if it was created succesfully.
-            if response.status_code == 201:
-                response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin, middleware=SessionMiddleware(mock.Mock()))
-                assert response.status_code == 204
-            else:
-                # Catch the unexpected behavour that sometimes the user is
-                # written into the database before the validation fails. This
-                # actually can happen if UserSerializer.validate instantiates
-                # User(**attrs)!
-                username = fixtures['user_attrs']['username']
-                assert not User.objects.filter(username=username)
+    user_attrs = user_attrs if user_attrs is not None else default_parameters["user_attrs"]
+    validators = validators if validators is not None else default_parameters["validators"]
+    with override_settings(AUTH_PASSWORD_VALIDATORS=validators):
+        response = post(reverse('api:user_list'), user_attrs, admin, middleware=SessionMiddleware(mock.Mock()))
+        assert response.status_code == expected_status_code
+        # Delete user if it was created succesfully.
+        if response.status_code == 201:
+            response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin, middleware=SessionMiddleware(mock.Mock()))
+            assert response.status_code == 204
+        else:
+            # Catch the unexpected behavior that sometimes the user is written
+            # into the database before the validation fails. This actually can
+            # happen if UserSerializer.validate instantiates User(**attrs)!
+            username = user_attrs['username']
+            assert not User.objects.filter(username=username)
 
 
 @pytest.mark.django_db
