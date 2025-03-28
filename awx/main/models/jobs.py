@@ -865,7 +865,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             host_qs = self.inventory.hosts
 
         host_qs = host_qs.only(*HOST_FACTS_FIELDS)
-        # host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
+        host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
         return host_qs
 
 
