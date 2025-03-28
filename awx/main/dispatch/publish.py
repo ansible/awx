@@ -9,21 +9,10 @@ from django.conf import settings
 
 from . import pg_bus_conn
 
-logger = logging.getLogger('awx.main.dispatch.registry')
+logger = logging.getLogger('awx.main.dispatch')
 
 # Registry of tasks with alternative implementations for the new dispatcher
 ALTERNATIVE_TASK_IMPLEMENTATIONS = {}
-
-
-# Add a debug function to see registry contents
-def _debug_registry():
-    logger.info(f"Registry contents: {list(ALTERNATIVE_TASK_IMPLEMENTATIONS.keys())}")
-    for name, impl in ALTERNATIVE_TASK_IMPLEMENTATIONS.items():
-        logger.info(f"  - {name} -> {impl}")
-
-
-# Call this after importing the module
-_debug_registry()
 
 
 def serialize_task(f):
@@ -108,27 +97,21 @@ class task:
             @classmethod
             def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, **kw):
                 # Entry point debug logging
-                logger.info(f"apply_async called for task: {cls.name}, uuid: {uuid}, registry: {list(ALTERNATIVE_TASK_IMPLEMENTATIONS.keys())}")
-
                 try:
                     from flags.state import flag_enabled
 
-                    # More logging about the flag
-                    flag_status = flag_enabled('FEATURE_NEW_DISPATCHER')
-                    logger.info(f"FEATURE_NEW_DISPATCHER flag is {flag_status} for task {cls.name}")
-
-                    if flag_status:
+                    if flag_enabled('FEATURE_NEW_DISPATCHER'):
                         if cls.name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
                             alt_impl = ALTERNATIVE_TASK_IMPLEMENTATIONS[cls.name]
-                            logger.info(f"✅ Using dispatcherd implementation for task: {cls.name}")
-                            logger.info(f"Alternative implementation is: {alt_impl}")
+                            logger.info(f"Using dispatcherd implementation for task: {cls.name}")
                             return alt_impl.apply_async(args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                         else:
-                            logger.info(f"⚠️ Task {cls.name} is not registered for dispatcherd, using original method")
+                            logger.info(f"⚠Task {cls.name} is not registered for dispatcherd, using original method")
                 except Exception as e:
-                    logger.warning(f"❌ Error in dispatcherd implementation check: {str(e)}", exc_info=True)
+                    logger.warning(f"Failed to check for dispatcherd implementation: {e}")
+                    # Continue with original implementation if anything fails
+                    pass
 
-                logger.info(f"💡 Using original dispatcher implementation for {cls.name}")
                 # Original implementation follows
                 queue = queue or getattr(cls.queue, 'im_func', cls.queue)
                 if not queue:

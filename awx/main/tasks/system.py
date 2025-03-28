@@ -701,26 +701,18 @@ def _get_active_task_ids_from_dispatcherd():
         return None
 
 
-## After defining both functions and register code
-logger.info(f"Module initialization with task name: {cluster_node_heartbeat.name}")
-
+# NOTE: This approach of registering alternative dispatcher implementations is a targeted solution
+# for specific functions (currently only cluster_node_heartbeat) and is not a general
+# solution for all tasks.
 try:
-    # Already have this - import registry
-    from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS, _debug_registry
+    # Import and use the registry from publish module
+    from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS
 
-    # Add call to debug function
-    _debug_registry()
-
-    # Register with exact string literal for easier debugging
-    task_name = cluster_node_heartbeat.name
-    logger.info(f"Registering task with name: {task_name!r}")
-    ALTERNATIVE_TASK_IMPLEMENTATIONS[task_name] = adispatch_cluster_node_heartbeat
-    logger.info(f"Successfully registered dispatcherd method for {task_name}")
-
-    # Call debug function again
-    _debug_registry()
-except Exception as e:
-    logger.exception(f"Failed to register dispatcherd method: {str(e)}")
+    # Register the alternative implementation
+    ALTERNATIVE_TASK_IMPLEMENTATIONS[cluster_node_heartbeat.name] = adispatch_cluster_node_heartbeat
+    logger.info(f"Successfully registered dispatcherd method for {cluster_node_heartbeat.name}")
+except Exception:
+    logger.exception("Failed to register dispatcherd method for cluster_node_heartbeat")
 
 
 def _heartbeat_instance_management():
