@@ -635,6 +635,9 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             for k, v in attrs.items():
                 if k not in exclusions and k != 'canonical_address_port':
                     setattr(obj, k, v)
+            # Call validators which need the model object for validation.
+            self.validate_with_obj(attrs, obj)
+            #
             obj.full_clean(exclude=exclusions)
             # full_clean may modify values on the instance; copy those changes
             # back to attrs so they are saved.
@@ -662,6 +665,23 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                 d[k] = list(map(force_str, v2))
             raise ValidationError(d)
         return attrs
+
+    def validate_with_obj(self, attrs, obj):
+        """
+        Overwrite this if you need the model instance for your validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :raise django.core.exceptionsValidationError: Raise this if your
+            validation fails.
+
+            To make the error shown at the respective form field, instantiate
+            the Exception with a dict containing the field name as key and the
+            error message as value.
+
+            Example: ``ValidationError({"password": "Not good enough!"})``
+        :return: None
+        """
+        return
 
     def reverse(self, *args, **kwargs):
         kwargs['request'] = self.context.get('request')
@@ -1006,15 +1026,15 @@ class UserSerializer(BaseSerializer):
 
         return value
 
-    def validate(self, attrs):
+    def validate_with_obj(self, attrs, obj):
         """
-        Validate the form input against the Django password validators.
+        Validate the password with the Django password validators
 
-        To enable this, configure the Django password validators in
+        To enable the Django password validators, configure
         `settings.AUTH_PASSWORD_VALIDATORS` as described in the [Django
         docs](https://docs.djangoproject.com/en/5.1/topics/auth/passwords/#enabling-password-validation)
 
-        :param attrs: The User form field names and their values as a dict.
+        :param dict attrs: The User form field names and their values as a dict.
             Example::
 
                 {
@@ -1024,34 +1044,31 @@ class UserSerializer(BaseSerializer):
                     'password': 'secret123'
                 }
 
-        :type attrs: dict
-        :raises ValidationError: If at least one Django password validator
-            fails.
-        :return: The unmodified input attrs dict.
-        :rtype: dict
+        :param obj: The User model instance.
+        :raises django.core.exceptions.ValidationError: Raise this if at least
+            one Django password validator fails.
+
+            The exception contains a dict ``{"password": <error-message>``}
+            which indicates that the password field has failed validation, and
+            the reason for failure.
+        :return: None.
         """
         # We must do this here instead of in `validate_password` bacause some
         # django password validators need access to other model instance fields,
-        # e.g. ``username`` for similarity validation.
+        # e.g. ``username`` for the ``UserAttributeSimilarityValidator``.
         password = attrs.get("password")
+        # Skip validation if no password has been entered. This may happen when
+        # an existing User is edited.
         if password and password != '$encrypted$':
-            # Create a User instance and set its attributes according to the
-            # form fields and their values.
-            #
-            # Note that we cannot simply do ``obj = User(**attrs)``, because
-            # then the user instance is written into the database before the
-            # validation is passed! See also
-            # https://www.django-rest-framework.org/community/3.0-announcement/#differences-between-modelserializer-validation-and-modelform
-            exclusions = self.get_validation_exclusions(self.instance)
-            obj = self.instance or self.Meta.model()
-            for k, v in attrs.items():
-                if k not in exclusions and k != 'canonical_address_port':
-                    setattr(obj, k, v)
             # Apply validators from settings.AUTH_PASSWORD_VALIDATORS. This may
             # raise ValidationError.
-            django_validate_password(password, user=obj)
-        #
-        return super().validate(attrs)
+            #
+            # If the validation fails, re-raise the exception with adjusted
+            # content to make the error appear near the password field.
+            try:
+                django_validate_password(password, user=obj)
+            except DjangoValidationError as exc:
+                raise DjangoValidationError({"password": exc.messages})
 
     def _update_password(self, obj, new_password):
         if new_password and new_password != '$encrypted$':
