@@ -634,6 +634,8 @@ def adispatch_cluster_node_heartbeat(binder):
     Dispatcherd implementation.
     Uses Control API to get running tasks.
     """
+    logger.info("Running cluster_node_heartbeat using dispatcherd implementation")
+
     # Run common instance management logic
     this_inst, instance_list, lost_instances = _heartbeat_instance_management()
     if this_inst is None:
@@ -648,10 +650,12 @@ def adispatch_cluster_node_heartbeat(binder):
     # Get running tasks using dispatcherd API
     active_task_ids = _get_active_task_ids_from_dispatcherd()
     if active_task_ids is None:
+        logger.warning("No active task IDs retrieved from dispatcherd, skipping reaper")
         return  # Failed to get task IDs, don't attempt reaping
 
     # Run local reaper using tasks from dispatcherd
     ref_time = datetime.now()  # No dispatch_time in dispatcherd version
+    logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
     # Always reap waiting tasks in the dispatcherd implementation
     reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
@@ -669,11 +673,13 @@ def _get_active_task_ids_from_dispatcherd():
     try:
         from dispatcherd.factories import get_control_from_settings
 
+        logger.debug("Querying dispatcherd API for running tasks")
         ctl = get_control_from_settings()
         running_data = ctl.control_with_reply('running')
 
         # Extract UUIDs from the running data
         if running_data and len(running_data) > 0:
+            logger.debug(f"Received {len(running_data)} response(s) from dispatcherd")
             # Process running data: first item is a dict with node_id and task entries
             data = running_data[0].copy()
             data.pop('node_id', None)
@@ -682,9 +688,11 @@ def _get_active_task_ids_from_dispatcherd():
             for task_key, task_value in data.items():
                 if isinstance(task_value, dict) and 'uuid' in task_value:
                     active_task_ids.append(task_value['uuid'])
+                    logger.debug(f"Found active task with UUID: {task_value['uuid']}")
                 elif isinstance(task_key, str):
                     # Handle case where UUID might be the key
                     active_task_ids.append(task_key)
+                    logger.debug(f"Found active task with key: {task_key}")
 
         logger.debug(f"Retrieved {len(active_task_ids)} active task IDs from dispatcherd")
         return active_task_ids
@@ -693,8 +701,15 @@ def _get_active_task_ids_from_dispatcherd():
         return None
 
 
-# Make this attribute available to the apply_async check in awx/main/dispatch/publish.py
-cluster_node_heartbeat.apply_async._new_method = adispatch_cluster_node_heartbeat.apply_async
+# NOTE: This approach of attaching new dispatcher implementations is a targeted solution
+# for specific functions (currently only cluster_node_heartbeat) and is not a general
+# solution for all tasks. Each task that needs special handling with the new dispatcher
+# must be individually modified in this way.
+try:
+    cluster_node_heartbeat.apply_async._new_method = adispatch_cluster_node_heartbeat.apply_async
+    logger.debug("Successfully attached dispatcherd method to cluster_node_heartbeat.apply_async")
+except Exception:
+    logger.exception("Failed to attach dispatcherd method to cluster_node_heartbeat.apply_async")
 
 
 def _heartbeat_instance_management():

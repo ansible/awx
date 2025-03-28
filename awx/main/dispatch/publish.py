@@ -97,14 +97,19 @@ class task:
                     from flags.state import flag_enabled
 
                     if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                        logger.debug(f"FEATURE_NEW_DISPATCHER is enabled, checking for special implementation of {cls.name}")
                         # Check if this specific apply_async method has a _new_method attribute
-                        if hasattr(apply_async, '_new_method'):
+                        if hasattr(cls.apply_async, '_new_method'):
                             # Use the alternative implementation
-                            return apply_async._new_method(args, kwargs, queue, uuid, **kw)
+                            return cls.apply_async._new_method(args, kwargs, queue, uuid, **kw)
+                        else:
+                            logger.debug(f"No special dispatcherd implementation found for {cls.name}")
                 except Exception:
+                    logger.warning(f"Failed to check for dispatcherd implementation: {e}")
                     # Continue with original implementation if anything fails
                     pass
 
+                logger.debug(f"Using original dispatcher implementation for {cls.name}")
                 # Original implementation follows
                 queue = queue or getattr(cls.queue, 'im_func', cls.queue)
                 if not queue:
