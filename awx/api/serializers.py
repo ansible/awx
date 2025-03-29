@@ -626,18 +626,41 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         return exclusions
 
     def validate(self, attrs):
+        """
+        Apply serializer validation. Called by DRF.
+
+        Can be extended by subclasses. Or consider overwriting
+        `validate_with_obj` in subclasses, which provides access to the model
+        object and exception handling for field validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :raise rest_framework.exceptions.ValidationError: If the validation
+            fails.
+
+            The exception must contain a dict with the names of the form fields
+            which failed validation as keys, and a list of error messages as
+            values. This ensures that the error messages are rendered near the
+            relevant fields.
+        :return: The names and values from the model form fields, possibly
+            modified by the validations.
+        :rtype: dict
+        """
         attrs = super(BaseSerializer, self).validate(attrs)
+        # Create/update a model instance and run its full_clean() method to
+        # do any validation implemented on the model class.
+        exclusions = self.get_validation_exclusions(self.instance)
+        # Create a new model instance or take the existing one if it exists,
+        # and update its attributes with the respective field values from
+        # attrs.
+        obj = self.instance or self.Meta.model()
+        for k, v in attrs.items():
+            if k not in exclusions and k != 'canonical_address_port':
+                setattr(obj, k, v)
         try:
-            # Create/update a model instance and run its full_clean() method to
-            # do any validation implemented on the model class.
-            exclusions = self.get_validation_exclusions(self.instance)
-            obj = self.instance or self.Meta.model()
-            for k, v in attrs.items():
-                if k not in exclusions and k != 'canonical_address_port':
-                    setattr(obj, k, v)
-            # Call validators which need the model object for validation.
+            # Run serializer validators which need the model object for
+            # validation.
             self.validate_with_obj(attrs, obj)
-            #
+            # Apply any validations implemented on the model class.
             obj.full_clean(exclude=exclusions)
             # full_clean may modify values on the instance; copy those changes
             # back to attrs so they are saved.
@@ -671,14 +694,23 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         Overwrite this if you need the model instance for your validation.
 
         :param dict attrs: The names and values of the model form fields.
+        :param obj: An instance of the class's meta model.
+
+            If the serializer runs on a newly created object, obj contains only
+            the attrs from its serializer. If the serializer runs because an
+            object has been edited, obj is the existing model instance with all
+            attributes and values available.
         :raise django.core.exceptionsValidationError: Raise this if your
             validation fails.
 
-            To make the error shown at the respective form field, instantiate
+            To make the error appear at the respective form field, instantiate
             the Exception with a dict containing the field name as key and the
             error message as value.
 
             Example: ``ValidationError({"password": "Not good enough!"})``
+
+            If the exception contains just a string, the message cannot be
+            related to a field and is rendered at the top of the model form.
         :return: None
         """
         return
