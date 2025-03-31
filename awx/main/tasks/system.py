@@ -1,78 +1,77 @@
 # Python
-from collections import namedtuple
 import functools
 import importlib
 import itertools
 import json
 import logging
 import os
-import psycopg
-from io import StringIO
-from contextlib import redirect_stdout
 import shutil
 import time
-from distutils.version import LooseVersion as Version
+from collections import namedtuple
+from contextlib import redirect_stdout
 from datetime import datetime
+from distutils.version import LooseVersion as Version
+from io import StringIO
 
-# Django
-from django.conf import settings
-from django.db import connection, transaction, DatabaseError, IntegrityError
-from django.db.models.fields.related import ForeignKey
-from django.utils.timezone import now, timedelta
-from django.utils.encoding import smart_str
-from django.contrib.auth.models import User
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import gettext_noop
-from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.query import QuerySet
+# Runner
+import ansible_runner.cleanup
+import psycopg
+from ansible_base.lib.utils.db import advisory_lock
+
+# django-ansible-base
+from ansible_base.resource_registry.tasks.sync import SyncExecutor
 
 # Django-CRUM
 from crum import impersonate
 
-# Django flags
-from flags.state import flag_enabled
-
-# Runner
-import ansible_runner.cleanup
-
 # dateutil
 from dateutil.parser import parse as parse_date
 
-# django-ansible-base
-from ansible_base.resource_registry.tasks.sync import SyncExecutor
-from ansible_base.lib.utils.db import advisory_lock
+# Django
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError, connection, transaction
+from django.db.models.fields.related import ForeignKey
+from django.db.models.query import QuerySet
+from django.utils.encoding import smart_str
+from django.utils.timezone import now, timedelta
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_noop
+
+# Django flags
+from flags.state import flag_enabled
+from rest_framework.exceptions import PermissionDenied
 
 # AWX
 from awx import __version__ as awx_application_version
+from awx.conf import settings_registry
+from awx.main import analytics
 from awx.main.access import access_registry
+from awx.main.analytics.subsystem_metrics import DispatcherMetrics
+from awx.main.constants import ACTIVE_STATES, ERROR_STATES
+from awx.main.consumers import emit_channel_notification
+from awx.main.dispatch import get_task_queuename, reaper
+from awx.main.dispatch.publish import task as task_awx
 from awx.main.models import (
-    Schedule,
-    TowerScheduleState,
     Instance,
     InstanceGroup,
-    UnifiedJob,
-    Notification,
     Inventory,
-    SmartInventoryMembership,
     Job,
+    Notification,
+    Schedule,
+    SmartInventoryMembership,
+    TowerScheduleState,
+    UnifiedJob,
     convert_jsonfields,
 )
-from awx.main.constants import ACTIVE_STATES, ERROR_STATES
-from dispatcherd.publish import task
-from awx.main.dispatch import get_task_queuename, reaper
-from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
-
-from awx.main.utils.reload import stop_local_services
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
-from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
-from awx.main.consumers import emit_channel_notification
-from awx.main import analytics
-from awx.conf import settings_registry
-from awx.main.analytics.subsystem_metrics import DispatcherMetrics
-
-from rest_framework.exceptions import PermissionDenied
+from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
+from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.reload import stop_local_services
+from dispatcherd.publish import task
 
 logger = logging.getLogger('awx.main.tasks.system')
 
@@ -597,11 +596,127 @@ def inspect_execution_and_hop_nodes(instance_list):
                     execution_node_health_check.apply_async([hostname])
 
 
-# @task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
-# TODO: replacement for bind_kwargs, https://github.com/ansible/dispatcher/issues/71
-@task(queue=get_task_queuename)
-# def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
+@task_awx(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
 def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
+    """
+    Original implementation for AWX dispatcher.
+    Uses worker_tasks from bind_kwargs to track running tasks.
+    """
+    # Run common instance management logic
+    this_inst, instance_list, lost_instances = _heartbeat_instance_management()
+    if this_inst is None:
+        return  # Early return case from instance management
+
+    # Check versions
+    _heartbeat_check_versions(this_inst, instance_list)
+
+    # Handle lost instances
+    _heartbeat_handle_lost_instances(lost_instances, this_inst)
+
+    # Run local reaper - original implementation using worker_tasks
+    if worker_tasks is not None:
+        active_task_ids = []
+        for task_list in worker_tasks.values():
+            active_task_ids.extend(task_list)
+
+        # Convert dispatch_time to datetime
+        ref_time = datetime.fromisoformat(dispatch_time) if dispatch_time else datetime.now()
+
+        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+
+        if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
+            reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+
+
+@task(queue=get_task_queuename, bind=True)
+def adispatch_cluster_node_heartbeat(binder):
+    """
+    Dispatcherd implementation.
+    Uses Control API to get running tasks.
+    """
+    logger.info("Running cluster_node_heartbeat using dispatcherd implementation")
+
+    # Run common instance management logic
+    this_inst, instance_list, lost_instances = _heartbeat_instance_management()
+    if this_inst is None:
+        return  # Early return case from instance management
+
+    # Check versions
+    _heartbeat_check_versions(this_inst, instance_list)
+
+    # Handle lost instances
+    _heartbeat_handle_lost_instances(lost_instances, this_inst)
+
+    # Get running tasks using dispatcherd API
+    active_task_ids = _get_active_task_ids_from_dispatcherd()
+    if active_task_ids is None:
+        logger.warning("No active task IDs retrieved from dispatcherd, skipping reaper")
+        return  # Failed to get task IDs, don't attempt reaping
+
+    # Run local reaper using tasks from dispatcherd
+    ref_time = datetime.now()  # No dispatch_time in dispatcherd version
+    logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
+    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    # Always reap waiting tasks in the dispatcherd implementation
+    reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+
+
+def _get_active_task_ids_from_dispatcherd():
+    """
+    Retrieve active task IDs from the dispatcherd control API.
+
+    Returns:
+        list: List of active task UUIDs
+        None: If there was an error retrieving the data
+    """
+    active_task_ids = []
+    try:
+        from dispatcherd.factories import get_control_from_settings
+
+        logger.debug("Querying dispatcherd API for running tasks")
+        ctl = get_control_from_settings()
+        running_data = ctl.control_with_reply('running')
+
+        # Extract UUIDs from the running data
+        if running_data and len(running_data) > 0:
+            logger.debug(f"Received {len(running_data)} response(s) from dispatcherd")
+            # Process running data: first item is a dict with node_id and task entries
+            data = running_data[0].copy()
+            data.pop('node_id', None)
+
+            # Extract task UUIDs from data structure
+            for task_key, task_value in data.items():
+                if isinstance(task_value, dict) and 'uuid' in task_value:
+                    active_task_ids.append(task_value['uuid'])
+                    logger.debug(f"Found active task with UUID: {task_value['uuid']}")
+                elif isinstance(task_key, str):
+                    # Handle case where UUID might be the key
+                    active_task_ids.append(task_key)
+                    logger.debug(f"Found active task with key: {task_key}")
+
+        logger.debug(f"Retrieved {len(active_task_ids)} active task IDs from dispatcherd")
+        return active_task_ids
+    except Exception:
+        logger.exception("Failed to get running tasks from dispatcherd")
+        return None
+
+
+# NOTE: This approach of registering alternative dispatcher implementations is a targeted solution
+# for specific functions (currently only cluster_node_heartbeat) and is not a general
+# solution for all tasks.
+try:
+    # Import and use the registry from publish module
+    from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS
+
+    # Register the alternative implementation
+    ALTERNATIVE_TASK_IMPLEMENTATIONS[cluster_node_heartbeat.name] = adispatch_cluster_node_heartbeat
+    logger.info(f"Successfully registered dispatcherd method for {cluster_node_heartbeat.name}")
+except Exception:
+    logger.exception("Failed to register dispatcherd method for cluster_node_heartbeat")
+
+
+def _heartbeat_instance_management():
+    """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
     instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
@@ -628,7 +743,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
         this_inst.local_health_check()
         if startup_event and this_inst.capacity != 0:
             logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
-            return
+            return None, None, None  # Early return case
         elif not last_last_seen:
             logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
         elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
@@ -641,7 +756,12 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             this_inst.local_health_check()
         else:
             raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
-    # IFF any node has a greater version than we do, then we'll shutdown services
+
+    return this_inst, instance_list, lost_instances
+
+
+def _heartbeat_check_versions(this_inst, instance_list):
+    """Check versions across instances and determine if shutdown is needed."""
     for other_inst in instance_list:
         if other_inst.node_type in ('execution', 'hop'):
             continue
@@ -658,6 +778,9 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             stop_local_services(communicate=False)
             raise RuntimeError("Shutting down.")
 
+
+def _heartbeat_handle_lost_instances(lost_instances, this_inst):
+    """Handle lost instances by reaping their jobs and marking them offline."""
     for other_inst in lost_instances:
         try:
             explanation = "Job reaped due to instance shutdown"
@@ -687,20 +810,6 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
                     logger.exception("Error marking {} as lost.".format(other_inst.hostname))
             else:
                 logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
-
-    # # general sketch with new dispatcher
-    # if flag_enabled('FEATURE_NEW_DISPATCHER'):
-    #     running_data = bind.control('running')
-    #     active_task_ids = [message['uuid'] for message in running_data.values()]
-
-    # # Run local reaper
-    # if worker_tasks is not None:
-    #     active_task_ids = []
-    #     for task_list in worker_tasks.values():
-    #         active_task_ids.extend(task_list)
-    #     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
-    #     if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
-    #         reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
 
 
 @task(queue=get_task_queuename)
