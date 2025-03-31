@@ -456,7 +456,7 @@ CELERYBEAT_SCHEDULE = {
 DISPATCHER_SCHEDULE = {}
 for options in CELERYBEAT_SCHEDULE.values():
     task_name = options['task']
-    DISPATCHER_SCHEDULE[task_name] = options
+    DISPATCHER_SCHEDULE[task_name] = options.copy()
     DISPATCHER_SCHEDULE[task_name]['schedule'] = options['schedule'].total_seconds()
 
 # Django Caching Configuration
@@ -1004,7 +1004,7 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 # projects can take advantage.
 
 METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
-METRICS_SERVICE_DISPATCHER = 'dispatcher'
+METRICS_SERVICE_DISPATCHER = 'dispatcherd'
 METRICS_SERVICE_WEBSOCKETS = 'websockets'
 
 METRICS_SUBSYSTEM_CONFIG = {
