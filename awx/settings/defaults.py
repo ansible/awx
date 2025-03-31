@@ -456,7 +456,7 @@ CELERYBEAT_SCHEDULE = {
 DISPATCHER_SCHEDULE = {}
 for options in CELERYBEAT_SCHEDULE.values():
     task_name = options['task']
-    DISPATCHER_SCHEDULE[task_name] = options
+    DISPATCHER_SCHEDULE[task_name] = options.copy()
     DISPATCHER_SCHEDULE[task_name]['schedule'] = options['schedule'].total_seconds()
 
 # Django Caching Configuration
