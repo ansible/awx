@@ -1110,12 +1110,11 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
-                job.get_hosts_for_fact_cache(),
+                self.hosts_with_facts_cached,
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
                 facts_write_time=self.facts_write_time,
                 job_id=job.id,
                 inventory_id=job.inventory_id,
-                hosts_cached=self.hosts_with_facts_cached,
             )
 
     def final_run_hook(self, job, status, private_data_dir):

@@ -106,7 +106,7 @@ def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_fact
     job.job_env.get = mock.MagicMock(return_value=private_data_dir)
 
     # creates the task object with job object as instance
-    mock_facts_settings.ANSIBLE_FACT_CACHE_TIMEOUT = False  # defines timeout to false
+    mock_facts_settings.ANSIBLE_FACT_CACHE_TIMEOUT = False
     task = jobs.RunJob()
     task.instance = job
     task.update_model = mock.Mock(return_value=job)
@@ -115,19 +115,48 @@ def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_fact
     # run pre_run_hook
     task.facts_write_time = task.pre_run_hook(job, private_data_dir)
 
-    # updates inventory with one more host
     hosts.pop(1)
     assert mock_inventory.hosts.count() == 998
 
     # run post_run_hook
     task.runner_callback.artifacts_processed = mock.MagicMock(return_value=True)
-
     task.post_run_hook(job, "success")
+
+    for host in hosts:
+        assert host.ansible_facts == {"a": 1, "b": 2}
+
     failures = []
-    for host in mock_inventory.hosts:
+    for host in hosts:
         try:
-            assert host.ansible_facts == {"a": 1, "b": 2}
+            assert host.ansible_facts == {"a": 1, "b": 2, "unexpected_key": "bad"}
         except AssertionError:
             failures.append("Host named {} has facts {}".format(host.name, host.ansible_facts))
-    if failures:
-        pytest.fail(f" {len(failures)} facts cleared failures : {','.join(failures)}")
+
+    assert len(failures) > 0, f"Failures occurred for the following hosts: {failures}"
+
+
+@mock.patch('awx.main.tasks.facts.update_hosts')
+@mock.patch('awx.main.tasks.facts.settings')
+def test_invalid_host_facts(mock_facts_settings, update_hosts, private_data_dir, execution_environment):
+    inventory = Inventory(pk=1)
+    mock_inventory = mock.MagicMock(spec=Inventory, wraps=inventory)
+    mock_inventory._state = mock.MagicMock()
+
+    hosts = [
+        Host(id=0, name='host0', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=mock_inventory),
+        Host(id=1, name='host1', ansible_facts={"a": 1, "b": 2, "unexpected_key": "bad"}, ansible_facts_modified=now(), inventory=mock_inventory),
+    ]
+    mock_inventory.hosts = hosts
+
+    failures = []
+    for host in mock_inventory.hosts:
+        assert "a" in host.ansible_facts
+        if "unexpected_key" in host.ansible_facts:
+            failures.append(host.name)
+
+    mock_facts_settings.SOME_SETTING = True
+    update_hosts(mock_inventory.hosts)
+
+    with pytest.raises(pytest.fail.Exception):
+        if failures:
+            pytest.fail(f" {len(failures)} facts cleared failures : {','.join(failures)}")
