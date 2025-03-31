@@ -11,6 +11,9 @@ from . import pg_bus_conn
 
 logger = logging.getLogger('awx.main.dispatch')
 
+# Registry of tasks with alternative implementations for the new dispatcher
+ALTERNATIVE_TASK_IMPLEMENTATIONS = {}
+
 
 def serialize_task(f):
     return '.'.join([f.__module__, f.__name__])
@@ -93,6 +96,23 @@ class task:
 
             @classmethod
             def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, **kw):
+                # Entry point debug logging
+                try:
+                    from flags.state import flag_enabled
+
+                    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                        if cls.name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
+                            alt_impl = ALTERNATIVE_TASK_IMPLEMENTATIONS[cls.name]
+                            logger.info(f"Using dispatcherd implementation for task: {cls.name}")
+                            return alt_impl.apply_async(args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
+                        else:
+                            logger.info(f"⚠Task {cls.name} is not registered for dispatcherd, using original method")
+                except Exception as e:
+                    logger.warning(f"Failed to check for dispatcherd implementation: {e}")
+                    # Continue with original implementation if anything fails
+                    pass
+
+                # Original implementation follows
                 queue = queue or getattr(cls.queue, 'im_func', cls.queue)
                 if not queue:
                     msg = f'{cls.name}: Queue value required and may not be None'
