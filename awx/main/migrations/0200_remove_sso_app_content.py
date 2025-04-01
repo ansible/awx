@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0198_delete_profile'),
+        ('main', '0199_delete_profile'),
     ]
 
     operations = [
