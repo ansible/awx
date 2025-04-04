@@ -3,6 +3,8 @@ from typing import TypeAlias
 
 
 var_value: TypeAlias = str | int
+update_queue: TypeAlias = list[tuple[int, var_value]]
+
 
 # logger = logging.getLogger('awx.main.commands.inventory_import')
 logger = logging.getLogger('awx.api.inventory_import')  # DJDEBUG logger above doesn't show up in docker-compose awx...
@@ -22,7 +24,7 @@ class InventoryVariable:
         :return: None
         """
         self.name = name
-        self._update_queue: list[tuple[int, var_value]] = []
+        self._update_queue: update_queue = []
         """
         A queue representing updates from inventory sources in the sequence of
         occurrence.
@@ -32,6 +34,15 @@ class InventoryVariable:
         considered the top of the queue, and holds the current value of the
         variable.
         """
+
+    def load(self, queue: update_queue) -> "InventoryVariable":
+        """Load internal state from a dict."""
+        self._update_queue = queue.copy()
+        return self
+
+    def dump(self) -> update_queue:
+        """Save internal state to a dict."""
+        return self._update_queue.copy()
 
     def update(self, value: var_value | None, invsrc_id: int) -> None:
         """
@@ -98,9 +109,7 @@ class InventoryVariable:
 
     @property
     def has_no_source(self) -> bool:
-        """
-        True, if the variable is orphan, i.e. no source contains this var anymore.
-        """
+        """True, if the variable is orphan, i.e. no source contains this var anymore."""
         return not self._update_queue
 
     def __str__(self):
@@ -116,7 +125,7 @@ class InventoryGroupVariables(dict):
     value under consideration of the inventory source update history.
     """
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str = "") -> None:
         """
         :param str name: The name of the group, 'all' for the all-group.
         :return: None
@@ -129,6 +138,31 @@ class InventoryGroupVariables(dict):
         # latest update which defined this variable.
         self._vars: dict[str, InventoryVariable] = {}
 
+    def _sync_vars(self) -> None:
+        """
+        Copy the current values of all variables into the internal dict.
+
+        Call this everytime the `_vars` structure has been modified.
+        """
+        for name, inv_var in self._vars.items():
+            self[name] = inv_var.value
+
+    def load(self, as_dict: dict) -> None:
+        """Load internal state from a dict."""
+        self.name = as_dict["name"]
+        for name, queue in as_dict["vars"].items():
+            self._vars[name] = InventoryVariable(name).load(queue)
+        self._sync_vars()
+
+    def dump(self) -> dict:
+        """Save internal state to a dict."""
+        as_dict = {}
+        as_dict["name"] = self.name
+        as_dict["vars"] = {}
+        for name, inv_var in self._vars.items():
+            as_dict["vars"][name] = inv_var.dump()
+        return as_dict
+
     def update_from_src(self, vars: dict[str, var_value], source_id: int) -> None:
         """
         Update with variables from an inventory source.
@@ -140,6 +174,10 @@ class InventoryGroupVariables(dict):
         :return: None
         """
         logger.error(f"InventoryGroupVariables({self.name}).update_from_src({vars=}, {source_id=}): {self=}")
+        # Create variables which are newly introduced by this source.
+        for name in vars:
+            if name not in self._vars:
+                self._vars[name] = InventoryVariable(name)
         # Combine the names of the existing vars and the new vars from this update.
         all_var_names = list(set(list(self.keys()) + list(vars.keys())))
         # Go through all variables (the existing ones, and the ones added by
@@ -147,19 +185,15 @@ class InventoryGroupVariables(dict):
         # update, and update the value of variables which are part of this
         # update.
         for name in all_var_names:
-            if name not in self._vars:
-                self._vars[name] = InventoryVariable(name)
-            self._vars[name].update(vars.get(name), source_id)  # Update or delete (if name not in vars)
-            # if name in vars:
-            #     self._vars[name].update(vars.get(name), source_id)
-            # else:
-            #     self._vars[name].delete(source_id)
+            # Update or delete source from var (if name not in vars).
+            self._vars[name].update(vars.get(name), source_id)
             # Delete vars which have no source anymore.
             if self._vars[name].has_no_source:
                 del self._vars[name]
                 del self[name]
-        for name, inv_var in self._vars.items():
-            self[name] = inv_var.value
+        # After the update, refresh the internal dict with the possibly changed
+        # current values.
+        self._sync_vars()
         logger.error(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
 
 
