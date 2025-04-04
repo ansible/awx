@@ -456,46 +456,23 @@ class Command(BaseCommand):
             )
 
     def _update_vars(self, group: str, newvars: dict, dbvars: dict, invsrc_id: int) -> dict:
-        data = []
-        filepath = f"/awx_devel/tmp/vars_{group}"
-        if not os.path.isfile(filepath):
-            with open(filepath, "w") as fp:
-                json.dump([{"invsrc_id": 0, "vars": dbvars}], fp)
-
-        with open(filepath, "r") as fp:
-            data = json.load(fp)
-            # djlogger.error(f"{data=}")
-            """
-            [
-                {
-                    "invsrc_id": <invsrc_id>,
-                    "vars": {name1: value1, name2: value2},
-                },
-                {
-                    "invsrc_id": <invsrc_id>,
-                    "vars": {name1: value1, name2: value2},
-                },
-            ]
-            """
-        data.append({"invsrc_id": invsrc_id, "vars": newvars})
-        djlogger.error(f"{data=}")
-        with open(filepath, "w") as fp:
-            json.dump(data, fp)
-
+        """"""
         inv_group_vars = InventoryGroupVariables(group)
-        for update_entry in data:
-            # source_id = update_entry["invsrc_id"]
-            inv_group_vars.update_from_src(update_entry["vars"], update_entry["invsrc_id"])
-            # varnames = set(list(update_entry["vars"].keys()) + list(inv_group_vars.vars.keys()))
-            # for name in varnames:
-            #     value = update_entry["vars"].get(name)
-            #     inv_group_vars.update_from_src(name, value, id)
-        # djlogger.error(", ".join([f"{name}" for name in inv_group_vars.keys()]))
-        djlogger.error(f"{inv_group_vars=}")
-        outvars = {}
-        for varname in inv_group_vars.keys():
-            outvars[varname] = inv_group_vars[varname]
-        return outvars
+        #
+        filepath = f"/awx_devel/tmp/vars_{group}"
+        #
+        if not os.path.isfile(filepath):
+            inv_group_vars.update_from_src(dbvars, 0)  # Assume 0 as inv_source_id for existing vars.
+        else:
+            with open(filepath, "r") as fp:
+                inv_group_vars.load(json.load(fp))
+        #
+        inv_group_vars.update_from_src(newvars, invsrc_id)
+        #
+        with open(filepath, "w") as fp:
+            json.dump(inv_group_vars.dump(), fp)
+        #
+        return inv_group_vars
 
     def _update_inventory(self):
         """
@@ -521,13 +498,7 @@ class Command(BaseCommand):
                 self.inventory.variables_dict,
                 self.inventory_source.id,
             )
-
-            # if self.overwrite_vars:
-            #     db_variables = self.all_group.variables
-            # else:
-            #     db_variables = self.inventory.variables_dict
-            #     db_variables.update(self.all_group.variables)
-
+        #
         if db_variables != self.inventory.variables_dict:
             self.inventory.variables = json.dumps(db_variables)
             self.inventory.save(update_fields=['variables'])
