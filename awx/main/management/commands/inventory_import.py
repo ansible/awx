@@ -33,11 +33,12 @@ from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
 from awx.main.utils.execution_environments import get_default_execution_environment
+from awx.main.utils.inventory_vars import InventoryGroupVariables
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
-# logger = logging.getLogger('awx.main.commands.inventory_import')
-logger = logging.getLogger('awx.api.inventory_import')  # DJDEBUG logger above doesn't show up in docker-compose awx...
+logger = logging.getLogger('awx.main.commands.inventory_import')
+djlogger = logging.getLogger('awx.api.inventory_import')  # DJDEBUG logger above doesn't show up in docker-compose awx...
 
 LICENSE_EXPIRED_MESSAGE = '''\
 Subscription expired.
@@ -454,6 +455,48 @@ class Command(BaseCommand):
                 group_group_count + group_host_count,
             )
 
+    def _update_vars(self, group: str, newvars: dict, dbvars: dict, invsrc_id: int) -> dict:
+        data = []
+        filepath = f"/awx_devel/tmp/vars_{group}"
+        if not os.path.isfile(filepath):
+            with open(filepath, "w") as fp:
+                json.dump([{"invsrc_id": 0, "vars": dbvars}], fp)
+
+        with open(filepath, "r") as fp:
+            data = json.load(fp)
+            # djlogger.error(f"{data=}")
+            """
+            [
+                {
+                    "invsrc_id": <invsrc_id>,
+                    "vars": {name1: value1, name2: value2},
+                },
+                {
+                    "invsrc_id": <invsrc_id>,
+                    "vars": {name1: value1, name2: value2},
+                },
+            ]
+            """
+        data.append({"invsrc_id": invsrc_id, "vars": newvars})
+        djlogger.error(f"{data=}")
+        with open(filepath, "w") as fp:
+            json.dump(data, fp)
+
+        inv_group_vars = InventoryGroupVariables(group)
+        for update_entry in data:
+            # source_id = update_entry["invsrc_id"]
+            inv_group_vars.update_from_src(update_entry["vars"], update_entry["invsrc_id"])
+            # varnames = set(list(update_entry["vars"].keys()) + list(inv_group_vars.vars.keys()))
+            # for name in varnames:
+            #     value = update_entry["vars"].get(name)
+            #     inv_group_vars.update_from_src(name, value, id)
+        # djlogger.error(", ".join([f"{name}" for name in inv_group_vars.keys()]))
+        djlogger.error(f"{inv_group_vars=}")
+        outvars = {}
+        for varname in inv_group_vars.keys():
+            outvars[varname] = inv_group_vars[varname]
+        return outvars
+
     def _update_inventory(self):
         """
         Update inventory variables from "all" group.
@@ -463,18 +506,28 @@ class Command(BaseCommand):
         # update variables mixing with each other.
         # issue for this: https://github.com/ansible/awx/issues/11623
 
+        # djlogger.error(f"_update_inventory(self={vars(self)}) >>>>")
+        djlogger.error(f"_update_inventory(inv={self.inventory.id}, invsrc={self.inventory_source.id}) >>>>")
         if self.inventory.kind == 'constructed' and self.inventory_source.overwrite_vars:
             # NOTE: we had to add a exception case to not merge variables
             # to make constructed inventory coherent
             db_variables = self.all_group.variables
         else:
-            logger.error(f"_update_inventory(): {self.inventory.variables_dict=}")
-            logger.error(f"_update_inventory(): {self.all_group.variables=}")
-            if self.overwrite_vars:
-                db_variables = self.all_group.variables
-            else:
-                db_variables = self.inventory.variables_dict
-                db_variables.update(self.all_group.variables)
+            djlogger.error(f"_update_inventory(): {self.inventory.variables_dict=}")
+            djlogger.error(f"_update_inventory(): {self.all_group.variables=}")
+            db_variables = self._update_vars(
+                "all",
+                self.all_group.variables,
+                self.inventory.variables_dict,
+                self.inventory_source.id,
+            )
+
+            # if self.overwrite_vars:
+            #     db_variables = self.all_group.variables
+            # else:
+            #     db_variables = self.inventory.variables_dict
+            #     db_variables.update(self.all_group.variables)
+
         if db_variables != self.inventory.variables_dict:
             self.inventory.variables = json.dumps(db_variables)
             self.inventory.save(update_fields=['variables'])
@@ -858,6 +911,7 @@ class Command(BaseCommand):
         # Load inventory and related objects from database.
         inventory_name = options.get('inventory_name', None)
         inventory_id = options.get('inventory_id', None)
+        djlogger.error(f"handle(): {inventory_id=} {inventory_name=}")
         if inventory_name and inventory_id:
             raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
         elif not inventory_name and not inventory_id:
@@ -897,6 +951,7 @@ class Command(BaseCommand):
                     overwrite_vars=bool(options.get('overwrite_vars', False)),
                     execution_environment=ee,
                 )
+                djlogger.error(f"handle(): inventory_source={vars(inventory_source)}")
                 inventory_update = inventory_source.create_inventory_update(
                     _eager_fields=dict(
                         status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd(), execution_environment=ee
@@ -950,6 +1005,7 @@ class Command(BaseCommand):
         self.inventory = inventory_update.inventory
         self.inventory_source = inventory_update.inventory_source
         self.inventory_update = inventory_update
+        djlogger.error(f"perform_update(): inventory={self.inventory.id} i_source={self.inventory_source.id} i_update={inventory_update.id}")
 
         # the update options, could be parser object or dict
         self.overwrite = bool(options.get('overwrite', False))
@@ -997,6 +1053,8 @@ class Command(BaseCommand):
             with ignore_inventory_computed_fields():
                 # TODO: move this to before perform_update
                 iu = self.inventory_update
+                # djlogger.error(f"self.inventory_update={vars(iu)}")  # DJDEBUG
+                djlogger.error(f"perform_update(): {iu.name=} {iu.inventory_id=} {iu.inventory_source_id=} {iu.source_vars=}")  # DJDEBUG
                 if iu.status != 'running':
                     with transaction.atomic():
                         self.inventory_update.status = 'running'
