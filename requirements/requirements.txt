@@ -122,7 +122,7 @@ deprecated==1.2.15
     #   pygithub
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.16
+django==4.2.20
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -167,7 +167,9 @@ djangorestframework-yaml==2.0.0
 durationpy==0.9
     # via kubernetes
 dynaconf==3.2.10
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 enum-compat==0.0.3
     # via asn1
 filelock==3.16.1
