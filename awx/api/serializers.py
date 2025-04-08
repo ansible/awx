@@ -1600,7 +1600,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         return host_filter
 
     def validate(self, attrs):
-        logger.error(f"InventorySerializer.validate({attrs=})")
+        logger.info(f"InventorySerializer.validate({attrs=})")
         kind = None
         if 'kind' in attrs:
             kind = attrs['kind']
@@ -1620,7 +1620,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         # The variables field contains vars from the all-group. Since this is
         # not an update from an inventory source, we update the variables when
         # the inventory object is saved.
-        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
+        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)  # TODO: silent_failure or not?
         update_group_variables("all", vars, None, 0)
         #
         return attrs
@@ -1914,12 +1914,19 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
-        logger.error(f"GroupSerializer.validate({attrs=})")
+        logger.info(f"GroupSerializer.validate({attrs=})")
         name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Host with that name already exists.'))
-        return super(GroupSerializer, self).validate(attrs)
+        attrs = super(GroupSerializer, self).validate(attrs)
+        # The variables field contains vars from the inventory group dialog.
+        # Since this is not an update from an inventory source, we update the
+        # variables when the inventory group object is saved.
+        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)  # TODO: silent_failure or not?
+        update_group_variables(name, vars, None, 0)
+        #
+        return attrs
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
