@@ -120,6 +120,7 @@ from awx.main.utils import (
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
+from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.signals import update_inventory_computed_fields
@@ -1623,6 +1624,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
         return host_filter
 
     def validate(self, attrs):
+        logger.error(f"InventorySerializer.validate({attrs=})")
         kind = None
         if 'kind' in attrs:
             kind = attrs['kind']
@@ -1637,7 +1639,15 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
 
         if kind == 'smart' and not host_filter:
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
-        return super(InventorySerializer, self).validate(attrs)
+        #
+        attrs = super(InventorySerializer, self).validate(attrs)
+        # The variables field contains vars from the all-group. Since this is
+        # not an update from an inventory source, we update the variables when
+        # the inventory object is saved.
+        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
+        update_group_variables("all", vars, None, 0)
+        #
+        return attrs
 
 
 class ConstructedFieldMixin(serializers.Field):
@@ -1928,6 +1938,7 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
+        logger.error(f"GroupSerializer.validate({attrs=})")
         name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():

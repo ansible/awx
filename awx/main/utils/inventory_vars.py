@@ -1,4 +1,6 @@
 import logging
+import os
+import json
 from typing import TypeAlias
 
 
@@ -16,6 +18,10 @@ class InventoryVariable:
 
     This class keeps track of the variable updates from different inventory
     sources.
+
+    An inventory variable cannot hold the value `None`. To indicate that the
+    variable holds no value, the empty string has to be used. See also the
+    documentation of method `update`.
     """
 
     def __init__(self, name: str) -> None:
@@ -35,14 +41,14 @@ class InventoryVariable:
         variable.
         """
 
-    def load(self, queue: update_queue) -> "InventoryVariable":
+    def load(self, updates: update_queue) -> "InventoryVariable":
         """Load internal state from a dict."""
-        self._update_queue = queue.copy()
+        self._update_queue = updates
         return self
 
     def dump(self) -> update_queue:
         """Save internal state to a dict."""
-        return self._update_queue.copy()
+        return self._update_queue
 
     def update(self, value: var_value | None, invsrc_id: int) -> None:
         """
@@ -54,7 +60,7 @@ class InventoryVariable:
 
         In other words:
 
-        If `value` is `None`, delete this update from the list of sources. The
+        If `value` is `None`, delete this update from the update queue. The
         current value is not changed.
 
         If `value` is not `None`, this source is moved to the top of the queue
@@ -63,7 +69,12 @@ class InventoryVariable:
         :param value: The new value of the variable. If None, no value is set
             and the source is removed from this variable.
 
-            .. Note:: Do we need to store variables with value None?
+            .. Note::
+
+                If `source_id` is 0 (indicating that the variable is set from an
+                inventory-level edit), the update queue is deleted completely.
+                Find the rational for this design in the description of
+                `InventoryGroupVariables.update_from_src`.
 
         :param int invsrc_id: The inventory source of the new variable value.
         :return: None
@@ -77,6 +88,10 @@ class InventoryVariable:
         # this variable.
         if value is not None:
             self._update_queue.append((invsrc_id, value))
+        elif invsrc_id == 0:
+            # Delete all updates if the variable has been deleted on
+            # inventory-level.
+            self._update_queue = []
 
     def _delete(self, invsrc_id: int) -> None:
         """
@@ -123,6 +138,9 @@ class InventoryGroupVariables(dict):
 
     This dict contains all variables of a inventory group and their current
     value under consideration of the inventory source update history.
+
+    Note that variables values cannot be `None`, use the empty string to
+    indicate that a variable holds no value. See also `InventoryVariable`.
     """
 
     def __init__(self, name: str = "") -> None:
@@ -147,27 +165,37 @@ class InventoryGroupVariables(dict):
         for name, inv_var in self._vars.items():
             self[name] = inv_var.value
 
-    def load(self, as_dict: dict) -> None:
+    def load(self, state: dict[str, update_queue]) -> None:
         """Load internal state from a dict."""
-        self.name = as_dict["name"]
-        for name, queue in as_dict["vars"].items():
-            self._vars[name] = InventoryVariable(name).load(queue)
+        for name, updates in state.items():
+            self._vars[name] = InventoryVariable(name).load(updates)
         self._sync_vars()
 
-    def dump(self) -> dict:
-        """Save internal state to a dict."""
-        as_dict = {}
-        as_dict["name"] = self.name
-        as_dict["vars"] = {}
+    def dump(self) -> dict[str, update_queue]:
+        """Return internal state as a dict."""
+        state = {}
         for name, inv_var in self._vars.items():
-            as_dict["vars"][name] = inv_var.dump()
-        return as_dict
+            state[name] = inv_var.dump()
+        return state
 
     def update_from_src(self, vars: dict[str, var_value], source_id: int) -> None:
         """
         Update with variables from an inventory source.
 
         Delete all variables for this source which are not in the update vars.
+
+        .. Note::
+
+            If the source_id indicates the special case that the update is
+            caused by an inventory-level object edit (id = 0), vars which are
+            not contained in the update are deleted together with their update
+            history.
+
+            We do this because if a variable is not contained in an
+            inventory-level update, it must have been explicitely deleted from
+            the inventory form field. This indicates that the operator expects
+            the variable to be removed from the group, and not that it reappears
+            with the value from the previous source update.
 
         :param dict vars: The variables from the inventory source.
         :param int invsrc_id: The id of the inventory source for this update.
@@ -195,6 +223,46 @@ class InventoryGroupVariables(dict):
         # current values.
         self._sync_vars()
         logger.error(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
+
+
+def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsrc_id: int) -> dict:
+    """
+    Update the inventory variables of one group.
+
+    The update can be triggered either by an inventory update via API, or via a
+    manual edit of the variables field in the awx inventory form.
+
+    TODO: Can we get rid of the dbvars? This is only needed because the new
+    update-var mechanism needs to be properly initialized if the db already
+    contains some variables.
+
+    :param str group: The inventory group name, or "all" for the all-group.
+    :param dict newvars: The variables contained in this update.
+    :param dict dbvars: (optional) The variables which are already stored in the
+        database for this inventory and this group.
+    :param int invsrc_id: The id of the inventory source. Usually this is the
+        database pk of the inventory source object, but there are some special
+        ids: -1 for the initial update from the database. 0 for manual updates.
+    """
+    inv_group_vars = InventoryGroupVariables(group)
+    #
+    filepath = f"/awx_devel/tmp/vars_{group}"
+    #
+    if not os.path.isfile(filepath):
+        if dbvars:
+            inv_group_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
+    else:
+        with open(filepath, "r") as fp:
+            inv_group_vars.load(json.load(fp))
+    #
+    inv_group_vars.update_from_src(newvars, invsrc_id)
+    #
+    with open(filepath, "w") as fp:
+        json.dump(inv_group_vars.dump(), fp)
+        fp.write("\n")
+    #
+    logger.error(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
+    return inv_group_vars
 
 
 if __name__ == "__main__":
