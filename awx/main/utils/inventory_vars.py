@@ -4,7 +4,7 @@ import json
 from typing import TypeAlias
 
 
-var_value: TypeAlias = str | int
+var_value: TypeAlias = str | int  # TODO: What are all possible value types?
 update_queue: TypeAlias = list[tuple[int, var_value]]
 
 
@@ -40,6 +40,10 @@ class InventoryVariable:
         considered the top of the queue, and holds the current value of the
         variable.
         """
+
+    def reset(self) -> None:
+        """Reset the variable by deleting its history."""
+        self._update_queue = []
 
     def load(self, updates: update_queue) -> "InventoryVariable":
         """Load internal state from a dict."""
@@ -91,7 +95,7 @@ class InventoryVariable:
         elif invsrc_id == 0:
             # Delete all updates if the variable has been deleted on
             # inventory-level.
-            self._update_queue = []
+            self.reset()
 
     def _delete(self, invsrc_id: int) -> None:
         """
@@ -178,7 +182,7 @@ class InventoryGroupVariables(dict):
             state[name] = inv_var.dump()
         return state
 
-    def update_from_src(self, vars: dict[str, var_value], source_id: int) -> None:
+    def update_from_src(self, vars: dict[str, var_value], source_id: int, overwrite: bool = False) -> None:
         """
         Update with variables from an inventory source.
 
@@ -199,15 +203,23 @@ class InventoryGroupVariables(dict):
 
         :param dict vars: The variables from the inventory source.
         :param int invsrc_id: The id of the inventory source for this update.
+        :param bool overwrite: If `True`, delete all variables from previous
+            updates. Therewith making this update overwrite all history. Default
+            is `False`.
         :return: None
         """
-        logger.error(f"InventoryGroupVariables({self.name}).update_from_src({vars=}, {source_id=}): {self=}")
+        logger.error(f"InventoryGroupVariables({self.name}).update_from_src({vars=}, {source_id=}, {overwrite=}): {self=}")
         # Create variables which are newly introduced by this source.
         for name in vars:
             if name not in self._vars:
                 self._vars[name] = InventoryVariable(name)
         # Combine the names of the existing vars and the new vars from this update.
         all_var_names = list(set(list(self.keys()) + list(vars.keys())))
+        # In overwrite-mode, delete all existing vars and their history before
+        # updating.
+        if overwrite:
+            for name in all_var_names:
+                self._vars[name].reset()
         # Go through all variables (the existing ones, and the ones added by
         # this update), delete this source from variables which are not in this
         # update, and update the value of variables which are part of this
@@ -225,7 +237,7 @@ class InventoryGroupVariables(dict):
         logger.error(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
 
 
-def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsrc_id: int) -> dict:
+def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsrc_id: int, overwrite: bool = False) -> dict[str, var_value]:
     """
     Update the inventory variables of one group.
 
@@ -243,6 +255,11 @@ def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsr
     :param int invsrc_id: The id of the inventory source. Usually this is the
         database pk of the inventory source object, but there are some special
         ids: -1 for the initial update from the database. 0 for manual updates.
+    :param bool overwrite: If `True`, delete all variables from previous
+        updates. Therewith making this update overwrite all history. Default is
+        `False`.
+    :return: The variables and their current values as a dict.
+    :rtype: dict
     """
     inv_group_vars = InventoryGroupVariables(group)
     #
@@ -255,7 +272,7 @@ def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsr
         with open(filepath, "r") as fp:
             inv_group_vars.load(json.load(fp))
     #
-    inv_group_vars.update_from_src(newvars, invsrc_id)
+    inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
     #
     with open(filepath, "w") as fp:
         json.dump(inv_group_vars.dump(), fp)
