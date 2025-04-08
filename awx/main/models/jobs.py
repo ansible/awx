@@ -51,6 +51,7 @@ from awx.main.models.mixins import (
     RelatedJobsMixin,
     WebhookMixin,
     WebhookTemplateMixin,
+    OpaQueryPathMixin,
 )
 from awx.main.constants import JOB_VARIABLE_PREFIXES
 
@@ -192,7 +193,9 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin):
+class JobTemplate(
+    UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin
+):
     """
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -606,6 +609,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         blank=True,
         default=1,
         help_text=_("If ran as part of sliced jobs, the total number of slices. If 1, job is not part of a sliced job."),
+    )
+    event_queries_processed = models.BooleanField(
+        default=True,
+        help_text=_("Events of this job have been queried for indirect host information, or do not need processing."),
     )
 
     def _get_parent_field_name(self):

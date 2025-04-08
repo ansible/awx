@@ -81,6 +81,8 @@ class Launchable(object):
                 response.json['status'] = status
                 if status in ('failed', 'error'):
                     setattr(response, 'rc', 1)
+                if status in ('canceled'):
+                    setattr(response, 'rc', 2)
         return response
 
     def perform(self, **kwargs):
@@ -561,6 +563,8 @@ class HasMonitor(object):
                 response.json['status'] = status
                 if status in ('failed', 'error'):
                     setattr(response, 'rc', 1)
+                if status in ('canceled'):
+                    setattr(response, 'rc', 2)
         else:
             return 'Unable to monitor finished job'
 

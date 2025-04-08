@@ -6,6 +6,7 @@ import copy
 import json
 import logging
 import re
+import yaml
 from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
@@ -626,15 +627,41 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         return exclusions
 
     def validate(self, attrs):
+        """
+        Apply serializer validation. Called by DRF.
+
+        Can be extended by subclasses. Or consider overwriting
+        `validate_with_obj` in subclasses, which provides access to the model
+        object and exception handling for field validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :raise rest_framework.exceptions.ValidationError: If the validation
+            fails.
+
+            The exception must contain a dict with the names of the form fields
+            which failed validation as keys, and a list of error messages as
+            values. This ensures that the error messages are rendered near the
+            relevant fields.
+        :return: The names and values from the model form fields, possibly
+            modified by the validations.
+        :rtype: dict
+        """
         attrs = super(BaseSerializer, self).validate(attrs)
+        # Create/update a model instance and run its full_clean() method to
+        # do any validation implemented on the model class.
+        exclusions = self.get_validation_exclusions(self.instance)
+        # Create a new model instance or take the existing one if it exists,
+        # and update its attributes with the respective field values from
+        # attrs.
+        obj = self.instance or self.Meta.model()
+        for k, v in attrs.items():
+            if k not in exclusions and k != 'canonical_address_port':
+                setattr(obj, k, v)
         try:
-            # Create/update a model instance and run its full_clean() method to
-            # do any validation implemented on the model class.
-            exclusions = self.get_validation_exclusions(self.instance)
-            obj = self.instance or self.Meta.model()
-            for k, v in attrs.items():
-                if k not in exclusions and k != 'canonical_address_port':
-                    setattr(obj, k, v)
+            # Run serializer validators which need the model object for
+            # validation.
+            self.validate_with_obj(attrs, obj)
+            # Apply any validations implemented on the model class.
             obj.full_clean(exclude=exclusions)
             # full_clean may modify values on the instance; copy those changes
             # back to attrs so they are saved.
@@ -662,6 +689,32 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                 d[k] = list(map(force_str, v2))
             raise ValidationError(d)
         return attrs
+
+    def validate_with_obj(self, attrs, obj):
+        """
+        Overwrite this if you need the model instance for your validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :param obj: An instance of the class's meta model.
+
+            If the serializer runs on a newly created object, obj contains only
+            the attrs from its serializer. If the serializer runs because an
+            object has been edited, obj is the existing model instance with all
+            attributes and values available.
+        :raise django.core.exceptionsValidationError: Raise this if your
+            validation fails.
+
+            To make the error appear at the respective form field, instantiate
+            the Exception with a dict containing the field name as key and the
+            error message as value.
+
+            Example: ``ValidationError({"password": "Not good enough!"})``
+
+            If the exception contains just a string, the message cannot be
+            related to a field and is rendered at the top of the model form.
+        :return: None
+        """
+        return
 
     def reverse(self, *args, **kwargs):
         kwargs['request'] = self.context.get('request')
@@ -984,7 +1037,6 @@ class UserSerializer(BaseSerializer):
         return ret
 
     def validate_password(self, value):
-        django_validate_password(value)
         if not self.instance and value in (None, ''):
             raise serializers.ValidationError(_('Password required for new User.'))
 
@@ -1006,6 +1058,50 @@ class UserSerializer(BaseSerializer):
             )
 
         return value
+
+    def validate_with_obj(self, attrs, obj):
+        """
+        Validate the password with the Django password validators
+
+        To enable the Django password validators, configure
+        `settings.AUTH_PASSWORD_VALIDATORS` as described in the [Django
+        docs](https://docs.djangoproject.com/en/5.1/topics/auth/passwords/#enabling-password-validation)
+
+        :param dict attrs: The User form field names and their values as a dict.
+            Example::
+
+                {
+                    'username': 'TestUsername', 'first_name': 'FirstName',
+                    'last_name': 'LastName', 'email': 'First.Last@my.org',
+                    'is_superuser': False, 'is_system_auditor': False,
+                    'password': 'secret123'
+                }
+
+        :param obj: The User model instance.
+        :raises django.core.exceptions.ValidationError: Raise this if at least
+            one Django password validator fails.
+
+            The exception contains a dict ``{"password": <error-message>``}
+            which indicates that the password field has failed validation, and
+            the reason for failure.
+        :return: None.
+        """
+        # We must do this here instead of in `validate_password` bacause some
+        # django password validators need access to other model instance fields,
+        # e.g. ``username`` for the ``UserAttributeSimilarityValidator``.
+        password = attrs.get("password")
+        # Skip validation if no password has been entered. This may happen when
+        # an existing User is edited.
+        if password and password != '$encrypted$':
+            # Apply validators from settings.AUTH_PASSWORD_VALIDATORS. This may
+            # raise ValidationError.
+            #
+            # If the validation fails, re-raise the exception with adjusted
+            # content to make the error appear near the password field.
+            try:
+                django_validate_password(password, user=obj)
+            except DjangoValidationError as exc:
+                raise DjangoValidationError({"password": exc.messages})
 
     def _update_password(self, obj, new_password):
         if new_password and new_password != '$encrypted$':
@@ -3352,11 +3448,17 @@ class JobRelaunchSerializer(BaseSerializer):
         choices=[('all', _('No change to job limit')), ('failed', _('All failed and unreachable hosts'))],
         write_only=True,
     )
+    job_type = serializers.ChoiceField(
+        required=False,
+        allow_null=True,
+        choices=NEW_JOB_TYPE_CHOICES,
+        write_only=True,
+    )
     credential_passwords = VerbatimField(required=True, write_only=True)
 
     class Meta:
         model = Job
-        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'credential_passwords')
+        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'job_type', 'credential_passwords')
 
     def validate_credential_passwords(self, value):
         pnts = self.instance.passwords_needed_to_start
@@ -5813,6 +5915,34 @@ class InstanceGroupSerializer(BaseSerializer):
     def validate_credential(self, value):
         if value and not value.kubernetes:
             raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
+        return value
+
+    def validate_pod_spec_override(self, value):
+        if not value:
+            return value
+
+        # value should be empty for non-container groups
+        if self.instance and not self.instance.is_container_group:
+            raise serializers.ValidationError(_('pod_spec_override is only valid for container groups'))
+
+        pod_spec_override_json = None
+        # defect if the value is yaml or json if yaml convert to json
+        try:
+            # convert yaml to json
+            pod_spec_override_json = yaml.safe_load(value)
+        except yaml.YAMLError:
+            try:
+                pod_spec_override_json = json.loads(value)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError(_('pod_spec_override must be valid yaml or json'))
+
+        # validate the
+        spec = pod_spec_override_json.get('spec', {})
+        automount_service_account_token = spec.get('automountServiceAccountToken', False)
+
+        if automount_service_account_token:
+            raise serializers.ValidationError(_('automountServiceAccountToken is not allowed for security reasons'))
+
         return value
 
     def validate(self, attrs):

@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0195_EE_permissions'),
+        ('main', '0197_add_opa_query_path'),
     ]
 
     operations = [

@@ -29,7 +29,7 @@ DOCUMENTATION = """
         description:
           - The date to start the rule
           - Used for all frequencies
-          - Format should be YYYY-MM-DD [HH:MM:SS]
+          - Format should be 'YYYY-MM-DD HH:MM:SS'
         type: str
       timezone:
         description:
@@ -47,8 +47,8 @@ DOCUMENTATION = """
         description:
           - How to end this schedule
           - If this is not defined, this schedule will never end
-          - If this is a positive integer, this schedule will end after this number of occurences
-          - If this is a date in the format YYYY-MM-DD [HH:MM:SS], this schedule ends after this date
+          - If this is a positive number, specified as a string, this schedule will end after this number of occurrences
+          - If this is a date in the format 'YYYY-MM-DD HH:MM:SS', this schedule ends after this date
           - Used for all types except none
         type: str
       on_days:

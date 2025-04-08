@@ -9,8 +9,8 @@ inputs:
     required: false
     default: false
     type: boolean
-  private-github-token:
-    description: GitHub Token for private repositories
+  private-github-key:
+    description: GitHub private key for private repositories
     required: false
     default: ''
 outputs:
@@ -32,7 +32,7 @@ runs:
       uses: ./.github/actions/awx_devel_image
       with:
         github-token: ${{ inputs.github-token }}
-        private-github-token: ${{ inputs.private-github-token}}
+        private-github-key: ${{ inputs.private-github-key }}
 
     - name: Upgrade ansible-core
       shell: bash

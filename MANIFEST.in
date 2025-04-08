@@ -28,4 +28,3 @@ include COPYING
 include Makefile
 prune awx/public
 prune awx/projects
-prune requirements/requirements_git.credentials.txt

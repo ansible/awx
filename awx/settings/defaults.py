@@ -9,9 +9,6 @@ import tempfile
 import socket
 from datetime import timedelta
 
-from split_settings.tools import include
-
-
 DEBUG = True
 SQL_DEBUG = DEBUG
 
@@ -447,6 +444,10 @@ CELERYBEAT_SCHEDULE = {
     'cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
     'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
     'periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': timedelta(minutes=15)},
+    'cleanup_and_save_indirect_host_entries_fallback': {
+        'task': 'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback',
+        'schedule': timedelta(minutes=60),
+    },
 }
 
 # Django Caching Configuration
@@ -1011,16 +1012,15 @@ METRICS_SUBSYSTEM_CONFIG = {
     }
 }
 
-
 # django-ansible-base
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
 ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = 'awx.resource_api'
 ANSIBLE_BASE_PERMISSION_MODEL = 'main.Permission'
 
-from ansible_base.lib import dynamic_config  # noqa: E402
-
-include(os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py'))
+# Defaults to be overridden by DAB
+SPECTACULAR_SETTINGS = {}
+OAUTH2_PROVIDER = {}
 
 # Add a postfix to the API URL patterns
 # example if set to '' API pattern will be /api
@@ -1066,5 +1066,20 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
 
+# For indirect host query processing
+# if a job is not immediently confirmed to have all events processed
+# it will be eligable for processing after this number of minutes
+INDIRECT_HOST_QUERY_FALLBACK_MINUTES = 60
+
+# If an error happens in event collection, give up after this time
+INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS = 3
+
+# Maximum age for indirect host audit records
+# Older records will be cleaned up
+INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
+
+
 # feature flags
 FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
+
+FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)

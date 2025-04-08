@@ -565,7 +565,6 @@ class JobEvent(BasePlaybookEvent):
             summaries = dict()
             updated_hosts_list = list()
             for host in hostnames:
-                updated_hosts_list.append(host.lower())
                 host_id = host_map.get(host)
                 if host_id not in existing_host_ids:
                     host_id = None
@@ -581,6 +580,12 @@ class JobEvent(BasePlaybookEvent):
                 )
                 summary.failed = bool(summary.dark or summary.failures)
                 summaries[(host_id, host)] = summary
+
+                # do not count dark / unreachable hosts as updated
+                if not bool(summary.dark):
+                    updated_hosts_list.append(host.lower())
+                else:
+                    logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
             JobHostSummary.objects.bulk_create(summaries.values())
 
