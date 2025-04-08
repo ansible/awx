@@ -33,7 +33,7 @@ from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
 from awx.main.utils.execution_environments import get_default_execution_environment
-from awx.main.utils.inventory_vars import InventoryGroupVariables
+from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
@@ -455,25 +455,6 @@ class Command(BaseCommand):
                 group_group_count + group_host_count,
             )
 
-    def _update_vars(self, group: str, newvars: dict, dbvars: dict, invsrc_id: int) -> dict:
-        """"""
-        inv_group_vars = InventoryGroupVariables(group)
-        #
-        filepath = f"/awx_devel/tmp/vars_{group}"
-        #
-        if not os.path.isfile(filepath):
-            inv_group_vars.update_from_src(dbvars, 0)  # Assume 0 as inv_source_id for existing vars.
-        else:
-            with open(filepath, "r") as fp:
-                inv_group_vars.load(json.load(fp))
-        #
-        inv_group_vars.update_from_src(newvars, invsrc_id)
-        #
-        with open(filepath, "w") as fp:
-            json.dump(inv_group_vars.dump(), fp)
-        #
-        return inv_group_vars
-
     def _update_inventory(self):
         """
         Update inventory variables from "all" group.
@@ -492,7 +473,7 @@ class Command(BaseCommand):
         else:
             djlogger.error(f"_update_inventory(): {self.inventory.variables_dict=}")
             djlogger.error(f"_update_inventory(): {self.all_group.variables=}")
-            db_variables = self._update_vars(
+            db_variables = update_group_variables(
                 "all",
                 self.all_group.variables,
                 self.inventory.variables_dict,
