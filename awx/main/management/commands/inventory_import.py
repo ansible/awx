@@ -474,10 +474,10 @@ class Command(BaseCommand):
             djlogger.error(f"_update_inventory(): {self.inventory.variables_dict=}")
             djlogger.error(f"_update_inventory(): {self.all_group.variables=}")
             db_variables = update_group_variables(
-                "all",
-                self.all_group.variables,
-                self.inventory.variables_dict,
-                self.inventory_source.id,
+                group="all",
+                newvars=self.all_group.variables,
+                dbvars=self.inventory.variables_dict,
+                invsrc_id=self.inventory_source.id,
             )
         #
         if db_variables != self.inventory.variables_dict:
@@ -509,12 +509,17 @@ class Command(BaseCommand):
             for group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[group.name]
                 db_variables = group.variables_dict
-                logger.error(f"_create_update_groups(): {group.name} {group.variables_dict=}")
-                logger.error(f"_create_update_groups(): {group.name} {mem_group.variables=}")
+                djlogger.error(f"_create_update_groups(): {group.name} - from db: {group.variables_dict=}")
+                djlogger.error(f"_create_update_groups(): {group.name} - from inv src: {mem_group.variables=}")
                 if self.overwrite_vars:
                     db_variables = mem_group.variables
                 else:
-                    db_variables.update(mem_group.variables)
+                    db_variables = update_group_variables(
+                        group=group.name,
+                        newvars=mem_group.variables,
+                        dbvars=group.variables_dict,
+                        invsrc_id=self.inventory_source.id,
+                    )
                 if db_variables != group.variables_dict:
                     group.variables = json.dumps(db_variables)
                     group.save(update_fields=['variables'])
