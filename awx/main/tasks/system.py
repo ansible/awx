@@ -664,7 +664,7 @@ def adispatch_cluster_node_heartbeat(binder):
     logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
     # If waiting jobs are hanging out, resubmit them
-    if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID).exists():
+    if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
         from awx.main.tasks.jobs import dispatch_waiting_jobs
 
         dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
