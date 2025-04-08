@@ -26,7 +26,6 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
 from awx.main.dispatch.config import get_max_workers
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
