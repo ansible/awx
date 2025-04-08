@@ -119,7 +119,12 @@ def dispatch_startup():
     apply_cluster_membership_policies()
     cluster_node_heartbeat()
     reaper.startup_reaping()
-    reaper.reap_waiting(grace_period=0)
+    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+        dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
+    else:
+        reaper.reap_waiting(grace_period=0)
     m = DispatcherMetrics()
     m.reset_values()
 
@@ -128,10 +133,11 @@ def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
         this_inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
-        try:
-            reaper.reap_waiting(this_inst, grace_period=0)
-        except Exception:
-            logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
+        if not flag_enabled('FEATURE_NEW_DISPATCHER'):
+            try:
+                reaper.reap_waiting(this_inst, grace_period=0)
+            except Exception:
+                logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
         logger.warning('Normal shutdown signal for instance {}, removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
@@ -657,8 +663,11 @@ def adispatch_cluster_node_heartbeat(binder):
     ref_time = datetime.now()  # No dispatch_time in dispatcherd version
     logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
-    # Always reap waiting tasks in the dispatcherd implementation
-    reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    # If waiting jobs are hanging out, resubmit them
+    if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID).exists():
+        from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+        dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
 
 
 def _get_active_task_ids_from_dispatcherd(binder):

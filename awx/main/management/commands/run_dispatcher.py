@@ -47,7 +47,7 @@ class Command(BaseCommand):
         if options.get('status'):
             if flag_enabled('FEATURE_NEW_DISPATCHER'):
                 ctl = get_control_from_settings()
-                running_data = ctl.control_with_reply('workers')
+                running_data = ctl.control_with_reply('status')
                 print(yaml.dump(running_data, default_flow_style=False))
                 return
             else:

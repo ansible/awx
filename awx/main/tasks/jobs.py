@@ -32,6 +32,7 @@ from gitdb.exc import BadName as BadGitName
 
 # AWX
 from dispatcherd.publish import task
+from dispatcherd.utils import serialize_task
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -46,6 +47,7 @@ from awx.main.models import (
     Instance,
     Inventory,
     InventorySource,
+    UnifiedJob,
     Job,
     AdHocCommand,
     ProjectUpdate,
@@ -109,6 +111,12 @@ def with_path_cleanup(f):
             self.cleanup_paths = []
 
     return _wrapped
+
+
+@task(on_duplicate='queue_one', bind=True)
+def dispatch_waiting_jobs(binder):
+    for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype'):
+        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'uuid': uj.celery_task_id})
 
 
 class BaseTask(object):
