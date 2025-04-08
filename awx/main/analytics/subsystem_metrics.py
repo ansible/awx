@@ -452,14 +452,14 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
 class CallbackReceiverMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
+        registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
 
 
 class DispatcherMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
+        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
 
 

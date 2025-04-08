@@ -46,10 +46,7 @@ register(
     'MANAGE_ORGANIZATION_AUTH',
     field_class=fields.BooleanField,
     label=_('Organization Admins Can Manage Users and Teams'),
-    help_text=_(
-        'Controls whether any Organization Admin has the privileges to create and manage users and teams. '
-        'You may want to disable this ability if you are using an LDAP or SAML integration.'
-    ),
+    help_text=_('Controls whether any Organization Admin has the privileges to create and manage users and teams.'),
     category=_('System'),
     category_slug='system',
 )
@@ -595,7 +592,7 @@ register(
 register(
     'LOG_AGGREGATOR_LOGGERS',
     field_class=fields.StringListField,
-    default=['awx', 'activity_stream', 'job_events', 'system_tracking', 'broadcast_websocket'],
+    default=['awx', 'activity_stream', 'job_events', 'system_tracking', 'broadcast_websocket', 'job_lifecycle'],
     label=_('Loggers Sending Data to Log Aggregator Form'),
     help_text=_(
         'List of loggers that will send HTTP logs to the collector, these can '
@@ -605,6 +602,7 @@ register(
         'job_events - callback data from Ansible job events\n'
         'system_tracking - facts gathered from scan jobs\n'
         'broadcast_websocket - errors pertaining to websockets broadcast metrics\n'
+        'job_lifecycle - logs related to processing of a job\n'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -777,6 +775,7 @@ register(
     category=_('System'),
     category_slug='system',
     required=False,
+    hidden=True,
 )
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
@@ -843,22 +842,12 @@ register(
     hidden=True,
 )
 
-register(
-    'UI_NEXT',
-    field_class=fields.BooleanField,
-    default=False,
-    label=_('Enable Preview of New User Interface'),
-    help_text=_('Enable preview of new user interface.'),
-    category=_('System'),
-    category_slug='system',
-    hidden=True,
-)
 
 register(
     'SUBSCRIPTION_USAGE_MODEL',
     field_class=fields.ChoiceField,
     choices=[
-        ('', _('Default model for AWX - no subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
+        ('', _('No subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
         (
             SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS,
             _('Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes'),
@@ -878,6 +867,7 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(
@@ -887,6 +877,7 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(
@@ -925,6 +916,16 @@ register(
     label=_('Release Receptor Work'),
     default=True,
     help_text=_('Release receptor work'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'RECEPTOR_KEEP_WORK_ON_ERROR',
+    field_class=fields.BooleanField,
+    label=_('Keep receptor work on error'),
+    default=False,
+    help_text=_('Prevent receptor work from being released on when error is detected'),
     category=('Debug'),
     category_slug='debug',
 )

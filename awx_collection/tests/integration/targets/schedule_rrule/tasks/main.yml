@@ -9,7 +9,7 @@
 
 - name: Test too many params (failure from validation of terms)
   ansible.builtin.debug:
-    msg: "{{ query(plugin_name | string, 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
+    msg: "{{ lookup(plugin_name | string, 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
   ignore_errors: true
   register: result
 
@@ -20,7 +20,7 @@
 
 - name: Test invalid frequency (failure from validation of term)
   ansible.builtin.debug:
-    msg: "{{ query(plugin_name, 'john', start_date='2020-4-16 03:45:07') }}"
+    msg: "{{ lookup(plugin_name, 'john', start_date='2020-4-16 03:45:07') }}"
   ignore_errors: true
   register: result
 
@@ -31,7 +31,7 @@
 
 - name: Test an invalid start date (generic failure case from get_rrule)
   ansible.builtin.debug:
-    msg: "{{ query(plugin_name, 'none', start_date='invalid') }}"
+    msg: "{{ lookup(plugin_name, 'none', start_date='invalid') }}"
   ignore_errors: true
   register: result
 
@@ -42,7 +42,7 @@
 
 - name: Test end_on as count (generic success case)
   ansible.builtin.debug:
-    msg: "{{ query(plugin_name, 'minute', start_date='2020-4-16 03:45:07', end_on='2') }}"
+    msg: "{{ lookup(plugin_name, 'minute', start_date='2020-4-16 03:45:07', end_on='2') }}"
   register: result
 
 - ansible.builtin.assert:

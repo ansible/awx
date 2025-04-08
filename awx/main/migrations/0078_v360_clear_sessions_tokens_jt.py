@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from awx.main.migrations._create_system_jobs import create_clearsessions_jt, create_cleartokens_jt
+from awx.main.migrations._create_system_jobs import create_clearsessions_jt
 
 
 class Migration(migrations.Migration):
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         # Schedule Analytics System Job Template
         migrations.RunPython(create_clearsessions_jt, migrations.RunPython.noop),
-        migrations.RunPython(create_cleartokens_jt, migrations.RunPython.noop),
+        # previously ran create_cleartokens_jt, logic for this has been removed
         migrations.AlterField(
             model_name='systemjob',
             name='job_type',

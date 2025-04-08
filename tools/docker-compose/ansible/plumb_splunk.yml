@@ -30,12 +30,6 @@
         existing_logging: "{{ lookup('awx.awx.controller_api', 'settings/logging', host=awx_host, verify_ssl=false) }}"
         new_logging: "{{ lookup('template', 'logging.json.j2') }}"
 
-    - name: Display existing Logging configuration
-      ansible.builtin.debug:
-        msg:
-          - "Here is your existing SAML configuration for reference:"
-          - "{{ existing_logging }}"
-
     - pause:
         ansible.builtin.prompt: "Continuing to run this will replace your existing logging settings (displayed above). They will all be captured except for your connection password. Be sure that is backed up before continuing"
 

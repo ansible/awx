@@ -21,6 +21,9 @@ from django.utils.encoding import smart_str
 # DRF error class to distinguish license exceptions
 from rest_framework.exceptions import PermissionDenied
 
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
+
 # AWX inventory imports
 from awx.main.models.inventory import Inventory, InventorySource, InventoryUpdate, Host
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
@@ -32,7 +35,6 @@ from awx.main.utils import ignore_inventory_computed_fields, get_licenser
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
-from awx.main.utils.pglock import advisory_lock
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 

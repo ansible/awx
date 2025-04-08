@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             model_name='organization',
             name='execution_environment_admin_role',
             field=awx.main.fields.ImplicitRoleField(
-                editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role='admin_role', related_name='+', to='main.Role'
+                editable=False, null='True', on_delete=django.db.models.deletion.SET_NULL, parent_role='admin_role', related_name='+', to='main.Role'
             ),
             preserve_default='True',
         ),

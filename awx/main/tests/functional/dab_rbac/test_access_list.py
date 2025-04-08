@@ -109,3 +109,17 @@ def test_team_indirect_access(get, team, admin_user, inventory):
     assert len(by_username['u1']['summary_fields']['indirect_access']) == 0
     access_entry = by_username['u1']['summary_fields']['direct_access'][0]
     assert sorted(access_entry['descendant_roles']) == sorted(['adhoc_role', 'use_role', 'update_role', 'read_role', 'admin_role'])
+
+
+@pytest.mark.django_db
+def test_workflow_access_list(workflow_job_template, alice, bob, setup_managed_roles, get, admin_user):
+    """Basic verification that WFJT access_list is functional"""
+    workflow_job_template.admin_role.members.add(alice)
+    workflow_job_template.organization.workflow_admin_role.members.add(bob)
+
+    url = reverse('api:workflow_job_template_access_list', kwargs={'pk': workflow_job_template.pk})
+    for u in (alice, bob, admin_user):
+        response = get(url, user=u, expect=200)
+        user_ids = [item['id'] for item in response.data['results']]
+        assert alice.pk in user_ids
+        assert bob.pk in user_ids

@@ -21,7 +21,9 @@ read_only_endpoints_with_modules = ['settings', 'role', 'project_update', 'workf
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
 # THINK HARD ABOUT DOING THIS
 no_module_for_endpoint = [
+    'application',  # Usage of OAuth tokens is deprecated
     'constructed_inventory',  # This is a view for inventory with kind=constructed
+    'token',  # Usage of OAuth tokens is deprecated
 ]
 
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
@@ -61,8 +63,6 @@ ignore_parameters = ['state', 'new_name', 'update_secrets', 'copy_from', 'is_int
 no_api_parameter_ok = {
     # The wait is for whether or not to wait for a project update on change
     'project': ['wait', 'interval', 'update_project'],
-    # Existing_token and id are for working with an existing tokens
-    'token': ['existing_token', 'existing_token_id'],
     # /survey spec is now how we handle associations
     # We take an organization here to help with the lookups only
     'job_template': ['survey_spec', 'organization'],

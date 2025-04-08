@@ -70,6 +70,7 @@ Once a Notification Template has been created, its configuration can be tested b
 
 The currently-defined Notification Types are:
 
+* AWS SNS
 * Email
 * Slack
 * Mattermost
@@ -81,6 +82,10 @@ The currently-defined Notification Types are:
 * Grafana
 
 Each of these have their own configuration and behavioral semantics and testing them may need to be approached in different ways. The following sections will give as much detail as possible.
+
+## AWS SNS
+
+The AWS SNS notification type supports sending messages into an SNS topic.
 
 ## Email
 
@@ -259,7 +264,7 @@ This will create an `httpbin` service reachable from the AWX container at `http:
 The Grafana notification type allows you to create Grafana annotations. Details about this feature of Grafana are available at http://docs.grafana.org/reference/annotations/. In order to allow AWX to add annotations, an API Key needs to be created in Grafana. Note that the created annotations are region events with start and endtime of the associated AWX Job. The annotation description is also provided by the subject of the associated AWX Job, for example:
 
 ```
-Job #1 'Ping Macbook' succeeded: https://towerhost/#/jobs/playbook/1
+Job #1 'Ping Macbook' succeeded: https://platformhost/#/jobs/playbook/1
 ```
 
 The configurable options of the Grafana notification type are:

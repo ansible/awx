@@ -72,17 +72,17 @@ class Launchable(object):
     def monitor(self, response, **kwargs):
         mon = monitor_workflow if response.type == 'workflow_job' else monitor
         if kwargs.get('monitor') or kwargs.get('wait'):
-            status = mon(
-                response,
-                self.page.connection.session,
-                print_stdout=not kwargs.get('wait'),
-                action_timeout=kwargs.get('action_timeout'),
-                interval=kwargs.get('interval'),
-            )
+            monitor_kwargs = {'print_stdout': bool(not kwargs.get('wait'))}
+            for key in ('action_timeout', 'interval'):
+                if key in kwargs:
+                    monitor_kwargs[key] = kwargs[key]
+            status = mon(response, self.page.connection.session, **monitor_kwargs)
             if status:
                 response.json['status'] = status
                 if status in ('failed', 'error'):
                     setattr(response, 'rc', 1)
+                if status in ('canceled'):
+                    setattr(response, 'rc', 2)
         return response
 
     def perform(self, **kwargs):
@@ -563,6 +563,8 @@ class HasMonitor(object):
                 response.json['status'] = status
                 if status in ('failed', 'error'):
                     setattr(response, 'rc', 1)
+                if status in ('canceled'):
+                    setattr(response, 'rc', 2)
         else:
             return 'Unable to monitor finished job'
 

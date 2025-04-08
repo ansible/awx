@@ -2,7 +2,7 @@ build
 coreapi
 django-debug-toolbar==3.2.4
 django-test-migrations
-drf-yasg
+drf-yasg<1.21.10  # introduces new DeprecationWarning that is turned into error
 # pprofile - re-add once https://github.com/vpelletier/pprofile/issues/41 is addressed
 ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
@@ -19,14 +19,14 @@ logutils
 jupyter
 # matplotlib - Caused issues when bumping to setuptools 58
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
-git+https://github.com/artefactual-labs/mockldap.git@master#egg=mockldap
 gprof2dot
 atomicwrites
 flake8
 yamllint
-pip>=21.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
+pip>=21.3,<=24.0 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
 
 # python debuggers
 debugpy
 remote-pdb
 sdb
+

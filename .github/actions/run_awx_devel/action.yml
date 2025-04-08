@@ -9,20 +9,30 @@ inputs:
     required: false
     default: false
     type: boolean
+  private-github-key:
+    description: GitHub private key for private repositories
+    required: false
+    default: ''
 outputs:
   ip:
     description: The IP of the tools_awx_1 container
     value: ${{ steps.data.outputs.ip }}
-  admin-token:
-    description: OAuth token for admin user
-    value: ${{ steps.data.outputs.admin_token }}
 runs:
   using: composite
   steps:
+    - name: Disable apparmor for rsyslogd, first step
+      shell: bash
+      run: sudo ln -s /etc/apparmor.d/usr.sbin.rsyslogd /etc/apparmor.d/disable/
+
+    - name: Disable apparmor for rsyslogd, second step
+      shell: bash
+      run: sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.rsyslogd
+
     - name: Build awx_devel image for running checks
       uses: ./.github/actions/awx_devel_image
       with:
         github-token: ${{ inputs.github-token }}
+        private-github-key: ${{ inputs.private-github-key }}
 
     - name: Upgrade ansible-core
       shell: bash
@@ -36,8 +46,10 @@ runs:
       shell: bash
       run: |
         DEV_DOCKER_OWNER=${{ github.repository_owner }} \
-        COMPOSE_TAG=${{ github.base_ref }} \
-        COMPOSE_UP_OPTS="-d" \
+        COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+        DJANGO_COLORS=nocolor \
+        SUPERVISOR_ARGS="-n -t" \
+        COMPOSE_UP_OPTS="-d --no-color" \
         make docker-compose
 
     - name: Update default AWX password
@@ -57,21 +69,9 @@ runs:
           awx-manage update_password --username=admin --password=password
         EOSH
 
-    - name: Build UI
-      # This must be a string comparison in composite actions:
-      # https://github.com/actions/runner/issues/2238
-      if: ${{ inputs.build-ui == 'true' }}
-      shell: bash
-      run: |
-        docker exec -i tools_awx_1 sh <<-EOSH
-          make ui-devel
-        EOSH
-
     - name: Get instance data
       id: data
       shell: bash
       run: |
         AWX_IP=$(docker inspect -f '{{.NetworkSettings.Networks.awx.IPAddress}}' tools_awx_1)
-        ADMIN_TOKEN=$(docker exec -i tools_awx_1 awx-manage create_oauth2_token --user admin)
         echo "ip=$AWX_IP" >> $GITHUB_OUTPUT
-        echo "admin_token=$ADMIN_TOKEN" >> $GITHUB_OUTPUT

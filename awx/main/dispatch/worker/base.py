@@ -16,10 +16,11 @@ from datetime import timedelta
 from django import db
 from django.conf import settings
 
+from ansible_base.lib.logging.runtime import log_excess_runtime
+
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch.periodic import Scheduler
 from awx.main.dispatch import pg_bus_conn
-from awx.main.utils.common import log_excess_runtime
 from awx.main.utils.db import set_connection_name
 import awx.main.analytics.subsystem_metrics as s_metrics
 
@@ -126,7 +127,7 @@ class AWXConsumerBase(object):
                 return
         self.dispatch_task(body)
 
-    @log_excess_runtime(logger)
+    @log_excess_runtime(logger, debug_cutoff=0.05, cutoff=0.2)
     def record_statistics(self):
         if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
             try:
@@ -183,6 +184,7 @@ class AWXConsumerPG(AWXConsumerBase):
         schedule['metrics_gather'] = {'control': self.record_metrics, 'schedule': timedelta(seconds=20)}
         self.scheduler = Scheduler(schedule)
 
+    @log_excess_runtime(logger, debug_cutoff=0.05, cutoff=0.2)
     def record_metrics(self):
         current_time = time.time()
         self.pool.produce_subsystem_metrics(self.subsystem_metrics)

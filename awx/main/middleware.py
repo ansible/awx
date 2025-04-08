@@ -6,7 +6,7 @@ import logging
 import threading
 import time
 import urllib.parse
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 from django.contrib.auth import logout
@@ -20,6 +20,7 @@ from awx.main import migrations
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
 from awx.urls import get_urlpatterns
+from awx.main.utils.named_url_graph import reset_counters
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -93,8 +94,8 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
             user = request.user
             if not user.pk:
                 return
-            if not (user.profile.ldap_dn or user.social_auth.exists() or user.enterprise_auth.exists()):
-                logout(request)
+
+            logout(request)
 
 
 class URLModificationMiddleware(MiddlewareMixin):
@@ -112,6 +113,7 @@ class URLModificationMiddleware(MiddlewareMixin):
     @classmethod
     def _named_url_to_pk(cls, node, resource, named_url):
         kwargs = {}
+        reset_counters()
         if node.populate_named_url_query_kwargs(kwargs, named_url):
             match = node.model.objects.filter(**kwargs).first()
             if match:
@@ -138,14 +140,36 @@ class URLModificationMiddleware(MiddlewareMixin):
 
     @classmethod
     def _convert_named_url(cls, url_path):
-        url_units = url_path.split('/')
-        # If the identifier is an empty string, it is always invalid.
-        if len(url_units) < 6 or url_units[1] != 'api' or url_units[2] not in ['v2'] or not url_units[4]:
-            return url_path
-        resource = url_units[3]
+        default_prefix = PurePosixPath('/api/v2/')
+        optional_prefix = PurePosixPath(f'/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}/v2/')
+
+        url_path_original = url_path
+        url_path = PurePosixPath(url_path)
+
+        if set(optional_prefix.parts).issubset(set(url_path.parts)):
+            url_prefix = optional_prefix
+        elif set(default_prefix.parts).issubset(set(url_path.parts)):
+            url_prefix = default_prefix
+        else:
+            return url_path_original
+
+        # Remove prefix
+        url_path = PurePosixPath(*url_path.parts[len(url_prefix.parts) :])
+        try:
+            resource_path = PurePosixPath(url_path.parts[0])
+            name = url_path.parts[1]
+            url_suffix = PurePosixPath(*url_path.parts[2:])  # remove name and resource
+        except IndexError:
+            return url_path_original
+
+        resource = resource_path.parts[0]
         if resource in settings.NAMED_URL_MAPPINGS:
-            url_units[4] = cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, url_units[4])
-        return '/'.join(url_units)
+            pk = PurePosixPath(cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, name))
+        else:
+            return url_path_original
+
+        parts = url_prefix.parts + resource_path.parts + pk.parts + url_suffix.parts
+        return PurePosixPath(*parts).as_posix() + '/'
 
     def process_request(self, request):
         old_path = request.path_info

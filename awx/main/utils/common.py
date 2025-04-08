@@ -6,7 +6,6 @@ from datetime import timedelta
 import json
 import yaml
 import logging
-import time
 import psycopg
 import os
 import subprocess
@@ -18,6 +17,8 @@ import threading
 import contextlib
 import tempfile
 import functools
+from importlib.metadata import version as _get_version
+from importlib.metadata import entry_points, EntryPoint
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -88,7 +89,6 @@ __all__ = [
     'deepmerge',
     'get_event_partition_epoch',
     'cleanup_new_process',
-    'log_excess_runtime',
     'unified_job_class_to_event_table_name',
 ]
 
@@ -145,6 +145,14 @@ def is_testing(argv=None):
     elif len(argv) >= 2 and argv[1] == 'test':
         return True
     return False
+
+
+def bypass_in_test(func):
+    def fn(*args, **kwargs):
+        if not is_testing():
+            return func(*args, **kwargs)
+
+    return fn
 
 
 class RequireDebugTrueOrTest(logging.Filter):
@@ -222,9 +230,7 @@ def get_awx_version():
     from awx import __version__
 
     try:
-        import pkg_resources
-
-        return pkg_resources.require('awx')[0].version
+        return _get_version('awx')
     except Exception:
         return __version__
 
@@ -354,7 +360,7 @@ def get_allowed_fields(obj, serializer_mapping):
     else:
         allowed_fields = [x.name for x in obj._meta.fields]
 
-    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login'], 'oauth2accesstoken': ['last_used'], 'oauth2application': ['client_secret']}
+    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {'user': ['last_login']}
     model_name = obj._meta.model_name
     fields_excluded = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(model_name, [])
     # see definition of from_db for CredentialType
@@ -1089,7 +1095,11 @@ def create_temporary_fifo(data):
     path = os.path.join(tempfile.mkdtemp(), next(tempfile._get_candidate_names()))
     os.mkfifo(path, stat.S_IRUSR | stat.S_IWUSR)
 
-    threading.Thread(target=lambda p, d: open(p, 'wb').write(d), args=(path, data)).start()
+    def tmp_write(path, data):
+        with open(path, 'wb') as f:
+            f.write(data)
+
+    threading.Thread(target=tmp_write, args=(path, data)).start()
     return path
 
 
@@ -1127,6 +1137,17 @@ def deepmerge(a, b):
         return b
 
 
+def table_exists(cursor, table_name):
+    cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{table_name}');")
+    row = cursor.fetchone()
+    if row is not None:
+        for val in row:  # should only have 1
+            if val is True:
+                logger.debug(f'Event partition table {table_name} already exists')
+                return True
+    return False
+
+
 def create_partition(tblname, start=None):
     """Creates new partition table for events.  By default it covers the current hour."""
     if start is None:
@@ -1143,13 +1164,8 @@ def create_partition(tblname, start=None):
     try:
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
-                row = cursor.fetchone()
-                if row is not None:
-                    for val in row:  # should only have 1
-                        if val is True:
-                            logger.debug(f'Event partition table {tblname}_{partition_label} already exists')
-                            return
+                if table_exists(cursor, f"{tblname}_{partition_label}"):
+                    return
 
                 cursor.execute(
                     f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
@@ -1161,9 +1177,11 @@ def create_partition(tblname, start=None):
         cause = e.__cause__
         if cause and hasattr(cause, 'sqlstate'):
             sqlstate = cause.sqlstate
+            if sqlstate is None:
+                raise
             sqlstate_cls = psycopg.errors.lookup(sqlstate)
 
-            if psycopg.errors.DuplicateTable == sqlstate_cls or psycopg.errors.UniqueViolation == sqlstate_cls:
+            if sqlstate_cls in (psycopg.errors.DuplicateTable, psycopg.errors.DuplicateObject, psycopg.errors.UniqueViolation):
                 logger.info(f'Caught known error due to partition creation race: {e}')
             else:
                 logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_cls))
@@ -1172,6 +1190,8 @@ def create_partition(tblname, start=None):
         cause = e.__cause__
         if cause and hasattr(cause, 'sqlstate'):
             sqlstate = cause.sqlstate
+            if sqlstate is None:
+                raise
             sqlstate_str = psycopg.errors.lookup(sqlstate)
             logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
         raise
@@ -1194,36 +1214,9 @@ def cleanup_new_process(func):
     return wrapper_cleanup_new_process
 
 
-def log_excess_runtime(func_logger, cutoff=5.0, debug_cutoff=5.0, msg=None, add_log_data=False):
-    def log_excess_runtime_decorator(func):
-        @functools.wraps(func)
-        def _new_func(*args, **kwargs):
-            start_time = time.time()
-            log_data = {'name': repr(func.__name__)}
-
-            if add_log_data:
-                return_value = func(*args, log_data=log_data, **kwargs)
-            else:
-                return_value = func(*args, **kwargs)
-
-            log_data['delta'] = time.time() - start_time
-            if isinstance(return_value, dict):
-                log_data.update(return_value)
-
-            if msg is None:
-                record_msg = 'Running {name} took {delta:.2f}s'
-            else:
-                record_msg = msg
-            if log_data['delta'] > cutoff:
-                func_logger.info(record_msg.format(**log_data))
-            elif log_data['delta'] > debug_cutoff:
-                func_logger.debug(record_msg.format(**log_data))
-            return return_value
-
-        return _new_func
-
-    return log_excess_runtime_decorator
-
-
 def unified_job_class_to_event_table_name(job_class):
     return f'main_{job_class().event_class.__name__.lower()}'
+
+
+def load_all_entry_points_for(entry_point_subsections: list[str], /) -> dict[str, EntryPoint]:
+    return {ep.name: ep for entry_point_category in entry_point_subsections for ep in entry_points(group=f'awx_plugins.{entry_point_category}')}

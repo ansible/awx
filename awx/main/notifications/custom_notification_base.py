@@ -32,3 +32,15 @@ class CustomNotificationBase(object):
             "denied": {"message": DEFAULT_APPROVAL_DENIED_MSG, "body": None},
         },
     }
+
+    job_metadata_messages = {
+        "started": {"body": "{{ job_metadata }}"},
+        "success": {"body": "{{ job_metadata }}"},
+        "error": {"body": "{{ job_metadata }}"},
+        "workflow_approval": {
+            "running": {"body": '{"body": "The approval node \\"{{ approval_node_name }}\\" needs review. This node can be viewed at: {{ workflow_url }}"}'},
+            "approved": {"body": '{"body": "The approval node \\"{{ approval_node_name }}\\" was approved. {{ workflow_url }}"}'},
+            "timed_out": {"body": '{"body": "The approval node \\"{{ approval_node_name }}\\" has timed out. {{ workflow_url }}"}'},
+            "denied": {"body": '{"body": "The approval node \\"{{ approval_node_name }}\\" was denied. {{ workflow_url }}"}'},
+        },
+    }

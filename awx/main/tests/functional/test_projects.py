@@ -335,7 +335,7 @@ def test_team_project_list(get, team_project_list):
 
 
 @pytest.mark.parametrize("u,expected_status_code", [('rando', 403), ('org_member', 403), ('org_admin', 201), ('admin', 201)])
-@pytest.mark.django_db()
+@pytest.mark.django_db
 def test_create_project(post, organization, org_admin, org_member, admin, rando, u, expected_status_code):
     if u == 'rando':
         u = rando
@@ -353,11 +353,12 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando,
             'organization': organization.id,
         },
         u,
+        expect=expected_status_code,
     )
-    print(result.data)
-    assert result.status_code == expected_status_code
     if expected_status_code == 201:
         assert Project.objects.filter(name='Project', organization=organization).exists()
+    elif expected_status_code == 403:
+        assert 'do not have permission' in str(result.data['detail'])
 
 
 @pytest.mark.django_db

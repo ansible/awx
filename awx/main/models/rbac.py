@@ -15,16 +15,18 @@ from crum import impersonate
 
 # Django
 from django.db import models, transaction, connection
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, post_save, post_delete
+from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 from django.apps import apps
 from django.conf import settings
 
 # Ansible_base app
-from ansible_base.rbac.models import RoleDefinition
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
 from ansible_base.lib.utils.models import get_type_for_model
 
 # AWX
@@ -557,12 +559,25 @@ def get_role_definition(role):
     f = obj._meta.get_field(role.role_field)
     action_name = f.name.rsplit("_", 1)[0]
     model_print = type(obj).__name__
-    rd_name = f'{model_print} {action_name.title()} Compat'
     perm_list = get_role_codenames(role)
     defaults = {
         'content_type_id': role.content_type_id,
         'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',
     }
+    # use Controller-specific role definitions for Team/Organization and member/admin
+    # instead of platform role definitions
+    # these should exist in the system already, so just do a lookup by role definition name
+    if model_print in ['Team', 'Organization'] and action_name in ['member', 'admin']:
+        rd_name = f'Controller {model_print} {action_name.title()}'
+        rd = RoleDefinition.objects.filter(name=rd_name).first()
+        if rd:
+            return rd
+        else:
+            return RoleDefinition.objects.create_from_permissions(permissions=perm_list, name=rd_name, managed=True, **defaults)
+
+    else:
+        rd_name = f'{model_print} {action_name.title()} Compat'
+
     with impersonate(None):
         try:
             rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
@@ -585,20 +600,32 @@ def get_role_from_object_role(object_role):
         model_name, role_name, _ = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
+    elif rd.name.startswith('Controller') and rd.name.endswith(' Admin'):
+        # Controller Organization Admin and Controller Team Admin
+        role_name = 'admin_role'
+    elif rd.name.startswith('Controller') and rd.name.endswith(' Member'):
+        # Controller Organization Member and Controller Team Member
+        role_name = 'member_role'
     elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
         # cases like "Organization Project Admin"
         model_name, target_model_name, role_name = rd.name.split()
         role_name = role_name.lower()
         model_cls = apps.get_model('main', target_model_name)
         target_model_name = get_type_for_model(model_cls)
+
+        # exception cases completely specific to one model naming convention
         if target_model_name == 'notification_template':
-            target_model_name = 'notification'  # total exception
+            target_model_name = 'notification'
+        elif target_model_name == 'workflow_job_template':
+            target_model_name = 'workflow'
+
         role_name = f'{target_model_name}_admin_role'
     elif rd.name.endswith(' Admin'):
         # cases like "project-admin"
         role_name = 'admin_role'
+    elif rd.name == 'Organization Audit':
+        role_name = 'auditor_role'
     else:
-        print(rd.name)
         model_name, role_name = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
@@ -683,9 +710,15 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 
     for role_id in pk_set:
         if reverse:
-            child_role = Role.objects.get(id=role_id)
+            try:
+                child_role = Role.objects.get(id=role_id)
+            except Role.DoesNotExist:
+                continue
         else:
-            parent_role = Role.objects.get(id=role_id)
+            try:
+                parent_role = Role.objects.get(id=role_id)
+            except Role.DoesNotExist:
+                continue
 
         # To a fault, we want to avoid running this if triggered from implicit_parents management
         # we only want to do anything if we know for sure this is a non-implicit team role
@@ -700,6 +733,85 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 
             team = Team.objects.get(pk=parent_role.object_id)
             give_or_remove_permission(child_role, team, giving=is_giving)
+
+
+ROLE_DEFINITION_TO_ROLE_FIELD = {
+    'Organization Member': 'member_role',
+    'Controller Organization Member': 'member_role',
+    'WorkflowJobTemplate Admin': 'admin_role',
+    'Organization WorkflowJobTemplate Admin': 'workflow_admin_role',
+    'WorkflowJobTemplate Execute': 'execute_role',
+    'WorkflowJobTemplate Approve': 'approval_role',
+    'InstanceGroup Admin': 'admin_role',
+    'InstanceGroup Use': 'use_role',
+    'Organization ExecutionEnvironment Admin': 'execution_environment_admin_role',
+    'Project Admin': 'admin_role',
+    'Organization Project Admin': 'project_admin_role',
+    'Project Use': 'use_role',
+    'Project Update': 'update_role',
+    'JobTemplate Admin': 'admin_role',
+    'Organization JobTemplate Admin': 'job_template_admin_role',
+    'JobTemplate Execute': 'execute_role',
+    'Inventory Admin': 'admin_role',
+    'Organization Inventory Admin': 'inventory_admin_role',
+    'Inventory Use': 'use_role',
+    'Inventory Adhoc': 'adhoc_role',
+    'Inventory Update': 'update_role',
+    'Organization NotificationTemplate Admin': 'notification_admin_role',
+    'Credential Admin': 'admin_role',
+    'Organization Credential Admin': 'credential_admin_role',
+    'Credential Use': 'use_role',
+    'Team Admin': 'admin_role',
+    'Controller Team Admin': 'admin_role',
+    'Team Member': 'member_role',
+    'Controller Team Member': 'member_role',
+    'Organization Admin': 'admin_role',
+    'Controller Organization Admin': 'admin_role',
+    'Organization Audit': 'auditor_role',
+    'Organization Execute': 'execute_role',
+    'Organization Approval': 'approval_role',
+}
+
+
+def _sync_assignments_to_old_rbac(instance, delete=True):
+    from awx.main.signals import disable_activity_stream
+
+    with disable_activity_stream():
+        with disable_rbac_sync():
+            field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
+            if not field_name:
+                return
+            try:
+                role = getattr(instance.object_role.content_object, field_name)
+            # in the case RoleUserAssignment is being cascade deleted, then
+            # object_role might not exist. In which case the object is about to be removed
+            # anyways so just return
+            except ObjectDoesNotExist:
+                return
+            if isinstance(instance.actor, get_user_model()):
+                # user
+                if delete:
+                    role.members.remove(instance.actor)
+                else:
+                    role.members.add(instance.actor)
+            else:
+                # team
+                if delete:
+                    instance.team.member_role.children.remove(role)
+                else:
+                    instance.team.member_role.children.add(role)
+
+
+@receiver(post_delete, sender=RoleUserAssignment)
+@receiver(post_delete, sender=RoleTeamAssignment)
+def sync_assignments_to_old_rbac_delete(instance, **kwargs):
+    _sync_assignments_to_old_rbac(instance, delete=True)
+
+
+@receiver(post_save, sender=RoleUserAssignment)
+@receiver(post_save, sender=RoleTeamAssignment)
+def sync_user_assignments_to_old_rbac_create(instance, **kwargs):
+    _sync_assignments_to_old_rbac(instance, delete=False)
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)

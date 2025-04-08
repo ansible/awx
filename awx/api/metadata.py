@@ -103,7 +103,7 @@ class Metadata(metadata.SimpleMetadata):
             default = field.get_default()
             if type(default) is UUID:
                 default = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-            if field.field_name == 'TOWER_URL_BASE' and default == 'https://towerhost':
+            if field.field_name == 'TOWER_URL_BASE' and default == 'https://platformhost':
                 default = '{}://{}'.format(self.request.scheme, self.request.get_host())
             field_info['default'] = default
         except serializers.SkipField:

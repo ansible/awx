@@ -5,6 +5,9 @@ DATABASES = {
         'NAME': "{{ pg_database }}",
         'USER': "{{ pg_username }}",
         'PASSWORD': "{{ pg_password }}",
+{% if pg_tls|bool %}
+        'OPTIONS': {'sslmode': 'require'},
+{% endif %}
 {% if enable_pgbouncer|bool %}
         'HOST': "pgbouncer",
         'PORT': "{{ pgbouncer_port }}",

@@ -1,0 +1,156 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 4,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "gridPos": {
+        "h": 22,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "maxPerRow": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "repeat": "service",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "editorMode": "code",
+          "expr": "{instance=~\"${instances:pipe}\", job=~\"${service}\"} | json | line_format \"{{.instance}} {{.body}}\"",
+          "maxLines": 100,
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Service ${service}",
+      "type": "logs"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "awx-1",
+          "value": "awx-1"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "P8E80F9AEF21F6940"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "multi": true,
+        "name": "instances",
+        "options": [],
+        "query": {
+          "label": "instance",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "-b",
+            "provision_instance",
+            "run_callback_receiver",
+            "run_dispatcher",
+            "run_rsyslog_configurer",
+            "run_ws_heartbeat",
+            "run_wsrelay",
+            "uwsgi"
+          ],
+          "value": [
+            "-b",
+            "provision_instance",
+            "run_callback_receiver",
+            "run_dispatcher",
+            "run_rsyslog_configurer",
+            "run_ws_heartbeat",
+            "run_wsrelay",
+            "uwsgi"
+          ]
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "P8E80F9AEF21F6940"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": {
+          "label": "job",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "AWX Service Logs",
+  "uid": "bdndgnhicrt34c",
+  "version": 12,
+  "weekStart": ""
+}

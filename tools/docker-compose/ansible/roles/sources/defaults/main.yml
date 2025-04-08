@@ -4,6 +4,7 @@ awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
 pg_username: 'awx'
 pg_database: 'awx'
+pg_tls: false
 control_plane_node_count: 1
 minikube_container_group: false
 receptor_socket_file: /var/run/awx-receptor/receptor.sock
@@ -18,18 +19,6 @@ sign_work: no  # currently defaults to no because openssl version mismatch cause
 work_sign_key_dir: '../_sources/receptor'
 work_sign_private_keyfile: "{{ work_sign_key_dir }}/work_private_key.pem"
 work_sign_public_keyfile: "{{ work_sign_key_dir }}/work_public_key.pem"
-
-# SSO variables
-enable_keycloak: false
-
-enable_ldap: false
-ldap_public_key_file_name: 'ldap.cert'
-ldap_private_key_file_name: 'ldap.key'
-ldap_cert_dir: '{{ sources_dest }}/ldap_certs'
-ldap_diff_dir: '{{ sources_dest }}/ldap_diffs'
-ldap_public_key_file: '{{ ldap_cert_dir }}/{{ ldap_public_key_file_name }}'
-ldap_private_key_file: '{{ ldap_cert_dir }}/{{ ldap_private_key_file_name }}'
-ldap_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
 
 # Hashicorp Vault
 enable_vault: false

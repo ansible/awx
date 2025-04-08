@@ -72,8 +72,8 @@ class PubSub(object):
                 ns = conn.wait(psycopg.generators.notifies(conn.pgconn))
             except psycopg.errors._NO_TRACEBACK as ex:
                 raise ex.with_traceback(None)
-        enc = psycopg._encodings.pgconn_encoding(conn.pgconn)
         for pgn in ns:
+            enc = conn.pgconn._encoding
             n = psycopg.connection.Notify(pgn.relname.decode(enc), pgn.extra.decode(enc), pgn.be_pid)
             yield n
 
@@ -102,7 +102,8 @@ def create_listener_connection():
 
     # Apply overrides specifically for the listener connection
     for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
-        conf[k] = v
+        if k != 'OPTIONS':
+            conf[k] = v
     for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
         conf['OPTIONS'][k] = v
 

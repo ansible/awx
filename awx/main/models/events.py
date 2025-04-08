@@ -4,11 +4,12 @@ import datetime
 from datetime import timezone
 import logging
 from collections import defaultdict
+import itertools
 import time
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, DatabaseError
+from django.db import models, DatabaseError, transaction
 from django.db.models.functions import Cast
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
@@ -564,7 +565,6 @@ class JobEvent(BasePlaybookEvent):
             summaries = dict()
             updated_hosts_list = list()
             for host in hostnames:
-                updated_hosts_list.append(host.lower())
                 host_id = host_map.get(host)
                 if host_id not in existing_host_ids:
                     host_id = None
@@ -580,6 +580,12 @@ class JobEvent(BasePlaybookEvent):
                 )
                 summary.failed = bool(summary.dark or summary.failures)
                 summaries[(host_id, host)] = summary
+
+                # do not count dark / unreachable hosts as updated
+                if not bool(summary.dark):
+                    updated_hosts_list.append(host.lower())
+                else:
+                    logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
             JobHostSummary.objects.bulk_create(summaries.values())
 
@@ -605,19 +611,23 @@ class JobEvent(BasePlaybookEvent):
     def _update_host_metrics(updated_hosts_list):
         from awx.main.models import HostMetric  # circular import
 
-        # bulk-create
         current_time = now()
-        HostMetric.objects.bulk_create(
-            [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=100
-        )
-        # bulk-update
-        batch_start, batch_size = 0, 1000
-        while batch_start <= len(updated_hosts_list):
-            batched_host_list = updated_hosts_list[batch_start : (batch_start + batch_size)]
-            HostMetric.objects.filter(hostname__in=batched_host_list).update(
-                last_automation=current_time, automated_counter=models.F('automated_counter') + 1, deleted=False
-            )
-            batch_start += batch_size
+
+        # FUTURE:
+        #   - Hand-rolled implementation of itertools.batched(), introduced in Python 3.12.  Replace.
+        #   - Ability to do ORM upserts *may* have been introduced in Django 5.0.
+        #     See the entry about `create_defaults` in https://docs.djangoproject.com/en/5.0/releases/5.0/#models.
+        #     Hopefully this will be fully ready for batch use by 5.2 LTS.
+
+        args = [iter(updated_hosts_list)] * 500
+        for hosts in itertools.zip_longest(*args):
+            with transaction.atomic():
+                HostMetric.objects.bulk_create(
+                    [HostMetric(hostname=hostname, last_automation=current_time) for hostname in hosts if hostname is not None], ignore_conflicts=True
+                )
+                HostMetric.objects.filter(hostname__in=hosts).update(
+                    last_automation=current_time, automated_counter=models.F('automated_counter') + 1, deleted=False
+                )
 
     @property
     def job_verbosity(self):

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from rest_framework.exceptions import ParseError
 
-from awx.main.access import BaseAccess, check_superuser, JobTemplateAccess, WorkflowJobTemplateAccess, SystemJobTemplateAccess, vars_are_encrypted
+from awx.main.access import BaseAccess, check_superuser, JobTemplateAccess, WorkflowJobTemplateAccess, vars_are_encrypted
 
 from awx.main.models import (
     Credential,
@@ -239,14 +239,3 @@ def test_user_capabilities_method():
     foo = object()
     foo_capabilities = foo_access.get_user_capabilities(foo, ['edit', 'copy'])
     assert foo_capabilities == {'edit': 'bar', 'copy': 'foo'}
-
-
-def test_system_job_template_can_start(mocker):
-    user = mocker.MagicMock(spec=User, id=1, is_system_auditor=True, is_superuser=False)
-    assert user.is_system_auditor
-    access = SystemJobTemplateAccess(user)
-    assert not access.can_start(None)
-
-    user.is_superuser = True
-    access = SystemJobTemplateAccess(user)
-    assert access.can_start(None)

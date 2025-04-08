@@ -4,25 +4,19 @@ import pytest
 # CRUM
 from crum import impersonate
 
-# Django
-from django.contrib.contenttypes.models import ContentType
-
 # AWX
-from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, WorkflowApprovalTemplate, Project, WorkflowJob, Schedule, Credential
+from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule, Credential
 from awx.api.versioning import reverse
 from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 @pytest.mark.django_db
 def test_subclass_types():
-    assert set(UnifiedJobTemplate._submodels_with_roles()) == set(
-        [
-            ContentType.objects.get_for_model(JobTemplate).id,
-            ContentType.objects.get_for_model(Project).id,
-            ContentType.objects.get_for_model(WorkflowJobTemplate).id,
-            ContentType.objects.get_for_model(WorkflowApprovalTemplate).id,
-        ]
-    )
+    assert set(UnifiedJobTemplate._submodels_with_roles()) == {
+        JobTemplate,
+        Project,
+        WorkflowJobTemplate,
+    }
 
 
 @pytest.mark.django_db

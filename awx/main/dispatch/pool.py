@@ -21,9 +21,11 @@ from django_guid import set_guid
 from jinja2 import Template
 import psutil
 
+from ansible_base.lib.logging.runtime import log_excess_runtime
+
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity, log_excess_runtime
+from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -366,7 +368,7 @@ class AutoscalePool(WorkerPool):
     def debug_meta(self):
         return 'min={} max={}'.format(self.min_workers, self.max_workers)
 
-    @log_excess_runtime(logger)
+    @log_excess_runtime(logger, debug_cutoff=0.05, cutoff=0.2)
     def cleanup(self):
         """
         Perform some internal account and cleanup.  This is run on

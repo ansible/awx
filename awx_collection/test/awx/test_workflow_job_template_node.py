@@ -8,6 +8,14 @@ import pytest
 from awx.main.models import WorkflowJobTemplateNode, WorkflowJobTemplate, JobTemplate, UnifiedJobTemplate
 
 
+pytestmark = pytest.mark.filterwarnings(
+    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: The suppression should be made more specific or the cause fixed.
+    # Ref: https://github.com/ansible/awx/pull/15620
+    "ignore::RuntimeWarning",
+)
+
+
 @pytest.fixture
 def job_template(project, inventory):
     return JobTemplate.objects.create(

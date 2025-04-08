@@ -25,16 +25,23 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_noop
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.query import QuerySet
 
 # Django-CRUM
 from crum import impersonate
 
+# Django flags
+from flags.state import flag_enabled
 
 # Runner
 import ansible_runner.cleanup
 
 # dateutil
 from dateutil.parser import parse as parse_date
+
+# django-ansible-base
+from ansible_base.resource_registry.tasks.sync import SyncExecutor
+from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -51,14 +58,14 @@ from awx.main.models import (
     Job,
     convert_jsonfields,
 )
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, ERROR_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 
 from awx.main.utils.reload import stop_local_services
-from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.helpers import is_run_threshold_reached
+from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
@@ -361,6 +368,20 @@ def send_notifications(notification_list, job_id=None):
                 logger.exception('Error saving notification {} result.'.format(notification.id))
 
 
+def events_processed_hook(unified_job):
+    """This method is intended to be called for every unified job
+    after the playbook_on_stats/EOF event is processed and final status is saved
+    Either one of these events could happen before the other, or there may be no events"""
+    unified_job.send_notification_templates('succeeded' if unified_job.status == 'successful' else 'failed')
+    if isinstance(unified_job, Job) and flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        if unified_job.event_queries_processed is True:
+            # If this is called from callback receiver, it likely does not have updated model data
+            # a refresh now is formally robust
+            unified_job.refresh_from_db(fields=['event_queries_processed'])
+        if unified_job.event_queries_processed is False:
+            save_indirect_host_entries.delay(unified_job.id)
+
+
 @task(queue=get_task_queuename)
 def gather_analytics():
     if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
@@ -376,48 +397,68 @@ def purge_old_stdout_files():
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
 
 
-def _cleanup_images_and_files(**kwargs):
-    if settings.IS_K8S:
-        return
-    this_inst = Instance.objects.me()
-    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    if runner_cleanup_kwargs:
-        stdout = ''
-        with StringIO() as buffer:
-            with redirect_stdout(buffer):
-                ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
-                stdout = buffer.getvalue()
-        if '(changed: True)' in stdout:
-            logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+class CleanupImagesAndFiles:
+    @classmethod
+    def get_first_control_instance(cls) -> Instance | None:
+        return (
+            Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+            .order_by('-hostname')
+            .first()
+        )
 
-    # if we are the first instance alphabetically, then run cleanup on execution nodes
-    checker_instance = (
-        Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
-        .order_by('-hostname')
-        .first()
-    )
-    if checker_instance and this_inst.hostname == checker_instance.hostname:
-        for inst in Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0):
-            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
-            if not runner_cleanup_kwargs:
-                continue
-            try:
-                stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
-                if '(changed: True)' in stdout:
-                    logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
-            except RuntimeError:
-                logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+    @classmethod
+    def get_execution_instances(cls) -> QuerySet[Instance]:
+        return Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+
+    @classmethod
+    def run_local(cls, this_inst: Instance, **kwargs):
+        if settings.IS_K8S:
+            return
+        runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
+        if runner_cleanup_kwargs:
+            stdout = ''
+            with StringIO() as buffer:
+                with redirect_stdout(buffer):
+                    ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+                    stdout = buffer.getvalue()
+            if '(changed: True)' in stdout:
+                logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+
+    @classmethod
+    def run_remote(cls, this_inst: Instance, **kwargs):
+        # if we are the first instance alphabetically, then run cleanup on execution nodes
+        checker_instance = cls.get_first_control_instance()
+
+        if checker_instance and this_inst.hostname == checker_instance.hostname:
+            for inst in cls.get_execution_instances():
+                runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+                if not runner_cleanup_kwargs:
+                    continue
+                try:
+                    stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+                    if '(changed: True)' in stdout:
+                        logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
+                except RuntimeError:
+                    logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+
+    @classmethod
+    def run(cls, **kwargs):
+        if settings.IS_K8S:
+            return
+        this_inst = Instance.objects.me()
+        cls.run_local(this_inst, **kwargs)
+        cls.run_remote(this_inst, **kwargs)
 
 
 @task(queue='tower_broadcast_all')
 def handle_removed_image(remove_images=None):
     """Special broadcast invocation of this method to handle case of deleted EE"""
-    _cleanup_images_and_files(remove_images=remove_images, file_pattern='')
+    CleanupImagesAndFiles.run(remove_images=remove_images, file_pattern='')
 
 
 @task(queue=get_task_queuename)
 def cleanup_images_and_files():
-    _cleanup_images_and_files(image_prune=True)
+    CleanupImagesAndFiles.run(image_prune=True)
 
 
 @task(queue=get_task_queuename)
@@ -682,6 +723,8 @@ def awx_receptor_workunit_reaper():
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
+    if settings.RECEPTOR_KEEP_WORK_ON_ERROR:
+        jobs_with_unreleased_receptor_units = jobs_with_unreleased_receptor_units.exclude(status__in=ERROR_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
         receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
@@ -701,7 +744,10 @@ def awx_k8s_reaper():
         logger.debug("Checking for orphaned k8s pods for {}.".format(group))
         pods = PodManager.list_active_jobs(group)
         time_cutoff = now() - timedelta(seconds=settings.K8S_POD_REAPER_GRACE_PERIOD)
-        for job in UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES):
+        reap_job_candidates = UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES)
+        if settings.RECEPTOR_KEEP_WORK_ON_ERROR:
+            reap_job_candidates = reap_job_candidates.exclude(status__in=ERROR_STATES)
+        for job in reap_job_candidates:
             logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
             try:
                 pm = PodManager(job)
@@ -712,7 +758,8 @@ def awx_k8s_reaper():
 
 @task(queue=get_task_queuename)
 def awx_periodic_scheduler():
-    with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
+    lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000
+    with advisory_lock('awx_periodic_scheduler_lock', lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
         if acquired is False:
             logger.debug("Not running periodic scheduler, another task holds lock")
             return
@@ -964,3 +1011,27 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, p
             permission_check_func(creater, copy_mapping.values())
     if isinstance(new_obj, Inventory):
         update_inventory_computed_fields.delay(new_obj.id)
+
+
+@task(queue=get_task_queuename)
+def periodic_resource_sync():
+    if not getattr(settings, 'RESOURCE_SERVER', None):
+        logger.debug("Skipping periodic resource_sync, RESOURCE_SERVER not configured")
+        return
+
+    with advisory_lock('periodic_resource_sync', wait=False) as acquired:
+        if acquired is False:
+            logger.debug("Not running periodic_resource_sync, another task holds lock")
+            return
+        logger.debug("Running periodic resource sync")
+
+        executor = SyncExecutor()
+        executor.run()
+        for key, item_list in executor.results.items():
+            if not item_list or key == 'noop':
+                continue
+            # Log creations and conflicts
+            if len(item_list) > 10 and settings.LOG_AGGREGATOR_LEVEL != 'DEBUG':
+                logger.info(f'Periodic resource sync {key}, first 10 items:\n{item_list[:10]}')
+            else:
+                logger.info(f'Periodic resource sync {key}:\n{item_list}')

@@ -13,8 +13,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldDoesNotExist
 from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
-from django.http import QueryDict
-from django.shortcuts import get_object_or_404
+from django.http import QueryDict, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -30,18 +30,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
+# Shared code for the AWX platform
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
+
 # django-ansible-base
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
+from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
+from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
 
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
 from awx.main.models.rbac import give_creator_permissions
 from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
-from awx.main.utils.licensing import server_product_name
+from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
@@ -76,7 +81,14 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):
+
     def get(self, request, *args, **kwargs):
+        if is_proxied_request():
+            next = request.GET.get('next', "")
+            if next:
+                next = f"?next={next}"
+            return redirect(f"/{next}")
+
         # The django.auth.contrib login form doesn't perform the content
         # negotiation we've come to expect from DRF; add in code to catch
         # situations where Accept != text/html (or */*) and reply with
@@ -92,9 +104,19 @@ class LoggedLoginView(auth_views.LoginView):
         return super(LoggedLoginView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        if is_proxied_request():
+            # Give a message, saying to login via AAP
+            return JsonResponse(
+                {
+                    'detail': _('Please log in via Platform Authentication.'),
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
+        ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
         if request.user.is_authenticated:
-            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
+            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, ip)))
             ret.set_cookie(
                 'userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False), samesite=getattr(settings, 'USER_COOKIE_SAMESITE', 'Lax')
             )
@@ -103,16 +125,21 @@ class LoggedLoginView(auth_views.LoginView):
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
+                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), ip)))
             ret.status_code = 401
             return ret
 
 
 class LoggedLogoutView(auth_views.LogoutView):
-
     success_url_allowed_hosts = set(settings.LOGOUT_ALLOWED_HOSTS.split(",")) if settings.LOGOUT_ALLOWED_HOSTS else set()
 
     def dispatch(self, request, *args, **kwargs):
+        if is_proxied_request():
+            # 1) We intentionally don't obey ?next= here, just always redirect to platform login
+            # 2) Hack to prevent rewrites of Location header
+            qs = "?__gateway_no_rewrite__=1&next=/"
+            return redirect(f"/api/gateway/v1/logout/{qs}")
+
         original_user = getattr(request, 'user', None)
         ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
@@ -134,10 +161,10 @@ def get_view_description(view, html=False):
 
 
 def get_default_schema():
-    if settings.SETTINGS_MODULE == 'awx.settings.development':
-        from awx.api.swagger import AutoSchema
+    if settings.DYNACONF.is_development_mode:
+        from awx.api.swagger import schema_view
 
-        return AutoSchema()
+        return schema_view
     else:
         return views.APIView.schema
 
@@ -151,22 +178,23 @@ class APIView(views.APIView):
         Store the Django REST Framework Request object as an attribute on the
         normal Django request, store time the request started.
         """
+        remote_headers = ['REMOTE_ADDR', 'REMOTE_HOST']
+
         self.time_started = time.time()
         if getattr(settings, 'SQL_DEBUG', False):
             self.queries_before = len(connection.queries)
 
+        if 'HTTP_X_TRUSTED_PROXY' in request.environ:
+            if validate_x_trusted_proxy_header(request.environ['HTTP_X_TRUSTED_PROXY']):
+                remote_headers = settings.REMOTE_HOST_HEADERS
+            else:
+                logger.warning("Request appeared to be a trusted upstream proxy but failed to provide a matching shared secret.")
+
         # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
         # they respect the allowed proxy list
-        if all(
-            [
-                settings.PROXY_IP_ALLOWED_LIST,
-                request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_ALLOWED_LIST,
-                request.environ.get('REMOTE_HOST') not in settings.PROXY_IP_ALLOWED_LIST,
-            ]
-        ):
-            for custom_header in settings.REMOTE_HOST_HEADERS:
-                if custom_header.startswith('HTTP_'):
-                    request.environ.pop(custom_header, None)
+        if settings.PROXY_IP_ALLOWED_LIST:
+            if not is_proxy_in_headers(self.request, settings.PROXY_IP_ALLOWED_LIST, remote_headers):
+                delete_headers_starting_with_http(request, settings.REMOTE_HOST_HEADERS)
 
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
@@ -211,17 +239,21 @@ class APIView(views.APIView):
             return response
 
         if response.status_code >= 400:
+            ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
             msg_data = {
                 'status_code': response.status_code,
                 'user_name': request.user,
                 'url_path': request.path,
-                'remote_addr': request.META.get('REMOTE_ADDR', None),
+                'remote_addr': ip,
             }
 
             if type(response.data) is dict:
                 msg_data['error'] = response.data.get('error', response.status_text)
             elif type(response.data) is list:
-                msg_data['error'] = ", ".join(list(map(lambda x: x.get('error', response.status_text), response.data)))
+                if len(response.data) > 0 and isinstance(response.data[0], str):
+                    msg_data['error'] = str(response.data[0])
+                else:
+                    msg_data['error'] = ", ".join(list(map(lambda x: x.get('error', response.status_text), response.data)))
             else:
                 msg_data['error'] = response.status_text
 
@@ -235,7 +267,8 @@ class APIView(views.APIView):
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
-                response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
+                if response.data and 'detail' in response.data:
+                    response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
                 logger.warning(status_msg)
@@ -244,7 +277,7 @@ class APIView(views.APIView):
         time_started = getattr(self, 'time_started', None)
         if request.user.is_authenticated:
             response['X-API-Product-Version'] = get_awx_version()
-        response['X-API-Product-Name'] = server_product_name()
+        response['X-API-Product-Name'] = detect_server_product_name()
 
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
@@ -340,12 +373,6 @@ class APIView(views.APIView):
             if 'version' in kwargs:
                 kwargs.pop('version')
         return super(APIView, self).dispatch(request, *args, **kwargs)
-
-    def check_permissions(self, request):
-        if request.method not in ('GET', 'OPTIONS', 'HEAD'):
-            if 'write' not in getattr(request.user, 'oauth_scopes', ['write']):
-                raise PermissionDenied()
-        return super(APIView, self).check_permissions(request)
 
 
 class GenericAPIView(generics.GenericAPIView, APIView):
@@ -817,7 +844,7 @@ class ResourceAccessList(ParentMixin, ListAPIView):
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
             ancestors = set(RoleEvaluation.objects.filter(content_type_id=content_type.id, object_id=obj.id).values_list('role_id', flat=True))
             qs = User.objects.filter(has_roles__in=ancestors) | User.objects.filter(is_superuser=True)
-            auditor_role = RoleDefinition.objects.filter(name="System Auditor").first()
+            auditor_role = RoleDefinition.objects.filter(name="Controller System Auditor").first()
             if auditor_role:
                 qs |= User.objects.filter(role_assignments__role_definition=auditor_role)
             return qs.distinct()

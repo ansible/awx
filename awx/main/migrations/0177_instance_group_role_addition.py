@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(
                 editable=False,
                 null='True',
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 parent_role=['singleton:system_administrator'],
                 related_name='+',
                 to='main.role',
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(
                 editable=False,
                 null='True',
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 parent_role=['singleton:system_auditor', 'use_role', 'admin_role'],
                 related_name='+',
                 to='main.role',
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
             model_name='instancegroup',
             name='use_role',
             field=awx.main.fields.ImplicitRoleField(
-                editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['admin_role'], related_name='+', to='main.role'
+                editable=False, null='True', on_delete=django.db.models.deletion.SET_NULL, parent_role=['admin_role'], related_name='+', to='main.role'
             ),
             preserve_default='True',
         ),

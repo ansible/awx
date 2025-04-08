@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             model_name='organization',
             name='approval_role',
             field=awx.main.fields.ImplicitRoleField(
-                editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role='admin_role', related_name='+', to='main.Role'
+                editable=False, null='True', on_delete=django.db.models.deletion.SET_NULL, parent_role='admin_role', related_name='+', to='main.Role'
             ),
             preserve_default='True',
         ),
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(
                 editable=False,
                 null='True',
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 parent_role=['organization.approval_role', 'admin_role'],
                 related_name='+',
                 to='main.Role',
@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(
                 editable=False,
                 null='True',
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 parent_role=[
                     'member_role',
                     'auditor_role',
@@ -139,7 +139,7 @@ class Migration(migrations.Migration):
             field=awx.main.fields.ImplicitRoleField(
                 editable=False,
                 null='True',
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=django.db.models.deletion.SET_NULL,
                 parent_role=['singleton:system_auditor', 'organization.auditor_role', 'execute_role', 'admin_role', 'approval_role'],
                 related_name='+',
                 to='main.Role',

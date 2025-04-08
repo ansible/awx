@@ -12,10 +12,7 @@ class Resources(object):
     _ad_hoc_related_cancel = r'ad_hoc_commands/\d+/cancel/'
     _ad_hoc_relaunch = r'ad_hoc_commands/\d+/relaunch/'
     _ansible_facts = r'hosts/\d+/ansible_facts/'
-    _application = r'applications/\d+/'
-    _applications = 'applications/'
     _auth = 'auth/'
-    _authtoken = 'authtoken/'
     _bulk = 'bulk/'
     _bulk_job_launch = 'bulk/job_launch/'
     _config = 'config/'
@@ -208,20 +205,11 @@ class Resources(object):
     _settings = 'settings/'
     _settings_all = 'settings/all/'
     _settings_authentication = 'settings/authentication/'
-    _settings_azuread_oauth2 = 'settings/azuread-oauth2/'
     _settings_changed = 'settings/changed/'
-    _settings_github = 'settings/github/'
-    _settings_github_org = 'settings/github-org/'
-    _settings_github_team = 'settings/github-team/'
-    _settings_google_oauth2 = 'settings/google-oauth2/'
     _settings_jobs = 'settings/jobs/'
-    _settings_ldap = 'settings/ldap/'
     _settings_logging = 'settings/logging/'
     _settings_named_url = 'settings/named-url/'
-    _settings_radius = 'settings/radius/'
-    _settings_saml = 'settings/saml/'
     _settings_system = 'settings/system/'
-    _settings_tacacsplus = 'settings/tacacsplus/'
     _settings_ui = 'settings/ui/'
     _settings_user = 'settings/user/'
     _settings_user_defaults = 'settings/user-defaults/'
@@ -242,8 +230,6 @@ class Resources(object):
     _team_permissions = r'teams/\d+/permissions/'
     _team_users = r'teams/\d+/users/'
     _teams = 'teams/'
-    _token = r'tokens/\d+/'
-    _tokens = 'tokens/'
     _unified_job_template = r'unified_job_templates/\d+/'
     _unified_job_templates = 'unified_job_templates/'
     _unified_jobs = 'unified_jobs/'
@@ -291,12 +277,7 @@ class Resources(object):
     def __getattr__(self, resource):
         if resource[:3] == '___':
             raise AttributeError('No existing resource: {}'.format(resource))
-        # Currently we don't handle anything under:
-        # /api/o/
-        # /api/login/
-        # /api/logout/
-        # If/when we do we will probably need to modify this __getattr__ method
-        # Also, if we add another API version, this would be handled here
+        # If/when we add another API version, this would be handled here
         prefix = 'v2'
         resource = '_' + resource
         return '{0}{1}'.format(getattr(self, prefix), getattr(self, resource))
