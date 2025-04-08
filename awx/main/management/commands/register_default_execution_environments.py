@@ -113,7 +113,14 @@ class Command(BaseCommand):
 
         # Create default globally available Execution Environments
         for ee in reversed(settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS):
-            _this_ee, ee_created = ExecutionEnvironment.objects.get_or_create(name=ee["name"], defaults={'image': ee["image"], 'credential': registry_cred, 'pull': ee["pull"]})
+            _this_ee, ee_created = ExecutionEnvironment.objects.get_or_create(
+                name=ee["name"],
+                defaults={
+                    'image': ee["image"],
+                    'credential': registry_cred,
+                    'pull': ee["pull"]
+                }
+            )
             if ee_created:
                 changed = True
                 print(f"'{ee['name']}' Default Execution Environment registered.")
