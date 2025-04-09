@@ -54,7 +54,7 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
             system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
             continue
 
-        hosts_cached.append(host)
+    hosts_cached.append(host)
 
     if last_filepath_written:
         return os.path.getmtime(last_filepath_written), hosts_cached
