@@ -3704,6 +3704,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
     capabilities_prefetch = ['admin', 'execute', {'copy': 'organization.workflow_admin'}]
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    nodes_job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None, choices=NEW_JOB_TYPE_CHOICES)
 
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -3731,6 +3732,8 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             'ask_tags_on_launch',
             'skip_tags',
             'job_tags',
+            'ask_nodes_job_type_on_launch',
+            'nodes_job_type',
         )
 
     def get_related(self, obj):
@@ -3774,7 +3777,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
 
         # process char_prompts, these are not direct fields on the model
         mock_obj = self.Meta.model()
-        for field_name in ('scm_branch', 'limit', 'skip_tags', 'job_tags'):
+        for field_name in ('scm_branch', 'limit', 'skip_tags', 'job_tags', 'nodes_job_type'):
             if field_name in attrs:
                 setattr(mock_obj, field_name, attrs[field_name])
                 attrs.pop(field_name)
@@ -3799,6 +3802,7 @@ class WorkflowJobTemplateWithSpecSerializer(WorkflowJobTemplateSerializer):
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    nodes_job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None, choices=NEW_JOB_TYPE_CHOICES)
 
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -3824,6 +3828,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             'webhook_guid',
             'skip_tags',
             'job_tags',
+            'nodes_job_type',
         )
 
     def get_related(self, obj):
@@ -4654,6 +4659,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
     skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
     job_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    nodes_job_type = serializers.ChoiceField(required=False, choices=NEW_JOB_TYPE_CHOICES, write_only=True)
 
     class Meta:
         model = WorkflowJobTemplate
@@ -4680,6 +4686,8 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
             'ask_tags_on_launch',
             'skip_tags',
             'job_tags',
+            'ask_nodes_job_type_on_launch',
+            'nodes_job_type',
         )
         read_only_fields = (
             'ask_inventory_on_launch',
@@ -4689,6 +4697,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
             'ask_limit_on_launch',
             'ask_scm_branch_on_launch',
             'ask_tags_on_launch',
+            'ask_nodes_job_type_on_launch',
         )
 
     def get_survey_enabled(self, obj):
