@@ -211,8 +211,8 @@ def mock_get_event_queryset_no_job_created():
 
 @pytest.fixture(scope='session', autouse=True)
 def mock_dispatcherd_publish():
-    with mock.patch('dispatcherd.registry.DispatcherMethod.apply_async') as _fixture:
-        yield _fixture
+    with mock.patch('dispatcherd.brokers.pg_notify.Broker.publish_message', autospec=True):
+        yield
 
 
 @pytest.fixture
