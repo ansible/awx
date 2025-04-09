@@ -119,7 +119,12 @@ def dispatch_startup():
     apply_cluster_membership_policies()
     cluster_node_heartbeat()
     reaper.startup_reaping()
-    reaper.reap_waiting(grace_period=0)
+    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+        dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
+    else:
+        reaper.reap_waiting(grace_period=0)
     m = DispatcherMetrics()
     m.reset_values()
 
@@ -128,10 +133,11 @@ def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
         this_inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
-        try:
-            reaper.reap_waiting(this_inst, grace_period=0)
-        except Exception:
-            logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
+        if not flag_enabled('FEATURE_NEW_DISPATCHER'):
+            try:
+                reaper.reap_waiting(this_inst, grace_period=0)
+            except Exception:
+                logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
         logger.warning('Normal shutdown signal for instance {}, removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
@@ -648,7 +654,7 @@ def adispatch_cluster_node_heartbeat(binder):
     _heartbeat_handle_lost_instances(lost_instances, this_inst)
 
     # Get running tasks using dispatcherd API
-    active_task_ids = _get_active_task_ids_from_dispatcherd()
+    active_task_ids = _get_active_task_ids_from_dispatcherd(binder)
     if active_task_ids is None:
         logger.warning("No active task IDs retrieved from dispatcherd, skipping reaper")
         return  # Failed to get task IDs, don't attempt reaping
@@ -657,11 +663,14 @@ def adispatch_cluster_node_heartbeat(binder):
     ref_time = datetime.now()  # No dispatch_time in dispatcherd version
     logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
-    # Always reap waiting tasks in the dispatcherd implementation
-    reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    # If waiting jobs are hanging out, resubmit them
+    if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
+        from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+        dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
 
 
-def _get_active_task_ids_from_dispatcherd():
+def _get_active_task_ids_from_dispatcherd(binder):
     """
     Retrieve active task IDs from the dispatcherd control API.
 
@@ -671,28 +680,23 @@ def _get_active_task_ids_from_dispatcherd():
     """
     active_task_ids = []
     try:
-        from dispatcherd.factories import get_control_from_settings
 
         logger.debug("Querying dispatcherd API for running tasks")
-        ctl = get_control_from_settings()
-        running_data = ctl.control_with_reply('running')
+        data = binder.control('running')
 
         # Extract UUIDs from the running data
-        if running_data and len(running_data) > 0:
-            logger.debug(f"Received {len(running_data)} response(s) from dispatcherd")
-            # Process running data: first item is a dict with node_id and task entries
-            data = running_data[0].copy()
-            data.pop('node_id', None)
+        # Process running data: first item is a dict with node_id and task entries
+        data.pop('node_id', None)
 
-            # Extract task UUIDs from data structure
-            for task_key, task_value in data.items():
-                if isinstance(task_value, dict) and 'uuid' in task_value:
-                    active_task_ids.append(task_value['uuid'])
-                    logger.debug(f"Found active task with UUID: {task_value['uuid']}")
-                elif isinstance(task_key, str):
-                    # Handle case where UUID might be the key
-                    active_task_ids.append(task_key)
-                    logger.debug(f"Found active task with key: {task_key}")
+        # Extract task UUIDs from data structure
+        for task_key, task_value in data.items():
+            if isinstance(task_value, dict) and 'uuid' in task_value:
+                active_task_ids.append(task_value['uuid'])
+                logger.debug(f"Found active task with UUID: {task_value['uuid']}")
+            elif isinstance(task_key, str):
+                # Handle case where UUID might be the key
+                active_task_ids.append(task_key)
+                logger.debug(f"Found active task with key: {task_key}")
 
         logger.debug(f"Retrieved {len(active_task_ids)} active task IDs from dispatcherd")
         return active_task_ids
