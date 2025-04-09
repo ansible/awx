@@ -129,7 +129,7 @@ def podman_image_generator():
 
 @pytest.fixture
 def run_job_from_playbook(default_org, demo_inv, post, admin):
-    def _rf(test_name, playbook, local_path=None, scm_url=None):
+    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None):
         project_name = f'{test_name} project'
         jt_name = f'{test_name} JT: {playbook}'
 
@@ -166,9 +166,13 @@ def run_job_from_playbook(default_org, demo_inv, post, admin):
         assert proj.get_project_path()
         assert playbook in proj.playbooks
 
+        jt_data = {'name': jt_name, 'project': proj.id, 'playbook': playbook, 'inventory': demo_inv.id}
+        if jt_params:
+            jt_data.update(jt_params)
+
         result = post(
             reverse('api:job_template_list'),
-            {'name': jt_name, 'project': proj.id, 'playbook': playbook, 'inventory': demo_inv.id},
+            jt_data,
             admin,
             expect=201,
         )
