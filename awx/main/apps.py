@@ -110,6 +110,7 @@ class MainConfig(AppConfig):
                 "producers": {
                     "ScheduledProducer": {"task_schedule": settings.DISPATCHER_SCHEDULE},
                     "OnStartProducer": {"task_list": {"awx.main.tasks.system.dispatch_startup": {}}},
+                    "ControlProducer": {},
                 },
                 "publish": {
                     "default_control_broker": "socket",
