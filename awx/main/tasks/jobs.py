@@ -17,6 +17,7 @@ import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
+from django.db import transaction
 
 # Shared code for the AWX platform
 from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
@@ -30,6 +31,7 @@ from gitdb.exc import BadName as BadGitName
 
 # AWX
 from dispatcherd.publish import task
+from dispatcherd.utils import serialize_task
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -37,13 +39,13 @@ from awx.main.constants import (
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
-    ACTIVE_STATES,
     HOST_FACTS_FIELDS,
 )
 from awx.main.models import (
     Instance,
     Inventory,
     InventorySource,
+    UnifiedJob,
     Job,
     AdHocCommand,
     ProjectUpdate,
@@ -110,6 +112,12 @@ def with_path_cleanup(f):
     return _wrapped
 
 
+@task(on_duplicate='queue_one', bind=True)
+def dispatch_waiting_jobs(binder):
+    for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
+        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'uuid': uj.celery_task_id})
+
+
 class BaseTask(object):
     model = None
     event_model = None
@@ -117,6 +125,7 @@ class BaseTask(object):
     callback_class = RunnerCallback
 
     def __init__(self):
+        self.instance = None
         self.cleanup_paths = []
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
@@ -457,12 +466,20 @@ class BaseTask(object):
         """
         Run the job/task and capture its output.
         """
-        self.instance = self.model.objects.get(pk=pk)
-        if self.instance.status != 'canceled' and self.instance.cancel_flag:
-            self.instance = self.update_model(self.instance.pk, start_args='', status='canceled')
-        if self.instance.status not in ACTIVE_STATES:
-            # Prevent starting the job if it has been reaped or handled by another process.
-            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because {self.instance.status} is not a valid active state')
+        if not self.instance:  # Used to skip fetch for local runs
+            with transaction.atomic():
+                self.instance = self.model.objects.select_for_update().get(pk=pk)
+                if self.instance.cancel_flag and self.instance.status != 'canceled':
+                    self.instance.start_args = ''
+                    self.instance.status = 'canceled'
+                    self.instance.save(update_fields=['start_args', 'status'])
+                if self.instance.status != 'waiting':
+                    # Prevent starting the job if it has been reaped or had a duplicate task.
+                    raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not "waiting"')
+                # self.instance because of the update_model pattern and when it's used in callback handlers
+                self.instance.status = 'running'
+                self.instance.start_args = ''  # blank field to remove encrypted passwords
+                self.instance.save(update_fields=['start_args', 'status'])
 
         if self.instance.execution_environment_id is None:
             from awx.main.signals import disable_activity_stream
@@ -470,8 +487,6 @@ class BaseTask(object):
             with disable_activity_stream():
                 self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
 
-        # self.instance because of the update_model pattern and when it's used in callback handlers
-        self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
         self.runner_callback.event_ct = 0
@@ -742,6 +757,7 @@ class SourceControlMixin(BaseTask):
             try:
                 # the job private_data_dir is passed so sync can download roles and collections there
                 sync_task = RunProjectUpdate(job_private_data_dir=private_data_dir)
+                sync_task.instance = local_project_sync  # avoids "waiting" status check, performance
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
                 self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
