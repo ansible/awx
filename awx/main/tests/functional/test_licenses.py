@@ -47,6 +47,7 @@ def index_licenses(path):
 
 def parse_requirement(reqt):
     parsed_requirement = parse_req_from_line(reqt.requirement, None)
+    assert parsed_requirement.requirement, reqt.__dict__
     name = parsed_requirement.requirement.name
     version = str(parsed_requirement.requirement.specifier)
     if version.startswith('=='):
