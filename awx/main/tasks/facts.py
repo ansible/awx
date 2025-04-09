@@ -1,31 +1,24 @@
 import codecs
 import datetime
+import os
 import json
 import logging
-import os
+
+# Django
+from django.conf import settings
+from django.utils.encoding import smart_str
+from django.utils.timezone import now
+from django.db import OperationalError
 
 # django-ansible-base
 from ansible_base.lib.logging.runtime import log_excess_runtime
 
-# Django
-from django.conf import settings
-from django.db import OperationalError
-from django.utils.encoding import smart_str
-from django.utils.timezone import now
-
 # AWX
 from awx.main.models.inventory import Host
 
+
 logger = logging.getLogger('awx.main.tasks.facts')
 system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
-
-
-class CachedHost:
-    def __init__(self, name, inventory, ansible_facts=None):
-        self.name = name
-        self.inventory = inventory
-        self.ansible_facts = ansible_facts or {}
-        self.ansible_facts_modified = None
 
 
 @log_excess_runtime(logger, debug_cutoff=0.01, msg='Inventory {inventory_id} host facts prepared for {written_ct} hosts, took {delta:.3f} s', add_log_data=True)
@@ -33,7 +26,6 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
     log_data['inventory_id'] = inventory_id
     log_data['written_ct'] = 0
     hosts_cached = list()
-
     try:
         os.makedirs(destination, mode=0o700)
     except FileExistsError:
@@ -43,7 +35,6 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
         timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
 
     last_filepath_written = None
-
     for host in hosts:
         if not host.ansible_facts_modified or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
             continue  # facts are expired - do not write them
@@ -59,10 +50,11 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
                 json.dump(host.ansible_facts, f)
                 log_data['written_ct'] += 1
                 last_filepath_written = filepath
-            hosts_cached.append(CachedHost(name=host.name, inventory=host.inventory, ansible_facts=host.ansible_facts))
         except IOError:
             system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
             continue
+
+        hosts_cached.append(host)
 
     if last_filepath_written:
         return os.path.getmtime(last_filepath_written), hosts_cached
