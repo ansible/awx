@@ -36,6 +36,7 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
 
     last_filepath_written = None
     for host in hosts:
+        hosts_cached.append(host)
         if not host.ansible_facts_modified or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
             continue  # facts are expired - do not write them
 
@@ -53,8 +54,6 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
         except IOError:
             system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
             continue
-
-    hosts_cached.append(host)
 
     if last_filepath_written:
         return os.path.getmtime(last_filepath_written), hosts_cached
