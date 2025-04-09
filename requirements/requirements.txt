@@ -358,7 +358,7 @@ protobuf==5.29.3
     #   opentelemetry-proto
 psutil==6.1.1
     # via -r /awx_devel/requirements/requirements.in
-psycopg==3.2.3
+psycopg==3.2.6
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.7.0
     # via pexpect
