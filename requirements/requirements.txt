@@ -528,6 +528,8 @@ yarl==1.18.3
     # via aiohttp
 zipp==3.21.0
     # via importlib-metadata
+zope-interface==7.2
+    # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
