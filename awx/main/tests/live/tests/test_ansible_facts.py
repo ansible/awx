@@ -30,7 +30,7 @@ def general_facts_test(facts_project, run_job_from_playbook):
 
         # GATHER FACTS
         name = f'test_gather_ansible_facts_{slug}'
-        res = run_job_from_playbook(name, 'gather.yml', proj=facts_project, **standard_kwargs)
+        run_job_from_playbook(name, 'gather.yml', proj=facts_project, **standard_kwargs)
         assert_facts_populated(name)
 
         # KEEP FACTS
