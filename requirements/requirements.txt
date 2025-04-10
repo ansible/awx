@@ -336,8 +336,6 @@ packaging==24.2
     #   ansible-runner
     #   opentelemetry-instrumentation
     #   setuptools-scm
-pbr==6.1.0
-    # via -r /awx_devel/requirements/requirements.in
 pexpect==4.7.0
     # via
     #   -r /awx_devel/requirements/requirements.in
