@@ -316,10 +316,13 @@ class AutoscalePool(WorkerPool):
     pool_cls = StatefulPoolWorker
 
     def __init__(self, *args, **kwargs):
-        self.max_workers = kwargs.pop('max_workers', None)
+        kwargs_max_workers = kwargs.pop('max_workers', None)
         super(AutoscalePool, self).__init__(*args, **kwargs)
 
-        self.max_workers = get_max_workers(**kwargs)
+        if kwargs_max_workers:
+            self.max_workers = kwargs_max_workers
+        else:
+            self.max_workers = get_max_workers(**kwargs)
 
         # the task manager enforces settings.TASK_MANAGER_TIMEOUT on its own
         # but if the task takes longer than the time defined here, we will force it to stop here
