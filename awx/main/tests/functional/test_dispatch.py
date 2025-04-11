@@ -12,7 +12,7 @@ import pytest
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
 from awx.main.dispatch.pool import StatefulPoolWorker, WorkerPool, AutoscalePool
-from dispatcherd.publish import task
+from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
 from awx.main.dispatch.periodic import Scheduler
 
