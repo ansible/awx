@@ -82,7 +82,12 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
 
-def dispatch_startup():
+def _run_dispatch_startup_common():
+    """
+    Execute the common startup initialization steps.
+    This includes updating schedules, syncing instance membership, and starting
+    local reaping and resetting metrics.
+    """
     startup_logger = logging.getLogger('awx.main.tasks')
 
     # TODO: Enable this on VM installs
@@ -92,14 +97,14 @@ def dispatch_startup():
     try:
         convert_jsonfields()
     except Exception:
-        logger.exception("Failed json field conversion, skipping.")
+        logger.exception("Failed JSON field conversion, skipping.")
 
-    startup_logger.debug("Syncing Schedules")
+    startup_logger.debug("Syncing schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
         except Exception:
-            logger.exception("Failed to rebuild schedule {}.".format(sch))
+            logger.exception("Failed to rebuild schedule %s.", sch)
 
     #
     # When the dispatcher starts, if the instance cannot be found in the database,
@@ -119,14 +124,40 @@ def dispatch_startup():
     apply_cluster_membership_policies()
     cluster_node_heartbeat()
     reaper.startup_reaping()
-    if flag_enabled('FEATURE_NEW_DISPATCHER'):
-        from awx.main.tasks.jobs import dispatch_waiting_jobs
-
-        dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
-    else:
-        reaper.reap_waiting(grace_period=0)
     m = DispatcherMetrics()
     m.reset_values()
+
+
+def _legacy_dispatch_startup():
+    """
+    Legacy branch for startup: simply performs reaping of waiting jobs with a zero grace period.
+    """
+    logger.debug("Legacy dispatcher: calling reaper.reap_waiting with grace_period=0")
+    reaper.reap_waiting(grace_period=0)
+
+
+def _dispatcherd_dispatch_startup():
+    """
+    New dispatcherd branch for startup: uses the control API to re-submit waiting jobs.
+    """
+    logger.debug("Dispatcherd enabled: dispatching waiting jobs via control channel")
+    from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+    dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
+
+
+def dispatch_startup():
+    """
+    System initialization at startup.
+    First, execute the common logic.
+    Then, if FEATURE_NEW_DISPATCHER is enabled, re-submit waiting jobs via the control API;
+    otherwise, fall back to legacy reaping of waiting jobs.
+    """
+    _run_dispatch_startup_common()
+    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        _dispatcherd_dispatch_startup()
+    else:
+        _legacy_dispatch_startup()
 
 
 def inform_cluster_of_shutdown():
