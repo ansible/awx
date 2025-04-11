@@ -481,7 +481,7 @@ class BaseTask(object):
                         # self.instance because of the update_model pattern and when it's used in callback handlers
                         self.instance.status = 'running'
                     self.instance.save(update_fields=['start_args', 'status'])
-                elif status == 'running':
+                elif self.instance.status == 'running':
                     logger.info(f'Job {self.instance.log_format} is being ran by another process, exiting')
                     return
 
