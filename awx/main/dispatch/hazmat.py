@@ -1,83 +1,32 @@
 import django
 
+# dispatcherd publisher logic is likely to be used, but needs manual preload
+from dispatcherd.brokers import pg_notify  # noqa
+
+# Cache may not be initialized until we are in the worker, so preload here
+from channels_redis import core  # noqa
+
 from awx import prepare_env
 
-prepare_env()
+from dispatcherd.utils import resolve_callable
 
+
+prepare_env()
 
 django.setup()  # noqa
 
 
-from ansible_base.rbac.models import DABPermission, ObjectRole, RoleDefinition, RoleEvaluation, RoleEvaluationUUID, RoleTeamAssignment, RoleUserAssignment
-from ansible_base.resource_registry.models.resource import Resource, ResourceType
-from ansible_base.resource_registry.models.service_identifier import ServiceID
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group, Permission, User
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.sessions.models import Session
-from django.contrib.sites.models import Site
 
-# Shell Plus Django Imports
-from django.core.cache import cache
-from django.db import transaction
-from django.db.models import Avg, Case, Count, Exists, F, Max, Min, OuterRef, Prefetch, Q, Subquery, Sum, When
-from django.urls import reverse
-from django.utils import timezone
-from flags.models import FlagState
 
-from awx.conf.models import Setting
-from awx.main.models.activity_stream import ActivityStream
-from awx.main.models.ad_hoc_commands import AdHocCommand
-from awx.main.models.credential import Credential, CredentialInputSource, CredentialType
-from awx.main.models.events import (
-    AdHocCommandEvent,
-    InventoryUpdateEvent,
-    JobEvent,
-    ProjectUpdateEvent,
-    SystemJobEvent,
-    UnpartitionedAdHocCommandEvent,
-    UnpartitionedInventoryUpdateEvent,
-    UnpartitionedJobEvent,
-    UnpartitionedProjectUpdateEvent,
-    UnpartitionedSystemJobEvent,
-)
-from awx.main.models.execution_environments import ExecutionEnvironment
-from awx.main.models.ha import (
-    Instance,
-    InstanceGroup,
-    InstanceLink,
-    InventoryInstanceGroupMembership,
-    JobLaunchConfigInstanceGroupMembership,
-    OrganizationInstanceGroupMembership,
-    ScheduleInstanceGroupMembership,
-    TowerScheduleState,
-    UnifiedJobTemplateInstanceGroupMembership,
-    WorkflowJobInstanceGroupMembership,
-    WorkflowJobNodeBaseInstanceGroupMembership,
-    WorkflowJobTemplateNodeBaseInstanceGroupMembership,
-)
-from awx.main.models.inventory import (
-    CustomInventoryScript,
-    Host,
-    HostMetric,
-    HostMetricSummaryMonthly,
-    Inventory,
-    InventoryConstructedInventoryMembership,
-    InventorySource,
-    InventoryUpdate,
-    SmartInventoryMembership,
-)
-from awx.main.models.jobs import Job, JobHostSummary, JobLaunchConfig, JobTemplate, SystemJob, SystemJobTemplate
-from awx.main.models.label import Label
-from awx.main.models.notifications import Notification, NotificationTemplate
-from awx.main.models.organization import Organization, OrganizationGalaxyCredentialMembership, Team, UserSessionMembership
-from awx.main.models.projects import Project, ProjectUpdate
-from awx.main.models.rbac import Role, RoleAncestorEntry
-from awx.main.models.receptor_address import ReceptorAddress
-from awx.main.models.schedules import Schedule
-from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobDeprecatedStdout, UnifiedJobTemplate
-from awx.main.models.workflow import WorkflowApproval, WorkflowApprovalTemplate, WorkflowJob, WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode
+# Preload all periodic tasks so their imports will be in shared memory
+for name, options in settings.CELERYBEAT_SCHEDULE.items():
+    resolve_callable(options['task'])
+
+
+# Preload in-line import from tasks
+from awx.main.scheduler.kubernetes import PodManager  # noqa
+
 
 from django.core.cache import cache as django_cache
 from django.db import connection
