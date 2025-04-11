@@ -161,17 +161,27 @@ def dispatch_startup():
 
 
 def inform_cluster_of_shutdown():
+    """
+    Clean system shutdown that marks the current instance offline.
+    In legacy mode, it also reaps waiting jobs.
+    In dispatcherd mode, it relies on dispatcherd's built-in cleanup.
+    """
     try:
-        this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
-        if not flag_enabled('FEATURE_NEW_DISPATCHER'):
-            try:
-                reaper.reap_waiting(this_inst, grace_period=0)
-            except Exception:
-                logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
-        logger.warning('Normal shutdown signal for instance {}, removed self from capacity pool.'.format(this_inst.hostname))
-    except Exception:
-        logger.exception('Encountered problem with normal shutdown signal.')
+        inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
+        inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
+    except Instance.DoesNotExist:
+        logger.exception("Cluster host not found: %s", settings.CLUSTER_HOST_ID)
+        return
+
+    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        logger.debug("Dispatcherd mode: no extra reaping required for instance %s", inst.hostname)
+    else:
+        try:
+            logger.debug("Legacy mode: reaping waiting jobs for instance %s", inst.hostname)
+            reaper.reap_waiting(inst, grace_period=0)
+        except Exception:
+            logger.exception("Failed to reap waiting jobs for %s", inst.hostname)
+    logger.warning("Normal shutdown processed for instance %s; instance removed from capacity pool.", inst.hostname)
 
 
 @task(queue=get_task_queuename)
