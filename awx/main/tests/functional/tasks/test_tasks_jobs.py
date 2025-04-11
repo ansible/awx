@@ -27,7 +27,7 @@ def test_cancel_flag_on_start(jt_linked):
     task = RunJob()
     with pytest.raises(RuntimeError) as exc:
         task.run(job.id)
-    assert 'because its status "canceled" is not "waiting"' in str(exc)
+    assert 'because its status "canceled" is not expected' in str(exc)
 
     job = Job.objects.get(id=job.id)
     assert job.status == 'canceled'
