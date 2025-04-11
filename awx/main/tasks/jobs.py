@@ -468,24 +468,24 @@ class BaseTask(object):
         """
         Run the job/task and capture its output.
         """
-        run_here = True
         if not self.instance:  # Used to skip fetch for local runs
             with transaction.atomic():
                 self.instance = self.model.objects.select_for_update().get(pk=pk)
 
                 # If status is not waiting (obtained under lock) then this process does not have clearence to run
-                run_here = bool(self.instance.status == 'waiting' and not self.instance.cancel_flag)
-                if run_here:
-                    # self.instance because of the update_model pattern and when it's used in callback handlers
-                    self.instance.status = 'running'
+                if self.instance.status == 'waiting':
                     self.instance.start_args = ''  # blank field to remove encrypted passwords
+                    if self.instance.cancel_flag is True:
+                        self.instance.status = 'canceled'
+                    else:
+                        # self.instance because of the update_model pattern and when it's used in callback handlers
+                        self.instance.status = 'running'
                     self.instance.save(update_fields=['start_args', 'status'])
+                elif status == 'running':
+                    logger.info(f'Job {self.instance.log_format} is being ran by another process, exiting')
+                    return
 
-        if not run_here:
-            # If job was canceled while waiting, we are the one that marks it as canceled
-            if self.instance.cancel_flag and self.instance.status == 'waiting':
-                self.instance = self.update_model(self.instance.pk, start_args='', status='canceled')
-            # Prevent starting the job if it has been reaped or had a duplicate task.
+        if self.instance.status != 'running':
             raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not "waiting"')
 
         if self.instance.execution_environment_id is None:
