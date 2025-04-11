@@ -209,6 +209,12 @@ def mock_get_event_queryset_no_job_created():
         yield _fixture
 
 
+@pytest.fixture(scope='session', autouse=True)
+def mock_dispatcherd_publish():
+    with mock.patch('dispatcherd.brokers.pg_notify.Broker.publish_message', autospec=True):
+        yield
+
+
 @pytest.fixture
 def mock_me():
     "Allows Instance.objects.me() to work without touching the database"
