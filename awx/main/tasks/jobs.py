@@ -486,7 +486,7 @@ class BaseTask(object):
                     return
 
         if self.instance.status != 'running':
-            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not "waiting"')
+            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
 
         if self.instance.execution_environment_id is None:
             from awx.main.signals import disable_activity_stream
