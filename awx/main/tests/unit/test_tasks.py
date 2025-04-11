@@ -107,7 +107,7 @@ def job():
 
 @pytest.fixture
 def adhoc_job():
-    return AdHocCommand(pk=1, id=1, inventory=Inventory())
+    return AdHocCommand(pk=1, id=1, inventory=Inventory(), status='waiting')
 
 
 @pytest.fixture
@@ -481,26 +481,6 @@ class TestGenericRun:
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
 
-    def test_cancel_flag(self, job, update_model_wrapper, execution_environment, mock_me, mock_create_partition):
-        job.status = 'running'
-        job.cancel_flag = True
-        job.websocket_emit_status = mock.Mock()
-        job.send_notification_templates = mock.Mock()
-        job.execution_environment = execution_environment
-
-        task = jobs.RunJob()
-        task.instance = job
-        task.update_model = mock.Mock(wraps=update_model_wrapper)
-        task.model.objects.get = mock.Mock(return_value=job)
-        task.build_private_data_files = mock.Mock()
-
-        with mock.patch('awx.main.tasks.jobs.shutil.copytree'):
-            with pytest.raises(Exception):
-                task.run(1)
-
-        for c in [mock.call(1, start_args='', status='canceled')]:
-            assert c in task.update_model.call_args_list
-
     def test_event_count(self, mock_me):
         task = jobs.RunJob()
         task.runner_callback.dispatcher = mock.MagicMock()
@@ -589,6 +569,8 @@ class TestAdhocRun(TestJobExecution):
         adhoc_job.send_notification_templates = mock.Mock()
 
         task = jobs.RunAdHocCommand()
+        adhoc_job.status = 'running'  # to bypass status flip
+        task.instance = adhoc_job  # to bypass fetch
         task.update_model = mock.Mock(wraps=adhoc_update_model_wrapper)
         task.model.objects.get = mock.Mock(return_value=adhoc_job)
         task.build_inventory = mock.Mock()

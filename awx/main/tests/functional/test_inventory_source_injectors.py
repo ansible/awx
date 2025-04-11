@@ -209,7 +209,7 @@ def test_inventory_update_injected_content(product_name, this_kind, inventory, f
         source_vars=src_vars,
     )
     inventory_source.credentials.add(fake_credential_factory(this_kind))
-    inventory_update = inventory_source.create_unified_job()
+    inventory_update = inventory_source.create_unified_job(_eager_fields={'status': 'waiting'})
     task = RunInventoryUpdate()
 
     def substitute_run(awx_receptor_job):
