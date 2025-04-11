@@ -33,6 +33,7 @@ from gitdb.exc import BadName as BadGitName
 
 # AWX
 from dispatcherd.publish import task
+from dispatcherd.worker.task import DispatcherCancel
 from dispatcherd.utils import serialize_task
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
@@ -470,17 +471,22 @@ class BaseTask(object):
         if not self.instance:  # Used to skip fetch for local runs
             with transaction.atomic():
                 self.instance = self.model.objects.select_for_update().get(pk=pk)
-                if self.instance.cancel_flag and self.instance.status != 'canceled':
-                    self.instance.start_args = ''
-                    self.instance.status = 'canceled'
+
+                # If status is not waiting (obtained under lock) then this process does not have clearence to run
+                if self.instance.status == 'waiting':
+                    self.instance.start_args = ''  # blank field to remove encrypted passwords
+                    if self.instance.cancel_flag is True:
+                        self.instance.status = 'canceled'
+                    else:
+                        # self.instance because of the update_model pattern and when it's used in callback handlers
+                        self.instance.status = 'running'
                     self.instance.save(update_fields=['start_args', 'status'])
-                if self.instance.status != 'waiting':
-                    # Prevent starting the job if it has been reaped or had a duplicate task.
-                    raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not "waiting"')
-                # self.instance because of the update_model pattern and when it's used in callback handlers
-                self.instance.status = 'running'
-                self.instance.start_args = ''  # blank field to remove encrypted passwords
-                self.instance.save(update_fields=['start_args', 'status'])
+                elif self.instance.status == 'running':
+                    logger.info(f'Job {self.instance.log_format} is being ran by another process, exiting')
+                    return
+
+        if self.instance.status != 'running':
+            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
 
         if self.instance.execution_environment_id is None:
             from awx.main.signals import disable_activity_stream
@@ -628,14 +634,14 @@ class BaseTask(object):
             elif status == 'canceled':
                 self.instance = self.update_model(pk)
                 cancel_flag_value = getattr(self.instance, 'cancel_flag', False)
-                if (cancel_flag_value is False) and signal_callback():
+                if cancel_flag_value is False:
                     self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="Task was canceled due to receiving a shutdown signal.")
-                    status = 'failed'
-                elif cancel_flag_value is False:
-                    self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="The running ansible process received a shutdown signal.")
                     status = 'failed'
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
+        except DispatcherCancel:
+            # dispatcher uses non-sigterm signal, and will raise this exception
+            status = 'canceled'
         except Exception:
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
