@@ -1,5 +1,4 @@
 build
-coreapi
 django-debug-toolbar==3.2.4
 django-test-migrations
 drf-yasg<1.21.10  # introduces new DeprecationWarning that is turned into error

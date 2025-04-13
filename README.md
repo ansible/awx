@@ -6,13 +6,13 @@
 > [!CAUTION]
 > The last release of this repository was released on Jul 2, 2024.
 > **Releases of this project are now paused during a large scale refactoring.**
-> For more information, follow [the Forum](http://forum.ansible.com/) and - more specifically - see the various communications on the matter:
+> For more information, follow [the Forum](https://forum.ansible.com/) and - more specifically - see the various communications on the matter:
 >
 > * [Blog: Upcoming Changes to the AWX Project](https://www.ansible.com/blog/upcoming-changes-to-the-awx-project/)
-> * [Streamlining AWX Releases](http://forum.ansible.com/t/streamlining-awx-releases/6894) Primary update
-> * [Refactoring AWX into a Pluggable, Service-Oriented Architecture](http://forum.ansible.com/t/refactoring-awx-into-a-pluggable-service-oriented-architecture/7404)
-> * [Upcoming changes to AWX Operator installation methods](http://forum.ansible.com/t/upcoming-changes-to-awx-operator-installation-methods/7598)
-> * [AWX UI and credential types transitioning to the new pluggable architecture](http://forum.ansible.com/t/awx-ui-and-credential-types-transitioning-to-the-new-pluggable-architecture/8027)
+> * [Streamlining AWX Releases](https://forum.ansible.com/t/streamlining-awx-releases/6894) Primary update
+> * [Refactoring AWX into a Pluggable, Service-Oriented Architecture](https://forum.ansible.com/t/refactoring-awx-into-a-pluggable-service-oriented-architecture/7404)
+> * [Upcoming changes to AWX Operator installation methods](https://forum.ansible.com/t/upcoming-changes-to-awx-operator-installation-methods/7598)
+> * [AWX UI and credential types transitioning to the new pluggable architecture](https://forum.ansible.com/t/awx-ui-and-credential-types-transitioning-to-the-new-pluggable-architecture/8027)
 
 AWX provides a web-based user interface, REST API, and task engine built on top of [Ansible](https://github.com/ansible/ansible). It is one of the upstream projects for [Red Hat Ansible Automation Platform](https://www.ansible.com/products/automation-platform).
 

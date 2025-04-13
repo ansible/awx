@@ -1,0 +1,27 @@
+name: 'Setup Python from Makefile'
+description: 'Extract and set up Python version from Makefile'
+inputs:
+  python-version:
+    description: 'Override Python version (optional)'
+    required: false
+    default: ''
+  working-directory:
+    description: 'Directory containing the Makefile'
+    required: false
+    default: '.'
+runs:
+  using: composite
+  steps:
+    - name: Get python version from Makefile
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.python-version }}" ]; then
+          echo "py_version=${{ inputs.python-version }}" >> $GITHUB_ENV
+        else
+          cd ${{ inputs.working-directory }}
+          echo "py_version=`make PYTHON_VERSION`" >> $GITHUB_ENV
+        fi
+    - name: Install python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.py_version }}

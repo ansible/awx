@@ -10,6 +10,8 @@ import time
 import sys
 import signal
 
+import redis
+
 # Django
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _, gettext_noop
@@ -120,6 +122,8 @@ class TaskBase:
                     self.subsystem_metrics.pipe_execute()
                 else:
                     logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            except redis.exceptions.ConnectionError as exc:
+                logger.warning(f"Redis connection error saving metrics for {self.prefix}, error: {exc}")
             except Exception:
                 logger.exception(f"Error saving metrics for {self.prefix}")
 

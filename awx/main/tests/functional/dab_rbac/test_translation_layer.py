@@ -107,6 +107,17 @@ def test_compat_role_naming(setup_managed_roles, job_template, rando, alice):
 
 
 @pytest.mark.django_db
+def test_organization_admin_has_audit(setup_managed_roles):
+    """This formalizes a behavior change from old to new RBAC system
+
+    Previously, the auditor_role did not list admin_role as a parent
+    this made various queries hard to deal with, requiring adding 2 conditions
+    The new system should explicitly list the auditor permission in org admin role"""
+    rd = RoleDefinition.objects.get(name='Organization Admin')
+    assert 'audit_organization' in rd.permissions.values_list('codename', flat=True)
+
+
+@pytest.mark.django_db
 def test_organization_level_permissions(organization, inventory, setup_managed_roles):
     u1 = User.objects.create(username='alice')
     u2 = User.objects.create(username='bob')

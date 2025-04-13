@@ -130,7 +130,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
@@ -161,6 +161,10 @@ jobs:
           show-progress: false
           path: awx
 
+      - uses: ./awx/.github/actions/setup-ssh-agent
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
+
       - name: Checkout awx-operator
         uses: actions/checkout@v4
         with:
@@ -168,38 +172,13 @@ jobs:
           repository: ansible/awx-operator
           path: awx-operator
 
-      - name: Get python version from Makefile
-        working-directory: awx
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - uses: ./awx/.github/actions/setup-python
         with:
-          python-version: ${{ env.py_version }}
+          working-directory: awx
 
       - name: Install playbook dependencies
         run: |
           python3 -m pip install docker
-
-      - name: Generate placeholder SSH private key if SSH auth for private repos is not needed
-        id: generate_key
-        shell: bash
-        run: |
-          if [[ -z "${{ secrets.PRIVATE_GITHUB_KEY }}" ]]; then
-            ssh-keygen -t ed25519 -C "github-actions" -N "" -f ~/.ssh/id_ed25519
-            echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
-            cat ~/.ssh/id_ed25519 >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "SSH_PRIVATE_KEY<<EOF" >> $GITHUB_OUTPUT
-            echo "${{ secrets.PRIVATE_GITHUB_KEY }}" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Add private GitHub key to SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ steps.generate_key.outputs.SSH_PRIVATE_KEY }}
 
       - name: Build AWX image
         working-directory: awx
@@ -299,7 +278,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
@@ -375,7 +354,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
