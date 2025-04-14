@@ -26,7 +26,10 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
+from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity, get_corrected_memory
+
+# ansible-runner
+from ansible_runner.utils.capacity import get_mem_in_bytes
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -321,15 +324,14 @@ class AutoscalePool(WorkerPool):
         super(AutoscalePool, self).__init__(*args, **kwargs)
 
         if self.max_workers is None:
-            settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
-            if settings_absmem is not None:
-                # There are 1073741824 bytes in a gigabyte. Convert bytes to gigabytes by dividing by 2**30
-                total_memory_gb = convert_mem_str_to_bytes(settings_absmem) // 2**30
-            else:
-                total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
+            # Get memory from ansible-runner, consistent with Instance.local_health_check, important to be consistent
+            total_memory_gb = get_mem_in_bytes()
+
+            # This may replace memory calculation with a user override
+            corrected_memory = get_corrected_memory(total_memory_gb)
 
             # Get same number as max forks based on memory, this function takes memory as bytes
-            self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
+            self.max_workers = get_mem_effective_capacity(corrected_memory, is_control_node=True)
 
             # add magic prime number of extra workers to ensure
             # we have a few extra workers to run the heartbeat
