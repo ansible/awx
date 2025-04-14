@@ -184,7 +184,7 @@ def inform_cluster_of_shutdown():
     logger.warning("Normal shutdown processed for instance %s; instance removed from capacity pool.", inst.hostname)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def migrate_jsonfield(table, pkfield, columns):
     batchsize = 10000
     with advisory_lock(f'json_migration_{table}', wait=False) as acquired:
@@ -230,7 +230,7 @@ def migrate_jsonfield(table, pkfield, columns):
         logger.warning(f"Migration of {table} to jsonb is finished.")
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def apply_cluster_membership_policies():
     from awx.main.signals import disable_activity_stream
 
@@ -342,7 +342,7 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_settings_change')
+@task_awx(queue='tower_settings_change')
 def clear_setting_cache(setting_keys):
     # log that cache is being cleared
     logger.info(f"clear_setting_cache of keys {setting_keys}")
@@ -355,7 +355,7 @@ def clear_setting_cache(setting_keys):
     cache.delete_many(cache_keys)
 
 
-@task(queue='tower_broadcast_all')
+@task_awx(queue='tower_broadcast_all')
 def delete_project_files(project_path):
     # TODO: possibly implement some retry logic
     lock_file = project_path + '.lock'
@@ -373,7 +373,7 @@ def delete_project_files(project_path):
             logger.exception('Could not remove lock file {}'.format(lock_file))
 
 
-@task(queue='tower_broadcast_all')
+@task_awx(queue='tower_broadcast_all')
 def profile_sql(threshold=1, minutes=1):
     if threshold <= 0:
         cache.delete('awx-profile-sql-threshold')
@@ -383,7 +383,7 @@ def profile_sql(threshold=1, minutes=1):
         logger.error('SQL QUERIES >={}s ENABLED FOR {} MINUTE(S)'.format(threshold, minutes))
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -428,13 +428,13 @@ def events_processed_hook(unified_job):
             save_indirect_host_entries.delay(unified_job.id)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def gather_analytics():
     if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def purge_old_stdout_files():
     nowtime = time.time()
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
@@ -496,18 +496,18 @@ class CleanupImagesAndFiles:
         cls.run_remote(this_inst, **kwargs)
 
 
-@task(queue='tower_broadcast_all')
+@task_awx(queue='tower_broadcast_all')
 def handle_removed_image(remove_images=None):
     """Special broadcast invocation of this method to handle case of deleted EE"""
     CleanupImagesAndFiles.run(remove_images=remove_images, file_pattern='')
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def cleanup_images_and_files():
     CleanupImagesAndFiles.run(image_prune=True)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def cluster_node_health_check(node):
     """
     Used for the health check endpoint, refreshes the status of the instance, but must be ran on target node
@@ -526,7 +526,7 @@ def cluster_node_health_check(node):
     this_inst.local_health_check()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def execution_node_health_check(node):
     if node == '':
         logger.warning('Remote health check incorrectly called with blank string')
@@ -681,8 +681,6 @@ def adispatch_cluster_node_heartbeat(binder):
     Dispatcherd implementation.
     Uses Control API to get running tasks.
     """
-    logger.info("Running cluster_node_heartbeat using dispatcherd implementation")
-
     # Run common instance management logic
     this_inst, instance_list, lost_instances = _heartbeat_instance_management()
     if this_inst is None:
@@ -746,16 +744,12 @@ def _get_active_task_ids_from_dispatcherd(binder):
         return None
 
 
-# NOTE: This approach of registering alternative dispatcher implementations is a targeted solution
-# for specific functions (currently only cluster_node_heartbeat) and is not a general
-# solution for all tasks.
+# NOTE: This approach of registering alternative dispatcher implementations is a targeted solution for specific functions.
 try:
-    # Import and use the registry from publish module
-    from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS
+    from awx.main.dispatch.publish import serialize_task, ALTERNATIVE_TASK_IMPLEMENTATIONS
 
     # Register the alternative implementation
-    ALTERNATIVE_TASK_IMPLEMENTATIONS[cluster_node_heartbeat.name] = adispatch_cluster_node_heartbeat
-    logger.info(f"Successfully registered dispatcherd method for {cluster_node_heartbeat.name}")
+    ALTERNATIVE_TASK_IMPLEMENTATIONS[serialize_task(cluster_node_heartbeat)] = adispatch_cluster_node_heartbeat
 except Exception:
     logger.exception("Failed to register dispatcherd method for cluster_node_heartbeat")
 
@@ -857,7 +851,7 @@ def _heartbeat_handle_lost_instances(lost_instances, this_inst):
                 logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def awx_receptor_workunit_reaper():
     """
     When an AWX job is launched via receptor, files such as status, stdin, and stdout are created
@@ -895,7 +889,7 @@ def awx_receptor_workunit_reaper():
     administrative_workunit_reaper(receptor_work_list)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def awx_k8s_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
@@ -918,7 +912,7 @@ def awx_k8s_reaper():
                 logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def awx_periodic_scheduler():
     lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000
     with advisory_lock('awx_periodic_scheduler_lock', lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
@@ -977,7 +971,7 @@ def awx_periodic_scheduler():
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def handle_failure_notifications(task_ids):
     """A task-ified version of the method that sends notifications."""
     found_task_ids = set()
@@ -992,7 +986,7 @@ def handle_failure_notifications(task_ids):
         logger.warning(f'Could not send notifications for {deleted_tasks} because they were not found in the database')
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def update_inventory_computed_fields(inventory_id):
     """
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -1042,7 +1036,7 @@ def update_smart_memberships_for_inventory(smart_inventory):
     return False
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def update_host_smart_inventory_memberships():
     smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
     changed_inventories = set([])
@@ -1058,7 +1052,7 @@ def update_host_smart_inventory_memberships():
         smart_inventory.update_computed_fields()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
     if user_id is None:
@@ -1120,7 +1114,7 @@ def _reconstruct_relationships(copy_mapping):
         new_obj.save()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, permission_check_func=None):
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
 
@@ -1175,7 +1169,7 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, p
         update_inventory_computed_fields.delay(new_obj.id)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def periodic_resource_sync():
     if not getattr(settings, 'RESOURCE_SERVER', None):
         logger.debug("Skipping periodic resource_sync, RESOURCE_SERVER not configured")

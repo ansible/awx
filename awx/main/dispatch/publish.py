@@ -96,19 +96,18 @@ class task:
 
             @classmethod
             def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, **kw):
-                # Entry point debug logging
                 try:
                     from flags.state import flag_enabled
 
                     if flag_enabled('FEATURE_NEW_DISPATCHER'):
                         if cls.name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
                             alt_impl = ALTERNATIVE_TASK_IMPLEMENTATIONS[cls.name]
-                            logger.info(f"Using dispatcherd implementation for task: {cls.name}")
+                            logger.info(f"[DISPATCHER] Using dispatcherd implementation for task: {cls.name}")
                             return alt_impl.apply_async(args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                         else:
-                            logger.info(f"⚠Task {cls.name} is not registered for dispatcherd, using original method")
+                            logger.info(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
                 except Exception as e:
-                    logger.warning(f"Failed to check for dispatcherd implementation: {e}")
+                    logger.warning(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
                     # Continue with original implementation if anything fails
                     pass
 
