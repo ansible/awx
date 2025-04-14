@@ -54,7 +54,7 @@ python-tss-sdk>=1.2.1
 pyyaml>=6.0.2  # require packing fix for cython 3 or higher
 pyzstd  # otel collector log file compression library
 receptorctl
-sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
+sqlparse>=0.5.2
 redis[hiredis]
 requests
 slack-sdk
