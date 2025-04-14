@@ -26,10 +26,10 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import get_mem_effective_capacity, get_corrected_memory
+from awx.main.utils.common import get_mem_effective_capacity, get_corrected_memory, get_corrected_cpu, get_cpu_effective_capacity
 
 # ansible-runner
-from ansible_runner.utils.capacity import get_mem_in_bytes
+from ansible_runner.utils.capacity import get_mem_in_bytes, get_cpu_count
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -311,6 +311,41 @@ class WorkerPool(object):
             logger.exception('could not kill {}'.format(worker.pid))
 
 
+def get_auto_max_workers():
+    """Method we normally rely on to get max_workers
+
+    Uses almost same logic as Instance.local_health_check
+    The important thing is to be MORE than Instance.capacity
+    so that the task-manager does not over-schedule this node
+
+    Ideally we would just use the capacity from the database plus reserve workers,
+    but this poses some bootstrap problems where OCP task containers
+    register themselves after startup
+    """
+    # Get memory from ansible-runner
+    total_memory_gb = get_mem_in_bytes()
+
+    # This may replace memory calculation with a user override
+    corrected_memory = get_corrected_memory(total_memory_gb)
+
+    # Get same number as max forks based on memory, this function takes memory as bytes
+    mem_capacity = get_mem_effective_capacity(corrected_memory, is_control_node=True)
+
+    # Follow same process for CPU capacity constraint
+    cpu_count = get_cpu_count()
+    corrected_cpu = get_corrected_cpu(cpu_count)
+    cpu_capacity = get_cpu_effective_capacity(corrected_cpu, is_control_node=True)
+
+    # Here is what is different from health checks,
+    auto_max = max(mem_capacity, cpu_capacity)
+
+    # add magic number of extra workers to ensure
+    # we have a few extra workers to run the heartbeat
+    auto_max += 7
+
+    return auto_max
+
+
 class AutoscalePool(WorkerPool):
     """
     An extended pool implementation that automatically scales workers up and
@@ -324,18 +359,7 @@ class AutoscalePool(WorkerPool):
         super(AutoscalePool, self).__init__(*args, **kwargs)
 
         if self.max_workers is None:
-            # Get memory from ansible-runner, consistent with Instance.local_health_check, important to be consistent
-            total_memory_gb = get_mem_in_bytes()
-
-            # This may replace memory calculation with a user override
-            corrected_memory = get_corrected_memory(total_memory_gb)
-
-            # Get same number as max forks based on memory, this function takes memory as bytes
-            self.max_workers = get_mem_effective_capacity(corrected_memory, is_control_node=True)
-
-            # add magic prime number of extra workers to ensure
-            # we have a few extra workers to run the heartbeat
-            self.max_workers += 7
+            self.max_workers = get_auto_max_workers()
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
