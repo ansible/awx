@@ -221,8 +221,7 @@ class Licenser(object):
 
     def validate_rh(self, user, pw):
         try:
-            host = 'subscription.rhsm.redhat.com'
-            # host = 'https://' + str(self.config.get("server", "hostname"))
+            host = 'https://' + str(self.config.get("server", "hostname"))
         except Exception:
             logger.exception('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
             host = None
@@ -343,7 +342,6 @@ class Licenser(object):
         valid_subs = []
         for sub in json:
             satellite = sub.get('satellite')
-
             if satellite:
                 is_valid = self.is_appropriate_sat_sub(sub)
             else:
