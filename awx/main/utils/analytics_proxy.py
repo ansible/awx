@@ -23,7 +23,7 @@ class TokenError(requests.RequestException):
     try:
       client = OIDCClient(...)
       client.make_request(...)
-    except TokenGenerationError as e:
+    except TokenError as e:
         print(f"Token generation failed due to {e.__cause__}")
     except requests.RequestException:
         print("API request failed)
