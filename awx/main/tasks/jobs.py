@@ -1091,7 +1091,7 @@ class RunJob(SourceControlMixin, BaseTask):
         # where ansible expects to find it
         if self.should_use_fact_cache():
             job.log_lifecycle("start_job_fact_cache")
-            self.facts_write_time = start_fact_cache(
+            self.facts_write_time, self.hosts_with_facts_cached = start_fact_cache(
                 job.get_hosts_for_fact_cache(), os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'), inventory_id=job.inventory_id
             )
 
@@ -1110,7 +1110,7 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
-                job.get_hosts_for_fact_cache(),
+                self.hosts_with_facts_cached,
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
                 facts_write_time=self.facts_write_time,
                 job_id=job.id,

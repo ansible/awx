@@ -1,3 +1,4 @@
+---
 - name: Perform an action with a different hostname via aap_hostname
   inventory:
     name: "Demo Inventory"
