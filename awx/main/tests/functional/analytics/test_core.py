@@ -87,8 +87,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': 'redhat_user',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTIONS_USERNAME': '',
-                'SUBSCRIPTIONS_PASSWORD': '',
+                'SUBSCRIPTIONS_CLIENT_ID': '',
+                'SUBSCRIPTIONS_CLIENT_SECRET': '',
             },
             True,
             ('redhat_user', 'redhat_pass'),
@@ -98,8 +98,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': None,
                 'REDHAT_PASSWORD': None,
-                'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
             },
             True,
             ('subs_user', 'subs_pass'),
@@ -109,8 +109,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': '',
-                'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
             },
             True,
             ('subs_user', 'subs_pass'),
@@ -120,8 +120,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': '',
-                'SUBSCRIPTIONS_USERNAME': '',
-                'SUBSCRIPTIONS_PASSWORD': '',
+                'SUBSCRIPTIONS_CLIENT_ID': '',
+                'SUBSCRIPTIONS_CLIENT_SECRET': '',
             },
             False,
             None,  # No request should be made
@@ -131,8 +131,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': '',
+                'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                'SUBSCRIPTIONS_CLIENT_SECRET': '',
             },
             False,
             None,  # Invalid, no request should be made

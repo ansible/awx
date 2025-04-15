@@ -176,16 +176,16 @@ class ApiV2SubscriptionView(APIView):
 
     def post(self, request):
         data = request.data.copy()
-        if data.get('subscriptions_password') == '$encrypted$':
-            data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
+        if data.get('subscriptions_client_secret') == '$encrypted$':
+            data['subscriptions_client_secret'] = settings.SUBSCRIPTIONS_CLIENT_SECRET
         try:
-            user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
+            user, pw = data.get('subscriptions_client_id'), data.get('subscriptions_client_secret')
             with set_environ(**settings.AWX_TASK_ENV):
                 validated = get_licenser().validate_rh(user, pw)
             if user:
-                settings.SUBSCRIPTIONS_USERNAME = data['subscriptions_username']
+                settings.SUBSCRIPTIONS_CLIENT_ID = data['subscriptions_client_id']
             if pw:
-                settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
+                settings.SUBSCRIPTIONS_CLIENT_SECRET = data['subscriptions_client_secret']
         except Exception as exc:
             msg = _("Invalid Subscription")
             if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
@@ -215,12 +215,12 @@ class ApiV2AttachView(APIView):
 
     def post(self, request):
         data = request.data.copy()
-        pool_id = data.get('pool_id', None)
-        if not pool_id:
-            return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
-        user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-        pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-        if pool_id and user and pw:
+        subscription_id = data.get('subscription_id', None)
+        if not subscription_id:
+            return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
+        user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        if subscription_id and user and pw:
             data = request.data.copy()
             try:
                 with set_environ(**settings.AWX_TASK_ENV):
@@ -239,7 +239,7 @@ class ApiV2AttachView(APIView):
                     logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
         for sub in validated:
-            if sub['pool_id'] == pool_id:
+            if sub['subscription_id'] == subscription_id:
                 sub['valid_key'] = True
                 settings.LICENSE = sub
                 return Response(sub)
