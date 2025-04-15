@@ -78,19 +78,24 @@ class Command(BaseCommand):
             else:
                 return Control('dispatcher').control({'control': 'reload'})
         if options.get('cancel'):
+            cancel_str = options.get('cancel')
+            try:
+                cancel_data = yaml.safe_load(cancel_str)
+            except Exception:
+                cancel_data = [cancel_str]
+            if not isinstance(cancel_data, list):
+                cancel_data = [cancel_str]
+
             if flag_enabled('FEATURE_NEW_DISPATCHER'):
                 ctl = get_control_from_settings()
-                running_data = ctl.control_with_reply('running')
-                print(yaml.dump(running_data, default_flow_style=False))
+                results = []
+                for task_id in cancel_data:
+                    # For each task UUID, send an individual cancel command
+                    result = ctl.control_with_reply('cancel', data={'uuid': task_id})
+                    results.append(result)
+                print(yaml.dump(results, default_flow_style=False))
                 return
             else:
-                cancel_str = options.get('cancel')
-                try:
-                    cancel_data = yaml.safe_load(cancel_str)
-                except Exception:
-                    cancel_data = [cancel_str]
-                if not isinstance(cancel_data, list):
-                    cancel_data = [cancel_str]
                 print(Control('dispatcher').cancel(cancel_data))
                 return
 
