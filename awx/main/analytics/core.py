@@ -186,7 +186,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
         if not (
             settings.AUTOMATION_ANALYTICS_URL
-            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_USERNAME and settings.SUBSCRIPTIONS_PASSWORD))
+            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_CLIENT_ID and settings.SUBSCRIPTIONS_CLIENT_SECRET))
         ):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
@@ -385,16 +385,16 @@ def ship(path):
                     logger.error("Automation Analytics API request failed, trying base auth method")
                     response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31))
             elif not rh_user or not rh_password:
-                logger.info('REDHAT_USERNAME and REDHAT_PASSWORD are not set, using SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD')
-                rh_user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-                rh_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+                logger.info('REDHAT_USERNAME and REDHAT_PASSWORD are not set, using SUBSCRIPTIONS_CLIENT_ID and SUBSCRIPTIONS_CLIENT_SECRET')
+                rh_user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+                rh_password = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
                 if rh_user and rh_password:
                     response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31))
                 elif not rh_user:
-                    logger.error('REDHAT_USERNAME and SUBSCRIPTIONS_USERNAME are not set')
+                    logger.error('REDHAT_USERNAME and SUBSCRIPTIONS_CLIENT_ID are not set')
                     return False
                 elif not rh_password:
-                    logger.error('REDHAT_PASSWORD and SUBSCRIPTIONS_USERNAME are not set')
+                    logger.error('REDHAT_PASSWORD and SUBSCRIPTIONS_CLIENT_ID are not set')
                     return False
         # Accept 2XX status_codes
         if response.status_code >= 300:

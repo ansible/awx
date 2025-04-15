@@ -219,8 +219,8 @@ class AnalyticsGenericView(APIView):
                 logger.error("Automation Analytics API request failed, trying base auth method")
                 response = self._base_auth_request(request, method, url, rh_user, rh_password, headers)
             except MissingSettings:
-                rh_user = self._get_setting('SUBSCRIPTIONS_USERNAME', None, ERROR_MISSING_USER)
-                rh_password = self._get_setting('SUBSCRIPTIONS_PASSWORD', None, ERROR_MISSING_PASSWORD)
+                rh_user = self._get_setting('SUBSCRIPTIONS_CLIENT_ID', None, ERROR_MISSING_USER)
+                rh_password = self._get_setting('SUBSCRIPTIONS_CLIENT_SECRET', None, ERROR_MISSING_PASSWORD)
                 response = self._base_auth_request(request, method, url, rh_user, rh_password, headers)
             #
             # Missing or wrong user/pass
