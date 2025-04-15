@@ -20,15 +20,15 @@ description:
     - Get subscriptions available to Automation Platform Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
-    username:
+    client_id:
       description:
-        - Red Hat or Red Hat Satellite username to get available subscriptions.
+        - Red Hat service account client ID or Red Hat Satellite username to get available subscriptions.
         - The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions
       required: True
       type: str
-    password:
+    client_secret:
       description:
-        - Red Hat or Red Hat Satellite password to get available subscriptions.
+        - Red Hat service account client secret or Red Hat Satellite password to get available subscriptions.
         - The credentials you use will be stored for future use in retrieving renewal or expanded subscriptions
       required: True
       type: str
@@ -53,13 +53,13 @@ subscriptions:
 EXAMPLES = '''
 - name: Get subscriptions
   subscriptions:
-    username: "my_username"
-    password: "My Password"
+    client_id: "c6bd7594-d776-46e5-8156-6d17af147479"
+    client_secret: "MO9QUvoOZ5fc5JQKXoTch1AsTLI7nFsZ"
 
 - name: Get subscriptions with a filter
   subscriptions:
-    username: "my_username"
-    password: "My Password"
+    client_id: "c6bd7594-d776-46e5-8156-6d17af147479"
+    client_secret: "MO9QUvoOZ5fc5JQKXoTch1AsTLI7nFsZ"
     filters:
       product_name: "Red Hat Ansible Automation Platform"
       support_level: "Self-Support"
@@ -72,8 +72,8 @@ def main():
 
     module = ControllerAPIModule(
         argument_spec=dict(
-            username=dict(type='str', required=True),
-            password=dict(type='str', no_log=True, required=True),
+            client_id=dict(type='str', required=True),
+            client_secret=dict(type='str', no_log=True, required=True),
             filters=dict(type='dict', required=False, default={}),
         ),
     )
@@ -82,8 +82,8 @@ def main():
 
     # Check if Tower is already licensed
     post_data = {
-        'subscriptions_password': module.params.get('password'),
-        'subscriptions_username': module.params.get('username'),
+        'subscriptions_client_secret': module.params.get('client_secret'),
+        'subscriptions_client_id': module.params.get('client_id'),
     }
     all_subscriptions = module.post_endpoint('config/subscriptions', data=post_data)['json']
     json_output['subscriptions'] = []

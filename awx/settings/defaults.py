@@ -964,6 +964,9 @@ CLUSTER_HOST_ID = socket.gethostname()
 # - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
 SUBSCRIPTION_USAGE_MODEL = ''
 
+# Default URL and query params for obtaining valid AAP subscriptions
+SUBSCRIPTIONS_RHSM_URL = 'https://console.redhat.com/api/rhsm/v2/products?include=providedProducts&oids=480&status=Active'
+
 # Host metrics cleanup - last time of the task/command run
 CLEANUP_HOST_METRICS_LAST_TS = None
 # Host metrics cleanup - minimal interval between two cleanups in days

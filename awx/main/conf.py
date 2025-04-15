@@ -124,8 +124,8 @@ register(
     allow_blank=True,
     encrypted=False,
     read_only=False,
-    label=_('Red Hat customer username'),
-    help_text=_('This username is used to send data to Automation Analytics'),
+    label=_('Red Hat Client ID for Analytics'),
+    help_text=_('Client ID used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
@@ -137,34 +137,34 @@ register(
     allow_blank=True,
     encrypted=True,
     read_only=False,
-    label=_('Red Hat customer password'),
-    help_text=_('This password is used to send data to Automation Analytics'),
+    label=_('Red Hat Client Secret for Analytics'),
+    help_text=_('Client secret used to send data to Automation Analytics'),
     category=_('System'),
     category_slug='system',
 )
 
 register(
-    'SUBSCRIPTIONS_USERNAME',
+    'SUBSCRIPTIONS_CLIENT_ID',
     field_class=fields.CharField,
     default='',
     allow_blank=True,
     encrypted=False,
     read_only=False,
-    label=_('Red Hat or Satellite username'),
-    help_text=_('This username is used to retrieve subscription and content information'),  # noqa
+    label=_('Red Hat Client ID for Subscriptions'),
+    help_text=_('Client ID used to retrieve subscription and content information'),  # noqa
     category=_('System'),
     category_slug='system',
 )
 
 register(
-    'SUBSCRIPTIONS_PASSWORD',
+    'SUBSCRIPTIONS_CLIENT_SECRET',
     field_class=fields.CharField,
     default='',
     allow_blank=True,
     encrypted=True,
     read_only=False,
-    label=_('Red Hat or Satellite password'),
-    help_text=_('This password is used to retrieve subscription and content information'),  # noqa
+    label=_('Red Hat Client Secret for Subscriptions'),
+    help_text=_('Client secret used to retrieve subscription and content information'),  # noqa
     category=_('System'),
     category_slug='system',
 )
