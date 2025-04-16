@@ -3,6 +3,8 @@ import os
 import json
 from typing import TypeAlias
 
+from awx.main.models import InventoryGroupVariablesWithHistory
+
 
 var_value: TypeAlias = str | int  # TODO: What are all possible value types?
 update_queue: TypeAlias = list[tuple[int, var_value]]
@@ -46,12 +48,12 @@ class InventoryVariable:
         self._update_queue = []
 
     def load(self, updates: update_queue) -> "InventoryVariable":
-        """Load internal state from a dict."""
+        """Load internal state from a list."""
         self._update_queue = updates
         return self
 
     def dump(self) -> update_queue:
-        """Save internal state to a dict."""
+        """Save internal state to a list."""
         return self._update_queue
 
     def update(self, value: var_value | None, invsrc_id: int) -> None:
@@ -152,7 +154,6 @@ class InventoryGroupVariables(dict):
         :param str name: The name of the group, 'all' for the all-group.
         :return: None
         """
-        logger.error(f"InventoryGroupVariables().__init__({name}) >>>>")
         super().__init__()
         self.name = name
         # In _vars we keep all sources for a given variable. This enables us to
@@ -169,13 +170,14 @@ class InventoryGroupVariables(dict):
         for name, inv_var in self._vars.items():
             self[name] = inv_var.value
 
-    def load(self, state: dict[str, update_queue]) -> None:
+    def from_dict(self, state: dict[str, update_queue]) -> "InventoryGroupVariables":
         """Load internal state from a dict."""
         for name, updates in state.items():
             self._vars[name] = InventoryVariable(name).load(updates)
         self._sync_vars()
+        return self
 
-    def dump(self) -> dict[str, update_queue]:
+    def to_dict(self) -> dict[str, update_queue]:
         """Return internal state as a dict."""
         state = {}
         for name, inv_var in self._vars.items():
@@ -256,33 +258,31 @@ def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsr
         database pk of the inventory source object, but there are some special
         ids: -1 for the initial update from the database. 0 for manual updates.
     :param bool overwrite: If `True`, delete all variables from previous
-        updates. Therewith making this update overwrite all history. Default is
+        updates, therewith making this update overwrite all history. Default is
         `False`.
     :return: The variables and their current values as a dict.
     :rtype: dict
     """
     inv_group_vars = InventoryGroupVariables(group)
-    #
-    filepath = f"/awx_devel/tmp/vars_{group}"
-    #
-    if not os.path.isfile(filepath):
+    # Restore the existing variables state.
+    try:
+        # Get the object for this group from the database.
+        model = InventoryGroupVariablesWithHistory.objects.get(group_name=group)
+    except InventoryGroupVariablesWithHistory.DoesNotExist:
+        # If no previous state exists, create a new database object, and
+        # initialize it with the current group variables.
+        model = InventoryGroupVariablesWithHistory(group_name=group)
         if dbvars:
             inv_group_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
     else:
-        with open(filepath, "r") as fp:
-            inv_group_vars.load(json.load(fp))
-    #
+        #
+        inv_group_vars.from_dict(json.loads(model.variables))
+    logger.error(f"update_group_variables(): before update_from_src {model.variables=}")
+    # Apply the new inventory update onto the group variables.
     inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
-    #
-    with open(filepath, "w") as fp:
-        json.dump(inv_group_vars.dump(), fp)
-        fp.write("\n")
-    #
+    # Save the new variables state.
+    model.variables = json.dumps(inv_group_vars.to_dict())
+    model.save()
+    logger.error(f"update_group_variables(): after update_from_src {model.variables=}")
     logger.error(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
     return inv_group_vars
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
