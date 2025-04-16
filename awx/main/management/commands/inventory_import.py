@@ -1070,5 +1070,3 @@ class Command(BaseCommand):
                 queries_this_import = connection.queries[queries_before:]
                 sqltime = sum(float(x['time']) for x in queries_this_import)
                 logger.warning('Inventory import required %d queries taking %0.3fs', len(queries_this_import), sqltime)
-
-        djlogger.error("<<<< perform_update()")
