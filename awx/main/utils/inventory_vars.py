@@ -10,8 +10,7 @@ var_value: TypeAlias = str | int  # TODO: What are all possible value types?
 update_queue: TypeAlias = list[tuple[int, var_value]]
 
 
-# logger = logging.getLogger('awx.main.commands.inventory_import')
-logger = logging.getLogger('awx.api.inventory_import')  # DJDEBUG logger above doesn't show up in docker-compose awx...
+logger = logging.getLogger('awx.api.inventory_import')
 
 
 class InventoryVariable:
@@ -85,7 +84,7 @@ class InventoryVariable:
         :param int invsrc_id: The inventory source of the new variable value.
         :return: None
         """
-        logger.error(f"InventoryVariable().update({value}, {invsrc_id}):")
+        logger.debug(f"InventoryVariable().update({value}, {invsrc_id}):")
         # Remove the existing entry for this inventory source in any case,
         # because we have to either bring it to the front of the queue (value is
         # not None) or we have to just delete it (value is None).
@@ -110,7 +109,7 @@ class InventoryVariable:
         # Remove last update from this source, if there was any.
         if data_index is not None:
             value = self._update_queue.pop(data_index)[1]
-            logger.error(f"InventoryVariable().delete({invsrc_id}): {data_index=} {value=}")
+            logger.debug(f"InventoryVariable().delete({invsrc_id}): {data_index=} {value=}")
 
     def _get_invsrc_index(self, invsrc_id: int) -> int | None:
         """Return the inventory source's position in the queue, or `None`."""
@@ -210,7 +209,7 @@ class InventoryGroupVariables(dict):
             is `False`.
         :return: None
         """
-        logger.error(f"InventoryGroupVariables({self.name}).update_from_src({vars=}, {source_id=}, {overwrite=}): {self=}")
+        logger.debug(f"InventoryGroupVariables({self.name}).update_from_src({vars=}, {source_id=}, {overwrite=}): {self=}")
         # Create variables which are newly introduced by this source.
         for name in vars:
             if name not in self._vars:
@@ -236,7 +235,7 @@ class InventoryGroupVariables(dict):
         # After the update, refresh the internal dict with the possibly changed
         # current values.
         self._sync_vars()
-        logger.error(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
+        logger.debug(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
 
 
 def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsrc_id: int, overwrite: bool = False) -> dict[str, var_value]:
@@ -277,12 +276,12 @@ def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsr
     else:
         #
         inv_group_vars.from_dict(json.loads(model.variables))
-    logger.error(f"update_group_variables(): before update_from_src {model.variables=}")
+    logger.debug(f"update_group_variables(): before update_from_src {model.variables=}")
     # Apply the new inventory update onto the group variables.
     inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
     # Save the new variables state.
     model.variables = json.dumps(inv_group_vars.to_dict())
     model.save()
-    logger.error(f"update_group_variables(): after update_from_src {model.variables=}")
-    logger.error(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
+    logger.debug(f"update_group_variables(): after update_from_src {model.variables=}")
+    logger.debug(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
     return inv_group_vars

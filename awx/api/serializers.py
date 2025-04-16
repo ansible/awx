@@ -1601,7 +1601,6 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         return host_filter
 
     def validate(self, attrs):
-        logger.info(f"InventorySerializer.validate({attrs=})")
         kind = None
         if 'kind' in attrs:
             kind = attrs['kind']
@@ -1915,7 +1914,6 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
-        logger.info(f"GroupSerializer.validate({attrs=})")
         name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
