@@ -32,7 +32,7 @@ def test_db_localhost():
     ],
     ids=['cpu_dominated', 'memory_dominated'],
 )
-def test_dispatcher_max_workers_reserve(settings):
+def test_dispatcher_max_workers_reserve(settings, fake_redis):
     """This tests that the dispatcher max_workers matches instance capacity
 
     Assumes capacity_adjustment is 1,
