@@ -21,6 +21,8 @@ from awx.main.models import Project, JobTemplate, Organization, Inventory
 
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
 
+del load_all_credentials
+
 
 def _copy_folders(source_path, dest_path, clear=False):
     "folder-by-folder, copy dirs in the source root dir to the destination root dir"
@@ -129,7 +131,7 @@ def podman_image_generator():
 
 @pytest.fixture
 def run_job_from_playbook(default_org, demo_inv, post, admin):
-    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None):
+    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None, wait=True):
         project_name = f'{test_name} project'
         jt_name = f'{test_name} JT: {playbook}'
 
@@ -180,7 +182,9 @@ def run_job_from_playbook(default_org, demo_inv, post, admin):
         job = jt.create_unified_job()
         job.signal_start()
 
-        wait_for_job(job)
-        assert job.status == 'successful'
+        if wait:
+            wait_for_job(job)
+            assert job.status == 'successful'
+        return {'job': job}
 
     return _rf

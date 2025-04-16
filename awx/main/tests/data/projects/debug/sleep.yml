@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars:
+    sleep_interval: 5
+  tasks:
+    - name: sleep for a specified interval
+      command: sleep '{{ sleep_interval }}'
