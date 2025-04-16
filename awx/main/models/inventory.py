@@ -1402,3 +1402,17 @@ class CustomInventoryScript(CommonModelNameNotUnique):
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
+
+
+class InventoryGroupVariablesWithHistory(models.Model):
+    """
+    Represents the inventory variables of one inventory group.
+
+    The purpose of this model is to persist the update history of the group
+    variables. The update history is maintained in another class
+    (`InventoryGroupVariables`), this class here is just a container for the
+    database storage.
+    """
+
+    group_name = models.CharField(max_length=256)
+    variables = models.JSONField()  # The group variables including their history.

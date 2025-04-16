@@ -33,6 +33,7 @@ from awx.main.models.inventory import (  # noqa
     InventorySource,
     InventoryUpdate,
     SmartInventoryMembership,
+    InventoryGroupVariablesWithHistory,
 )
 from awx.main.models.jobs import (  # noqa
     Job,
