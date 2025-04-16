@@ -1415,4 +1415,4 @@ class InventoryGroupVariablesWithHistory(models.Model):
     """
 
     group_name = models.CharField(max_length=256)
-    variables = models.JSONField()  # The group variables including their history.
+    variables = models.JSONField()  # The group variables, including their history.
