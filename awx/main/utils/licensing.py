@@ -221,7 +221,8 @@ class Licenser(object):
 
     def validate_rh(self, user, pw):
         try:
-            host = 'https://' + str(self.config.get("server", "hostname"))
+            host = 'subscription.rhsm.redhat.com'
+            # host = 'https://' + str(self.config.get("server", "hostname"))
         except Exception:
             logger.exception('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
             host = None
@@ -500,6 +501,7 @@ def get_licenser(*args, **kwargs):
     from awx.main.utils.licensing import Licenser, OpenLicense
 
     try:
+        return Licenser(*args, **kwargs)
         if detect_server_product_name() == 'AWX':
             return OpenLicense()
         else:
