@@ -1,5 +1,4 @@
 import logging
-import os
 import json
 from typing import TypeAlias
 
@@ -73,14 +72,6 @@ class InventoryVariable:
 
         :param value: The new value of the variable. If None, no value is set
             and the source is removed from this variable.
-
-            .. Note::
-
-                If `source_id` is 0 (indicating that the variable is set from an
-                inventory-level edit), the update queue is deleted completely.
-                Find the rational for this design in the description of
-                `InventoryGroupVariables.update_from_src`.
-
         :param int invsrc_id: The inventory source of the new variable value.
         :return: None
         """
@@ -93,10 +84,6 @@ class InventoryVariable:
         # this variable.
         if value is not None:
             self._update_queue.append((invsrc_id, value))
-        elif invsrc_id == 0:
-            # Delete all updates if the variable has been deleted on
-            # inventory-level.
-            self.reset()
 
     def _delete(self, invsrc_id: int) -> None:
         """
@@ -188,19 +175,6 @@ class InventoryGroupVariables(dict):
         Update with variables from an inventory source.
 
         Delete all variables for this source which are not in the update vars.
-
-        .. Note::
-
-            If the source_id indicates the special case that the update is
-            caused by an inventory-level object edit (id = 0), vars which are
-            not contained in the update are deleted together with their update
-            history.
-
-            We do this because if a variable is not contained in an
-            inventory-level update, it must have been explicitely deleted from
-            the inventory form field. This indicates that the operator expects
-            the variable to be removed from the group, and not that it reappears
-            with the value from the previous source update.
 
         :param dict vars: The variables from the inventory source.
         :param int invsrc_id: The id of the inventory source for this update.
