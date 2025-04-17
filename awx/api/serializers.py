@@ -1640,11 +1640,31 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
         #
         attrs = super(InventorySerializer, self).validate(attrs)
-        # The variables field contains vars from the all-group. Since this is
-        # not an update from an inventory source, we update the variables when
-        # the inventory object is saved.
-        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)  # TODO: silent_failure or not?
-        update_group_variables("all", vars, None, 0)
+        # The variables field contains vars from the inventory dialog, hence
+        # representing the "all"-group variables.
+        #
+        # Since this is not an update from an inventory source, we update the
+        # variables when the inventory object is saved.
+        #
+        # A user edit on the inventory variables is considered a reset of the
+        # variables update history. Particularly if the user removes a variable
+        # by editing the inventory variables field, the variable is not supposed
+        # to reappear with a value from a previous inventory source update.
+        #
+        # We achieve this by forcing `overwrite=True` on such an update.
+        #
+        # As a side-effect, variables which have been set by source updates and
+        # have survived a user-edit (i.e. they have not been deleted from the
+        # variables field) will be assumed to originate from the user edit and
+        # are thus no longer deleted from the inventory when they are removed
+        # from their original source!
+        #
+        # Note that we use the inventory source id 0 for user-edit updates
+        # because a regular inventory source cannot have an id of 0 since
+        # PostgreSQL assigns pk's starting from 1 (if this assumption doesn't
+        # hold true, we have to assign another special value for invsrc_id).
+        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
+        update_group_variables(group="all", newvars=vars, dbvars=None, invsrc_id=0, overwrite=True)
         #
         return attrs
 
@@ -1945,8 +1965,11 @@ class GroupSerializer(BaseSerializerWithVariables):
         # The variables field contains vars from the inventory group dialog.
         # Since this is not an update from an inventory source, we update the
         # variables when the inventory group object is saved.
-        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)  # TODO: silent_failure or not?
-        update_group_variables(name, vars, None, 0)
+        #
+        # For details on the update logic, please refer to the comments in
+        # `InventorySerializer.validate`.
+        vars = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
+        update_group_variables(group=name, newvars=vars, dbvars=None, invsrc_id=0, overwrite=True)
         #
         return attrs
 
