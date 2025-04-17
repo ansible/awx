@@ -1414,5 +1414,11 @@ class InventoryGroupVariablesWithHistory(models.Model):
     database storage.
     """
 
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='inventory_group_variables',
+        null=True,
+        on_delete=models.CASCADE,
+    )
     group_name = models.CharField(max_length=256)
     variables = models.JSONField()  # The group variables, including their history.

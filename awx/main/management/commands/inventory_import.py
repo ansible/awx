@@ -468,9 +468,9 @@ class Command(BaseCommand):
                 newvars=self.all_group.variables,
                 dbvars=self.inventory.variables_dict,
                 invsrc_id=self.inventory_source.id,
+                inventory_id=self.inventory.id,
                 overwrite=self.overwrite_vars,
             )
-        #
         if db_variables != self.inventory.variables_dict:
             self.inventory.variables = json.dumps(db_variables)
             self.inventory.save(update_fields=['variables'])
@@ -505,6 +505,7 @@ class Command(BaseCommand):
                     newvars=mem_group.variables,
                     dbvars=group.variables_dict,
                     invsrc_id=self.inventory_source.id,
+                    inventory_id=self.inventory.id,
                     overwrite=self.overwrite_vars,
                 )
                 if db_variables != group.variables_dict:

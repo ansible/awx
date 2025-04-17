@@ -212,7 +212,14 @@ class InventoryGroupVariables(dict):
         logger.debug(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
 
 
-def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsrc_id: int, overwrite: bool = False) -> dict[str, var_value]:
+def update_group_variables(
+    group: str,
+    newvars: dict,
+    dbvars: dict | None,
+    invsrc_id: int,
+    inventory_id: int,
+    overwrite: bool = False,
+) -> dict[str, var_value]:
     """
     Update the inventory variables of one group.
 
@@ -230,6 +237,8 @@ def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsr
     :param int invsrc_id: The id of the inventory source. Usually this is the
         database pk of the inventory source object, but there are some special
         ids: -1 for the initial update from the database. 0 for manual updates.
+    :param int inventory_id: The id of the inventory on which this update is
+        applied.
     :param bool overwrite: If `True`, delete all variables from previous
         updates, therewith making this update overwrite all history. Default is
         `False`.
@@ -240,22 +249,23 @@ def update_group_variables(group: str, newvars: dict, dbvars: dict | None, invsr
     # Restore the existing variables state.
     try:
         # Get the object for this group from the database.
-        model = InventoryGroupVariablesWithHistory.objects.get(group_name=group)
+        model = InventoryGroupVariablesWithHistory.objects.get(inventory_id=inventory_id, group_name=group)
     except InventoryGroupVariablesWithHistory.DoesNotExist:
         # If no previous state exists, create a new database object, and
         # initialize it with the current group variables.
-        model = InventoryGroupVariablesWithHistory(group_name=group)
+        model = InventoryGroupVariablesWithHistory(inventory_id=inventory_id, group_name=group)
         if dbvars:
             inv_group_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
     else:
-        #
+        # Load the group variables state from the database object.
         inv_group_vars.from_dict(json.loads(model.variables))
-    logger.debug(f"update_group_variables(): before update_from_src {model.variables=}")
+    #
+    logger.debug(f"update_group_variables: before update_from_src {model.variables=}")
     # Apply the new inventory update onto the group variables.
     inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
     # Save the new variables state.
     model.variables = json.dumps(inv_group_vars.to_dict())
     model.save()
-    logger.debug(f"update_group_variables(): after update_from_src {model.variables=}")
+    logger.debug(f"update_group_variables: after update_from_src {model.variables=}")
     logger.debug(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
     return inv_group_vars
