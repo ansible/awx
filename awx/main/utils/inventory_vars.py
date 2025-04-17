@@ -18,10 +18,6 @@ class InventoryVariable:
 
     This class keeps track of the variable updates from different inventory
     sources.
-
-    An inventory variable cannot hold the value `None`. To indicate that the
-    variable holds no value, the empty string has to be used. See also the
-    documentation of method `update`.
     """
 
     def __init__(self, name: str) -> None:
@@ -58,20 +54,10 @@ class InventoryVariable:
         """
         Update the variable with a new value from an inventory source.
 
-        If `value` is not `None`, it becomes the new current value. Otherwise
-        the current value is not changed, and this source is removed from the
-        list of sources for this variable.
-
-        In other words:
-
-        If `value` is `None`, delete this update from the update queue. The
-        current value is not changed.
-
-        If `value` is not `None`, this source is moved to the top of the queue
+        Updating means that this source is moved to the top of the queue
         and `value` becomes the new current value.
 
-        :param value: The new value of the variable. If None, no value is set
-            and the source is removed from this variable.
+        :param value: The new value of the variable.
         :param int invsrc_id: The inventory source of the new variable value.
         :return: None
         """
@@ -79,13 +65,12 @@ class InventoryVariable:
         # Remove the existing entry for this inventory source in any case,
         # because we have to either bring it to the front of the queue (value is
         # not None) or we have to just delete it (value is None).
-        self._delete(invsrc_id)
+        self.delete(invsrc_id)
         # Add source from this update to the front of the queue, if it contains
         # this variable.
-        if value is not None:
-            self._update_queue.append((invsrc_id, value))
+        self._update_queue.append((invsrc_id, value))
 
-    def _delete(self, invsrc_id: int) -> None:
+    def delete(self, invsrc_id: int) -> None:
         """
         Delete an inventory source from the variable.
 
@@ -201,7 +186,10 @@ class InventoryGroupVariables(dict):
         # update.
         for name in all_var_names:
             # Update or delete source from var (if name not in vars).
-            self._vars[name].update(vars.get(name), source_id)
+            if name in vars:
+                self._vars[name].update(vars["name"], source_id)
+            else:
+                self._vars[name].delete(source_id)
             # Delete vars which have no source anymore.
             if self._vars[name].has_no_source:
                 del self._vars[name]
