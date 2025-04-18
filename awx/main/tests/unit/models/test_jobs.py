@@ -103,7 +103,7 @@ def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir, ref_tim
         assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == ansible_facts_new
     assert hosts[1].ansible_facts_modified > ref_time
-    bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
+    bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'], batch_size=100)
 
 
 def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
@@ -139,4 +139,4 @@ def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
         assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == {}
     assert hosts[1].ansible_facts_modified > ref_time
-    bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
+    bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'], batch_size=100)
