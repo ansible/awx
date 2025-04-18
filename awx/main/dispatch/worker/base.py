@@ -238,7 +238,7 @@ class AWXConsumerPG(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
 
-        logger.info(f"Running worker {self.name} listening to queues {self.queues}")
+        logger.info(f"Running {self.name}, workers min={self.pool.min_workers} max={self.pool.max_workers}, listening to queues {self.queues}")
         init = False
 
         while True:

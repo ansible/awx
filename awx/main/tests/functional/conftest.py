@@ -63,6 +63,33 @@ def swagger_autogen(requests=__SWAGGER_REQUESTS__):
     return requests
 
 
+class FakeRedis:
+    def keys(self, *args, **kwargs):
+        return []
+
+    def set(self):
+        pass
+
+    def get(self):
+        return None
+
+    @classmethod
+    def from_url(cls, *args, **kwargs):
+        return cls()
+
+    def pipeline(self):
+        return self
+
+    def ping(self):
+        return
+
+
+@pytest.fixture
+def fake_redis():
+    with mock.patch('redis.Redis', new=FakeRedis):  # turn off redis stuff
+        yield
+
+
 @pytest.fixture
 def user():
     def u(name, is_superuser=False):

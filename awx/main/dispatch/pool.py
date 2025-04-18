@@ -7,6 +7,7 @@ import time
 import traceback
 from datetime import datetime
 from uuid import uuid4
+import json
 
 import collections
 from multiprocessing import Process
@@ -25,7 +26,10 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
+from awx.main.utils.common import get_mem_effective_capacity, get_corrected_memory, get_corrected_cpu, get_cpu_effective_capacity
+
+# ansible-runner
+from ansible_runner.utils.capacity import get_mem_in_bytes, get_cpu_count
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -307,6 +311,41 @@ class WorkerPool(object):
             logger.exception('could not kill {}'.format(worker.pid))
 
 
+def get_auto_max_workers():
+    """Method we normally rely on to get max_workers
+
+    Uses almost same logic as Instance.local_health_check
+    The important thing is to be MORE than Instance.capacity
+    so that the task-manager does not over-schedule this node
+
+    Ideally we would just use the capacity from the database plus reserve workers,
+    but this poses some bootstrap problems where OCP task containers
+    register themselves after startup
+    """
+    # Get memory from ansible-runner
+    total_memory_gb = get_mem_in_bytes()
+
+    # This may replace memory calculation with a user override
+    corrected_memory = get_corrected_memory(total_memory_gb)
+
+    # Get same number as max forks based on memory, this function takes memory as bytes
+    mem_capacity = get_mem_effective_capacity(corrected_memory, is_control_node=True)
+
+    # Follow same process for CPU capacity constraint
+    cpu_count = get_cpu_count()
+    corrected_cpu = get_corrected_cpu(cpu_count)
+    cpu_capacity = get_cpu_effective_capacity(corrected_cpu, is_control_node=True)
+
+    # Here is what is different from health checks,
+    auto_max = max(mem_capacity, cpu_capacity)
+
+    # add magic number of extra workers to ensure
+    # we have a few extra workers to run the heartbeat
+    auto_max += 7
+
+    return auto_max
+
+
 class AutoscalePool(WorkerPool):
     """
     An extended pool implementation that automatically scales workers up and
@@ -320,19 +359,7 @@ class AutoscalePool(WorkerPool):
         super(AutoscalePool, self).__init__(*args, **kwargs)
 
         if self.max_workers is None:
-            settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
-            if settings_absmem is not None:
-                # There are 1073741824 bytes in a gigabyte. Convert bytes to gigabytes by dividing by 2**30
-                total_memory_gb = convert_mem_str_to_bytes(settings_absmem) // 2**30
-            else:
-                total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
-
-            # Get same number as max forks based on memory, this function takes memory as bytes
-            self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
-
-            # add magic prime number of extra workers to ensure
-            # we have a few extra workers to run the heartbeat
-            self.max_workers += 7
+            self.max_workers = get_auto_max_workers()
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
@@ -345,6 +372,9 @@ class AutoscalePool(WorkerPool):
         # the AutoscalePool class does not save these to redis directly, but reports via produce_subsystem_metrics
         self.scale_up_ct = 0
         self.worker_count_max = 0
+
+        # last time we wrote current tasks, to avoid too much log spam
+        self.last_task_list_log = time.monotonic()
 
     def produce_subsystem_metrics(self, metrics_object):
         metrics_object.set('dispatcher_pool_scale_up_events', self.scale_up_ct)
@@ -463,6 +493,14 @@ class AutoscalePool(WorkerPool):
                 self.worker_count_max = new_worker_ct
             return ret
 
+    @staticmethod
+    def fast_task_serialization(current_task):
+        try:
+            return str(current_task.get('task')) + ' - ' + str(sorted(current_task.get('args', []))) + ' - ' + str(sorted(current_task.get('kwargs', {})))
+        except Exception:
+            # just make sure this does not make things worse
+            return str(current_task)
+
     def write(self, preferred_queue, body):
         if 'guid' in body:
             set_guid(body['guid'])
@@ -484,6 +522,15 @@ class AutoscalePool(WorkerPool):
                 if isinstance(body, dict):
                     task_name = body.get('task')
                 logger.warning(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
+                # Once every 10 seconds write out task list for debugging
+                if time.monotonic() - self.last_task_list_log >= 10.0:
+                    task_counts = {}
+                    for worker in self.workers:
+                        task_slug = self.fast_task_serialization(worker.current_task)
+                        task_counts.setdefault(task_slug, 0)
+                        task_counts[task_slug] += 1
+                    logger.info(f'Running tasks by count:\n{json.dumps(task_counts, indent=2)}')
+                    self.last_task_list_log = time.monotonic()
                 return super(AutoscalePool, self).write(preferred_queue, body)
         except Exception:
             for conn in connections.all():

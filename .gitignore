@@ -150,6 +150,8 @@ use_dev_supervisor.txt
 
 awx/ui/src
 awx/ui/build
+awx/ui/.ui-built
+awx/ui_next
 
 # Docs build stuff
 docs/docsite/build/
