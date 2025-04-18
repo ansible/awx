@@ -62,7 +62,8 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
 
 
 def raw_update_hosts(host_list):
-    Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
+    host_list = sorted(host_list, key=lambda host: host.id)
+    Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'], batch_size=100)
 
 
 def update_hosts(host_list, max_tries=5):
