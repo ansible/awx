@@ -602,7 +602,7 @@ class JobEvent(BasePlaybookEvent):
                     h.last_job_host_summary_id = host_mapping[h.id]
                     updated_hosts.add(h)
 
-            Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
+            Host.objects.bulk_update(sorted(updated_hosts, key=lambda host: host.id), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
 
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)
