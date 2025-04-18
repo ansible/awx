@@ -21,8 +21,8 @@ def worker_delete_target(ready_event, continue_event, field_name):
     # wait for the coordination message
     continue_event.wait()
 
-    # presumed fix
-    host_list = sorted(host_list, key=lambda host: host.id)
+    # # presumed fix
+    # host_list = sorted(host_list, key=lambda host: host.id)
 
     # NOTE: did not reproduce the bug without batch_size
     Host.objects.bulk_update(host_list, [field_name], batch_size=100)
