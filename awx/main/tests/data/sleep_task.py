@@ -8,6 +8,8 @@ from django.db import connection
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task as old_task
 
+from ansible_base.lib.utils.db import advisory_lock
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,3 +48,10 @@ def sleep_break_connection(seconds=0.2):
             logger.info(f'  query errored as expected\ntype: {type(exc)}\nstr: {str(exc)}')
 
     logger.info(f'Connection present: {bool(connection.connection)}, reports closed: {getattr(connection.connection, "closed", "not_found")}')
+
+
+@task()
+def advisory_lock_exception():
+    time.sleep(0.2)  # so it can fill up all the workers... hacky for now
+    with advisory_lock('advisory_lock_exception', lock_session_timeout_milliseconds=20):
+        raise RuntimeError('this is an intentional error')
