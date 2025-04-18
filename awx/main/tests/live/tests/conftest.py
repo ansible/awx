@@ -21,8 +21,6 @@ from awx.main.models import Project, JobTemplate, Organization, Inventory
 
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
 
-del load_all_credentials
-
 
 def _copy_folders(source_path, dest_path, clear=False):
     "folder-by-folder, copy dirs in the source root dir to the destination root dir"
