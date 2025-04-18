@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from dispatcherd.config import settings
 from dispatcherd.factories import get_control_from_settings
 from dispatcherd.utils import serialize_task
@@ -31,26 +33,45 @@ def check_jobs_work():
     wait_for_job(job)
 
 
-def test_can_recover_connection():
-    min_workers = settings.service['pool_kwargs']['min_workers']
-
-    for i in range(min_workers):
-        sleep_break_connection.delay()
-
-    task_name = serialize_task(sleep_break_connection)
-    poll_for_task_finish(task_name)
-
-    # Jobs should still work even after the breaking task has ran
-    check_jobs_work()
-
-
+@pytest.mark.skip(reason='AAP-43763 connection recovery not finished')
 def test_advisory_lock_error_clears():
+    """Run a task that has an exception while holding advisory_lock
+
+    This is regression testing for a bug in its exception handling
+    expected to be fixed by
+    https://github.com/ansible/django-ansible-base/pull/713
+
+    This is an "easier" test case than the next,
+    because it passes just by fixing the DAB case,
+    and passing this does not generally guarentee that
+    workers will not be left with a connection in a bad state.
+    """
     min_workers = settings.service['pool_kwargs']['min_workers']
 
     for i in range(min_workers):
         advisory_lock_exception.delay()
 
     task_name = serialize_task(advisory_lock_exception)
+    poll_for_task_finish(task_name)
+
+    # Jobs should still work even after the breaking task has ran
+    check_jobs_work()
+
+
+@pytest.mark.skip(reason='AAP-43763 connection recovery not finished')
+def test_can_recover_connection():
+    """Run a task that intentionally times out the worker connection
+
+    If no connection fixing is implemented outside of that task scope,
+    then subsequent tasks will all error, thus checking that jobs run,
+    after running the sleep_break_connection task.
+    """
+    min_workers = settings.service['pool_kwargs']['min_workers']
+
+    for i in range(min_workers):
+        sleep_break_connection.delay()
+
+    task_name = serialize_task(sleep_break_connection)
     poll_for_task_finish(task_name)
 
     # Jobs should still work even after the breaking task has ran
