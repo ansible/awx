@@ -33,7 +33,6 @@ def check_jobs_work():
     wait_for_job(job)
 
 
-@pytest.mark.skip(reason='AAP-43763 connection recovery not finished')
 def test_advisory_lock_error_clears():
     """Run a task that has an exception while holding advisory_lock
 
@@ -58,7 +57,6 @@ def test_advisory_lock_error_clears():
     check_jobs_work()
 
 
-@pytest.mark.skip(reason='AAP-43763 connection recovery not finished')
 def test_can_recover_connection():
     """Run a task that intentionally times out the worker connection
 
