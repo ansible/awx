@@ -1,7 +1,5 @@
 import time
 
-import pytest
-
 from dispatcherd.config import settings
 from dispatcherd.factories import get_control_from_settings
 from dispatcherd.utils import serialize_task
