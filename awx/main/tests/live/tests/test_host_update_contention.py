@@ -5,6 +5,7 @@ from django.db import connection
 from django.utils.timezone import now
 
 from awx.main.models import Inventory, Host
+from awx.main.utils.db import bulk_update_sorted_by_id
 
 
 def worker_delete_target(ready_event, continue_event, field_name):
@@ -25,7 +26,7 @@ def worker_delete_target(ready_event, continue_event, field_name):
     # host_list = sorted(host_list, key=lambda host: host.id)
 
     # NOTE: did not reproduce the bug without batch_size
-    Host.objects.bulk_update(host_list, [field_name], batch_size=100)
+    bulk_update_sorted_by_id(Host, host_list, fields=[field_name], batch_size=100)
     print('finished doing the bulk update in worker')
 
 
