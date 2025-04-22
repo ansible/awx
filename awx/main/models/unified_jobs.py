@@ -18,6 +18,7 @@ from collections import OrderedDict
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
+from django.db.models.constraints import UniqueConstraint
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
@@ -111,7 +112,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         ordering = ('name',)
         # unique_together here is intentionally commented out. Please make sure sub-classes of this model
         # contain at least this uniqueness restriction: SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
-        # unique_together = [('polymorphic_ctype', 'name', 'organization')]
+        constraints = [UniqueConstraint(fields=['polymorphic_ctype', 'name', 'organization'], name='ujt_hard_name_constraint')]
 
     old_pk = models.PositiveIntegerField(
         null=True,
