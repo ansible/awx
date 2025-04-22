@@ -187,7 +187,7 @@ class InventoryGroupVariables(dict):
         for name in all_var_names:
             # Update or delete source from var (if name not in vars).
             if name in vars:
-                self._vars[name].update(vars["name"], source_id)
+                self._vars[name].update(vars[name], source_id)
             else:
                 self._vars[name].delete(source_id)
             # Delete vars which have no source anymore.
