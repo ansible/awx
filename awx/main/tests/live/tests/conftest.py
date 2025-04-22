@@ -114,6 +114,12 @@ def demo_inv(default_org):
     return inventory
 
 
+@pytest.fixture(scope='session')
+def demo_proj(default_org):
+    proj, _ = Project.objects.get_or_create(name='Demo Project', defaults={'organization': default_org})
+    return proj
+
+
 @pytest.fixture
 def podman_image_generator():
     """
