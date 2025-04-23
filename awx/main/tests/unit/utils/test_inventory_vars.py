@@ -18,11 +18,11 @@ def test_inventory_variable_update_basic():
     assert str(x) == "2"
     x.update(3, 103)
     assert str(x) == "3"
-    x.update(None, 102)
+    x.delete(102)
     assert str(x) == "3"
-    x.update(None, 103)
+    x.delete(103)
     assert str(x) == "1"
-    x.update(None, 101)
+    x.delete(101)
     assert x.value is None
     assert x.has_no_source
 
@@ -48,10 +48,15 @@ def test_inventory_variable_update_basic():
 def test_inventory_variable_update(updates: tuple[int, int | None, int | None]):
     """
     Test if the variable value is set correctly on a sequence of updates.
+
+    For this test, the value `None` implies the deletion of the source.
     """
     x = InventoryVariable("x")
     for src_id, value, expected_value in updates:
-        x.update(value, src_id)
+        if value is None:
+            x.delete(src_id)
+        else:
+            x.update(value, src_id)
         assert x.value == expected_value
 
 
