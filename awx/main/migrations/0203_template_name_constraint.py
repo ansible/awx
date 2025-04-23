@@ -48,18 +48,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(rename_jts, migrations.RunPython.noop),
         migrations.RunPython(rename_projects, migrations.RunPython.noop),
-        # migrations.AddConstraint(
-        #     model_name='jobtemplate',
-        #     constraint=models.UniqueConstraint(fields=('polymorphic_ctype', 'name', 'organization'), name='jt_name_constraint'),
-        # ),
-        # migrations.AddConstraint(
-        #     model_name='project',
-        #     constraint=models.UniqueConstraint(fields=('polymorphic_ctype', 'name', 'organization'), name='project_name_constraint'),
-        # ),
-        # migrations.AddConstraint(
-        #     model_name='unifiedjobtemplate',
-        #     constraint=models.UniqueConstraint(fields=('polymorphic_ctype', 'name', 'organization', 'inventorysource'), name='ujt_hard_name_constraint'),
-        # ),
         migrations.AddField(
             model_name='unifiedjobtemplate',
             name='org_unique',
