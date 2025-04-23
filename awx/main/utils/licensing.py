@@ -243,10 +243,7 @@ class Licenser(object):
 
     def get_rhsm_subs(self, host, user, pw):
         json = []
-        try:
-            subs = requests.get('/'.join([host, 'subscription/users/{}/owners'.format(user)]), verify=True, auth=(user, pw))
-        except requests.exceptions.ConnectionError as error:
-            raise error
+        subs = requests.get('/'.join([host, 'subscription/users/{}/owners'.format(user)]), verify=True, auth=(user, pw))
         subs.raise_for_status()
 
         for sub in subs.json():
@@ -261,14 +258,19 @@ class Licenser(object):
             verify = str(self.config.get("rhsm", "repo_ca_cert"))
             port = str(self.config.get("server", "port"))
         except Exception as e:
+            verify = True
             logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
         if port:
             host = ':'.join([host, port])
         json = []
         try:
-            orgs = requests.get('/'.join([host, 'katello/api/organizations']), verify=True, auth=(user, pw))
+            orgs = requests.get('/'.join([host, 'katello/api/organizations']), verify=verify, auth=(user, pw))
         except requests.exceptions.ConnectionError as error:
             raise error
+        except OSError as error:
+            raise OSError(
+                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
+            ) from error  # noqa
         orgs.raise_for_status()
 
         for org in orgs.json()['results']:
