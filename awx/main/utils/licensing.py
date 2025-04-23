@@ -243,25 +243,18 @@ class Licenser(object):
         return []
 
     def get_rhsm_subs(self, host, client_id, client_secret):
-        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
-        # TODO: remove this after fixing the custom ca issue in insights.py file
-        verify = True
         try:
             client = OIDCClient(client_id, client_secret, DEFAULT_OIDC_TOKEN_ENDPOINT, ['api.console'])
             subs = client.make_request(
                 'GET',
                 host,
-                verify=verify,
+                verify=True,
                 timeout=(31, 31),
             )
         except TokenError as e:
             raise e
         except requests.exceptions.ConnectionError as error:
             raise error
-        except OSError as error:
-            raise OSError(
-                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
-            ) from error  # noqa
         subs.raise_for_status()
         subs_formatted = []
         for sku in subs.json()['body']:
@@ -280,18 +273,14 @@ class Licenser(object):
             port = str(self.config.get("server", "port"))
         except Exception as e:
             logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
-            verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
+            verify = True
         if port:
             host = ':'.join([host, port])
         json = []
         try:
-            orgs = requests.get('/'.join([host, 'katello/api/organizations']), verify=verify, auth=(user, pw))
+            orgs = requests.get('/'.join([host, 'katello/api/organizations']), verify=True, auth=(user, pw))
         except requests.exceptions.ConnectionError as error:
             raise error
-        except OSError as error:
-            raise OSError(
-                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
-            ) from error  # noqa
         orgs.raise_for_status()
 
         for org in orgs.json()['results']:
