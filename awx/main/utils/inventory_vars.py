@@ -106,7 +106,7 @@ class InventoryVariable:
 
     def __str__(self):
         """Return the string representation of the current value."""
-        return str(self.value)
+        return str(self.value or "")
 
 
 class InventoryGroupVariables(dict):
