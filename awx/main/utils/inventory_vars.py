@@ -223,8 +223,9 @@ def update_group_variables(
     :param dict dbvars: (optional) The variables which are already stored in the
         database for this inventory and this group.
     :param int invsrc_id: The id of the inventory source. Usually this is the
-        database pk of the inventory source object, but there are some special
-        ids: -1 for the initial update from the database. 0 for manual updates.
+        database primary key of the inventory source object, but there is one
+        special id -1 which is used for the initial update from the database and
+        for manual updates via the GUI.
     :param int inventory_id: The id of the inventory on which this update is
         applied.
     :param bool overwrite: If `True`, delete all variables from previous
