@@ -278,9 +278,13 @@ class Licenser(object):
             host = ':'.join([host, port])
         json = []
         try:
-            orgs = requests.get('/'.join([host, 'katello/api/organizations']), verify=True, auth=(user, pw))
+            orgs = requests.get('/'.join([host, 'katello/api/organizations']), verify=verify, auth=(user, pw))
         except requests.exceptions.ConnectionError as error:
             raise error
+        except OSError as error:
+            raise OSError(
+                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
+            ) from error  # noqa
         orgs.raise_for_status()
 
         for org in orgs.json()['results']:
