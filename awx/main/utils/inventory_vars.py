@@ -1,11 +1,11 @@
 import logging
 import json
-from typing import TypeAlias
+from typing import TypeAlias, Any
 
 from awx.main.models import InventoryGroupVariablesWithHistory
 
 
-var_value: TypeAlias = str | int  # TODO: What are all possible value types?
+var_value: TypeAlias = Any
 update_queue: TypeAlias = list[tuple[int, var_value]]
 
 
@@ -50,7 +50,7 @@ class InventoryVariable:
         """Save internal state to a list."""
         return self._update_queue
 
-    def update(self, value: var_value | None, invsrc_id: int) -> None:
+    def update(self, value: var_value, invsrc_id: int) -> None:
         """
         Update the variable with a new value from an inventory source.
 
@@ -87,12 +87,15 @@ class InventoryVariable:
                 return i
         return None
 
-    def _get_current_value(self) -> var_value | None:
-        """Return the current value of the variable, or None."""
+    def _get_current_value(self) -> var_value:
+        """
+        Return the current value of the variable, or None if the variable has no
+        history.
+        """
         return self._update_queue[-1][1] if self._update_queue else None
 
     @property
-    def value(self) -> var_value | None:
+    def value(self) -> var_value:
         """Read the current value of the variable."""
         return self._get_current_value()
 
