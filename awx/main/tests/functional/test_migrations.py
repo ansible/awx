@@ -128,7 +128,7 @@ class TestMigrationSmoke:
         for proj_id in proj_ids:
             proj = Project.objects.get(id=proj_id)
             assert proj.name != 'duplicate-project-name'
-            assert proj.name.startswtih('duplicate-project-name')
+            assert proj.name.startswith('duplicate-project-name')
             assert proj.org_unique is True
 
         # The inventory source had this field set to avoid the constrains
