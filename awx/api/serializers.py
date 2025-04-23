@@ -1984,7 +1984,7 @@ class GroupSerializer(BaseSerializerWithVariables):
                 newvars=variables,
                 dbvars=None,
                 invsrc_id=-1,
-                inventory_id=self.instance.inventory,
+                inventory_id=self.instance.inventory.id,
                 overwrite=True,
             )
         #
