@@ -141,14 +141,14 @@ class InventoryGroupVariables(dict):
         for name, inv_var in self._vars.items():
             self[name] = inv_var.value
 
-    def from_dict(self, state: dict[str, update_queue]) -> "InventoryGroupVariables":
+    def load_state(self, state: dict[str, update_queue]) -> "InventoryGroupVariables":
         """Load internal state from a dict."""
         for name, updates in state.items():
             self._vars[name] = InventoryVariable(name).load(updates)
         self._sync_vars()
         return self
 
-    def to_dict(self) -> dict[str, update_queue]:
+    def save_state(self) -> dict[str, update_queue]:
         """Return internal state as a dict."""
         state = {}
         for name, inv_var in self._vars.items():
@@ -247,13 +247,13 @@ def update_group_variables(
             inv_group_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
     else:
         # Load the group variables state from the database object.
-        inv_group_vars.from_dict(json.loads(model.variables))
+        inv_group_vars.load_state(json.loads(model.variables))
     #
     logger.debug(f"update_group_variables: before update_from_src {model.variables=}")
     # Apply the new inventory update onto the group variables.
     inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
     # Save the new variables state.
-    model.variables = json.dumps(inv_group_vars.to_dict())
+    model.variables = json.dumps(inv_group_vars.save_state())
     model.save()
     logger.debug(f"update_group_variables: after update_from_src {model.variables=}")
     logger.debug(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
