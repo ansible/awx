@@ -1659,8 +1659,8 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
         # are thus no longer deleted from the inventory when they are removed
         # from their original source!
         #
-        # Note that we use the inventory source id 0 for user-edit updates
-        # because a regular inventory source cannot have an id of 0 since
+        # Note that we use the inventory source id -1 for user-edit updates
+        # because a regular inventory source cannot have an id of -1 since
         # PostgreSQL assigns pk's starting from 1 (if this assumption doesn't
         # hold true, we have to assign another special value for invsrc_id).
         variables = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
@@ -1670,7 +1670,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
             group="all",
             newvars=variables,
             dbvars=None,
-            invsrc_id=0,
+            invsrc_id=-1,
             inventory_id=self.instance.id,
             overwrite=True,
         )
@@ -1983,7 +1983,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             group=name,
             newvars=variables,
             dbvars=None,
-            invsrc_id=0,
+            invsrc_id=-1,
             inventory_id=self.instance.inventory,
             overwrite=True,
         )
