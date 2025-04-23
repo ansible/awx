@@ -1,5 +1,4 @@
 import logging
-import json
 from typing import TypeAlias, Any
 
 from awx.main.models import InventoryGroupVariablesWithHistory
@@ -247,13 +246,13 @@ def update_group_variables(
             inv_group_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
     else:
         # Load the group variables state from the database object.
-        inv_group_vars.load_state(json.loads(model.variables))
+        inv_group_vars.load_state(model.variables)
     #
     logger.debug(f"update_group_variables: before update_from_src {model.variables=}")
     # Apply the new inventory update onto the group variables.
     inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
     # Save the new variables state.
-    model.variables = json.dumps(inv_group_vars.save_state())
+    model.variables = inv_group_vars.save_state()
     model.save()
     logger.debug(f"update_group_variables: after update_from_src {model.variables=}")
     logger.debug(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
