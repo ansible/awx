@@ -1120,8 +1120,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
     def save(self, *args, **kwargs):
         # if this is a new object, inherit organization from its inventory
-        if not self.pk and self.inventory and self.inventory.organization_id and not self.organization_id:
-            self.organization_id = self.inventory.organization_id
+        if not self.pk:
+            self.org_unique = False  # needed to exclude from unique (name, organization) constraint
+            if self.inventory and self.inventory.organization_id and not self.organization_id:
+                self.organization_id = self.inventory.organization_id
 
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.

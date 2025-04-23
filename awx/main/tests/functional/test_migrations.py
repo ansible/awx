@@ -106,3 +106,32 @@ class TestMigrationSmoke:
         )
         DABPermission = new_state.apps.get_model('dab_rbac', 'DABPermission')
         assert not DABPermission.objects.filter(codename='view_executionenvironment').exists()
+
+        # Test create a Project with a duplicate name
+        Organization = new_state.apps.get_model('main', 'Organization')
+        Project = new_state.apps.get_model('main', 'Project')
+        org = Organization.objects.create(name='duplicate-obj-organization', created=now(), modified=now())
+        proj_ids = []
+        for i in range(3):
+            proj = Project.objects.create(name='duplicate-project-name', organization=org, created=now(), modified=now())
+            proj_ids.append(proj.id)
+
+        # The uniqueness rules will not apply to InventorySource
+        Inventory = new_state.apps.get_model('main', 'Inventory')
+        InventorySource = new_state.apps.get_model('main', 'InventorySource')
+        inv = Inventory.objects.create(name='migration-test-inv', organization=org, created=now(), modified=now())
+        inv_src = InventorySource.objects.create(name='migration-test-src', inventory=inv, organization=org, created=now(), modified=now())
+
+        new_state = migrator.apply_tested_migration(
+            ('main', '0203_template_name_constraint'),
+        )
+        for proj_id in proj_ids:
+            proj = Project.objects.get(id=proj_id)
+            assert proj.name != 'duplicate-project-name'
+            assert proj.name.startswtih('duplicate-project-name')
+            assert proj.org_unique is True
+
+        # The inventory source had this field set to avoid the constrains
+        InventorySource = new_state.apps.get_model('main', 'InventorySource')
+        inv_src = InventorySource.objects.get(name='migration-test-src')
+        assert inv_src.org_unique is False

@@ -1,4 +1,5 @@
 import multiprocessing
+import json
 
 import pytest
 
@@ -28,6 +29,8 @@ def create_in_subprocess(project_id, ready_event, continue_event, admin_auth):
     # should either have a conflict or create
     assert response.status_code in (400, 201)
     print(f'Subprocess got {response.status_code}')
+    if response.status_code == 400:
+        print(json.dumps(response.json(), indent=2))
     return response.status_code
 
 

@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Cast
+from django.db.models.constraints import UniqueConstraint
 
 # from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
@@ -357,26 +358,6 @@ class JobTemplate(
             if 'organization' not in update_fields and 'organization_id' not in update_fields:
                 update_fields.append('organization_id')
         return super(JobTemplate, self).save(*args, **kwargs)
-
-    def validate_unique(self, exclude=None):
-        """Custom over-ride for JT specifically
-        because organization is inferred from project after full_clean is finished
-        thus the organization field is not yet set when validation happens
-        """
-        errors = []
-        for ut in JobTemplate.SOFT_UNIQUE_TOGETHER:
-            kwargs = {'name': self.name}
-            if self.project:
-                kwargs['organization'] = self.project.organization_id
-            else:
-                kwargs['organization'] = None
-            qs = JobTemplate.objects.filter(**kwargs)
-            if self.pk:
-                qs = qs.exclude(pk=self.pk)
-            if qs.exists():
-                errors.append('%s with this (%s) combination already exists.' % (JobTemplate.__name__, ', '.join(set(ut) - {'polymorphic_ctype'})))
-        if errors:
-            raise ValidationError(errors)
 
     def create_unified_job(self, **kwargs):
         prevent_slicing = kwargs.pop('_prevent_slicing', False)
