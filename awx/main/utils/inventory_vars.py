@@ -62,12 +62,9 @@ class InventoryVariable:
         :return: None
         """
         logger.debug(f"InventoryVariable().update({value}, {invsrc_id}):")
-        # Remove the existing entry for this inventory source in any case,
-        # because we have to either bring it to the front of the queue (value is
-        # not None) or we have to just delete it (value is None).
+        # Move this source to the front of the queue by first deleting a
+        # possibly existing entry, and then add the new entry to the front.
         self.delete(invsrc_id)
-        # Add source from this update to the front of the queue, if it contains
-        # this variable.
         self._update_queue.append((invsrc_id, value))
 
     def delete(self, invsrc_id: int) -> None:
