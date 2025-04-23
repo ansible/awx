@@ -1414,6 +1414,16 @@ class InventoryGroupVariablesWithHistory(models.Model):
     database storage.
     """
 
+    class Meta:
+        constraints = [
+            # Do not allow two groups with the same name in one inventory.
+            models.UniqueConstraint(
+                fields=["inventory", "group_name"],
+                name="unique_group_names_per_inventory",
+                violation_error_message=_("No two groups with the same name in an inventory."),
+            ),
+        ]
+
     inventory = models.ForeignKey(
         'Inventory',
         related_name='inventory_group_variables',
