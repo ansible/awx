@@ -384,6 +384,26 @@ class JobTemplate(
                 WorkflowJobNode.objects.create(**create_kwargs)
         return job
 
+    def validate_unique(self, exclude=None):
+        """Custom over-ride for JT specifically
+        because organization is inferred from project after full_clean is finished
+        thus the organization field is not yet set when validation happens
+        """
+        errors = []
+        for ut in JobTemplate.SOFT_UNIQUE_TOGETHER:
+            kwargs = {'name': self.name}
+            if self.project:
+                kwargs['organization'] = self.project.organization_id
+            else:
+                kwargs['organization'] = None
+            qs = JobTemplate.objects.filter(**kwargs)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                errors.append('%s with this (%s) combination already exists.' % (JobTemplate.__name__, ', '.join(set(ut) - {'polymorphic_ctype'})))
+        if errors:
+            raise ValidationError(errors)
+
     def get_absolute_url(self, request=None):
         return reverse('api:job_template_detail', kwargs={'pk': self.pk}, request=request)
 
