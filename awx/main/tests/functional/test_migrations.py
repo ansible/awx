@@ -129,9 +129,11 @@ class TestMigrationSmoke:
             proj = Project.objects.get(id=proj_id)
             assert proj.name != 'duplicate-project-name'
             assert proj.name.startswith('duplicate-project-name')
-            assert proj.org_unique is True
 
         # The inventory source had this field set to avoid the constrains
         InventorySource = new_state.apps.get_model('main', 'InventorySource')
         inv_src = InventorySource.objects.get(name='migration-test-src')
         assert inv_src.org_unique is False
+        Project = new_state.apps.get_model('main', 'Project')
+        for proj in Project.objects.all():
+            assert proj.org_unique is True
