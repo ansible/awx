@@ -1640,17 +1640,17 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         # because a regular inventory source cannot have an id of -1 since
         # PostgreSQL assigns pk's starting from 1 (if this assumption doesn't
         # hold true, we have to assign another special value for invsrc_id).
-        variables = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
-        logger.debug(f"InventorySerilizer.validate: {variables=}")
-        assert self.instance.id is not None
-        update_group_variables(
-            group="all",
-            newvars=variables,
-            dbvars=None,
-            invsrc_id=-1,
-            inventory_id=self.instance.id,
-            overwrite=True,
-        )
+        if self.instance:
+            variables = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
+            logger.debug(f"InventorySerializer.validate: {variables=}")
+            update_group_variables(
+                group="all",
+                newvars=variables,
+                dbvars=None,
+                invsrc_id=-1,
+                inventory_id=self.instance.id,
+                overwrite=True,
+            )
         #
         return attrs
 
@@ -1954,16 +1954,16 @@ class GroupSerializer(BaseSerializerWithVariables):
         #
         # For details on the update logic, please refer to the comments in
         # `InventorySerializer.validate`.
-        variables = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
-        assert self.instance.inventory is not None
-        update_group_variables(
-            group=name,
-            newvars=variables,
-            dbvars=None,
-            invsrc_id=-1,
-            inventory_id=self.instance.inventory,
-            overwrite=True,
-        )
+        if self.instance:
+            variables = parse_yaml_or_json(attrs.get("variables"), silent_failure=False)
+            update_group_variables(
+                group=name,
+                newvars=variables,
+                dbvars=None,
+                invsrc_id=-1,
+                inventory_id=self.instance.inventory,
+                overwrite=True,
+            )
         #
         return attrs
 
