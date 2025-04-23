@@ -120,7 +120,7 @@ class TestMigrationSmoke:
         Inventory = new_state.apps.get_model('main', 'Inventory')
         InventorySource = new_state.apps.get_model('main', 'InventorySource')
         inv = Inventory.objects.create(name='migration-test-inv', organization=org, created=now(), modified=now())
-        inv_src = InventorySource.objects.create(name='migration-test-src', inventory=inv, organization=org, created=now(), modified=now())
+        InventorySource.objects.create(name='migration-test-src', source='file', inventory=inv, organization=org, created=now(), modified=now())
 
         new_state = migrator.apply_tested_migration(
             ('main', '0203_template_name_constraint'),
