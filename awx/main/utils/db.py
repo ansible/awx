@@ -45,7 +45,13 @@ dj_db_dict = dict[str, Union[str, int]]
 
 
 def psycopg_connection_from_django(**kwargs) -> psycopg.Connection:
-    "Compatibility with dispatcher connection factory, just returns the Django connection"
+    """Compatibility with dispatcherd connection factory, just returns the Django connection
+
+    dispatcherd passes config info as kwargs, but in this case we just want to ignore then.
+    Because the point of this it to not reconnect, but rely on existing Django connection management.
+    """
+    if connection.connection is None:
+        connection.ensure_connection()
     return connection.connection
 
 
