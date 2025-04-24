@@ -1416,11 +1416,11 @@ class InventoryGroupVariablesWithHistory(models.Model):
 
     class Meta:
         constraints = [
-            # Do not allow two groups with the same name in one inventory.
+            # Do not allow the same inventory/group combination more than once.
             models.UniqueConstraint(
-                fields=["inventory", "group_name"],
-                name="unique_group_names_per_inventory",
-                violation_error_message=_("No two groups with the same name in an inventory."),
+                fields=["inventory", "group"],
+                name="unique_inventory_group",
+                violation_error_message=_("Inventory/Group combination must be unique."),
             ),
         ]
 
@@ -1430,5 +1430,10 @@ class InventoryGroupVariablesWithHistory(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-    group_name = models.CharField(max_length=256)
+    group = models.ForeignKey(  # `None` denotes the 'all'-group.
+        'Group',
+        related_name='inventory_group_variables',
+        null=True,
+        on_delete=models.CASCADE,
+    )
     variables = models.JSONField()  # The group variables, including their history.

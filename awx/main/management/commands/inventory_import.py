@@ -464,7 +464,7 @@ class Command(BaseCommand):
             db_variables = self.all_group.variables
         else:
             db_variables = update_group_variables(
-                group="all",
+                group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
                 newvars=self.all_group.variables,
                 dbvars=self.inventory.variables_dict,
                 invsrc_id=self.inventory_source.id,
@@ -501,7 +501,7 @@ class Command(BaseCommand):
                 mem_group = self.all_group.all_groups[group.name]
                 db_variables = group.variables_dict
                 db_variables = update_group_variables(
-                    group=group.name,
+                    group_id=group.id,
                     newvars=mem_group.variables,
                     dbvars=group.variables_dict,
                     invsrc_id=self.inventory_source.id,

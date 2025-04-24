@@ -62,7 +62,7 @@ def test_inventory_variable_update(updates: tuple[int, int | None, int | None]):
 
 def test_inventory_group_variables_update_basic():
     """Test basic functionality of an inventory variables update."""
-    vars = InventoryGroupVariables("all")
+    vars = InventoryGroupVariables(1)
     vars.update_from_src({"x": 1, "y": 2}, 101)
     assert vars == {"x": 1, "y": 2}
 
@@ -104,7 +104,7 @@ def test_inventory_group_variables_update(updates: tuple[int, int | None, int | 
     """
     Test if the group vars are set correctly on various update sequences.
     """
-    groupvars = InventoryGroupVariables("test_group")
+    groupvars = InventoryGroupVariables(2)
     for src_id, vars, expected_vars in updates:
         groupvars.update_from_src(vars, src_id)
         assert groupvars == expected_vars
