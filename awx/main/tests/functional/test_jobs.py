@@ -19,7 +19,7 @@ from awx.main.models import (
     ExecutionEnvironment,
 )
 from awx.main.tasks.system import cluster_node_heartbeat
-from awx.main.tasks.facts import update_hosts
+from awx.main.utils.db import bulk_update_sorted_by_id
 
 from django.db import OperationalError
 from django.test.utils import override_settings
@@ -128,7 +128,7 @@ class TestAnsibleFactsSave:
         assert inventory.hosts.count() == 3
         Host.objects.get(pk=last_pk).delete()
         assert inventory.hosts.count() == 2
-        update_hosts(hosts)
+        bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
         assert inventory.hosts.count() == 2
         for host in inventory.hosts.all():
             host.refresh_from_db()
@@ -141,7 +141,7 @@ class TestAnsibleFactsSave:
         db_mock = mocker.patch('awx.main.tasks.facts.Host.objects.bulk_update')
         db_mock.side_effect = OperationalError('deadlock detected')
         with pytest.raises(OperationalError):
-            update_hosts(hosts)
+            bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
 
     def fake_bulk_update(self, host_list):
         if self.current_call > 2:
@@ -155,7 +155,7 @@ class TestAnsibleFactsSave:
             host.ansible_facts = {'foo': 'bar'}
         self.current_call = 0
         mocker.patch('awx.main.tasks.facts.raw_update_hosts', new=self.fake_bulk_update)
-        update_hosts(hosts)
+        bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
         for host in inventory.hosts.all():
             host.refresh_from_db()
             assert host.ansible_facts == {'foo': 'bar'}

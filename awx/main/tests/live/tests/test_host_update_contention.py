@@ -12,6 +12,7 @@ def worker_delete_target(ready_event, continue_event, field_name):
     """Runs the bulk update, will be called in duplicate, in parallel"""
     inv = Inventory.objects.get(organization__name='Default', name='test_host_update_contention')
     host_list = list(inv.hosts.all())
+    # Using random.shuffle for non-security-critical shuffling in a test
     random.shuffle(host_list)
     for i, host in enumerate(host_list):
         setattr(host, field_name, f'my_var: {i}')
