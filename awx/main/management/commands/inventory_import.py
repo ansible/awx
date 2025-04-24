@@ -500,14 +500,10 @@ class Command(BaseCommand):
             for group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[group.name]
                 db_variables = group.variables_dict
-                db_variables = update_group_variables(
-                    group_id=group.id,
-                    newvars=mem_group.variables,
-                    dbvars=group.variables_dict,
-                    invsrc_id=self.inventory_source.id,
-                    inventory_id=self.inventory.id,
-                    overwrite=self.overwrite_vars,
-                )
+                if self.overwrite_vars:
+                    db_variables = mem_group.variables
+                else:
+                    db_variables.update(mem_group.variables)
                 if db_variables != group.variables_dict:
                     group.variables = json.dumps(db_variables)
                     group.save(update_fields=['variables'])

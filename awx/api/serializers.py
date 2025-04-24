@@ -1988,48 +1988,6 @@ class GroupSerializer(BaseSerializerWithVariables):
             ret['inventory'] = None
         return ret
 
-    @staticmethod
-    def _update_variables(group_id, variables, inventory_id):
-        """
-        Update the inventory group variables.
-
-        The variables field contains vars from the inventory group dialog.
-
-        Since this is not an update from an inventory source, we update the
-        variables when the inventory group details form is saved.
-
-        For details on the update logic, please refer to the comments in
-        `InventorySerializer._update_variables`.
-
-        :param int group_id: The primary key of the related group object.
-        :param str variables: The variables as plain text in yaml or json
-            format.
-        :param int inventory_id: The primary key of the related inventory
-            object.
-        """
-        variables_dict = parse_yaml_or_json(variables, silent_failure=False)
-        logger.debug(f"GroupSerializer._update_variables: {group_id=} {inventory_id=} {variables_dict=}")
-        update_group_variables(
-            group_id=group_id,
-            newvars=variables_dict,
-            dbvars=None,
-            invsrc_id=-1,
-            inventory_id=inventory_id,
-            overwrite=True,
-        )
-
-    def create(self, validated_data):
-        """Called when a new inventory group has to be created."""
-        obj = super().create(validated_data)
-        self._update_variables(obj.id, validated_data.get("variables") or "", obj.inventory.id)
-        return obj
-
-    def update(self, obj, validated_data):
-        """Called when an existing inventory group is updated."""
-        obj = super().update(obj, validated_data)
-        self._update_variables(obj.id, validated_data.get("variables") or "", obj.inventory.id)
-        return obj
-
 
 class BulkHostSerializer(HostSerializer):
     class Meta:
