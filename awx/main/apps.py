@@ -116,6 +116,7 @@ class MainConfig(AppConfig):
                     "default_control_broker": "socket",
                     "default_broker": "pg_notify",
                 },
+                "worker": {"worker_cls": "awx.main.dispatch.worker.dispatcherd.AWXTaskWorker"},
             }
         )
 
