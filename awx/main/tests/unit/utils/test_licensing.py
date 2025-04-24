@@ -11,13 +11,13 @@ def test_rhsm_licensing():
     def mocked_requests_get(*args, **kwargs):
         assert kwargs['verify'] == True
         response = Response()
-        subs = json.dumps([{'key': 'dummy'}])
+        subs = json.dumps({'body': []})
         response.status_code = HTTPStatus.OK
         response._content = bytes(subs, 'utf-8')
         return response
 
     licenser = Licenser()
-    with patch('requests.get', new=mocked_requests_get):
+    with patch('awx.main.utils.analytics_proxy.OIDCClient.make_request', new=mocked_requests_get):
         licenser.get_rhsm_subs('localhost', 'admin', 'admin')
     pass
 
