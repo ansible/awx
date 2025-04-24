@@ -368,8 +368,12 @@ def ship(path):
         logger.error('AUTOMATION_ANALYTICS_URL is not set')
         return False
 
-    rh_id = getattr(settings, 'REDHAT_USERNAME', None) or getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None) or getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
+    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
+
+    if not (rh_id and rh_secret):
+        rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
 
     if not rh_id:
         logger.error('Neither REDHAT_USERNAME nor SUBSCRIPTIONS_CLIENT_ID are set')
