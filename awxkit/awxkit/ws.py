@@ -37,7 +37,7 @@ class WSClient(object):
                'control': ['limit_reached']}
     e.x:
     ```
-    ws = WSClient(token, port=8013, secure=False).connect()
+    ws = WSClient(port=8013, secure=False, session_id='xyz', csrftoken='abc').connect()
     ws.job_details()
     ... # launch job
     job_messages = [msg for msg in ws]
@@ -52,7 +52,6 @@ class WSClient(object):
 
     def __init__(
         self,
-        token=None,
         hostname='',
         port=443,
         secure=True,
@@ -80,15 +79,12 @@ class WSClient(object):
         self.suffix = ws_suffix
         self._use_ssl = secure
         self.hostname = hostname
-        self.token = token
         self.session_id = session_id
         self.csrftoken = csrftoken
         self._recv_queue = Queue()
         self._ws_closed = False
         self._ws_connected_flag = threading.Event()
-        if self.token is not None:
-            auth_cookie = 'token="{0.token}";'.format(self)
-        elif self.session_id is not None:
+        if self.session_id is not None:
             auth_cookie = '{1}="{0.session_id}"'.format(self, session_cookie_name)
             if self.csrftoken:
                 auth_cookie += ';csrftoken={0.csrftoken}'.format(self)

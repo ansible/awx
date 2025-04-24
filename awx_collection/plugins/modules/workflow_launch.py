@@ -97,7 +97,7 @@ EXAMPLES = '''
     extra_vars:
       var1: My First Variable
       var2: My Second Variable
-    wait: False
+    wait: false
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

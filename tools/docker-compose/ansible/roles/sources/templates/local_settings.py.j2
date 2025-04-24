@@ -42,10 +42,6 @@ OPTIONAL_API_URLPATTERN_PREFIX = '{{ api_urlpattern_prefix }}'
 # Enable the following line to turn on database settings logging.
 # LOGGING['loggers']['awx.conf']['level'] = 'DEBUG'
 
-# Enable the following lines to turn on LDAP auth logging.
-# LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
-# LOGGING['loggers']['django_auth_ldap']['level'] = 'DEBUG'
-
 {% if enable_otel|bool %}
 LOGGING['handlers']['otel'] |= {
     'class': 'awx.main.utils.handlers.OTLPHandler',

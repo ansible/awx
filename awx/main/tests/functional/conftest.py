@@ -44,7 +44,6 @@ from awx.main.models.events import (
 )
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
-from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.utils import is_testing
 
@@ -62,6 +61,33 @@ if is_testing():
 @pytest.fixture(scope="session")
 def swagger_autogen(requests=__SWAGGER_REQUESTS__):
     return requests
+
+
+class FakeRedis:
+    def keys(self, *args, **kwargs):
+        return []
+
+    def set(self):
+        pass
+
+    def get(self):
+        return None
+
+    @classmethod
+    def from_url(cls, *args, **kwargs):
+        return cls()
+
+    def pipeline(self):
+        return self
+
+    def ping(self):
+        return
+
+
+@pytest.fixture
+def fake_redis():
+    with mock.patch('redis.Redis', new=FakeRedis):  # turn off redis stuff
+        yield
 
 
 @pytest.fixture
@@ -113,20 +139,6 @@ def team_member(user, team):
     ret = user('team-member', False)
     team.member_role.members.add(ret)
     return ret
-
-
-@pytest.fixture(scope="session", autouse=True)
-def project_playbooks():
-    """
-    Return playbook_files as playbooks for manual projects when testing.
-    """
-
-    class PlaybooksMock(mock.PropertyMock):
-        def __get__(self, obj, obj_type):
-            return obj.playbook_files
-
-    mocked = mock.patch.object(Project, 'playbooks', new_callable=PlaybooksMock)
-    mocked.start()
 
 
 @pytest.fixture
@@ -199,12 +211,6 @@ def team_factory(organization):
         return t
 
     return factory
-
-
-@pytest.fixture
-def user_project(user):
-    owner = user('owner')
-    return Project.objects.create(name="test-user-project", created_by=owner, description="test-user-project-desc")
 
 
 @pytest.fixture
@@ -357,13 +363,6 @@ def inventory(organization):
 
 
 @pytest.fixture
-def insights_inventory(inventory):
-    inventory.scm_type = 'insights'
-    inventory.save()
-    return inventory
-
-
-@pytest.fixture
 def scm_inventory_source(inventory, project):
     inv_src = InventorySource(
         name="test-scm-inv",
@@ -510,23 +509,6 @@ def group_factory(inventory):
             return Group.objects.create(inventory=inventory, name=name)
 
     return g
-
-
-@pytest.fixture
-def hosts(group_factory):
-    group1 = group_factory('group-1')
-
-    def rf(host_count=1):
-        hosts = []
-        for i in range(0, host_count):
-            name = '%s-host-%s' % (group1.name, i)
-            (host, created) = group1.inventory.hosts.get_or_create(name=name)
-            if created:
-                group1.hosts.add(host)
-            hosts.append(host)
-        return hosts
-
-    return rf
 
 
 @pytest.fixture
@@ -810,11 +792,6 @@ def get_db_prep_save(self, value, connection, **kwargs):
         value = dumps(value)
 
     return value
-
-
-@pytest.fixture
-def oauth_application(admin):
-    return Application.objects.create(name='test app', user=admin, client_type='confidential', authorization_grant_type='password')
 
 
 class MockCopy:

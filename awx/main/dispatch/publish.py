@@ -5,9 +5,9 @@ import time
 from uuid import uuid4
 
 from django_guid import get_guid
+from django.conf import settings
 
 from . import pg_bus_conn
-from awx.main.utils import is_testing
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -101,7 +101,7 @@ class task:
                 obj = cls.get_async_body(args=args, kwargs=kwargs, uuid=uuid, **kw)
                 if callable(queue):
                     queue = queue()
-                if not is_testing():
+                if not settings.DISPATCHER_MOCK_PUBLISH:
                     with pg_bus_conn() as conn:
                         conn.notify(queue, json.dumps(obj))
                 return (obj, queue)

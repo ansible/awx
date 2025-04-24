@@ -377,7 +377,7 @@ class TestWorkflowJobTemplatePrompts:
         assert workflow_job.scm_branch is None
         assert workflow_job.job_tags is None
         assert workflow_job.skip_tags is None
-        assert len(workflow_job.labels.all()) is 0
+        assert len(workflow_job.labels.all()) == 0
 
         # fields from prompts used
         workflow_job = workflow_job_template.create_unified_job(**prompts_data)

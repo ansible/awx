@@ -150,8 +150,8 @@ EXAMPLES = '''
     description: Source for inventory
     inventory: previously-created-inventory
     credential: previously-created-credential
-    overwrite: True
-    update_on_launch: True
+    overwrite: true
+    update_on_launch: true
     organization: Default
     source_vars:
       private: false

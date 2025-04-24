@@ -17,6 +17,9 @@ from django.db import connections
 # Runner
 import ansible_runner
 
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
+
 # AWX
 from awx.main.utils.execution_environments import get_default_pod_spec
 from awx.main.exceptions import ReceptorNodeNotFound
@@ -30,7 +33,6 @@ from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
-from awx.main.utils.pglock import advisory_lock
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -226,22 +228,24 @@ class RemoteJobError(RuntimeError):
     pass
 
 
-def run_until_complete(node, timing_data=None, **kwargs):
+def run_until_complete(node, timing_data=None, worktype='ansible-runner', ttl='20s', **kwargs):
     """
     Runs an ansible-runner work_type on remote node, waits until it completes, then returns stdout.
     """
+
     config_data = read_receptor_config()
     receptor_ctl = get_receptor_ctl(config_data)
 
     use_stream_tls = getattr(get_conn_type(node, receptor_ctl), 'name', None) == "STREAMTLS"
     kwargs.setdefault('tlsclient', get_tls_client(config_data, use_stream_tls))
-    kwargs.setdefault('ttl', '20s')
+    if ttl is not None:
+        kwargs['ttl'] = ttl
     kwargs.setdefault('payload', '')
     if work_signing_enabled(config_data):
         kwargs['signwork'] = True
 
     transmit_start = time.time()
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, **kwargs)
+    result = receptor_ctl.submit_work(worktype=worktype, node=node, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -360,7 +364,7 @@ def _convert_args_to_cli(vargs):
     args = ['cleanup']
     for option in ('exclude_strings', 'remove_images'):
         if vargs.get(option):
-            args.append('--{}="{}"'.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
+            args.append('--{} {}'.format(option.replace('_', '-'), ' '.join(f'"{item}"' for item in vargs.get(option))))
     for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))
@@ -369,7 +373,7 @@ def _convert_args_to_cli(vargs):
     return args
 
 
-def worker_cleanup(node_name, vargs, timeout=300.0):
+def worker_cleanup(node_name, vargs):
     args = _convert_args_to_cli(vargs)
 
     remote_command = ' '.join(args)
@@ -403,13 +407,40 @@ class AWXReceptorJob:
             res = self._run_internal(receptor_ctl)
             return res
         finally:
-            # Make sure to always release the work unit if we established it
-            if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
-                if settings.RECPETOR_KEEP_WORK_ON_ERROR and getattr(res, 'status', 'error') == 'error':
-                    try:
-                        receptor_ctl.simple_command(f"work release {self.unit_id}")
-                    except Exception:
-                        logger.exception(f"Error releasing work unit {self.unit_id}.")
+            status = getattr(res, 'status', 'error')
+            self._receptor_release_work(receptor_ctl, status)
+
+    def _receptor_release_work(self, receptor_ctl: ReceptorControl, status: str) -> None:
+        """
+        Releases the work unit from Receptor if certain conditions are met.
+        This method checks several conditions before attempting to release the work unit:
+        - If `self.unit_id` is `None`, the method returns immediately.
+        - If the `RECEPTOR_RELEASE_WORK` setting is `False`, the method returns immediately.
+        - If the `RECEPTOR_KEEP_WORK_ON_ERROR` setting is `True` and the status is 'error', the method returns immediately.
+        If none of the above conditions are met, the method attempts to release the work unit using the Receptor control command.
+        If an exception occurs during the release process, it logs an error message.
+        Args:
+            receptor_ctl (ReceptorControl): The Receptor control object used to issue commands.
+            status (str): The status of the work unit, which may affect whether it is released.
+        """
+
+        if self.unit_id is None:
+            logger.debug("No work unit ID to release.")
+            return
+
+        if settings.RECEPTOR_RELEASE_WORK is False:
+            logger.debug(f"RECEPTOR_RELEASE_WORK is False, not releasing work unit {self.unit_id}.")
+            return
+
+        if settings.RECEPTOR_KEEP_WORK_ON_ERROR and status == 'error':
+            logger.debug(f"RECEPTOR_KEEP_WORK_ON_ERROR is True and status is 'error', not releasing work unit {self.unit_id}.")
+            return
+
+        try:
+            logger.debug(f"Released work unit {self.unit_id}.")
+            receptor_ctl.simple_command(f"work release {self.unit_id}")
+        except Exception:
+            logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload

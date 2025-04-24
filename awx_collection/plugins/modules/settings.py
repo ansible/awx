@@ -52,21 +52,6 @@ EXAMPLES = '''
     name: "AWX_ISOLATION_SHOW_PATHS"
     value: "'/var/lib/awx/projects/', '/tmp'"
   register: testing_settings
-
-- name: Set the LDAP Auth Bind Password
-  settings:
-    name: "AUTH_LDAP_BIND_PASSWORD"
-    value: "Password"
-  no_log: true
-
-- name: Set all the LDAP Auth Bind Params
-  settings:
-    settings:
-      AUTH_LDAP_BIND_PASSWORD: "password"
-      AUTH_LDAP_USER_ATTR_MAP:
-        email: "mail"
-        first_name: "givenName"
-        last_name: "surname"
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

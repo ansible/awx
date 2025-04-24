@@ -182,7 +182,7 @@ EXAMPLES = '''
       - frequency: 'day'
         every: 1
         on_days: 'sunday'
-        include: False
+        include: false
 
 - name: Delete 'my_schedule' schedule for my_workflow
   schedule:

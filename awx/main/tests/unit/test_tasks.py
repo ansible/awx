@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import configparser
 import json
 import os
 import shutil
@@ -10,7 +9,8 @@ import fcntl
 from unittest import mock
 import pytest
 import yaml
-import jinja2
+
+from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT
 
 from django.conf import settings
 
@@ -37,7 +37,6 @@ from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
 from awx.main.tasks import jobs, system, receptor
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
-from awx.main.utils.execution_environments import CONTAINER_ROOT
 
 from awx.main.utils.licensing import Licenser
 from awx.main.constants import JOB_VARIABLE_PREFIXES
@@ -373,8 +372,8 @@ class TestExtraVarSanitation(TestJobExecution):
         task = jobs.RunJob()
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
         for name in JOB_VARIABLE_PREFIXES:
@@ -392,8 +391,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -403,8 +402,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == {'a': [self.UNSAFE]}
         assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
 
@@ -414,8 +413,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert not hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -426,8 +425,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
         assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
 
@@ -440,8 +439,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == 'other-value'
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -455,8 +454,8 @@ class TestExtraVarSanitation(TestJobExecution):
 
         task.build_extra_vars_file(job, private_data_dir)
 
-        fd = open(os.path.join(private_data_dir, 'env', 'extravars'))
-        extra_vars = yaml.load(fd, Loader=SafeLoader)
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
         assert extra_vars['msg'] == self.UNSAFE
         assert hasattr(extra_vars['msg'], '__UNSAFE__')
 
@@ -856,202 +855,6 @@ class TestJobCredentials(TestJobExecution):
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
 
-    @pytest.mark.parametrize("verify", (True, False))
-    def test_k8s_credential(self, job, private_data_dir, verify, mock_me):
-        k8s = CredentialType.defaults['kubernetes_bearer_token']()
-        inputs = {
-            'host': 'https://example.org/',
-            'bearer_token': 'token123',
-        }
-        if verify:
-            inputs['verify_ssl'] = True
-            inputs['ssl_ca_cert'] = 'CERTDATA'
-        credential = Credential(
-            pk=1,
-            credential_type=k8s,
-            inputs=inputs,
-        )
-        credential.inputs['bearer_token'] = encrypt_field(credential, 'bearer_token')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['K8S_AUTH_HOST'] == 'https://example.org/'
-        assert env['K8S_AUTH_API_KEY'] == 'token123'
-
-        if verify:
-            assert env['K8S_AUTH_VERIFY_SSL'] == 'True'
-            local_path = to_host_path(env['K8S_AUTH_SSL_CA_CERT'], private_data_dir)
-            cert = open(local_path, 'r').read()
-            assert cert == 'CERTDATA'
-        else:
-            assert env['K8S_AUTH_VERIFY_SSL'] == 'False'
-            assert 'K8S_AUTH_SSL_CA_CERT' not in env
-
-        assert safe_env['K8S_AUTH_API_KEY'] == HIDDEN_PASSWORD
-
-    def test_aws_cloud_credential(self, job, private_data_dir, mock_me):
-        aws = CredentialType.defaults['aws']()
-        credential = Credential(pk=1, credential_type=aws, inputs={'username': 'bob', 'password': 'secret'})
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['AWS_ACCESS_KEY_ID'] == 'bob'
-        assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
-        assert 'AWS_SECURITY_TOKEN' not in env
-        assert safe_env['AWS_SECRET_ACCESS_KEY'] == HIDDEN_PASSWORD
-
-    def test_aws_cloud_credential_with_sts_token(self, private_data_dir, job, mock_me):
-        aws = CredentialType.defaults['aws']()
-        credential = Credential(pk=1, credential_type=aws, inputs={'username': 'bob', 'password': 'secret', 'security_token': 'token'})
-        for key in ('password', 'security_token'):
-            credential.inputs[key] = encrypt_field(credential, key)
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['AWS_ACCESS_KEY_ID'] == 'bob'
-        assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
-        assert env['AWS_SECURITY_TOKEN'] == 'token'
-        assert safe_env['AWS_SECRET_ACCESS_KEY'] == HIDDEN_PASSWORD
-
-    @pytest.mark.parametrize("cred_env_var", ['GCE_CREDENTIALS_FILE_PATH', 'GOOGLE_APPLICATION_CREDENTIALS'])
-    def test_gce_credentials(self, cred_env_var, private_data_dir, job, mock_me):
-        gce = CredentialType.defaults['gce']()
-        credential = Credential(pk=1, credential_type=gce, inputs={'username': 'bob', 'project': 'some-project', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
-        credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-        runner_path = env[cred_env_var]
-        local_path = to_host_path(runner_path, private_data_dir)
-        json_data = json.load(open(local_path, 'rb'))
-        assert json_data['type'] == 'service_account'
-        assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
-        assert json_data['client_email'] == 'bob'
-        assert json_data['project_id'] == 'some-project'
-
-    def test_azure_rm_with_tenant(self, private_data_dir, job, mock_me):
-        azure = CredentialType.defaults['azure_rm']()
-        credential = Credential(
-            pk=1, credential_type=azure, inputs={'client': 'some-client', 'secret': 'some-secret', 'tenant': 'some-tenant', 'subscription': 'some-subscription'}
-        )
-        credential.inputs['secret'] = encrypt_field(credential, 'secret')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['AZURE_CLIENT_ID'] == 'some-client'
-        assert env['AZURE_SECRET'] == 'some-secret'
-        assert env['AZURE_TENANT'] == 'some-tenant'
-        assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-        assert safe_env['AZURE_SECRET'] == HIDDEN_PASSWORD
-
-    def test_azure_rm_with_password(self, private_data_dir, job, mock_me):
-        azure = CredentialType.defaults['azure_rm']()
-        credential = Credential(
-            pk=1, credential_type=azure, inputs={'subscription': 'some-subscription', 'username': 'bob', 'password': 'secret', 'cloud_environment': 'foobar'}
-        )
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
-        assert env['AZURE_AD_USER'] == 'bob'
-        assert env['AZURE_PASSWORD'] == 'secret'
-        assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
-        assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
-
-    def test_vmware_credentials(self, private_data_dir, job, mock_me):
-        vmware = CredentialType.defaults['vmware']()
-        credential = Credential(pk=1, credential_type=vmware, inputs={'username': 'bob', 'password': 'secret', 'host': 'https://example.org'})
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['VMWARE_USER'] == 'bob'
-        assert env['VMWARE_PASSWORD'] == 'secret'
-        assert env['VMWARE_HOST'] == 'https://example.org'
-        assert safe_env['VMWARE_PASSWORD'] == HIDDEN_PASSWORD
-
-    def test_openstack_credentials(self, private_data_dir, job, mock_me):
-        task = jobs.RunJob()
-        task.instance = job
-        openstack = CredentialType.defaults['openstack']()
-        credential = Credential(
-            pk=1, credential_type=openstack, inputs={'username': 'bob', 'password': 'secret', 'project': 'tenant-name', 'host': 'https://keystone.example.org'}
-        )
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        private_data_files, ssh_key_data = task.build_private_data_files(job, private_data_dir)
-        env = task.build_env(job, private_data_dir, private_data_files=private_data_files)
-        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        config_loc = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
-        shade_config = open(config_loc, 'r').read()
-        assert shade_config == '\n'.join(
-            [
-                'clouds:',
-                '  devstack:',
-                '    auth:',
-                '      auth_url: https://keystone.example.org',
-                '      password: secret',
-                '      project_name: tenant-name',
-                '      username: bob',
-                '    verify: true',
-                '',
-            ]
-        )
-
-    @pytest.mark.parametrize("ca_file", [None, '/path/to/some/file'])
-    def test_rhv_credentials(self, private_data_dir, job, ca_file, mock_me):
-        rhv = CredentialType.defaults['rhv']()
-        inputs = {
-            'host': 'some-ovirt-host.example.org',
-            'username': 'bob',
-            'password': 'some-pass',
-        }
-        if ca_file:
-            inputs['ca_file'] = ca_file
-        credential = Credential(pk=1, credential_type=rhv, inputs=inputs)
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        config = configparser.ConfigParser()
-        host_path = to_host_path(env['OVIRT_INI_PATH'], private_data_dir)
-        config.read(host_path)
-        assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
-        assert config.get('ovirt', 'ovirt_username') == 'bob'
-        assert config.get('ovirt', 'ovirt_password') == 'some-pass'
-        if ca_file:
-            assert config.get('ovirt', 'ovirt_ca_file') == ca_file
-        else:
-            with pytest.raises(configparser.NoOptionError):
-                config.get('ovirt', 'ovirt_ca_file')
-
     @pytest.mark.parametrize(
         'authorize, expected_authorize',
         [
@@ -1082,316 +885,9 @@ class TestJobCredentials(TestJobExecution):
         assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
         if authorize:
             assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
-        assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
+        with open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r') as f:
+            assert f.read() == self.EXAMPLE_PRIVATE_KEY
         assert safe_env['ANSIBLE_NET_PASSWORD'] == HIDDEN_PASSWORD
-
-    def test_terraform_cloud_credentials(self, job, private_data_dir, mock_me):
-        terraform = CredentialType.defaults['terraform']()
-        hcl_config = '''
-        backend "s3" {
-            bucket = "s3_sample_bucket"
-            key    = "/tf_state/"
-            region = "us-east-1"
-        }
-        '''
-        credential = Credential(pk=1, credential_type=terraform, inputs={'configuration': hcl_config})
-        credential.inputs['configuration'] = encrypt_field(credential, 'configuration')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
-        config = open(local_path, 'r').read()
-        assert config == hcl_config
-
-    def test_terraform_gcs_backend_credentials(self, job, private_data_dir, mock_me):
-        terraform = CredentialType.defaults['terraform']()
-        hcl_config = '''
-        backend "gcs" {
-            bucket = "gce_storage"
-        }
-        '''
-        gce_backend_credentials = '''
-        {
-            "type": "service_account",
-            "project_id": "sample",
-            "private_key_id": "eeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "private_key": "-----BEGIN PRIVATE KEY-----\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n-----END PRIVATE KEY-----\n",
-            "client_email": "sample@sample.iam.gserviceaccount.com",
-            "client_id": "0123456789",
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cloud-content-robot%40sample.iam.gserviceaccount.com",
-        }
-        '''
-        credential = Credential(pk=1, credential_type=terraform, inputs={'configuration': hcl_config, 'gce_credentials': gce_backend_credentials})
-        credential.inputs['configuration'] = encrypt_field(credential, 'configuration')
-        credential.inputs['gce_credentials'] = encrypt_field(credential, 'gce_credentials')
-        job.credentials.add(credential)
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
-        config = open(local_path, 'r').read()
-        assert config == hcl_config
-
-        credentials_path = to_host_path(env['GOOGLE_BACKEND_CREDENTIALS'], private_data_dir)
-        credentials = open(credentials_path, 'r').read()
-        assert credentials == gce_backend_credentials
-
-    def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir, mock_me):
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
-            injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token.foo()}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
-
-        with pytest.raises(jinja2.exceptions.UndefinedError):
-            credential.credential_type.inject_credential(credential, {}, {}, [], private_data_dir)
-
-    def test_custom_environment_injectors(self, private_data_dir, mock_me):
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
-            injectors={'env': {'MY_CLOUD_API_TOKEN': '{{api_token}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
-
-        env = {}
-        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        assert env['MY_CLOUD_API_TOKEN'] == 'ABC123'
-
-    def test_custom_environment_injectors_with_boolean_env_var(self, private_data_dir, mock_me):
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
-            injectors={'env': {'TURBO_BUTTON': '{{turbo_button}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'turbo_button': True})
-
-        env = {}
-        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        assert env['TURBO_BUTTON'] == str(True)
-
-    def test_custom_environment_injectors_with_reserved_env_var(self, private_data_dir, job, mock_me):
-        task = jobs.RunJob()
-        task.instance = job
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
-            injectors={'env': {'JOB_ID': 'reserved'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
-        job.credentials.add(credential)
-
-        env = task.build_env(job, private_data_dir)
-
-        assert env['JOB_ID'] == str(job.pk)
-
-    def test_custom_environment_injectors_with_secret_field(self, private_data_dir, mock_me):
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'password', 'label': 'Password', 'type': 'string', 'secret': True}]},
-            injectors={'env': {'MY_CLOUD_PRIVATE_VAR': '{{password}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'password': 'SUPER-SECRET-123'})
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-
-        env = {}
-        safe_env = {}
-        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-
-        assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
-        assert 'SUPER-SECRET-123' not in safe_env.values()
-        assert safe_env['MY_CLOUD_PRIVATE_VAR'] == HIDDEN_PASSWORD
-
-    def test_custom_environment_injectors_with_extra_vars(self, private_data_dir, job, mock_me):
-        task = jobs.RunJob()
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
-            injectors={'extra_vars': {'api_token': '{{api_token}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
-        job.credentials.add(credential)
-
-        args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
-        extra_vars = parse_extra_vars(args, private_data_dir)
-
-        assert extra_vars["api_token"] == "ABC123"
-        assert hasattr(extra_vars["api_token"], '__UNSAFE__')
-
-    def test_custom_environment_injectors_with_boolean_extra_vars(self, job, private_data_dir, mock_me):
-        task = jobs.RunJob()
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
-            injectors={'extra_vars': {'turbo_button': '{{turbo_button}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'turbo_button': True})
-        job.credentials.add(credential)
-
-        args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
-        extra_vars = parse_extra_vars(args, private_data_dir)
-
-        assert extra_vars["turbo_button"] == "True"
-
-    def test_custom_environment_injectors_with_nested_extra_vars(self, private_data_dir, job, mock_me):
-        task = jobs.RunJob()
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'host', 'label': 'Host', 'type': 'string'}]},
-            injectors={'extra_vars': {'auth': {'host': '{{host}}'}}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'host': 'example.com'})
-        job.credentials.add(credential)
-
-        args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
-        extra_vars = parse_extra_vars(args, private_data_dir)
-
-        assert extra_vars["auth"]["host"] == "example.com"
-
-    def test_custom_environment_injectors_with_templated_extra_vars_key(self, private_data_dir, job, mock_me):
-        task = jobs.RunJob()
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'environment', 'label': 'Environment', 'type': 'string'}, {'id': 'host', 'label': 'Host', 'type': 'string'}]},
-            injectors={'extra_vars': {'{{environment}}_auth': {'host': '{{host}}'}}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'environment': 'test', 'host': 'example.com'})
-        job.credentials.add(credential)
-
-        args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
-        extra_vars = parse_extra_vars(args, private_data_dir)
-
-        assert extra_vars["test_auth"]["host"] == "example.com"
-
-    def test_custom_environment_injectors_with_complicated_boolean_template(self, job, private_data_dir, mock_me):
-        task = jobs.RunJob()
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'turbo_button', 'label': 'Turbo Button', 'type': 'boolean'}]},
-            injectors={'extra_vars': {'turbo_button': '{% if turbo_button %}FAST!{% else %}SLOW!{% endif %}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'turbo_button': True})
-        job.credentials.add(credential)
-
-        args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
-        extra_vars = parse_extra_vars(args, private_data_dir)
-
-        assert extra_vars["turbo_button"] == "FAST!"
-
-    def test_custom_environment_injectors_with_secret_extra_vars(self, job, private_data_dir, mock_me):
-        """
-        extra_vars that contain secret field values should be censored in the DB
-        """
-        task = jobs.RunJob()
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'password', 'label': 'Password', 'type': 'string', 'secret': True}]},
-            injectors={'extra_vars': {'password': '{{password}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'password': 'SUPER-SECRET-123'})
-        credential.inputs['password'] = encrypt_field(credential, 'password')
-        job.credentials.add(credential)
-
-        args = task.build_args(job, private_data_dir, {})
-        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
-
-        extra_vars = parse_extra_vars(args, private_data_dir)
-        assert extra_vars["password"] == "SUPER-SECRET-123"
-
-    def test_custom_environment_injectors_with_file(self, private_data_dir, mock_me):
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'api_token', 'label': 'API Token', 'type': 'string'}]},
-            injectors={'file': {'template': '[mycloud]\n{{api_token}}'}, 'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}},
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'api_token': 'ABC123'})
-
-        env = {}
-        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        path = to_host_path(env['MY_CLOUD_INI_FILE'], private_data_dir)
-        assert open(path, 'r').read() == '[mycloud]\nABC123'
-
-    def test_custom_environment_injectors_with_unicode_content(self, private_data_dir, mock_me):
-        value = 'Iñtërnâtiônàlizætiøn'
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': []},
-            injectors={'file': {'template': value}, 'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}},
-        )
-        credential = Credential(
-            pk=1,
-            credential_type=some_cloud,
-        )
-
-        env = {}
-        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        path = to_host_path(env['MY_CLOUD_INI_FILE'], private_data_dir)
-        assert open(path, 'r').read() == value
-
-    def test_custom_environment_injectors_with_files(self, private_data_dir, mock_me):
-        some_cloud = CredentialType(
-            kind='cloud',
-            name='SomeCloud',
-            managed=False,
-            inputs={'fields': [{'id': 'cert', 'label': 'Certificate', 'type': 'string'}, {'id': 'key', 'label': 'Key', 'type': 'string'}]},
-            injectors={
-                'file': {'template.cert': '[mycert]\n{{cert}}', 'template.key': '[mykey]\n{{key}}'},
-                'env': {'MY_CERT_INI_FILE': '{{tower.filename.cert}}', 'MY_KEY_INI_FILE': '{{tower.filename.key}}'},
-            },
-        )
-        credential = Credential(pk=1, credential_type=some_cloud, inputs={'cert': 'CERT123', 'key': 'KEY123'})
-
-        env = {}
-        credential.credential_type.inject_credential(credential, env, {}, [], private_data_dir)
-
-        cert_path = to_host_path(env['MY_CERT_INI_FILE'], private_data_dir)
-        key_path = to_host_path(env['MY_KEY_INI_FILE'], private_data_dir)
-        assert open(cert_path, 'r').read() == '[mycert]\nCERT123'
-        assert open(key_path, 'r').read() == '[mykey]\nKEY123'
 
     def test_multi_cloud(self, private_data_dir, mock_me):
         gce = CredentialType.defaults['gce']()
@@ -1414,7 +910,8 @@ class TestJobCredentials(TestJobExecution):
 
         # Because this is testing a mix of multiple cloud creds, we are not going to test the GOOGLE_APPLICATION_CREDENTIALS here
         path = to_host_path(env['GCE_CREDENTIALS_FILE_PATH'], private_data_dir)
-        json_data = json.load(open(path, 'rb'))
+        with open(path, 'rb') as f:
+            json_data = json.load(f)
         assert json_data['type'] == 'service_account'
         assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
         assert json_data['client_email'] == 'bob'
@@ -1767,7 +1264,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
             assert env['GCE_ZONE'] == expected_gce_zone
-            json_data = json.load(open(env[cred_env_var], 'rb'))
+            with open(env[cred_env_var], 'rb') as f:
+                json_data = json.load(f)
             assert json_data['type'] == 'service_account'
             assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
             assert json_data['client_email'] == 'bob'
@@ -1796,7 +1294,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         path = to_host_path(env['OS_CLIENT_CONFIG_FILE'], private_data_dir)
-        shade_config = open(path, 'r').read()
+        with open(path, 'r') as f:
+            shade_config = f.read()
         assert (
             '\n'.join(
                 [

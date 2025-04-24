@@ -115,12 +115,12 @@ EXAMPLES = '''
         - general
       token: cefda9e2be1f21d11cdd9452f5b7f97fda977f42
     messages:
-       started:
-         message: "{{ '{{ job_friendly_name }}{{ job.id }} started' }}"
-       success:
-         message: "{{ '{{ job_friendly_name }} completed in {{ job.elapsed }} seconds' }}"
-       error:
-         message: "{{ '{{ job_friendly_name }} FAILED! Please look at {{ job.url }}' }}"
+      started:
+        message: "{{ '{{ job_friendly_name }}{{ job.id }} started' }}"
+      success:
+        message: "{{ '{{ job_friendly_name }} completed in {{ job.elapsed }} seconds' }}"
+      error:
+        message: "{{ '{{ job_friendly_name }} FAILED! Please look at {{ job.url }}' }}"
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
@@ -147,8 +147,8 @@ EXAMPLES = '''
         - user1@example.com
       host: smtp.example.com
       port: 25
-      use_tls: no
-      use_ssl: no
+      use_tls: false
+      use_ssl: false
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
@@ -188,7 +188,7 @@ EXAMPLES = '''
         - user1
       port: 8080
       server: irc.example.com
-      use_ssl: no
+      use_ssl: false
     state: present
     controller_config_file: "~/tower_cli.cfg"
 

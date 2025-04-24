@@ -18,7 +18,7 @@ class TestUnifiedOrganization:
     def data_for_model(self, model, orm_style=False):
         data = {'name': 'foo', 'organization': None}
         if model == 'JobTemplate':
-            proj = models.Project.objects.create(name="test-proj", playbook_files=['helloworld.yml'])
+            proj = models.Project.objects.create(name="test-proj", playbook_files=['helloworld.yml'], scm_type='git', scm_url='https://foo.invalid')
             if orm_style:
                 data['project_id'] = proj.id
             else:

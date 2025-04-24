@@ -206,51 +206,51 @@ EXAMPLES = '''
 
 - name: Create workflow with 2 Job Templates and an approval node in between
   block:
-  - name: Create a workflow job template
-    tower_workflow_job_template:
-      name: my-workflow-job-template
-      ask_scm_branch_on_launch: true
-      organization: Default
+    - name: Create a workflow job template
+      tower_workflow_job_template:
+        name: my-workflow-job-template
+        ask_scm_branch_on_launch: true
+        organization: Default
 
-  - name: Create 1st node
-    tower_workflow_job_template_node:
-      identifier: my-first-node
-      workflow_job_template: my-workflow-job-template
-      unified_job_template: some_job_template
-      organization: Default
+    - name: Create 1st node
+      tower_workflow_job_template_node:
+        identifier: my-first-node
+        workflow_job_template: my-workflow-job-template
+        unified_job_template: some_job_template
+        organization: Default
 
-  - name: Create 2nd approval node
-    tower_workflow_job_template_node:
-      identifier: my-second-approval-node
-      workflow_job_template: my-workflow-job-template
-      organization: Default
-      approval_node:
-        description: "Do this?"
-        name: my-second-approval-node
-        timeout: 3600
+    - name: Create 2nd approval node
+      tower_workflow_job_template_node:
+        identifier: my-second-approval-node
+        workflow_job_template: my-workflow-job-template
+        organization: Default
+        approval_node:
+          description: "Do this?"
+          name: my-second-approval-node
+          timeout: 3600
 
-  - name: Create 3rd node
-    tower_workflow_job_template_node:
-      identifier: my-third-node
-      workflow_job_template: my-workflow-job-template
-      unified_job_template: some_other_job_template
-      organization: Default
+    - name: Create 3rd node
+      tower_workflow_job_template_node:
+        identifier: my-third-node
+        workflow_job_template: my-workflow-job-template
+        unified_job_template: some_other_job_template
+        organization: Default
 
-  - name: Link 1st node to 2nd Approval node
-    tower_workflow_job_template_node:
-      identifier: my-first-node
-      workflow_job_template: my-workflow-job-template
-      organization: Default
-      success_nodes:
-        - my-second-approval-node
+    - name: Link 1st node to 2nd Approval node
+      tower_workflow_job_template_node:
+        identifier: my-first-node
+        workflow_job_template: my-workflow-job-template
+        organization: Default
+        success_nodes:
+          - my-second-approval-node
 
-  - name: Link 2nd Approval Node 3rd node
-    tower_workflow_job_template_node:
-      identifier: my-second-approval-node
-      workflow_job_template: my-workflow-job-template
-      organization: Default
-      success_nodes:
-        - my-third-node
+    - name: Link 2nd Approval Node 3rd node
+      tower_workflow_job_template_node:
+        identifier: my-second-approval-node
+        workflow_job_template: my-workflow-job-template
+        organization: Default
+        success_nodes:
+          - my-third-node
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

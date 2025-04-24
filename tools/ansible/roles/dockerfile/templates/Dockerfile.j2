@@ -6,14 +6,14 @@
 
 {% if not headless|bool %}
 # UI_next build contaienr
-FROM quay.io/centos/centos:stream9 AS ui-next-builder
+FROM quay.io/centos/centos:stream9 AS ui-builder
 USER root
 RUN dnf -y update && dnf install -y nodejs make git
 RUN npm install -g n && n 18
 
 COPY . /tmp/src/
 WORKDIR /tmp/src/
-RUN make ui-next
+RUN make ui
 {% endif %}
 
 # Build container
@@ -44,9 +44,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     libtool-ltdl-devel \
     make \
     nss \
-    openldap-devel \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
     patch \
     postgresql \
     postgresql-devel \
@@ -94,7 +91,7 @@ COPY . /tmp/src/
 WORKDIR /tmp/src/
 
 {% if not headless|bool %}
-COPY --from=ui-next-builder /tmp/src/awx/ui_next/build /tmp/src/awx/ui_next/build
+COPY --from=ui-builder /tmp/src/awx/ui/build /tmp/src/awx/ui/build
 {% endif %}
 
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
@@ -104,6 +101,7 @@ RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_
 {% endif %}
 
 {% endif %}
+
 
 # Final container(s)
 FROM quay.io/centos/centos:stream9
@@ -129,9 +127,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     glibc-langpack-en \
     krb5-workstation \
     nginx \
-    "openldap >= 2.6.2-3" \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
     postgresql \
     python3.11 \
     "python3.11-devel" \

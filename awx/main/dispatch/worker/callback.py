@@ -20,6 +20,7 @@ from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, Inv
 from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
+from awx.main.tasks.system import events_processed_hook
 import awx.main.analytics.subsystem_metrics as s_metrics
 from .base import BaseWorker
 
@@ -46,7 +47,7 @@ def job_stats_wrapup(job_identifier, event=None):
         # If the status was a finished state before this update was made, send notifications
         # If not, we will send notifications when the status changes
         if uj.status not in ACTIVE_STATES:
-            uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
+            events_processed_hook(uj)
 
     except Exception:
         logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
@@ -85,6 +86,7 @@ class CallbackBrokerWorker(BaseWorker):
         return os.getpid()
 
     def read(self, queue):
+        has_redis_error = False
         try:
             res = self.redis.blpop(self.queue_name, timeout=1)
             if res is None:
@@ -94,14 +96,21 @@ class CallbackBrokerWorker(BaseWorker):
             self.subsystem_metrics.inc('callback_receiver_events_popped_redis', 1)
             self.subsystem_metrics.inc('callback_receiver_events_in_memory', 1)
             return json.loads(res[1])
+        except redis.exceptions.ConnectionError as exc:
+            # Low noise log, because very common and many workers will write this
+            logger.error(f"redis connection error: {exc}")
+            has_redis_error = True
+            time.sleep(5)
         except redis.exceptions.RedisError:
             logger.exception("encountered an error communicating with redis")
+            has_redis_error = True
             time.sleep(1)
         except (json.JSONDecodeError, KeyError):
             logger.exception("failed to decode JSON message from redis")
         finally:
-            self.record_statistics()
-            self.record_read_metrics()
+            if not has_redis_error:
+                self.record_statistics()
+                self.record_read_metrics()
 
         return {'event': 'FLUSH'}
 

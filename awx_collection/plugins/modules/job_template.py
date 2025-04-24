@@ -339,7 +339,7 @@ EXAMPLES = '''
       - "2nd credential"
     state: "present"
     controller_config_file: "~/tower_cli.cfg"
-    survey_enabled: yes
+    survey_enabled: true
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
 
 - name: Add start notification to Job Template

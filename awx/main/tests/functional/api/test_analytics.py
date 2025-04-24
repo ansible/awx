@@ -1,7 +1,10 @@
 import pytest
 import requests
-from awx.api.views.analytics import AnalyticsGenericView, MissingSettings, AUTOMATION_ANALYTICS_API_URL_PATH
+from unittest import mock
+from awx.api.views.analytics import AnalyticsGenericView, MissingSettings, AUTOMATION_ANALYTICS_API_URL_PATH, ERROR_MISSING_USER, ERROR_MISSING_PASSWORD
 from django.test.utils import override_settings
+from django.test import RequestFactory
+from rest_framework import status
 
 from awx.main.utils import get_awx_version
 from django.utils import translation
@@ -84,3 +87,102 @@ class TestAnalyticsGenericView:
                     AnalyticsGenericView._get_setting(setting_name, False, None)
             else:
                 assert AnalyticsGenericView._get_setting(setting_name, False, None) == setting_value
+
+    @pytest.mark.parametrize(
+        "settings_map, expected_auth, expected_error_keyword",
+        [
+            # Test case 1: Valid Red Hat credentials
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': 'redhat_user',
+                    'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
+                    'SUBSCRIPTIONS_USERNAME': '',
+                    'SUBSCRIPTIONS_PASSWORD': '',
+                },
+                ('redhat_user', 'redhat_pass'),
+                None,
+            ),
+            # Test case 2: Valid Subscription credentials
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': '',
+                    'REDHAT_PASSWORD': '',
+                    'SUBSCRIPTIONS_USERNAME': 'subs_user',
+                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                },
+                ('subs_user', 'subs_pass'),
+                None,
+            ),
+            # Test case 3: No credentials
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': '',
+                    'REDHAT_PASSWORD': '',
+                    'SUBSCRIPTIONS_USERNAME': '',
+                    'SUBSCRIPTIONS_PASSWORD': '',
+                },
+                None,
+                ERROR_MISSING_USER,
+            ),
+            # Test case 4: Both credentials
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': 'redhat_user',
+                    'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
+                    'SUBSCRIPTIONS_USERNAME': 'subs_user',
+                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                },
+                ('redhat_user', 'redhat_pass'),
+                None,
+            ),
+            # Test case 5: Missing password
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': '',
+                    'REDHAT_PASSWORD': '',
+                    'SUBSCRIPTIONS_USERNAME': 'subs_user',  # NOSONAR
+                    'SUBSCRIPTIONS_PASSWORD': '',
+                },
+                None,
+                ERROR_MISSING_PASSWORD,
+            ),
+        ],
+    )
+    @pytest.mark.django_db
+    def test__send_to_analytics_credentials(self, settings_map, expected_auth, expected_error_keyword):
+        with override_settings(**settings_map):
+            request = RequestFactory().post('/some/path')
+            view = AnalyticsGenericView()
+
+            if expected_auth:
+                with mock.patch('requests.request') as mock_request:
+                    mock_request.return_value = mock.Mock(status_code=200)
+
+                    analytic_url = view._get_analytics_url(request.path)
+                    response = view._send_to_analytics(request, 'POST')
+
+                    # Assertions
+                    mock_request.assert_called_once_with(
+                        'POST',
+                        analytic_url,
+                        auth=expected_auth,
+                        verify=mock.ANY,
+                        headers=mock.ANY,
+                        json=mock.ANY,
+                        params=mock.ANY,
+                        timeout=mock.ANY,
+                    )
+                    assert response.status_code == 200
+            else:
+                # Test when settings are missing and MissingSettings is raised
+                response = view._send_to_analytics(request, 'POST')
+
+                # # Assert that _error_response is called when MissingSettings is raised
+                # mock_error_response.assert_called_once_with(expected_error_keyword, remote=False)
+                assert response.status_code == status.HTTP_403_FORBIDDEN
+                assert response.data['error']['keyword'] == expected_error_keyword

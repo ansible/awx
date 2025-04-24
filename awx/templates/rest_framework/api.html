@@ -1,11 +1,19 @@
 {% extends 'rest_framework/base.html' %}
-{% load i18n static %}
+{% load i18n static ansible_base.lib.templatetags.requests ansible_base.lib.templatetags.util %}
 
 {% block title %}{{ name }} &middot; {% trans 'AWX REST API' %}{% endblock %}
 
 {% block bootstrap_theme %}
+  {% is_proxied_request as proxied %}
   <link rel="stylesheet" type="text/css" href="{% static 'rest_framework/css/bootstrap.min.css' %}" />
+  {% if proxied %}
+  <style>
+    {# inline_file from DAB #}
+    {% inline_file "static/api/api.css" True %}
+  </style>
+  {% else %}
   <link rel="stylesheet" type="text/css" href="{% static 'api/api.css' %}?v={{tower_version}}" />
+  {% endif %}
 {% endblock %}
 
 {% block style %}
@@ -24,7 +32,6 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="{% url 'api:api_root_view' %}">
-          <img class="logo" src="{% static 'media/logo-header.svg' %}">
           <span>{% trans 'REST API' %}</span>
         </a>
         <a class="navbar-title" href="{{ request.get_full_path }}">
@@ -74,5 +81,14 @@
   <a class="toggle-description js-tooltip" href="#" title="Show/Hide Description"><span class="glyphicon glyphicon-question-sign"></span></a>
 </div>
 {{ block.super }}
+
+{% is_proxied_request as proxied %}
+{% if proxied %}
+<script>
+  {# inline_file from DAB #}
+  {% inline_file "static/api/api.js" True %}
+</script>
+{% else %}
 <script src="{% static 'api/api.js' %}?v={{tower_version}}"></script>
+{% endif %}
 {% endblock %}

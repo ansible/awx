@@ -3,7 +3,6 @@ import json
 import os
 
 import jinja2
-import pkg_resources
 import yaml
 
 from sphinx.util.osutil import copyfile, ensuredir

@@ -13,7 +13,7 @@ runs:
         docker logs tools_awx_1 > ${{ inputs.log-filename }}
 
     - name: Upload AWX logs as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: docker-compose-logs
+        name: docker-compose-logs-${{ inputs.log-filename }}
         path: ${{ inputs.log-filename }}

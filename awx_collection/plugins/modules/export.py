@@ -86,11 +86,6 @@ options:
         - workflow names, IDs, or named URLs to export
       type: list
       elements: str
-    applications:
-      description:
-        - OAuth2 application names, IDs, or named URLs to export
-      type: list
-      elements: str
     schedules:
       description:
         - schedule names, IDs, or named URLs to export
@@ -106,7 +101,7 @@ extends_documentation_fragment: awx.awx.auth
 EXAMPLES = '''
 - name: Export all assets
   export:
-    all: True
+    all: true
 
 - name: Export all inventories
   export:

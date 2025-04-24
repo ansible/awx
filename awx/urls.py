@@ -26,20 +26,18 @@ def get_urlpatterns(prefix=None):
         path(f'api{prefix}v2/', include(api_version_urls)),
         path(f'api{prefix}', include(api_urls)),
         path('', include(root_urls)),
-        re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
-        re_path(r'^sso/', include('social_django.urls', namespace='social')),
         re_path(r'^(?:api/)?400.html$', handle_400),
         re_path(r'^(?:api/)?403.html$', handle_403),
         re_path(r'^(?:api/)?404.html$', handle_404),
         re_path(r'^(?:api/)?500.html$', handle_500),
         re_path(r'^csp-violation/', handle_csp_violation),
         re_path(r'^login/', handle_login_redirect),
-        # want api/v2/doesnotexist to return a 404, not match the ui_next urls,
+        # want api/v2/doesnotexist to return a 404, not match the ui urls,
         # so use a negative lookahead assertion here
-        re_path(r'^(?!api/|sso/).*', include('awx.ui_next.urls', namespace='ui_next')),
+        re_path(r'^(?!api/).*', include('awx.ui.urls', namespace='ui')),
     ]
 
-    if settings.SETTINGS_MODULE == 'awx.settings.development':
+    if settings.DYNACONF.is_development_mode:
         try:
             import debug_toolbar
 

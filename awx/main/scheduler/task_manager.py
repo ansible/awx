@@ -10,6 +10,8 @@ import time
 import sys
 import signal
 
+import redis
+
 # Django
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _, gettext_noop
@@ -18,6 +20,9 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 from ansible_base.lib.utils.models import get_type_for_model
+
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
 from awx.main.dispatch.reaper import reap_job
@@ -34,7 +39,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
-from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import (
     ScheduleTaskManager,
     ScheduleWorkflowManager,
@@ -118,6 +122,8 @@ class TaskBase:
                     self.subsystem_metrics.pipe_execute()
                 else:
                     logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            except redis.exceptions.ConnectionError as exc:
+                logger.warning(f"Redis connection error saving metrics for {self.prefix}, error: {exc}")
             except Exception:
                 logger.exception(f"Error saving metrics for {self.prefix}")
 
@@ -389,8 +395,8 @@ class DependencyManager(TaskBase):
             if job_deps:
                 dependencies += job_deps
                 with disable_activity_stream():
-                    task.dependent_jobs.add(*dependencies)
-                logger.debug(f'Linked {[dep.log_format for dep in dependencies]} as dependencies of {task.log_format}')
+                    task.dependent_jobs.add(*job_deps)
+                logger.debug(f'Linked {[dep.log_format for dep in job_deps]} as dependencies of {task.log_format}')
 
         UnifiedJob.objects.filter(pk__in=[task.pk for task in undeped_tasks]).update(dependencies_processed=True)
 

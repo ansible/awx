@@ -1625,7 +1625,7 @@ class UnifiedJob(
         elif state == "execution_node_chosen":
             extra["execution_node"] = self.execution_node or "NOT_SET"
 
-        logger_job_lifecycle.info(f"{msg} {json.dumps(extra)}")
+        logger_job_lifecycle.info(f"{msg} {json.dumps(extra)}", extra={'lifecycle_data': extra, 'organization_id': self.organization_id})
 
     @property
     def launched_by(self):

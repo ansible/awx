@@ -8,10 +8,10 @@ from importlib import import_module
 sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
 
 project = u'Ansible AWX'
-copyright = u'2023, Red Hat'
+copyright = u'2024, Red Hat'
 author = u'Red Hat'
 
-pubdateshort = '2023-08-04'
+pubdateshort = '2024-11-22'
 pubdate = datetime.strptime(pubdateshort, '%Y-%m-%d').strftime('%B %d, %Y')
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -35,8 +35,12 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
+    'notfound.extension',
     'swagger',
 ]
+
+notfound_urls_prefix = "/projects/awx/en/latest/"
+notfound_template = "404.rst"
 
 html_theme = 'sphinx_ansible_theme'
 html_theme_path = ["_static"]
@@ -58,19 +62,11 @@ locale_dirs = ['locale/']  # path is example but recommended.
 gettext_compact = False  # optional.
 
 rst_epilog = """
-.. |atqi| replace:: *AWX Quick Installation Guide*
-.. |atqs| replace:: *AWX Quick Setup Guide*
-.. |atir| replace:: *AWX Installation and Reference Guide*
-.. |ata| replace:: *AWX Administration Guide*
-.. |atu| replace:: *AWX User Guide*
-.. |atumg| replace:: *AWX Upgrade and Migration Guide*
 .. |atapi| replace:: *AWX API Guide*
 .. |atrn| replace:: *AWX Release Notes*
 .. |aa| replace:: Ansible Automation
-.. |AA| replace:: Automation Analytics
 .. |aap| replace:: Ansible Automation Platform
 .. |ab| replace:: ansible-builder
-.. |ap| replace:: Automation Platform
 .. |at| replace:: AWX
 .. |At| replace:: AWX
 .. |ah| replace:: Automation Hub

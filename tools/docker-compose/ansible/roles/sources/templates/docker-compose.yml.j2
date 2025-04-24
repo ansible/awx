@@ -28,7 +28,7 @@ services:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     container_name: tools_awx_{{ container_postfix }}
     hostname: awx-{{ container_postfix }}
-    command: launch_awx.sh
+    command: launch_awx.sh supervisord --pidfile=/tmp/supervisor_pid ${SUPERVISOR_ARGS:--n}
     environment:
       OS: "{{ os_info.stdout }}"
       SDB_HOST: 0.0.0.0
@@ -41,6 +41,7 @@ services:
       AWX_LOGGING_MODE: stdout
       DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
       UWSGI_MOUNT_PATH: {{ ingress_path }}
+      DJANGO_COLORS: "${DJANGO_COLORS:-}"
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
@@ -99,7 +100,7 @@ services:
       - "3000:3001"  # used by the UI dev env
 {% endif %}
   redis_{{ container_postfix }}:
-    image: redis:latest
+    image: mirror.gcr.io/library/redis:latest
     container_name: tools_redis_{{ container_postfix }}
     volumes:
       - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
@@ -111,7 +112,7 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
-    image: haproxy:2.3
+    image: mirror.gcr.io/library/haproxy:2.3
     user: "{{ ansible_user_uid }}"
     volumes:
       - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:Z"
@@ -127,53 +128,9 @@ services:
     - "awx_{{ container_postfix }}"
   {% endfor %}
 {% endif %}
-{% if enable_keycloak|bool %}
-  keycloak:
-    image: quay.io/keycloak/keycloak:15.0.2
-    container_name: tools_keycloak_1
-    hostname: keycloak
-    user: "{{ ansible_user_uid }}"
-    networks:
-      - awx
-    ports:
-      - "8443:8443"
-    environment:
-      DB_VENDOR: postgres
-      DB_ADDR: postgres
-      DB_DATABASE: keycloak
-      DB_USER: {{ pg_username }}
-      DB_PASSWORD: {{ pg_password }}
-    depends_on:
-      - postgres
-{% endif %}
-{% if enable_ldap|bool %}
-  ldap:
-    image: bitnami/openldap:2
-    container_name: tools_ldap_1
-    hostname: ldap
-    user: "{{ ansible_user_uid }}"
-    networks:
-      - awx
-    ports:
-      - "389:1389"
-      - "636:1636"
-    environment:
-      LDAP_ADMIN_USERNAME: admin
-      LDAP_ADMIN_PASSWORD: admin
-      LDAP_CUSTOM_LDIF_DIR: /opt/bitnami/openldap/ldiffs
-      LDAP_ENABLE_TLS: "yes"
-      LDAP_LDAPS_PORT_NUMBER: 1636
-      LDAP_TLS_CERT_FILE: /opt/bitnami/openldap/certs/{{ ldap_public_key_file_name }}
-      LDAP_TLS_CA_FILE: /opt/bitnami/openldap/certs/{{ ldap_public_key_file_name }}
-      LDAP_TLS_KEY_FILE: /opt/bitnami/openldap/certs/{{ ldap_private_key_file_name }}
-    volumes:
-      - 'openldap_data:/bitnami/openldap'
-      - '../../docker-compose/_sources/ldap_certs:/opt/bitnami/openldap/certs'
-      - '../../docker-compose/_sources/ldap_diffs:/opt/bitnami/openldap/ldiffs'
-{% endif %}
 {% if enable_splunk|bool %}
   splunk:
-    image: splunk/splunk:latest
+    image: mirror.gcr.io/splunk/splunk:latest
     container_name: tools_splunk_1
     hostname: splunk
     networks:
@@ -188,7 +145,7 @@ services:
 {% endif %}
 {% if enable_prometheus|bool %}
   prometheus:
-    image: prom/prometheus:latest
+    image: mirror.gcr.io/prom/prometheus:latest
     container_name: tools_prometheus_1
     hostname: prometheus
     networks:
@@ -201,7 +158,7 @@ services:
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
-    image: grafana/grafana-enterprise:latest
+    image: mirror.gcr.io/grafana/grafana-enterprise:latest
     container_name: tools_grafana_1
     hostname: grafana
     networks:
@@ -214,20 +171,6 @@ services:
     depends_on:
       - prometheus
 {% endif %}
-{% if enable_tacacs|bool %}
-  tacacs:
-    image: dchidell/docker-tacacs
-    container_name: tools_tacacs_1
-    hostname: tacacs
-    ports:
-      - "49:49"
-{% endif %}
-  # A useful container that simply passes through log messages to the console
-  # helpful for testing awx/tower logging
-  # logstash:
-  #   build:
-  #     context: ../../docker-compose
-  #     dockerfile: Dockerfile-logstash
   postgres:
     image: quay.io/sclorg/postgresql-15-c9s
     container_name: tools_postgres_1
@@ -256,7 +199,7 @@ services:
        - "${AWX_PG_PORT:-5441}:5432"
 {% if enable_pgbouncer|bool %}
   pgbouncer:
-    image: bitnami/pgbouncer:latest
+    image: mirror.gcr.io/bitnami/pgbouncer:latest
     container_name: tools_pgbouncer_1
     hostname: pgbouncer
     networks:
@@ -277,7 +220,7 @@ services:
 {% endif %}
 {% if enable_otel|bool %}
   otel:
-    image: otel/opentelemetry-collector-contrib:0.88.0
+    image: mirror.gcr.io/otel/opentelemetry-collector-contrib:0.88.0
     container_name: tools_otel_1
     hostname: otel
     command: ["--config=/etc/otel-collector-config.yaml", ""]
@@ -293,7 +236,7 @@ services:
 {% endif %}
 {% if enable_loki|bool %}
   loki:
-    image: grafana/loki:2.9.5
+    image: mirror.gcr.io/grafana/loki:2.9.5
     container_name: tools_loki_1
     hostname: loki
     ports:
@@ -376,11 +319,6 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
-{% if enable_ldap|bool %}
-  openldap_data:
-    name: tools_ldap_1
-    driver: local
-{% endif %}
 {% if enable_vault|bool %}
   hashicorp_vault_data:
     name: tools_vault_1

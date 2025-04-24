@@ -73,7 +73,6 @@ def check_related(resource):
 @contextmanager
 def as_user(v, username, password=None):
     """Context manager to allow running tests as an alternative login user."""
-    access_token = False
     if not isinstance(v, api.client.Connection):
         connection = v.connection
     else:
@@ -82,11 +81,6 @@ def as_user(v, username, password=None):
     if isinstance(username, api.User):
         password = username.password
         username = username.username
-
-    if isinstance(username, api.OAuth2AccessToken):
-        access_token = username.token
-        username = None
-        password = None
 
     try:
         if config.use_sessions:
@@ -101,10 +95,7 @@ def as_user(v, username, password=None):
                     break
             if session_id:
                 del connection.session.cookies[connection.session_cookie_name]
-            if access_token:
-                kwargs = dict(token=access_token)
-            else:
-                kwargs = connection.get_session_requirements()
+            kwargs = connection.get_session_requirements()
         else:
             previous_auth = connection.session.auth
             kwargs = dict()
@@ -112,8 +103,6 @@ def as_user(v, username, password=None):
         yield
     finally:
         if config.use_sessions:
-            if access_token:
-                connection.session.auth = None
             del connection.session.cookies[connection.session_cookie_name]
             if session_id:
                 connection.session.cookies.set(connection.session_cookie_name, session_id, domain=domain)

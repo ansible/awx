@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  author: "For Test"
+  company: AWX
+  license: MIT
+  min_ansible_version: 1.4
+  platforms:
+    - name: EL
+      versions:
+        - 8
+        - 9
+    - name: Fedora
+      versions:
+        - 39
+        - 40
+        - 41
+  categories:
+    - stuff
+dependencies: []

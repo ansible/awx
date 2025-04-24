@@ -160,6 +160,11 @@ class LogstashFormatter(LogstashFormatterBase):
             data = json.loads(data)
         data_for_log = {}
 
+        # For the job_lifecycle logger, copy some raw data fields directly
+        for key in ('lifecycle_data', 'organization_id'):
+            if key in raw_data:
+                data_for_log[key] = raw_data[key]
+
         if kind == 'job_events' and raw_data.get('python_objects', {}).get('job_event'):
             job_event = raw_data['python_objects']['job_event']
             guid = job_event.event_data.pop('guid', None)

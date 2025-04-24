@@ -18,6 +18,9 @@ import urllib.parse as urlparse
 # Django
 from django.conf import settings
 
+# Shared code for the AWX platform
+from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
+
 
 # Runner
 import ansible_runner
@@ -65,9 +68,9 @@ from awx.main.tasks.callback import (
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
+from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields, events_processed_hook
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
-from awx.main.utils.execution_environments import CONTAINER_ROOT, to_container_path
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.common import (
     update_scm_url,
@@ -79,10 +82,12 @@ from awx.main.utils.common import (
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields
 from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
+
+# Django flags
+from flags.state import flag_enabled
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -299,7 +304,7 @@ class BaseTask(object):
         env = {}
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
-            if attr == attr.upper() and attr.startswith('ANSIBLE_'):
+            if attr == attr.upper() and attr.startswith('ANSIBLE_') and not attr.startswith('ANSIBLE_BASE_'):
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
@@ -437,20 +442,6 @@ class BaseTask(object):
         Hook for any steps to run after job/task is marked as complete.
         """
         instance.log_lifecycle("finalize_run")
-        artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
-        collections_info = os.path.join(artifact_dir, 'collections.json')
-        ansible_version_file = os.path.join(artifact_dir, 'ansible_version.txt')
-
-        if os.path.exists(collections_info):
-            with open(collections_info) as ee_json_info:
-                ee_collections_info = json.loads(ee_json_info.read())
-                instance.installed_collections = ee_collections_info
-                instance.save(update_fields=['installed_collections'])
-        if os.path.exists(ansible_version_file):
-            with open(ansible_version_file) as ee_ansible_info:
-                ansible_version_info = ee_ansible_info.readline()
-                instance.ansible_version = ansible_version_info
-                instance.save(update_fields=['ansible_version'])
 
         # Run task manager appropriately for speculative dependencies
         if instance.unifiedjob_blocked_jobs.exists():
@@ -531,9 +522,13 @@ class BaseTask(object):
 
             credentials = self.build_credentials_list(self.instance)
 
+            container_root = None
+            if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
+                container_root = private_data_dir
+
             for credential in credentials:
                 if credential:
-                    credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir)
+                    credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir, container_root=container_root)
 
             self.runner_callback.safe_env.update(self.safe_cred_env)
 
@@ -650,7 +645,7 @@ class BaseTask(object):
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
         if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
+            events_processed_hook(self.instance)
 
         try:
             self.final_run_hook(self.instance, status, private_data_dir)
@@ -698,6 +693,7 @@ class SourceControlMixin(BaseTask):
             logger.debug(f'Project not available locally, {self.instance.id} will sync with remote')
             sync_needs.append(source_update_tag)
 
+        # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
         # Galaxy requirements are not supported for manual projects
         if project.scm_type and ((not has_cache) or branch_override):
@@ -909,7 +905,7 @@ class RunJob(SourceControlMixin, BaseTask):
         cred_files = private_data_files.get('credentials', {})
         for cloud_cred in job.cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
-                env['OS_CLIENT_CONFIG_FILE'] = to_container_path(cred_files.get(cloud_cred, ''), private_data_dir)
+                env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
         for network_cred in job.network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
@@ -924,11 +920,15 @@ class RunJob(SourceControlMixin, BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
-        path_vars = (
-            ('ANSIBLE_COLLECTIONS_PATHS', 'collections_paths', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
+        path_vars = [
             ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'),
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
-        )
+        ]
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            path_vars.append(
+                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+            )
 
         config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
 
@@ -944,6 +944,11 @@ class RunJob(SourceControlMixin, BaseTask):
                         paths = [config_values[config_setting]] + paths
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+            if 'callbacks_enabled' in config_values:
+                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
 
         return env
 
@@ -1086,7 +1091,7 @@ class RunJob(SourceControlMixin, BaseTask):
         # where ansible expects to find it
         if self.should_use_fact_cache():
             job.log_lifecycle("start_job_fact_cache")
-            self.facts_write_time = start_fact_cache(
+            self.facts_write_time, self.hosts_with_facts_cached = start_fact_cache(
                 job.get_hosts_for_fact_cache(), os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'), inventory_id=job.inventory_id
             )
 
@@ -1105,7 +1110,7 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
-                job.get_hosts_for_fact_cache(),
+                self.hosts_with_facts_cached,
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
                 facts_write_time=self.facts_write_time,
                 job_id=job.id,
@@ -1278,6 +1283,7 @@ class RunProjectUpdate(BaseTask):
                 'local_path': os.path.basename(project_update.project.local_path),
                 'project_path': project_update.get_project_path(check_if_exists=False),  # deprecated
                 'insights_url': settings.INSIGHTS_URL_BASE,
+                'oidc_endpoint': settings.INSIGHTS_OIDC_ENDPOINT,
                 'awx_license_type': get_license().get('license_type', 'UNLICENSED'),
                 'awx_version': get_awx_version(),
                 'scm_url': scm_url,
@@ -1384,6 +1390,17 @@ class RunProjectUpdate(BaseTask):
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            # copy the special callback (not stdout type) plugin to get list of collections
+            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+            if not os.path.exists(pdd_plugins_path):
+                os.mkdir(pdd_plugins_path)
+            from awx.playbooks import library
+
+            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
+            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+            shutil.copyfile(plugin_file_source, plugin_file_dest)
+
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)
         # To avoid hangs, very important to release lock even if errors happen here
@@ -1444,6 +1461,11 @@ class RunProjectUpdate(BaseTask):
         )
         return params
 
+    def build_credentials_list(self, project_update):
+        if project_update.scm_type == 'insights' and project_update.credential:
+            return [project_update.credential]
+        return []
+
 
 @task(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
@@ -1501,7 +1523,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise NotImplementedError('Cannot update file sources through the task system.')
 
         if inventory_update.source == 'scm' and inventory_update.source_project_update:
-            env_key = 'ANSIBLE_COLLECTIONS_PATHS'
+            env_key = 'ANSIBLE_COLLECTIONS_PATH'
             config_setting = 'collections_paths'
             folder = 'requirements_collections'
             default = '~/.ansible/collections:/usr/share/ansible/collections'
@@ -1519,12 +1541,12 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                         paths = [config_values[config_setting]] + paths
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
-        if 'ANSIBLE_COLLECTIONS_PATHS' in env:
-            paths = env['ANSIBLE_COLLECTIONS_PATHS'].split(':')
+        if 'ANSIBLE_COLLECTIONS_PATH' in env:
+            paths = env['ANSIBLE_COLLECTIONS_PATH'].split(':')
         else:
             paths = ['~/.ansible/collections', '/usr/share/ansible/collections']
         paths.append('/usr/share/automation-controller/collections')
-        env['ANSIBLE_COLLECTIONS_PATHS'] = os.pathsep.join(paths)
+        env['ANSIBLE_COLLECTIONS_PATH'] = os.pathsep.join(paths)
 
         return env
 
@@ -1552,7 +1574,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                 args.append('-i')
                 script_params = dict(hostvars=True, towervars=True)
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
-                args.append(to_container_path(source_inv_path, private_data_dir))
+                args.append(get_incontainer_path(source_inv_path, private_data_dir))
                 # Include any facts from input inventories so they can be used in filters
                 start_fact_cache(
                     input_inventory.hosts.only(*HOST_FACTS_FIELDS),
