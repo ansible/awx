@@ -119,13 +119,13 @@ class InventoryGroupVariables(dict):
     indicate that a variable holds no value. See also `InventoryVariable`.
     """
 
-    def __init__(self, name: str = "") -> None:
+    def __init__(self, id: int) -> None:
         """
-        :param str name: The name of the group, 'all' for the all-group.
+        :param int id: The id of the group object.
         :return: None
         """
         super().__init__()
-        self.name = name
+        self.id = id
         # In _vars we keep all sources for a given variable. This enables us to
         # find the current value for a variable, which is the value from the
         # latest update which defined this variable.
@@ -167,7 +167,7 @@ class InventoryGroupVariables(dict):
             is `False`.
         :return: None
         """
-        logger.debug(f"InventoryGroupVariables({self.name}).update_from_src({vars=}, {source_id=}, {overwrite=}): {self=}")
+        logger.debug(f"InventoryGroupVariables({self.id}).update_from_src({vars=}, {source_id=}, {overwrite=}): {self=}")
         # Create variables which are newly introduced by this source.
         for name in vars:
             if name not in self._vars:
@@ -196,11 +196,11 @@ class InventoryGroupVariables(dict):
         # After the update, refresh the internal dict with the possibly changed
         # current values.
         self._sync_vars()
-        logger.debug(f"InventoryGroupVariables({self.name}).update_from_src(): {self=}")
+        logger.debug(f"InventoryGroupVariables({self.id}).update_from_src(): {self=}")
 
 
 def update_group_variables(
-    group: str,
+    group_id: int | None,
     newvars: dict,
     dbvars: dict | None,
     invsrc_id: int,
@@ -217,10 +217,12 @@ def update_group_variables(
     update-var mechanism needs to be properly initialized if the db already
     contains some variables.
 
-    :param str group: The inventory group name, or "all" for the all-group.
+    :param int group_id: The inventory group id (pk). For the 'all'-group use
+        `None`, because this group is not an actual `Group` object in the
+        database.
     :param dict newvars: The variables contained in this update.
-    :param dict dbvars: (optional) The variables which are already stored in the
-        database for this inventory and this group.
+    :param dict dbvars: The variables which are already stored in the database
+        for this inventory and this group. Can be `None`.
     :param int invsrc_id: The id of the inventory source. Usually this is the
         database primary key of the inventory source object, but there is one
         special id -1 which is used for the initial update from the database and
@@ -233,15 +235,15 @@ def update_group_variables(
     :return: The variables and their current values as a dict.
     :rtype: dict
     """
-    inv_group_vars = InventoryGroupVariables(group)
+    inv_group_vars = InventoryGroupVariables(group_id)
     # Restore the existing variables state.
     try:
         # Get the object for this group from the database.
-        model = InventoryGroupVariablesWithHistory.objects.get(inventory_id=inventory_id, group_name=group)
+        model = InventoryGroupVariablesWithHistory.objects.get(inventory_id=inventory_id, group_id=group_id)
     except InventoryGroupVariablesWithHistory.DoesNotExist:
         # If no previous state exists, create a new database object, and
         # initialize it with the current group variables.
-        model = InventoryGroupVariablesWithHistory(inventory_id=inventory_id, group_name=group)
+        model = InventoryGroupVariablesWithHistory(inventory_id=inventory_id, group_id=group_id)
         if dbvars:
             inv_group_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
     else:
@@ -255,5 +257,5 @@ def update_group_variables(
     model.variables = inv_group_vars.save_state()
     model.save()
     logger.debug(f"update_group_variables: after update_from_src {model.variables=}")
-    logger.debug(f"update_group_variables({group}, {newvars}): {inv_group_vars}")
+    logger.debug(f"update_group_variables({group_id=}, {newvars}): {inv_group_vars}")
     return inv_group_vars
