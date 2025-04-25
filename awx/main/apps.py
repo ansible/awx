@@ -82,9 +82,22 @@ class MainConfig(AppConfig):
         super().ready()
 
         from django.conf import settings
+
         from awx.main.utils.db import get_pg_notify_params
         from awx.main.dispatch import get_task_queuename
         from awx.main.dispatch.pool import get_auto_max_workers
+        from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS
+
+        # from dispatcherd.config import settings as dispatcher_settings
+        from dispatcherd.utils import serialize_task
+
+        dispatcherd_schedule = {}
+        for task_name, options in settings.DISPATCHER_SCHEDULE.items():
+            if task_name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
+                taskd_name = serialize_task(ALTERNATIVE_TASK_IMPLEMENTATIONS[task_name])
+            else:
+                taskd_name = task_name
+            dispatcherd_schedule[taskd_name] = options
 
         dispatcher_setup(
             {
@@ -108,7 +121,7 @@ class MainConfig(AppConfig):
                     "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
                 },
                 "producers": {
-                    "ScheduledProducer": {"task_schedule": settings.DISPATCHER_SCHEDULE},
+                    "ScheduledProducer": {"task_schedule": dispatcherd_schedule},
                     "OnStartProducer": {"task_list": {"awx.main.tasks.system.dispatch_startup": {}}},
                     "ControlProducer": {},
                 },
