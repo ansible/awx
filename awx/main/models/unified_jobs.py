@@ -1409,7 +1409,7 @@ class UnifiedJob(
 
         opts = self.get_start_kwargs()
 
-        if not all(opts.values()):
+        if opts and (not all(opts.values())):
             return (False, None)
 
         # remove any job_explanations that may have been set while job was in pending

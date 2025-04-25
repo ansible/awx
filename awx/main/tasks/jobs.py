@@ -118,6 +118,8 @@ def with_path_cleanup(f):
 def dispatch_waiting_jobs(binder):
     for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
         kwargs = uj.get_start_kwargs()
+        if not kwargs:
+            kwargs = {}
         binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
 
 
