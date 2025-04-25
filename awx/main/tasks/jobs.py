@@ -117,7 +117,8 @@ def with_path_cleanup(f):
 @task(on_duplicate='queue_one', bind=True)
 def dispatch_waiting_jobs(binder):
     for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
-        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'uuid': uj.celery_task_id})
+        kwargs = uj.get_start_kwargs()
+        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
 
 
 class BaseTask(object):
