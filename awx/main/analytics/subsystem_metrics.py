@@ -44,11 +44,12 @@ class MetricsServer(MetricsServerSettings):
 
 
 class BaseM:
-    def __init__(self, field, help_text):
+    def __init__(self, field, help_text, labels=None):
         self.field = field
         self.help_text = help_text
         self.current_value = 0
         self.metric_has_changed = False
+        self.labels = labels or {}
 
     def reset_value(self, conn):
         conn.hset(root_key, self.field, 0)
@@ -69,12 +70,16 @@ class BaseM:
         value = conn.hget(root_key, self.field)
         return self.decode_value(value)
 
-    def to_prometheus(self, instance_data):
+    def to_prometheus(self, instance_data, namespace=None):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
             if self.field in instance_data[instance]:
+                # Build label string
+                labels = f'node="{instance}"'
+                if namespace:
+                    labels += f',subsystem="{namespace}"'
                 # on upgrade, if there are stale instances, we can end up with issues where new metrics are not present
-                output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
+                output_text += f'{self.field}{{{labels}}} {instance_data[instance][self.field]}\n'
         return output_text
 
 
@@ -167,14 +172,17 @@ class HistogramM(BaseM):
         self.sum.store_value(conn)
         self.inf.store_value(conn)
 
-    def to_prometheus(self, instance_data):
+    def to_prometheus(self, instance_data, namespace=None):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} histogram\n"
         for instance in instance_data:
+            # Build label string
+            node_label = f'node="{instance}"'
+            subsystem_label = f',subsystem="{namespace}"' if namespace else ''
             for i, b in enumerate(self.buckets):
-                output_text += f'{self.field}_bucket{{le="{b}",node="{instance}"}} {sum(instance_data[instance][self.field]["counts"][0:i+1])}\n'
-            output_text += f'{self.field}_bucket{{le="+Inf",node="{instance}"}} {instance_data[instance][self.field]["inf"]}\n'
-            output_text += f'{self.field}_count{{node="{instance}"}} {instance_data[instance][self.field]["inf"]}\n'
-            output_text += f'{self.field}_sum{{node="{instance}"}} {instance_data[instance][self.field]["sum"]}\n'
+                output_text += f'{self.field}_bucket{{le="{b}",{node_label}{subsystem_label}}} {sum(instance_data[instance][self.field]["counts"][0:i+1])}\n'
+            output_text += f'{self.field}_bucket{{le="+Inf",{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
+            output_text += f'{self.field}_count{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
+            output_text += f'{self.field}_sum{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["sum"]}\n'
         return output_text
 
 
@@ -273,20 +281,22 @@ class Metrics(MetricsNamespace):
 
     def pipe_execute(self):
         if self.metrics_have_changed is True:
-            duration_to_save = time.perf_counter()
+            duration_pipe_exec = time.perf_counter()
             for m in self.METRICS:
                 self.METRICS[m].store_value(self.pipe)
             self.pipe.execute()
             self.last_pipe_execute = time.time()
             self.metrics_have_changed = False
-            duration_to_save = time.perf_counter() - duration_to_save
-            self.METRICS['subsystem_metrics_pipe_execute_seconds'].inc(duration_to_save)
-            self.METRICS['subsystem_metrics_pipe_execute_calls'].inc(1)
+            duration_pipe_exec = time.perf_counter() - duration_pipe_exec
 
-            duration_to_save = time.perf_counter()
+            duration_send_metrics = time.perf_counter()
             self.send_metrics()
-            duration_to_save = time.perf_counter() - duration_to_save
-            self.METRICS['subsystem_metrics_send_metrics_seconds'].inc(duration_to_save)
+            duration_send_metrics = time.perf_counter() - duration_send_metrics
+
+            # Increment operational metrics
+            self.METRICS['subsystem_metrics_pipe_execute_seconds'].inc(duration_pipe_exec)
+            self.METRICS['subsystem_metrics_pipe_execute_calls'].inc(1)
+            self.METRICS['subsystem_metrics_send_metrics_seconds'].inc(duration_send_metrics)
 
     def send_metrics(self):
         # more than one thread could be calling this at the same time, so should
@@ -352,7 +362,13 @@ class Metrics(MetricsNamespace):
         if instance_data:
             for field in self.METRICS:
                 if len(metrics_filter) == 0 or field in metrics_filter:
-                    output_text += self.METRICS[field].to_prometheus(instance_data)
+                    # Add subsystem label only for operational metrics
+                    namespace = (
+                        self._namespace
+                        if field in ['subsystem_metrics_pipe_execute_seconds', 'subsystem_metrics_pipe_execute_calls', 'subsystem_metrics_send_metrics_seconds']
+                        else None
+                    )
+                    output_text += self.METRICS[field].to_prometheus(instance_data, namespace)
         return output_text
 
 
