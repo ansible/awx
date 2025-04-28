@@ -286,14 +286,20 @@
         name: "{{ project_name }}"
         organization: Default
         state: absent
-      register: result
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the 2nd project
       project:
         name: "{{ project_name }}"
         organization: "{{ org2_name }}"
         state: absent
-      register: result
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the 2nd organization
       organization:

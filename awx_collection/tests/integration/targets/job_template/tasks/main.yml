@@ -452,7 +452,10 @@
     credential: "{{ cred3 }}"
     job_type: run
     state: absent
-  register: result
+  register: del_res
+  until: del_res is succeeded
+  retries: 5
+  delay: 3
 
 - assert:
     that:
