@@ -13,7 +13,7 @@ def worker_delete_target(ready_event, continue_event, field_name):
     inv = Inventory.objects.get(organization__name='Default', name='test_host_update_contention')
     host_list = list(inv.hosts.all())
     # Using random.shuffle for non-security-critical shuffling in a test
-    random.shuffle(host_list)
+    random.shuffle(host_list)  # NOSONAR
     for i, host in enumerate(host_list):
         setattr(host, field_name, f'my_var: {i}')
 
@@ -22,9 +22,6 @@ def worker_delete_target(ready_event, continue_event, field_name):
     ready_event.set()
     # wait for the coordination message
     continue_event.wait()
-
-    # # presumed fix
-    # host_list = sorted(host_list, key=lambda host: host.id)
 
     # NOTE: did not reproduce the bug without batch_size
     bulk_update_sorted_by_id(Host, host_list, fields=[field_name], batch_size=100)

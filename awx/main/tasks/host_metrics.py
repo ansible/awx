@@ -8,7 +8,6 @@ from django.db.models.functions import TruncMonth
 from django.utils.timezone import now
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
-from awx.main.models import Host
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
@@ -150,7 +149,7 @@ class HostMetricSummaryMonthlyTask:
             # Create/Update stats
             HostMetricSummaryMonthly.objects.bulk_create(self.records_to_create)
 
-            bulk_update_sorted_by_id(Host, self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'])
+            bulk_update_sorted_by_id(HostMetricSummaryMonthly, self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'])
 
             # Set timestamp of last run
             settings.HOST_METRIC_SUMMARY_TASK_LAST_TS = now()

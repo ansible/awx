@@ -78,12 +78,11 @@ def test_start_job_fact_cache_within_timeout(hosts, tmpdir):
         assert os.path.exists(os.path.join(fact_cache, host.name))
 
 
-@pytest.mark.django_db
 def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir, ref_time):
     fact_cache = os.path.join(tmpdir, 'facts')
     last_modified, _ = start_fact_cache(hosts, fact_cache, timeout=0)
 
-    bulk_update_sorted_by_id = mocker.patch('awx.main.utils.db.bulk_update_sorted_by_id')
+    bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
 
     ansible_facts_new = {"foo": "bar"}
     filepath = os.path.join(fact_cache, hosts[1].name)
@@ -104,15 +103,14 @@ def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir, ref_tim
         assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == ansible_facts_new
     assert hosts[1].ansible_facts_modified > ref_time
-    # bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'], bulk_update=100)
-    bulk_update_sorted_by_id(Host, hosts[1], fields=['ansible_facts', 'ansible_facts_modified'])
+    bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
 
 
 def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
     fact_cache = os.path.join(tmpdir, 'facts')
     last_modified, _ = start_fact_cache(hosts, fact_cache, timeout=0)
 
-    bulk_update_sorted_by_id = mocker.patch('awx.main.utils.db.bulk_update_sorted_by_id')
+    bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
 
     for h in hosts:
         filepath = os.path.join(fact_cache, h.name)
@@ -124,24 +122,21 @@ def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
 
     finish_fact_cache(hosts, fact_cache, last_modified)
 
-    bulk_update_sorted_by_id(Host, hosts[1], fields=['ansible_facts', 'ansible_facts_modified'])
+    bulk_update.assert_not_called()
 
 
-@pytest.mark.django_db
 def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
-    fact_cache = os.path.join(str(tmpdir), 'facts')
+    fact_cache = os.path.join(tmpdir, 'facts')
     last_modified, _ = start_fact_cache(hosts, fact_cache, timeout=0)
 
-    bulk_update_sorted_by_id = mocker.patch('awx.main.utils.db.bulk_update_sorted_by_id')
+    bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
 
     os.remove(os.path.join(fact_cache, hosts[1].name))
     finish_fact_cache(hosts, fact_cache, last_modified)
-    for host in hosts:
-        host.refresh_from_db()
 
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
         assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == {}
     assert hosts[1].ansible_facts_modified > ref_time
-    bulk_update_sorted_by_id(Host, hosts[1], fields=['ansible_facts', 'ansible_facts_modified'])
+    bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
