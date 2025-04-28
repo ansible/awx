@@ -81,7 +81,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
         try:
             data_source = compiled_jq.input(event.event_data['res']).all()
         except Exception as e:
-            logger.error(f'error for module {resolved_action} and data {event.event_data["res"]}: {e}')
+            logger.warning(f'error for module {resolved_action} and data {event.event_data["res"]}: {e}')
             continue
 
         for data in data_source:
