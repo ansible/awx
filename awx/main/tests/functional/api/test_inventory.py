@@ -3,11 +3,15 @@ import pytest
 import json
 from unittest import mock
 
+import yaml
+
 from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
 from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.models import InventoryGroupVariablesWithHistory
+from awx.main.utils.inventory_vars import update_group_variables
 
 
 @pytest.fixture
@@ -690,3 +694,44 @@ class TestConstructedInventory:
         assert inv_r.data['url'] != const_r.data['url']
         assert inv_r.data['related']['constructed_url'] == url_const
         assert const_r.data['related']['constructed_url'] == url_const
+
+
+@pytest.mark.django_db
+class TestInventoryAllVariables:
+    def simulate_update(self, inv_src, variables_dict, overwrite=True):
+        """This mirrors a line which does similar action in inventory_import.py"""
+        return update_group_variables(
+            group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
+            newvars=variables_dict,
+            dbvars=inv_src.inventory.variables,
+            invsrc_id=inv_src.id,
+            inventory_id=inv_src.inventory_id,
+            overwrite=overwrite,
+        )
+
+    def test_applies_manual_vars(self, inventory, patch, admin_user):
+        assert InventoryGroupVariablesWithHistory.objects.exists() is False
+
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'foo: bar'}, user=admin_user, expect=200)
+
+        igv = inventory.inventory_group_variables.first()
+        assert igv
+        assert igv.variables == {'foo': [[-1, 'bar']]}
+
+    def test_update_then_user_change(self, inventory, patch, admin_user, inventory_source):
+        assert inventory_source.inventory_id == inventory.pk  # sanity
+        new_vars = self.simulate_update(inventory_source, {'foo': 'foo_source', 'bar': 'bar_source'})
+        inventory.variables = new_vars
+        inventory.save()
+        inventory.inventory_group_variables.count() == 1
+        igv = inventory.inventory_group_variables.first()
+        assert igv.variables == {'foo': [[inventory_source.id, 'foo_source']], 'bar': [[inventory_source.id, 'bar_source']]}
+        assert yaml.safe_load(inventory.variables) == {'foo': 'foo_source', 'bar': 'bar_source'}
+
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'foo': 'foo_user'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert yaml.safe_load(inventory.variables) == {'foo': 'foo_user'}
+
+        inventory.inventory_group_variables.count() == 1
+        igv = inventory.inventory_group_variables.first()
+        assert igv.variables == {'foo': [[-1, 'foo_user'], [inventory_source.pk, 'foo_source']], 'bar': [[inventory_source.id, 'bar_source']]}
