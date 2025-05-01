@@ -667,7 +667,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             active_task_ids.extend(task_list)
 
         # Convert dispatch_time to datetime
-        ref_time = datetime.fromisoformat(dispatch_time) if dispatch_time else datetime.now()
+        ref_time = datetime.fromisoformat(dispatch_time) if dispatch_time else now()
 
         reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
 
@@ -699,7 +699,7 @@ def adispatch_cluster_node_heartbeat(binder):
         return  # Failed to get task IDs, don't attempt reaping
 
     # Run local reaper using tasks from dispatcherd
-    ref_time = datetime.now()  # No dispatch_time in dispatcherd version
+    ref_time = now()  # No dispatch_time in dispatcherd version
     logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
     reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
     # If waiting jobs are hanging out, resubmit them
