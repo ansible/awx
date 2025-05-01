@@ -105,7 +105,7 @@ class task:
                             logger.info(f"[DISPATCHER] Using dispatcherd implementation for task: {cls.name}")
                             return alt_impl.apply_async(args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                         else:
-                            logger.info(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
+                            logger.debug(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
                 except Exception:
                     logger.warning(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
                     # Continue with original implementation if anything fails
