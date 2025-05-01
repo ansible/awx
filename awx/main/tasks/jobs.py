@@ -68,7 +68,7 @@ from awx.main.tasks.callback import (
     RunnerCallbackForProjectUpdate,
     RunnerCallbackForSystemJob,
 )
-from awx.main.tasks.signals import with_signal_handling, signal_callback
+from awx.main.tasks.signals import with_signal_handling, signal_callback, signal_state
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields, events_processed_hook
@@ -117,7 +117,10 @@ def with_path_cleanup(f):
 @task(on_duplicate='queue_one', bind=True)
 def dispatch_waiting_jobs(binder):
     for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
-        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'uuid': uj.celery_task_id})
+        kwargs = uj.get_start_kwargs()
+        if not kwargs:
+            kwargs = {}
+        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
 
 
 class BaseTask(object):
@@ -512,6 +515,7 @@ class BaseTask(object):
             self.build_project_dir(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
+                logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
                 self.instance = self.update_model(self.instance.pk, status='canceled')
 
             if self.instance.status != 'running':
@@ -641,6 +645,8 @@ class BaseTask(object):
             self.runner_callback.delay_update(job_explanation=str(exc))
         except DispatcherCancel:
             # dispatcher uses non-sigterm signal, and will raise this exception
+            signal_state.dispatcher_cancel_flag = True
+            logger.info(f'Caught DispatcherCancel error for {self.instance.log_format}')
             status = 'canceled'
         except Exception:
             # this could catch programming or file system errors

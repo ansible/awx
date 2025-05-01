@@ -1363,7 +1363,30 @@ class UnifiedJob(
             traceback=self.result_traceback,
         )
 
-    def pre_start(self, **kwargs):
+    def get_start_kwargs(self):
+        needed = self.get_passwords_needed_to_start()
+
+        decrypted_start_args = decrypt_field(self, 'start_args')
+
+        if not decrypted_start_args or decrypted_start_args == '{}':
+            return None
+
+        try:
+            start_args = json.loads(decrypted_start_args)
+        except Exception:
+            logger.exception(f'Unexpected malformed start_args on unified_job={self.id}')
+            return None
+
+        opts = dict([(field, start_args.get(field, '')) for field in needed])
+
+        if not all(opts.values()):
+            missing_fields = ', '.join([k for k, v in opts.items() if not v])
+            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
+            self.save(update_fields=['job_explanation'])
+
+        return opts
+
+    def pre_start(self):
         if not self.can_start:
             self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
@@ -1384,25 +1407,10 @@ class UnifiedJob(
                 self.save(update_fields=['job_explanation'])
                 return (False, None)
 
-        needed = self.get_passwords_needed_to_start()
-        try:
-            start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception:
-            start_args = None
+        opts = self.get_start_kwargs()
 
-        if start_args in (None, ''):
-            start_args = kwargs
-
-        opts = dict([(field, start_args.get(field, '')) for field in needed])
-
-        if not all(opts.values()):
-            missing_fields = ', '.join([k for k, v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
-            self.save(update_fields=['job_explanation'])
+        if opts and (not all(opts.values())):
             return (False, None)
-
-        if 'extra_vars' in kwargs:
-            self.handle_extra_data(kwargs['extra_vars'])
 
         # remove any job_explanations that may have been set while job was in pending
         if self.job_explanation != "":

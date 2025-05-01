@@ -510,6 +510,9 @@ class AWXReceptorJob:
                     raise SignalExit()
                 res = processor_future.result()
             except (SignalExit, DispatcherCancel):
+                if not signal_callback():
+                    # Record if this was from dispatcherd signal handling
+                    signal_state.dispatcher_cancel_flag = True
                 receptor_ctl.simple_command(f"work cancel {self.unit_id}")
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
