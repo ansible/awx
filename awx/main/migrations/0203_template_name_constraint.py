@@ -4,23 +4,10 @@ import logging
 
 from django.db import migrations, models
 
-from django.db.models import Count
+from awx.main.migrations._db_constraints import _rename_duplicates
 
 
 logger = logging.getLogger(__name__)
-
-
-def _rename_duplicates(cls):
-    for organization_id in cls.objects.order_by().values_list('organization_id', flat=True).distinct():
-        duplicate_data = cls.objects.values('name').filter(organization_id=organization_id).annotate(count=Count('name')).order_by().filter(count__gt=1)
-        for data in duplicate_data:
-            name = data['name']
-            ct = 0
-            for ujt in cls.objects.filter(name=name):
-                ct += 1
-                ujt.name = ujt.name + f'_dup{ct}'
-                logger.info(f'Renaming duplicate {cls._meta.model_name} to `{ujt.name}` because of duplicate name entry')
-                ujt.save(update_fields=['name'])
 
 
 def rename_jts(apps, schema_editor):

@@ -125,10 +125,13 @@ class TestMigrationSmoke:
         new_state = migrator.apply_tested_migration(
             ('main', '0203_template_name_constraint'),
         )
-        for proj_id in proj_ids:
+        for i, proj_id in enumerate(proj_ids):
             proj = Project.objects.get(id=proj_id)
-            assert proj.name != 'duplicate-project-name'
-            assert proj.name.startswith('duplicate-project-name')
+            if i == 0:
+                assert proj.name == 'duplicate-project-name'
+            else:
+                assert proj.name != 'duplicate-project-name'
+                assert proj.name.startswith('duplicate-project-name')
 
         # The inventory source had this field set to avoid the constrains
         InventorySource = new_state.apps.get_model('main', 'InventorySource')
