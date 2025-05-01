@@ -17,6 +17,7 @@ class SignalState:
     def reset(self):
         self.sigterm_flag = False
         self.sigint_flag = False
+        self.dispatcher_cancel_flag = False
 
         self.is_active = False  # for nested context managers
         self.original_sigterm = None
@@ -63,7 +64,7 @@ signal_state = SignalState()
 
 
 def signal_callback():
-    return bool(signal_state.sigterm_flag or signal_state.sigint_flag)
+    return bool(signal_state.sigterm_flag or signal_state.sigint_flag or signal_state.dispatcher_cancel_flag)
 
 
 def with_signal_handling(f):
