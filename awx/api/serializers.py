@@ -1676,7 +1676,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
             object.
         """
         variables_dict = parse_yaml_or_json(variables, silent_failure=False)
-        logger.debug(f"InventorySerializer._update_variables: {inventory_id=} {variables_dict=}")
+        logger.debug(f"InventorySerializer._update_variables: {inventory_id=} {variables_dict=}, {variables=}")
         update_group_variables(
             group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
             newvars=variables_dict,
@@ -1688,12 +1688,14 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
 
     def create(self, validated_data):
         """Called when a new inventory has to be created."""
+        logger.debug(f"InventorySerializer.create({validated_data=}) >>>>")
         obj = super().create(validated_data)
         self._update_variables(validated_data.get("variables") or "", obj.id)
         return obj
 
     def update(self, obj, validated_data):
         """Called when an existing inventory is updated."""
+        logger.debug(f"InventorySerializer.update({validated_data=}) >>>>")
         obj = super().update(obj, validated_data)
         self._update_variables(validated_data.get("variables") or "", obj.id)
         return obj
