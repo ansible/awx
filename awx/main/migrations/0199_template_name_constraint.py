@@ -29,7 +29,7 @@ def change_inventory_source_org_unique(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0202_delete_token_cleanup_job'),
+        ('main', '0198_alter_inventorysource_source_and_more'),
     ]
 
     operations = [

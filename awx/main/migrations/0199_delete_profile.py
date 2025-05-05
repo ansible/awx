@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0198_alter_inventorysource_source_and_more'),
+        ('main', '0199_template_name_constraint'),
     ]
 
     operations = [
