@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0202_delete_token_cleanup_job'),
+        ('main', '0203_delete_token_cleanup_job'),
     ]
 
     operations = [
