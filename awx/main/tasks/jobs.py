@@ -114,7 +114,7 @@ def with_path_cleanup(f):
     return _wrapped
 
 
-@task(on_duplicate='queue_one', bind=True)
+@task(on_duplicate='queue_one', bind=True, queue=get_task_queuename)
 def dispatch_waiting_jobs(binder):
     for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
         kwargs = uj.get_start_kwargs()
