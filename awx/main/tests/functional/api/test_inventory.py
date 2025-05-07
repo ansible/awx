@@ -3,8 +3,6 @@ import pytest
 import json
 from unittest import mock
 
-import yaml
-
 from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse

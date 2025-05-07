@@ -1,12 +1,14 @@
 import subprocess
 import time
+import os.path
+from urllib.parse import urlsplit
 
 import pytest
 from unittest import mock
 
 from awx.main.models.projects import Project
 from awx.main.models.organization import Organization
-from awx.main.models.inventory import Group, Inventory, InventoryUpdate, InventorySource
+from awx.main.models.inventory import Inventory, InventorySource
 from awx.main.tests.live.tests.conftest import wait_for_job
 
 
@@ -47,6 +49,41 @@ def wait_for_update(instance, timeout=3.0):
     update = instance.current_job or instance.last_job
     if update:
         wait_for_job(update)
+
+
+def change_source_vars_and_update(invsrc, group_vars):
+    """
+    Change the variables content of an inventory source and update its
+    inventory.
+
+    Does not return before the inventory update is finished.
+
+    :param invsrc: The inventory source instance.
+    :param dict group_vars: The variables for various groups. Format::
+
+        {
+            <group>: {<variable>: <value>, <variable>: <value>, ..}, <group>:
+            {<variable>: <value>, <variable>: <value>, ..}, ..
+        }
+
+    :return: None
+    """
+    project = invsrc.source_project
+    repo_path = urlsplit(project.scm_url).path
+    filepath = os.path.join(repo_path, invsrc.source_path)
+    # print(f"change_source_vars_and_update: {project=} {repo_path=} {filepath=}")
+    with open(filepath, "w") as fp:
+        for group, variables in group_vars.items():
+            fp.write(f"[{group}:vars]\n")
+            for name, value in variables.items():
+                fp.write(f"{name}={value}\n")
+    subprocess.run('git add .; git commit -m "Update variables in invsrc.source_path"', cwd=repo_path, shell=True)
+    # Update the project to sync the changed repo contents.
+    project.update()
+    wait_for_update(project)
+    # Update the inventory from the changed source.
+    invsrc.update()
+    wait_for_update(invsrc)
 
 
 @pytest.fixture
@@ -101,7 +138,51 @@ def inventory_source(inventory, project):
     inv_src.delete()
 
 
-def test_inventory_var_deleted_in_source(live_tmp_folder, project, inventory, inventory_source):
+@pytest.fixture
+def inventory_source_factory(inventory, project):
+    """
+    Use this fixture if you want to use multiple inventory sources for the same
+    inventory in your test.
+    """
+    # https://docs.pytest.org/en/stable/how-to/fixtures.html#factories-as-fixtures
+
+    created = []
+    # repo_path = f"{live_tmp_folder}/{GIT_REPO_FOLDER}"
+
+    def _factory(inventory_file, name):
+        # Make sure the inventory file exists before the inventory source
+        # instance is created.
+        #
+        # Note: The current implementation of the inventory source object allows
+        # to create an instance even when the inventory source file does not
+        # exist. If this behaviour changes, uncomment the following code block
+        # and add the fixture `live_tmp_folder` to the factory function
+        # signature.
+        #
+        # inventory_file_path = os.path.join(repo_path, inventory_file) if not
+        # os.path.isfile(inventory_file_path): with open(inventory_file_path,
+        #     "w") as fp: pass subprocess.run(f'git add .; git commit -m "Create
+        #         {inventory_file_path}"', cwd=repo_path, shell=True)
+        #
+        # Create the inventory source instance.
+        name = f"{NAME_PREFIX}-invsrc-{name}"
+        inv_src = InventorySource(
+            name=name,
+            source_project=project,
+            source="scm",
+            source_path=inventory_file,
+            inventory=inventory,
+        )
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            inv_src.save()
+        return inv_src
+
+    yield _factory
+    for instance in created:
+        instance.delete()
+
+
+def test_inventory_var_deleted_in_source(inventory, inventory_source):
     """
     Verify that a variable which is deleted from its (git-)source between two
     updates is also deleted from the inventory.
@@ -110,23 +191,32 @@ def test_inventory_var_deleted_in_source(live_tmp_folder, project, inventory, in
     """
     inventory_source.update()
     wait_for_update(inventory_source)
-    inv_vars = Inventory.objects.get(name=inventory.name).variables_dict
-    print(f"After 1st update: {inv_vars=}")
-    assert inv_vars == {"a": "value_a", "b": "value_b"}
-    # Remove variable `a` from source.
-    repo_path = f"{live_tmp_folder}/{GIT_REPO_FOLDER}"
-    path = f"{repo_path}/inventory_var_deleted_in_source.ini"
-    with open(path, "w") as fp:
-        fp.write("[all:vars]\n")
-        fp.write("b=value_b\n")
-    subprocess.run('git add .; git commit -m "Update variables"', cwd=repo_path, shell=True)
-    # Update the project to sync the changed repo contents.
-    project.update()
-    wait_for_update(project)
-    # Update the inventory from the changed source.
-    inventory_source.update()
-    wait_for_update(inventory_source)
-    #
-    inv_vars = Inventory.objects.get(name=inventory.name).variables_dict
-    print(f"After 2nd update: {inv_vars=}")
-    assert inv_vars == {"b": "value_b"}
+    assert {"a": "value_a", "b": "value_b"} == Inventory.objects.get(name=inventory.name).variables_dict
+    # Remove variable `a` from source and verify that it is also removed from
+    # the inventory variables.
+    change_source_vars_and_update(inventory_source, {"all": {"b": "value_b"}})
+    assert {"b": "value_b"} == Inventory.objects.get(name=inventory.name).variables_dict
+
+
+def test_inventory_vars_with_multiple_sources(inventory, inventory_source_factory):
+    """
+    Verify a sequence of updates from various sources with changing content.
+    """
+    invsrc_a = inventory_source_factory("invsrc_a.ini", "A")
+    invsrc_b = inventory_source_factory("invsrc_b.ini", "B")
+    invsrc_c = inventory_source_factory("invsrc_c.ini", "C")
+
+    change_source_vars_and_update(invsrc_a, {"all": {"x": "x_from_a", "y": "y_from_a"}})
+    assert {"x": "x_from_a", "y": "y_from_a"} == Inventory.objects.get(name=inventory.name).variables_dict
+    change_source_vars_and_update(invsrc_b, {"all": {"x": "x_from_b", "y": "y_from_b", "z": "z_from_b"}})
+    assert {"x": "x_from_b", "y": "y_from_b", "z": "z_from_b"} == Inventory.objects.get(name=inventory.name).variables_dict
+    change_source_vars_and_update(invsrc_c, {"all": {"x": "x_from_c", "z": "z_from_c"}})
+    assert {"x": "x_from_c", "y": "y_from_b", "z": "z_from_c"} == Inventory.objects.get(name=inventory.name).variables_dict
+    change_source_vars_and_update(invsrc_b, {"all": {}})
+    assert {"x": "x_from_c", "y": "y_from_a", "z": "z_from_c"} == Inventory.objects.get(name=inventory.name).variables_dict
+    change_source_vars_and_update(invsrc_c, {"all": {"z": "z_from_c"}})
+    assert {"x": "x_from_a", "y": "y_from_a", "z": "z_from_c"} == Inventory.objects.get(name=inventory.name).variables_dict
+    change_source_vars_and_update(invsrc_a, {"all": {}})
+    assert {"z": "z_from_c"} == Inventory.objects.get(name=inventory.name).variables_dict
+    change_source_vars_and_update(invsrc_c, {"all": {}})
+    assert {} == Inventory.objects.get(name=inventory.name).variables_dict
