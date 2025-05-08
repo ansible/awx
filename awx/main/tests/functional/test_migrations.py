@@ -123,7 +123,7 @@ class TestMigrationSmoke:
         InventorySource.objects.create(name='migration-test-src', source='file', inventory=inv, organization=org, created=now(), modified=now())
 
         new_state = migrator.apply_tested_migration(
-            ('main', '0203_template_name_constraint'),
+            ('main', '0199_template_name_constraint'),
         )
         for i, proj_id in enumerate(proj_ids):
             proj = Project.objects.get(id=proj_id)
