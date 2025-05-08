@@ -459,7 +459,7 @@
 
 - assert:
     that:
-      - "result is changed"
+      - "del_res is changed"
 
 - name: Delete the Demo Project
   project:
@@ -468,7 +468,6 @@
     state: absent
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
-  register: result
 
 - name: Delete Credential1
   credential:
@@ -520,4 +519,3 @@
   organization:
     name: "{{ org_name }}"
     state: absent
-  register: result
