@@ -33,7 +33,7 @@ from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from dispatcherd.worker.task import DispatcherCancel
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
-from dispatcherd.publish import task
+from awx.main.dispatch.publish import task as task_awx
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -856,7 +856,7 @@ def reload_receptor():
         raise RuntimeError("Receptor reload failed")
 
 
-@task()
+@task_awx()
 def write_receptor_config():
     """
     This task runs async on each control node, K8S only.
@@ -879,7 +879,7 @@ def write_receptor_config():
             reload_receptor()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
     InstanceLink.objects.filter(target__instance__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
