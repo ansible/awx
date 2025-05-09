@@ -1,15 +1,9 @@
 # Copyright (c) 2017 Ansible by Red Hat
 # All Rights Reserved.
 
-import psycopg
-from typing import Union
-from copy import deepcopy
-
 from awx.settings.application_name import set_application_name
 
 from django.conf import settings
-from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.backends.postgresql.base import DatabaseWrapper as PsycopgDatabaseWrapper
 
 
 def set_connection_name(function):
