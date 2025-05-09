@@ -36,6 +36,7 @@ Markdown  # used for formatting API help
 maturin  # pydantic-core build dep
 msgpack
 msrestazure
+OPA-python-client==2.0.2 # Code contain monkey patch targeted to 2.0.2 to fix https://github.com/Turall/OPA-python-client/issues/29
 openshift
 opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
 opentelemetry-sdk~=1.24

@@ -97,8 +97,8 @@ class TestAnalyticsGenericView:
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': 'redhat_user',
                     'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                    'SUBSCRIPTIONS_USERNAME': '',
-                    'SUBSCRIPTIONS_PASSWORD': '',
+                    'SUBSCRIPTIONS_CLIENT_ID': '',
+                    'SUBSCRIPTIONS_CLIENT_SECRET': '',
                 },
                 ('redhat_user', 'redhat_pass'),
                 None,
@@ -109,8 +109,8 @@ class TestAnalyticsGenericView:
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': '',
                     'REDHAT_PASSWORD': '',
-                    'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                    'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                    'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
                 },
                 ('subs_user', 'subs_pass'),
                 None,
@@ -121,8 +121,8 @@ class TestAnalyticsGenericView:
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': '',
                     'REDHAT_PASSWORD': '',
-                    'SUBSCRIPTIONS_USERNAME': '',
-                    'SUBSCRIPTIONS_PASSWORD': '',
+                    'SUBSCRIPTIONS_CLIENT_ID': '',
+                    'SUBSCRIPTIONS_CLIENT_SECRET': '',
                 },
                 None,
                 ERROR_MISSING_USER,
@@ -133,8 +133,8 @@ class TestAnalyticsGenericView:
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': 'redhat_user',
                     'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                    'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                    'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                    'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                    'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
                 },
                 ('redhat_user', 'redhat_pass'),
                 None,
@@ -145,8 +145,8 @@ class TestAnalyticsGenericView:
                     'INSIGHTS_TRACKING_STATE': True,
                     'REDHAT_USERNAME': '',
                     'REDHAT_PASSWORD': '',
-                    'SUBSCRIPTIONS_USERNAME': 'subs_user',  # NOSONAR
-                    'SUBSCRIPTIONS_PASSWORD': '',
+                    'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',  # NOSONAR
+                    'SUBSCRIPTIONS_CLIENT_SECRET': '',
                 },
                 None,
                 ERROR_MISSING_PASSWORD,

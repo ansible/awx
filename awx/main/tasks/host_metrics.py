@@ -12,6 +12,7 @@ from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
 from ansible_base.lib.utils.db import advisory_lock
+from awx.main.utils.db import bulk_update_sorted_by_id
 
 
 logger = logging.getLogger('awx.main.tasks.host_metrics')
@@ -146,8 +147,9 @@ class HostMetricSummaryMonthlyTask:
                 month = month + relativedelta(months=1)
 
             # Create/Update stats
-            HostMetricSummaryMonthly.objects.bulk_create(self.records_to_create, batch_size=1000)
-            HostMetricSummaryMonthly.objects.bulk_update(self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'], batch_size=1000)
+            HostMetricSummaryMonthly.objects.bulk_create(self.records_to_create)
+
+            bulk_update_sorted_by_id(HostMetricSummaryMonthly, self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'])
 
             # Set timestamp of last run
             settings.HOST_METRIC_SUMMARY_TASK_LAST_TS = now()

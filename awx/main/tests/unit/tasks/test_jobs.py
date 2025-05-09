@@ -32,112 +32,140 @@ def private_data_dir():
     shutil.rmtree(private_data, True)
 
 
-@mock.patch('awx.main.tasks.facts.update_hosts')
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
-def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, update_hosts, private_data_dir, execution_environment):
-    # creates inventory_object with two hosts
-    inventory = Inventory(pk=1)
-    mock_inventory = mock.MagicMock(spec=Inventory, wraps=inventory)
-    mock_inventory._state = mock.MagicMock()
-    qs_hosts = QuerySet()
-    hosts = [
-        Host(id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=mock_inventory),
-        Host(id=2, name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=mock_inventory),
-    ]
-    qs_hosts._result_cache = hosts
-    qs_hosts.only = mock.MagicMock(return_value=hosts)
-    mock_inventory.hosts = qs_hosts
-    assert mock_inventory.hosts.count() == 2
+def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
+    # Create mocked inventory and host queryset
+    inventory = mock.MagicMock(spec=Inventory, pk=1)
+    host1 = mock.MagicMock(spec=Host, id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
+    host2 = mock.MagicMock(spec=Host, id=2, name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
 
-    # creates job object with fact_cache enabled
-    org = Organization(pk=1)
-    proj = Project(pk=1, organization=org)
-    job = mock.MagicMock(spec=Job, use_fact_cache=True, project=proj, organization=org, job_slice_number=1, job_slice_count=1)
-    job.inventory = mock_inventory
-    job.execution_environment = execution_environment
-    job.get_hosts_for_fact_cache = Job.get_hosts_for_fact_cache.__get__(job)  # to run original method
+    # Mock hosts queryset
+    hosts = [host1, host2]
+    qs_hosts = mock.MagicMock(spec=QuerySet)
+    qs_hosts._result_cache = hosts
+    qs_hosts.only.return_value = hosts
+    qs_hosts.count.side_effect = lambda: len(qs_hosts._result_cache)
+    inventory.hosts = qs_hosts
+
+    # Create mocked job object
+    org = mock.MagicMock(spec=Organization, pk=1)
+    proj = mock.MagicMock(spec=Project, pk=1, organization=org)
+    job = mock.MagicMock(
+        spec=Job,
+        use_fact_cache=True,
+        project=proj,
+        organization=org,
+        job_slice_number=1,
+        job_slice_count=1,
+        inventory=inventory,
+        execution_environment=execution_environment,
+    )
+    job.get_hosts_for_fact_cache = Job.get_hosts_for_fact_cache.__get__(job)
     job.job_env.get = mock.MagicMock(return_value=private_data_dir)
 
-    # creates the task object with job object as instance
-    mock_facts_settings.ANSIBLE_FACT_CACHE_TIMEOUT = False  # defines timeout to false
-    task = jobs.RunJob()
-    task.instance = job
-    task.update_model = mock.Mock(return_value=job)
-    task.model.objects.get = mock.Mock(return_value=job)
-
-    # run pre_run_hook
-    task.facts_write_time = task.pre_run_hook(job, private_data_dir)
-
-    # updates inventory with one more host
-    hosts.append(Host(id=3, name='host3', ansible_facts={"added": True}, ansible_facts_modified=now(), inventory=mock_inventory))
-    assert mock_inventory.hosts.count() == 3
-
-    # run post_run_hook
-    task.runner_callback.artifacts_processed = mock.MagicMock(return_value=True)
-
-    task.post_run_hook(job, "success")
-    assert mock_inventory.hosts[2].ansible_facts == {"added": True}
-
-
-@mock.patch('awx.main.tasks.facts.update_hosts')
-@mock.patch('awx.main.tasks.facts.settings')
-@mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
-def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, update_hosts, private_data_dir, execution_environment):
-    # creates inventory_object with two hosts
-    inventory = Inventory(pk=1)
-    mock_inventory = mock.MagicMock(spec=Inventory, wraps=inventory)
-    mock_inventory._state = mock.MagicMock()
-    qs_hosts = QuerySet()
-    hosts = [Host(id=num, name=f'host{num}', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=mock_inventory) for num in range(999)]
-
-    qs_hosts._result_cache = hosts
-    qs_hosts.only = mock.MagicMock(return_value=hosts)
-    mock_inventory.hosts = qs_hosts
-    assert mock_inventory.hosts.count() == 999
-
-    # creates job object with fact_cache enabled
-    org = Organization(pk=1)
-    proj = Project(pk=1, organization=org)
-    job = mock.MagicMock(spec=Job, use_fact_cache=True, project=proj, organization=org, job_slice_number=1, job_slice_count=3)
-    job.inventory = mock_inventory
-    job.execution_environment = execution_environment
-    job.get_hosts_for_fact_cache = Job.get_hosts_for_fact_cache.__get__(job)  # to run original method
-    job.job_env.get = mock.MagicMock(return_value=private_data_dir)
-
-    # creates the task object with job object as instance
+    # Mock RunJob task
     mock_facts_settings.ANSIBLE_FACT_CACHE_TIMEOUT = False
     task = jobs.RunJob()
     task.instance = job
     task.update_model = mock.Mock(return_value=job)
     task.model.objects.get = mock.Mock(return_value=job)
 
-    # run pre_run_hook
+    # Run pre_run_hook
     task.facts_write_time = task.pre_run_hook(job, private_data_dir)
 
-    hosts.pop(1)
-    assert mock_inventory.hosts.count() == 998
+    # Add a third mocked host
+    host3 = mock.MagicMock(spec=Host, id=3, name='host3', ansible_facts={"added": True}, ansible_facts_modified=now(), inventory=inventory)
+    qs_hosts._result_cache.append(host3)
+    assert inventory.hosts.count() == 3
 
-    # run post_run_hook
+    # Run post_run_hook
     task.runner_callback.artifacts_processed = mock.MagicMock(return_value=True)
     task.post_run_hook(job, "success")
 
+    # Verify final host facts
+    assert qs_hosts._result_cache[2].ansible_facts == {"added": True}
+
+
+@mock.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+@mock.patch('awx.main.tasks.facts.settings')
+@mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
+def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
+    # Fully mocked inventory
+    mock_inventory = mock.MagicMock(spec=Inventory)
+
+    # Create 999 mocked Host instances
+    hosts = []
+    for i in range(999):
+        host = mock.MagicMock(spec=Host)
+        host.id = i
+        host.name = f'host{i}'
+        host.ansible_facts = {"a": 1, "b": 2}
+        host.ansible_facts_modified = now()
+        host.inventory = mock_inventory
+        hosts.append(host)
+
+    # Mock inventory.hosts behavior
+    mock_qs_hosts = mock.MagicMock()
+    mock_qs_hosts.only.return_value = hosts
+    mock_qs_hosts.count.return_value = 999
+    mock_inventory.hosts = mock_qs_hosts
+
+    # Mock Organization and Project
+    org = mock.MagicMock(spec=Organization)
+    proj = mock.MagicMock(spec=Project)
+    proj.organization = org
+
+    # Mock job object
+    job = mock.MagicMock(spec=Job)
+    job.use_fact_cache = True
+    job.project = proj
+    job.organization = org
+    job.job_slice_number = 1
+    job.job_slice_count = 3
+    job.execution_environment = execution_environment
+    job.inventory = mock_inventory
+    job.job_env.get.return_value = private_data_dir
+
+    # Bind actual method for host filtering
+    job.get_hosts_for_fact_cache = Job.get_hosts_for_fact_cache.__get__(job)
+
+    # Mock task instance
+    mock_facts_settings.ANSIBLE_FACT_CACHE_TIMEOUT = False
+    task = jobs.RunJob()
+    task.instance = job
+    task.update_model = mock.Mock(return_value=job)
+    task.model.objects.get = mock.Mock(return_value=job)
+
+    # Call pre_run_hook
+    task.facts_write_time = task.pre_run_hook(job, private_data_dir)
+
+    # Simulate one host deletion
+    hosts.pop(1)
+    mock_qs_hosts.count.return_value = 998
+
+    # Call post_run_hook
+    task.runner_callback.artifacts_processed = mock.MagicMock(return_value=True)
+    task.post_run_hook(job, "success")
+
+    # Assert that ansible_facts were preserved
     for host in hosts:
         assert host.ansible_facts == {"a": 1, "b": 2}
 
+    # Add expected failure cases
     failures = []
     for host in hosts:
         try:
             assert host.ansible_facts == {"a": 1, "b": 2, "unexpected_key": "bad"}
         except AssertionError:
-            failures.append("Host named {} has facts {}".format(host.name, host.ansible_facts))
+            failures.append(f"Host named {host.name} has facts {host.ansible_facts}")
 
     assert len(failures) > 0, f"Failures occurred for the following hosts: {failures}"
 
 
-@mock.patch('awx.main.tasks.facts.update_hosts')
+@mock.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
 @mock.patch('awx.main.tasks.facts.settings')
-def test_invalid_host_facts(mock_facts_settings, update_hosts, private_data_dir, execution_environment):
+def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, private_data_dir, execution_environment):
     inventory = Inventory(pk=1)
     mock_inventory = mock.MagicMock(spec=Inventory, wraps=inventory)
     mock_inventory._state = mock.MagicMock()
@@ -155,7 +183,7 @@ def test_invalid_host_facts(mock_facts_settings, update_hosts, private_data_dir,
             failures.append(host.name)
 
     mock_facts_settings.SOME_SETTING = True
-    update_hosts(mock_inventory.hosts)
+    bulk_update_sorted_by_id(Host, mock_inventory.hosts, fields=['ansible_facts'])
 
     with pytest.raises(pytest.fail.Exception):
         if failures:

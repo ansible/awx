@@ -10,7 +10,7 @@ from django.core.validators import URLValidator, _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
-from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField  # noqa
+from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField, FloatField  # noqa
 from rest_framework.serializers import PrimaryKeyRelatedField  # noqa
 
 # AWX
@@ -207,7 +207,8 @@ class URLField(CharField):
         if self.allow_plain_hostname:
             try:
                 url_parts = urlparse.urlsplit(value)
-                if url_parts.hostname and '.' not in url_parts.hostname:
+                looks_like_ipv6 = bool(url_parts.netloc and url_parts.netloc.startswith('[') and url_parts.netloc.endswith(']'))
+                if not looks_like_ipv6 and url_parts.hostname and '.' not in url_parts.hostname:
                     netloc = '{}.local'.format(url_parts.hostname)
                     if url_parts.port:
                         netloc = '{}:{}'.format(netloc, url_parts.port)

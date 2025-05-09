@@ -128,3 +128,41 @@ class TestURLField:
         else:
             with pytest.raises(ValidationError):
                 field.run_validators(url)
+
+    @pytest.mark.parametrize(
+        "url, expect_error",
+        [
+            ("https://[1:2:3]", True),
+            ("http://[1:2:3]", True),
+            ("https://[2001:db8:3333:4444:5555:6666:7777:8888", True),
+            ("https://2001:db8:3333:4444:5555:6666:7777:8888", True),
+            ("https://[2001:db8:3333:4444:5555:6666:7777:8888]", False),
+            ("https://[::1]", False),
+            ("https://[::]", False),
+            ("https://[2001:db8::1]", False),
+            ("https://[2001:db8:0:0:0:0:1:1]", False),
+            ("https://[fe80::2%eth0]", True),  # ipv6 scope identifier
+            ("https://[fe80:0:0:0:200:f8ff:fe21:67cf]", False),
+            ("https://[::ffff:192.168.1.10]", False),
+            ("https://[0:0:0:0:0:ffff:c000:0201]", False),
+            ("https://[2001:0db8:000a:0001:0000:0000:0000:0000]", False),
+            ("https://[2001:db8:a:1::]", False),
+            ("https://[ff02::1]", False),
+            ("https://[ff02:0:0:0:0:0:0:1]", False),
+            ("https://[fc00::1]", False),
+            ("https://[fd12:3456:789a:1::1]", False),
+            ("https://[2001:db8::abcd:ef12:3456:7890]", False),
+            ("https://[2001:db8:0000:abcd:0000:ef12:0000:3456]", False),
+            ("https://[::ffff:10.0.0.1]", False),
+            ("https://[2001:db8:cafe::]", False),
+            ("https://[2001:db8:cafe:0:0:0:0:0]", False),
+            ("https://[fe80::210:f3ff:fedf:4567%3]", True),  # ipv6 scope identifier, numerical interface
+        ],
+    )
+    def test_ipv6_urls(self, url, expect_error):
+        field = URLField()
+        if expect_error:
+            with pytest.raises(ValidationError, match="Enter a valid URL"):
+                field.run_validators(url)
+        else:
+            field.run_validators(url)

@@ -353,7 +353,10 @@
         project: "{{ proj1 }}"
         playbook: hello_world.yml
         state: absent
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the jt2
       job_template:
@@ -361,7 +364,10 @@
         project: "{{ proj2 }}"
         playbook: hello_world.yml
         state: absent
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the Project2
       project:
@@ -370,7 +376,10 @@
         state: absent
         scm_type: git
         scm_url: https://github.com/ansible/ansible-tower-samples.git
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the Project1
       project:
@@ -379,7 +388,10 @@
         state: absent
         scm_type: git
         scm_url: https://github.com/ansible/ansible-tower-samples.git
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete Credential1
       credential:
