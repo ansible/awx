@@ -1100,3 +1100,8 @@ FLAGS = {
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
     'FEATURE_POLICY_AS_CODE_ENABLED': [{'condition': 'boolean', 'value': False}],
 }
+
+# Dispatcher worker lifetime. If set to None, workers will never be retired
+# based on age. Note workers will finish their last task before retiring if
+# they are busy when they reach retirement age.
+WORKER_MAX_LIFETIME_SECONDS = 14400  # seconds
