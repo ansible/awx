@@ -99,7 +99,7 @@ class task:
                 try:
                     from flags.state import flag_enabled
 
-                    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                         if cls.name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
                             alt_impl = ALTERNATIVE_TASK_IMPLEMENTATIONS[cls.name]
                             logger.info(f"[DISPATCHER] Using dispatcherd implementation for task: {cls.name}")

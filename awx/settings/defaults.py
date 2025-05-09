@@ -1090,7 +1090,7 @@ INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
 # feature flags
 FLAGS = {
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
-    'FEATURE_NEW_DISPATCHER': [{'condition': 'boolean', 'value': True}],
+    'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
 }
 
 FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)

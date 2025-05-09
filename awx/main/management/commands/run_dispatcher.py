@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 ctl = get_control_from_settings()
                 running_data = ctl.control_with_reply('status')
                 print(yaml.dump(running_data, default_flow_style=False))
@@ -56,14 +56,14 @@ class Command(BaseCommand):
                 print(Control('dispatcher').status())
                 return
         if options.get('schedule'):
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 print('NOT YET IMPLEMENTED')
                 return
             else:
                 print(Control('dispatcher').schedule())
             return
         if options.get('running'):
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 ctl = get_control_from_settings()
                 running_data = ctl.control_with_reply('running')
                 print(yaml.dump(running_data, default_flow_style=False))
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 print(Control('dispatcher').running())
                 return
         if options.get('reload'):
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 print('NOT YET IMPLEMENTED')
                 return
             else:
@@ -86,7 +86,7 @@ class Command(BaseCommand):
             if not isinstance(cancel_data, list):
                 cancel_data = [cancel_str]
 
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 ctl = get_control_from_settings()
                 results = []
                 for task_id in cancel_data:
@@ -99,7 +99,7 @@ class Command(BaseCommand):
                 print(Control('dispatcher').cancel(cancel_data))
                 return
 
-        if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
             run_service()
         else:
             consumer = None
