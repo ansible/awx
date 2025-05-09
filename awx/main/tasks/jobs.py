@@ -30,11 +30,14 @@ import ansible_runner
 import git
 from gitdb.exc import BadName as BadGitName
 
-
-# AWX
+# Dispatcherd
 from dispatcherd.publish import task
 from dispatcherd.worker.task import DispatcherCancel
 from dispatcherd.utils import serialize_task
+
+
+# AWX
+from awx.main.dispatch.publish import task as task_awx
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -114,7 +117,7 @@ def with_path_cleanup(f):
     return _wrapped
 
 
-@task(on_duplicate='queue_one', bind=True)
+@task(on_duplicate='queue_one', bind=True, queue=get_task_queuename)
 def dispatch_waiting_jobs(binder):
     for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
         kwargs = uj.get_start_kwargs()
@@ -831,7 +834,7 @@ class SourceControlMixin(BaseTask):
             self.release_lock(project)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunJob(SourceControlMixin, BaseTask):
     """
     Run a job using ansible-playbook.
@@ -1156,7 +1159,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 update_inventory_computed_fields.delay(inventory.id)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
@@ -1495,7 +1498,7 @@ class RunProjectUpdate(BaseTask):
         return []
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
@@ -1758,7 +1761,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunAdHocCommand(BaseTask):
     """
     Run an ad hoc command using ansible.
@@ -1911,7 +1914,7 @@ class RunAdHocCommand(BaseTask):
         return d
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent

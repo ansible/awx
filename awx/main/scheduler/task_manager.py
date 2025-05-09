@@ -525,7 +525,7 @@ class TaskManager(TaskBase):
                 task.log_lifecycle("waiting")
 
         if flag_enabled('FEATURE_NEW_DISPATCHER'):
-            self.control_nodes_to_notify.add(task.controller_node)
+            self.control_nodes_to_notify.add(task.get_queue_name())
         else:
             # apply_async does a NOTIFY to the channel dispatcher is listening to
             # postgres will treat this as part of the transaction, which is what we want
