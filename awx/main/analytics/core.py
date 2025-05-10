@@ -22,7 +22,7 @@ from ansible_base.lib.utils.db import advisory_lock
 from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
-from awx.main.utils.analytics_proxy import OIDCClient, DEFAULT_OIDC_TOKEN_ENDPOINT
+from awx.main.utils.analytics_proxy import OIDCClient
 
 __all__ = ['register', 'gather', 'ship']
 
@@ -186,7 +186,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
         if not (
             settings.AUTOMATION_ANALYTICS_URL
-            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_USERNAME and settings.SUBSCRIPTIONS_PASSWORD))
+            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_CLIENT_ID and settings.SUBSCRIPTIONS_CLIENT_SECRET))
         ):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
@@ -368,8 +368,20 @@ def ship(path):
         logger.error('AUTOMATION_ANALYTICS_URL is not set')
         return False
 
-    rh_user = getattr(settings, 'REDHAT_USERNAME', None)
-    rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
+    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
+
+    if not (rh_id and rh_secret):
+        rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+
+    if not rh_id:
+        logger.error('Neither REDHAT_USERNAME nor SUBSCRIPTIONS_CLIENT_ID are set')
+        return False
+
+    if not rh_secret:
+        logger.error('Neither REDHAT_PASSWORD nor SUBSCRIPTIONS_CLIENT_SECRET are set')
+        return False
 
     with open(path, 'rb') as f:
         files = {'file': (os.path.basename(path), f, settings.INSIGHTS_AGENT_MIME)}
@@ -377,25 +389,13 @@ def ship(path):
         s.headers = get_awx_http_client_headers()
         s.headers.pop('Content-Type')
         with set_environ(**settings.AWX_TASK_ENV):
-            if rh_user and rh_password:
-                try:
-                    client = OIDCClient(rh_user, rh_password, DEFAULT_OIDC_TOKEN_ENDPOINT, ['api.console'])
-                    response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
-                except requests.RequestException:
-                    logger.error("Automation Analytics API request failed, trying base auth method")
-                    response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31))
-            elif not rh_user or not rh_password:
-                logger.info('REDHAT_USERNAME and REDHAT_PASSWORD are not set, using SUBSCRIPTIONS_USERNAME and SUBSCRIPTIONS_PASSWORD')
-                rh_user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-                rh_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-                if rh_user and rh_password:
-                    response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31))
-                elif not rh_user:
-                    logger.error('REDHAT_USERNAME and SUBSCRIPTIONS_USERNAME are not set')
-                    return False
-                elif not rh_password:
-                    logger.error('REDHAT_PASSWORD and SUBSCRIPTIONS_USERNAME are not set')
-                    return False
+            try:
+                client = OIDCClient(rh_id, rh_secret)
+                response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
+            except requests.RequestException:
+                logger.error("Automation Analytics API request failed, trying base auth method")
+                response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
+
         # Accept 2XX status_codes
         if response.status_code >= 300:
             logger.error('Upload failed with status {}, {}'.format(response.status_code, response.text))

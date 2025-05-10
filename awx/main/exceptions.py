@@ -38,5 +38,12 @@ class PostRunError(Exception):
         super(PostRunError, self).__init__(msg)
 
 
+class PolicyEvaluationError(Exception):
+    def __init__(self, msg, status='failed', tb=''):
+        self.status = status
+        self.tb = tb
+        super(PolicyEvaluationError, self).__init__(msg)
+
+
 class ReceptorNodeNotFound(RuntimeError):
     pass

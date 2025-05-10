@@ -38,6 +38,7 @@ from django.utils.translation import gettext_lazy as _
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
+from awx.main.utils.analytics_proxy import OIDCClient
 
 MAX_INSTANCES = 9999999
 
@@ -228,37 +229,38 @@ class Licenser(object):
             host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
 
         if not user:
-            raise ValueError('subscriptions_username is required')
+            raise ValueError('subscriptions_client_id is required')
 
         if not pw:
-            raise ValueError('subscriptions_password is required')
+            raise ValueError('subscriptions_client_secret is required')
 
         if host and user and pw:
             if 'subscription.rhsm.redhat.com' in host:
-                json = self.get_rhsm_subs(host, user, pw)
+                json = self.get_rhsm_subs(settings.SUBSCRIPTIONS_RHSM_URL, user, pw)
             else:
                 json = self.get_satellite_subs(host, user, pw)
             return self.generate_license_options_from_entitlements(json)
         return []
 
-    def get_rhsm_subs(self, host, user, pw):
-        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
-        json = []
-        try:
-            subs = requests.get('/'.join([host, 'subscription/users/{}/owners'.format(user)]), verify=verify, auth=(user, pw))
-        except requests.exceptions.ConnectionError as error:
-            raise error
-        except OSError as error:
-            raise OSError(
-                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
-            ) from error  # noqa
-        subs.raise_for_status()
+    def get_rhsm_subs(self, host, client_id, client_secret):
+        client = OIDCClient(client_id, client_secret)
+        subs = client.make_request(
+            'GET',
+            host,
+            verify=True,
+            timeout=(31, 31),
+        )
 
-        for sub in subs.json():
-            resp = requests.get('/'.join([host, 'subscription/owners/{}/pools/?match=*tower*'.format(sub['key'])]), verify=verify, auth=(user, pw))
-            resp.raise_for_status()
-            json.extend(resp.json())
-        return json
+        subs.raise_for_status()
+        subs_formatted = []
+        for sku in subs.json()['body']:
+            sku_data = {k: v for k, v in sku.items() if k != 'subscriptions'}
+            for sub in sku['subscriptions']:
+                sub_data = sku_data.copy()
+                sub_data['subscriptions'] = sub
+                subs_formatted.append(sub_data)
+
+        return subs_formatted
 
     def get_satellite_subs(self, host, user, pw):
         port = None
@@ -267,7 +269,7 @@ class Licenser(object):
             port = str(self.config.get("server", "port"))
         except Exception as e:
             logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
-            verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
+            verify = True
         if port:
             host = ':'.join([host, port])
         json = []
@@ -314,20 +316,11 @@ class Licenser(object):
             return False
         return True
 
-    def is_appropriate_sub(self, sub):
-        if sub['activeSubscription'] is False:
-            return False
-        # Products that contain Ansible Tower
-        products = sub.get('providedProducts', [])
-        if any(product.get('productId') == '480' for product in products):
-            return True
-        return False
-
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
 
         ValidSub = collections.namedtuple(
-            'ValidSub', 'sku name support_level end_date trial developer_license quantity pool_id satellite subscription_id account_number usage'
+            'ValidSub', 'sku name support_level end_date trial developer_license quantity satellite subscription_id account_number usage'
         )
         valid_subs = []
         for sub in json:
@@ -335,10 +328,14 @@ class Licenser(object):
             if satellite:
                 is_valid = self.is_appropriate_sat_sub(sub)
             else:
-                is_valid = self.is_appropriate_sub(sub)
+                # the list of subs from console.redhat.com are already valid based on the query params we provided
+                is_valid = True
             if is_valid:
                 try:
-                    end_date = parse(sub.get('endDate'))
+                    if satellite:
+                        end_date = parse(sub.get('endDate'))
+                    else:
+                        end_date = parse(sub['subscriptions']['endDate'])
                 except Exception:
                     continue
                 now = datetime.utcnow()
@@ -346,44 +343,50 @@ class Licenser(object):
                 if end_date < now:
                     # If the sub has a past end date, skip it
                     continue
-                try:
-                    quantity = int(sub['quantity'])
-                    if quantity == -1:
-                        # effectively, unlimited
-                        quantity = MAX_INSTANCES
-                except Exception:
-                    continue
 
-                sku = sub['productId']
-                trial = sku.startswith('S')  # i.e.,, SER/SVC
                 developer_license = False
                 support_level = ''
-                usage = ''
-                pool_id = sub['id']
-                subscription_id = sub['subscriptionId']
-                account_number = sub['accountNumber']
+                account_number = ''
+                usage = sub.get('usage', '')
                 if satellite:
+                    try:
+                        quantity = int(sub['quantity'])
+                    except Exception:
+                        continue
+                    sku = sub['productId']
+                    subscription_id = sub['subscriptionId']
+                    sub_name = sub['productName']
                     support_level = sub['support_level']
-                    usage = sub['usage']
+                    account_number = sub['accountNumber']
                 else:
-                    for attr in sub.get('productAttributes', []):
-                        if attr.get('name') == 'support_level':
-                            support_level = attr.get('value')
-                        elif attr.get('name') == 'usage':
-                            usage = attr.get('value')
-                        elif attr.get('name') == 'ph_product_name' and attr.get('value') == 'RHEL Developer':
-                            developer_license = True
+                    try:
+                        if sub['capacity']['name'] == "Nodes":
+                            quantity = int(sub['capacity']['quantity']) * int(sub['subscriptions']['quantity'])
+                        else:
+                            continue
+                    except Exception:
+                        continue
+                    sku = sub['sku']
+                    sub_name = sub['name']
+                    support_level = sub['serviceLevel']
+                    subscription_id = sub['subscriptions']['number']
+                    if sub.get('name') == 'RHEL Developer':
+                        developer_license = True
+
+                if quantity == -1:
+                    # effectively, unlimited
+                    quantity = MAX_INSTANCES
+                trial = sku.startswith('S')  # i.e.,, SER/SVC
 
                 valid_subs.append(
                     ValidSub(
                         sku,
-                        sub['productName'],
+                        sub_name,
                         support_level,
                         end_date,
                         trial,
                         developer_license,
                         quantity,
-                        pool_id,
                         satellite,
                         subscription_id,
                         account_number,
@@ -414,7 +417,6 @@ class Licenser(object):
                 license._attrs['satellite'] = satellite
                 license._attrs['valid_key'] = True
                 license.update(license_date=int(sub.end_date.strftime('%s')))
-                license.update(pool_id=sub.pool_id)
                 license.update(subscription_id=sub.subscription_id)
                 license.update(account_number=sub.account_number)
                 licenses.append(license._attrs.copy())

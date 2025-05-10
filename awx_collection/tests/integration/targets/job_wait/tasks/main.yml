@@ -156,9 +156,17 @@
         project: "{{ proj_name }}"
         inventory: "Demo Inventory"
         state: absent
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the project
       project:
         name: "{{ proj_name }}"
         organization: Default
         state: absent
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3

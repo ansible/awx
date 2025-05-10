@@ -77,7 +77,14 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
         if jq_str_for_event not in compiled_jq_expressions:
             compiled_jq_expressions[resolved_action] = jq.compile(jq_str_for_event)
         compiled_jq = compiled_jq_expressions[resolved_action]
-        for data in compiled_jq.input(event.event_data['res']).all():
+
+        try:
+            data_source = compiled_jq.input(event.event_data['res']).all()
+        except Exception as e:
+            logger.warning(f'error for module {resolved_action} and data {event.event_data["res"]}: {e}')
+            continue
+
+        for data in data_source:
             # From this jq result (specific to a single Ansible module), get index information about this host record
             if not data.get('canonical_facts'):
                 if not facts_missing_logged:

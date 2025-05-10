@@ -23,7 +23,7 @@ class TokenError(requests.RequestException):
     try:
       client = OIDCClient(...)
       client.make_request(...)
-    except TokenGenerationError as e:
+    except TokenError as e:
         print(f"Token generation failed due to {e.__cause__}")
     except requests.RequestException:
         print("API request failed)
@@ -102,13 +102,15 @@ class OIDCClient:
         self,
         client_id: str,
         client_secret: str,
-        token_url: str,
-        scopes: list[str],
+        token_url: str = DEFAULT_OIDC_TOKEN_ENDPOINT,
+        scopes: list[str] = None,
         base_url: str = '',
     ) -> None:
         self.client_id: str = client_id
         self.client_secret: str = client_secret
         self.token_url: str = token_url
+        if scopes is None:
+            scopes = ['api.console']
         self.scopes = scopes
         self.base_url: str = base_url
         self.token: Optional[Token] = None
