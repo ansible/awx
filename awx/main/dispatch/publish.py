@@ -110,7 +110,7 @@ class task:
                             logger.debug(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
                         return submit_task(alt_impl, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                 except Exception:
-                    logger.warning(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
+                    logger.exception(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
                     # Continue with original implementation if anything fails
                     pass
 
