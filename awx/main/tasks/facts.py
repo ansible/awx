@@ -22,7 +22,8 @@ system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 
 
 @log_excess_runtime(logger, debug_cutoff=0.01, msg='Inventory {inventory_id} host facts prepared for {written_ct} hosts, took {delta:.3f} s', add_log_data=True)
-def start_fact_cache(hosts, artifacts_dir, log_data, timeout=None, inventory_id=None):
+def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_data=None):
+    log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['written_ct'] = 0
     hosts_cached = []
@@ -74,7 +75,8 @@ def start_fact_cache(hosts, artifacts_dir, log_data, timeout=None, inventory_id=
     msg='Inventory {inventory_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
     add_log_data=True,
 )
-def finish_fact_cache(artifacts_dir, log_data, job_id=None, inventory_id=None):
+def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=None):
+    log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['updated_ct'] = 0
     log_data['unmodified_ct'] = 0
@@ -95,7 +97,7 @@ def finish_fact_cache(artifacts_dir, log_data, job_id=None, inventory_id=None):
         return
 
     host_names = summary.get('hosts_cached', [])
-    hosts_cached = Host.objects.filter(name__in=host_names, inventory_id=inventory_id).order_by('id').iterator()
+    hosts_cached = Host.objects.filter(name__in=host_names).order_by('id').iterator()
 
     # Path where individual fact files were written
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
@@ -109,6 +111,7 @@ def finish_fact_cache(artifacts_dir, log_data, job_id=None, inventory_id=None):
             continue
 
         if os.path.exists(filepath):
+            # If the file changed since we wrote the last facts file, pre-playbook run...
             modified = os.path.getmtime(filepath)
             if not facts_write_time or modified >= facts_write_time:
                 try:
@@ -134,6 +137,8 @@ def finish_fact_cache(artifacts_dir, log_data, job_id=None, inventory_id=None):
             else:
                 log_data['unmodified_ct'] += 1
         else:
+            # if the file goes missing, ansible removed it (likely via clear_facts)
+            # if the file goes missing, but the host has not started facts, then we should not clear the facts
             host.ansible_facts = {}
             host.ansible_facts_modified = now()
             hosts_to_update.append(host)

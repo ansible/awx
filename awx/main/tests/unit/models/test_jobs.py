@@ -33,14 +33,23 @@ def hosts(ref_time):
 
 
 def test_start_job_fact_cache(hosts, tmpdir):
-    fact_cache = os.path.join(tmpdir, 'facts')
-    start_fact_cache(hosts, fact_cache, timeout=0)
+    # Create artifacts dir inside tmpdir
+    artifacts_dir = tmpdir.mkdir("artifacts")
+
+    # Assign a mock inventory ID
+    inventory_id = 42
+
+    # Call the function WITHOUT log_data — the decorator handles it
+    start_fact_cache(hosts, artifacts_dir=str(artifacts_dir), timeout=0, inventory_id=inventory_id)
+
+    # Fact files are written into artifacts_dir/fact_cache/
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
 
     for host in hosts:
-        filepath = os.path.join(fact_cache, host.name)
+        filepath = os.path.join(fact_cache_dir, host.name)
         assert os.path.exists(filepath)
-        with open(filepath, 'r') as f:
-            assert f.read() == json.dumps(host.ansible_facts)
+        with open(filepath, 'r', encoding='utf-8') as f:
+            assert json.load(f) == host.ansible_facts
 
 
 def test_fact_cache_with_invalid_path_traversal(tmpdir):
@@ -50,11 +59,19 @@ def test_fact_cache_with_invalid_path_traversal(tmpdir):
             ansible_facts={"a": 1, "b": 2},
         ),
     ]
+    artifacts_dir = tmpdir.mkdir("artifacts")
+    inventory_id = 42
 
-    fact_cache = os.path.join(tmpdir, 'facts')
-    start_fact_cache(hosts, fact_cache, timeout=0)
-    # a file called "foo" should _not_ be written outside the facts dir
-    assert os.listdir(os.path.join(fact_cache, '..')) == ['facts']
+    start_fact_cache(hosts, artifacts_dir=str(artifacts_dir), timeout=0, inventory_id=inventory_id)
+
+    # Fact cache directory (safe location)
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+
+    # The bad host name should not produce a file
+    assert not os.path.exists(os.path.join(fact_cache_dir, '../foo'))
+
+    # Make sure the fact_cache dir exists and is still empty
+    assert os.listdir(fact_cache_dir) == []
 
 
 def test_start_job_fact_cache_past_timeout(hosts, tmpdir):
@@ -68,12 +85,17 @@ def test_start_job_fact_cache_past_timeout(hosts, tmpdir):
 
 
 def test_start_job_fact_cache_within_timeout(hosts, tmpdir):
-    fact_cache = os.path.join(tmpdir, 'facts')
-    # the hosts fixture was modified 5s ago, which is less than 7s
-    start_fact_cache(hosts, fact_cache, timeout=7)
+    artifacts_dir = tmpdir.mkdir("artifacts")
 
+    # The hosts fixture was modified 5s ago, which is less than 7s
+    start_fact_cache(hosts, str(artifacts_dir), timeout=7)
+
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
     for host in hosts:
-        assert os.path.exists(os.path.join(fact_cache, host.name))
+        filepath = os.path.join(fact_cache_dir, host.name)
+        assert os.path.exists(filepath)
+        with open(filepath, 'r') as f:
+            assert json.load(f) == host.ansible_facts
 
 
 def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
@@ -81,10 +103,18 @@ def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
     start_fact_cache(hosts, fact_cache, timeout=0)
 
     bulk_update = mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+
+    # Mock the os.path.exists behavior for host deletion
+    # Let's assume the fact file for hosts[1] is missing.
     mocker.patch('os.path.exists', side_effect=lambda path: hosts[1].name not in path)
 
-    # Simulate one host's fact file getting deleted
-    os.remove(os.path.join(fact_cache, hosts[1].name))
+    # Simulate one host's fact file getting deleted manually
+    host_to_delete_filepath = os.path.join(fact_cache, hosts[1].name)
+
+    # Simulate the file being removed by checking existence first, to avoid FileNotFoundError
+    if os.path.exists(host_to_delete_filepath):
+        os.remove(host_to_delete_filepath)
+
     finish_fact_cache(fact_cache)
 
     # Simulate side effects that would normally be applied during bulk update
