@@ -463,13 +463,19 @@ class Command(BaseCommand):
             # to make constructed inventory coherent
             db_variables = self.all_group.variables
         else:
+            # Update the "all" group variables.
+            #
+            # Note that we don't pass self.overwrite_vars to overwrite, instead
+            # it is forced disabled. This is because overwrite_vars=True is not
+            # supposed to overwrite the "all" group vars, but only child-group
+            # and host vars.
             db_variables = update_group_variables(
                 group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
                 newvars=self.all_group.variables,
                 dbvars=self.inventory.variables_dict,
                 invsrc_id=self.inventory_source.id,
                 inventory_id=self.inventory.id,
-                overwrite=self.overwrite_vars,
+                overwrite=False,
             )
         if db_variables != self.inventory.variables_dict:
             self.inventory.variables = json.dumps(db_variables)
