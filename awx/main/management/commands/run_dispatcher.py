@@ -12,8 +12,10 @@ from flags.state import flag_enabled
 
 from dispatcherd.factories import get_control_from_settings
 from dispatcherd import run_service
+from dispatcherd.config import setup as dispatcher_setup
 
 from awx.main.dispatch import get_task_queuename
+from awx.main.dispatch.config import get_dispatcherd_config
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
 from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
@@ -100,6 +102,7 @@ class Command(BaseCommand):
                 return
 
         if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+            dispatcher_setup(get_dispatcherd_config())
             run_service()
         else:
             consumer = None
