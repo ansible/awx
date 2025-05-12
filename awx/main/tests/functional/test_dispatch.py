@@ -25,14 +25,6 @@ Prevent logger.<warn, debug, error> calls from triggering database operations
 '''
 
 
-@pytest.fixture(autouse=True, scope='module')
-def _disable_dispatcherd():
-    ffs = deepcopy(settings.FLAGS)
-    ffs['FEATURE_DISPATCHERD_ENABLED'][0]['value'] = False
-    with override_settings(FLAGS=ffs):
-        yield
-
-
 @pytest.fixture(autouse=True)
 def _disable_database_settings(mocker):
     m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=mock.PropertyMock)
@@ -311,6 +303,13 @@ class TestTaskDispatcher:
 
 
 class TestTaskPublisher:
+    @pytest.fixture(autouse=True)
+    def _disable_dispatcherd(self):
+        ffs = deepcopy(settings.FLAGS)
+        ffs['FEATURE_DISPATCHERD_ENABLED'][0]['value'] = False
+        with override_settings(FLAGS=ffs):
+            yield
+
     def test_function_callable(self):
         assert add(2, 2) == 4
 
