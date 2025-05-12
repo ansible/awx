@@ -360,8 +360,13 @@ class Licenser(object):
                     account_number = sub['accountNumber']
                 else:
                     try:
+                        # Determine total quantity based on capacity name
+                        # if capacity name is Nodes, capacity quantity x subscription quantity
+                        # if capacity name is Sockets, capacity quantity / 2 (minimum of 1) x subscription quantity
                         if sub['capacity']['name'] == "Nodes":
                             quantity = int(sub['capacity']['quantity']) * int(sub['subscriptions']['quantity'])
+                        elif sub['capacity']['name'] == "Sockets":
+                            quantity = max(int(sub['capacity']['quantity']) / 2, 1) * int(sub['subscriptions']['quantity'])
                         else:
                             continue
                     except Exception:

@@ -155,26 +155,36 @@ class TestAnalyticsGenericView:
     )
     @pytest.mark.django_db
     def test__send_to_analytics_credentials(self, settings_map, expected_auth, expected_error_keyword):
+        """
+        Test _send_to_analytics with various combinations of credentials.
+        """
         with override_settings(**settings_map):
             request = RequestFactory().post('/some/path')
             view = AnalyticsGenericView()
 
             if expected_auth:
-                with mock.patch('requests.request') as mock_request:
-                    mock_request.return_value = mock.Mock(status_code=200)
+                with mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client:
+                    # Configure the mock OIDCClient instance and its make_request method
+                    mock_client_instance = mock.Mock()
+                    mock_oidc_client.return_value = mock_client_instance
+                    mock_client_instance.make_request.return_value = mock.Mock(status_code=200)
 
                     analytic_url = view._get_analytics_url(request.path)
                     response = view._send_to_analytics(request, 'POST')
 
                     # Assertions
-                    mock_request.assert_called_once_with(
+                    # Assert OIDCClient instantiation
+                    expected_client_id, expected_client_secret = expected_auth
+                    mock_oidc_client.assert_called_once_with(expected_client_id, expected_client_secret)
+
+                    # Assert make_request call
+                    mock_client_instance.make_request.assert_called_once_with(
                         'POST',
                         analytic_url,
-                        auth=expected_auth,
-                        verify=mock.ANY,
                         headers=mock.ANY,
-                        json=mock.ANY,
+                        verify=mock.ANY,
                         params=mock.ANY,
+                        json=mock.ANY,
                         timeout=mock.ANY,
                     )
                     assert response.status_code == 200
