@@ -5,8 +5,11 @@ import signal
 import time
 import yaml
 from unittest import mock
+from copy import deepcopy
 
 from django.utils.timezone import now as tz_now
+from django.conf import settings
+from django.test.utils import override_settings
 import pytest
 
 from awx.main.models import Job, WorkflowJob, Instance
@@ -20,6 +23,14 @@ from awx.main.dispatch.periodic import Scheduler
 '''
 Prevent logger.<warn, debug, error> calls from triggering database operations
 '''
+
+
+@pytest.fixture(autouse=True, scope='module')
+def _disable_dispatcherd():
+    ffs = deepcopy(settings.FLAGS)
+    ffs['FEATURE_DISPATCHERD_ENABLED'][0]['value'] = False
+    with override_settings(FLAGS=ffs):
+        yield
 
 
 @pytest.fixture(autouse=True)
