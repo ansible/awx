@@ -22,15 +22,14 @@ system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 
 
 @log_excess_runtime(logger, debug_cutoff=0.01, msg='Inventory {inventory_id} host facts prepared for {written_ct} hosts, took {delta:.3f} s', add_log_data=True)
-def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=None):
+def start_fact_cache(hosts, artifacts_dir, log_data, timeout=None, inventory_id=None):
     log_data['inventory_id'] = inventory_id
     log_data['written_ct'] = 0
     hosts_cached = []
 
-    try:
-        os.makedirs(destination, mode=0o700)
-    except FileExistsError:
-        pass
+    # Create the fact_cache directory inside artifacts_dir
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+    os.makedirs(fact_cache_dir, mode=0o700, exist_ok=True)
 
     if timeout is None:
         timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
@@ -42,9 +41,9 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
         if not host.ansible_facts_modified or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
             continue  # facts are expired - do not write them
 
-        filepath = os.path.join(destination, host.name)
-        if not os.path.realpath(filepath).startswith(destination):
-            system_tracking_logger.error(f'facts for host {smart_str(host.name)} could not be cached')
+        filepath = os.path.join(fact_cache_dir, host.name)
+        if not os.path.realpath(filepath).startswith(fact_cache_dir):
+            logger.error(f'facts for host {smart_str(host.name)} could not be cached')
             continue
 
         try:
@@ -54,15 +53,17 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
                 log_data['written_ct'] += 1
                 last_write_time = os.path.getmtime(filepath)
         except IOError:
-            system_tracking_logger.error(f'facts for host {smart_str(host.name)} could not be cached')
+            logger.error(f'facts for host {smart_str(host.name)} could not be cached')
             continue
 
-    # Write summary file to artifacts dir
+    # Write summary file directly to the artifacts_dir
     if inventory_id is not None:
-        artifact_dir = os.path.join('artifacts', f'inventory_{inventory_id}')
-        os.makedirs(artifact_dir, exist_ok=True)
-        summary_file = os.path.join(artifact_dir, 'host_cache_summary.json')
-        summary_data = {'last_write_time': last_write_time, 'hosts_cached': hosts_cached, 'written_ct': log_data['written_ct']}
+        summary_file = os.path.join(artifacts_dir, 'host_cache_summary.json')
+        summary_data = {
+            'last_write_time': last_write_time,
+            'hosts_cached': hosts_cached,
+            'written_ct': log_data['written_ct'],
+        }
         with open(summary_file, 'w', encoding='utf-8') as f:
             json.dump(summary_data, f, indent=2)
 
@@ -73,42 +74,43 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
     msg='Inventory {inventory_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
     add_log_data=True,
 )
-def finish_fact_cache(destination, log_data, job_id=None, inventory_id=None):
+def finish_fact_cache(artifacts_dir, log_data, job_id=None, inventory_id=None):
     log_data['inventory_id'] = inventory_id
     log_data['updated_ct'] = 0
     log_data['unmodified_ct'] = 0
     log_data['cleared_ct'] = 0
 
-    summary_path = os.path.join(destination, 'host_cache_summary.json')
+    # The summary file is directly inside the artifacts dir
+    summary_path = os.path.join(artifacts_dir, 'host_cache_summary.json')
     if not os.path.exists(summary_path):
-        system_tracking_logger.error(f'Missing summary file at {summary_path}')
+        logger.error(f'Missing summary file at {summary_path}')
         return
 
     try:
         with open(summary_path, 'r', encoding='utf-8') as f:
             summary = json.load(f)
-        facts_write_time = os.path.getmtime(summary_path)  # Get mtime *after* successful read
+        facts_write_time = os.path.getmtime(summary_path)  # After successful read
     except (json.JSONDecodeError, OSError) as e:
-        system_tracking_logger.error(f'Error reading summary file at {summary_path}: {e}')
+        logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
 
     host_names = summary.get('hosts_cached', [])
-
-    # Lookup Host objects.  Use iterator() for large queries.  Order by 'id'.
     hosts_cached = Host.objects.filter(name__in=host_names, inventory_id=inventory_id).order_by('id').iterator()
 
+    # Path where individual fact files were written
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+
     hosts_to_update = []
-    host_facts_dir = os.path.join(settings.ANSIBLE_FACT_CACHE, str(inventory_id))
 
     for host in hosts_cached:
-        filepath = os.path.join(host_facts_dir, host.name)
-        if not os.path.realpath(filepath).startswith(host_facts_dir):
-            system_tracking_logger.error(f'Invalid path for facts file: {filepath}')
+        filepath = os.path.join(fact_cache_dir, host.name)
+        if not os.path.realpath(filepath).startswith(fact_cache_dir):
+            logger.error(f'Invalid path for facts file: {filepath}')
             continue
 
         if os.path.exists(filepath):
             modified = os.path.getmtime(filepath)
-            if not facts_write_time or modified > facts_write_time:
+            if not facts_write_time or modified >= facts_write_time:
                 try:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         ansible_facts = json.load(f)
@@ -116,9 +118,9 @@ def finish_fact_cache(destination, log_data, job_id=None, inventory_id=None):
                     continue
 
                 host.ansible_facts = ansible_facts
-                host.ansible_facts_modified = now()  # Use Django's timezone-aware now()
+                host.ansible_facts_modified = now()
                 hosts_to_update.append(host)
-                system_tracking_logger.info(
+                logger.info(
                     f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
                     extra=dict(
                         inventory_id=host.inventory.id,
@@ -133,9 +135,9 @@ def finish_fact_cache(destination, log_data, job_id=None, inventory_id=None):
                 log_data['unmodified_ct'] += 1
         else:
             host.ansible_facts = {}
-            host.ansible_facts_modified = now()  # Use Django's timezone-aware now()
+            host.ansible_facts_modified = now()
             hosts_to_update.append(host)
-            system_tracking_logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
+            logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
             log_data['cleared_ct'] += 1
 
         if len(hosts_to_update) >= 100:
