@@ -150,11 +150,11 @@ def dispatch_startup():
     """
     System initialization at startup.
     First, execute the common logic.
-    Then, if FEATURE_NEW_DISPATCHER is enabled, re-submit waiting jobs via the control API;
+    Then, if FEATURE_DISPATCHERD_ENABLED is enabled, re-submit waiting jobs via the control API;
     otherwise, fall back to legacy reaping of waiting jobs.
     """
     _run_dispatch_startup_common()
-    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
         _dispatcherd_dispatch_startup()
     else:
         _legacy_dispatch_startup()
@@ -173,7 +173,7 @@ def inform_cluster_of_shutdown():
         logger.exception("Cluster host not found: %s", settings.CLUSTER_HOST_ID)
         return
 
-    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
         logger.debug("Dispatcherd mode: no extra reaping required for instance %s", inst.hostname)
     else:
         try:

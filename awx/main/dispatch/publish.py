@@ -4,6 +4,8 @@ import json
 import time
 from uuid import uuid4
 
+from dispatcherd.publish import submit_task
+
 from django_guid import get_guid
 from django.conf import settings
 
@@ -99,13 +101,14 @@ class task:
                 try:
                     from flags.state import flag_enabled
 
-                    if flag_enabled('FEATURE_NEW_DISPATCHER'):
+                    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                         if cls.name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
                             alt_impl = ALTERNATIVE_TASK_IMPLEMENTATIONS[cls.name]
                             logger.info(f"[DISPATCHER] Using dispatcherd implementation for task: {cls.name}")
-                            return alt_impl.apply_async(args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                         else:
+                            alt_impl = cls.name
                             logger.debug(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
+                        return submit_task(alt_impl, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                 except Exception:
                     logger.warning(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
                     # Continue with original implementation if anything fails
