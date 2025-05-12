@@ -4,7 +4,6 @@
 # Production settings for AWX project.
 
 import os
-from pathlib import Path
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -25,7 +24,7 @@ ALLOWED_HOSTS = []
 BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
 
 # Switch to a writable location for the dispatcher sockfile location
-DISPATCHERD_DEBUGGING_SOCKFILE = str(Path().home() / 'dispatcherd.sock')
+DISPATCHERD_DEBUGGING_SOCKFILE = os.path.realpath('/var/run/tower/dispatcherd.sock')
 
 # Very important that this is editable (not read_only) in the API
 AWX_ISOLATION_SHOW_PATHS = [
@@ -34,4 +33,3 @@ AWX_ISOLATION_SHOW_PATHS = [
 ]
 
 del os
-del Path

@@ -1108,5 +1108,5 @@ FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
 FLAGS = {
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
     'FEATURE_POLICY_AS_CODE_ENABLED': [{'condition': 'boolean', 'value': False}],
-    'FEATURE_NEW_DISPATCHER': [{'condition': 'boolean', 'value': True}],
+    'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
 }
