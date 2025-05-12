@@ -102,7 +102,7 @@ class Command(BaseCommand):
                 return
 
         if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-            dispatcher_setup(get_dispatcherd_config())
+            dispatcher_setup(get_dispatcherd_config(for_service=True))
             run_service()
         else:
             consumer = None
