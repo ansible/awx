@@ -524,7 +524,7 @@ class TaskManager(TaskBase):
                 task.save()
                 task.log_lifecycle("waiting")
 
-        if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
             self.control_nodes_to_notify.add(task.get_queue_name())
         else:
             # apply_async does a NOTIFY to the channel dispatcher is listening to
@@ -730,7 +730,7 @@ class TaskManager(TaskBase):
         for workflow_approval in self.get_expired_workflow_approvals():
             self.timeout_approval_node(workflow_approval)
 
-        if flag_enabled('FEATURE_NEW_DISPATCHER'):
+        if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
             for controller_node in self.control_nodes_to_notify:
                 logger.info(f'Notifying node {controller_node} of new waiting jobs.')
                 dispatch_waiting_jobs.apply_async(queue=controller_node)

@@ -1477,7 +1477,7 @@ class UnifiedJob(
         canceled = []
         # Special case for task manager (used during workflow job cancellation)
         if not connection.get_autocommit():
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 try:
                     from dispatcherd.factories import get_control_from_settings
 
@@ -1495,7 +1495,7 @@ class UnifiedJob(
         # Standard case with reply
         try:
             timeout = 5
-            if flag_enabled('FEATURE_NEW_DISPATCHER'):
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 from dispatcherd.factories import get_control_from_settings
 
                 ctl = get_control_from_settings()
