@@ -118,7 +118,7 @@ class MainConfig(AppConfig):
                         "channels": ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()],
                         "default_publish_channel": settings.CLUSTER_HOST_ID,  # used for debugging commands
                     },
-                    "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
+                    # "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
                 },
                 "producers": {
                     "ScheduledProducer": {"task_schedule": dispatcherd_schedule},
