@@ -5,6 +5,7 @@ import time
 from uuid import uuid4
 
 from dispatcherd.publish import submit_task
+from dispatcherd.utils import resolve_callable
 
 from django_guid import get_guid
 from django.conf import settings
@@ -108,9 +109,11 @@ class task:
                         else:
                             alt_impl = cls.name
                             logger.debug(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
-                        return submit_task(alt_impl, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
+                        # At this point we have the import string, and submit_task wants the method, so back to that
+                        actual_task = resolve_callable(alt_impl)
+                        return submit_task(actual_task, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                 except Exception:
-                    logger.warning(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
+                    logger.exception(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
                     # Continue with original implementation if anything fails
                     pass
 

@@ -81,57 +81,9 @@ class MainConfig(AppConfig):
     def ready(self):
         super().ready()
 
-        from django.conf import settings
+        from awx.main.dispatch.config import get_dispatcherd_config
 
-        from ansible_base.lib.utils.db import get_pg_notify_params
-        from awx.main.dispatch import get_task_queuename
-        from awx.main.dispatch.pool import get_auto_max_workers
-        from awx.main.dispatch.publish import ALTERNATIVE_TASK_IMPLEMENTATIONS
-
-        # from dispatcherd.config import settings as dispatcher_settings
-        from dispatcherd.utils import serialize_task
-
-        dispatcherd_schedule = {}
-        for task_name, options in settings.DISPATCHER_SCHEDULE.items():
-            if task_name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
-                taskd_name = serialize_task(ALTERNATIVE_TASK_IMPLEMENTATIONS[task_name])
-            else:
-                taskd_name = task_name
-            dispatcherd_schedule[taskd_name] = options
-
-        dispatcher_setup(
-            {
-                "version": 2,
-                "service": {
-                    "pool_kwargs": {
-                        "min_workers": settings.JOB_EVENT_WORKERS,
-                        "max_workers": get_auto_max_workers(),
-                    },
-                    "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID},
-                    "process_manager_cls": "ForkServerManager",
-                    "process_manager_kwargs": {"preload_modules": ['awx.main.dispatch.hazmat']},
-                },
-                "brokers": {
-                    "pg_notify": {
-                        "config": get_pg_notify_params(),
-                        "sync_connection_factory": "ansible_base.lib.utils.db.psycopg_connection_from_django",
-                        "channels": ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()],
-                        "default_publish_channel": settings.CLUSTER_HOST_ID,  # used for debugging commands
-                    },
-                    "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
-                },
-                "producers": {
-                    "ScheduledProducer": {"task_schedule": dispatcherd_schedule},
-                    "OnStartProducer": {"task_list": {"awx.main.tasks.system.dispatch_startup": {}}},
-                    "ControlProducer": {},
-                },
-                "publish": {
-                    "default_control_broker": "socket",
-                    "default_broker": "pg_notify",
-                },
-                "worker": {"worker_cls": "awx.main.dispatch.worker.dispatcherd.AWXTaskWorker"},
-            }
-        )
+        dispatcher_setup(get_dispatcherd_config())
 
         """
         Credential loading triggers database operations. There are cases we want to call
