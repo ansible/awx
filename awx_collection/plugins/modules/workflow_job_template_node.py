@@ -320,9 +320,13 @@ def main():
             wfjt_search_fields['organization'] = organization_id
         wfjt_data = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{'data': wfjt_search_fields})
         if wfjt_data is None:
-            module.fail_json(
-                msg="The workflow {0} in organization {1} was not found on the controller instance server".format(workflow_job_template, organization)
-            )
+            if state == 'absent':
+                # if the workflow doesn't exist, it can't have workflow nodes.
+                module.exit_json(**module.json_output)
+            else:
+                module.fail_json(
+                    msg="The workflow {0} in organization {1} was not found on the controller instance server".format(workflow_job_template, organization)
+                )
         workflow_job_template_id = wfjt_data['id']
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
