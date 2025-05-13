@@ -69,7 +69,7 @@ from awx.main.tasks.callback import (
     RunnerCallbackForSystemJob,
 )
 from awx.main.tasks.policy import evaluate_policy
-from awx.main.tasks.signals import with_signal_handling, signal_callback, signal_state
+from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields, events_processed_hook
