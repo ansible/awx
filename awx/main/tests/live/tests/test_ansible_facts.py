@@ -1,14 +1,20 @@
 import pytest
 
-from awx.main.tests.live.tests.conftest import wait_for_events
+from awx.main.tests.live.tests.conftest import wait_for_events, wait_for_job
 
 from awx.main.models import Job, Inventory
+
+
+@pytest.fixture
+def facts_project(live_tmp_folder, project_factory):
+    return project_factory(scm_url=f'file://{live_tmp_folder}/facts')
 
 
 def assert_facts_populated(name):
     job = Job.objects.filter(name__icontains=name).order_by('-created').first()
     assert job is not None
     wait_for_events(job)
+    wait_for_job(job)
 
     inventory = job.inventory
     assert inventory.hosts.count() > 0  # sanity
@@ -17,24 +23,24 @@ def assert_facts_populated(name):
 
 
 @pytest.fixture
-def general_facts_test(live_tmp_folder, run_job_from_playbook):
+def general_facts_test(facts_project, run_job_from_playbook):
     def _rf(slug, jt_params):
         jt_params['use_fact_cache'] = True
-        standard_kwargs = dict(scm_url=f'file://{live_tmp_folder}/facts', jt_params=jt_params)
+        standard_kwargs = dict(jt_params=jt_params)
 
         # GATHER FACTS
         name = f'test_gather_ansible_facts_{slug}'
-        run_job_from_playbook(name, 'gather.yml', **standard_kwargs)
+        run_job_from_playbook(name, 'gather.yml', proj=facts_project, **standard_kwargs)
         assert_facts_populated(name)
 
         # KEEP FACTS
         name = f'test_clear_ansible_facts_{slug}'
-        run_job_from_playbook(name, 'no_op.yml', **standard_kwargs)
+        run_job_from_playbook(name, 'no_op.yml', proj=facts_project, **standard_kwargs)
         assert_facts_populated(name)
 
         # CLEAR FACTS
         name = f'test_clear_ansible_facts_{slug}'
-        run_job_from_playbook(name, 'clear.yml', **standard_kwargs)
+        run_job_from_playbook(name, 'clear.yml', proj=facts_project, **standard_kwargs)
         job = Job.objects.filter(name__icontains=name).order_by('-created').first()
 
         assert job is not None
