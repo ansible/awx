@@ -44,7 +44,7 @@ class SignalState:
     def connect_signals(self):
         for for_signal in self.signals:
             self.original_methods[for_signal] = signal.getsignal(for_signal)
-            signal.signal(for_signal, lambda *args, for_signal=None: self.set_signal_flag(args, for_signal=for_signal))
+            signal.signal(for_signal, lambda *args: self.set_signal_flag(*args, for_signal=for_signal))
         self.is_active = True
 
     def restore_signals(self):
