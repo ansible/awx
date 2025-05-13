@@ -50,7 +50,7 @@ def test_outer_inner_signal_handling():
     @with_signal_handling
     def f1():
         assert signal_callback() is False
-        signal_state.set_sigterm_flag()
+        signal_state.set_signal_flag(for_signal=signal.SIGTERM)
         assert signal_callback()
         f2()
 
@@ -74,7 +74,7 @@ def test_inner_outer_signal_handling():
     @with_signal_handling
     def f2():
         assert signal_callback() is False
-        signal_state.set_sigint_flag()
+        signal_state.set_signal_flag(for_signal=signal.SIGINT)
         assert signal_callback()
 
     @with_signal_handling

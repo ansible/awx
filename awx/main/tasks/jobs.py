@@ -31,7 +31,6 @@ from gitdb.exc import BadName as BadGitName
 
 # Dispatcherd
 from dispatcherd.publish import task
-from dispatcherd.worker.task import DispatcherCancel
 from dispatcherd.utils import serialize_task
 
 # AWX
@@ -648,11 +647,6 @@ class BaseTask(object):
             self.runner_callback.delay_update(job_explanation=str(exc), result_traceback=str(exc))
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
-        except DispatcherCancel:
-            # dispatcher uses non-sigterm signal, and will raise this exception
-            signal_state.dispatcher_cancel_flag = True
-            logger.info(f'Caught DispatcherCancel error for {self.instance.log_format}')
-            status = 'canceled'
         except Exception:
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
