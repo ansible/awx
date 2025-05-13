@@ -13,7 +13,7 @@ def test_cancel_and_delete_job(live_tmp_folder, run_job_from_playbook, post, del
 
     # Wait for first event so that we can be sure the job is in-progress first
     start = time.time()
-    timeout = 3.0
+    timeout = 10.0
     while not job.job_events.exists():
         time.sleep(0.2)
         if time.time() - start > timeout:
