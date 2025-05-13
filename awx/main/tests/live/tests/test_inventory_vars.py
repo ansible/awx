@@ -131,6 +131,7 @@ def inventory_source(inventory, project):
         source="scm",
         source_path="inventory_var_deleted_in_source.ini",
         inventory=inventory,
+        overwrite_vars=True,
     )
     with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         inv_src.save()
@@ -172,6 +173,7 @@ def inventory_source_factory(inventory, project):
             source="scm",
             source_path=inventory_file,
             inventory=inventory,
+            overwrite_vars=True,
         )
         with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
             inv_src.save()

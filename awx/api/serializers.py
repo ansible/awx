@@ -1657,7 +1657,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
         editing the inventory variables field, the variable is not supposed to
         reappear with a value from a previous inventory source update.
 
-        We achieve this by forcing `overwrite=True` on such an update.
+        We achieve this by forcing `reset=True` on such an update.
 
         As a side-effect, variables which have been set by source updates and
         have survived a user-edit (i.e. they have not been deleted from the
@@ -1683,7 +1683,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
             dbvars=None,
             invsrc_id=-1,
             inventory_id=inventory_id,
-            overwrite=True,
+            reset=True,
         )
 
     def create(self, validated_data):

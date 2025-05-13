@@ -154,29 +154,39 @@ class InventoryGroupVariables(dict):
             state[name] = inv_var.dump()
         return state
 
-    def update_from_src(self, vars: dict[str, var_value], source_id: int, overwrite: bool = False) -> None:
+    def update_from_src(
+        self,
+        new_vars: dict[str, var_value],
+        source_id: int,
+        overwrite_vars: bool = True,
+        reset: bool = False,
+    ) -> None:
         """
         Update with variables from an inventory source.
 
         Delete all variables for this source which are not in the update vars.
 
-        :param dict vars: The variables from the inventory source.
+        :param dict new_vars: The variables from the inventory source.
         :param int invsrc_id: The id of the inventory source for this update.
-        :param bool overwrite: If `True`, delete all variables from previous
-            updates. Therewith making this update overwrite all history. Default
-            is `False`.
+        :param bool overwrite_vars: If `True`, delete this source's history
+            entry for variables which are not in this update. If `False`, keep
+            the old updates in the history for such variables. Default is
+            `True`.
+        :param bool reset: If `True`, delete the update history for all existing
+            variables before updating the new vars. Therewith making this update
+            overwrite all history. Default is `False`.
         :return: None
         """
-        logger.debug(f"InventoryGroupVariables({self.id}).update_from_src({vars=}, {source_id=}, {overwrite=}): {self=}")
+        logger.debug(f"InventoryGroupVariables({self.id}).update_from_src({new_vars=}, {source_id=}, {overwrite_vars=}, {reset=}): {self=}")
         # Create variables which are newly introduced by this source.
-        for name in vars:
+        for name in new_vars:
             if name not in self._vars:
                 self._vars[name] = InventoryVariable(name)
         # Combine the names of the existing vars and the new vars from this update.
-        all_var_names = list(set(list(self.keys()) + list(vars.keys())))
-        # In overwrite-mode, delete all existing vars and their history before
+        all_var_names = list(set(list(self.keys()) + list(new_vars.keys())))
+        # In reset-mode, delete all existing vars and their history before
         # updating.
-        if overwrite:
+        if reset:
             for name in all_var_names:
                 self._vars[name].reset()
         # Go through all variables (the existing ones, and the ones added by
@@ -185,9 +195,9 @@ class InventoryGroupVariables(dict):
         # update.
         for name in all_var_names:
             # Update or delete source from var (if name not in vars).
-            if name in vars:
-                self._vars[name].update(vars[name], source_id)
-            else:
+            if name in new_vars:
+                self._vars[name].update(new_vars[name], source_id)
+            elif overwrite_vars:
                 self._vars[name].delete(source_id)
             # Delete vars which have no source anymore.
             if self._vars[name].has_no_source:
@@ -205,10 +215,13 @@ def update_group_variables(
     dbvars: dict | None,
     invsrc_id: int,
     inventory_id: int,
-    overwrite: bool = False,
+    overwrite_vars: bool = True,
+    reset: bool = False,
 ) -> dict[str, var_value]:
     """
     Update the inventory variables of one group.
+
+    Merge the new variables into the existing group variables.
 
     The update can be triggered either by an inventory update via API, or via a
     manual edit of the variables field in the awx inventory form.
@@ -229,9 +242,12 @@ def update_group_variables(
         for manual updates via the GUI.
     :param int inventory_id: The id of the inventory on which this update is
         applied.
-    :param bool overwrite: If `True`, delete all variables from previous
-        updates, therewith making this update overwrite all history. Default is
-        `False`.
+    :param bool overwrite_vars: If `True`, delete variables which were merged
+        from the same source in a previous update, but are no longer contained
+        in that source. If `False`, such variables would not be removed from the
+        group. Default is `True`.
+    :param bool reset: If `True`, delete all variables from previous updates,
+        therewith making this update overwrite all history. Default is `False`.
     :return: The variables and their current values as a dict.
     :rtype: dict
     """
@@ -252,7 +268,7 @@ def update_group_variables(
     #
     logger.debug(f"update_group_variables: before update_from_src {model.variables=}")
     # Apply the new inventory update onto the group variables.
-    inv_group_vars.update_from_src(newvars, invsrc_id, overwrite)
+    inv_group_vars.update_from_src(newvars, invsrc_id, overwrite_vars, reset)
     # Save the new variables state.
     model.variables = inv_group_vars.save_state()
     model.save()

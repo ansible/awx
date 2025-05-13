@@ -697,13 +697,10 @@ class TestConstructedInventory:
 class TestInventoryAllVariables:
 
     @staticmethod
-    def simulate_update_from_source(inv_src, variables_dict, overwrite_vars=False):
+    def simulate_update_from_source(inv_src, variables_dict, overwrite_vars=True):
         """
         Update `inventory` with variables `variables_dict` from source
         `inv_src`.
-
-        Note that 'overwrite_vars=False' is actually forced for updates from
-        source (see method `_update_inventory`), so use 'True' with caution.
         """
         # Perform an update from source the same way it is done in
         # `inventory_import.Command._update_inventory`.
@@ -713,13 +710,13 @@ class TestInventoryAllVariables:
             dbvars=inv_src.inventory.variables_dict,
             invsrc_id=inv_src.id,
             inventory_id=inv_src.inventory.id,
-            overwrite=overwrite_vars,
+            overwrite_vars=overwrite_vars,
         )
         inv_src.inventory.variables = json.dumps(new_vars)
         inv_src.inventory.save(update_fields=["variables"])
         return new_vars
 
-    def update_and_verify(self, inv_src, new_vars, expect=None, overwrite_vars=False):
+    def update_and_verify(self, inv_src, new_vars, expect=None, overwrite_vars=True, teststep=None):
         """
         Helper: Update from source and verify the new inventory variables.
 
@@ -729,19 +726,15 @@ class TestInventoryAllVariables:
         :param dict expect: (optional) The expected variables state of the
             inventory after the update. If not set or None, expect `new_vars`.
         :param bool overwrite_vars: The status of the inventory source option
-            'overwrite variables'.
-
-            .. Note::
-
-                Note that 'overwrite_vars=False' is actually forced for updates
-                from source (see method `_update_inventory`), so use 'True' with
-                caution.
-
+            'overwrite variables'. Default is `True`.
         :raise AssertionError: If the inventory does not contain the expected
             variables after the update.
         """
         self.simulate_update_from_source(inv_src, new_vars, overwrite_vars=overwrite_vars)
-        assert inv_src.inventory.variables_dict == (expect if expect is not None else new_vars)
+        if teststep is not None:
+            assert inv_src.inventory.variables_dict == (expect if expect is not None else new_vars), f"Test step {teststep}"
+        else:
+            assert inv_src.inventory.variables_dict == (expect if expect is not None else new_vars)
 
     def test_set_variables_through_inventory_details_update(self, inventory, patch, admin_user):
         """
@@ -896,13 +889,13 @@ class TestInventoryAllVariables:
         inventory.refresh_from_db()
         assert inventory.variables_dict == {"x": 0}
         # Test step 2: Source A overwrites value of var x
-        self.update_and_verify(inv_src_a, {"x": 1})
+        self.update_and_verify(inv_src_a, {"x": 1}, teststep=2)
         # Test step 3: Source A overwrites value of var x
-        self.update_and_verify(inv_src_b, {"x": 2})
+        self.update_and_verify(inv_src_b, {"x": 2}, teststep=3)
         # Test step 4: Value of var x from source A reappears
-        self.update_and_verify(inv_src_b, {}, expect={"x": 1})
+        self.update_and_verify(inv_src_b, {}, expect={"x": 1}, teststep=4)
         # Test step 5: Value of var x from initial user edit reappears
-        self.update_and_verify(inv_src_a, {}, expect={"x": 0})
+        self.update_and_verify(inv_src_a, {}, expect={"x": 0}, teststep=5)
 
     def test_interleaved_deletions(self, inventory, patch, admin_user, inventory_source):
         """
@@ -926,13 +919,13 @@ class TestInventoryAllVariables:
         inventory.refresh_from_db()
         assert inventory.variables_dict == {"x": 0}
         # Test step 2: Source A overwrites value of var x
-        self.update_and_verify(inv_src_a, {"x": 1})
+        self.update_and_verify(inv_src_a, {"x": 1}, teststep=2)
         # Test step 3: Source B overwrites value of var x
-        self.update_and_verify(inv_src_b, {"x": 2})
+        self.update_and_verify(inv_src_b, {"x": 2}, teststep=3)
         # Test step 4: Source C overwrites value of var x
-        self.update_and_verify(inv_src_c, {"x": 3})
+        self.update_and_verify(inv_src_c, {"x": 3}, teststep=4)
         # Test step 5: Value of var x from source C remains unchanged
-        self.update_and_verify(inv_src_b, {}, expect={"x": 3})
+        self.update_and_verify(inv_src_b, {}, expect={"x": 3}, teststep=5)
         # Test step 6: Value of var x from source A reappears, because the
         # latest update from source B did not contain var x.
-        self.update_and_verify(inv_src_c, {}, expect={"x": 1})
+        self.update_and_verify(inv_src_c, {}, expect={"x": 1}, teststep=6)
