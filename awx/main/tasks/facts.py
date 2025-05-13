@@ -81,7 +81,6 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
     log_data['updated_ct'] = 0
     log_data['unmodified_ct'] = 0
     log_data['cleared_ct'] = 0
-
     # The summary file is directly inside the artifacts dir
     summary_path = os.path.join(artifacts_dir, 'host_cache_summary.json')
     if not os.path.exists(summary_path):
@@ -98,10 +97,8 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
 
     host_names = summary.get('hosts_cached', [])
     hosts_cached = Host.objects.filter(name__in=host_names).order_by('id').iterator()
-
     # Path where individual fact files were written
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
-
     hosts_to_update = []
 
     for host in hosts_cached:
@@ -120,20 +117,23 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
                 except ValueError:
                     continue
 
-                host.ansible_facts = ansible_facts
-                host.ansible_facts_modified = now()
-                hosts_to_update.append(host)
-                logger.info(
-                    f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
-                    extra=dict(
-                        inventory_id=host.inventory.id,
-                        host_name=host.name,
-                        ansible_facts=host.ansible_facts,
-                        ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                        job_id=job_id,
-                    ),
-                )
-                log_data['updated_ct'] += 1
+                if ansible_facts != host.ansible_facts:
+                    host.ansible_facts = ansible_facts
+                    host.ansible_facts_modified = now()
+                    hosts_to_update.append(host)
+                    logger.info(
+                        f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
+                        extra=dict(
+                            inventory_id=host.inventory.id,
+                            host_name=host.name,
+                            ansible_facts=host.ansible_facts,
+                            ansible_facts_modified=host.ansible_facts_modified.isoformat(),
+                            job_id=job_id,
+                        ),
+                    )
+                    log_data['updated_ct'] += 1
+                else:
+                    log_data['unmodified_ct'] += 1
             else:
                 log_data['unmodified_ct'] += 1
         else:
