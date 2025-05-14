@@ -451,9 +451,14 @@ CELERYBEAT_SCHEDULE = {
 
 DISPATCHER_SCHEDULE = {}
 for options in CELERYBEAT_SCHEDULE.values():
+    new_options = options.copy()
     task_name = options['task']
-    DISPATCHER_SCHEDULE[task_name] = options.copy()
-    DISPATCHER_SCHEDULE[task_name]['schedule'] = options['schedule'].total_seconds()
+    # Handle the only one exception case of the heartbeat which has a new implementation
+    if task_name == 'awx.main.tasks.system.cluster_node_heartbeat':
+        task_name = 'awx.main.tasks.system.adispatch_cluster_node_heartbeat'
+        new_options['task'] = task_name
+    new_options['schedule'] = options['schedule'].total_seconds()
+    DISPATCHER_SCHEDULE[task_name] = new_options
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True

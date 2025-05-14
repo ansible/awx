@@ -744,16 +744,6 @@ def _get_active_task_ids_from_dispatcherd(binder):
         return None
 
 
-# NOTE: This approach of registering alternative dispatcher implementations is a targeted solution for specific functions.
-try:
-    from awx.main.dispatch.publish import serialize_task, ALTERNATIVE_TASK_IMPLEMENTATIONS
-
-    # Register the alternative implementation
-    ALTERNATIVE_TASK_IMPLEMENTATIONS[serialize_task(cluster_node_heartbeat)] = adispatch_cluster_node_heartbeat
-except Exception:
-    logger.exception("Failed to register dispatcherd method for cluster_node_heartbeat")
-
-
 def _heartbeat_instance_management():
     """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
