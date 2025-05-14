@@ -14,9 +14,6 @@ from . import pg_bus_conn
 
 logger = logging.getLogger('awx.main.dispatch')
 
-# Registry of tasks with alternative implementations for the new dispatcher
-ALTERNATIVE_TASK_IMPLEMENTATIONS = {}
-
 
 def serialize_task(f):
     return '.'.join([f.__module__, f.__name__])
@@ -103,14 +100,8 @@ class task:
                     from flags.state import flag_enabled
 
                     if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-                        if cls.name in ALTERNATIVE_TASK_IMPLEMENTATIONS:
-                            alt_impl = ALTERNATIVE_TASK_IMPLEMENTATIONS[cls.name]
-                            logger.info(f"[DISPATCHER] Using dispatcherd implementation for task: {cls.name}")
-                        else:
-                            alt_impl = cls.name
-                            logger.debug(f"[DISPATCHER] No alternative registered for {cls.name}; using original legacy method.")
                         # At this point we have the import string, and submit_task wants the method, so back to that
-                        actual_task = resolve_callable(alt_impl)
+                        actual_task = resolve_callable(cls.name)
                         return submit_task(actual_task, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
                 except Exception:
                     logger.exception(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
