@@ -2,6 +2,7 @@
 # All Rights Reserved.
 import logging
 import yaml
+import os
 
 import redis
 
@@ -47,12 +48,18 @@ class Command(BaseCommand):
             ),
         )
 
+    def verify_dispatcherd_socket(self):
+        if not os.path.exists(settings.DISPATCHERD_DEBUGGING_SOCKFILE):
+            raise CommandError('Dispatcher is not running locally')
+
     def handle(self, *arg, **options):
         if options.get('status'):
             if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                 ctl = get_control_from_settings()
                 running_data = ctl.control_with_reply('status')
-                print(yaml.dump(running_data, default_flow_style=False))
+                if len(running_data) != 1:
+                    raise CommandError('Did not receive expected number of replies')
+                print(yaml.dump(running_data[0], default_flow_style=False))
                 return
             else:
                 print(Control('dispatcher').status())

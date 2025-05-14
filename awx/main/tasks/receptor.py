@@ -30,7 +30,6 @@ from awx.main.utils.common import (
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
-from dispatcherd.worker.task import DispatcherCancel
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task as task_awx
@@ -509,10 +508,7 @@ class AWXReceptorJob:
                 if signal_callback():
                     raise SignalExit()
                 res = processor_future.result()
-            except (SignalExit, DispatcherCancel):
-                if not signal_callback():
-                    # Record if this was from dispatcherd signal handling
-                    signal_state.dispatcher_cancel_flag = True
+            except SignalExit:
                 receptor_ctl.simple_command(f"work cancel {self.unit_id}")
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
