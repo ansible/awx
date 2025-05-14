@@ -29,7 +29,7 @@ def change_inventory_source_org_unique(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0199_alter_inventorysource_source_and_more'),
+        ('main', '0199_inventorygroupvariableswithhistory_and_more'),
     ]
 
     operations = [
