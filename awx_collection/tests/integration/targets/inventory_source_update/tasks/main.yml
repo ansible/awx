@@ -121,7 +121,7 @@
         that:
           - "result is changed"
 
-    - name: Attempt to delete an inventory source from an inventory that does not exist that does not exist
+    - name: Attempt to delete an inventory source from an inventory that does not exist
       inventory_source:
         name: "{{ inv_source3 }}"
         source: scm
@@ -131,6 +131,7 @@
         description: Source for Test inventory
         organization: Default
         inventory: Does not exist
+      register: result
 
     - assert:
         that:

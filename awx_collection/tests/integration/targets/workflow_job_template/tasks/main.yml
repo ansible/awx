@@ -433,6 +433,8 @@
         identifier: root
         unified_job_template: "{{ jt1_name }}"
         workflow: Does not exist
+        state: absent
+      register: results
 
     - assert:
         that:
