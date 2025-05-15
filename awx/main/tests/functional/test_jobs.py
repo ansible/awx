@@ -44,8 +44,8 @@ def test_job_capacity_and_with_inactive_node():
     i = Instance.objects.create(hostname='test-1')
     i.save_health_data('18.0.1', 2, 8000)
     assert i.enabled is True
-    assert i.capacity_adjustment == 1.0
-    assert i.capacity == 62
+    assert i.capacity_adjustment == 0.75
+    assert i.capacity == 48.5
     i.enabled = False
     i.save()
     with override_settings(CLUSTER_HOST_ID=i.hostname):

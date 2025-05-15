@@ -39,7 +39,7 @@ def test_dispatcher_max_workers_reserve(settings, fake_redis):
     plus reserve worker count
     """
     with override_settings(**settings):
-        i = Instance.objects.create(hostname='test-1', node_type='hybrid')
+        i = Instance.objects.create(hostname='test-1', node_type='hybrid', capacity_adjustment=1.0)
         i.local_health_check()
 
         assert get_auto_max_workers() == i.capacity + 7, (i.cpu, i.memory, i.cpu_capacity, i.mem_capacity)
