@@ -682,13 +682,13 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.instance = self.update_model(pk)
-        if not self.instance:
-            logger.error(f'Unified job pk={pk} appears to be deleted while running')
-            return
         self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
+        if not self.instance:
+            logger.error(f'Unified job pk={pk} appears to be deleted while running')
+            return
         if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
             events_processed_hook(self.instance)
 
