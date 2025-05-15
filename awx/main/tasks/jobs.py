@@ -466,6 +466,31 @@ class BaseTask(object):
     def should_use_fact_cache(self):
         return False
 
+    def transition_status(self, pk: int) -> bool:
+        """Atomically transition status to running, if False returned, another process got it"""
+        with transaction.atomic():
+            # Explanation of parts for the fetch:
+            # .values - avoid loading a full object, this is known to lead to deadlocks due to signals
+            #   the signals load other related rows which another process may be locking, and happens in practice
+            # of=('self',) - keeps FK tables out of the lock list, another way deadlocks can happen
+            # .get - just load the single job
+            instance_data = UnifiedJob.objects.select_for_update(of=('self',)).values('status', 'cancel_flag').get(pk=pk)
+
+            # If status is not waiting (obtained under lock) then this process does not have clearence to run
+            if instance_data['status'] == 'waiting':
+                if instance_data['cancel_flag']:
+                    updated_status = 'canceled'
+                else:
+                    updated_status = 'running'
+                # Explanation of the update:
+                # .filter - again, do not load the full object
+                # .update - a bulk update on just that one row, avoid loading unintended data
+                UnifiedJob.objects.filter(pk=pk).update(status=updated_status, start_args='')
+            elif instance_data['status'] == 'running':
+                logger.info(f'Job {pk} is being ran by another process, exiting')
+                return False
+        return True
+
     @with_path_cleanup
     @with_signal_handling
     def run(self, pk, **kwargs):
@@ -473,30 +498,15 @@ class BaseTask(object):
         Run the job/task and capture its output.
         """
         if not self.instance:  # Used to skip fetch for local runs
-            with transaction.atomic():
-                self.instance = self.model.objects.select_for_update().get(pk=pk)
+            if not self.transition_status(pk):
+                logger.info(f'Job {pk} is being ran by another process, exiting')
+                return
 
-                # If status is not waiting (obtained under lock) then this process does not have clearence to run
-                if self.instance.status == 'waiting':
-                    self.instance.start_args = ''  # blank field to remove encrypted passwords
-                    if self.instance.cancel_flag is True:
-                        self.instance.status = 'canceled'
-                    else:
-                        # self.instance because of the update_model pattern and when it's used in callback handlers
-                        self.instance.status = 'running'
-                    self.instance.save(update_fields=['start_args', 'status'])
-                elif self.instance.status == 'running':
-                    logger.info(f'Job {self.instance.log_format} is being ran by another process, exiting')
-                    return
-
+        # Load the instance
+        self.instance = self.update_model(pk)
         if self.instance.status != 'running':
-            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
-
-        if self.instance.execution_environment_id is None:
-            from awx.main.signals import disable_activity_stream
-
-            with disable_activity_stream():
-                self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
+            logger.error(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
+            return
 
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
@@ -510,6 +520,12 @@ class BaseTask(object):
         private_data_dir = None
 
         try:
+            if self.instance.execution_environment_id is None:
+                from awx.main.signals import disable_activity_stream
+
+                with disable_activity_stream():
+                    self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
+
             self.instance.send_notification_templates("running")
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
@@ -670,6 +686,9 @@ class BaseTask(object):
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
+        if not self.instance:
+            logger.error(f'Unified job pk={pk} appears to be deleted while running')
+            return
         if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
             events_processed_hook(self.instance)
 

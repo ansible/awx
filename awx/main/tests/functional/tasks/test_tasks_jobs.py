@@ -18,16 +18,14 @@ def test_does_not_run_reaped_job(mocker, mock_me):
 
 
 @pytest.mark.django_db
-def test_cancel_flag_on_start(jt_linked):
+def test_cancel_flag_on_start(jt_linked, caplog):
     job = jt_linked.create_unified_job()
     job.status = 'waiting'
     job.cancel_flag = True
     job.save()
 
     task = RunJob()
-    with pytest.raises(RuntimeError) as exc:
-        task.run(job.id)
-    assert 'because its status "canceled" is not expected' in str(exc)
+    task.run(job.id)
 
     job = Job.objects.get(id=job.id)
     assert job.status == 'canceled'
