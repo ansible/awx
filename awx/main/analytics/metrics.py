@@ -128,7 +128,7 @@ def metrics():
         registry=REGISTRY,
     )
 
-    LICENSE_EXPIRY = Gauge('awx_license_expiry', 'Time before AWX license expires', registry=REGISTRY)
+    LICENSE_EXPIRY = Gauge('awx_license_expiry', 'Time before license expires', registry=REGISTRY)
     LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license', registry=REGISTRY)
     LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license', registry=REGISTRY)
 
