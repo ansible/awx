@@ -51,6 +51,10 @@ options:
     - If provided, the other locations for config files will not be considered.
     type: path
     aliases: [tower_config_file]
+  http_headers:
+    description:
+    - Arbitrary headers to add to every HTTP request
+    type: dict
 
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library

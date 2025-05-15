@@ -56,6 +56,7 @@ class ControllerModule(AnsibleModule):
         validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
         request_timeout=dict(type='float', required=False, fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT'])),
         controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
+        http_headers=dict(type='dict', required=False, default={}),
     )
     # Associations of these types are ordered and have special consideration in the modified associations function
     ordered_associations = ['instance_groups', 'galaxy_credentials', 'input_inventories']
@@ -473,6 +474,8 @@ class ControllerAPIModule(ControllerModule):
 
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
+        if self.params.get('http_headers'):
+            headers.update(self.params['http_headers'])
 
         # Authenticate to AWX (if not already done so)
         if not self.authenticated:
@@ -626,16 +629,19 @@ class ControllerAPIModule(ControllerModule):
         if self.username and self.password:
             # use api url /api/v2/me to get current user info as a testing request
             me_url = self.build_url("me").geturl()
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": self._get_basic_authorization_header(),
+            }
+            if self.params.get('http_headers'):
+                headers.update(self.params['http_headers'])
             self.session.open(
                 "GET",
                 me_url,
                 validate_certs=self.verify_ssl,
                 timeout=self.request_timeout,
                 follow_redirects=True,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": self._get_basic_authorization_header(),
-                },
+                headers=headers,
             )
 
     def authenticate(self, **kwargs):
