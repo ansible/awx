@@ -594,7 +594,11 @@ def inspect_established_receptor_connections(mesh_status):
 def inspect_execution_and_hop_nodes(instance_list):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        ctl = get_receptor_ctl()
+        try:
+            ctl = get_receptor_ctl()
+        except FileNotFoundError:
+            logger.error('Receptor daemon not running, skipping execution node check')
+            return
         mesh_status = ctl.simple_command('status')
 
         inspect_established_receptor_connections(mesh_status)
@@ -864,7 +868,11 @@ def awx_receptor_workunit_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
     logger.debug("Checking for unreleased receptor work units")
-    receptor_ctl = get_receptor_ctl()
+    try:
+        receptor_ctl = get_receptor_ctl()
+    except FileNotFoundError:
+        logger.error('Receptor daemon not found, skipping work unit reaper')
+        return
     receptor_work_list = receptor_ctl.simple_command("work list")
 
     unit_ids = [id for id in receptor_work_list]
