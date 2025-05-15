@@ -1,5 +1,3 @@
-import logging
-
 import pytest
 
 from awx.main.tasks.jobs import RunJob
