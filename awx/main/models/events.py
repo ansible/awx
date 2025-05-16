@@ -24,6 +24,7 @@ from awx.main.managers import DeferJobCreatedManager
 from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
+from awx.main.utils.db import bulk_update_sorted_by_id
 
 analytics_logger = logging.getLogger('awx.analytics.job_events')
 
@@ -602,7 +603,7 @@ class JobEvent(BasePlaybookEvent):
                     h.last_job_host_summary_id = host_mapping[h.id]
                     updated_hosts.add(h)
 
-            Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
+            bulk_update_sorted_by_id(Host, updated_hosts, ['last_job_id', 'last_job_host_summary_id'])
 
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)

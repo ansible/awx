@@ -472,7 +472,7 @@ class TestGenericRun:
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with mock.patch('awx.main.tasks.jobs.shutil.copytree'):
+        with mock.patch('awx.main.tasks.jobs.shutil.copytree'), mock.patch('awx.main.tasks.jobs.evaluate_policy'):
             with pytest.raises(Exception):
                 task.run(1)
 

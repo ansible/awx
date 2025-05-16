@@ -18,6 +18,7 @@ from collections import OrderedDict
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
+from django.db.models.constraints import UniqueConstraint
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
@@ -111,7 +112,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         ordering = ('name',)
         # unique_together here is intentionally commented out. Please make sure sub-classes of this model
         # contain at least this uniqueness restriction: SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
-        # unique_together = [('polymorphic_ctype', 'name', 'organization')]
+        # Unique name constraint - note that inventory source model is excluded from this constraint entirely
+        constraints = [
+            UniqueConstraint(fields=['polymorphic_ctype', 'name', 'organization'], condition=models.Q(org_unique=True), name='ujt_hard_name_constraint')
+        ]
 
     old_pk = models.PositiveIntegerField(
         null=True,
@@ -180,6 +184,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     )
     labels = models.ManyToManyField("Label", blank=True, related_name='%(class)s_labels')
     instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='UnifiedJobTemplateInstanceGroupMembership')
+    org_unique = models.BooleanField(
+        blank=True, default=True, editable=False, help_text=_('Used internally to selectively enforce database constraint on name')
+    )
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()

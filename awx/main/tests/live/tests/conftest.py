@@ -3,6 +3,7 @@ import time
 import os
 import shutil
 import tempfile
+import logging
 
 import pytest
 
@@ -17,6 +18,9 @@ from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: 
 from awx.main.tests import data
 
 from awx.main.models import Project, JobTemplate, Organization, Inventory
+
+
+logger = logging.getLogger(__name__)
 
 
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
@@ -110,6 +114,12 @@ def demo_inv(default_org):
     return inventory
 
 
+@pytest.fixture(scope='session')
+def demo_proj(default_org):
+    proj, _ = Project.objects.get_or_create(name='Demo Project', defaults={'organization': default_org})
+    return proj
+
+
 @pytest.fixture
 def podman_image_generator():
     """
@@ -128,29 +138,28 @@ def podman_image_generator():
 
 
 @pytest.fixture
-def run_job_from_playbook(default_org, demo_inv, post, admin):
-    def _rf(test_name, playbook, local_path=None, scm_url=None):
-        project_name = f'{test_name} project'
-        jt_name = f'{test_name} JT: {playbook}'
-
-        old_proj = Project.objects.filter(name=project_name).first()
-        if old_proj:
-            old_proj.delete()
-
-        old_jt = JobTemplate.objects.filter(name=jt_name).first()
-        if old_jt:
-            old_jt.delete()
-
-        proj_kwargs = {'name': project_name, 'organization': default_org.id}
+def project_factory(post, default_org, admin):
+    def _rf(scm_url=None, local_path=None):
+        proj_kwargs = {}
         if local_path:
             # manual path
+            project_name = f'Manual roject {local_path}'
             proj_kwargs['scm_type'] = ''
             proj_kwargs['local_path'] = local_path
         elif scm_url:
+            project_name = f'Project {scm_url}'
             proj_kwargs['scm_type'] = 'git'
             proj_kwargs['scm_url'] = scm_url
         else:
             raise RuntimeError('Need to provide scm_url or local_path')
+
+        proj_kwargs['name'] = project_name
+        proj_kwargs['organization'] = default_org.id
+
+        old_proj = Project.objects.filter(name=project_name).first()
+        if old_proj:
+            logger.info(f'Deleting existing project {project_name}')
+            old_proj.delete()
 
         result = post(
             reverse('api:project_list'),
@@ -159,6 +168,23 @@ def run_job_from_playbook(default_org, demo_inv, post, admin):
             expect=201,
         )
         proj = Project.objects.get(id=result.data['id'])
+        return proj
+
+    return _rf
+
+
+@pytest.fixture
+def run_job_from_playbook(demo_inv, post, admin, project_factory):
+    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None, proj=None):
+        jt_name = f'{test_name} JT: {playbook}'
+
+        if not proj:
+            proj = project_factory(scm_url=scm_url, local_path=local_path)
+
+        old_jt = JobTemplate.objects.filter(name=jt_name).first()
+        if old_jt:
+            logger.info(f'Deleting existing JT {jt_name}')
+            old_jt.delete()
 
         if proj.current_job:
             wait_for_job(proj.current_job)
@@ -166,9 +192,13 @@ def run_job_from_playbook(default_org, demo_inv, post, admin):
         assert proj.get_project_path()
         assert playbook in proj.playbooks
 
+        jt_data = {'name': jt_name, 'project': proj.id, 'playbook': playbook, 'inventory': demo_inv.id}
+        if jt_params:
+            jt_data.update(jt_params)
+
         result = post(
             reverse('api:job_template_list'),
-            {'name': jt_name, 'project': proj.id, 'playbook': playbook, 'inventory': demo_inv.id},
+            jt_data,
             admin,
             expect=201,
         )
@@ -178,5 +208,7 @@ def run_job_from_playbook(default_org, demo_inv, post, admin):
 
         wait_for_job(job)
         assert job.status == 'successful'
+
+        return {'job': job, 'job_template': jt, 'project': proj}
 
     return _rf

@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0197_add_opa_query_path'),
+        ('main', '0200_template_name_constraint'),
     ]
 
     operations = [
