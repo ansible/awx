@@ -175,7 +175,7 @@ def project_factory(post, default_org, admin):
 
 @pytest.fixture
 def run_job_from_playbook(demo_inv, post, admin, project_factory):
-    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None, proj=None):
+    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None, proj=None, wait=True):
         jt_name = f'{test_name} JT: {playbook}'
 
         if not proj:
@@ -206,9 +206,9 @@ def run_job_from_playbook(demo_inv, post, admin, project_factory):
         job = jt.create_unified_job()
         job.signal_start()
 
-        wait_for_job(job)
-        assert job.status == 'successful'
-
+        if wait:
+            wait_for_job(job)
+            assert job.status == 'successful'
         return {'job': job, 'job_template': jt, 'project': proj}
 
     return _rf

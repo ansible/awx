@@ -4,6 +4,9 @@ import json
 import time
 from uuid import uuid4
 
+from dispatcherd.publish import submit_task
+from dispatcherd.utils import resolve_callable
+
 from django_guid import get_guid
 from django.conf import settings
 
@@ -93,6 +96,19 @@ class task:
 
             @classmethod
             def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, **kw):
+                try:
+                    from flags.state import flag_enabled
+
+                    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+                        # At this point we have the import string, and submit_task wants the method, so back to that
+                        actual_task = resolve_callable(cls.name)
+                        return submit_task(actual_task, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
+                except Exception:
+                    logger.exception(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
+                    # Continue with original implementation if anything fails
+                    pass
+
+                # Original implementation follows
                 queue = queue or getattr(cls.queue, 'im_func', cls.queue)
                 if not queue:
                     msg = f'{cls.name}: Queue value required and may not be None'

@@ -24,6 +24,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
+from flags.state import flag_enabled
 
 # REST Framework
 from rest_framework.exceptions import ParseError
@@ -1369,7 +1370,30 @@ class UnifiedJob(
             traceback=self.result_traceback,
         )
 
-    def pre_start(self, **kwargs):
+    def get_start_kwargs(self):
+        needed = self.get_passwords_needed_to_start()
+
+        decrypted_start_args = decrypt_field(self, 'start_args')
+
+        if not decrypted_start_args or decrypted_start_args == '{}':
+            return None
+
+        try:
+            start_args = json.loads(decrypted_start_args)
+        except Exception:
+            logger.exception(f'Unexpected malformed start_args on unified_job={self.id}')
+            return None
+
+        opts = dict([(field, start_args.get(field, '')) for field in needed])
+
+        if not all(opts.values()):
+            missing_fields = ', '.join([k for k, v in opts.items() if not v])
+            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
+            self.save(update_fields=['job_explanation'])
+
+        return opts
+
+    def pre_start(self):
         if not self.can_start:
             self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
@@ -1390,25 +1414,10 @@ class UnifiedJob(
                 self.save(update_fields=['job_explanation'])
                 return (False, None)
 
-        needed = self.get_passwords_needed_to_start()
-        try:
-            start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception:
-            start_args = None
+        opts = self.get_start_kwargs()
 
-        if start_args in (None, ''):
-            start_args = kwargs
-
-        opts = dict([(field, start_args.get(field, '')) for field in needed])
-
-        if not all(opts.values()):
-            missing_fields = ', '.join([k for k, v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
-            self.save(update_fields=['job_explanation'])
+        if opts and (not all(opts.values())):
             return (False, None)
-
-        if 'extra_vars' in kwargs:
-            self.handle_extra_data(kwargs['extra_vars'])
 
         # remove any job_explanations that may have been set while job was in pending
         if self.job_explanation != "":
@@ -1470,21 +1479,44 @@ class UnifiedJob(
     def cancel_dispatcher_process(self):
         """Returns True if dispatcher running this job acknowledged request and sent SIGTERM"""
         if not self.celery_task_id:
-            return
+            return False
+
         canceled = []
+        # Special case for task manager (used during workflow job cancellation)
         if not connection.get_autocommit():
-            # this condition is purpose-written for the task manager, when it cancels jobs in workflows
-            ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+                try:
+                    from dispatcherd.factories import get_control_from_settings
+
+                    ctl = get_control_from_settings()
+                    ctl.control('cancel', data={'uuid': self.celery_task_id})
+                except Exception:
+                    logger.exception("Error sending cancel command to new dispatcher")
+            else:
+                try:
+                    ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
+                except Exception:
+                    logger.exception("Error sending cancel command to legacy dispatcher")
             return True  # task manager itself needs to act under assumption that cancel was received
 
+        # Standard case with reply
         try:
-            # Use control and reply mechanism to cancel and obtain confirmation
             timeout = 5
-            canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+                from dispatcherd.factories import get_control_from_settings
+
+                ctl = get_control_from_settings()
+                results = ctl.control_with_reply('cancel', data={'uuid': self.celery_task_id}, expected_replies=1, timeout=timeout)
+                # Check if cancel was successful by checking if we got any results
+                return bool(results and len(results) > 0)
+            else:
+                # Original implementation
+                canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
         except socket.timeout:
             logger.error(f'could not reach dispatcher on {self.controller_node} within {timeout}s')
         except Exception:
             logger.exception("error encountered when checking task status")
+
         return bool(self.celery_task_id in canceled)  # True or False, whether confirmation was obtained
 
     def cancel(self, job_explanation=None, is_chain=False):

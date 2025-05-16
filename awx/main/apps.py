@@ -1,5 +1,7 @@
 import os
 
+from dispatcherd.config import setup as dispatcher_setup
+
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 from awx.main.utils.common import bypass_in_test, load_all_entry_points_for
@@ -78,6 +80,10 @@ class MainConfig(AppConfig):
 
     def ready(self):
         super().ready()
+
+        from awx.main.dispatch.config import get_dispatcherd_config
+
+        dispatcher_setup(get_dispatcherd_config())
 
         """
         Credential loading triggers database operations. There are cases we want to call

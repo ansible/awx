@@ -12,7 +12,7 @@ from django.db import transaction
 # Django flags
 from flags.state import flag_enabled
 
-from awx.main.dispatch.publish import task
+from awx.main.dispatch.publish import task as task_awx
 from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 from awx.main.models.event_query import EventQuery
@@ -159,7 +159,7 @@ def cleanup_old_indirect_host_entries() -> None:
     IndirectManagedNodeAudit.objects.filter(created__lt=limit).delete()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> None:
     try:
         job = Job.objects.get(id=job_id)
@@ -201,7 +201,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
         logger.exception(f'Error processing indirect host data for job_id={job_id}')
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def cleanup_and_save_indirect_host_entries_fallback() -> None:
     if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
         return

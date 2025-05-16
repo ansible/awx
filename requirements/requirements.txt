@@ -128,6 +128,8 @@ deprecated==1.2.15
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-semantic-conventions
     #   pygithub
+dispatcherd==2025.5.12
+    # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
 django==4.2.20
@@ -366,7 +368,7 @@ protobuf==5.29.3
     #   opentelemetry-proto
 psutil==6.1.1
     # via -r /awx_devel/requirements/requirements.in
-psycopg==3.2.3
+psycopg==3.2.6
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.7.0
     # via pexpect
@@ -425,6 +427,7 @@ pyyaml==6.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
+    #   dispatcherd
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl

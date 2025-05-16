@@ -422,6 +422,9 @@ DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 # sqlite3 based tests will use this
 DISPATCHER_MOCK_PUBLISH = False
 
+# Debugging sockfile for the --status command
+DISPATCHERD_DEBUGGING_SOCKFILE = os.path.join(BASE_DIR, 'dispatcherd.sock')
+
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
@@ -445,6 +448,17 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(minutes=60),
     },
 }
+
+DISPATCHER_SCHEDULE = {}
+for options in CELERYBEAT_SCHEDULE.values():
+    new_options = options.copy()
+    task_name = options['task']
+    # Handle the only one exception case of the heartbeat which has a new implementation
+    if task_name == 'awx.main.tasks.system.cluster_node_heartbeat':
+        task_name = 'awx.main.tasks.system.adispatch_cluster_node_heartbeat'
+        new_options['task'] = task_name
+    new_options['schedule'] = options['schedule'].total_seconds()
+    DISPATCHER_SCHEDULE[task_name] = new_options
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
@@ -795,6 +809,7 @@ LOGGING = {
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'dispatcherd': {'handlers': ['dispatcher', 'console'], 'level': 'INFO'},
     },
 }
 
@@ -994,7 +1009,7 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 # projects can take advantage.
 
 METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
-METRICS_SERVICE_DISPATCHER = 'dispatcher'
+METRICS_SERVICE_DISPATCHER = 'dispatcherd'
 METRICS_SERVICE_WEBSOCKETS = 'websockets'
 
 METRICS_SUBSYSTEM_CONFIG = {
@@ -1099,6 +1114,7 @@ FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
 FLAGS = {
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
     'FEATURE_POLICY_AS_CODE_ENABLED': [{'condition': 'boolean', 'value': False}],
+    'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
 }
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired

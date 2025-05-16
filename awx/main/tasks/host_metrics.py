@@ -7,7 +7,7 @@ from django.db.models import Count, F
 from django.db.models.functions import TruncMonth
 from django.utils.timezone import now
 from awx.main.dispatch import get_task_queuename
-from awx.main.dispatch.publish import task
+from awx.main.dispatch.publish import task as task_awx
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
@@ -18,7 +18,7 @@ from awx.main.utils.db import bulk_update_sorted_by_id
 logger = logging.getLogger('awx.main.tasks.host_metrics')
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def cleanup_host_metrics():
     if is_run_threshold_reached(getattr(settings, 'CLEANUP_HOST_METRICS_LAST_TS', None), getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400):
         logger.info(f"Executing cleanup_host_metrics, last ran at {getattr(settings, 'CLEANUP_HOST_METRICS_LAST_TS', '---')}")
@@ -29,7 +29,7 @@ def cleanup_host_metrics():
         logger.info("Finished cleanup_host_metrics")
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def host_metric_summary_monthly():
     """Run cleanup host metrics summary monthly task each week"""
     if is_run_threshold_reached(getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', None), getattr(settings, 'HOST_METRIC_SUMMARY_TASK_INTERVAL', 7) * 86400):

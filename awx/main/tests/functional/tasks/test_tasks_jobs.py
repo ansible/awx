@@ -15,3 +15,17 @@ def test_does_not_run_reaped_job(mocker, mock_me):
     job.refresh_from_db()
     assert job.status == 'failed'
     mock_run.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_cancel_flag_on_start(jt_linked, caplog):
+    job = jt_linked.create_unified_job()
+    job.status = 'waiting'
+    job.cancel_flag = True
+    job.save()
+
+    task = RunJob()
+    task.run(job.id)
+
+    job = Job.objects.get(id=job.id)
+    assert job.status == 'canceled'
