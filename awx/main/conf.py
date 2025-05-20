@@ -92,7 +92,6 @@ register(
     ),
     category=_('System'),
     category_slug='system',
-    required=False,
 )
 
 register(
@@ -239,7 +238,6 @@ register(
     help_text=_('List of modules allowed to be used by ad-hoc jobs.'),
     category=_('Jobs'),
     category_slug='jobs',
-    required=False,
 )
 
 register(
@@ -250,7 +248,6 @@ register(
         ('never', _('Never')),
         ('template', _('Only On Job Template Definitions')),
     ],
-    required=True,
     label=_('When can extra variables contain Jinja templates?'),
     help_text=_(
         'Ansible allows variable substitution via the Jinja2 templating '
@@ -275,7 +272,6 @@ register(
 register(
     'AWX_ISOLATION_SHOW_PATHS',
     field_class=fields.StringListIsolatedPathField,
-    required=False,
     label=_('Paths to expose to isolated jobs'),
     help_text=_(
         'List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. '
@@ -441,7 +437,6 @@ register(
 register(
     'AWX_ANSIBLE_CALLBACK_PLUGINS',
     field_class=fields.StringListField,
-    required=False,
     label=_('Ansible Callback Plugins'),
     help_text=_('List of paths to search for extra callback plugins to be used when running jobs. Enter one path per line.'),
     category=_('Jobs'),
@@ -555,7 +550,6 @@ register(
     help_text=_('Port on Logging Aggregator to send logs to (if required and not provided in Logging Aggregator).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False,
 )
 register(
     'LOG_AGGREGATOR_TYPE',
@@ -577,7 +571,6 @@ register(
     help_text=_('Username for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False,
 )
 register(
     'LOG_AGGREGATOR_PASSWORD',
@@ -589,7 +582,6 @@ register(
     help_text=_('Password or authentication token for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False,
 )
 register(
     'LOG_AGGREGATOR_LOGGERS',
@@ -776,7 +768,6 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
-    required=False,
     hidden=True,
 )
 register(
