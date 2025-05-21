@@ -26,21 +26,20 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
         "brokers": {
             "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
         },
-        "publish": {
-            "default_control_broker": "socket",
-            "default_broker": "pg_notify",
-        },
+        "publish": {"default_control_broker": "socket"},
         "worker": {"worker_cls": "awx.main.dispatch.worker.dispatcherd.AWXTaskWorker"},
     }
 
     if mock_publish:
         config["brokers"]["noop"] = {}
+        config["publish"]["default_broker"] = "noop"
     else:
         config["brokers"]["pg_notify"] = {
             "config": get_pg_notify_params(),
             "sync_connection_factory": "ansible_base.lib.utils.db.psycopg_connection_from_django",
             "default_publish_channel": settings.CLUSTER_HOST_ID,  # used for debugging commands
         }
+        config["publish"]["default_broker"] = "pg_notify"
 
     if for_service:
         config["producers"] = {
