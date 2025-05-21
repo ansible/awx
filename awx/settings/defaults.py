@@ -23,7 +23,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, '../really_long_folder_name_long_name_long_name/really_long_folder_name_long_name_long_name/awx.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
         'ATOMIC_REQUESTS': True,
         'TEST': {
             # Test database cannot be :memory: for inventory tests.
