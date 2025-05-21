@@ -40,14 +40,6 @@ class HelpfulArgumentParser(ArgumentParser):
         self._print_message('\n')
         self.exit(2, '%s: %s\n' % (self.prog, message))
 
-    def _parse_known_args(self, args, ns):
-        for arg in ('-h', '--help'):
-            # the -h argument is extraneous; if you leave it off,
-            # awx-cli will just print usage info
-            if arg in args:
-                args.remove(arg)
-        return super(HelpfulArgumentParser, self)._parse_known_args(args, ns)
-
 
 def color_enabled():
     return _color.enabled
