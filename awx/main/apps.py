@@ -87,12 +87,14 @@ class MainConfig(AppConfig):
         This configuration provides the minimum such that code can submit
         tasks to pg_notify to run those tasks.
         """
-        if connection.vendor != 'postgresql':
-            return
-
         from awx.main.dispatch.config import get_dispatcherd_config
 
-        dispatcher_setup(get_dispatcherd_config())
+        if connection.vendor != 'postgresql':
+            config_dict = get_dispatcherd_config(mock_publish=True)
+        else:
+            config_dict = get_dispatcherd_config()
+
+        dispatcher_setup(config_dict)
 
     def ready(self):
         super().ready()

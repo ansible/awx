@@ -5,7 +5,7 @@ from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.pool import get_auto_max_workers
 
 
-def get_dispatcherd_config(for_service: bool = False) -> dict:
+def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False) -> dict:
     """Return a dictionary config for dispatcherd
 
     Parameters:
@@ -24,11 +24,6 @@ def get_dispatcherd_config(for_service: bool = False) -> dict:
             "process_manager_kwargs": {"preload_modules": ['awx.main.dispatch.hazmat']},
         },
         "brokers": {
-            "pg_notify": {
-                "config": get_pg_notify_params(),
-                "sync_connection_factory": "ansible_base.lib.utils.db.psycopg_connection_from_django",
-                "default_publish_channel": settings.CLUSTER_HOST_ID,  # used for debugging commands
-            },
             "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
         },
         "publish": {
@@ -37,6 +32,15 @@ def get_dispatcherd_config(for_service: bool = False) -> dict:
         },
         "worker": {"worker_cls": "awx.main.dispatch.worker.dispatcherd.AWXTaskWorker"},
     }
+
+    if mock_publish:
+        config["brokers"]["noop"] = {}
+    else:
+        config["brokers"]["pg_notify"] = {
+            "config": get_pg_notify_params(),
+            "sync_connection_factory": "ansible_base.lib.utils.db.psycopg_connection_from_django",
+            "default_publish_channel": settings.CLUSTER_HOST_ID,  # used for debugging commands
+        }
 
     if for_service:
         config["producers"] = {
