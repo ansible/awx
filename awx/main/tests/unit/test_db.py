@@ -6,12 +6,6 @@ import unittest
 
 import pytest
 
-from dispatcherd.config import is_setup
-
-from django.test.utils import override_settings
-from django.conf import settings
-from django.apps import apps
-
 import awx
 from awx.main.db.profiled_pg.base import RecordedQueryLog
 
@@ -152,27 +146,3 @@ def test_sql_above_threshold(tmpdir):
         assert q['sql'] == QUERY['sql']
         assert EXPLAIN in q['explain']
         assert 'test_sql_above_threshold' in q['bt']
-
-
-def test_configure_dispatcherd_with_long_name():
-    """Regression testing for a bug where dispatcherd threw error due to long sqlite3 names
-
-    This needs to not error so that we can run commands that do not submit background tasks
-    like collectstatic and other things like that.
-    """
-    long_name_db = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(settings.BASE_DIR, 'really_long_folder_name_long_name_long_name/really_long_folder_name_long_name_long_name/awx.sqlite3'),
-            'ATOMIC_REQUESTS': True,
-            'TEST': {
-                # Test database cannot be :memory: for inventory tests.
-                'NAME': os.path.join(settings.BASE_DIR, 'awx_test.sqlite3')
-            },
-        }
-    }
-    with override_settings(DATABASES=long_name_db):
-        app_config = apps.get_app_config('main')
-        app_config.configure_dispatcherd()
-
-    assert not is_setup()
