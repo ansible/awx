@@ -105,7 +105,7 @@ class ControllerModule(AnsibleModule):
                 setattr(self, short_param, direct_value)
 
         # Perform some basic validation
-        if not self.host.startswith(("https://", "http://")): # NOSONAR
+        if not self.host.startswith(("https://", "http://")):  # NOSONAR
             self.host = "https://{0}".format(self.host)
 
         # Try to parse the hostname as a url
