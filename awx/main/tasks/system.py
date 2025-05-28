@@ -788,7 +788,8 @@ def _heartbeat_instance_management():
                 logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
             this_inst.local_health_check()
         else:
-            raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+            logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+            return None, None, None
 
     return this_inst, instance_list, lost_instances
 
