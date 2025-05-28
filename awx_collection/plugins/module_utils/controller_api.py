@@ -15,7 +15,6 @@ from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionEr
 from base64 import b64encode
 from socket import getaddrinfo, IPPROTO_TCP
 import time
-import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd, environ, getenv
@@ -106,7 +105,7 @@ class ControllerModule(AnsibleModule):
                 setattr(self, short_param, direct_value)
 
         # Perform some basic validation
-        if not re.match('^https{0,1}://', self.host):
+        if not self.host.startswith(("https://", "http://")):
             self.host = "https://{0}".format(self.host)
 
         # Try to parse the hostname as a url
