@@ -1,15 +1,13 @@
-# Copyright (c) 2015 Ansible, Inc.
-# All Rights Reserved.
+# This file exists for backwards compatibility only
+# the current way of running AWX is to point settings to
+# awx/settings/__init__.py as the entry point for the settings
+# that is done by exporting: export DJANGO_SETTINGS_MODULE=awx.settings
+import os
 
-# Development settings for AWX project, but with DEBUG disabled
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings")
+os.environ.setdefault("AWX_MODE", "development,quiet")
 
-# Load development settings.
-from defaults import *  # NOQA
+from ansible_base.lib.dynamic_config import export
+from . import DYNACONF  # noqa
 
-# Load development settings.
-from development import *  # NOQA
-
-# Disable capturing DEBUG
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
-SQL_DEBUG = DEBUG
+export(__name__, DYNACONF)

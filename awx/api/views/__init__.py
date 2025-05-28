@@ -33,11 +33,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
-
 # Django REST Framework
 from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
 from rest_framework.parsers import FormParser
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -48,14 +47,8 @@ from rest_framework import status
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
 
-# ANSIConv
-import ansiconv
-
-# Python Social Auth
-from social_core.backends.utils import load_backends
-
-# Django OAuth Toolkit
-from oauth2_provider.models import get_access_token_model
+# ansi2html
+from ansi2html import Ansi2HTMLConverter
 
 import pytz
 from wsgiref.util import FileWrapper
@@ -104,6 +97,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.plugins import compute_cloud_inventory_sources
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
@@ -129,7 +123,6 @@ from awx.api.views.mixin import (
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
-
 
 logger = logging.getLogger('awx.api.views')
 
@@ -678,41 +671,6 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     name = _('Schedule Jobs List')
 
 
-class AuthView(APIView):
-    '''List enabled single-sign-on endpoints'''
-
-    authentication_classes = []
-    permission_classes = (AllowAny,)
-    swagger_topic = 'System Configuration'
-
-    def get(self, request):
-        from rest_framework.reverse import reverse
-
-        data = OrderedDict()
-        err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        auth_backends = list(load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items())
-        # Return auth backends in consistent order: Google, GitHub, SAML.
-        auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
-        for name, backend in auth_backends:
-            login_url = reverse('social:begin', args=(name,))
-            complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
-            backend_data = {'login_url': login_url, 'complete_url': complete_url}
-            if name == 'saml':
-                backend_data['metadata_url'] = reverse('sso:saml_metadata')
-                for idp in sorted(settings.SOCIAL_AUTH_SAML_ENABLED_IDPS.keys()):
-                    saml_backend_data = dict(backend_data.items())
-                    saml_backend_data['login_url'] = '%s?idp=%s' % (login_url, idp)
-                    full_backend_name = '%s:%s' % (name, idp)
-                    if (err_backend == full_backend_name or err_backend == name) and err_message:
-                        saml_backend_data['error'] = err_message
-                    data[full_backend_name] = saml_backend_data
-            else:
-                if err_backend == name and err_message:
-                    backend_data['error'] = err_message
-                data[name] = backend_data
-        return Response(data)
-
-
 def immutablesharedfields(cls):
     '''
     Class decorator to prevent modifying shared resources when ALLOW_LOCAL_RESOURCE_MANAGEMENT setting is set to False.
@@ -1185,121 +1143,6 @@ class UserMeList(ListAPIView):
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
-
-
-class OAuth2ApplicationList(ListCreateAPIView):
-    name = _("OAuth 2 Applications")
-
-    model = models.OAuth2Application
-    serializer_class = serializers.OAuth2ApplicationSerializer
-    swagger_topic = 'Authentication'
-
-
-class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
-    name = _("OAuth 2 Application Detail")
-
-    model = models.OAuth2Application
-    serializer_class = serializers.OAuth2ApplicationSerializer
-    swagger_topic = 'Authentication'
-
-    def update_raw_data(self, data):
-        data.pop('client_secret', None)
-        return super(OAuth2ApplicationDetail, self).update_raw_data(data)
-
-
-class ApplicationOAuth2TokenList(SubListCreateAPIView):
-    name = _("OAuth 2 Application Tokens")
-
-    model = models.OAuth2AccessToken
-    serializer_class = serializers.OAuth2TokenSerializer
-    parent_model = models.OAuth2Application
-    relationship = 'oauth2accesstoken_set'
-    parent_key = 'application'
-    swagger_topic = 'Authentication'
-
-
-class OAuth2ApplicationActivityStreamList(SubListAPIView):
-    model = models.ActivityStream
-    serializer_class = serializers.ActivityStreamSerializer
-    parent_model = models.OAuth2Application
-    relationship = 'activitystream_set'
-    swagger_topic = 'Authentication'
-    search_fields = ('changes',)
-
-
-class OAuth2TokenList(ListCreateAPIView):
-    name = _("OAuth2 Tokens")
-
-    model = models.OAuth2AccessToken
-    serializer_class = serializers.OAuth2TokenSerializer
-    swagger_topic = 'Authentication'
-
-
-class OAuth2UserTokenList(SubListCreateAPIView):
-    name = _("OAuth2 User Tokens")
-
-    model = models.OAuth2AccessToken
-    serializer_class = serializers.OAuth2TokenSerializer
-    parent_model = models.User
-    relationship = 'main_oauth2accesstoken'
-    parent_key = 'user'
-    swagger_topic = 'Authentication'
-
-
-class UserAuthorizedTokenList(SubListCreateAPIView):
-    name = _("OAuth2 User Authorized Access Tokens")
-
-    model = models.OAuth2AccessToken
-    serializer_class = serializers.UserAuthorizedTokenSerializer
-    parent_model = models.User
-    relationship = 'oauth2accesstoken_set'
-    parent_key = 'user'
-    swagger_topic = 'Authentication'
-
-    def get_queryset(self):
-        return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
-
-
-class OrganizationApplicationList(SubListCreateAPIView):
-    name = _("Organization OAuth2 Applications")
-
-    model = models.OAuth2Application
-    serializer_class = serializers.OAuth2ApplicationSerializer
-    parent_model = models.Organization
-    relationship = 'applications'
-    parent_key = 'organization'
-    swagger_topic = 'Authentication'
-
-
-class UserPersonalTokenList(SubListCreateAPIView):
-    name = _("OAuth2 Personal Access Tokens")
-
-    model = models.OAuth2AccessToken
-    serializer_class = serializers.UserPersonalTokenSerializer
-    parent_model = models.User
-    relationship = 'main_oauth2accesstoken'
-    parent_key = 'user'
-    swagger_topic = 'Authentication'
-
-    def get_queryset(self):
-        return get_access_token_model().objects.filter(application__isnull=True, user=self.request.user)
-
-
-class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
-    name = _("OAuth Token Detail")
-
-    model = models.OAuth2AccessToken
-    serializer_class = serializers.OAuth2TokenDetailSerializer
-    swagger_topic = 'Authentication'
-
-
-class OAuth2TokenActivityStreamList(SubListAPIView):
-    model = models.ActivityStream
-    serializer_class = serializers.ActivityStreamSerializer
-    parent_model = models.OAuth2AccessToken
-    relationship = 'activitystream_set'
-    swagger_topic = 'Authentication'
-    search_fields = ('changes',)
 
 
 class UserTeamsList(SubListAPIView):
@@ -2236,9 +2079,9 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
 
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
-        if parent.source not in models.CLOUD_INVENTORY_SOURCES:
+        if parent.source not in compute_cloud_inventory_sources():
             return Response(
-                dict(msg=_("Notification Templates can only be assigned when source is one of {}.").format(models.CLOUD_INVENTORY_SOURCES, parent.source)),
+                dict(msg=_("Notification Templates can only be assigned when source is one of {}.").format(compute_cloud_inventory_sources(), parent.source)),
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return super(InventorySourceNotificationTemplatesAnyList, self).post(request, *args, **kwargs)
@@ -2394,9 +2237,12 @@ class JobTemplateList(ListCreateAPIView):
 
     def check_permissions(self, request):
         if request.method == 'POST':
-            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
-            if not can_access:
-                self.permission_denied(request, message=messages)
+            if request.user.is_anonymous:
+                self.permission_denied(request)
+            else:
+                can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+                if not can_access:
+                    self.permission_denied(request, message=messages)
 
         super(JobTemplateList, self).check_permissions(request)
 
@@ -3121,9 +2967,12 @@ class WorkflowJobTemplateList(ListCreateAPIView):
 
     def check_permissions(self, request):
         if request.method == 'POST':
-            can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
-            if not can_access:
-                self.permission_denied(request, message=messages)
+            if request.user.is_anonymous:
+                self.permission_denied(request)
+            else:
+                can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+                if not can_access:
+                    self.permission_denied(request, message=messages)
 
         super(WorkflowJobTemplateList, self).check_permissions(request)
 
@@ -3586,6 +3435,7 @@ class JobRelaunch(RetrieveAPIView):
 
         copy_kwargs = {}
         retry_hosts = serializer.validated_data.get('hosts', None)
+        job_type = serializer.validated_data.get('job_type', None)
         if retry_hosts and retry_hosts != 'all':
             if obj.status in ACTIVE_STATES:
                 return Response(
@@ -3606,6 +3456,8 @@ class JobRelaunch(RetrieveAPIView):
                 )
             copy_kwargs['limit'] = ','.join(retry_host_list)
 
+        if job_type:
+            copy_kwargs['job_type'] = job_type
         new_job = obj.copy_unified_job(**copy_kwargs)
         result = new_job.signal_start(**serializer.validated_data['credential_passwords'])
         if not result:
@@ -4205,7 +4057,8 @@ class UnifiedJobStdout(RetrieveAPIView):
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
 
-                body = ansiconv.to_html(html.escape(content))
+                conv = Ansi2HTMLConverter()
+                body = conv.convert(html.escape(content))
 
                 context = {'title': get_view_name(self.__class__), 'body': mark_safe(body), 'dark': dark_bg, 'content_only': content_only}
                 data = render_to_string('api/stdout.html', context).strip()

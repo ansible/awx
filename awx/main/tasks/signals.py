@@ -14,16 +14,21 @@ class SignalExit(Exception):
 
 
 class SignalState:
+    # SIGTERM: Sent by supervisord to process group on shutdown
+    # SIGUSR1: The dispatcherd cancel signal
+    signals = (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1)
+
     def reset(self):
-        self.sigterm_flag = False
-        self.sigint_flag = False
+        for for_signal in self.signals:
+            self.signal_flags[for_signal] = False
+            self.original_methods[for_signal] = None
 
         self.is_active = False  # for nested context managers
-        self.original_sigterm = None
-        self.original_sigint = None
         self.raise_exception = False
 
     def __init__(self):
+        self.signal_flags = {}
+        self.original_methods = {}
         self.reset()
 
     def raise_if_needed(self):
@@ -31,31 +36,28 @@ class SignalState:
             self.raise_exception = False  # so it is not raised a second time in error handling
             raise SignalExit()
 
-    def set_sigterm_flag(self, *args):
-        self.sigterm_flag = True
-        self.raise_if_needed()
-
-    def set_sigint_flag(self, *args):
-        self.sigint_flag = True
+    def set_signal_flag(self, *args, for_signal=None):
+        self.signal_flags[for_signal] = True
+        logger.info(f'Processed signal {for_signal}, set exit flag')
         self.raise_if_needed()
 
     def connect_signals(self):
-        self.original_sigterm = signal.getsignal(signal.SIGTERM)
-        self.original_sigint = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGTERM, self.set_sigterm_flag)
-        signal.signal(signal.SIGINT, self.set_sigint_flag)
+        for for_signal in self.signals:
+            self.original_methods[for_signal] = signal.getsignal(for_signal)
+            signal.signal(for_signal, lambda *args, for_signal=for_signal: self.set_signal_flag(*args, for_signal=for_signal))
         self.is_active = True
 
     def restore_signals(self):
-        signal.signal(signal.SIGTERM, self.original_sigterm)
-        signal.signal(signal.SIGINT, self.original_sigint)
-        # if we got a signal while context manager was active, call parent methods.
-        if self.sigterm_flag:
-            if callable(self.original_sigterm):
-                self.original_sigterm()
-        if self.sigint_flag:
-            if callable(self.original_sigint):
-                self.original_sigint()
+        for for_signal in self.signals:
+            original_method = self.original_methods[for_signal]
+            signal.signal(for_signal, original_method)
+            # if we got a signal while context manager was active, call parent methods.
+            if self.signal_flags[for_signal]:
+                if callable(original_method):
+                    try:
+                        original_method()
+                    except Exception as exc:
+                        logger.info(f'Error processing original {for_signal} signal, error: {str(exc)}')
         self.reset()
 
 
@@ -63,7 +65,7 @@ signal_state = SignalState()
 
 
 def signal_callback():
-    return bool(signal_state.sigterm_flag or signal_state.sigint_flag)
+    return any(signal_state.signal_flags[for_signal] for for_signal in signal_state.signals)
 
 
 def with_signal_handling(f):

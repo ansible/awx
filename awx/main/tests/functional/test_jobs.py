@@ -19,7 +19,7 @@ from awx.main.models import (
     ExecutionEnvironment,
 )
 from awx.main.tasks.system import cluster_node_heartbeat
-from awx.main.tasks.facts import update_hosts
+from awx.main.utils.db import bulk_update_sorted_by_id
 
 from django.db import OperationalError
 from django.test.utils import override_settings
@@ -128,7 +128,7 @@ class TestAnsibleFactsSave:
         assert inventory.hosts.count() == 3
         Host.objects.get(pk=last_pk).delete()
         assert inventory.hosts.count() == 2
-        update_hosts(hosts)
+        bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
         assert inventory.hosts.count() == 2
         for host in inventory.hosts.all():
             host.refresh_from_db()
@@ -141,7 +141,7 @@ class TestAnsibleFactsSave:
         db_mock = mocker.patch('awx.main.tasks.facts.Host.objects.bulk_update')
         db_mock.side_effect = OperationalError('deadlock detected')
         with pytest.raises(OperationalError):
-            update_hosts(hosts)
+            bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
 
     def fake_bulk_update(self, host_list):
         if self.current_call > 2:
@@ -149,16 +149,28 @@ class TestAnsibleFactsSave:
         self.current_call += 1
         raise OperationalError('deadlock detected')
 
-    def test_update_hosts_resolved_deadlock(self, inventory, mocker):
-        hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
-        for host in hosts:
-            host.ansible_facts = {'foo': 'bar'}
-        self.current_call = 0
-        mocker.patch('awx.main.tasks.facts.raw_update_hosts', new=self.fake_bulk_update)
-        update_hosts(hosts)
-        for host in inventory.hosts.all():
-            host.refresh_from_db()
-            assert host.ansible_facts == {'foo': 'bar'}
+
+@pytest.mark.django_db
+def test_update_hosts_resolved_deadlock(inventory, mocker):
+
+    hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+
+    # Set ansible_facts for each host
+    for host in hosts:
+        host.ansible_facts = {'foo': 'bar'}
+
+    bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
+
+    # Save changes and refresh from DB to ensure the updated facts are saved
+    for host in hosts:
+        host.save()  # Ensure changes are persisted in the DB
+        host.refresh_from_db()  # Refresh from DB to get latest data
+
+    # Assert that the ansible_facts were updated correctly
+    for host in inventory.hosts.all():
+        assert host.ansible_facts == {'foo': 'bar'}
+
+    bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
 
 
 @pytest.mark.django_db

@@ -1,1 +1,0 @@
-FROM kibana:5

@@ -10,6 +10,7 @@ from awx.api.generics import APIView, Response
 from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
 from awx.main.utils import get_awx_version
+from awx.main.utils.analytics_proxy import OIDCClient
 from rest_framework import status
 
 from collections import OrderedDict
@@ -179,33 +180,59 @@ class AnalyticsGenericView(APIView):
 
         return Response(response.content, status=response.status_code)
 
+    @staticmethod
+    def _base_auth_request(request: requests.Request, method: str, url: str, user: str, pw: str, headers: dict[str, str]) -> requests.Response:
+        response = requests.request(
+            method,
+            url,
+            auth=(user, pw),
+            verify=settings.INSIGHTS_CERT_PATH,
+            params=getattr(request, 'query_params', {}),
+            headers=headers,
+            json=getattr(request, 'data', {}),
+            timeout=(31, 31),
+        )
+        return response
+
     def _send_to_analytics(self, request, method):
         try:
             headers = self._request_headers(request)
 
             self._get_setting('INSIGHTS_TRACKING_STATE', False, ERROR_UPLOAD_NOT_ENABLED)
-            url = self._get_analytics_url(request.path)
-            rh_user = self._get_setting('REDHAT_USERNAME', None, ERROR_MISSING_USER)
-            rh_password = self._get_setting('REDHAT_PASSWORD', None, ERROR_MISSING_PASSWORD)
-
             if method not in ["GET", "POST", "OPTIONS"]:
                 return self._error_response(ERROR_UNSUPPORTED_METHOD, method, remote=False, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                response = requests.request(
+            url = self._get_analytics_url(request.path)
+            using_subscriptions_credentials = False
+            try:
+                rh_user = getattr(settings, 'REDHAT_USERNAME', None)
+                rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+                if not (rh_user and rh_password):
+                    rh_user = self._get_setting('SUBSCRIPTIONS_CLIENT_ID', None, ERROR_MISSING_USER)
+                    rh_password = self._get_setting('SUBSCRIPTIONS_CLIENT_SECRET', None, ERROR_MISSING_PASSWORD)
+                    using_subscriptions_credentials = True
+
+                client = OIDCClient(rh_user, rh_password)
+                response = client.make_request(
                     method,
                     url,
-                    auth=(rh_user, rh_password),
-                    verify=settings.INSIGHTS_CERT_PATH,
-                    params=request.query_params,
                     headers=headers,
-                    json=request.data,
+                    verify=settings.INSIGHTS_CERT_PATH,
+                    params=getattr(request, 'query_params', {}),
+                    json=getattr(request, 'data', {}),
                     timeout=(31, 31),
                 )
+            except requests.RequestException:
+                # subscriptions credentials are not valid for basic auth, so just return 401
+                if using_subscriptions_credentials:
+                    response = Response(status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    logger.error("Automation Analytics API request failed, trying base auth method")
+                    response = self._base_auth_request(request, method, url, rh_user, rh_password, headers)
             #
             # Missing or wrong user/pass
             #
             if response.status_code == status.HTTP_401_UNAUTHORIZED:
-                text = (response.text or '').rstrip("\n")
+                text = response.get('text', '').rstrip("\n")
                 return self._error_response(ERROR_UNAUTHORIZED, text, remote=True, remote_status_code=response.status_code)
             #
             # Not found, No entitlement or No data in Analytics

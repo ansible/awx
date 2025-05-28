@@ -66,7 +66,6 @@ EXAMPLES = '''
       object_query: "Safe=MY_SAFE;Object=awxuser"
       object_query_format: "Exact"
     state: present
-
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

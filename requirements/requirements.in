@@ -1,5 +1,7 @@
+
 aiohttp>=3.9.4 # CVE-2024-30251
-ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
+ansi2html  # Used to format the stdout from jobs into html for display
+jq  # used for indirect host counting feature
 asciichartpy
 asn1
 azure-identity
@@ -7,37 +9,34 @@ azure-keyvault
 boto3
 botocore
 channels
-channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography>=41.0.7  # CVE-2023-49083
-Cython<3 # due to https://github.com/yaml/pyyaml/pull/702
+channels-redis
+cryptography<42.0.0  # investigation is needed for 42+ to work with OpenSSL v3.0.x (RHEL 9.4) and v3.2.x (RHEL 9.5)
+Cython
 daphne
 distro
-django==4.2.10  # CVE-2024-24680
-django-auth-ldap
+django==4.2.20  # CVE-2025-26699
 django-cors-headers
 django-crum
 django-extensions
-django-guid==3.2.1
+django-guid
 django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
-django-pglocks
-django-radius
 django-solo
-django-split-settings==1.0.0    # We hit a strange issue where the release process errored when upgrading past 1.0.0 see UPGRADE BLOCKERS
 djangorestframework>=3.15.0
 djangorestframework-yaml
+dynaconf<4
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
-grpcio<1.63.0 # 1.63.0+ requires cython>=3
-hiredis==2.0.0  # see UPGRADE BLOCKERs
+grpcio
 irc
 jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
 maturin  # pydantic-core build dep
-msgpack<1.0.6  # 1.0.6+ requires cython>=3
+msgpack
 msrestazure
+OPA-python-client==2.0.2 # Code contain monkey patch targeted to 2.0.2 to fix https://github.com/Turall/OPA-python-client/issues/29
 openshift
 opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
 opentelemetry-sdk~=1.24
@@ -53,28 +52,22 @@ pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host 
 python-daemon>3.0.0
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
-python-ldap
-pyyaml>=6.0.1
+pyyaml>=6.0.2  # require packing fix for cython 3 or higher
 pyzstd  # otel collector log file compression library
 receptorctl
-social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
-social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
-redis
+redis[hiredis]
 requests
 slack-sdk
-tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
 twisted[tls]>=23.10.0  # CVE-2023-46137
 uWSGI
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
-setuptools  # see UPGRADE BLOCKERs
+setuptools<71.0.0  # see UPGRADE BLOCKERs, path hack in v71 breaks irc deps
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
-
-# Temporarily added to use ansible-runner from git branch, to be removed
-# when ansible-runner moves from requirements_git.txt to here
-pbr
+django-flags>=5.0.13
+dispatcherd  # tasking system, previously part of AWX code base

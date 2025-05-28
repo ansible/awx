@@ -121,6 +121,22 @@
         that:
           - "result is changed"
 
+    - name: Attempt to delete an inventory source from an inventory that does not exist
+      inventory_source:
+        name: "{{ inv_source3 }}"
+        source: scm
+        state: absent
+        source_project: "{{ project_name }}"
+        source_path: inventories/create_100_hosts.ini
+        description: Source for Test inventory
+        organization: Default
+        inventory: Does not exist
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
   always:
     - name: Delete Inventory
       inventory:

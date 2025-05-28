@@ -25,6 +25,7 @@ def get_application_name(CLUSTER_HOST_ID, function=''):
 
 
 def set_application_name(DATABASES, CLUSTER_HOST_ID, function=''):
+    """In place modification of DATABASES to set the application name for the connection."""
     # If settings files were not properly passed DATABASES could be {} at which point we don't need to set the app name.
     if not DATABASES or 'default' not in DATABASES:
         return

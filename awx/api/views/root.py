@@ -28,10 +28,11 @@ from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import URLPathVersioning, is_optional_api_urlpattern_prefix_request, reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
+from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
 
 logger = logging.getLogger('awx.api.views.root')
@@ -51,27 +52,11 @@ class ApiRootView(APIView):
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
         data['available_versions'] = dict(v2=v2)
-        if not is_optional_api_urlpattern_prefix_request(request):
-            data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
         if MODE == 'development':
             data['swagger'] = drf_reverse('api:schema-swagger-ui')
-        return Response(data)
-
-
-class ApiOAuthAuthorizationRootView(APIView):
-    permission_classes = (AllowAny,)
-    name = _("API OAuth 2 Authorization Root")
-    versioning_class = None
-    swagger_topic = 'Authentication'
-
-    def get(self, request, format=None):
-        data = OrderedDict()
-        data['authorize'] = drf_reverse('api:authorize')
-        data['token'] = drf_reverse('api:token')
-        data['revoke_token'] = drf_reverse('api:revoke-token')
         return Response(data)
 
 
@@ -99,8 +84,6 @@ class ApiVersionRootView(APIView):
         data['credentials'] = reverse('api:credential_list', request=request)
         data['credential_types'] = reverse('api:credential_type_list', request=request)
         data['credential_input_sources'] = reverse('api:credential_input_source_list', request=request)
-        data['applications'] = reverse('api:o_auth2_application_list', request=request)
-        data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['constructed_inventory'] = reverse('api:constructed_inventory_list', request=request)
@@ -194,19 +177,21 @@ class ApiV2SubscriptionView(APIView):
 
     def post(self, request):
         data = request.data.copy()
-        if data.get('subscriptions_password') == '$encrypted$':
-            data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
+        if data.get('subscriptions_client_secret') == '$encrypted$':
+            data['subscriptions_client_secret'] = settings.SUBSCRIPTIONS_CLIENT_SECRET
         try:
-            user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
+            user, pw = data.get('subscriptions_client_id'), data.get('subscriptions_client_secret')
             with set_environ(**settings.AWX_TASK_ENV):
                 validated = get_licenser().validate_rh(user, pw)
             if user:
-                settings.SUBSCRIPTIONS_USERNAME = data['subscriptions_username']
+                settings.SUBSCRIPTIONS_CLIENT_ID = data['subscriptions_client_id']
             if pw:
-                settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
+                settings.SUBSCRIPTIONS_CLIENT_SECRET = data['subscriptions_client_secret']
         except Exception as exc:
             msg = _("Invalid Subscription")
-            if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
+            if isinstance(exc, TokenError) or (
+                isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+            ):
                 msg = _("The provided credentials are invalid (HTTP 401).")
             elif isinstance(exc, requests.exceptions.ProxyError):
                 msg = _("Unable to connect to proxy server.")
@@ -233,12 +218,12 @@ class ApiV2AttachView(APIView):
 
     def post(self, request):
         data = request.data.copy()
-        pool_id = data.get('pool_id', None)
-        if not pool_id:
-            return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
-        user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-        pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-        if pool_id and user and pw:
+        subscription_id = data.get('subscription_id', None)
+        if not subscription_id:
+            return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
+        user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        if subscription_id and user and pw:
             data = request.data.copy()
             try:
                 with set_environ(**settings.AWX_TASK_ENV):
@@ -257,7 +242,7 @@ class ApiV2AttachView(APIView):
                     logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
         for sub in validated:
-            if sub['pool_id'] == pool_id:
+            if sub['subscription_id'] == subscription_id:
                 sub['valid_key'] = True
                 settings.LICENSE = sub
                 return Response(sub)
@@ -285,9 +270,6 @@ class ApiV2ConfigView(APIView):
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
-        # Guarding against settings.UI_NEXT being set to a non-boolean value
-        ui_next_state = settings.UI_NEXT if settings.UI_NEXT in (True, False) else False
-
         data = dict(
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
@@ -296,17 +278,7 @@ class ApiV2ConfigView(APIView):
             analytics_status=pendo_state,
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
-            ui_next=ui_next_state,
         )
-
-        # If LDAP is enabled, user_ldap_fields will return a list of field
-        # names that are managed by LDAP and should be read-only for users with
-        # a non-empty ldap_dn attribute.
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            user_ldap_fields = ['username', 'password']
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            data['user_ldap_fields'] = user_ldap_fields
 
         if (
             request.user.is_superuser

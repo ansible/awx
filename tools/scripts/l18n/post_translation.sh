@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Rename the zh_cn folder 
+# Rename the zh_cn folder
 mv translations/zh_cn translations/zh
 
 # Create a directory for api (locale)
@@ -34,15 +34,12 @@ for d in */ ; do
     rm $dir/django.po
 done
 
-cd .. 
+cd ..
 
 awx_api_path="awx/locale" # locale will be dropped here
-awx_ui_path="awx/ui/src/locales" # locales will be dropped here
 
 rsync -av locale/ $awx_api_path
-rsync -av locales/ $awx_ui_path
 
 rm -rf translations/
 rm -rf locale/
 rm -rf locales/
-

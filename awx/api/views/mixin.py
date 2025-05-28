@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from awx.main.constants import ACTIVE_STATES
+from awx.main.models import Organization
 from awx.main.utils import get_object_or_400
 from awx.main.models.ha import Instance, InstanceGroup, schedule_policy_task
 from awx.main.models.organization import Team
@@ -58,6 +59,21 @@ class UnifiedJobDeletionMixin(object):
 
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class OrganizationInstanceGroupMembershipMixin(object):
+    """
+    This mixin overloads attach/detach so that it calls Organization.save(),
+    to ensure instance group updates are persisted
+    """
+
+    def unattach(self, request, *args, **kwargs):
+        with transaction.atomic():
+            organization_queryset = Organization.objects.select_for_update()
+            organization = organization_queryset.get(pk=self.get_parent_object().id)
+            response = super(OrganizationInstanceGroupMembershipMixin, self).unattach(request, *args, **kwargs)
+            organization.save()
+            return response
 
 
 class InstanceGroupMembershipMixin(object):

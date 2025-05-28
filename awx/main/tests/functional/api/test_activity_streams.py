@@ -109,7 +109,8 @@ def test_stream_queryset_hides_shows_items(
     settings.ACTIVITY_STREAM_ENABLED = True
     # this user is not in any organizations and should not see any resource activity
     no_access_user = user('no-access-user', False)
-    queryset = ActivityStreamAccess(no_access_user).get_queryset()
+    access = ActivityStreamAccess(no_access_user)
+    queryset = access.get_queryset()
 
     assert not queryset.filter(project__pk=project.pk)
     assert not queryset.filter(credential__pk=org_credential.pk)
@@ -120,9 +121,11 @@ def test_stream_queryset_hides_shows_items(
     assert not queryset.filter(host__pk=host.pk)
     assert not queryset.filter(team__pk=team.pk)
     assert not queryset.filter(notification_template__pk=notification_template.pk)
+    assert not access.can_read(activity_stream_entry)
 
     # Organization admin should be able to see most things in the ActivityStream
-    queryset = ActivityStreamAccess(org_admin).get_queryset()
+    access = ActivityStreamAccess(org_admin)
+    queryset = access.get_queryset()
 
     assert queryset.filter(project__pk=project.pk, operation='create').count() == 1
     assert queryset.filter(credential__pk=org_credential.pk, operation='create').count() == 1
@@ -133,6 +136,7 @@ def test_stream_queryset_hides_shows_items(
     assert queryset.filter(host__pk=host.pk, operation='create').count() == 1
     assert queryset.filter(team__pk=team.pk, operation='create').count() == 1
     assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1
+    assert access.can_read(activity_stream_entry)
 
 
 @pytest.mark.django_db

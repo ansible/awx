@@ -12,13 +12,13 @@ requirements:
   - None
 description:
   - Returns GET requests from the Automation Platform Controller API. See
-    U(https://docs.ansible.com/ansible-tower/latest/html/towerapi/index.html) for API usage.
+    U(https://docs.ansible.com/automation-controller/latest/html/towerapi/) for API usage.
   - For use that is cross-compatible between the awx.awx and ansible.controller collection
     see the controller_meta module
 options:
   _terms:
     description:
-      - The endpoint to query, i.e. teams, users, tokens, job_templates, etc.
+      - The endpoint to query, i.e. teams, users, job_templates, etc.
     required: True
   query_params:
     description:

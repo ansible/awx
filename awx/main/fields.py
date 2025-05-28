@@ -832,7 +832,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                             'type': 'string',
                             # The environment variable _value_ can be any ascii,
                             # but pexpect will choke on any unicode
-                            'pattern': '^[\x00-\x7F]*$',
+                            'pattern': '^[\x00-\x7f]*$',
                         },
                     },
                     'additionalProperties': False,
@@ -1039,7 +1039,7 @@ class OrderedManyToManyField(models.ManyToManyField):
             descriptor = getattr(instance, self.name)
             order_with_respect_to = descriptor.source_field_name
 
-            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: instance.pk})):
+            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: instance.pk}).order_by('id')):
                 if ig.position != i:
                     ig.position = i
                     ig.save()

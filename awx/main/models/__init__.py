@@ -16,9 +16,9 @@ from ansible_base.lib.utils.models import prevent_search
 from ansible_base.lib.utils.models import user_summary_fields
 
 # AWX
-from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
+from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, VERBOSITY_CHOICES  # noqa
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
-from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
+from awx.main.models.organization import Organization, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
 from awx.main.models.receptor_address import ReceptorAddress  # noqa
@@ -33,6 +33,7 @@ from awx.main.models.inventory import (  # noqa
     InventorySource,
     InventoryUpdate,
     SmartInventoryMembership,
+    InventoryGroupVariablesWithHistory,
 )
 from awx.main.models.jobs import (  # noqa
     Job,
@@ -93,9 +94,6 @@ from awx.main.models.workflow import (  # noqa
     WorkflowApproval,
     WorkflowApprovalTemplate,
 )
-from awx.api.versioning import reverse
-from awx.main.models.oauth import OAuth2AccessToken, OAuth2Application  # noqa
-from oauth2_provider.models import Grant, RefreshToken  # noqa -- needed django-oauth-toolkit model migrations
 
 
 # Add custom methods to User model for permissions checks.
@@ -202,7 +200,7 @@ User.add_to_class('created', created)
 
 def get_system_auditor_role():
     rd, created = RoleDefinition.objects.get_or_create(
-        name='System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
+        name='Controller System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
     )
     if created:
         rd.permissions.add(*list(permission_registry.permission_qs.filter(codename__startswith='view')))
@@ -244,33 +242,6 @@ def user_is_system_auditor(user, tf):
 User.add_to_class('is_system_auditor', user_is_system_auditor)
 
 
-def user_is_in_enterprise_category(user, category):
-    ret = (category,) in user.enterprise_auth.values_list('provider') and not user.has_usable_password()
-    # NOTE: this if-else block ensures existing enterprise users are still able to
-    # log in. Remove it in a future release
-    if category == 'radius':
-        ret = ret or not user.has_usable_password()
-    elif category == 'saml':
-        ret = ret or user.social_auth.all()
-    return ret
-
-
-User.add_to_class('is_in_enterprise_category', user_is_in_enterprise_category)
-
-
-def o_auth2_application_get_absolute_url(self, request=None):
-    return reverse('api:o_auth2_application_detail', kwargs={'pk': self.pk}, request=request)
-
-
-OAuth2Application.add_to_class('get_absolute_url', o_auth2_application_get_absolute_url)
-
-
-def o_auth2_token_get_absolute_url(self, request=None):
-    return reverse('api:o_auth2_token_detail', kwargs={'pk': self.pk}, request=request)
-
-
-OAuth2AccessToken.add_to_class('get_absolute_url', o_auth2_token_get_absolute_url)
-
 from awx.main.registrar import activity_stream_registrar  # noqa
 
 activity_stream_registrar.connect(Organization)
@@ -292,7 +263,6 @@ activity_stream_registrar.connect(Job)
 activity_stream_registrar.connect(AdHocCommand)
 # activity_stream_registrar.connect(JobHostSummary)
 # activity_stream_registrar.connect(JobEvent)
-# activity_stream_registrar.connect(Profile)
 activity_stream_registrar.connect(Schedule)
 activity_stream_registrar.connect(NotificationTemplate)
 activity_stream_registrar.connect(Notification)
@@ -303,8 +273,6 @@ activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
 activity_stream_registrar.connect(WorkflowApproval)
 activity_stream_registrar.connect(WorkflowApprovalTemplate)
-activity_stream_registrar.connect(OAuth2Application)
-activity_stream_registrar.connect(OAuth2AccessToken)
 
 # Register models
 permission_registry.register(Project, Team, WorkflowJobTemplate, JobTemplate, Inventory, Organization, Credential, NotificationTemplate, ExecutionEnvironment)
@@ -312,8 +280,3 @@ permission_registry.register(InstanceGroup, parent_field_name=None)  # Not part 
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))
-prevent_search(OAuth2AccessToken._meta.get_field('token'))
-prevent_search(RefreshToken._meta.get_field('token'))
-prevent_search(OAuth2Application._meta.get_field('client_secret'))
-prevent_search(OAuth2Application._meta.get_field('client_id'))
-prevent_search(Grant._meta.get_field('code'))

@@ -37,7 +37,7 @@ def post_webhook(file, webhook_key, url, verbose, event_type, insecure):
 
     \b
     For setting up webhooks in AWX see:
-        https://docs.ansible.com/ansible-tower/latest/html/userguide/webhooks.html
+        https://ansible.readthedocs.io/projects/awx/en/latest/userguide/webhooks.html
 
     \b
     Example usage for GitHub:

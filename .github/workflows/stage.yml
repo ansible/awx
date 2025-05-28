@@ -45,30 +45,28 @@ jobs:
           exit 0
 
       - name: Checkout awx
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           path: awx
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           repository: ${{ github.repository_owner }}/awx-operator
           path: awx-operator
 
       - name: Checkout awx-logos
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          show-progress: false
           repository: ansible/awx-logos
           path: awx-logos
 
-      - name: Get python version from Makefile
-        working-directory: awx
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - uses: ./awx/.github/actions/setup-python
         with:
-          python-version: ${{ env.py_version }}
+          working-directory: awx
 
       - name: Install playbook dependencies
         run: |
@@ -86,17 +84,14 @@ jobs:
         run: |
           cp ../awx-logos/awx/ui/client/assets/* awx/ui/public/static/media/
 
-      - name: Setup node and npm
+      - name: Setup node and npm for new UI build
         uses: actions/setup-node@v2
         with:
-          node-version: '16.13.1'
+          node-version: '18'
 
-      - name: Prebuild UI for awx image (to speed up build process)
+      - name: Prebuild new UI for awx image (to speed up build process)
         working-directory: awx
-        run: |
-          sudo apt-get install gettext
-          make ui-release
-          make ui-next
+        run: make ui
 
       - name: Set build env variables
         run: |

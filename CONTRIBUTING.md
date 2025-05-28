@@ -2,7 +2,7 @@
 
 Hi there! We're excited to have you as a contributor.
 
-Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on irc.libera.chat, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+Have questions about this document or anything not covered here? Create a topic using the [AWX tag on the Ansible Forum](https://forum.ansible.com/tag/awx).
 
 ## Table of contents
 
@@ -30,7 +30,7 @@ Have questions about this document or anything not covered here? Come chat with 
 - You must use `git commit --signoff` for any commit to be merged, and agree that usage of --signoff constitutes agreement with the terms of [DCO 1.1](./DCO_1_1.md).
 - Take care to make sure no merge commits are in the submission, and use `git rebase` vs `git merge` for this reason.
   - If collaborating with someone else on the same branch, consider using `--force-with-lease` instead of `--force`. This will prevent you from accidentally overwriting commits pushed by someone else. For more information, see [git push docs](https://git-scm.com/docs/git-push#git-push---force-with-leaseltrefnamegt).
-- If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on irc.libera.chat, and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
+- If submitting a large code change, it's a good idea to create a [forum topic tagged with 'awx'](https://forum.ansible.com/tag/awx), and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
 - We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)
 
 ## Setting up your development environment
@@ -67,7 +67,7 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 
 #### Frontend Development
 
-See [the ui development documentation](awx/ui/CONTRIBUTING.md).
+See [the ansible-ui development documentation](https://github.com/ansible/ansible-ui/blob/main/CONTRIBUTING.md).
 
 #### Fork and clone the AWX repo
 
@@ -121,18 +121,18 @@ If it has someone assigned to it then that person is the person responsible for 
 
 **NOTES**
 
-> Issue assignment will only be done for maintainers of the project. If you decide to work on an issue, please feel free to add a comment in the issue to let others know that you are working on it; but know that we will accept the first pull request from whomever is able to fix an issue. Once your PR is accepted we can add you as an assignee to an issue upon request. 
+> Issue assignment will only be done for maintainers of the project. If you decide to work on an issue, please feel free to add a comment in the issue to let others know that you are working on it; but know that we will accept the first pull request from whomever is able to fix an issue. Once your PR is accepted we can add you as an assignee to an issue upon request.
 
 
-> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+> If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
-> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](./awx/ui/README.md).
+> If you're planning to develop features or fixes for the UI, please review the [UI Developer doc](https://github.com/ansible/ansible-ui/blob/main/CONTRIBUTING.md).
 
 ### Translations
 
 At this time we do not accept PRs for adding additional language translations as we have an automated process for generating our translations. This is because translations require constant care as new strings are added and changed in the code base. Because of this the .po files are overwritten during every translation release cycle. We also can't support a lot of translations on AWX as its an open source project and each language adds time and cost to maintain. If you would like to see AWX translated into a new language please create an issue and ask others you know to upvote the issue. Our translation team will review the needs of the community and see what they can do around supporting additional language.
 
-If you find an issue with an existing translation, please see the [Reporting Issues](#reporting-issues) section to open an issue and our translation team will work with you on a resolution. 
+If you find an issue with an existing translation, please see the [Reporting Issues](#reporting-issues) section to open an issue and our translation team will work with you on a resolution.
 
 
 ## Submitting Pull Requests
@@ -143,15 +143,13 @@ Here are a few things you can do to help the visibility of your change, and incr
 
 - No issues when running linters/code checkers
   - Python: black: `(container)/awx_devel$ make black`
-  - Javascript: `(container)/awx_devel$ make ui-lint`
 - No issues from unit tests
   - Python: py.test: `(container)/awx_devel$ make test`
-  - JavaScript: `(container)/awx_devel$ make ui-test`
 - Write tests for new functionality, update/add tests for bug fixes
 - Make the smallest change possible
 - Write good commit messages. See [How to write a Git commit message](https://chris.beams.io/posts/git-commit/).
 
-It's generally a good idea to discuss features with us first by engaging us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+It's generally a good idea to discuss features with us first by engaging on the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
 We like to keep our commit history clean, and will require resubmission of pull requests that contain merge commits. Use `git pull --rebase`, rather than
 `git pull`, and `git rebase`, rather than `git merge`.
@@ -161,11 +159,11 @@ Sometimes it might take us a while to fully review your PR. We try to keep the `
 When your PR is initially submitted the checks will not be run until a maintainer allows them to be. Once a maintainer has done a quick review of your work the PR will have the linter and unit tests run against them via GitHub Actions, and the status reported in the PR.
 
 ## Reporting Issues
- 
+
 We welcome your feedback, and encourage you to file an issue when you run into a problem. But before opening a new issues, we ask that you please view our [Issues guide](./ISSUES.md).
 
 ## Getting Help
 
-If you require additional assistance, please reach out to us at `#ansible-awx` on irc.libera.chat, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
+If you require additional assistance, please submit your question to the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
 For extra information on debugging tools, see [Debugging](./docs/debugging/).

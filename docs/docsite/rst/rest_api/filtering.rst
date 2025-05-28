@@ -94,7 +94,7 @@ Field lookups may also be used for more advanced queries, by appending the looku
 
 The following field lookups are supported:
 
-- ``exact``: Exact match (default lookup if not specified).
+- ``exact``: Exact match (default lookup if not specified, refer to the following note for more information).
 - ``iexact``: Case-insensitive version of exact.
 - ``contains``: Field contains value.
 - ``icontains``: Case-insensitive version of contains.
@@ -122,3 +122,18 @@ Filtering based on the requesting user's level of access by query string paramet
 
 - ``role_level``: Level of role to filter on, such as ``admin_role``
 
+
+.. note::
+
+    Previous releases of AWX returned queries with **__exact** results by default, but you may find that the latest versions are returning a larger subset instead. As a workaround, set the ``limit`` to ``?limit__exact`` for the default filter. For example, ``/api/v2/jobs/?limit__exact=example.domain.com`` results in:
+
+    ::
+
+        {
+            "count": 1,
+            "next": null,
+            "previous": null,
+            "results": [
+        ... 
+
+.. this note is generically written for AWX. For downstream, the change started in AAP 2.0 so we can be more specific if necessary.

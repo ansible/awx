@@ -6,7 +6,6 @@ import re
 from django.utils.translation import gettext_lazy as _
 
 __all__ = [
-    'CLOUD_PROVIDERS',
     'PRIVILEGE_ESCALATION_METHODS',
     'ANSI_SGR_PATTERN',
     'CAN_CANCEL',
@@ -14,7 +13,6 @@ __all__ = [
     'STANDARD_INVENTORY_UPDATE_ENV',
 ]
 
-CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'controller', 'insights', 'terraform', 'openshift_virtualization')
 PRIVILEGE_ESCALATION_METHODS = [
     ('sudo', _('Sudo')),
     ('su', _('Su')),
@@ -43,6 +41,7 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
+ERROR_STATES = ('error',)
 MINIMAL_EVENTS = set(['playbook_on_play_start', 'playbook_on_task_start', 'playbook_on_stats', 'EOF'])
 CENSOR_VALUE = '************'
 ENV_BLOCKLIST = frozenset(
@@ -78,6 +77,8 @@ LOGGER_BLOCKLIST = (
     'awx.main.utils.log',
     # loggers that may be called getting logging settings
     'awx.conf',
+    # dispatcherd should only use 1 database connection
+    'dispatcherd',
 )
 
 # Reported version for node seen in receptor mesh but for which capacity check

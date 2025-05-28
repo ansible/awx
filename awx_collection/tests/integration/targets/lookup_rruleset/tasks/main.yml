@@ -11,7 +11,7 @@
 
 - name: Call ruleset with no rules
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name | string, '2022-04-30 10:30:45') }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name | string, '2022-04-30 10:30:45') }}"
   ignore_errors: True
   register: results
 
@@ -23,7 +23,7 @@
 
 - name: call ruleset with a missing frequency
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -41,7 +41,7 @@
 
 - name: call ruleset with a missing frequency
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -59,7 +59,7 @@
 
 - name: call rruleset with an invalid frequency
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -78,7 +78,7 @@
 
 - name: call rruleset with an invalid end_on
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -97,7 +97,7 @@
 
 - name: Every Mondays
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -114,7 +114,7 @@
 
 - name: call rruleset with an invalid byweekday
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -133,7 +133,7 @@
 
 - name: call rruleset with a monthly rule with invalid bymonthday (a)
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -152,7 +152,7 @@
 
 - name: call rruleset with a monthly rule with invalid bymonthday (-1)
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -171,7 +171,7 @@
 
 - name: call rruleset with a monthly rule with invalid bymonthday (32)
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -190,7 +190,7 @@
 
 - name: call rruleset with a monthly rule with invalid bysetpos (junk)
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -209,7 +209,7 @@
 
 - name: call rruleset with an invalid timezone
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='junk' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='junk' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -228,7 +228,7 @@
 
 - name: call rruleset with only exclude rules
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -249,7 +249,7 @@
 
 - name: Every day except for Sundays
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -269,7 +269,7 @@
 
 - name: Every day except for April 30th
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2023-04-28 17:00:00', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2023-04-28 17:00:00', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -290,7 +290,7 @@
 
 - name: Every 5 minutes but not on Mondays from 5-7pm
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -313,7 +313,7 @@
 
 - name: Every 15 minutes Monday to Friday from 10:01am to 6:02pm (inclusive)
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -342,7 +342,7 @@
 
 - name: Any Saturday whose month day is between 12 and 18
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
@@ -359,7 +359,7 @@
 
 - name: mondays, Tuesdays, and WEDNESDAY with case-insensitivity
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    complex_rule: "{{ lookup(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   ignore_errors: True
   register: results
   vars:
