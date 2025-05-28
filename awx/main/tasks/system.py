@@ -864,15 +864,8 @@ def awx_receptor_workunit_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
     logger.debug("Checking for unreleased receptor work units")
-    try:
-        receptor_ctl = get_receptor_ctl()
-    except FileNotFoundError:
-        logger.info('Receptorctl sockfile not found for workunit reaper, doing nothing')
-        return
-    try:
-        receptor_work_list = receptor_ctl.simple_command("work list")
-    except ValueError as exc:
-        logger.info(f'Error getting work list for workunit reaper, error: {str(exc)}')
+    receptor_ctl = get_receptor_ctl()
+    receptor_work_list = receptor_ctl.simple_command("work list")
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
