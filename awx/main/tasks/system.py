@@ -599,7 +599,11 @@ def inspect_execution_and_hop_nodes(instance_list):
         except FileNotFoundError:
             logger.error('Receptor daemon not running, skipping execution node check')
             return
-        mesh_status = ctl.simple_command('status')
+        try:
+            mesh_status = ctl.simple_command('status')
+        except ValueError as exc:
+            logger.error(f'Error running receptorctl status command, error: {str(exc)}')
+            return
 
         inspect_established_receptor_connections(mesh_status)
 
