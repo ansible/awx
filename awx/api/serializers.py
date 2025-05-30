@@ -734,7 +734,7 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
-class OpaQueryPathEnabledMixin(serializers.Serializer):
+class OpaQueryPathMixin(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -749,7 +749,7 @@ class OpaQueryPathEnabledMixin(serializers.Serializer):
         return value
 
 
-class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathEnabledMixin):
+class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
     # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
@@ -1182,7 +1182,7 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
-class OrganizationSerializer(BaseSerializer, OpaQueryPathEnabledMixin):
+class OrganizationSerializer(BaseSerializer, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -1541,7 +1541,7 @@ class LabelsListMixin(object):
         return res
 
 
-class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathEnabledMixin):
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
