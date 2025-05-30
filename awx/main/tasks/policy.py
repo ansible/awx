@@ -8,7 +8,6 @@ from typing import Optional, Union
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from flags.state import flag_enabled
 from opa_client import OpaClient
 from opa_client.base import BaseClient
 from requests import HTTPError
@@ -364,9 +363,6 @@ def opa_client(headers=None):
 
 def evaluate_policy(instance):
     # Policy evaluation for Policy as Code feature
-    if not flag_enabled("FEATURE_POLICY_AS_CODE_ENABLED"):
-        return
-
     if not settings.OPA_HOST:
         return
 

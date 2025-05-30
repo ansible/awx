@@ -46,9 +46,6 @@ from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
 
-# django-flags
-from flags.state import flag_enabled
-
 # AWX
 from awx.main.access import get_user_capabilities
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
@@ -740,9 +737,6 @@ class EmptySerializer(serializers.Serializer):
 class OpaQueryPathEnabledMixin(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        if not flag_enabled("FEATURE_POLICY_AS_CODE_ENABLED") and 'opa_query_path' in self.fields:
-            self.fields.pop('opa_query_path')
 
     def validate_opa_query_path(self, value):
         # Decode the URL and re-encode it

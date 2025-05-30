@@ -1092,10 +1092,6 @@ INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS = 3
 # Older records will be cleaned up
 INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
 
-
-# setting for Policy as Code feature
-FEATURE_POLICY_AS_CODE_ENABLED = False
-
 OPA_HOST = ''  # The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.
 OPA_PORT = 8181  # The port used to connect to the OPA server. Defaults to 8181.
 OPA_SSL = False  # Enable or disable the use of SSL to connect to the OPA server. Defaults to false.
@@ -1113,7 +1109,6 @@ OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OP
 FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
 FLAGS = {
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
-    'FEATURE_POLICY_AS_CODE_ENABLED': [{'condition': 'boolean', 'value': False}],
     'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
 }
 
