@@ -80,11 +80,6 @@ options:
       default: "present"
       choices: ["present", "absent", "exists"]
       type: str
-    opa_query_path:
-      description:
-        - The query path for the OPA policy to evaluate prior to job execution.
-        - The query path should be formatted as package/rule.
-      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

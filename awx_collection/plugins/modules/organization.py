@@ -84,10 +84,6 @@ options:
         - list of Ansible Galaxy credential names, IDs, or named URLs to associate to the organization
       type: list
       elements: str
-    opa_query_path:
-      description:
-        - The query path for the OPA policy to evaluate prior to job execution. The query path should be formatted as package/rule.
-      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 

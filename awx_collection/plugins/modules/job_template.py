@@ -315,11 +315,7 @@ options:
       description:
         - Prevent falling back to instance groups set on the associated inventory or organization
       type: bool
-    opa_query_path:
-      description:
-        - The query path for the OPA policy to evaluate prior to job execution.
-        - The query path should be formatted as package/rule.
-      type: str
+
 extends_documentation_fragment: awx.awx.auth
 
 notes:
