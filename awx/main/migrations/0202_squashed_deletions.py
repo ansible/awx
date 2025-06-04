@@ -7,7 +7,7 @@ from awx.main.migrations._create_system_jobs import delete_clear_tokens_sjt
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0200_template_name_constraint'),
+        ('main', '0201_create_managed_creds'),
     ]
 
     operations = [
