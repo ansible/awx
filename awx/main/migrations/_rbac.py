@@ -248,7 +248,7 @@ def rebuild_role_hierarchy(apps, schema_editor):
     stop = time()
     logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
     start = time()
-    # Role.rebuild_role_ancestor_list(roots, [])  # Removed - no longer needed with new RBAC system
+    # Legacy RBAC ancestor rebuilding removed - no longer needed with new RBAC system
     stop = time()
     logger.info('Rebuild ancestors completed in %f seconds' % (stop - start))
     logger.info('Done.')
@@ -316,6 +316,4 @@ def rebuild_role_parentage(apps, schema_editor, models=None):
 
     logger.info('Rebuild parentage completed in %f seconds' % (time() - start))
 
-    # this is ran because the ordinary signals for
-    # Role.parents.add and Role.parents.remove not called in migration
-    # Role.rebuild_role_ancestor_list(list(additions), list(removals))  # Removed - no longer needed with new RBAC system
+    # Legacy RBAC ancestor rebuilding removed - no longer needed with new RBAC system
