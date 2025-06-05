@@ -150,3 +150,24 @@ def test_ship_credential(setting_map, expected_result, expected_auth, temp_analy
             assert mock_analytic_post.call_args[1]['auth'] == expected_auth
         else:
             mock_analytic_post.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_gather_cleanup_on_auth_failure(mock_valid_license, temp_analytic_tar):
+    settings.INSIGHTS_TRACKING_STATE = True
+    settings.AUTOMATION_ANALYTICS_URL = 'https://example.com/api'
+    settings.REDHAT_USERNAME = 'test_user'
+    settings.REDHAT_PASSWORD = 'test_password'
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.tar.gz') as temp_file:
+        temp_file_path = temp_file.name
+
+    try:
+        with mock.patch('awx.main.analytics.core.ship', return_value=False):
+            with mock.patch('awx.main.analytics.core.package', return_value=temp_file_path):
+                gather(module=importlib.import_module(__name__), collection_type='scheduled')
+
+                assert not os.path.exists(temp_file_path), "Temp file was not cleaned up after ship failure"
+    finally:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)

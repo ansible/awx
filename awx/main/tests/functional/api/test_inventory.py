@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from awx.api.versioning import reverse
 
 from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.utils.inventory_vars import update_group_variables
 
 
 @pytest.fixture
@@ -690,3 +691,241 @@ class TestConstructedInventory:
         assert inv_r.data['url'] != const_r.data['url']
         assert inv_r.data['related']['constructed_url'] == url_const
         assert const_r.data['related']['constructed_url'] == url_const
+
+
+@pytest.mark.django_db
+class TestInventoryAllVariables:
+
+    @staticmethod
+    def simulate_update_from_source(inv_src, variables_dict, overwrite_vars=True):
+        """
+        Update `inventory` with variables `variables_dict` from source
+        `inv_src`.
+        """
+        # Perform an update from source the same way it is done in
+        # `inventory_import.Command._update_inventory`.
+        new_vars = update_group_variables(
+            group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
+            newvars=variables_dict,
+            dbvars=inv_src.inventory.variables_dict,
+            invsrc_id=inv_src.id,
+            inventory_id=inv_src.inventory.id,
+            overwrite_vars=overwrite_vars,
+        )
+        inv_src.inventory.variables = json.dumps(new_vars)
+        inv_src.inventory.save(update_fields=["variables"])
+        return new_vars
+
+    def update_and_verify(self, inv_src, new_vars, expect=None, overwrite_vars=True, teststep=None):
+        """
+        Helper: Update from source and verify the new inventory variables.
+
+        :param inv_src: An inventory source object with its inventory property
+            set to the inventory fixture of the called.
+        :param dict new_vars: The variables of the inventory source `inv_src`.
+        :param dict expect: (optional) The expected variables state of the
+            inventory after the update. If not set or None, expect `new_vars`.
+        :param bool overwrite_vars: The status of the inventory source option
+            'overwrite variables'. Default is `True`.
+        :raise AssertionError: If the inventory does not contain the expected
+            variables after the update.
+        """
+        self.simulate_update_from_source(inv_src, new_vars, overwrite_vars=overwrite_vars)
+        if teststep is not None:
+            assert inv_src.inventory.variables_dict == (expect if expect is not None else new_vars), f"Test step {teststep}"
+        else:
+            assert inv_src.inventory.variables_dict == (expect if expect is not None else new_vars)
+
+    def test_set_variables_through_inventory_details_update(self, inventory, patch, admin_user):
+        """
+        Set an inventory variable by changing the inventory details, simulating
+        a user edit.
+        """
+        # a: x
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'a: x'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {"a": "x"}
+
+    def test_variables_set_by_user_persist_update_from_src(self, inventory, inventory_source, patch, admin_user):
+        """
+        Verify the special behavior that a variable which originates from a user
+        edit (instead of a source update), is not removed from the inventory
+        when a source update with overwrite_vars=True does not contain that
+        variable. This behavior is considered special because a variable which
+        originates from a source would actually be deleted.
+
+        In addition, verify that an existing variable which was set by a user
+        edit can be overwritten by a source update.
+        """
+        # Set two variables via user edit.
+        patch(
+            url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}),
+            data={'variables': '{"a": "a_from_user", "b": "b_from_user"}'},
+            user=admin_user,
+            expect=200,
+        )
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {'a': 'a_from_user', 'b': 'b_from_user'}
+        # Update from a source which contains only one of the two variables from
+        # the previous update.
+        self.simulate_update_from_source(inventory_source, {'a': 'a_from_source'})
+        # Verify inventory variables.
+        assert inventory.variables_dict == {'a': 'a_from_source', 'b': 'b_from_user'}
+
+    def test_variables_set_through_src_get_removed_on_update_from_same_src(self, inventory, inventory_source, patch, admin_user):
+        """
+        Verify that a variable which originates from a source update, is removed
+        from the inventory when a source update with overwrite_vars=True does
+        not contain that variable.
+
+        In addition, verify that an existing variable which was set by a user
+        edit can be overwritten by a source update.
+        """
+        # Set two variables via update from source.
+        self.simulate_update_from_source(inventory_source, {'a': 'a_from_source', 'b': 'b_from_source'})
+        # Verify inventory variables.
+        assert inventory.variables_dict == {'a': 'a_from_source', 'b': 'b_from_source'}
+        # Update from the same source which now contains only one of the two
+        # variables from the previous update.
+        self.simulate_update_from_source(inventory_source, {'b': 'b_from_source'})
+        # Verify the variable has been deleted from the inventory.
+        assert inventory.variables_dict == {'b': 'b_from_source'}
+
+    def test_overwrite_variables_through_inventory_details_update(self, inventory, patch, admin_user):
+        """
+        Set and update the inventory variables multiple times by changing the
+        inventory details via api, simulating user edits.
+
+        Any variables update by means of an inventory details update shall
+        overwright all existing inventory variables.
+        """
+        # a: x
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'a: x'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {"a": "x"}
+        # a: x2
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'a: x2'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {"a": "x2"}
+        # b: y
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'b: y'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {"b": "y"}
+
+    def test_inventory_group_variables_internal_data(self, inventory, patch, admin_user):
+        """
+        Basic verification of how variable updates are stored internally.
+
+        .. Warning::
+
+            This test verifies a specific implementation of the inventory
+            variables update business logic. It may deliver false negatives if
+            the implementation changes.
+        """
+        # x: a
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'a: x'}, user=admin_user, expect=200)
+        igv = inventory.inventory_group_variables.first()
+        assert igv.variables == {'a': [[-1, 'x']]}
+        # b: y
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'b: y'}, user=admin_user, expect=200)
+        igv = inventory.inventory_group_variables.first()
+        assert igv.variables == {'b': [[-1, 'y']]}
+
+    def test_update_then_user_change(self, inventory, patch, admin_user, inventory_source):
+        """
+        1. Update inventory vars by means of an inventory source update.
+        2. Update inventory vars by editing the inventory details (aka a 'user
+           update'), thereby changing variables values and deleting variables
+           from the inventory.
+
+        .. Warning::
+
+            This test partly relies on a specific implementation of the
+            inventory variables update business logic. It may deliver false
+            negatives if the implementation changes.
+        """
+        assert inventory_source.inventory_id == inventory.pk  # sanity
+        # ---- Test step 1: Set variables by updating from an inventory source.
+        self.simulate_update_from_source(inventory_source, {'foo': 'foo_from_source', 'bar': 'bar_from_source'})
+        # Verify inventory variables.
+        assert inventory.variables_dict == {'foo': 'foo_from_source', 'bar': 'bar_from_source'}
+        # Verify internal storage of variables data. Note that this is
+        # implementation specific
+        assert inventory.inventory_group_variables.count() == 1
+        igv = inventory.inventory_group_variables.first()
+        assert igv.variables == {'foo': [[inventory_source.id, 'foo_from_source']], 'bar': [[inventory_source.id, 'bar_from_source']]}
+        # ---- Test step 2: Change the variables by editing the inventory details.
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'foo: foo_from_user'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        # Verify that variable `foo` contains the new value, and that variable
+        # `bar` has been deleted from the inventory.
+        assert inventory.variables_dict == {"foo": "foo_from_user"}
+        # Verify internal storage of variables data. Note that this is
+        # implementation specific
+        inventory.inventory_group_variables.count() == 1
+        igv = inventory.inventory_group_variables.first()
+        assert igv.variables == {'foo': [[-1, 'foo_from_user']]}
+
+    def test_monotonic_deletions(self, inventory, patch, admin_user):
+        """
+        Verify the variables history logic for monotonic deletions.
+
+        Monotonic in this context means that the variables are deleted in the
+        reverse order of their creation.
+
+        1. Set inventory variable x: 0, expect INV={x: 0}
+
+        (The following steps use overwrite_variables=False)
+
+        2. Update from source A={x: 1}, expect INV={x: 1}
+        3. Update from source B={x: 2}, expect INV={x: 2}
+        4. Update from source B={}, expect INV={x: 1}
+        5. Update from source A={}, expect INV={x: 0}
+        """
+        inv_src_a = InventorySource.objects.create(name="inv-src-A", inventory=inventory, source="ec2")
+        inv_src_b = InventorySource.objects.create(name="inv-src-B", inventory=inventory, source="ec2")
+        # Test step 1:
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'x: 0'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {"x": 0}
+        # Test step 2: Source A overwrites value of var x
+        self.update_and_verify(inv_src_a, {"x": 1}, teststep=2)
+        # Test step 3: Source A overwrites value of var x
+        self.update_and_verify(inv_src_b, {"x": 2}, teststep=3)
+        # Test step 4: Value of var x from source A reappears
+        self.update_and_verify(inv_src_b, {}, expect={"x": 1}, teststep=4)
+        # Test step 5: Value of var x from initial user edit reappears
+        self.update_and_verify(inv_src_a, {}, expect={"x": 0}, teststep=5)
+
+    def test_interleaved_deletions(self, inventory, patch, admin_user, inventory_source):
+        """
+        Verify the variables history logic for interleaved deletions.
+
+        Interleaved in this context means that the variables are deleted in a
+        different order than the sequence of their creation.
+
+        1. Set inventory variable x: 0, expect INV={x: 0}
+        2. Update from source A={x: 1}, expect INV={x: 1}
+        3. Update from source B={x: 2}, expect INV={x: 2}
+        4. Update from source C={x: 3}, expect INV={x: 3}
+        5. Update from source B={}, expect INV={x: 3}
+        6. Update from source C={}, expect INV={x: 1}
+        """
+        inv_src_a = InventorySource.objects.create(name="inv-src-A", inventory=inventory, source="ec2")
+        inv_src_b = InventorySource.objects.create(name="inv-src-B", inventory=inventory, source="ec2")
+        inv_src_c = InventorySource.objects.create(name="inv-src-C", inventory=inventory, source="ec2")
+        # Test step 1. Set inventory variable x: 0
+        patch(url=reverse('api:inventory_detail', kwargs={'pk': inventory.pk}), data={'variables': 'x: 0'}, user=admin_user, expect=200)
+        inventory.refresh_from_db()
+        assert inventory.variables_dict == {"x": 0}
+        # Test step 2: Source A overwrites value of var x
+        self.update_and_verify(inv_src_a, {"x": 1}, teststep=2)
+        # Test step 3: Source B overwrites value of var x
+        self.update_and_verify(inv_src_b, {"x": 2}, teststep=3)
+        # Test step 4: Source C overwrites value of var x
+        self.update_and_verify(inv_src_c, {"x": 3}, teststep=4)
+        # Test step 5: Value of var x from source C remains unchanged
+        self.update_and_verify(inv_src_b, {}, expect={"x": 3}, teststep=5)
+        # Test step 6: Value of var x from source A reappears, because the
+        # latest update from source B did not contain var x.
+        self.update_and_verify(inv_src_c, {}, expect={"x": 1}, teststep=6)

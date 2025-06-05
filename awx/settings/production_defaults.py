@@ -23,8 +23,13 @@ ALLOWED_HOSTS = []
 # only used for deprecated fields and management commands for them
 BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
 
+# Switch to a writable location for the dispatcher sockfile location
+DISPATCHERD_DEBUGGING_SOCKFILE = os.path.realpath('/var/run/tower/dispatcherd.sock')
+
 # Very important that this is editable (not read_only) in the API
 AWX_ISOLATION_SHOW_PATHS = [
     '/etc/pki/ca-trust:/etc/pki/ca-trust:O',
     '/usr/share/pki:/usr/share/pki:O',
 ]
+
+del os

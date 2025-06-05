@@ -243,14 +243,23 @@ class Licenser(object):
         return []
 
     def get_rhsm_subs(self, host, client_id, client_secret):
-        client = OIDCClient(client_id, client_secret)
-        subs = client.make_request(
-            'GET',
-            host,
-            verify=True,
-            timeout=(31, 31),
-        )
-
+        try:
+            client = OIDCClient(client_id, client_secret)
+            subs = client.make_request(
+                'GET',
+                host,
+                verify=True,
+                timeout=(5, 20),
+            )
+        except requests.RequestException:
+            logger.warning("Failed to connect to console.redhat.com using Service Account credentials. Falling back to basic auth.")
+            subs = requests.request(
+                'GET',
+                host,
+                auth=(client_id, client_secret),
+                verify=True,
+                timeout=(5, 20),
+            )
         subs.raise_for_status()
         subs_formatted = []
         for sku in subs.json()['body']:
@@ -360,8 +369,13 @@ class Licenser(object):
                     account_number = sub['accountNumber']
                 else:
                     try:
+                        # Determine total quantity based on capacity name
+                        # if capacity name is Nodes, capacity quantity x subscription quantity
+                        # if capacity name is Sockets, capacity quantity / 2 (minimum of 1) x subscription quantity
                         if sub['capacity']['name'] == "Nodes":
                             quantity = int(sub['capacity']['quantity']) * int(sub['subscriptions']['quantity'])
+                        elif sub['capacity']['name'] == "Sockets":
+                            quantity = max(int(sub['capacity']['quantity']) / 2, 1) * int(sub['subscriptions']['quantity'])
                         else:
                             continue
                     except Exception:

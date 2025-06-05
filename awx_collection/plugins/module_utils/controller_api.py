@@ -15,7 +15,6 @@ from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionEr
 from base64 import b64encode
 from socket import getaddrinfo, IPPROTO_TCP
 import time
-import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd, environ, getenv
@@ -73,10 +72,9 @@ class ControllerModule(AnsibleModule):
             aliases=['aap_request_timeout'],
             required=False,
             fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT', 'AAP_REQUEST_TIMEOUT'])),
-        controller_oauthtoken=dict(
+        aap_token=dict(
             type='raw',
             no_log=True,
-            aliases=['tower_oauthtoken', 'aap_token'],
              required=False,
              fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
         ),
@@ -135,7 +133,7 @@ class ControllerModule(AnsibleModule):
                 setattr(self, short_param, direct_value)
 
         # Perform some basic validation
-        if not re.match('^https{0,1}://', self.host):
+        if not self.host.startswith(("https://", "http://")):  # NOSONAR
             self.host = "https://{0}".format(self.host)
 
         # Try to parse the hostname as a url

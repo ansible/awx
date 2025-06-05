@@ -155,26 +155,36 @@ class TestAnalyticsGenericView:
     )
     @pytest.mark.django_db
     def test__send_to_analytics_credentials(self, settings_map, expected_auth, expected_error_keyword):
+        """
+        Test _send_to_analytics with various combinations of credentials.
+        """
         with override_settings(**settings_map):
             request = RequestFactory().post('/some/path')
             view = AnalyticsGenericView()
 
             if expected_auth:
-                with mock.patch('requests.request') as mock_request:
-                    mock_request.return_value = mock.Mock(status_code=200)
+                with mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client:
+                    # Configure the mock OIDCClient instance and its make_request method
+                    mock_client_instance = mock.Mock()
+                    mock_oidc_client.return_value = mock_client_instance
+                    mock_client_instance.make_request.return_value = mock.Mock(status_code=200)
 
                     analytic_url = view._get_analytics_url(request.path)
                     response = view._send_to_analytics(request, 'POST')
 
                     # Assertions
-                    mock_request.assert_called_once_with(
+                    # Assert OIDCClient instantiation
+                    expected_client_id, expected_client_secret = expected_auth
+                    mock_oidc_client.assert_called_once_with(expected_client_id, expected_client_secret)
+
+                    # Assert make_request call
+                    mock_client_instance.make_request.assert_called_once_with(
                         'POST',
                         analytic_url,
-                        auth=expected_auth,
-                        verify=mock.ANY,
                         headers=mock.ANY,
-                        json=mock.ANY,
+                        verify=mock.ANY,
                         params=mock.ANY,
+                        json=mock.ANY,
                         timeout=mock.ANY,
                     )
                     assert response.status_code == 200
@@ -186,3 +196,64 @@ class TestAnalyticsGenericView:
                 # mock_error_response.assert_called_once_with(expected_error_keyword, remote=False)
                 assert response.status_code == status.HTTP_403_FORBIDDEN
                 assert response.data['error']['keyword'] == expected_error_keyword
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "settings_map, expected_auth",
+        [
+            # Test case 1: Username and password should be used for basic auth
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': 'redhat_user',
+                    'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
+                    'SUBSCRIPTIONS_CLIENT_ID': '',
+                    'SUBSCRIPTIONS_CLIENT_SECRET': '',
+                },
+                ('redhat_user', 'redhat_pass'),
+            ),
+            # Test case 2: Client ID and secret should be used for basic auth
+            (
+                {
+                    'INSIGHTS_TRACKING_STATE': True,
+                    'REDHAT_USERNAME': '',
+                    'REDHAT_PASSWORD': '',
+                    'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                    'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
+                },
+                None,
+            ),
+        ],
+    )
+    def test__send_to_analytics_fallback_to_basic_auth(self, settings_map, expected_auth):
+        """
+        Test _send_to_analytics with basic auth fallback.
+        """
+        with override_settings(**settings_map):
+            request = RequestFactory().post('/some/path')
+            view = AnalyticsGenericView()
+
+            with mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client, mock.patch(
+                'awx.api.views.analytics.AnalyticsGenericView._base_auth_request'
+            ) as mock_base_auth_request:
+                # Configure the mock OIDCClient instance and its make_request method
+                mock_client_instance = mock.Mock()
+                mock_oidc_client.return_value = mock_client_instance
+                mock_client_instance.make_request.side_effect = requests.RequestException("Incorrect credentials")
+
+                analytic_url = view._get_analytics_url(request.path)
+                view._send_to_analytics(request, 'POST')
+
+                if expected_auth:
+                    # assert mock_base_auth_request called with expected_auth
+                    mock_base_auth_request.assert_called_once_with(
+                        request,
+                        'POST',
+                        analytic_url,
+                        expected_auth[0],
+                        expected_auth[1],
+                        mock.ANY,
+                    )
+                else:
+                    # assert mock_base_auth_request not called
+                    mock_base_auth_request.assert_not_called()

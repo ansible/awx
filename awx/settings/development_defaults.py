@@ -73,4 +73,5 @@ AWX_DISABLE_TASK_MANAGERS = False
 def set_dev_flags(settings):
     defaults_flags = settings.get("FLAGS", {})
     defaults_flags['FEATURE_INDIRECT_NODE_COUNTING_ENABLED'] = [{'condition': 'boolean', 'value': True}]
+    defaults_flags['FEATURE_DISPATCHERD_ENABLED'] = [{'condition': 'boolean', 'value': True}]
     return {'FLAGS': defaults_flags}

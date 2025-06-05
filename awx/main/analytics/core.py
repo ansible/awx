@@ -324,10 +324,10 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                     settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
 
         if collection_type != 'dry-run':
-            if succeeded:
-                for fpath in tarfiles:
-                    if os.path.exists(fpath):
-                        os.remove(fpath)
+            for fpath in tarfiles:
+                if os.path.exists(fpath):
+                    os.remove(fpath)
+
             with disable_activity_stream():
                 if not settings.AUTOMATION_ANALYTICS_LAST_GATHER or until > settings.AUTOMATION_ANALYTICS_LAST_GATHER:
                     # `AUTOMATION_ANALYTICS_LAST_GATHER` is set whether collection succeeds or fails;

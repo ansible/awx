@@ -46,9 +46,6 @@ from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
 
-# django-flags
-from flags.state import flag_enabled
-
 # AWX
 from awx.main.access import get_user_capabilities
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
@@ -120,6 +117,7 @@ from awx.main.utils import (
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
+from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.signals import update_inventory_computed_fields
@@ -736,12 +734,9 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
-class OpaQueryPathEnabledMixin(serializers.Serializer):
+class OpaQueryPathMixin(serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        if not flag_enabled("FEATURE_POLICY_AS_CODE_ENABLED") and 'opa_query_path' in self.fields:
-            self.fields.pop('opa_query_path')
 
     def validate_opa_query_path(self, value):
         # Decode the URL and re-encode it
@@ -754,7 +749,7 @@ class OpaQueryPathEnabledMixin(serializers.Serializer):
         return value
 
 
-class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathEnabledMixin):
+class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
     # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
@@ -1187,7 +1182,7 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
-class OrganizationSerializer(BaseSerializer, OpaQueryPathEnabledMixin):
+class OrganizationSerializer(BaseSerializer, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -1546,7 +1541,7 @@ class LabelsListMixin(object):
         return res
 
 
-class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathEnabledMixin):
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1637,7 +1632,67 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQuery
 
         if kind == 'smart' and not host_filter:
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
+
         return super(InventorySerializer, self).validate(attrs)
+
+    @staticmethod
+    def _update_variables(variables, inventory_id):
+        """
+        Update the inventory variables of the 'all'-group.
+
+        The variables field contains vars from the inventory dialog, hence
+        representing the "all"-group variables.
+
+        Since this is not an update from an inventory source, we update the
+        variables when the inventory details form is saved.
+
+        A user edit on the inventory variables is considered a reset of the
+        variables update history. Particularly if the user removes a variable by
+        editing the inventory variables field, the variable is not supposed to
+        reappear with a value from a previous inventory source update.
+
+        We achieve this by forcing `reset=True` on such an update.
+
+        As a side-effect, variables which have been set by source updates and
+        have survived a user-edit (i.e. they have not been deleted from the
+        variables field) will be assumed to originate from the user edit and are
+        thus no longer deleted from the inventory when they are removed from
+        their original source!
+
+        Note that we use the inventory source id -1 for user-edit updates
+        because a regular inventory source cannot have an id of -1 since
+        PostgreSQL assigns pk's starting from 1 (if this assumption doesn't hold
+        true, we have to assign another special value for invsrc_id).
+
+        :param str variables: The variables as plain text in yaml or json
+            format.
+        :param int inventory_id: The primary key of the related inventory
+            object.
+        """
+        variables_dict = parse_yaml_or_json(variables, silent_failure=False)
+        logger.debug(f"InventorySerializer._update_variables: {inventory_id=} {variables_dict=}, {variables=}")
+        update_group_variables(
+            group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
+            newvars=variables_dict,
+            dbvars=None,
+            invsrc_id=-1,
+            inventory_id=inventory_id,
+            reset=True,
+        )
+
+    def create(self, validated_data):
+        """Called when a new inventory has to be created."""
+        logger.debug(f"InventorySerializer.create({validated_data=}) >>>>")
+        obj = super().create(validated_data)
+        self._update_variables(validated_data.get("variables") or "", obj.id)
+        return obj
+
+    def update(self, obj, validated_data):
+        """Called when an existing inventory is updated."""
+        logger.debug(f"InventorySerializer.update({validated_data=}) >>>>")
+        obj = super().update(obj, validated_data)
+        self._update_variables(validated_data.get("variables") or "", obj.id)
+        return obj
 
 
 class ConstructedFieldMixin(serializers.Field):
@@ -1928,10 +1983,12 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
+        # Do not allow the group name to conflict with an existing host name.
         name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Host with that name already exists.'))
+        #
         return super(GroupSerializer, self).validate(attrs)
 
     def validate_name(self, value):

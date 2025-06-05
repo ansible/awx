@@ -33,6 +33,7 @@ from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
 from awx.main.utils.execution_environments import get_default_execution_environment
+from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
@@ -457,19 +458,19 @@ class Command(BaseCommand):
         """
         Update inventory variables from "all" group.
         """
-        # TODO: We disable variable overwrite here in case user-defined inventory variables get
-        # mangled. But we still need to figure out a better way of processing multiple inventory
-        # update variables mixing with each other.
-        # issue for this: https://github.com/ansible/awx/issues/11623
-
         if self.inventory.kind == 'constructed' and self.inventory_source.overwrite_vars:
             # NOTE: we had to add a exception case to not merge variables
             # to make constructed inventory coherent
             db_variables = self.all_group.variables
         else:
-            db_variables = self.inventory.variables_dict
-            db_variables.update(self.all_group.variables)
-
+            db_variables = update_group_variables(
+                group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
+                newvars=self.all_group.variables,
+                dbvars=self.inventory.variables_dict,
+                invsrc_id=self.inventory_source.id,
+                inventory_id=self.inventory.id,
+                overwrite_vars=self.overwrite_vars,
+            )
         if db_variables != self.inventory.variables_dict:
             self.inventory.variables = json.dumps(db_variables)
             self.inventory.save(update_fields=['variables'])

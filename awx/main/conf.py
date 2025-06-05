@@ -4,7 +4,6 @@ import logging
 # Django
 from django.core.checks import Error
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 
 # Django REST Framework
 from rest_framework import serializers
@@ -92,7 +91,6 @@ register(
     ),
     category=_('System'),
     category_slug='system',
-    required=False,
 )
 
 register(
@@ -239,7 +237,6 @@ register(
     help_text=_('List of modules allowed to be used by ad-hoc jobs.'),
     category=_('Jobs'),
     category_slug='jobs',
-    required=False,
 )
 
 register(
@@ -250,7 +247,6 @@ register(
         ('never', _('Never')),
         ('template', _('Only On Job Template Definitions')),
     ],
-    required=True,
     label=_('When can extra variables contain Jinja templates?'),
     help_text=_(
         'Ansible allows variable substitution via the Jinja2 templating '
@@ -275,7 +271,6 @@ register(
 register(
     'AWX_ISOLATION_SHOW_PATHS',
     field_class=fields.StringListIsolatedPathField,
-    required=False,
     label=_('Paths to expose to isolated jobs'),
     help_text=_(
         'List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. '
@@ -441,7 +436,6 @@ register(
 register(
     'AWX_ANSIBLE_CALLBACK_PLUGINS',
     field_class=fields.StringListField,
-    required=False,
     label=_('Ansible Callback Plugins'),
     help_text=_('List of paths to search for extra callback plugins to be used when running jobs. Enter one path per line.'),
     category=_('Jobs'),
@@ -555,7 +549,6 @@ register(
     help_text=_('Port on Logging Aggregator to send logs to (if required and not provided in Logging Aggregator).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False,
 )
 register(
     'LOG_AGGREGATOR_TYPE',
@@ -577,7 +570,6 @@ register(
     help_text=_('Username for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False,
 )
 register(
     'LOG_AGGREGATOR_PASSWORD',
@@ -589,7 +581,6 @@ register(
     help_text=_('Password or authentication token for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
     category_slug='logging',
-    required=False,
 )
 register(
     'LOG_AGGREGATOR_LOGGERS',
@@ -776,7 +767,6 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
-    required=False,
     hidden=True,
 )
 register(
@@ -984,123 +974,122 @@ def csrf_trusted_origins_validate(serializer, attrs):
 register_validate('system', csrf_trusted_origins_validate)
 
 
-if settings.FEATURE_POLICY_AS_CODE_ENABLED:  # Unable to use flag_enabled due to AppRegistryNotReady error
-    register(
-        'OPA_HOST',
-        field_class=fields.CharField,
-        label=_('OPA server hostname'),
-        default='',
-        help_text=_('The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-        allow_blank=True,
-    )
+register(
+    'OPA_HOST',
+    field_class=fields.CharField,
+    label=_('OPA server hostname'),
+    default='',
+    help_text=_('The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+    allow_blank=True,
+)
 
-    register(
-        'OPA_PORT',
-        field_class=fields.IntegerField,
-        label=_('OPA server port'),
-        default=8181,
-        help_text=_('The port used to connect to the OPA server. Defaults to 8181.'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-    )
+register(
+    'OPA_PORT',
+    field_class=fields.IntegerField,
+    label=_('OPA server port'),
+    default=8181,
+    help_text=_('The port used to connect to the OPA server. Defaults to 8181.'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+)
 
-    register(
-        'OPA_SSL',
-        field_class=fields.BooleanField,
-        label=_('Use SSL for OPA connection'),
-        default=False,
-        help_text=_('Enable or disable the use of SSL to connect to the OPA server. Defaults to false.'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-    )
+register(
+    'OPA_SSL',
+    field_class=fields.BooleanField,
+    label=_('Use SSL for OPA connection'),
+    default=False,
+    help_text=_('Enable or disable the use of SSL to connect to the OPA server. Defaults to false.'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+)
 
-    register(
-        'OPA_AUTH_TYPE',
-        field_class=fields.ChoiceField,
-        label=_('OPA authentication type'),
-        choices=[OPA_AUTH_TYPES.NONE, OPA_AUTH_TYPES.TOKEN, OPA_AUTH_TYPES.CERTIFICATE],
-        default=OPA_AUTH_TYPES.NONE,
-        help_text=_('The authentication type that will be used to connect to the OPA server: "None", "Token", or "Certificate".'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-    )
+register(
+    'OPA_AUTH_TYPE',
+    field_class=fields.ChoiceField,
+    label=_('OPA authentication type'),
+    choices=[OPA_AUTH_TYPES.NONE, OPA_AUTH_TYPES.TOKEN, OPA_AUTH_TYPES.CERTIFICATE],
+    default=OPA_AUTH_TYPES.NONE,
+    help_text=_('The authentication type that will be used to connect to the OPA server: "None", "Token", or "Certificate".'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+)
 
-    register(
-        'OPA_AUTH_TOKEN',
-        field_class=fields.CharField,
-        label=_('OPA authentication token'),
-        default='',
-        help_text=_(
-            'The token for authentication to the OPA server. Required when OPA_AUTH_TYPE is "Token". If an authorization header is defined in OPA_AUTH_CUSTOM_HEADERS, it will be overridden by OPA_AUTH_TOKEN.'
-        ),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-        allow_blank=True,
-        encrypted=True,
-    )
+register(
+    'OPA_AUTH_TOKEN',
+    field_class=fields.CharField,
+    label=_('OPA authentication token'),
+    default='',
+    help_text=_(
+        'The token for authentication to the OPA server. Required when OPA_AUTH_TYPE is "Token". If an authorization header is defined in OPA_AUTH_CUSTOM_HEADERS, it will be overridden by OPA_AUTH_TOKEN.'
+    ),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+    allow_blank=True,
+    encrypted=True,
+)
 
-    register(
-        'OPA_AUTH_CLIENT_CERT',
-        field_class=fields.CharField,
-        label=_('OPA client certificate content'),
-        default='',
-        help_text=_('The content of the client certificate file for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-        allow_blank=True,
-    )
+register(
+    'OPA_AUTH_CLIENT_CERT',
+    field_class=fields.CharField,
+    label=_('OPA client certificate content'),
+    default='',
+    help_text=_('The content of the client certificate file for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+    allow_blank=True,
+)
 
-    register(
-        'OPA_AUTH_CLIENT_KEY',
-        field_class=fields.CharField,
-        label=_('OPA client key content'),
-        default='',
-        help_text=_('The content of the client key for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-        allow_blank=True,
-        encrypted=True,
-    )
+register(
+    'OPA_AUTH_CLIENT_KEY',
+    field_class=fields.CharField,
+    label=_('OPA client key content'),
+    default='',
+    help_text=_('The content of the client key for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+    allow_blank=True,
+    encrypted=True,
+)
 
-    register(
-        'OPA_AUTH_CA_CERT',
-        field_class=fields.CharField,
-        label=_('OPA CA certificate content'),
-        default='',
-        help_text=_('The content of the CA certificate for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-        allow_blank=True,
-    )
+register(
+    'OPA_AUTH_CA_CERT',
+    field_class=fields.CharField,
+    label=_('OPA CA certificate content'),
+    default='',
+    help_text=_('The content of the CA certificate for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+    allow_blank=True,
+)
 
-    register(
-        'OPA_AUTH_CUSTOM_HEADERS',
-        field_class=fields.DictField,
-        label=_('OPA custom authentication headers'),
-        default={},
-        help_text=_('Optional custom headers included in requests to the OPA server. Defaults to empty dictionary ({}).'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-    )
+register(
+    'OPA_AUTH_CUSTOM_HEADERS',
+    field_class=fields.DictField,
+    label=_('OPA custom authentication headers'),
+    default={},
+    help_text=_('Optional custom headers included in requests to the OPA server. Defaults to empty dictionary ({}).'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+)
 
-    register(
-        'OPA_REQUEST_TIMEOUT',
-        field_class=fields.FloatField,
-        label=_('OPA request timeout'),
-        default=1.5,
-        help_text=_('The number of seconds after which the connection to the OPA server will time out. Defaults to 1.5 seconds.'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-    )
+register(
+    'OPA_REQUEST_TIMEOUT',
+    field_class=fields.FloatField,
+    label=_('OPA request timeout'),
+    default=1.5,
+    help_text=_('The number of seconds after which the connection to the OPA server will time out. Defaults to 1.5 seconds.'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+)
 
-    register(
-        'OPA_REQUEST_RETRIES',
-        field_class=fields.IntegerField,
-        label=_('OPA request retry count'),
-        default=2,
-        help_text=_('The number of retry attempts for connecting to the OPA server. Default is 2.'),
-        category=('PolicyAsCode'),
-        category_slug='policyascode',
-    )
+register(
+    'OPA_REQUEST_RETRIES',
+    field_class=fields.IntegerField,
+    label=_('OPA request retry count'),
+    default=2,
+    help_text=_('The number of retry attempts for connecting to the OPA server. Default is 2.'),
+    category=('PolicyAsCode'),
+    category_slug='policyascode',
+)
