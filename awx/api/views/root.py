@@ -30,7 +30,7 @@ from awx.main.utils import get_awx_version
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
-from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
+from awx.main.models import Project, Organization, Instance, InstanceGroup
 from awx.main.utils import set_environ
 from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
