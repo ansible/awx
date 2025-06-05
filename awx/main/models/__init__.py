@@ -67,7 +67,6 @@ from awx.main.models.ha import (  # noqa
 )
 from awx.main.models.rbac import (  # noqa
     Role,
-    batch_role_ancestor_rebuilding,
     role_summary_fields_generator,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
