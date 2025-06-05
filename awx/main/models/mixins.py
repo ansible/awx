@@ -2,7 +2,6 @@
 from copy import copy, deepcopy
 import json
 import logging
-import os
 
 import requests
 
@@ -10,7 +9,6 @@ import requests
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.crypto import get_random_string
@@ -21,7 +19,7 @@ from ansible_base.lib.utils.models import prevent_search
 # AWX
 
 from awx.main.models.rbac import Role, RoleAncestorEntry, to_permissions
-from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
+from awx.main.utils import parse_yaml_or_json, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
@@ -41,7 +39,6 @@ __all__ = [
     'TaskManagerProjectUpdateMixin',
     'TaskManagerInventoryUpdateMixin',
     'ExecutionEnvironmentMixin',
-    'CustomVirtualEnvMixin',
     'OpaQueryPathMixin',
 ]
 
@@ -521,23 +518,6 @@ class ExecutionEnvironmentMixin(models.Model):
                 return self.inventory.organization.default_environment
 
         return get_default_execution_environment()
-
-
-class CustomVirtualEnvMixin(models.Model):
-    class Meta:
-        abstract = True
-
-    custom_virtualenv = models.CharField(
-        blank=True, null=True, default=None, max_length=100, help_text=_('Local absolute file path containing a custom Python virtualenv to use')
-    )
-
-    def clean_custom_virtualenv(self):
-        value = self.custom_virtualenv
-        if value and os.path.join(value, '') not in get_custom_venv_choices():
-            raise ValidationError(_('{} is not a valid virtualenv in {}').format(value, settings.BASE_VENV_PATH))
-        if value:
-            return os.path.join(value, '')
-        return None
 
 
 class RelatedJobsMixin(object):

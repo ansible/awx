@@ -19,9 +19,6 @@ SECRET_KEY = None
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
-# Ansible base virtualenv paths and enablement
-# only used for deprecated fields and management commands for them
-BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
 
 # Switch to a writable location for the dispatcher sockfile location
 DISPATCHERD_DEBUGGING_SOCKFILE = os.path.realpath('/var/run/tower/dispatcherd.sock')

@@ -49,16 +49,3 @@ Jobs will use the first available execution environment in this list:
 If more than one EE fits a criteria (applies for 6 and 7), then the most recently created one will be used.
 
 ## Migrating from Custom Virtual Environments
-
-If you have installed dependencies inside of custom virtual environments in
-a prior release, then have a look at this series of commands for help migrating
-dependencies out of the venvs and into EEs.
-
- - `awx-manage list_custom_venvs`
- - `awx-manage custom_venv_associations`
- - `awx-manage export_custom_venv`
-
-Follow those in order, and read the help text to see what arguments are necessary.
-
-Output from the `awx-manage export_custom_venv -q ..` command can
-be a starting point for writing an `ansible-builder` definition file.

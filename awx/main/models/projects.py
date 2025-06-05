@@ -31,7 +31,7 @@ from awx.main.models.unified_jobs import (
     UnifiedJobTemplate,
 )
 from awx.main.models.jobs import Job
-from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin, RelatedJobsMixin
+from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, RelatedJobsMixin
 from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
@@ -250,7 +250,7 @@ class ProjectOptions(models.Model):
         return proj_path + '.lock'
 
 
-class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
+class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, RelatedJobsMixin):
     """
     A project represents a playbook git repo that can access a set of inventories
     """

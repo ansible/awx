@@ -14,7 +14,6 @@ class TestJobNotificationMixin(object):
         'job': {
             'allow_simultaneous': bool,
             'artifacts': {},
-            'custom_virtualenv': str,
             'controller_node': str,
             'created': datetime.datetime,
             'description': str,

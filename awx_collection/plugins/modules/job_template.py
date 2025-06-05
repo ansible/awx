@@ -86,12 +86,7 @@ options:
       description:
         - Execution Environment name, ID, or named URL to use for the job template.
       type: str
-    custom_virtualenv:
-      description:
-        - Local absolute file path containing a custom Python virtualenv to use.
-        - Only compatible with older versions of AWX/Tower
-        - Deprecated, will be removed in the future
-      type: str
+
     instance_groups:
       description:
         - list of Instance Group names, IDs, or named URLs for this Organization to run on.
@@ -400,7 +395,7 @@ def main():
         vault_credential=dict(),
         credentials=dict(type='list', elements='str'),
         execution_environment=dict(),
-        custom_virtualenv=dict(),
+
         instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
         limit=dict(),
@@ -538,7 +533,7 @@ def main():
         'become_enabled',
         'diff_mode',
         'allow_simultaneous',
-        'custom_virtualenv',
+
         'job_slice_count',
         'webhook_service',
         'prevent_instance_group_fallback',

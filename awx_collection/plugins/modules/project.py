@@ -108,12 +108,7 @@ options:
       description:
         - Default Execution Environment name, ID, or named URL to use for jobs relating to the project.
       type: str
-    custom_virtualenv:
-      description:
-        - Local absolute file path containing a custom Python virtualenv to use.
-        - Only compatible with older versions of AWX/Tower
-        - Deprecated, will be removed in the future
-      type: str
+
     organization:
       description:
         - Name, ID, or named URL of organization for the project.
@@ -267,7 +262,7 @@ def main():
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
         timeout=dict(type='int', aliases=['job_timeout']),
         default_environment=dict(),
-        custom_virtualenv=dict(),
+
         organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
@@ -369,7 +364,7 @@ def main():
         'scm_update_cache_timeout',
         'timeout',
         'scm_update_cache_timeout',
-        'custom_virtualenv',
+
         'description',
         'allow_override',
     ):

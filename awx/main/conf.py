@@ -220,15 +220,6 @@ register(
     category_slug='system',
 )
 
-register(
-    'CUSTOM_VENV_PATHS',
-    field_class=fields.StringListPathField,
-    label=_('Custom virtual environment paths'),
-    help_text=_('Paths where Tower will look for custom virtual environments (in addition to /var/lib/awx/venv/). Enter one path per line.'),
-    category=_('System'),
-    category_slug='system',
-    default=[],
-)
 
 register(
     'AD_HOC_COMMANDS',
