@@ -9,7 +9,7 @@ import requests
 # Django
 from django.apps import apps
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
@@ -20,7 +20,7 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 
-from awx.main.models.rbac import Role, RoleAncestorEntry, to_permissions
+from awx.main.models.rbac import to_permissions
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
@@ -66,31 +66,17 @@ class ResourceMixin(models.Model):
 
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
-        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            if cls._meta.model_name == 'organization' and role_field in org_role_to_permission:
-                # Organization roles can not use the DAB RBAC shortcuts
-                # like Organization.access_qs(user, 'change_jobtemplate') is needed
-                # not just Organization.access_qs(user, 'change') is needed
-                if accessor.is_superuser:
-                    return cls.objects.values_list('id')
+        if cls._meta.model_name == 'organization' and role_field in org_role_to_permission:
+            # Organization roles can not use the DAB RBAC shortcuts
+            # like Organization.access_qs(user, 'change_jobtemplate') is needed
+            # not just Organization.access_qs(user, 'change') is needed
+            if accessor.is_superuser:
+                return cls.objects.values_list('id')
 
-                codename = org_role_to_permission[role_field]
+            codename = org_role_to_permission[role_field]
 
-                return cls.access_ids_qs(accessor, codename, content_types=content_types)
-            return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
-        if accessor._meta.model_name == 'user':
-            ancestor_roles = accessor.roles.all()
-        elif type(accessor) == Role:
-            ancestor_roles = [accessor]
-        else:
-            raise RuntimeError(f'Role filters only valid for users and ancestor role, received {accessor}')
-
-        if content_types is None:
-            ct_kwarg = dict(content_type_id=ContentType.objects.get_for_model(cls).id)
-        else:
-            ct_kwarg = dict(content_type_id__in=content_types)
-
-        return RoleAncestorEntry.objects.filter(ancestor__in=ancestor_roles, role_field=role_field, **ct_kwarg).values_list('object_id').distinct()
+            return cls.access_ids_qs(accessor, codename, content_types=content_types)
+        return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
 
     @staticmethod
     def _accessible_objects(cls, accessor, role_field):
