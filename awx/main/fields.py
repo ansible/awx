@@ -337,30 +337,25 @@ class ImplicitRoleField(models.ForeignKey):
         Model = utils.get_current_apps().get_model('main', instance.__class__.__name__)
         latest_instance = Model.objects.get(pk=instance.pk)
 
-        # Avoid circular import
-        from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+        # Create any missing role objects
+        missing_roles = []
+        for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
+            cur_role = getattr(latest_instance, implicit_role_field.name, None)
+            if cur_role is None:
+                missing_roles.append(Role_(role_field=implicit_role_field.name, content_type_id=ct_id, object_id=latest_instance.id))
 
-        with batch_role_ancestor_rebuilding():
-            # Create any missing role objects
-            missing_roles = []
-            for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
-                cur_role = getattr(latest_instance, implicit_role_field.name, None)
-                if cur_role is None:
-                    missing_roles.append(Role_(role_field=implicit_role_field.name, content_type_id=ct_id, object_id=latest_instance.id))
+        if len(missing_roles) > 0:
+            Role_.objects.bulk_create(missing_roles)
+            updates = {}
+            role_ids = []
+            for role in Role_.objects.filter(content_type_id=ct_id, object_id=latest_instance.id):
+                setattr(latest_instance, role.role_field, role)
+                updates[role.role_field] = role.id
+                role_ids.append(role.id)
+            type(latest_instance).objects.filter(pk=latest_instance.pk).update(**updates)
 
-            if len(missing_roles) > 0:
-                Role_.objects.bulk_create(missing_roles)
-                updates = {}
-                role_ids = []
-                for role in Role_.objects.filter(content_type_id=ct_id, object_id=latest_instance.id):
-                    setattr(latest_instance, role.role_field, role)
-                    updates[role.role_field] = role.id
-                    role_ids.append(role.id)
-                type(latest_instance).objects.filter(pk=latest_instance.pk).update(**updates)
-                Role.rebuild_role_ancestor_list(role_ids, [])
-
-            update_role_parentage_for_instance(latest_instance)
-            instance.refresh_from_db()
+        update_role_parentage_for_instance(latest_instance)
+        instance.refresh_from_db()
 
     def _resolve_parent_roles(self, instance):
         if not self.parent_role:
@@ -392,13 +387,7 @@ class ImplicitRoleField(models.ForeignKey):
             role_ids.append(getattr(instance, implicit_role_field.name + '_id'))
 
         Role_ = utils.get_current_apps().get_model('main', 'Role')
-        child_ids = [x for x in Role_.parents.through.objects.filter(to_role_id__in=role_ids).distinct().values_list('from_role_id', flat=True)]
         Role_.objects.filter(id__in=role_ids).delete()
-
-        # Avoid circular import
-        from awx.main.models.rbac import Role
-
-        Role.rebuild_role_ancestor_list([], child_ids)
 
 
 class SmartFilterField(models.TextField):

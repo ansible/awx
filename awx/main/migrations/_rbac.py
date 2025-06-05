@@ -4,7 +4,7 @@ from time import time
 from django.db.models import Subquery, OuterRef, F
 
 from awx.main.fields import update_role_parentage_for_instance
-from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
+from awx.main.models.rbac import Role
 
 logger = logging.getLogger('rbac_migrations')
 
@@ -33,10 +33,9 @@ def create_roles(apps, schema_editor):
         ]
     ]
 
-    with batch_role_ancestor_rebuilding():
-        for model in models:
-            for obj in model.objects.iterator():
-                obj.save()
+    for model in models:
+        for obj in model.objects.iterator():
+            obj.save()
 
 
 def delete_all_user_roles(apps, schema_editor):
@@ -249,7 +248,7 @@ def rebuild_role_hierarchy(apps, schema_editor):
     stop = time()
     logger.info('Found %d roots in %f seconds, rebuilding ancestry map' % (len(roots), stop - start))
     start = time()
-    Role.rebuild_role_ancestor_list(roots, [])
+    # Role.rebuild_role_ancestor_list(roots, [])  # Removed - no longer needed with new RBAC system
     stop = time()
     logger.info('Rebuild ancestors completed in %f seconds' % (stop - start))
     logger.info('Done.')
@@ -319,4 +318,4 @@ def rebuild_role_parentage(apps, schema_editor, models=None):
 
     # this is ran because the ordinary signals for
     # Role.parents.add and Role.parents.remove not called in migration
-    Role.rebuild_role_ancestor_list(list(additions), list(removals))
+    # Role.rebuild_role_ancestor_list(list(additions), list(removals))  # Removed - no longer needed with new RBAC system

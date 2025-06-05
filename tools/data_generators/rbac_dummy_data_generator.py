@@ -51,7 +51,6 @@ from awx.main.models import (  # noqa
     User,
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
-    batch_role_ancestor_rebuilding,
 )
 from awx.main.models.schedules import Schedule  # noqa
 
@@ -202,7 +201,7 @@ startTime = datetime.now()
 
 def make_the_data():
     with disable_activity_stream():
-        with batch_role_ancestor_rebuilding(), disable_computed_fields():
+        with disable_computed_fields():
             admin, created = User.objects.get_or_create(username='admin', is_superuser=True)
             if created:
                 admin.is_superuser = True
