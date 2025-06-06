@@ -360,7 +360,7 @@ test_coverage:
 	fi
 
 test_migrations:
-	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test --create-db $(COVERAGE_ARGS) $(PYTEST_ARGS) $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test --create-db $(COVERAGE_ARGS) $(TEST_DIRS)
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
