@@ -425,11 +425,19 @@ jobs:
           ACTIONS_RUNTIME_TOKEN: ${{ steps.get-runtime-token.outputs.result }}
         run: |
           echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
-          artifacts=$(
-            curl -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" \
-              ${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview \
-            | jq -r '.value | .[] | select(.name | startswith("coverage-")) | .url'
+          artifacts_json=$(
+            curl -sf -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" \
+            "${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
           )
+
+          # Check if the response contains a non-null `.value`
+          artifacts=$(echo "$artifacts_json" | jq -er '
+            .value? // empty | .[]? | select(.name | startswith("coverage-")) | .url
+          ') || {
+            echo "Failed to extract artifact URLs from response:"
+            echo "$artifacts_json"
+            exit 1
+          }
 
           for artifact in $artifacts; do
             curl -i -X DELETE -H "Accept: application/json;api-version=6.0-preview" -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact"
