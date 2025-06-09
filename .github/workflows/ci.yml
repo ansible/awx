@@ -425,17 +425,23 @@ jobs:
           ACTIONS_RUNTIME_TOKEN: ${{ steps.get-runtime-token.outputs.result }}
         run: |
           echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
-          artifacts_json=$(
-            curl -sf -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" \
-            "${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
-          )
 
-          # Check if the response contains a non-null `.value`
-          artifacts=$(echo "$artifacts_json" | jq -er '
-            .value? // empty | .[]? | select(.name | startswith("coverage-")) | .url
-          ') || {
+          artifact_url="${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
+
+          echo "artifact_url $artifact_url"
+
+          response=$(curl -s -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact_url")
+          curl_exit=$?
+
+          if [[ $curl_exit -ne 0 ]]; then
+            echo "Error: curl failed with exit code $curl_exit"
+            echo "$response"
+            exit $curl_exit
+          fi
+
+          artifacts=$(echo "$response" | jq -er '.value | .[] | select(.name | startswith("coverage-")) | .url') || {
             echo "Failed to extract artifact URLs from response:"
-            echo "$artifacts_json"
+            echo "$response"
             exit 1
           }
 
