@@ -352,6 +352,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           show-progress: false
 
       - uses: ./.github/actions/setup-python
