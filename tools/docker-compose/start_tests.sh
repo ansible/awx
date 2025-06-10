@@ -1,12 +1,12 @@
 #!/bin/bash
-set -euo pipefail
+set +x
 
 cd /awx_devel
 make clean
 make awx-link
 
-if [[ $# -eq 0 ]]; then
+if [[ ! $@ ]]; then
     make test
 else
-    make "$@"
+    make $@
 fi
