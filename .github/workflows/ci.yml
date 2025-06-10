@@ -395,24 +395,6 @@ jobs:
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
           echo 'Download the HTML artifacts to view the coverage report.' >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload coverage report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: awx-collection-integration-coverage-html
-          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/reports/coverage
-
-  collection-integration-coverage-cleanup:
-    name: cleanup awx_collection integration partial files
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs:
-      - collection-integration-coverage-combine
-    if: ${{ always() }}  # run even if tests or combing job failed
-    strategy:
-      fail-fast: false
-    permissions:
-      actions: write  # needed to delete coverage files
-    steps:
       # Deletes intermediate coverage artifacts using the public GitHub REST API.
       # Replaces an older workaround that accessed internal runtime APIs.
       # This prevents storage buildup and reduces PR confusion when leftover artifacts cause failures.
@@ -454,3 +436,9 @@ jobs:
                 -H "Accept: application/vnd.github+json" \
                 "$delete_url"
           done <<< "$artifacts"
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: awx-collection-integration-coverage-html
+          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/reports/coverage
