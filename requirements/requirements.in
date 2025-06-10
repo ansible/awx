@@ -14,7 +14,7 @@ cryptography<42.0.0  # investigation is needed for 42+ to work with OpenSSL v3.0
 Cython
 daphne
 distro
-django==4.2.20  # CVE-2025-26699
+django==4.2.21  # CVE-2025-32873
 django-cors-headers
 django-crum
 django-extensions
