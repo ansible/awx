@@ -344,12 +344,7 @@ jobs:
 
   finalize-codecov:
     needs:
-      - api-test
-      - api-migrations
-      - api-lint
-      - api-swagger
-      - awx-collection
-      - api-schema
+      - common-tests
       - collection-integration
     runs-on: ubuntu-latest
     steps:
