@@ -228,7 +228,6 @@ jobs:
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
           ansible-core-version: ${{ matrix.ansible }}
-          codecov-token: ${{ secrets.CODECOV_TOKEN }}
           collection-root: awx_collection
           pre-test-cmd: >-
             ansible-playbook
@@ -239,6 +238,46 @@ jobs:
             -e collection_version=1.0.0
             -e '{"awx_template_version": false}'
           testing-type: sanity
+
+      - name: Upload test coverage to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.cov-report-files != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.cov-report-files }}
+          flags: >-
+            CI-GHA,
+            pytest,
+            OS-${{ runner.os }}
+          name: ${{ github.job }}-${{ matrix.os || runner.os }}  # Unique name per job
+          token: ${{ secrets.CODECOV_TOKEN }}
+          parallel: true  # <--- ENABLE PARALLEL MODE
+
+      - name: Upload test results to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.test-result-files != ''
+        uses: codecov/test-results-action@v1
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.test-result-files }}
+          flags: >-
+            CI-GHA,
+            pytest,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload awx jUnit test reports to the unified dashboard
         if: >-
