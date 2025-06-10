@@ -2,7 +2,7 @@
 
 codecov:
   notify:
-    after_n_builds: 6  # Number of test matrix+lint jobs uploading coverage
+    after_n_builds: 9  # Number of test matrix+lint jobs uploading coverage
     wait_for_ci: false
 
   require_ci_to_pass: false
