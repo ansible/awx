@@ -78,6 +78,7 @@ jobs:
           flags: >-
             CI-GHA,
             pytest,
+            awx-unit,
             OS-${{ runner.os }}
           name: ${{ github.job }}-${{ matrix.os || runner.os }}  # Unique name per job
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -254,6 +255,7 @@ jobs:
           flags: >-
             CI-GHA,
             pytest,
+            awx-sanity,
             OS-${{ runner.os }}
           name: ${{ github.job }}-${{ matrix.os || runner.os }}  # Unique name per job
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -363,7 +365,7 @@ jobs:
           flags: >-
             CI-GHA,
             ansible-test,
-            integration,
+            awx-collection-integration,
             OS-${{ runner.os }}
           name: ${{ github.job }}-${{ matrix.os || runner.os }}
           token: ${{ secrets.CODECOV_TOKEN }}
