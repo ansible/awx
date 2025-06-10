@@ -78,10 +78,11 @@ jobs:
           flags: >-
             CI-GHA,
             pytest,
-            OS-${{
-              runner.os
-            }}
+            OS-${{ runner.os }}
+          name: ${{ github.job }}-${{ matrix.os || runner.os }}  # Unique name per job
           token: ${{ secrets.CODECOV_TOKEN }}
+          parallel: true  # <--- ENABLE PARALLEL MODE
+
       - name: Upload test results to Codecov
         if: >-
           !cancelled()
@@ -324,10 +325,10 @@ jobs:
             CI-GHA,
             ansible-test,
             integration,
-            OS-${{
-              runner.os
-            }}
+            OS-${{ runner.os }}
+          name: ${{ github.job }}-${{ matrix.os || runner.os }}
           token: ${{ secrets.CODECOV_TOKEN }}
+          parallel: true  # <--- ENABLE PARALLEL MODE
 
       # Upload coverage report as artifact
       - uses: actions/upload-artifact@v4
@@ -340,6 +341,22 @@ jobs:
         if: always()
         with:
           log-filename: collection-integration-${{ matrix.target-regex.name }}.log
+
+  finalize-codecov:
+    needs:
+      - api-test
+      - api-migrations
+      - api-lint
+      - api-swagger
+      - awx-collection
+      - api-schema
+      - collection-integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Finalize Codecov report
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   collection-integration-coverage-combine:
     name: combine awx_collection integration coverage
