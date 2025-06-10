@@ -362,23 +362,12 @@ jobs:
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core
 
-      - name: Download coverage artifacts A to H
+      - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          name: coverage-a-h
+          merge-multiple: true
           path: coverage
-
-      - name: Download coverage artifacts I to P
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-i-p
-          path: coverage
-
-      - name: Download coverage artifacts Z to Z
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-r-z0-9
-          path: coverage
+          pattern: coverage-*
 
       - name: Combine coverage
         run: |
