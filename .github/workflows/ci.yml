@@ -424,30 +424,39 @@ jobs:
           ACTIONS_RUNTIME_URL: ${{ steps.get-runtime-url.outputs.result }}
           ACTIONS_RUNTIME_TOKEN: ${{ steps.get-runtime-token.outputs.result }}
         run: |
-          echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
+          echo "::add-mask::$GITHUB_TOKEN"
 
-          artifact_url="${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
+          api_url="https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+          echo "Fetching artifacts from: $api_url"
 
-          echo "artifact_url $artifact_url"
-
-          response=$(curl -s -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact_url")
+          response=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+                          -H "Accept: application/vnd.github+json" \
+                          "$api_url")
           curl_exit=$?
 
           if [[ $curl_exit -ne 0 ]]; then
-            echo "Error: curl failed with exit code $curl_exit"
+            echo "Error fetching artifacts. Exit code $curl_exit"
             echo "$response"
             exit $curl_exit
           fi
 
-          artifacts=$(echo "$response" | jq -er '.value | .[] | select(.name | startswith("coverage-")) | .url') || {
-            echo "Failed to extract artifact URLs from response:"
-            echo "$response"
-            exit 1
-          }
+          # Find artifact IDs of interest
+          artifacts=$(echo "$response" | jq -r '.artifacts | .[] | select(.name | startswith("coverage-")) | "\(.name) \(.id)"')
 
-          for artifact in $artifacts; do
-            curl -i -X DELETE -H "Accept: application/json;api-version=6.0-preview" -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact"
-          done
+          if [[ -z "$artifacts" ]]; then
+            echo "No coverage artifacts found to delete."
+            echo "Full API response:"
+            echo "$response"
+            exit 0
+          fi
+
+          while read -r name id; do
+            delete_url="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$id"
+            echo "Deleting artifact '$name' with ID $id"
+            curl -s -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "$delete_url"
+          done <<< "$artifacts"
 
       - name: Upload coverage report as artifact
         uses: actions/upload-artifact@v4
