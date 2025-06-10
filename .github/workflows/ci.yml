@@ -346,12 +346,14 @@ jobs:
     needs:
       - common-tests
       - collection-integration
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Finalize Codecov report
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   collection-integration-coverage-combine:
     name: combine awx_collection integration coverage
