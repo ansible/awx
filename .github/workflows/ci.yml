@@ -426,7 +426,7 @@ jobs:
         run: |
           echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
 
-          artifact_url="${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
+          artifact_url="${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${GITHUB_RUN_ID}/artifacts?api-version=6.0-preview"
 
           echo "artifact_url $artifact_url"
 
