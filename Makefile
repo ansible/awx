@@ -25,8 +25,6 @@ COVERAGE_ARGS ?= --cov=awx --cov-report=xml --junitxml=reports/junit.xml --no-co
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 # pytest args to run tests in parallel
 PARALLEL_TESTS ?= -n auto
-# extra args to pass to pytest
-PYTEST_ARGS ?=
 # collection integration test directories (defaults to all)
 COLLECTION_TEST_TARGET ?=
 # args for collection install
@@ -317,14 +315,14 @@ black: reports
 	@chmod +x .git/hooks/pre-commit
 
 genschema: reports
-	$(MAKE) swagger PYTEST_ARGS="--genschema --create-db "
+	$(MAKE) swagger PYTEST_ADDOPTS="--genschema --create-db "
 	mv swagger.json schema.json
 
 swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	(set -o pipefail && py.test $(PYTEST_ARGS) $(COVERAGE_ARGS) $(PARALLEL_TESTS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
+	(set -o pipefail && py.test $(COVERAGE_ARGS) $(PARALLEL_TESTS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
@@ -347,16 +345,16 @@ test:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider $(PYTEST_ARGS) $(PARALLEL_TESTS) $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider $(PARALLEL_TESTS) $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
 live_test:
-	cd awx/main/tests/live && py.test $(PYTEST_ARGS) tests/
+	cd awx/main/tests/live && py.test tests/
 
 ## Run all API unit tests with coverage enabled.
 test_coverage:
-	$(MAKE) test PYTEST_ARGS="--create-db $(COVERAGE_ARGS)"
+	$(MAKE) test PYTEST_ADDOPTS="--create-db $(COVERAGE_ARGS)"
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo 'cov-report-files=awxkit/coverage.xml,reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
@@ -364,7 +362,7 @@ test_coverage:
 	fi
 
 test_migrations:
-	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test --create-db $(PYTEST_ARGS) $(PARALLEL_TESTS) $(COVERAGE_ARGS) $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test --create-db $(PARALLEL_TESTS) $(COVERAGE_ARGS) $(TEST_DIRS)
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
@@ -382,7 +380,7 @@ test_collection:
 	fi && \
 	if ! [ -x "$(shell command -v ansible-playbook)" ]; then pip install ansible-core; fi
 	ansible --version
-	py.test $(PYTEST_ARGS) $(COLLECTION_TEST_DIRS) $(COVERAGE_ARGS) -v
+	py.test $(COLLECTION_TEST_DIRS) $(COVERAGE_ARGS) -v
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
@@ -444,7 +442,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test $(PYTEST_ARGS) awx/main/tests/unit awx/conf/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit
 
 ## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
