@@ -20,7 +20,7 @@ COLLECTION_SANITY_ARGS ?= --docker
 # collection unit testing directories
 COLLECTION_TEST_DIRS ?= awx_collection/test/awx
 # pytest added args to collect coverage
-COVERAGE_ARGS ?= --cov=awx --cov-report=xml --junitxml=reports/junit.xml --no-cov-on-fail
+COVERAGE_ARGS ?= --cov=awx --cov-report=xml --junitxml=reports/junit.xml
 # pytest test directories
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 # pytest args to run tests in parallel
