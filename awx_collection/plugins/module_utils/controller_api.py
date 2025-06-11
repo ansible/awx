@@ -75,8 +75,8 @@ class ControllerModule(AnsibleModule):
         aap_token=dict(
             type='raw',
             no_log=True,
-             required=False,
-             fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
+            required=False,
+            fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
         ),
         controller_config_file=dict(
             type='path',
