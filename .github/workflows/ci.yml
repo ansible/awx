@@ -335,6 +335,7 @@ jobs:
         with:
           name: coverage-${{ matrix.target-regex.name }}
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          retention-days: 1
 
       - uses: ./.github/actions/upload_awx_devel_logs
         if: always()
@@ -352,6 +353,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           show-progress: false
 
       - uses: ./.github/actions/setup-python
@@ -361,23 +363,12 @@ jobs:
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core
 
-      - name: Download coverage artifacts A to H
+      - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          name: coverage-a-h
+          merge-multiple: true
           path: coverage
-
-      - name: Download coverage artifacts I to P
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-i-p
-          path: coverage
-
-      - name: Download coverage artifacts Z to Z
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-r-z0-9
-          path: coverage
+          pattern: coverage-*
 
       - name: Combine coverage
         run: |
@@ -394,46 +385,6 @@ jobs:
           echo >> $GITHUB_STEP_SUMMARY
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
           echo 'Download the HTML artifacts to view the coverage report.' >> $GITHUB_STEP_SUMMARY
-
-      # This is a huge hack, there's no official action for removing artifacts currently.
-      # Also ACTIONS_RUNTIME_URL and ACTIONS_RUNTIME_TOKEN aren't available in normal run
-      # steps, so we have to use github-script to get them.
-      #
-      # The advantage of doing this, though, is that we save on artifact storage space.
-
-      - name: Get secret artifact runtime URL
-        uses: actions/github-script@v6
-        id: get-runtime-url
-        with:
-          result-encoding: string
-          script: |
-            const { ACTIONS_RUNTIME_URL } = process.env;
-            return ACTIONS_RUNTIME_URL;
-
-      - name: Get secret artifact runtime token
-        uses: actions/github-script@v6
-        id: get-runtime-token
-        with:
-          result-encoding: string
-          script: |
-            const { ACTIONS_RUNTIME_TOKEN } = process.env;
-            return ACTIONS_RUNTIME_TOKEN;
-
-      - name: Remove intermediary artifacts
-        env:
-          ACTIONS_RUNTIME_URL: ${{ steps.get-runtime-url.outputs.result }}
-          ACTIONS_RUNTIME_TOKEN: ${{ steps.get-runtime-token.outputs.result }}
-        run: |
-          echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
-          artifacts=$(
-            curl -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" \
-              ${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview \
-            | jq -r '.value | .[] | select(.name | startswith("coverage-")) | .url'
-          )
-
-          for artifact in $artifacts; do
-            curl -i -X DELETE -H "Accept: application/json;api-version=6.0-preview" -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact"
-          done
 
       - name: Upload coverage report as artifact
         uses: actions/upload-artifact@v4
