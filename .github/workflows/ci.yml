@@ -142,7 +142,46 @@ jobs:
           private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Run live dev env tests
-        run: docker exec tools_awx_1 /bin/bash -c "make live_test"
+        run: docker exec tools_awx_1 /bin/bash -c "PYTEST_ADDOPTS='--cov=awx --cov-report=xml --junitxml=../../../../reports/junit.xml --no-cov-on-fail' make live_test"
+
+      - name: Upload test coverage to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.cov-report-files != ''
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.cov-report-files }}
+          flags: >-
+            CI-GHA,
+            pytest,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: >-
+          !cancelled()
+          && steps.make-run.outputs.test-result-files != ''
+        uses: codecov/test-results-action@v1
+        with:
+          fail_ci_if_error: >-
+            ${{
+              toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
+            }}
+          files: >-
+            ${{ steps.make-run.outputs.test-result-files }}
+          flags: >-
+            CI-GHA,
+            pytest,
+            OS-${{
+              runner.os
+            }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - uses: ./.github/actions/upload_awx_devel_logs
         if: always()
