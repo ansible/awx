@@ -9,43 +9,6 @@ When trying to fix a bug, it is best to replicate its behavior within a test wit
 
 The unit tests are stored in the `test/awx` directory and, where possible, test interactions between the collections modules and the AWX database. This is achieved by  using a Python testing suite and having a mocked layer which emulates interactions with the API. You do not need a server to run these unit tests. The depth of testing is not fixed and can change from module to module.
 
-Let's take a closer look at the `test_token.py` file (which tests the `token` module):
-
-```
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
-
-import pytest
-
-from awx.main.models import OAuth2AccessToken
-
-
-@pytest.mark.django_db
-def test_create_token(run_module, admin_user):
-
-    module_args = {
-        'description': 'barfoo',
-        'state': 'present',
-        'scope': 'read',
-        'controller_host': None,
-        'controller_username': None,
-        'controller_password': None,
-        'validate_certs': None,
-        'controller_oauthtoken': None,
-        'controller_config_file': None,
-    }
-
-    result = run_module('token', module_args, admin_user)
-    assert result.get('changed'), result
-
-    tokens = OAuth2AccessToken.objects.filter(description='barfoo')
-    assert len(tokens) == 1, 'Tokens with description of barfoo != 0: {0}'.format(len(tokens))
-    assert tokens[0].scope == 'read', 'Token was not given read access'
-```
-
-This test has a single test called `test_create_token`. It creates a `module_args` section which is what will be passed into our module. We then call `run_module`, asking it to run the `token` module with the `module_args` we created and give us back the results. After that, we run an assertion to validate that our module did in fact report a change to the system. We will then use Python objects to look up the token that has a description of `barfoo` (which was in our arguments to the module). We want to validate that we only got back one token (the one we created) and that the scope of the token we created was read.
-
 
 ### Completion Test
 
@@ -91,22 +54,6 @@ While not strictly followed, the general flow of a test should be:
     group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
     group_name2: "AWX-Collection-tests-instance_group-group2-{{ test_id }}"
     cred_name1: "AWX-Collection-tests-instance_group-cred1-{{ test_id }}"
-```
-
-- **Non-creating tests (i.e. test for specific error conditions, etc), with assertion**
-
-```
-- name: Try to use a token as a dict which is missing the token parameter
-  job_list:
-    controller_oauthtoken:
-      not_token: "This has no token entry"
-  register: results
-  ignore_errors: true
-
-- assert:
-    that:
-      - results is failed
-      - '"The provided dict in controller_oauthtoken did not properly contain the token entry" == results.msg'
 ```
 
 - **`Block:`**
@@ -162,7 +109,7 @@ rootdir: /home/student1/awx, configfile: pytest.ini
 plugins: cov-2.10.1, django-3.10.0, pythonpath-0.7.3, mock-1.11.1, timeout-1.4.2, forked-1.3.0, xdist-1.34.0
 collected 116 items
 
-awx_collection/test/awx/test_application.py::test_create_application PASSED                [  0%]
+awx_collection/test/awx/test_ad_hoc_wait.py::test_ad_hoc_wait_successful PASSED            [  0%]
 awx_collection/test/awx/test_completeness.py::test_completeness PASSED                     [  1%]
 
 ...
@@ -177,18 +124,18 @@ FAILED awx_collection/test/awx/test_module_utils.py::test_type_warning - SystemE
 make: *** [Makefile:382: test_collection] Error 1
 ```
 
-In addition to running all of the tests, you can also specify specific tests to run. This is useful when developing a single module. In this example, we will run the tests for the `token` module:
+In addition to running all of the tests, you can also specify specific tests to run. This is useful when developing a single module. In this example, we will run the tests for the `project` module:
 
 ```
-$ pytest awx_collection/test/awx/test_token.py
+$ pytest awx_collection/test/awx/test_project.py
 ============================ test session starts ============================
 platform darwin -- Python 3.7.0, pytest-3.6.0, py-1.8.1, pluggy-0.6.0
 django: settings: awx.settings.development (from ini)
 rootdir: /Users/jowestco/junk/awx, inifile: pytest.ini
 plugins: xdist-1.27.0, timeout-1.3.4, pythonpath-0.7.3, mock-1.11.1, forked-1.1.3, django-3.9.0, cov-2.8.1
-collected 1 item                                                                                                                                                  
+collected 1 item
 
-awx_collection/test/awx/test_token.py .                               [100%]
+awx_collection/test/awx/test_project.py .                               [100%]
 
 ========================= 1 passed in 1.72 seconds =========================
 ```

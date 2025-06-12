@@ -18,7 +18,7 @@ description:
 options:
   _terms:
     description:
-      - The endpoint to query, i.e. teams, users, tokens, job_templates, etc.
+      - The endpoint to query, i.e. teams, users, job_templates, etc.
     required: True
   query_params:
     description:

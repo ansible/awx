@@ -1,7 +1,0 @@
----
-version: '2'
-services:
-  # Primary AWX Development Container
-  awx:
-    links:
-      - logstash

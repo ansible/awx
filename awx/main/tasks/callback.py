@@ -1,10 +1,15 @@
 import json
+import os.path
 import time
 import logging
 from collections import deque
+from typing import Tuple, Optional
+
+from awx.main.models.event_query import EventQuery
 
 # Django
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django_guid import get_guid
 from django.utils.functional import cached_property
 from django.db import connections
@@ -15,11 +20,67 @@ from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSA
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
+from flags.state import flag_enabled
+
 logger = logging.getLogger('awx.main.tasks.callback')
+
+
+def collect_queries(query_file_contents) -> dict:
+    """
+    collect_queries extracts host queries from the contents of
+    ansible_data.json
+    """
+    result = {}
+
+    try:
+        installed_collections = query_file_contents['installed_collections']
+    except KeyError:
+        logger.error("installed_collections missing in callback response")
+        return result
+
+    for key, value in installed_collections.items():
+        if 'host_query' in value and 'version' in value:
+            result[key] = value
+
+    return result
+
+
+COLLECTION_FILENAME = "ansible_data.json"
+
+
+def try_load_query_file(artifact_dir) -> Tuple[bool, Optional[dict]]:
+    """
+    try_load_query_file checks the artifact directory after job completion and
+    returns the contents of ansible_data.json if present
+    """
+
+    if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        return False, None
+
+    queries_path = os.path.join(artifact_dir, COLLECTION_FILENAME)
+    if not os.path.isfile(queries_path):
+        logger.info(f"no query file found: {queries_path}")
+        return False, None
+
+    try:
+        f = open(queries_path, "r")
+    except OSError as e:
+        logger.error(f"error opening query file {queries_path}: {e}")
+        return False, None
+
+    with f:
+        try:
+            queries = json.load(f)
+        except ValueError as e:
+            logger.error(f"error parsing query file {queries_path}: {e}")
+            return False, None
+
+        return True, queries
 
 
 class RunnerCallback:
     def __init__(self, model=None):
+        self.instance = None
         self.parent_workflow_job_id = None
         self.host_map = {}
         self.guid = get_guid()
@@ -214,6 +275,32 @@ class RunnerCallback:
                     self.delay_update(**{field_name: field_value})
 
     def artifacts_handler(self, artifact_dir):
+        success, query_file_contents = try_load_query_file(artifact_dir)
+        if success:
+            self.delay_update(event_queries_processed=False)
+            collections_info = collect_queries(query_file_contents)
+            for collection, data in collections_info.items():
+                version = data['version']
+                event_query = data['host_query']
+                instance = EventQuery(fqcn=collection, collection_version=version, event_query=event_query)
+                try:
+                    instance.validate_unique()
+                    instance.save()
+
+                    logger.info(f"eventy query for collection {collection}, version {version} created")
+                except ValidationError as e:
+                    logger.info(e)
+
+            if 'installed_collections' in query_file_contents:
+                self.delay_update(installed_collections=query_file_contents['installed_collections'])
+            else:
+                logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain installed_collections')
+
+            if 'ansible_version' in query_file_contents:
+                self.delay_update(ansible_version=query_file_contents['ansible_version'])
+            else:
+                logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
+
         self.artifacts_processed = True
 
 

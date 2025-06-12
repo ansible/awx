@@ -82,7 +82,7 @@ def test_delete_same_named_schedule(run_module, project, inventory, admin_user):
 )
 def test_rrule_lookup_plugin(collection_import, freq, kwargs, expect):
     LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule()
-    generated_rule = LookupModule.get_rrule(freq, kwargs)
+    generated_rule = LookupModule.get_rrule(freq, kwargs)[0]
     assert generated_rule == expect
     rrule_checker = SchedulePreviewSerializer()
     # Try to run our generated rrule through the awx validator
@@ -99,7 +99,7 @@ def test_empty_schedule_rrule(collection_import, freq):
         pfreq = 'DAILY;COUNT=1'
     else:
         pfreq = freq.upper() + 'LY'
-    assert LookupModule.get_rrule(freq, {}).endswith(' RRULE:FREQ={0};INTERVAL=1'.format(pfreq))
+    assert LookupModule.get_rrule(freq, {})[0].endswith(' RRULE:FREQ={0};INTERVAL=1'.format(pfreq))
 
 
 @pytest.mark.parametrize(

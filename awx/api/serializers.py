@@ -6,13 +6,11 @@ import copy
 import json
 import logging
 import re
+import yaml
+import urllib.parse
 from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
-
-# OAuth2
-from oauthlib import oauth2
-from oauthlib.common import generate_token
 
 # Jinja
 from jinja2 import sandbox, StrictUndefined
@@ -50,7 +48,7 @@ from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE, org_role_to_permission
+from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -79,14 +77,11 @@ from awx.main.models import (
     Label,
     Notification,
     NotificationTemplate,
-    OAuth2AccessToken,
-    OAuth2Application,
     Organization,
     Project,
     ProjectUpdate,
     ProjectUpdateEvent,
     ReceptorAddress,
-    RefreshToken,
     Role,
     Schedule,
     SystemJob,
@@ -102,7 +97,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
     StdoutMaxBytesExceeded,
-    CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import role_summary_fields_generator, give_creator_permissions, get_role_codenames, to_permissions, get_role_from_object_role
@@ -119,8 +113,11 @@ from awx.main.utils import (
     truncate_stdout,
     get_licenser,
 )
+
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
+from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.signals import update_inventory_computed_fields
@@ -133,8 +130,6 @@ from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, Ver
 
 # AWX Utils
 from awx.api.validators import HostnameRegexValidator
-
-from awx.sso.common import get_external_account
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -634,15 +629,41 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         return exclusions
 
     def validate(self, attrs):
+        """
+        Apply serializer validation. Called by DRF.
+
+        Can be extended by subclasses. Or consider overwriting
+        `validate_with_obj` in subclasses, which provides access to the model
+        object and exception handling for field validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :raise rest_framework.exceptions.ValidationError: If the validation
+            fails.
+
+            The exception must contain a dict with the names of the form fields
+            which failed validation as keys, and a list of error messages as
+            values. This ensures that the error messages are rendered near the
+            relevant fields.
+        :return: The names and values from the model form fields, possibly
+            modified by the validations.
+        :rtype: dict
+        """
         attrs = super(BaseSerializer, self).validate(attrs)
+        # Create/update a model instance and run its full_clean() method to
+        # do any validation implemented on the model class.
+        exclusions = self.get_validation_exclusions(self.instance)
+        # Create a new model instance or take the existing one if it exists,
+        # and update its attributes with the respective field values from
+        # attrs.
+        obj = self.instance or self.Meta.model()
+        for k, v in attrs.items():
+            if k not in exclusions and k != 'canonical_address_port':
+                setattr(obj, k, v)
         try:
-            # Create/update a model instance and run its full_clean() method to
-            # do any validation implemented on the model class.
-            exclusions = self.get_validation_exclusions(self.instance)
-            obj = self.instance or self.Meta.model()
-            for k, v in attrs.items():
-                if k not in exclusions and k != 'canonical_address_port':
-                    setattr(obj, k, v)
+            # Run serializer validators which need the model object for
+            # validation.
+            self.validate_with_obj(attrs, obj)
+            # Apply any validations implemented on the model class.
             obj.full_clean(exclude=exclusions)
             # full_clean may modify values on the instance; copy those changes
             # back to attrs so they are saved.
@@ -671,6 +692,32 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             raise ValidationError(d)
         return attrs
 
+    def validate_with_obj(self, attrs, obj):
+        """
+        Overwrite this if you need the model instance for your validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :param obj: An instance of the class's meta model.
+
+            If the serializer runs on a newly created object, obj contains only
+            the attrs from its serializer. If the serializer runs because an
+            object has been edited, obj is the existing model instance with all
+            attributes and values available.
+        :raise django.core.exceptionsValidationError: Raise this if your
+            validation fails.
+
+            To make the error appear at the respective form field, instantiate
+            the Exception with a dict containing the field name as key and the
+            error message as value.
+
+            Example: ``ValidationError({"password": "Not good enough!"})``
+
+            If the exception contains just a string, the message cannot be
+            related to a field and is rendered at the top of the model form.
+        :return: None
+        """
+        return
+
     def reverse(self, *args, **kwargs):
         kwargs['request'] = self.context.get('request')
         return reverse(*args, **kwargs)
@@ -687,7 +734,22 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
-class UnifiedJobTemplateSerializer(BaseSerializer):
+class OpaQueryPathMixin(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def validate_opa_query_path(self, value):
+        # Decode the URL and re-encode it
+        decoded_value = urllib.parse.unquote(value)
+        re_encoded_value = urllib.parse.quote(decoded_value, safe='/')
+
+        if value != re_encoded_value:
+            raise serializers.ValidationError(_("The URL must be properly encoded."))
+
+        return value
+
+
+class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
     # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
@@ -961,8 +1023,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
-    ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
-    external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -979,22 +1039,13 @@ class UserSerializer(BaseSerializer):
             'is_superuser',
             'is_system_auditor',
             'password',
-            'ldap_dn',
             'last_login',
-            'external_account',
         )
         extra_kwargs = {'last_login': {'read_only': True}}
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
-        if self.get_external_account(obj):
-            # If this is an external account it shouldn't have a password field
-            ret.pop('password', None)
-        else:
-            # If its an internal account lets assume there is a password and return $encrypted$ to the user
-            ret['password'] = '$encrypted$'
-        if obj and type(self) is UserSerializer:
-            ret['auth'] = obj.social_auth.values('provider', 'uid')
+        ret['password'] = '$encrypted$'
         return ret
 
     def get_validation_exclusions(self, obj=None):
@@ -1003,7 +1054,6 @@ class UserSerializer(BaseSerializer):
         return ret
 
     def validate_password(self, value):
-        django_validate_password(value)
         if not self.instance and value in (None, ''):
             raise serializers.ValidationError(_('Password required for new User.'))
 
@@ -1026,11 +1076,52 @@ class UserSerializer(BaseSerializer):
 
         return value
 
+    def validate_with_obj(self, attrs, obj):
+        """
+        Validate the password with the Django password validators
+
+        To enable the Django password validators, configure
+        `settings.AUTH_PASSWORD_VALIDATORS` as described in the [Django
+        docs](https://docs.djangoproject.com/en/5.1/topics/auth/passwords/#enabling-password-validation)
+
+        :param dict attrs: The User form field names and their values as a dict.
+            Example::
+
+                {
+                    'username': 'TestUsername', 'first_name': 'FirstName',
+                    'last_name': 'LastName', 'email': 'First.Last@my.org',
+                    'is_superuser': False, 'is_system_auditor': False,
+                    'password': 'secret123'
+                }
+
+        :param obj: The User model instance.
+        :raises django.core.exceptions.ValidationError: Raise this if at least
+            one Django password validator fails.
+
+            The exception contains a dict ``{"password": <error-message>``}
+            which indicates that the password field has failed validation, and
+            the reason for failure.
+        :return: None.
+        """
+        # We must do this here instead of in `validate_password` bacause some
+        # django password validators need access to other model instance fields,
+        # e.g. ``username`` for the ``UserAttributeSimilarityValidator``.
+        password = attrs.get("password")
+        # Skip validation if no password has been entered. This may happen when
+        # an existing User is edited.
+        if password and password != '$encrypted$':
+            # Apply validators from settings.AUTH_PASSWORD_VALIDATORS. This may
+            # raise ValidationError.
+            #
+            # If the validation fails, re-raise the exception with adjusted
+            # content to make the error appear near the password field.
+            try:
+                django_validate_password(password, user=obj)
+            except DjangoValidationError as exc:
+                raise DjangoValidationError({"password": exc.messages})
+
     def _update_password(self, obj, new_password):
-        # For now we're not raising an error, just not saving password for
-        # users managed by LDAP who already have an unusable password set.
-        # Get external password will return something like ldap or enterprise or None if the user isn't external. We only want to allow a password update for a None option
-        if new_password and new_password != '$encrypted$' and not self.get_external_account(obj):
+        if new_password and new_password != '$encrypted$':
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
 
@@ -1044,9 +1135,6 @@ class UserSerializer(BaseSerializer):
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
-
-    def get_external_account(self, obj):
-        return get_external_account(obj)
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
@@ -1078,43 +1166,9 @@ class UserSerializer(BaseSerializer):
                 roles=self.reverse('api:user_roles_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:user_activity_stream_list', kwargs={'pk': obj.pk}),
                 access_list=self.reverse('api:user_access_list', kwargs={'pk': obj.pk}),
-                tokens=self.reverse('api:o_auth2_token_list', kwargs={'pk': obj.pk}),
-                authorized_tokens=self.reverse('api:user_authorized_token_list', kwargs={'pk': obj.pk}),
-                personal_tokens=self.reverse('api:user_personal_token_list', kwargs={'pk': obj.pk}),
             )
         )
         return res
-
-    def _validate_ldap_managed_field(self, value, field_name):
-        if not getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            return value
-        try:
-            is_ldap_user = bool(self.instance and self.instance.profile.ldap_dn)
-        except AttributeError:
-            is_ldap_user = False
-        if is_ldap_user:
-            ldap_managed_fields = ['username']
-            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            if field_name in ldap_managed_fields:
-                if value != getattr(self.instance, field_name):
-                    raise serializers.ValidationError(_('Unable to change %s on user managed by LDAP.') % field_name)
-        return value
-
-    def validate_username(self, value):
-        return self._validate_ldap_managed_field(value, 'username')
-
-    def validate_first_name(self, value):
-        return self._validate_ldap_managed_field(value, 'first_name')
-
-    def validate_last_name(self, value):
-        return self._validate_ldap_managed_field(value, 'last_name')
-
-    def validate_email(self, value):
-        return self._validate_ldap_managed_field(value, 'email')
-
-    def validate_is_superuser(self, value):
-        return self._validate_ldap_managed_field(value, 'is_superuser')
 
 
 class UserActivityStreamSerializer(UserSerializer):
@@ -1128,205 +1182,12 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
-class BaseOAuth2TokenSerializer(BaseSerializer):
-    refresh_token = serializers.SerializerMethodField()
-    token = serializers.SerializerMethodField()
-    ALLOWED_SCOPES = ['read', 'write']
-
-    class Meta:
-        model = OAuth2AccessToken
-        fields = ('*', '-name', 'description', 'user', 'token', 'refresh_token', 'application', 'expires', 'scope')
-        read_only_fields = ('user', 'token', 'expires', 'refresh_token')
-        extra_kwargs = {'scope': {'allow_null': False, 'required': False}, 'user': {'allow_null': False, 'required': True}}
-
-    def get_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if request.method == 'POST':
-                return obj.token
-            else:
-                return CENSOR_VALUE
-        except ObjectDoesNotExist:
-            return ''
-
-    def get_refresh_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if not obj.refresh_token:
-                return None
-            elif request.method == 'POST':
-                return getattr(obj.refresh_token, 'token', '')
-            else:
-                return CENSOR_VALUE
-        except ObjectDoesNotExist:
-            return None
-
-    def get_related(self, obj):
-        ret = super(BaseOAuth2TokenSerializer, self).get_related(obj)
-        if obj.user:
-            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
-        if obj.application:
-            ret['application'] = self.reverse('api:o_auth2_application_detail', kwargs={'pk': obj.application.pk})
-        ret['activity_stream'] = self.reverse('api:o_auth2_token_activity_stream_list', kwargs={'pk': obj.pk})
-        return ret
-
-    def _is_valid_scope(self, value):
-        if not value or (not isinstance(value, str)):
-            return False
-        words = value.split()
-        for word in words:
-            if words.count(word) > 1:
-                return False  # do not allow duplicates
-            if word not in self.ALLOWED_SCOPES:
-                return False
-        return True
-
-    def validate_scope(self, value):
-        if not self._is_valid_scope(value):
-            raise serializers.ValidationError(_('Must be a simple space-separated string with allowed scopes {}.').format(self.ALLOWED_SCOPES))
-        return value
-
-    def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
-        try:
-            return super(BaseOAuth2TokenSerializer, self).create(validated_data)
-        except oauth2.AccessDeniedError as e:
-            raise PermissionDenied(str(e))
-
-
-class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
-    class Meta:
-        extra_kwargs = {
-            'scope': {'allow_null': False, 'required': False},
-            'user': {'allow_null': False, 'required': True},
-            'application': {'allow_null': False, 'required': True},
-        }
-
-    def create(self, validated_data):
-        current_user = self.context['request'].user
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS'])
-        obj = super(UserAuthorizedTokenSerializer, self).create(validated_data)
-        obj.save()
-        if obj.application:
-            RefreshToken.objects.create(user=current_user, token=generate_token(), application=obj.application, access_token=obj)
-        return obj
-
-
-class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
-    def create(self, validated_data):
-        current_user = self.context['request'].user
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS'])
-        obj = super(OAuth2TokenSerializer, self).create(validated_data)
-        if obj.application and obj.application.user:
-            obj.user = obj.application.user
-        obj.save()
-        if obj.application:
-            RefreshToken.objects.create(user=current_user, token=generate_token(), application=obj.application, access_token=obj)
-        return obj
-
-
-class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
-    class Meta:
-        read_only_fields = ('*', 'user', 'application')
-
-
-class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
-    class Meta:
-        read_only_fields = ('user', 'token', 'expires', 'application')
-
-    def create(self, validated_data):
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS'])
-        validated_data['application'] = None
-        obj = super(UserPersonalTokenSerializer, self).create(validated_data)
-        obj.save()
-        return obj
-
-
-class OAuth2ApplicationSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete']
-
-    class Meta:
-        model = OAuth2Application
-        fields = (
-            '*',
-            'description',
-            '-user',
-            'client_id',
-            'client_secret',
-            'client_type',
-            'redirect_uris',
-            'authorization_grant_type',
-            'skip_authorization',
-            'organization',
-        )
-        read_only_fields = ('client_id', 'client_secret')
-        read_only_on_update_fields = ('user', 'authorization_grant_type')
-        extra_kwargs = {
-            'user': {'allow_null': True, 'required': False},
-            'organization': {'allow_null': False},
-            'authorization_grant_type': {'allow_null': False, 'label': _('Authorization Grant Type')},
-            'client_secret': {'label': _('Client Secret')},
-            'client_type': {'label': _('Client Type')},
-            'redirect_uris': {'label': _('Redirect URIs')},
-            'skip_authorization': {'label': _('Skip Authorization')},
-        }
-
-    def to_representation(self, obj):
-        ret = super(OAuth2ApplicationSerializer, self).to_representation(obj)
-        request = self.context.get('request', None)
-        if request.method != 'POST' and obj.client_type == 'confidential':
-            ret['client_secret'] = CENSOR_VALUE
-        if obj.client_type == 'public':
-            ret.pop('client_secret', None)
-        return ret
-
-    def get_related(self, obj):
-        res = super(OAuth2ApplicationSerializer, self).get_related(obj)
-        res.update(
-            dict(
-                tokens=self.reverse('api:o_auth2_application_token_list', kwargs={'pk': obj.pk}),
-                activity_stream=self.reverse('api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}),
-            )
-        )
-        if obj.organization_id:
-            res.update(
-                dict(
-                    organization=self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id}),
-                )
-            )
-        return res
-
-    def get_modified(self, obj):
-        if obj is None:
-            return None
-        return obj.updated
-
-    def _summary_field_tokens(self, obj):
-        token_list = [{'id': x.pk, 'token': CENSOR_VALUE, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
-        if has_model_field_prefetched(obj, 'oauth2accesstoken_set'):
-            token_count = len(obj.oauth2accesstoken_set.all())
-        else:
-            if len(token_list) < 10:
-                token_count = len(token_list)
-            else:
-                token_count = obj.oauth2accesstoken_set.count()
-        return {'count': token_count, 'results': token_list}
-
-    def get_summary_fields(self, obj):
-        ret = super(OAuth2ApplicationSerializer, self).get_summary_fields(obj)
-        ret['tokens'] = self._summary_field_tokens(obj)
-        return ret
-
-
-class OrganizationSerializer(BaseSerializer):
+class OrganizationSerializer(BaseSerializer, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Organization
-        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment')
+        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment', 'opa_query_path')
         read_only_fields = ('*', 'custom_virtualenv')
 
     def get_related(self, obj):
@@ -1341,7 +1202,6 @@ class OrganizationSerializer(BaseSerializer):
             admins=self.reverse('api:organization_admins_list', kwargs={'pk': obj.pk}),
             teams=self.reverse('api:organization_teams_list', kwargs={'pk': obj.pk}),
             credentials=self.reverse('api:organization_credential_list', kwargs={'pk': obj.pk}),
-            applications=self.reverse('api:organization_applications_list', kwargs={'pk': obj.pk}),
             activity_stream=self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates=self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
             notification_templates_started=self.reverse('api:organization_notification_templates_started_list', kwargs={'pk': obj.pk}),
@@ -1681,7 +1541,7 @@ class LabelsListMixin(object):
         return res
 
 
-class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1702,6 +1562,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
             'inventory_sources_with_failures',
             'pending_deletion',
             'prevent_instance_group_fallback',
+            'opa_query_path',
         )
 
     def get_related(self, obj):
@@ -1771,7 +1632,67 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
 
         if kind == 'smart' and not host_filter:
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
+
         return super(InventorySerializer, self).validate(attrs)
+
+    @staticmethod
+    def _update_variables(variables, inventory_id):
+        """
+        Update the inventory variables of the 'all'-group.
+
+        The variables field contains vars from the inventory dialog, hence
+        representing the "all"-group variables.
+
+        Since this is not an update from an inventory source, we update the
+        variables when the inventory details form is saved.
+
+        A user edit on the inventory variables is considered a reset of the
+        variables update history. Particularly if the user removes a variable by
+        editing the inventory variables field, the variable is not supposed to
+        reappear with a value from a previous inventory source update.
+
+        We achieve this by forcing `reset=True` on such an update.
+
+        As a side-effect, variables which have been set by source updates and
+        have survived a user-edit (i.e. they have not been deleted from the
+        variables field) will be assumed to originate from the user edit and are
+        thus no longer deleted from the inventory when they are removed from
+        their original source!
+
+        Note that we use the inventory source id -1 for user-edit updates
+        because a regular inventory source cannot have an id of -1 since
+        PostgreSQL assigns pk's starting from 1 (if this assumption doesn't hold
+        true, we have to assign another special value for invsrc_id).
+
+        :param str variables: The variables as plain text in yaml or json
+            format.
+        :param int inventory_id: The primary key of the related inventory
+            object.
+        """
+        variables_dict = parse_yaml_or_json(variables, silent_failure=False)
+        logger.debug(f"InventorySerializer._update_variables: {inventory_id=} {variables_dict=}, {variables=}")
+        update_group_variables(
+            group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
+            newvars=variables_dict,
+            dbvars=None,
+            invsrc_id=-1,
+            inventory_id=inventory_id,
+            reset=True,
+        )
+
+    def create(self, validated_data):
+        """Called when a new inventory has to be created."""
+        logger.debug(f"InventorySerializer.create({validated_data=}) >>>>")
+        obj = super().create(validated_data)
+        self._update_variables(validated_data.get("variables") or "", obj.id)
+        return obj
+
+    def update(self, obj, validated_data):
+        """Called when an existing inventory is updated."""
+        logger.debug(f"InventorySerializer.update({validated_data=}) >>>>")
+        obj = super().update(obj, validated_data)
+        self._update_variables(validated_data.get("variables") or "", obj.id)
+        return obj
 
 
 class ConstructedFieldMixin(serializers.Field):
@@ -1814,7 +1735,7 @@ class ConstructedInventorySerializer(InventorySerializer):
         required=False,
         allow_null=True,
         min_value=0,
-        max_value=2,
+        max_value=5,
         default=None,
         help_text=_('The verbosity level for the related auto-created inventory source, special to constructed inventory'),
     )
@@ -2062,10 +1983,12 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
+        # Do not allow the group name to conflict with an existing host name.
         name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Host with that name already exists.'))
+        #
         return super(GroupSerializer, self).validate(attrs)
 
     def validate_name(self, value):
@@ -2350,6 +2273,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
+    source = serializers.ChoiceField(choices=[])
 
     class Meta:
         fields = (
@@ -2370,6 +2294,14 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'limit',
         )
         read_only_fields = ('*', 'custom_virtualenv')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if 'source' in self.fields:
+            source_options = load_combined_inventory_source_options()
+
+            self.fields['source'].choices = [(plugin, description) for plugin, description in source_options.items()]
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -3395,6 +3327,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'webhook_service',
             'webhook_credential',
             'prevent_instance_group_fallback',
+            'opa_query_path',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 
@@ -3596,11 +3529,17 @@ class JobRelaunchSerializer(BaseSerializer):
         choices=[('all', _('No change to job limit')), ('failed', _('All failed and unreachable hosts'))],
         write_only=True,
     )
+    job_type = serializers.ChoiceField(
+        required=False,
+        allow_null=True,
+        choices=NEW_JOB_TYPE_CHOICES,
+        write_only=True,
+    )
     credential_passwords = VerbatimField(required=True, write_only=True)
 
     class Meta:
         model = Job
-        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'credential_passwords')
+        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'job_type', 'credential_passwords')
 
     def validate_credential_passwords(self, value):
         pnts = self.instance.passwords_needed_to_start
@@ -5550,7 +5489,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         return summary_fields
 
     def validate_unified_job_template(self, value):
-        if type(value) == InventorySource and value.source not in CLOUD_INVENTORY_SOURCES:
+        if type(value) == InventorySource and value.source not in load_combined_inventory_source_options():
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         elif type(value) == Project and value.scm_type == '':
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))
@@ -6059,6 +5998,34 @@ class InstanceGroupSerializer(BaseSerializer):
             raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
         return value
 
+    def validate_pod_spec_override(self, value):
+        if not value:
+            return value
+
+        # value should be empty for non-container groups
+        if self.instance and not self.instance.is_container_group:
+            raise serializers.ValidationError(_('pod_spec_override is only valid for container groups'))
+
+        pod_spec_override_json = None
+        # defect if the value is yaml or json if yaml convert to json
+        try:
+            # convert yaml to json
+            pod_spec_override_json = yaml.safe_load(value)
+        except yaml.YAMLError:
+            try:
+                pod_spec_override_json = json.loads(value)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError(_('pod_spec_override must be valid yaml or json'))
+
+        # validate the
+        spec = pod_spec_override_json.get('spec', {})
+        automount_service_account_token = spec.get('automountServiceAccountToken', False)
+
+        if automount_service_account_token:
+            raise serializers.ValidationError(_('automountServiceAccountToken is not allowed for security reasons'))
+
+        return value
+
     def validate(self, attrs):
         attrs = super(InstanceGroupSerializer, self).validate(attrs)
 
@@ -6124,8 +6091,6 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
-            ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
-            ('o_auth2_application', ('id', 'name', 'description')),
             ('credential_type', ('id', 'name', 'description', 'kind', 'managed')),
             ('ad_hoc_command', ('id', 'name', 'status', 'limit')),
             ('workflow_approval', ('id', 'name', 'unified_job_id')),

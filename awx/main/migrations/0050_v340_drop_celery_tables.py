@@ -17,8 +17,8 @@ tables_to_drop = [
     'djkombu_message',
     'djkombu_queue',
 ]
-postgres_sql = ([("DROP TABLE IF EXISTS {} CASCADE;".format(table))] for table in tables_to_drop)
-sqlite_sql = ([("DROP TABLE IF EXISTS {};".format(table))] for table in tables_to_drop)
+postgres_sql = (["DROP TABLE IF EXISTS {} CASCADE;".format(table)] for table in tables_to_drop)
+sqlite_sql = (["DROP TABLE IF EXISTS {};".format(table)] for table in tables_to_drop)
 
 
 class Migration(migrations.Migration):

@@ -44,9 +44,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     libtool-ltdl-devel \
     make \
     nss \
-    openldap-devel \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
     patch \
     postgresql \
     postgresql-devel \
@@ -105,6 +102,7 @@ RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_
 
 {% endif %}
 
+
 # Final container(s)
 FROM quay.io/centos/centos:stream9
 
@@ -129,9 +127,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     glibc-langpack-en \
     krb5-workstation \
     nginx \
-    "openldap >= 2.6.2-3" \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
     postgresql \
     python3.11 \
     "python3.11-devel" \

@@ -87,7 +87,7 @@ ui/src/webpack: $(UI_DIR)/src/node_modules/webpack
 ## True target for ui/src/webpack.
 $(UI_DIR)/src/node_modules/webpack:
 	@echo "=== Installing webpack ==="
-	@cd $(UI_DIR)/src && npm install webpack
+	@cd $(UI_DIR)/src && n 18 && npm install webpack
 
 .PHONY: clean/ui
 ## Clean ui

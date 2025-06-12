@@ -9,6 +9,7 @@ from prometheus_client.core import GaugeMetricFamily, HistogramMetricFamily
 from prometheus_client.registry import CollectorRegistry
 from django.conf import settings
 from django.http import HttpRequest
+import redis.exceptions
 from rest_framework.request import Request
 
 from awx.main.consumers import emit_channel_notification
@@ -290,8 +291,12 @@ class Metrics(MetricsNamespace):
     def send_metrics(self):
         # more than one thread could be calling this at the same time, so should
         # acquire redis lock before sending metrics
-        lock = self.conn.lock(root_key + '-' + self._namespace + '_lock')
-        if not lock.acquire(blocking=False):
+        try:
+            lock = self.conn.lock(root_key + '-' + self._namespace + '_lock')
+            if not lock.acquire(blocking=False):
+                return
+        except redis.exceptions.ConnectionError as exc:
+            logger.warning(f'Connection error in send_metrics: {exc}')
             return
         try:
             current_time = time.time()
@@ -452,14 +457,14 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
 class CallbackReceiverMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
+        registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
 
 
 class DispatcherMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
+        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
 
 

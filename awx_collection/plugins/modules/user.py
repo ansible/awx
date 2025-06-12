@@ -92,7 +92,7 @@ EXAMPLES = '''
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
-    superuser: yes
+    superuser: true
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
@@ -101,7 +101,7 @@ EXAMPLES = '''
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
-    auditor: yes
+    auditor: true
     state: present
     controller_config_file: "~/tower_cli.cfg"
 

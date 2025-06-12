@@ -27,5 +27,5 @@ def _migrate_setting(apps, old_key, new_key, encrypted=False):
 
 
 def prefill_rh_credentials(apps, schema_editor):
-    _migrate_setting(apps, 'REDHAT_USERNAME', 'SUBSCRIPTIONS_USERNAME', encrypted=False)
-    _migrate_setting(apps, 'REDHAT_PASSWORD', 'SUBSCRIPTIONS_PASSWORD', encrypted=True)
+    _migrate_setting(apps, 'REDHAT_USERNAME', 'SUBSCRIPTIONS_CLIENT_ID', encrypted=False)
+    _migrate_setting(apps, 'REDHAT_PASSWORD', 'SUBSCRIPTIONS_CLIENT_SECRET', encrypted=True)

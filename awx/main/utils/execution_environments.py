@@ -1,6 +1,4 @@
-import os
 import logging
-from pathlib import Path
 
 from django.conf import settings
 
@@ -30,6 +28,7 @@ def get_default_execution_environment():
 
 
 def get_default_pod_spec():
+    job_label: str = settings.AWX_CONTAINER_GROUP_DEFAULT_JOB_LABEL
     ee = get_default_execution_environment()
     if ee is None:
         raise RuntimeError("Unable to find an execution environment.")
@@ -37,10 +36,30 @@ def get_default_pod_spec():
     return {
         "apiVersion": "v1",
         "kind": "Pod",
-        "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE},
+        "metadata": {"namespace": settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE, "labels": {job_label: ""}},
         "spec": {
             "serviceAccountName": "default",
             "automountServiceAccountToken": False,
+            "affinity": {
+                "podAntiAffinity": {
+                    "preferredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "weight": 100,
+                            "podAffinityTerm": {
+                                "labelSelector": {
+                                    "matchExpressions": [
+                                        {
+                                            "key": job_label,
+                                            "operator": "Exists",
+                                        }
+                                    ]
+                                },
+                                "topologyKey": "kubernetes.io/hostname",
+                            },
+                        }
+                    ]
+                }
+            },
             "containers": [
                 {
                     "image": ee.image,
@@ -51,24 +70,3 @@ def get_default_pod_spec():
             ],
         },
     }
-
-
-# this is the root of the private data dir as seen from inside
-# of the container running a job
-CONTAINER_ROOT = '/runner'
-
-
-def to_container_path(path, private_data_dir):
-    """Given a path inside of the host machine filesystem,
-    this returns the expected path which would be observed by the job running
-    inside of the EE container.
-    This only handles the volume mount from private_data_dir to /runner
-    """
-    if not os.path.isabs(private_data_dir):
-        raise RuntimeError('The private_data_dir path must be absolute')
-    # due to how tempfile.mkstemp works, we are probably passed a resolved path, but unresolved private_data_dir
-    resolved_path = Path(path).resolve()
-    resolved_pdd = Path(private_data_dir).resolve()
-    if resolved_pdd != resolved_path and resolved_pdd not in resolved_path.parents:
-        raise RuntimeError(f'Cannot convert path {resolved_path} unless it is a subdir of {resolved_pdd}')
-    return str(resolved_path).replace(str(resolved_pdd), CONTAINER_ROOT, 1)

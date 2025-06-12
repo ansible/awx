@@ -56,10 +56,10 @@ ln -s ../ansible-runner tools/docker-compose/editable_dependencies/
 
 Simply removing the symlink from  `tools/docker-compose/editable_dependencies` **will cause problem**!
 
-and the volume `tools_awx_var_lib` needs to be deleted as well with
+and the volume `tools_var_lib_awx` needs to be deleted as well with
 
 ```bash
 make docker-compose-down
-docker volume rm tools_awx_var_lib
+docker volume rm tools_var_lib_awx
 ```
 

@@ -18,6 +18,7 @@ import pytest
 from ansible.module_utils.six import raise_from
 
 from ansible_base.rbac.models import RoleDefinition, DABPermission
+from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
 from awx.main.tests.functional.conftest import _request
 from awx.main.tests.functional.conftest import credentialtype_scm, credentialtype_ssh  # noqa: F401; pylint: disable=unused-import
 from awx.main.models import (

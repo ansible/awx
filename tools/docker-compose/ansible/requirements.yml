@@ -1,5 +1,6 @@
 ---
 collections:
-  - awx.awx
+  - source: ./awx_collection
+    type: dir
   - flowerysong.hvault
   - community.docker

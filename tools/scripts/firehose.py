@@ -30,8 +30,7 @@ import datetime
 import itertools
 import json
 import multiprocessing
-import pkg_resources
-import random
+import site
 import subprocess
 import sys
 from io import StringIO
@@ -132,7 +131,7 @@ def cleanup(sql):
 
 def generate_jobs(jobs, batch_size, time_delta):
     print(f'inserting {jobs} job(s)')
-    sys.path.insert(0, pkg_resources.get_distribution('awx').module_path)
+    sys.path[:0] = site.getsitepackages()
     from awx import prepare_env
 
     prepare_env()

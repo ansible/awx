@@ -39,7 +39,6 @@ from awx.main.models import (
     Job,
     JobHostSummary,
     JobTemplate,
-    OAuth2AccessToken,
     Organization,
     Project,
     Role,
@@ -54,7 +53,6 @@ from awx.main.models import (
     WorkflowApprovalTemplate,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
 )
-from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
@@ -400,8 +398,6 @@ def model_serializer_mapping():
         models.WorkflowApproval: serializers.WorkflowApprovalActivityStreamSerializer,
         models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,
         models.WorkflowJob: serializers.WorkflowJobSerializer,
-        models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,
-        models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
     }
 
 
@@ -443,8 +439,6 @@ def activity_stream_create(sender, instance, created, **kwargs):
             changes['labels'] = [label.name for label in instance.labels.iterator()]
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
-        if type(instance) == OAuth2AccessToken:
-            changes['token'] = CENSOR_VALUE
         activity_entry = get_activity_stream_class()(operation='create', object1=object1, changes=json.dumps(changes), actor=get_current_user_or_none())
         # TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
@@ -506,8 +500,6 @@ def activity_stream_delete(sender, instance, **kwargs):
         return
     changes.update(model_to_dict(instance, model_serializer_mapping()))
     object1 = camelcase_to_underscore(instance.__class__.__name__)
-    if type(instance) == OAuth2AccessToken:
-        changes['token'] = CENSOR_VALUE
     activity_entry = get_activity_stream_class()(operation='delete', changes=json.dumps(changes), object1=object1, actor=get_current_user_or_none())
     activity_entry.save()
     connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
@@ -669,13 +661,3 @@ def save_user_session_membership(sender, **kwargs):
             membership.delete()
         if len(expired):
             consumers.emit_channel_notification('control-limit_reached_{}'.format(user_id), dict(group_name='control', reason='limit_reached'))
-
-
-@receiver(post_save, sender=OAuth2AccessToken)
-def create_access_token_user_if_missing(sender, **kwargs):
-    obj = kwargs['instance']
-    if obj.application and obj.application.user:
-        obj.user = obj.application.user
-        post_save.disconnect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
-        obj.save()
-        post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)

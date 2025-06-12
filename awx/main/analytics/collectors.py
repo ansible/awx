@@ -142,7 +142,7 @@ def config(since, **kwargs):
     return {
         'platform': {
             'system': platform.system(),
-            'dist': distro.linux_distribution(),
+            'dist': (distro.name(), distro.version(), distro.codename()),
             'release': platform.release(),
             'type': install_type,
         },
@@ -442,11 +442,6 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
         return query
 
     return _copy_table(table='events', query=query(fr"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
-
-
-@register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)
-def events_table_unpartitioned(since, full_path, until, **kwargs):
-    return _events_table(since, full_path, until, '_unpartitioned_main_jobevent', 'created', **kwargs)
 
 
 @register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)

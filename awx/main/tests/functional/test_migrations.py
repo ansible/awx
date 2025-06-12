@@ -106,3 +106,37 @@ class TestMigrationSmoke:
         )
         DABPermission = new_state.apps.get_model('dab_rbac', 'DABPermission')
         assert not DABPermission.objects.filter(codename='view_executionenvironment').exists()
+
+        # Test create a Project with a duplicate name
+        Organization = new_state.apps.get_model('main', 'Organization')
+        Project = new_state.apps.get_model('main', 'Project')
+        org = Organization.objects.create(name='duplicate-obj-organization', created=now(), modified=now())
+        proj_ids = []
+        for i in range(3):
+            proj = Project.objects.create(name='duplicate-project-name', organization=org, created=now(), modified=now())
+            proj_ids.append(proj.id)
+
+        # The uniqueness rules will not apply to InventorySource
+        Inventory = new_state.apps.get_model('main', 'Inventory')
+        InventorySource = new_state.apps.get_model('main', 'InventorySource')
+        inv = Inventory.objects.create(name='migration-test-inv', organization=org, created=now(), modified=now())
+        InventorySource.objects.create(name='migration-test-src', source='file', inventory=inv, organization=org, created=now(), modified=now())
+
+        new_state = migrator.apply_tested_migration(
+            ('main', '0200_template_name_constraint'),
+        )
+        for i, proj_id in enumerate(proj_ids):
+            proj = Project.objects.get(id=proj_id)
+            if i == 0:
+                assert proj.name == 'duplicate-project-name'
+            else:
+                assert proj.name != 'duplicate-project-name'
+                assert proj.name.startswith('duplicate-project-name')
+
+        # The inventory source had this field set to avoid the constrains
+        InventorySource = new_state.apps.get_model('main', 'InventorySource')
+        inv_src = InventorySource.objects.get(name='migration-test-src')
+        assert inv_src.org_unique is False
+        Project = new_state.apps.get_model('main', 'Project')
+        for proj in Project.objects.all():
+            assert proj.org_unique is True

@@ -9,7 +9,6 @@ from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldL
 
 from awx.main.models import (
     AdHocCommand,
-    ActivityStream,
     Job,
     JobTemplate,
     SystemJob,
@@ -19,7 +18,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
     WorkflowJobOptions,
 )
-from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
 
 
@@ -28,7 +26,6 @@ from awx.main.models.jobs import JobOptions
     [
         (User, 'password__icontains'),
         (User, 'settings__value__icontains'),
-        (User, 'main_oauth2accesstoken__token__gt'),
         (UnifiedJob, 'job_args__icontains'),
         (UnifiedJob, 'job_env__icontains'),
         (UnifiedJob, 'start_args__icontains'),
@@ -40,8 +37,6 @@ from awx.main.models.jobs import JobOptions
         (WorkflowJob, 'survey_passwords__icontains'),
         (JobTemplate, 'survey_spec__icontains'),
         (WorkflowJobTemplate, 'survey_spec__icontains'),
-        (ActivityStream, 'o_auth2_application__client_secret__gt'),
-        (OAuth2Application, 'grant__code__gt'),
     ],
 )
 def test_filter_sensitive_fields_and_relations(model, query):

@@ -43,7 +43,7 @@ def test_job_template_copy(
         c.save()
     assert get(reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}), alice, expect=200).data['can_copy'] is True
     jt_copy_pk_alice = post(
-        reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}), {'name': 'new jt name'}, alice, expect=201
+        reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}), {'name': 'new jt name alice'}, alice, expect=201
     ).data['id']
 
     jt_copy_admin = type(job_template_with_survey_passwords).objects.get(pk=jt_copy_pk)
@@ -53,7 +53,7 @@ def test_job_template_copy(
     assert jt_copy_alice.created_by == alice
 
     for jt_copy in (jt_copy_admin, jt_copy_alice):
-        assert jt_copy.name == 'new jt name'
+        assert jt_copy.name.startswith('new jt name')
         assert jt_copy.project == project
         assert jt_copy.inventory == inventory
         assert jt_copy.playbook == job_template_with_survey_passwords.playbook
