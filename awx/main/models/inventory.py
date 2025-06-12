@@ -43,6 +43,7 @@ from awx.main.models.mixins import (
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
     CustomVirtualEnvMixin,
+    OpaQueryPathMixin,
 )
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -68,7 +69,7 @@ class InventoryConstructedInventoryMembership(models.Model):
     )
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
+class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin):
     """
     an inventory source contains lists and hosts.
     """
@@ -1119,8 +1120,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
     def save(self, *args, **kwargs):
         # if this is a new object, inherit organization from its inventory
-        if not self.pk and self.inventory and self.inventory.organization_id and not self.organization_id:
-            self.organization_id = self.inventory.organization_id
+        if not self.pk:
+            self.org_unique = False  # needed to exclude from unique (name, organization) constraint
+            if self.inventory and self.inventory.organization_id and not self.organization_id:
+                self.organization_id = self.inventory.organization_id
 
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
@@ -1401,3 +1404,38 @@ class CustomInventoryScript(CommonModelNameNotUnique):
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
+
+
+class InventoryGroupVariablesWithHistory(models.Model):
+    """
+    Represents the inventory variables of one inventory group.
+
+    The purpose of this model is to persist the update history of the group
+    variables. The update history is maintained in another class
+    (`InventoryGroupVariables`), this class here is just a container for the
+    database storage.
+    """
+
+    class Meta:
+        constraints = [
+            # Do not allow the same inventory/group combination more than once.
+            models.UniqueConstraint(
+                fields=["inventory", "group"],
+                name="unique_inventory_group",
+                violation_error_message=_("Inventory/Group combination must be unique."),
+            ),
+        ]
+
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='inventory_group_variables',
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    group = models.ForeignKey(  # `None` denotes the 'all'-group.
+        'Group',
+        related_name='inventory_group_variables',
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    variables = models.JSONField()  # The group variables, including their history.

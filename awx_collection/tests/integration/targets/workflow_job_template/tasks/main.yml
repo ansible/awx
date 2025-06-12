@@ -428,6 +428,18 @@
         that:
           - "results is changed"
 
+    - name: Remove a node from a workflow that does not exist.
+      workflow_job_template_node:
+        identifier: root
+        unified_job_template: "{{ jt1_name }}"
+        workflow: Does not exist
+        state: absent
+      register: results
+
+    - assert:
+        that:
+          - "results is not changed"
+
     - name: Create root node
       workflow_job_template_node:
         identifier: root

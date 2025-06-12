@@ -1,0 +1,17 @@
+---
+
+- hosts: all
+  vars:
+    extra_value: ""
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: set a custom fact
+      set_fact:
+        foo: "bar{{ extra_value }}"
+        bar:
+          a:
+            b:
+              - "c"
+              - "d"
+        cacheable: true

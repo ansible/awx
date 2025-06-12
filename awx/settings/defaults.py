@@ -9,9 +9,6 @@ import tempfile
 import socket
 from datetime import timedelta
 
-from split_settings.tools import include
-
-
 DEBUG = True
 SQL_DEBUG = DEBUG
 
@@ -82,10 +79,6 @@ LANGUAGE_CODE = 'en-us'
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale
-USE_L10N = True
 
 USE_TZ = True
 
@@ -424,6 +417,14 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 
+# If you set this, nothing will ever be sent to pg_notify
+# this is not practical to use, although periodic schedules may still run slugish but functional tasks
+# sqlite3 based tests will use this
+DISPATCHER_MOCK_PUBLISH = False
+
+# Debugging sockfile for the --status command
+DISPATCHERD_DEBUGGING_SOCKFILE = os.path.join(BASE_DIR, 'dispatcherd.sock')
+
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
@@ -442,7 +443,22 @@ CELERYBEAT_SCHEDULE = {
     'cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
     'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
     'periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': timedelta(minutes=15)},
+    'cleanup_and_save_indirect_host_entries_fallback': {
+        'task': 'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback',
+        'schedule': timedelta(minutes=60),
+    },
 }
+
+DISPATCHER_SCHEDULE = {}
+for options in CELERYBEAT_SCHEDULE.values():
+    new_options = options.copy()
+    task_name = options['task']
+    # Handle the only one exception case of the heartbeat which has a new implementation
+    if task_name == 'awx.main.tasks.system.cluster_node_heartbeat':
+        task_name = 'awx.main.tasks.system.adispatch_cluster_node_heartbeat'
+        new_options['task'] = task_name
+    new_options['schedule'] = options['schedule'].total_seconds()
+    DISPATCHER_SCHEDULE[task_name] = new_options
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
@@ -793,6 +809,7 @@ LOGGING = {
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'dispatcherd': {'handlers': ['dispatcher', 'console'], 'level': 'INFO'},
     },
 }
 
@@ -962,6 +979,9 @@ CLUSTER_HOST_ID = socket.gethostname()
 # - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
 SUBSCRIPTION_USAGE_MODEL = ''
 
+# Default URL and query params for obtaining valid AAP subscriptions
+SUBSCRIPTIONS_RHSM_URL = 'https://console.redhat.com/api/rhsm/v2/products?include=providedProducts&oids=480&status=Active'
+
 # Host metrics cleanup - last time of the task/command run
 CLEANUP_HOST_METRICS_LAST_TS = None
 # Host metrics cleanup - minimal interval between two cleanups in days
@@ -989,7 +1009,7 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 # projects can take advantage.
 
 METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
-METRICS_SERVICE_DISPATCHER = 'dispatcher'
+METRICS_SERVICE_DISPATCHER = 'dispatcherd'
 METRICS_SERVICE_WEBSOCKETS = 'websockets'
 
 METRICS_SUBSYSTEM_CONFIG = {
@@ -1006,16 +1026,15 @@ METRICS_SUBSYSTEM_CONFIG = {
     }
 }
 
-
 # django-ansible-base
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
 ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = 'awx.resource_api'
 ANSIBLE_BASE_PERMISSION_MODEL = 'main.Permission'
 
-from ansible_base.lib import dynamic_config  # noqa: E402
-
-include(os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py'))
+# Defaults to be overridden by DAB
+SPECTACULAR_SETTINGS = {}
+OAUTH2_PROVIDER = {}
 
 # Add a postfix to the API URL patterns
 # example if set to '' API pattern will be /api
@@ -1061,5 +1080,39 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
 
+# For indirect host query processing
+# if a job is not immediently confirmed to have all events processed
+# it will be eligable for processing after this number of minutes
+INDIRECT_HOST_QUERY_FALLBACK_MINUTES = 60
+
+# If an error happens in event collection, give up after this time
+INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS = 3
+
+# Maximum age for indirect host audit records
+# Older records will be cleaned up
+INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
+
+OPA_HOST = ''  # The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.
+OPA_PORT = 8181  # The port used to connect to the OPA server. Defaults to 8181.
+OPA_SSL = False  # Enable or disable the use of SSL to connect to the OPA server. Defaults to false.
+
+OPA_AUTH_TYPE = 'None'  # The authentication type that will be used to connect to the OPA server: "None", "Token", or "Certificate".
+OPA_AUTH_TOKEN = ''  # The token for authentication to the OPA server. Required when OPA_AUTH_TYPE is "Token". If an authorization header is defined in OPA_AUTH_CUSTOM_HEADERS, it will be overridden by OPA_AUTH_TOKEN.
+OPA_AUTH_CLIENT_CERT = ''  # The content of the client certificate file for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
+OPA_AUTH_CLIENT_KEY = ''  # The content of the client key for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
+OPA_AUTH_CA_CERT = ''  # The content of the CA certificate for mTLS authentication to the OPA server. Required when OPA_AUTH_TYPE is "Certificate".
+OPA_AUTH_CUSTOM_HEADERS = {}  # Optional custom headers included in requests to the OPA server. Defaults to empty dictionary ({}).
+OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to the OPA server will time out. Defaults to 1.5 seconds.
+OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
+
 # feature flags
-FLAGS = {'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}]}
+FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
+FLAGS = {
+    'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
+    'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
+}
+
+# Dispatcher worker lifetime. If set to None, workers will never be retired
+# based on age. Note workers will finish their last task before retiring if
+# they are busy when they reach retirement age.
+WORKER_MAX_LIFETIME_SECONDS = 14400  # seconds

@@ -42,6 +42,7 @@ __all__ = [
     'TaskManagerInventoryUpdateMixin',
     'ExecutionEnvironmentMixin',
     'CustomVirtualEnvMixin',
+    'OpaQueryPathMixin',
 ]
 
 
@@ -692,3 +693,16 @@ class WebhookMixin(models.Model):
             logger.debug("Webhook status update sent.")
         else:
             logger.error("Posting webhook status failed, code: {}\n" "{}\nPayload sent: {}".format(response.status_code, response.text, json.dumps(data)))
+
+
+class OpaQueryPathMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    opa_query_path = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        default=None,
+        help_text=_("The query path for the OPA policy to evaluate prior to job execution. The query path should be formatted as package/rule."),
+    )

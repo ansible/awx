@@ -54,6 +54,7 @@ jobs:
         uses: ./.github/actions/awx_devel_image
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Run check ${{ matrix.tests.name }}
         id: make-run
@@ -129,7 +130,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
@@ -138,6 +139,7 @@ jobs:
         with:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Run live dev env tests
         run: docker exec tools_awx_1 /bin/bash -c "make live_test"
@@ -159,6 +161,10 @@ jobs:
           show-progress: false
           path: awx
 
+      - uses: ./awx/.github/actions/setup-ssh-agent
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
+
       - name: Checkout awx-operator
         uses: actions/checkout@v4
         with:
@@ -166,14 +172,9 @@ jobs:
           repository: ansible/awx-operator
           path: awx-operator
 
-      - name: Get python version from Makefile
-        working-directory: awx
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - uses: ./awx/.github/actions/setup-python
         with:
-          python-version: ${{ env.py_version }}
+          working-directory: awx
 
       - name: Install playbook dependencies
         run: |
@@ -277,7 +278,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
@@ -286,6 +287,7 @@ jobs:
         with:
           build-ui: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Install dependencies for running tests
         run: |
@@ -333,6 +335,7 @@ jobs:
         with:
           name: coverage-${{ matrix.target-regex.name }}
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          retention-days: 1
 
       - uses: ./.github/actions/upload_awx_devel_logs
         if: always()
@@ -350,32 +353,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core
 
-      - name: Download coverage artifacts A to H
+      - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          name: coverage-a-h
+          merge-multiple: true
           path: coverage
-
-      - name: Download coverage artifacts I to P
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-i-p
-          path: coverage
-
-      - name: Download coverage artifacts Z to Z
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-r-z0-9
-          path: coverage
+          pattern: coverage-*
 
       - name: Combine coverage
         run: |
@@ -392,46 +385,6 @@ jobs:
           echo >> $GITHUB_STEP_SUMMARY
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
           echo 'Download the HTML artifacts to view the coverage report.' >> $GITHUB_STEP_SUMMARY
-
-      # This is a huge hack, there's no official action for removing artifacts currently.
-      # Also ACTIONS_RUNTIME_URL and ACTIONS_RUNTIME_TOKEN aren't available in normal run
-      # steps, so we have to use github-script to get them.
-      #
-      # The advantage of doing this, though, is that we save on artifact storage space.
-
-      - name: Get secret artifact runtime URL
-        uses: actions/github-script@v6
-        id: get-runtime-url
-        with:
-          result-encoding: string
-          script: |
-            const { ACTIONS_RUNTIME_URL } = process.env;
-            return ACTIONS_RUNTIME_URL;
-
-      - name: Get secret artifact runtime token
-        uses: actions/github-script@v6
-        id: get-runtime-token
-        with:
-          result-encoding: string
-          script: |
-            const { ACTIONS_RUNTIME_TOKEN } = process.env;
-            return ACTIONS_RUNTIME_TOKEN;
-
-      - name: Remove intermediary artifacts
-        env:
-          ACTIONS_RUNTIME_URL: ${{ steps.get-runtime-url.outputs.result }}
-          ACTIONS_RUNTIME_TOKEN: ${{ steps.get-runtime-token.outputs.result }}
-        run: |
-          echo "::add-mask::${ACTIONS_RUNTIME_TOKEN}"
-          artifacts=$(
-            curl -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" \
-              ${ACTIONS_RUNTIME_URL}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview \
-            | jq -r '.value | .[] | select(.name | startswith("coverage-")) | .url'
-          )
-
-          for artifact in $artifacts; do
-            curl -i -X DELETE -H "Accept: application/json;api-version=6.0-preview" -H "Authorization: Bearer $ACTIONS_RUNTIME_TOKEN" "$artifact"
-          done
 
       - name: Upload coverage report as artifact
         uses: actions/upload-artifact@v4

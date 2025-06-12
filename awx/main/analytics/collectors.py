@@ -142,7 +142,7 @@ def config(since, **kwargs):
     return {
         'platform': {
             'system': platform.system(),
-            'dist': distro.linux_distribution(),
+            'dist': (distro.name(), distro.version(), distro.codename()),
             'release': platform.release(),
             'type': install_type,
         },

@@ -34,40 +34,18 @@ def test_wrapup_does_send_notifications(mocker):
     mock.assert_called_once_with('succeeded')
 
 
-class FakeRedis:
-    def keys(self, *args, **kwargs):
-        return []
-
-    def set(self):
-        pass
-
-    def get(self):
-        return None
-
-    @classmethod
-    def from_url(cls, *args, **kwargs):
-        return cls()
-
-    def pipeline(self):
-        return self
-
-
 class TestCallbackBrokerWorker(TransactionTestCase):
     @pytest.fixture(autouse=True)
-    def turn_off_websockets(self):
+    def turn_off_websockets_and_redis(self, fake_redis):
         with mock.patch('awx.main.dispatch.worker.callback.emit_event_detail', lambda *a, **kw: None):
             yield
-
-    def get_worker(self):
-        with mock.patch('redis.Redis', new=FakeRedis):  # turn off redis stuff
-            return CallbackBrokerWorker()
 
     def event_create_kwargs(self):
         inventory_update = InventoryUpdate.objects.create(source='file', inventory_source=InventorySource.objects.create(source='file'))
         return dict(inventory_update=inventory_update, created=inventory_update.created)
 
     def test_flush_with_valid_event(self):
-        worker = self.get_worker()
+        worker = CallbackBrokerWorker()
         events = [InventoryUpdateEvent(uuid=str(uuid4()), **self.event_create_kwargs())]
         worker.buff = {InventoryUpdateEvent: events}
         worker.flush()
@@ -75,7 +53,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 1
 
     def test_flush_with_invalid_event(self):
-        worker = self.get_worker()
+        worker = CallbackBrokerWorker()
         kwargs = self.event_create_kwargs()
         events = [
             InventoryUpdateEvent(uuid=str(uuid4()), stdout='good1', **kwargs),
@@ -90,7 +68,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert worker.buff == {InventoryUpdateEvent: [events[1]]}
 
     def test_duplicate_key_not_saved_twice(self):
-        worker = self.get_worker()
+        worker = CallbackBrokerWorker()
         events = [InventoryUpdateEvent(uuid=str(uuid4()), **self.event_create_kwargs())]
         worker.buff = {InventoryUpdateEvent: events.copy()}
         worker.flush()
@@ -104,7 +82,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert worker.buff.get(InventoryUpdateEvent, []) == []
 
     def test_give_up_on_bad_event(self):
-        worker = self.get_worker()
+        worker = CallbackBrokerWorker()
         events = [InventoryUpdateEvent(uuid=str(uuid4()), counter=-2, **self.event_create_kwargs())]
         worker.buff = {InventoryUpdateEvent: events.copy()}
 
@@ -117,7 +95,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 0  # sanity
 
     def test_flush_with_empty_buffer(self):
-        worker = self.get_worker()
+        worker = CallbackBrokerWorker()
         worker.buff = {InventoryUpdateEvent: []}
         with mock.patch.object(InventoryUpdateEvent.objects, 'bulk_create') as flush_mock:
             worker.flush()
@@ -127,7 +105,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         # In postgres, text fields reject NUL character, 0x00
         # tests use sqlite3 which will not raise an error
         # but we can still test that it is sanitized before saving
-        worker = self.get_worker()
+        worker = CallbackBrokerWorker()
         kwargs = self.event_create_kwargs()
         events = [InventoryUpdateEvent(uuid=str(uuid4()), stdout="\x00", **kwargs)]
         assert "\x00" in events[0].stdout  # sanity

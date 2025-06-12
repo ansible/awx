@@ -68,3 +68,7 @@
   job_template:
     name: "{{ bulk_job_name }}"
     state: absent
+  register: del_res
+  until: del_res is succeeded
+  retries: 5
+  delay: 3

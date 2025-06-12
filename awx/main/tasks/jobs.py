@@ -17,10 +17,10 @@ import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
+from django.db import transaction
 
 # Shared code for the AWX platform
 from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
-
 
 # Runner
 import ansible_runner
@@ -29,9 +29,12 @@ import ansible_runner
 import git
 from gitdb.exc import BadName as BadGitName
 
+# Dispatcherd
+from dispatcherd.publish import task
+from dispatcherd.utils import serialize_task
 
 # AWX
-from awx.main.dispatch.publish import task
+from awx.main.dispatch.publish import task as task_awx
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -39,13 +42,13 @@ from awx.main.constants import (
     JOB_FOLDER_PREFIX,
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
-    ACTIVE_STATES,
     HOST_FACTS_FIELDS,
 )
 from awx.main.models import (
     Instance,
     Inventory,
     InventorySource,
+    UnifiedJob,
     Job,
     AdHocCommand,
     ProjectUpdate,
@@ -65,10 +68,12 @@ from awx.main.tasks.callback import (
     RunnerCallbackForProjectUpdate,
     RunnerCallbackForSystemJob,
 )
+from awx.main.tasks.policy import evaluate_policy
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
-from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
+from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields, events_processed_hook
+from awx.main.exceptions import AwxTaskError, PolicyEvaluationError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.common import (
@@ -81,10 +86,12 @@ from awx.main.utils.common import (
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields
 from awx.main.utils.update_model import update_model
 from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
+
+# Django flags
+from flags.state import flag_enabled
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -108,6 +115,15 @@ def with_path_cleanup(f):
     return _wrapped
 
 
+@task(on_duplicate='queue_one', bind=True, queue=get_task_queuename)
+def dispatch_waiting_jobs(binder):
+    for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
+        kwargs = uj.get_start_kwargs()
+        if not kwargs:
+            kwargs = {}
+        binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
+
+
 class BaseTask(object):
     model = None
     event_model = None
@@ -115,6 +131,7 @@ class BaseTask(object):
     callback_class = RunnerCallback
 
     def __init__(self):
+        self.instance = None
         self.cleanup_paths = []
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
@@ -302,6 +319,8 @@ class BaseTask(object):
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
             if attr == attr.upper() and attr.startswith('ANSIBLE_') and not attr.startswith('ANSIBLE_BASE_'):
+                if attr == 'ANSIBLE_STANDARD_SETTINGS_FILES':
+                    continue  # special case intended only for dynaconf use
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
@@ -439,20 +458,6 @@ class BaseTask(object):
         Hook for any steps to run after job/task is marked as complete.
         """
         instance.log_lifecycle("finalize_run")
-        artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
-        collections_info = os.path.join(artifact_dir, 'collections.json')
-        ansible_version_file = os.path.join(artifact_dir, 'ansible_version.txt')
-
-        if os.path.exists(collections_info):
-            with open(collections_info) as ee_json_info:
-                ee_collections_info = json.loads(ee_json_info.read())
-                instance.installed_collections = ee_collections_info
-                instance.save(update_fields=['installed_collections'])
-        if os.path.exists(ansible_version_file):
-            with open(ansible_version_file) as ee_ansible_info:
-                ansible_version_info = ee_ansible_info.readline()
-                instance.ansible_version = ansible_version_info
-                instance.save(update_fields=['ansible_version'])
 
         # Run task manager appropriately for speculative dependencies
         if instance.unifiedjob_blocked_jobs.exists():
@@ -463,27 +468,48 @@ class BaseTask(object):
     def should_use_fact_cache(self):
         return False
 
+    def transition_status(self, pk: int) -> bool:
+        """Atomically transition status to running, if False returned, another process got it"""
+        with transaction.atomic():
+            # Explanation of parts for the fetch:
+            # .values - avoid loading a full object, this is known to lead to deadlocks due to signals
+            #   the signals load other related rows which another process may be locking, and happens in practice
+            # of=('self',) - keeps FK tables out of the lock list, another way deadlocks can happen
+            # .get - just load the single job
+            instance_data = UnifiedJob.objects.select_for_update(of=('self',)).values('status', 'cancel_flag').get(pk=pk)
+
+            # If status is not waiting (obtained under lock) then this process does not have clearence to run
+            if instance_data['status'] == 'waiting':
+                if instance_data['cancel_flag']:
+                    updated_status = 'canceled'
+                else:
+                    updated_status = 'running'
+                # Explanation of the update:
+                # .filter - again, do not load the full object
+                # .update - a bulk update on just that one row, avoid loading unintended data
+                UnifiedJob.objects.filter(pk=pk).update(status=updated_status, start_args='')
+            elif instance_data['status'] == 'running':
+                logger.info(f'Job {pk} is being ran by another process, exiting')
+                return False
+        return True
+
     @with_path_cleanup
     @with_signal_handling
     def run(self, pk, **kwargs):
         """
         Run the job/task and capture its output.
         """
-        self.instance = self.model.objects.get(pk=pk)
-        if self.instance.status != 'canceled' and self.instance.cancel_flag:
-            self.instance = self.update_model(self.instance.pk, start_args='', status='canceled')
-        if self.instance.status not in ACTIVE_STATES:
-            # Prevent starting the job if it has been reaped or handled by another process.
-            raise RuntimeError(f'Not starting {self.instance.status} task pk={pk} because {self.instance.status} is not a valid active state')
+        if not self.instance:  # Used to skip fetch for local runs
+            if not self.transition_status(pk):
+                logger.info(f'Job {pk} is being ran by another process, exiting')
+                return
 
-        if self.instance.execution_environment_id is None:
-            from awx.main.signals import disable_activity_stream
+        # Load the instance
+        self.instance = self.update_model(pk)
+        if self.instance.status != 'running':
+            logger.error(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
+            return
 
-            with disable_activity_stream():
-                self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
-
-        # self.instance because of the update_model pattern and when it's used in callback handlers
-        self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
         self.runner_callback.event_ct = 0
@@ -496,12 +522,20 @@ class BaseTask(object):
         private_data_dir = None
 
         try:
+            if self.instance.execution_environment_id is None:
+                from awx.main.signals import disable_activity_stream
+
+                with disable_activity_stream():
+                    self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
+
             self.instance.send_notification_templates("running")
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
+            evaluate_policy(self.instance)
             self.build_project_dir(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
+                logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
                 self.instance = self.update_model(self.instance.pk, status='canceled')
 
             if self.instance.status != 'running':
@@ -533,9 +567,13 @@ class BaseTask(object):
 
             credentials = self.build_credentials_list(self.instance)
 
+            container_root = None
+            if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
+                container_root = private_data_dir
+
             for credential in credentials:
                 if credential:
-                    credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir)
+                    credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir, container_root=container_root)
 
             self.runner_callback.safe_env.update(self.safe_cred_env)
 
@@ -620,12 +658,11 @@ class BaseTask(object):
             elif status == 'canceled':
                 self.instance = self.update_model(pk)
                 cancel_flag_value = getattr(self.instance, 'cancel_flag', False)
-                if (cancel_flag_value is False) and signal_callback():
+                if cancel_flag_value is False:
                     self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="Task was canceled due to receiving a shutdown signal.")
                     status = 'failed'
-                elif cancel_flag_value is False:
-                    self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="The running ansible process received a shutdown signal.")
-                    status = 'failed'
+        except PolicyEvaluationError as exc:
+            self.runner_callback.delay_update(job_explanation=str(exc), result_traceback=str(exc))
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
@@ -651,8 +688,11 @@ class BaseTask(object):
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
+        if not self.instance:
+            logger.error(f'Unified job pk={pk} appears to be deleted while running')
+            return
         if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
+            events_processed_hook(self.instance)
 
         try:
             self.final_run_hook(self.instance, status, private_data_dir)
@@ -747,6 +787,7 @@ class SourceControlMixin(BaseTask):
             try:
                 # the job private_data_dir is passed so sync can download roles and collections there
                 sync_task = RunProjectUpdate(job_private_data_dir=private_data_dir)
+                sync_task.instance = local_project_sync  # avoids "waiting" status check, performance
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
                 self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
@@ -810,7 +851,7 @@ class SourceControlMixin(BaseTask):
             self.release_lock(project)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunJob(SourceControlMixin, BaseTask):
     """
     Run a job using ansible-playbook.
@@ -927,11 +968,15 @@ class RunJob(SourceControlMixin, BaseTask):
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
-        path_vars = (
-            ('ANSIBLE_COLLECTIONS_PATHS', 'collections_paths', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
+        path_vars = [
             ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'),
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
-        )
+        ]
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            path_vars.append(
+                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+            )
 
         config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
 
@@ -947,6 +992,11 @@ class RunJob(SourceControlMixin, BaseTask):
                         paths = [config_values[config_setting]] + paths
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
+
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+            if 'callbacks_enabled' in config_values:
+                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
 
         return env
 
@@ -1089,8 +1139,8 @@ class RunJob(SourceControlMixin, BaseTask):
         # where ansible expects to find it
         if self.should_use_fact_cache():
             job.log_lifecycle("start_job_fact_cache")
-            self.facts_write_time = start_fact_cache(
-                job.get_hosts_for_fact_cache(), os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'), inventory_id=job.inventory_id
+            self.hosts_with_facts_cached = start_fact_cache(
+                job.get_hosts_for_fact_cache(), artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)), inventory_id=job.inventory_id
             )
 
     def build_project_dir(self, job, private_data_dir):
@@ -1100,7 +1150,7 @@ class RunJob(SourceControlMixin, BaseTask):
         super(RunJob, self).post_run_hook(job, status)
         job.refresh_from_db(fields=['job_env'])
         private_data_dir = job.job_env.get('AWX_PRIVATE_DATA_DIR')
-        if (not private_data_dir) or (not hasattr(self, 'facts_write_time')):
+        if not private_data_dir:
             # If there's no private data dir, that means we didn't get into the
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
@@ -1108,9 +1158,7 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
-                job.get_hosts_for_fact_cache(),
-                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                facts_write_time=self.facts_write_time,
+                artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
             )
@@ -1126,7 +1174,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 update_inventory_computed_fields.delay(inventory.id)
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
@@ -1388,6 +1436,17 @@ class RunProjectUpdate(BaseTask):
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            # copy the special callback (not stdout type) plugin to get list of collections
+            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+            if not os.path.exists(pdd_plugins_path):
+                os.mkdir(pdd_plugins_path)
+            from awx.playbooks import library
+
+            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
+            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+            shutil.copyfile(plugin_file_source, plugin_file_dest)
+
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)
         # To avoid hangs, very important to release lock even if errors happen here
@@ -1454,7 +1513,7 @@ class RunProjectUpdate(BaseTask):
         return []
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
@@ -1510,7 +1569,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise NotImplementedError('Cannot update file sources through the task system.')
 
         if inventory_update.source == 'scm' and inventory_update.source_project_update:
-            env_key = 'ANSIBLE_COLLECTIONS_PATHS'
+            env_key = 'ANSIBLE_COLLECTIONS_PATH'
             config_setting = 'collections_paths'
             folder = 'requirements_collections'
             default = '~/.ansible/collections:/usr/share/ansible/collections'
@@ -1528,12 +1587,12 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                         paths = [config_values[config_setting]] + paths
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
-        if 'ANSIBLE_COLLECTIONS_PATHS' in env:
-            paths = env['ANSIBLE_COLLECTIONS_PATHS'].split(':')
+        if 'ANSIBLE_COLLECTIONS_PATH' in env:
+            paths = env['ANSIBLE_COLLECTIONS_PATH'].split(':')
         else:
             paths = ['~/.ansible/collections', '/usr/share/ansible/collections']
         paths.append('/usr/share/automation-controller/collections')
-        env['ANSIBLE_COLLECTIONS_PATHS'] = os.pathsep.join(paths)
+        env['ANSIBLE_COLLECTIONS_PATH'] = os.pathsep.join(paths)
 
         return env
 
@@ -1565,7 +1624,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                 # Include any facts from input inventories so they can be used in filters
                 start_fact_cache(
                     input_inventory.hosts.only(*HOST_FACTS_FIELDS),
-                    os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'fact_cache'),
+                    artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(inventory_update.id)),
                     inventory_id=input_inventory.id,
                 )
 
@@ -1717,7 +1776,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunAdHocCommand(BaseTask):
     """
     Run an ad hoc command using ansible.
@@ -1870,7 +1929,7 @@ class RunAdHocCommand(BaseTask):
         return d
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent

@@ -34,9 +34,11 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v4
+      - uses: ./.github/actions/setup-python
+
       - name: Install python requests
         run: pip install requests
+
       - name: Check if user is a member of Ansible org
         uses: jannekem/run-python-script-action@v1
         id: check_user

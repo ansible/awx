@@ -174,6 +174,9 @@ class PodManager(object):
             )
             pod_spec['spec']['containers'][0]['name'] = self.pod_name
 
+        # Prevent mounting of service account token in job pods in order to prevent job pods from accessing the k8s API via in cluster service account auth
+        pod_spec['spec']['automountServiceAccountToken'] = False
+
         return pod_spec
 
 

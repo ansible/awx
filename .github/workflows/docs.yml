@@ -12,7 +12,7 @@ jobs:
         with:
           show-progress: false
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/setup-python
         with:
           python-version: '3.x'
 

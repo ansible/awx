@@ -87,8 +87,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': 'redhat_user',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTIONS_USERNAME': '',
-                'SUBSCRIPTIONS_PASSWORD': '',
+                'SUBSCRIPTIONS_CLIENT_ID': '',
+                'SUBSCRIPTIONS_CLIENT_SECRET': '',
             },
             True,
             ('redhat_user', 'redhat_pass'),
@@ -98,8 +98,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': None,
                 'REDHAT_PASSWORD': None,
-                'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
             },
             True,
             ('subs_user', 'subs_pass'),
@@ -109,8 +109,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': '',
-                'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': 'subs_pass',  # NOSONAR
+                'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                'SUBSCRIPTIONS_CLIENT_SECRET': 'subs_pass',  # NOSONAR
             },
             True,
             ('subs_user', 'subs_pass'),
@@ -120,8 +120,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': '',
-                'SUBSCRIPTIONS_USERNAME': '',
-                'SUBSCRIPTIONS_PASSWORD': '',
+                'SUBSCRIPTIONS_CLIENT_ID': '',
+                'SUBSCRIPTIONS_CLIENT_SECRET': '',
             },
             False,
             None,  # No request should be made
@@ -131,8 +131,8 @@ def mock_analytic_post():
             {
                 'REDHAT_USERNAME': '',
                 'REDHAT_PASSWORD': 'redhat_pass',  # NOSONAR
-                'SUBSCRIPTIONS_USERNAME': 'subs_user',
-                'SUBSCRIPTIONS_PASSWORD': '',
+                'SUBSCRIPTIONS_CLIENT_ID': 'subs_user',
+                'SUBSCRIPTIONS_CLIENT_SECRET': '',
             },
             False,
             None,  # Invalid, no request should be made
@@ -150,3 +150,24 @@ def test_ship_credential(setting_map, expected_result, expected_auth, temp_analy
             assert mock_analytic_post.call_args[1]['auth'] == expected_auth
         else:
             mock_analytic_post.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_gather_cleanup_on_auth_failure(mock_valid_license, temp_analytic_tar):
+    settings.INSIGHTS_TRACKING_STATE = True
+    settings.AUTOMATION_ANALYTICS_URL = 'https://example.com/api'
+    settings.REDHAT_USERNAME = 'test_user'
+    settings.REDHAT_PASSWORD = 'test_password'
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.tar.gz') as temp_file:
+        temp_file_path = temp_file.name
+
+    try:
+        with mock.patch('awx.main.analytics.core.ship', return_value=False):
+            with mock.patch('awx.main.analytics.core.package', return_value=temp_file_path):
+                gather(module=importlib.import_module(__name__), collection_type='scheduled')
+
+                assert not os.path.exists(temp_file_path), "Temp file was not cleaned up after ship failure"
+    finally:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
