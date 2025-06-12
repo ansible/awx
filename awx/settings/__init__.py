@@ -8,7 +8,6 @@ from ansible_base.lib.dynamic_config import (
     load_envvars,
     load_python_file_with_injected_context,
     load_standard_settings_files,
-    toggle_feature_flags,
 )
 from .functions import (
     assert_production_settings,
@@ -68,13 +67,6 @@ load_envvars(DYNACONF)
 DYNACONF.update(
     merge_application_name(DYNACONF),
     loader_identifier="awx.settings:merge_application_name",
-    merge=True,
-)
-
-# Toggle feature flags based on installer settings
-DYNACONF.update(
-    toggle_feature_flags(DYNACONF),
-    loader_identifier="awx.settings:toggle_feature_flags",
     merge=True,
 )
 
