@@ -351,6 +351,11 @@ test:
 
 live_test:
 	cd awx/main/tests/live && py.test tests/
+	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	then \
+	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
+	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
+	fi
 
 ## Run all API unit tests with coverage enabled.
 test_coverage:
