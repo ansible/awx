@@ -142,6 +142,7 @@ jobs:
           private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Run live dev env tests
+        id: make-run
         run: docker exec tools_awx_1 /bin/bash -c "PYTEST_ADDOPTS='--cov=awx --cov-report=xml --junitxml=../../../../reports/junit.xml --no-cov-on-fail' make live_test"
 
       - name: Upload test coverage to Codecov
