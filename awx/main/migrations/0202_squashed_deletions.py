@@ -97,4 +97,12 @@ class Migration(migrations.Migration):
                 max_length=32,
             ),
         ),
+        # Removal of unused RBAC items
+        migrations.RemoveField(
+            model_name='role',
+            name='ancestors',
+        ),
+        migrations.DeleteModel(
+            name='RoleAncestorEntry',
+        ),
     ]
