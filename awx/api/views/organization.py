@@ -53,18 +53,15 @@ from awx.api.serializers import (
     CredentialSerializer,
 )
 from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, OrganizationCountsMixin, OrganizationInstanceGroupMembershipMixin
-from awx.api.views import immutablesharedfields
 
 logger = logging.getLogger('awx.api.views.organization')
 
 
-@immutablesharedfields
 class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
 
-@immutablesharedfields
 class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
@@ -107,7 +104,6 @@ class OrganizationInventoriesList(SubListAPIView):
     relationship = 'inventories'
 
 
-@immutablesharedfields
 class OrganizationUsersList(BaseUsersList):
     model = User
     serializer_class = UserSerializer
@@ -116,7 +112,6 @@ class OrganizationUsersList(BaseUsersList):
     ordering = ('username',)
 
 
-@immutablesharedfields
 class OrganizationAdminsList(BaseUsersList):
     model = User
     serializer_class = UserSerializer
@@ -155,7 +150,6 @@ class OrganizationWorkflowJobTemplatesList(SubListCreateAPIView):
     parent_key = 'organization'
 
 
-@immutablesharedfields
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
     model = Team
     serializer_class = TeamSerializer
