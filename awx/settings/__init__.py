@@ -78,5 +78,15 @@ DYNACONF.update(
     merge=True,
 )
 
+# Force specific settings to be True
+DYNACONF.update(
+    {
+        'RESOURCE_SERVER_SYNC_ENABLED': True,
+        'ENABLE_SERVICE_BACKED_SSO': True,
+    },
+    loader_identifier="awx.settings:force_settings",
+    merge=True,
+)
+
 # Update django.conf.settings with DYNACONF values
 export(__name__, DYNACONF)

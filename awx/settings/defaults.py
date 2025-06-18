@@ -1052,6 +1052,9 @@ ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
 # If we have a resource server defined, apply local changes to that server
 RESOURCE_SERVER_SYNC_ENABLED = True
 
+# Enable service-backed SSO functionality
+ENABLE_SERVICE_BACKED_SSO = True
+
 # Settings for the ansible_base RBAC system
 
 # This has been moved to data migration code
