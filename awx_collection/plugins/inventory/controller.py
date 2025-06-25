@@ -135,7 +135,9 @@ class InventoryModule(BaseInventoryPlugin):
                 ), e)
         inventory_id = inventory_id.replace('/', '')
 
-        inventory = module.get_endpoint('inventories/{inv_id}/script/'.format(inv_id=inventory_id), data={'hostvars': '1', 'towervars': '1', 'all': '1'})['json']
+        inventory = module.get_endpoint(
+            'inventories/{inv_id}/script/'.format(inv_id=inventory_id), data={'hostvars': '1', 'towervars': '1', 'all': '1'}
+        )['json']
 
         # To start with, create all the groups.
         for group_name in inventory:
