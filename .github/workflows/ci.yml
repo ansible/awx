@@ -143,7 +143,7 @@ jobs:
 
       - name: Run live dev env tests
         id: make-run
-        run: docker exec tools_awx_1 /bin/bash -c "GITHUB_ACTIONS=${GITHUB_ACTIONS} PYTEST_ADDOPTS='--cov=awx --cov-report=xml --junitxml=../../../../reports/junit.xml --no-cov-on-fail' make live_test"
+        run: docker exec tools_awx_1 /bin/bash -c "GITHUB_ACTIONS=${GITHUB_ACTIONS} GITHUB_OUTPUT=${GITHUB_OUTPUT} PYTEST_ADDOPTS='--cov=awx --cov-report=xml --junitxml=../../../../reports/junit.xml --no-cov-on-fail' make live_test"
 
       - name: Upload test coverage to Codecov
         if: >-
