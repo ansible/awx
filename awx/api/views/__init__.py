@@ -55,7 +55,7 @@ from wsgiref.util import FileWrapper
 
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
-from ansible_base.rbac.models import RoleEvaluation, ObjectRole
+from ansible_base.rbac.models import RoleEvaluation, ObjectRole, DABContentType
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
@@ -750,8 +750,8 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        model_ct = ContentType.objects.get_for_model(self.model)
-        parent_ct = ContentType.objects.get_for_model(self.parent_model)
+        model_ct = DABContentType.objects.get_for_model(self.model)
+        parent_ct = DABContentType.objects.get_for_model(self.parent_model)
 
         rd = get_role_definition(team.member_role)
         role = ObjectRole.objects.filter(object_id=team.id, content_type=parent_ct, role_definition=rd).first()
