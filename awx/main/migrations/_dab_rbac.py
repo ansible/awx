@@ -112,7 +112,12 @@ def get_descendents(f, children_map):
 
 def get_permissions_for_role(role_field, children_map, apps):
     Permission = apps.get_model('dab_rbac', 'DABPermission')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    try:
+        # After migration for remote permissions
+        ContentType = apps.get_model('dab_rbac', 'DABPermission')
+    except LookupError:
+        # If using DAB from before remote permissions are implemented
+        ContentType = apps.get_model('contenttypes', 'ContentType')
 
     perm_list = []
     for child_field in get_descendents(role_field, children_map):
