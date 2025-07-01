@@ -286,7 +286,13 @@ def setup_managed_role_definitions(apps, schema_editor):
         'special': '{cls.__name__} {action}',
     }
 
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    try:
+        # After migration for remote permissions
+        ContentType = apps.get_model('dab_rbac', 'DABPermission')
+    except LookupError:
+        # If using DAB from before remote permissions are implemented
+        ContentType = apps.get_model('contenttypes', 'ContentType')
+
     Permission = apps.get_model('dab_rbac', 'DABPermission')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     Organization = apps.get_model(settings.ANSIBLE_BASE_ORGANIZATION_MODEL)
