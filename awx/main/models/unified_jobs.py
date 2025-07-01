@@ -34,7 +34,7 @@ from polymorphic.models import PolymorphicModel
 
 from ansible_base.lib.utils.models import prevent_search, get_type_for_model
 from ansible_base.rbac import permission_registry
-from ansible_base.rbac.models import DABContentType, RoleEvaluation
+from ansible_base.rbac.models import RoleEvaluation
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
@@ -230,7 +230,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             qs = cls.objects.filter(polymorphic_ctype__in=role_cts)
             return qs.values_list('id', flat=True)
 
-        dab_role_cts = DABContentType.objects.get_for_models(*role_subclasses).values()
+        dab_role_cts = permission_registry.content_type_model.objects.get_for_models(*role_subclasses).values()
 
         return (
             RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in dab_role_cts])
