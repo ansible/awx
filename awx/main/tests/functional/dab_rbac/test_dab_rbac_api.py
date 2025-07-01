@@ -1,7 +1,8 @@
 import pytest
 
-from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse as django_reverse
+
+from ansible_bae.rbac.models import DABContentType
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
@@ -14,7 +15,7 @@ from ansible_base.rbac.models import RoleDefinition
 def test_managed_roles_created(setup_managed_roles):
     "Managed RoleDefinitions are created in post_migration signal, we expect to see them here"
     for cls in (JobTemplate, Inventory):
-        ct = ContentType.objects.get_for_model(cls)
+        ct = DABContentType.objects.get_for_model(cls)
         rds = list(RoleDefinition.objects.filter(content_type=ct))
         assert len(rds) > 1
         assert f'{cls.__name__} Admin' in [rd.name for rd in rds]
@@ -30,7 +31,7 @@ def test_custom_read_role(admin_user, post, setup_managed_roles):
     )
     rd_id = resp.data['id']
     rd = RoleDefinition.objects.get(id=rd_id)
-    assert rd.content_type == ContentType.objects.get_for_model(Inventory)
+    assert rd.content_type == DABContentType.objects.get_for_model(Inventory)
 
 
 @pytest.mark.django_db
@@ -71,7 +72,7 @@ def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
     rd, _ = RoleDefinition.objects.get_or_create(
         name='inventory-delete',
         permissions=['delete_inventory', 'view_inventory', 'change_inventory'],
-        content_type=ContentType.objects.get_for_model(Inventory),
+        content_type=DABContentType.objects.get_for_model(Inventory),
     )
     rd.give_permission(rando, inventory)
     inv_id = inventory.pk
@@ -85,7 +86,7 @@ def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
 @pytest.mark.django_db
 def test_assign_custom_add_role(admin_user, rando, organization, post, setup_managed_roles):
     rd, _ = RoleDefinition.objects.get_or_create(
-        name='inventory-add', permissions=['add_inventory', 'view_organization'], content_type=ContentType.objects.get_for_model(Organization)
+        name='inventory-add', permissions=['add_inventory', 'view_organization'], content_type=DABContentType.objects.get_for_model(Organization)
     )
     rd.give_permission(rando, organization)
     url = reverse('api:inventory_list')
