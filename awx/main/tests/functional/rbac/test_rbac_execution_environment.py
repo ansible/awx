@@ -1,7 +1,5 @@
 import pytest
 
-from django.contrib.contenttypes.models import ContentType
-
 from awx.main.access import ExecutionEnvironmentAccess
 from awx.main.models import ExecutionEnvironment, Organization, Team
 from awx.main.models.rbac import get_role_codenames
@@ -10,6 +8,7 @@ from awx.api.versioning import reverse
 from django.urls import reverse as django_reverse
 
 from ansible_base.rbac.models import RoleDefinition
+from ansible_base.rbac import permission_registry
 
 
 @pytest.fixture
@@ -17,7 +16,7 @@ def ee_rd():
     return RoleDefinition.objects.create_from_permissions(
         name='EE object admin',
         permissions=['change_executionenvironment', 'delete_executionenvironment'],
-        content_type=ContentType.objects.get_for_model(ExecutionEnvironment),
+        content_type=permission_registry.content_type_model.objects.get_for_model(ExecutionEnvironment),
     )
 
 
@@ -26,7 +25,7 @@ def org_ee_rd():
     return RoleDefinition.objects.create_from_permissions(
         name='EE org admin',
         permissions=['add_executionenvironment', 'change_executionenvironment', 'delete_executionenvironment', 'view_organization'],
-        content_type=ContentType.objects.get_for_model(Organization),
+        content_type=permission_registry.content_type_model.objects.get_for_model(Organization),
     )
 
 
