@@ -36,11 +36,9 @@ def _parse_exception_message(exception: PolicyEvaluationError):
 
 
 @pytest.fixture(autouse=True)
-def enable_flag():
+def setup_opa_settings():
     with override_settings(
         OPA_HOST='opa.example.com',
-        FLAGS={"FEATURE_POLICY_AS_CODE_ENABLED": [("boolean", True)]},
-        FLAG_SOURCES=('flags.sources.SettingsFlagsSource',),
     ):
         yield
 

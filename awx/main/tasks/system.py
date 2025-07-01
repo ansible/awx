@@ -594,8 +594,16 @@ def inspect_established_receptor_connections(mesh_status):
 def inspect_execution_and_hop_nodes(instance_list):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        ctl = get_receptor_ctl()
-        mesh_status = ctl.simple_command('status')
+        try:
+            ctl = get_receptor_ctl()
+        except FileNotFoundError:
+            logger.error('Receptor daemon not running, skipping execution node check')
+            return
+        try:
+            mesh_status = ctl.simple_command('status')
+        except ValueError as exc:
+            logger.error(f'Error running receptorctl status command, error: {str(exc)}')
+            return
 
         inspect_established_receptor_connections(mesh_status)
 
@@ -784,7 +792,8 @@ def _heartbeat_instance_management():
                 logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
             this_inst.local_health_check()
         else:
-            raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+            logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+            return None, None, None
 
     return this_inst, instance_list, lost_instances
 
@@ -864,8 +873,16 @@ def awx_receptor_workunit_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
     logger.debug("Checking for unreleased receptor work units")
-    receptor_ctl = get_receptor_ctl()
-    receptor_work_list = receptor_ctl.simple_command("work list")
+    try:
+        receptor_ctl = get_receptor_ctl()
+    except FileNotFoundError:
+        logger.info('Receptorctl sockfile not found for workunit reaper, doing nothing')
+        return
+    try:
+        receptor_work_list = receptor_ctl.simple_command("work list")
+    except ValueError as exc:
+        logger.info(f'Error getting work list for workunit reaper, error: {str(exc)}')
+        return
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)

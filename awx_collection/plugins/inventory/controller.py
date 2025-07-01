@@ -134,9 +134,10 @@ class InventoryModule(BaseInventoryPlugin):
                     'Invalid type for configuration option inventory_id, ' 'not integer, and cannot convert to string: {err}'.format(err=to_native(e))
                 ), e)
         inventory_id = inventory_id.replace('/', '')
-        inventory_url = '/api/v2/inventories/{inv_id}/script/'.format(inv_id=inventory_id)
 
-        inventory = module.get_endpoint(inventory_url, data={'hostvars': '1', 'towervars': '1', 'all': '1'})['json']
+        inventory = module.get_endpoint(
+            'inventories/{inv_id}/script/'.format(inv_id=inventory_id), data={'hostvars': '1', 'towervars': '1', 'all': '1'}
+        )['json']
 
         # To start with, create all the groups.
         for group_name in inventory:
@@ -169,7 +170,7 @@ class InventoryModule(BaseInventoryPlugin):
         # Fetch extra variables if told to do so
         if self.get_option('include_metadata'):
 
-            config_data = module.get_endpoint('/api/v2/config/')['json']
+            config_data = module.get_endpoint('config/')['json']
 
             server_data = {}
             server_data['license_type'] = config_data.get('license_info', {}).get('license_type', 'unknown')

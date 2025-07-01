@@ -319,6 +319,8 @@ class BaseTask(object):
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
             if attr == attr.upper() and attr.startswith('ANSIBLE_') and not attr.startswith('ANSIBLE_BASE_'):
+                if attr == 'ANSIBLE_STANDARD_SETTINGS_FILES':
+                    continue  # special case intended only for dynaconf use
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():

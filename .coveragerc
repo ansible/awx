@@ -17,6 +17,23 @@ exclude_also =
 
 [run]
 branch = True
+# NOTE: `disable_warnings` is needed when `pytest-cov` runs in tandem
+# NOTE: with `pytest-xdist`. These warnings are false negative in this
+# NOTE: context.
+#
+# NOTE: It's `coveragepy` that emits the warnings and previously they
+# NOTE: wouldn't get on the radar of `pytest`'s `filterwarnings`
+# NOTE: mechanism. This changed, however, with `pytest >= 8.4`. And
+# NOTE: since we set `filterwarnings = error`, those warnings are being
+# NOTE: raised as exceptions, cascading into `pytest`'s internals and
+# NOTE: causing tracebacks and crashes of the test sessions.
+#
+# Ref:
+# * https://github.com/pytest-dev/pytest-cov/issues/693
+# * https://github.com/pytest-dev/pytest-cov/pull/695
+# * https://github.com/pytest-dev/pytest-cov/pull/696
+disable_warnings =
+  module-not-measured
 omit =
     awx/main/migrations/*
     awx/settings/defaults.py

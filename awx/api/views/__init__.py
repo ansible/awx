@@ -56,7 +56,6 @@ from wsgiref.util import FileWrapper
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
-from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
@@ -671,81 +670,16 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     name = _('Schedule Jobs List')
 
 
-def immutablesharedfields(cls):
-    '''
-    Class decorator to prevent modifying shared resources when ALLOW_LOCAL_RESOURCE_MANAGEMENT setting is set to False.
-
-    Works by overriding these view methods:
-    - create
-    - delete
-    - perform_update
-    create and delete are overridden to raise a PermissionDenied exception.
-    perform_update is overridden to check if any shared fields are being modified,
-    and raise a PermissionDenied exception if so.
-    '''
-    # create instead of perform_create because some of our views
-    # override create instead of perform_create
-    if hasattr(cls, 'create'):
-        cls.original_create = cls.create
-
-        @functools.wraps(cls.create)
-        def create_wrapper(*args, **kwargs):
-            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
-                return cls.original_create(*args, **kwargs)
-            raise PermissionDenied({'detail': _('Creation of this resource is not allowed. Create this resource via the platform ingress.')})
-
-        cls.create = create_wrapper
-
-    if hasattr(cls, 'delete'):
-        cls.original_delete = cls.delete
-
-        @functools.wraps(cls.delete)
-        def delete_wrapper(*args, **kwargs):
-            if settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
-                return cls.original_delete(*args, **kwargs)
-            raise PermissionDenied({'detail': _('Deletion of this resource is not allowed. Delete this resource via the platform ingress.')})
-
-        cls.delete = delete_wrapper
-
-    if hasattr(cls, 'perform_update'):
-        cls.original_perform_update = cls.perform_update
-
-        @functools.wraps(cls.perform_update)
-        def update_wrapper(*args, **kwargs):
-            if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
-                view, serializer = args
-                instance = view.get_object()
-                if instance:
-                    if isinstance(instance, models.Organization):
-                        shared_fields = OrganizationType._declared_fields.keys()
-                    elif isinstance(instance, models.User):
-                        shared_fields = UserType._declared_fields.keys()
-                    elif isinstance(instance, models.Team):
-                        shared_fields = TeamType._declared_fields.keys()
-                    attrs = serializer.validated_data
-                    for field in shared_fields:
-                        if field in attrs and getattr(instance, field) != attrs[field]:
-                            raise PermissionDenied({field: _(f"Cannot change shared field '{field}'. Alter this field via the platform ingress.")})
-            return cls.original_perform_update(*args, **kwargs)
-
-        cls.perform_update = update_wrapper
-
-    return cls
-
-
-@immutablesharedfields
 class TeamList(ListCreateAPIView):
     model = models.Team
     serializer_class = serializers.TeamSerializer
 
 
-@immutablesharedfields
 class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = models.Team
     serializer_class = serializers.TeamSerializer
 
 
-@immutablesharedfields
 class TeamUsersList(BaseUsersList):
     model = models.User
     serializer_class = serializers.UserSerializer
@@ -1127,7 +1061,6 @@ class ProjectCopy(CopyAPIView):
     copy_return_serializer_class = serializers.ProjectSerializer
 
 
-@immutablesharedfields
 class UserList(ListCreateAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
@@ -1184,14 +1117,6 @@ class UserRolesList(SubListAttachDetachAPIView):
         role = get_object_or_400(models.Role, pk=sub_id)
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        # Prevent user to be associated with team/org when ALLOW_LOCAL_RESOURCE_MANAGEMENT is False
-        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
-            for model in [models.Organization, models.Team]:
-                ct = content_types[model]
-                if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
-                    data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
-                    return Response(data, status=status.HTTP_403_FORBIDDEN)
-
         credential_content_type = content_types[models.Credential]
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
@@ -1264,7 +1189,6 @@ class UserActivityStreamList(SubListAPIView):
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
 
 
-@immutablesharedfields
 class UserDetail(RetrieveUpdateDestroyAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
@@ -4239,13 +4163,6 @@ class RoleUsersList(SubListAttachDetachAPIView):
         role = self.get_parent_object()
 
         content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        if not settings.ALLOW_LOCAL_RESOURCE_MANAGEMENT:
-            for model in [models.Organization, models.Team]:
-                ct = content_types[model]
-                if role.content_type == ct and role.role_field in ['member_role', 'admin_role']:
-                    data = dict(msg=_(f"Cannot directly modify user membership to {ct.model}. Direct shared resource management disabled"))
-                    return Response(data, status=status.HTTP_403_FORBIDDEN)
-
         credential_content_type = content_types[models.Credential]
         if role.content_type == credential_content_type:
             if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
