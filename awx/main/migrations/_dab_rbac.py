@@ -114,7 +114,7 @@ def get_permissions_for_role(role_field, children_map, apps):
     Permission = apps.get_model('dab_rbac', 'DABPermission')
     try:
         # After migration for remote permissions
-        ContentType = apps.get_model('dab_rbac', 'DABPermission')
+        ContentType = apps.get_model('dab_rbac', 'DABContentType')
     except LookupError:
         # If using DAB from before remote permissions are implemented
         ContentType = apps.get_model('contenttypes', 'ContentType')
@@ -288,7 +288,7 @@ def setup_managed_role_definitions(apps, schema_editor):
 
     try:
         # After migration for remote permissions
-        ContentType = apps.get_model('dab_rbac', 'DABPermission')
+        ContentType = apps.get_model('dab_rbac', 'DABContentType')
     except LookupError:
         # If using DAB from before remote permissions are implemented
         ContentType = apps.get_model('contenttypes', 'ContentType')
