@@ -839,16 +839,16 @@ class ResourceAccessList(ParentMixin, ListAPIView):
     def get_queryset(self):
         obj = self.get_parent_object()
 
-        content_type = ContentType.objects.get_for_model(obj)
-
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            ancestors = set(RoleEvaluation.objects.filter(content_type_id=content_type.id, object_id=obj.id).values_list('role_id', flat=True))
+            content_type = permission_registry.content_type_model.objects.get_for_model(obj)
+            ancestors = set(RoleEvaluation.objects.filter(content_type=content_type, object_id=obj.id).values_list('role_id', flat=True))
             qs = User.objects.filter(has_roles__in=ancestors) | User.objects.filter(is_superuser=True)
             auditor_role = RoleDefinition.objects.filter(name="Controller System Auditor").first()
             if auditor_role:
                 qs |= User.objects.filter(role_assignments__role_definition=auditor_role)
             return qs.distinct()
 
+        content_type = ContentType.objects.get_for_model(obj)
         roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))
 
         ancestors = set()
