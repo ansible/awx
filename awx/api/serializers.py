@@ -2771,10 +2771,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     # Singleton roles should not be managed from this view, as per copy/edit rework spec
                     role_dict['user_capabilities'] = {'unattach': False}
 
-                dab_ct = permission_registry.content_type_model.get_by_natural_key(content_type.app_label, content_type.model)
-
                 descendant_perms = list(
-                    RoleEvaluation.objects.filter(role__in=team.has_roles.all(), object_id=obj.id, content_type=dab_ct)
+                    RoleEvaluation.objects.filter(role__in=team.has_roles.all(), object_id=obj.id, content_type_id=content_type.id)
                     .values_list('codename', flat=True)
                     .distinct()
                 )
@@ -2782,10 +2780,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 ret.append({'role': role_dict, 'descendant_roles': get_roles_from_perms(descendant_perms)})
             return ret
 
-        gfk_kwargs = dict(content_type=content_type, object_id=obj.id)
-        dab_gfk_kwargs = dict(
-            content_type=permission_registry.content_type_model.get_by_natural_key(content_type.app_label, content_type.model), object_id=obj.id
-        )
+        gfk_kwargs = dict(content_type_id=content_type.id, object_id=obj.id)
         direct_permissive_role_ids = Role.objects.filter(**gfk_kwargs).values_list('id', flat=True)
 
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
@@ -2795,7 +2790,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             new_roles_seen = set()
             all_team_roles = set()
             all_permissive_role_ids = set()
-            for evaluation in RoleEvaluation.objects.filter(role__in=user.has_roles.all(), **dab_gfk_kwargs).prefetch_related('role'):
+            for evaluation in RoleEvaluation.objects.filter(role__in=user.has_roles.all(), **gfk_kwargs).prefetch_related('role'):
                 new_role = evaluation.role
                 if new_role.id in new_roles_seen:
                     continue
@@ -2803,9 +2798,9 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 old_role = get_role_from_object_role(new_role)
                 all_permissive_role_ids.add(old_role.id)
 
-                if int(new_role.object_id) == obj.id and new_role.content_type.model == content_type.model:
+                if int(new_role.object_id) == obj.id and new_role.content_type_id == content_type.id:
                     ret['summary_fields']['direct_access'].append(format_role_perm(old_role))
-                elif new_role.content_type.model == 'team':
+                elif new_role.content_type_id == team_content_type.id:
                     all_team_roles.add(old_role)
                 else:
                     ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
@@ -2815,7 +2810,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             # these contribute to all potential permission-granting roles of the object
             user_teams_qs = permission_registry.team_model.objects.filter(member_roles__in=ObjectRole.objects.filter(users=user))
             team_obj_roles = ObjectRole.objects.filter(teams__in=user_teams_qs)
-            for evaluation in RoleEvaluation.objects.filter(role__in=team_obj_roles, **dab_gfk_kwargs).prefetch_related('role'):
+            for evaluation in RoleEvaluation.objects.filter(role__in=team_obj_roles, **gfk_kwargs).prefetch_related('role'):
                 new_role = evaluation.role
                 if new_role.id in new_roles_seen:
                     continue
