@@ -17,7 +17,13 @@ logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 
 def create_permissions_as_operation(apps, schema_editor):
+    # NOTE: the DAB ContentType changes adjusted how they fire
+    # before they would fire on every app config, like contenttypes
     create_dab_permissions(global_apps.get_app_config("main"), apps=apps)
+    # This changed to only fire once and do a global creation
+    # so we need to call it for specifically the dab_rbac app
+    # multiple calls will not hurt anything
+    create_dab_permissions(global_apps.get_app_config("dab_rbac"), apps=apps)
 
 
 """
