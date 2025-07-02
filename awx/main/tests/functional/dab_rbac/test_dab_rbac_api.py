@@ -2,13 +2,12 @@ import pytest
 
 from django.urls import reverse as django_reverse
 
-from ansible_bae.rbac import permission_registry
-
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
 from awx.main.access import JobTemplateAccess, WorkflowJobTemplateAccess
 
 from ansible_base.rbac.models import RoleDefinition
+from ansible_base.rbac import permission_registry
 
 
 @pytest.mark.django_db
