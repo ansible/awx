@@ -458,33 +458,6 @@ class Role(models.Model):
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
             from ansible_base.rbac.models import RoleEvaluation
 
-            # TODO: translate between DAB RBAC content type id and the standard ct, possibility
-            # from django.db.models import Q, Subquery
-
-            # # Step 1: get all distinct content_type_ids present in RoleEvaluation with matching role
-            # content_type_ids = (
-            #     RoleEvaluation.objects
-            #     .filter(role__in=user.has_roles.all())
-            #     .values_list('content_type_id', flat=True)
-            #     .distinct()
-            # )
-
-            # # Step 2: Build disjunction (Q object) piece-by-piece
-            # combined_q = Q()
-            # for dab_ct_id in content_type_ids:
-            #     dab_ct = permission_registry.content_type_model.objects.get_for_id(dab_ct_id)
-
-            #     object_ids_subquery = RoleEvaluation.objects.filter(
-            #         role__in=user.has_roles.all(),
-            #         content_type_id=dab_ct_id,
-            #     ).values_list('object_id', flat=True)
-
-            #     # Add to ORed filter
-            #     combined_q |= Q(content_type_id=dab_ct.id, object_id__in=Subquery(object_ids_subquery))
-
-            # # Step 3: Apply the filter
-            # return roles_qs.filter(combined_q)
-
             q = RoleEvaluation.objects.filter(role__in=user.has_roles.all()).values_list('object_id', 'content_type_id').query
             return roles_qs.extra(where=[f'(object_id,content_type_id) in ({q})'])
 
