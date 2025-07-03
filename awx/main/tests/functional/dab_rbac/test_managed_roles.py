@@ -32,31 +32,17 @@ def test_org_child_add_permission(setup_managed_roles):
 
 
 @pytest.mark.django_db
-def test_controller_specific_roles_have_correct_permissions(setup_managed_roles):
-    '''
-    Controller specific roles should have the same permissions as the platform roles
-    e.g. Controller Team Admin should have same permission set as Team Admin
-    '''
-    for rd_name in ['Controller Team Admin', 'Controller Team Member', 'Controller Organization Member', 'Controller Organization Admin']:
-        rd = RoleDefinition.objects.get(name=rd_name)
-        rd_platform = RoleDefinition.objects.get(name=rd_name.split('Controller ')[1])
-        assert set(rd.permissions.all()) == set(rd_platform.permissions.all())
-
-
-@pytest.mark.django_db
 @pytest.mark.parametrize('resource_name', ['Team', 'Organization'])
 @pytest.mark.parametrize('action', ['Member', 'Admin'])
-def test_legacy_RBAC_uses_controller_specific_roles(setup_managed_roles, resource_name, action, team, bob, organization):
+def test_legacy_RBAC_uses_platform_roles(setup_managed_roles, resource_name, action, team, bob, organization):
     '''
-    Assignment to legacy RBAC roles should use controller specific role definitions
-    e.g. Controller Team Admin, Controller Team Member, Controller Organization Member, Controller Organization Admin
+    Assignment to legacy RBAC roles should use platform role definitions
+    e.g. Team Admin, Team Member, Organization Member, Organization Admin
     '''
     resource = team if resource_name == 'Team' else organization
     if action == 'Member':
         resource.member_role.members.add(bob)
     else:
         resource.admin_role.members.add(bob)
-    rd = RoleDefinition.objects.get(name=f'Controller {resource_name} {action}')
-    rd_platform = RoleDefinition.objects.get(name=f'{resource_name} {action}')
+    rd = RoleDefinition.objects.get(name=f'{resource_name} {action}')
     assert RoleUserAssignment.objects.filter(role_definition=rd, user=bob, object_id=resource.id).exists()
-    assert not RoleUserAssignment.objects.filter(role_definition=rd_platform, user=bob, object_id=resource.id).exists()

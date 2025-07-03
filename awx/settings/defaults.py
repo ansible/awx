@@ -540,7 +540,7 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 
 
 # If True, allow users to be assigned to roles that were created via JWT
-ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
+ALLOW_LOCAL_ASSIGNING_JWT_ROLES = True
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.

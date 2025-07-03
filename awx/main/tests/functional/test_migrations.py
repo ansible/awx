@@ -90,8 +90,8 @@ class TestMigrationSmoke:
 
         RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
         assert RoleUserAssignment.objects.filter(user=user.id, object_id=org.id).exists()
-        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Controller Organization Member', object_id=org.id).exists()
-        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Controller Team Member', object_id=team.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Organization Member', object_id=org.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Team Member', object_id=team.id).exists()
 
         # Regression testing for bug that comes from current vs past models mismatch
         RoleDefinition = new_state.apps.get_model('dab_rbac', 'RoleDefinition')
