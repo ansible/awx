@@ -32,19 +32,8 @@ def convert_controller_role_definitions(apps, schema_editor):
         if not old_role:
             continue  # Skip if the old role doesn't exist
 
-        # Find or create the new role definition with the same permissions
-        new_role, created = RoleDefinition.objects.get_or_create(
-            name=new_name,
-            defaults={
-                'description': old_role.description.replace('Controller ', '') if old_role.description else '',
-                'managed': old_role.managed,
-                'content_type': old_role.content_type,
-            },
-        )
-
-        # If we created a new role, copy the permissions
-        if created:
-            new_role.permissions.set(old_role.permissions.all())
+        # Find the new role definition
+        new_role = RoleDefinition.objects.get(name=new_name)
 
         # Collect all the assignments that need to be migrated
         # Group by object (content_type + object_id) to batch the give_permissions calls
@@ -85,36 +74,11 @@ def convert_controller_role_definitions(apps, schema_editor):
     RoleDefinition.objects.filter(name='Controller System Auditor').update(name='Platform Auditor')
 
 
-def reverse_convert_controller_role_definitions(apps, schema_editor):
-    """
-    Reverse the conversion of Controller role definitions to platform role definitions.
-    """
-    RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
-    RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
-    RoleTeamAssignment = apps.get_model('dab_rbac', 'RoleTeamAssignment')
-    role_mappings = {
-        'Controller Organization Admin': 'Organization Admin',
-        'Controller Organization Member': 'Organization Member',
-        'Controller Team Admin': 'Team Admin',
-        'Controller Team Member': 'Team Member',
-    }
-
-    for _, new_name in role_mappings.items():
-        RoleUserAssignment.objects.filter(role_definition__name=new_name).delete()
-        RoleTeamAssignment.objects.filter(role_definition__name=new_name).delete()
-
-    # rename Platform Auditor to Controller System Auditor
-    RoleDefinition.objects.filter(name='Platform Auditor').update(name='Controller System Auditor')
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ('main', '0202_squashed_deletions'),
     ]
 
     operations = [
-        migrations.RunPython(
-            convert_controller_role_definitions,
-            reverse_convert_controller_role_definitions,
-        ),
+        migrations.RunPython(convert_controller_role_definitions),
     ]
