@@ -26,7 +26,10 @@ def test_managed_roles_created(setup_managed_roles):
 def test_custom_read_role(admin_user, post, setup_managed_roles):
     rd_url = django_reverse('roledefinition-list')
     resp = post(
-        url=rd_url, data={"name": "read role made for test", "content_type": "awx.inventory", "permissions": ['view_inventory']}, user=admin_user, expect=201
+        url=rd_url,
+        data={"name": "read role made for test", "content_type": "awx.inventory", "permissions": ['awx.view_inventory']},
+        user=admin_user,
+        expect=201,
     )
     rd_id = resp.data['id']
     rd = RoleDefinition.objects.get(id=rd_id)
@@ -36,7 +39,7 @@ def test_custom_read_role(admin_user, post, setup_managed_roles):
 @pytest.mark.django_db
 def test_custom_system_roles_prohibited(admin_user, post):
     rd_url = django_reverse('roledefinition-list')
-    resp = post(url=rd_url, data={"name": "read role made for test", "content_type": None, "permissions": ['view_inventory']}, user=admin_user, expect=400)
+    resp = post(url=rd_url, data={"name": "read role made for test", "content_type": None, "permissions": ['awx.view_inventory']}, user=admin_user, expect=400)
     assert 'System-wide roles are not enabled' in str(resp.data)
 
 
