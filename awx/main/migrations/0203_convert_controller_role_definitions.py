@@ -91,7 +91,6 @@ def convert_controller_role_definitions(apps, schema_editor):
     # Delete the Controller System Auditor role
     RoleDefinition.objects.filter(name='Controller System Auditor').delete()
 
-
 class Migration(migrations.Migration):
     dependencies = [
         ('main', '0202_squashed_deletions'),
