@@ -58,7 +58,7 @@ def consolidate_indirect_user_roles(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('conf', '0016_remove_tacacs_plus_auth_conf'),
+        ('main', '0202_squashed_deletions'),
     ]
 
     operations = [migrations.RunPython(consolidate_indirect_user_roles, migrations.RunPython.noop)]
