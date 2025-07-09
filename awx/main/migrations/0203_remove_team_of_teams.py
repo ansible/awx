@@ -15,8 +15,10 @@ def consolidate_indirect_user_roles(apps, schema_editor):
 
     # get object roles for membership on teams
     ObjectRole = apps.get_model('dab_rbac', 'ObjectRole')
+    Role = apps.get_model('main', 'Role')
+
     team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(
-        role_definition__description='Has member permissions to a single team'
+        role_definition__name='Team Member'
     )
 
     # for team member object role, check if teams are assigned
@@ -46,13 +48,31 @@ def consolidate_indirect_user_roles(apps, schema_editor):
             for team in incl_teams:
                 team_users = team_member_object_roles.get(object_id=team.id).users.all()
 
+                # mirror changes to Role model
                 for parent_id in all_parents:
                     parent_obj_role = team_member_object_roles.get(object_id=parent_id)
+                    parent_role = Role.objects.get(object_id=parent_id)
                     for user in team_users:
                         parent_obj_role.users.add(user.id)
+                        parent_role.members.add(user.id)
 
-                # remove team from object role
-                obj_role.teams.remove(team.id)
+
+def clear_indirect_teams(apps, schema_editor):
+    """
+    Teams should not be team members on other Teams. If a Team's membership
+    ObjectRole has any teams assigned, clear it.
+    """
+    # get all roles for membership on teams
+    ObjectRole = apps.get_model('dab_rbac', 'ObjectRole')
+    team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(
+        role_definition__description='Team Member'
+    )
+
+    # for team member roles, check if teams are assigned
+    for obj_role in team_member_object_roles:
+        incl_teams = obj_role.teams.all()
+        if incl_teams:
+            obj_role.teams.clear()
 
 
 class Migration(migrations.Migration):
@@ -61,4 +81,7 @@ class Migration(migrations.Migration):
         ('main', '0202_squashed_deletions'),
     ]
 
-    operations = [migrations.RunPython(consolidate_indirect_user_roles, migrations.RunPython.noop)]
+    operations = [
+        migrations.RunPython(consolidate_indirect_user_roles, migrations.RunPython.noop),
+        migrations.RunPython(clear_indirect_teams, migrations.RunPython.noop)
+    ]
