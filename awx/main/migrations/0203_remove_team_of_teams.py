@@ -15,7 +15,7 @@ def consolidate_indirect_user_roles(apps, schema_editor):
 
     # get object roles for membership on teams
     ObjectRole = apps.get_model('dab_rbac', 'ObjectRole')
-    Role = apps.get_model('main', 'Role')
+    Team = apps.get_model('main', 'Team')
 
     team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(role_definition__name='Team Member')
 
@@ -49,10 +49,10 @@ def consolidate_indirect_user_roles(apps, schema_editor):
                 # mirror changes to Role model
                 for parent_id in all_parents:
                     parent_obj_role = team_member_object_roles.get(object_id=parent_id)
-                    parent_role = Role.objects.get(object_id=parent_id)
+                    parent_role = Team.objects.get(id=parent_id)
                     for user in team_users:
                         parent_obj_role.users.add(user.id)
-                        parent_role.members.add(user.id)
+                        parent_role.member_role.members.add(user.id)
 
 
 def clear_indirect_teams(apps, schema_editor):
