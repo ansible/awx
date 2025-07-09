@@ -17,9 +17,7 @@ def consolidate_indirect_user_roles(apps, schema_editor):
     ObjectRole = apps.get_model('dab_rbac', 'ObjectRole')
     Role = apps.get_model('main', 'Role')
 
-    team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(
-        role_definition__name='Team Member'
-    )
+    team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(role_definition__name='Team Member')
 
     # for team member object role, check if teams are assigned
     for obj_role in team_member_object_roles:
@@ -64,9 +62,7 @@ def clear_indirect_teams(apps, schema_editor):
     """
     # get all roles for membership on teams
     ObjectRole = apps.get_model('dab_rbac', 'ObjectRole')
-    team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(
-        role_definition__description='Team Member'
-    )
+    team_member_object_roles = ObjectRole.objects.filter(content_type__model='team').filter(role_definition__description='Team Member')
 
     # for team member roles, check if teams are assigned
     for obj_role in team_member_object_roles:
@@ -83,5 +79,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(consolidate_indirect_user_roles, migrations.RunPython.noop),
-        migrations.RunPython(clear_indirect_teams, migrations.RunPython.noop)
+        migrations.RunPython(clear_indirect_teams, migrations.RunPython.noop),
     ]
