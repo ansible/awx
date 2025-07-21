@@ -5,6 +5,18 @@ from django.db import migrations, models
 from awx.main.migrations._create_system_jobs import delete_clear_tokens_sjt
 
 
+def update_github_app_kind(apps, schema_editor):
+    """
+    Updates the 'kind' field for CredentialType records
+    from 'github_app' to 'github_app_lookup'.
+    This addresses a change in the entry point key for the GitHub App plugin.
+    """
+    CredentialType = apps.get_model('main', 'CredentialType')
+    db_alias = schema_editor.connection.alias
+
+    CredentialType.objects.using(db_alias).filter(kind='github_app').update(kind='github_app_lookup')
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ('main', '0201_create_managed_creds'),
@@ -97,4 +109,5 @@ class Migration(migrations.Migration):
                 max_length=32,
             ),
         ),
+        migrations.RunPython(update_github_app_kind, migrations.RunPython.noop),
     ]
