@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+
 import io
 import os
 import json
@@ -61,12 +62,14 @@ def import_awxkit():
     global HAS_AWX_KIT
     try:
         import tower_cli  # noqa
+
         HAS_TOWER_CLI = True
     except ImportError:
         HAS_TOWER_CLI = False
 
     try:
         import awxkit  # noqa
+
         HAS_AWX_KIT = True
     except ImportError:
         HAS_AWX_KIT = False
@@ -177,10 +180,10 @@ def run_module(request, collection_import):
         if not isinstance(module_params, dict):
             raise RuntimeError('Module params must be dict, got {0}'.format(type(module_params)))
 
-        # Ansible params can be passed as an invocation argument or over stdin
-        # this short circuits within the AnsibleModule interface
         def mock_load_params(self):
             self.params = module_params
+            self._ANSIBLE_PROFILE = 'legacy'
+            return module_params, 'legacy'
 
         if getattr(resource_module, 'ControllerAWXKitModule', None):
             resource_class = resource_module.ControllerAWXKitModule
@@ -190,7 +193,6 @@ def run_module(request, collection_import):
             raise RuntimeError("The module has neither a ControllerAWXKitModule or a ControllerAPIModule")
 
         with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
-            # Call the test utility (like a mock server) instead of issuing HTTP requests
             with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
                 if HAS_TOWER_CLI:
                     tower_cli_mgr = mock.patch('tower_cli.api.Session.request', new=new_request)
@@ -200,13 +202,11 @@ def run_module(request, collection_import):
                     tower_cli_mgr = suppress()
                 with tower_cli_mgr:
                     try:
-                        # Ansible modules return data to the mothership over stdout
                         with redirect_stdout(stdout_buffer):
                             resource_module.main()
                     except SystemExit:
-                        pass  # A system exit indicates successful execution
+                        pass
                     except Exception:
-                        # dump the stdout back to console for debugging
                         print(stdout_buffer.getvalue())
                         raise
 
