@@ -538,9 +538,6 @@ AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 # Automatically remove nodes that have missed their heartbeats after some time
 AWX_AUTO_DEPROVISION_INSTANCES = False
 
-# If False, do not allow creation of resources that are shared with the platform ingress
-# e.g. organizations, teams, and users
-ALLOW_LOCAL_RESOURCE_MANAGEMENT = True
 
 # If True, allow users to be assigned to roles that were created via JWT
 ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False

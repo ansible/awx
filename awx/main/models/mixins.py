@@ -86,7 +86,7 @@ class ResourceMixin(models.Model):
             raise RuntimeError(f'Role filters only valid for users and ancestor role, received {accessor}')
 
         if content_types is None:
-            ct_kwarg = dict(content_type_id=ContentType.objects.get_for_model(cls).id)
+            ct_kwarg = dict(content_type=ContentType.objects.get_for_model(cls))
         else:
             ct_kwarg = dict(content_type_id__in=content_types)
 

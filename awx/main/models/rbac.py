@@ -27,6 +27,7 @@ from django.conf import settings
 
 # Ansible_base app
 from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
+from ansible_base.rbac import permission_registry
 from ansible_base.lib.utils.models import get_type_for_model
 
 # AWX
@@ -561,7 +562,7 @@ def get_role_definition(role):
     model_print = type(obj).__name__
     perm_list = get_role_codenames(role)
     defaults = {
-        'content_type_id': role.content_type_id,
+        'content_type': permission_registry.content_type_model.objects.get_by_natural_key(role.content_type.app_label, role.content_type.model),
         'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',
     }
     # use Controller-specific role definitions for Team/Organization and member/admin

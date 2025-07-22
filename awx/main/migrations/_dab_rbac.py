@@ -17,7 +17,13 @@ logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 
 def create_permissions_as_operation(apps, schema_editor):
+    # NOTE: the DAB ContentType changes adjusted how they fire
+    # before they would fire on every app config, like contenttypes
     create_dab_permissions(global_apps.get_app_config("main"), apps=apps)
+    # This changed to only fire once and do a global creation
+    # so we need to call it for specifically the dab_rbac app
+    # multiple calls will not hurt anything
+    create_dab_permissions(global_apps.get_app_config("dab_rbac"), apps=apps)
 
 
 """
@@ -112,7 +118,12 @@ def get_descendents(f, children_map):
 
 def get_permissions_for_role(role_field, children_map, apps):
     Permission = apps.get_model('dab_rbac', 'DABPermission')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    try:
+        # After migration for remote permissions
+        ContentType = apps.get_model('dab_rbac', 'DABContentType')
+    except LookupError:
+        # If using DAB from before remote permissions are implemented
+        ContentType = apps.get_model('contenttypes', 'ContentType')
 
     perm_list = []
     for child_field in get_descendents(role_field, children_map):
@@ -281,7 +292,13 @@ def setup_managed_role_definitions(apps, schema_editor):
         'special': '{cls.__name__} {action}',
     }
 
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    try:
+        # After migration for remote permissions
+        ContentType = apps.get_model('dab_rbac', 'DABContentType')
+    except LookupError:
+        # If using DAB from before remote permissions are implemented
+        ContentType = apps.get_model('contenttypes', 'ContentType')
+
     Permission = apps.get_model('dab_rbac', 'DABPermission')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     Organization = apps.get_model(settings.ANSIBLE_BASE_ORGANIZATION_MODEL)
