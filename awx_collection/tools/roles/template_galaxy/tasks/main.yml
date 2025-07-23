@@ -2,7 +2,7 @@
 - name: Sanity assertions, that some variables have a non-blank value
   assert:
     that:
-      - collection_version
+      - collection_version != ''
       - collection_package
       - collection_path
 
