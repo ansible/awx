@@ -193,7 +193,9 @@
         that:
           - "result is failed"
           - "result is not changed"
-          - "'test-non-existing-org' in result.msg"
+          - >-
+            'Request to /api/v2/organizations/?name=test-non-existing-org' in result.msg and
+            'returned 0 items, expected 1' in result.msg
           - "result.total_results == 0"
 
   always:
