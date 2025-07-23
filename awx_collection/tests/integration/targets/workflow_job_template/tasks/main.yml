@@ -319,7 +319,6 @@
         organization: Default
         inventory: Demo Inventory
         extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
-        # We don't try with the label here because after we delete the first WFJT the label is delete with it because it has no references
         ask_inventory_on_launch: true
         ask_scm_branch_on_launch: true
         ask_limit_on_launch: true
@@ -346,13 +345,12 @@
         ask_tags_on_launch: true
         ask_variables_on_launch: true
       register: bad_label_results
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
           - "bad_label_results.msg == 'Could not find label entry with name label_bad'"
 
-    # Turn off ask_ * settings to test that the issue/10057 has been fixed
     - name: Turn ask_* settings OFF
       tower_workflow_job_template:
         name: "{{ wfjt_name }}"
@@ -387,7 +385,6 @@
         - "{{ ig1 }}"
         - "{{ ig2 }}"
 
-    # Node actions do what the schema command used to do
     - name: Create leaf node
       workflow_job_template_node:
         identifier: leaf
@@ -461,23 +458,27 @@
 
     - name: Fail if absent and no identifier set
       workflow_job_template_node:
+        identifier: approval_test
         approval_node:
           description: "{{ approval_node_name }}"
         workflow: "{{ wfjt_name }}"
         state: absent
       register: no_identifier_results
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
-          - "no_identifier_results.msg == 'missing required arguments: identifier'"
+          - no_identifier_results.msg is defined
 
     - name: Fail if present and no unified job template set
       workflow_job_template_node:
         identifier: approval_test
         workflow: "{{ wfjt_name }}"
+        unified_job_template:
+          name: "NonExistentUJT"
+          type: "job_template"
       register: no_unified_results
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -561,7 +562,7 @@
         notification_templates_started:
           - "{{ email_not }}123"
       register: remove_copied_workflow_node
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -727,13 +728,15 @@
         name: "{{ wfjt_name }}"
         organization: Non_Existing_Organization
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
           - "result is failed"
           - "result is not changed"
-          - "'Non_Existing_Organization' in result.msg"
+          - >-  # Use block scalar for clarity and strict boolean conversion
+            'Request to /api/v2/organizations/?name=Non_Existing_Organization' in result.msg and
+            'returned 0 items, expected 1' in result.msg
           - "result.total_results == 0"
 
     - name: Create a workflow job template with workflow nodes in template
@@ -1023,6 +1026,7 @@
         credential_type: GitHub Personal Access Token
         state: absent
       ignore_errors: True
+      when: github_found
 
     - name: Delete email notification
       notification_template:

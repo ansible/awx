@@ -78,12 +78,12 @@
 
     - name: Use lookup to check that schedules was enabled
       ansible.builtin.set_fact:
-        schedules_enabled_test: "lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled"
+        schedules_enabled_test: "{{ lookup('awx.awx.controller_api', 'schedules/' + result.id | string + '/').enabled }}"
 
     - name: Newly created schedules should have API default value for enabled
       assert:
         that:
-          - schedules_enabled_test
+          - schedules_enabled_test is true
 
     - name: Build a real schedule with exists
       schedule:
@@ -400,9 +400,7 @@
         credential_type: Red Hat Ansible Automation Platform
         state: absent
       ignore_errors: True
-
     # Labels can not be deleted
-
     - name: Delete an execution environment
       execution_environment:
         name: "{{ ee1 }}"
@@ -432,7 +430,7 @@
         state: absent
       ignore_errors: True
 
-    - name: Delete slice hosts
+    - name: "Delete slice hosts"
       host:
         name: "{{ host_name }}-{{ item }}"
         inventory: "{{ slice_inventory }}"
