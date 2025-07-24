@@ -11,8 +11,7 @@ the following fields (some fields may not be visible to all users):
 * `time_zone`: The configured time zone for the server.
 * `license_info`: Information about the current license.
 * `version`: Version of Ansible Tower package installed.
-* `custom_virtualenvs`: Deprecated venv locations from before migration to
-  execution environments. Export tooling is in `awx-manage` commands.
+
 * `eula`: The current End-User License Agreement
 {% endifmeth %}
 

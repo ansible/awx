@@ -152,7 +152,7 @@ class Metadata(metadata.SimpleMetadata):
                 pass
         if field.field_name == 'type':
             field_info['type'] = 'choice'
-        elif field.field_name in ('url', 'custom_virtualenv', 'token'):
+        elif field.field_name in ('url', 'token'):
             field_info['type'] = 'string'
         elif field.field_name in ('related', 'summary_fields'):
             field_info['type'] = 'object'

@@ -171,7 +171,6 @@ PROXY_IP_ALLOWED_LIST = []
 # If this setting is an empty list (the default), we will only trust ourself
 CSRF_TRUSTED_ORIGINS = []
 
-CUSTOM_VENV_PATHS = []
 
 # Warning: this is a placeholder for a database setting
 # This should not be set via a file.

@@ -47,7 +47,6 @@ from awx.main.models.mixins import (
     SurveyJobTemplateMixin,
     SurveyJobMixin,
     TaskManagerJobMixin,
-    CustomVirtualEnvMixin,
     RelatedJobsMixin,
     WebhookMixin,
     WebhookTemplateMixin,
@@ -193,9 +192,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(
-    UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin
-):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin):
     """
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -559,7 +556,7 @@ class JobTemplate(
         return UnifiedJob.objects.filter(unified_job_template=self)
 
 
-class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin, CustomVirtualEnvMixin, WebhookMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin, WebhookMixin):
     """
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the

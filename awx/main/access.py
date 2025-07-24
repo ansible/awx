@@ -1590,7 +1590,6 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
             'ask_inventory_on_launch',
             'ask_credential_on_launch',
             'survey_enabled',
-            'custom_virtualenv',
             'diff_mode',
             'timeout',
             'job_slice_count',

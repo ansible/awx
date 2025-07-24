@@ -26,11 +26,11 @@ from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
-from awx.main.utils import get_awx_version, get_custom_venv_choices
+from awx.main.utils import get_awx_version
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
-from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
+from awx.main.models import Project, Organization, Instance, InstanceGroup
 from awx.main.utils import set_environ
 from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
@@ -291,11 +291,8 @@ class ApiV2ConfigView(APIView):
                 dict(
                     project_base_dir=settings.PROJECTS_ROOT,
                     project_local_paths=Project.get_local_path_choices(),
-                    custom_virtualenvs=get_custom_venv_choices(),
                 )
             )
-        elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
-            data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)
 
