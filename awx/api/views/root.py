@@ -223,6 +223,8 @@ class ApiV2AttachView(APIView):
             return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
         user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
         pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        if not (user and pw):
+            return Response({"error": _("Missing subscription credentials")}, status=status.HTTP_400_BAD_REQUEST)
         if subscription_id and user and pw:
             data = request.data.copy()
             try:
