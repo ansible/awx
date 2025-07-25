@@ -361,7 +361,7 @@ jobs:
           python-version: '3.x'
 
       - name: Upgrade ansible-core
-        run: python3 -m pip install --upgrade ansible-core
+        run: python3 -m pip install --upgrade 'ansible-core<2.18'
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
