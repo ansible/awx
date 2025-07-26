@@ -8,6 +8,7 @@ import operator
 from collections import OrderedDict
 
 from django.conf import settings
+from django.core.cache import cache
 from django.utils.encoding import smart_str
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -221,6 +222,8 @@ class ApiV2AttachView(APIView):
         subscription_id = data.get('subscription_id', None)
         if not subscription_id:
             return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
+        # Ensure we always use the latest subscription credentials
+        cache.delete_many(['SUBSCRIPTIONS_CLIENT_ID', 'SUBSCRIPTIONS_CLIENT_SECRET'])
         user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
         pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
         if not (user and pw):
