@@ -8,7 +8,6 @@
   set_fact:
     jt_name: "AWX-Collection-tests-job_wait-long_running-{{ test_id }}"
     proj_name: "AWX-Collection-tests-job_wait-long_running-{{ test_id }}"
-    wfjt_name2: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}"
 
 - block:
     - name: Create a project
@@ -33,7 +32,7 @@
       job_wait:
         job_id: "99999999"
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -75,7 +74,7 @@
       job_wait:
         job_id: "{{ job.id }}"
         timeout: 5
-      ignore_errors: true
+      ignore_errors: yes
       register: wait_results
 
     - assert:
@@ -94,7 +93,7 @@
         job_id: "{{ job.id }}"
         timeout: 60
       register: wait_results
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -126,7 +125,7 @@
     - name: Kick off a workflow
       workflow_launch:
         workflow_template: "{{ wfjt_name2 }}"
-      ignore_errors: true
+      ignore_errors: yes
       register: workflow
 
     - name: Wait for the Workflow Job to finish

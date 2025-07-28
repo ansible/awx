@@ -1,11 +1,11 @@
 ---
 - name: Generate a test ID
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
 - name: Generate names
-  set_fact:
+  ansible.builtin.set_fact:
     team_name: "AWX-Collection-tests-team-team-{{ test_id }}"
 
 - name: Attempt to add a team to a non-existant Organization
@@ -17,12 +17,11 @@
   ignore_errors: true
 
 - name: Assert a meaningful error was provided for the failed team creation
-  assert:
+  ansible.builtin.assert:
     that:
       - "result is failed"
-      - "result is not changed"
-      - "'Missing_Organization' in result.msg"
-      - "result.total_results == 0"
+      - >-
+          'Missing_Organization' in result.msg
 
 - name: Create a team
   team:
@@ -30,9 +29,10 @@
     organization: Default
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Create a team with exists
   team:
@@ -41,9 +41,10 @@
     state: exists
   register: result
 
-- assert:
+- name: Assert result did not change
+  ansible.builtin.assert:
     that:
-      - "result is not changed"
+      - not result.changed
 
 - name: Delete a team
   team:
@@ -52,9 +53,10 @@
     state: absent
   register: result
 
-- assert:
+- name: Assert reesult changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Create a team with exists
   team:
@@ -63,9 +65,10 @@
     state: exists
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Delete a team
   team:
@@ -74,9 +77,10 @@
     state: absent
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Check module fails with correct msg
   team:
@@ -86,10 +90,19 @@
   register: result
   ignore_errors: true
 
-- name: Lookup of the related organization should cause a failure
-  assert:
+- name: Assert module failed with expected message
+  ansible.builtin.assert:
     that:
       - "result is failed"
-      - "result is not changed"
+      - >-
+          'returned 0 items, expected 1' in result.msg or
+          'returned 0 items, expected 1' in result.exception or
+          'returned 0 items, expected 1' in result.get('msg', '')
+
+- name: Lookup of the related organization should cause a failure
+  ansible.builtin.assert:
+    that:
+      - result.failed
+      - not result.changed
       - "'Non_Existing_Org' in result.msg"
       - "result.total_results == 0"

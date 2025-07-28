@@ -70,7 +70,7 @@
     command_id: "{{ command.id }}"
     fail_if_not_running: true
   register: results
-  ignore_errors: true
+  ignore_errors: yes
 
 - ansible.builtin.assert:
     that:
@@ -81,7 +81,7 @@
     command_id: "{{ command.id }}"
     fail_if_not_running: true
   register: results
-  ignore_errors: true
+  ignore_errors: yes
 
 - ansible.builtin.assert:
     that:
@@ -91,7 +91,7 @@
   awx.awx.ad_hoc_command_cancel:
     command_id: 9999999999
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - ansible.builtin.assert:
     that:

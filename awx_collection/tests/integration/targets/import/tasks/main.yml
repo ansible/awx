@@ -49,7 +49,7 @@
                 name: "{{ org_name1 }}"
                 type: "organization"
       register: import_output
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:

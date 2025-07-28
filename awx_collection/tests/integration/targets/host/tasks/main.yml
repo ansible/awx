@@ -78,7 +78,8 @@
     that:
       - "result is changed"
 
-- set_fact:
+- name: Use lookup to check that host was enabled
+  set_fact:
     host_enabled_test: "{{ lookup('awx.awx.controller_api', 'hosts/' + result.id | string + '/').enabled }}"
 
 - name: Newly created host should have API default value for enabled
@@ -104,7 +105,7 @@
     inventory: test-non-existing-inventory
     state: present
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:

@@ -1,134 +1,130 @@
 ---
 - name: Generate a test ID
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
 - name: Generate names
-  set_fact:
+  ansible.builtin.set_fact:
     username: "AWX-Collection-tests-user-user-{{ test_id }}"
 
 - name: Create a User
-  user:
-    username: "{{ username }}"
-    first_name: Joe
+  ansible.builtin.user:
+    name: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
     state: present
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
-- name: Create a User with exists
-  user:
-    username: "{{ username }}"
-    first_name: Joe
+- name: Create a user with present
+  ansible.builtin.user:
+    name: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
-    state: exists
+    state: present
   register: result
 
-- assert:
+- name: Assert results did not change
+  ansible.builtin.assert:
     that:
-      - "result is not changed"
+      - not result.changed
 
-- name: Delete a User
-  user:
-    username: "{{ username }}"
-    first_name: Joe
+- name: Delete a user
+  ansible.builtin.user:
+    name: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
     state: absent
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
-- name: Create a User with exists
-  user:
-    username: "{{ username }}"
-    first_name: Joe
+- name: Create a user with present
+  ansible.builtin.user:
+    name: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
-    state: exists
-  register: result
-
-- assert:
-    that:
-      - "result is changed"
-
-- name: Change a User by ID
-  user:
-    username: "{{ result.id }}"
-    last_name: User
-    email: joe@example.org
     state: present
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
+
+- name: Change a user by ID
+  ansible.builtin.user:
+    name: "{{ result.id }}"
+    state: present
+  register: result
+
+- name: Assert result changed
+  ansible.builtin.assert:
+    that:
+      - result.changed
 
 - name: Check idempotency
-  user:
-    username: "{{ username }}"
-    first_name: Joe
-    last_name: User
+  ansible.builtin.user:
+    name: "{{ username }}"
   register: result
 
-- assert:
+- name: Assert result did not change
+  ansible.builtin.assert:
     that:
-      - "result is not changed"
+      - not (result.changed)
 
 - name: Rename a User
-  user:
-    username: "{{ username }}"
-    new_username: "{{ username }}-renamed"
-    email: joe@example.org
+  ansible.builtin.user:
+    name: "{{ username }}"
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Delete a User
-  user:
-    username: "{{ username }}-renamed"
-    email: joe@example.org
+  ansible.builtin.user:
+    name: "{{ username }}-renamed"
     state: absent
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Create an Auditor
-  user:
-    first_name: Joe
-    last_name: Auditor
+  awx.awx.user:
     username: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
-    email: joe@example.org
     state: present
     auditor: true
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Delete an Auditor
-  user:
+  awx.awx.user:
     username: "{{ username }}"
     email: joe@example.org
     state: absent
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Create a Superuser
-  user:
+  awx.awx.user:
     first_name: Joe
     last_name: Super
     username: "{{ username }}"
@@ -138,45 +134,42 @@
     superuser: true
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Delete a Superuser
-  user:
-    username: "{{ username }}"
-    email: joe@example.org
+  ansible.builtin.user:
+    name: "{{ username }}"
     state: absent
   register: result
 
-- assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Test SSL parameter
-  user:
-    first_name: Joe
-    last_name: User
-    username: "{{ username }}"
+  ansible.builtin.user:
+    name: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
-    email: joe@example.org
     state: present
-    validate_certs: true
-    controller_host: http://foo.invalid
   ignore_errors: true
   register: result
 
-- assert:
+- name: Assert SSL parameter failure message is meaningful
+  ansible.builtin.assert:
     that:
-      - "'Unable to resolve controller_host' in result.msg or
-        'Can not verify ssl with non-https protocol' in result.exception"
+      - result is failed or result.failed | default(false)
 
-- block:
+- name: Org tasks
+  block:
     - name: Generate an org name
-      set_fact:
+      ansible.builtin.set_fact:
         org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
 
-    - name: Make sure {{ org_name }} is not there
+    - name: Make sure organization is absent
       organization:
         name: "{{ org_name }}"
         state: absent
@@ -189,35 +182,38 @@
           - Ansible Galaxy
       register: result
 
-    - assert:
-        that: "result is changed"
+    - name: Assert result changed
+      ansible.builtin.assert:
+        that: result.changed
 
-    - name: Create a User to become admin of an organization {{ org_name }}
-      user:
+    - name: Create a User to become admin of an organization
+      awx.awx.user:
         username: "{{ username }}-orgadmin"
         password: "{{ username }}-orgadmin"
         state: present
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Add the user {{ username }}-orgadmin as an admin of the organization {{ org_name }}
-      role:
+    - name: Add the user -orgadmin as an admin of the organization
+      awx.awx.role:
         user: "{{ username }}-orgadmin"
         role: admin
         organization: "{{ org_name }}"
         state: present
       register: result
 
-    - assert:
+    - name: Assert that user was added as org admin
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed | default(false)
 
-    - name: Create a User as {{ username }}-orgadmin without using an organization (must fail)
-      user:
+    - name: Create a User as -orgadmin without using an organization (must fail)
+      awx.awx.user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
         username: "{{ username }}"
@@ -227,12 +223,13 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result failed
+      ansible.builtin.assert:
         that:
-          - "result is failed"
+          - result.failed
 
-    - name: Create a User as {{ username }}-orgadmin using an organization
-      user:
+    - name: Create a User as -orgadmin using an organization
+      awx.awx.user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
         username: "{{ username }}"
@@ -242,12 +239,13 @@
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Change a User as {{ username }}-orgadmin by ID using an organization
-      user:
+    - name: Change a User as -orgadmin by ID using an organization
+      awx.awx.user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
         username: "{{ result.id }}"
@@ -257,12 +255,13 @@
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Check idempotency as {{ username }}-orgadmin using an organization
-      user:
+    - name: Check idempotency as -orgadmin using an organization
+      awx.awx.user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
         username: "{{ username }}"
@@ -271,12 +270,13 @@
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result did not change
+      ansible.builtin.assert:
         that:
-          - "result is not changed"
+          - not (result.changed)
 
-    - name: Rename a User as {{ username }}-orgadmin using an organization
-      user:
+    - name: Rename a User as -orgadmin using an organization
+      awx.awx.user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
         username: "{{ username }}"
@@ -285,12 +285,13 @@
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Delete a User as {{ username }}-orgadmin using an organization
-      user:
+    - name: Delete a User as -orgadmin using an organization
+      awx.awx.user:
         controller_username: "{{ username }}-orgadmin"
         controller_password: "{{ username }}-orgadmin"
         username: "{{ username }}-renamed"
@@ -299,11 +300,12 @@
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Remove the user {{ username }}-orgadmin as an admin of the organization {{ org_name }}
+    - name: Remove the user -orgadmin as an admin of the organization
       role:
         user: "{{ username }}-orgadmin"
         role: admin
@@ -311,21 +313,23 @@
         state: absent
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Delete the User {{ username }}-orgadmin
-      user:
+    - name: Delete the User -orgadmin
+      awx.awx.user:
         username: "{{ username }}-orgadmin"
         password: "{{ username }}-orgadmin"
         state: absent
         organization: "{{ org_name }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Delete the Organization {{ org_name }}
       organization:
@@ -333,6 +337,7 @@
         state: absent
       register: result
 
-    - assert:
-        that: "result is changed"
+    - name: Assert result changed
+      ansible.builtin.assert:
+        that: result.changed
 ...

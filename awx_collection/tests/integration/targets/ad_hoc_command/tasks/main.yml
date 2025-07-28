@@ -108,7 +108,7 @@
     credential: "{{ ssh_cred_name }}"
     module_name: "Does not exist"
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:

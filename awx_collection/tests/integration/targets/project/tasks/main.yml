@@ -63,7 +63,7 @@
         state: exists
         request_timeout: .001
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -106,7 +106,7 @@
         scm_url: https://github.com/ansible/ansible-tower-samples
         wait: false
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -165,7 +165,7 @@
         scm_url: https://github.com/ansible/ansible-tower-samples
         scm_credential: "{{ cred_name }}"
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -182,7 +182,7 @@
         scm_url: https://github.com/ansible/ansible-tower-samples
         scm_credential: Non_Existing_Credential
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:

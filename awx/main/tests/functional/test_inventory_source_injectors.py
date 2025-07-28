@@ -223,6 +223,10 @@ def test_inventory_update_injected_content(product_name, this_kind, inventory, f
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == 'auto'
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
+
+        # Ensure the directory exists before trying to list/read it
+        os.makedirs(private_data_dir, exist_ok=True)
+
         env, content = read_content(private_data_dir, envvars, inventory_update)
 
         # Assert inventory plugin inventory file is in private_data_dir

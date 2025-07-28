@@ -1,18 +1,19 @@
 ---
 - name: Generate a random string for names
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
 - name: Generate random names for test objects
-  set_fact:
+  ansible.builtin.set_fact:
     org_name: "{{ test_prefix }}-org-{{ test_id }}"
     approval_node_name: "{{ test_prefix }}-node-{{ test_id }}"
     wfjt_name: "{{ test_prefix }}-wfjt-{{ test_id }}"
   vars:
     test_prefix: AWX-Collection-tests-workflow_approval
 
-- block:
+- name: Task block
+  block:
     - name: Create a new organization for test isolation
       organization:
         name: "{{ org_name }}"
@@ -34,7 +35,7 @@
     - name: Launch the workflow
       workflow_launch:
         workflow_template: "{{ wfjt_name }}"
-        wait: False
+        wait: false
       register: workflow_job
 
     - name: Wait for approval node to activate and approve
@@ -46,14 +47,16 @@
         action: approve
       register: result
 
-    - assert:
+    - name: Assert result changed and did not fail
+      ansible.builtin.assert:
         that:
-          - "result is changed"
-          - "result is not failed"
+          - result.changed
+          - not (result.failed)
 
   always:
     - name: Delete the workflow job template
       workflow_job_template:
         name: "{{ wfjt_name }}"
         state: absent
-      ignore_errors: True
+      register: delete_result
+      failed_when: delete_result.failed and "'not found' not in delete_result.msg"

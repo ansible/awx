@@ -36,7 +36,7 @@
     organization: "Non_existing_org"
     state: present
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:

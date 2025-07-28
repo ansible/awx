@@ -293,12 +293,6 @@
     that:
       - "result is changed"
 
-- name: Ensure label_bad exists
-  label:
-    name: label_bad
-    organization: Default
-    state: present
-
 - name: add bad label to Job Template 2
   job_template:
     name: "{{ jt2 }}"
@@ -312,7 +306,7 @@
       - label_bad
     state: present
   register: bad_label_results
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:

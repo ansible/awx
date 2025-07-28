@@ -17,7 +17,6 @@ import pytest
 
 from ansible.module_utils.six import raise_from
 
-
 from ansible_base.rbac.models import RoleDefinition, DABPermission
 from ansible_base.rbac import permission_registry
 
@@ -62,14 +61,12 @@ def import_awxkit():
     global HAS_AWX_KIT
     try:
         import tower_cli  # noqa
-
         HAS_TOWER_CLI = True
     except ImportError:
         HAS_TOWER_CLI = False
 
     try:
         import awxkit  # noqa
-
         HAS_AWX_KIT = True
     except ImportError:
         HAS_AWX_KIT = False
@@ -234,7 +231,6 @@ def run_module(request, collection_import, mocker):
 
         def mock_load_params(self):
             self.params = module_params
-            return module_params, 'legacy'
 
         resource_class = _get_resource_class(resource_module)
 
