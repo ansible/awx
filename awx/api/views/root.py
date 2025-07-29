@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db import connection
 from django.utils.encoding import smart_str
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -27,6 +28,7 @@ from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
+from awx.main.tasks.system import clear_setting_cache
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
@@ -250,6 +252,7 @@ class ApiV2AttachView(APIView):
             if sub['subscription_id'] == subscription_id:
                 sub['valid_key'] = True
                 settings.LICENSE = sub
+                connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
                 return Response(sub)
 
         return Response({"error": _("Error processing subscription metadata.")}, status=status.HTTP_400_BAD_REQUEST)
@@ -269,7 +272,6 @@ class ApiV2ConfigView(APIView):
         '''Return various sitewide configuration settings'''
 
         license_data = get_licenser().validate()
-
         if not license_data.get('valid_key', False):
             license_data = {}
 
@@ -333,6 +335,7 @@ class ApiV2ConfigView(APIView):
 
             try:
                 license_data_validated = get_licenser().license_from_manifest(license_data)
+                connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
             except Exception:
                 logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
@@ -351,6 +354,7 @@ class ApiV2ConfigView(APIView):
     def delete(self, request):
         try:
             settings.LICENSE = {}
+            connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log
