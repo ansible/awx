@@ -5,11 +5,6 @@ import pytest
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test.utils import override_settings
-from django.contrib.auth.models import AnonymousUser
-
-from ansible_base.lib.utils.response import get_relative_url
-from ansible_base.lib.testing.fixtures import settings_override_mutable  # NOQA: F401 imported to be a pytest fixture
-
 from awx.main.models import User
 from awx.api.versioning import reverse
 
@@ -19,33 +14,6 @@ from awx.api.versioning import reverse
 #
 
 EXAMPLE_USER_DATA = {"username": "affable", "first_name": "a", "last_name": "a", "email": "a@a.com", "is_superuser": False, "password": "r$TyKiOCb#ED"}
-
-
-@pytest.mark.django_db
-def test_validate_local_user(post, admin_user, settings, settings_override_mutable):  # NOQA: F811 this is how you use a pytest fixture
-    "Copy of the test by same name in django-ansible-base for integration and compatibility testing"
-    url = get_relative_url('validate-local-account')
-    admin_user.set_password('password')
-    admin_user.save()
-    data = {
-        "username": admin_user.username,
-        "password": "password",
-    }
-    with override_settings(RESOURCE_SERVER={"URL": "https://foo.invalid", "SECRET_KEY": "foobar"}):
-        response = post(url=url, data=data, user=AnonymousUser(), expect=200)
-
-    assert 'ansible_id' in response.data
-    assert response.data['auth_code'] is not None, response.data
-
-    # No resource server, return coherent response but can not provide auth code
-    response = post(url=url, data=data, user=AnonymousUser(), expect=200)
-    assert 'ansible_id' in response.data
-    assert response.data['auth_code'] is None
-
-    # wrong password
-    data['password'] = 'foobar'
-    response = post(url=url, data=data, user=AnonymousUser(), expect=401)
-    # response.data may be none here, this is just testing that we get no server error
 
 
 @pytest.mark.django_db
