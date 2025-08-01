@@ -71,7 +71,7 @@ $(function() {
 
   $('a.resize').click(function() {
     $(this).tooltip('hide');
-    if ($(this).find('span.glyphicon-resize-full').size()) {
+    if ($(this).find('span.glyphicon-resize-full').length) {
       $(this).find('span.glyphicon').addClass('glyphicon-resize-small').removeClass('glyphicon-resize-full');
       $('.container').addClass('container-fluid').removeClass('container');
       document.cookie = 'api_width=wide; path=/api/';
