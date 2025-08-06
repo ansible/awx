@@ -1,9 +1,7 @@
 ---
-- name: Create User
+- name: Create user
   ansible.builtin.user:
-    username: testing_user
-    first_name: testing
-    last_name: user
+    name: testing_user
     password: password
 
 - name: Create Job Template
@@ -59,7 +57,7 @@
     description: role definition to launch job
     state: absent
 
-- name: Delete User
+- name: Delete user
   ansible.builtin.user:
-    username: testing_user
+    name: testing_user
     state: absent

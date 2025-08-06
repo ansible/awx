@@ -81,7 +81,7 @@
           - result.changed
 
     - name: Use lookup to check that schedules was enabled
-      ansible.builtin.ansible.builtin.set_fact:
+      ansible.builtin.set_fact:
         schedules_enabled_test: "{{ lookup('awx.awx.controller_api', 'schedules/' + result.id | string + '/').enabled }}"
 
     - name: Newly created schedules should have API default value for enabled
