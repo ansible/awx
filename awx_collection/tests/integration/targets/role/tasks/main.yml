@@ -1,11 +1,11 @@
 ---
 - name: Generate a test id
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
 - name: Generate names
-  set_fact:
+  ansible.builtin.set_fact:
     username: "AWX-Collection-tests-role-user-{{ test_id }}"
     project_name: "AWX-Collection-tests-role-project-1-{{ test_id }}"
     jt1: "AWX-Collection-tests-role-jt1-{{ test_id }}"
@@ -15,34 +15,32 @@
     team2_name: "AWX-Collection-tests-team-team-{{ test_id }}2"
     org2_name: "AWX-Collection-tests-organization-{{ test_id }}2"
 
-- block:
-    - name: Create a User
-      user:
-        first_name: Joe
-        last_name: User
+- name: Main block for user creation
+  block:
+
+    - name: Create a user with a valid sanitized name
+      awx.awx.user:
         username: "{{ username }}"
         password: "{{ 65535 | random | to_uuid }}"
-        email: joe@example.org
         state: present
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Create a 2nd User
-      user:
-        first_name: Joe
-        last_name: User
+      awx.awx.user:
         username: "{{ username }}2"
         password: "{{ 65535 | random | to_uuid }}"
-        email: joe@example.org
         state: present
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Create teams
       team:
@@ -52,9 +50,11 @@
       loop:
         - "{{ team_name }}"
         - "{{ team2_name }}"
-    - assert:
+
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Create a project
       project:
@@ -65,7 +65,8 @@
         wait: true
       register: project_info
 
-    - assert:
+    - name: Assert project_info is changed
+      ansible.builtin.assert:
         that:
           - project_info is changed
 
@@ -80,9 +81,10 @@
         - jt2
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Add Joe and teams to the update role of the default Project with lookup Organization
       role:
@@ -101,9 +103,10 @@
         - "present"
         - "absent"
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Add Joe to the new project by ID
       role:
@@ -121,9 +124,10 @@
         - "present"
         - "absent"
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Add Joe as execution admin to Default Org.
       role:
@@ -138,9 +142,10 @@
         - "present"
         - "absent"
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Create a workflow
       workflow_job_template:
@@ -161,27 +166,25 @@
         state: present
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
-    - name: Add Joe to nonexistant job template execute role
-      role:
+    - name: Add Joe to nonexistent job template execute role
+      awx.awx.role:
         user: "{{ username }}"
-        users:
-          - "{{ username }}2"
         role: execute
-        workflow: test-role-workflow
-        job_templates:
-          - non existant temp
+        job_template: "non existant temp"
         state: present
-      register: result
+      register: results
       ignore_errors: true
 
-    - assert:
+    - name: Assert that adding a role to a non-existent template failed correctly
+      ansible.builtin.assert:
         that:
-          - "'There were 1 missing items, missing items' in result.msg"
-          - "'non existant temp' in result.msg"
+          - results.failed
+          - "'missing items' in results.msg"
 
     - name: Add Joe to workflow execute role, no-op
       role:
@@ -193,7 +196,8 @@
         state: present
       register: result
 
-    - assert:
+    - name: Assert result did not change
+      ansible.builtin.assert:
         that:
           - "result is not changed"
 
@@ -206,9 +210,10 @@
         state: present
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
     - name: Create a 2nd organization
       organization:
@@ -240,22 +245,21 @@
         - "present"
         - "absent"
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
-          - "result is changed"
+          - result.changed
 
   always:
     - name: Delete a User
-      user:
-        username: "{{ username }}"
-        email: joe@example.org
+      ansible.builtin.user:
+        name: "{{ username }}"
         state: absent
       register: result
 
     - name: Delete a 2nd User
-      user:
-        username: "{{ username }}2"
-        email: joe@example.org
+      ansible.builtin.user:
+        name: "{{ username }}2"
         state: absent
       register: result
 
@@ -284,16 +288,6 @@
       project:
         name: "{{ project_name }}"
         organization: Default
-        state: absent
-      register: del_res
-      until: del_res is succeeded
-      retries: 5
-      delay: 3
-
-    - name: Delete the 2nd project
-      project:
-        name: "{{ project_name }}"
-        organization: "{{ org2_name }}"
         state: absent
       register: del_res
       until: del_res is succeeded

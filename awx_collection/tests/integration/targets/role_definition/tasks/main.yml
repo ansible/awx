@@ -10,9 +10,10 @@
     state: present
   register: result
 
-- assert:
+- name: Assert result is changed
+  ansible.builtin.assert:
     that:
-      - result is changed
+      - result.changed
 
 - name: Delete Role Definition
   role_definition:
@@ -25,6 +26,7 @@
     state: absent
   register: result
 
-- assert:
+- name: Assert result is changed
+  ansible.builtin.assert:
     that:
-      - result is changed
+      - result.changed

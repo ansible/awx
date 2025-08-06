@@ -32,13 +32,14 @@
       job_wait:
         job_id: "99999999"
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
           - result is failed
-          - "result.msg =='Unable to wait, no job_id 99999999 found: The requested object could not be found.' or
-            'Unable to wait on job 99999999; that ID does not exist.'"
+          - >-
+            result.msg == 'Unable to wait, no job_id 99999999 found: The requested object could not be found.' or
+            result.msg == 'Unable to wait on job 99999999; that ID does not exist.'
 
     - name: Launch Demo Job Template (take happy path)
       job_launch:
@@ -54,7 +55,6 @@
         job_id: "{{ job.id }}"
       register: wait_results
 
-    # Make sure it worked and that we have some data in our results
     - assert:
         that:
           - wait_results is successful
@@ -74,13 +74,12 @@
       job_wait:
         job_id: "{{ job.id }}"
         timeout: 5
-      ignore_errors: true
+      ignore_errors: yes
       register: wait_results
 
-    # Make sure that we failed and that we have some data in our results
     - assert:
         that:
-          - "wait_results.msg == 'Monitoring aborted due to timeout' or 'Timeout waiting for job to finish.'"
+          - "'aborted due to timeout' in wait_results.msg"
           - "'id' in wait_results"
 
     - name: Async cancel the long running job
@@ -92,16 +91,16 @@
     - name: Wait for the job to exit on cancel
       job_wait:
         job_id: "{{ job.id }}"
+        timeout: 60
       register: wait_results
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
           - wait_results is failed
           - 'wait_results.status == "canceled"'
-          - "'Job with id ~ job.id failed' or 'Job with id= ~ job.id failed, error: Job failed.' is in wait_results.msg"
+          - "'Unable to find job with id' not in result.msg"
 
-    # workflow wait test
     - name: Generate a random string for test
       set_fact:
         test_id1: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
@@ -126,7 +125,7 @@
     - name: Kick off a workflow
       workflow_launch:
         workflow_template: "{{ wfjt_name2 }}"
-      ignore_errors: true
+      ignore_errors: yes
       register: workflow
 
     - name: Wait for the Workflow Job to finish
@@ -135,7 +134,6 @@
         job_type: "workflow_jobs"
       register: wait_workflow_results
 
-    # Make sure it worked and that we have some data in our results
     - assert:
         that:
           - wait_workflow_results is successful
@@ -147,6 +145,12 @@
       workflow_job_template:
         name: "{{ wfjt_name2 }}"
         state: absent
+
+    - name: Get all jobs for the template
+      awx.awx.job_list:
+        query:
+          job_template: "{{ jt_name }}"
+      register: job_list
 
     - name: Delete the job template
       job_template:

@@ -127,7 +127,7 @@
         organization: Default
         kind: smart
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -187,13 +187,15 @@
         organization: test-non-existing-org
         state: present
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
           - "result is failed"
           - "result is not changed"
-          - "'test-non-existing-org' in result.msg"
+          - >-
+            'test-non-existing-org' in result.msg and
+            'returned 0 items, expected 1' in result.msg
           - "result.total_results == 0"
 
   always:

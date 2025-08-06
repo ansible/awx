@@ -40,7 +40,7 @@
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS to a baseline
   awx.awx.settings:
     name: AWX_ISOLATION_SHOW_PATHS
-    value: '["/var/lib/awx/projects/"]'
+    value: ["/var/lib/awx/projects/"]
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS to get an error back from the controller
   awx.awx.settings:
@@ -51,9 +51,11 @@
   register: result
   ignore_errors: true
 
-- ansible.builtin.assert:
+- name: Assert result failed
+  ansible.builtin.assert:
     that:
-      - "result is failed"
+      - result.failed
+      - "'Unable to update settings' in result.msg | default('')"
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS
   awx.awx.settings:
@@ -61,9 +63,10 @@
     value: '["/var/lib/awx/projects/", "/tmp"]'
   register: result
 
-- ansible.builtin.assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Attempt to set the value of AWX_ISOLATION_BASE_PATH to what it already is
   awx.awx.settings:
@@ -71,12 +74,14 @@
     value: /tmp
   register: result
 
-- ansible.builtin.debug:
+- name: Debug result
+  ansible.builtin.debug:
     msg: "{{ result }}"
 
-- ansible.builtin.assert:
+- name: Result is not changed
+  ansible.builtin.assert:
     that:
-      - "result is not changed"
+      - not (result.changed)
 
 - name: Apply a single setting via settings
   awx.awx.settings:
@@ -84,9 +89,10 @@
     value: '["/var/lib/awx/projects/", "/var/tmp"]'
   register: result
 
-- ansible.builtin.assert:
+- name: Result is changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Apply multiple setting via settings with no change
   awx.awx.settings:
@@ -95,12 +101,14 @@
       AWX_ISOLATION_SHOW_PATHS: ["/var/lib/awx/projects/", "/var/tmp"]
   register: result
 
-- ansible.builtin.debug:
+- name: Debug
+  ansible.builtin.debug:
     msg: "{{ result }}"
 
-- ansible.builtin.assert:
+- name: Assert result is not changed
+  ansible.builtin.assert:
     that:
-      - "result is not changed"
+      - not (result.changed)
 
 - name: Apply multiple setting via settings with change
   awx.awx.settings:
@@ -109,9 +117,10 @@
       AWX_ISOLATION_SHOW_PATHS: []
   register: result
 
-- ansible.builtin.assert:
+- name: Assert result changed
+  ansible.builtin.assert:
     that:
-      - "result is changed"
+      - result.changed
 
 - name: Handle an omit value
   awx.awx.settings:
@@ -120,6 +129,8 @@
   register: result
   ignore_errors: true
 
-- ansible.builtin.assert:
+- name: Assert result failed
+  ansible.builtin.assert:
     that:
-      - "'Unable to update settings' in result.msg"
+      - result.failed
+      - "'Unable to update settings' in result.msg | default('')"
