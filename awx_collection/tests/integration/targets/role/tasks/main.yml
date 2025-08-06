@@ -18,6 +18,10 @@
 - name: Main block for user creation
   block:
 
+    - name: Set a hashed password
+      ansible.builtin.set_fact:
+        password: "{{ 'MySecret123!' | password_hash('sha512') }}"
+
     - name: Create a user with a valid sanitized name
       ansible.builtin.user:
         name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', ''))[:31] }}"
