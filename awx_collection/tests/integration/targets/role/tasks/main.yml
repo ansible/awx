@@ -19,11 +19,10 @@
   block:
 
     - name: Create a user with a valid sanitized name
-      ansible.builtin.user:
-        name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', ''))[:31] }}"
-        password: "$6$rounds=656000$Wkt9h9WFnMzN2j0O$klpQzqZqJgRYvbsrklFjufnEV.KOaV6QxHf29wb1Yj.MC/x7DrBvZZMRoZdlDeYECjV3EtRxYcTVK0r/sKrzb1"
+      awx.awx.user:
+        username: "{{ username }}"
+        password: "{{ 65535 | random | to_uuid }}"
         state: present
-      become: true
       register: result
 
     - name: Assert result changed
@@ -32,11 +31,10 @@
           - result.changed
 
     - name: Create a 2nd User
-      ansible.builtin.user:
-        name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', '') + '2')[:31] }}"
-        password: "$6$rounds=656000$Wkt9h9WFnMzN2j0O$klpQzqZqJgRYvbsrklFjufnEV.KOaV6QxHf29wb1Yj.MC/x7DrBvZZMRoZdlDeYECjV3EtRxYcTVK0r/sKrzb1"
+      awx.awx.user:
+        username: "{{ username }}2"
+        password: "{{ 65535 | random | to_uuid }}"
         state: present
-      become: true
       register: result
 
     - name: Assert result changed
