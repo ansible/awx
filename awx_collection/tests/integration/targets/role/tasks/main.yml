@@ -18,14 +18,10 @@
 - name: Main block for user creation
   block:
 
-    - name: Set a hashed password
-      ansible.builtin.set_fact:
-        password: "{{ 'MySecret123!' | password_hash('sha512') }}"
-
     - name: Create a user with a valid sanitized name
       ansible.builtin.user:
         name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', ''))[:31] }}"
-        password: "{{ password }}"
+        password: "$6$rounds=656000$Wkt9h9WFnMzN2j0O$klpQzqZqJgRYvbsrklFjufnEV.KOaV6QxHf29wb1Yj.MC/x7DrBvZZMRoZdlDeYECjV3EtRxYcTVK0r/sKrzb1"
         state: present
       become: true
       register: result
@@ -38,7 +34,7 @@
     - name: Create a 2nd User
       ansible.builtin.user:
         name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', '') + '2')[:31] }}"
-        password: "{{ password }}"
+        password: password: "$6$rounds=656000$Wkt9h9WFnMzN2j0O$klpQzqZqJgRYvbsrklFjufnEV.KOaV6QxHf29wb1Yj.MC/x7DrBvZZMRoZdlDeYECjV3EtRxYcTVK0r/sKrzb1"
         state: present
       register: result
 
