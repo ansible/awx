@@ -1,16 +1,17 @@
 ---
 - name: Generate a random string for test
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
 - name: Generate names
-  set_fact:
+  ansible.builtin.set_fact:
     wfjt_name1: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}"
     wfjt_name2: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id }}-2"
     approval_node_name: "AWX-Collection-tests-workflow_launch_approval_node-{{ test_id }}"
 
-- block:
+- name: Create workflows
+  block:
 
     - name: Create our workflow
       workflow_job_template:
@@ -30,9 +31,10 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert that workflow launch failed with expected error
+      ansible.builtin.assert:
         that:
-          - result is failed
+          - result.failed | default(false)
           - "'Unable to find workflow job template' in result.msg"
 
     - name: Run the workflow without waiting (this should just give us back a job ID)
@@ -42,7 +44,8 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert result not failed
+      ansible.builtin.assert:
         that:
           - result is not failed
           - "'id' in result['job_info']"
@@ -54,9 +57,10 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert result failed
+      ansible.builtin.assert:
         that:
-          - result is failed
+          - result.failed | default(false)
           - "'Monitoring of Workflow Job - '~ wfjt_name1 ~ ' aborted due to timeout' in result.msg"
 
     - name: Kick off a workflow and wait for it
@@ -65,9 +69,10 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert result did not fail
+      ansible.builtin.assert:
         that:
-          - result is not failed
+          - not (result.failed | default(false))
           - "'id' in result['job_info']"
 
     - name: Kick off a workflow with extra_vars but not enabled
@@ -79,9 +84,10 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert result failed
+      ansible.builtin.assert:
         that:
-          - result is failed
+          - result.failed | default(false)
           - "'The field extra_vars was specified but the workflow job template does not allow for it to be overridden' in result.errors"
 
     - name: Prompt the workflow's with survey
@@ -126,9 +132,10 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert result did not fail
+      ansible.builtin.assert:
         that:
-          - result is not failed
+          - not (result.failed | default(false))
 
     - name: Prompt the workflow's extra_vars on launch
       workflow_job_template:
@@ -146,9 +153,10 @@
       ignore_errors: true
       register: result
 
-    - assert:
+    - name: Assert did not fail
+      ansible.builtin.assert:
         that:
-          - result is not failed
+          - not (result.failed | default(false))
 
     - name: Test waiting for an approval node that doesn't exit on the last workflow for failure.
       workflow_approval:
@@ -160,9 +168,10 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result failed
+      ansible.builtin.assert:
         that:
-          - result is failed
+          - result.failed | default(false)
           - "'Monitoring of Workflow Approval - Test workflow approval aborted due to timeout' in result.msg"
 
     - name: Create new Workflow
@@ -208,9 +217,10 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result didn't fail
+      ansible.builtin.assert:
         that:
-          - result is failed
+          - result.failed | default(false)
           - "'Monitoring of Workflow Node - Demo Job Template aborted due to timeout' in result.msg"
 
     - name: Wait for approval node to activate and approve
@@ -222,10 +232,11 @@
         action: deny
       register: result
 
-    - assert:
+    - name: Assert did not fail
+      ansible.builtin.assert:
         that:
-          - result is not failed
-          - result is changed
+          - not (result.failed | default(false))
+          - result.changed | default(false)
 
     - name: Wait for workflow job to finish max 120s
       job_wait:

@@ -38,7 +38,7 @@
   ad_hoc_command_wait:
     command_id: "99999999"
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:
@@ -85,13 +85,13 @@
   ad_hoc_command_wait:
     command_id: "{{ command.id }}"
     timeout: 1
-  ignore_errors: true
+  ignore_errors: yes
   register: wait_results
 
 # Make sure that we failed and that we have some data in our results
 - assert:
     that:
-      - "'Monitoring aborted due to timeout' or 'Timeout waiting for command to finish.' in wait_results.msg"
+      - "('Monitoring of ad hoc command -' in wait_results.msg and 'aborted due to timeout' in wait_results.msg) or ('Timeout waiting for command to finish.' in wait_results.msg)"
       - "'id' in wait_results"
 
 - name: Async cancel the long-running command
@@ -104,7 +104,7 @@
   ad_hoc_command_wait:
     command_id: "{{ command.id }}"
   register: wait_results
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:
