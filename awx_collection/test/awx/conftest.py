@@ -191,7 +191,7 @@ def run_module(request, collection_import):
 
         with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
             # Call the test utility (like a mock server) instead of issuing HTTP requests
-            with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
+            with mock.patch('ansible.module_utils.basic._ANSIBLE_PROFILE', 'legacy'):
                 if HAS_TOWER_CLI:
                     tower_cli_mgr = mock.patch('tower_cli.api.Session.request', new=new_request)
                 elif HAS_AWX_KIT:
