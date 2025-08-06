@@ -13,7 +13,7 @@
     proj1: "AWX-Collection-tests-schedule-proj1-{{ test_id }}"
     proj2: "AWX-Collection-tests-schedule-proj2-{{ test_id }}"
     jt1: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
-    jt2: "AWX-Collection-tests-schedule-jt2-{{ test_id }}"
+    jt2: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
     ee1: "AWX-Collection-tests-schedule-ee1-{{ test_id }}"
     label1: "AWX-Collection-tests-schedule-l1-{{ test_id }}"
     label2: "AWX-Collection-tests-schedule-l2-{{ test_id }}"
@@ -23,10 +23,10 @@
     host_name: "AWX-Collection-tests-schedule-host-{{ test_id }}"
     slice_num: 10
 
-- name: Block
+- name: Assert blocks
   block:
     - name: Try to create without an rrule
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: present
         unified_job_template: "Demo Job Template"
@@ -34,14 +34,14 @@
       register: result
       ignore_errors: true
 
-    - name: Assert error due to missing rrule
+    - name: Assert result is failed
       ansible.builtin.assert:
         that:
-          - result.failed | default(false)
-          - "'This field is required' in (result.msg | default(''))"
+          - result is failed
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Create with options that the JT does not support
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: present
         unified_job_template: "Demo Job Template"
@@ -61,14 +61,14 @@
       register: result
       ignore_errors: true
 
-    - name: Assert failure due to unsupported JT options
+    - name: Unable to create schedule
       ansible.builtin.assert:
         that:
-          - result.failed | default(false)
-          - "'Field is not configured to prompt on launch' in (result.msg | default(''))"
+          - result is failed
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Build a real schedule
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: present
         unified_job_template: "Demo Job Template"
@@ -78,19 +78,19 @@
     - name: Assert result is changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - result is changed
 
     - name: Use lookup to check that schedules was enabled
       ansible.builtin.set_fact:
-        schedules_enabled_test: "{{ lookup('awx.awx.controller_api', 'schedules/' + result.id | string + '/').enabled }}"
+        schedules_enabled_test: "lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled"
 
     - name: Newly created schedules should have API default value for enabled
       ansible.builtin.assert:
         that:
-          - schedules_enabled_test is true
+          - schedules_enabled_test
 
     - name: Build a real schedule with exists
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: exists
         unified_job_template: "Demo Job Template"
@@ -100,10 +100,10 @@
     - name: Assert result did not change
       ansible.builtin.assert:
         that:
-          - not (result.changed)
+          - result is not changed
 
     - name: Delete a real schedule
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: absent
         unified_job_template: "Demo Job Template"
@@ -113,10 +113,10 @@
     - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - result is changed
 
     - name: Build a real schedule with exists
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: exists
         unified_job_template: "Demo Job Template"
@@ -126,23 +126,23 @@
     - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - result is changed
 
     - name: Rebuild the same schedule
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         state: present
         unified_job_template: "Demo Job Template"
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
-    - name: Assert result did not change
+    - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - not (result.changed)
+          - result is not changed
 
     - name: Create a Demo Project
-      awx.awx.project:
+      project:
         name: "{{ proj1 }}"
         organization: Default
         allow_override: true
@@ -151,11 +151,11 @@
         scm_url: https://github.com/ansible/ansible-tower-samples.git
 
     - name: "Create a new organization"
-      awx.awx.organization:
+      organization:
         name: "{{ org_name }}"
 
     - name: Create a Demo Project in another org
-      awx.awx.project:
+      project:
         name: "{{ proj2 }}"
         organization: "{{ org_name }}"
         allow_override: true
@@ -164,14 +164,14 @@
         scm_url: https://github.com/ansible/ansible-tower-samples.git
 
     - name: Create Credential1
-      awx.awx.credential:
+      credential:
         name: "{{ cred1 }}"
         organization: Default
         credential_type: Red Hat Ansible Automation Platform
       register: cred1_result
 
     - name: Create Job Template with all prompts
-      awx.awx.job_template:
+      job_template:
         name: "{{ jt1 }}"
         organization: Default
         project: "{{ proj1 }}"
@@ -200,10 +200,10 @@
     - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - "result is changed"
 
     - name: Create labels
-      awx.awx.label:
+      label:
         name: "{{ item }}"
         organization: "{{ org_name }}"
       loop:
@@ -211,26 +211,26 @@
         - "{{ label2 }}"
 
     - name: Create an execution environment
-      awx.awx.execution_environment:
+      execution_environment:
         name: "{{ ee1 }}"
         image: "junk"
 
     - name: Create instance groups
-      awx.awx.instance_group:
+      instance_group:
         name: "{{ item }}"
       loop:
         - "{{ ig1 }}"
         - "{{ ig2 }}"
 
     - name: Create proper inventory for slice count
-      awx.awx.inventory:
+      inventory:
         name: "{{ slice_inventory }}"
         organization: "{{ org_name }}"
         state: present
       register: result
 
     - name: Create a Host
-      awx.awx.host:
+      host:
         name: "{{ host_name }}-{{ item }}"
         inventory: "{{ slice_inventory }}"
         state: present
@@ -240,7 +240,7 @@
       register: result
 
     - name: Create with options that the JT does support
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched2 }}"
         state: present
         organization: Default
@@ -276,10 +276,10 @@
     - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - "result is changed"
 
     - name: Reset some options
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched2 }}"
         state: present
         execution_environment: ""
@@ -294,10 +294,10 @@
     - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - "result is changed"
 
     - name: Disable a schedule
-      awx.awx.schedule:
+      schedule:
         name: "{{ sched1 }}"
         unified_job_template: "Demo Job Template"
         state: present
@@ -307,10 +307,10 @@
     - name: Assert result changed
       ansible.builtin.assert:
         that:
-          - result.changed
+          - result is changed
 
     - name: Create a second Job Template in new org
-      awx.awx.job_template:
+      job_template:
         name: "{{ jt2 }}"
         project: "{{ proj2 }}"
         inventory: Demo Inventory
@@ -319,75 +319,62 @@
         state: present
 
     - name: Build a schedule with a job template's name in two orgs
-      awx.awx.schedule:
-        name: "{{ sched2 }}"
+      schedule:
+        name: "{{ sched1 }}"
         state: present
         unified_job_template: "{{ jt2 }}"
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
+    - name: Verify we can't find the schedule without the UJT lookup
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        rrule: "DTSTART:20201219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+      ignore_errors: true
+
+    - name: Assert result failed
+      ansible.builtin.assert:
+        that:
+          - result is failed
+
+    - name: Verify we can find the schedule with the UJT lookup and delete it
+      schedule:
+        name: "{{ sched1 }}"
+        state: absent
+        unified_job_template: "{{ jt2 }}"
+      register: result
+
+    - name: Assert result changed
+      ansible.builtin.assert:
+        that:
+          - result is changed
+
   always:
     - name: Delete the schedules
-      awx.awx.schedule:
-        name: "{{ item.name }}"
-        unified_job_template: "{{ item.ujt }}"
-        state: absent
-      loop:
-        - name: "{{ sched1 }}"
-          ujt: "Demo Job Template"
-        - name: "{{ sched2 }}"
-          ujt: "{{ jt1 }}"
-        - name: "{{ sched2 }}"
-          ujt: "{{ jt2 }}"
-      failed_when: >
-        delete_schedules_results is failed
-
-    - name: "Delete slice hosts"
-      awx.awx.host:
-        name: "{{ host_name }}-{{ item }}"
-        inventory: "{{ slice_inventory }}"
-        state: absent
-      loop: "{{ range(slice_num)|list }}"
-      failed_when: >
-        delete_hosts_result is failed
-
-    - name: Delete slice inventory
-      awx.awx.inventory:
-        name: "{{ slice_inventory }}"
-        organization: "{{ org_name }}"
-        state: absent
-      failed_when: >
-        delete_slice_inventory is failed
-
-    - name: Delete instance groups
-      awx.awx.instance_group:
+      schedule:
         name: "{{ item }}"
         state: absent
       loop:
-        - "{{ ig1 }}"
-        - "{{ ig2 }}"
+        - "{{ sched1 }}"
+        - "{{ sched2 }}"
       failed_when: >
-        delete_instance_groups is failed
+        delete_schedules_results is failed
 
-    - name: Delete an execution environment
-      awx.awx.execution_environment:
-        name: "{{ ee1 }}"
-        image: "junk"
+    - name: Delete the jt1
+      job_template:
+        name: "{{ jt1 }}"
+        project: "{{ proj1 }}"
+        playbook: hello_world.yml
         state: absent
-      failed_when: >
-        delete_execution_environment is failed
-
-    - name: Delete Credential1
-      awx.awx.credential:
-        name: "{{ cred1 }}"
-        organization: Default
-        credential_type: Red Hat Ansible Automation Platform
-        state: absent
-      failed_when: >
-        delete_credential1 is failed
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the jt2
-      awx.awx.job_template:
+      job_template:
         name: "{{ jt2 }}"
         project: "{{ proj2 }}"
         playbook: hello_world.yml
@@ -398,7 +385,7 @@
       delay: 3
 
     - name: Delete the Project2
-      awx.awx.project:
+      project:
         name: "{{ proj2 }}"
         organization: "{{ org_name }}"
         state: absent
@@ -409,26 +396,8 @@
       retries: 5
       delay: 3
 
-    - name: Remove the organization
-      awx.awx.organization:
-        name: "{{ org_name }}"
-        state: absent
-      failed_when: >
-        remove_the_organization is failed
-
-    - name: Delete the jt1
-      awx.awx.job_template:
-        name: "{{ jt1 }}"
-        project: "{{ proj1 }}"
-        playbook: hello_world.yml
-        state: absent
-      register: del_res
-      until: del_res is succeeded
-      retries: 5
-      delay: 3
-
     - name: Delete the Project1
-      awx.awx.project:
+      project:
         name: "{{ proj1 }}"
         organization: Default
         state: absent
@@ -438,3 +407,56 @@
       until: del_res is succeeded
       retries: 5
       delay: 3
+
+    - name: Delete Credential1
+      credential:
+        name: "{{ cred1 }}"
+        organization: Default
+        credential_type: Red Hat Ansible Automation Platform
+        state: absent
+      failed_when: >
+        delete_credential1_fails
+
+    # Labels can not be deleted
+
+    - name: Delete an execution environment
+      execution_environment:
+        name: "{{ ee1 }}"
+        image: "junk"
+        state: absent
+      failed_when: >
+        delete_execution_environment_fails
+
+    - name: Delete instance groups
+      instance_group:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ ig1 }}"
+        - "{{ ig2 }}"
+      failed_when: >
+        delete_instance_groups_fails
+
+    - name: Remove the organization
+      organization:
+        name: "{{ org_name }}"
+        state: absent
+      failed_when: >
+        remove_org_fails
+
+    - name: Delete slice inventory
+      inventory:
+        name: "{{ slice_inventory }}"
+        organization: "{{ org_name }}"
+        state: absent
+      failed_when: >
+        delete_slice_inventory_fails
+
+    - name: Delete slice hosts
+      host:
+        name: "{{ host_name }}-{{ item }}"
+        inventory: "{{ slice_inventory }}"
+        state: absent
+      loop: "{{ range(slice_num)|list }}"
+      failed_when: >
+        delete_slice_hosts_fails
