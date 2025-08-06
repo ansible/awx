@@ -36,6 +36,7 @@
         name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', '') + '2')[:31] }}"
         password: "$6$rounds=656000$Wkt9h9WFnMzN2j0O$klpQzqZqJgRYvbsrklFjufnEV.KOaV6QxHf29wb1Yj.MC/x7DrBvZZMRoZdlDeYECjV3EtRxYcTVK0r/sKrzb1"
         state: present
+      become: true
       register: result
 
     - name: Assert result changed
