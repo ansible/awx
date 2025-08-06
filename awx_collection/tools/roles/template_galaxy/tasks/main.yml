@@ -2,9 +2,9 @@
 - name: Sanity assertions, that some variables have a non-blank value
   assert:
     that:
-      - collection_version
-      - collection_package
-      - collection_path
+      - collection_version is defined and collection_version | length > 0
+      - collection_package is defined and collection_package | length > 0
+      - collection_path is defined and collection_path | length > 0
 
 - name: Set the collection version in the controller_api.py file
   replace:
