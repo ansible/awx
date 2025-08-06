@@ -21,7 +21,7 @@
     - name: Create a user with a valid sanitized name
       ansible.builtin.user:
         name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', ''))[:31] }}"
-        password: "{{ 'yourpassword' | password_hash('sha512') }}"
+        password: "{{ password }}"
         state: present
       become: true
       register: result
@@ -34,7 +34,7 @@
     - name: Create a 2nd User
       ansible.builtin.user:
         name: "{{ ('u' + username | lower | regex_replace('[^a-z0-9]', '') + '2')[:31] }}"
-        password: "{{ 'yourpassword' | password_hash('sha512') }}"
+        password: "{{ password }}"
         state: present
       register: result
 
