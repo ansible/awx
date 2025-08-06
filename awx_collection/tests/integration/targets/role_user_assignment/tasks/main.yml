@@ -1,8 +1,8 @@
 ---
 - name: Create user
-  ansible.builtin.user:
-    name: testing_user
-    password: password
+  awx.awx.user:
+    username: testing_user
+    password: "{{ 65535 | random | to_uuid }}"
 
 - name: Create Job Template
   job_template:
