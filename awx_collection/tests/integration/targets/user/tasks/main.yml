@@ -9,8 +9,9 @@
     username: "AWX-Collection-tests-user-user-{{ test_id }}"
 
 - name: Create a User
-  ansible.builtin.user:
-    name: "{{ username }}"
+  awx.awx.user:
+    username: "{{ username }}"
+    first_name: Joe
     password: "{{ 65535 | random | to_uuid }}"
     state: present
   register: result
@@ -20,11 +21,12 @@
     that:
       - result.changed
 
-- name: Create a user with present
-  ansible.builtin.user:
-    name: "{{ username }}"
+- name: Create a User with exists
+  awx.awx.user:
+    username: "{{ username }}"
+    first_name: Joe
     password: "{{ 65535 | random | to_uuid }}"
-    state: present
+    state: exists
   register: result
 
 - name: Assert results did not change
@@ -32,9 +34,10 @@
     that:
       - not result.changed
 
-- name: Delete a user
-  ansible.builtin.user:
-    name: "{{ username }}"
+- name: Delete a User
+  awx.awx.user:
+    username: "{{ username }}"
+    first_name: Joe
     password: "{{ 65535 | random | to_uuid }}"
     state: absent
   register: result
@@ -44,11 +47,12 @@
     that:
       - result.changed
 
-- name: Create a user with present
-  ansible.builtin.user:
-    name: "{{ username }}"
+- name: Create a User with exists
+  awx.awx.user:
+    username: "{{ username }}"
+    first_name: Joe
     password: "{{ 65535 | random | to_uuid }}"
-    state: present
+    state: exists
   register: result
 
 - name: Assert result changed
@@ -56,9 +60,11 @@
     that:
       - result.changed
 
-- name: Change a user by ID
-  ansible.builtin.user:
-    name: "{{ result.id }}"
+- name: Change a User by ID
+  awx.awx.user:
+    username: "{{ result.id }}"
+    last_name: User
+    email: joe@example.org
     state: present
   register: result
 
@@ -68,8 +74,10 @@
       - result.changed
 
 - name: Check idempotency
-  ansible.builtin.user:
-    name: "{{ username }}"
+  awx.awx.user:
+    username: "{{ username }}"
+    first_name: Joe
+    last_name: User
   register: result
 
 - name: Assert result did not change
@@ -78,8 +86,10 @@
       - not (result.changed)
 
 - name: Rename a User
-  ansible.builtin.user:
-    name: "{{ username }}"
+  awx.awx.user:
+    username: "{{ username }}"
+    new_username: "{{ username }}-renamed"
+    email: joe@example.org
   register: result
 
 - name: Assert result changed
@@ -88,8 +98,9 @@
       - result.changed
 
 - name: Delete a User
-  ansible.builtin.user:
-    name: "{{ username }}-renamed"
+  awx.awx.user:
+    username: "{{ username }}-renamed"
+    email: joe@example.org
     state: absent
   register: result
 
@@ -100,8 +111,11 @@
 
 - name: Create an Auditor
   awx.awx.user:
+    first_name: Joe
+    last_name: Auditor
     username: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
+    email: joe@example.org
     state: present
     auditor: true
   register: result
@@ -140,8 +154,9 @@
       - result.changed
 
 - name: Delete a Superuser
-  ansible.builtin.user:
-    name: "{{ username }}"
+  awx.awx.user:
+    username: "{{ username }}"
+    email: joe@example.org
     state: absent
   register: result
 
@@ -151,10 +166,15 @@
       - result.changed
 
 - name: Test SSL parameter
-  ansible.builtin.user:
-    name: "{{ username }}"
+  awx.awx.user:
+    first_name: Joe
+    last_name: User
+    username: "{{ username }}"
     password: "{{ 65535 | random | to_uuid }}"
+    email: joe@example.org
     state: present
+    validate_certs: true
+    controller_host: http://foo.invalid
   ignore_errors: true
   register: result
 
