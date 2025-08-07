@@ -273,6 +273,9 @@
     - name: Create a workflow job template
       awx.awx.workflow_job_template:
         name: "{{ wfjt_name }}"
+        organization: Default
+        inventory: Demo Inventory
+        extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
         labels:
           - "{{ lab1 }}"
         ask_inventory_on_launch: true
