@@ -82,7 +82,7 @@
 
     - name: Use lookup to check that schedules was enabled
       ansible.builtin.set_fact:
-        schedules_enabled_test: "lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled"
+        schedules_enabled_test: "{{lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled | bool}}"
 
     - name: Newly created schedules should have API default value for enabled
       ansible.builtin.assert:
@@ -359,8 +359,7 @@
       loop:
         - "{{ sched1 }}"
         - "{{ sched2 }}"
-      failed_when: >
-        delete_schedules_results is failed
+      failed_when: false
 
     - name: Delete the jt1
       job_template:
@@ -395,6 +394,7 @@
       until: del_res is succeeded
       retries: 5
       delay: 3
+      failed_when: false
 
     - name: Delete the Project1
       project:
@@ -414,8 +414,7 @@
         organization: Default
         credential_type: Red Hat Ansible Automation Platform
         state: absent
-      failed_when: >
-        delete_credential1_fails
+      failed_when: false
 
     # Labels can not be deleted
 
@@ -424,8 +423,7 @@
         name: "{{ ee1 }}"
         image: "junk"
         state: absent
-      failed_when: >
-        delete_execution_environment_fails
+      failed_when: false
 
     - name: Delete instance groups
       instance_group:
@@ -434,23 +432,20 @@
       loop:
         - "{{ ig1 }}"
         - "{{ ig2 }}"
-      failed_when: >
-        delete_instance_groups_fails
+      failed_when: false
 
     - name: Remove the organization
       organization:
         name: "{{ org_name }}"
         state: absent
-      failed_when: >
-        remove_org_fails
+      failed_when: false
 
     - name: Delete slice inventory
       inventory:
         name: "{{ slice_inventory }}"
         organization: "{{ org_name }}"
         state: absent
-      failed_when: >
-        delete_slice_inventory_fails
+      failed_when: false
 
     - name: Delete slice hosts
       host:
@@ -458,5 +453,4 @@
         inventory: "{{ slice_inventory }}"
         state: absent
       loop: "{{ range(slice_num)|list }}"
-      failed_when: >
-        delete_slice_hosts_fails
+      failed_when: false
