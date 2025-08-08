@@ -411,6 +411,7 @@
       awx.awx.workflow_job_template_node:
         identifier: leaf
         unified_job_template: "{{ jt2_name }}"
+        lookup_organization: "{{ org_name }}"
         workflow: "{{ wfjt_name }}"
         execution_environment: "{{ ee1 }}"
         forks: 12
