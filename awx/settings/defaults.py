@@ -339,7 +339,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'polymorphic',
-    'django_guid',
     'corsheaders',
     'awx.conf',
     'awx.main',
@@ -884,10 +883,9 @@ RECEPTOR_KEEP_WORK_ON_ERROR = False
 RECEPTOR_LOG_LEVEL = 'info'
 
 MIDDLEWARE = [
-    'django_guid.middleware.guid_middleware',
+    'ansible_base.lib.middleware.observability.ObservabilityMiddleware',
     'ansible_base.lib.middleware.logging.log_request.LogTracebackMiddleware',
     'awx.main.middleware.SettingsCacheMiddleware',
-    'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -931,8 +929,6 @@ BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
 # How often should web instances advertise themselves?
 BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
-
-DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'
@@ -1100,6 +1096,19 @@ ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES = False
 ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
 ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = False  # System auditor has always been restricted to users
 ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-defined system-wide roles
+
+# Observability and Profiling Settings
+# Each feature can be independently enabled/disabled for safe production use
+# ANSIBLE_BASE_PROFILE_TIMING: Add X-API-Time header (minimal overhead, safe for prod)
+# ANSIBLE_BASE_PROFILE_NODE: Add X-API-Node header (may expose internal topology)
+# ANSIBLE_BASE_CPROFILE_REQUESTS: Generate cProfile files (high overhead, debug only)
+# ANSIBLE_BASE_SQL_PROFILING: Add SQL metrics + trace_id comments (moderate overhead)
+ANSIBLE_BASE_PROFILE_TIMING = False
+ANSIBLE_BASE_PROFILE_NODE = False
+ANSIBLE_BASE_CPROFILE_REQUESTS = False
+ANSIBLE_BASE_SQL_PROFILING = False
+# Directory where cProfile files are written (defaults to system temp directory if not set)
+ANSIBLE_BASE_CPROFILE_DIR = '/tmp'
 
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
