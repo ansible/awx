@@ -344,7 +344,10 @@ def main():
 
     unified_job_template = module.params.get('unified_job_template')
     if unified_job_template:
-        new_fields['unified_job_template'] = module.get_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})['id']
+        ujt = module.get_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})
+        if ujt is None or 'id' not in ujt:
+            module.fail_json(msg=f'Could not get unified_job_template name_or_id={unified_job_template} search_fields={search_fields}, got {ujt}')
+        new_fields['unified_job_template'] = ujt['id']
     inventory = module.params.get('inventory')
     if inventory:
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)

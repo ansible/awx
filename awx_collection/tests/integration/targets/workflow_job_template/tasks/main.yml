@@ -365,7 +365,7 @@
         ask_tags_on_launch: true
         ask_variables_on_launch: true
       register: results
-      failed_when: false
+      ignore_errors: true
 
     - name: Assert creation failed due to bad label
       ansible.builtin.assert:
@@ -410,8 +410,7 @@
     - name: Create leaf node
       awx.awx.workflow_job_template_node:
         identifier: leaf
-        unified_job_template:
-          name: "{{ jt2_name }}"
+        unified_job_template: "{{ jt2_name }}"
         workflow: "{{ wfjt_name }}"
         execution_environment: "{{ ee1 }}"
         forks: 12
@@ -433,8 +432,7 @@
     - name: Update prompts on leaf node
       awx.awx.workflow_job_template_node:
         identifier: leaf
-        unified_job_template:
-          name: "{{ jt2_name }}"
+        unified_job_template: "{{ jt2_name }}"
         lookup_organization: "{{ org_name }}"
         workflow: "{{ wfjt_name }}"
         execution_environment: ""
@@ -453,8 +451,7 @@
     - name: Remove a node from a workflow that does not exist.
       awx.awx.workflow_job_template_node:
         identifier: root
-        unified_job_template:
-          name: "{{ jt1_name }}"
+        unified_job_template: "{{ jt1_name }}"
         workflow: Does not exist
         state: absent
       register: results
@@ -467,8 +464,7 @@
     - name: Create root node
       awx.awx.workflow_job_template_node:
         identifier: root
-        unified_job_template:
-          name: "{{ jt1_name }}"
+        unified_job_template: "{{ jt1_name }}"
         workflow: "{{ wfjt_name }}"
 
     - name: Fail if no name is set for approval
@@ -511,9 +507,6 @@
       awx.awx.workflow_job_template_node:
         identifier: approval_test
         workflow: "{{ wfjt_name }}"
-        unified_job_template:
-          name: "NonExistentUJT"
-          type: "job_template"
       register: no_unified_results
       failed_when: false
       ignore_errors: true
