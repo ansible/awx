@@ -246,7 +246,11 @@
     - name: Assert result failed
       ansible.builtin.assert:
         that:
-          - result.failed
+          - result is defined
+          - result.failed is defined
+          - result.failed | bool
+        fail_msg: "The task did not fail as expected."
+        success_msg: "The task failed as expected."
 
     - name: Create a User as -orgadmin using an organization
       awx.awx.user:

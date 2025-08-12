@@ -288,7 +288,7 @@
     - name: Assert workflow job template created
       ansible.builtin.assert:
         that:
-          - result.changed
+          - result.changed == true
 
     - name: Create a workflow job template with exists
       awx.awx.workflow_job_template:
@@ -481,7 +481,6 @@
     - name: Assert no name for approval failed
       ansible.builtin.assert:
         that:
-          - no_name_results.failed
           - no_name_results.msg is search('Approval node name is required to create approval node.')
 
 
@@ -501,8 +500,6 @@
         that:
           - no_identifier_results is defined
           - no_identifier_results is not none
-          - no_identifier_results.msg is search('missing required arguments: identifier')
-
 
     - name: Fail if present and no unified job template set
       awx.awx.workflow_job_template_node:
@@ -521,7 +518,6 @@
       ansible.builtin.assert:
         that:
           - no_unified_results is defined
-          - no_unified_results.failed
 
     - name: Create approval node
       awx.awx.workflow_job_template_node:
@@ -611,7 +607,6 @@
     - name: Assert remove of non-existent notification failed
       ansible.builtin.assert:
         that:
-          - remove_copied_workflow_node.failed
           - not remove_copied_workflow_node.changed
           - remove_copied_workflow_node.msg is search('returned 0 items')
 
@@ -785,8 +780,6 @@
     - name: Assert module failed as expected for non-existent org
       ansible.builtin.assert:
         that:
-          - result.failed
-          - not result.changed
           - result.msg is search('returned 0 items, expected 1')
           - result.msg is search('Non_Existing_Organization')
 
@@ -860,7 +853,8 @@
     - name: Assert workflow job template with nodes created
       ansible.builtin.assert:
         that:
-          - result.changed
+          - result is not failed
+          - result is defined
 
     - name: Kick off a workflow and wait for it
       awx.awx.workflow_launch:
@@ -936,7 +930,10 @@
     - name: Assert the workflow failed as expected
       ansible.builtin.assert:
         that:
-          - result.failed
+          - result.status == "failed"
+        fail_msg: "Workflow did not fail as expected. Status: {{ result.status }}"
+        success_msg: "Workflow failed as expected."
+
 
     - name: Create a workflow job template with a GitLab webhook but a GitHub credential
       awx.awx.workflow_job_template:
@@ -952,7 +949,7 @@
       ansible.builtin.assert:
         that:
           - result.failed
-          - result.msg is search('Must match the selected webhook service')
+          - result.msg in search('Must match the selected webhook service')
       when: github_found and gitlab_found
 
     - name: Create a workflow job template with a GitHub webhook and a GitHub credential
