@@ -3102,9 +3102,6 @@ class CredentialSerializerCreate(CredentialSerializer):
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
 
-        if 'credential_type' in attrs and attrs['credential_type'].kind == 'galaxy' and list(owner_fields) != ['organization']:
-            raise serializers.ValidationError({"organization": _("Galaxy credentials must be owned by an Organization.")})
-
         return super(CredentialSerializerCreate, self).validate(attrs)
 
     def create(self, validated_data):
