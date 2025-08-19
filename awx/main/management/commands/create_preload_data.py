@@ -4,7 +4,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from crum import impersonate
-from awx.main.models import User, Organization, Project, Inventory, CredentialType, Credential, Host, JobTemplate
+from awx.main.models import User, Organization, Project, Inventory, CredentialType, Credential, Host, JobTemplate, Label
 from awx.main.signals import disable_computed_fields
 
 
@@ -50,9 +50,11 @@ class Command(BaseCommand):
 
                     ssh_type = CredentialType.objects.filter(namespace='ssh').first()
                     c, _ = Credential.objects.get_or_create(
-                        credential_type=ssh_type, name='Demo Credential', inputs={'username': getattr(superuser, 'username', 'null')}, created_by=superuser
+                        credential_type=ssh_type,
+                        name='Demo Credential',
+                        inputs={'username': getattr(superuser, 'username', 'null')},
+                        created_by=superuser,
                     )
-
                     if superuser:
                         c.admin_role.members.add(superuser)
 
@@ -73,15 +75,28 @@ class Command(BaseCommand):
                         created_by=superuser,
                     )
 
+                    label, _ = Label.objects.get_or_create(organization=o, name='demo')
+
+                    jt_description = (
+                        "This template serves as a quick introduction to how Ansible Automation works. "
+                        "It runs a basic automation task, allowing you to see Ansible in action without "
+                        "needing to set up anything complex. You can use this template to understand "
+                        "how job templates operate and test how Ansible interacts with systems in a "
+                        "simple, safe environment."
+                    )
                     jt = JobTemplate.objects.filter(name='Demo Job Template').first()
                     if jt:
                         jt.project = p
+                        jt.description = jt_description
                         jt.inventory = i
                         jt.playbook = 'hello_world.yml'
                         jt.save()
                     else:
-                        jt, _ = JobTemplate.objects.get_or_create(name='Demo Job Template', playbook='hello_world.yml', project=p, inventory=i)
+                        jt, _ = JobTemplate.objects.get_or_create(
+                            name='Demo Job Template', description=jt_description, playbook='hello_world.yml', project=p, inventory=i
+                        )
                     jt.credentials.add(c)
+                    jt.labels.add(label)
 
                     print('Default organization added.')
                     print('Demo Credential, Inventory, and Job Template added.')
