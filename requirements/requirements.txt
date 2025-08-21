@@ -20,8 +20,6 @@ ansi2html==1.9.2
     # via -r /awx_devel/requirements/requirements.in
 # git+https://github.com/ansible/ansible-runner.git@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
-asciichartpy==1.5.25
-    # via -r /awx_devel/requirements/requirements.in
 asgiref==3.11.0
     # via
     #   channels
@@ -561,7 +559,6 @@ pip==25.3
 setuptools==80.9.0
     # via
     #   -r /awx_devel/requirements/requirements.in
-    #   asciichartpy
     #   autobahn
     #   incremental
     #   pbr
