@@ -34,6 +34,13 @@ Using |prog| requires some initial configuration.  Here is a simple example for 
         --conf.insecure \
         users list
 
+.. note:: To execute AWX CLI on |rhaap| 2.5 and later, you must set your environment variable to:
+    
+    .. code:: 
+        
+        AWXKIT_API_BASE_PATH=/api/controller/
+
+
 There are multiple ways to configure and authenticate with an AWX or |RHAT| server.  For more details, see :ref:`authentication`.
 
 By default, |prog| prints valid JSON for successful commands.  Certain commands (such as those for printing job stdout) print raw text and do not allow for custom formatting.  For details on customizing |prog|'s output format, see :ref:`formatting`.
