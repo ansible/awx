@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'AWX CLI'
-copyright = '2024, Ansible by Red Hat'
+copyright = '2025, Ansible by Red Hat'
 author = 'Ansible by Red Hat'
 
 
@@ -54,5 +54,5 @@ rst_epilog = '''
 .. |prog| replace:: awx
 .. |at| replace:: automation controller
 .. |At| replace:: Automation controller
-.. |RHAT| replace:: Red Hat Ansible Automation Platform controller
+.. |RHAT| replace:: Red Hat Ansible Automation Platform
 '''
