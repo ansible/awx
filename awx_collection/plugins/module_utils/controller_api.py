@@ -329,6 +329,7 @@ class ControllerModule(AnsibleModule):
 
         return prefix
 
+
 class ControllerAPIModule(ControllerModule):
     # TODO: Move the collection version check into controller_module.py
     # This gets set by the make process so whatever is in here is irrelevant
