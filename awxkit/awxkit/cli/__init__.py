@@ -44,7 +44,17 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
         sys.exit(1)
     except Unauthorized as e:
         cli.parser.print_help()
-        msg = '\nValid credentials were not provided.\n$ awx login --help'
+
+        # Check if this might be an AAP Gateway authentication issue
+        error_msg = str(e).lower()
+        if 'platform authentication' in error_msg or 'please log in via platform authentication' in error_msg:
+            msg = '\nAuthentication failed: AAP Gateway detected.\n'
+            msg += 'For AAP Gateway environments, try setting:\n'
+            msg += '$ export AWXKIT_FORCE_BASIC_AUTH=true\n'
+            msg += '$ awx login --help'
+        else:
+            msg = '\nValid credentials were not provided.\n$ awx login --help'
+
         cprint(msg + '\n', 'red', file=stderr)
         if cli.verbose:
             cprint(e.__class__, 'red', file=stderr)
