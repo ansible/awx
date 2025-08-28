@@ -303,8 +303,8 @@ class ControllerModule(AnsibleModule):
         else:
             super().warn(warning)
 
-    def api_path(self, app_key=None, default_api_path="/api"):
-        if ControllerAPIModule._COLLECTION_TYPE != "awx" or app_key is not None:
+    def api_path(self, app_key=None, default_api_path="/api/"):
+        if self._COLLECTION_TYPE != "awx" or app_key is not None:
             if app_key is None:
                 app_key = "controller"
 
