@@ -44,7 +44,11 @@ class ControllerAWXKitModule(ControllerModule):
             if not self.authenticated:
                 self.authenticate()
             prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
-            v2_path = path.join('/', prefix, 'v2/')
+            if not prefix.startswith('/'):
+                prefix = f"/{prefix}"
+            if not prefix.endswith('/'):
+                prefix = f"{prefix}/"
+            v2_path = f"{prefix}v2/"
             v2_index = get_registered_page(v2_path)(self.connection).get()
             self.api_ref = ApiV2(connection=self.connection, **{'json': v2_index})
         return self.api_ref
