@@ -10,6 +10,7 @@ try:
     from awxkit.api.client import Connection
     from awxkit.api.pages.api import ApiV2
     from awxkit.api import get_registered_page
+    from awxkit.config import config
 
     HAS_AWX_KIT = True
 except ImportError:
@@ -43,12 +44,7 @@ class ControllerAWXKitModule(ControllerModule):
         if not self.apiV2Ref:
             if not self.authenticated:
                 self.authenticate()
-            prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
-            if not prefix.startswith('/'):
-                prefix = f"/{prefix}"
-            if not prefix.endswith('/'):
-                prefix = f"{prefix}/"
-            v2_path = f"{prefix}v2/"
+            v2_path = f"{self.api_path(default_api_path=config.api_base_path)}v2/"
             v2_index = get_registered_page(v2_path)(self.connection).get()
             self.api_ref = ApiV2(connection=self.connection, **{'json': v2_index})
         return self.api_ref

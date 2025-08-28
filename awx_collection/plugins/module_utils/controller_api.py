@@ -303,6 +303,31 @@ class ControllerModule(AnsibleModule):
         else:
             super().warn(warning)
 
+    def api_path(self, app_key=None, default_api_path="/api"):
+        if ControllerAPIModule._COLLECTION_TYPE != "awx" or app_key is not None:
+            if app_key is None:
+                app_key = "controller"
+
+            default_api_path = "/api/{0}/".format(app_key)
+
+        prefix = default_api_path
+        if app_key is None or app_key == "controller":
+            # if the env variable exists use it only when app is not defined or controller
+            controller_base_path = getenv(CONTROLLER_BASE_PATH_ENV_VAR)
+            if controller_base_path:
+                self.warn(
+                    "using controller base path from environment variable:"
+                    " {0} = {1}".format(CONTROLLER_BASE_PATH_ENV_VAR, controller_base_path)
+                )
+                prefix = controller_base_path
+
+        if not prefix.startswith('/'):
+            prefix = "/{0}".format(prefix)
+
+        if not prefix.endswith('/'):
+            prefix = "{0}/".format(prefix)
+
+        return prefix
 
 class ControllerAPIModule(ControllerModule):
     # TODO: Move the collection version check into controller_module.py
@@ -616,34 +641,6 @@ class ControllerAPIModule(ControllerModule):
         else:
             status_code = response.status
         return {'status_code': status_code, 'json': response_json}
-
-    def api_path(self, app_key=None):
-
-        default_api_path = "/api/"
-        if self._COLLECTION_TYPE != "awx" or app_key is not None:
-            if app_key is None:
-                app_key = "controller"
-
-            default_api_path = "/api/{0}/".format(app_key)
-
-        prefix = default_api_path
-        if app_key is None or app_key == "controller":
-            # if the env variable exists use it only when app is not defined or controller
-            controller_base_path = getenv(CONTROLLER_BASE_PATH_ENV_VAR)
-            if controller_base_path:
-                self.warn(
-                    "using controller base path from environment variable:"
-                    " {0} = {1}".format(CONTROLLER_BASE_PATH_ENV_VAR, controller_base_path)
-                )
-                prefix = controller_base_path
-
-        if not prefix.startswith('/'):
-            prefix = "/{0}".format(prefix)
-
-        if not prefix.endswith('/'):
-            prefix = "{0}/".format(prefix)
-
-        return prefix
 
     def _get_basic_authorization_header(self):
         basic_credentials = b64encode("{0}:{1}".format(self.username, self.password).encode()).decode()
