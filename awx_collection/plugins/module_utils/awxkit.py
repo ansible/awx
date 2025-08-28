@@ -4,7 +4,7 @@ __metaclass__ = type
 
 from .controller_api import ControllerModule
 from ansible.module_utils.basic import missing_required_lib
-from os import getenv, path
+from os import getenv
 
 try:
     from awxkit.api.client import Connection
