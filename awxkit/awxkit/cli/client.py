@@ -116,7 +116,6 @@ class CLI(object):
             error_msg = str(e).lower()
             should_fallback = (
                 'platform authentication' in error_msg
-                or 'please log in via platform authentication' in error_msg
                 or 'unauthorized' in error_msg
                 or ('401' in error_msg and 'login' in error_msg)
                 or 'csrf' in error_msg  # CSRF errors also indicate session auth issues
