@@ -94,45 +94,9 @@ class CLI(object):
             self.root.get()
             return
 
-        # Auto-detect AAP Gateway environment and use Basic auth
-        api_base_path = config.get('api_base_path', '/api/')
-        if '/controller/' in api_base_path:
-            # This looks like an AAP Gateway environment - use Basic auth
-            config.use_sessions = False
-            username = self.get_config('username')
-            password = self.get_config('password')
-            if username and password:
-                self.root.connection.login(username, password)
-            self.root.get()
-            return
-
-        # Try session-based authentication first for direct AWX
+        # Use session-based authentication by default
         config.use_sessions = True
-        try:
-            self.root.load_session().get()
-        except Exception as e:
-            # Check if this is an AAP Gateway authentication error
-            # Look for various error patterns that indicate AAP Gateway blocking session auth
-            error_msg = str(e).lower()
-            should_fallback = (
-                'platform authentication' in error_msg
-                or 'unauthorized' in error_msg
-                or ('401' in error_msg and 'login' in error_msg)
-                or 'csrf' in error_msg  # CSRF errors also indicate session auth issues
-            )
-
-            if should_fallback:
-                # Fallback to Basic authentication for AAP Gateway
-                config.use_sessions = False
-                # Apply Basic auth credentials to the session
-                username = self.get_config('username')
-                password = self.get_config('password')
-                if username and password:
-                    self.root.connection.login(username, password)
-                self.root.get()
-            else:
-                # Re-raise other authentication errors
-                raise
+        self.root.load_session().get()
 
     def connect(self):
         """Fetch top-level resources from /api/v2"""
