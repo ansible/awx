@@ -106,3 +106,24 @@ def test_config_file():
 
     assert config.credentials.default.username == 'mary'
     assert config.credentials.default.password == 'secret'
+
+
+def test_controller_optional_api_urlpattern_prefix():
+    """Tests that CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX is honored when set."""
+    cli = CLI()
+    cli.parse_args(['awx'], env={'CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX': '/custom/api/'})
+    assert config.api_base_path == '/custom/api/'
+
+
+def test_awxkit_api_base_path_fallback():
+    """Tests that AWXKIT_API_BASE_PATH overrides CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX."""
+    cli = CLI()
+    cli.parse_args(['awx'], env={'CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX': '/custom/api/', 'AWXKIT_API_BASE_PATH': '/override/api/'})
+    assert config.api_base_path == '/override/api/'
+
+
+def test_api_base_path_default():
+    """Tests that api_base_path defaults to /api/ when no environment variables are set."""
+    cli = CLI()
+    cli.parse_args(['awx'])
+    assert config.api_base_path == '/api/'
