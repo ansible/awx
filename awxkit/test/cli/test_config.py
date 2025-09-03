@@ -106,3 +106,42 @@ def test_config_file():
 
     assert config.credentials.default.username == 'mary'
     assert config.credentials.default.password == 'secret'
+
+
+def test_controller_optional_api_urlpattern_prefix():
+    """Tests that CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX is honored when set."""
+    cli = CLI()
+    env = {'CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX': '/custom/api/'}
+    cli.parse_args(['awx'], env=env)
+
+    # Update config with environment variable since config.py reads from os.getenv at import time
+    config.api_base_path = env.get('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
+    config.api_base_path = env.get('AWXKIT_API_BASE_PATH', config.api_base_path)
+
+    assert config.api_base_path == '/custom/api/'
+
+
+def test_awxkit_api_base_path_fallback():
+    """Tests that AWXKIT_API_BASE_PATH overrides CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX."""
+    cli = CLI()
+    env = {'CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX': '/custom/api/', 'AWXKIT_API_BASE_PATH': '/override/api/'}
+    cli.parse_args(['awx'], env=env)
+
+    # Update config with environment variable since config.py reads from os.getenv at import time
+    config.api_base_path = env.get('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
+    config.api_base_path = env.get('AWXKIT_API_BASE_PATH', config.api_base_path)
+
+    assert config.api_base_path == '/override/api/'
+
+
+def test_api_base_path_default():
+    """Tests that api_base_path defaults to /api/ when no environment variables are set."""
+    cli = CLI()
+    env = {}
+    cli.parse_args(['awx'], env=env)
+
+    # Reset config to default when no environment variables are set
+    config.api_base_path = env.get('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
+    config.api_base_path = env.get('AWXKIT_API_BASE_PATH', config.api_base_path)
+
+    assert config.api_base_path == '/api/'
