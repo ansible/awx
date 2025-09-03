@@ -44,9 +44,7 @@ def run(stdout=sys.stdout, stderr=sys.stderr, argv=[]):
         sys.exit(1)
     except Unauthorized as e:
         cli.parser.print_help()
-
         msg = '\nValid credentials were not provided.\n$ awx login --help'
-
         cprint(msg + '\n', 'red', file=stderr)
         if cli.verbose:
             cprint(e.__class__, 'red', file=stderr)
