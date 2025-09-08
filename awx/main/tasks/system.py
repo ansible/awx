@@ -1071,7 +1071,23 @@ def delete_inventory(inventory_id, user_id, retries=5):
             user = None
     with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
-            Inventory.objects.get(id=inventory_id).delete()
+            inventory = Inventory.objects.get(id=inventory_id)
+
+            # Defense-in-depth: Explicitly clean up role assignments before deletion
+            # This ensures cleanup happens even if model signals don't fire properly
+            try:
+                from django.contrib.contenttypes.models import ContentType
+                from ansible_base.rbac.models import ObjectRole
+
+                ct = ContentType.objects.get_for_model(inventory)
+                deleted_roles_count = ObjectRole.objects.filter(content_type=ct, object_id=inventory_id).count()
+                if deleted_roles_count > 0:
+                    ObjectRole.objects.filter(content_type=ct, object_id=inventory_id).delete()
+                    logger.debug('Async deletion: Cleaned up {} ObjectRole records for inventory {}'.format(deleted_roles_count, inventory_id))
+            except Exception as e:
+                logger.warning('Failed to clean up role assignments during async deletion of inventory {}: {}'.format(inventory_id, e))
+
+            inventory.delete()
             emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
             logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
