@@ -485,22 +485,32 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
     def delete(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
 
-        # Explicitly clean up role assignments before deletion to prevent orphaned assignments
-        # This ensures RoleUserAssignment and RoleTeamAssignment records are properly cascade deleted
+        # Explicitly clean up role assignments before deletion to prevent
+        # orphaned assignments. This ensures RoleUserAssignment and
+        # RoleTeamAssignment records are properly cascade deleted
         try:
             from django.contrib.contenttypes.models import ContentType
             from ansible_base.rbac.models import ObjectRole
-
+            
             ct = ContentType.objects.get_for_model(self)
-            deleted_roles_count = ObjectRole.objects.filter(content_type=ct, object_id=self.pk).count()
-            ObjectRole.objects.filter(content_type=ct, object_id=self.pk).delete()
-
+            object_roles = ObjectRole.objects.filter(
+                content_type=ct, object_id=self.pk
+            )
+            deleted_roles_count = object_roles.count()
+            object_roles.delete()
+            
             if deleted_roles_count > 0:
-                logger.debug(f"Cleaned up {deleted_roles_count} ObjectRole records for inventory {self.pk}")
-
+                logger.debug(
+                    f"Cleaned up {deleted_roles_count} ObjectRole records "
+                    f"for inventory {self.pk}"
+                )
+                
         except Exception as e:
             # Log the error but don't prevent inventory deletion
-            logger.warning(f"Failed to clean up role assignments for inventory {self.pk}: {e}")
+            logger.warning(
+                f"Failed to clean up role assignments for inventory "
+                f"{self.pk}: {e}"
+            )
 
         super(Inventory, self).delete(*args, **kwargs)
 
