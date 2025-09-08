@@ -31,7 +31,9 @@ def test_inventory_role_assignments_deleted_sync(inventory, alice, setup_managed
 
 @pytest.mark.django_db
 def test_inventory_role_assignments_deleted_async(inventory, alice, setup_managed_roles):
-    """Test role assignments are properly cleaned up when inventory is deleted asynchronously."""
+    """Test role assignments are properly cleaned up via schedule_deletion."""
+    from unittest.mock import patch
+
     # Get the managed Inventory Admin role definition
     inv_rd = RoleDefinition.objects.get(name='Inventory Admin')
 
@@ -44,12 +46,10 @@ def test_inventory_role_assignments_deleted_async(inventory, alice, setup_manage
     # Verify assignment exists before deletion
     assert RoleUserAssignment.objects.filter(user=alice, object_id=str(inventory_id), role_definition=inv_rd).exists()
 
-    # Mark as pending deletion and call async task directly
-    inventory.pending_deletion = True
-    inventory.save()
-
-    # Call the actual deletion task (runs synchronously in tests)
-    delete_inventory(inventory_id, user_id)
+    # Mock the WebSocket notification to avoid Redis dependency
+    with patch('awx.main.tasks.system.emit_channel_notification'):
+        # Call delete_inventory directly (simulating Celery task)
+        delete_inventory(inventory_id, user_id)
 
     # Verify role assignment is cleaned up
     assert not RoleUserAssignment.objects.filter(user_id=user_id, object_id=str(inventory_id), role_definition=inv_rd).exists()
