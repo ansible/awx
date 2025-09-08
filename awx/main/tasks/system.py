@@ -1077,10 +1077,10 @@ def delete_inventory(inventory_id, user_id, retries=5):
             # deletion. This ensures cleanup happens even if model signals
             # don't fire properly
             try:
-                from django.contrib.contenttypes.models import ContentType
                 from ansible_base.rbac.models import ObjectRole
+                from ansible_base.rbac import permission_registry
 
-                ct = ContentType.objects.get_for_model(inventory)
+                ct = permission_registry.content_type_model.objects.get_for_model(inventory)
                 object_roles = ObjectRole.objects.filter(content_type=ct, object_id=inventory_id)
                 deleted_roles_count = object_roles.count()
                 if deleted_roles_count > 0:

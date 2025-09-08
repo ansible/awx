@@ -489,10 +489,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         # orphaned assignments. This ensures RoleUserAssignment and
         # RoleTeamAssignment records are properly cascade deleted
         try:
-            from django.contrib.contenttypes.models import ContentType
             from ansible_base.rbac.models import ObjectRole
+            from ansible_base.rbac import permission_registry
 
-            ct = ContentType.objects.get_for_model(self)
+            ct = permission_registry.content_type_model.objects.get_for_model(self)
             object_roles = ObjectRole.objects.filter(content_type=ct, object_id=self.pk)
             deleted_roles_count = object_roles.count()
             object_roles.delete()
