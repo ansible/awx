@@ -491,26 +491,18 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         try:
             from django.contrib.contenttypes.models import ContentType
             from ansible_base.rbac.models import ObjectRole
-            
+
             ct = ContentType.objects.get_for_model(self)
-            object_roles = ObjectRole.objects.filter(
-                content_type=ct, object_id=self.pk
-            )
+            object_roles = ObjectRole.objects.filter(content_type=ct, object_id=self.pk)
             deleted_roles_count = object_roles.count()
             object_roles.delete()
-            
+
             if deleted_roles_count > 0:
-                logger.debug(
-                    f"Cleaned up {deleted_roles_count} ObjectRole records "
-                    f"for inventory {self.pk}"
-                )
-                
+                logger.debug(f"Cleaned up {deleted_roles_count} ObjectRole records " f"for inventory {self.pk}")
+
         except Exception as e:
             # Log the error but don't prevent inventory deletion
-            logger.warning(
-                f"Failed to clean up role assignments for inventory "
-                f"{self.pk}: {e}"
-            )
+            logger.warning(f"Failed to clean up role assignments for inventory " f"{self.pk}: {e}")
 
         super(Inventory, self).delete(*args, **kwargs)
 

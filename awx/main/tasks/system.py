@@ -1079,37 +1079,19 @@ def delete_inventory(inventory_id, user_id, retries=5):
             try:
                 from django.contrib.contenttypes.models import ContentType
                 from ansible_base.rbac.models import ObjectRole
-                
+
                 ct = ContentType.objects.get_for_model(inventory)
-                object_roles = ObjectRole.objects.filter(
-                    content_type=ct, object_id=inventory_id
-                )
+                object_roles = ObjectRole.objects.filter(content_type=ct, object_id=inventory_id)
                 deleted_roles_count = object_roles.count()
                 if deleted_roles_count > 0:
                     object_roles.delete()
-                    logger.debug(
-                        'Async deletion: Cleaned up {} ObjectRole records '
-                        'for inventory {}'.format(
-                            deleted_roles_count, inventory_id
-                        )
-                    )
+                    logger.debug('Async deletion: Cleaned up {} ObjectRole records ' 'for inventory {}'.format(deleted_roles_count, inventory_id))
             except Exception as e:
-                logger.warning(
-                    'Failed to clean up role assignments during async '
-                    'deletion of inventory {}: {}'.format(inventory_id, e)
-                )
+                logger.warning('Failed to clean up role assignments during async ' 'deletion of inventory {}: {}'.format(inventory_id, e))
 
             inventory.delete()
-            emit_channel_notification(
-                'inventories-status_changed', {
-                    'group_name': 'inventories',
-                    'inventory_id': inventory_id,
-                    'status': 'deleted'
-                }
-            )
-            logger.debug(
-                'Deleted inventory {} as user {}.'.format(inventory_id, user_id)
-            )
+            emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
+            logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
             logger.exception("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
