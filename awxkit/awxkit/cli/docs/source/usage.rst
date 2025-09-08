@@ -10,7 +10,7 @@ Installation
 Synopsis
 --------
 
-|prog| commands follow a simple format:
+CLI commands follow a simple format:
 
 .. code:: bash
 
@@ -25,7 +25,14 @@ The ``action`` is the thing you want to do (a verb). Resources generally have a 
 Getting Started
 ---------------
 
-Using |prog| requires some initial configuration.  Here is a simple example for interacting with an AWX or |RHAT| server:
+Using |prog| requires some initial configuration. To execute AWX CLI on |RHAT| 2.5 and later, you must set your environment variable to:
+    
+    .. code:: 
+        
+        AWXKIT_API_BASE_PATH=/api/controller/
+
+
+Here is a simple example for interacting with an AWX or |RHAT| server:
 
 .. code:: bash
 
