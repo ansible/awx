@@ -30,6 +30,7 @@ EXPECTED_VALUES = {
     'awx_license_instance_free': 0,
     'awx_pending_jobs_total': 0,
     'awx_database_connections_total': 1,
+    'awx_license_expiry': 0,
 }
 
 

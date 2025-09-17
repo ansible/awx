@@ -47,6 +47,7 @@ These can be specified via (from highest to lowest precedence):
  - direct module parameters
  - environment variables (most useful when running against localhost)
  - a config file path specified by the `tower_config_file` parameter
+ - a config file at `./tower_cli.cfg`, i.e. in the current directory
  - a config file at `~/.tower_cli.cfg`
  - a config file at `/etc/tower/tower_cli.cfg`
 
@@ -58,6 +59,15 @@ host = https://localhost:8043
 verify_ssl = true
 username = foo
 password = bar
+```
+
+or like this:
+
+```
+host: https://localhost:8043
+verify_ssl: true
+oauth_token: <token>
+
 ```
 
 ## Release and Upgrade Notes

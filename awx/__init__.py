@@ -62,7 +62,8 @@ else:
 
 def prepare_env():
     # Update the default settings environment variable based on current mode.
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings')
+    os.environ.setdefault('AWX_MODE', MODE)
     # Hide DeprecationWarnings when running in production.  Need to first load
     # settings to apply our filter after Django's own warnings filter.
     from django.conf import settings

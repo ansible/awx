@@ -18,11 +18,13 @@ from collections import OrderedDict
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
+from django.db.models.constraints import UniqueConstraint
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
+from flags.state import flag_enabled
 
 # REST Framework
 from rest_framework.exceptions import ParseError
@@ -32,6 +34,7 @@ from polymorphic.models import PolymorphicModel
 
 from ansible_base.lib.utils.models import prevent_search, get_type_for_model
 from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleEvaluation
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
@@ -111,7 +114,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         ordering = ('name',)
         # unique_together here is intentionally commented out. Please make sure sub-classes of this model
         # contain at least this uniqueness restriction: SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
-        # unique_together = [('polymorphic_ctype', 'name', 'organization')]
+        # Unique name constraint - note that inventory source model is excluded from this constraint entirely
+        constraints = [
+            UniqueConstraint(fields=['polymorphic_ctype', 'name', 'organization'], condition=models.Q(org_unique=True), name='ujt_hard_name_constraint')
+        ]
 
     old_pk = models.PositiveIntegerField(
         null=True,
@@ -180,6 +186,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     )
     labels = models.ManyToManyField("Label", blank=True, related_name='%(class)s_labels')
     instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='UnifiedJobTemplateInstanceGroupMembership')
+    org_unique = models.BooleanField(
+        blank=True, default=True, editable=False, help_text=_('Used internally to selectively enforce database constraint on name')
+    )
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
@@ -210,20 +219,21 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         # do not use this if in a subclass
         if cls != UnifiedJobTemplate:
             return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
-        from ansible_base.rbac.models import RoleEvaluation
 
         action = to_permissions[role_field]
 
         # Special condition for super auditor
         role_subclasses = cls._submodels_with_roles()
-        role_cts = ContentType.objects.get_for_models(*role_subclasses).values()
         all_codenames = {f'{action}_{cls._meta.model_name}' for cls in role_subclasses}
         if not (all_codenames - accessor.singleton_permissions()):
+            role_cts = ContentType.objects.get_for_models(*role_subclasses).values()
             qs = cls.objects.filter(polymorphic_ctype__in=role_cts)
             return qs.values_list('id', flat=True)
 
+        dab_role_cts = permission_registry.content_type_model.objects.get_for_models(*role_subclasses).values()
+
         return (
-            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in role_cts])
+            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in dab_role_cts])
             .values_list('object_id')
             .distinct()
         )
@@ -1362,7 +1372,30 @@ class UnifiedJob(
             traceback=self.result_traceback,
         )
 
-    def pre_start(self, **kwargs):
+    def get_start_kwargs(self):
+        needed = self.get_passwords_needed_to_start()
+
+        decrypted_start_args = decrypt_field(self, 'start_args')
+
+        if not decrypted_start_args or decrypted_start_args == '{}':
+            return None
+
+        try:
+            start_args = json.loads(decrypted_start_args)
+        except Exception:
+            logger.exception(f'Unexpected malformed start_args on unified_job={self.id}')
+            return None
+
+        opts = dict([(field, start_args.get(field, '')) for field in needed])
+
+        if not all(opts.values()):
+            missing_fields = ', '.join([k for k, v in opts.items() if not v])
+            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
+            self.save(update_fields=['job_explanation'])
+
+        return opts
+
+    def pre_start(self):
         if not self.can_start:
             self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
@@ -1383,25 +1416,10 @@ class UnifiedJob(
                 self.save(update_fields=['job_explanation'])
                 return (False, None)
 
-        needed = self.get_passwords_needed_to_start()
-        try:
-            start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception:
-            start_args = None
+        opts = self.get_start_kwargs()
 
-        if start_args in (None, ''):
-            start_args = kwargs
-
-        opts = dict([(field, start_args.get(field, '')) for field in needed])
-
-        if not all(opts.values()):
-            missing_fields = ', '.join([k for k, v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
-            self.save(update_fields=['job_explanation'])
+        if opts and (not all(opts.values())):
             return (False, None)
-
-        if 'extra_vars' in kwargs:
-            self.handle_extra_data(kwargs['extra_vars'])
 
         # remove any job_explanations that may have been set while job was in pending
         if self.job_explanation != "":
@@ -1463,21 +1481,44 @@ class UnifiedJob(
     def cancel_dispatcher_process(self):
         """Returns True if dispatcher running this job acknowledged request and sent SIGTERM"""
         if not self.celery_task_id:
-            return
+            return False
+
         canceled = []
+        # Special case for task manager (used during workflow job cancellation)
         if not connection.get_autocommit():
-            # this condition is purpose-written for the task manager, when it cancels jobs in workflows
-            ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+                try:
+                    from dispatcherd.factories import get_control_from_settings
+
+                    ctl = get_control_from_settings()
+                    ctl.control('cancel', data={'uuid': self.celery_task_id})
+                except Exception:
+                    logger.exception("Error sending cancel command to new dispatcher")
+            else:
+                try:
+                    ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
+                except Exception:
+                    logger.exception("Error sending cancel command to legacy dispatcher")
             return True  # task manager itself needs to act under assumption that cancel was received
 
+        # Standard case with reply
         try:
-            # Use control and reply mechanism to cancel and obtain confirmation
             timeout = 5
-            canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
+            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+                from dispatcherd.factories import get_control_from_settings
+
+                ctl = get_control_from_settings()
+                results = ctl.control_with_reply('cancel', data={'uuid': self.celery_task_id}, expected_replies=1, timeout=timeout)
+                # Check if cancel was successful by checking if we got any results
+                return bool(results and len(results) > 0)
+            else:
+                # Original implementation
+                canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
         except socket.timeout:
             logger.error(f'could not reach dispatcher on {self.controller_node} within {timeout}s')
         except Exception:
             logger.exception("error encountered when checking task status")
+
         return bool(self.celery_task_id in canceled)  # True or False, whether confirmation was obtained
 
     def cancel(self, job_explanation=None, is_chain=False):

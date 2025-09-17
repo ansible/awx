@@ -70,7 +70,7 @@
         organization: Some Org
         image: quay.io/ansible/awx-ee
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:

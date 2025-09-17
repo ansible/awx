@@ -4,6 +4,7 @@ __metaclass__ = type
 
 from .controller_api import ControllerModule
 from ansible.module_utils.basic import missing_required_lib
+from os import getenv
 
 try:
     from awxkit.api.client import Connection
@@ -42,7 +43,13 @@ class ControllerAWXKitModule(ControllerModule):
         if not self.apiV2Ref:
             if not self.authenticated:
                 self.authenticate()
-            v2_index = get_registered_page('/api/v2/')(self.connection).get()
+            prefix = getenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
+            if not prefix.startswith('/'):
+                prefix = f"/{prefix}"
+            if not prefix.endswith('/'):
+                prefix = f"{prefix}/"
+            v2_path = f"{prefix}v2/"
+            v2_index = get_registered_page(v2_path)(self.connection).get()
             self.api_ref = ApiV2(connection=self.connection, **{'json': v2_index})
         return self.api_ref
 

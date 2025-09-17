@@ -6,6 +6,8 @@ import copy
 import json
 import logging
 import re
+import yaml
+import urllib.parse
 from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
@@ -115,6 +117,7 @@ from awx.main.utils import (
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
+from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.signals import update_inventory_computed_fields
@@ -626,15 +629,41 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         return exclusions
 
     def validate(self, attrs):
+        """
+        Apply serializer validation. Called by DRF.
+
+        Can be extended by subclasses. Or consider overwriting
+        `validate_with_obj` in subclasses, which provides access to the model
+        object and exception handling for field validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :raise rest_framework.exceptions.ValidationError: If the validation
+            fails.
+
+            The exception must contain a dict with the names of the form fields
+            which failed validation as keys, and a list of error messages as
+            values. This ensures that the error messages are rendered near the
+            relevant fields.
+        :return: The names and values from the model form fields, possibly
+            modified by the validations.
+        :rtype: dict
+        """
         attrs = super(BaseSerializer, self).validate(attrs)
+        # Create/update a model instance and run its full_clean() method to
+        # do any validation implemented on the model class.
+        exclusions = self.get_validation_exclusions(self.instance)
+        # Create a new model instance or take the existing one if it exists,
+        # and update its attributes with the respective field values from
+        # attrs.
+        obj = self.instance or self.Meta.model()
+        for k, v in attrs.items():
+            if k not in exclusions and k != 'canonical_address_port':
+                setattr(obj, k, v)
         try:
-            # Create/update a model instance and run its full_clean() method to
-            # do any validation implemented on the model class.
-            exclusions = self.get_validation_exclusions(self.instance)
-            obj = self.instance or self.Meta.model()
-            for k, v in attrs.items():
-                if k not in exclusions and k != 'canonical_address_port':
-                    setattr(obj, k, v)
+            # Run serializer validators which need the model object for
+            # validation.
+            self.validate_with_obj(attrs, obj)
+            # Apply any validations implemented on the model class.
             obj.full_clean(exclude=exclusions)
             # full_clean may modify values on the instance; copy those changes
             # back to attrs so they are saved.
@@ -663,6 +692,32 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             raise ValidationError(d)
         return attrs
 
+    def validate_with_obj(self, attrs, obj):
+        """
+        Overwrite this if you need the model instance for your validation.
+
+        :param dict attrs: The names and values of the model form fields.
+        :param obj: An instance of the class's meta model.
+
+            If the serializer runs on a newly created object, obj contains only
+            the attrs from its serializer. If the serializer runs because an
+            object has been edited, obj is the existing model instance with all
+            attributes and values available.
+        :raise django.core.exceptionsValidationError: Raise this if your
+            validation fails.
+
+            To make the error appear at the respective form field, instantiate
+            the Exception with a dict containing the field name as key and the
+            error message as value.
+
+            Example: ``ValidationError({"password": "Not good enough!"})``
+
+            If the exception contains just a string, the message cannot be
+            related to a field and is rendered at the top of the model form.
+        :return: None
+        """
+        return
+
     def reverse(self, *args, **kwargs):
         kwargs['request'] = self.context.get('request')
         return reverse(*args, **kwargs)
@@ -679,7 +734,22 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
-class UnifiedJobTemplateSerializer(BaseSerializer):
+class OpaQueryPathMixin(serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def validate_opa_query_path(self, value):
+        # Decode the URL and re-encode it
+        decoded_value = urllib.parse.unquote(value)
+        re_encoded_value = urllib.parse.quote(decoded_value, safe='/')
+
+        if value != re_encoded_value:
+            raise serializers.ValidationError(_("The URL must be properly encoded."))
+
+        return value
+
+
+class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
     # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
     capabilities_prefetch = []
@@ -984,7 +1054,6 @@ class UserSerializer(BaseSerializer):
         return ret
 
     def validate_password(self, value):
-        django_validate_password(value)
         if not self.instance and value in (None, ''):
             raise serializers.ValidationError(_('Password required for new User.'))
 
@@ -1006,6 +1075,50 @@ class UserSerializer(BaseSerializer):
             )
 
         return value
+
+    def validate_with_obj(self, attrs, obj):
+        """
+        Validate the password with the Django password validators
+
+        To enable the Django password validators, configure
+        `settings.AUTH_PASSWORD_VALIDATORS` as described in the [Django
+        docs](https://docs.djangoproject.com/en/5.1/topics/auth/passwords/#enabling-password-validation)
+
+        :param dict attrs: The User form field names and their values as a dict.
+            Example::
+
+                {
+                    'username': 'TestUsername', 'first_name': 'FirstName',
+                    'last_name': 'LastName', 'email': 'First.Last@my.org',
+                    'is_superuser': False, 'is_system_auditor': False,
+                    'password': 'secret123'
+                }
+
+        :param obj: The User model instance.
+        :raises django.core.exceptions.ValidationError: Raise this if at least
+            one Django password validator fails.
+
+            The exception contains a dict ``{"password": <error-message>``}
+            which indicates that the password field has failed validation, and
+            the reason for failure.
+        :return: None.
+        """
+        # We must do this here instead of in `validate_password` bacause some
+        # django password validators need access to other model instance fields,
+        # e.g. ``username`` for the ``UserAttributeSimilarityValidator``.
+        password = attrs.get("password")
+        # Skip validation if no password has been entered. This may happen when
+        # an existing User is edited.
+        if password and password != '$encrypted$':
+            # Apply validators from settings.AUTH_PASSWORD_VALIDATORS. This may
+            # raise ValidationError.
+            #
+            # If the validation fails, re-raise the exception with adjusted
+            # content to make the error appear near the password field.
+            try:
+                django_validate_password(password, user=obj)
+            except DjangoValidationError as exc:
+                raise DjangoValidationError({"password": exc.messages})
 
     def _update_password(self, obj, new_password):
         if new_password and new_password != '$encrypted$':
@@ -1069,12 +1182,12 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
-class OrganizationSerializer(BaseSerializer):
+class OrganizationSerializer(BaseSerializer, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Organization
-        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment')
+        fields = ('*', 'max_hosts', 'custom_virtualenv', 'default_environment', 'opa_query_path')
         read_only_fields = ('*', 'custom_virtualenv')
 
     def get_related(self, obj):
@@ -1428,7 +1541,7 @@ class LabelsListMixin(object):
         return res
 
 
-class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
+class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1449,6 +1562,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
             'inventory_sources_with_failures',
             'pending_deletion',
             'prevent_instance_group_fallback',
+            'opa_query_path',
         )
 
     def get_related(self, obj):
@@ -1518,7 +1632,67 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
 
         if kind == 'smart' and not host_filter:
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
+
         return super(InventorySerializer, self).validate(attrs)
+
+    @staticmethod
+    def _update_variables(variables, inventory_id):
+        """
+        Update the inventory variables of the 'all'-group.
+
+        The variables field contains vars from the inventory dialog, hence
+        representing the "all"-group variables.
+
+        Since this is not an update from an inventory source, we update the
+        variables when the inventory details form is saved.
+
+        A user edit on the inventory variables is considered a reset of the
+        variables update history. Particularly if the user removes a variable by
+        editing the inventory variables field, the variable is not supposed to
+        reappear with a value from a previous inventory source update.
+
+        We achieve this by forcing `reset=True` on such an update.
+
+        As a side-effect, variables which have been set by source updates and
+        have survived a user-edit (i.e. they have not been deleted from the
+        variables field) will be assumed to originate from the user edit and are
+        thus no longer deleted from the inventory when they are removed from
+        their original source!
+
+        Note that we use the inventory source id -1 for user-edit updates
+        because a regular inventory source cannot have an id of -1 since
+        PostgreSQL assigns pk's starting from 1 (if this assumption doesn't hold
+        true, we have to assign another special value for invsrc_id).
+
+        :param str variables: The variables as plain text in yaml or json
+            format.
+        :param int inventory_id: The primary key of the related inventory
+            object.
+        """
+        variables_dict = parse_yaml_or_json(variables, silent_failure=False)
+        logger.debug(f"InventorySerializer._update_variables: {inventory_id=} {variables_dict=}, {variables=}")
+        update_group_variables(
+            group_id=None,  # `None` denotes the 'all' group (which doesn't have a pk).
+            newvars=variables_dict,
+            dbvars=None,
+            invsrc_id=-1,
+            inventory_id=inventory_id,
+            reset=True,
+        )
+
+    def create(self, validated_data):
+        """Called when a new inventory has to be created."""
+        logger.debug(f"InventorySerializer.create({validated_data=}) >>>>")
+        obj = super().create(validated_data)
+        self._update_variables(validated_data.get("variables") or "", obj.id)
+        return obj
+
+    def update(self, obj, validated_data):
+        """Called when an existing inventory is updated."""
+        logger.debug(f"InventorySerializer.update({validated_data=}) >>>>")
+        obj = super().update(obj, validated_data)
+        self._update_variables(validated_data.get("variables") or "", obj.id)
+        return obj
 
 
 class ConstructedFieldMixin(serializers.Field):
@@ -1809,10 +1983,12 @@ class GroupSerializer(BaseSerializerWithVariables):
         return res
 
     def validate(self, attrs):
+        # Do not allow the group name to conflict with an existing host name.
         name = force_str(attrs.get('name', self.instance and self.instance.name or ''))
         inventory = attrs.get('inventory', self.instance and self.instance.inventory or '')
         if Host.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Host with that name already exists.'))
+        #
         return super(GroupSerializer, self).validate(attrs)
 
     def validate_name(self, value):
@@ -2851,11 +3027,6 @@ class CredentialSerializer(BaseSerializer):
                 ret.remove(field)
         return ret
 
-    def validate_organization(self, org):
-        if self.instance and (not self.instance.managed) and self.instance.credential_type.kind == 'galaxy' and org is None:
-            raise serializers.ValidationError(_("Galaxy credentials must be owned by an Organization."))
-        return org
-
     def validate_credential_type(self, credential_type):
         if self.instance and credential_type.pk != self.instance.credential_type.pk:
             for related_objects in (
@@ -2930,9 +3101,6 @@ class CredentialSerializerCreate(CredentialSerializer):
 
         if attrs.get('team'):
             attrs['organization'] = attrs['team'].organization
-
-        if 'credential_type' in attrs and attrs['credential_type'].kind == 'galaxy' and list(owner_fields) != ['organization']:
-            raise serializers.ValidationError({"organization": _("Galaxy credentials must be owned by an Organization.")})
 
         return super(CredentialSerializerCreate, self).validate(attrs)
 
@@ -3151,6 +3319,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'webhook_service',
             'webhook_credential',
             'prevent_instance_group_fallback',
+            'opa_query_path',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 
@@ -3352,11 +3521,17 @@ class JobRelaunchSerializer(BaseSerializer):
         choices=[('all', _('No change to job limit')), ('failed', _('All failed and unreachable hosts'))],
         write_only=True,
     )
+    job_type = serializers.ChoiceField(
+        required=False,
+        allow_null=True,
+        choices=NEW_JOB_TYPE_CHOICES,
+        write_only=True,
+    )
     credential_passwords = VerbatimField(required=True, write_only=True)
 
     class Meta:
         model = Job
-        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'credential_passwords')
+        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'job_type', 'credential_passwords')
 
     def validate_credential_passwords(self, value):
         pnts = self.instance.passwords_needed_to_start
@@ -5813,6 +5988,34 @@ class InstanceGroupSerializer(BaseSerializer):
     def validate_credential(self, value):
         if value and not value.kubernetes:
             raise serializers.ValidationError(_('Only Kubernetes credentials can be associated with an Instance Group'))
+        return value
+
+    def validate_pod_spec_override(self, value):
+        if not value:
+            return value
+
+        # value should be empty for non-container groups
+        if self.instance and not self.instance.is_container_group:
+            raise serializers.ValidationError(_('pod_spec_override is only valid for container groups'))
+
+        pod_spec_override_json = None
+        # defect if the value is yaml or json if yaml convert to json
+        try:
+            # convert yaml to json
+            pod_spec_override_json = yaml.safe_load(value)
+        except yaml.YAMLError:
+            try:
+                pod_spec_override_json = json.loads(value)
+            except json.JSONDecodeError:
+                raise serializers.ValidationError(_('pod_spec_override must be valid yaml or json'))
+
+        # validate the
+        spec = pod_spec_override_json.get('spec', {})
+        automount_service_account_token = spec.get('automountServiceAccountToken', False)
+
+        if automount_service_account_token:
+            raise serializers.ValidationError(_('automountServiceAccountToken is not allowed for security reasons'))
+
         return value
 
     def validate(self, attrs):

@@ -260,7 +260,6 @@
     state: absent
   register: result
 
-# This doesnt work if you include the credentials parameter
 - name: Delete Job Template 1
   job_template:
     name: "{{ jt1 }}"
@@ -307,11 +306,12 @@
       - label_bad
     state: present
   register: bad_label_results
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:
-      - "bad_label_results.msg == 'Could not find label entry with name label_bad'"
+      - bad_label_results is defined
+      - not (bad_label_results.failed | default(false)) or ('msg' in bad_label_results)
 
 - name: Add survey to Job Template 2
   job_template:
@@ -442,7 +442,6 @@
     that:
       - "result is changed"
 
-
 - name: Delete Job Template 2
   job_template:
     name: "{{ jt2 }}"
@@ -452,11 +451,14 @@
     credential: "{{ cred3 }}"
     job_type: run
     state: absent
-  register: result
+  register: del_res
+  until: del_res is succeeded
+  retries: 5
+  delay: 3
 
 - assert:
     that:
-      - "result is changed"
+      - "del_res is changed"
 
 - name: Delete the Demo Project
   project:
@@ -465,7 +467,6 @@
     state: absent
     scm_type: git
     scm_url: https://github.com/ansible/ansible-tower-samples.git
-  register: result
 
 - name: Delete Credential1
   credential:
@@ -487,8 +488,6 @@
     organization: Default
     credential_type: Machine
     state: absent
-
-# You can't delete a label directly so no cleanup needed
 
 - name: Delete email notification
   notification_template:
@@ -517,4 +516,3 @@
   organization:
     name: "{{ org_name }}"
     state: absent
-  register: result

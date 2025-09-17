@@ -7,6 +7,7 @@ import time
 import traceback
 from datetime import datetime
 from uuid import uuid4
+import json
 
 import collections
 from multiprocessing import Process
@@ -25,12 +26,18 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
+from awx.main.utils.common import get_mem_effective_capacity, get_corrected_memory, get_corrected_cpu, get_cpu_effective_capacity
+
+# ansible-runner
+from ansible_runner.utils.capacity import get_mem_in_bytes, get_cpu_count
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 else:
     logger = logging.getLogger('awx.main.dispatch')
+
+
+RETIRED_SENTINEL_TASK = "[retired]"
 
 
 class NoOpResultQueue(object):
@@ -77,11 +84,17 @@ class PoolWorker(object):
         self.queue = MPQueue(queue_size)
         self.process = Process(target=target, args=(self.queue, self.finished) + args)
         self.process.daemon = True
+        self.creation_time = time.monotonic()
+        self.retiring = False
 
     def start(self):
         self.process.start()
 
     def put(self, body):
+        if self.retiring:
+            uuid = body.get('uuid', 'N/A') if isinstance(body, dict) else 'N/A'
+            logger.info(f"Worker pid:{self.pid} is retiring. Refusing new task {uuid}.")
+            raise QueueFull("Worker is retiring and not accepting new tasks")  # AutoscalePool.write handles QueueFull
         uuid = '?'
         if isinstance(body, dict):
             if not body.get('uuid'):
@@ -99,6 +112,11 @@ class PoolWorker(object):
         gracefully.
         """
         self.queue.put('QUIT')
+
+    @property
+    def age(self):
+        """Returns the current age of the worker in seconds."""
+        return time.monotonic() - self.creation_time
 
     @property
     def pid(self):
@@ -146,6 +164,8 @@ class PoolWorker(object):
                 # the purpose of self.managed_tasks is to just track internal
                 # state of which events are *currently* being processed.
                 logger.warning('Event UUID {} appears to be have been duplicated.'.format(uuid))
+            if self.retiring:
+                self.managed_tasks[RETIRED_SENTINEL_TASK] = {'task': RETIRED_SENTINEL_TASK}
 
     @property
     def current_task(self):
@@ -261,6 +281,8 @@ class WorkerPool(object):
             '{% for w in workers %}'
             '.  worker[pid:{{ w.pid }}]{% if not w.alive %} GONE exit={{ w.exitcode }}{% endif %}'
             ' sent={{ w.messages_sent }}'
+            ' age={{ "%.0f"|format(w.age) }}s'
+            ' retiring={{ w.retiring }}'
             '{% if w.messages_finished %} finished={{ w.messages_finished }}{% endif %}'
             ' qsize={{ w.managed_tasks|length }}'
             ' rss={{ w.mb }}MB'
@@ -307,6 +329,41 @@ class WorkerPool(object):
             logger.exception('could not kill {}'.format(worker.pid))
 
 
+def get_auto_max_workers():
+    """Method we normally rely on to get max_workers
+
+    Uses almost same logic as Instance.local_health_check
+    The important thing is to be MORE than Instance.capacity
+    so that the task-manager does not over-schedule this node
+
+    Ideally we would just use the capacity from the database plus reserve workers,
+    but this poses some bootstrap problems where OCP task containers
+    register themselves after startup
+    """
+    # Get memory from ansible-runner
+    total_memory_gb = get_mem_in_bytes()
+
+    # This may replace memory calculation with a user override
+    corrected_memory = get_corrected_memory(total_memory_gb)
+
+    # Get same number as max forks based on memory, this function takes memory as bytes
+    mem_capacity = get_mem_effective_capacity(corrected_memory, is_control_node=True)
+
+    # Follow same process for CPU capacity constraint
+    cpu_count = get_cpu_count()
+    corrected_cpu = get_corrected_cpu(cpu_count)
+    cpu_capacity = get_cpu_effective_capacity(corrected_cpu, is_control_node=True)
+
+    # Here is what is different from health checks,
+    auto_max = max(mem_capacity, cpu_capacity)
+
+    # add magic number of extra workers to ensure
+    # we have a few extra workers to run the heartbeat
+    auto_max += 7
+
+    return auto_max
+
+
 class AutoscalePool(WorkerPool):
     """
     An extended pool implementation that automatically scales workers up and
@@ -317,22 +374,13 @@ class AutoscalePool(WorkerPool):
 
     def __init__(self, *args, **kwargs):
         self.max_workers = kwargs.pop('max_workers', None)
+        self.max_worker_lifetime_seconds = kwargs.pop(
+            'max_worker_lifetime_seconds', getattr(settings, 'WORKER_MAX_LIFETIME_SECONDS', 14400)
+        )  # Default to 4 hours
         super(AutoscalePool, self).__init__(*args, **kwargs)
 
         if self.max_workers is None:
-            settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
-            if settings_absmem is not None:
-                # There are 1073741824 bytes in a gigabyte. Convert bytes to gigabytes by dividing by 2**30
-                total_memory_gb = convert_mem_str_to_bytes(settings_absmem) // 2**30
-            else:
-                total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
-
-            # Get same number as max forks based on memory, this function takes memory as bytes
-            self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
-
-            # add magic prime number of extra workers to ensure
-            # we have a few extra workers to run the heartbeat
-            self.max_workers += 7
+            self.max_workers = get_auto_max_workers()
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
@@ -345,6 +393,9 @@ class AutoscalePool(WorkerPool):
         # the AutoscalePool class does not save these to redis directly, but reports via produce_subsystem_metrics
         self.scale_up_ct = 0
         self.worker_count_max = 0
+
+        # last time we wrote current tasks, to avoid too much log spam
+        self.last_task_list_log = time.monotonic()
 
     def produce_subsystem_metrics(self, metrics_object):
         metrics_object.set('dispatcher_pool_scale_up_events', self.scale_up_ct)
@@ -385,6 +436,7 @@ class AutoscalePool(WorkerPool):
         """
         orphaned = []
         for w in self.workers[::]:
+            is_retirement_age = self.max_worker_lifetime_seconds is not None and w.age > self.max_worker_lifetime_seconds
             if not w.alive:
                 # the worker process has exited
                 # 1. take the task it was running and enqueue the error
@@ -393,6 +445,10 @@ class AutoscalePool(WorkerPool):
                 #    send them to another worker
                 logger.error('worker pid:{} is gone (exit={})'.format(w.pid, w.exitcode))
                 if w.current_task:
+                    if w.current_task == {'task': RETIRED_SENTINEL_TASK}:
+                        logger.debug('scaling down worker pid:{} due to worker age: {}'.format(w.pid, w.age))
+                        self.workers.remove(w)
+                        continue
                     if w.current_task != 'QUIT':
                         try:
                             for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid']):
@@ -403,6 +459,7 @@ class AutoscalePool(WorkerPool):
                         logger.warning(f'Worker was told to quit but has not, pid={w.pid}')
                 orphaned.extend(w.orphaned_tasks)
                 self.workers.remove(w)
+
             elif w.idle and len(self.workers) > self.min_workers:
                 # the process has an empty queue (it's idle) and we have
                 # more processes in the pool than we need (> min)
@@ -411,6 +468,22 @@ class AutoscalePool(WorkerPool):
                 logger.debug('scaling down worker pid:{}'.format(w.pid))
                 w.quit()
                 self.workers.remove(w)
+
+            elif w.idle and is_retirement_age:
+                logger.debug('scaling down worker pid:{} due to worker age: {}'.format(w.pid, w.age))
+                w.quit()
+                self.workers.remove(w)
+
+            elif is_retirement_age and not w.retiring and not w.idle:
+                logger.info(
+                    f"Worker pid:{w.pid} (age: {w.age:.0f}s) exceeded max lifetime ({self.max_worker_lifetime_seconds:.0f}s). "
+                    "Signaling for graceful retirement."
+                )
+                # Send QUIT signal; worker will finish current task then exit.
+                w.quit()
+                # mark as retiring to reject any future tasks that might be assigned in meantime
+                w.retiring = True
+
             if w.alive:
                 # if we discover a task manager invocation that's been running
                 # too long, reap it (because otherwise it'll just hold the postgres
@@ -463,6 +536,14 @@ class AutoscalePool(WorkerPool):
                 self.worker_count_max = new_worker_ct
             return ret
 
+    @staticmethod
+    def fast_task_serialization(current_task):
+        try:
+            return str(current_task.get('task')) + ' - ' + str(sorted(current_task.get('args', []))) + ' - ' + str(sorted(current_task.get('kwargs', {})))
+        except Exception:
+            # just make sure this does not make things worse
+            return str(current_task)
+
     def write(self, preferred_queue, body):
         if 'guid' in body:
             set_guid(body['guid'])
@@ -484,6 +565,15 @@ class AutoscalePool(WorkerPool):
                 if isinstance(body, dict):
                     task_name = body.get('task')
                 logger.warning(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
+                # Once every 10 seconds write out task list for debugging
+                if time.monotonic() - self.last_task_list_log >= 10.0:
+                    task_counts = {}
+                    for worker in self.workers:
+                        task_slug = self.fast_task_serialization(worker.current_task)
+                        task_counts.setdefault(task_slug, 0)
+                        task_counts[task_slug] += 1
+                    logger.info(f'Running tasks by count:\n{json.dumps(task_counts, indent=2)}')
+                    self.last_task_list_log = time.monotonic()
                 return super(AutoscalePool, self).write(preferred_queue, body)
         except Exception:
             for conn in connections.all():

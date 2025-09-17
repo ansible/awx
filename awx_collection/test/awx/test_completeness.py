@@ -93,6 +93,9 @@ needs_development = ['inventory_script', 'instance']
 needs_param_development = {
     'host': ['instance_id'],
     'workflow_approval': ['description', 'execution_environment'],
+    'inventory': ['opa_query_path'],
+    'job_template': ['opa_query_path'],
+    'organization': ['opa_query_path'],
 }
 # -----------------------------------------------------------------------------------------------------------
 

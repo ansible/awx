@@ -161,11 +161,10 @@
 
 - name: "Find number of hosts in {{ group_name1 }}"
   set_fact:
-    group1_host_count: "{{ lookup('awx.awx.controller_api', 'groups/{{result.id}}/all_hosts/') |length}}"
-
+    group1_host_count: "{{ lookup('awx.awx.controller_api', 'groups/' + result.id | string + '/all_hosts/') | length }}"
 - assert:
     that:
-      - group1_host_count  == "3"
+      - group1_host_count == 3
 
 - name: Delete Group 3
   group:
@@ -209,7 +208,7 @@
     inventory: test-non-existing-inventory
     state: present
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:

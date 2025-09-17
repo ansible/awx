@@ -3,8 +3,6 @@ import json
 
 import pytest
 
-from django.contrib.contenttypes.models import ContentType
-
 from crum import impersonate
 
 from awx.main.fields import ImplicitRoleField
@@ -60,7 +58,7 @@ def test_role_migration_matches(request, model, setup_managed_roles):
             new_codenames = set(rd.permissions.values_list('codename', flat=True))
             # all the old roles should map to a non-Compat role definition
             if 'Compat' not in rd.name:
-                model_rds = RoleDefinition.objects.filter(content_type=ContentType.objects.get_for_model(obj))
+                model_rds = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get_for_model(obj))
                 rd_data = {}
                 for rd in model_rds:
                     rd_data[rd.name] = list(rd.permissions.values_list('codename', flat=True))
@@ -76,7 +74,7 @@ def test_role_migration_matches(request, model, setup_managed_roles):
 
 @pytest.mark.django_db
 def test_role_naming(setup_managed_roles):
-    qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='dmin')
+    qs = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get(model='jobtemplate'), name__endswith='dmin')
     assert qs.count() == 1  # sanity
     rd = qs.first()
     assert rd.name == 'JobTemplate Admin'
@@ -86,7 +84,7 @@ def test_role_naming(setup_managed_roles):
 
 @pytest.mark.django_db
 def test_action_role_naming(setup_managed_roles):
-    qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='ecute')
+    qs = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get(model='jobtemplate'), name__endswith='ecute')
     assert qs.count() == 1  # sanity
     rd = qs.first()
     assert rd.name == 'JobTemplate Execute'
@@ -98,12 +96,23 @@ def test_action_role_naming(setup_managed_roles):
 def test_compat_role_naming(setup_managed_roles, job_template, rando, alice):
     with impersonate(alice):
         job_template.read_role.members.add(rando)
-    qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='ompat')
+    qs = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get(model='jobtemplate'), name__endswith='ompat')
     assert qs.count() == 1  # sanity
     rd = qs.first()
     assert rd.name == 'JobTemplate Read Compat'
     assert rd.description
     assert rd.created_by is None
+
+
+@pytest.mark.django_db
+def test_organization_admin_has_audit(setup_managed_roles):
+    """This formalizes a behavior change from old to new RBAC system
+
+    Previously, the auditor_role did not list admin_role as a parent
+    this made various queries hard to deal with, requiring adding 2 conditions
+    The new system should explicitly list the auditor permission in org admin role"""
+    rd = RoleDefinition.objects.get(name='Organization Admin')
+    assert 'audit_organization' in rd.permissions.values_list('codename', flat=True)
 
 
 @pytest.mark.django_db

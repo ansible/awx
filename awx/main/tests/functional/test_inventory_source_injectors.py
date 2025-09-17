@@ -209,7 +209,7 @@ def test_inventory_update_injected_content(product_name, this_kind, inventory, f
         source_vars=src_vars,
     )
     inventory_source.credentials.add(fake_credential_factory(this_kind))
-    inventory_update = inventory_source.create_unified_job()
+    inventory_update = inventory_source.create_unified_job(_eager_fields={'status': 'waiting'})
     task = RunInventoryUpdate()
 
     def substitute_run(awx_receptor_job):
@@ -223,6 +223,10 @@ def test_inventory_update_injected_content(product_name, this_kind, inventory, f
         private_data_dir = envvars.pop('AWX_PRIVATE_DATA_DIR')
         assert envvars.pop('ANSIBLE_INVENTORY_ENABLED') == 'auto'
         set_files = bool(os.getenv("MAKE_INVENTORY_REFERENCE_FILES", 'false').lower()[0] not in ['f', '0'])
+
+        # Ensure the directory exists before trying to list/read it
+        os.makedirs(private_data_dir, exist_ok=True)
+
         env, content = read_content(private_data_dir, envvars, inventory_update)
 
         # Assert inventory plugin inventory file is in private_data_dir
@@ -231,7 +235,7 @@ def test_inventory_update_injected_content(product_name, this_kind, inventory, f
             len([True for k in content.keys() if k.endswith(inventory_filename)]) > 0
         ), f"'{inventory_filename}' file not found in inventory update runtime files {content.keys()}"
 
-        env.pop('ANSIBLE_COLLECTIONS_PATHS', None)  # collection paths not relevant to this test
+        env.pop('ANSIBLE_COLLECTIONS_PATH', None)
         base_dir = os.path.join(DATA, 'plugins')
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)

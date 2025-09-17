@@ -36,13 +36,7 @@ jobs:
         with:
           show-progress: false
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.py_version }}
+      - uses: ./.github/actions/setup-python
 
       - name: Install dependencies
         run: |

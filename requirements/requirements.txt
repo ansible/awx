@@ -1,11 +1,16 @@
 adal==1.2.7
     # via msrestazure
+aiodns==3.2.0
+    # via aiohttp
+aiofiles==24.1.0
+    # via opa-python-client
 aiohappyeyeballs==2.4.4
     # via aiohttp
-aiohttp==3.11.11
+aiohttp[speedups]==3.11.11
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry
+    #   opa-python-client
     #   twilio
 aiohttp-retry==2.8.3
     # via twilio
@@ -72,6 +77,8 @@ botocore==1.35.96
     #   -r /awx_devel/requirements/requirements.in
     #   boto3
     #   s3transfer
+brotli==1.1.0
+    # via aiohttp
 cachetools==5.5.0
     # via google-auth
 # git+https://github.com/ansible/system-certifi.git@devel  # git requirements installed separately
@@ -83,6 +90,7 @@ cachetools==5.5.0
 cffi==1.17.1
     # via
     #   cryptography
+    #   pycares
     #   pynacl
 channels==4.2.0
     # via
@@ -120,9 +128,11 @@ deprecated==1.2.15
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-semantic-conventions
     #   pygithub
+dispatcherd==2025.5.21
+    # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.16
+django==4.2.21
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -158,10 +168,6 @@ django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.4.0
     # via -r /awx_devel/requirements/requirements.in
-django-split-settings==1.3.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
 djangorestframework==3.15.2
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -170,6 +176,10 @@ djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 durationpy==0.9
     # via kubernetes
+dynaconf==3.2.10
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 enum-compat==0.0.3
     # via asn1
 filelock==3.16.1
@@ -292,6 +302,8 @@ oauthlib==3.2.2
     #   django-oauth-toolkit
     #   kubernetes
     #   requests-oauthlib
+opa-python-client==2.0.2
+    # via -r /awx_devel/requirements/requirements.in
 openshift==0.13.2
     # via -r /awx_devel/requirements/requirements.in
 opentelemetry-api==1.29.0
@@ -336,8 +348,6 @@ packaging==24.2
     #   ansible-runner
     #   opentelemetry-instrumentation
     #   setuptools-scm
-pbr==6.1.0
-    # via -r /awx_devel/requirements/requirements.in
 pexpect==4.7.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -358,7 +368,7 @@ protobuf==5.29.3
     #   opentelemetry-proto
 psutil==6.1.1
     # via -r /awx_devel/requirements/requirements.in
-psycopg==3.2.3
+psycopg==3.2.6
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.7.0
     # via pexpect
@@ -371,6 +381,8 @@ pyasn1-modules==0.4.1
     # via
     #   google-auth
     #   service-identity
+pycares==4.5.0
+    # via aiodns
 pycparser==2.22
     # via cffi
 pygerduty==0.38.3
@@ -415,6 +427,7 @@ pyyaml==6.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
+    #   dispatcherd
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
@@ -440,6 +453,7 @@ requests==2.32.3
     #   kubernetes
     #   msal
     #   msrest
+    #   opa-python-client
     #   opentelemetry-exporter-otlp-proto-http
     #   pygithub
     #   python-dsv-sdk

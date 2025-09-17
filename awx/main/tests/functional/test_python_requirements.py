@@ -36,7 +36,7 @@ def test_bootstrap_consistent():
     assert not different_requirements
 
 
-@pytest.mark.skip(reason="This test needs some love")
+@pytest.mark.xfail(reason="This test needs some love")
 def test_env_matches_requirements_txt():
     from pip.operations import freeze
 

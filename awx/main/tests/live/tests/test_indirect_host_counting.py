@@ -14,7 +14,7 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
 
     # Data matches to awx/main/tests/data/projects/host_query/extensions/audit/event_query.yml
     # this just does things in-line to be a more localized test for the immediate testing
-    module_jq_str = '{canonical_facts: {host_name: .direct_host_name}, facts: {device_type: .device_type}}'
+    module_jq_str = '{name: .name, canonical_facts: {host_name: .direct_host_name}, facts: {device_type: .device_type}}'
     event_query = {'demo.query.example': {'query': module_jq_str}}
 
     # Run the task logic directly with local data
@@ -50,13 +50,14 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
     job.refresh_from_db()
     if job.event_queries_processed is False:
         save_indirect_host_entries.delay(job.id, wait_for_events=False)
-        # This will poll for the background task to finish
-        for _ in range(10):
-            if IndirectManagedNodeAudit.objects.filter(job=job).exists():
-                break
-            time.sleep(0.2)
-        else:
-            raise RuntimeError(f'No IndirectManagedNodeAudit records ever populated for job_id={job.id}')
+
+    # event_queries_processed only assures the task has started, it might take a minor amount of time to finish
+    for _ in range(10):
+        if IndirectManagedNodeAudit.objects.filter(job=job).exists():
+            break
+        time.sleep(0.2)
+    else:
+        raise RuntimeError(f'No IndirectManagedNodeAudit records ever populated for job_id={job.id}')
 
     assert IndirectManagedNodeAudit.objects.filter(job=job).count() == 1
     host_audit = IndirectManagedNodeAudit.objects.filter(job=job).first()

@@ -1,6 +1,9 @@
 import os
 
+from dispatcherd.config import setup as dispatcher_setup
+
 from django.apps import AppConfig
+from django.db import connection
 from django.utils.translation import gettext_lazy as _
 from awx.main.utils.common import bypass_in_test, load_all_entry_points_for
 from awx.main.utils.migration import is_database_synchronized
@@ -76,8 +79,27 @@ class MainConfig(AppConfig):
             cls = entry_point.load()
             InventorySourceOptions.injectors[entry_point_name] = cls
 
+    def configure_dispatcherd(self):
+        """This implements the default configuration for dispatcherd
+
+        If running the tasking service like awx-manage run_dispatcher,
+        some additional config will be applied on top of this.
+        This configuration provides the minimum such that code can submit
+        tasks to pg_notify to run those tasks.
+        """
+        from awx.main.dispatch.config import get_dispatcherd_config
+
+        if connection.vendor != 'postgresql':
+            config_dict = get_dispatcherd_config(mock_publish=True)
+        else:
+            config_dict = get_dispatcherd_config()
+
+        dispatcher_setup(config_dict)
+
     def ready(self):
         super().ready()
+
+        self.configure_dispatcherd()
 
         """
         Credential loading triggers database operations. There are cases we want to call

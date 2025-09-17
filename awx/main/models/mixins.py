@@ -42,6 +42,7 @@ __all__ = [
     'TaskManagerInventoryUpdateMixin',
     'ExecutionEnvironmentMixin',
     'CustomVirtualEnvMixin',
+    'OpaQueryPathMixin',
 ]
 
 
@@ -85,7 +86,7 @@ class ResourceMixin(models.Model):
             raise RuntimeError(f'Role filters only valid for users and ancestor role, received {accessor}')
 
         if content_types is None:
-            ct_kwarg = dict(content_type_id=ContentType.objects.get_for_model(cls).id)
+            ct_kwarg = dict(content_type=ContentType.objects.get_for_model(cls))
         else:
             ct_kwarg = dict(content_type_id__in=content_types)
 
@@ -692,3 +693,16 @@ class WebhookMixin(models.Model):
             logger.debug("Webhook status update sent.")
         else:
             logger.error("Posting webhook status failed, code: {}\n" "{}\nPayload sent: {}".format(response.status_code, response.text, json.dumps(data)))
+
+
+class OpaQueryPathMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    opa_query_path = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        default=None,
+        help_text=_("The query path for the OPA policy to evaluate prior to job execution. The query path should be formatted as package/rule."),
+    )

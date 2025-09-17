@@ -36,7 +36,7 @@
       debug:
         msg: "{{ query(plugin_name, 'ping', host='DNE://junk.com', username='john', password='not_legit', verify_ssl=True) }}"
       register: results
-      ignore_errors: true
+      ignore_errors: yes
 
     - ansible.builtin.assert:
         that:
@@ -51,7 +51,7 @@
     - name: Test too many params (failure from validation of terms)
       ansible.builtin.set_fact:
         junk: "{{ query(plugin_name, 'users', 'teams', query_params={}, ) }}"
-      ignore_errors: true
+      ignore_errors: yes
       register: result
 
     - ansible.builtin.assert:
@@ -62,7 +62,7 @@
     - name: Try to load invalid endpoint
       ansible.builtin.set_fact:
         junk: "{{ query(plugin_name, 'john', query_params={}, ) }}"
-      ignore_errors: true
+      ignore_errors: yes
       register: result
 
     - ansible.builtin.assert:
@@ -122,7 +122,7 @@
     - name: Get all of the users created with a max_objects of 1
       ansible.builtin.set_fact:
         users: "{{ lookup(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 1 }, return_all=true, max_objects=1 ) }}"
-      ignore_errors: true
+      ignore_errors: yes
       register: max_user_errors
 
     - ansible.builtin.assert:
@@ -138,7 +138,7 @@
       ansible.builtin.set_fact:
         failed_user_id: "{{ query(plugin_name, 'users', query_params={ 'username': 'john jacob jingleheimer schmidt' }, expect_one=True) }}"
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - ansible.builtin.assert:
         that:
@@ -149,7 +149,7 @@
       ansible.builtin.set_fact:
         too_many_user_ids: " {{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id }, expect_one=True) }}"
       register: results
-      ignore_errors: true
+      ignore_errors: yes
 
     - ansible.builtin.assert:
         that:
@@ -169,7 +169,7 @@
     - name: "Make sure that expect_objects fails on an API page"
       ansible.builtin.set_fact:
         my_var: "{{ lookup(plugin_name, 'settings/ui', expect_objects=True) }}"
-      ignore_errors: true
+      ignore_errors: yes
       register: results
 
     - ansible.builtin.assert:

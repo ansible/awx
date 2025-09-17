@@ -393,7 +393,7 @@ def test_dependency_isolation(organization):
     this should keep dependencies isolated"""
     with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         updating_projects = [
-            Project.objects.create(name='iso-proj', organization=organization, scm_url='https://foo.invalid', scm_type='git', scm_update_on_launch=True)
+            Project.objects.create(name=f'iso-proj{i}', organization=organization, scm_url='https://foo.invalid', scm_type='git', scm_update_on_launch=True)
             for i in range(2)
         ]
 

@@ -4,7 +4,8 @@
 <!---
 If you are fixing an existing issue, please include "related #nnn" in your
 commit message and your description; but you should still explain what
-the change does.
+the change does. Also please make sure that if this PR has an attached JIRA, put AAP-<number>
+in as the first entry for your PR title.
 -->
 
 ##### ISSUE TYPE
@@ -22,11 +23,6 @@ the change does.
  - Docs
  - Other
 
-##### AWX VERSION
-<!--- Paste verbatim output from `make VERSION` between quotes below -->
-```
-
-```
 
 
 ##### ADDITIONAL INFORMATION

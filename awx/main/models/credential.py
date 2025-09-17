@@ -550,10 +550,10 @@ class CredentialType(CommonModelNameNotUnique):
         # TODO: User "side-loaded" credential custom_injectors isn't supported
         ManagedCredentialType.registry[ns] = SimpleNamespace(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs, backend=plugin.backend)
 
-    def inject_credential(self, credential, env, safe_env, args, private_data_dir):
+    def inject_credential(self, credential, env, safe_env, args, private_data_dir, container_root=None):
         from awx_plugins.interfaces._temporary_private_inject_api import inject_credential
 
-        inject_credential(self, credential, env, safe_env, args, private_data_dir)
+        inject_credential(self, credential, env, safe_env, args, private_data_dir, container_root=container_root)
 
 
 class CredentialTypeHelper:

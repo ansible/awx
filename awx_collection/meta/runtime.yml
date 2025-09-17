@@ -263,3 +263,7 @@ plugin_routing:
         removal_date: '2022-01-23'
         warning_text: The tower_* modules have been deprecated, use awx.awx.workflow_node_wait instead.
       redirect: awx.awx.workflow_node_wait
+    role:
+      deprecation:
+        removal_version: '25.0.0'
+        warning_text: This is replaced by the DAB role system, via the role_definition module.

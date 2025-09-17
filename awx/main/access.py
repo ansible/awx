@@ -2098,7 +2098,7 @@ class WorkflowJobAccess(BaseAccess):
     def filtered_queryset(self):
         return WorkflowJob.objects.filter(
             Q(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-            | Q(organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), is_bulk_job=True)
+            | Q(organization__in=Organization.accessible_pk_qs(self.user, 'auditor_role'))
         )
 
     def can_read(self, obj):
@@ -2496,12 +2496,11 @@ class UnifiedJobAccess(BaseAccess):
 
     def filtered_queryset(self):
         inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
-        org_auditor_qs = Organization.objects.filter(Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
         qs = self.model.objects.filter(
             Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
             | Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs)
             | Q(adhoccommand__inventory__id__in=inv_pk_qs)
-            | Q(organization__in=org_auditor_qs)
+            | Q(organization__in=Organization.accessible_pk_qs(self.user, 'auditor_role'))
         )
         return qs
 

@@ -12,7 +12,7 @@ from django.db import transaction
 # Django flags
 from flags.state import flag_enabled
 
-from awx.main.dispatch.publish import task
+from awx.main.dispatch.publish import task as task_awx
 from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 from awx.main.models.event_query import EventQuery
@@ -45,26 +45,46 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
     facts_missing_logged = False
     unhashable_facts_logged = False
 
+    job_event_queries_fqcn = {}
+    for query_k, query_v in job_event_queries.items():
+        if len(parts := query_k.split('.')) != 3:
+            logger.info(f"Skiping malformed query '{query_k}'. Expected to be of the form 'a.b.c'")
+            continue
+        if parts[2] != '*':
+            continue
+        job_event_queries_fqcn['.'.join(parts[0:2])] = query_v
+
     for event in job.job_events.filter(event_data__isnull=False).iterator():
         if 'res' not in event.event_data:
             continue
 
-        if 'resolved_action' not in event.event_data or event.event_data['resolved_action'] not in job_event_queries.keys():
+        if not (resolved_action := event.event_data.get('resolved_action', None)):
             continue
 
-        resolved_action = event.event_data['resolved_action']
+        if len(resolved_action_parts := resolved_action.split('.')) != 3:
+            logger.debug(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
+            continue
 
-        # We expect a dict with a 'query' key for the resolved_action
-        if 'query' not in job_event_queries[resolved_action]:
+        resolved_action_fqcn = '.'.join(resolved_action_parts[0:2])
+
+        # Match module invocation to collection queries
+        # First match against fully qualified query names i.e. a.b.c
+        # Then try and match against wildcard queries i.e. a.b.*
+        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_fqcn.get(resolved_action_fqcn, {})).get('query')):
             continue
 
         # Recall from cache, or process the jq expression, and loop over the jq results
-        jq_str_for_event = job_event_queries[resolved_action]['query']
-
         if jq_str_for_event not in compiled_jq_expressions:
             compiled_jq_expressions[resolved_action] = jq.compile(jq_str_for_event)
         compiled_jq = compiled_jq_expressions[resolved_action]
-        for data in compiled_jq.input(event.event_data['res']).all():
+
+        try:
+            data_source = compiled_jq.input(event.event_data['res']).all()
+        except Exception as e:
+            logger.warning(f'error for module {resolved_action} and data {event.event_data["res"]}: {e}')
+            continue
+
+        for data in data_source:
             # From this jq result (specific to a single Ansible module), get index information about this host record
             if not data.get('canonical_facts'):
                 if not facts_missing_logged:
@@ -82,6 +102,8 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
 
             # Obtain the record based on the hashable canonical_facts now determined
             facts = data.get('facts')
+            name = data.get('name')
+
             if hashable_facts in results:
                 audit_record = results[hashable_facts]
             else:
@@ -90,7 +112,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
                     facts=facts,
                     job=job,
                     organization=job.organization,
-                    name=event.host_name,
+                    name=name,
                 )
                 results[hashable_facts] = audit_record
 
@@ -137,7 +159,7 @@ def cleanup_old_indirect_host_entries() -> None:
     IndirectManagedNodeAudit.objects.filter(created__lt=limit).delete()
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> None:
     try:
         job = Job.objects.get(id=job_id)
@@ -179,7 +201,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
         logger.exception(f'Error processing indirect host data for job_id={job_id}')
 
 
-@task(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename)
 def cleanup_and_save_indirect_host_entries_fallback() -> None:
     if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
         return

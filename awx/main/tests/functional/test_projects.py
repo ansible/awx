@@ -436,21 +436,22 @@ def test_project_list_ordering_by_name(get, order_by, expected_names, organizati
 
 @pytest.mark.parametrize('order_by', ('name', '-name'))
 @pytest.mark.django_db
-def test_project_list_ordering_with_duplicate_names(get, order_by, organization_factory):
+def test_project_list_ordering_with_duplicate_names(get, order_by, admin):
     # why? because all the '1' mean that all the names are the same, you can't sort based on that,
     # meaning you have to fall back on the default sort order, which in this case, is ID
     'ensure sorted order of project list is maintained correctly when the project names the same'
-    objects = organization_factory(
-        'org1',
-        projects=['1', '1', '1', '1', '1'],
-        superusers=['admin'],
-    )
+    from awx.main.models import Organization
+
+    projects = []
+    for i in range(5):
+        projects.append(Project.objects.create(name='1', organization=Organization.objects.create(name=f'org{i}')))
     project_ids = {}
     for x in range(3):
-        results = get(reverse('api:project_list'), objects.superusers.admin, QUERY_STRING='order_by=%s' % order_by).data['results']
+        results = get(reverse('api:project_list'), user=admin, QUERY_STRING='order_by=%s' % order_by).data['results']
         project_ids[x] = [proj['id'] for proj in results]
     assert project_ids[0] == project_ids[1] == project_ids[2]
     assert project_ids[0] == sorted(project_ids[0])
+    assert set(project_ids[0]) == set([proj.id for proj in projects])
 
 
 @pytest.mark.django_db
