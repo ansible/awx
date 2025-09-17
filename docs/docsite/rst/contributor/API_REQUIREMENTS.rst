@@ -1296,7 +1296,6 @@ References
 - **HTTP Status Code Definitions**: https://tools.ietf.org/html/rfc7231#section-6
 - **OAuth 2.0 Authorization Framework**: https://tools.ietf.org/html/rfc6749
 - **JWT Best Practices**: https://tools.ietf.org/html/rfc8725
-- **AWX API Standards**: ``/Users/thavo/awx/API_STANDARDS.md``
 - **AWX Source Code**: https://github.com/ansible/awx
 
 ----
