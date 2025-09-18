@@ -127,7 +127,7 @@ def main():
             response = module.post_endpoint('config/attach', data={'subscription_id': module.params.get('subscription_id')})
 
         # Check API response for errors (AAP-44277 fix)
-        if response and response.get('status_code', 200) >= 400:
+        if response and response.get('status_code') and response.get('status_code') != 200:
             error_msg = response.get('json', {}).get('error', 'License operation failed')
             module.fail_json(msg=error_msg)
 
