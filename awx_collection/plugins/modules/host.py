@@ -89,35 +89,32 @@ def main():
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
-    # Extract our parameters
-    name = module.params.get('name')
-    new_name = module.params.get('new_name')
-    description = module.params.get('description')
-    inventory = module.params.get('inventory')
-    enabled = module.params.get('enabled')
-    state = module.params.get('state')
-    variables = module.params.get('variables')
-
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
+    inventory_id = module.resolve_name_to_id('inventories', module.params.get('inventory'))
 
     # Attempt to look up host based on the provided name and inventory ID
-    host = module.get_one('hosts', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'inventory': inventory_id}})
+    host = module.get_one('hosts', name_or_id=module.params.get('name'), check_exists=(module.params.get('state') == 'exists'), **{'data': {'inventory': inventory_id}})
 
-    if state == 'absent':
+    if module.params.get('state') == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(host)
 
     # Create the data that gets sent for create and update
-    host_fields = {
-        'name': new_name if new_name else (module.get_item_name(host) if host else name),
-        'inventory': inventory_id,
-        'enabled': enabled,
-    }
-    if description is not None:
-        host_fields['description'] = description
-    if variables is not None:
-        host_fields['variables'] = json.dumps(variables)
+    host_fields = {'inventory': inventory_id}
+
+    # Auto-populate fields from argument spec (excluding special cases)
+    for field in argument_spec:
+        if field in ['new_name', 'state', 'variables'] or module.params.get(field) is None:
+            continue
+        host_fields[field] = module.params.get(field)
+
+    # Handle special cases
+    # Name field - use new_name if provided, otherwise existing name or original name
+    host_fields['name'] = module.params.get('new_name') if module.params.get('new_name') else (module.get_item_name(host) if host else module.params.get('name'))
+
+    # Variables field - needs JSON serialization
+    if module.params.get('variables') is not None:
+        host_fields['variables'] = json.dumps(module.params.get('variables'))
 
     # If the state was present and we can let the module build or update the existing host, this will return on its own
     module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
