@@ -24,28 +24,11 @@ jobs:
         with:
           show-progress: false
 
-      - uses: ./.github/actions/setup-python
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - uses: ./.github/actions/setup-ssh-agent
+      - name: Build awx_devel image to use for schema gen
+        uses: ./.github/actions/awx_devel_image
         with:
-          ssh-private-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
-          docker pull -q `make print-DEVEL_IMAGE_NAME`
-        continue-on-error: true
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
-          make docker-compose-build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Generate API Schema
         run: |
