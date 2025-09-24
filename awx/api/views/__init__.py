@@ -55,8 +55,7 @@ from wsgiref.util import FileWrapper
 
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
-from ansible_base.rbac.models import RoleEvaluation, ObjectRole
-from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleEvaluation
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
@@ -85,7 +84,6 @@ from awx.api.generics import (
 from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
-from awx.main.models.rbac import get_role_definition
 from awx.main.utils import (
     camelcase_to_underscore,
     extract_ansible_vars,
@@ -751,17 +749,9 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        model_ct = permission_registry.content_type_model.objects.get_for_model(self.model)
-        parent_ct = permission_registry.content_type_model.objects.get_for_model(self.parent_model)
-
-        rd = get_role_definition(team.member_role)
-        role = ObjectRole.objects.filter(object_id=team.id, content_type=parent_ct, role_definition=rd).first()
-        if role is None:
-            # Team has no permissions, therefore team has no projects
-            return self.model.objects.none()
-        else:
-            project_qs = self.model.accessible_objects(self.request.user, 'read_role')
-            return project_qs.filter(id__in=RoleEvaluation.objects.filter(content_type_id=model_ct.id, role=role).values_list('object_id'))
+        my_qs = self.model.accessible_objects(self.request.user, 'read_role')
+        team_qs = models.Project.accessible_objects(team, 'read_role')
+        return my_qs & team_qs
 
 
 class TeamActivityStreamList(SubListAPIView):
@@ -876,13 +866,23 @@ class ProjectTeamsList(ListAPIView):
     serializer_class = serializers.TeamSerializer
 
     def get_queryset(self):
-        p = get_object_or_404(models.Project, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(models.Project, 'read', p):
+        parent = get_object_or_404(models.Project, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(models.Project, 'read', parent):
             raise PermissionDenied()
-        project_ct = ContentType.objects.get_for_model(models.Project)
+
+        project_ct = ContentType.objects.get_for_model(parent)
         team_ct = ContentType.objects.get_for_model(self.model)
-        all_roles = models.Role.objects.filter(Q(descendents__content_type=project_ct) & Q(descendents__object_id=p.pk), content_type=team_ct)
-        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in all_roles])
+
+        roles_on_project = models.Role.objects.filter(
+            content_type=project_ct,
+            object_id=parent.pk,
+        )
+
+        team_member_parent_roles = models.Role.objects.filter(children__in=roles_on_project, role_field='member_role', content_type=team_ct).distinct()
+
+        team_ids = team_member_parent_roles.values_list('object_id', flat=True)
+        my_qs = self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=team_ids)
+        return my_qs
 
 
 class ProjectSchedulesList(SubListCreateAPIView):
@@ -1152,7 +1152,6 @@ class UserOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     model = models.Organization
     serializer_class = serializers.OrganizationSerializer
     parent_model = models.User
-    relationship = 'organizations'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1166,7 +1165,6 @@ class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     model = models.Organization
     serializer_class = serializers.OrganizationSerializer
     parent_model = models.User
-    relationship = 'admin_of_organizations'
 
     def get_queryset(self):
         parent = self.get_parent_object()

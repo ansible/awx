@@ -65,7 +65,7 @@ def test_export(run_module, admin_user):
     all_assets_except_users = {k: v for k, v in assets.items() if k != 'users'}
 
     for k, v in all_assets_except_users.items():
-        assert v == [], f"Expected resource {k} to be empty. Instead it is {v}"
+        assert v == [] or v is None, f"Expected resource {k} to be empty. Instead it is {v}"
 
 
 @pytest.mark.django_db

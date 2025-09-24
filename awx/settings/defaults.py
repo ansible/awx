@@ -83,7 +83,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'ui', 'build'),
+    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
     os.path.join(BASE_DIR, 'static'),
 ]
 
@@ -540,7 +540,7 @@ AWX_AUTO_DEPROVISION_INSTANCES = False
 
 
 # If True, allow users to be assigned to roles that were created via JWT
-ALLOW_LOCAL_ASSIGNING_JWT_ROLES = False
+ALLOW_LOCAL_ASSIGNING_JWT_ROLES = True
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
@@ -598,6 +598,12 @@ VMWARE_INSTANCE_ID_VAR = 'config.instanceUuid, config.instanceuuid'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True
 
 VMWARE_VALIDATE_CERTS = False
+
+# -----------------
+# -- VMware ESXi --
+# -----------------
+# TODO: Verify matches with AAP-53978 solution in awx-plugins
+VMWARE_ESXI_EXCLUDE_EMPTY_GROUPS = True
 
 # ---------------------------
 # -- Google Compute Engine --
@@ -711,7 +717,7 @@ DISABLE_LOCAL_AUTH = False
 TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
-INSIGHTS_OIDC_ENDPOINT = "https://sso.example.org"
+INSIGHTS_OIDC_ENDPOINT = "https://sso.example.org/"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
@@ -1069,6 +1075,7 @@ ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
 # Currently features are enabled to keep compatibility with old system, except custom roles
 ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN = False
 # ANSIBLE_BASE_ALLOW_CUSTOM_ROLES = True
+ANSIBLE_BASE_ALLOW_TEAM_PARENTS = False
 ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES = False
 ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
 ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = False  # System auditor has always been restricted to users
@@ -1088,6 +1095,9 @@ INDIRECT_HOST_QUERY_FALLBACK_GIVEUP_DAYS = 3
 # Maximum age for indirect host audit records
 # Older records will be cleaned up
 INDIRECT_HOST_AUDIT_RECORD_MAX_AGE_DAYS = 7
+
+# setting for Policy as Code feature
+FEATURE_POLICY_AS_CODE_ENABLED = False
 
 OPA_HOST = ''  # The hostname used to connect to the OPA server. If empty, policy enforcement will be disabled.
 OPA_PORT = 8181  # The port used to connect to the OPA server. Defaults to 8181.

@@ -67,6 +67,7 @@ EXAMPLES = '''
 '''
 
 import base64
+
 from ..module_utils.controller_api import ControllerAPIModule
 
 
@@ -120,11 +121,17 @@ def main():
 
     # Do the actual install, if we need to
     if perform_install:
-        json_output['changed'] = True
         if module.params.get('manifest', None):
-            module.post_endpoint('config', data={'manifest': manifest.decode()})
+            response = module.post_endpoint('config', data={'manifest': manifest.decode()})
         else:
-            module.post_endpoint('config/attach', data={'subscription_id': module.params.get('subscription_id')})
+            response = module.post_endpoint('config/attach', data={'subscription_id': module.params.get('subscription_id')})
+
+        # Check API response for errors (AAP-44277 fix)
+        if response and response.get('status_code') and response.get('status_code') != 200:
+            error_msg = response.get('json', {}).get('error', 'License operation failed')
+            module.fail_json(msg=error_msg)
+
+        json_output['changed'] = True
 
     module.exit_json(**json_output)
 

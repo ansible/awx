@@ -1200,6 +1200,13 @@ class UnifiedJob(
                     fd = StringIO(fd.getvalue().replace('\\r\\n', '\n'))
                     return fd
 
+    def _fix_double_escapes(self, content):
+        """
+        Collapse double-escaped sequences into single-escaped form.
+        """
+        # Replace \\ followed by one of ' " \ n r t
+        return re.sub(r'\\([\'"\\nrt])', r'\1', content)
+
     def _escape_ascii(self, content):
         # Remove ANSI escape sequences used to embed event data.
         content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
@@ -1207,12 +1214,14 @@ class UnifiedJob(
         content = re.sub(r'\x1b[^m]*m', '', content)
         return content
 
-    def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False):
+    def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False, fix_escapes=False):
         content = self.result_stdout_raw_handle().read()
         if redact_sensitive:
             content = UriCleaner.remove_sensitive(content)
         if escape_ascii:
             content = self._escape_ascii(content)
+        if fix_escapes:
+            content = self._fix_double_escapes(content)
         return content
 
     @property
@@ -1221,9 +1230,10 @@ class UnifiedJob(
 
     @property
     def result_stdout(self):
-        return self._result_stdout_raw(escape_ascii=True)
+        # Human-facing output should fix escapes
+        return self._result_stdout_raw(escape_ascii=True, fix_escapes=True)
 
-    def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
+    def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False, fix_escapes=False):
         return_buffer = StringIO()
         if end_line is not None:
             end_line = int(end_line)
@@ -1246,14 +1256,18 @@ class UnifiedJob(
             return_buffer = UriCleaner.remove_sensitive(return_buffer)
         if escape_ascii:
             return_buffer = self._escape_ascii(return_buffer)
+        if fix_escapes:
+            return_buffer = self._fix_double_escapes(return_buffer)
 
         return return_buffer, start_actual, end_actual, absolute_end
 
     def result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=False):
+        # Raw should NOT fix escapes
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive)
 
     def result_stdout_limited(self, start_line=0, end_line=None, redact_sensitive=False):
-        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True)
+        # Human-facing should fix escapes
+        return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True, fix_escapes=True)
 
     @property
     def workflow_job_id(self):

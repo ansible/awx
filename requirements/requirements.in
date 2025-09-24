@@ -1,4 +1,3 @@
-
 aiohttp>=3.9.4 # CVE-2024-30251
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
@@ -29,7 +28,7 @@ filelock
 GitPython>=3.1.37  # CVE-2023-41040
 grpcio
 irc
-jinja2>=3.1.3  # CVE-2024-22195
+jinja2>=3.1.6  # CVE-2025-27516
 JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
@@ -47,9 +46,10 @@ prometheus_client
 psycopg
 psutil
 pygerduty
+PyGithub <= 2.6.0
 pyopenssl>=23.2.0  # resolve dep conflict from cryptography pin above
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
-python-daemon>3.0.0
+python-daemon
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
 pyyaml>=6.0.2  # require packing fix for cython 3 or higher
@@ -60,14 +60,20 @@ redis[hiredis]
 requests
 slack-sdk
 twilio
-twisted[tls]>=23.10.0  # CVE-2023-46137
-uWSGI
+twisted[tls]>=24.7.0  # CVE-2024-41810
+urllib3>=1.26.19 # CVE-2024-37891
+uWSGI>=2.0.28
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
-setuptools<71.0.0  # see UPGRADE BLOCKERs, path hack in v71 breaks irc deps
+setuptools==80.9.0  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 django-flags>=5.0.13
 dispatcherd  # tasking system, previously part of AWX code base
+protobuf>=4.25.8 # CVE-2025-4565
+idna>=3.10 # CVE-2024-3651
+# Temporarily added to use ansible-runner from git branch, to be removed
+# when ansible-runner moves from requirements_git.txt to here
+pbr

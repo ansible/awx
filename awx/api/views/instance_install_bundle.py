@@ -12,7 +12,7 @@ import re
 import asn1
 from awx.api import serializers
 from awx.api.generics import GenericAPIView, Response
-from awx.api.permissions import IsSystemAdminOrAuditor
+from awx.api.permissions import IsSystemAdmin
 from awx.main import models
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -48,7 +48,7 @@ class InstanceInstallBundle(GenericAPIView):
     name = _('Install Bundle')
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
-    permission_classes = (IsSystemAdminOrAuditor,)
+    permission_classes = (IsSystemAdmin,)
 
     def get(self, request, *args, **kwargs):
         instance_obj = self.get_object()

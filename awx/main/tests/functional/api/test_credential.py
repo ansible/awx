@@ -1224,6 +1224,30 @@ def test_custom_credential_type_create(get, post, organization, admin):
     assert decrypt_field(cred, 'api_token') == 'secret'
 
 
+@pytest.mark.django_db
+def test_galaxy_create_ok(post, organization, admin):
+    params = {
+        'credential_type': 1,
+        'name': 'Galaxy credential',
+        'inputs': {
+            'url': 'https://galaxy.ansible.com',
+            'token': 'some_galaxy_token',
+        },
+    }
+    galaxy = CredentialType.defaults['galaxy_api_token']()
+    galaxy.save()
+    params['user'] = admin.id
+    params['credential_type'] = galaxy.pk
+    response = post(reverse('api:credential_list'), params, admin)
+    assert response.status_code == 201
+
+    assert Credential.objects.count() == 1
+    cred = Credential.objects.all()[:1].get()
+    assert cred.credential_type == galaxy
+    assert cred.inputs['url'] == 'https://galaxy.ansible.com'
+    assert decrypt_field(cred, 'token') == 'some_galaxy_token'
+
+
 #
 # misc xfail conditions
 #

@@ -4,6 +4,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from crum import impersonate
+from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 from awx.main.models import User, Organization, Project, Inventory, CredentialType, Credential, Host, JobTemplate
 from awx.main.signals import disable_computed_fields
 
@@ -16,8 +17,9 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Wrap the operation in an atomic block, so we do not on accident
         # create the organization but not create the project, etc.
-        with transaction.atomic():
-            self._handle()
+        with no_reverse_sync():
+            with transaction.atomic():
+                self._handle()
 
     def _handle(self):
         changed = False

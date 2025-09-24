@@ -34,6 +34,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
     dnf -y install \
+    openssh-clients \
     iputils \
     gcc \
     gcc-c++ \
@@ -58,6 +59,10 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
+# Add github.com to known hosts
+RUN mkdir -p ~/.ssh && chmod 0700 ~/.ssh
+RUN ssh-keyscan github.com > ~/.ssh/known_hosts
+
 RUN pip3.11 install -vv build
 
 {% if image_architecture == 'ppc64le'  %}
@@ -76,7 +81,7 @@ ADD requirements/requirements.txt \
     requirements/requirements_git.txt \
     /tmp/requirements/
 
-RUN cd /tmp && make requirements_awx
+RUN --mount=type=ssh cd /tmp && make requirements_awx
 
 ARG VERSION
 ARG SETUPTOOLS_SCM_PRETEND_VERSION

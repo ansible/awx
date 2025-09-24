@@ -32,7 +32,7 @@ Installing the `tar.gz` involves no special instructions.
 ## Running
 
 Non-deprecated modules in this collection have no Python requirements, but
-may require the official [AWX CLI](https://pypi.org/project/awxkit/)
+may require the AWX CLI
 in the future. The `DOCUMENTATION` for each module will report this.
 
 You can specify authentication by host, username, and password.

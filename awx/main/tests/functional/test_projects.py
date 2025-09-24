@@ -334,6 +334,69 @@ def test_team_project_list(get, team_project_list):
     )
 
 
+@pytest.mark.django_db
+def test_project_teams_list_multiple_roles_distinct(get, organization_factory):
+    # test projects with multiple roles on the same team
+    objects = organization_factory(
+        'org1',
+        superusers=['admin'],
+        teams=['teamA'],
+        projects=['proj1'],
+        roles=[
+            'teamA.member_role:proj1.admin_role',
+            'teamA.member_role:proj1.use_role',
+            'teamA.member_role:proj1.update_role',
+            'teamA.member_role:proj1.read_role',
+        ],
+    )
+    admin = objects.superusers.admin
+    proj1 = objects.projects.proj1
+
+    res = get(reverse('api:project_teams_list', kwargs={'pk': proj1.pk}), admin).data
+    names = [t['name'] for t in res['results']]
+    assert names == ['teamA']
+
+
+@pytest.mark.django_db
+def test_project_teams_list_multiple_teams(get, organization_factory):
+    # test projects with multiple teams
+    objs = organization_factory(
+        'org1',
+        superusers=['admin'],
+        teams=['teamA', 'teamB', 'teamC', 'teamD'],
+        projects=['proj1'],
+        roles=[
+            'teamA.member_role:proj1.admin_role',
+            'teamB.member_role:proj1.update_role',
+            'teamC.member_role:proj1.use_role',
+            'teamD.member_role:proj1.read_role',
+        ],
+    )
+    admin = objs.superusers.admin
+    proj1 = objs.projects.proj1
+
+    res = get(reverse('api:project_teams_list', kwargs={'pk': proj1.pk}), admin).data
+    names = sorted([t['name'] for t in res['results']])
+    assert names == ['teamA', 'teamB', 'teamC', 'teamD']
+
+
+@pytest.mark.django_db
+def test_project_teams_list_no_direct_assignments(get, organization_factory):
+    # test projects with no direct team assignments
+    objects = organization_factory(
+        'org1',
+        superusers=['admin'],
+        teams=['teamA'],
+        projects=['proj1'],
+        roles=[],
+    )
+    admin = objects.superusers.admin
+    proj1 = objects.projects.proj1
+
+    res = get(reverse('api:project_teams_list', kwargs={'pk': proj1.pk}), admin).data
+    assert res['count'] == 0
+
+
 @pytest.mark.parametrize("u,expected_status_code", [('rando', 403), ('org_member', 403), ('org_admin', 201), ('admin', 201)])
 @pytest.mark.django_db
 def test_create_project(post, organization, org_admin, org_member, admin, rando, u, expected_status_code):

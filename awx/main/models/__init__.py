@@ -173,34 +173,16 @@ pre_delete.connect(cleanup_created_modified_by, sender=User)
 
 
 @property
-def user_get_organizations(user):
-    return Organization.access_qs(user, 'member')
-
-
-@property
-def user_get_admin_of_organizations(user):
-    return Organization.access_qs(user, 'change')
-
-
-@property
-def user_get_auditor_of_organizations(user):
-    return Organization.access_qs(user, 'audit')
-
-
-@property
 def created(user):
     return user.date_joined
 
 
-User.add_to_class('organizations', user_get_organizations)
-User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
-User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
 User.add_to_class('created', created)
 
 
 def get_system_auditor_role():
     rd, created = RoleDefinition.objects.get_or_create(
-        name='Controller System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
+        name='Platform Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
     )
     if created:
         rd.permissions.add(*list(permission_registry.permission_qs.filter(codename__startswith='view')))

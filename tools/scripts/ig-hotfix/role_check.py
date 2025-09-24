@@ -8,12 +8,16 @@ from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import Role
 
+from awx.main.models.ha import Instance
+from awx.main.models.ha import InstanceLink
+
 
 team_ct = ContentType.objects.get(app_label='main', model='team')
 
 crosslinked = defaultdict(lambda: defaultdict(dict))
 crosslinked_parents = defaultdict(list)
 orphaned_roles = set()
+orphaned_instancelinks = set()
 
 
 def resolve(obj, path):
@@ -143,10 +147,29 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
             crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
         continue
 
+sys.stderr.write('===================================\n')
+
+# Find orphaned InstanceLink records which point to non-existent Instance
+# objects.
+#
+# This can only happen because the current backup/restore process doesn't
+# preserve Instance tables, but rather recreates them on restore.
+existing_instance_ids = set(Instance.objects.values_list('id', flat=True))
+for link in InstanceLink.objects.all():
+    # Consider the instancelink orphaned if source or target does not exist.
+    orphaned_fks = {}
+    if link.source_id and link.source_id not in existing_instance_ids:
+        orphaned_fks["source_id"] = link.source_id
+    if link.target_id and link.target_id not in existing_instance_ids:
+        orphaned_fks["target_id"] = link.target_id
+    if orphaned_fks:
+        sys.stderr.write(f"InstanceLink id={link.id} has orphaned foreign keys: " + ", ".join(f"{k}={v}" for k, v in orphaned_fks.items()) + "\n")
+        orphaned_instancelinks.add(link.id)
 
 sys.stderr.write('===================================\n')
 
 
+# Output a script which fixes the issues found above.
 print(
     f"""\
 from collections import Counter
@@ -155,6 +178,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import Role
+from awx.main.models.ha import InstanceLink
 
 
 delete_counts = Counter()
@@ -187,6 +211,14 @@ for child, parents in crosslinked_parents.items():
     print(f"r = Role.objects.get(id={child})")
     print(f"r.parents.remove(*Role.objects.filter(id__in={parents!r}))")
     print(f"queue.add((r.content_object.__class__, r.object_id))")
+
+if orphaned_instancelinks:
+    print()
+    print("# Delete InstanceLink objects that are pointing to non-existent Instances.")
+    print()
+    for instancelink_id in orphaned_instancelinks:
+        print(f"_, c = InstanceLink.objects.filter(id={instancelink_id}).delete()")
+        print("delete_counts.update(c)")
 
 print('\n\n')
 print('print("Objects deleted:", dict(delete_counts.most_common()))')
