@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 from typing import Optional
+import os
 
 from awx.settings.application_name import set_application_name
 from awx import MODE
@@ -42,6 +43,8 @@ MIN_PG_VERSION = 12
 
 
 def db_requirement_violations() -> Optional[str]:
+    if os.getenv('SKIP_PG_VERSION_CHECK', False):
+        return None
     if connection.vendor == 'postgresql':
 
         # enforce the postgres version is a minimum of 12 (we need this for partitioning); if not, then terminate program with exit code of 1
