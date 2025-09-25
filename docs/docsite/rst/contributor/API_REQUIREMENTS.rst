@@ -61,7 +61,6 @@ API Development Requirements
 
 **Configuration Requirements**:
 
-- **Custom Components**: All major DRF components must be customized for enterprise needs
 - **Centralized Settings**: API configuration must be centralized and environment-aware
 - **Version Control**: Default API version must be explicitly configured
 - **Error Handling**: Custom exception handler for consistent error responses
