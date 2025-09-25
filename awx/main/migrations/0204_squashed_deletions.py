@@ -20,7 +20,7 @@ def update_github_app_kind(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0201_create_managed_creds'),
+        ('main', '0203_remove_team_of_teams'),
     ]
     operations = [
         migrations.DeleteModel(

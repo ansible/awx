@@ -10,7 +10,7 @@ from rest_framework import permissions
 
 # AWX
 from awx.main.access import check_user_access
-from awx.main.models import Inventory, UnifiedJob
+from awx.main.models import Inventory, UnifiedJob, Organization
 from awx.main.utils import get_object_or_400
 
 logger = logging.getLogger('awx.api.permissions')
@@ -228,10 +228,17 @@ class InventoryInventorySourcesUpdatePermission(ModelAccessPermission):
 class UserPermission(ModelAccessPermission):
     def check_post_permissions(self, request, view, obj=None):
         if not request.data:
-            return request.user.admin_of_organizations.exists()
+            return Organization.access_qs(request.user, 'change').exists()
         elif request.user.is_superuser:
             return True
         raise PermissionDenied()
+
+
+class IsSystemAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
+        return request.user.is_superuser
 
 
 class IsSystemAdminOrAuditor(permissions.BasePermission):

@@ -10,6 +10,7 @@ on:
       - devel
       - release_*
       - feature_*
+      - stable-*
 jobs:
   push-development-images:
     runs-on: ubuntu-latest

@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from awx.api.versioning import reverse
@@ -5,6 +7,9 @@ from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance
 
 from django.test.utils import override_settings
+from django.http import HttpResponse
+
+from rest_framework import status
 
 
 INSTANCE_KWARGS = dict(hostname='example-host', cpu=6, node_type='execution', memory=36000000000, cpu_capacity=6, mem_capacity=42)
@@ -87,3 +92,11 @@ def test_custom_hostname_regex(post, admin_user):
                 "peers": [],
             }
             post(url=url, user=admin_user, data=data, expect=value[1])
+
+
+def test_instance_install_bundle(get, admin_user, system_auditor):
+    instance = Instance.objects.create(**INSTANCE_KWARGS)
+    url = reverse('api:instance_install_bundle', kwargs={'pk': instance.pk})
+    with mock.patch('awx.api.views.instance_install_bundle.InstanceInstallBundle.get', return_value=HttpResponse({'test': 'data'}, status=status.HTTP_200_OK)):
+        get(url=url, user=admin_user, expect=200)
+        get(url=url, user=system_auditor, expect=403)

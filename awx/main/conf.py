@@ -1094,3 +1094,13 @@ register(
     category=('PolicyAsCode'),
     category_slug='policyascode',
 )
+
+
+def policy_as_code_validate(serializer, attrs):
+    opa_host = attrs.get('OPA_HOST', '')
+    if opa_host and (opa_host.startswith('http://') or opa_host.startswith('https://')):
+        raise serializers.ValidationError({'OPA_HOST': _("OPA_HOST should not include 'http://' or 'https://' prefixes. Please enter only the hostname.")})
+    return attrs
+
+
+register_validate('policyascode', policy_as_code_validate)

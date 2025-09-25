@@ -60,7 +60,7 @@ options:
     - Path to the controller config file.
     - If provided, the other locations for config files will not be considered.
     type: path
-    aliases: [tower_config_file]
+    aliases: [ tower_config_file ]
 
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library

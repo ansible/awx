@@ -38,7 +38,7 @@ class ActionModule(ActionBase):
 
     def _obtain_auth_token(self, oidc_endpoint, client_id, client_secret):
         if oidc_endpoint.endswith('/'):
-            oidc_endpoint = oidc_endpoint.rstrip('/')
+            oidc_endpoint = oidc_endpoint[:-1]
         main_url = oidc_endpoint + '/.well-known/openid-configuration'
         response = requests.get(url=main_url, headers={'Accept': 'application/json'})
         data = {}

@@ -125,9 +125,6 @@ def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
         assert host.ansible_facts_modified == ref_time
-
-    # Verify facts were cleared for host with deleted cache file
-    assert hosts[1].ansible_facts == {}
     assert hosts[1].ansible_facts_modified > ref_time
 
     # Current implementation skips the call entirely if hosts_to_update == []

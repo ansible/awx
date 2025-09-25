@@ -26,6 +26,11 @@ def change_inventory_source_org_unique(apps, schema_editor):
     logger.info(f'Set database constraint rule for {r} inventory source objects')
 
 
+def rename_wfjt(apps, schema_editor):
+    cls = apps.get_model('main', 'WorkflowJobTemplate')
+    _rename_duplicates(cls)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -40,6 +45,7 @@ class Migration(migrations.Migration):
             name='org_unique',
             field=models.BooleanField(blank=True, default=True, editable=False, help_text='Used internally to selectively enforce database constraint on name'),
         ),
+        migrations.RunPython(rename_wfjt, migrations.RunPython.noop),
         migrations.RunPython(change_inventory_source_org_unique, migrations.RunPython.noop),
         migrations.AddConstraint(
             model_name='unifiedjobtemplate',
