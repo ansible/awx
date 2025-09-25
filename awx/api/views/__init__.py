@@ -721,8 +721,11 @@ class TeamRolesList(SubListAttachDetachAPIView):
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
             if not role.content_object.organization or role.content_object.organization.id != team.organization.id:
-                data = dict(msg=_("You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                if not request.user.is_superuser:
+                    data = dict(msg=_("You cannot grant credential access to a team because you do not have permission to do so"))
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return super(TeamRolesList, self).post(request, *args, **kwargs)
 
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
