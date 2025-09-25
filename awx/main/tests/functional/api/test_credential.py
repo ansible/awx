@@ -288,6 +288,39 @@ def test_sa_grant_private_credential_to_team_through_role_teams(post, credential
 
 
 @pytest.mark.django_db
+def test_grant_credential_to_team_different_organization(post, get, credential, organizations, admin, org_admin, team, team_member):
+    """Test that credential from different org can be assigned to team"""
+    orgs = organizations(2)
+    credential.organization = orgs[0]
+    credential.save()
+    team.organization = orgs[1]
+    team.save()
+
+    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
+    assert response.status_code == 400
+
+    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
+    assert response.status_code == 204
+
+    assert credential.use_role in team.member_role.children.all()
+
+    assert team_member in credential.read_role
+    assert team_member in credential.use_role
+    assert team_member not in credential.admin_role
+
+    # Assert: Team member can see the credential in API (functional check)
+    response = get(reverse('api:team_credentials_list', kwargs={'pk': team.id}), team_member)
+    assert response.status_code == 200
+    assert response.data['count'] == 1
+    assert response.data['results'][0]['id'] == credential.id
+
+    # Assert: Team member can see the credential in general credentials API
+    response = get(reverse('api:credential_list'), team_member)
+    assert response.status_code == 200
+    assert any(cred['id'] == credential.id for cred in response.data['results'])
+
+
+@pytest.mark.django_db
 def test_sa_grant_private_credential_to_team_through_team_roles(post, credential, admin, team):
     # not even a system admin can grant a private cred to a team though
     response = post(reverse('api:role_teams_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
