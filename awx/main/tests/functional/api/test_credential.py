@@ -299,10 +299,7 @@ def test_grant_credential_to_team_different_organization(post, get, credential, 
     # Non-superuser (org_admin) trying cross-org assignment should get 400
     response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
     assert response.status_code == 400
-    assert (
-        "You do not have permission to grant credential access to a team when the Organization field isn't set, or belongs to a different organization"
-        in response.data['msg']
-    )
+    assert "You cannot grant credential access to a team because you do not have permission to do so" in response.data['msg']
 
     # Superuser (admin) can do cross-org assignment
     response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)

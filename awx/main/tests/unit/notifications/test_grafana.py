@@ -13,7 +13,7 @@ def test_send_messages():
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey")
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='')
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -43,7 +43,7 @@ def test_send_messages_with_no_verify_ssl():
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", grafana_no_verify_ssl=True)
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='', grafana_no_verify_ssl=True)
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -74,7 +74,7 @@ def test_send_messages_with_dashboardid(dashboardId):
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=dashboardId)
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=dashboardId, panelId='')
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -97,7 +97,7 @@ def test_send_messages_with_dashboardid(dashboardId):
         assert sent_messages == 1
 
 
-@pytest.mark.parametrize("panelId", [42, 0])
+@pytest.mark.parametrize("panelId", ['42', '0'])
 def test_send_messages_with_panelid(panelId):
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
@@ -105,7 +105,7 @@ def test_send_messages_with_panelid(panelId):
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=None, panelId=panelId)
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId=panelId)
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -122,7 +122,7 @@ def test_send_messages_with_panelid(panelId):
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': panelId, 'time': 60000},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': int(panelId), 'time': 60000},
             verify=True,
         )
         assert sent_messages == 1
@@ -135,7 +135,7 @@ def test_send_messages_with_bothids():
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=42, panelId=42)
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='42', panelId='42')
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -158,6 +158,36 @@ def test_send_messages_with_bothids():
         assert sent_messages == 1
 
 
+def test_send_messages_with_emptyids():
+    with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
+        requests_mock.post.return_value.status_code = 200
+        m = {}
+        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
+        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['subject'] = "test subject"
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='')
+        message = EmailMessage(
+            m['subject'],
+            {"started": m['started'], "finished": m['finished']},
+            [],
+            [
+                'https://example.com',
+            ],
+        )
+        sent_messages = backend.send_messages(
+            [
+                message,
+            ]
+        )
+        requests_mock.post.assert_called_once_with(
+            'https://example.com/api/annotations',
+            headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
+            verify=True,
+        )
+        assert sent_messages == 1
+
+
 def test_send_messages_with_tags():
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
@@ -165,7 +195,7 @@ def test_send_messages_with_tags():
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=None, panelId=None, annotation_tags=["ansible"])
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='', annotation_tags=["ansible"])
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
