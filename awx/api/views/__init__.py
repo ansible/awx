@@ -4246,10 +4246,6 @@ class RoleTeamsList(SubListAttachDetachAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get_queryset(self):
-        role = models.Role.objects.get(pk=self.kwargs['pk'])
-        return models.Role.filter_visible_roles(self.request.user, role.children.all())
-
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to
