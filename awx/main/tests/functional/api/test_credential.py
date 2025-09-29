@@ -296,9 +296,15 @@ def test_grant_credential_to_team_different_organization(post, get, credential, 
     team.organization = orgs[1]
     team.save()
 
+    # Non-superuser (org_admin) trying cross-org assignment should get 400
     response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
     assert response.status_code == 400
+    assert (
+        "You do not have permission to grant credential access to a team when the Organization field isn't set, or belongs to a different organization"
+        in response.data['msg']
+    )
 
+    # Superuser (admin) can do cross-org assignment
     response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
     assert response.status_code == 204
 
@@ -308,16 +314,33 @@ def test_grant_credential_to_team_different_organization(post, get, credential, 
     assert team_member in credential.use_role
     assert team_member not in credential.admin_role
 
-    # Assert: Team member can see the credential in API (functional check)
+    # Team member can see the credential in API (functional check)
     response = get(reverse('api:team_credentials_list', kwargs={'pk': team.id}), team_member)
     assert response.status_code == 200
     assert response.data['count'] == 1
     assert response.data['results'][0]['id'] == credential.id
 
-    # Assert: Team member can see the credential in general credentials API
+    # Team member can see the credential in general credentials API
     response = get(reverse('api:credential_list'), team_member)
     assert response.status_code == 200
     assert any(cred['id'] == credential.id for cred in response.data['results'])
+
+
+@pytest.mark.django_db
+def test_grant_credential_with_no_organization_to_team(post, credential, admin, org_admin, team):
+    """Test granting credential with no organization to a team"""
+    credential.organization = None
+    credential.save()
+
+    # Non-superuser (org_admin) trying to assign private credential should get 400
+    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
+    assert response.status_code == 400
+    assert "You cannot grant private credential access to a team" in response.data['msg']
+
+    # Even superuser cannot assign private credential to team
+    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
+    assert response.status_code == 400
+    assert "You cannot grant private credential access to a team" in response.data['msg']
 
 
 @pytest.mark.django_db
