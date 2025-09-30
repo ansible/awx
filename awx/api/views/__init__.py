@@ -721,11 +721,17 @@ class TeamRolesList(SubListAttachDetachAPIView):
         credential_content_type = ContentType.objects.get_for_model(models.Credential)
         if role.content_type == credential_content_type:
             if not role.content_object.organization:
-                data = dict(msg=_("You cannot grant private credential access to a team"))
+                data = dict(
+                    msg=_("You cannot grant access to a credential that is not assigned to an organization (private credentials cannot be assigned to teams)")
+                )
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             elif role.content_object.organization.id != team.organization.id:
                 if not request.user.is_superuser:
-                    data = dict(msg=_("You cannot grant credential access to a team because you do not have permission to do so"))
+                    data = dict(
+                        msg=_(
+                            "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
+                        )
+                    )
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         return super(TeamRolesList, self).post(request, *args, **kwargs)
@@ -4209,12 +4215,18 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         if role.content_type == credential_content_type:
             # Private credentials (no organization) are never allowed for teams
             if not role.content_object.organization:
-                data = dict(msg=_("You cannot grant private credential access to a team"))
+                data = dict(
+                    msg=_("You cannot grant access to a credential that is not assigned to an organization (private credentials cannot be assigned to teams)")
+                )
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             # Cross-organization credentials are only allowed for superusers
             elif role.content_object.organization.id != team.organization.id:
                 if not request.user.is_superuser:
-                    data = dict(msg=_("You cannot grant credential access to a team because you do not have permission to do so"))
+                    data = dict(
+                        msg=_(
+                            "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
+                        )
+                    )
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         action = 'attach'
