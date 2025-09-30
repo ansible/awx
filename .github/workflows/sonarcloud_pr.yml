@@ -25,7 +25,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
-          path: .
+          path: reports/
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
