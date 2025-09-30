@@ -288,8 +288,8 @@ def test_sa_grant_private_credential_to_team_through_role_teams(post, credential
 
 
 @pytest.mark.django_db
-def test_grant_credential_to_team_different_organization_via_role_teams(post, get, credential, organizations, admin, org_admin, team, team_member):
-    # Test cross-org credential assignment via role_teams_list endpoint
+def test_grant_credential_to_team_different_organization_through_role_teams(post, get, credential, organizations, admin, org_admin, team, team_member):
+    # # Test that credential from different org can be assigned to team by a superuser through role_teams_list endpoint
     orgs = organizations(2)
     credential.organization = orgs[0]
     credential.save()
@@ -312,25 +312,8 @@ def test_grant_credential_to_team_different_organization_via_role_teams(post, ge
 
 
 @pytest.mark.django_db
-def test_grant_credential_with_no_organization_to_team_via_role_teams(post, credential, admin, org_admin, team):
-    # Test private credential access control via role_teams_list endpoint
-    credential.organization = None
-    credential.save()
-
-    # Non-superuser (org_admin) trying to assign private credential should get 400
-    response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, org_admin)
-    assert response.status_code == 400
-    assert "You cannot grant private credential access to a team" in response.data['msg']
-
-    # Even superuser cannot assign private credential to team
-    response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, admin)
-    assert response.status_code == 400
-    assert "You cannot grant private credential access to a team" in response.data['msg']
-
-
-@pytest.mark.django_db
 def test_grant_credential_to_team_different_organization(post, get, credential, organizations, admin, org_admin, team, team_member):
-    # Test that credential from different org can be assigned to team
+    # Test that credential from different org can be assigned to team by a superuser
     orgs = organizations(2)
     credential.organization = orgs[0]
     credential.save()
@@ -362,23 +345,6 @@ def test_grant_credential_to_team_different_organization(post, get, credential, 
     response = get(reverse('api:credential_list'), team_member)
     assert response.status_code == 200
     assert any(cred['id'] == credential.id for cred in response.data['results'])
-
-
-@pytest.mark.django_db
-def test_grant_credential_with_no_organization_to_team(post, credential, admin, org_admin, team):
-    # Test granting credential with no organization to a team
-    credential.organization = None
-    credential.save()
-
-    # Non-superuser (org_admin) trying to assign private credential
-    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
-    assert response.status_code == 400
-    assert "You cannot grant private credential access to a team" in response.data['msg']
-
-    # Even superuser cannot assign private credential to team
-    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
-    assert response.status_code == 400
-    assert "You cannot grant private credential access to a team" in response.data['msg']
 
 
 @pytest.mark.django_db
