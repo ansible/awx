@@ -17,6 +17,7 @@ from awx.main.utils import get_awx_version, camelcase_to_underscore, datetime_ho
 from awx.main import models
 from awx.main.analytics import register
 from awx.main.scheduler.task_manager_models import TaskManagerModels
+from awx.conf import db_settings
 
 """
 This module is used to define metrics collected by awx.main.analytics.gather()
@@ -146,9 +147,9 @@ def config(since, **kwargs):
             'release': platform.release(),
             'type': install_type,
         },
-        'install_uuid': settings.INSTALL_UUID,
+        'install_uuid': db_settings.INSTALL_UUID,
         'instance_uuid': settings.SYSTEM_UUID,
-        'tower_url_base': settings.TOWER_URL_BASE,
+        'tower_url_base': db_settings.TOWER_URL_BASE,
         'tower_version': get_awx_version(),
         'license_type': license_info.get('license_type', 'UNLICENSED'),
         'license_date': license_info.get('license_date'),
@@ -174,10 +175,10 @@ def config(since, **kwargs):
         'free_instances': license_info.get('free_instances', 0),
         'total_licensed_instances': license_info.get('instance_count', 0),
         'license_expiry': license_info.get('time_remaining', 0),
-        'pendo_tracking': settings.PENDO_TRACKING_STATE,
+        'pendo_tracking': db_settings.PENDO_TRACKING_STATE,
         'authentication_backends': settings.AUTHENTICATION_BACKENDS,
-        'logging_aggregators': settings.LOG_AGGREGATOR_LOGGERS,
-        'external_logger_enabled': settings.LOG_AGGREGATOR_ENABLED,
+        'logging_aggregators': db_settings.LOG_AGGREGATOR_LOGGERS,
+        'external_logger_enabled': db_settings.LOG_AGGREGATOR_ENABLED,
         'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', None),
     }
 

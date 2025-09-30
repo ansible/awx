@@ -24,6 +24,9 @@ from rest_framework.exceptions import PermissionDenied
 # django-ansible-base
 from ansible_base.lib.utils.db import advisory_lock
 
+# Dynamic settings
+from awx.conf import db_settings
+
 # AWX inventory imports
 from awx.main.models.inventory import Inventory, InventorySource, InventoryUpdate, Host
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
@@ -1028,7 +1031,7 @@ class Command(BaseCommand):
                         if settings.SQL_DEBUG:
                             logger.warning('loading into database...')
                         with ignore_inventory_computed_fields():
-                            if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
+                            if getattr(db_settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                                 self.load_into_database()
                             else:
                                 with disable_activity_stream():

@@ -46,6 +46,9 @@ from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
 
+# dynamic settings
+from awx.conf import db_settings
+
 # AWX
 from awx.main.access import get_user_capabilities
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
@@ -2074,7 +2077,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         inv = attrs['inventory']
         if inv.kind != '':
             raise serializers.ValidationError(_('Hosts can only be created in manual inventories (not smart or constructed types).'))
-        if len(attrs['hosts']) > settings.BULK_HOST_MAX_CREATE:
+        if len(attrs['hosts']) > db_settings.BULK_HOST_MAX_CREATE:
             raise serializers.ValidationError(_('Number of hosts exceeds system setting BULK_HOST_MAX_CREATE'))
         if request and not request.user.is_superuser:
             if request.user not in inv.admin_role:
@@ -2146,7 +2149,7 @@ class BulkHostDeleteSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         request = self.context.get('request', None)
-        max_hosts = settings.BULK_HOST_MAX_DELETE
+        max_hosts = db_settings.BULK_HOST_MAX_DELETE
         # Validating the number of hosts to be deleted
         if len(attrs['hosts']) > max_hosts:
             raise serializers.ValidationError(
@@ -3646,7 +3649,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         # Load module name choices dynamically from DB settings.
         if field_name == 'module_name':
             field_class = serializers.ChoiceField
-            module_name_choices = [(x, x) for x in settings.AD_HOC_COMMANDS]
+            module_name_choices = [(x, x) for x in db_settings.AD_HOC_COMMANDS]
             module_name_default = 'command' if 'command' in [x[0] for x in module_name_choices] else ''
             field_kwargs['choices'] = module_name_choices
             field_kwargs['required'] = bool(not module_name_default)
@@ -4394,7 +4397,7 @@ class JobEventSerializer(BaseSerializer):
         # If the view logic says to not truncate (request was to the detail view or a param was used)
         if self.context.get('no_truncate', False):
             return data
-        max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
+        max_bytes = db_settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if 'stdout' in data:
             data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
         return data
@@ -4469,7 +4472,7 @@ class AdHocCommandEventSerializer(BaseSerializer):
         # If the view logic says to not truncate (request was to the detail view or a param was used)
         if self.context.get('no_truncate', False):
             return data
-        max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
+        max_bytes = db_settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if 'stdout' in data:
             data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
         return data
@@ -4872,7 +4875,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
     def validate(self, attrs):
         request = self.context.get('request', None)
         identifiers = set()
-        if len(attrs['jobs']) > settings.BULK_JOB_MAX_LAUNCH:
+        if len(attrs['jobs']) > db_settings.BULK_JOB_MAX_LAUNCH:
             raise serializers.ValidationError(_('Number of requested jobs exceeds system setting BULK_JOB_MAX_LAUNCH'))
 
         for node in attrs['jobs']:
@@ -5942,7 +5945,7 @@ class InstanceGroupSerializer(BaseSerializer):
         return res
 
     def validate_policy_instance_list(self, value):
-        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+        if self.instance and self.instance.name in [db_settings.DEFAULT_EXECUTION_QUEUE_NAME, db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             if self.instance.policy_instance_list != value:
                 raise serializers.ValidationError(_('%s instance group policy_instance_list may not be changed.' % self.instance.name))
         for instance_name in value:
@@ -5955,7 +5958,7 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_policy_instance_percentage(self, value):
-        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+        if self.instance and self.instance.name in [db_settings.DEFAULT_EXECUTION_QUEUE_NAME, db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             if value != self.instance.policy_instance_percentage:
                 raise serializers.ValidationError(
                     _('%s instance group policy_instance_percentage may not be changed from the initial value set by the installer.' % self.instance.name)
@@ -5970,16 +5973,16 @@ class InstanceGroupSerializer(BaseSerializer):
         return value
 
     def validate_name(self, value):
-        if self.instance and self.instance.name == settings.DEFAULT_EXECUTION_QUEUE_NAME and value != settings.DEFAULT_EXECUTION_QUEUE_NAME:
-            raise serializers.ValidationError(_('%s instance group name may not be changed.' % settings.DEFAULT_EXECUTION_QUEUE_NAME))
+        if self.instance and self.instance.name == db_settings.DEFAULT_EXECUTION_QUEUE_NAME and value != db_settings.DEFAULT_EXECUTION_QUEUE_NAME:
+            raise serializers.ValidationError(_('%s instance group name may not be changed.' % db_settings.DEFAULT_EXECUTION_QUEUE_NAME))
 
-        if self.instance and self.instance.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and value != settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
-            raise serializers.ValidationError(_('%s instance group name may not be changed.' % settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME))
+        if self.instance and self.instance.name == db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and value != db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+            raise serializers.ValidationError(_('%s instance group name may not be changed.' % db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME))
 
         return value
 
     def validate_is_container_group(self, value):
-        if self.instance and self.instance.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
+        if self.instance and self.instance.name in [db_settings.DEFAULT_EXECUTION_QUEUE_NAME, db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
             if value != self.instance.is_container_group:
                 raise serializers.ValidationError(_('%s instance group is_container_group may not be changed.' % self.instance.name))
 

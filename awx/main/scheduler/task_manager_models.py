@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from awx.conf import db_settings
 
 from awx.main.models import (
     Instance,
@@ -169,7 +170,7 @@ class TaskManagerInstanceGroups:
         self.controlplane_ig = None
         self.pk_ig_map = dict()
         self.control_task_impact = kwargs.get('control_task_impact', settings.AWX_CONTROL_NODE_TASK_IMPACT)
-        self.controlplane_ig_name = kwargs.get('controlplane_ig_name', settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+        self.controlplane_ig_name = kwargs.get('controlplane_ig_name', db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
 
         if instance_groups is not None:  # for testing
             self.instance_groups = {ig.name: TaskManagerInstanceGroup(ig, self.task_manager_instances, **kwargs) for ig in instance_groups}
@@ -260,7 +261,7 @@ class TaskManagerModels:
     def __init__(self, **kwargs):
         # We want to avoid calls to settings over and over in loops, so cache this information here
         kwargs['control_task_impact'] = kwargs.get('control_task_impact', settings.AWX_CONTROL_NODE_TASK_IMPACT)
-        kwargs['controlplane_ig_name'] = kwargs.get('controlplane_ig_name', settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+        kwargs['controlplane_ig_name'] = kwargs.get('controlplane_ig_name', db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
         self.instances = TaskManagerInstances(**kwargs)
         self.instance_groups = TaskManagerInstanceGroups(task_manager_instances=self.instances, **kwargs)
 

@@ -16,6 +16,7 @@ from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
 from django.urls import reverse, resolve
 
+from awx.conf import db_settings
 from awx.main import migrations
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
@@ -35,7 +36,7 @@ class SettingsCacheMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
-        settings._awx_conf_memoizedcache.clear()
+        db_settings._awx_conf_memoizedcache.clear()
 
 
 class TimingMiddleware(threading.local, MiddlewareMixin):
@@ -47,7 +48,7 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
 
     def process_request(self, request):
         self.start_time = time.time()
-        if settings.AWX_REQUEST_PROFILE:
+        if db_settings.AWX_REQUEST_PROFILE:
             self.prof.start()
 
     def process_response(self, request, response):
@@ -55,7 +56,7 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
             return response
         total_time = time.time() - self.start_time
         response['X-API-Total-Time'] = '%0.3fs' % total_time
-        if settings.AWX_REQUEST_PROFILE:
+        if db_settings.AWX_REQUEST_PROFILE:
             response['X-API-Profile-File'] = self.prof.stop()
         perf_logger.debug(
             f'request: {request}, response_time: {response["X-API-Total-Time"]}',
@@ -90,7 +91,7 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
-        if settings.DISABLE_LOCAL_AUTH:
+        if db_settings.DISABLE_LOCAL_AUTH:
             user = request.user
             if not user.pk:
                 return

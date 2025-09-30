@@ -1,6 +1,7 @@
 from awx.main.tasks.system import clear_setting_cache
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+
+from awx.conf import db_settings
 
 
 class Command(BaseCommand):
@@ -22,12 +23,12 @@ class Command(BaseCommand):
         """
 
         if enable:
-            settings.DISABLE_LOCAL_AUTH = False
-            print("Setting has changed to {} allowing local authentication".format(settings.DISABLE_LOCAL_AUTH))
+            db_settings.DISABLE_LOCAL_AUTH = False
+            print("Setting has changed to {} allowing local authentication".format(db_settings.DISABLE_LOCAL_AUTH))
 
         elif disable:
-            settings.DISABLE_LOCAL_AUTH = True
-            print("Setting has changed to {} disallowing local authentication".format(settings.DISABLE_LOCAL_AUTH))
+            db_settings.DISABLE_LOCAL_AUTH = True
+            print("Setting has changed to {} disallowing local authentication".format(db_settings.DISABLE_LOCAL_AUTH))
 
         else:
             raise CommandError('Please pass --enable flag to allow local auth or --disable flag to disable local auth')

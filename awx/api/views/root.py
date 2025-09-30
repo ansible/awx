@@ -37,6 +37,7 @@ from awx.main.models import Project, Organization, Instance, InstanceGroup, JobT
 from awx.main.utils import set_environ
 from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
+from awx.conf import db_settings
 
 logger = logging.getLogger('awx.api.views.root')
 
@@ -55,9 +56,9 @@ class ApiRootView(APIView):
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
         data['available_versions'] = dict(v2=v2)
-        data['custom_logo'] = settings.CUSTOM_LOGO
-        data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
-        data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
+        data['custom_logo'] = db_settings.CUSTOM_LOGO
+        data['custom_login_info'] = db_settings.CUSTOM_LOGIN_INFO
+        data['login_redirect_override'] = db_settings.LOGIN_REDIRECT_OVERRIDE
         if MODE == 'development':
             data['swagger'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
@@ -144,7 +145,7 @@ class ApiV2PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': settings.INSTALL_UUID}
+        response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': db_settings.INSTALL_UUID}
 
         response['instances'] = []
         for instance in Instance.objects.exclude(node_type='hop'):
@@ -181,15 +182,15 @@ class ApiV2SubscriptionView(APIView):
     def post(self, request):
         data = request.data.copy()
         if data.get('subscriptions_client_secret') == '$encrypted$':
-            data['subscriptions_client_secret'] = settings.SUBSCRIPTIONS_CLIENT_SECRET
+            data['subscriptions_client_secret'] = db_settings.SUBSCRIPTIONS_CLIENT_SECRET
         try:
             user, pw = data.get('subscriptions_client_id'), data.get('subscriptions_client_secret')
-            with set_environ(**settings.AWX_TASK_ENV):
+            with set_environ(**db_settings.AWX_TASK_ENV):
                 validated = get_licenser().validate_rh(user, pw)
             if user:
-                settings.SUBSCRIPTIONS_CLIENT_ID = data['subscriptions_client_id']
+                db_settings.SUBSCRIPTIONS_CLIENT_ID = data['subscriptions_client_id']
             if pw:
-                settings.SUBSCRIPTIONS_CLIENT_SECRET = data['subscriptions_client_secret']
+                db_settings.SUBSCRIPTIONS_CLIENT_SECRET = data['subscriptions_client_secret']
         except Exception as exc:
             msg = _("Invalid Subscription")
             if isinstance(exc, TokenError) or (
@@ -224,16 +225,15 @@ class ApiV2AttachView(APIView):
         subscription_id = data.get('subscription_id', None)
         if not subscription_id:
             return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
-        # Ensure we always use the latest subscription credentials
         cache.delete_many(['SUBSCRIPTIONS_CLIENT_ID', 'SUBSCRIPTIONS_CLIENT_SECRET'])
-        user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-        pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        user = getattr(db_settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        pw = getattr(db_settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
         if not (user and pw):
             return Response({"error": _("Missing subscription credentials")}, status=status.HTTP_400_BAD_REQUEST)
         if subscription_id and user and pw:
             data = request.data.copy()
             try:
-                with set_environ(**settings.AWX_TASK_ENV):
+                with set_environ(**db_settings.AWX_TASK_ENV):
                     validated = get_licenser().validate_rh(user, pw)
             except Exception as exc:
                 msg = _("Invalid Subscription")
@@ -251,7 +251,7 @@ class ApiV2AttachView(APIView):
         for sub in validated:
             if sub['subscription_id'] == subscription_id:
                 sub['valid_key'] = True
-                settings.LICENSE = sub
+                db_settings.LICENSE = sub
                 connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
                 return Response(sub)
 
@@ -275,7 +275,7 @@ class ApiV2ConfigView(APIView):
         if not license_data.get('valid_key', False):
             license_data = {}
 
-        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+        pendo_state = db_settings.PENDO_TRACKING_STATE if db_settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
         data = dict(
             time_zone=settings.TIME_ZONE,
@@ -353,7 +353,7 @@ class ApiV2ConfigView(APIView):
 
     def delete(self, request):
         try:
-            settings.LICENSE = {}
+            db_settings.LICENSE = {}
             connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:

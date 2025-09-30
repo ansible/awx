@@ -2,7 +2,6 @@ import json
 
 from cryptography.fernet import InvalidToken
 from django.test.utils import override_settings
-from django.conf import settings
 from django.core.management import call_command
 import os
 import pytest
@@ -11,6 +10,9 @@ from awx.main import models
 from awx.conf.models import Setting
 from awx.main.management.commands import regenerate_secret_key
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value
+from awx.conf import db_settings
+
+from awx.conf.testing import override_db_settings
 
 
 PREFIX = '$encrypted$UTF8$AESCBC$'
@@ -33,15 +35,15 @@ class TestKeyRegeneration:
             new_cred.get_input('password')
 
         # verify that the new SECRET_KEY *does* work
-        with override_settings(SECRET_KEY=new_key):
+        with override_db_settings(SECRET_KEY=new_key):
             assert new_cred.get_input('password') == 'secret'
 
     def test_encrypted_setting_values(self):
         # test basic decryption
-        settings.REDHAT_PASSWORD = 'sensitive'
+        db_settings.REDHAT_PASSWORD = 'sensitive'
         s = Setting.objects.filter(key='REDHAT_PASSWORD').first()
         assert s.value.startswith(PREFIX)
-        assert settings.REDHAT_PASSWORD == 'sensitive'
+        assert db_settings.REDHAT_PASSWORD == 'sensitive'
 
         # re-key the setting value
         new_key = regenerate_secret_key.Command().handle()
@@ -49,17 +51,17 @@ class TestKeyRegeneration:
         assert s.value != new_setting.value
 
         # wipe out the local cache so the value is pulled from the DB again
-        settings.cache.delete('REDHAT_PASSWORD')
+        db_settings.cache.delete('REDHAT_PASSWORD')
 
         # verify that the old SECRET_KEY doesn't work
-        settings._awx_conf_memoizedcache.clear()
+        db_settings._awx_conf_memoizedcache.clear()
         with pytest.raises(InvalidToken):
-            settings.REDHAT_PASSWORD
+            db_settings.REDHAT_PASSWORD
 
         # verify that the new SECRET_KEY *does* work
-        settings._awx_conf_memoizedcache.clear()
-        with override_settings(SECRET_KEY=new_key):
-            assert settings.REDHAT_PASSWORD == 'sensitive'
+        db_settings._awx_conf_memoizedcache.clear()
+        with override_db_settings(SECRET_KEY=new_key):
+            assert db_settings.REDHAT_PASSWORD == 'sensitive'
 
     def test_encrypted_notification_secrets(self, notification_template_with_encrypt):
         # test basic decryption

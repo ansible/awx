@@ -57,6 +57,9 @@ from wsgiref.util import FileWrapper
 from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation
 
+# dynamic settings
+from awx.conf import db_settings
+
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset
@@ -460,7 +463,7 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
         res = self.is_valid_relation(parent, sub)
         if res:
             return res
-        if sub.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and parent.node_type == 'hybrid':
+        if sub.name == db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and parent.node_type == 'hybrid':
             return {'msg': _(f"Cannot disassociate hybrid instance {parent.hostname} from {sub.name}.")}
         return None
 
@@ -565,7 +568,7 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
         res = self.is_valid_relation(parent, sub)
         if res:
             return res
-        if sub.node_type == 'hybrid' and parent.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+        if sub.node_type == 'hybrid' and parent.name == db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
             return {'msg': _(f"Cannot disassociate hybrid node {sub.hostname} from {parent.name}.")}
         return None
 
@@ -988,7 +991,7 @@ class ProjectUpdateEventsList(SubListAPIView):
     pagination_class = UnifiedJobEventPagination
 
     def finalize_response(self, request, response, *args, **kwargs):
-        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        response['X-UI-Max-Events'] = db_settings.MAX_UI_JOB_EVENTS
         return super(ProjectUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
 
     def get_queryset(self):
@@ -1007,7 +1010,7 @@ class SystemJobEventsList(SubListAPIView):
     pagination_class = UnifiedJobEventPagination
 
     def finalize_response(self, request, response, *args, **kwargs):
-        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        response['X-UI-Max-Events'] = db_settings.MAX_UI_JOB_EVENTS
         return super(SystemJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
     def get_queryset(self):
@@ -1406,7 +1409,7 @@ class CredentialExternalTest(SubDetailAPIView):
                 backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            with set_environ(**settings.AWX_TASK_ENV):
+            with set_environ(**db_settings.AWX_TASK_ENV):
                 obj.credential_type.plugin.backend(**backend_kwargs)
                 return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
@@ -2032,7 +2035,7 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
         with ignore_inventory_computed_fields():
-            if not settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
+            if not db_settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
                 from awx.main.signals import disable_activity_stream
 
                 with disable_activity_stream():
@@ -2060,7 +2063,7 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
         with ignore_inventory_computed_fields():
-            if not settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
+            if not db_settings.ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC:
                 from awx.main.signals import disable_activity_stream
 
                 with disable_activity_stream():
@@ -2548,6 +2551,7 @@ class JobTemplateCallback(GenericAPIView):
         host for the current request.
         """
         # Find the list of remote host names/IPs to check.
+        # TODO: use db_settings here
         remote_hosts = set(get_remote_hosts(self.request))
         # Add the reverse lookup of IP addresses.
         for rh in list(remote_hosts):
@@ -3548,7 +3552,7 @@ class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
     search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
-        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        response['X-UI-Max-Events'] = db_settings.MAX_UI_JOB_EVENTS
         return super(BaseJobEventsList, self).finalize_response(request, response, *args, **kwargs)
 
 

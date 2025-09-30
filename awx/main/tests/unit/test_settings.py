@@ -19,18 +19,6 @@ def test_postprocess_auth_basic_enabled():
     assert 'awx.api.authentication.LoggedBasicAuthentication' in REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
 
 
-def test_default_settings():
-    """Ensure that all default settings are present in the snapshot."""
-    from django.conf import settings
-
-    for k in dir(settings):
-        if k not in settings.DEFAULTS_SNAPSHOT or k in LOCAL_SETTINGS:
-            continue
-        default_val = getattr(settings.default_settings, k, None)
-        snapshot_val = settings.DEFAULTS_SNAPSHOT[k]
-        assert default_val == snapshot_val, f'Setting for {k} does not match shapshot:\nsnapshot: {snapshot_val}\ndefault: {default_val}'
-
-
 def test_django_conf_settings_is_awx_settings():
     """Ensure that the settings loaded from dynaconf are the same as the settings delivered to django."""
     from django.conf import settings

@@ -6,6 +6,8 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 
+from awx.conf import db_settings
+
 from awx.api.generics import APIView, Response
 from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
@@ -121,7 +123,7 @@ class AnalyticsGenericView(APIView):
 
     def _get_analytics_url(self, request_path):
         analytics_path = self._get_analytics_path(request_path)
-        url = getattr(settings, 'AUTOMATION_ANALYTICS_URL', None)
+        url = getattr(db_settings, 'AUTOMATION_ANALYTICS_URL', None)
         if not url:
             raise MissingSettings(ERROR_MISSING_URL)
         url_parts = urlparse.urlsplit(url)
@@ -130,7 +132,7 @@ class AnalyticsGenericView(APIView):
 
     @staticmethod
     def _get_setting(setting_name, default, error_message):
-        setting = getattr(settings, setting_name, default)
+        setting = getattr(db_settings, setting_name, default)
         if not setting:
             raise MissingSettings(error_message)
         return setting
@@ -204,8 +206,8 @@ class AnalyticsGenericView(APIView):
             url = self._get_analytics_url(request.path)
             using_subscriptions_credentials = False
             try:
-                rh_user = getattr(settings, 'REDHAT_USERNAME', None)
-                rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+                rh_user = getattr(db_settings, 'REDHAT_USERNAME', None)
+                rh_password = getattr(db_settings, 'REDHAT_PASSWORD', None)
                 if not (rh_user and rh_password):
                     rh_user = self._get_setting('SUBSCRIPTIONS_CLIENT_ID', None, ERROR_MISSING_USER)
                     rh_password = self._get_setting('SUBSCRIPTIONS_CLIENT_SECRET', None, ERROR_MISSING_PASSWORD)

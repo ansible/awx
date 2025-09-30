@@ -7,19 +7,20 @@ from django.conf import settings
 
 from awx.main.utils.reload import supervisor_service_command
 from awx.main.dispatch.publish import task as task_awx
+from awx.conf import db_settings
 
 
-def construct_rsyslog_conf_template(settings=settings):
+def construct_rsyslog_conf_template(settings=settings, db_settings=db_settings):
     tmpl = ''
     parts = []
-    enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED')
-    host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
-    port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
-    protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
-    timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
-    action_queue_size = getattr(settings, 'LOG_AGGREGATOR_ACTION_QUEUE_SIZE', 131072)
-    max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
-    spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
+    enabled = getattr(db_settings, 'LOG_AGGREGATOR_ENABLED')
+    host = getattr(db_settings, 'LOG_AGGREGATOR_HOST', '')
+    port = getattr(db_settings, 'LOG_AGGREGATOR_PORT', '')
+    protocol = getattr(db_settings, 'LOG_AGGREGATOR_PROTOCOL', '')
+    timeout = getattr(db_settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
+    action_queue_size = getattr(db_settings, 'LOG_AGGREGATOR_ACTION_QUEUE_SIZE', 131072)
+    max_disk_space_action_queue = getattr(db_settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
+    spool_directory = getattr(db_settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
 
     queue_options = [
@@ -41,7 +42,7 @@ def construct_rsyslog_conf_template(settings=settings):
         spool_directory = '/var/lib/awx'
 
     max_bytes = settings.MAX_EVENT_RES_DATA
-    if settings.LOG_AGGREGATOR_RSYSLOGD_DEBUG:
+    if db_settings.LOG_AGGREGATOR_RSYSLOGD_DEBUG:
         parts.append('$DebugLevel 2')
     parts.extend(
         [
@@ -74,12 +75,12 @@ def construct_rsyslog_conf_template(settings=settings):
             if parsed.port:
                 port = parsed.port
         except ValueError:
-            port = settings.LOG_AGGREGATOR_PORT
+            port = db_settings.LOG_AGGREGATOR_PORT
 
         # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst
         ssl = 'on' if parsed.scheme == 'https' else 'off'
-        skip_verify = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
-        allow_unsigned = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
+        skip_verify = 'off' if db_settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
+        allow_unsigned = 'off' if db_settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
         if not port:
             port = 443 if parsed.scheme == 'https' else 80
 
@@ -101,9 +102,9 @@ def construct_rsyslog_conf_template(settings=settings):
             if parsed.query:
                 path = f'{path}?{urlparse.quote(parsed.query)}'
             params.append(f'restpath="{path}"')
-        username = escape_quotes(getattr(settings, 'LOG_AGGREGATOR_USERNAME', ''))
-        password = escape_quotes(getattr(settings, 'LOG_AGGREGATOR_PASSWORD', ''))
-        if getattr(settings, 'LOG_AGGREGATOR_TYPE', None) == 'splunk':
+        username = escape_quotes(getattr(db_settings, 'LOG_AGGREGATOR_USERNAME', ''))
+        password = escape_quotes(getattr(db_settings, 'LOG_AGGREGATOR_PASSWORD', ''))
+        if getattr(db_settings, 'LOG_AGGREGATOR_TYPE', None) == 'splunk':
             # splunk has a weird authorization header <shrug>
             if password:
                 # from omhttp docs:

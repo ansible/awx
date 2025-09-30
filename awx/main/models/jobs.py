@@ -54,6 +54,7 @@ from awx.main.models.mixins import (
     OpaQueryPathMixin,
 )
 from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.conf import db_settings
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -326,8 +327,8 @@ class JobTemplate(
         return [fd for fd in ['project', 'inventory'] if not getattr(self, '{}_id'.format(fd))]
 
     def clean_forks(self):
-        if settings.MAX_FORKS > 0 and self.forks > settings.MAX_FORKS:
-            raise ValidationError(_(f'Maximum number of forks ({settings.MAX_FORKS}) exceeded.'))
+        if db_settings.MAX_FORKS > 0 and self.forks > db_settings.MAX_FORKS:
+            raise ValidationError(_(f'Maximum number of forks ({db_settings.MAX_FORKS}) exceeded.'))
         return self.forks
 
     def create_job(self, **kwargs):
@@ -635,7 +636,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return reverse('api:job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/playbook/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(db_settings.TOWER_URL_BASE, "{}/jobs/playbook/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def _set_default_dependencies_processed(self):
         """
@@ -1281,7 +1282,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return reverse('api:system_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/management/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(db_settings.TOWER_URL_BASE, "{}/jobs/management/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     @property
     def event_class(self):

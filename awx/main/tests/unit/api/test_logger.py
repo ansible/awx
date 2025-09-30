@@ -1,9 +1,8 @@
 import pytest
 
-from django.conf import settings
-
 from awx.main.utils.external_logging import construct_rsyslog_conf_template
-from awx.main.tests.functional.api.test_settings import _mock_logging_defaults
+
+from awx.conf.testing import override_db_settings
 
 '''
 # Example User Data
@@ -179,38 +178,33 @@ data_loggly = {
         ),
     ],
 )
-def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfile, expected_config):
-    mock_settings, _ = _mock_logging_defaults()
+def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfile, expected_config, settings):
+    mock_settings = {'LOG_AGGREGATOR_ENABLED': enabled, 'LOG_AGGREGATOR_TYPE': log_type, 'LOG_AGGREGATOR_HOST': host}
 
-    # Set test settings
-    logging_defaults = getattr(settings, 'LOGGING')
-    setattr(mock_settings, 'LOGGING', logging_defaults)
-    setattr(mock_settings, 'LOGGING["handlers"]["external_logger"]["address"]', '/var/run/awx-rsyslog/rsyslog.sock')
-    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', enabled)
-    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', log_type)
-    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', host)
-    setattr(mock_settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', errorfile)
+    settings.LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = errorfile
+
     if port:
-        setattr(mock_settings, 'LOG_AGGREGATOR_PORT', port)
+        mock_settings['LOG_AGGREGATOR_PORT'] = port
     if protocol:
-        setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', protocol)
+        mock_settings['LOG_AGGREGATOR_PROTOCOL'] = protocol
 
-    # create rsyslog conf template
-    tmpl = construct_rsyslog_conf_template(mock_settings)
+    with override_db_settings(**mock_settings):
 
-    # check validity of created template
-    assert expected_config in tmpl
+        # create rsyslog conf template
+        tmpl = construct_rsyslog_conf_template(settings=settings)
+
+        # check validity of created template
+        assert expected_config in tmpl
 
 
 def test_splunk_auth():
-    mock_settings, _ = _mock_logging_defaults()
-    # Set test settings
-    logging_defaults = getattr(settings, 'LOGGING')
-    setattr(mock_settings, 'LOGGING', logging_defaults)
-    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
-    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'splunk')
-    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'example.org')
-    setattr(mock_settings, 'LOG_AGGREGATOR_PASSWORD', 'SECRET-TOKEN')
+    mock_settings = {
+        'LOG_AGGREGATOR_ENABLED': True,
+        'LOG_AGGREGATOR_TYPE': 'splunk',
+        'LOG_AGGREGATOR_HOST': 'example.org',
+        'LOG_AGGREGATOR_PASSWORD': 'SECRET-TOKEN',
+    }
 
-    tmpl = construct_rsyslog_conf_template(mock_settings)
-    assert 'httpheaderkey="Authorization" httpheadervalue="Splunk SECRET-TOKEN"' in tmpl
+    with override_db_settings(**mock_settings):
+        tmpl = construct_rsyslog_conf_template()
+        assert 'httpheaderkey="Authorization" httpheadervalue="Splunk SECRET-TOKEN"' in tmpl

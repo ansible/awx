@@ -8,6 +8,8 @@ from django.test.utils import override_settings
 from ansible_base.jwt_consumer.common.util import generate_x_trusted_proxy_header
 from ansible_base.lib.testing.fixtures import rsa_keypair_factory, rsa_keypair  # noqa: F401; pylint: disable=unused-import
 
+from awx.conf.testing import override_db_settings
+
 
 class HeaderTrackingMiddleware(object):
     def __init__(self):
@@ -73,8 +75,9 @@ class TestTrustedProxyAllowListIntegration:
             'HTTP_X_FROM_THE_LOAD_BALANCER': 'some-actual-ip',
         }
         with mock.patch('ansible_base.jwt_consumer.common.cache.JWTCache.get_key_from_cache', lambda self: None):
-            with override_settings(ANSIBLE_BASE_JWT_KEY=rsa_keypair.public, PROXY_IP_ALLOWED_LIST=[]):
-                get(url, user=admin, middleware=middleware, **headers)
+            with override_settings(ANSIBLE_BASE_JWT_KEY=rsa_keypair.public):
+                with override_db_settings(PROXY_IP_ALLOWED_LIST=[]):
+                    get(url, user=admin, middleware=middleware, **headers)
         assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 
     def test_x_trusted_proxy_invalid_signature(self, get, admin, url, patch, middleware):
@@ -83,7 +86,7 @@ class TestTrustedProxyAllowListIntegration:
             'HTTP_X_TRUSTED_PROXY': 'DEAD-BEEF',
             'HTTP_X_FROM_THE_LOAD_BALANCER': 'some-actual-ip',
         }
-        with override_settings(PROXY_IP_ALLOWED_LIST=[]):
+        with override_db_settings(PROXY_IP_ALLOWED_LIST=[]):
             get(url, user=admin, middleware=middleware, **headers)
         assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 

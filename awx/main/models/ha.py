@@ -19,6 +19,8 @@ from solo.models import SingletonModel
 
 from ansible_base.lib.utils.models import prevent_search
 
+from awx.conf import db_settings
+
 # AWX
 from awx import __version__ as awx_application_version
 from awx.main.utils import is_testing
@@ -269,8 +271,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         any kwargs will override that key=value combination in the returned dict
         """
         vargs = dict()
-        if settings.AWX_CLEANUP_PATHS:
-            vargs['file_pattern'] = os.path.join(settings.AWX_ISOLATION_BASE_PATH, JOB_FOLDER_PREFIX % '*') + '*'
+        if db_settings.AWX_CLEANUP_PATHS:
+            vargs['file_pattern'] = os.path.join(db_settings.AWX_ISOLATION_BASE_PATH, JOB_FOLDER_PREFIX % '*') + '*'
         vargs.update(kwargs)
         if not isinstance(vargs.get('grace_period'), int):
             vargs['grace_period'] = 60  # grace period of 60 minutes, need to set because CLI default will not take effect

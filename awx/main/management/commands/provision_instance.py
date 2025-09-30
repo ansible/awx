@@ -8,6 +8,7 @@ from django.db import transaction
 from django.conf import settings
 
 from awx.main.models import Instance
+from awx.conf import db_settings
 
 
 class Command(BaseCommand):
@@ -36,9 +37,9 @@ class Command(BaseCommand):
             from awx.main.management.commands.register_queue import RegisterQueue
 
             (changed, instance) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
-            RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
+            RegisterQueue(db_settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
             RegisterQueue(
-                settings.DEFAULT_EXECUTION_QUEUE_NAME,
+                db_settings.DEFAULT_EXECUTION_QUEUE_NAME,
                 100,
                 0,
                 [],

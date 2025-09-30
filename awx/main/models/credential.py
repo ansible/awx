@@ -29,6 +29,8 @@ from rest_framework.serializers import ValidationError as DRFValidationError
 # django-ansible-base
 from ansible_base.lib.utils.db import advisory_lock
 
+from awx.conf import db_settings
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.fields import (
@@ -637,7 +639,7 @@ class CredentialInputSource(PrimordialModel):
 
         backend_kwargs.update(self.metadata)
 
-        with set_environ(**settings.AWX_TASK_ENV):
+        with set_environ(**db_settings.AWX_TASK_ENV):
             return backend(**backend_kwargs)
 
     def get_absolute_url(self, request=None):

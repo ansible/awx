@@ -12,6 +12,7 @@ from awx.ui.fields import PendoTrackingStateField, CustomLogoField  # noqa
 register(
     'PENDO_TRACKING_STATE',
     field_class=PendoTrackingStateField,
+    default='off',
     choices=[('off', _('Off')), ('anonymous', _('Anonymous')), ('detailed', _('Detailed'))],
     label=_('User Analytics Tracking State'),
     help_text=_('Enable or Disable User Analytics Tracking.'),
@@ -60,11 +61,13 @@ register(
     category=_('UI'),
     category_slug='ui',
     hidden=True,
+    default=4000,
 )
 
 register(
     'UI_LIVE_UPDATES_ENABLED',
     field_class=fields.BooleanField,
+    default=True,
     label=_('Enable Live Updates in the UI'),
     help_text=_('If disabled, the page will not refresh when events are received. Reloading the page will be required to get the latest details.'),
     category=_('UI'),

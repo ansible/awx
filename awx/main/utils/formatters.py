@@ -12,6 +12,7 @@ from dateutil.tz import tzutc
 from django.utils.timezone import now
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
+from awx.conf import db_settings
 
 
 class TimeFormatter(logging.Formatter):
@@ -277,7 +278,7 @@ class LogstashFormatter(LogstashFormatterBase):
         if record.exc_info:
             message.update(self.get_debug_fields(record))
 
-        if settings.LOG_AGGREGATOR_TYPE == 'splunk':
+        if db_settings.LOG_AGGREGATOR_TYPE == 'splunk':
             # splunk messages must have a top level "event" key when using the /services/collector/event receiver.
             # The event receiver wont scan an event for a timestamp field therefore a time field must also be supplied containing epoch timestamp
             message = {'time': record.created, 'event': message}

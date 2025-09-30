@@ -28,7 +28,7 @@ of the local JSON files that represent the fact data.  Any records with file
 modification times that have increased (because Ansible updated the file via
 `cache.set()`) will result in the latest value being saved to the database.  On
 subsequent playbook runs, AWX will _only_ inject cached facts that are _newer_
-than `settings.ANSIBLE_FACT_CACHE_TIMEOUT` seconds.
+than `db_settings.ANSIBLE_FACT_CACHE_TIMEOUT` seconds.
 
 ## AWX Fact Logging
 New and changed facts will be logged via AWX's logging facility, specifically

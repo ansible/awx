@@ -1,5 +1,5 @@
 # Django
-from django.conf import settings
+from .lazy import settings
 from django.utils.translation import gettext_lazy as _
 
 # AWX
@@ -82,17 +82,6 @@ register(
     # Optional; field is stored encrypted in the database and only $encrypted$
     # is returned via the API.
     encrypted=True,
-)
-
-register(
-    'EXAMPLE_USER_SETTING',
-    field_class=fields.CharField,
-    allow_blank=True,
-    label=_('Example Setting'),
-    help_text=_('Example setting which can be different for each user.'),
-    category=_('User'),
-    category_slug='user',
-    default='',
 )
 
 # Unregister the example settings above.

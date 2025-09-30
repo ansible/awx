@@ -15,7 +15,6 @@ from logging import Filter
 
 from django.apps import apps
 from django.db import models
-from django.conf import settings
 
 from django_guid import get_guid
 from django_guid.log_filters import CorrelationId
@@ -23,6 +22,7 @@ from django_guid.log_filters import CorrelationId
 from awx import MODE
 from awx.main.constants import LOGGER_BLOCKLIST
 from awx.main.utils.common import get_search_fields
+from awx.conf import db_settings
 
 __all__ = ['SmartFilter', 'ExternalLoggerEnabled', 'DynamicLevelFilter']
 
@@ -42,7 +42,7 @@ class FieldFromSettings(object):
     def __get__(self, instance, type=None):
         if self.setting_name in getattr(instance, 'settings_override', {}):
             return instance.settings_override[self.setting_name]
-        return getattr(settings, self.setting_name, None)
+        return getattr(db_settings, self.setting_name, None)
 
     def __set__(self, instance, value):
         if value is None:
@@ -117,7 +117,7 @@ class DynamicLevelFilter(Filter):
             cutoff_level = logging.WARNING
         else:
             try:
-                cutoff_level = logging._nameToLevel[settings.LOG_AGGREGATOR_LEVEL]
+                cutoff_level = logging._nameToLevel[db_settings.LOG_AGGREGATOR_LEVEL]
             except Exception:
                 cutoff_level = logging.WARNING
 

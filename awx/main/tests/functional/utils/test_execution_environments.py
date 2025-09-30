@@ -1,11 +1,12 @@
 import pytest
 
 from django.conf import settings
-from django.test.utils import override_settings
 
 from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.management.commands.register_default_execution_environments import Command
+
+from awx.conf.testing import override_db_settings
 
 
 @pytest.fixture
@@ -42,5 +43,5 @@ def test_default_to_control_plane(set_up_defaults):
 def test_user_default(set_up_defaults):
     """If superuser has configured a default, then their preference should come first, of course"""
     ee = ExecutionEnvironment.objects.create(name='Steves environment', image='quay.io/ansible/awx-ee')
-    with override_settings(DEFAULT_EXECUTION_ENVIRONMENT=ee):
+    with override_db_settings(DEFAULT_EXECUTION_ENVIRONMENT=ee):
         assert get_default_execution_environment() == ee

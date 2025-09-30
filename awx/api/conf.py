@@ -18,6 +18,7 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
     unit=_('seconds'),
+    default=1800,
 )
 register(
     'SESSIONS_PER_USER',
@@ -27,6 +28,7 @@ register(
     help_text=_('Maximum number of simultaneous logged in sessions a user may have. To disable enter -1.'),
     category=_('Authentication'),
     category_slug='authentication',
+    default=-1,
 )
 register(
     'DISABLE_LOCAL_AUTH',
@@ -35,6 +37,7 @@ register(
     help_text=_("Controls whether users are prevented from using the built-in authentication system. "),
     category=_('Authentication'),
     category_slug='authentication',
+    default=False,
 )
 register(
     'AUTH_BASIC_ENABLED',
@@ -43,6 +46,7 @@ register(
     help_text=_('Enable HTTP Basic Auth for the API Browser.'),
     category=_('Authentication'),
     category_slug='authentication',
+    default=True,
 )
 register(
     'LOGIN_REDIRECT_OVERRIDE',

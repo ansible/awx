@@ -3,6 +3,7 @@ import pytest
 from awx.api.versioning import reverse
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.access import ActivityStreamAccess
+from awx.conf import db_settings
 from awx.conf.models import Setting
 
 
@@ -13,7 +14,7 @@ def activity_stream_entry(organization, org_admin):
 
 @pytest.mark.django_db
 def test_get_activity_stream_list(monkeypatch, organization, get, user, settings):
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     url = reverse('api:activity_stream_list')
     response = get(url, user('admin', True))
 
@@ -22,7 +23,7 @@ def test_get_activity_stream_list(monkeypatch, organization, get, user, settings
 
 @pytest.mark.django_db
 def test_basic_fields(monkeypatch, organization, get, user, settings):
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     u = user('admin', True)
     activity_stream = ActivityStream.objects.filter(organization=organization).latest('pk')
     activity_stream.actor = u
@@ -43,7 +44,7 @@ def test_basic_fields(monkeypatch, organization, get, user, settings):
 @pytest.mark.django_db
 def test_ctint_activity_stream(monkeypatch, get, user, settings):
     Setting.objects.create(key="FOO", value="bar")
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     u = user('admin', True)
     activity_stream = ActivityStream.objects.filter(setting__icontains="FOO").latest('pk')
     activity_stream.actor = u
@@ -61,7 +62,7 @@ def test_ctint_activity_stream(monkeypatch, get, user, settings):
 
 @pytest.mark.django_db
 def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_admin, settings):
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
     assert activity_stream_entry.role.first() == organization.admin_role
@@ -70,7 +71,7 @@ def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_adm
 
 @pytest.mark.django_db
 def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, settings):
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
     assert activity_stream_entry.role.first() == organization.admin_role
@@ -80,7 +81,7 @@ def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, 
 @pytest.mark.django_db
 @pytest.mark.activity_stream_access
 def test_stream_access_cant_change(activity_stream_entry, organization, org_admin, settings):
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     access = ActivityStreamAccess(org_admin)
     # These should always return false because the activity stream cannot be edited
     assert not access.can_add(activity_stream_entry)
@@ -106,7 +107,7 @@ def test_stream_queryset_hides_shows_items(
     team,
     settings,
 ):
-    settings.ACTIVITY_STREAM_ENABLED = True
+    db_settings.ACTIVITY_STREAM_ENABLED = True
     # this user is not in any organizations and should not see any resource activity
     no_access_user = user('no-access-user', False)
     access = ActivityStreamAccess(no_access_user)

@@ -5,7 +5,6 @@
 import logging
 
 # Django
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
@@ -13,6 +12,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
+# Dynamic settings
+from awx.conf import db_settings
 
 # AWX
 # from awx.main.analytics import collectors
@@ -33,13 +34,13 @@ class MetricsView(APIView):
     renderer_classes = [renderers.PlainTextRenderer, renderers.PrometheusJSONRenderer, renderers.BrowsableAPIRenderer]
 
     def initialize_request(self, request, *args, **kwargs):
-        if settings.ALLOW_METRICS_FOR_ANONYMOUS_USERS:
+        if db_settings.ALLOW_METRICS_FOR_ANONYMOUS_USERS:
             self.permission_classes = (AllowAny,)
         return super(APIView, self).initialize_request(request, *args, **kwargs)
 
     def get(self, request):
         '''Show Metrics Details'''
-        if settings.ALLOW_METRICS_FOR_ANONYMOUS_USERS or request.user.is_superuser or request.user.is_system_auditor:
+        if db_settings.ALLOW_METRICS_FOR_ANONYMOUS_USERS or request.user.is_superuser or request.user.is_system_auditor:
             metrics_to_show = ''
             if not request.query_params.get('subsystemonly', "0") == "1":
                 metrics_to_show += metrics().decode('UTF-8')

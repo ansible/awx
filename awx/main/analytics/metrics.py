@@ -1,4 +1,4 @@
-from django.conf import settings
+from awx.conf import db_settings
 from prometheus_client import CollectorRegistry, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
@@ -137,15 +137,15 @@ def metrics():
     license_info = get_license()
     SYSTEM_INFO.info(
         {
-            'install_uuid': settings.INSTALL_UUID,
-            'insights_analytics': str(settings.INSIGHTS_TRACKING_STATE),
-            'tower_url_base': settings.TOWER_URL_BASE,
+            'install_uuid': db_settings.INSTALL_UUID,
+            'insights_analytics': str(db_settings.INSIGHTS_TRACKING_STATE),
+            'tower_url_base': db_settings.TOWER_URL_BASE,
             'tower_version': get_awx_version(),
             'license_type': license_info.get('license_type', 'UNLICENSED'),
             'license_expiry': str(license_info.get('time_remaining', 0)),
-            'pendo_tracking': settings.PENDO_TRACKING_STATE,
-            'external_logger_enabled': str(settings.LOG_AGGREGATOR_ENABLED),
-            'external_logger_type': getattr(settings, 'LOG_AGGREGATOR_TYPE', 'None'),
+            'pendo_tracking': db_settings.PENDO_TRACKING_STATE,
+            'external_logger_enabled': str(db_settings.LOG_AGGREGATOR_ENABLED),
+            'external_logger_type': getattr(db_settings, 'LOG_AGGREGATOR_TYPE', 'None'),
         }
     )
 

@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from awx.conf import db_settings
 
 from awx.main.models.execution_environments import ExecutionEnvironment
 
@@ -17,8 +18,8 @@ def get_control_plane_execution_environment():
 
 
 def get_default_execution_environment():
-    if settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
-        return settings.DEFAULT_EXECUTION_ENVIRONMENT
+    if db_settings.DEFAULT_EXECUTION_ENVIRONMENT is not None:
+        return db_settings.DEFAULT_EXECUTION_ENVIRONMENT
     installed_default = ExecutionEnvironment.objects.filter(
         image__in=[ee['image'] for ee in settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS], organization=None, managed=False
     ).first()

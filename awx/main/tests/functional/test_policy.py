@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 import requests.exceptions
-from django.test import override_settings
 
 from awx.main.models import (
     Job,
@@ -25,6 +24,8 @@ from awx.main.exceptions import PolicyEvaluationError
 from awx.main.tasks import policy
 from awx.main.tasks.policy import JobSerializer, OPA_AUTH_TYPES
 
+from awx.conf.testing import override_db_settings
+
 
 def _parse_exception_message(exception: PolicyEvaluationError):
     pe_plain = str(exception.value)
@@ -37,9 +38,7 @@ def _parse_exception_message(exception: PolicyEvaluationError):
 
 @pytest.fixture(autouse=True)
 def setup_opa_settings():
-    with override_settings(
-        OPA_HOST='opa.example.com',
-    ):
+    with override_db_settings(OPA_HOST='opa.example.com'):
         yield
 
 
@@ -442,7 +441,7 @@ def test_opa_cert_file(settings_kwargs, expected_client_cert, expected_verify, v
     - SSL with system CA store
     - No SSL
     """
-    with override_settings(**settings_kwargs):
+    with override_db_settings(**settings_kwargs):
         client_cert_path = None
         verify_path = None
 
@@ -478,7 +477,7 @@ def test_opa_cert_file(settings_kwargs, expected_client_cert, expected_verify, v
 
 
 @pytest.mark.django_db
-@override_settings(
+@override_db_settings(
     OPA_HOST='opa.example.com',
     OPA_SSL=False,  # SSL disabled
     OPA_AUTH_TYPE=OPA_AUTH_TYPES.CERTIFICATE,  # But cert auth enabled
@@ -500,7 +499,7 @@ def test_evaluate_policy_cert_auth_requires_ssl():
 
 
 @pytest.mark.django_db
-@override_settings(
+@override_db_settings(
     OPA_HOST='opa.example.com',
     OPA_SSL=True,
     OPA_AUTH_TYPE=OPA_AUTH_TYPES.CERTIFICATE,
@@ -527,7 +526,7 @@ def test_evaluate_policy_missing_cert_settings():
 
 
 @pytest.mark.django_db
-@override_settings(
+@override_db_settings(
     OPA_HOST='opa.example.com',
     OPA_PORT=8181,
     OPA_SSL=True,
@@ -595,7 +594,7 @@ def test_opa_client_context_manager_mtls():
 
 
 @pytest.mark.django_db
-@override_settings(
+@override_db_settings(
     OPA_HOST='opa.example.com',
     OPA_SSL=True,
     OPA_AUTH_TYPE=OPA_AUTH_TYPES.TOKEN,

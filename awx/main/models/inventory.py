@@ -52,6 +52,7 @@ from awx.main.models.notifications import (
 from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
+from awx.conf import db_settings
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
@@ -1335,7 +1336,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return reverse('api:inventory_update_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/inventory/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(db_settings.TOWER_URL_BASE, "{}/jobs/inventory/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def get_actual_source_path(self):
         '''Alias to source_path that combines with project path for for SCM file based sources'''

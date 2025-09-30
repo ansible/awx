@@ -5,7 +5,6 @@ import json
 import re
 from unittest import mock
 
-from django.conf import settings
 from django.utils.encoding import smart_str
 from django.utils.timezone import now as tz_now
 
@@ -26,6 +25,8 @@ from awx.main.models import (
     SystemJob,
     SystemJobEvent,
 )
+
+from awx.conf import db_settings
 
 
 def _mk_project_update(created=None):
@@ -162,14 +163,14 @@ def test_text_stdout_with_max_stdout(sqlite_copy, get, admin):
     created = tz_now()
     job = SystemJob(created=created)
     job.save()
-    total_bytes = settings.STDOUT_MAX_BYTES_DISPLAY + 1
+    total_bytes = db_settings.STDOUT_MAX_BYTES_DISPLAY + 1
     large_stdout = 'X' * total_bytes
     SystemJobEvent(system_job=job, stdout=large_stdout, start_line=0, job_created=created).save()
     url = reverse('api:system_job_detail', kwargs={'pk': job.pk})
     response = get(url, user=admin, expect=200)
     assert response.data['result_stdout'] == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
+        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=db_settings.STDOUT_MAX_BYTES_DISPLAY)
     )
 
 
@@ -189,7 +190,7 @@ def test_max_bytes_display(sqlite_copy, Parent, Child, relation, view, fmt, get,
     created = tz_now()
     job = Parent(created=created)
     job.save()
-    total_bytes = settings.STDOUT_MAX_BYTES_DISPLAY + 1
+    total_bytes = db_settings.STDOUT_MAX_BYTES_DISPLAY + 1
     large_stdout = 'X' * total_bytes
     Child(**{relation: job, 'stdout': large_stdout, 'start_line': 0, 'job_created': created}).save()
     url = reverse(view, kwargs={'pk': job.pk})
@@ -197,7 +198,7 @@ def test_max_bytes_display(sqlite_copy, Parent, Child, relation, view, fmt, get,
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert smart_str(response.content) == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
+        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=db_settings.STDOUT_MAX_BYTES_DISPLAY)
     )
 
     response = get(url + '?format={}_download'.format(fmt), user=admin, expect=200)
@@ -228,7 +229,7 @@ def test_legacy_result_stdout_text_fallback(Cls, view, fmt, get, admin):
 def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
     job = Cls()
     job.save()
-    total_bytes = settings.STDOUT_MAX_BYTES_DISPLAY + 1
+    total_bytes = db_settings.STDOUT_MAX_BYTES_DISPLAY + 1
     large_stdout = 'X' * total_bytes
     job.result_stdout_text = large_stdout
     job.save()
@@ -237,7 +238,7 @@ def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert smart_str(response.content) == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=settings.STDOUT_MAX_BYTES_DISPLAY)
+        'supported for sizes over {max} bytes.'.format(actual=total_bytes, max=db_settings.STDOUT_MAX_BYTES_DISPLAY)
     )
 
     response = get(url + '?format={}'.format(fmt + '_download'), user=admin, expect=200)

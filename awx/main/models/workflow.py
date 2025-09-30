@@ -44,6 +44,7 @@ from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemp
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.utils import ScheduleWorkflowManager
+from awx.conf import db_settings
 
 
 __all__ = [
@@ -692,7 +693,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         return reverse('api:workflow_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(db_settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def notification_data(self):
         result = super(WorkflowJob, self).notification_data()
@@ -875,7 +876,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return None
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
+        return urljoin(db_settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
 
     def _get_parent_field_name(self):
         return 'workflow_approval_template'
@@ -988,7 +989,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return (msg, body)
 
     def context(self, approval_status):
-        workflow_url = urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
+        workflow_url = urljoin(db_settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
         return {
             'approval_status': approval_status,
             'approval_node_name': self.workflow_approval_template.name,

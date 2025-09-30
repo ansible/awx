@@ -4,9 +4,9 @@
 # All Rights Reserved.
 
 from contextlib import contextmanager
+from types import SimpleNamespace
 import codecs
 from uuid import uuid4
-import time
 
 from unittest import mock
 
@@ -43,7 +43,6 @@ def settings(request):
     """
     cache = LocMemCache(str(uuid4()), {})  # make a new random cache each time
     settings = LazySettings()
-    registry = SettingsRegistry(settings)
     defaults = {}
 
     # @pytest.mark.defined_in_file can be used to mark specific setting values
@@ -54,16 +53,19 @@ def settings(request):
         if marker.name == 'defined_in_file':
             defaults = marker.kwargs
 
-    defaults['DEFAULTS_SNAPSHOT'] = {}
-    settings.configure(**defaults)
-    settings._wrapped = SettingsWrapper(settings._wrapped, cache, registry)
+    og_settings = SimpleNamespace(**defaults)
+    registry = SettingsRegistry(settings=og_settings)
+    registry.apps_ready()
+
+    settings._wrapped = SettingsWrapper(default_settings=og_settings, cache=cache, registry=registry)
     return settings
 
 
 @pytest.mark.defined_in_file(DEBUG=True)
 def test_unregistered_setting(settings):
-    "native Django settings are not stored in DB, and aren't cached"
-    assert settings.DEBUG is True
+    "If a setting is not explicitly registered it raises attribute error"
+    with pytest.raises(AttributeError):
+        assert settings.DEBUG is True
     assert settings.cache.get('DEBUG') is None
 
 
@@ -78,6 +80,8 @@ def test_read_only_setting(settings):
 @pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 @pytest.mark.parametrize('read_only', [True, False])
 def test_setting_defined_in_file(settings, read_only):
+    assert hasattr(settings.default_settings, 'AWX_SOME_SETTING')  # sanity
+    assert hasattr(settings.registry.settings, 'AWX_SOME_SETTING')  # sanity
     kwargs = {'read_only': True} if read_only else {}
     settings.registry.register('AWX_SOME_SETTING', field_class=fields.CharField, category=_('System'), category_slug='system', **kwargs)
     assert settings.AWX_SOME_SETTING == 'DEFAULT'
@@ -102,27 +106,6 @@ def test_setting_defined_in_file_with_specific_default(settings):
     assert len(settings.registry.get_registered_settings(read_only=False)) == 0
     settings = settings.registry.get_registered_settings(read_only=True)
     assert settings == ['AWX_SOME_SETTING']
-
-
-@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
-def test_read_only_defaults_are_cached(settings):
-    "read-only settings are stored in the cache"
-    settings.registry.register('AWX_SOME_SETTING', field_class=fields.CharField, category=_('System'), category_slug='system')
-    assert settings.AWX_SOME_SETTING == 'DEFAULT'
-    assert settings.cache.get('AWX_SOME_SETTING') == 'DEFAULT'
-
-
-@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
-def test_cache_respects_timeout(settings):
-    "only preload the cache every SETTING_CACHE_TIMEOUT settings"
-    settings.registry.register('AWX_SOME_SETTING', field_class=fields.CharField, category=_('System'), category_slug='system')
-
-    assert settings.AWX_SOME_SETTING == 'DEFAULT'
-    cache_expiration = settings.cache.get('_awx_conf_preload_expires')
-    assert cache_expiration > time.time()
-
-    assert settings.AWX_SOME_SETTING == 'DEFAULT'
-    assert settings.cache.get('_awx_conf_preload_expires') == cache_expiration
 
 
 def test_default_setting(settings, mocker):
@@ -305,19 +288,6 @@ def test_readonly_sensitive_cache_data_is_encrypted(settings):
 
 
 @pytest.mark.defined_in_file(AWX_VAR='DEFAULT')
-def test_in_memory_cache_only_for_registered_settings(settings):
-    "Test that we only make use of the in-memory TTL cache for registered settings"
-    settings._awx_conf_memoizedcache.clear()
-    settings.MIDDLEWARE
-    assert len(settings._awx_conf_memoizedcache) == 0  # does not cache MIDDLEWARE
-    settings.registry.register('AWX_VAR', field_class=fields.CharField, category=_('System'), category_slug='system')
-    settings._wrapped.__dict__['all_supported_settings'] = ['AWX_VAR']  # because it is cached_property
-    settings._awx_conf_memoizedcache.clear()
-    assert settings.AWX_VAR == 'DEFAULT'
-    assert len(settings._awx_conf_memoizedcache) == 1  # caches registered settings
-
-
-@pytest.mark.defined_in_file(AWX_VAR='DEFAULT')
 def test_in_memory_cache_works(settings):
     settings._awx_conf_memoizedcache.clear()
     settings.registry.register('AWX_VAR', field_class=fields.CharField, category=_('System'), category_slug='system')
@@ -327,7 +297,7 @@ def test_in_memory_cache_works(settings):
 
     with mock.patch('awx.conf.settings.SettingsWrapper._get_local', return_value='DEFAULT') as mock_get:
         assert settings.AWX_VAR == 'DEFAULT'
-        mock_get.assert_called_once_with('AWX_VAR')
+        mock_get.assert_not_called()
 
     with mock.patch.object(settings, '_get_local') as mock_get:
         assert settings.AWX_VAR == 'DEFAULT'

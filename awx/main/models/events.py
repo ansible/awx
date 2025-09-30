@@ -7,7 +7,6 @@ from collections import defaultdict
 import itertools
 import time
 
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, DatabaseError, transaction
 from django.db.models.functions import Cast
@@ -16,6 +15,9 @@ from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
+
+# dynamic settings
+from awx.conf import db_settings
 
 from awx.api.versioning import reverse
 from awx.main import consumers
@@ -63,7 +65,7 @@ def create_host_status_counts(event_data):
 
 
 def emit_event_detail(event):
-    if settings.UI_LIVE_UPDATES_ENABLED is False and event.event not in MINIMAL_EVENTS:
+    if db_settings.UI_LIVE_UPDATES_ENABLED is False and event.event not in MINIMAL_EVENTS:
         return
     cls = event.__class__
     relation = {
@@ -400,7 +402,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             value = force_str(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
-        if settings.LOG_AGGREGATOR_ENABLED:
+        if db_settings.LOG_AGGREGATOR_ENABLED:
             analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
 
     @classmethod

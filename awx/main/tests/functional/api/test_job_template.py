@@ -7,6 +7,8 @@ from awx.api.versioning import reverse
 from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate, Organization, Project, Inventory
 from awx.main.migrations import _save_password_keys as save_password_keys
 
+from awx.conf.testing import override_db_settings
+
 # Django
 from django.apps import apps
 from django.test.utils import override_settings
@@ -69,23 +71,23 @@ def test_invalid_credential_kind_xfail(get, post, organization_factory, job_temp
 
 
 @pytest.mark.django_db
-def test_create_with_forks_exceeding_maximum_xfail(alice, post, project, inventory, settings):
+def test_create_with_forks_exceeding_maximum_xfail(alice, post, project, inventory):
     project.use_role.members.add(alice)
     inventory.use_role.members.add(alice)
-    settings.MAX_FORKS = 10
-    response = post(
-        url=reverse('api:job_template_list'),
-        data={
-            'name': 'Some name',
-            'project': project.id,
-            'inventory': inventory.id,
-            'playbook': 'helloworld.yml',
-            'forks': 11,
-        },
-        user=alice,
-        expect=400,
-    )
-    assert 'Maximum number of forks (10) exceeded' in str(response.data)
+    with override_db_settings(MAX_FORKS=10):
+        response = post(
+            url=reverse('api:job_template_list'),
+            data={
+                'name': 'Some name',
+                'project': project.id,
+                'inventory': inventory.id,
+                'playbook': 'helloworld.yml',
+                'forks': 11,
+            },
+            user=alice,
+            expect=400,
+        )
+        assert 'Maximum number of forks (10) exceeded' in str(response.data)
 
 
 @pytest.mark.django_db
@@ -381,7 +383,7 @@ def test_job_template_missing_inventory(project, inventory, admin_user, post):
 class TestJobTemplateCallbackProxyIntegration:
     """
     Test the interaction of provision job template callback feature and:
-        settings.PROXY_IP_ALLOWED_LIST
+        db_settings.PROXY_IP_ALLOWED_LIST
         x-trusted-proxy http header
     """
 
@@ -390,7 +392,7 @@ class TestJobTemplateCallbackProxyIntegration:
         jt = JobTemplate.objects.create(name='test-jt', inventory=inventory, project=project, playbook='helloworld.yml', host_config_key='abcd')
         return jt
 
-    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    @override_db_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
     def test_host_not_found(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811
         job_template.inventory.hosts.create(name='foobar')
 
@@ -423,7 +425,7 @@ class TestJobTemplateCallbackProxyIntegration:
             ),
         ),
     )
-    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    @override_db_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
     def test_proxy_ip_allowed_list(self, job_template, admin_user, post, headers, expected):  # noqa: F811
         job_template.inventory.hosts.create(name='my.proxy.example.org')
 
@@ -435,7 +437,7 @@ class TestJobTemplateCallbackProxyIntegration:
             **headers
         )
 
-    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=[])
+    @override_db_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=[])
     def test_no_proxy_trust_all_headers(self, job_template, admin_user, post):
         job_template.inventory.hosts.create(name='foobar')
 
@@ -446,7 +448,7 @@ class TestJobTemplateCallbackProxyIntegration:
         }
         post(url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}), data={'host_config_key': 'abcd'}, user=admin_user, expect=201, **headers)
 
-    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    @override_db_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
     def test_trusted_proxy(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811
         job_template.inventory.hosts.create(name='foobar')
 
@@ -465,7 +467,7 @@ class TestJobTemplateCallbackProxyIntegration:
                     **headers
                 )
 
-    @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
+    @override_db_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
     def test_trusted_proxy_host_not_found(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811
         job_template.inventory.hosts.create(name='foobar')
 

@@ -1,5 +1,6 @@
 # Python
 import logging
+import tempfile
 
 # Django
 from django.core.checks import Error
@@ -19,6 +20,7 @@ logger = logging.getLogger('awx.main.conf')
 register(
     'ACTIVITY_STREAM_ENABLED',
     field_class=fields.BooleanField,
+    default=True,
     label=_('Enable Activity Stream'),
     help_text=_('Enable capturing activity for the activity stream.'),
     category=_('System'),
@@ -28,6 +30,7 @@ register(
 register(
     'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC',
     field_class=fields.BooleanField,
+    default=False,
     label=_('Enable Activity Stream for Inventory Sync'),
     help_text=_('Enable capturing activity for the activity stream when running inventory sync.'),
     category=_('System'),
@@ -37,6 +40,7 @@ register(
 register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
+    default=True,
     label=_('All Users Visible to Organization Admins'),
     help_text=_('Controls whether any Organization Admin can view all users and teams, even those not associated with their Organization.'),
     category=_('System'),
@@ -46,6 +50,7 @@ register(
 register(
     'MANAGE_ORGANIZATION_AUTH',
     field_class=fields.BooleanField,
+    default=True,
     label=_('Organization Admins Can Manage Users and Teams'),
     help_text=_('Controls whether any Organization Admin has the privileges to create and manage users and teams.'),
     category=_('System'),
@@ -61,11 +66,13 @@ register(
     help_text=_('This setting is used by services like notifications to render a valid url to the service.'),
     category=_('System'),
     category_slug='system',
+    default='https://platformhost',
 )
 
 register(
     'REMOTE_HOST_HEADERS',
     field_class=fields.StringListField,
+    default=['REMOTE_ADDR', 'REMOTE_HOST'],
     label=_('Remote Host Headers'),
     help_text=_(
         'HTTP headers and meta keys to search to determine remote host '
@@ -81,6 +88,7 @@ register(
 register(
     'PROXY_IP_ALLOWED_LIST',
     field_class=fields.StringListField,
+    default=[],
     label=_('Proxy IP Allowed List'),
     help_text=_(
         "If the service is behind a reverse proxy/load balancer, use this setting "
@@ -95,7 +103,7 @@ register(
 
 register(
     'CSRF_TRUSTED_ORIGINS',
-    default=[],
+    default=['http://localhost', 'https://localhost'],
     field_class=fields.StringListField,
     label=_('CSRF Trusted Origins List'),
     help_text=_(
@@ -189,11 +197,13 @@ register(
     category=_('System'),
     category_slug='system',
     read_only=True,
+    default='00000000-0000-0000-0000-000000000000',
 )
 
 register(
     'DEFAULT_CONTROL_PLANE_QUEUE_NAME',
     field_class=fields.CharField,
+    default='controlplane',
     label=_('The instance group where control plane tasks run'),
     category=_('System'),
     category_slug='system',
@@ -203,6 +213,7 @@ register(
 register(
     'DEFAULT_EXECUTION_QUEUE_NAME',
     field_class=fields.CharField,
+    default='default',
     label=_('The instance group where user jobs run (currently only on non-VM installs)'),
     category=_('System'),
     category_slug='system',
@@ -234,6 +245,27 @@ register(
 register(
     'AD_HOC_COMMANDS',
     field_class=fields.StringListField,
+    default=[
+        'command',
+        'shell',
+        'yum',
+        'apt',
+        'apt_key',
+        'apt_repository',
+        'apt_rpm',
+        'service',
+        'group',
+        'user',
+        'mount',
+        'ping',
+        'selinux',
+        'setup',
+        'win_ping',
+        'win_service',
+        'win_updates',
+        'win_group',
+        'win_user',
+    ],
     label=_('Ansible Modules Allowed for Ad Hoc Jobs'),
     help_text=_('List of modules allowed to be used by ad-hoc jobs.'),
     category=_('Jobs'),
@@ -248,6 +280,7 @@ register(
         ('never', _('Never')),
         ('template', _('Only On Job Template Definitions')),
     ],
+    default='template',
     label=_('When can extra variables contain Jinja templates?'),
     help_text=_(
         'Ansible allows variable substitution via the Jinja2 templating '
@@ -267,6 +300,7 @@ register(
     help_text=_('The directory in which the service will create new temporary directories for job execution and isolation (such as credential files).'),
     category=_('Jobs'),
     category_slug='jobs',
+    default=tempfile.gettempdir,
 )
 
 register(
@@ -280,6 +314,7 @@ register(
     ),
     category=_('Jobs'),
     category_slug='jobs',
+    default=[],
 )
 
 register(
@@ -296,6 +331,7 @@ register(
 register(
     'AWX_RUNNER_KEEPALIVE_SECONDS',
     field_class=fields.IntegerField,
+    default=0,
     label=_('K8S Ansible Runner Keep-Alive Message Interval'),
     help_text=_('Only applies to jobs running in a Container Group. If not 0, send a message every so-many seconds to keep connection open.'),
     category=_('Jobs'),
@@ -314,6 +350,7 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
     placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
+    default={'ANSIBLE_FORCE_COLOR': 'false', 'GIT_SSH_COMMAND': "ssh -o StrictHostKeyChecking=no"},
 )
 
 register(
@@ -329,6 +366,7 @@ register(
 register(
     'PROJECT_UPDATE_VVV',
     field_class=fields.BooleanField,
+    default=False,
     label=_('Run Project Updates With Higher Verbosity'),
     help_text=_('Adds the CLI -vvv flag to ansible-playbook runs of project_update.yml used for project updates.'),
     category=_('Jobs'),
@@ -394,6 +432,7 @@ register(
 register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
+    default=1048576,
     min_value=0,
     label=_('Standard Output Maximum Display Size'),
     help_text=_('Maximum Size of Standard Output in bytes to display before requiring the output be downloaded.'),
@@ -411,6 +450,7 @@ register(
     ),
     category=_('Jobs'),
     category_slug='jobs',
+    default=1024,
 )
 
 register(
@@ -428,6 +468,7 @@ register(
     'SCHEDULE_MAX_JOBS',
     field_class=fields.IntegerField,
     min_value=1,
+    default=10,
     label=_('Maximum Scheduled Jobs'),
     help_text=_('Maximum number of the same job template that can be waiting to run when launching from a schedule before no more are created.'),
     category=_('Jobs'),
@@ -441,6 +482,7 @@ register(
     help_text=_('List of paths to search for extra callback plugins to be used when running jobs. Enter one path per line.'),
     category=_('Jobs'),
     category_slug='jobs',
+    default=[],
 )
 
 register(
@@ -769,6 +811,7 @@ register(
     category=_('System'),
     category_slug='system',
     hidden=True,
+    default=None,
 )
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
@@ -791,15 +834,6 @@ register(
     category=_('System'),
     category_slug='system',
     unit=_('seconds'),
-)
-
-register(
-    'IS_K8S',
-    field_class=fields.BooleanField,
-    read_only=True,
-    category=_('System'),
-    category_slug='system',
-    help_text=_('Indicates whether the instance is part of a kubernetes-based deployment.'),
 )
 
 register(
@@ -858,6 +892,7 @@ register(
     field_class=fields.DateTimeField,
     label=_('Last cleanup date for HostMetrics'),
     allow_null=True,
+    default=None,
     category=_('System'),
     category_slug='system',
     hidden=True,
@@ -868,6 +903,7 @@ register(
     field_class=fields.DateTimeField,
     label=_('Last computing date of HostMetricSummaryMonthly'),
     allow_null=True,
+    default=None,
     category=_('System'),
     category_slug='system',
     hidden=True,
@@ -896,8 +932,8 @@ register(
 register(
     'DEFAULT_CONTAINER_RUN_OPTIONS',
     field_class=fields.StringListField,
-    label=_('Container Run Options'),
     default=['--network', 'slirp4netns:enable_ipv6=true'],
+    label=_('Container Run Options'),
     help_text=_("List of options to pass to podman run example: ['--network', 'slirp4netns:enable_ipv6=true', '--log-level', 'debug']"),
     category=('Jobs'),
     category_slug='jobs',

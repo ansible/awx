@@ -12,8 +12,6 @@ import yaml
 
 from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT
 
-from django.conf import settings
-
 from awx.main.models import (
     AdHocCommand,
     Credential,
@@ -40,6 +38,8 @@ from awx.main.utils.safe_yaml import SafeLoader
 
 from awx.main.utils.licensing import Licenser
 from awx.main.constants import JOB_VARIABLE_PREFIXES
+
+from awx.conf.testing import override_db_settings
 
 from receptorctl.socket_interface import ReceptorControl
 
@@ -553,7 +553,7 @@ class TestGenericRun:
         task.instance = job
         task._write_extra_vars_file = mock.Mock()
 
-        with mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
+        with override_db_settings(AWX_TASK_ENV={'FOO': 'BAR'}):
             env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
@@ -901,13 +901,13 @@ class TestJobCredentials(TestJobExecution):
 
         assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
 
-    def test_awx_task_env(self, settings, private_data_dir, job, mock_me):
-        settings.AWX_TASK_ENV = {'FOO': 'BAR'}
-        task = jobs.RunJob()
-        task.instance = job
-        env = task.build_env(job, private_data_dir)
+    def test_awx_task_env(self, private_data_dir, job, mock_me):
+        with override_db_settings(AWX_TASK_ENV={'FOO': 'BAR'}):
+            task = jobs.RunJob()
+            task.instance = job
+            env = task.build_env(job, private_data_dir)
 
-        assert env['FOO'] == 'BAR'
+            assert env['FOO'] == 'BAR'
 
 
 @pytest.mark.usefixtures("patch_Organization")
@@ -929,14 +929,14 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
     }
 
     def test_galaxy_credentials_ignore_certs(self, private_data_dir, project_update, ignore, mock_me):
-        settings.GALAXY_IGNORE_CERTS = ignore
-        task = jobs.RunProjectUpdate()
-        task.instance = project_update
-        env = task.build_env(project_update, private_data_dir)
-        if ignore:
-            assert env['ANSIBLE_GALAXY_IGNORE'] == 'True'
-        else:
-            assert 'ANSIBLE_GALAXY_IGNORE' not in env
+        with override_db_settings(GALAXY_IGNORE_CERTS=ignore):
+            task = jobs.RunProjectUpdate()
+            task.instance = project_update
+            env = task.build_env(project_update, private_data_dir)
+            if ignore:
+                assert env['ANSIBLE_GALAXY_IGNORE'] == 'True'
+            else:
+                assert 'ANSIBLE_GALAXY_IGNORE' not in env
 
     def test_galaxy_credentials_empty(self, private_data_dir, project_update, mock_me):
         class RunProjectUpdate(jobs.RunProjectUpdate):
@@ -1074,16 +1074,16 @@ class TestProjectUpdateCredentials(TestJobExecution):
         expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
         assert 'bob' in expect_passwords.values()
 
-    def test_awx_task_env(self, project_update, settings, private_data_dir, scm_type, execution_environment, mock_me):
+    def test_awx_task_env(self, project_update, private_data_dir, scm_type, execution_environment, mock_me):
         project_update.execution_environment = execution_environment
-        settings.AWX_TASK_ENV = {'FOO': 'BAR'}
-        task = jobs.RunProjectUpdate()
-        task.instance = project_update
-        project_update.scm_type = scm_type
+        with override_db_settings(AWX_TASK_ENV={'FOO': 'BAR'}):
+            task = jobs.RunProjectUpdate()
+            task.instance = project_update
+            project_update.scm_type = scm_type
 
-        env = task.build_env(project_update, private_data_dir)
+            env = task.build_env(project_update, private_data_dir)
 
-        assert env['FOO'] == 'BAR'
+            assert env['FOO'] == 'BAR'
 
 
 class TestInventoryUpdateCredentials(TestJobExecution):
@@ -1421,12 +1421,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         inventory_update.get_cloud_credential = get_cred
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
-        settings.AWX_TASK_ENV = {'FOO': 'BAR'}
+        with override_db_settings(AWX_TASK_ENV={'FOO': 'BAR'}):
+            private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+            env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
-        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
-        env = task.build_env(inventory_update, private_data_dir, private_data_files)
-
-        assert env['FOO'] == 'BAR'
+            assert env['FOO'] == 'BAR'
 
 
 def test_os_open_oserror():

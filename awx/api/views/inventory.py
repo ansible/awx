@@ -5,7 +5,6 @@
 import logging
 
 # Django
-from django.conf import settings
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
@@ -15,6 +14,9 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import serializers
+
+# dynamic settings
+from awx.conf import db_settings
 
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
@@ -62,7 +64,7 @@ class InventoryUpdateEventsList(SubListAPIView):
         return iu.get_event_queryset()
 
     def finalize_response(self, request, response, *args, **kwargs):
-        response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
+        response['X-UI-Max-Events'] = db_settings.MAX_UI_JOB_EVENTS
         return super(InventoryUpdateEventsList, self).finalize_response(request, response, *args, **kwargs)
 
 

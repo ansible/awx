@@ -33,8 +33,9 @@ class SettingsRegistry(object):
         self._validate_registry = {}
         self._dependent_settings = {}
         self.settings = settings
+        self.apps_ready_called = False
 
-    def register(self, setting, **kwargs):
+    def register(self, setting: str, **kwargs):
         if setting in self._registry:
             raise ImproperlyConfigured('Setting "{}" is already registered.'.format(setting))
         category = kwargs.setdefault('category', None)
@@ -54,6 +55,25 @@ class SettingsRegistry(object):
         for depends_on_setting in depends_on:
             dependent_settings = self._dependent_settings.setdefault(depends_on_setting, set())
             dependent_settings.add(setting)
+
+        # If this is a dynamic post-import registration, then check if it is defined in settings
+        if self.apps_ready_called:
+            self.mark_ready_only(setting)
+
+    def mark_ready_only(self, setting_key):
+        # If the field is defined in settings, then we make the field read-only
+        try:
+            getattr(self.settings, setting_key)
+            self._registry[setting_key]['read_only'] = True
+            self._registry[setting_key]['defined_in_file'] = True
+        except AttributeError:
+            pass
+
+    def apps_ready(self):
+        """Call when apps are ready, marks read-only for those defined in Django settings"""
+        for setting_key in self._registry.keys():
+            self.mark_ready_only(setting_key)
+        self.apps_ready_called = True
 
     def unregister(self, setting):
         self._registry.pop(setting, None)
@@ -118,7 +138,7 @@ class SettingsRegistry(object):
         field_kwargs = {}
         field_kwargs.update(self._registry[setting])
         field_kwargs.update(kwargs)
-        field_class = original_field_class = field_kwargs.pop('field_class')
+        field_class = field_kwargs.pop('field_class')
         if mixin_class:
             field_class = type(field_class.__name__, (mixin_class, field_class), {})
         category_slug = field_kwargs.pop('category_slug', None)
@@ -145,21 +165,6 @@ class SettingsRegistry(object):
             field_instance.help_text = str(_('This value has been set manually in a settings file.')) + '\n\n' + str(field_instance.help_text)
         field_instance.encrypted = encrypted
         field_instance.warning_text = warning_text
-        original_field_instance = field_instance
-        if field_class != original_field_class:
-            original_field_instance = original_field_class(**field_kwargs)
-        if category_slug == 'user' and for_user:
-            try:
-                field_instance.default = original_field_instance.to_representation(getattr(self.settings, setting))
-            except Exception:
-                logger.warning('Unable to retrieve default value for user setting "%s".', setting, exc_info=True)
-        elif not field_instance.read_only or field_instance.default is empty or field_instance.defined_in_file:
-            try:
-                field_instance.default = original_field_instance.to_representation(self.settings._awx_conf_settings._get_default(setting))
-            except AttributeError:
-                pass
-            except Exception:
-                logger.warning('Unable to retrieve default value for setting "%s".', setting, exc_info=True)
 
         # `PENDO_TRACKING_STATE` is disabled for the open source awx license
         if setting == 'PENDO_TRACKING_STATE' and get_license().get('license_type') == 'open':

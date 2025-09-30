@@ -7,10 +7,10 @@ import time
 
 from kubernetes.config import kube_config
 
-from django.conf import settings
 from django_guid import set_guid
 
 from awx.main.tasks.system import dispatch_startup, inform_cluster_of_shutdown
+from awx.conf import db_settings
 
 from .base import BaseWorker
 
@@ -97,7 +97,7 @@ class TaskWorker(BaseWorker):
             'task': u'awx.main.tasks.jobs.RunProjectUpdate'
         }
         """
-        settings.__clean_on_fork__()
+        db_settings.__clean_on_fork__()
         result = None
         try:
             result = self.run_callable(body)

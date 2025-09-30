@@ -35,11 +35,6 @@ SESSION_COOKIE_SECURE = False
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = False
 
-# Disable Pendo on the UI for development/test.
-# Note: This setting may be overridden by database settings.
-PENDO_TRACKING_STATE = "off"
-INSIGHTS_TRACKING_STATE = False
-
 # debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
 INSTALLED_APPS = "@merge drf_yasg,debug_toolbar"
 MIDDLEWARE = "@insert 0 debug_toolbar.middleware.DebugToolbarMiddleware"
@@ -48,7 +43,6 @@ DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
 
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
-INSTALL_UUID = '00000000-0000-0000-0000-000000000000'
 
 # Ansible base virtualenv paths and enablement
 # only used for deprecated fields and management commands for them

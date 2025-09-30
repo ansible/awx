@@ -6,7 +6,6 @@ from pprint import pformat
 
 from typing import Optional, Union
 
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from opa_client import OpaClient
 from opa_client.base import BaseClient
@@ -16,6 +15,8 @@ from rest_framework import fields
 
 from awx.main import models
 from awx.main.exceptions import PolicyEvaluationError
+
+from awx.conf import db_settings
 
 
 # Monkey patching opa_client.base.BaseClient to fix retries and timeout settings
@@ -290,20 +291,20 @@ def opa_cert_file():
 
     try:
         # Case 1: Full mTLS with client cert and optional CA cert
-        if settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.CERTIFICATE:
+        if db_settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.CERTIFICATE:
             # Create client certificate file (required for mTLS)
             client_cert_temp = tempfile.NamedTemporaryFile(delete=True, mode='w', suffix=".pem")
-            client_cert_temp.write(settings.OPA_AUTH_CLIENT_CERT)
+            client_cert_temp.write(db_settings.OPA_AUTH_CLIENT_CERT)
             client_cert_temp.write("\n")
-            client_cert_temp.write(settings.OPA_AUTH_CLIENT_KEY)
+            client_cert_temp.write(db_settings.OPA_AUTH_CLIENT_KEY)
             client_cert_temp.write("\n")
             client_cert_temp.flush()
 
             # If CA cert is provided, use it for server verification
             # Otherwise, use system CA store (True)
-            if settings.OPA_AUTH_CA_CERT:
+            if db_settings.OPA_AUTH_CA_CERT:
                 ca_temp = tempfile.NamedTemporaryFile(delete=True, mode='w', suffix=".pem")
-                ca_temp.write(settings.OPA_AUTH_CA_CERT)
+                ca_temp.write(db_settings.OPA_AUTH_CA_CERT)
                 ca_temp.write("\n")
                 ca_temp.flush()
                 verify_path = ca_temp.name
@@ -313,12 +314,12 @@ def opa_cert_file():
             yield (client_cert_temp.name, verify_path)
 
         # Case 2: TLS with only server verification (no client cert)
-        elif settings.OPA_SSL:
+        elif db_settings.OPA_SSL:
             # If CA cert is provided, use it for server verification
             # Otherwise, use system CA store (True)
-            if settings.OPA_AUTH_CA_CERT:
+            if db_settings.OPA_AUTH_CA_CERT:
                 ca_temp = tempfile.NamedTemporaryFile(delete=True, mode='w', suffix=".pem")
-                ca_temp.write(settings.OPA_AUTH_CA_CERT)
+                ca_temp.write(db_settings.OPA_AUTH_CA_CERT)
                 ca_temp.write("\n")
                 ca_temp.flush()
                 verify_path = ca_temp.name
@@ -345,13 +346,13 @@ def opa_client(headers=None):
         cert, verify = cert_files
 
         with OpaClient(
-            host=settings.OPA_HOST,
-            port=settings.OPA_PORT,
+            host=db_settings.OPA_HOST,
+            port=db_settings.OPA_PORT,
             headers=headers,
-            ssl=settings.OPA_SSL,
+            ssl=db_settings.OPA_SSL,
             cert=cert,
-            timeout=settings.OPA_REQUEST_TIMEOUT,
-            retries=settings.OPA_REQUEST_RETRIES,
+            timeout=db_settings.OPA_REQUEST_TIMEOUT,
+            retries=db_settings.OPA_REQUEST_RETRIES,
         ) as client:
             # Workaround for https://github.com/Turall/OPA-python-client/issues/32
             # by directly setting cert and verify on requests.session
@@ -363,7 +364,7 @@ def opa_client(headers=None):
 
 def evaluate_policy(instance):
     # Policy evaluation for Policy as Code feature
-    if not settings.OPA_HOST:
+    if not db_settings.OPA_HOST:
         return
 
     if not isinstance(instance, models.Job):
@@ -373,21 +374,21 @@ def evaluate_policy(instance):
 
     input_data = JobSerializer(instance=instance).data
 
-    headers = settings.OPA_AUTH_CUSTOM_HEADERS
-    if settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.TOKEN:
-        headers.update({'Authorization': 'Bearer {}'.format(settings.OPA_AUTH_TOKEN)})
+    headers = db_settings.OPA_AUTH_CUSTOM_HEADERS
+    if db_settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.TOKEN:
+        headers.update({'Authorization': 'Bearer {}'.format(db_settings.OPA_AUTH_TOKEN)})
 
-    if settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.CERTIFICATE and not settings.OPA_SSL:
+    if db_settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.CERTIFICATE and not db_settings.OPA_SSL:
         raise PolicyEvaluationError(_('OPA_AUTH_TYPE=Certificate requires OPA_SSL to be enabled.'))
 
     cert_settings_missing = []
 
-    if settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.CERTIFICATE:
-        if not settings.OPA_AUTH_CLIENT_CERT:
+    if db_settings.OPA_AUTH_TYPE == OPA_AUTH_TYPES.CERTIFICATE:
+        if not db_settings.OPA_AUTH_CLIENT_CERT:
             cert_settings_missing += ['OPA_AUTH_CLIENT_CERT']
-        if not settings.OPA_AUTH_CLIENT_KEY:
+        if not db_settings.OPA_AUTH_CLIENT_KEY:
             cert_settings_missing += ['OPA_AUTH_CLIENT_KEY']
-        if not settings.OPA_AUTH_CA_CERT:
+        if not db_settings.OPA_AUTH_CA_CERT:
             cert_settings_missing += ['OPA_AUTH_CA_CERT']
 
         if cert_settings_missing:

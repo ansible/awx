@@ -39,6 +39,8 @@ from receptorctl.socket_interface import ReceptorControl
 
 from filelock import FileLock
 
+from awx.conf import db_settings
+
 logger = logging.getLogger('awx.main.tasks.receptor')
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
 __RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
@@ -284,7 +286,7 @@ def run_until_complete(node, timing_data=None, worktype='ansible-runner', ttl='2
         else:
             raise
     finally:
-        if settings.RECEPTOR_RELEASE_WORK:
+        if db_settings.RECEPTOR_RELEASE_WORK:
             try:
                 res = receptor_ctl.simple_command(f"work release {unit_id}")
 
@@ -428,11 +430,11 @@ class AWXReceptorJob:
             logger.debug("No work unit ID to release.")
             return
 
-        if settings.RECEPTOR_RELEASE_WORK is False:
+        if db_settings.RECEPTOR_RELEASE_WORK is False:
             logger.debug(f"RECEPTOR_RELEASE_WORK is False, not releasing work unit {self.unit_id}.")
             return
 
-        if settings.RECEPTOR_KEEP_WORK_ON_ERROR and status == 'error':
+        if db_settings.RECEPTOR_KEEP_WORK_ON_ERROR and status == 'error':
             logger.debug(f"RECEPTOR_KEEP_WORK_ON_ERROR is True and status is 'error', not releasing work unit {self.unit_id}.")
             return
 
@@ -601,7 +603,7 @@ class AWXReceptorJob:
                 receptor_params["secret_kube_config"] = kubeconfig_yaml
         else:
             private_data_dir = self.runner_params['private_data_dir']
-            if self.work_type == 'ansible-runner' and settings.AWX_CLEANUP_PATHS:
+            if self.work_type == 'ansible-runner' and db_settings.AWX_CLEANUP_PATHS:
                 # on execution nodes, we rely on the private data dir being deleted
                 cli_params = f"--private-data-dir={private_data_dir} --delete"
             else:
@@ -645,9 +647,11 @@ class AWXReceptorJob:
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
 
-        if settings.AWX_RUNNER_KEEPALIVE_SECONDS:
+        if db_settings.AWX_RUNNER_KEEPALIVE_SECONDS:
             pod_spec['spec']['containers'][0].setdefault('env', [])
-            pod_spec['spec']['containers'][0]['env'].append({'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': str(settings.AWX_RUNNER_KEEPALIVE_SECONDS)})
+            pod_spec['spec']['containers'][0]['env'].append(
+                {'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': str(db_settings.AWX_RUNNER_KEEPALIVE_SECONDS)}
+            )
 
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
@@ -660,11 +664,11 @@ class AWXReceptorJob:
         # This assumes the node and SA supports hostPath volumes
         # type is not passed due to backward compatibility,
         # which means that no checks will be performed before mounting the hostPath volume.
-        if settings.AWX_MOUNT_ISOLATED_PATHS_ON_K8S and settings.AWX_ISOLATION_SHOW_PATHS:
+        if db_settings.AWX_MOUNT_ISOLATED_PATHS_ON_K8S and db_settings.AWX_ISOLATION_SHOW_PATHS:
             spec_volume_mounts = []
             spec_volumes = []
 
-            for idx, this_path in enumerate(settings.AWX_ISOLATION_SHOW_PATHS):
+            for idx, this_path in enumerate(db_settings.AWX_ISOLATION_SHOW_PATHS):
                 mount_option = None
                 if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
                     src, dest, mount_option = this_path.split(':')
@@ -712,7 +716,7 @@ class AWXReceptorJob:
         if self.task:
             pod_spec['metadata'] = deepmerge(
                 pod_spec.get('metadata', {}),
-                dict(name=self.pod_name, labels={'ansible-awx': settings.INSTALL_UUID, 'ansible-awx-job-id': str(self.task.instance.id)}),
+                dict(name=self.pod_name, labels={'ansible-awx': db_settings.INSTALL_UUID, 'ansible-awx-job-id': str(self.task.instance.id)}),
             )
 
         return pod_spec
