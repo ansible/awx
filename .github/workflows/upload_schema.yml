@@ -38,7 +38,7 @@ jobs:
             --workdir=/awx_devel `make print-DEVEL_IMAGE_NAME` /start_tests.sh genschema
 
       - name: Upload API Schema
-        uses: keithweaver/aws-s3-github-action@v1.0.0
+        uses: keithweaver/aws-s3-github-action@4dd5a7b81d54abaa23bbac92b27e85d7f405ae53
         with:
           command: cp
           source: ${{ github.workspace }}/schema.json
