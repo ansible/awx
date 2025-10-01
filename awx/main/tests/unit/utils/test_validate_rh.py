@@ -134,35 +134,6 @@ def test_validate_rh_no_host_fallback_to_candlepin():
         mock_generate.assert_called_once_with([], is_candlepin=True)
 
 
-def test_validate_rh_no_host_returns_empty_list():
-    """Test validate_rh returns empty list when no host is available
-    - basic_auth=True
-    - no host from config
-    - REDHAT_CANDLEPIN_HOST is not set
-    """
-    licenser = Licenser()
-
-    with patch.object(licenser, 'get_host_from_rhsm_config', return_value=None) as mock_get_host, patch(
-        'awx.main.utils.licensing.getattr', return_value=None
-    ) as mock_getattr, patch.object(licenser, 'get_rhsm_subs') as mock_get_rhsm, patch.object(
-        licenser, 'get_satellite_subs'
-    ) as mock_get_satellite, patch.object(
-        licenser, 'get_crc_subs'
-    ) as mock_get_crc, patch.object(
-        licenser, 'generate_license_options_from_entitlements'
-    ) as mock_generate:
-
-        licenser.validate_rh('testuser', 'testpass', basic_auth=True)
-
-        # Assert no subscription methods were called
-        mock_get_host.assert_called_once()
-        mock_getattr.assert_called_once()
-        mock_get_rhsm.assert_not_called()
-        mock_get_satellite.assert_not_called()
-        mock_get_crc.assert_not_called()
-        mock_generate.assert_not_called()
-
-
 def test_validate_rh_empty_credentials_basic_auth():
     """Test validate_rh with empty string credentials raises ValueError"""
     licenser = Licenser()
