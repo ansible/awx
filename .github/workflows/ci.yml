@@ -172,9 +172,10 @@ jobs:
           repository: ansible/awx-operator
           path: awx-operator
 
-      - uses: ./awx/.github/actions/setup-python
+      - name: Setup python, referencing action at awx relative path
+        uses: ./awx/.github/actions/setup-python
         with:
-          working-directory: awx
+          python-version: '3.x'
 
       - name: Install playbook dependencies
         run: |

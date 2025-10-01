@@ -249,7 +249,7 @@ class Licenser(object):
                 'GET',
                 host,
                 verify=True,
-                timeout=(5, 20),
+                timeout=(31, 31),
             )
         except requests.RequestException:
             logger.warning("Failed to connect to console.redhat.com using Service Account credentials. Falling back to basic auth.")
@@ -258,7 +258,7 @@ class Licenser(object):
                 host,
                 auth=(client_id, client_secret),
                 verify=True,
-                timeout=(5, 20),
+                timeout=(31, 31),
             )
         subs.raise_for_status()
         subs_formatted = []

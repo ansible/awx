@@ -1,5 +1,7 @@
 from ansible_base.resource_registry.registry import ParentResource, ResourceConfig, ServiceAPIConfig, SharedResource
 from ansible_base.resource_registry.shared_types import OrganizationType, TeamType, UserType
+from ansible_base.rbac.models import RoleDefinition
+from ansible_base.resource_registry.shared_types import RoleDefinitionType
 
 from awx.main import models
 
@@ -18,5 +20,9 @@ RESOURCE_LIST = (
         models.Team,
         shared_resource=SharedResource(serializer=TeamType, is_provider=False),
         parent_resources=[ParentResource(model=models.Organization, field_name="organization")],
+    ),
+    ResourceConfig(
+        RoleDefinition,
+        shared_resource=SharedResource(serializer=RoleDefinitionType, is_provider=False),
     ),
 )

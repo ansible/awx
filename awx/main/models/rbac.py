@@ -27,7 +27,9 @@ from django.conf import settings
 
 # Ansible_base app
 from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
+from ansible_base.rbac.sync import maybe_reverse_sync_assignment, maybe_reverse_sync_unassignment, maybe_reverse_sync_role_definition
 from ansible_base.rbac import permission_registry
+from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 from ansible_base.lib.utils.models import get_type_for_model
 
 # AWX
@@ -560,34 +562,27 @@ def get_role_definition(role):
     f = obj._meta.get_field(role.role_field)
     action_name = f.name.rsplit("_", 1)[0]
     model_print = type(obj).__name__
+    rd_name = f'{model_print} {action_name.title()} Compat'
     perm_list = get_role_codenames(role)
     defaults = {
         'content_type': permission_registry.content_type_model.objects.get_by_natural_key(role.content_type.app_label, role.content_type.model),
         'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',
     }
-    # use Controller-specific role definitions for Team/Organization and member/admin
-    # instead of platform role definitions
-    # these should exist in the system already, so just do a lookup by role definition name
-    if model_print in ['Team', 'Organization'] and action_name in ['member', 'admin']:
-        rd_name = f'Controller {model_print} {action_name.title()}'
-        rd = RoleDefinition.objects.filter(name=rd_name).first()
-        if rd:
-            return rd
-        else:
-            return RoleDefinition.objects.create_from_permissions(permissions=perm_list, name=rd_name, managed=True, **defaults)
-
-    else:
-        rd_name = f'{model_print} {action_name.title()} Compat'
 
     with impersonate(None):
         try:
-            rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+            with no_reverse_sync():
+                rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
         except ValidationError:
             # This is a tricky case - practically speaking, users should not be allowed to create team roles
             # or roles that include the team member permission.
             # If we need to create this for compatibility purposes then we will create it as a managed non-editable role
             defaults['managed'] = True
-            rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+            with no_reverse_sync():
+                rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+
+        if created and rbac_sync_enabled.enabled:
+            maybe_reverse_sync_role_definition(rd, action='create')
     return rd
 
 
@@ -601,12 +596,6 @@ def get_role_from_object_role(object_role):
         model_name, role_name, _ = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
-    elif rd.name.startswith('Controller') and rd.name.endswith(' Admin'):
-        # Controller Organization Admin and Controller Team Admin
-        role_name = 'admin_role'
-    elif rd.name.startswith('Controller') and rd.name.endswith(' Member'):
-        # Controller Organization Member and Controller Team Member
-        role_name = 'member_role'
     elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
         # cases like "Organization Project Admin"
         model_name, target_model_name, role_name = rd.name.split()
@@ -633,12 +622,14 @@ def get_role_from_object_role(object_role):
     return getattr(object_role.content_object, role_name)
 
 
-def give_or_remove_permission(role, actor, giving=True):
+def give_or_remove_permission(role, actor, giving=True, rd=None):
     obj = role.content_object
     if obj is None:
         return
-    rd = get_role_definition(role)
-    rd.give_or_remove_permission(actor, obj, giving=giving)
+    if not rd:
+        rd = get_role_definition(role)
+    assignment = rd.give_or_remove_permission(actor, obj, giving=giving)
+    return assignment
 
 
 class SyncEnabled(threading.local):
@@ -690,7 +681,15 @@ def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
             role = Role.objects.get(pk=user_or_role_id)
         else:
             user = get_user_model().objects.get(pk=user_or_role_id)
-        give_or_remove_permission(role, user, giving=is_giving)
+        rd = get_role_definition(role)
+        assignment = give_or_remove_permission(role, user, giving=is_giving, rd=rd)
+
+        # sync to resource server
+        if rbac_sync_enabled.enabled:
+            if is_giving:
+                maybe_reverse_sync_assignment(assignment)
+            else:
+                maybe_reverse_sync_unassignment(rd, user, role.content_object)
 
 
 def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
@@ -733,12 +732,19 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
             from awx.main.models.organization import Team
 
             team = Team.objects.get(pk=parent_role.object_id)
-            give_or_remove_permission(child_role, team, giving=is_giving)
+            rd = get_role_definition(child_role)
+            assignment = give_or_remove_permission(child_role, team, giving=is_giving, rd=rd)
+
+            # sync to resource server
+            if rbac_sync_enabled.enabled:
+                if is_giving:
+                    maybe_reverse_sync_assignment(assignment)
+                else:
+                    maybe_reverse_sync_unassignment(rd, team, child_role.content_object)
 
 
 ROLE_DEFINITION_TO_ROLE_FIELD = {
     'Organization Member': 'member_role',
-    'Controller Organization Member': 'member_role',
     'WorkflowJobTemplate Admin': 'admin_role',
     'Organization WorkflowJobTemplate Admin': 'workflow_admin_role',
     'WorkflowJobTemplate Execute': 'execute_role',
@@ -763,11 +769,8 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
     'Organization Credential Admin': 'credential_admin_role',
     'Credential Use': 'use_role',
     'Team Admin': 'admin_role',
-    'Controller Team Admin': 'admin_role',
     'Team Member': 'member_role',
-    'Controller Team Member': 'member_role',
     'Organization Admin': 'admin_role',
-    'Controller Organization Admin': 'admin_role',
     'Organization Audit': 'auditor_role',
     'Organization Execute': 'execute_role',
     'Organization Approval': 'approval_role',

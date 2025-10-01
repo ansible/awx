@@ -2839,7 +2839,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     {
                         "role": {
                             "id": None,
-                            "name": _("Controller System Auditor"),
+                            "name": _("Platform Auditor"),
                             "description": _("Can view all aspects of the system"),
                             "user_capabilities": {"unattach": False},
                         },
@@ -5998,7 +5998,7 @@ class InstanceGroupSerializer(BaseSerializer):
         if self.instance and not self.instance.is_container_group:
             raise serializers.ValidationError(_('pod_spec_override is only valid for container groups'))
 
-        pod_spec_override_json = None
+        pod_spec_override_json = {}
         # defect if the value is yaml or json if yaml convert to json
         try:
             # convert yaml to json

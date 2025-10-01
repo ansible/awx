@@ -35,21 +35,21 @@ class TestNewToOld:
 
     def test_new_to_old_rbac_team_member_addition(self, admin, post, team, bob, setup_managed_roles):
         '''
-        Assign user to Controller Team Member role definition, should be added to team.member_role.members
+        Assign user to Team Member role definition, should be added to team.member_role.members
         '''
-        rd = RoleDefinition.objects.get(name='Controller Team Member')
+        rd = RoleDefinition.objects.get(name='Team Member')
 
         url = get_relative_url('roleuserassignment-list')
         post(url, user=admin, data={'role_definition': rd.id, 'user': bob.id, 'object_id': team.id}, expect=201)
         assert bob in team.member_role.members.all()
 
-    def test_new_to_old_rbac_team_member_removal(self, admin, delete, team, bob):
+    def test_new_to_old_rbac_team_member_removal(self, admin, delete, team, bob, setup_managed_roles):
         '''
-        Remove user from Controller Team Member role definition, should be deleted from team.member_role.members
+        Remove user from Team Member role definition, should be deleted from team.member_role.members
         '''
         team.member_role.members.add(bob)
 
-        rd = RoleDefinition.objects.get(name='Controller Team Member')
+        rd = RoleDefinition.objects.get(name='Team Member')
         user_assignment = RoleUserAssignment.objects.get(user=bob, role_definition=rd, object_id=team.id)
 
         url = get_relative_url('roleuserassignment-detail', kwargs={'pk': user_assignment.id})

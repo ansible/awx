@@ -117,7 +117,7 @@ cryptography==41.0.7
     #   pyjwt
     #   pyopenssl
     #   service-identity
-cython==3.0.11
+cython==3.1.3
     # via -r /awx_devel/requirements/requirements.in
 daphne==4.1.2
     # via -r /awx_devel/requirements/requirements.in
@@ -210,6 +210,7 @@ hyperlink==21.0.0
     #   twisted
 idna==3.10
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   hyperlink
     #   requests
     #   twisted
@@ -494,7 +495,6 @@ smmap==5.0.2
     # via gitdb
 sqlparse==0.5.3
     # via
-    #   -r /awx_devel/requirements/requirements.in
     #   django
     #   django-ansible-base
 tempora==5.8.0
@@ -523,6 +523,7 @@ typing-extensions==4.12.2
     #   twisted
 urllib3==2.3.0
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   botocore
     #   django-ansible-base
     #   kubernetes
@@ -534,7 +535,7 @@ uwsgitop==0.12
     # via -r /awx_devel/requirements/requirements.in
 websocket-client==1.8.0
     # via kubernetes
-wheel==0.45.1
+wheel==0.42.0
     # via -r /awx_devel/requirements/requirements.in
 wrapt==1.17.0
     # via
@@ -550,7 +551,7 @@ zope-interface==7.2
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
     # via -r /awx_devel/requirements/requirements.in
-setuptools==70.3.0
+setuptools==80.9.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   asciichartpy

@@ -21,6 +21,8 @@ from django.db import transaction
 
 # Shared code for the AWX platform
 from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
+from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import PermissionDenied
 
 # Runner
 import ansible_runner
@@ -87,8 +89,6 @@ from awx.main.utils.common import (
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.utils.update_model import update_model
-from rest_framework.exceptions import PermissionDenied
-from django.utils.translation import gettext_lazy as _
 
 # Django flags
 from flags.state import flag_enabled
