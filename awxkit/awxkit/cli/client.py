@@ -82,6 +82,18 @@ class CLI(object):
         return '--help' in self.argv or '-h' in self.argv
 
     def authenticate(self):
+        """Configure the current session for authentication"""
+        # Check if Basic auth is forced via environment variable
+        if config.get('force_basic_auth', False):
+            config.use_sessions = False
+            # Apply Basic auth credentials to the session
+            username = self.get_config('username')
+            password = self.get_config('password')
+            if username and password:
+                self.root.connection.login(username, password)
+            self.root.get()
+            return
+        
         """Configure the current session for basic auth"""
         config.use_sessions = True
         self.root.load_session().get()
