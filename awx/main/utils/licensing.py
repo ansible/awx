@@ -231,14 +231,15 @@ class Licenser(object):
         # if basic auth is True, host is read from rhsm.conf (subscription.rhsm.redhat.com)
         # if basic auth is False, host is settings.SUBSCRIPTIONS_RHSM_URL (console.redhat.com)
         # if rhsm.conf is not found, host is settings.REDHAT_CANDLEPIN_HOST (satellite server)
-        is_candlepin = True
         if basic_auth:
             host = self.get_host_from_rhsm_config()
+            if not host:
+                host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
         else:
             host = settings.SUBSCRIPTIONS_RHSM_URL
 
         if not host:
-            host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
+            raise ValueError('Could not get host url for subscriptions')
 
         if not user:
             raise ValueError('subscriptions_client_id or subscriptions_username is required')
@@ -253,9 +254,8 @@ class Licenser(object):
                 else:
                     json = self.get_satellite_subs(host, user, pw)
             else:
-                is_candlepin = False
                 json = self.get_crc_subs(host, user, pw)
-            return self.generate_license_options_from_entitlements(json, is_candlepin=is_candlepin)
+            return self.generate_license_options_from_entitlements(json, is_candlepin=basic_auth)
         return []
 
     def get_rhsm_subs(self, host, user, pw):
