@@ -182,6 +182,8 @@ class ApiV2SubscriptionView(APIView):
         data = request.data.copy()
 
         try:
+            user = None
+            pw = None
             basic_auth = False
             # determine if the credentials are for basic auth or not
             if data.get('subscriptions_client_id'):

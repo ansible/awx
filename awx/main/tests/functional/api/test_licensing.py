@@ -76,11 +76,12 @@ class TestApiV2SubscriptionView:
         response = post(reverse('api:api_v2_subscription_view'), data, admin)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Invalid Subscription' in response.data['error']
+        assert 'Missing subscription credentials' in response.data['error']
 
-    def test_missing_password_returns_error(self, post, admin):
+    def test_missing_password_returns_error(self, post, admin, settings):
         """Test POST with missing password returns 400 error"""
         data = {'subscriptions_username': 'test_user'}
+        settings.SUBSCRIPTIONS_PASSWORD = None
 
         response = post(reverse('api:api_v2_subscription_view'), data, admin)
 
@@ -94,11 +95,12 @@ class TestApiV2SubscriptionView:
         response = post(reverse('api:api_v2_subscription_view'), data, admin)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Invalid Subscription' in response.data['error']
+        assert 'Missing subscription credentials' in response.data['error']
 
-    def test_missing_client_secret_returns_error(self, post, admin):
+    def test_missing_client_secret_returns_error(self, post, admin, settings):
         """Test POST with missing client_secret returns 400 error"""
         data = {'subscriptions_client_id': 'test_client_id'}
+        settings.SUBSCRIPTIONS_CLIENT_SECRET = None
 
         response = post(reverse('api:api_v2_subscription_view'), data, admin)
 
@@ -112,11 +114,12 @@ class TestApiV2SubscriptionView:
         response = post(reverse('api:api_v2_subscription_view'), data, admin)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Invalid Subscription' in response.data['error']
+        assert 'Missing subscription credentials' in response.data['error']
 
-    def test_empty_password_returns_error(self, post, admin):
+    def test_empty_password_returns_error(self, post, admin, settings):
         """Test POST with empty password returns 400 error"""
         data = {'subscriptions_username': 'test_user', 'subscriptions_password': ''}
+        settings.SUBSCRIPTIONS_PASSWORD = None
 
         response = post(reverse('api:api_v2_subscription_view'), data, admin)
 
