@@ -38,11 +38,12 @@ jobs:
             --workdir=/awx_devel `make print-DEVEL_IMAGE_NAME` /start_tests.sh genschema
 
       - name: Upload API Schema
-        env:
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-          AWS_REGION: 'us-east-1'
-        run: |
-          ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
-          ansible localhost -c local -m aws_s3 \
-            -a "src=${{ github.workspace }}/schema.json bucket=awx-public-ci-files object=${GITHUB_REF##*/}/schema.json mode=put permission=public-read"
+        uses: keithweaver/aws-s3-github-action@4dd5a7b81d54abaa23bbac92b27e85d7f405ae53
+        with:
+          command: cp
+          source: ${{ github.workspace }}/schema.json
+          destination: s3://awx-public-ci-files/${{ github.ref_name }}/schema.json
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
+          aws_region: us-east-1
+          flags: --acl public-read --only-show-errors

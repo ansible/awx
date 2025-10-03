@@ -4247,34 +4247,6 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class RoleParentsList(SubListAPIView):
-    deprecated = True
-    model = models.Role
-    serializer_class = serializers.RoleSerializer
-    parent_model = models.Role
-    relationship = 'parents'
-    permission_classes = (IsAuthenticated,)
-    search_fields = ('role_field', 'content_type__model')
-
-    def get_queryset(self):
-        role = models.Role.objects.get(pk=self.kwargs['pk'])
-        return models.Role.filter_visible_roles(self.request.user, role.parents.all())
-
-
-class RoleChildrenList(SubListAPIView):
-    deprecated = True
-    model = models.Role
-    serializer_class = serializers.RoleSerializer
-    parent_model = models.Role
-    relationship = 'children'
-    permission_classes = (IsAuthenticated,)
-    search_fields = ('role_field', 'content_type__model')
-
-    def get_queryset(self):
-        role = models.Role.objects.get(pk=self.kwargs['pk'])
-        return models.Role.filter_visible_roles(self.request.user, role.children.all())
-
-
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).

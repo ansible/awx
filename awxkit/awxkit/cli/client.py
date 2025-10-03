@@ -82,7 +82,38 @@ class CLI(object):
         return '--help' in self.argv or '-h' in self.argv
 
     def authenticate(self):
-        """Configure the current session for basic auth"""
+        """Configure the current session for authentication.
+
+        Uses Basic authentication when AWXKIT_FORCE_BASIC_AUTH environment variable
+        is set to true, otherwise defaults to session-based authentication.
+
+        For AAP Gateway environments, set AWXKIT_FORCE_BASIC_AUTH=true to bypass
+        session login restrictions.
+        """
+        # Check if Basic auth is forced via environment variable
+        if config.get('force_basic_auth', False):
+            config.use_sessions = False
+
+            # Validate credentials are provided
+            username = self.get_config('username')
+            password = self.get_config('password')
+
+            if not username or not password:
+                raise ValueError(
+                    "Basic authentication requires both username and password. "
+                    "Provide --conf.username and --conf.password or set "
+                    "CONTROLLER_USERNAME and CONTROLLER_PASSWORD environment variables."
+                )
+
+            # Apply Basic auth credentials to the session
+            try:
+                self.root.connection.login(username, password)
+                self.root.get()
+            except Exception as e:
+                raise RuntimeError(f"Basic authentication failed: {str(e)}. " "Verify credentials and network connectivity.") from e
+            return
+
+        # Use session-based authentication (default)
         config.use_sessions = True
         self.root.load_session().get()
 

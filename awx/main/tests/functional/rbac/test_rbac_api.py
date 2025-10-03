@@ -388,36 +388,6 @@ def test_remove_team_from_role(post, team, admin, role):
 
 
 #
-# /roles/<id>/parents/
-#
-
-
-@pytest.mark.django_db
-def test_role_parents(get, team, admin, role):
-    role.parents.add(team.member_role)
-    url = reverse('api:role_parents_list', kwargs={'pk': role.id})
-    response = get(url, admin)
-    assert response.status_code == 200
-    assert response.data['count'] == 1
-    assert response.data['results'][0]['id'] == team.member_role.id
-
-
-#
-# /roles/<id>/children/
-#
-
-
-@pytest.mark.django_db
-def test_role_children(get, team, admin, role):
-    role.parents.add(team.member_role)
-    url = reverse('api:role_children_list', kwargs={'pk': team.member_role.id})
-    response = get(url, admin)
-    assert response.status_code == 200
-    assert response.data['count'] == 2
-    assert response.data['results'][0]['id'] == role.id or response.data['results'][1]['id'] == role.id
-
-
-#
 # Generics
 #
 

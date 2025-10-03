@@ -180,16 +180,46 @@ class ApiV2SubscriptionView(APIView):
 
     def post(self, request):
         data = request.data.copy()
-        if data.get('subscriptions_client_secret') == '$encrypted$':
-            data['subscriptions_client_secret'] = settings.SUBSCRIPTIONS_CLIENT_SECRET
+
         try:
-            user, pw = data.get('subscriptions_client_id'), data.get('subscriptions_client_secret')
+            user = None
+            pw = None
+            basic_auth = False
+            # determine if the credentials are for basic auth or not
+            if data.get('subscriptions_client_id'):
+                user, pw = data.get('subscriptions_client_id'), data.get('subscriptions_client_secret')
+                if pw == '$encrypted$':
+                    pw = settings.SUBSCRIPTIONS_CLIENT_SECRET
+            elif data.get('subscriptions_username'):
+                user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
+                if pw == '$encrypted$':
+                    pw = settings.SUBSCRIPTIONS_PASSWORD
+                basic_auth = True
+
+            if not user or not pw:
+                return Response({"error": _("Missing subscription credentials")}, status=status.HTTP_400_BAD_REQUEST)
+
             with set_environ(**settings.AWX_TASK_ENV):
-                validated = get_licenser().validate_rh(user, pw)
-            if user:
-                settings.SUBSCRIPTIONS_CLIENT_ID = data['subscriptions_client_id']
-            if pw:
-                settings.SUBSCRIPTIONS_CLIENT_SECRET = data['subscriptions_client_secret']
+                validated = get_licenser().validate_rh(user, pw, basic_auth)
+
+            # update settings if the credentials were valid
+            if basic_auth:
+                if user:
+                    settings.SUBSCRIPTIONS_USERNAME = user
+                if pw:
+                    settings.SUBSCRIPTIONS_PASSWORD = pw
+            else:
+                if user:
+                    settings.SUBSCRIPTIONS_CLIENT_ID = user
+                    if not settings.REDHAT_USERNAME:
+                        # plumb these to analytics credentials
+                        settings.REDHAT_USERNAME = user
+                if pw:
+                    settings.SUBSCRIPTIONS_CLIENT_SECRET = pw
+                    if not settings.REDHAT_PASSWORD:
+                        # plumb these to analytics credentials
+                        settings.REDHAT_PASSWORD = pw
+
         except Exception as exc:
             msg = _("Invalid Subscription")
             if isinstance(exc, TokenError) or (
@@ -225,16 +255,21 @@ class ApiV2AttachView(APIView):
         if not subscription_id:
             return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
         # Ensure we always use the latest subscription credentials
-        cache.delete_many(['SUBSCRIPTIONS_CLIENT_ID', 'SUBSCRIPTIONS_CLIENT_SECRET'])
+        cache.delete_many(['SUBSCRIPTIONS_CLIENT_ID', 'SUBSCRIPTIONS_CLIENT_SECRET', 'SUBSCRIPTIONS_USERNAME', 'SUBSCRIPTIONS_PASSWORD'])
         user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
         pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        basic_auth = False
+        if not (user and pw):
+            user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+            pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+            basic_auth = True
         if not (user and pw):
             return Response({"error": _("Missing subscription credentials")}, status=status.HTTP_400_BAD_REQUEST)
         if subscription_id and user and pw:
             data = request.data.copy()
             try:
                 with set_environ(**settings.AWX_TASK_ENV):
-                    validated = get_licenser().validate_rh(user, pw)
+                    validated = get_licenser().validate_rh(user, pw, basic_auth)
             except Exception as exc:
                 msg = _("Invalid Subscription")
                 if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
