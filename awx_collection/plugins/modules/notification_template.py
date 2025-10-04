@@ -46,6 +46,7 @@ options:
       description:
         - The organization name, ID, or named URL the notification belongs to.
       type: str
+      required: True
     notification_type:
       description:
         - The type of notification to be sent.
