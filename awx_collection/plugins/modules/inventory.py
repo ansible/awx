@@ -70,6 +70,31 @@ options:
         - List of Inventory names, IDs, or named URLs to use as input for Constructed Inventory.
       type: list
       elements: str
+    source_vars:
+      description:
+        - Source variables for constructed inventories.
+      type: str
+    limit:
+      description:
+        - Limit filter for constructed inventories.
+      type: str
+    update_cache_timeout:
+      description:
+        - The cache timeout for the related auto-created inventory source.
+        - Only Valid for constructed inventories.
+      default: 0
+      type: int
+    verbosity:
+      description:
+        - Verbosity
+      type: str
+      choices:
+        - '0'
+        - '1'
+        - '2'
+        - '3'
+        - '4'
+        - '5'
     prevent_instance_group_fallback:
       description:
         - Prevent falling back to instance groups set on the organization
@@ -80,7 +105,7 @@ options:
       default: "present"
       choices: ["present", "absent", "exists"]
       type: str
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: ansible.controller.auth
 '''
 
 
@@ -101,10 +126,7 @@ EXAMPLES = '''
     organization: Foo
     state: present
 
-# You can create and modify constructed inventories by creating an inventory
-# of kind "constructed" and then editing the automatically generated inventory
-# source for that inventory.
-- name: Add constructed inventory with two existing input inventories
+- name: Add constructed inventory
   inventory:
     name: My Constructed Inventory
     organization: Default
@@ -112,23 +134,10 @@ EXAMPLES = '''
     input_inventories:
       - "West Datacenter"
       - "East Datacenter"
-
-- name: Edit the constructed inventory source
-  inventory_source:
-    # The constructed inventory source will always be in the format:
-    # "Auto-created source for: <constructed inventory name>"
-    name: "Auto-created source for: My Constructed Inventory"
-    inventory: My Constructed Inventory
-    limit: host3,host4,host6
     source_vars:
-      plugin: constructed
-      strict: true
-      use_vars_plugins: true
-      groups:
-        shutdown: resolved_state == "shutdown"
-        shutdown_in_product_dev: resolved_state == "shutdown" and account_alias == "product_dev"
-      compose:
-        resolved_state: state | default("running")
+      plugin: 'constructed'
+    update_cache_timeout: 0
+    limit: "aaa"
 '''
 
 
@@ -151,6 +160,10 @@ def main():
         prevent_instance_group_fallback=dict(type='bool'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
         input_inventories=dict(type='list', elements='str'),
+        source_vars=dict(),
+        update_cache_timeout=dict(type='int'),
+        limit=dict(),
+        verbosity=dict(choices=['0', '1', '2', '3', '4', '5']),
     )
 
     # Create a module for ourselves
@@ -162,17 +175,28 @@ def main():
     copy_from = module.params.get('copy_from')
     description = module.params.get('description')
     organization = module.params.get('organization')
-    variables = module.params.get('variables')
     state = module.params.get('state')
     kind = module.params.get('kind')
-    host_filter = module.params.get('host_filter')
-    prevent_instance_group_fallback = module.params.get('prevent_instance_group_fallback')
+
+    if kind == 'constructed':
+        input_inventory_names = module.params.get('input_inventories')
+        source_vars = module.params.get('source_vars')
+        update_cache_timeout = module.params.get('update_cache_timeout')
+        limit = module.params.get('limit')
+        verbosity = module.params.get('verbosity')
+    else:
+        variables = module.params.get('variables')
+        host_filter = module.params.get('host_filter')
+        prevent_instance_group_fallback = module.params.get('prevent_instance_group_fallback')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up inventory based on the provided name and org ID
-    inventory = module.get_one('inventories', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
+    if kind == 'constructed':
+        inventory = module.get_one('constructed_inventories', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
+    else:
+        inventory = module.get_one('inventories', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -195,43 +219,64 @@ def main():
         'name': new_name if new_name else (module.get_item_name(inventory) if inventory else name),
         'organization': org_id,
         'kind': kind,
-        'host_filter': host_filter,
     }
-    if prevent_instance_group_fallback is not None:
-        inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
+
     if description is not None:
         inventory_fields['description'] = description
-    if variables is not None:
-        inventory_fields['variables'] = json.dumps(variables)
 
     association_fields = {}
 
-    instance_group_names = module.params.get('instance_groups')
-    if instance_group_names is not None:
-        association_fields['instance_groups'] = []
-        for item in instance_group_names:
-            association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
-
-    # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
-    if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
-        module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
-
     if kind == 'constructed':
-        input_inventory_names = module.params.get('input_inventories')
         if input_inventory_names is not None:
             association_fields['input_inventories'] = []
             for item in input_inventory_names:
                 association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item))
+        if source_vars is not None:
+            inventory_fields['source_vars'] = source_vars.replace('\\n', '\n')
+        if update_cache_timeout is not None:
+            inventory_fields['update_cache_timeout'] = update_cache_timeout
+        if limit is not None:
+            inventory_fields['limit'] = limit
+        if verbosity is not None:
+            inventory_fields['verbosity'] = verbosity
+
+    else:
+        if prevent_instance_group_fallback is not None:
+            inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
+        if variables is not None:
+            inventory_fields['variables'] = json.dumps(variables)
+        if host_filter is not None:
+            inventory_fields['host_filter'] = host_filter
+
+        instance_group_names = module.params.get('instance_groups')
+        if instance_group_names is not None:
+            association_fields['instance_groups'] = []
+            for item in instance_group_names:
+                association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+
+        # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
+        if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+            module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
-    module.create_or_update_if_needed(
-        inventory,
-        inventory_fields,
-        endpoint='inventories',
-        item_type='inventory',
-        associations=association_fields,
-    )
+    if kind == 'constructed':
+        module.create_or_update_if_needed(
+            inventory,
+            inventory_fields,
+            endpoint='constructed_inventories',
+            item_type='inventory',
+            associations=association_fields,
+        )
 
+    else:
+        module.create_or_update_if_needed(
+            inventory,
+            inventory_fields,
+            endpoint='inventories',
+            item_type='inventory',
+            associations=association_fields,
+        )
 
 if __name__ == '__main__':
     main()
+
