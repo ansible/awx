@@ -71,6 +71,11 @@ options:
         - inventory names, IDs, or named URLs to export
       type: list
       elements: str
+    constructed_inventory:
+      description:
+        - constructed inventory names, IDs, or named URLs to export
+      type: list
+      elements: str
     projects:
       description:
         - project names, IDs, or named URLs to export
