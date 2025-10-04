@@ -55,7 +55,7 @@ options:
     pull:
       description:
         - determine image pull behavior
-      choices: ["always", "missing", "never"]
+      choices: ["", "always", "missing", "never"]
       default: 'missing'
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -84,7 +84,7 @@ def main():
         credential=dict(),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
         # NOTE: Default for pull differs from API (which is blank by default)
-        pull=dict(choices=['always', 'missing', 'never'], default='missing'),
+        pull=dict(choices=['always', 'missing', 'never', ''], default='missing'),
     )
 
     # Create a module for ourselves
@@ -110,8 +110,11 @@ def main():
     if description:
         new_fields['description'] = description
 
-    if pull:
-        new_fields['pull'] = pull
+    if pull is not None:
+        if pull == '':
+          new_fields['pull'] = None
+        else:
+          new_fields['pull'] = pull
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization = module.params.get('organization')
