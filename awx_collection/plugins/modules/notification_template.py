@@ -94,6 +94,12 @@ options:
       description:
         - Optional custom messages for notification template.
       type: dict
+    update_secrets:
+      description:
+        - C(true) will always change password if user specifies password, even if API gives $encrypted$ for password.
+        - C(false) will only set the password if other values change too.
+      type: bool
+      default: true
     state:
       description:
         - Desired state of the resource.
@@ -223,6 +229,7 @@ def main():
         notification_type=dict(choices=['awssns', 'email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
         notification_configuration=dict(type='dict'),
         messages=dict(type='dict'),
+        update_secrets=dict(type='bool', default=True, no_log=False),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
