@@ -115,6 +115,7 @@ options:
         - Service that webhook requests will be accepted from
       type: str
       choices:
+        - ""
         - github
         - gitlab
     webhook_credential:
@@ -548,25 +549,25 @@ EXAMPLES = '''
           success_nodes:
             - identifier: node401
           failure_nodes:
-            - identifier: node301
+          -   identifier: node301
           always_nodes: []
           credentials:
-            - name: cyberark
-              organization:
-                name: Default
+              - name: cyberark
+                organization:
+                    name: Default
           instance_groups:
-            - name: SunCavanaugh Cloud
+              - name: SunCavanaugh Cloud
           labels:
-            - name: Custom Label
-              organization:
-                name: Default
+              - name: Custom Label
+                organization:
+                    name: Default
       - all_parents_must_converge: false
         identifier: node301
         unified_job_template:
-          description: Approval node for example
-          timeout: 900
-          type: workflow_approval
-          name: Approval Node for Demo
+            description: Approval node for example
+            timeout: 900
+            type: workflow_approval
+            name: Approval Node for Demo
         related:
           success_nodes:
             - identifier: node401
@@ -574,6 +575,7 @@ EXAMPLES = '''
         unified_job_template:
           name: Cleanup Activity Stream
           type: system_job_template
+
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -652,19 +654,25 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
             if workflow_node['identifier']:
                 search_fields = {'identifier': workflow_node['identifier']}
             if 'execution_environment' in workflow_node:
-                workflow_node_fields['execution_environment'] = module.get_one(
-                    'execution_environments', name_or_id=workflow_node['execution_environment']['name']
-                )['id']
+                if workflow_node['execution_environment'] == '':
+                    workflow_node_fields['execution_environment'] = ''
+                else:
+                    workflow_node_fields['execution_environment'] = module.get_one(
+                        'execution_environments', name_or_id=workflow_node['execution_environment']['name']
+                    )['id']
 
         # Two lookup methods are used based on a fix added in 21.11.0, and the awx export model
         if 'inventory' in workflow_node:
-            if 'name' in workflow_node['inventory']:
-                inv_lookup_data = {}
-                if 'organization' in workflow_node['inventory']:
-                    inv_lookup_data['organization'] = module.resolve_name_to_id('organizations', workflow_node['inventory']['organization']['name'])
-                workflow_node_fields['inventory'] = module.get_one('inventories', name_or_id=workflow_node['inventory']['name'], data=inv_lookup_data)['id']
+            if workflow_node['inventory'] == '':
+                workflow_node_fields['inventory'] = ''
             else:
-                workflow_node_fields['inventory'] = module.get_one('inventories', name_or_id=workflow_node['inventory'])['id']
+                if 'name' in workflow_node['inventory']:
+                    inv_lookup_data = {}
+                    if 'organization' in workflow_node['inventory']:
+                        inv_lookup_data['organization'] = module.resolve_name_to_id('organizations', workflow_node['inventory']['organization']['name'])
+                    workflow_node_fields['inventory'] = module.get_one('inventories', name_or_id=workflow_node['inventory']['name'], data=inv_lookup_data)['id']
+                else:
+                    workflow_node_fields['inventory'] = module.get_one('inventories', name_or_id=workflow_node['inventory'])['id']
 
         # Set Search fields
         search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
@@ -828,7 +836,7 @@ def main():
         ask_inventory_on_launch=dict(type='bool'),
         ask_scm_branch_on_launch=dict(type='bool'),
         ask_limit_on_launch=dict(type='bool'),
-        webhook_service=dict(choices=['github', 'gitlab']),
+        webhook_service=dict(choices=['github', 'gitlab', '']),
         webhook_credential=dict(),
         labels=dict(type="list", elements='str'),
         notification_templates_started=dict(type="list", elements='str'),
@@ -888,8 +896,18 @@ def main():
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
     webhook_credential = module.params.get('webhook_credential')
-    if webhook_credential:
-        new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
+    if webhook_credential is not None:
+        if webhook_credential == '':
+            new_fields['webhook_credential'] = ''
+        else:
+            new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
+
+    webhook_service = module.params.get('webhook_service')
+    if webhook_service is not None:
+        if webhook_service == '':
+            new_fields['webhook_service'] = ''
+        else:
+            new_fields['webhook_service'] = webhook_service
 
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
@@ -907,7 +925,6 @@ def main():
         'ask_labels_on_launch',
         'ask_tags_on_launch',
         'ask_skip_tags_on_launch',
-        'webhook_service',
         'job_tags',
         'skip_tags',
     ):
