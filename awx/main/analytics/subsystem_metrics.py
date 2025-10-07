@@ -456,7 +456,10 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
             logger.debug(f"No metric data not found in redis for metric namespace '{self._metrics._namespace}'")
             return None
 
-        host_metrics = instance_data.get(my_hostname)
+        if not (host_metrics := instance_data.get(my_hostname)):
+            logger.debug(f"Metric data for this node '{my_hostname}' not found in redis for metric namespace '{self._metrics._namespace}'")
+            return None
+
         for _, metric in self._metrics.METRICS.items():
             entry = host_metrics.get(metric.field)
             if not entry:
