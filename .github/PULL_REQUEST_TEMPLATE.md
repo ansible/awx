@@ -17,7 +17,6 @@ in as the first entry for your PR title.
 ##### COMPONENT NAME
 <!--- Name of the module/plugin/module/task -->
  - API
- - UI
  - Collection
  - CLI
  - Docs
