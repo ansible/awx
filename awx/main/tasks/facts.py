@@ -108,32 +108,33 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
             continue
 
         if os.path.exists(filepath):
-            # If the file changed since we wrote the last facts file, pre-playbook run...
-            modified = os.path.getmtime(filepath)
-            if not facts_write_time or modified >= facts_write_time:
-                try:
-                    with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                        ansible_facts = json.load(f)
-                except ValueError:
-                    continue
+            # Read the fact file to check if it has changed
+            # We cannot rely solely on mtime comparison because timezone differences
+            # between the controller and managed nodes can cause incorrect filtering.
+            # For example, if the controller is in UTC and a managed node is in PST (UTC-8),
+            # the file mtime may appear to be in the past even though the facts were just updated.
+            try:
+                with codecs.open(filepath, 'r', encoding='utf-8') as f:
+                    ansible_facts = json.load(f)
+            except ValueError:
+                continue
 
-                if ansible_facts != host.ansible_facts:
-                    host.ansible_facts = ansible_facts
-                    host.ansible_facts_modified = now()
-                    hosts_to_update.append(host)
-                    logger.info(
-                        f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
-                        extra=dict(
-                            inventory_id=host.inventory.id,
-                            host_name=host.name,
-                            ansible_facts=host.ansible_facts,
-                            ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                            job_id=job_id,
-                        ),
-                    )
-                    log_data['updated_ct'] += 1
-                else:
-                    log_data['unmodified_ct'] += 1
+            # Check if facts content has actually changed
+            if ansible_facts != host.ansible_facts:
+                host.ansible_facts = ansible_facts
+                host.ansible_facts_modified = now()
+                hosts_to_update.append(host)
+                logger.info(
+                    f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
+                    extra=dict(
+                        inventory_id=host.inventory.id,
+                        host_name=host.name,
+                        ansible_facts=host.ansible_facts,
+                        ansible_facts_modified=host.ansible_facts_modified.isoformat(),
+                        job_id=job_id,
+                    ),
+                )
+                log_data['updated_ct'] += 1
             else:
                 log_data['unmodified_ct'] += 1
         else:
