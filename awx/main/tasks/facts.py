@@ -90,7 +90,6 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
     try:
         with open(summary_path, 'r', encoding='utf-8') as f:
             summary = json.load(f)
-        facts_write_time = os.path.getmtime(summary_path)  # After successful read
     except (json.JSONDecodeError, OSError) as e:
         logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
