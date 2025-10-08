@@ -181,8 +181,7 @@ def test_fact_cache_timezone_mtime_edge_case(inventory, hosts_multi_timezone, tm
     # PST host: mtime = baseline + 10 - 28800 (8h), should NOT be updated
     # This simulates a file that appears older than the baseline
     assert 'tz_test' not in pst_host.ansible_facts, (
-        "PST host facts should NOT be updated because the artificial -8h offset "
-        "makes the file appear older than the baseline timestamp"
+        "PST host facts should NOT be updated because the artificial -8h offset " "makes the file appear older than the baseline timestamp"
     )
 
 

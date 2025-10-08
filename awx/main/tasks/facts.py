@@ -138,6 +138,9 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
                     log_data['updated_ct'] += 1
                 else:
                     log_data['unmodified_ct'] += 1
+            else:
+                # File exists but wasn't modified since playbook start - count as unmodified
+                log_data['unmodified_ct'] += 1
         else:
             # if the file goes missing, ansible removed it (likely via clear_facts)
             # if the file goes missing, but the host has not started facts, then we should not clear the facts
