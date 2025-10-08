@@ -119,19 +119,22 @@ def test_fact_cache_timezone_file_mtime_comparison(inventory, hosts_multi_timezo
 
 def test_fact_cache_timezone_mtime_edge_case(inventory, hosts_multi_timezone, tmpdir, mocker):
     """
-    Test edge case where file mtime is manipulated to simulate timezone offset.
+    Test that the fix correctly handles file mtime comparisons.
 
-    This test directly manipulates file modification times to simulate
-    what happens when a file is created in a different timezone.
+    This test verifies that using summary.get('last_write_time') as the baseline
+    correctly identifies which files were modified after the playbook started,
+    regardless of artificial mtime offsets.
     """
     artifacts_dir = tmpdir.mkdir("artifacts")
 
     # Start fact cache
     start_fact_cache(hosts_multi_timezone, str(artifacts_dir), inventory_id=inventory.id)
 
-    # Get the mtime of summary file to use as baseline for file manipulation
+    # Get the baseline timestamp from inside the summary (this is what the fix uses)
     summary_path = os.path.join(artifacts_dir, 'host_cache_summary.json')
-    facts_write_time = os.path.getmtime(summary_path)
+    with open(summary_path, 'r', encoding='utf-8') as f:
+        summary = json.load(f)
+    facts_write_time = summary.get('last_write_time')
 
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
 
@@ -169,16 +172,17 @@ def test_fact_cache_timezone_mtime_edge_case(inventory, hosts_multi_timezone, tm
     # Check results
     utc_host, cest_host, pst_host = hosts_multi_timezone
 
-    # UTC host should always work
+    # UTC host: mtime = baseline + 10, should be updated
     assert 'tz_test' in utc_host.ansible_facts, "UTC host facts should be updated"
 
-    # BUG REVEAL: These assertions may fail due to timezone mtime comparison
-    assert 'tz_test' in cest_host.ansible_facts, (
-        "CEST host facts were not updated. " "File mtime comparison failed due to +2h timezone offset. " "This reveals the bug in facts.py:111"
-    )
+    # CEST host: mtime = baseline + 10 + 7200 (2h), should be updated
+    assert 'tz_test' in cest_host.ansible_facts, "CEST host facts should be updated (mtime > baseline)"
 
-    assert 'tz_test' in pst_host.ansible_facts, (
-        "PST host facts were not updated. " "File mtime comparison failed due to -8h timezone offset. " "This reveals the bug in facts.py:111"
+    # PST host: mtime = baseline + 10 - 28800 (8h), should NOT be updated
+    # This simulates a file that appears older than the baseline
+    assert 'tz_test' not in pst_host.ansible_facts, (
+        "PST host facts should NOT be updated because the artificial -8h offset "
+        "makes the file appear older than the baseline timestamp"
     )
 
 

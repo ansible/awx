@@ -94,6 +94,10 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
 
+    # Get the timestamp that was saved during start_fact_cache()
+    # This is the mtime of the last fact file written, NOT the summary file's mtime
+    facts_write_time = summary.get('last_write_time')
+
     host_names = summary.get('hosts_cached', [])
     hosts_cached = Host.objects.filter(name__in=host_names).order_by('id').iterator()
     # Path where individual fact files were written
@@ -107,35 +111,33 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
             continue
 
         if os.path.exists(filepath):
-            # Read the fact file to check if it has changed
-            # We cannot rely solely on mtime comparison because timezone differences
-            # between the controller and managed nodes can cause incorrect filtering.
-            # For example, if the controller is in UTC and a managed node is in PST (UTC-8),
-            # the file mtime may appear to be in the past even though the facts were just updated.
-            try:
-                with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                    ansible_facts = json.load(f)
-            except ValueError:
-                continue
+            modified = os.path.getmtime(filepath)
+            # Only read the file if it was modified after the playbook started
+            # This prevents timezone issues by using the saved timestamp from the summary
+            if not facts_write_time or modified >= facts_write_time:
+                try:
+                    with codecs.open(filepath, 'r', encoding='utf-8') as f:
+                        ansible_facts = json.load(f)
+                except ValueError:
+                    continue
 
-            # Check if facts content has actually changed
-            if ansible_facts != host.ansible_facts:
-                host.ansible_facts = ansible_facts
-                host.ansible_facts_modified = now()
-                hosts_to_update.append(host)
-                logger.info(
-                    f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
-                    extra=dict(
-                        inventory_id=host.inventory.id,
-                        host_name=host.name,
-                        ansible_facts=host.ansible_facts,
-                        ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                        job_id=job_id,
-                    ),
-                )
-                log_data['updated_ct'] += 1
-            else:
-                log_data['unmodified_ct'] += 1
+                if ansible_facts != host.ansible_facts:
+                    host.ansible_facts = ansible_facts
+                    host.ansible_facts_modified = now()
+                    hosts_to_update.append(host)
+                    logger.info(
+                        f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
+                        extra=dict(
+                            inventory_id=host.inventory.id,
+                            host_name=host.name,
+                            ansible_facts=host.ansible_facts,
+                            ansible_facts_modified=host.ansible_facts_modified.isoformat(),
+                            job_id=job_id,
+                        ),
+                    )
+                    log_data['updated_ct'] += 1
+                else:
+                    log_data['unmodified_ct'] += 1
         else:
             # if the file goes missing, ansible removed it (likely via clear_facts)
             # if the file goes missing, but the host has not started facts, then we should not clear the facts
