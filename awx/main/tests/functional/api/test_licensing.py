@@ -164,45 +164,6 @@ class TestApiV2SubscriptionView:
             assert settings.SUBSCRIPTIONS_CLIENT_ID == 'new_client_id'
             assert settings.SUBSCRIPTIONS_CLIENT_SECRET == 'new_client_secret'
 
-    def test_analytics_credentials_plumbed_when_missing(self, post, admin, settings):
-        """Test that service account credentials are plumbed to analytics when REDHAT_* settings are missing"""
-        data = {'subscriptions_client_id': 'analytics_client_id', 'subscriptions_client_secret': 'analytics_client_secret'}
-
-        # Ensure REDHAT_* settings are not set
-        settings.REDHAT_USERNAME = None
-        settings.REDHAT_PASSWORD = None
-
-        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
-            mock_licenser = MagicMock()
-            mock_licenser.validate_rh.return_value = []
-            mock_get_licenser.return_value = mock_licenser
-
-            response = post(reverse('api:api_v2_subscription_view'), data, admin)
-
-            assert response.status_code == status.HTTP_200_OK
-            assert settings.REDHAT_USERNAME == 'analytics_client_id'
-            assert settings.REDHAT_PASSWORD == 'analytics_client_secret'
-
-    def test_analytics_credentials_not_overwritten_when_present(self, post, admin, settings):
-        """Test that existing REDHAT_* settings are not overwritten"""
-        data = {'subscriptions_client_id': 'new_client_id', 'subscriptions_client_secret': 'new_client_secret'}
-
-        # Set existing REDHAT_* settings
-        settings.REDHAT_USERNAME = 'existing_username'
-        settings.REDHAT_PASSWORD = 'existing_password'
-
-        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
-            mock_licenser = MagicMock()
-            mock_licenser.validate_rh.return_value = []
-            mock_get_licenser.return_value = mock_licenser
-
-            response = post(reverse('api:api_v2_subscription_view'), data, admin)
-
-            assert response.status_code == status.HTTP_200_OK
-            # REDHAT_* settings should remain unchanged
-            assert settings.REDHAT_USERNAME == 'existing_username'
-            assert settings.REDHAT_PASSWORD == 'existing_password'
-
     def test_validate_rh_exception_handling(self, post, admin):
         """Test that exceptions from validate_rh are properly handled"""
         data = {'subscriptions_username': 'test_user', 'subscriptions_password': 'test_password'}
@@ -235,3 +196,49 @@ class TestApiV2SubscriptionView:
             assert response.status_code == status.HTTP_200_OK
             # Should use service account (basic_auth=False) since client_id is present
             mock_licenser.validate_rh.assert_called_once_with('test_client_id', 'test_client_secret', False)
+
+    def test_basic_auth_clears_service_account_settings(self, post, admin, settings):
+        """Test that setting basic auth credentials clears service account settings"""
+        # Pre-populate service account settings
+        settings.SUBSCRIPTIONS_CLIENT_ID = 'existing_client_id'
+        settings.SUBSCRIPTIONS_CLIENT_SECRET = 'existing_client_secret'
+
+        data = {'subscriptions_username': 'test_user', 'subscriptions_password': 'test_password'}
+
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+
+            assert response.status_code == status.HTTP_200_OK
+            # Basic auth settings should be set
+            assert settings.SUBSCRIPTIONS_USERNAME == 'test_user'
+            assert settings.SUBSCRIPTIONS_PASSWORD == 'test_password'
+            # Service account settings should be cleared
+            assert settings.SUBSCRIPTIONS_CLIENT_ID == ""
+            assert settings.SUBSCRIPTIONS_CLIENT_SECRET == ""
+
+    def test_service_account_clears_basic_auth_settings(self, post, admin, settings):
+        """Test that setting service account credentials clears basic auth settings"""
+        # Pre-populate basic auth settings
+        settings.SUBSCRIPTIONS_USERNAME = 'existing_username'
+        settings.SUBSCRIPTIONS_PASSWORD = 'existing_password'
+
+        data = {'subscriptions_client_id': 'test_client_id', 'subscriptions_client_secret': 'test_client_secret'}
+
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+
+            assert response.status_code == status.HTTP_200_OK
+            # Service account settings should be set
+            assert settings.SUBSCRIPTIONS_CLIENT_ID == 'test_client_id'
+            assert settings.SUBSCRIPTIONS_CLIENT_SECRET == 'test_client_secret'
+            # Basic auth settings should be cleared
+            assert settings.SUBSCRIPTIONS_USERNAME == ""
+            assert settings.SUBSCRIPTIONS_PASSWORD == ""
