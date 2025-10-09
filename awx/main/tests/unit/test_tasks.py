@@ -1086,6 +1086,37 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+class TestProjectUpdateServiceAccountCredentials(TestJobExecution):
+    @pytest.fixture
+    def project_update(self):
+        project_update = ProjectUpdate(
+            pk=1,
+            project=Project(pk=1, organization=Organization(pk=1)),
+        )
+        project_update.websocket_emit_status = mock.Mock()
+        return project_update
+
+    def test_service_account_credentials(self, project_update, mock_me):
+        expected_id = '4ns1bl3'
+        expected_secret = 'w0rks-rul3s'
+
+        task = jobs.RunProjectUpdate()
+        insights = CredentialType.defaults['insights']()
+        project_update.credential = Credential(pk=1, credential_type=insights, inputs={'client_id': expected_id, 'client_secret': expected_secret})
+        project_update.credential.inputs['client_secret'] = encrypt_field(project_update.credential, 'client_secret')
+
+        passwords = task.build_passwords(project_update, {})
+        password_prompts = task.get_password_prompts(passwords)
+        expect_passwords = task.create_expect_passwords_data_struct(password_prompts, passwords)
+        cred_list = task.build_credentials_list(project_update)
+
+        assert expected_id in expect_passwords.values()
+        assert expected_secret in expect_passwords.values()
+
+        assert len(cred_list) == 1
+        assert 'client_id' in cred_list[0].inputs
+
+
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
     def inventory_update(self, execution_environment):
