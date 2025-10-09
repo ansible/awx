@@ -8,7 +8,7 @@ aiohappyeyeballs==2.4.4
     # via aiohttp
 aiohttp[speedups]==3.11.11
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   aiohttp-retry
     #   opa-python-client
     #   twilio
@@ -17,21 +17,18 @@ aiohttp-retry==2.8.3
 aiosignal==1.3.2
     # via aiohttp
 ansi2html==1.9.2
-    # via -r /awx_devel/requirements/requirements.in
-# git+https://github.com/ansible/ansible-runner.git@devel  # git requirements installed separately
-    # via -r /awx_devel/requirements/requirements_git.txt
+    # via -r requirements.in
 asciichartpy==1.5.25
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 asgiref==3.8.1
     # via
     #   channels
     #   channels-redis
     #   daphne
     #   django
-    #   django-ansible-base
     #   django-cors-headers
 asn1==2.7.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 attrs==24.3.0
     # via
     #   aiohttp
@@ -45,12 +42,6 @@ autocommand==2.2.2
     # via jaraco-text
 automat==24.8.1
     # via twisted
-# awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
-    # via -r /awx_devel/requirements/requirements_git.txt
-awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
-    # via
-    #   -r /awx_devel/requirements/requirements_git.txt
-    #   awx-plugins-core
 azure-core==1.32.0
     # via
     #   azure-identity
@@ -59,31 +50,28 @@ azure-core==1.32.0
     #   azure-keyvault-secrets
     #   msrest
 azure-identity==1.19.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 azure-keyvault==4.2.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 azure-keyvault-certificates==4.9.0
     # via azure-keyvault
 azure-keyvault-keys==4.10.0
     # via azure-keyvault
 azure-keyvault-secrets==4.9.0
     # via azure-keyvault
-backports-tarfile==1.2.0
-    # via jaraco-context
 boto3==1.35.96
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 botocore==1.35.96
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   boto3
     #   s3transfer
 brotli==1.1.0
     # via aiohttp
 cachetools==5.5.0
     # via google-auth
-# git+https://github.com/ansible/system-certifi.git@devel  # git requirements installed separately
+certifi==2025.10.5
     # via
-    #   -r /awx_devel/requirements/requirements_git.txt
     #   kubernetes
     #   msrest
     #   requests
@@ -94,10 +82,10 @@ cffi==1.17.1
     #   pynacl
 channels==4.2.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels-redis
 channels-redis==4.2.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 charset-normalizer==3.4.1
     # via requests
 click==8.1.8
@@ -106,21 +94,20 @@ constantly==23.10.4
     # via twisted
 cryptography==41.0.7
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   adal
     #   autobahn
     #   azure-identity
     #   azure-keyvault-keys
-    #   django-ansible-base
     #   jwcrypto
     #   msal
     #   pyjwt
     #   pyopenssl
     #   service-identity
 cython==3.1.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 daphne==4.1.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 deprecated==1.2.15
     # via
     #   opentelemetry-api
@@ -129,14 +116,13 @@ deprecated==1.2.15
     #   opentelemetry-semantic-conventions
     #   pygithub
 dispatcherd==2025.5.21
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 distro==1.9.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django==4.2.21
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels
-    #   django-ansible-base
     #   django-cors-headers
     #   django-crum
     #   django-extensions
@@ -146,44 +132,34 @@ django==4.2.21
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
-# django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
-    # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.6.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-crum==0.7.9
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
+    # via -r requirements.in
 django-extensions==3.2.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-flags==5.0.13
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
+    # via -r requirements.in
 django-guid==3.5.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-oauth-toolkit==1.7.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-polymorphic==3.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 django-solo==2.4.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 djangorestframework==3.15.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
+    # via -r requirements.in
 djangorestframework-yaml==2.0.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 durationpy==0.9
     # via kubernetes
 dynaconf==3.2.10
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
+    # via -r requirements.in
 enum-compat==0.0.3
     # via asn1
 filelock==3.16.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 frozenlist==1.5.0
     # via
     #   aiohttp
@@ -191,7 +167,7 @@ frozenlist==1.5.0
 gitdb==4.0.12
     # via gitpython
 gitpython==3.1.44
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 google-auth==2.37.0
     # via kubernetes
 googleapis-common-protos==1.66.0
@@ -200,7 +176,7 @@ googleapis-common-protos==1.66.0
     #   opentelemetry-exporter-otlp-proto-http
 grpcio==1.69.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
 hiredis==3.1.0
     # via redis
@@ -210,21 +186,17 @@ hyperlink==21.0.0
     #   twisted
 idna==3.10
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   hyperlink
     #   requests
     #   twisted
     #   yarl
 importlib-metadata==8.5.0
     # via opentelemetry-api
-importlib-resources==6.5.2
-    # via irc
 incremental==24.7.2
     # via twisted
-inflection==0.5.1
-    # via django-ansible-base
 irc==20.5.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 isodate==0.7.2
     # via
     #   azure-keyvault-certificates
@@ -248,18 +220,18 @@ jaraco-text==4.0.0
     # via
     #   irc
     #   jaraco-collections
-jinja2==3.1.5
-    # via -r /awx_devel/requirements/requirements.in
+jinja2==3.1.6
+    # via -r requirements.in
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
 jq==1.8.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 json-log-formatter==1.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 jsonschema==4.23.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 jsonschema-specifications==2024.10.1
     # via jsonschema
 jwcrypto==1.5.6
@@ -269,11 +241,11 @@ kubernetes==31.0.0
 lockfile==0.12.2
     # via python-daemon
 markdown==3.7
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 markupsafe==3.0.2
     # via jinja2
 maturin==1.8.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 more-itertools==10.5.0
     # via
     #   irc
@@ -288,12 +260,12 @@ msal-extensions==1.2.0
     # via azure-identity
 msgpack==1.1.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels-redis
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4.post1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 multidict==6.1.0
     # via
     #   aiohttp
@@ -304,12 +276,12 @@ oauthlib==3.2.2
     #   kubernetes
     #   requests-oauthlib
 opa-python-client==2.0.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 openshift==0.13.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 opentelemetry-api==1.29.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-instrumentation
@@ -317,7 +289,7 @@ opentelemetry-api==1.29.0
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
 opentelemetry-exporter-otlp==1.29.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 opentelemetry-exporter-otlp-proto-common==1.29.0
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
@@ -329,7 +301,7 @@ opentelemetry-exporter-otlp-proto-http==1.29.0
 opentelemetry-instrumentation==0.50b0
     # via opentelemetry-instrumentation-logging
 opentelemetry-instrumentation-logging==0.50b0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 opentelemetry-proto==1.29.0
     # via
     #   opentelemetry-exporter-otlp-proto-common
@@ -337,7 +309,7 @@ opentelemetry-proto==1.29.0
     #   opentelemetry-exporter-otlp-proto-http
 opentelemetry-sdk==1.29.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
 opentelemetry-semantic-conventions==0.50b0
@@ -346,31 +318,31 @@ opentelemetry-semantic-conventions==0.50b0
     #   opentelemetry-sdk
 packaging==24.2
     # via
-    #   ansible-runner
     #   opentelemetry-instrumentation
     #   setuptools-scm
+pbr==7.0.1
+    # via -r requirements.in
 pexpect==4.7.0
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   ansible-runner
+    # via -r requirements.in
 pkgconfig==1.5.5
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 portalocker==2.10.1
     # via msal-extensions
 prometheus-client==0.21.1
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 propcache==0.2.1
     # via
     #   aiohttp
     #   yarl
 protobuf==5.29.3
     # via
+    #   -r requirements.in
     #   googleapis-common-protos
     #   opentelemetry-proto
 psutil==6.1.1
-    # via -r /awx_devel/requirements/requirements.in
-psycopg==3.2.6
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
+psycopg==3.2.10
+    # via -r requirements.in
 ptyprocess==0.7.0
     # via pexpect
 pyasn1==0.6.1
@@ -387,13 +359,12 @@ pycares==4.5.0
 pycparser==2.22
     # via cffi
 pygerduty==0.38.3
-    # via -r /awx_devel/requirements/requirements.in
-pygithub==2.6.1
-    # via awx-plugins-core
+    # via -r requirements.in
+pygithub==2.6.0
+    # via -r requirements.in
 pyjwt[crypto]==2.10.1
     # via
     #   adal
-    #   django-ansible-base
     #   msal
     #   pygithub
     #   twilio
@@ -401,14 +372,12 @@ pynacl==1.5.0
     # via pygithub
 pyopenssl==24.3.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   twisted
 pyparsing==2.4.6
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 python-daemon==3.1.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   ansible-runner
+    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
     #   adal
@@ -417,28 +386,27 @@ python-dateutil==2.9.0.post0
     #   receptorctl
     #   tempora
 python-dsv-sdk==1.0.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 python-string-utils==1.0.0
     # via openshift
 python-tss-sdk==1.2.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 pytz==2024.2
     # via irc
 pyyaml==6.0.2
     # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   ansible-runner
+    #   -r requirements.in
     #   dispatcherd
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
 pyzstd==0.16.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 receptorctl==1.5.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 redis[hiredis]==5.2.1
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   channels-redis
 referencing==0.35.1
     # via
@@ -446,10 +414,9 @@ referencing==0.35.1
     #   jsonschema-specifications
 requests==2.32.3
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   adal
     #   azure-core
-    #   django-ansible-base
     #   django-oauth-toolkit
     #   kubernetes
     #   msal
@@ -478,9 +445,9 @@ semantic-version==2.10.0
 service-identity==24.2.0
     # via twisted
 setuptools-rust==1.10.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 setuptools-scm[toml]==8.1.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 six==1.17.0
     # via
     #   azure-core
@@ -490,22 +457,22 @@ six==1.17.0
     #   pygerduty
     #   python-dateutil
 slack-sdk==3.34.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 smmap==5.0.2
     # via gitdb
 sqlparse==0.5.3
     # via
+    #   -r requirements.in
     #   django
-    #   django-ansible-base
 tempora==5.8.0
     # via
     #   irc
     #   jaraco-logging
 twilio==9.4.2
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 twisted[tls]==24.11.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   daphne
 txaio==23.1.1
     # via autobahn
@@ -518,25 +485,23 @@ typing-extensions==4.12.2
     #   azure-keyvault-secrets
     #   jwcrypto
     #   opentelemetry-sdk
-    #   psycopg
     #   pygithub
     #   twisted
 urllib3==2.3.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   botocore
-    #   django-ansible-base
     #   kubernetes
     #   pygithub
     #   requests
 uwsgi==2.0.28
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 uwsgitop==0.12
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 websocket-client==1.8.0
     # via kubernetes
 wheel==0.42.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 wrapt==1.17.0
     # via
     #   deprecated
@@ -550,13 +515,14 @@ zope-interface==7.2
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
-    # via -r /awx_devel/requirements/requirements.in
+    # via -r requirements.in
 setuptools==80.9.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
+    #   -r requirements.in
     #   asciichartpy
     #   autobahn
     #   incremental
+    #   pbr
     #   setuptools-rust
     #   setuptools-scm
     #   zope-interface
