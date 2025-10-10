@@ -39,11 +39,17 @@ Django Development Requirements
 
 - Each functional area must have its own Django app
 - Use descriptive app names that reflect business domains
-- Implement proper ``__init__.py`` files for package initialization
 - Separate API logic from core business logic
 
-1.2 Custom Management Commands
-------------------------------
+1.2 Pre-Management Command Code
+--------------------------------
+
+This section describes the code that runs before every management command.
+
+AWX persistent services (i.e. wsrelay, heartbeat, dispatcher) all have management commands as entry points. So if you want to write a new persistent service, make a management command.
+
+System jobs are implemented as management commands too.
+
 
 **REQUIRED**: Implement custom Django management integration:
 
@@ -97,10 +103,10 @@ Django Development Requirements
     # Include optional local settings
     include(optional('local_settings.py'))
 
-2.2 External Configuration Support
-----------------------------------
+2.2 Sourcing config from files
+-------------------------------
 
-**REQUIRED**: Support external configuration files and environment variables:
+**REQUIRED**: Sourcing config from multiple files (in a directory) on disk:
 
 .. code-block:: python
 
@@ -109,28 +115,6 @@ Django Development Requirements
     if EXTERNAL_SETTINGS:
         include(EXTERNAL_SETTINGS, scope=locals())
 
-2.3 Settings Snapshot Mechanism
--------------------------------
-
-**REQUIRED**: Implement settings tracking for runtime configuration:
-
-.. code-block:: python
-
-    # Create snapshot of default settings
-    DEFAULTS_SNAPSHOT = {}
-    for setting in dir(sys.modules[__name__]):
-        if setting.isupper():
-            DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(
-                getattr(sys.modules[__name__], setting)
-            )
-
-**Requirements**:
-
-- Track default vs. customizable settings
-- Support runtime configuration changes
-- Maintain configuration history for auditing
-
-----
 
 3. URL Patterns and Routing
 ============================
@@ -162,6 +146,8 @@ Django Development Requirements
 
 **REQUIRED**: Conditional URL patterns based on environment:
 
+This example allows the Django debug toolbar to work.
+
 .. code-block:: python
 
     # Development-only URLs
@@ -171,6 +157,24 @@ Django Development Requirements
             urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
         except ImportError:
             pass
+
+
+**OPTIONAL**: If you want to include your own debug logic and endpoints:
+
+.. code-block:: python
+
+    if MODE == 'development':
+        # Only include these if we are in the development environment
+        from awx.api.swagger import schema_view
+
+        from awx.api.urls.debug import urls as debug_urls
+
+        urlpatterns += [re_path(r'^debug/', include(debug_urls))]
+        urlpatterns += [
+            re_path(r'^swagger(?P<format>\.json|\.yaml)/$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+            re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+            re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+        ]
 
 **Requirements**:
 
@@ -241,7 +245,7 @@ Django Development Requirements
 
 **Requirements**:
 
-- One file per logical domain
+- One file per logical domain until the domain gets too big, create a folder for it instead. In the past, credentials were broken out into logical domains until they were moved out of AWX, then they were collapsed back down to a single file.
 - Use consistent naming conventions
 - Implement comprehensive model validation
 - Custom managers for complex queries
@@ -251,38 +255,10 @@ Django Development Requirements
 5. REST API Development
 =======================
 
-5.1 Django REST Framework Configuration
----------------------------------------
+5.1 Custom Authentication Classes
+----------------------------------
 
-**REQUIRED**: Comprehensive DRF setup with custom components:
-
-.. code-block:: python
-
-    # settings/defaults.py
-    REST_FRAMEWORK = {
-        'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
-        'PAGE_SIZE': 25,
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'awx.api.authentication.JWTAuthentication',
-            'awx.api.authentication.SessionAuthentication',
-            'awx.api.authentication.LoggedBasicAuthentication',
-        ),
-        'DEFAULT_PERMISSION_CLASSES': (
-            'awx.api.permissions.ModelAccessPermission',
-        ),
-        'DEFAULT_PARSER_CLASSES': (
-            'awx.api.parsers.JSONParser',
-        ),
-        'DEFAULT_RENDERER_CLASSES': (
-            'awx.api.renderers.DefaultJSONRenderer',
-            'awx.api.renderers.BrowsableAPIRenderer',
-        ),
-        'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',
-        'EXCEPTION_HANDLER': 'awx.api.views.api_exception_handler',
-    }
-
-5.2 Custom Authentication Classes
----------------------------------
+The recommended best practice is to log all of the terminal (return) paths of authentication, not just the successful ones.
 
 **REQUIRED**: Implement domain-specific authentication with logging:
 
@@ -305,7 +281,7 @@ Django Development Requirements
                 )
             return ret
 
-5.3 Custom Permission Classes
+5.2 Custom Permission Classes
 -----------------------------
 
 **REQUIRED**: Implement comprehensive permission checking:
@@ -363,10 +339,10 @@ Django Development Requirements
     CSRF_COOKIE_HTTPONLY = True
     CSRF_TRUSTED_ORIGINS = []
 
-6.2 External Secret Management
+6.2 Django SECRET_KEY loading
 ------------------------------
 
-**REQUIRED**: Implement external secret loading:
+**REQUIRED**: Implement Django SECRET_KEY loading:
 
 .. code-block:: python
 
@@ -378,6 +354,8 @@ Django Development Requirements
     else:
         if not DEBUG:
             raise ImproperlyConfigured("SECRET_KEY must be configured in production")
+
+For more detail, refer to the `Django documentation <https://docs.djangoproject.com/en/5.2/ref/settings/#secret-key>`_.
 
 6.3 Proxy and Network Security
 ------------------------------
@@ -409,7 +387,7 @@ Django Development Requirements
 7.1 Advanced Database Configuration
 -----------------------------------
 
-**REQUIRED**: Optimize database connections for production:
+**REQUIRED**: Robust database connections for production:
 
 .. code-block:: python
 
@@ -425,9 +403,6 @@ Django Development Requirements
                 'keepalives_idle': 5,
                 'keepalives_interval': 5,
                 'keepalives_count': 5,
-            },
-            'TEST': {
-                'NAME': 'test_awx',
             },
         }
     }
@@ -450,7 +425,9 @@ Django Development Requirements
 7.3 Migration Management
 ------------------------
 
-**REQUIRED**: Structured migration organization::
+**REQUIRED**: Structured migration organization
+
+::
 
     migrations/
     ├── 0001_initial.py
@@ -459,12 +436,7 @@ Django Development Requirements
     └── _migration_utils.py
 
 **Requirements**:
-
-- Use ``ATOMIC_REQUESTS`` for transaction safety
-- Configure connection keepalives for long-running processes
-- Implement database version validation
-- Squash migrations at release boundaries
-- Separate test database configuration
+It is best practice to not to re-write migrations. If possible, include a reverse migration, especially for data migrations to make testing easier.
 
 ----
 
@@ -538,73 +510,10 @@ Django Development Requirements
 
 ----
 
-9. Static Files and Templates
+9. Application Configuration
 =============================
 
-9.1 Multi-Source Static File Management
----------------------------------------
-
-**REQUIRED**: Configure multiple static file sources:
-
-.. code-block:: python
-
-    # Static files configuration
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'ui', 'build'),  # Frontend build
-        os.path.join(BASE_DIR, 'static'),       # App static files
-    ]
-    STATIC_ROOT = '/var/lib/awx/public/static'
-    STATIC_URL = '/static/'
-
-    STATICFILES_FINDERS = [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    ]
-
-9.2 Template Configuration
---------------------------
-
-**REQUIRED**: Multi-directory template setup with custom processors:
-
-.. code-block:: python
-
-    TEMPLATES = [
-        {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [
-                os.path.join(BASE_DIR, 'templates'),
-                os.path.join(BASE_DIR, 'ui', 'public'),
-                os.path.join(BASE_DIR, 'ui', 'build', 'awx'),
-            ],
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': [
-                    'django.contrib.auth.context_processors.auth',
-                    'django.template.context_processors.debug',
-                    'django.template.context_processors.request',
-                    'awx.ui.context_processors.csp',
-                    'awx.ui.context_processors.version',
-                ],
-                'builtins': [
-                    'awx.main.templatetags.swagger',
-                ],
-            },
-        },
-    ]
-
-**Requirements**:
-
-- Multiple static file directories
-- Custom template context processors
-- Built-in template tags for common functionality
-- Frontend build integration support
-
-----
-
-10. Application Configuration
-=============================
-
-10.1 Advanced AppConfig Implementation
+9.1 Advanced AppConfig Implementation
 --------------------------------------
 
 **REQUIRED**: Custom application configuration with initialization:
@@ -647,10 +556,10 @@ Django Development Requirements
 
 ----
 
-11. Middleware Implementation
+10. Middleware Implementation
 =============================
 
-11.1 Custom Middleware for Enterprise Features
+10.1 Custom Middleware for Enterprise Features
 ----------------------------------------------
 
 **REQUIRED**: Implement domain-specific middleware:
@@ -687,10 +596,10 @@ Django Development Requirements
 
 ----
 
-12. Deployment Patterns
+11. Deployment Patterns
 ========================
 
-12.1 Production-Ready ASGI/WSGI Configuration
+11.1 Production-Ready ASGI/WSGI Configuration
 ---------------------------------------------
 
 **REQUIRED**: Proper application server setup:
@@ -715,33 +624,6 @@ Django Development Requirements
 
     prepare_env()
     application = get_wsgi_application()
-
-12.2 Version Validation
------------------------
-
-**REQUIRED**: Production deployment verification:
-
-.. code-block:: python
-
-    def validate_production_deployment():
-        """Validate production deployment requirements"""
-        if MODE == 'production':
-            version_file = '/var/lib/awx/.version'
-            try:
-                with open(version_file, 'r') as f:
-                    deployed_version = f.read().strip()
-                if deployed_version != __version__:
-                    raise ValueError("Version mismatch in production deployment")
-            except (FileNotFoundError, ValueError) as e:
-                logger.error("Production deployment validation failed")
-                raise DeploymentError("Invalid production deployment") from e
-
-**Requirements**:
-
-- Environment preparation before Django setup
-- Version metadata validation in production
-- Proper ASGI/WSGI application configuration
-- Deployment verification mechanisms
 
 ----
 
