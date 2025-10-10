@@ -1,0 +1,85 @@
+---
+name: SonarQube
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+permissions: read-all
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          show-progress: false
+
+      - name: Download coverage report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: reports/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download PR number artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-number
+          path: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Extract PR number
+        run: |
+          cat pr-number.txt
+          echo "PR_NUMBER=$(cat pr-number.txt)" >> $GITHUB_ENV
+
+      - name: Get PR info
+        uses: octokit/request-action@v2.x
+        id: pr_info
+        with:
+          route: GET /repos/{repo}/pulls/{number}
+          repo: ${{ github.event.repository.full_name }}
+          number: ${{ env.PR_NUMBER }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set PR info into env
+        run: |
+          echo "PR_BASE=${{ fromJson(steps.pr_info.outputs.data).base.ref }}" >> $GITHUB_ENV
+          echo "PR_HEAD=${{ fromJson(steps.pr_info.outputs.data).head.ref }}" >> $GITHUB_ENV
+
+      - name: Add base branch
+        run: |
+          gh pr checkout ${{ env.PR_NUMBER }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract and export repo owner/name
+        run: |
+          REPO_SLUG="${GITHUB_REPOSITORY}"
+          IFS="/" read -r REPO_OWNER REPO_NAME <<< "$REPO_SLUG"
+          echo "REPO_OWNER=$REPO_OWNER" >> $GITHUB_ENV
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets[format('{0}', vars.SONAR_TOKEN_SECRET_NAME)] }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.REPO_OWNER }}
+            -Dsonar.projectKey=${{ env.REPO_OWNER }}_${{ env.REPO_NAME }}
+            -Dsonar.pullrequest.key=${{ env.PR_NUMBER }}
+            -Dsonar.pullrequest.branch=${{ env.PR_HEAD }}
+            -Dsonar.pullrequest.base=${{ env.PR_BASE }}
+            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }}

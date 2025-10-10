@@ -208,18 +208,19 @@ class ApiV2SubscriptionView(APIView):
                     settings.SUBSCRIPTIONS_USERNAME = user
                 if pw:
                     settings.SUBSCRIPTIONS_PASSWORD = pw
+                # mutual exclusion for basic auth and service account
+                # only one should be set at a given time so that
+                # config/attach/ knows which credentials to use
+                settings.SUBSCRIPTIONS_CLIENT_ID = ""
+                settings.SUBSCRIPTIONS_CLIENT_SECRET = ""
             else:
                 if user:
                     settings.SUBSCRIPTIONS_CLIENT_ID = user
-                    if not settings.REDHAT_USERNAME:
-                        # plumb these to analytics credentials
-                        settings.REDHAT_USERNAME = user
                 if pw:
                     settings.SUBSCRIPTIONS_CLIENT_SECRET = pw
-                    if not settings.REDHAT_PASSWORD:
-                        # plumb these to analytics credentials
-                        settings.REDHAT_PASSWORD = pw
-
+                # mutual exclusion for basic auth and service account
+                settings.SUBSCRIPTIONS_USERNAME = ""
+                settings.SUBSCRIPTIONS_PASSWORD = ""
         except Exception as exc:
             msg = _("Invalid Subscription")
             if isinstance(exc, TokenError) or (
@@ -283,6 +284,7 @@ class ApiV2AttachView(APIView):
                 else:
                     logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+
         for sub in validated:
             if sub['subscription_id'] == subscription_id:
                 sub['valid_key'] = True
