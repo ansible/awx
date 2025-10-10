@@ -219,30 +219,65 @@ class Licenser(object):
             kwargs['license_date'] = int(kwargs['license_date'])
         self._attrs.update(kwargs)
 
-    def validate_rh(self, user, pw):
+    def get_host_from_rhsm_config(self):
         try:
             host = 'https://' + str(self.config.get("server", "hostname"))
         except Exception:
             logger.exception('Cannot access rhsm.conf, make sure subscription manager is installed and configured.')
             host = None
+        return host
+
+    def validate_rh(self, user, pw, basic_auth):
+        # if basic auth is True, host is read from rhsm.conf (subscription.rhsm.redhat.com)
+        # if basic auth is False, host is settings.SUBSCRIPTIONS_RHSM_URL (console.redhat.com)
+        # if rhsm.conf is not found, host is settings.REDHAT_CANDLEPIN_HOST (satellite server)
+        if basic_auth:
+            host = self.get_host_from_rhsm_config()
+            if not host:
+                host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
+        else:
+            host = settings.SUBSCRIPTIONS_RHSM_URL
+
         if not host:
-            host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
+            raise ValueError('Could not get host url for subscriptions')
 
         if not user:
-            raise ValueError('subscriptions_client_id is required')
+            raise ValueError('subscriptions_client_id or subscriptions_username is required')
 
         if not pw:
-            raise ValueError('subscriptions_client_secret is required')
+            raise ValueError('subscriptions_client_secret or subscriptions_password is required')
 
         if host and user and pw:
-            if 'subscription.rhsm.redhat.com' in host:
-                json = self.get_rhsm_subs(settings.SUBSCRIPTIONS_RHSM_URL, user, pw)
+            if basic_auth:
+                if 'subscription.rhsm.redhat.com' in host:
+                    json = self.get_rhsm_subs(host, user, pw)
+                else:
+                    json = self.get_satellite_subs(host, user, pw)
             else:
-                json = self.get_satellite_subs(host, user, pw)
-            return self.generate_license_options_from_entitlements(json)
+                json = self.get_crc_subs(host, user, pw)
+            return self.generate_license_options_from_entitlements(json, is_candlepin=basic_auth)
         return []
 
-    def get_rhsm_subs(self, host, client_id, client_secret):
+    def get_rhsm_subs(self, host, user, pw):
+        verify = getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', True)
+        json = []
+        try:
+            subs = requests.get('/'.join([host, 'subscription/users/{}/owners'.format(user)]), verify=verify, auth=(user, pw))
+        except requests.exceptions.ConnectionError as error:
+            raise error
+        except OSError as error:
+            raise OSError(
+                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
+            ) from error  # noqa
+        subs.raise_for_status()
+
+        for sub in subs.json():
+            resp = requests.get('/'.join([host, 'subscription/owners/{}/pools/?match=*tower*'.format(sub['key'])]), verify=verify, auth=(user, pw))
+            resp.raise_for_status()
+            json.extend(resp.json())
+        return json
+
+    def get_crc_subs(self, host, client_id, client_secret):
         try:
             client = OIDCClient(client_id, client_secret)
             subs = client.make_request(
@@ -320,12 +355,21 @@ class Licenser(object):
                     json.append(license)
         return json
 
+    def is_appropriate_sub(self, sub):
+        if sub['activeSubscription'] is False:
+            return False
+        # Products that contain Ansible Tower
+        products = sub.get('providedProducts', [])
+        if any(product.get('productId') == '480' for product in products):
+            return True
+        return False
+
     def is_appropriate_sat_sub(self, sub):
         if 'Red Hat Ansible Automation' not in sub['subscription_name']:
             return False
         return True
 
-    def generate_license_options_from_entitlements(self, json):
+    def generate_license_options_from_entitlements(self, json, is_candlepin=False):
         from dateutil.parser import parse
 
         ValidSub = collections.namedtuple(
@@ -336,12 +380,14 @@ class Licenser(object):
             satellite = sub.get('satellite')
             if satellite:
                 is_valid = self.is_appropriate_sat_sub(sub)
+            elif is_candlepin:
+                is_valid = self.is_appropriate_sub(sub)
             else:
-                # the list of subs from console.redhat.com are already valid based on the query params we provided
+                # the list of subs from console.redhat.com and subscriptions.rhsm.redhat.com are already valid based on the query params we provided
                 is_valid = True
             if is_valid:
                 try:
-                    if satellite:
+                    if is_candlepin:
                         end_date = parse(sub.get('endDate'))
                     else:
                         end_date = parse(sub['subscriptions']['endDate'])
@@ -354,10 +400,10 @@ class Licenser(object):
                     continue
 
                 developer_license = False
-                support_level = ''
+                support_level = sub.get('support_level', '')
                 account_number = ''
                 usage = sub.get('usage', '')
-                if satellite:
+                if is_candlepin:
                     try:
                         quantity = int(sub['quantity'])
                     except Exception:
@@ -365,7 +411,6 @@ class Licenser(object):
                     sku = sub['productId']
                     subscription_id = sub['subscriptionId']
                     sub_name = sub['productName']
-                    support_level = sub['support_level']
                     account_number = sub['accountNumber']
                 else:
                     try:
@@ -434,6 +479,8 @@ class Licenser(object):
                 license.update(subscription_id=sub.subscription_id)
                 license.update(account_number=sub.account_number)
                 licenses.append(license._attrs.copy())
+            # sort by sku
+            licenses.sort(key=lambda x: x['sku'])
             return licenses
 
         raise ValueError('No valid Red Hat Ansible Automation subscription could be found for this account.')  # noqa
