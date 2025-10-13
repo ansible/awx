@@ -32,6 +32,8 @@ asgiref==3.8.1
     #   django-cors-headers
 asn1==2.7.1
     # via -r /awx_devel/requirements/requirements.in
+akeyless==3.0.0
+    # via -r /awx_devel/requirements/requirements.in
 attrs==24.3.0
     # via
     #   aiohttp

@@ -111,6 +111,7 @@ tower-backup-*
 # Other
 .tower_cycle
 env/*
+.envrc
 nohup.out
 reports
 *.bak
@@ -159,3 +160,6 @@ _readthedocs/
 
 # Pyenv
 .python-version
+
+# pipenv
+Pipfile*

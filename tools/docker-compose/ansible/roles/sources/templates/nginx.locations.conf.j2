@@ -2,6 +2,10 @@ location {{ (ingress_path + '/static').replace('//', '/') }} {
     alias /var/lib/awx/public/static/;
 }
 
+location {{ (ingress_path + '/static/awx').replace('//', '/') }} {
+    alias /var/lib/awx/public/static/;
+}
+
 location {{ (ingress_path + '/locales').replace('//', '/') }} {
     alias /var/lib/awx/public/static/awx/locales;
 }

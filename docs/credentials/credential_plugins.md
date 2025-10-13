@@ -239,3 +239,120 @@ HTTP/1.1 201 Created
    unsigned public key data using the HashiCorp Vault SSH Secrets API.
    AWX will generate an `id_rsa` and `id_rsa-cert.pub` on the fly and
    apply them using `ssh-add`.
+
+
+Akeyless Vault Secret Lookup
+----------------------------
+
+AWX supports retrieving secret values from Akeyless Vault
+(https://www.akeyless.io/)
+
+The following example illustrates how to configure a Machine Credential to pull
+its password from an Akeyless Vault:
+
+1.  Look up the ID of the Machine and Akeyless Vault Secret Lookup Credential
+    types (in this example, `1` and `17`):
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credential_types/?name=Machine" \
+    -H "Authorization: Bearer <token>"
+HTTP/1.1 200 OK
+{
+    "results": [
+        {
+            "id": 1,
+            "url": "/api/v2/credential_types/1/",
+            "name": "Machine",
+            ...
+```
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credential_types/?name__startswith=Akeyless" \
+    -H "Authorization: Bearer <token>"
+HTTP/1.1 200 OK
+{
+    "results": [
+        {
+            "id": 17,
+            "url": "/api/v2/credential_types/17/",
+            "name": "Akeyless Vault Secret Lookup",
+            ...
+```
+
+2.  Create a Machine and an Akeyless Vault Credential:
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credentials/" \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"user": N, "credential_type": 1, "name": "My SSH", "inputs": {"username": "example"}}'
+
+HTTP/1.1 201 Created
+{
+    "credential_type": 1,
+    "description": "",
+    "id": 1,
+    ...
+```
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credentials/" \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"user": N, "credential_type": 17, "name": "My Akeyless Credential", "inputs": {"gateway_url": "https://your-gateway.akeyless.io", "access_id": "your-access-id", "access_key": "your-access-key"}}'
+
+HTTP/1.1 201 Created
+{
+    "credential_type": 17,
+    "description": "",
+    "id": 2,
+    ...
+```
+
+3.  Link the Machine Credential to the Akeyless Vault Credential:
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credentials/1/input_sources/" \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"source_credential": 2, "input_field_name": "password", "metadata": {"secret_path": "/myapp/database/password", "secret_key": "password"}}'
+HTTP/1.1 201 Created
+```
+
+### Akeyless Credential Fields
+
+- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://your-gateway.akeyless.io)
+- **Access ID**: Your Akeyless API Access ID
+- **Access Key**: Your Akeyless API Access Key (stored encrypted)
+- **CA Certificate**: Optional CA certificate for TLS verification (PEM format)
+
+### Akeyless Metadata Fields
+
+- **Secret Path**: The path to the secret in Akeyless (e.g., /myapp/database/password)
+- **Secret Key**: Optional specific key within the secret to retrieve (for JSON secrets)
+
+### Example Usage
+
+When using Akeyless with JSON secrets, you can specify a specific key to retrieve:
+
+```json
+{
+  "secret_path": "/myapp/database",
+  "secret_key": "password"
+}
+```
+
+This will retrieve the `password` field from the JSON secret stored at `/myapp/database` in Akeyless.
+
+For simple string secrets, omit the `secret_key` field:
+
+```json
+{
+  "secret_path": "/myapp/api-key"
+}
+```
+
+This will retrieve the entire secret value as a string.

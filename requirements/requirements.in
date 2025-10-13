@@ -77,3 +77,4 @@ idna>=3.10 # CVE-2024-3651
 # Temporarily added to use ansible-runner from git branch, to be removed
 # when ansible-runner moves from requirements_git.txt to here
 pbr
+akeyless>=3.0.0
