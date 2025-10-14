@@ -47,7 +47,7 @@ psutil
 pygerduty
 PyGithub
 pyopenssl
-pyparsing # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
+pyparsing==2.4.7 # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
