@@ -283,3 +283,197 @@ def test_fact_cache_clock_skew_between_controller_and_node(inventory, tmpdir, mo
         assert host.ansible_facts.get('updated') is True, (
             f"Host {host.name} in {host.ansible_facts.get('timezone')} timezone " f"did not get updated facts. This reveals timezone filtering bug."
         )
+
+
+def test_fact_cache_with_ansible_runner_modified_list(inventory, tmpdir, mocker):
+    """
+    Test that finish_fact_cache() correctly uses the fact_cache_modified.json file
+    provided by ansible-runner to determine which facts were modified.
+
+    This is the preferred solution that eliminates timezone issues by having
+    ansible-runner detect modifications on the execution node using its local clock.
+    """
+    artifacts_dir = tmpdir.mkdir("artifacts")
+
+    # Create test hosts
+    hosts = [
+        Host(id=1, name='localhost', inventory=inventory, ansible_facts={'old': 'data1'}, ansible_facts_modified=now()),
+        Host(id=2, name='host2', inventory=inventory, ansible_facts={'old': 'data2'}, ansible_facts_modified=now()),
+        Host(id=3, name='host3', inventory=inventory, ansible_facts={'old': 'data3'}, ansible_facts_modified=now()),
+    ]
+
+    # Start fact cache
+    start_fact_cache(hosts, str(artifacts_dir), inventory_id=inventory.id)
+
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+
+    # Update fact files for all hosts
+    for host in hosts:
+        filepath = os.path.join(fact_cache_dir, host.name)
+        new_facts = {'new': f'updated_{host.name}'}
+
+        with codecs.open(filepath, 'w', encoding='utf-8') as f:
+            os.chmod(f.name, 0o600)
+            json.dump(new_facts, f)
+
+    # Simulate ansible-runner writing the fact_cache_modified.json file
+    # ansible-runner detected that only 'localhost' and 'host3' were modified
+    modified_list = {
+        'modified_files': ['localhost', 'host3']  # host2 NOT in the list
+    }
+
+    fact_cache_modified_file = os.path.join(artifacts_dir, 'fact_cache_modified.json')
+    with open(fact_cache_modified_file, 'w', encoding='utf-8') as f:
+        json.dump(modified_list, f, indent=2)
+
+    # Mock the database query and bulk update
+    mock_qs = mocker.MagicMock()
+    mock_qs.order_by.return_value.iterator.return_value = iter(hosts)
+    mocker.patch.object(Host.objects, 'filter', return_value=mock_qs)
+    mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+
+    # Process facts
+    finish_fact_cache(str(artifacts_dir), job_id=1, inventory_id=inventory.id)
+
+    # Verify: Only localhost and host3 should be updated (per ansible-runner's list)
+    localhost, host2, host3 = hosts
+
+    assert localhost.ansible_facts.get('new') == 'updated_localhost', (
+        "localhost should be updated (in modified_files list)"
+    )
+
+    assert host2.ansible_facts.get('new') is None, (
+        "host2 should NOT be updated (not in modified_files list)"
+    )
+    assert host2.ansible_facts.get('old') == 'data2', (
+        "host2 should retain old facts"
+    )
+
+    assert host3.ansible_facts.get('new') == 'updated_host3', (
+        "host3 should be updated (in modified_files list)"
+    )
+
+
+def test_fact_cache_fallback_to_timestamp_when_no_modified_list(inventory, tmpdir, mocker):
+    """
+    Test that finish_fact_cache() falls back to timestamp comparison
+    when fact_cache_modified.json is not provided by ansible-runner.
+
+    This ensures backward compatibility with older ansible-runner versions.
+    """
+    artifacts_dir = tmpdir.mkdir("artifacts")
+
+    # Create test hosts
+    hosts = [
+        Host(id=1, name='testhost', inventory=inventory, ansible_facts={'version': 1}, ansible_facts_modified=now()),
+    ]
+
+    # Start fact cache
+    start_fact_cache(hosts, str(artifacts_dir), inventory_id=inventory.id)
+
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+    filepath = os.path.join(fact_cache_dir, 'testhost')
+
+    # Update the fact file
+    new_facts = {'version': 2}
+    with codecs.open(filepath, 'w', encoding='utf-8') as f:
+        os.chmod(f.name, 0o600)
+        json.dump(new_facts, f)
+
+    # NOTE: We do NOT create fact_cache_modified.json
+    # This simulates an older ansible-runner that doesn't provide this file
+
+    # Mock the database query and bulk update
+    mock_qs = mocker.MagicMock()
+    mock_qs.order_by.return_value.iterator.return_value = iter(hosts)
+    mocker.patch.object(Host.objects, 'filter', return_value=mock_qs)
+    mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+
+    # Process facts
+    finish_fact_cache(str(artifacts_dir), job_id=1, inventory_id=inventory.id)
+
+    # Verify: Host should still be updated using fallback timestamp comparison
+    assert hosts[0].ansible_facts.get('version') == 2, (
+        "Host facts should be updated even without fact_cache_modified.json "
+        "(fallback to timestamp comparison)"
+    )
+
+
+def test_fact_cache_with_timezone_offset_and_modified_list(inventory, tmpdir, mocker):
+    """
+    Test that the ansible-runner modified list solution works correctly
+    even when files have timezone-affected timestamps that would fail
+    the old timestamp comparison method.
+
+    This demonstrates the key benefit: ansible-runner's list is timezone-independent.
+    """
+    artifacts_dir = tmpdir.mkdir("artifacts")
+
+    # Create hosts simulating different timezones
+    hosts = [
+        Host(id=1, name='utc-host', inventory=inventory, ansible_facts={'tz': 'UTC'}, ansible_facts_modified=now()),
+        Host(id=2, name='est-host', inventory=inventory, ansible_facts={'tz': 'EST'}, ansible_facts_modified=now()),
+    ]
+
+    # Start fact cache
+    start_fact_cache(hosts, str(artifacts_dir), inventory_id=inventory.id)
+
+    # Get baseline timestamp
+    summary_path = os.path.join(artifacts_dir, 'host_cache_summary.json')
+    with open(summary_path, 'r', encoding='utf-8') as f:
+        summary = json.load(f)
+    facts_write_time = summary.get('last_write_time')
+
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+
+    # Update fact files
+    for host in hosts:
+        filepath = os.path.join(fact_cache_dir, host.name)
+        new_facts = {'tz': host.ansible_facts['tz'], 'updated': True}
+
+        with codecs.open(filepath, 'w', encoding='utf-8') as f:
+            os.chmod(f.name, 0o600)
+            json.dump(new_facts, f)
+
+    # Simulate timezone bug: EST host file has mtime that appears OLDER than baseline
+    # (This would cause timestamp comparison to fail)
+    utc_filepath = os.path.join(fact_cache_dir, 'utc-host')
+    est_filepath = os.path.join(fact_cache_dir, 'est-host')
+
+    # UTC host: mtime after baseline (would pass timestamp check)
+    os.utime(utc_filepath, (facts_write_time + 10, facts_write_time + 10))
+
+    # EST host: mtime BEFORE baseline due to 5-hour timezone offset
+    # (This simulates the bug: file modified but appears older)
+    os.utime(est_filepath, (facts_write_time - 18000, facts_write_time - 18000))  # -5 hours
+
+    # ansible-runner provides modified list (correctly identified both hosts)
+    modified_list = {
+        'modified_files': ['utc-host', 'est-host']  # Both hosts actually modified
+    }
+
+    fact_cache_modified_file = os.path.join(artifacts_dir, 'fact_cache_modified.json')
+    with open(fact_cache_modified_file, 'w', encoding='utf-8') as f:
+        json.dump(modified_list, f, indent=2)
+
+    # Mock the database query and bulk update
+    mock_qs = mocker.MagicMock()
+    mock_qs.order_by.return_value.iterator.return_value = iter(hosts)
+    mocker.patch.object(Host.objects, 'filter', return_value=mock_qs)
+    mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+
+    # Process facts
+    finish_fact_cache(str(artifacts_dir), job_id=1, inventory_id=inventory.id)
+
+    # Verify: BOTH hosts should be updated because ansible-runner's list is timezone-independent
+    utc_host, est_host = hosts
+
+    assert utc_host.ansible_facts.get('updated') is True, (
+        "UTC host should be updated"
+    )
+
+    assert est_host.ansible_facts.get('updated') is True, (
+        "EST host should be updated even though its mtime appears older than baseline. "
+        "The ansible-runner modified list correctly identifies it as modified, "
+        "eliminating the timezone bug."
+    )

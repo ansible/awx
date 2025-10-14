@@ -94,7 +94,20 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
 
-    # Get the timestamp that was saved during start_fact_cache()
+    # Check if ansible-runner provided a list of modified fact files
+    # This is the preferred method as it eliminates timezone issues
+    modified_facts_file = os.path.join(artifacts_dir, 'fact_cache_modified.json')
+    modified_files_set = None
+    if os.path.exists(modified_facts_file):
+        try:
+            with open(modified_facts_file, 'r', encoding='utf-8') as f:
+                modified_data = json.load(f)
+                modified_files_set = set(modified_data.get('modified_files', []))
+                logger.debug(f'Using ansible-runner modified files list: {modified_files_set}')
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning(f'Could not read fact_cache_modified.json: {e}, falling back to timestamp comparison')
+
+    # Fallback: Get the timestamp that was saved during start_fact_cache()
     # This is the mtime of the last fact file written, NOT the summary file's mtime
     facts_write_time = summary.get('last_write_time')
 
@@ -111,10 +124,17 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
             continue
 
         if os.path.exists(filepath):
-            modified = os.path.getmtime(filepath)
-            # Only read the file if it was modified after the playbook started
-            # This prevents timezone issues by using the saved timestamp from the summary
-            if not facts_write_time or modified >= facts_write_time:
+            # Determine if file was modified using ansible-runner list or timestamp comparison
+            if modified_files_set is not None:
+                # Preferred: Use ansible-runner's modification detection
+                was_modified = host.name in modified_files_set
+            else:
+                # Fallback: Use timestamp comparison (has timezone issues)
+                modified = os.path.getmtime(filepath)
+                was_modified = not facts_write_time or modified >= facts_write_time
+
+            # Only read the file if it was modified
+            if was_modified:
                 try:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         ansible_facts = json.load(f)
