@@ -157,7 +157,7 @@ django-polymorphic==4.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.4.0
     # via -r /awx_devel/requirements/requirements.in
-djangorestframework==3.15.2
+djangorestframework==3.16.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
@@ -391,7 +391,7 @@ pyopenssl==25.3.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   twisted
-pyparsing==3.2.5
+pyparsing==2.4.7
     # via -r /awx_devel/requirements/requirements.in
 python-daemon==3.1.2
     # via
