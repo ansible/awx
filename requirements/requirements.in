@@ -36,8 +36,8 @@ msgpack
 msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
 openshift
-opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
-opentelemetry-sdk~=1.24
+opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
+opentelemetry-sdk~=1.37
 opentelemetry-instrumentation-logging
 opentelemetry-exporter-otlp
 pexpect
@@ -47,7 +47,7 @@ psutil
 pygerduty
 PyGithub
 pyopenssl
-pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
+pyparsing # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
