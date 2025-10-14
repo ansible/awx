@@ -597,19 +597,16 @@ class CredentialInputSource(PrimordialModel):
         'Credential',
         related_name='input_sources',
         on_delete=models.CASCADE,
-        default=None,
         null=True,
     )
     source_credential = models.ForeignKey(
         'Credential',
         related_name='target_input_sources',
         on_delete=models.CASCADE,
-        default=None,
         null=True,
     )
     input_field_name = models.CharField(
         max_length=1024,
-        default=None
     )
     metadata = DynamicCredentialInputField(blank=True, default=dict)
 
