@@ -241,16 +241,16 @@ HTTP/1.1 201 Created
    apply them using `ssh-add`.
 
 
-Akeyless Vault Secret Lookup
+Akeyless
 ----------------------------
 
-AWX supports retrieving secret values from Akeyless Vault
+AWX supports retrieving secret values from Akeyless
 (https://www.akeyless.io/)
 
 The following example illustrates how to configure a Machine Credential to pull
-its password from an Akeyless Vault:
+its password from a Akeyless:
 
-1.  Look up the ID of the Machine and Akeyless Vault Secret Lookup Credential
+1.  Look up the ID of the Machine and Akeyless
     types (in this example, `1` and `17`):
 
 ```shell
@@ -275,7 +275,7 @@ HTTP/1.1 200 OK
         {
             "id": 17,
             "url": "/api/v2/credential_types/17/",
-            "name": "Akeyless Vault Secret Lookup",
+            "name": "Akeyless",
             ...
 ```
 

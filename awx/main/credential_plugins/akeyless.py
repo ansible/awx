@@ -120,8 +120,8 @@ akeyless_plugin = type(
     'AkeylessPlugin',
     (),
     {
-        'name': 'Akeyless Vault Secret Lookup',
-        'namespace': 'akeyless_vault',
+        'name': 'Akeyless',
+        'namespace': 'akeyless',
         'kind': 'external',
         'inputs': {
             'fields': [
@@ -172,6 +172,7 @@ akeyless_plugin = type(
                     'required': False,
                 },
             ],
+            'required': ['gateway_url', 'access_id', 'access_key', 'secret_path'],
         },
         'backend': akeyless_backend,
     },
