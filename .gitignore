@@ -111,7 +111,6 @@ tower-backup-*
 # Other
 .tower_cycle
 env/*
-.envrc
 nohup.out
 reports
 *.bak
