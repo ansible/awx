@@ -102,9 +102,14 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         try:
             with open(modified_facts_file, 'r', encoding='utf-8') as f:
                 modified_data = json.load(f)
-                modified_files_set = set(modified_data.get('modified_files', []))
-                logger.debug(f'Using ansible-runner modified files list: {modified_files_set}')
-        except (json.JSONDecodeError, OSError) as e:
+                modified_files_list = modified_data.get('modified_files', [])
+                # Handle case where modified_files is null/None
+                if modified_files_list is not None:
+                    modified_files_set = set(modified_files_list)
+                    logger.debug(f'Using ansible-runner modified files list: {modified_files_set}')
+                else:
+                    logger.warning('fact_cache_modified.json has null modified_files, falling back to timestamp comparison')
+        except (json.JSONDecodeError, OSError, TypeError) as e:
             logger.warning(f'Could not read fact_cache_modified.json: {e}, falling back to timestamp comparison')
 
     # Fallback: Get the timestamp that was saved during start_fact_cache()
