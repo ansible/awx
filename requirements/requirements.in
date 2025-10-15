@@ -20,7 +20,7 @@ django-extensions
 django-guid
 django-polymorphic
 django-solo
-djangorestframework>=3.15.0
+djangorestframework==3.15.2  # upgrading to 3.16+ throws NOT_REQUIRED_DEFAULT error on required fields in serializer that have no default
 djangorestframework-yaml
 dynaconf
 filelock

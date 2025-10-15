@@ -60,3 +60,8 @@ Verify ansible-runner's build dependency doesn't conflict with the changes made.
 ### urllib3 and OPA-python-client
 There are incompatible version dependancies for urllib3 between OPA-python-client and kubernetes.
 OPA-python-client v2.0.3+ requires urllib3 v2.5.0+ and kubernetes v34.1.0 caps it at v.2.4.0.
+
+## djangorestframework
+Upgrading to 3.16.1 introduced errors on the tests around CredentialInputSource. We have several
+fields on that model set to default=null but in the serializer they're set to required: true which causes
+a conflict.
