@@ -157,7 +157,7 @@ django-polymorphic==4.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.4.0
     # via -r /awx_devel/requirements/requirements.in
-djangorestframework==3.16.1
+djangorestframework==3.15.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
