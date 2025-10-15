@@ -318,9 +318,7 @@ def test_fact_cache_with_ansible_runner_modified_list(inventory, tmpdir, mocker)
 
     # Simulate ansible-runner writing the fact_cache_modified.json file
     # ansible-runner detected that only 'localhost' and 'host3' were modified
-    modified_list = {
-        'modified_files': ['localhost', 'host3']  # host2 NOT in the list
-    }
+    modified_list = {'modified_files': ['localhost', 'host3']}  # host2 NOT in the list
 
     fact_cache_modified_file = os.path.join(artifacts_dir, 'fact_cache_modified.json')
     with open(fact_cache_modified_file, 'w', encoding='utf-8') as f:
@@ -338,20 +336,12 @@ def test_fact_cache_with_ansible_runner_modified_list(inventory, tmpdir, mocker)
     # Verify: Only localhost and host3 should be updated (per ansible-runner's list)
     localhost, host2, host3 = hosts
 
-    assert localhost.ansible_facts.get('new') == 'updated_localhost', (
-        "localhost should be updated (in modified_files list)"
-    )
+    assert localhost.ansible_facts.get('new') == 'updated_localhost', "localhost should be updated (in modified_files list)"
 
-    assert host2.ansible_facts.get('new') is None, (
-        "host2 should NOT be updated (not in modified_files list)"
-    )
-    assert host2.ansible_facts.get('old') == 'data2', (
-        "host2 should retain old facts"
-    )
+    assert host2.ansible_facts.get('new') is None, "host2 should NOT be updated (not in modified_files list)"
+    assert host2.ansible_facts.get('old') == 'data2', "host2 should retain old facts"
 
-    assert host3.ansible_facts.get('new') == 'updated_host3', (
-        "host3 should be updated (in modified_files list)"
-    )
+    assert host3.ansible_facts.get('new') == 'updated_host3', "host3 should be updated (in modified_files list)"
 
 
 def test_fact_cache_fallback_to_timestamp_when_no_modified_list(inventory, tmpdir, mocker):
@@ -394,8 +384,7 @@ def test_fact_cache_fallback_to_timestamp_when_no_modified_list(inventory, tmpdi
 
     # Verify: Host should still be updated using fallback timestamp comparison
     assert hosts[0].ansible_facts.get('version') == 2, (
-        "Host facts should be updated even without fact_cache_modified.json "
-        "(fallback to timestamp comparison)"
+        "Host facts should be updated even without fact_cache_modified.json " "(fallback to timestamp comparison)"
     )
 
 
@@ -448,9 +437,7 @@ def test_fact_cache_with_timezone_offset_and_modified_list(inventory, tmpdir, mo
     os.utime(est_filepath, (facts_write_time - 18000, facts_write_time - 18000))  # -5 hours
 
     # ansible-runner provides modified list (correctly identified both hosts)
-    modified_list = {
-        'modified_files': ['utc-host', 'est-host']  # Both hosts actually modified
-    }
+    modified_list = {'modified_files': ['utc-host', 'est-host']}  # Both hosts actually modified
 
     fact_cache_modified_file = os.path.join(artifacts_dir, 'fact_cache_modified.json')
     with open(fact_cache_modified_file, 'w', encoding='utf-8') as f:
@@ -468,9 +455,7 @@ def test_fact_cache_with_timezone_offset_and_modified_list(inventory, tmpdir, mo
     # Verify: BOTH hosts should be updated because ansible-runner's list is timezone-independent
     utc_host, est_host = hosts
 
-    assert utc_host.ansible_facts.get('updated') is True, (
-        "UTC host should be updated"
-    )
+    assert utc_host.ansible_facts.get('updated') is True, "UTC host should be updated"
 
     assert est_host.ansible_facts.get('updated') is True, (
         "EST host should be updated even though its mtime appears older than baseline. "
