@@ -49,29 +49,19 @@ Make sure to delete the old tarball if it is an upgrade.
 Anything pinned in `*.in` files involves additional manual work in
 order to upgrade. Some information related to that work is outlined here.
 
-### django-oauth-toolkit
+### pip, setuptools and setuptools_scm, wheel, cython
 
-Versions later than 1.4.1 throw an error about id_token_id, due to the
-OpenID Connect work that was done in
-https://github.com/jazzband/django-oauth-toolkit/pull/915.  This may
-be fixable by creating a migration on our end?
-
-### pip, setuptools and setuptools_scm
-
-If modifying these libraries make sure testing with the offline build is performed to confirm they are functionally working.
-Versions need to match the versions used in the pip bootstrapping step
-in the top-level Makefile.
+If modifying these libraries make sure testing with the offline build is performed to confirm 
+they are functionally working. Versions need to match the versions used in the pip bootstrapping
+ step in the top-level Makefile.
 
 Verify ansible-runner's build dependency doesn't conflict with the changes made.
 
-### cryptography
+### urllib3 and OPA-python-client
+There are incompatible version dependancies for urllib3 between OPA-python-client and kubernetes.
+OPA-python-client v2.0.3+ requires urllib3 v2.5.0+ and kubernetes v34.1.0 caps it at v.2.4.0.
 
-If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.
-
-## Library Notes
-
-### pexpect
-
-Version 4.8 makes us a little bit nervous with changes to `searchwindowsize` https://github.com/pexpect/pexpect/pull/579/files
-Pin to `pexpect==4.7.x` until we have more time to move to `4.8` and test.
-
+## djangorestframework
+Upgrading to 3.16.1 introduced errors on the tests around CredentialInputSource. We have several
+fields on that model set to default=null but in the serializer they're set to required: true which causes
+a conflict.
