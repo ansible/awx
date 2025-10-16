@@ -97,8 +97,16 @@ class TestMigrationSmoke:
         # Test create a Project with a duplicate name
         Organization = new_state.apps.get_model('main', 'Organization')
         Project = new_state.apps.get_model('main', 'Project')
+        JobTemplate = new_state.apps.get_model('main', 'JobTemplate')
         WorkflowJobTemplate = new_state.apps.get_model('main', 'WorkflowJobTemplate')
         org = Organization.objects.create(name='duplicate-obj-organization', created=now(), modified=now())
+
+        # Create JobTemplates with duplicate names (migration will rename these first)
+        jt_ids = []
+        for i in range(3):
+            jt = JobTemplate.objects.create(name='duplicate-jobtemplate-name', organization=org, project=None, playbook='', created=now(), modified=now())
+            jt_ids.append(jt.id)
+
         proj_ids = []
         for i in range(3):
             proj = Project.objects.create(name='duplicate-project-name', organization=org, created=now(), modified=now())
@@ -122,9 +130,19 @@ class TestMigrationSmoke:
         )
 
         # Get the models from the new state for verification
+        JobTemplate = new_state.apps.get_model('main', 'JobTemplate')
         Project = new_state.apps.get_model('main', 'Project')
         WorkflowJobTemplate = new_state.apps.get_model('main', 'WorkflowJobTemplate')
         InventorySource = new_state.apps.get_model('main', 'InventorySource')
+
+        # Verify JobTemplate duplicates are renamed
+        for i, jt_id in enumerate(jt_ids):
+            jt = JobTemplate.objects.get(id=jt_id)
+            if i == 0:
+                assert jt.name == 'duplicate-jobtemplate-name'
+            else:
+                assert jt.name != 'duplicate-jobtemplate-name'
+                assert jt.name.startswith('duplicate-jobtemplate-name')
 
         for i, proj_id in enumerate(proj_ids):
             proj = Project.objects.get(id=proj_id)
@@ -146,8 +164,12 @@ class TestMigrationSmoke:
         # The inventory source had this field set to avoid the constrains
         inv_src = InventorySource.objects.get(name='migration-test-src')
         assert inv_src.org_unique is False
+        for jt in JobTemplate.objects.all():
+            assert jt.org_unique is True
         for proj in Project.objects.all():
             assert proj.org_unique is True
+        for wfjt in WorkflowJobTemplate.objects.all():
+            assert wfjt.org_unique is True
 
         # Piggyback test for the new credential types
         validate_exists = ['GitHub App Installation Access Token Lookup', 'Terraform backend configuration']
