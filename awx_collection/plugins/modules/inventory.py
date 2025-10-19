@@ -154,7 +154,7 @@ def main():
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
-        opa_query_path=dict(),
+        opa_query_path=dict(type='str'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
         input_inventories=dict(type='list', elements='str'),
     )
@@ -211,7 +211,7 @@ def main():
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
     if opa_query_path is not None:
-        inventory_fields['opa_query_path'] = json.dumps(variables)
+        inventory_fields['opa_query_path'] = opa_query_path
 
     association_fields = {}
 
