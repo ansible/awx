@@ -17,6 +17,7 @@ def test_inventory_create(run_module, admin_user, organization):
             'name': 'foo-inventory',
             'organization': organization.name,
             'variables': {'foo': 'bar', 'another-foo': {'barz': 'bar2'}},
+            'opa_query_path': 'foo/bar',
             'state': 'present',
         },
         admin_user,

@@ -154,6 +154,7 @@ def main():
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
+        opa_query_path=dict(),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
         input_inventories=dict(type='list', elements='str'),
     )
