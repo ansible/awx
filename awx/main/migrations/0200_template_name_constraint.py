@@ -38,13 +38,13 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(rename_jts, migrations.RunPython.noop),
-        migrations.RunPython(rename_projects, migrations.RunPython.noop),
         migrations.AddField(
             model_name='unifiedjobtemplate',
             name='org_unique',
             field=models.BooleanField(blank=True, default=True, editable=False, help_text='Used internally to selectively enforce database constraint on name'),
         ),
+        migrations.RunPython(rename_jts, migrations.RunPython.noop),
+        migrations.RunPython(rename_projects, migrations.RunPython.noop),
         migrations.RunPython(rename_wfjt, migrations.RunPython.noop),
         migrations.RunPython(change_inventory_source_org_unique, migrations.RunPython.noop),
         migrations.AddConstraint(

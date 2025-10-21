@@ -9,7 +9,7 @@ boto3
 botocore
 channels
 channels-redis
-cryptography<42.0.0  # investigation is needed for 42+ to work with OpenSSL v3.0.x (RHEL 9.4) and v3.2.x (RHEL 9.5)
+cryptography
 Cython
 daphne
 distro
@@ -18,12 +18,11 @@ django-cors-headers
 django-crum
 django-extensions
 django-guid
-django-oauth-toolkit<2.0.0      # Version 2.0.0 has breaking changes that will need to be worked out before upgrading
 django-polymorphic
 django-solo
-djangorestframework>=3.15.0
+djangorestframework==3.15.2  # upgrading to 3.16+ throws NOT_REQUIRED_DEFAULT error on required fields in serializer that have no default
 djangorestframework-yaml
-dynaconf<4
+dynaconf
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
 grpcio
@@ -35,20 +34,20 @@ Markdown  # used for formatting API help
 maturin  # pydantic-core build dep
 msgpack
 msrestazure
-OPA-python-client==2.0.2 # Code contain monkey patch targeted to 2.0.2 to fix https://github.com/Turall/OPA-python-client/issues/29
+OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
 openshift
-opentelemetry-api~=1.24     # new y streams can be drastically different, in a good way
-opentelemetry-sdk~=1.24
+opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
+opentelemetry-sdk~=1.37
 opentelemetry-instrumentation-logging
 opentelemetry-exporter-otlp
-pexpect==4.7.0  # see library notes
+pexpect
 prometheus_client
 psycopg
 psutil
 pygerduty
-PyGithub <= 2.6.0
-pyopenssl>=23.2.0  # resolve dep conflict from cryptography pin above
-pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
+PyGithub
+pyopenssl
+pyparsing==2.4.7 # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1
@@ -61,13 +60,13 @@ requests
 slack-sdk
 twilio
 twisted[tls]>=24.7.0  # CVE-2024-41810
-urllib3>=1.26.19 # CVE-2024-37891
+urllib3<2.4.0, >=1.26.19 # CVE-2024-37891. capped by kubernetes 34.1.0 reqs
 uWSGI>=2.0.28
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools==80.9.0  # see UPGRADE BLOCKERs
-setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
+setuptools_scm[toml]
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 django-flags>=5.0.13
