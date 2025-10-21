@@ -339,13 +339,7 @@ packaging==25.0
     #   setuptools-scm
 pbr==7.0.1
     # via -r /awx_devel/requirements/requirements.in
-<<<<<<< HEAD
-pexpect==4.7.0
-||||||| 309724b12b
-pexpect==4.7.0
-=======
 pexpect==4.9.0
->>>>>>> devel
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
