@@ -1,0 +1,66 @@
+---
+name: API Schema Change Detection
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+  CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  DEV_DOCKER_OWNER: ${{ github.repository_owner }}
+  COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
+  UPSTREAM_REPOSITORY_ID: 91594105
+
+on:
+  pull_request:
+    branches:
+      - devel
+      - release_**
+      - feature_**
+      - stable-**
+
+jobs:
+  api-schema-detection:
+    name: Detect API Schema Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+          fetch-depth: 0  
+
+      - name: Build awx_devel image for schema check
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
+
+      - name: Detect API schema changes
+        id: schema-check
+        continue-on-error: true
+        run: |
+          AWX_DOCKER_ARGS='-e GITHUB_ACTIONS' \
+          AWX_DOCKER_CMD='make detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}' \
+          make docker-runner 2>&1 | tee schema-diff.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Add schema diff to job summary
+        if: always()
+        # show text and if for some reason, it can't be generated, state that it can't be. 
+        run: |
+          echo "## API Schema Change Detection Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f schema-diff.txt ]; then
+            if grep -q "^+" schema-diff.txt || grep -q "^-" schema-diff.txt; then
+              echo "### Schema changes detected" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```diff' >> $GITHUB_STEP_SUMMARY
+              cat schema-diff.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### No schema changes detected" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "### Unable to generate schema diff" >> $GITHUB_STEP_SUMMARY 
+          fi
