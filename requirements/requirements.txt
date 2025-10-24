@@ -356,21 +356,9 @@ protobuf==6.32.1
     #   -r /awx_devel/requirements/requirements.in
     #   googleapis-common-protos
     #   opentelemetry-proto
-<<<<<<< HEAD
-psutil==7.1.1
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   akeyless
-psycopg==3.2.6
-||||||| 309724b12b
-psutil==6.1.1
-    # via -r /awx_devel/requirements/requirements.in
-psycopg==3.2.6
-=======
 psutil==7.1.0
     # via -r /awx_devel/requirements/requirements.in
 psycopg==3.2.10
->>>>>>> devel
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.7.0
     # via pexpect
@@ -389,14 +377,7 @@ pycparser==2.23
     # via cffi
 pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
-<<<<<<< HEAD
-pygithub==2.6.0
-||||||| 309724b12b
-pygithub==2.6.1
-    # via awx-plugins-core
-=======
 pygithub==2.8.1
->>>>>>> devel
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   awx-plugins-core
