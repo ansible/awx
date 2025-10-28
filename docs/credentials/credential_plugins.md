@@ -69,6 +69,31 @@ hashivault.hashivault_kv_plugin.backend(
 )
 ```
 
+```python
+# Akeyless - programmatic secret fetching
+from awx.main.credential_plugins import akeyless_plugin, akeyless_ssh_plugin
+
+# KV/Static secret lookup
+akeyless_plugin.backend(
+    gateway_url='https://api.akeyless.io',
+    access_id='your-access-id',
+    access_key='your-access-key',
+    secret_path='/path/to/secret',
+    secret_key='dbpass',  # optional for JSON/key-value secrets
+)
+
+# SSH certificate signing
+akeyless_ssh_plugin.backend(
+    gateway_url='https://api.akeyless.io',
+    access_id='your-access-id',
+    access_key='your-access-key',
+    cert_issue_name='/remote/ssh/certificate/issuer',
+    cert_username='ubuntu',                   # or comma-separated list, e.g. "ubuntu,nobody"
+    public_key_data='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ...',
+    ttl=600,                                  # optional
+)
+```
+
 Supported Plugins
 =================
 
@@ -324,7 +349,7 @@ HTTP/1.1 201 Created
 
 ### Akeyless Credential Fields
 
-- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://your-gateway.akeyless.io)
+- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://api.akeyless.io or https://your-gateway.akeyless.io)
 - **Access ID**: Your Akeyless API Access ID
 - **Access Key**: Your Akeyless API Access Key (stored encrypted)
 - **CA Certificate**: Optional CA certificate for TLS verification (PEM format)
@@ -356,3 +381,104 @@ For simple string secrets, omit the `secret_key` field:
 ```
 
 This will retrieve the entire secret value as a string.
+
+
+Akeyless SSH
+----------------------------
+
+AWX supports requesting signed SSH certificates from Akeyless
+(https://www.akeyless.io/). Make sure to follow the steps outlined in [Using SSH Certificates to Access Remote Machines
+](https://tutorials.akeyless.io/docs/using-ssh-certificates-to-access-remote-machines).
+
+The following example illustrates how to configure a Machine Credential to sign
+an SSH public key using Akeyless:
+
+1.  Look up the ID of the Machine and Akeyless SSH Credential
+    types (in this example, `1` and `18`):
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credential_types/?name=Machine" \
+    -H "Authorization: Bearer <token>"
+HTTP/1.1 200 OK
+{
+    "results": [
+        {
+            "id": 1,
+            "url": "/api/v2/credential_types/1/",
+            "name": "Machine",
+            ...
+```
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credential_types/?name=Akeyless%20SSH" \
+    -H "Authorization: Bearer <token>"
+HTTP/1.1 200 OK
+{
+    "results": [
+        {
+            "id": 18,
+            "url": "/api/v2/credential_types/18/",
+            "name": "Akeyless SSH",
+            ...
+```
+
+2.  Create a Machine and an Akeyless SSH Credential:
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credentials/" \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"user": N, "credential_type": 1, "name": "My SSH", "inputs": {"username": "example", "ssh_key_data": "RSA KEY DATA"}}'
+
+HTTP/1.1 201 Created
+{
+    "credential_type": 1,
+    "description": "",
+    "id": 1,
+    ...
+```
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credentials/" \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"user": N, "credential_type": 18, "name": "My Akeyless SSH", "inputs": {"gateway_url": "https://api.akeyless.io", "access_id": "your-access-id", "access_key": "your-access-key"}}'
+
+HTTP/1.1 201 Created
+{
+    "credential_type": 18,
+    "description": "",
+    "id": 2,
+    ...
+```
+
+3.  Link the Machine Credential to the Akeyless SSH Credential:
+
+```shell
+~ curl -sik "https://awx.example.org/api/v2/credentials/1/input_sources/" \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"source_credential": 2, "input_field_name": "password", "metadata": {"cert_issue_name": "/remote/ssh/certificate/issuer", "cert_username": "ubuntu", "public_key_data": "UNSIGNED PUBLIC KEY", "ttl": 600}}'
+HTTP/1.1 201 Created
+```
+
+4. Associate the Machine Credential with a Job Template. When the Job Template
+   is run, AWX will use the provided Akeyless gateway and credentials to request
+   a signed SSH certificate using the issuer and username(s) you provide.
+
+### Akeyless SSH Credential Fields
+
+- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://api.akeyless.io or https://your-gateway.akeyless.io)
+- **Access ID**: Your Akeyless API Access ID
+- **Access Key**: Your Akeyless API Access Key (stored encrypted)
+- **CA Certificate**: Optional CA certificate for TLS verification (PEM format)
+
+### Akeyless SSH Metadata Fields
+
+- **Certificate Issuer Name (cert_issue_name)**: Full path to the SSH certificate issuer in Akeyless (e.g., /remote/ssh/certificate/issuer)
+- **Certificate Username (cert_username)**: Username(s) to embed in the certificate; comma-separated for multiple (e.g., "ubuntu,nobody")
+- **Public Key Data (public_key_data)**: The SSH public key to sign (e.g., "ssh-rsa AAAA...")
+- **TTL (ttl)**: Optional time-to-live in seconds for the certificate
