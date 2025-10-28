@@ -421,6 +421,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('galaxy', _('Galaxy/Automation Hub')),
         ('cryptography', _('Cryptography')),
         ('akeyless', _('Akeyless')),
+        ('akeyless_ssh', _('Akeyless SSH')),
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)

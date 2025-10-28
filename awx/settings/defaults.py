@@ -84,6 +84,7 @@ USE_TZ = True
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ui', 'build', 'static'),
+    os.path.join(BASE_DIR, 'ui', 'build', 'awx'),
     os.path.join(BASE_DIR, 'static'),
 ]
 

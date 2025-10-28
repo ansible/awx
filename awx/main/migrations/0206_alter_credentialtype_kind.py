@@ -28,6 +28,7 @@ class Migration(migrations.Migration):
                     ('galaxy', 'Galaxy/Automation Hub'),
                     ('cryptography', 'Cryptography'),
                     ('akeyless', 'Akeyless'),
+                    ('akeyless_ssh', 'Akeyless SSH'),
                 ],
                 max_length=32,
             ),

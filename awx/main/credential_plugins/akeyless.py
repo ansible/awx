@@ -1,9 +1,14 @@
 # Copyright (c) 2025 Akeyless Security Ltd.
 # All Rights Reserved.
 
+from ast import List
 import collections
+from dataclasses import dataclass
 import logging
-from typing import Dict, Any
+import os
+import tempfile
+from types import SimpleNamespace
+from typing import Callable, Dict, Any, Optional, List
 import json
 
 from akeyless import Configuration, ApiClient, V2Api, Auth, DescribeItem, GetSecretValue
@@ -11,159 +16,97 @@ from akeyless.rest import ApiException
 from akeyless.models.item import Item
 from akeyless.models.item_general_info import ItemGeneralInfo
 from akeyless.models.static_secret_details_info import StaticSecretDetailsInfo
+from akeyless.models.get_ssh_certificate import GetSSHCertificate
 
-
-SUPPORTED_ITEM_TYPES = ['STATIC_SECRET']
 
 logger = logging.getLogger('awx.main.credential_plugins.akeyless')
 logger.setLevel(logging.DEBUG)
-logger.info('Akeyless credential plugin initialized')
-
-AkeylessCredentialPlugin = collections.namedtuple('AkeylessCredentialPlugin', ['name', 'namespace', 'kind', 'inputs', 'backend', 'injectors'])
+logger.debug('Akeyless credential plugin initialized')
 
 
-def akeyless_backend(**kwargs) -> str:
+# HELPER FUNCTIONS
+
+@dataclass
+class CommonPluginInputs:
+    gateway_url: str
+    access_id: str
+    access_key: str
+    ca_cert: Optional[str]
+
+@dataclass
+class SecretsPluginInputs:
+    secret_path: str
+    secret_key: Optional[str]
+
+def parse_plugin_inputs(**kwargs) -> CommonPluginInputs:
     """
-    Backend function to retrieve secrets from Akeyless Vault.
+    Parse plugin inputs.
 
     Args:
-        gateway_url: Akeyless Gateway URL
-        access_id: API Access ID
-        access_key: API Access Key
-        ca_cert: Optional CA certificate for TLS verification
-        secret_path: Path to the secret in Akeyless
-        secret_key: Optional specific key within the secret to retrieve
+        **kwargs: Keyword arguments
 
     Returns:
-        str: The secret value or specific key value
-
-    Raises:
-        Exception: If authentication fails or secret cannot be retrieved
+        PluginInputs: Plugin inputs
     """
 
-    logger.info('=== AKEYLESS BACKED CALLED ===')
-    logger.info(f"Received kwargs: {kwargs}")
-
-    # Extract credential inputs
-    gateway_url = kwargs.get('gateway_url')
+    gateway_url = kwargs.get('gateway_url').rstrip('/')
     access_id = kwargs.get('access_id')
     access_key = kwargs.get('access_key')
     ca_cert = kwargs.get('ca_cert')
 
-    # Extract metadata for secret lookup
+    if not all([gateway_url, access_id, access_key]):
+        raise Exception("Missing required parameters: gateway_url, access_id, and access_key are required")
+
+    return CommonPluginInputs(gateway_url=gateway_url, access_id=access_id, access_key=access_key, ca_cert=ca_cert)
+
+def parse_secrets_plugin_inputs(**kwargs) -> SecretsPluginInputs:
+    """
+    Parse the secrets plugin inputs.
+
+    Args:
+        **kwargs: Keyword arguments
+
+    Returns:
+        SecretsPluginInputs: Secrets plugin inputs
+    """
     secret_path = kwargs.get('secret_path')
     secret_key = kwargs.get('secret_key')
+    return SecretsPluginInputs(secret_path=secret_path, secret_key=secret_key)
 
-    if not all([gateway_url, access_id, access_key, secret_path]):
-        raise Exception("Missing required parameters: gateway_url, access_id, access_key, and secret_path are required")
+TMP_CA_CERT_ATTRIBUTE_NAME = '_ca_tmp_file_path'
 
-    try:
-        # Configure Akeyless client
-        configuration = Configuration()
-        configuration.host = gateway_url.rstrip('/')
+def create_ca_cert_file(ca_cert: str) -> str:
+    """
+    Create a CA certificate file in a temporary directory.
 
-        # Add CA certificate if provided
-        # if ca_cert:
-        #     configuration.ssl_ca_cert = ca_cert
+    Args:
+        ``ca_cert`` (``str``): The CA certificate in PEM format.
 
-        # Create API client
-        api_client = ApiClient(configuration)
-        api_client.user_agent = 'AWX'
-        api_client.default_headers['akeylessclienttype'] = 'AWX'
+    Returns:
+        ``str``: The path to the CA certificate file.
+    """
+    ca_tmp_file_path = None
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix=".pem") as temp_file:
+        temp_file.write(ca_cert)
+        ca_tmp_file_path = temp_file.name
+    return ca_tmp_file_path
 
-        api_instance = V2Api(api_client)
+def cleanup_ca_cert_file(ca_tmp_file_path: str):
+    """
+    Cleanup the CA certificate file.
+    
+    Args:
+        ``ca_tmp_file_path`` (``str``): The path to the CA certificate file.
+    """
+    logger.debug(f"Cleaning up CA certificate file: {ca_tmp_file_path}...")
+    if ca_tmp_file_path:
+        try:
+            os.unlink(ca_tmp_file_path)
+            logger.debug(f"CA certificate file cleaned up: {ca_tmp_file_path}")
+        except OSError:
+            logger.error(f"Failed to cleanup CA certificate file: {ca_tmp_file_path}")
 
-        # Authenticate
-        logger.info(f"Authenticating with Akeyless...")
-        auth_body = Auth(access_id=access_id, access_key=access_key)
-        auth_response = api_instance.auth(auth_body)
-
-        # TODO move to debug for prod
-        logger.info(f"Auth response: {auth_response}")
-
-        if not auth_response.token:
-            raise Exception("Failed to authenticate with Akeyless: No token received")
-
-        t_token = auth_response.token
-
-        # Describe the item
-        # TODO move to debug for prod
-        logger.info(f"Describing item '{secret_path}'...")
-        describe_item_request_body = DescribeItem(name=secret_path, token=t_token)
-        describe_item_response: Item = api_instance.describe_item(describe_item_request_body)
-
-        # TODO move to debug for prod
-        logger.info(f"Describe item response: {describe_item_response}, type: {type(describe_item_response)}")
-
-        item_type = describe_item_response.item_type
-
-        if item_type not in SUPPORTED_ITEM_TYPES:
-            raise NotImplementedError(f"Secret '{secret_path}' is of type '{item_type}' is not supported (supported types: {SUPPORTED_ITEM_TYPES})")
-
-        # Get the static secret format (e.g. text, json, key/value)
-        item_general_info: ItemGeneralInfo = describe_item_response.item_general_info
-        static_secret_info: StaticSecretDetailsInfo = item_general_info.static_secret_info
-        static_secret_format: str = static_secret_info.format
-        static_secret_sub_type: str = describe_item_response.item_sub_type
-
-        # TODO move to debug for prod
-        logger.info(f"Static secret format is '{static_secret_format}'")
-
-        # Get secret value
-        get_secret_body = GetSecretValue(names=[secret_path], token=t_token)
-        secret_response = api_instance.get_secret_value(get_secret_body)
-
-        # TODO move to debug for prod
-        logger.info(f"Secret response: {secret_response}")
-
-        # Retrieve the static secret value depending on the format
-        if static_secret_format == 'text':
-
-            if static_secret_sub_type == 'password':
-                if secret_key:
-                    if secret_key in ['username', 'password']:
-                        secret_data = secret_response[secret_path]
-                        secret_dict = json.loads(secret_data)
-                        secret_value = secret_dict[secret_key]
-                    else:
-                        raise NotImplementedError(
-                            f"Static secret sub type '{static_secret_sub_type}' does not have the key '{secret_key}', only 'username' and 'password' are supported"
-                        )
-                else:
-                    secret_value = secret_response[secret_path]
-
-            elif static_secret_sub_type == 'generic':
-                secret_value = secret_response[secret_path]
-            else:
-                raise NotImplementedError(f"Static secret sub type '{static_secret_sub_type}' is not supported (supported sub types: 'password', 'generic')")
-        elif static_secret_format == 'json' or static_secret_format == 'key-value':
-            secret_data = secret_response[secret_path]
-            # If a specific key is requested, try to parse as JSON and extract the key
-            # Otherwise, return the entire secret data
-            if secret_key:
-                secret_dict = json.loads(secret_data)
-                if secret_key in secret_dict:
-                    secret_value = secret_dict[secret_key]
-                else:
-                    raise KeyError(f"Key '{secret_key}' not found in secret at path: {secret_path}")
-            else:
-                secret_value = str(secret_data)
-        else:
-            raise NotImplementedError(f"Static secret format '{static_secret_format}' is not supported (supported formats: 'text', 'json', 'key-value')")
-
-        # TODO remove for prod
-        logger.info(f"Secret value: '{secret_value}' (type: {type(secret_value)})")
-        return secret_value
-    except ApiException as e:
-        logger.error(f"Akeyless API error: {e.reason} (Status: {e.status})")
-        raise Exception(f"Akeyless API error: {e.reason} (Status: {e.status})")
-    except Exception as e:
-        logger.error(f"Failed to retrieve secret from Akeyless: {str(e)}")
-        raise Exception(f"Failed to retrieve secret from Akeyless: {str(e)}")
-
-
-inputs: Dict[str, Any] = {}
-inputs['fields'] = [
+common_plugin_inputs: List[Dict[str, Any]] = [
     {
         'id': 'gateway_url',
         'label': 'Gateway URL',
@@ -192,11 +135,175 @@ inputs['fields'] = [
         'label': 'CA Certificate',
         'type': 'string',
         'multiline': True,
-        'help_text': 'Optional CA certificate for TLS verification (PEM format)',
+        'help_text': 'Path to the CA certificate for TLS verification (PEM format)',
         'required': False,
     },
 ]
-inputs['metadata'] = [
+
+def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
+    """
+    Setup the Akeyless client.
+
+    Args:
+        ``plugin_inputs`` (``PluginInputs``): Plugin inputs
+
+    Returns:
+        ``akeyless.V2Api``: The Akeyless API instance
+    """
+    logger.debug(f"Setting up Akeyless client with gateway URL: {plugin_inputs.gateway_url}...")
+    client_configuration = Configuration(host=plugin_inputs.gateway_url)
+    ca_tmp_file_path = None
+    if plugin_inputs.ca_cert:
+        logger.debug(f"Using CA certificate: {plugin_inputs.ca_cert}")
+        ca_tmp_file_path = create_ca_cert_file(plugin_inputs.ca_cert)
+        client_configuration.ssl_ca_cert = ca_tmp_file_path
+        client_configuration.verify_ssl = True
+    logger.debug(f"Creating API client with configuration: {client_configuration}...")
+    api_client = ApiClient(client_configuration)
+    api_client.user_agent = 'AWX'
+    api_client.default_headers['akeylessclienttype'] = 'AWX'
+    v2_api = V2Api(api_client)
+    setattr(v2_api, TMP_CA_CERT_ATTRIBUTE_NAME, ca_tmp_file_path)
+    return v2_api
+
+def authenticate(plugin_inputs: CommonPluginInputs, api_instance: V2Api) -> str:
+    """
+    Authenticate with Akeyless.
+
+    Args:
+        ``plugin_inputs`` (``PluginInputs``): Plugin inputs
+        ``api_instance`` (``akeyless.V2Api``): The Akeyless API instance
+
+    Returns:
+        ``str``: The authentication token.
+
+    Raises:
+        ``Exception``: If authentication fails.
+    """
+
+    auth_body = Auth(
+        access_id=plugin_inputs.access_id,
+        access_key=plugin_inputs.access_key
+    )
+    auth_response = api_instance.auth(auth_body)
+    if not auth_response.token:
+        raise Exception("Failed to authenticate with Akeyless: No token received")
+    return auth_response.token
+
+# SECRETS PLUGIN
+SUPPORTED_ITEM_TYPES = ['STATIC_SECRET']
+
+AkeylessCredentialPlugin = collections.namedtuple('AkeylessCredentialPlugin', ['name', 'namespace', 'kind', 'inputs', 'backend', 'injectors'])
+
+def akeyless_backend(**kwargs) -> str:
+    """
+    Backend function to retrieve secrets from Akeyless Vault.
+
+    Args:
+        gateway_url: Akeyless Gateway URL
+        access_id: API Access ID
+        access_key: API Access Key
+        ca_cert: Optional CA certificate for TLS verification
+        secret_path: Path to the secret in Akeyless
+        secret_key: Optional specific key within the secret to retrieve
+
+    Returns:
+        str: The secret value or specific key value
+
+    Raises:
+        Exception: If authentication fails or secret cannot be retrieved
+    """
+    # TODO remove for prod
+    logger.info('=== AKEYLESS SECRETS BACKEND CALLED ===')
+    logger.info(f"Received kwargs: {kwargs}")
+
+    plugin_inputs = parse_plugin_inputs(**kwargs)
+    secrets_plugin_inputs = parse_secrets_plugin_inputs(**kwargs)
+
+    try:
+        # Configure Akeyless client
+        api_instance = setup_client(plugin_inputs)
+
+        # Authenticate
+        t_token = authenticate(plugin_inputs, api_instance)
+
+        # Describe the item
+        logger.debug(f"Describing item '{secrets_plugin_inputs.secret_path}'...")
+        describe_item_request_body = DescribeItem(name=secrets_plugin_inputs.secret_path, token=t_token)
+        describe_item_response: Item = api_instance.describe_item(describe_item_request_body)
+
+        logger.debug(f"Describe item response: {describe_item_response}, type: {type(describe_item_response)}")
+
+        item_type = describe_item_response.item_type
+
+        if item_type not in SUPPORTED_ITEM_TYPES:
+            raise NotImplementedError(f"Secret '{secrets_plugin_inputs.secret_path}' is of type '{item_type}' is not supported (supported types: {SUPPORTED_ITEM_TYPES})")
+
+        # Get the static secret format (e.g. text, json, key/value)
+        item_general_info: ItemGeneralInfo = describe_item_response.item_general_info
+        static_secret_info: StaticSecretDetailsInfo = item_general_info.static_secret_info
+        static_secret_format: str = static_secret_info.format
+        static_secret_sub_type: str = describe_item_response.item_sub_type
+
+        logger.debug(f"Static secret format is '{static_secret_format}'")
+
+        # Get secret value
+        get_secret_body = GetSecretValue(names=[secrets_plugin_inputs.secret_path], token=t_token)
+        secret_response = api_instance.get_secret_value(get_secret_body)
+
+        logger.debug(f"Secret response: {secret_response}")
+
+        # Retrieve the static secret value depending on the format
+        if static_secret_format == 'text':
+
+            if static_secret_sub_type == 'password':
+                if secrets_plugin_inputs.secret_key:
+                    if secrets_plugin_inputs.secret_key in ['username', 'password']:
+                        secret_data = secret_response[secrets_plugin_inputs.secret_path]
+                        secret_dict = json.loads(secret_data)
+                        secret_value = secret_dict[secrets_plugin_inputs.secret_key]
+                    else:
+                        raise NotImplementedError(
+                            f"Static secret sub type '{static_secret_sub_type}' does not have the key '{secrets_plugin_inputs.secret_key}', only 'username' and 'password' are supported"
+                        )
+                else:
+                    secret_value = secret_response[secrets_plugin_inputs.secret_path]
+
+            elif static_secret_sub_type == 'generic':
+                secret_value = secret_response[secrets_plugin_inputs.secret_path]
+            else:
+                raise NotImplementedError(f"Static secret sub type '{static_secret_sub_type}' is not supported (supported sub types: 'password', 'generic')")
+        elif static_secret_format == 'json' or static_secret_format == 'key-value':
+            secret_data = secret_response[secrets_plugin_inputs.secret_path]
+            # If a specific key is requested, try to parse as JSON and extract the key
+            # Otherwise, return the entire secret data
+            if secrets_plugin_inputs.secret_key:
+                secret_dict = json.loads(secret_data)
+                if secrets_plugin_inputs.secret_key in secret_dict:
+                    secret_value = secret_dict[secrets_plugin_inputs.secret_key]
+                else:
+                    raise KeyError(f"Key '{secrets_plugin_inputs.secret_key}' not found in secret at path: {secrets_plugin_inputs.secret_path}")
+            else:
+                secret_value = str(secret_data)
+        else:
+            raise NotImplementedError(f"Static secret format '{static_secret_format}' is not supported (supported formats: 'text', 'json', 'key-value')")
+
+        logger.debug(f"Secret value: '{secret_value}' (type: {type(secret_value)})")
+        return secret_value
+    except ApiException as e:
+        logger.error(f"Akeyless API error: {e.reason} (Status: {e.status})")
+        raise Exception(f"Akeyless API error: {e.reason} (Status: {e.status})")
+    except Exception as e:
+        logger.error(f"Failed to retrieve secret from Akeyless: {str(e)}")
+        raise Exception(f"Failed to retrieve secret from Akeyless: {str(e)}")
+    finally:
+        tmp = getattr(api_instance, TMP_CA_CERT_ATTRIBUTE_NAME, None) if api_instance else None
+        if tmp:
+            cleanup_ca_cert_file(tmp)
+
+secrets_plugin_inputs: Dict[str, Any] = {}
+secrets_plugin_inputs['fields'] = common_plugin_inputs
+secrets_plugin_inputs['metadata'] = [
     {
         'id': 'secret_path',
         'label': 'Secret Path',
@@ -212,13 +319,163 @@ inputs['metadata'] = [
         'required': False,
     },
 ]
-inputs['required'] = ['gateway_url', 'access_id', 'access_key', 'secret_path']
+secrets_plugin_inputs['required'] = ['gateway_url', 'access_id', 'access_key', 'secret_path']
 
 akeyless_plugin = AkeylessCredentialPlugin(
     'Akeyless',
     namespace='akeyless',
     kind='external',
-    inputs=inputs,
+    inputs=secrets_plugin_inputs,
     backend=akeyless_backend,
     injectors={},
 )
+
+# SSH PLUGIN
+
+@dataclass
+class SSHPluginInputs:
+    cert_issue_name: str
+    cert_username: str
+    public_key_data: str
+    ttl: Optional[int]
+
+class AkeylessSSHPlugin(SimpleNamespace):
+    def __init__(self,
+        inputs: Dict[str, Any],
+    ):
+        self.name = 'Akeyless SSH'
+        self.namespace = 'akeyless_ssh'
+        self.kind = 'external'
+        self.inputs = inputs
+        self.backend = create_ssh_certificate
+        self.injectors = {}
+
+def parse_ssh_plugin_inputs(**kwargs) -> SSHPluginInputs:
+    """
+    Parse the ssh plugin inputs.
+
+    Args:
+        **kwargs: Keyword arguments
+
+    Returns:
+        SSHPluginInputs: SSH plugin inputs
+    """
+
+    cert_issue_name = kwargs.get('cert_issue_name')
+    cert_username = kwargs.get('cert_username')
+    ttl = kwargs.get('ttl')
+    public_key_data = kwargs.get('public_key_data')
+    return SSHPluginInputs(
+        cert_issue_name=cert_issue_name,
+        cert_username=cert_username,
+        ttl=ttl,
+        public_key_data=public_key_data,
+    )
+
+def create_ssh_plugin() -> AkeylessSSHPlugin:
+    """
+    Create an SSH plugin instance.
+    """
+
+    ssh_plugin_inputs: Dict[str, Any] = {}
+    ssh_plugin_inputs['fields'] = common_plugin_inputs
+    ssh_plugin_inputs['metadata'] = [
+        {
+            'id': 'cert_issue_name',
+            'label': 'Certificate Issuer Name',
+            'type': 'string',
+            'help_text': 'The full path to the certificate issuer in Akeyless (e.g., /remote/ssh/certificate/issuer)',
+            'required': True,
+        },
+        {
+            'id': 'cert_username',
+            'label': 'Certificate Username',
+            'type': 'string',
+            'help_text': 'The username(s) to sign into the SSH certificate in a comma-separated list, e.g., "ubuntu,nobody,nonroot"',
+            'required': True,
+        },
+        {
+            'id': 'public_key_data',
+            'label': 'Public Key Data',
+            'type': 'string',
+            'help_text': 'The public key data to sign the SSH certificate with (e.g. "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA/ZHU=")',
+            'required': True,
+        },
+        {
+            'id': 'ttl',
+            'label': 'TTL',
+            'type': 'number',
+            'help_text': 'Time to live in seconds for the SSH certificate. If not defined, will use the default TTL of the certificate issuer. The value must be larger than the one defined in the certificate issuer.',
+            'required': False,
+        }
+    ]
+    ssh_plugin_inputs['required'] = ['gateway_url', 'access_id', 'access_key', 'cert_issue_name', 'cert_username', 'public_key_data']
+
+    return AkeylessSSHPlugin(
+        inputs=ssh_plugin_inputs,
+    )
+
+def generate_ssh_certificate(
+    api_instance: V2Api,
+    t_token: str,
+    ssh_plugin_inputs: SSHPluginInputs,
+) -> str:
+    """
+    Generate a signed SSH certificate from Akeyless.
+
+    Args:
+        ``api_instance`` (``akeyless.V2Api``): The Akeyless API instance
+        ``t_token`` (``str``): The authentication token
+        ``ssh_plugin_inputs`` (``SSHPluginInputs``): The SSH plugin inputs
+
+    Returns:
+        ``str``: The signed SSH public key data (e.g. 'rsa-sha2-256-cert-v01@openssh.com AAAAHHNzaC1yc/2...+/ZHU=')
+
+    Raises:
+        ``Exception``: If the SSH certificate cannot be generated
+    """
+
+    body = GetSSHCertificate(
+        token=t_token,
+        cert_issuer_name=ssh_plugin_inputs.cert_issue_name,
+        cert_username=ssh_plugin_inputs.cert_username,
+        ttl=ssh_plugin_inputs.ttl,
+        public_key_data=ssh_plugin_inputs.public_key_data,
+    )
+    response = api_instance.get_ssh_certificate(body)
+    logger.debug(f"Get SSH certificate response: {response}")
+    if not response.data:
+        raise Exception("Failed to generate signed SSH certificate from Akeyless: No data received")
+    return response.data
+
+def create_ssh_certificate(**kwargs) -> str:
+    """
+    Create a signed SSH certificate from Akeyless.
+    """
+    
+    logger.info('=== AKEYLESS CREATE SSH CERTIFICATE CALLED ===')
+    logger.info(f"Received kwargs: {kwargs}")
+
+    plugin_inputs = parse_plugin_inputs(**kwargs)
+    ssh_plugin_inputs = parse_ssh_plugin_inputs(**kwargs)
+
+    try:
+        api_instance = setup_client(plugin_inputs)
+
+        t_token = authenticate(plugin_inputs, api_instance)
+
+        ssh_certificate = generate_ssh_certificate(api_instance, t_token, ssh_plugin_inputs)
+        return ssh_certificate
+
+    except ApiException as e:
+        logger.error(f"Akeyless API error: {e.reason} (Status: {e.status})")
+        raise Exception(f"Akeyless API error: {e.reason} (Status: {e.status})")
+    except Exception as e:
+        logger.error(f"Failed to generate signed SSH certificate from Akeyless: {str(e)}")
+        raise Exception(f"Failed to generate signed SSH certificate from Akeyless: {str(e)}")
+    finally:
+        tmp = getattr(api_instance, TMP_CA_CERT_ATTRIBUTE_NAME, None) if api_instance else None
+        if tmp:
+            cleanup_ca_cert_file(tmp)
+
+akeyless_ssh_plugin = create_ssh_plugin()
