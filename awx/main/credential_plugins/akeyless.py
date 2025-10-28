@@ -26,6 +26,7 @@ logger.debug('Akeyless credential plugin initialized')
 
 # HELPER FUNCTIONS
 
+
 @dataclass
 class CommonPluginInputs:
     gateway_url: str
@@ -33,10 +34,12 @@ class CommonPluginInputs:
     access_key: str
     ca_cert: Optional[str]
 
+
 @dataclass
 class SecretsPluginInputs:
     secret_path: str
     secret_key: Optional[str]
+
 
 def parse_plugin_inputs(**kwargs) -> CommonPluginInputs:
     """
@@ -59,6 +62,7 @@ def parse_plugin_inputs(**kwargs) -> CommonPluginInputs:
 
     return CommonPluginInputs(gateway_url=gateway_url, access_id=access_id, access_key=access_key, ca_cert=ca_cert)
 
+
 def parse_secrets_plugin_inputs(**kwargs) -> SecretsPluginInputs:
     """
     Parse the secrets plugin inputs.
@@ -73,7 +77,9 @@ def parse_secrets_plugin_inputs(**kwargs) -> SecretsPluginInputs:
     secret_key = kwargs.get('secret_key')
     return SecretsPluginInputs(secret_path=secret_path, secret_key=secret_key)
 
+
 TMP_CA_CERT_ATTRIBUTE_NAME = '_ca_tmp_file_path'
+
 
 def create_ca_cert_file(ca_cert: str) -> str:
     """
@@ -91,10 +97,11 @@ def create_ca_cert_file(ca_cert: str) -> str:
         ca_tmp_file_path = temp_file.name
     return ca_tmp_file_path
 
+
 def cleanup_ca_cert_file(ca_tmp_file_path: str):
     """
     Cleanup the CA certificate file.
-    
+
     Args:
         ``ca_tmp_file_path`` (``str``): The path to the CA certificate file.
     """
@@ -105,6 +112,7 @@ def cleanup_ca_cert_file(ca_tmp_file_path: str):
             logger.debug(f"CA certificate file cleaned up: {ca_tmp_file_path}")
         except OSError:
             logger.error(f"Failed to cleanup CA certificate file: {ca_tmp_file_path}")
+
 
 common_plugin_inputs: List[Dict[str, Any]] = [
     {
@@ -140,6 +148,7 @@ common_plugin_inputs: List[Dict[str, Any]] = [
     },
 ]
 
+
 def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
     """
     Setup the Akeyless client.
@@ -166,6 +175,7 @@ def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
     setattr(v2_api, TMP_CA_CERT_ATTRIBUTE_NAME, ca_tmp_file_path)
     return v2_api
 
+
 def authenticate(plugin_inputs: CommonPluginInputs, api_instance: V2Api) -> str:
     """
     Authenticate with Akeyless.
@@ -181,19 +191,18 @@ def authenticate(plugin_inputs: CommonPluginInputs, api_instance: V2Api) -> str:
         ``Exception``: If authentication fails.
     """
 
-    auth_body = Auth(
-        access_id=plugin_inputs.access_id,
-        access_key=plugin_inputs.access_key
-    )
+    auth_body = Auth(access_id=plugin_inputs.access_id, access_key=plugin_inputs.access_key)
     auth_response = api_instance.auth(auth_body)
     if not auth_response.token:
         raise Exception("Failed to authenticate with Akeyless: No token received")
     return auth_response.token
 
+
 # SECRETS PLUGIN
 SUPPORTED_ITEM_TYPES = ['STATIC_SECRET']
 
 AkeylessCredentialPlugin = collections.namedtuple('AkeylessCredentialPlugin', ['name', 'namespace', 'kind', 'inputs', 'backend', 'injectors'])
+
 
 def akeyless_backend(**kwargs) -> str:
     """
@@ -237,7 +246,9 @@ def akeyless_backend(**kwargs) -> str:
         item_type = describe_item_response.item_type
 
         if item_type not in SUPPORTED_ITEM_TYPES:
-            raise NotImplementedError(f"Secret '{secrets_plugin_inputs.secret_path}' is of type '{item_type}' is not supported (supported types: {SUPPORTED_ITEM_TYPES})")
+            raise NotImplementedError(
+                f"Secret '{secrets_plugin_inputs.secret_path}' is of type '{item_type}' is not supported (supported types: {SUPPORTED_ITEM_TYPES})"
+            )
 
         # Get the static secret format (e.g. text, json, key/value)
         item_general_info: ItemGeneralInfo = describe_item_response.item_general_info
@@ -301,6 +312,7 @@ def akeyless_backend(**kwargs) -> str:
         if tmp:
             cleanup_ca_cert_file(tmp)
 
+
 secrets_plugin_inputs: Dict[str, Any] = {}
 secrets_plugin_inputs['fields'] = common_plugin_inputs
 secrets_plugin_inputs['metadata'] = [
@@ -332,6 +344,7 @@ akeyless_plugin = AkeylessCredentialPlugin(
 
 # SSH PLUGIN
 
+
 @dataclass
 class SSHPluginInputs:
     cert_issue_name: str
@@ -339,8 +352,10 @@ class SSHPluginInputs:
     public_key_data: str
     ttl: Optional[int]
 
+
 class AkeylessSSHPlugin(SimpleNamespace):
-    def __init__(self,
+    def __init__(
+        self,
         inputs: Dict[str, Any],
     ):
         self.name = 'Akeyless SSH'
@@ -349,6 +364,7 @@ class AkeylessSSHPlugin(SimpleNamespace):
         self.inputs = inputs
         self.backend = create_ssh_certificate
         self.injectors = {}
+
 
 def parse_ssh_plugin_inputs(**kwargs) -> SSHPluginInputs:
     """
@@ -371,6 +387,7 @@ def parse_ssh_plugin_inputs(**kwargs) -> SSHPluginInputs:
         ttl=ttl,
         public_key_data=public_key_data,
     )
+
 
 def create_ssh_plugin() -> AkeylessSSHPlugin:
     """
@@ -407,13 +424,14 @@ def create_ssh_plugin() -> AkeylessSSHPlugin:
             'type': 'number',
             'help_text': 'Time to live in seconds for the SSH certificate. If not defined, will use the default TTL of the certificate issuer. The value must be larger than the one defined in the certificate issuer.',
             'required': False,
-        }
+        },
     ]
     ssh_plugin_inputs['required'] = ['gateway_url', 'access_id', 'access_key', 'cert_issue_name', 'cert_username', 'public_key_data']
 
     return AkeylessSSHPlugin(
         inputs=ssh_plugin_inputs,
     )
+
 
 def generate_ssh_certificate(
     api_instance: V2Api,
@@ -448,11 +466,12 @@ def generate_ssh_certificate(
         raise Exception("Failed to generate signed SSH certificate from Akeyless: No data received")
     return response.data
 
+
 def create_ssh_certificate(**kwargs) -> str:
     """
     Create a signed SSH certificate from Akeyless.
     """
-    
+
     logger.info('=== AKEYLESS CREATE SSH CERTIFICATE CALLED ===')
     logger.info(f"Received kwargs: {kwargs}")
 
@@ -477,5 +496,6 @@ def create_ssh_certificate(**kwargs) -> str:
         tmp = getattr(api_instance, TMP_CA_CERT_ATTRIBUTE_NAME, None) if api_instance else None
         if tmp:
             cleanup_ca_cert_file(tmp)
+
 
 akeyless_ssh_plugin = create_ssh_plugin()
