@@ -57,6 +57,17 @@ jobs:
           AWX_DOCKER_CMD='${{ matrix.tests.command }}'
           make docker-runner
 
+      - name: Inject PR number into coverage.xml
+        if: >-
+          !cancelled()
+          && github.event_name == 'pull_request'
+          && steps.make-run.outputs.cov-report-files != ''
+        run: |
+          if [ -f "reports/coverage.xml" ]; then
+            sed -i '2i<!-- PR ${{ github.event.pull_request.number }} -->' reports/coverage.xml
+            echo "Injected PR number ${{ github.event.pull_request.number }} into coverage.xml"
+          fi
+
       - name: Upload test coverage to Codecov
         if: >-
           !cancelled()
@@ -95,6 +106,14 @@ jobs:
               runner.os
             }}
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.tests.name }}-artifacts
+          path: reports/coverage.xml
+          retention-days: 5
 
       - name: Upload awx jUnit test reports
         if: >-
