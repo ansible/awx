@@ -41,10 +41,33 @@ PENDO_TRACKING_STATE = "off"
 INSIGHTS_TRACKING_STATE = False
 
 # debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
-INSTALLED_APPS = "@merge drf_yasg,debug_toolbar"
+INSTALLED_APPS = "@merge drf_spectacular,debug_toolbar"
 MIDDLEWARE = "@insert 0 debug_toolbar.middleware.DebugToolbarMiddleware"
 
 DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
+
+# drf-spectacular settings for API schema generation
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'AWX API',
+    'DESCRIPTION': 'AWX API Documentation',
+    'VERSION': 'v2',
+    'OAS_VERSION': '3.0.3',  # Set OpenAPI Specification version to 3.0.3
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
+    'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
+    'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
+    'CONTACT': {'email': 'contact@snippets.local'},
+    'LICENSE': {'name': 'Apache License'},
+    'TERMS_OF_SERVICE': 'https://www.google.com/policies/terms/',
+    # Use our custom schema class that handles swagger_topic and deprecated views
+    'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+    },
+}
 
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'

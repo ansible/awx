@@ -375,15 +375,13 @@ REST_FRAMEWORK = {
     'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
     'NON_FIELD_ERRORS_KEY': '__all__',
     'DEFAULT_VERSION': 'v2',
-    # For swagger schema generation
+    # For OpenAPI schema generation with drf-spectacular
     # see https://github.com/encode/django-rest-framework/pull/6532
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
-SWAGGER_SETTINGS = {
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'awx.api.swagger.CustomSwaggerAutoSchema',
-}
+# SWAGGER_SETTINGS removed - migrated to drf-spectacular (see SPECTACULAR_SETTINGS in development_defaults.py)
 
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 
