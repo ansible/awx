@@ -96,6 +96,7 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import compute_cloud_inventory_sources
+from awx.main.utils.common import memoize
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
@@ -266,7 +267,24 @@ class DashboardJobsGraphView(APIView):
         period = request.query_params.get('period', 'month')
         job_type = request.query_params.get('job_type', 'all')
 
-        user_unified_jobs = get_user_queryset(request.user, models.UnifiedJob).exclude(launch_type='sync')
+        user_id = getattr(request.user, 'id', None) or 0
+        try:
+            payload = self._compute_dashboard_jobs_graph(user_id, period, job_type)
+        except ParseError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(payload)
+
+    @staticmethod
+    @memoize(ttl=15)
+    def _compute_dashboard_jobs_graph(user_id, period, job_type):
+        # Debug log when there is a cache miss
+        logger.debug('DashboardJobsGraphView cache miss: user_id=%s period=%s job_type=%s', user_id, period, job_type)
+        # Validate period. Raise exception to let caller return 400 error in response
+        if period not in ('month', 'two_weeks', 'week', 'day'):
+            raise ParseError(_('Unknown period "%s"') % str(period))
+
+        user = models.User.objects.get(pk=user_id) if user_id else None
+        user_unified_jobs = get_user_queryset(user, models.UnifiedJob).exclude(launch_type='sync')
 
         success_query = user_unified_jobs.filter(status='successful')
         failed_query = user_unified_jobs.filter(status='failed')
@@ -300,8 +318,6 @@ class DashboardJobsGraphView(APIView):
         elif period == 'day':
             start = end - dateutil.relativedelta.relativedelta(days=1)
             interval = 'hour'
-        else:
-            return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
         dashboard_data = {"jobs": {"successful": [], "failed": [], "canceled": [], "error": []}}
 
@@ -353,7 +369,7 @@ class DashboardJobsGraphView(APIView):
             canceled_list.append([time.mktime(date.timetuple()), data_c.get(date, 0)])
             error_list.append([time.mktime(date.timetuple()), data_e.get(date, 0)])
 
-        return Response(dashboard_data)
+        return dashboard_data
 
 
 class InstanceList(ListCreateAPIView):
