@@ -19,8 +19,6 @@ from akeyless.models.get_ssh_certificate import GetSSHCertificate
 
 
 logger = logging.getLogger('awx.main.credential_plugins.akeyless')
-logger.setLevel(logging.DEBUG)
-logger.debug('Akeyless credential plugin initialized')
 
 SUPPORTED_ITEM_TYPES = ['STATIC_SECRET']
 TMP_CA_CERT_ATTRIBUTE_NAME = '_ca_tmp_file_path'
@@ -133,6 +131,7 @@ def create_ca_cert_file(ca_cert: str) -> str:
     with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix=".pem") as temp_file:
         temp_file.write(ca_cert)
         ca_tmp_file_path = temp_file.name
+    os.chmod(ca_tmp_file_path, 0o600)
     return ca_tmp_file_path
 
 
@@ -143,13 +142,13 @@ def cleanup_ca_cert_file(ca_tmp_file_path: str):
     Args:
         ``ca_tmp_file_path`` (``str``): The path to the CA certificate file.
     """
-    logger.debug(f"Cleaning up CA certificate file: {ca_tmp_file_path}...")
+    logger.debug(f"Cleaning up CA certificate file '{ca_tmp_file_path}'...")
     if ca_tmp_file_path:
         try:
             os.unlink(ca_tmp_file_path)
-            logger.debug(f"CA certificate file cleaned up: {ca_tmp_file_path}")
-        except OSError:
-            logger.error(f"Failed to cleanup CA certificate file: {ca_tmp_file_path}")
+            logger.debug(f"CA certificate file '{ca_tmp_file_path}' cleaned up")
+        except OSError as e:
+            logger.error(f"Failed to cleanup CA certificate file '{ca_tmp_file_path}': {e}", exc_info=True)
 
 
 def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
@@ -162,15 +161,14 @@ def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
     Returns:
         ``akeyless.V2Api``: The Akeyless API instance
     """
-    logger.debug(f"Setting up Akeyless client with gateway URL: {plugin_inputs.gateway_url}...")
+    logger.debug(f"Setting up Akeyless client with gateway URL '{plugin_inputs.gateway_url}'...")
     client_configuration = Configuration(host=plugin_inputs.gateway_url)
     ca_tmp_file_path = None
     if plugin_inputs.ca_cert:
-        logger.debug(f"Using CA certificate: {plugin_inputs.ca_cert}")
+        logger.debug(f"Setting up Akeyless client with CA certificate...")
         ca_tmp_file_path = create_ca_cert_file(plugin_inputs.ca_cert)
         client_configuration.ssl_ca_cert = ca_tmp_file_path
         client_configuration.verify_ssl = True
-    logger.debug(f"Creating API client with configuration: {client_configuration}...")
     api_client = ApiClient(client_configuration)
     api_client.user_agent = 'AWX'
     api_client.default_headers['akeylessclienttype'] = 'AWX'
@@ -265,10 +263,6 @@ def get_secret_value(**kwargs) -> str:
     Raises:
         Exception: If authentication fails or secret cannot be retrieved
     """
-    # TODO remove for prod
-    logger.info('=== AKEYLESS SECRETS BACKEND CALLED ===')
-    logger.info(f"Received kwargs: {kwargs}")
-
     plugin_inputs = parse_plugin_inputs(**kwargs)
     secrets_plugin_inputs = parse_secrets_plugin_inputs(**kwargs)
 
@@ -284,7 +278,7 @@ def get_secret_value(**kwargs) -> str:
         describe_item_request_body = DescribeItem(name=secrets_plugin_inputs.secret_path, token=t_token)
         describe_item_response: Item = api_instance.describe_item(describe_item_request_body)
 
-        logger.debug(f"Describe item response: {describe_item_response}, type: {type(describe_item_response)}")
+        logger.debug(f"Describe item response: {describe_item_response}")
 
         item_type = describe_item_response.item_type
 
@@ -304,8 +298,6 @@ def get_secret_value(**kwargs) -> str:
         # Get secret value
         get_secret_body = GetSecretValue(names=[secrets_plugin_inputs.secret_path], token=t_token)
         secret_response = api_instance.get_secret_value(get_secret_body)
-
-        logger.debug(f"Secret response: {secret_response}")
 
         # Retrieve the static secret value depending on the format
         if static_secret_format == 'text':
@@ -342,7 +334,6 @@ def get_secret_value(**kwargs) -> str:
         else:
             raise NotImplementedError(f"Static secret format '{static_secret_format}' is not supported (supported formats: 'text', 'json', 'key-value')")
 
-        logger.debug(f"Secret value: '{secret_value}' (type: {type(secret_value)})")
         return secret_value
     except ApiException as e:
         logger.error(f"Akeyless API error: {e.reason} (Status: {e.status})")
@@ -441,7 +432,6 @@ def generate_ssh_certificate(
         public_key_data=ssh_plugin_inputs.public_key_data,
     )
     response = api_instance.get_ssh_certificate(body)
-    logger.debug(f"Get SSH certificate response: {response}")
     if not response.data:
         raise Exception("Failed to generate signed SSH certificate from Akeyless: No data received")
     return response.data
@@ -451,9 +441,6 @@ def create_ssh_certificate(**kwargs) -> str:
     """
     Create a signed SSH certificate from Akeyless.
     """
-
-    logger.info('=== AKEYLESS CREATE SSH CERTIFICATE CALLED ===')
-    logger.info(f"Received kwargs: {kwargs}")
 
     plugin_inputs = parse_plugin_inputs(**kwargs)
     ssh_plugin_inputs = parse_ssh_plugin_inputs(**kwargs)
