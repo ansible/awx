@@ -381,7 +381,7 @@ REST_FRAMEWORK = {
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
-# SWAGGER_SETTINGS removed - migrated to drf-spectacular (see SPECTACULAR_SETTINGS in development_defaults.py)
+# SWAGGER_SETTINGS removed - migrated to drf-spectacular (see SPECTACULAR_SETTINGS below)
 
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 
@@ -1053,6 +1053,22 @@ SPECTACULAR_SETTINGS = {
         'deepLinking': True,
         'persistAuthorization': True,
         'displayOperationId': True,
+    },
+    # Resolve enum naming collisions with meaningful names
+    # Format: 'ComponentPath': 'DesiredEnumName'
+    'ENUM_NAME_OVERRIDES': {
+        'JobSerializer.status': 'JobStatusEnum',
+        'UnifiedJobSerializer.status': 'UnifiedJobStatusEnum',
+        'JobSerializer.job_type': 'JobTypeEnum',
+        'JobTemplateSerializer.job_type': 'JobTemplateJobTypeEnum',
+        'AdHocCommandSerializer.job_type': 'AdHocCommandJobTypeEnum',
+        'ProjectUpdateSerializer.job_type': 'ProjectUpdateJobTypeEnum',
+        'JobSerializer.verbosity': 'JobVerbosityEnum',
+        'AdHocCommandSerializer.verbosity': 'AdHocCommandVerbosityEnum',
+        'InventoryUpdateSerializer.verbosity': 'InventoryUpdateVerbosityEnum',
+        'JobEventSerializer.event': 'JobEventEnum',
+        'InventorySerializer.kind': 'InventoryKindEnum',
+        'CredentialTypeSerializer.kind': 'CredentialTypeKindEnum',
     },
 }
 OAUTH2_PROVIDER = {}
