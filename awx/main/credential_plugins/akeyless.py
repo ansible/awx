@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 from ast import List
-import collections
 from dataclasses import dataclass
 import logging
 import os
@@ -23,8 +22,93 @@ logger = logging.getLogger('awx.main.credential_plugins.akeyless')
 logger.setLevel(logging.DEBUG)
 logger.debug('Akeyless credential plugin initialized')
 
+SUPPORTED_ITEM_TYPES = ['STATIC_SECRET']
+TMP_CA_CERT_ATTRIBUTE_NAME = '_ca_tmp_file_path'
+COMMON_PLUGIN_FIELDS: List[Dict[str, Any]] = [
+    {
+        'id': 'gateway_url',
+        'label': 'Gateway URL',
+        'type': 'string',
+        'help_text': 'The URL of your Akeyless Gateway (e.g., https://api.akeyless.io, https://my.akeyless.gw/api/v2)',
+        'required': True,
+        'default': 'https://api.akeyless.io',
+    },
+    {
+        'id': 'access_id',
+        'label': 'Access ID',
+        'type': 'string',
+        'help_text': 'Your Akeyless API Access ID',
+        'required': True,
+    },
+    {
+        'id': 'access_key',
+        'label': 'Access Key',
+        'type': 'string',
+        'help_text': 'Your Akeyless API Access Key',
+        'secret': True,
+        'required': True,
+    },
+    {
+        'id': 'ca_cert',
+        'label': 'CA Certificate',
+        'type': 'string',
+        'multiline': True,
+        'help_text': 'Path to the CA certificate for TLS verification (PEM format)',
+        'required': False,
+    },
+]
 
-# HELPER FUNCTIONS
+# COMMON
+
+
+class AkeylessPlugin(SimpleNamespace):
+    def __init__(
+        self,
+        name: str,
+        namespace: str,
+        metadata: List[Dict[str, Any]],
+        required: List[str],
+        backend: Callable,
+    ):
+        self.name = name
+        self.namespace = namespace
+        self.kind = 'external'
+        self.inputs = {
+            'metadata': metadata,
+            'required': required,
+            'fields': COMMON_PLUGIN_FIELDS,
+        }
+        self.backend = backend
+        self.injectors = {}
+
+
+def create_plugin(
+    name: str,
+    namespace: str,
+    metadata: List[Dict[str, Any]],
+    required: List[str],
+    backend: Callable,
+) -> AkeylessPlugin:
+    """
+    Create a new Akeyless plugin.
+
+    Args:
+        `name` (``str``): The name of the plugin
+        `namespace` (``str``): The namespace of the plugin
+        `metadata` (``List[Dict[str, Any]]``): The metadata of the plugin
+        `required` (``List[str]``): The required fields of the plugin
+        `backend` (``Callable``): The backend of the plugin
+
+    Returns:
+        ``AkeylessPlugin``: The Akeyless plugin
+    """
+    return AkeylessPlugin(
+        name=name,
+        namespace=namespace,
+        metadata=metadata,
+        required=required,
+        backend=backend,
+    )
 
 
 @dataclass
@@ -33,52 +117,6 @@ class CommonPluginInputs:
     access_id: str
     access_key: str
     ca_cert: Optional[str]
-
-
-@dataclass
-class SecretsPluginInputs:
-    secret_path: str
-    secret_key: Optional[str]
-
-
-def parse_plugin_inputs(**kwargs) -> CommonPluginInputs:
-    """
-    Parse plugin inputs.
-
-    Args:
-        **kwargs: Keyword arguments
-
-    Returns:
-        PluginInputs: Plugin inputs
-    """
-
-    gateway_url = kwargs.get('gateway_url').rstrip('/')
-    access_id = kwargs.get('access_id')
-    access_key = kwargs.get('access_key')
-    ca_cert = kwargs.get('ca_cert')
-
-    if not all([gateway_url, access_id, access_key]):
-        raise Exception("Missing required parameters: gateway_url, access_id, and access_key are required")
-
-    return CommonPluginInputs(gateway_url=gateway_url, access_id=access_id, access_key=access_key, ca_cert=ca_cert)
-
-
-def parse_secrets_plugin_inputs(**kwargs) -> SecretsPluginInputs:
-    """
-    Parse the secrets plugin inputs.
-
-    Args:
-        **kwargs: Keyword arguments
-
-    Returns:
-        SecretsPluginInputs: Secrets plugin inputs
-    """
-    secret_path = kwargs.get('secret_path')
-    secret_key = kwargs.get('secret_key')
-    return SecretsPluginInputs(secret_path=secret_path, secret_key=secret_key)
-
-
-TMP_CA_CERT_ATTRIBUTE_NAME = '_ca_tmp_file_path'
 
 
 def create_ca_cert_file(ca_cert: str) -> str:
@@ -112,41 +150,6 @@ def cleanup_ca_cert_file(ca_tmp_file_path: str):
             logger.debug(f"CA certificate file cleaned up: {ca_tmp_file_path}")
         except OSError:
             logger.error(f"Failed to cleanup CA certificate file: {ca_tmp_file_path}")
-
-
-common_plugin_inputs: List[Dict[str, Any]] = [
-    {
-        'id': 'gateway_url',
-        'label': 'Gateway URL',
-        'type': 'string',
-        'help_text': 'The URL of your Akeyless Gateway (e.g., https://api.akeyless.io, https://my.akeyless.gw/api/v2)',
-        'required': True,
-        'default': 'https://api.akeyless.io',
-    },
-    {
-        'id': 'access_id',
-        'label': 'Access ID',
-        'type': 'string',
-        'help_text': 'Your Akeyless API Access ID',
-        'required': True,
-    },
-    {
-        'id': 'access_key',
-        'label': 'Access Key',
-        'type': 'string',
-        'help_text': 'Your Akeyless API Access Key',
-        'secret': True,
-        'required': True,
-    },
-    {
-        'id': 'ca_cert',
-        'label': 'CA Certificate',
-        'type': 'string',
-        'multiline': True,
-        'help_text': 'Path to the CA certificate for TLS verification (PEM format)',
-        'required': False,
-    },
-]
 
 
 def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
@@ -199,12 +202,52 @@ def authenticate(plugin_inputs: CommonPluginInputs, api_instance: V2Api) -> str:
 
 
 # SECRETS PLUGIN
-SUPPORTED_ITEM_TYPES = ['STATIC_SECRET']
-
-AkeylessCredentialPlugin = collections.namedtuple('AkeylessCredentialPlugin', ['name', 'namespace', 'kind', 'inputs', 'backend', 'injectors'])
 
 
-def akeyless_backend(**kwargs) -> str:
+@dataclass
+class SecretsPluginInputs:
+    secret_path: str
+    secret_key: Optional[str]
+
+
+def parse_plugin_inputs(**kwargs) -> CommonPluginInputs:
+    """
+    Parse plugin inputs.
+
+    Args:
+        **kwargs: Keyword arguments
+
+    Returns:
+        PluginInputs: Plugin inputs
+    """
+
+    gateway_url = kwargs.get('gateway_url').rstrip('/')
+    access_id = kwargs.get('access_id')
+    access_key = kwargs.get('access_key')
+    ca_cert = kwargs.get('ca_cert')
+
+    if not all([gateway_url, access_id, access_key]):
+        raise Exception("Missing required parameters: gateway_url, access_id, and access_key are required")
+
+    return CommonPluginInputs(gateway_url=gateway_url, access_id=access_id, access_key=access_key, ca_cert=ca_cert)
+
+
+def parse_secrets_plugin_inputs(**kwargs) -> SecretsPluginInputs:
+    """
+    Parse the secrets plugin inputs.
+
+    Args:
+        **kwargs: Keyword arguments
+
+    Returns:
+        SecretsPluginInputs: Secrets plugin inputs
+    """
+    secret_path = kwargs.get('secret_path')
+    secret_key = kwargs.get('secret_key')
+    return SecretsPluginInputs(secret_path=secret_path, secret_key=secret_key)
+
+
+def get_secret_value(**kwargs) -> str:
     """
     Backend function to retrieve secrets from Akeyless Vault.
 
@@ -313,33 +356,27 @@ def akeyless_backend(**kwargs) -> str:
             cleanup_ca_cert_file(tmp)
 
 
-secrets_plugin_inputs: Dict[str, Any] = {}
-secrets_plugin_inputs['fields'] = common_plugin_inputs
-secrets_plugin_inputs['metadata'] = [
-    {
-        'id': 'secret_path',
-        'label': 'Secret Path',
-        'type': 'string',
-        'help_text': 'The path to the secret in Akeyless (e.g., /myapp/database/password)',
-        'required': True,
-    },
-    {
-        'id': 'secret_key',
-        'label': 'Secret Key',
-        'type': 'string',
-        'help_text': 'Optional specific key within the secret to retrieve (for JSON secrets)',
-        'required': False,
-    },
-]
-secrets_plugin_inputs['required'] = ['gateway_url', 'access_id', 'access_key', 'secret_path']
-
-akeyless_plugin = AkeylessCredentialPlugin(
-    'Akeyless',
+akeyless_plugin = create_plugin(
+    name='Akeyless',
     namespace='akeyless',
-    kind='external',
-    inputs=secrets_plugin_inputs,
-    backend=akeyless_backend,
-    injectors={},
+    metadata=[
+        {
+            'id': 'secret_path',
+            'label': 'Secret Path',
+            'type': 'string',
+            'help_text': 'The path to the secret in Akeyless (e.g., /myapp/database/password)',
+            'required': True,
+        },
+        {
+            'id': 'secret_key',
+            'label': 'Secret Key',
+            'type': 'string',
+            'help_text': 'Optional specific key within the secret to retrieve (for JSON secrets)',
+            'required': False,
+        },
+    ],
+    required=['gateway_url', 'access_id', 'access_key', 'secret_path'],
+    backend=get_secret_value,
 )
 
 # SSH PLUGIN
@@ -351,19 +388,6 @@ class SSHPluginInputs:
     cert_username: str
     public_key_data: str
     ttl: Optional[int]
-
-
-class AkeylessSSHPlugin(SimpleNamespace):
-    def __init__(
-        self,
-        inputs: Dict[str, Any],
-    ):
-        self.name = 'Akeyless SSH'
-        self.namespace = 'akeyless_ssh'
-        self.kind = 'external'
-        self.inputs = inputs
-        self.backend = create_ssh_certificate
-        self.injectors = {}
 
 
 def parse_ssh_plugin_inputs(**kwargs) -> SSHPluginInputs:
@@ -386,50 +410,6 @@ def parse_ssh_plugin_inputs(**kwargs) -> SSHPluginInputs:
         cert_username=cert_username,
         ttl=ttl,
         public_key_data=public_key_data,
-    )
-
-
-def create_ssh_plugin() -> AkeylessSSHPlugin:
-    """
-    Create an SSH plugin instance.
-    """
-
-    ssh_plugin_inputs: Dict[str, Any] = {}
-    ssh_plugin_inputs['fields'] = common_plugin_inputs
-    ssh_plugin_inputs['metadata'] = [
-        {
-            'id': 'cert_issue_name',
-            'label': 'Certificate Issuer Name',
-            'type': 'string',
-            'help_text': 'The full path to the certificate issuer in Akeyless (e.g., /remote/ssh/certificate/issuer)',
-            'required': True,
-        },
-        {
-            'id': 'cert_username',
-            'label': 'Certificate Username',
-            'type': 'string',
-            'help_text': 'The username(s) to sign into the SSH certificate in a comma-separated list, e.g., "ubuntu,nobody,nonroot"',
-            'required': True,
-        },
-        {
-            'id': 'public_key_data',
-            'label': 'Public Key Data',
-            'type': 'string',
-            'help_text': 'The public key data to sign the SSH certificate with (e.g. "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA/ZHU=")',
-            'required': True,
-        },
-        {
-            'id': 'ttl',
-            'label': 'TTL',
-            'type': 'number',
-            'help_text': 'Time to live in seconds for the SSH certificate. If not defined, will use the default TTL of the certificate issuer. The value must be larger than the one defined in the certificate issuer.',
-            'required': False,
-        },
-    ]
-    ssh_plugin_inputs['required'] = ['gateway_url', 'access_id', 'access_key', 'cert_issue_name', 'cert_username', 'public_key_data']
-
-    return AkeylessSSHPlugin(
-        inputs=ssh_plugin_inputs,
     )
 
 
@@ -498,4 +478,39 @@ def create_ssh_certificate(**kwargs) -> str:
             cleanup_ca_cert_file(tmp)
 
 
-akeyless_ssh_plugin = create_ssh_plugin()
+akeyless_ssh_plugin = create_plugin(
+    name='Akeyless SSH',
+    namespace='akeyless_ssh',
+    metadata=[
+        {
+            'id': 'cert_issue_name',
+            'label': 'Certificate Issuer Name',
+            'type': 'string',
+            'help_text': 'The full path to the certificate issuer in Akeyless (e.g., /remote/ssh/certificate/issuer)',
+            'required': True,
+        },
+        {
+            'id': 'cert_username',
+            'label': 'Certificate Username',
+            'type': 'string',
+            'help_text': 'The username(s) to sign into the SSH certificate in a comma-separated list, e.g., "ubuntu,nobody,nonroot"',
+            'required': True,
+        },
+        {
+            'id': 'public_key_data',
+            'label': 'Public Key Data',
+            'type': 'string',
+            'help_text': 'The public key data to sign the SSH certificate with (e.g. "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDA/ZHU=")',
+            'required': True,
+        },
+        {
+            'id': 'ttl',
+            'label': 'TTL',
+            'type': 'number',
+            'help_text': 'Time to live in seconds for the SSH certificate. If not defined, will use the default TTL of the certificate issuer. The value must be larger than the one defined in the certificate issuer.',
+            'required': False,
+        },
+    ],
+    required=['gateway_url', 'access_id', 'access_key', 'cert_issue_name', 'cert_username', 'public_key_data'],
+    backend=create_ssh_certificate,
+)
