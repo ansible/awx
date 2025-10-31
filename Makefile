@@ -315,8 +315,10 @@ black: reports
 	@chmod +x .git/hooks/pre-commit
 
 genschema: reports
-	$(MAKE) swagger PYTEST_ADDOPTS="--genschema --create-db "
-	mv swagger.json schema.json
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(MANAGEMENT_COMMAND) spectacular --file schema.json --validate --fail-on-warn
 
 check: black
 
