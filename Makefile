@@ -318,17 +318,6 @@ genschema: reports
 	$(MAKE) swagger PYTEST_ADDOPTS="--genschema --create-db "
 	mv swagger.json schema.json
 
-swagger: reports
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	(set -o pipefail && py.test $(COVERAGE_ARGS) $(PARALLEL_TESTS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
-	then \
-	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
-	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
-	fi
-
 check: black
 
 api-lint:
