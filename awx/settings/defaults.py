@@ -1055,20 +1055,21 @@ SPECTACULAR_SETTINGS = {
         'displayOperationId': True,
     },
     # Resolve enum naming collisions with meaningful names
-    # Format: 'ComponentPath': 'DesiredEnumName'
     'ENUM_NAME_OVERRIDES': {
-        'JobSerializer.status': 'JobStatusEnum',
-        'UnifiedJobSerializer.status': 'UnifiedJobStatusEnum',
-        'JobSerializer.job_type': 'JobTypeEnum',
-        'JobTemplateSerializer.job_type': 'JobTemplateJobTypeEnum',
-        'AdHocCommandSerializer.job_type': 'AdHocCommandJobTypeEnum',
-        'ProjectUpdateSerializer.job_type': 'ProjectUpdateJobTypeEnum',
-        'JobSerializer.verbosity': 'JobVerbosityEnum',
-        'AdHocCommandSerializer.verbosity': 'AdHocCommandVerbosityEnum',
-        'InventoryUpdateSerializer.verbosity': 'InventoryUpdateVerbosityEnum',
-        'JobEventSerializer.event': 'JobEventEnum',
-        'InventorySerializer.kind': 'InventoryKindEnum',
-        'CredentialTypeSerializer.kind': 'CredentialTypeKindEnum',
+        # Status field collisions
+        'Status4e1Enum': 'UnifiedJobStatusEnum',
+        'Status876Enum': 'JobStatusEnum',
+        # Job type field collisions
+        'JobType8b8Enum': 'JobTemplateJobTypeEnum',
+        'JobType95bEnum': 'AdHocCommandJobTypeEnum',
+        'JobType963Enum': 'ProjectUpdateJobTypeEnum',
+        # Verbosity field collisions
+        'Verbosity481Enum': 'JobVerbosityEnum',
+        'Verbosity8cfEnum': 'InventoryUpdateVerbosityEnum',
+        # Event field collision
+        'Event4d3Enum': 'JobEventEnum',
+        # Kind field collision
+        'Kind362Enum': 'InventoryKindEnum',
     },
 }
 OAUTH2_PROVIDER = {}
