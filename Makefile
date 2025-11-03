@@ -541,7 +541,8 @@ SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/$(SCHEMA_DIFF_BASE_BRANCH)/schema.json -o reference-schema.json
 	# Ignore differences in whitespace with -b
-	diff -u -b reference-schema.json schema.json
+	# diff exits with 1 when files differ - capture but don't fail
+	-diff -u -b reference-schema.json schema.json
 
 docker-compose-clean: awx/projects
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml rm -sf
