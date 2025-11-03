@@ -314,11 +314,17 @@ black: reports
 	@echo "fi" >> .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 
-genschema: reports
+genschema: awx-link reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) spectacular --file schema.json --validate --fail-on-warn
+	$(MANAGEMENT_COMMAND) spectacular --format openapi-json --file schema.json
+
+genschema-yaml: awx-link reports
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(MANAGEMENT_COMMAND) spectacular --format openapi --file schema.yaml
 
 check: black
 
