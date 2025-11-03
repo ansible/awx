@@ -47,7 +47,7 @@ jobs:
 
       - name: Add schema diff to job summary
         if: always()
-        # show text and if for some reason, it can't be generated, state that it can't be. 
+        # show text and if for some reason, it can't be generated, state that it can't be.
         run: |
           echo "## API Schema Change Detection Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -55,12 +55,18 @@ jobs:
             if grep -q "^+" schema-diff.txt || grep -q "^-" schema-diff.txt; then
               echo "### Schema changes detected" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
+              # Truncate to first 1000 lines to stay under GitHub's 1MB summary limit
+              TOTAL_LINES=$(wc -l < schema-diff.txt)
+              if [ $TOTAL_LINES -gt 1000 ]; then
+                echo "_Showing first 1000 of ${TOTAL_LINES} lines. See job logs or download artifact for full diff._" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+              fi
               echo '```diff' >> $GITHUB_STEP_SUMMARY
-              cat schema-diff.txt >> $GITHUB_STEP_SUMMARY
+              head -n 1000 schema-diff.txt >> $GITHUB_STEP_SUMMARY
               echo '```' >> $GITHUB_STEP_SUMMARY
             else
               echo "### No schema changes detected" >> $GITHUB_STEP_SUMMARY
             fi
           else
-            echo "### Unable to generate schema diff" >> $GITHUB_STEP_SUMMARY 
+            echo "### Unable to generate schema diff" >> $GITHUB_STEP_SUMMARY
           fi
