@@ -528,8 +528,8 @@ docker-compose-test: awx/projects docker-compose-sources
 docker-compose-runtest: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /start_tests.sh
 
-docker-compose-build-swagger: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 /start_tests.sh swagger
+docker-compose-build-schema: awx/projects docker-compose-sources
+	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 make genschema
 
 SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
