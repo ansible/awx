@@ -11,6 +11,8 @@ USER root
 RUN dnf -y update && dnf install -y nodejs make git
 RUN npm install -g n && n 18
 
+RUN mkdir somedirfortest
+
 COPY . /tmp/src/
 WORKDIR /tmp/src/
 RUN make ui
