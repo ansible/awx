@@ -49,5 +49,3 @@ Get Involved
 We welcome your feedback and ideas via the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
 For a full list of all the ways to talk with the Ansible Community, see the [AWX Communication guide](https://ansible.readthedocs.io/projects/awx/en/latest/contributor/communication.html).
-
-#Dummy Check
