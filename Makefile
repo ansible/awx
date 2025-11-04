@@ -433,8 +433,8 @@ test_collection_sanity:
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && \
-		python$(ANSIBLE_TEST_PYTHON_VERSION) -m ansible_test integration --python $(ANSIBLE_TEST_PYTHON_VERSION) --coverage -vvv $(COLLECTION_TEST_TARGET) && \
-		python$(ANSIBLE_TEST_PYTHON_VERSION) -m ansible_test coverage xml --requirements --group-by command --group-by version
+		python3 -m ansible_test integration --python $(ANSIBLE_TEST_PYTHON_VERSION) --coverage -vvv $(COLLECTION_TEST_TARGET) && \
+		python3 -m ansible_test coverage xml --requirements --group-by command --group-by version
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=integration*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
