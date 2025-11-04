@@ -323,7 +323,7 @@ swagger: reports
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	(set -o pipefail && py.test $(COVERAGE_ARGS) $(PARALLEL_TESTS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	@if [ "${GITHUB_ACTIONS}" = "true" ] && [ -n "${GITHUB_OUTPUT}" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
 	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
@@ -355,7 +355,7 @@ live_test:
 ## Run all API unit tests with coverage enabled.
 test_coverage:
 	$(MAKE) test PYTEST_ADDOPTS="--create-db $(COVERAGE_ARGS)"
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	@if [ "${GITHUB_ACTIONS}" = "true" ] && [ -n "${GITHUB_OUTPUT}" ]; \
 	then \
 	  echo 'cov-report-files=awxkit/coverage.xml,reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
 	  echo 'test-result-files=awxkit/report.xml,reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
@@ -363,7 +363,7 @@ test_coverage:
 
 test_migrations:
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider --migrations -m migration_test --create-db $(PARALLEL_TESTS) $(COVERAGE_ARGS) $(TEST_DIRS)
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	@if [ "${GITHUB_ACTIONS}" = "true" ] && [ -n "${GITHUB_OUTPUT}" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
 	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
@@ -381,7 +381,7 @@ test_collection:
 	if ! [ -x "$(shell command -v ansible-playbook)" ]; then pip install ansible-core; fi
 	ansible --version
 	py.test $(COLLECTION_TEST_DIRS) $(COVERAGE_ARGS) -v
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	@if [ "${GITHUB_ACTIONS}" = "true" ] && [ -n "${GITHUB_OUTPUT}" ]; \
 	then \
 	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
 	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
@@ -423,7 +423,7 @@ test_collection_sanity:
 	cd $(COLLECTION_INSTALL) && \
 		ansible-test sanity $(COLLECTION_SANITY_ARGS) --coverage --junit && \
 		ansible-test coverage xml --requirements --group-by command --group-by version
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	@if [ "${GITHUB_ACTIONS}" = "true" ] && [ -n "${GITHUB_OUTPUT}" ]; \
 	then \
 	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=sanity*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
 	  echo test-result-files="$$(find "$(COLLECTION_INSTALL)/tests/output/junit/" -type f -name '*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
@@ -433,7 +433,7 @@ test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && \
 		ansible-test integration --coverage -vvv $(COLLECTION_TEST_TARGET) && \
 		ansible-test coverage xml --requirements --group-by command --group-by version
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
+	@if [ "${GITHUB_ACTIONS}" = "true" ] && [ -n "${GITHUB_OUTPUT}" ]; \
 	then \
 	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=integration*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
 	fi
