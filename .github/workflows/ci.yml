@@ -294,7 +294,7 @@ jobs:
 
       - uses: ./.github/actions/setup-python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - uses: ./.github/actions/run_awx_devel
         id: awx
@@ -372,7 +372,7 @@ jobs:
 
       - uses: ./.github/actions/setup-python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core
