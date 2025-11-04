@@ -83,7 +83,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
+    os.path.join(BASE_DIR, 'ui', 'build'),
     os.path.join(BASE_DIR, 'static'),
 ]
 
