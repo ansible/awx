@@ -390,11 +390,11 @@ jobs:
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
           cp -rv coverage/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cd ~/.ansible/collections/ansible_collections/awx/awx
-          python3 -m ansible_test coverage combine --requirements
-          python3 -m ansible_test coverage html
+          python -m ansible.test coverage combine --requirements
+          python -m ansible.test coverage html
           echo '## AWX Collection Integration Coverage' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          python3 -m ansible_test coverage report >> $GITHUB_STEP_SUMMARY
+          python -m ansible.test coverage report >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo >> $GITHUB_STEP_SUMMARY
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
