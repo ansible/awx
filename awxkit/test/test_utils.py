@@ -93,7 +93,12 @@ def test_random_titles_generates_correct_characters(non_ascii):
     title = utils.random_title(non_ascii=non_ascii)
     if non_ascii:
         with pytest.raises(UnicodeEncodeError):
-            title.encode('ascii')
+            # There is a tiny (flaky) chance that random_title will just happen
+            # to generate unicode that is also valid ascii
+            # so we repeat a few times, just to be sure we get non-ascii
+            for i in range(4):
+                title = utils.random_title(non_ascii=non_ascii)
+                title.encode('ascii')
         title.encode('utf-8')
     else:
         title.encode('ascii')
