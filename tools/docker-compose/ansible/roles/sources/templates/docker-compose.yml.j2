@@ -76,12 +76,12 @@ services:
       # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "~/.kube/config:/var/lib/awx/.kube/config"
-      - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
+      - "valkey_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
     depends_on:
       postgres:
         condition: service_started
-      redis_{{ container_postfix }}:
+      valkey_{{ container_postfix }}:
         condition: service_started
 {% if editable_dependencies | length > 0 %}
       init_awx:
@@ -99,16 +99,16 @@ services:
       - "2222:2222"  # receptor foo node
       - "3000:3001"  # used by the UI dev env
 {% endif %}
-  redis_{{ container_postfix }}:
-    image: mirror.gcr.io/library/redis:latest
-    container_name: tools_redis_{{ container_postfix }}
+  valkey_{{ container_postfix }}:
+    image: docker.io/valkey/valkey:7.2
+    container_name: tools_valkey_{{ container_postfix }}
     volumes:
-      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
-      - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
+      - "../../valkey/valkey.conf:/etc/valkey/valkey.conf:Z"
+      - "valkey_socket_{{ container_postfix }}:/var/run/redis/:rw"
     networks:
       - awx
-    entrypoint: ["redis-server"]
-    command: ["/usr/local/etc/redis/redis.conf"]
+    entrypoint: ["valkey-server"]
+    command: ["/etc/valkey/valkey.conf"]
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
@@ -316,8 +316,8 @@ volumes:
     name: tools_awx_db_15
 {% for i in range(control_plane_node_count|int) -%}
   {% set container_postfix = loop.index %}
-  redis_socket_{{ container_postfix }}:
-    name: tools_redis_socket_{{ container_postfix }}
+  valkey_socket_{{ container_postfix }}:
+    name: tools_valkey_socket_{{ container_postfix }}
 {% endfor -%}
 {% if enable_vault|bool %}
   hashicorp_vault_data:
