@@ -296,6 +296,10 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Remove system ansible to avoid conflicts
+        run: |
+          python -m pip uninstall -y ansible ansible-core || true
+
       - uses: ./.github/actions/run_awx_devel
         id: awx
         with:
@@ -307,6 +311,7 @@ jobs:
         run: |
           python -m pip install -e ./awxkit/
           python -m pip install -r awx_collection/requirements.txt
+          hash -r  # Rehash to pick up newly installed scripts
 
       - name: Run integration tests
         id: make-run
@@ -374,6 +379,10 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Remove system ansible to avoid conflicts
+        run: |
+          python -m pip uninstall -y ansible ansible-core || true
+
       - name: Upgrade ansible-core
         run: python -m pip install --upgrade ansible-core
 
@@ -390,11 +399,12 @@ jobs:
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
           cp -rv coverage/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cd ~/.ansible/collections/ansible_collections/awx/awx
-          ansible-test coverage combine --requirements
-          ansible-test coverage html
+          hash -r  # Rehash to pick up newly installed scripts
+          PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage combine --requirements
+          PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage html
           echo '## AWX Collection Integration Coverage' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          ansible-test coverage report >> $GITHUB_STEP_SUMMARY
+          PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage report >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo >> $GITHUB_STEP_SUMMARY
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
