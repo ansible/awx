@@ -433,7 +433,6 @@ test_collection_sanity:
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && \
-		$(PYTHON) -m pip show ansible-core > /dev/null 2>&1 && \
 		PATH="$$($(PYTHON) -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$$PATH" ansible-test integration --python $(ANSIBLE_TEST_PYTHON_VERSION) --coverage -vvv $(COLLECTION_TEST_TARGET) && \
 		PATH="$$($(PYTHON) -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$$PATH" ansible-test coverage xml --requirements --group-by command --group-by version
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
