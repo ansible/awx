@@ -3980,9 +3980,12 @@ class JobJobEventsChildrenSummary(APIView):
                 z = i
                 next_non_meta_event = events[-1]
                 while z < len(events):
-                    if events[z]['event'] not in JobJobEventsChildrenSummary.meta_events:
+                    if events[z]['event'] not in JobJobEventsChildrenSummary.meta_events + ('',):
                         next_non_meta_event = events[z]
                         break
+                    elif not events[z]['event']:
+                        breakpoint()
+                        logging.warning(f"JobEventChildrenSummary: job event 'event' field is unexpectedly empty for job {job.id}")
                     z += 1
                 event_level_after = models.JobEvent.LEVEL_FOR_EVENT[next_non_meta_event['event']]
                 if event_level_after and event_level_after > event_level_before:
