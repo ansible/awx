@@ -100,7 +100,7 @@ services:
       - "3000:3001"  # used by the UI dev env
 {% endif %}
   valkey_{{ container_postfix }}:
-    image: docker.io/valkey/valkey:7.2
+    image: ghcr.io/valkey-io/valkey:7.2.11
     container_name: tools_valkey_{{ container_postfix }}
     volumes:
       - "../../valkey/valkey.conf:/etc/valkey/valkey.conf:Z"
