@@ -323,6 +323,7 @@ jobs:
           echo 'password = password' >> ~/.tower_cli.cfg
           echo 'verify_ssl = false' >> ~/.tower_cli.cfg
           TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
+          export PYTHONPATH="$(python -c 'import site; print(":".join(site.getsitepackages()))')${PYTHONPATH:+:$PYTHONPATH}"
           make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
         env:
           ANSIBLE_TEST_PREFER_PODMAN: 1
