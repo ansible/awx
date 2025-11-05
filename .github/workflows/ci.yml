@@ -192,7 +192,7 @@ jobs:
 
       - name: Install playbook dependencies
         run: |
-          python3 -m pip install docker
+          python -m pip install docker
 
       - name: Build AWX image
         working-directory: awx
@@ -206,8 +206,8 @@ jobs:
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         run: |
-          python3 -m pip install -r molecule/requirements.txt
-          python3 -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
+          python -m pip install -r molecule/requirements.txt
+          python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
           $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
@@ -305,8 +305,8 @@ jobs:
 
       - name: Install dependencies for running tests
         run: |
-          python3 -m pip install -e ./awxkit/
-          python3 -m pip install -r awx_collection/requirements.txt
+          python -m pip install -e ./awxkit/
+          python -m pip install -r awx_collection/requirements.txt
 
       - name: Run integration tests
         id: make-run
@@ -375,7 +375,7 @@ jobs:
           python-version: '3.13'
 
       - name: Upgrade ansible-core
-        run: python3 -m pip install --upgrade ansible-core
+        run: python -m pip install --upgrade ansible-core
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
@@ -390,11 +390,11 @@ jobs:
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
           cp -rv coverage/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cd ~/.ansible/collections/ansible_collections/awx/awx
-          python -m ansible.test coverage combine --requirements
-          python -m ansible.test coverage html
+          ansible-test coverage combine --requirements
+          ansible-test coverage html
           echo '## AWX Collection Integration Coverage' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          python -m ansible.test coverage report >> $GITHUB_STEP_SUMMARY
+          ansible-test coverage report >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo >> $GITHUB_STEP_SUMMARY
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY
