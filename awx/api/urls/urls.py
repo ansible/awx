@@ -4,7 +4,6 @@
 from __future__ import absolute_import, unicode_literals
 from django.urls import include, re_path
 
-from awx import MODE
 from awx.api.generics import LoggedLoginView, LoggedLogoutView
 from awx.api.views.root import (
     ApiRootView,
