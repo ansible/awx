@@ -163,8 +163,6 @@ urlpatterns = [
     re_path(r'^redoc/$', redoc_view, name='schema-redoc'),
 ]
 
-if MODE == 'development':
-    # Only include debug URLs in development environment
-    from awx.api.urls.debug import urls as debug_urls
+from awx.api.urls.debug import urls as debug_urls
 
-    urlpatterns += [re_path(r'^debug/', include(debug_urls))]
+urlpatterns += [re_path(r'^debug/', include(debug_urls))]
