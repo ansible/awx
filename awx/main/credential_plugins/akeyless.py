@@ -156,7 +156,7 @@ def setup_client(plugin_inputs: CommonPluginInputs) -> V2Api:
     Setup the Akeyless client.
 
     Args:
-        ``plugin_inputs`` (``PluginInputs``): Plugin inputs
+        ``plugin_inputs`` (``CommonPluginInputs``): Plugin inputs
 
     Returns:
         ``akeyless.V2Api``: The Akeyless API instance
@@ -182,7 +182,7 @@ def authenticate(plugin_inputs: CommonPluginInputs, api_instance: V2Api) -> str:
     Authenticate with Akeyless.
 
     Args:
-        ``plugin_inputs`` (``PluginInputs``): Plugin inputs
+        ``plugin_inputs`` (``CommonPluginInputs``): Plugin inputs
         ``api_instance`` (``akeyless.V2Api``): The Akeyless API instance
 
     Returns:
@@ -216,7 +216,7 @@ def parse_plugin_inputs(**kwargs) -> CommonPluginInputs:
         **kwargs: Keyword arguments
 
     Returns:
-        PluginInputs: Plugin inputs
+        ``CommonPluginInputs``: Common plugin inputs
     """
 
     gateway_url = kwargs.get('gateway_url').rstrip('/')
@@ -250,18 +250,18 @@ def get_secret_value(**kwargs) -> str:
     Backend function to retrieve secrets from Akeyless Vault.
 
     Args:
-        gateway_url: Akeyless Gateway URL
-        access_id: API Access ID
-        access_key: API Access Key
-        ca_cert: Optional CA certificate for TLS verification
-        secret_path: Path to the secret in Akeyless
-        secret_key: Optional specific key within the secret to retrieve
+        `gateway_url` (``str``): Akeyless Gateway URL
+        `access_id` (``str``): API Access ID
+        `access_key` (``str``): API Access Key
+        `ca_cert` (``str``): Optional CA certificate for TLS verification
+        `secret_path` (``str``): Path to the secret in Akeyless
+        `secret_key` (``str``): Optional specific key within the secret to retrieve
 
     Returns:
-        str: The secret value or specific key value
+        ``str``: The secret value or specific key value
 
     Raises:
-        Exception: If authentication fails or secret cannot be retrieved
+        ``Exception``: If authentication fails or secret cannot be retrieved
     """
     plugin_inputs = parse_plugin_inputs(**kwargs)
     secrets_plugin_inputs = parse_secrets_plugin_inputs(**kwargs)
@@ -386,10 +386,10 @@ def parse_ssh_plugin_inputs(**kwargs) -> SSHPluginInputs:
     Parse the ssh plugin inputs.
 
     Args:
-        **kwargs: Keyword arguments
+        ``**kwargs``: Keyword arguments
 
     Returns:
-        SSHPluginInputs: SSH plugin inputs
+        ``SSHPluginInputs``: SSH plugin inputs
     """
 
     cert_issue_name = kwargs.get('cert_issue_name')
@@ -440,6 +440,15 @@ def generate_ssh_certificate(
 def create_ssh_certificate(**kwargs) -> str:
     """
     Create a signed SSH certificate from Akeyless.
+
+    Args:
+        ``**kwargs``: Keyword arguments
+
+    Returns:
+        ``str``: The signed SSH public key data (e.g. 'rsa-sha2-256-cert-v01@openssh.com AAAAHHNzaC1yc/2...+/ZHU=')
+
+    Raises:
+        ``Exception``: If the SSH certificate cannot be generated
     """
 
     plugin_inputs = parse_plugin_inputs(**kwargs)
