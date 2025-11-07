@@ -269,9 +269,151 @@ HTTP/1.1 201 Created
 Akeyless
 ----------------------------
 
-AWX supports retrieving secret values from Akeyless
-(https://www.akeyless.io/)
+AWX supports retrieving [static secrets](https://docs.akeyless.io/docs/static-secrets) and [signed SSH certificates](https://docs.akeyless.io/docs/ssh-certificates) from Akeyless used to populate AWX Machine credential fields used to enable users to log into machines using basic or SSH authentication.
 
+### Credential Types
+
+The Akeyless Plugin exposes 2 credential types: Akeyless and Akeyless SSH. 
+
+**Note**: The plugin currently only supports [API Key authentication](https://docs.akeyless.io/docs/api-key).
+
+Both credential types provide the following fields:
+
+- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://api.akeyless.io or https://your-gateway.akeyless.io)
+- **Access ID**: Your Akeyless API Access ID.
+- **Access Key**: Your Akeyless API Access Key (stored encrypted).
+- **(Optional) CA Certificate**: If using an Akeyless Gateway with a private/self-signed certificate, provide the CA certificate for TLS verification (PEM format).
+
+
+### AWX UI: Remote Access using Basic Authentication
+
+The following example illustrates how to SSH into a remote Ubuntu 24.04 machine using dynamically-populated user/password stored in an Akeyless password-type static secret.
+
+#### Prerequisites
+
+- The remote Ubuntu machine hostname is `ssh_server` and is accessible on port `22`.
+- The remote Ubuntu machine has a user named `awx` with password `awx`:
+
+    ```bash
+    useradd -m -s /bin/bash awx
+    echo "awx:awx" | chpasswd
+    ```
+- The SSH server running on the remote Ubuntu machine allows password authentication:
+
+    ```bash
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+    ```
+- The AWX server has a mounted volume with Ansible playbooks. For example, in a Docker compose setup:
+
+    ```yaml
+    services:
+      awx:
+        image: "ghcr.io/ansible/awx_devel:add-akeyless-credential"
+        volumes:
+        - "/host/path/to/playbooks:/var/lib/awx/projects/playbooks:rw"
+    ```
+
+    Create an Ansible playbook in `/host/path/to/playbooks/demo-basic-auth-ssh.yaml` with the following:
+
+    ```yaml
+    ---
+    - name: Test SSH connection to ssh_server using Akeyless credentials
+        hosts: ssh_server
+        gather_facts: true
+        connection: ssh
+        
+        tasks:
+        - name: Display connection information
+        ansible.builtin.debug:
+            msg: |
+            Successfully connected to {{ inventory_hostname }}!
+            User: {{ ansible_user }}
+            Host: {{ ansible_host | default(inventory_hostname) }}
+            OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+            Architecture: {{ ansible_architecture }}
+
+        - name: Verify we can run commands as the authenticated user
+        ansible.builtin.command: whoami
+        register: whoami_result
+        
+        - name: Display current user
+        ansible.builtin.debug:
+            msg: "Currently running as: {{ whoami_result.stdout }}"
+
+        - name: Check user's home directory
+        ansible.builtin.stat:
+            path: "{{ ansible_env.HOME }}"
+        register: home_dir
+        
+        - name: Display home directory information
+        ansible.builtin.debug:
+            msg: |
+            Home directory: {{ home_dir.stat.path }}
+            Home directory exists: {{ home_dir.stat.exists }}
+
+        - name: Create a test file to verify write access
+        ansible.builtin.copy:
+            content: |
+            This file was created by AWX using Akeyless credentials
+            Timestamp: {{ ansible_date_time.iso8601 }}
+            User: {{ ansible_user }}
+            dest: "/home/{{ ansible_user }}/awx-test-file.txt"
+            mode: '0644'
+            
+        - name: Verify test file was created
+        ansible.builtin.command: cat /home/{{ ansible_user }}/awx-test-file.txt
+        register: test_file_content
+        
+        - name: Display test file content
+        ansible.builtin.debug:
+            msg: "{{ test_file_content.stdout_lines }}"
+
+        - name: Clean up test file
+        ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/awx-test-file.txt"
+            state: absent
+    ```
+
+#### Steps
+
+1. [Create a new Akeyless password type static secret](https://docs.akeyless.io/docs/create-secret) named `/awx/basic-auth-test` with username `awx` and password `awx` using the Akeyless Console or CLI:
+
+    ```bash
+    AKEYLESS_PROFILE=awx-demo
+    akeyless configure \
+    --profile "$AKEYLESS_PROFILE" \
+    --access-id "$AKEYLESS_ACCESS_ID" \
+    --access-key "$AKEYLESS_ACCESS_KEY"
+
+    akeyless create-secret \
+    --name "/awx/basic-auth-test \
+    --username "awx" \
+    --password "awx" \
+    --profile "$AKEYLESS_PROFILE"
+    ```
+
+2. In AWX, create a new Organization named `secops`.
+3. In AWX, create a new Inventory named `akeyless` in Organization `secops`.
+4. In AWX, create a new Project named `akeyless-test` using a **Manual** _Source control type_ and selecting the `playbooks` in the _Playbook directory_ field.
+4. In AWX, create a new Host named `ssh_server` with variables inside Inventory `akeyless`:
+
+    ```yaml
+    ansible_host: ssh_server
+    ansible_port: 22
+    ```
+
+5. In AWX, create a new Credential named `awx-basic-auth-test`, select `secops` Organization and select `Akeyless` in _Credential type_ field.  Fill in the _Gateway URL_, _Access ID_ and _Access Key_. Click on _Test_ and enter `/awx/basic-auth-test` in _Secret Path_, `password` in _Secret Key_ fields and click on _Run_. The test should succeed.
+
+6. In AWX, create a new Credential named `awx-basic-auth-test` and select `Machine` in _Credential type_ field. In the _Username_ field, select the key icon (hint: Populate field from an external secret management system). In the _Secret Management System_ modal that pops up, select the `awx-basic-auth-test` credential and fill in the  `/awx/basic-auth-test` in _Secret Path_, `username` in _Secret Key_ fields. Do the same thing but for the _Password_ field but enter `password` in _Secret Key_ field.
+
+7. In AWX, create a new Job Template named `test-static-basic-auth-retrieval`, select `secops` in _Organization_ field, select `akeyless` in _Inventory_ field, select `akeyless-test` in _Project_ field and select `demo-basic-auth-ssh.yaml` in the _Playbook_ field.
+
+8. In AWX, launch the `test-static-basic-auth-retrieval` Job Template.
+
+
+### Programmatic Access
 The following example illustrates how to configure a Machine Credential to pull
 its password from a Akeyless:
 
@@ -347,41 +489,6 @@ HTTP/1.1 201 Created
 HTTP/1.1 201 Created
 ```
 
-### Akeyless Credential Fields
-
-- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://api.akeyless.io or https://your-gateway.akeyless.io)
-- **Access ID**: Your Akeyless API Access ID
-- **Access Key**: Your Akeyless API Access Key (stored encrypted)
-- **CA Certificate**: Optional CA certificate for TLS verification (PEM format)
-
-### Akeyless Metadata Fields
-
-- **Secret Path**: The path to the secret in Akeyless (e.g., /myapp/database/password)
-- **Secret Key**: Optional specific key within the secret to retrieve (for JSON secrets)
-
-### Example Usage
-
-When using Akeyless with JSON secrets, you can specify a specific key to retrieve:
-
-```json
-{
-  "secret_path": "/myapp/database",
-  "secret_key": "password"
-}
-```
-
-This will retrieve the `password` field from the JSON secret stored at `/myapp/database` in Akeyless.
-
-For simple string secrets, omit the `secret_key` field:
-
-```json
-{
-  "secret_path": "/myapp/api-key"
-}
-```
-
-This will retrieve the entire secret value as a string.
-
 
 Akeyless SSH
 ----------------------------
@@ -389,6 +496,139 @@ Akeyless SSH
 AWX supports requesting signed SSH certificates from Akeyless
 (https://www.akeyless.io/). Make sure to follow the steps outlined in [Using SSH Certificates to Access Remote Machines
 ](https://tutorials.akeyless.io/docs/using-ssh-certificates-to-access-remote-machines).
+
+### AWX UI: Remote Access using Signed SSH Certificate
+
+The following example illustrates how to SSH into a remote Ubuntu 24.04 machine using dynamically-populated Signed SSH Certificates generated by an SSH Certificate Issuer available in Akeyless for a user `awx`.
+
+#### Prerequisites
+
+- The remote Ubuntu machine hostname is `ssh_server` and is accessible on port `22`.
+- The remote Ubuntu machine has `openssh-server` installed and set up:
+
+    ```bash
+    apt update
+    DEBIAN_FRONTEND=noninteractive apt install openssh-server -y
+    mkdir -p /var/run/sshd
+    /usr/sbin/sshd -D &
+    ```
+
+- The remote Ubuntu machine has an existing user named `awx`:
+
+    ```bash
+    useradd -m -s /bin/bash awx
+    echo "awx:awx" | chpasswd
+    mkdir -p /home/awx/.ssh
+    chown awx:awx /home/awx/.ssh
+    chmod 700 /home/awx/.ssh
+    ```
+- The AWX server has a mounted volume with Ansible playbooks. For example, in a Docker compose setup:
+
+    ```yaml
+    services:
+      awx:
+        image: "ghcr.io/ansible/awx_devel:add-akeyless-credential"
+        volumes:
+        - "/host/path/to/playbooks:/var/lib/awx/projects/playbooks:rw"
+    ```
+
+    Create an Ansible playbook in `/host/path/to/playbooks/demo-ssh-auth.yaml` with the following:
+
+    ```yaml
+    ---
+    - name: Test SSH Certificate Authentication
+    hosts: ssh_server
+    gather_facts: false
+    become: false
+    
+    tasks:
+        - name: Test connection
+        ansible.builtin.command: hostname
+        register: result
+        
+        - name: Display result
+        ansible.builtin.debug:
+            msg: "Connection successful! Hostname: {{ result.stdout }}"
+    ```
+
+#### Steps
+
+1. Create an RSA 2048 bit private key:
+
+    ```bash
+    AKEYLESS_PROFILE=awx-demo
+    akeyless configure \
+    --profile "$AKEYLESS_PROFILE" \
+    --access-id "$AKEYLESS_ACCESS_ID" \
+    --access-key "$AKEYLESS_ACCESS_KEY"
+
+    akeyless create-key \
+    --name "/awx/ssh-signing-key" \
+    --alg RSA2048 \
+    --profile "$AKEYLESS_PROFILE"
+    ```
+
+1. Get the RSA public key corresponding to the private key and output to a file:
+
+    ```bash
+    akeyless get-rsa-public \
+    --name "/awx/ssh-signing-key" \
+    --profile "$AKEYLESS_PROFILE" \
+    --json | jq -r '.ssh' > /tmp/ca.pub
+
+    cat /tmp/ca.pub
+    # OUTPUT: ssh-rsa AAAAB3NzaC1...
+    ```
+
+1. Create an SSH Certificate Issuer:
+
+    ```bash
+    akeyless create-ssh-cert-issuer \
+    --name "/awx/ssh-cert-issuer" \
+    --signer-key-name "/awx/ssh-signing-key"  \
+    --ttl 300 \
+    --allowed-users 'awx' \
+    --profile $AKEYLESS_PROFILE
+    ```
+
+1. Create a new private key:
+
+    ```bash
+    ssh-keygen -t rsa -b 2048 -f ~/.ssh/awx_rsa
+    ```
+
+1. In the remote Ubuntu machine, configure the SSH server to trust the signer public key and restart the SSH server:
+
+    ```bash
+    # echo the output from step 2.
+    echo "ssh-rsa AAAAB3NzaC1..." > /etc/ssh/ca.pub
+
+    cat >> /etc/ssh/sshd_config << 'EOF'
+    TrustedUserCAKeys /etc/ssh/ca.pub
+    PubkeyAcceptedKeyTypes=+ssh-rsa,ssh-rsa-cert-v01@openssh.com
+    EOF
+
+    service ssh restart
+    ```
+
+1. In AWX, create a new Organization named `secops`.
+1. In AWX, create a new Inventory named `akeyless` in Organization `secops`.
+1. In AWX, create a new Project named `akeyless-test` using a **Manual** _Source control type_ and selecting the `playbooks` in the _Playbook directory_ field.
+1. In AWX, create a new Host named `ssh_server` with variables inside Inventory `akeyless`:
+
+    ```yaml
+    ansible_host: ssh_server
+    ansible_port: 22
+    ```
+
+1. In AWX, create a new Credential named `awx-ssh-auth-test`, select `secops` Organization and select `Akeyless SSH` in _Credential type_ field.  Fill in the _Gateway URL_, _Access ID_ and _Access Key_. 
+
+1. In AWX, create a new Credential named `awx-ssh-auth-test` and select `Machine` in _Credential type_ field. In the _Username_ field enter `awx`, select `secops` in _Organization_ field and select `Akeyless SSH` in _Credential type_ field. In the _Secret Management System_ modal that pops up, select the `awx-ssh-auth-test` in _Credential_ field, enter `/awx/ssh-cert-issuer` in _Certificate Issuer Name_ field, `awx` in the _Certificate Username_ field and enter the output of the public key generated in step 4, (e.g. `cat ~/.ssh/awx_rsa.pub` `ssh-rsa AAAAB3...`). In the _SSH Private Key_, enter the output of the private key generated in step 4 (e.g. cat ~/.ssh/awx_rsa, `-----BEGIN OPENSSH PRIVATE KEY-----...`).
+
+
+7. In AWX, create a new Job Template named `test-ssh-auth`, select `secops` in _Organization_ field, select `akeyless` in _Inventory_ field, select `akeyless-test` in _Project_ field and select `demo-ssh-auth.yaml` in the _Playbook_ field.
+
+8. In AWX, launch the `test-ssh-auth` Job Template.
 
 The following example illustrates how to configure a Machine Credential to sign
 an SSH public key using Akeyless:
@@ -468,17 +708,3 @@ HTTP/1.1 201 Created
 4. Associate the Machine Credential with a Job Template. When the Job Template
    is run, AWX will use the provided Akeyless gateway and credentials to request
    a signed SSH certificate using the issuer and username(s) you provide.
-
-### Akeyless SSH Credential Fields
-
-- **Gateway URL**: The URL of your Akeyless Gateway (e.g., https://api.akeyless.io or https://your-gateway.akeyless.io)
-- **Access ID**: Your Akeyless API Access ID
-- **Access Key**: Your Akeyless API Access Key (stored encrypted)
-- **CA Certificate**: Optional CA certificate for TLS verification (PEM format)
-
-### Akeyless SSH Metadata Fields
-
-- **Certificate Issuer Name (cert_issue_name)**: Full path to the SSH certificate issuer in Akeyless (e.g., /remote/ssh/certificate/issuer)
-- **Certificate Username (cert_username)**: Username(s) to embed in the certificate; comma-separated for multiple (e.g., "ubuntu,nobody")
-- **Public Key Data (public_key_data)**: The SSH public key to sign (e.g., "ssh-rsa AAAA...")
-- **TTL (ttl)**: Optional time-to-live in seconds for the certificate
