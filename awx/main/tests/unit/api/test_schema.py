@@ -1,6 +1,5 @@
 import warnings
-import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 from awx.api.schema import CustomAutoSchema
 
