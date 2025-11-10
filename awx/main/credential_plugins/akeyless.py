@@ -503,7 +503,7 @@ akeyless_ssh_plugin = create_plugin(
             'id': 'ttl',
             'label': 'TTL',
             'type': 'number',
-            'help_text': 'Time to live in seconds for the SSH certificate. If not defined, will use the default TTL of the certificate issuer. The value must be larger than the one defined in the certificate issuer.',
+            'help_text': 'Time to live in seconds for the SSH certificate. If not defined, will use the default TTL of the certificate issuer. The value must be smaller than the one defined in the certificate issuer.',
             'required': False,
         },
     ],
