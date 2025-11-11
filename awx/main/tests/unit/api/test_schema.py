@@ -1,7 +1,14 @@
 import warnings
 from unittest.mock import Mock, patch
 
-from awx.api.schema import CustomAutoSchema
+from rest_framework.permissions import IsAuthenticated
+
+from awx.api.schema import (
+    CustomAutoSchema,
+    AuthenticatedSpectacularAPIView,
+    AuthenticatedSpectacularSwaggerView,
+    AuthenticatedSpectacularRedocView,
+)
 
 
 class TestCustomAutoSchema:
@@ -248,3 +255,19 @@ class TestCustomAutoSchema:
         tags = schema.get_tags()
         # swagger_topic should take priority
         assert tags == ['Priority_Topic']
+
+
+class TestAuthenticatedSchemaViews:
+    """Unit tests for authenticated schema view classes."""
+
+    def test_authenticated_spectacular_api_view_requires_authentication(self):
+        """Test that AuthenticatedSpectacularAPIView requires authentication."""
+        assert IsAuthenticated in AuthenticatedSpectacularAPIView.permission_classes
+
+    def test_authenticated_spectacular_swagger_view_requires_authentication(self):
+        """Test that AuthenticatedSpectacularSwaggerView requires authentication."""
+        assert IsAuthenticated in AuthenticatedSpectacularSwaggerView.permission_classes
+
+    def test_authenticated_spectacular_redoc_view_requires_authentication(self):
+        """Test that AuthenticatedSpectacularRedocView requires authentication."""
+        assert IsAuthenticated in AuthenticatedSpectacularRedocView.permission_classes
