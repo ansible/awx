@@ -1043,7 +1043,7 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
     'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
     'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
-    'CONTACT': {'email': 'contact@snippets.local'},
+    'CONTACT': {'email': 'controller-eng@redhat.com'},
     'LICENSE': {'name': 'Apache License'},
     'TERMS_OF_SERVICE': 'https://www.google.com/policies/terms/',
     # Use our custom schema class that handles swagger_topic and deprecated views
@@ -1054,6 +1054,7 @@ SPECTACULAR_SETTINGS = {
         'persistAuthorization': True,
         'displayOperationId': True,
     },
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
     # Resolve enum naming collisions with meaningful names
     'ENUM_NAME_OVERRIDES': {
         # Status field collisions
