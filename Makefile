@@ -27,6 +27,8 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 PARALLEL_TESTS ?= -n auto
 # collection integration test directories (defaults to all)
 COLLECTION_TEST_TARGET ?=
+# Python version for ansible-test (must be 3.11, 3.12, or 3.13)
+ANSIBLE_TEST_PYTHON_VERSION ?= 3.13
 # args for collection install
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
@@ -428,8 +430,8 @@ test_collection_sanity:
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && \
-		ansible-test integration --coverage -vvv $(COLLECTION_TEST_TARGET) && \
-		ansible-test coverage xml --requirements --group-by command --group-by version
+		PATH="$$($(PYTHON) -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$$PATH" ansible-test integration --python $(ANSIBLE_TEST_PYTHON_VERSION) --coverage -vvv $(COLLECTION_TEST_TARGET) && \
+		PATH="$$($(PYTHON) -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$$PATH" ansible-test coverage xml --requirements --group-by command --group-by version
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=integration*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
