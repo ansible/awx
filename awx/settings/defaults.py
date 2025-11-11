@@ -1054,7 +1054,6 @@ SPECTACULAR_SETTINGS = {
         'persistAuthorization': True,
         'displayOperationId': True,
     },
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
     # Resolve enum naming collisions with meaningful names
     'ENUM_NAME_OVERRIDES': {
         # Status field collisions

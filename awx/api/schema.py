@@ -1,5 +1,6 @@
 import warnings
 
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -46,11 +47,29 @@ class CustomAutoSchema(AutoSchema):
         return getattr(self.view, 'deprecated', False)
 
 
+class AuthenticatedSpectacularAPIView(SpectacularAPIView):
+    """SpectacularAPIView that requires authentication."""
+
+    permission_classes = [IsAuthenticated]
+
+
+class AuthenticatedSpectacularSwaggerView(SpectacularSwaggerView):
+    """SpectacularSwaggerView that requires authentication."""
+
+    permission_classes = [IsAuthenticated]
+
+
+class AuthenticatedSpectacularRedocView(SpectacularRedocView):
+    """SpectacularRedocView that requires authentication."""
+
+    permission_classes = [IsAuthenticated]
+
+
 # Schema view (returns OpenAPI schema JSON/YAML)
-schema_view = SpectacularAPIView.as_view()
+schema_view = AuthenticatedSpectacularAPIView.as_view()
 
 # Swagger UI view
-swagger_ui_view = SpectacularSwaggerView.as_view(url_name='api:schema-json')
+swagger_ui_view = AuthenticatedSpectacularSwaggerView.as_view(url_name='api:schema-json')
 
 # ReDoc UI view
-redoc_view = SpectacularRedocView.as_view(url_name='api:schema-json')
+redoc_view = AuthenticatedSpectacularRedocView.as_view(url_name='api:schema-json')
