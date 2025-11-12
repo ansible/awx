@@ -1086,6 +1086,70 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+@pytest.mark.django_db
+class TestProjectUpdateRefspec(TestJobExecution):
+    @pytest.fixture
+    def project_update(self, execution_environment):
+        org = Organization(pk=1)
+        proj = Project(pk=1, organization=org, allow_override=True)
+        project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+        project_update.execution_environment = execution_environment
+        return project_update
+
+    def test_refspec_with_allow_override_includes_plus_prefix(self, project_update, private_data_dir, mock_me):
+        """Test that refspec includes + prefix to allow non-fast-forward updates when allow_override is True"""
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+
+        # Call build_extra_vars_file which sets the refspec
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
+        # Read the extra vars file to check the refspec
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
+
+        # Verify the refspec includes the + prefix for force updates
+        assert 'scm_refspec' in extra_vars
+        assert extra_vars['scm_refspec'] == '+refs/heads/*:refs/remotes/origin/*'
+
+    def test_custom_refspec_not_overridden(self, project_update, private_data_dir, mock_me):
+        """Test that custom user-provided refspec is not overridden"""
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        project_update.scm_refspec = 'refs/pull/*/head:refs/remotes/origin/pr/*'
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
+
+        # Custom refspec should be preserved
+        assert extra_vars['scm_refspec'] == 'refs/pull/*/head:refs/remotes/origin/pr/*'
+
+    def test_no_refspec_without_allow_override(self, execution_environment, private_data_dir, mock_me):
+        """Test that no refspec is set when allow_override is False"""
+        org = Organization(pk=1)
+        proj = Project(pk=1, organization=org, allow_override=False)
+        project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+        project_update.execution_environment = execution_environment
+
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+
+        with mock.patch.object(Licenser, 'validate', lambda *args, **kw: {}):
+            task.build_extra_vars_file(project_update, private_data_dir)
+
+        with open(os.path.join(private_data_dir, 'env', 'extravars')) as fd:
+            extra_vars = yaml.load(fd, Loader=SafeLoader)
+
+        # No refspec should be set
+        assert 'scm_refspec' not in extra_vars
+
+
 class TestInventoryUpdateCredentials(TestJobExecution):
     @pytest.fixture
     def inventory_update(self, execution_environment):

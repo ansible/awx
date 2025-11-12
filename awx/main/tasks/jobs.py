@@ -1346,7 +1346,7 @@ class RunProjectUpdate(BaseTask):
             extra_vars['scm_refspec'] = project_update.scm_refspec
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
-            extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+            extra_vars['scm_refspec'] = '+refs/heads/*:refs/remotes/origin/*'
 
         if project_update.scm_type == 'archive':
             # for raw archive, prevent error moving files between volumes
