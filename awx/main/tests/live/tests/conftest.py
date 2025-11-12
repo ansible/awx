@@ -26,9 +26,6 @@ logger = logging.getLogger(__name__)
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
 
 
-del load_all_credentials
-
-
 def _copy_folders(source_path, dest_path, clear=False):
     "folder-by-folder, copy dirs in the source root dir to the destination root dir"
     for dirname in os.listdir(source_path):
