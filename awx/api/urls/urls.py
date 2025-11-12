@@ -158,7 +158,7 @@ urlpatterns = [
     re_path(r'^logout/$', LoggedLogoutView.as_view(next_page='/api/', redirect_field_name='next'), name='logout'),
     # Schema endpoints (available in all modes for API documentation and testing)
     re_path(r'^schema/$', schema_view, name='schema-json'),
-    re_path(r'^swagger/$', swagger_ui_view, name='schema-swagger-ui'),
+    re_path(r'^docs/$', swagger_ui_view, name='schema-swagger-ui'),
     re_path(r'^redoc/$', redoc_view, name='schema-redoc'),
 ]
 

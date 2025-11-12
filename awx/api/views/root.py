@@ -59,7 +59,7 @@ class ApiRootView(APIView):
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
         if MODE == 'development':
-            data['swagger'] = drf_reverse('api:schema-swagger-ui')
+            data['docs'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
 
 
