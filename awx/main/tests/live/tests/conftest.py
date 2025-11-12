@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
 
 
+del load_all_credentials
+
+
 def _copy_folders(source_path, dest_path, clear=False):
     "folder-by-folder, copy dirs in the source root dir to the destination root dir"
     for dirname in os.listdir(source_path):
@@ -139,7 +142,7 @@ def podman_image_generator():
 
 @pytest.fixture
 def project_factory(post, default_org, admin):
-    def _rf(scm_url=None, local_path=None):
+    def _rf(scm_url=None, local_path=None, **extra_kwargs):
         proj_kwargs = {}
         if local_path:
             # manual path
@@ -152,6 +155,9 @@ def project_factory(post, default_org, admin):
             proj_kwargs['scm_url'] = scm_url
         else:
             raise RuntimeError('Need to provide scm_url or local_path')
+
+        if extra_kwargs:
+            proj_kwargs.update(extra_kwargs)
 
         proj_kwargs['name'] = project_name
         proj_kwargs['organization'] = default_org.id
