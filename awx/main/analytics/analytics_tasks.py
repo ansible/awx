@@ -9,7 +9,7 @@ from awx.main.dispatch import get_task_queuename
 logger = logging.getLogger('awx.main.scheduler')
 
 
-@task_awx(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename, timeout=300, on_duplicate='discard')
 def send_subsystem_metrics():
     DispatcherMetrics().send_metrics()
     CallbackReceiverMetrics().send_metrics()

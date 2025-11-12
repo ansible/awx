@@ -139,7 +139,7 @@ def construct_rsyslog_conf_template(settings=settings):
     return tmpl
 
 
-@task_awx(queue='rsyslog_configurer')
+@task_awx(queue='rsyslog_configurer', timeout=600, on_duplicate='queue_one')
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     # Write config to a temp file then move it to preserve atomicity
