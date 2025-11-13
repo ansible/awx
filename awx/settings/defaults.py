@@ -352,6 +352,7 @@ INSTALLED_APPS = [
     'ansible_base.resource_registry',
     'ansible_base.rbac',
     'ansible_base.feature_flags',
+    'ansible_base.api_documentation',
     'flags',
 ]
 
