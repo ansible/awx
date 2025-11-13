@@ -32,7 +32,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.unified_jobs import UnifiedJob
-from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
+from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity, get_redis_client
 from awx.main.models.mixins import RelatedJobsMixin, ResourceMixin
 from awx.main.models.receptor_address import ReceptorAddress
 
@@ -397,7 +397,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
-            redis.Redis.from_url(settings.BROKER_URL).ping()
+            get_redis_client(settings.BROKER_URL).ping()
         except redis.ConnectionError:
             errors = _('Failed to connect to Redis')
 

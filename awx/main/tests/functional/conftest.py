@@ -77,14 +77,33 @@ def swagger_autogen(requests=__SWAGGER_REQUESTS__):
 
 
 class FakeRedis:
+    def __init__(self, *args, **kwargs):
+        # Accept and ignore all arguments to match redis.Redis signature
+        pass
+
     def keys(self, *args, **kwargs):
         return []
 
-    def set(self):
+    def set(self, *args, **kwargs):
         pass
 
-    def get(self):
+    def get(self, *args, **kwargs):
         return None
+
+    def rpush(self, *args, **kwargs):
+        return 1
+
+    def blpop(self, *args, **kwargs):
+        return None
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    def llen(self, *args, **kwargs):
+        return 0
+
+    def scan_iter(self, *args, **kwargs):
+        return iter([])
 
     @classmethod
     def from_url(cls, *args, **kwargs):

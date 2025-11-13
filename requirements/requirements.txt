@@ -433,7 +433,7 @@ pyzstd==0.18.0
     # via -r /awx_devel/requirements/requirements.in
 receptorctl==1.6.0
     # via -r /awx_devel/requirements/requirements.in
-redis[hiredis]==6.4.0
+redis[hiredis]==7.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels-redis

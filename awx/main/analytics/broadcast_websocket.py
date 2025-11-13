@@ -1,8 +1,6 @@
 import datetime
 import asyncio
 import logging
-import redis
-import redis.asyncio
 import re
 
 from prometheus_client import (
@@ -15,6 +13,7 @@ from prometheus_client import (
 )
 
 from django.conf import settings
+from awx.main.utils.common import get_redis_client, get_redis_client_async
 
 
 BROADCAST_WEBSOCKET_REDIS_KEY_NAME = 'broadcast_websocket_stats'
@@ -80,7 +79,7 @@ class RelayWebsocketStatsManager:
 
     async def run_loop(self):
         try:
-            redis_conn = await redis.asyncio.Redis.from_url(settings.BROKER_URL)
+            redis_conn = await get_redis_client_async(settings.BROKER_URL)
             while True:
                 stats_data_str = ''.join(stat.serialize() for stat in self._stats.values())
                 await redis_conn.set(self._redis_key, stats_data_str)
@@ -103,7 +102,7 @@ class RelayWebsocketStatsManager:
         """
         Stringified verion of all the stats
         """
-        redis_conn = redis.Redis.from_url(settings.BROKER_URL)
+        redis_conn = get_redis_client(settings.BROKER_URL)
         stats_str = redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
         return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
 

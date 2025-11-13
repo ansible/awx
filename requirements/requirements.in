@@ -56,7 +56,7 @@ pyyaml>=6.0.2  # require packing fix for cython 3 or higher
 pyzstd  # otel collector log file compression library
 receptorctl
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
-redis[hiredis]
+redis[hiredis]>=7.0  # requires 7.0+ for retry functionality on connection errors
 requests
 slack-sdk
 twilio

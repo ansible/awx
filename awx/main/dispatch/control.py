@@ -4,9 +4,9 @@ import json
 
 from django.conf import settings
 from django.db import connection
-import redis
 
 from awx.main.dispatch import get_task_queuename
+from awx.main.utils.common import get_redis_client
 
 from . import pg_bus_conn
 
@@ -24,7 +24,7 @@ class Control(object):
         self.queuename = host or get_task_queuename()
 
     def status(self, *args, **kwargs):
-        r = redis.Redis.from_url(settings.BROKER_URL)
+        r = get_redis_client(settings.BROKER_URL)
         if self.service == 'dispatcher':
             stats = r.get(f'awx_{self.service}_statistics') or b''
             return stats.decode('utf-8')
