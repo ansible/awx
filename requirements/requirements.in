@@ -13,7 +13,7 @@ cryptography
 Cython
 daphne
 distro
-django==4.2.21  # CVE-2025-32873
+django==4.2.26  # CVE-2025-32873
 django-cors-headers
 django-crum
 django-extensions
