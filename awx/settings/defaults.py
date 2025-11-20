@@ -309,11 +309,6 @@ TEMPLATES = [
                 'awx.ui.context_processors.csp',
                 'awx.ui.context_processors.version',
             ],
-            'builtins': ['awx.main.templatetags.swagger'],
-            'libraries': {
-                "ansible_base.lib.templatetags.requests": "ansible_base.lib.templatetags.requests",
-                "ansible_base.lib.templatetags.util": "ansible_base.lib.templatetags.util",
-            },
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
