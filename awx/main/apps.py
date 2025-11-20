@@ -1,4 +1,5 @@
 import os
+import sys
 
 from dispatcherd.config import setup as dispatcher_setup
 
@@ -99,7 +100,10 @@ class MainConfig(AppConfig):
     def ready(self):
         super().ready()
 
-        self.configure_dispatcherd()
+        # Django 5.2+ is stricter about database access during app initialization
+        # Skip dispatcher configuration during pytest initialization to avoid database queries
+        if 'pytest' not in sys.modules:
+            self.configure_dispatcherd()
 
         """
         Credential loading triggers database operations. There are cases we want to call
