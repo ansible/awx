@@ -11,13 +11,22 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
     Parameters:
     for_service: if True, include dynamic options needed for running the dispatcher service
       this will require database access, you should delay evaluation until after app setup
+    mock_publish: if True, use mock values that don't require database access
+      this is used during tests to avoid database queries during app initialization
     """
+    # When mock_publish=True (e.g., during tests), use a default value to avoid
+    # database access in get_auto_max_workers() which queries settings.IS_K8S
+    if mock_publish:
+        max_workers = 20  # Reasonable default for tests
+    else:
+        max_workers = get_auto_max_workers()
+
     config = {
         "version": 2,
         "service": {
             "pool_kwargs": {
                 "min_workers": settings.JOB_EVENT_WORKERS,
-                "max_workers": get_auto_max_workers(),
+                "max_workers": max_workers,
             },
             "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID},
             "process_manager_cls": "ForkServerManager",

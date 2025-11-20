@@ -1,5 +1,4 @@
 import os
-import sys
 
 from dispatcherd.config import setup as dispatcher_setup
 
@@ -100,12 +99,7 @@ class MainConfig(AppConfig):
     def ready(self):
         super().ready()
 
-        # Skip dispatcherd configuration during pytest initialization.
-        # pytest-django blocks database access before the test database is set up,
-        # but dispatcherd configuration needs to access settings which queries the database.
-        # For tests, dispatcherd is configured via an autouse fixture after DB is ready.
-        if 'pytest' not in sys.modules:
-            self.configure_dispatcherd()
+        self.configure_dispatcherd()
 
         """
         Credential loading triggers database operations. There are cases we want to call

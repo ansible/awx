@@ -34,22 +34,6 @@ def pytest_unconfigure(config):
     del sys._called_from_test
 
 
-@pytest.fixture(scope='session', autouse=True)
-def configure_dispatcherd_for_tests(django_db_setup, django_db_blocker):
-    """Configure dispatcherd after test database is ready.
-
-    We skip dispatcherd configuration in MainConfig.ready() during pytest initialization
-    because pytest-django blocks database access before the test DB exists, but
-    dispatcherd configuration needs to query settings from the database.
-    This fixture runs once per test session after the DB is set up.
-    """
-    from django.apps import apps
-
-    with django_db_blocker.unblock():
-        main_config = apps.get_app_config('main')
-        main_config.configure_dispatcherd()
-
-
 @pytest.fixture
 def mock_access():
     @contextmanager
