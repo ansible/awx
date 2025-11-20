@@ -100,8 +100,10 @@ class MainConfig(AppConfig):
     def ready(self):
         super().ready()
 
-        # Django 5.2+ is stricter about database access during app initialization
-        # Skip dispatcher configuration during pytest initialization to avoid database queries
+        # Skip dispatcherd configuration during pytest initialization.
+        # pytest-django blocks database access before the test database is set up,
+        # but dispatcherd configuration needs to access settings which queries the database.
+        # For tests, dispatcherd is configured via an autouse fixture after DB is ready.
         if 'pytest' not in sys.modules:
             self.configure_dispatcherd()
 
