@@ -424,6 +424,7 @@ DISPATCHER_MOCK_PUBLISH = False
 DISPATCHERD_DEBUGGING_SOCKFILE = os.path.join(BASE_DIR, 'dispatcherd.sock')
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
+REDIS_RETRY_COUNT = 3  # Number of retries for Redis connection errors
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
     'cluster_heartbeat': {

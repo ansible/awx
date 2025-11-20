@@ -117,9 +117,13 @@ class FakeRedis:
 
 
 @pytest.fixture
-def fake_redis():
-    with mock.patch('redis.Redis', new=FakeRedis):  # turn off redis stuff
+def fake_redis(request):
+    # Skip this fixture if the test is marked with donotusefakeredis
+    if 'donotusefakeredis' in request.keywords:
         yield
+    else:
+        with mock.patch('redis.Redis', new=FakeRedis):  # turn off redis stuff
+            yield
 
 
 @pytest.fixture

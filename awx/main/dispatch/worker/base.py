@@ -60,7 +60,7 @@ class AWXConsumerBase(object):
         if pool is None:
             self.pool = WorkerPool()
         self.pool.init_workers(self.worker.work_loop)
-        self.redis = get_redis_client(settings.BROKER_URL)
+        self.redis = get_redis_client()
 
     @property
     def listening_on(self):

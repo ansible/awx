@@ -28,7 +28,7 @@ class CallbackQueueDispatcher(object):
     def __init__(self):
         self.queue = getattr(settings, 'CALLBACK_QUEUE', '')
         self.logger = logging.getLogger('awx.main.queue.CallbackQueueDispatcher')
-        self.connection = get_redis_client(settings.BROKER_URL)
+        self.connection = get_redis_client()
 
     def dispatch(self, obj):
         self.connection.rpush(self.queue, json.dumps(obj, cls=AnsibleJSONEncoder))

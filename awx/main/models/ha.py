@@ -397,7 +397,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
-            get_redis_client(settings.BROKER_URL).ping()
+            get_redis_client().ping()
         except redis.ConnectionError:
             errors = _('Failed to connect to Redis')
 

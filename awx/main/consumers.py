@@ -106,7 +106,7 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         (group, message) = unwrap_broadcast_msg(data)
         if group == "metrics":
             message = json.loads(message['text'])
-            conn = await get_redis_client_async(settings.BROKER_URL)
+            conn = get_redis_client_async()
             await conn.set(
                 settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX + "-" + message['metrics_namespace'] + "_instance_" + message['instance'], message['metrics']
             )

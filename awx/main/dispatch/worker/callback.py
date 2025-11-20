@@ -73,7 +73,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     def __init__(self):
         self.buff = {}
-        self.redis = get_redis_client(settings.BROKER_URL)
+        self.redis = get_redis_client()
         self.subsystem_metrics = s_metrics.CallbackReceiverMetrics(auto_pipe_execute=False)
         self.queue_pop = 0
         self.queue_name = settings.CALLBACK_QUEUE
