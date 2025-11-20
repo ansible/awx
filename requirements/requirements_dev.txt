@@ -1,5 +1,5 @@
 build
-django-debug-toolbar==3.2.4
+django-debug-toolbar>=6.0  # Django 5.2 compatibility
 django-test-migrations
 drf-spectacular>=0.27.0  # Modern OpenAPI 3.0 schema generator
 # pprofile - re-add once https://github.com/vpelletier/pprofile/issues/41 is addressed
@@ -28,4 +28,3 @@ pip>=21.3,<=24.0 # PEP 660 – Editable installs for pyproject.toml based builds
 debugpy
 remote-pdb
 sdb
-

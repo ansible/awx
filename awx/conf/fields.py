@@ -160,10 +160,13 @@ class StringListIsolatedPathField(StringListField):
 class URLField(CharField):
     # these lines set up a custom regex that allow numbers in the
     # top-level domain
+    # Django 5.2 removed URLValidator.ul, it was \u00a1-\uffff for unicode letters
+    ul = r'\u00a1-\uffff'
+
     tld_re = (
         r'\.'  # dot
         r'(?!-)'  # can't start with a dash
-        r'(?:[a-z' + URLValidator.ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
+        r'(?:[a-z' + ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
         r'|xn--[a-z0-9]{1,59})'  # or punycode label
         r'(?<!-)'  # can't end with a dash
         r'\.?'  # may have a trailing dot
