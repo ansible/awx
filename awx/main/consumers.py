@@ -95,6 +95,9 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
         logger.info(f"client '{self.channel_name}' joined the broadcast group.")
 
+        # Initialize Redis client once for reuse across all message handling
+        self._redis_conn = get_redis_client_async()
+
     async def disconnect(self, code):
         logger.info(f"client '{self.channel_name}' disconnected from the broadcast group.")
         await self.channel_layer.group_discard(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
@@ -106,8 +109,7 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         (group, message) = unwrap_broadcast_msg(data)
         if group == "metrics":
             message = json.loads(message['text'])
-            conn = get_redis_client_async()
-            await conn.set(
+            await self._redis_conn.set(
                 settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX + "-" + message['metrics_namespace'] + "_instance_" + message['instance'], message['metrics']
             )
         else:

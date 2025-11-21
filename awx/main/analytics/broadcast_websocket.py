@@ -65,6 +65,8 @@ class FixedSlidingWindow:
 
 
 class RelayWebsocketStatsManager:
+    _redis_client = None  # Cached Redis client for get_stats_sync()
+
     def __init__(self, local_hostname):
         self._local_hostname = local_hostname
         self._stats = dict()
@@ -102,8 +104,10 @@ class RelayWebsocketStatsManager:
         """
         Stringified verion of all the stats
         """
-        redis_conn = get_redis_client()
-        stats_str = redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
+        # Reuse cached Redis client to avoid creating new connection pools on every call
+        if cls._redis_client is None:
+            cls._redis_client = get_redis_client()
+        stats_str = cls._redis_client.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
         return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
 
 
