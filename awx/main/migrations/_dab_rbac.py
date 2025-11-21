@@ -194,7 +194,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     # NOTE: this import is expected to break at some point, and then just move the data here
     from awx.main.models.rbac import role_descriptions
 
-    for role in Role.objects.prefetch_related('members', 'parents').iterator():
+    for role in Role.objects.prefetch_related('members', 'parents').iterator(chunk_size=1000):
         if role.singleton_name:
             continue  # only bothering to migrate object roles
 
