@@ -124,7 +124,7 @@ dispatcherd==2025.5.21
     # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==5.2
+django==5.2.8
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
