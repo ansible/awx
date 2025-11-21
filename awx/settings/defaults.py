@@ -1054,6 +1054,10 @@ SPECTACULAR_SETTINGS = {
         'persistAuthorization': True,
         'displayOperationId': True,
     },
+    # Only document the JSON API, not the browseable forms
+    'PARSER_WHITELIST': [
+        'rest_framework.parsers.JSONParser',
+    ],
     # Resolve enum naming collisions with meaningful names
     'ENUM_NAME_OVERRIDES': {
         # Status field collisions
