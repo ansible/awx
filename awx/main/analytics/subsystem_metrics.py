@@ -199,8 +199,8 @@ class Metrics(MetricsNamespace):
     def __init__(self, namespace, auto_pipe_execute=False, instance_name=None, metrics_have_changed=True, **kwargs):
         MetricsNamespace.__init__(self, namespace)
 
-        self.pipe = get_redis_client().pipeline()
         self.conn = get_redis_client()
+        self.pipe = self.conn.pipeline()
         self.last_pipe_execute = time.time()
         # track if metrics have been modified since last saved to redis
         # start with True so that we get an initial save to redis
