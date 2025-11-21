@@ -19,7 +19,7 @@ import redis.exceptions
 
 from ansible_base.lib.logging.runtime import log_excess_runtime
 
-from awx.main.utils.common import get_redis_client
+from awx.main.utils.redis import get_redis_client
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch.periodic import Scheduler
 from awx.main.dispatch import pg_bus_conn

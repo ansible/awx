@@ -5,7 +5,7 @@ import json
 from django.db import connection
 
 from awx.main.dispatch import get_task_queuename
-from awx.main.utils.common import get_redis_client
+from awx.main.utils.redis import get_redis_client
 
 from . import pg_bus_conn
 

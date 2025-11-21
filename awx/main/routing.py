@@ -8,7 +8,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 
 from ansible_base.lib.channels.middleware import DrfAuthMiddlewareStack
 
-from awx.main.utils.common import get_redis_client
+from awx.main.utils.redis import get_redis_client
 from . import consumers
 
 

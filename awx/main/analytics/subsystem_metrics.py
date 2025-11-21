@@ -14,7 +14,7 @@ from rest_framework.request import Request
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.utils import is_testing
-from awx.main.utils.common import get_redis_client
+from awx.main.utils.redis import get_redis_client
 
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')

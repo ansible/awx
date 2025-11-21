@@ -15,18 +15,12 @@ from rest_framework.exceptions import ParseError
 from ansible_base.lib.utils.models import get_type_for_model
 
 from awx.main.utils import common
-from awx.main.utils.common import get_redis_client
 from awx.api.validators import HostnameRegexValidator
 
 from awx.main.models import Job, AdHocCommand, InventoryUpdate, ProjectUpdate, SystemJob, WorkflowJob, Inventory, JobTemplate, UnifiedJobTemplate, UnifiedJob
 
 from django.core.exceptions import ValidationError
 from django.utils.regex_helper import _lazy_re_compile
-from django.test import override_settings
-
-from redis.retry import Retry
-from redis.backoff import ExponentialBackoff
-from redis.exceptions import BusyLoadingError, ConnectionError, TimeoutError
 
 
 @pytest.mark.parametrize(
@@ -351,126 +345,3 @@ class TestHostnameRegexValidator:
     def test_bad_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
         assert h("@#$%)$#(TUFAS_DG") is None
-
-
-class TestRedisClientRetry:
-    """Tests for get_redis_client() retry configuration."""
-
-    @pytest.mark.donotusefakeredis
-    @override_settings(REDIS_RETRY_COUNT=7, BROKER_URL='redis://localhost:6379')
-    def test_get_redis_client_respects_retry_count_setting(self):
-        """Verify that get_redis_client uses REDIS_RETRY_COUNT from settings.
-
-        This test mocks only at the socket level, allowing the actual Redis client
-        and ConnectionPool to be instantiated with real retry configuration.
-        """
-        import redis
-
-        # Mock at the socket/connection level to avoid needing actual Redis server
-        with mock.patch('redis.connection.Connection.connect') as mock_connect:
-            # Allow connection initialization without actual socket
-            mock_connect.return_value = None
-
-            # Create the client - this executes the actual code path
-            client = get_redis_client()
-
-            # Verify we got a real Redis client instance, not a mock
-            assert isinstance(client, redis.Redis)
-            assert hasattr(client, 'connection_pool')
-
-            # Get the connection pool that was actually created
-            pool = client.connection_pool
-
-            # Verify the pool has the retry configuration in its connection_kwargs
-            assert 'retry' in pool.connection_kwargs
-            retry_obj = pool.connection_kwargs['retry']
-
-            # Verify retry count from settings (7, not the default 3)
-            assert isinstance(retry_obj, Retry)
-            assert retry_obj._retries == 7, f"Expected 7 retries from override_settings, got {retry_obj._retries}"
-
-            # Verify exponential backoff is configured
-            assert hasattr(retry_obj, '_backoff')
-            assert isinstance(retry_obj._backoff, ExponentialBackoff)
-
-            # Verify the correct exceptions trigger retries
-            retry_on_error = pool.connection_kwargs.get('retry_on_error', [])
-            assert BusyLoadingError in retry_on_error, "BusyLoadingError should trigger retry"
-            assert ConnectionError in retry_on_error, "ConnectionError should trigger retry"
-            assert TimeoutError in retry_on_error, "TimeoutError should trigger retry"
-
-    @pytest.mark.donotusefakeredis
-    @override_settings(REDIS_RETRY_COUNT=3, BROKER_URL='redis://localhost:6379')
-    def test_redis_client_reconnects_on_broken_pipe(self):
-        """Unit Test: Verify reconnection occurs successfully when a broken pipe is simulated.
-
-        This test simulates a BrokenPipeError (which maps to ConnectionError in redis-py)
-        and verifies that the retry mechanism successfully retries and completes the operation.
-        """
-        from redis.exceptions import ConnectionError as RedisConnectionError
-
-        # Mock at multiple levels to properly simulate the connection without parser issues
-        with mock.patch('redis.connection.Connection.connect') as mock_connect, mock.patch('redis.connection.Connection.can_read', return_value=False):
-
-            mock_connect.return_value = None
-
-            # Create the client with retry configuration
-            client = get_redis_client()
-
-            # Mock send_command at the connection level to simulate broken pipe
-            # First call raises ConnectionError (broken pipe), subsequent calls succeed
-            with mock.patch('redis.connection.Connection.send_command') as mock_send_command, mock.patch(
-                'redis.connection.Connection.read_response'
-            ) as mock_read_response:
-
-                # Simulate broken pipe on first attempt, then success
-                mock_send_command.side_effect = [
-                    RedisConnectionError("Broken pipe"),  # First attempt fails
-                    None,  # Retry succeeds
-                ]
-                mock_read_response.return_value = b'OK'
-
-                # Attempt a Redis operation that should trigger retry
-                # The retry logic should catch the ConnectionError and retry
-                result = client.set('test_key', 'test_value')
-
-                # Verify the operation eventually succeeded
-                assert result is True or result == b'OK'
-
-                # Verify send_command was called twice (initial + 1 retry)
-                assert mock_send_command.call_count == 2, f"Expected 2 calls (1 failure + 1 retry), got {mock_send_command.call_count}"
-
-    @pytest.mark.donotusefakeredis
-    @override_settings(REDIS_RETRY_COUNT=3, BROKER_URL='redis://localhost:6379')
-    def test_redis_client_retries_on_timeout(self):
-        """Unit Test: Verify retry occurs on timeout errors.
-
-        This test simulates a TimeoutError and verifies the retry mechanism works.
-        """
-        from redis.exceptions import TimeoutError as RedisTimeoutError
-
-        with mock.patch('redis.connection.Connection.connect') as mock_connect, mock.patch('redis.connection.Connection.can_read', return_value=False):
-
-            mock_connect.return_value = None
-
-            client = get_redis_client()
-
-            # Simulate timeout on first attempt, success on retry
-            with mock.patch('redis.connection.Connection.send_command') as mock_send_command, mock.patch(
-                'redis.connection.Connection.read_response'
-            ) as mock_read_response:
-
-                mock_send_command.side_effect = [
-                    RedisTimeoutError("Operation timed out"),  # First attempt times out
-                    None,  # Retry succeeds
-                ]
-                mock_read_response.return_value = 1
-
-                # Attempt rpush operation (like CallbackQueueDispatcher uses)
-                result = client.rpush('test_queue', 'test_data')
-
-                # Verify the operation eventually succeeded
-                assert result == 1
-
-                # Verify retry occurred
-                assert mock_send_command.call_count == 2, f"Expected 2 calls (1 timeout + 1 retry), got {mock_send_command.call_count}"

@@ -90,8 +90,6 @@ __all__ = [
     'get_event_partition_epoch',
     'cleanup_new_process',
     'unified_job_class_to_event_table_name',
-    'get_redis_client',
-    'get_redis_client_async',
 ]
 
 
@@ -1222,75 +1220,3 @@ def unified_job_class_to_event_table_name(job_class):
 
 def load_all_entry_points_for(entry_point_subsections: list[str], /) -> dict[str, EntryPoint]:
     return {ep.name: ep for entry_point_category in entry_point_subsections for ep in entry_points(group=f'awx_plugins.{entry_point_category}')}
-
-
-def _get_redis_pool_kwargs():
-    """
-    Get common Redis connection pool kwargs with retry configuration.
-
-    Returns:
-        dict: Keyword arguments for redis.ConnectionPool.from_url()
-    """
-    from django.conf import settings
-    from redis.backoff import ExponentialBackoff
-    from redis.retry import Retry
-    from redis.exceptions import BusyLoadingError, ConnectionError, TimeoutError
-
-    retry = Retry(ExponentialBackoff(), retries=settings.REDIS_RETRY_COUNT)
-    return {
-        'retry': retry,
-        'retry_on_error': [BusyLoadingError, ConnectionError, TimeoutError],
-    }
-
-
-def get_redis_client():
-    """
-    Create a Redis client with automatic retry on connection errors.
-
-    This function creates a Redis connection with built-in retry logic to handle
-    transient connection failures (like broken pipes, timeouts, etc.) that can occur
-    during long-running operations.
-
-    Based on PR feedback: https://github.com/ansible/awx/pull/16158#issuecomment-3486839154
-    Uses redis-py's built-in retry mechanism instead of custom retry logic.
-
-    Returns:
-        redis.Redis: A Redis client instance configured with retry logic
-
-    Notes:
-        - Uses exponential backoff with configurable retries (REDIS_RETRY_COUNT setting)
-        - Retries on BusyLoadingError, ConnectionError, and TimeoutError
-        - Requires redis-py 7.0+
-    """
-    import redis
-    from django.conf import settings
-
-    pool = redis.ConnectionPool.from_url(
-        settings.BROKER_URL,
-        **_get_redis_pool_kwargs(),
-    )
-    return redis.Redis(connection_pool=pool)
-
-
-def get_redis_client_async():
-    """
-    Create an async Redis client with automatic retry on connection errors.
-
-    This is the async version of get_redis_client() for use with asyncio code.
-
-    Returns:
-        redis.asyncio.Redis: An async Redis client instance configured with retry logic
-
-    Notes:
-        - Uses exponential backoff with configurable retries (REDIS_RETRY_COUNT setting)
-        - Retries on BusyLoadingError, ConnectionError, and TimeoutError
-        - Requires redis-py 7.0+
-    """
-    import redis.asyncio
-    from django.conf import settings
-
-    pool = redis.asyncio.ConnectionPool.from_url(
-        settings.BROKER_URL,
-        **_get_redis_pool_kwargs(),
-    )
-    return redis.asyncio.Redis(connection_pool=pool)

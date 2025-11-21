@@ -9,7 +9,7 @@ import logging
 from django.conf import settings
 
 # AWX
-from awx.main.utils.common import get_redis_client
+from awx.main.utils.redis import get_redis_client
 
 __all__ = ['CallbackQueueDispatcher']
 

@@ -15,7 +15,7 @@ import psutil
 
 import redis
 
-from awx.main.utils.common import get_redis_client
+from awx.main.utils.redis import get_redis_client
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
