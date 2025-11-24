@@ -40,6 +40,7 @@ from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
 from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
@@ -1023,10 +1024,19 @@ class GenericCancelView(RetrieveAPIView):
     # In subclass set model, serializer_class
     obj_permission_type = 'cancel'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Determine if job can be canceled'},
+    )
+    def get(self, request, *args, **kwargs):
+        return super(GenericCancelView, self).get(request, *args, **kwargs)
+
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(GenericCancelView, self).dispatch(*args, **kwargs)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Cancel job'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_cancel:

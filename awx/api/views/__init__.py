@@ -56,6 +56,7 @@ from wsgiref.util import FileWrapper
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
@@ -2243,6 +2244,9 @@ class JobTemplateLaunch(RetrieveAPIView):
 
         return modern_data
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Launch a job'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3006,6 +3010,9 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
         return data
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Launch a workflow job'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3045,6 +3052,9 @@ class WorkflowJobRelaunch(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return Response({})
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Relaunch a workflow job'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.is_sliced_job:
@@ -3222,6 +3232,9 @@ class SystemJobTemplateLaunch(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return Response({})
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Launch a system job'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3350,6 +3363,9 @@ class JobRelaunch(RetrieveAPIView):
                 self.permission_denied(request, message=messages['detail'])
         return super(JobRelaunch, self).check_object_permissions(request, obj)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Relaunch a job'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         context = self.get_serializer_context()
@@ -3782,11 +3798,17 @@ class AdHocCommandRelaunch(GenericAPIView):
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandRelaunch, self).dispatch(*args, **kwargs)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Return passwords needed to start an ad hoc command'},
+    )
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
         return Response(data)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Relaunch an ad hoc command'},
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 

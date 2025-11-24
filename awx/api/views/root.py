@@ -23,6 +23,8 @@ from rest_framework import status
 
 import requests
 
+from ansible_base.lib.utils.schema import extend_schema_if_available
+
 from awx import MODE
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
@@ -138,6 +140,9 @@ class ApiV2PingView(APIView):
     name = _('Ping')
     swagger_topic = 'System Configuration'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Return basic information about this instance'},
+    )
     def get(self, request, format=None):
         """Return some basic information about this instance
 
@@ -178,6 +183,9 @@ class ApiV2SubscriptionView(APIView):
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'List valid AAP subscriptions'},
+    )
     def post(self, request):
         data = request.data.copy()
 
@@ -250,6 +258,9 @@ class ApiV2AttachView(APIView):
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Attach a subscription'},
+    )
     def post(self, request):
         data = request.data.copy()
         subscription_id = data.get('subscription_id', None)
@@ -305,6 +316,9 @@ class ApiV2ConfigView(APIView):
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head', 'get'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Return various configuration settings'},
+    )
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
 
@@ -343,6 +357,9 @@ class ApiV2ConfigView(APIView):
 
         return Response(data)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Upload a subscription manifest'},
+    )
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid subscription data")}, status=status.HTTP_400_BAD_REQUEST)
@@ -388,6 +405,9 @@ class ApiV2ConfigView(APIView):
         logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid subscription")}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Remove the current subscription'},
+    )
     def delete(self, request):
         try:
             settings.LICENSE = {}
