@@ -45,7 +45,6 @@ We require all of our community members and contributors to adhere to the [Ansib
 
 Get Involved
 ------------
-#DummyChange
 
 We welcome your feedback and ideas via the [Ansible Forum](https://forum.ansible.com/tag/awx).
 
