@@ -42,7 +42,7 @@ jobs:
         with:
           command: cp
           source: ${{ github.workspace }}/schema.json
-          destination: s3://awx-public-ci-files/${{ github.ref_name }}/schema.json
+          destination: s3://awx-public-ci-files/${{ github.event.repository.name }}/${{ github.ref_name }}/schema.json
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
           aws_region: us-east-1

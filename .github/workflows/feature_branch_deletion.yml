@@ -20,4 +20,4 @@ jobs:
         run: |
           ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
           ansible localhost -c local -m aws_s3 \
-            -a "bucket=awx-public-ci-files object=${GITHUB_REF##*/}/schema.json mode=delobj permission=public-read"
+          -a "bucket=awx-public-ci-files object=${{ github.event.repository.name }}/${GITHUB_REF##*/}/schema.json mode=delobj permission=public-read"
