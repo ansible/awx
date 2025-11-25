@@ -13,7 +13,7 @@ body:
     attributes:
       label: Please confirm the following
       options:
-        - label: I agree to follow this project's [code of conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+        - label: I agree to follow this project's [code of conduct](https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html).
           required: true
         - label: I have checked the [current issues](https://github.com/ansible/awx/issues) for duplicates.
           required: true
