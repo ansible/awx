@@ -1148,11 +1148,8 @@ OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to
 OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
 
 # feature flags
-FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
-FLAGS = {
-    'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
-    'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
-}
+FEATURE_INDIRECT_NODE_COUNTING_ENABLED = False
+FEATURE_DISPATCHERD_ENABLED = False
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired
 # based on age. Note workers will finish their last task before retiring if

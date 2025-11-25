@@ -461,6 +461,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
 
 class TestGenericRun:
+    @pytest.mark.django_db(reset_sequences=True)
     def test_generic_failure(self, patch_Job, execution_environment, mock_me, mock_create_partition):
         job = Job(status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
@@ -545,6 +546,7 @@ class TestGenericRun:
         private_data_dir, extra_vars, safe_dict = call_args
         assert extra_vars['super_secret'] == "CLASSIFIED"
 
+    @pytest.mark.django_db
     def test_awx_task_env(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
@@ -845,6 +847,7 @@ class TestJobCredentials(TestJobExecution):
             [None, '0'],
         ],
     )
+    @pytest.mark.django_db
     def test_net_credentials(self, authorize, expected_authorize, job, private_data_dir, mock_me):
         task = jobs.RunJob()
         task.instance = job
@@ -901,6 +904,7 @@ class TestJobCredentials(TestJobExecution):
 
         assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
 
+    @pytest.mark.django_db
     def test_awx_task_env(self, settings, private_data_dir, job, mock_me):
         settings.AWX_TASK_ENV = {'FOO': 'BAR'}
         task = jobs.RunJob()

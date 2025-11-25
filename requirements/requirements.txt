@@ -22,7 +22,7 @@ ansi2html==1.9.2
     # via -r /awx_devel/requirements/requirements_git.txt
 asciichartpy==1.5.25
     # via -r /awx_devel/requirements/requirements.in
-asgiref==3.10.0
+asgiref==3.11.0
     # via
     #   channels
     #   channels-redis
@@ -104,7 +104,7 @@ click==8.1.8
     # via receptorctl
 constantly==23.10.4
     # via twisted
-cryptography==46.0.2
+cryptography==46.0.3
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
@@ -138,7 +138,7 @@ django==4.2.26
     #   django-solo
     #   djangorestframework
     #   drf-spectacular
-# django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
+# django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.9.0
     # via -r /awx_devel/requirements/requirements.in
@@ -148,7 +148,7 @@ django-crum==0.7.9
     #   django-ansible-base
 django-extensions==4.1
     # via -r /awx_devel/requirements/requirements.in
-django-flags==5.0.14
+django-flags==5.1.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
@@ -169,7 +169,7 @@ drf-spectacular==0.29.0
     # via -r /awx_devel/requirements/requirements.in
 durationpy==0.10
     # via kubernetes
-dynaconf==3.2.11
+dynaconf==3.2.12
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base

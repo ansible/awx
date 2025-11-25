@@ -11,8 +11,6 @@ import socket
 # /usr/lib64/python/mimetypes.py
 import mimetypes
 
-from dynaconf import post_hook
-
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '9888', '--allow-root', '--no-browser']
 
@@ -70,11 +68,5 @@ AWX_DISABLE_TASK_MANAGERS = False
 # Needed for launching runserver in debug mode
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
-
-# This modifies FLAGS set by defaults, must be deferred to run later
-@post_hook
-def set_dev_flags(settings):
-    defaults_flags = settings.get("FLAGS", {})
-    defaults_flags['FEATURE_INDIRECT_NODE_COUNTING_ENABLED'] = [{'condition': 'boolean', 'value': True}]
-    defaults_flags['FEATURE_DISPATCHERD_ENABLED'] = [{'condition': 'boolean', 'value': True}]
-    return {'FLAGS': defaults_flags}
+FEATURE_INDIRECT_NODE_COUNTING_ENABLED = True
+FEATURE_DISPATCHERD_ENABLED = True
