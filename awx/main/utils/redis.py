@@ -20,7 +20,7 @@ def _get_redis_pool_kwargs():
     Returns:
         dict: Keyword arguments for redis.ConnectionPool.from_url()
     """
-    retry = Retry(ExponentialBackoff(), retries=settings.REDIS_RETRY_COUNT)
+    retry = Retry(ExponentialBackoff(cap=1.0, base=0.5), retries=settings.REDIS_RETRY_COUNT)
     return {
         'retry': retry,
         'retry_on_error': [BusyLoadingError, ConnectionError, TimeoutError],
