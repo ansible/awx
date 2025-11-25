@@ -152,11 +152,27 @@ jobs:
           echo "All changed files in PR:"
           echo "$files"
 
-          # Convert to comma-separated list for sonar.inclusions
+          # Filter out files that are excluded by .coveragerc to avoid coverage conflicts
+          # This prevents SonarCloud from analyzing files that have no coverage data
           if [ -n "$files" ]; then
-            inclusions=$(echo "$files" | tr '\n' ',' | sed 's/,$//')
-            echo "SONAR_INCLUSIONS=$inclusions" >> $GITHUB_ENV
-            echo "└── Result: ✅ Will scan these files: $inclusions"
+            # Filter out files matching .coveragerc omit patterns
+            filtered_files=$(echo "$files" | grep -v "settings/.*_defaults\.py$" | grep -v "settings/defaults\.py$" | grep -v "main/migrations/")
+
+            # Show which files were filtered out for transparency
+            excluded_files=$(echo "$files" | grep -E "(settings/.*_defaults\.py$|settings/defaults\.py$|main/migrations/)" || true)
+            if [ -n "$excluded_files" ]; then
+              echo "├── Filtered out (coverage-excluded): $(echo "$excluded_files" | wc -l) file(s)"
+              echo "$excluded_files" | sed 's/^/│   - /'
+            fi
+
+            if [ -n "$filtered_files" ]; then
+              inclusions=$(echo "$filtered_files" | tr '\n' ',' | sed 's/,$//')
+              echo "SONAR_INCLUSIONS=$inclusions" >> $GITHUB_ENV
+              echo "└── Result: ✅ Will scan these files (excluding coverage-omitted files): $inclusions"
+            else
+              echo "└── Result: ✅ All changed files are excluded by coverage config, running full SonarCloud analysis"
+              # Don't set SONAR_INCLUSIONS, let it scan everything per sonar-project.properties
+            fi
           else
             echo "└── Result: ✅ Running SonarCloud analysis"
           fi
