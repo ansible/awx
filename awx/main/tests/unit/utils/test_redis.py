@@ -24,8 +24,8 @@ class TestRedisRetryConfiguration:
         # Assert provided values match values on the object
         assert retry._retries == settings.REDIS_RETRY_COUNT == 3
         assert isinstance(backoff, ExponentialBackoff)
-        assert backoff._base == 0.5
-        assert backoff._cap == 1.0
+        assert backoff._base == settings.REDIS_BACKOFF_BASE == 0.5
+        assert backoff._cap == settings.REDIS_BACKOFF_CAP == 1.0
         assert BusyLoadingError in retry_errors
         assert ConnectionError in retry_errors
         assert TimeoutError in retry_errors
@@ -37,8 +37,8 @@ class TestRedisRetryConfiguration:
         retry_errors_async = client_async.connection_pool.connection_kwargs['retry_on_error']
 
         assert retry_async._retries == settings.REDIS_RETRY_COUNT
-        assert backoff_async._base == 0.5
-        assert backoff_async._cap == 1.0
+        assert backoff_async._base == settings.REDIS_BACKOFF_BASE
+        assert backoff_async._cap == settings.REDIS_BACKOFF_CAP
         assert ConnectionError in retry_errors_async
 
     @override_settings(REDIS_RETRY_COUNT=5)
@@ -55,3 +55,20 @@ class TestRedisRetryConfiguration:
 
         # Assert provided value (5) matches value on object
         assert retry._retries == 5
+
+    @override_settings(REDIS_BACKOFF_CAP=2.0, REDIS_BACKOFF_BASE=1.0)
+    def test_override_backoff_settings_applied_to_client(self):
+        """Verify override_settings for backoff parameters are applied to client object."""
+        from importlib import reload
+        import awx.main.utils.redis as redis_module
+
+        reload(redis_module)
+        from awx.main.utils.redis import get_redis_client as get_client_new
+
+        client = get_client_new()
+        retry = client.connection_pool.connection_kwargs['retry']
+        backoff = retry._backoff
+
+        # Assert provided values match values on object
+        assert backoff._cap == 2.0
+        assert backoff._base == 1.0
