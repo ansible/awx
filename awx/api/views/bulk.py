@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+from ansible_base.lib.utils.schema import extend_schema_if_available
+
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework.permissions import IsAuthenticated
@@ -19,6 +21,7 @@ from awx.api import (
 )
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Retrieves a list of available bulk actions"})
 class BulkView(APIView):
     name = _('Bulk')
     swagger_topic = 'Bulk'
@@ -39,6 +42,7 @@ class BulkView(APIView):
         return Response(data)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Bulk launch job templates"})
 class BulkJobLaunchView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     model = UnifiedJob
@@ -58,6 +62,7 @@ class BulkJobLaunchView(GenericAPIView):
         return Response(bulkjob_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Bulk create hosts"})
 class BulkHostCreateView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     model = Host
@@ -75,6 +80,7 @@ class BulkHostCreateView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Bulk delete hosts"})
 class BulkHostDeleteView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     model = Host

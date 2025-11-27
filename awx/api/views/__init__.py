@@ -167,6 +167,7 @@ class DashboardView(APIView):
     name = _("Dashboard")
     swagger_topic = 'Dashboard'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get aggregate statistics for Tower"})
     def get(self, request, format=None):
         '''Show Dashboard Details'''
         data = OrderedDict()
@@ -263,6 +264,7 @@ class DashboardJobsGraphView(APIView):
     name = _("Dashboard Jobs Graphs")
     swagger_topic = 'Jobs'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get dasboard data for jobs"})
     def get(self, request, format=None):
         period = request.query_params.get('period', 'month')
         job_type = request.query_params.get('job_type', 'all')
@@ -532,6 +534,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
 class InstanceGroupAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists
     parent_model = models.InstanceGroup
+    resource_purpose = 'access list for an instance group'
 
 
 class InstanceGroupObjectRolesList(SubListAPIView):
@@ -836,11 +839,13 @@ class ExecutionEnvironmentJobTemplateList(SubListAPIView):
     serializer_class = serializers.UnifiedJobTemplateSerializer
     parent_model = models.ExecutionEnvironment
     relationship = 'unifiedjobtemplates'
+    resource_purpose = 'unified job templates using this execution environment'
 
 
 class ExecutionEnvironmentCopy(CopyAPIView):
     model = models.ExecutionEnvironment
     copy_return_serializer_class = serializers.ExecutionEnvironmentSerializer
+    resource_purpose = 'copy of an existing execution environment'
 
 
 class ExecutionEnvironmentActivityStreamList(SubListAPIView):
@@ -850,6 +855,7 @@ class ExecutionEnvironmentActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     search_fields = ('changes',)
     filter_read_permission = False
+    resource_purpose = 'activity stream of an execution environment'
 
 
 class ProjectList(ListCreateAPIView):
@@ -1266,6 +1272,7 @@ class CredentialTypeCredentialList(SubListCreateAPIView):
     serializer_class = serializers.CredentialSerializer
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Get activity stream for credential type"})
 class CredentialTypeActivityStreamList(SubListAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1363,6 +1370,7 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
         return super(CredentialDetail, self).destroy(request, *args, **kwargs)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Get activity stream for a credential"})
 class CredentialActivityStreamList(SubListAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
@@ -1371,6 +1379,7 @@ class CredentialActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Get access list for a credential"})
 class CredentialAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists's
     parent_model = models.Credential
@@ -1390,6 +1399,7 @@ class CredentialObjectRolesList(SubListAPIView):
         return models.Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Copy credential"})
 class CredentialCopy(CopyAPIView):
     model = models.Credential
     copy_return_serializer_class = serializers.CredentialSerializer
@@ -1407,6 +1417,7 @@ class CredentialExternalTest(SubDetailAPIView):
     serializer_class = serializers.EmptySerializer
     obj_permission_type = 'use'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Test update the input values and metadata of an external credential"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         backend_kwargs = {}
@@ -1467,6 +1478,7 @@ class CredentialTypeExternalTest(SubDetailAPIView):
     model = models.CredentialType
     serializer_class = serializers.EmptySerializer
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Test a complete set of input values for an external credential"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         backend_kwargs = request.data.get('inputs', {})
@@ -1524,6 +1536,7 @@ class HostMetricSummaryMonthlyList(ListAPIView):
     serializer_class = serializers.HostMetricSummaryMonthlySerializer
     permission_classes = (IsSystemAdminOrAuditor,)
     search_fields = ('date',)
+    resource_purpose = 'monthly summaries for host metrics'
 
     def get_queryset(self):
         return self.model.objects.all()
@@ -1591,6 +1604,7 @@ class HostGroupsList(SubListCreateAttachDetachAPIView):
     serializer_class = serializers.GroupSerializer
     parent_model = models.Host
     relationship = 'groups'
+    resource_purpose = 'the list of groups a host is directly a member of'
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -1613,6 +1627,7 @@ class HostAllGroupsList(SubListAPIView):
     serializer_class = serializers.GroupSerializer
     parent_model = models.Host
     relationship = 'groups'
+    resource_purpose = 'the list of all groups of which the host is directly or indirectly a member of'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1627,6 +1642,7 @@ class HostInventorySourcesList(SubListAPIView):
     serializer_class = serializers.InventorySourceSerializer
     parent_model = models.Host
     relationship = 'inventory_sources'
+    resource_purpose = 'inventory sources of a host'
 
 
 class HostSmartInventoriesList(SubListAPIView):
@@ -1634,6 +1650,7 @@ class HostSmartInventoriesList(SubListAPIView):
     serializer_class = serializers.InventorySerializer
     parent_model = models.Host
     relationship = 'smart_inventories'
+    resource_purpose = 'smart inventories of a host'
 
 
 class HostActivityStreamList(SubListAPIView):
@@ -1642,6 +1659,7 @@ class HostActivityStreamList(SubListAPIView):
     parent_model = models.Host
     relationship = 'activitystream_set'
     search_fields = ('changes',)
+    resource_purpose = 'activity stream for a host'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1703,6 +1721,7 @@ class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetac
     parent_model = models.Group
     relationship = 'children'
     enforce_parent_relationship = 'inventory'
+    resource_purpose = 'child groups'
 
     def unattach(self, request, *args, **kwargs):
         sub_id = request.data.get('id', None)
@@ -1729,6 +1748,7 @@ class GroupPotentialChildrenList(SubListAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
     parent_model = models.Group
+    resource_purpose = 'potential children of group'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1748,6 +1768,7 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     serializer_class = serializers.HostSerializer
     parent_model = models.Group
     relationship = 'hosts'
+    resource_purpose = 'hosts of a group'
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -1773,6 +1794,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
     serializer_class = serializers.HostSerializer
     parent_model = models.Group
     relationship = 'hosts'
+    resource_purpose = 'all hosts of a group including subgroups'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1787,6 +1809,7 @@ class GroupInventorySourcesList(SubListAPIView):
     serializer_class = serializers.InventorySourceSerializer
     parent_model = models.Group
     relationship = 'inventory_sources'
+    resource_purpose = 'inventory sources for a group'
 
 
 class GroupActivityStreamList(SubListAPIView):
@@ -1795,6 +1818,7 @@ class GroupActivityStreamList(SubListAPIView):
     parent_model = models.Group
     relationship = 'activitystream_set'
     search_fields = ('changes',)
+    resource_purpose = 'activity stream for a group'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1851,11 +1875,13 @@ class InventoryVariableData(BaseVariableData):
 class HostVariableData(BaseVariableData):
     model = models.Host
     serializer_class = serializers.HostVariableDataSerializer
+    resource_purpose = 'variable data for a host'
 
 
 class GroupVariableData(BaseVariableData):
     model = models.Group
     serializer_class = serializers.GroupVariableDataSerializer
+    resource_purpose = 'variable data for a group'
 
 
 class InventoryScriptView(RetrieveAPIView):
@@ -3501,10 +3527,12 @@ class BaseJobHostSummariesList(SubListAPIView):
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
     parent_model = models.Host
+    resource_purpose = 'job summaries of a host'
 
 
 class GroupJobHostSummariesList(BaseJobHostSummariesList):
     parent_model = models.Group
+    resource_purpose = 'job host summaries for a group'
 
 
 class JobJobHostSummariesList(BaseJobHostSummariesList):
@@ -3580,6 +3608,7 @@ class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
 
 class HostJobEventsList(BaseJobEventsList):
     parent_model = models.Host
+    resource_purpose = 'job events of a host'
 
     def get_queryset(self):
         parent_obj = self.get_parent_object()
@@ -3590,6 +3619,7 @@ class HostJobEventsList(BaseJobEventsList):
 
 class GroupJobEventsList(BaseJobEventsList):
     parent_model = models.Group
+    resource_purpose = 'job events for a group'
 
 
 class JobJobEventsList(BaseJobEventsList):
@@ -3770,11 +3800,13 @@ class InventoryAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
 class GroupAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     parent_model = models.Group
     relationship = 'ad_hoc_commands'
+    resource_purpose = 'ad hoc commands for a group'
 
 
 class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     parent_model = models.Host
     relationship = 'ad_hoc_commands'
+    resource_purpose = 'ad hoc commands of a host'
 
 
 class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
@@ -3782,6 +3814,9 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.AdHocCommandDetailSerializer
 
 
+@extend_schema_if_available(
+    extensions={'x-ai-description': 'Cancel an ad hoc command'},
+)
 class AdHocCommandCancel(GenericCancelView):
     model = models.AdHocCommand
     serializer_class = serializers.AdHocCommandCancelSerializer
@@ -3873,6 +3908,7 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
 
 class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
     parent_model = models.Host
+    resource_purpose = 'events of ad hoc command of a host'
 
     def get_queryset(self):
         return super(BaseAdHocCommandEventsList, self).get_queryset()
@@ -3892,6 +3928,7 @@ class AdHocCommandActivityStreamList(SubListAPIView):
     parent_model = models.AdHocCommand
     relationship = 'activitystream_set'
     search_fields = ('changes',)
+    resource_purpose = 'activity stream of an ad hoc command'
 
 
 class AdHocCommandNotificationsList(SubListAPIView):
@@ -4150,6 +4187,7 @@ class ActivityStreamList(SimpleListAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
     search_fields = ('changes',)
+    resource_purpose = 'audit trail entries for tracking system changes'
 
 
 class ActivityStreamDetail(RetrieveAPIView):

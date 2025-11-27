@@ -15,6 +15,8 @@ from rest_framework import status
 
 from collections import OrderedDict
 
+from ansible_base.lib.utils.schema import extend_schema_if_available
+
 AUTOMATION_ANALYTICS_API_URL_PATH = "/api/tower-analytics/v1"
 AWX_ANALYTICS_API_PREFIX = 'analytics'
 
@@ -38,6 +40,8 @@ class MissingSettings(Exception):
 
 
 class GetNotAllowedMixin(object):
+    skip_ai_description = True
+
     def get(self, request, format=None):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -47,6 +51,9 @@ class AnalyticsRootView(APIView):
     name = _('Automation Analytics')
     swagger_topic = 'Automation Analytics'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Retrieve list of available analytics endpoints'},
+    )
     def get(self, request, format=None):
         data = OrderedDict()
         data['authorized'] = reverse('api:analytics_authorized', request=request)
@@ -278,6 +285,9 @@ class AnalyticsGenericDetailView(AnalyticsGenericView):
         return self._send_to_analytics(request, method="OPTIONS")
 
 
+@extend_schema_if_available(
+    extensions={'x-ai-description': 'Check if the user has access to Red Hat Insights'},
+)
 class AnalyticsAuthorizedView(AnalyticsGenericListView):
     name = _("Authorized")
 

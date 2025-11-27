@@ -1024,9 +1024,6 @@ class GenericCancelView(RetrieveAPIView):
     # In subclass set model, serializer_class
     obj_permission_type = 'cancel'
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Determine if job can be canceled'},
-    )
     def get(self, request, *args, **kwargs):
         return super(GenericCancelView, self).get(request, *args, **kwargs)
 
@@ -1034,9 +1031,6 @@ class GenericCancelView(RetrieveAPIView):
     def dispatch(self, *args, **kwargs):
         return super(GenericCancelView, self).dispatch(*args, **kwargs)
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Cancel job'},
-    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_cancel:
