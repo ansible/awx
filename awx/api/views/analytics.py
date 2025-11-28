@@ -50,6 +50,7 @@ class AnalyticsRootView(APIView):
     permission_classes = (AnalyticsPermission,)
     name = _('Automation Analytics')
     swagger_topic = 'Automation Analytics'
+    resource_purpose = 'automation analytics endpoints'
 
     @extend_schema_if_available(
         extensions={'x-ai-description': 'Retrieve list of available analytics endpoints'},
@@ -290,44 +291,55 @@ class AnalyticsGenericDetailView(AnalyticsGenericView):
 )
 class AnalyticsAuthorizedView(AnalyticsGenericListView):
     name = _("Authorized")
+    resource_purpose = 'red hat insights authorization status'
 
 
 class AnalyticsReportsList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Reports")
     swagger_topic = "Automation Analytics"
+    resource_purpose = 'automation analytics reports'
 
 
 class AnalyticsReportDetail(AnalyticsGenericDetailView):
     name = _("Report")
+    resource_purpose = 'automation analytics report detail'
 
 
 class AnalyticsReportOptionsList(AnalyticsGenericListView):
     name = _("Report Options")
+    resource_purpose = 'automation analytics report options'
 
 
 class AnalyticsAdoptionRateList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Adoption Rate")
+    resource_purpose = 'automation analytics adoption rate data'
 
 
 class AnalyticsEventExplorerList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Event Explorer")
+    resource_purpose = 'automation analytics event explorer data'
 
 
 class AnalyticsHostExplorerList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Host Explorer")
+    resource_purpose = 'automation analytics host explorer data'
 
 
 class AnalyticsJobExplorerList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Job Explorer")
+    resource_purpose = 'automation analytics job explorer data'
 
 
 class AnalyticsProbeTemplatesList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Probe Templates")
+    resource_purpose = 'automation analytics probe templates'
 
 
 class AnalyticsProbeTemplateForHostsList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Probe Template For Hosts")
+    resource_purpose = 'automation analytics probe templates for hosts'
 
 
 class AnalyticsRoiTemplatesList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("ROI Templates")
+    resource_purpose = 'automation analytics roi templates'

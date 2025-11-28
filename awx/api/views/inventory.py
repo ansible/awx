@@ -57,6 +57,7 @@ class InventoryUpdateEventsList(SubListAPIView):
     name = _('Inventory Update Events List')
     search_fields = ('stdout',)
     pagination_class = UnifiedJobEventPagination
+    resource_purpose = 'events of an inventory update'
 
     def get_queryset(self):
         iu = self.get_parent_object()
@@ -71,11 +72,13 @@ class InventoryUpdateEventsList(SubListAPIView):
 class InventoryList(ListCreateAPIView):
     model = Inventory
     serializer_class = InventorySerializer
+    resource_purpose = 'list and create inventories'
 
 
 class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = Inventory
     serializer_class = InventorySerializer
+    resource_purpose = 'inventory detail'
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -102,10 +105,12 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
 class ConstructedInventoryDetail(InventoryDetail):
     serializer_class = ConstructedInventorySerializer
+    resource_purpose = 'constructed inventory detail'
 
 
 class ConstructedInventoryList(InventoryList):
     serializer_class = ConstructedInventorySerializer
+    resource_purpose = 'list and create constructed inventories'
 
     def get_queryset(self):
         r = super().get_queryset()
@@ -118,6 +123,7 @@ class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     serializer_class = InventorySerializer
     parent_model = Inventory
     relationship = 'input_inventories'
+    resource_purpose = 'input inventories of a constructed inventory'
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.kind == 'constructed':
@@ -131,6 +137,7 @@ class InventoryActivityStreamList(SubListAPIView):
     parent_model = Inventory
     relationship = 'activitystream_set'
     search_fields = ('changes',)
+    resource_purpose = 'activity stream for an inventory'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -159,6 +166,7 @@ class InventoryObjectRolesList(SubListAPIView):
     parent_model = Inventory
     search_fields = ('role_field', 'content_type__model')
     deprecated = True
+    resource_purpose = 'roles of an inventory'
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -171,6 +179,7 @@ class InventoryJobTemplateList(SubListAPIView):
     serializer_class = JobTemplateSerializer
     parent_model = Inventory
     relationship = 'jobtemplates'
+    resource_purpose = 'job templates using an inventory'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -181,6 +190,7 @@ class InventoryJobTemplateList(SubListAPIView):
 
 class InventoryLabelList(LabelSubListCreateAttachDetachView):
     parent_model = Inventory
+    resource_purpose = 'labels of an inventory'
 
 
 class InventoryCopy(CopyAPIView):

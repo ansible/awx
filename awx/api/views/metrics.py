@@ -29,6 +29,7 @@ logger = logging.getLogger('awx.analytics')
 class MetricsView(APIView):
     name = _('Metrics')
     swagger_topic = 'Metrics'
+    resource_purpose = 'prometheus metrics data'
 
     renderer_classes = [renderers.PlainTextRenderer, renderers.PrometheusJSONRenderer, renderers.BrowsableAPIRenderer]
 

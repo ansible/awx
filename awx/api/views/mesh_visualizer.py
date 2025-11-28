@@ -13,6 +13,7 @@ class MeshVisualizer(APIView):
     name = _("Mesh Visualizer")
     permission_classes = (IsSystemAdminOrAuditor,)
     swagger_topic = "System Configuration"
+    resource_purpose = 'mesh network topology visualization data'
 
     def get(self, request, format=None):
         data = {

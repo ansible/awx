@@ -24,6 +24,7 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
     model = Label
     serializer_class = LabelSerializer
     relationship = 'labels'
+    resource_purpose = 'labels of a resource'
 
     def unattach(self, request, *args, **kwargs):
         (sub_id, res) = super().unattach_validate(request)
@@ -61,9 +62,11 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
 class LabelDetail(RetrieveUpdateAPIView):
     model = Label
     serializer_class = LabelSerializer
+    resource_purpose = 'label detail'
 
 
 class LabelList(ListCreateAPIView):
     name = _("Labels")
     model = Label
     serializer_class = LabelSerializer
+    resource_purpose = 'list and create labels'

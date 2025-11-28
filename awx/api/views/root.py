@@ -48,6 +48,7 @@ class ApiRootView(APIView):
     name = _('REST API')
     versioning_class = URLPathVersioning
     swagger_topic = 'Versioning'
+    resource_purpose = 'api root and version information'
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
@@ -68,6 +69,7 @@ class ApiRootView(APIView):
 class ApiVersionRootView(APIView):
     permission_classes = (AllowAny,)
     swagger_topic = 'Versioning'
+    resource_purpose = 'api top-level resources'
 
     def get(self, request, format=None):
         '''List top level resources'''
@@ -139,6 +141,7 @@ class ApiV2PingView(APIView):
     authentication_classes = ()
     name = _('Ping')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'basic instance information'
 
     @extend_schema_if_available(
         extensions={'x-ai-description': 'Return basic information about this instance'},
@@ -177,6 +180,7 @@ class ApiV2SubscriptionView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Subscriptions')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'aap subscription validation'
 
     def check_permissions(self, request):
         super(ApiV2SubscriptionView, self).check_permissions(request)
@@ -252,6 +256,7 @@ class ApiV2AttachView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Attach Subscription')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'subscription attachment'
 
     def check_permissions(self, request):
         super(ApiV2AttachView, self).check_permissions(request)
@@ -310,6 +315,7 @@ class ApiV2ConfigView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'system configuration and license management'
 
     def check_permissions(self, request):
         super(ApiV2ConfigView, self).check_permissions(request)

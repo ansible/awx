@@ -24,6 +24,7 @@ logger = logging.getLogger('awx.api.views.webhooks')
 class WebhookKeyView(GenericAPIView):
     serializer_class = serializers.EmptySerializer
     permission_classes = (WebhookKeyPermission,)
+    resource_purpose = 'webhook key management'
 
     def get_queryset(self):
         qs_models = {'job_templates': JobTemplate, 'workflow_job_templates': WorkflowJobTemplate}
@@ -52,6 +53,7 @@ class WebhookReceiverBase(APIView):
     authentication_classes = ()
 
     ref_keys = {}
+    resource_purpose = 'webhook receiver for triggering jobs'
 
     def get_queryset(self):
         qs_models = {'job_templates': JobTemplate, 'workflow_job_templates': WorkflowJobTemplate}
@@ -175,6 +177,7 @@ class WebhookReceiverBase(APIView):
 
 class GithubWebhookReceiver(WebhookReceiverBase):
     service = 'github'
+    resource_purpose = 'github webhook receiver'
 
     ref_keys = {
         'pull_request': 'pull_request.head.sha',
@@ -212,6 +215,7 @@ class GithubWebhookReceiver(WebhookReceiverBase):
 
 class GitlabWebhookReceiver(WebhookReceiverBase):
     service = 'gitlab'
+    resource_purpose = 'gitlab webhook receiver'
 
     ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'object_attributes.last_commit.id'}
 
@@ -250,6 +254,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
 
 class BitbucketDcWebhookReceiver(WebhookReceiverBase):
     service = 'bitbucket_dc'
+    resource_purpose = 'bitbucket data center webhook receiver'
 
     ref_keys = {
         'repo:refs_changed': 'changes.0.toHash',
