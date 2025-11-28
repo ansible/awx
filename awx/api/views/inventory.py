@@ -19,6 +19,8 @@ from rest_framework import serializers
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
 
+from ansible_base.lib.utils.schema import extend_schema_if_available
+
 from awx.api.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
@@ -110,6 +112,7 @@ class ConstructedInventoryList(InventoryList):
         return r.filter(kind='constructed')
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Get or create input inventory inventory"})
 class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     model = Inventory
     serializer_class = InventorySerializer
@@ -121,6 +124,7 @@ class InventoryInputInventoriesList(SubListAttachDetachAPIView):
             raise serializers.ValidationError({'error': 'You cannot add a constructed inventory to another constructed inventory.'})
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Get activity stream for an inventory"})
 class InventoryActivityStreamList(SubListAPIView):
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
@@ -140,11 +144,13 @@ class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = InstanceGroupSerializer
     parent_model = Inventory
     relationship = 'instance_groups'
+    resource_purpose = 'instance groups of an inventory'
 
 
 class InventoryAccessList(ResourceAccessList):
     model = User  # needs to be User for AccessLists's
     parent_model = Inventory
+    resource_purpose = 'users who accessed the inventory'
 
 
 class InventoryObjectRolesList(SubListAPIView):
@@ -180,3 +186,4 @@ class InventoryLabelList(LabelSubListCreateAttachDetachView):
 class InventoryCopy(CopyAPIView):
     model = Inventory
     copy_return_serializer_class = InventorySerializer
+    resource_purpose = 'copy of an inventory'

@@ -421,6 +421,7 @@ class InstancePeersList(SubListAPIView):
     search_fields = ('address',)
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "List receptor addresses of instance group"})
 class InstanceReceptorAddressesList(SubListAPIView):
     name = _("Receptor Addresses")
     model = models.ReceptorAddress
@@ -478,11 +479,13 @@ class InstanceHealthCheck(GenericAPIView):
         return super().get_queryset().filter(node_type='execution')
         # FIXME: For now, we don't have a good way of checking the health of a hop node.
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get instance health check result"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         data = self.get_serializer(data=request.data).to_representation(obj)
         return Response(data, status=status.HTTP_200_OK)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Perform instance health check"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.health_check_pending:
@@ -529,12 +532,13 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     serializer_class = serializers.UnifiedJobListSerializer
     parent_model = models.InstanceGroup
     relationship = "unifiedjob_set"
+    resource_purpose = 'jobs of an instance group'
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Retrieve access list of an instance group"})
 class InstanceGroupAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists
     parent_model = models.InstanceGroup
-    resource_purpose = 'access list for an instance group'
 
 
 class InstanceGroupObjectRolesList(SubListAPIView):
@@ -557,6 +561,7 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     parent_model = models.InstanceGroup
     relationship = "instances"
     search_fields = ('hostname',)
+    resource_purpose = 'instance of an instance group'
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.node_type == 'control':
@@ -1847,6 +1852,7 @@ class InventoryGroupsList(SubListCreateAttachDetachAPIView):
     parent_key = 'inventory'
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "List root (top-level) groups of an inventory"})
 class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
@@ -1870,6 +1876,7 @@ class BaseVariableData(RetrieveUpdateAPIView):
 class InventoryVariableData(BaseVariableData):
     model = models.Inventory
     serializer_class = serializers.InventoryVariableDataSerializer
+    resource_purpose = 'variable data for an inventory'
 
 
 class HostVariableData(BaseVariableData):
@@ -1884,6 +1891,7 @@ class GroupVariableData(BaseVariableData):
     resource_purpose = 'variable data for a group'
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Generate inventory group and host data as needed for an inventory script"})
 class InventoryScriptView(RetrieveAPIView):
     model = models.Inventory
     serializer_class = serializers.InventoryScriptSerializer
@@ -1915,6 +1923,7 @@ class InventoryScriptView(RetrieveAPIView):
         return Response(obj.get_script_data(hostvars=hostvars, towervars=towervars, show_all=show_all, slice_number=slice_number, slice_count=slice_count))
 
 
+@extend_schema_if_available(extensions={"x-ai-description": "Create group tree for an inventory"})
 class InventoryTreeView(RetrieveAPIView):
     model = models.Inventory
     serializer_class = serializers.GroupTreeSerializer
@@ -1954,6 +1963,7 @@ class InventoryInventorySourcesList(SubListCreateAPIView):
     always_allow_superuser = False
     relationship = 'inventory_sources'
     parent_key = 'inventory'
+    resource_purpose = 'inventory sources'
 
 
 class InventoryInventorySourcesUpdate(RetrieveAPIView):
@@ -1964,6 +1974,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
     serializer_class = serializers.InventorySourceUpdateSerializer
     permission_classes = (InventoryInventorySourcesUpdatePermission,)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Determine if any of the sources of this inventory can be updated"})
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
         update_data = []
@@ -1972,6 +1983,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
             update_data.append(details)
         return Response(update_data)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Update inventory sources"})
     def post(self, request, *args, **kwargs):
         inventory = self.get_object()
         update_data = []
@@ -2030,6 +2042,7 @@ class InventorySourceActivityStreamList(SubListAPIView):
     parent_model = models.InventorySource
     relationship = 'activitystream_set'
     search_fields = ('changes',)
+    resource_purpose = 'activity stream of an inventory source'
 
 
 class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
@@ -2142,6 +2155,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
     obj_permission_type = 'start'
     serializer_class = serializers.InventorySourceUpdateSerializer
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Update inventory source"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(instance=obj, data=request.data)
@@ -3795,6 +3809,7 @@ class InventoryAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
     parent_model = models.Inventory
     relationship = 'ad_hoc_commands'
     parent_key = 'inventory'
+    resource_purpose = 'ad hoc command for an inventory'
 
 
 class GroupAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
