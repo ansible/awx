@@ -107,6 +107,8 @@ class AnalyticsGenericView(APIView):
         return Response(response.json(), status=response.status_code)
     """
 
+    resource_purpose = 'base view for analytics api proxy'
+
     permission_classes = (AnalyticsPermission,)
 
     @staticmethod
@@ -265,6 +267,8 @@ class AnalyticsGenericView(APIView):
 
 
 class AnalyticsGenericListView(AnalyticsGenericView):
+    resource_purpose = 'analytics api proxy list view'
+
     def get(self, request, format=None):
         return self._send_to_analytics(request, method="GET")
 
@@ -276,6 +280,8 @@ class AnalyticsGenericListView(AnalyticsGenericView):
 
 
 class AnalyticsGenericDetailView(AnalyticsGenericView):
+    resource_purpose = 'analytics api proxy detail view'
+
     def get(self, request, slug, format=None):
         return self._send_to_analytics(request, method="GET")
 

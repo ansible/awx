@@ -1930,6 +1930,7 @@ class GroupActivityStreamList(SubListAPIView):
 class GroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
+    resource_purpose = 'group detail'
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1945,6 +1946,7 @@ class InventoryGroupsList(SubListCreateAttachDetachAPIView):
     parent_model = models.Inventory
     relationship = 'groups'
     parent_key = 'inventory'
+    resource_purpose = 'groups of an inventory'
 
 
 @extend_schema_if_available(extensions={"x-ai-description": "List root (top-level) groups of an inventory"})
@@ -1954,6 +1956,7 @@ class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
     parent_model = models.Inventory
     relationship = 'groups'
     parent_key = 'inventory'
+    resource_purpose = 'root groups of an inventory'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1966,6 +1969,7 @@ class BaseVariableData(RetrieveUpdateAPIView):
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
     permission_classes = (VariableDataPermission,)
+    resource_purpose = 'base view for variable data'
 
 
 class InventoryVariableData(BaseVariableData):
@@ -1992,6 +1996,7 @@ class InventoryScriptView(RetrieveAPIView):
     serializer_class = serializers.InventoryScriptSerializer
     permission_classes = (TaskPermission,)
     filter_backends = ()
+    resource_purpose = 'inventory script data'
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2023,6 +2028,7 @@ class InventoryTreeView(RetrieveAPIView):
     model = models.Inventory
     serializer_class = serializers.GroupTreeSerializer
     filter_backends = ()
+    resource_purpose = 'inventory group tree'
 
     def _populate_group_children(self, group_data, all_group_data_map, group_children_map):
         if 'children' in group_data:
@@ -2068,6 +2074,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
     obj_permission_type = 'start'
     serializer_class = serializers.InventorySourceUpdateSerializer
     permission_classes = (InventoryInventorySourcesUpdatePermission,)
+    resource_purpose = 'update inventory sources'
 
     @extend_schema_if_available(extensions={"x-ai-description": "Determine if any of the sources of this inventory can be updated"})
     def retrieve(self, request, *args, **kwargs):
@@ -2260,6 +2267,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
     model = models.InventorySource
     obj_permission_type = 'start'
     serializer_class = serializers.InventorySourceUpdateSerializer
+    resource_purpose = 'update an inventory source'
 
     @extend_schema_if_available(extensions={"x-ai-description": "Update inventory source"})
     def post(self, request, *args, **kwargs):
@@ -3655,6 +3663,7 @@ class JobCreateSchedule(RetrieveAPIView):
     model = models.Job
     obj_permission_type = 'start'
     serializer_class = serializers.JobCreateScheduleSerializer
+    resource_purpose = 'create a schedule from a job'
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -3717,6 +3726,7 @@ class JobNotificationsList(SubListAPIView):
     parent_model = models.Job
     relationship = 'notifications'
     search_fields = ('subject', 'notification_type', 'body')
+    resource_purpose = 'notifications of a job'
 
 
 class BaseJobHostSummariesList(SubListAPIView):
@@ -3727,6 +3737,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     name = _('Job Host Summaries List')
     search_fields = ('host_name',)
     filter_read_permission = False
+    resource_purpose = 'base view for job host summaries'
 
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
@@ -3741,15 +3752,18 @@ class GroupJobHostSummariesList(BaseJobHostSummariesList):
 
 class JobJobHostSummariesList(BaseJobHostSummariesList):
     parent_model = models.Job
+    resource_purpose = 'job host summaries of a job'
 
 
 class JobHostSummaryDetail(RetrieveAPIView):
     model = models.JobHostSummary
     serializer_class = serializers.JobHostSummarySerializer
+    resource_purpose = 'job host summary detail'
 
 
 class JobEventDetail(RetrieveAPIView):
     serializer_class = serializers.JobEventSerializer
+    resource_purpose = 'job event detail'
 
     @property
     def is_partitioned(self):
@@ -3774,6 +3788,7 @@ class JobEventChildrenList(NoTruncateMixin, SubListAPIView):
     relationship = 'children'
     name = _('Job Event Children List')
     search_fields = ('stdout',)
+    resource_purpose = 'child events of a job event'
 
     @property
     def is_partitioned(self):
@@ -3804,6 +3819,7 @@ class BaseJobEventsList(NoTruncateMixin, SubListAPIView):
     relationship = 'job_events'
     name = _('Job Events List')
     search_fields = ('stdout',)
+    resource_purpose = 'base view for job events'
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
@@ -3829,6 +3845,7 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
     parent_model = models.Job
     pagination_class = UnifiedJobEventPagination
+    resource_purpose = 'job events of a job'
 
     def get_queryset(self):
         job = self.get_parent_object()
@@ -3839,6 +3856,7 @@ class JobJobEventsList(BaseJobEventsList):
 class JobJobEventsChildrenSummary(APIView):
     renderer_classes = [JSONRenderer]
     meta_events = ('debug', 'verbose', 'warning', 'error', 'system_warning', 'deprecated')
+    resource_purpose = 'children summary for job events'
 
     def get(self, request, **kwargs):
         resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False, is_tree=True)
@@ -3945,6 +3963,7 @@ class AdHocCommandList(ListCreateAPIView):
     model = models.AdHocCommand
     serializer_class = serializers.AdHocCommandListSerializer
     always_allow_superuser = False
+    resource_purpose = 'list and create ad hoc commands'
 
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
@@ -4017,6 +4036,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
 class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.AdHocCommand
     serializer_class = serializers.AdHocCommandDetailSerializer
+    resource_purpose = 'ad hoc command detail'
 
 
 @extend_schema_if_available(
@@ -4025,12 +4045,14 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class AdHocCommandCancel(GenericCancelView):
     model = models.AdHocCommand
     serializer_class = serializers.AdHocCommandCancelSerializer
+    resource_purpose = 'cancel an ad hoc command'
 
 
 class AdHocCommandRelaunch(GenericAPIView):
     model = models.AdHocCommand
     obj_permission_type = 'start'
     serializer_class = serializers.AdHocCommandRelaunchSerializer
+    resource_purpose = 'relaunch an ad hoc command'
 
     # FIXME: Figure out why OPTIONS request still shows all fields.
 
@@ -4089,6 +4111,7 @@ class AdHocCommandRelaunch(GenericAPIView):
 class AdHocCommandEventDetail(RetrieveAPIView):
     model = models.AdHocCommandEvent
     serializer_class = serializers.AdHocCommandEventSerializer
+    resource_purpose = 'ad hoc command event detail'
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -4104,6 +4127,7 @@ class BaseAdHocCommandEventsList(NoTruncateMixin, SubListAPIView):
     name = _('Ad Hoc Command Events List')
     search_fields = ('stdout',)
     pagination_class = UnifiedJobEventPagination
+    resource_purpose = 'base view for ad hoc command events'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -4125,6 +4149,7 @@ class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
 
 class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
     parent_model = models.AdHocCommand
+    resource_purpose = 'events of an ad hoc command'
 
 
 class AdHocCommandActivityStreamList(SubListAPIView):
@@ -4142,11 +4167,13 @@ class AdHocCommandNotificationsList(SubListAPIView):
     parent_model = models.AdHocCommand
     relationship = 'notifications'
     search_fields = ('subject', 'notification_type', 'body')
+    resource_purpose = 'notifications of an ad hoc command'
 
 
 class SystemJobList(ListAPIView):
     model = models.SystemJob
     serializer_class = serializers.SystemJobListSerializer
+    resource_purpose = 'list system jobs'
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
@@ -4157,11 +4184,13 @@ class SystemJobList(ListAPIView):
 class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.SystemJob
     serializer_class = serializers.SystemJobSerializer
+    resource_purpose = 'system job detail'
 
 
 class SystemJobCancel(GenericCancelView):
     model = models.SystemJob
     serializer_class = serializers.SystemJobCancelSerializer
+    resource_purpose = 'cancel a system job'
 
 
 class SystemJobNotificationsList(SubListAPIView):
@@ -4170,18 +4199,21 @@ class SystemJobNotificationsList(SubListAPIView):
     parent_model = models.SystemJob
     relationship = 'notifications'
     search_fields = ('subject', 'notification_type', 'body')
+    resource_purpose = 'notifications of a system job'
 
 
 class UnifiedJobTemplateList(ListAPIView):
     model = models.UnifiedJobTemplate
     serializer_class = serializers.UnifiedJobTemplateSerializer
     search_fields = ('description', 'name', 'jobtemplate__playbook')
+    resource_purpose = 'list unified job templates'
 
 
 class UnifiedJobList(ListAPIView):
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     search_fields = ('description', 'name', 'job__playbook')
+    resource_purpose = 'list unified jobs'
 
 
 def redact_ansi(line):
@@ -4236,6 +4268,7 @@ class UnifiedJobStdout(RetrieveAPIView):
         renderers.AnsiDownloadRenderer,
     ]
     filter_backends = ()
+    resource_purpose = 'stdout output of a unified job'
 
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
@@ -4299,28 +4332,34 @@ class UnifiedJobStdout(RetrieveAPIView):
 
 class ProjectUpdateStdout(UnifiedJobStdout):
     model = models.ProjectUpdate
+    resource_purpose = 'stdout output of a project update'
 
 
 class InventoryUpdateStdout(UnifiedJobStdout):
     model = models.InventoryUpdate
+    resource_purpose = 'stdout output of an inventory update'
 
 
 class JobStdout(UnifiedJobStdout):
     model = models.Job
+    resource_purpose = 'stdout output of a job'
 
 
 class AdHocCommandStdout(UnifiedJobStdout):
     model = models.AdHocCommand
+    resource_purpose = 'stdout output of an ad hoc command'
 
 
 class NotificationTemplateList(ListCreateAPIView):
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
+    resource_purpose = 'list and create notification templates'
 
 
 class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
+    resource_purpose = 'notification template detail'
 
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -4340,6 +4379,7 @@ class NotificationTemplateTest(GenericAPIView):
     model = models.NotificationTemplate
     obj_permission_type = 'start'
     serializer_class = serializers.EmptySerializer
+    resource_purpose = 'test a notification template'
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -4370,22 +4410,26 @@ class NotificationTemplateNotificationList(SubListAPIView):
     relationship = 'notifications'
     parent_key = 'notification_template'
     search_fields = ('subject', 'notification_type', 'body')
+    resource_purpose = 'notifications of a notification template'
 
 
 class NotificationTemplateCopy(CopyAPIView):
     model = models.NotificationTemplate
     copy_return_serializer_class = serializers.NotificationTemplateSerializer
+    resource_purpose = 'copy a notification template'
 
 
 class NotificationList(ListAPIView):
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
     search_fields = ('subject', 'notification_type', 'body')
+    resource_purpose = 'list notifications'
 
 
 class NotificationDetail(RetrieveAPIView):
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
+    resource_purpose = 'notification detail'
 
 
 class ActivityStreamList(SimpleListAPIView):
@@ -4398,6 +4442,7 @@ class ActivityStreamList(SimpleListAPIView):
 class ActivityStreamDetail(RetrieveAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
+    resource_purpose = 'activity stream entry detail'
 
 
 class RoleList(ListAPIView):
@@ -4406,12 +4451,14 @@ class RoleList(ListAPIView):
     serializer_class = serializers.RoleSerializer
     permission_classes = (IsAuthenticated,)
     search_fields = ('role_field', 'content_type__model')
+    resource_purpose = 'list roles'
 
 
 class RoleDetail(RetrieveAPIView):
     deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
+    resource_purpose = 'role detail'
 
 
 class RoleUsersList(SubListAttachDetachAPIView):
@@ -4421,6 +4468,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
     parent_model = models.Role
     relationship = 'members'
     ordering = ('username',)
+    resource_purpose = 'users with a role'
 
     def get_queryset(self):
         role = self.get_parent_object()
@@ -4457,6 +4505,7 @@ class RoleTeamsList(SubListAttachDetachAPIView):
     parent_model = models.Role
     relationship = 'member_role.parents'
     permission_classes = (IsAuthenticated,)
+    resource_purpose = 'teams with a role'
 
     def get_queryset(self):
         role = self.get_parent_object()
@@ -4526,6 +4575,7 @@ for attr, value in list(locals().items()):
 class WorkflowApprovalTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.WorkflowApprovalTemplate
     serializer_class = serializers.WorkflowApprovalTemplateSerializer
+    resource_purpose = 'workflow approval template detail'
 
 
 class WorkflowApprovalTemplateJobsList(SubListAPIView):
@@ -4534,11 +4584,13 @@ class WorkflowApprovalTemplateJobsList(SubListAPIView):
     parent_model = models.WorkflowApprovalTemplate
     relationship = 'approvals'
     parent_key = 'workflow_approval_template'
+    resource_purpose = 'workflow approvals of a workflow approval template'
 
 
 class WorkflowApprovalList(ListAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalListSerializer
+    resource_purpose = 'list workflow approvals'
 
     def get(self, request, *args, **kwargs):
         return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
@@ -4547,12 +4599,14 @@ class WorkflowApprovalList(ListAPIView):
 class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalSerializer
+    resource_purpose = 'workflow approval detail'
 
 
 class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
     permission_classes = (WorkflowApprovalPermission,)
+    resource_purpose = 'approve a workflow approval'
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -4568,6 +4622,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer
     permission_classes = (WorkflowApprovalPermission,)
+    resource_purpose = 'deny a workflow approval'
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()

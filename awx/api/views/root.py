@@ -130,6 +130,7 @@ class ApiVersionRootView(APIView):
 
 class ApiV2RootView(ApiVersionRootView):
     name = _('Version 2')
+    resource_purpose = 'api v2 root'
 
 
 class ApiV2PingView(APIView):

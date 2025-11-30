@@ -14,6 +14,7 @@ class TaskManagerDebugView(APIView):
     exclude_from_schema = True
     permission_classes = [AllowAny]
     prefix = 'Task'
+    resource_purpose = 'debug task manager'
 
     def get(self, request):
         TaskManager().schedule()
@@ -29,6 +30,7 @@ class DependencyManagerDebugView(APIView):
     exclude_from_schema = True
     permission_classes = [AllowAny]
     prefix = 'Dependency'
+    resource_purpose = 'debug dependency manager'
 
     def get(self, request):
         DependencyManager().schedule()
@@ -44,6 +46,7 @@ class WorkflowManagerDebugView(APIView):
     exclude_from_schema = True
     permission_classes = [AllowAny]
     prefix = 'Workflow'
+    resource_purpose = 'debug workflow manager'
 
     def get(self, request):
         WorkflowManager().schedule()
@@ -58,6 +61,7 @@ class DebugRootView(APIView):
     _ignore_model_permissions = True
     exclude_from_schema = True
     permission_classes = [AllowAny]
+    resource_purpose = 'debug endpoints root'
 
     def get(self, request, format=None):
         '''List of available debug urls'''
