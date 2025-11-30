@@ -21,7 +21,6 @@ from awx.api import (
 )
 
 
-@extend_schema_if_available(extensions={"x-ai-description": "Retrieves a list of available bulk actions"})
 class BulkView(APIView):
     name = _('Bulk')
     swagger_topic = 'Bulk'
@@ -33,6 +32,7 @@ class BulkView(APIView):
     ]
     allowed_methods = ['GET', 'OPTIONS']
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Retrieves a list of available bulk actions"})
     def get(self, request, format=None):
         '''List top level resources'''
         data = OrderedDict()
@@ -42,18 +42,19 @@ class BulkView(APIView):
         return Response(data)
 
 
-@extend_schema_if_available(extensions={"x-ai-description": "Bulk launch job templates"})
 class BulkJobLaunchView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     model = UnifiedJob
     serializer_class = serializers.BulkJobLaunchSerializer
     allowed_methods = ['GET', 'POST', 'OPTIONS']
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get information about bulk job launch endpoint"})
     def get(self, request):
         data = OrderedDict()
         data['detail'] = "Specify a list of unified job templates to launch alongside their launchtime parameters"
         return Response(data, status=status.HTTP_200_OK)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Bulk launch job templates"})
     def post(self, request):
         bulkjob_serializer = serializers.BulkJobLaunchSerializer(data=request.data, context={'request': request})
         if bulkjob_serializer.is_valid():
@@ -62,16 +63,17 @@ class BulkJobLaunchView(GenericAPIView):
         return Response(bulkjob_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema_if_available(extensions={"x-ai-description": "Bulk create hosts"})
 class BulkHostCreateView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     model = Host
     serializer_class = serializers.BulkHostCreateSerializer
     allowed_methods = ['GET', 'POST', 'OPTIONS']
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get information about bulk host create endpoint"})
     def get(self, request):
         return Response({"detail": "Bulk create hosts with this endpoint"}, status=status.HTTP_200_OK)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Bulk create hosts"})
     def post(self, request):
         serializer = serializers.BulkHostCreateSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -80,16 +82,17 @@ class BulkHostCreateView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema_if_available(extensions={"x-ai-description": "Bulk delete hosts"})
 class BulkHostDeleteView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     model = Host
     serializer_class = serializers.BulkHostDeleteSerializer
     allowed_methods = ['GET', 'POST', 'OPTIONS']
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get information about bulk host delete endpoint"})
     def get(self, request):
         return Response({"detail": "Bulk delete hosts with this endpoint"}, status=status.HTTP_200_OK)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Bulk delete hosts"})
     def post(self, request):
         serializer = serializers.BulkHostDeleteSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
