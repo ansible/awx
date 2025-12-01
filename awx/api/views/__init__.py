@@ -367,7 +367,7 @@ class InstanceList(ListCreateAPIView):
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
     ordering = ('id',)
-    resource_purpose = 'list and create instances'
+    resource_purpose = 'instances'
 
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related('receptor_addresses')
@@ -443,7 +443,7 @@ class ReceptorAddressesList(ListAPIView):
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
     search_fields = ('address',)
-    resource_purpose = 'list receptor addresses'
+    resource_purpose = 'receptor addresses'
 
 
 class ReceptorAddressDetail(RetrieveAPIView):
@@ -521,7 +521,7 @@ class InstanceGroupList(ListCreateAPIView):
     name = _("Instance Groups")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
-    resource_purpose = 'list and create instance groups'
+    resource_purpose = 'instance groups'
 
 
 class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -599,7 +599,7 @@ class ScheduleList(ListCreateAPIView):
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
     ordering = ('id',)
-    resource_purpose = 'list and create schedules'
+    resource_purpose = 'schedules'
 
 
 class ScheduleDetail(RetrieveUpdateDestroyAPIView):
@@ -707,7 +707,7 @@ class ScheduleUnifiedJobsList(SubListAPIView):
 class TeamList(ListCreateAPIView):
     model = models.Team
     serializer_class = serializers.TeamSerializer
-    resource_purpose = 'list and create teams'
+    resource_purpose = 'teams'
 
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
@@ -850,7 +850,7 @@ class ExecutionEnvironmentList(ListCreateAPIView):
     model = models.ExecutionEnvironment
     serializer_class = serializers.ExecutionEnvironmentSerializer
     swagger_topic = "Execution Environments"
-    resource_purpose = 'list and create execution environments'
+    resource_purpose = 'execution environments'
 
 
 class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
@@ -903,7 +903,7 @@ class ExecutionEnvironmentActivityStreamList(SubListAPIView):
 class ProjectList(ListCreateAPIView):
     model = models.Project
     serializer_class = serializers.ProjectSerializer
-    resource_purpose = 'list and create projects'
+    resource_purpose = 'projects'
 
 
 class ProjectDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -1045,7 +1045,7 @@ class ProjectUpdateView(RetrieveAPIView):
 class ProjectUpdateList(ListAPIView):
     model = models.ProjectUpdate
     serializer_class = serializers.ProjectUpdateListSerializer
-    resource_purpose = 'list project updates'
+    resource_purpose = 'project updates'
 
 
 class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
@@ -1151,7 +1151,7 @@ class UserList(ListCreateAPIView):
     serializer_class = serializers.UserSerializer
     permission_classes = (UserPermission,)
     ordering = ('username',)
-    resource_purpose = 'list and create users'
+    resource_purpose = 'users'
 
 
 class UserMeList(ListAPIView):
@@ -1328,7 +1328,7 @@ class UserAccessList(ResourceAccessList):
 class CredentialTypeList(ListCreateAPIView):
     model = models.CredentialType
     serializer_class = serializers.CredentialTypeSerializer
-    resource_purpose = 'list and create credential types'
+    resource_purpose = 'credential types'
 
 
 class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
@@ -1366,7 +1366,7 @@ class CredentialTypeActivityStreamList(SubListAPIView):
 class CredentialList(ListCreateAPIView):
     model = models.Credential
     serializer_class = serializers.CredentialSerializerCreate
-    resource_purpose = 'list and create credentials'
+    resource_purpose = 'credentials'
 
 
 class CredentialOwnerUsersList(SubListAPIView):
@@ -1550,7 +1550,7 @@ class CredentialInputSourceList(ListCreateAPIView):
 
     model = models.CredentialInputSource
     serializer_class = serializers.CredentialInputSourceSerializer
-    resource_purpose = 'list and create credential input sources'
+    resource_purpose = 'credential input sources'
 
 
 class CredentialInputSourceSubList(SubListCreateAPIView):
@@ -1611,7 +1611,7 @@ class HostMetricList(ListAPIView):
     serializer_class = serializers.HostMetricSerializer
     permission_classes = (IsSystemAdminOrAuditor,)
     search_fields = ('hostname', 'deleted')
-    resource_purpose = 'list host metrics'
+    resource_purpose = 'host metrics'
 
     def get_queryset(self):
         return self.model.objects.all()
@@ -1647,7 +1647,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
     model = models.Host
     serializer_class = serializers.HostSerializer
-    resource_purpose = 'list and create hosts'
+    resource_purpose = 'hosts'
 
     def get_queryset(self):
         qs = super(HostList, self).get_queryset()
@@ -1790,7 +1790,7 @@ class GatewayTimeout(APIException):
 class GroupList(ListCreateAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
-    resource_purpose = 'list and create groups'
+    resource_purpose = 'groups'
 
 
 class EnforceParentRelationshipMixin(object):
@@ -2129,7 +2129,7 @@ class InventorySourceList(ListCreateAPIView):
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
     always_allow_superuser = False
-    resource_purpose = 'list and create inventory sources'
+    resource_purpose = 'inventory sources'
 
 
 class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -2300,7 +2300,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
 class InventoryUpdateList(ListAPIView):
     model = models.InventoryUpdate
     serializer_class = serializers.InventoryUpdateListSerializer
-    resource_purpose = 'list inventory updates'
+    resource_purpose = 'inventory updates'
 
 
 class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
@@ -2336,7 +2336,7 @@ class JobTemplateList(ListCreateAPIView):
     model = models.JobTemplate
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
-    resource_purpose = 'list and create job templates'
+    resource_purpose = 'job templates'
 
     def check_permissions(self, request):
         if request.method == 'POST':
@@ -2938,7 +2938,7 @@ class WorkflowJobNodeList(ListAPIView):
     model = models.WorkflowJobNode
     serializer_class = serializers.WorkflowJobNodeListSerializer
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-    resource_purpose = 'list workflow job nodes'
+    resource_purpose = 'workflow job nodes'
 
 
 class WorkflowJobNodeDetail(RetrieveAPIView):
@@ -2975,7 +2975,7 @@ class WorkflowJobTemplateNodeList(ListCreateAPIView):
     model = models.WorkflowJobTemplateNode
     serializer_class = serializers.WorkflowJobTemplateNodeSerializer
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-    resource_purpose = 'list and create workflow job template nodes'
+    resource_purpose = 'workflow job template nodes'
 
 
 class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
@@ -3114,7 +3114,7 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     model = models.WorkflowJobTemplate
     serializer_class = serializers.WorkflowJobTemplateSerializer
     always_allow_superuser = False
-    resource_purpose = 'list and create workflow job templates'
+    resource_purpose = 'workflow job templates'
 
     def check_permissions(self, request):
         if request.method == 'POST':
@@ -3390,7 +3390,7 @@ class WorkflowJobTemplateActivityStreamList(SubListAPIView):
 class WorkflowJobList(ListAPIView):
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobListSerializer
-    resource_purpose = 'list workflow jobs'
+    resource_purpose = 'workflow jobs'
 
 
 class WorkflowJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
@@ -3451,7 +3451,7 @@ class WorkflowJobActivityStreamList(SubListAPIView):
 class SystemJobTemplateList(ListAPIView):
     model = models.SystemJobTemplate
     serializer_class = serializers.SystemJobTemplateSerializer
-    resource_purpose = 'list system job templates'
+    resource_purpose = 'system job templates'
 
     @extend_schema_if_available(extensions={"x-ai-description": "List system job templates"})
     def get(self, request, *args, **kwargs):
@@ -3536,7 +3536,7 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SystemJobTemplateNotific
 class JobList(ListAPIView):
     model = models.Job
     serializer_class = serializers.JobListSerializer
-    resource_purpose = 'list jobs'
+    resource_purpose = 'jobs'
 
 
 class JobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
@@ -3985,7 +3985,7 @@ class AdHocCommandList(ListCreateAPIView):
     model = models.AdHocCommand
     serializer_class = serializers.AdHocCommandListSerializer
     always_allow_superuser = False
-    resource_purpose = 'list and create ad hoc commands'
+    resource_purpose = 'ad hoc commands'
 
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
@@ -4195,7 +4195,7 @@ class AdHocCommandNotificationsList(SubListAPIView):
 class SystemJobList(ListAPIView):
     model = models.SystemJob
     serializer_class = serializers.SystemJobListSerializer
-    resource_purpose = 'list system jobs'
+    resource_purpose = 'system jobs'
 
     @extend_schema_if_available(extensions={"x-ai-description": "List system jobs"})
     def get(self, request, *args, **kwargs):
@@ -4229,14 +4229,14 @@ class UnifiedJobTemplateList(ListAPIView):
     model = models.UnifiedJobTemplate
     serializer_class = serializers.UnifiedJobTemplateSerializer
     search_fields = ('description', 'name', 'jobtemplate__playbook')
-    resource_purpose = 'list unified job templates'
+    resource_purpose = 'unified job templates'
 
 
 class UnifiedJobList(ListAPIView):
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     search_fields = ('description', 'name', 'job__playbook')
-    resource_purpose = 'list unified jobs'
+    resource_purpose = 'unified jobs'
 
 
 def redact_ansi(line):
@@ -4376,7 +4376,7 @@ class AdHocCommandStdout(UnifiedJobStdout):
 class NotificationTemplateList(ListCreateAPIView):
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
-    resource_purpose = 'list and create notification templates'
+    resource_purpose = 'notification templates'
 
 
 class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
@@ -4448,7 +4448,7 @@ class NotificationList(ListAPIView):
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
     search_fields = ('subject', 'notification_type', 'body')
-    resource_purpose = 'list notifications'
+    resource_purpose = 'notifications'
 
 
 class NotificationDetail(RetrieveAPIView):
@@ -4476,7 +4476,7 @@ class RoleList(ListAPIView):
     serializer_class = serializers.RoleSerializer
     permission_classes = (IsAuthenticated,)
     search_fields = ('role_field', 'content_type__model')
-    resource_purpose = 'list roles'
+    resource_purpose = 'roles'
 
 
 class RoleDetail(RetrieveAPIView):
@@ -4617,7 +4617,7 @@ class WorkflowApprovalTemplateJobsList(SubListAPIView):
 class WorkflowApprovalList(ListAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalListSerializer
-    resource_purpose = 'list workflow approvals'
+    resource_purpose = 'workflow approvals'
 
     @extend_schema_if_available(extensions={"x-ai-description": "List workflow approvals"})
     def get(self, request, *args, **kwargs):

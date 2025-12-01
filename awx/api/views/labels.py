@@ -71,4 +71,4 @@ class LabelList(ListCreateAPIView):
     name = _("Labels")
     model = Label
     serializer_class = LabelSerializer
-    resource_purpose = 'list and create labels'
+    resource_purpose = 'labels'

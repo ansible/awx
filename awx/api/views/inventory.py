@@ -72,7 +72,7 @@ class InventoryUpdateEventsList(SubListAPIView):
 class InventoryList(ListCreateAPIView):
     model = Inventory
     serializer_class = InventorySerializer
-    resource_purpose = 'list and create inventories'
+    resource_purpose = 'inventories'
 
 
 class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -110,7 +110,7 @@ class ConstructedInventoryDetail(InventoryDetail):
 
 class ConstructedInventoryList(InventoryList):
     serializer_class = ConstructedInventorySerializer
-    resource_purpose = 'list and create constructed inventories'
+    resource_purpose = 'constructed inventories'
 
     def get_queryset(self):
         r = super().get_queryset()

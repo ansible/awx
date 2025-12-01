@@ -60,7 +60,7 @@ logger = logging.getLogger('awx.api.views.organization')
 class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
-    resource_purpose = 'list and create organizations'
+    resource_purpose = 'organizations'
 
 
 class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
