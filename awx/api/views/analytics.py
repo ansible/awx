@@ -269,12 +269,15 @@ class AnalyticsGenericView(APIView):
 class AnalyticsGenericListView(AnalyticsGenericView):
     resource_purpose = 'analytics api proxy list view'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get analytics data from Red Hat Insights"})
     def get(self, request, format=None):
         return self._send_to_analytics(request, method="GET")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Post query to Red Hat Insights analytics"})
     def post(self, request, format=None):
         return self._send_to_analytics(request, method="POST")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get analytics endpoint options"})
     def options(self, request, format=None):
         return self._send_to_analytics(request, method="OPTIONS")
 
@@ -282,12 +285,15 @@ class AnalyticsGenericListView(AnalyticsGenericView):
 class AnalyticsGenericDetailView(AnalyticsGenericView):
     resource_purpose = 'analytics api proxy detail view'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get specific analytics resource from Red Hat Insights"})
     def get(self, request, slug, format=None):
         return self._send_to_analytics(request, method="GET")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Post query for specific analytics resource to Red Hat Insights"})
     def post(self, request, slug, format=None):
         return self._send_to_analytics(request, method="POST")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get options for specific analytics resource"})
     def options(self, request, slug, format=None):
         return self._send_to_analytics(request, method="OPTIONS")
 

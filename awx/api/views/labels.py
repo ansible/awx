@@ -2,6 +2,7 @@
 from awx.api.generics import SubListCreateAttachDetachAPIView, RetrieveUpdateAPIView, ListCreateAPIView
 from awx.main.models import Label
 from awx.api.serializers import LabelSerializer
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # Django
 from django.utils.translation import gettext_lazy as _
@@ -40,6 +41,7 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
 
         return res
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Create or attach a label to a resource"})
     def post(self, request, *args, **kwargs):
         # If a label already exists in the database, attach it instead of erroring out
         # that it already exists

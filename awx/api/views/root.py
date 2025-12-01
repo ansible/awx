@@ -51,6 +51,7 @@ class ApiRootView(APIView):
     resource_purpose = 'api root and version information'
 
     @method_decorator(ensure_csrf_cookie)
+    @extend_schema_if_available(extensions={"x-ai-description": "List supported API versions"})
     def get(self, request, format=None):
         '''List supported API versions'''
         v2 = reverse('api:api_v2_root_view', request=request, kwargs={'version': 'v2'})
@@ -71,6 +72,7 @@ class ApiVersionRootView(APIView):
     swagger_topic = 'Versioning'
     resource_purpose = 'api top-level resources'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List top-level API resources"})
     def get(self, request, format=None):
         '''List top level resources'''
         data = OrderedDict()

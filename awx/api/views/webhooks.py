@@ -11,6 +11,7 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
@@ -32,11 +33,13 @@ class WebhookKeyView(GenericAPIView):
 
         return super().get_queryset()
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get the webhook key for a template"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
 
         return Response({'webhook_key': obj.webhook_key})
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Rotate the webhook key for a template"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.rotate_webhook_key()
@@ -129,6 +132,7 @@ class WebhookReceiverBase(APIView):
             raise PermissionDenied
 
     @csrf_exempt
+    @extend_schema_if_available(extensions={"x-ai-description": "Receive a webhook event and trigger a job"})
     def post(self, request, *args, **kwargs):
         # Ensure that the full contents of the request are captured for multiple uses.
         request.body

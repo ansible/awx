@@ -615,6 +615,7 @@ class SchedulePreview(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     resource_purpose = 'schedule recurrence rule preview'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Preview schedule recurrence rule occurrences"})
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -639,6 +640,7 @@ class ScheduleZoneInfo(APIView):
     swagger_topic = 'System Configuration'
     resource_purpose = 'timezone information for schedules'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get timezone information for schedules"})
     def get(self, request):
         return Response({'zones': models.Schedule.get_zoneinfo(), 'links': models.Schedule.get_zoneinfo_links()})
 
@@ -739,6 +741,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
             raise PermissionDenied()
         return models.Role.filter_visible_roles(self.request.user, team.member_role.children.all().exclude(pk=team.read_role.pk))
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add a role to a team"})
     def post(self, request, *args, **kwargs):
         sub_id = request.data.get('id', None)
         if not sub_id:
@@ -1022,6 +1025,7 @@ class ProjectUpdateView(RetrieveAPIView):
     permission_classes = (ProjectUpdatePermission,)
     resource_purpose = 'trigger project update'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Trigger a project update"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_update:
@@ -1193,6 +1197,7 @@ class UserRolesList(SubListAttachDetachAPIView):
 
         return models.Role.filter_visible_roles(self.request.user, u.roles.all()).exclude(content_type=content_type, object_id=u.id)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add a role to a user"})
     def post(self, request, *args, **kwargs):
         sub_id = request.data.get('id', None)
         if not sub_id:
@@ -1619,6 +1624,7 @@ class HostMetricDetail(RetrieveDestroyAPIView):
     permission_classes = (IsSystemAdminOrAuditor,)
     resource_purpose = 'host metric detail'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Soft delete a host metric"})
     def delete(self, request, *args, **kwargs):
         self.get_object().soft_delete()
 
@@ -1664,6 +1670,7 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.HostSerializer
     resource_purpose = 'host detail'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Delete a host"})
     def delete(self, request, *args, **kwargs):
         if self.get_object().inventory.pending_deletion:
             return Response({"error": _("The inventory for this host is already being deleted.")}, status=status.HTTP_400_BAD_REQUEST)
@@ -1677,6 +1684,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
     serializer_class = serializers.AnsibleFactsSerializer
     resource_purpose = 'ansible facts of a host'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get Ansible facts for a host"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.inventory.kind == 'constructed':
@@ -2156,6 +2164,7 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
     parent_model = models.InventorySource
     resource_purpose = 'base view for notification templates of an inventory source'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add a notification template to an inventory source"})
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
         if parent.source not in compute_cloud_inventory_sources():
@@ -2486,10 +2495,12 @@ class JobTemplateSurveySpec(GenericAPIView):
     serializer_class = serializers.EmptySerializer
     resource_purpose = 'job template survey specification'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get job template survey specification"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         return Response(obj.display_survey_spec())
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Update job template survey specification"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -2649,6 +2660,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                 # Submission provides new encrypted default
                 survey_item['default'] = encrypt_value(survey_item['default'])
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Delete job template survey specification"})
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
@@ -2782,6 +2794,7 @@ class JobTemplateCallback(GenericAPIView):
                 pass
         return matches
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get job template callback configuration"})
     def get(self, request, *args, **kwargs):
         job_template = self.get_object()
         matching_hosts = self.find_matching_hosts()
@@ -2791,6 +2804,7 @@ class JobTemplateCallback(GenericAPIView):
             data['request_meta'] = d
         return Response(data)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Trigger job template via provisioning callback"})
     def post(self, request, *args, **kwargs):
         extra_vars = None
         # Be careful here: content_type can look like '<content_type>; charset=blar'
@@ -3034,6 +3048,7 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
     permission_classes = []
     resource_purpose = 'create an approval node for a workflow job template node'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Create an approval node for a workflow job template node"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(instance=obj, data=request.data)
@@ -3125,6 +3140,7 @@ class WorkflowJobTemplateCopy(CopyAPIView):
     copy_return_serializer_class = serializers.WorkflowJobTemplateSerializer
     resource_purpose = 'copy a workflow job template'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get workflow job template copy status"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(obj.__class__, 'read', obj):
@@ -3253,6 +3269,7 @@ class WorkflowJobRelaunch(GenericAPIView):
                 self.permission_denied(request, message=messages['workflow_job_template'])
         return super(WorkflowJobRelaunch, self).check_object_permissions(request, obj)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get workflow job relaunch information"})
     def get(self, request, *args, **kwargs):
         return Response({})
 
@@ -3400,6 +3417,7 @@ class WorkflowJobCancel(GenericCancelView):
     serializer_class = serializers.WorkflowJobCancelSerializer
     resource_purpose = 'cancel a workflow job'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a workflow job"})
     def post(self, request, *args, **kwargs):
         r = super().post(request, *args, **kwargs)
         ScheduleWorkflowManager().schedule()
@@ -3435,6 +3453,7 @@ class SystemJobTemplateList(ListAPIView):
     serializer_class = serializers.SystemJobTemplateSerializer
     resource_purpose = 'list system job templates'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List system job templates"})
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
             raise PermissionDenied(_("Superuser privileges needed."))
@@ -3453,6 +3472,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
     serializer_class = serializers.EmptySerializer
     resource_purpose = 'launch a system job from a system job template'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get system job template launch information"})
     def get(self, request, *args, **kwargs):
         return Response({})
 
@@ -3665,6 +3685,7 @@ class JobCreateSchedule(RetrieveAPIView):
     serializer_class = serializers.JobCreateScheduleSerializer
     resource_purpose = 'create a schedule from a job'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a schedule from a job"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3858,6 +3879,7 @@ class JobJobEventsChildrenSummary(APIView):
     meta_events = ('debug', 'verbose', 'warning', 'error', 'system_warning', 'deprecated')
     resource_purpose = 'children summary for job events'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get children summary for job events"})
     def get(self, request, **kwargs):
         resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False, is_tree=True)
         job = get_object_or_404(models.Job, pk=kwargs['pk'])
@@ -4175,6 +4197,7 @@ class SystemJobList(ListAPIView):
     serializer_class = serializers.SystemJobListSerializer
     resource_purpose = 'list system jobs'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List system jobs"})
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
             raise PermissionDenied(_("Superuser privileges needed."))
@@ -4361,6 +4384,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.NotificationTemplateSerializer
     resource_purpose = 'notification template detail'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Delete a notification template"})
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
@@ -4381,6 +4405,7 @@ class NotificationTemplateTest(GenericAPIView):
     serializer_class = serializers.EmptySerializer
     resource_purpose = 'test a notification template'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Send a test notification from a notification template"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         msg = "Notification Test {} {}".format(obj.id, settings.TOWER_URL_BASE)
@@ -4475,6 +4500,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
         self.check_parent_access(role)
         return role.members.all()
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add a user to a role"})
     def post(self, request, *args, **kwargs):
         # Forbid implicit user creation here
         sub_id = request.data.get('id', None)
@@ -4512,6 +4538,7 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         self.check_parent_access(role)
         return models.Team.objects.filter(member_role__children=role)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add a team to a role"})
     def post(self, request, pk, *args, **kwargs):
         sub_id = request.data.get('id', None)
         if not sub_id:
@@ -4592,6 +4619,7 @@ class WorkflowApprovalList(ListAPIView):
     serializer_class = serializers.WorkflowApprovalListSerializer
     resource_purpose = 'list workflow approvals'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List workflow approvals"})
     def get(self, request, *args, **kwargs):
         return super(WorkflowApprovalList, self).get(request, *args, **kwargs)
 
@@ -4608,6 +4636,7 @@ class WorkflowApprovalApprove(RetrieveAPIView):
     permission_classes = (WorkflowApprovalPermission,)
     resource_purpose = 'approve a workflow approval'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Approve a workflow approval"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
@@ -4624,6 +4653,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
     permission_classes = (WorkflowApprovalPermission,)
     resource_purpose = 'deny a workflow approval'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Deny a workflow approval"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
