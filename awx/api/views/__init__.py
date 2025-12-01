@@ -1368,6 +1368,14 @@ class CredentialList(ListCreateAPIView):
     serializer_class = serializers.CredentialSerializerCreate
     resource_purpose = 'credentials'
 
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Create a new credential. The `inputs` field contain type-specific input fields. The required fields depend on related `credential_type`. Use GET /v2/credential_types/{id}/ (tool name: controller.credential_types_retrieve) and inspect `inputs` field for the specific credential type's expected schema."
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 class CredentialOwnerUsersList(SubListAPIView):
     model = models.User
