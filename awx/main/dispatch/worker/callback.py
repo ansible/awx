@@ -15,6 +15,7 @@ import psutil
 
 import redis
 
+from awx.main.utils.redis import get_redis_client
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
@@ -72,7 +73,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     def __init__(self):
         self.buff = {}
-        self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        self.redis = get_redis_client()
         self.subsystem_metrics = s_metrics.CallbackReceiverMetrics(auto_pipe_execute=False)
         self.queue_pop = 0
         self.queue_name = settings.CALLBACK_QUEUE

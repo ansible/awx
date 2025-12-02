@@ -10,6 +10,7 @@ import time
 import re
 
 import asn1
+from ansible_base.lib.utils.schema import extend_schema_if_available
 from awx.api import serializers
 from awx.api.generics import GenericAPIView, Response
 from awx.api.permissions import IsSystemAdmin
@@ -49,7 +50,9 @@ class InstanceInstallBundle(GenericAPIView):
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     permission_classes = (IsSystemAdmin,)
+    resource_purpose = 'install bundle'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Generate and download install bundle for an instance"})
     def get(self, request, *args, **kwargs):
         instance_obj = self.get_object()
 

@@ -11,6 +11,7 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
@@ -24,6 +25,7 @@ logger = logging.getLogger('awx.api.views.webhooks')
 class WebhookKeyView(GenericAPIView):
     serializer_class = serializers.EmptySerializer
     permission_classes = (WebhookKeyPermission,)
+    resource_purpose = 'webhook key management'
 
     def get_queryset(self):
         qs_models = {'job_templates': JobTemplate, 'workflow_job_templates': WorkflowJobTemplate}
@@ -31,11 +33,13 @@ class WebhookKeyView(GenericAPIView):
 
         return super().get_queryset()
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get the webhook key for a template"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
 
         return Response({'webhook_key': obj.webhook_key})
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Rotate the webhook key for a template"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.rotate_webhook_key()
@@ -52,6 +56,7 @@ class WebhookReceiverBase(APIView):
     authentication_classes = ()
 
     ref_keys = {}
+    resource_purpose = 'webhook receiver for triggering jobs'
 
     def get_queryset(self):
         qs_models = {'job_templates': JobTemplate, 'workflow_job_templates': WorkflowJobTemplate}
@@ -127,6 +132,7 @@ class WebhookReceiverBase(APIView):
             raise PermissionDenied
 
     @csrf_exempt
+    @extend_schema_if_available(extensions={"x-ai-description": "Receive a webhook event and trigger a job"})
     def post(self, request, *args, **kwargs):
         # Ensure that the full contents of the request are captured for multiple uses.
         request.body
@@ -175,6 +181,7 @@ class WebhookReceiverBase(APIView):
 
 class GithubWebhookReceiver(WebhookReceiverBase):
     service = 'github'
+    resource_purpose = 'github webhook receiver'
 
     ref_keys = {
         'pull_request': 'pull_request.head.sha',
@@ -212,6 +219,7 @@ class GithubWebhookReceiver(WebhookReceiverBase):
 
 class GitlabWebhookReceiver(WebhookReceiverBase):
     service = 'gitlab'
+    resource_purpose = 'gitlab webhook receiver'
 
     ref_keys = {'Push Hook': 'checkout_sha', 'Tag Push Hook': 'checkout_sha', 'Merge Request Hook': 'object_attributes.last_commit.id'}
 
@@ -250,6 +258,7 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
 
 class BitbucketDcWebhookReceiver(WebhookReceiverBase):
     service = 'bitbucket_dc'
+    resource_purpose = 'bitbucket data center webhook receiver'
 
     ref_keys = {
         'repo:refs_changed': 'changes.0.toHash',

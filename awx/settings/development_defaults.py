@@ -11,8 +11,6 @@ import socket
 # /usr/lib64/python/mimetypes.py
 import mimetypes
 
-from dynaconf import post_hook
-
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '9888', '--allow-root', '--no-browser']
 
@@ -41,10 +39,13 @@ PENDO_TRACKING_STATE = "off"
 INSIGHTS_TRACKING_STATE = False
 
 # debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
-INSTALLED_APPS = "@merge drf_yasg,debug_toolbar"
+INSTALLED_APPS = "@merge drf_spectacular,debug_toolbar"
 MIDDLEWARE = "@insert 0 debug_toolbar.middleware.DebugToolbarMiddleware"
 
 DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
+
+# drf-spectacular settings for API schema generation
+# SPECTACULAR_SETTINGS moved to defaults.py so it's available in all environments
 
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
@@ -67,11 +68,5 @@ AWX_DISABLE_TASK_MANAGERS = False
 # Needed for launching runserver in debug mode
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
-
-# This modifies FLAGS set by defaults, must be deferred to run later
-@post_hook
-def set_dev_flags(settings):
-    defaults_flags = settings.get("FLAGS", {})
-    defaults_flags['FEATURE_INDIRECT_NODE_COUNTING_ENABLED'] = [{'condition': 'boolean', 'value': True}]
-    defaults_flags['FEATURE_DISPATCHERD_ENABLED'] = [{'condition': 'boolean', 'value': True}]
-    return {'FLAGS': defaults_flags}
+FEATURE_INDIRECT_NODE_COUNTING_ENABLED = True
+FEATURE_DISPATCHERD_ENABLED = True

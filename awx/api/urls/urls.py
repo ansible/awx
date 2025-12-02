@@ -4,7 +4,6 @@
 from __future__ import absolute_import, unicode_literals
 from django.urls import include, re_path
 
-from awx import MODE
 from awx.api.generics import LoggedLoginView, LoggedLogoutView
 from awx.api.views.root import (
     ApiRootView,
@@ -148,21 +147,21 @@ v2_urls = [
 
 
 app_name = 'api'
+
+# Import schema views (needed for both development and testing)
+from awx.api.schema import schema_view, swagger_ui_view, redoc_view
+
 urlpatterns = [
     re_path(r'^$', ApiRootView.as_view(), name='api_root_view'),
     re_path(r'^(?P<version>(v2))/', include(v2_urls)),
     re_path(r'^login/$', LoggedLoginView.as_view(template_name='rest_framework/login.html', extra_context={'inside_login_context': True}), name='login'),
     re_path(r'^logout/$', LoggedLogoutView.as_view(next_page='/api/', redirect_field_name='next'), name='logout'),
+    # Schema endpoints (available in all modes for API documentation and testing)
+    re_path(r'^schema/$', schema_view, name='schema-json'),
+    re_path(r'^docs/$', swagger_ui_view, name='schema-swagger-ui'),
+    re_path(r'^redoc/$', redoc_view, name='schema-redoc'),
 ]
-if MODE == 'development':
-    # Only include these if we are in the development environment
-    from awx.api.swagger import schema_view
 
-    from awx.api.urls.debug import urls as debug_urls
+from awx.api.urls.debug import urls as debug_urls
 
-    urlpatterns += [re_path(r'^debug/', include(debug_urls))]
-    urlpatterns += [
-        re_path(r'^swagger(?P<format>\.json|\.yaml)/$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-        re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    ]
+urlpatterns += [re_path(r'^debug/', include(debug_urls))]

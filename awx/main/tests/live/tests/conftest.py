@@ -139,7 +139,7 @@ def podman_image_generator():
 
 @pytest.fixture
 def project_factory(post, default_org, admin):
-    def _rf(scm_url=None, local_path=None):
+    def _rf(scm_url=None, local_path=None, **extra_kwargs):
         proj_kwargs = {}
         if local_path:
             # manual path
@@ -152,6 +152,9 @@ def project_factory(post, default_org, admin):
             proj_kwargs['scm_url'] = scm_url
         else:
             raise RuntimeError('Need to provide scm_url or local_path')
+
+        if extra_kwargs:
+            proj_kwargs.update(extra_kwargs)
 
         proj_kwargs['name'] = project_name
         proj_kwargs['organization'] = default_org.id

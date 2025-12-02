@@ -83,7 +83,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
+    os.path.join(BASE_DIR, 'ui', 'build'),
     os.path.join(BASE_DIR, 'static'),
 ]
 
@@ -352,6 +352,7 @@ INSTALLED_APPS = [
     'ansible_base.resource_registry',
     'ansible_base.rbac',
     'ansible_base.feature_flags',
+    'ansible_base.api_documentation',
     'flags',
 ]
 
@@ -375,15 +376,13 @@ REST_FRAMEWORK = {
     'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
     'NON_FIELD_ERRORS_KEY': '__all__',
     'DEFAULT_VERSION': 'v2',
-    # For swagger schema generation
+    # For OpenAPI schema generation with drf-spectacular
     # see https://github.com/encode/django-rest-framework/pull/6532
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
-SWAGGER_SETTINGS = {
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'awx.api.swagger.CustomSwaggerAutoSchema',
-}
+# SWAGGER_SETTINGS removed - migrated to drf-spectacular (see SPECTACULAR_SETTINGS below)
 
 AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 
@@ -426,6 +425,9 @@ DISPATCHER_MOCK_PUBLISH = False
 DISPATCHERD_DEBUGGING_SOCKFILE = os.path.join(BASE_DIR, 'dispatcherd.sock')
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
+REDIS_RETRY_COUNT = 3  # Number of retries for Redis connection errors
+REDIS_BACKOFF_CAP = 1.0  # Maximum backoff delay in seconds for Redis retries
+REDIS_BACKOFF_BASE = 0.5  # Base for exponential backoff calculation for Redis retries
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
     'cluster_heartbeat': {
@@ -1036,7 +1038,44 @@ ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = 'awx.resource_api'
 ANSIBLE_BASE_PERMISSION_MODEL = 'main.Permission'
 
 # Defaults to be overridden by DAB
-SPECTACULAR_SETTINGS = {}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'AWX API',
+    'DESCRIPTION': 'AWX API Documentation',
+    'VERSION': 'v2',
+    'OAS_VERSION': '3.0.3',  # Set OpenAPI Specification version to 3.0.3
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
+    'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
+    'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
+    'CONTACT': {'email': 'controller-eng@redhat.com'},
+    'LICENSE': {'name': 'Apache License'},
+    'TERMS_OF_SERVICE': 'https://www.google.com/policies/terms/',
+    # Use our custom schema class that handles swagger_topic and deprecated views
+    'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+    },
+    # Resolve enum naming collisions with meaningful names
+    'ENUM_NAME_OVERRIDES': {
+        # Status field collisions
+        'Status4e1Enum': 'UnifiedJobStatusEnum',
+        'Status876Enum': 'JobStatusEnum',
+        # Job type field collisions
+        'JobType8b8Enum': 'JobTemplateJobTypeEnum',
+        'JobType95bEnum': 'AdHocCommandJobTypeEnum',
+        'JobType963Enum': 'ProjectUpdateJobTypeEnum',
+        # Verbosity field collisions
+        'Verbosity481Enum': 'JobVerbosityEnum',
+        'Verbosity8cfEnum': 'InventoryUpdateVerbosityEnum',
+        # Event field collision
+        'Event4d3Enum': 'JobEventEnum',
+        # Kind field collision
+        'Kind362Enum': 'InventoryKindEnum',
+    },
+}
 OAUTH2_PROVIDER = {}
 
 # Add a postfix to the API URL patterns
@@ -1113,11 +1152,8 @@ OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to
 OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
 
 # feature flags
-FLAG_SOURCES = ('flags.sources.SettingsFlagsSource',)
-FLAGS = {
-    'FEATURE_INDIRECT_NODE_COUNTING_ENABLED': [{'condition': 'boolean', 'value': False}],
-    'FEATURE_DISPATCHERD_ENABLED': [{'condition': 'boolean', 'value': False}],
-}
+FEATURE_INDIRECT_NODE_COUNTING_ENABLED = False
+FEATURE_DISPATCHERD_ENABLED = False
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired
 # based on age. Note workers will finish their last task before retiring if

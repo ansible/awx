@@ -15,6 +15,8 @@ Ansible AWX helps teams manage complex multi-tier deployments by adding control,
    :caption: Community
 
    contributor/index
+   contributor/DJANGO_REQUIREMENTS
+   contributor/API_REQUIREMENTS
 
 .. toctree::
    :maxdepth: 2

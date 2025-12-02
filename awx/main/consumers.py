@@ -3,7 +3,6 @@ import logging
 import time
 import hmac
 import asyncio
-import redis
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
@@ -13,6 +12,8 @@ from django.contrib.auth.models import User
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
+
+from awx.main.utils.redis import get_redis_client_async
 
 logger = logging.getLogger('awx.main.consumers')
 XRF_KEY = '_auth_user_xrf'
@@ -94,6 +95,9 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
         logger.info(f"client '{self.channel_name}' joined the broadcast group.")
 
+        # Initialize Redis client once for reuse across all message handling
+        self._redis_conn = get_redis_client_async()
+
     async def disconnect(self, code):
         logger.info(f"client '{self.channel_name}' disconnected from the broadcast group.")
         await self.channel_layer.group_discard(settings.BROADCAST_WEBSOCKET_GROUP_NAME, self.channel_name)
@@ -105,8 +109,9 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         (group, message) = unwrap_broadcast_msg(data)
         if group == "metrics":
             message = json.loads(message['text'])
-            conn = redis.Redis.from_url(settings.BROKER_URL)
-            conn.set(settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX + "-" + message['metrics_namespace'] + "_instance_" + message['instance'], message['metrics'])
+            await self._redis_conn.set(
+                settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX + "-" + message['metrics_namespace'] + "_instance_" + message['instance'], message['metrics']
+            )
         else:
             await self.channel_layer.group_send(group, message)
 

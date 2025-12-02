@@ -852,7 +852,7 @@ def reload_receptor():
         raise RuntimeError("Receptor reload failed")
 
 
-@task_awx()
+@task_awx(on_duplicate='queue_one')
 def write_receptor_config():
     """
     This task runs async on each control node, K8S only.
@@ -875,7 +875,7 @@ def write_receptor_config():
             reload_receptor()
 
 
-@task_awx(queue=get_task_queuename)
+@task_awx(queue=get_task_queuename, on_duplicate='discard')
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
     InstanceLink.objects.filter(target__instance__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)

@@ -167,3 +167,9 @@ class TestMigrationSmoke:
             assert CredentialType.objects.filter(
                 name=expected_name
             ).exists(), f'Could not find {expected_name} credential type name, all names: {list(CredentialType.objects.values_list("name", flat=True))}'
+
+        # Verify the system_administrator role exists
+        Role = new_state.apps.get_model('main', 'Role')
+        assert Role.objects.filter(
+            singleton_name='system_administrator', role_field='system_administrator'
+        ).exists(), "expected to find a system_administrator singleton role"

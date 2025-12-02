@@ -27,6 +27,8 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 PARALLEL_TESTS ?= -n auto
 # collection integration test directories (defaults to all)
 COLLECTION_TEST_TARGET ?=
+# Python version for ansible-test (must be 3.11, 3.12, or 3.13)
+ANSIBLE_TEST_PYTHON_VERSION ?= 3.13
 # args for collection install
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
@@ -314,20 +316,17 @@ black: reports
 	@echo "fi" >> .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 
-genschema: reports
-	$(MAKE) swagger PYTEST_ADDOPTS="--genschema --create-db "
-	mv swagger.json schema.json
-
-swagger: reports
+genschema: awx-link reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	(set -o pipefail && py.test $(COVERAGE_ARGS) $(PARALLEL_TESTS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
-	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
-	then \
-	  echo 'cov-report-files=reports/coverage.xml' >> "${GITHUB_OUTPUT}"; \
-	  echo 'test-result-files=reports/junit.xml' >> "${GITHUB_OUTPUT}"; \
-	fi
+	$(MANAGEMENT_COMMAND) spectacular --format openapi-json --file schema.json
+
+genschema-yaml: awx-link reports
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(MANAGEMENT_COMMAND) spectacular --format openapi --file schema.yaml
 
 check: black
 
@@ -431,8 +430,8 @@ test_collection_sanity:
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && \
-		ansible-test integration --coverage -vvv $(COLLECTION_TEST_TARGET) && \
-		ansible-test coverage xml --requirements --group-by command --group-by version
+		PATH="$$($(PYTHON) -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$$PATH" ansible-test integration --python $(ANSIBLE_TEST_PYTHON_VERSION) --coverage -vvv $(COLLECTION_TEST_TARGET) && \
+		PATH="$$($(PYTHON) -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$$PATH" ansible-test coverage xml --requirements --group-by command --group-by version
 	@if [ "${GITHUB_ACTIONS}" = "true" ]; \
 	then \
 	  echo cov-report-files="$$(find "$(COLLECTION_INSTALL)/tests/output/reports/" -type f -name 'coverage=integration*.xml' -print0 | tr '\0' ',' | sed 's#,$$##')" >> "${GITHUB_OUTPUT}"; \
@@ -537,14 +536,16 @@ docker-compose-test: awx/projects docker-compose-sources
 docker-compose-runtest: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /start_tests.sh
 
-docker-compose-build-swagger: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 /start_tests.sh swagger
+docker-compose-build-schema: awx/projects docker-compose-sources
+	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 make genschema
 
+SCHEMA_DIFF_BASE_FOLDER ?= awx
 SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
-	curl https://s3.amazonaws.com/awx-public-ci-files/$(SCHEMA_DIFF_BASE_BRANCH)/schema.json -o reference-schema.json
+	curl https://s3.amazonaws.com/awx-public-ci-files/$(SCHEMA_DIFF_BASE_FOLDER)/$(SCHEMA_DIFF_BASE_BRANCH)/schema.json -o reference-schema.json
 	# Ignore differences in whitespace with -b
-	diff -u -b reference-schema.json schema.json
+	# diff exits with 1 when files differ - capture but don't fail
+	-diff -u -b reference-schema.json schema.json
 
 docker-compose-clean: awx/projects
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml rm -sf

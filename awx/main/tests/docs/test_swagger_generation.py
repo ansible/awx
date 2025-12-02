@@ -7,7 +7,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.functional import Promise
 from django.utils.encoding import force_str
 
-from drf_yasg.codecs import OpenAPICodecJson
 import pytest
 
 from awx.api.versioning import drf_reverse
@@ -43,10 +42,10 @@ class TestSwaggerGeneration:
     @pytest.fixture(autouse=True, scope='function')
     def _prepare(self, get, admin):
         if not self.__class__.JSON:
-            url = drf_reverse('api:schema-swagger-ui') + '?format=openapi'
+            # drf-spectacular returns OpenAPI schema directly from schema endpoint
+            url = drf_reverse('api:schema-json') + '?format=json'
             response = get(url, user=admin)
-            codec = OpenAPICodecJson([])
-            data = codec.generate_swagger_object(response.data)
+            data = response.data
             if response.has_header('X-Deprecated-Paths'):
                 data['deprecated_paths'] = json.loads(response['X-Deprecated-Paths'])
 

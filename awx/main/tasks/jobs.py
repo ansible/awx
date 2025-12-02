@@ -1321,7 +1321,7 @@ class RunProjectUpdate(BaseTask):
 
         galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
         if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
-            logger.warning('Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
+            logger.warning(f'Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
 
         extra_vars.update(
             {
@@ -1346,7 +1346,7 @@ class RunProjectUpdate(BaseTask):
             extra_vars['scm_refspec'] = project_update.scm_refspec
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
-            extra_vars['scm_refspec'] = 'refs/heads/*:refs/remotes/origin/*'
+            extra_vars['scm_refspec'] = '+refs/heads/*:refs/remotes/origin/*'
 
         if project_update.scm_type == 'archive':
             # for raw archive, prevent error moving files between volumes

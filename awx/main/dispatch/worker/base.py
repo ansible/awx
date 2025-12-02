@@ -19,6 +19,7 @@ import redis.exceptions
 
 from ansible_base.lib.logging.runtime import log_excess_runtime
 
+from awx.main.utils.redis import get_redis_client
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch.periodic import Scheduler
 from awx.main.dispatch import pg_bus_conn
@@ -59,7 +60,7 @@ class AWXConsumerBase(object):
         if pool is None:
             self.pool = WorkerPool()
         self.pool.init_workers(self.worker.work_loop)
-        self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        self.redis = get_redis_client()
 
     @property
     def listening_on(self):

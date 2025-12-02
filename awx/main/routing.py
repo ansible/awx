@@ -8,6 +8,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 
 from ansible_base.lib.channels.middleware import DrfAuthMiddlewareStack
 
+from awx.main.utils.redis import get_redis_client
 from . import consumers
 
 
@@ -18,7 +19,7 @@ _application = None
 class AWXProtocolTypeRouter(ProtocolTypeRouter):
     def __init__(self, *args, **kwargs):
         try:
-            r = redis.Redis.from_url(settings.BROKER_URL)
+            r = get_redis_client()
             for k in r.scan_iter('asgi:*', 500):
                 logger.debug(f"cleaning up Redis key {k}")
                 r.delete(k)

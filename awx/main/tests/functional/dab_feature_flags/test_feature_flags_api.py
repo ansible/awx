@@ -1,36 +1,30 @@
 import pytest
-from django.test import override_settings
-
+from flags.state import get_flags, flag_state
+from ansible_base.feature_flags.models import AAPFlag
+from ansible_base.feature_flags.utils import create_initial_data as seed_feature_flags
+from django.conf import settings
 from awx.main.models import User
 
 
-@override_settings(FLAGS={})
 @pytest.mark.django_db
 def test_feature_flags_list_endpoint(get):
-    bob = User.objects.create(username='bob', password='test_user', is_superuser=False)
-
-    url = "/api/v2/feature_flags_state/"
+    bob = User.objects.create(username='bob', password='test_user', is_superuser=True)
+    url = "/api/v2/feature_flags/states/"
     response = get(url, user=bob, expect=200)
-    assert len(response.data) == 0
+    assert len(get_flags()) > 0
+    assert len(response.data["results"]) == len(get_flags())
 
 
-@override_settings(
-    FLAGS={
-        "FEATURE_SOME_PLATFORM_FLAG_ENABLED": [
-            {"condition": "boolean", "value": False},
-            {"condition": "before date", "value": "2022-06-01T12:00Z"},
-        ],
-        "FEATURE_SOME_PLATFORM_FLAG_FOO_ENABLED": [
-            {"condition": "boolean", "value": True},
-        ],
-    }
-)
 @pytest.mark.django_db
-def test_feature_flags_list_endpoint_override(get):
-    bob = User.objects.create(username='bob', password='test_user', is_superuser=False)
+@pytest.mark.parametrize('flag_val', (True, False))
+def test_feature_flags_list_endpoint_override(get, flag_val):
+    bob = User.objects.create(username='bob', password='test_user', is_superuser=True)
 
-    url = "/api/v2/feature_flags_state/"
+    AAPFlag.objects.all().delete()
+    flag_name = "FEATURE_DISPATCHERD_ENABLED"
+    setattr(settings, flag_name, flag_val)
+    seed_feature_flags()
+    url = "/api/v2/feature_flags/states/"
     response = get(url, user=bob, expect=200)
-    assert len(response.data) == 2
-    assert response.data["FEATURE_SOME_PLATFORM_FLAG_ENABLED"] is False
-    assert response.data["FEATURE_SOME_PLATFORM_FLAG_FOO_ENABLED"] is True
+    assert len(response.data["results"]) == 6
+    assert flag_state(flag_name) == flag_val

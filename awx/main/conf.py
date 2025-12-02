@@ -145,6 +145,35 @@ register(
 )
 
 register(
+    'SUBSCRIPTIONS_USERNAME',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    read_only=False,
+    label=_('Red Hat Username for Subscriptions'),
+    help_text=_('Username used to retrieve subscription and content information'),  # noqa
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'SUBSCRIPTIONS_PASSWORD',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    read_only=False,
+    label=_('Red Hat Password for Subscriptions'),
+    help_text=_('Password used to retrieve subscription and content information'),  # noqa
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+
+register(
     'SUBSCRIPTIONS_CLIENT_ID',
     field_class=fields.CharField,
     default='',
@@ -155,6 +184,7 @@ register(
     help_text=_('Client ID used to retrieve subscription and content information'),  # noqa
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(
@@ -168,6 +198,7 @@ register(
     help_text=_('Client secret used to retrieve subscription and content information'),  # noqa
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(

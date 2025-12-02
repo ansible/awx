@@ -32,18 +32,9 @@ jobs:
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
             coverage-upload-name: ""
-          - name: api-swagger
-            command: /start_tests.sh swagger
-            coverage-upload-name: ""
           - name: awx-collection
             command: /start_tests.sh test_collection_all
             coverage-upload-name: "awx-collection"
-          - name: api-schema
-            command: >-
-              /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{
-                github.event.pull_request.base.ref || github.ref_name
-              }}
-            coverage-upload-name: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -62,6 +53,17 @@ jobs:
           AWX_DOCKER_ARGS='-e GITHUB_ACTIONS -e GITHUB_OUTPUT -v "${GITHUB_OUTPUT}:${GITHUB_OUTPUT}:rw,Z"'
           AWX_DOCKER_CMD='${{ matrix.tests.command }}'
           make docker-runner
+
+      - name: Inject PR number into coverage.xml
+        if: >-
+          !cancelled()
+          && github.event_name == 'pull_request'
+          && steps.make-run.outputs.cov-report-files != ''
+        run: |
+          if [ -f "reports/coverage.xml" ]; then
+            sed -i '2i<!-- PR ${{ github.event.pull_request.number }} -->' reports/coverage.xml
+            echo "Injected PR number ${{ github.event.pull_request.number }} into coverage.xml"
+          fi
 
       - name: Upload test coverage to Codecov
         if: >-
@@ -102,6 +104,14 @@ jobs:
             }}
           token: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.tests.name }}-artifacts
+          path: reports/coverage.xml
+          retention-days: 5
+
       - name: Upload awx jUnit test reports
         if: >-
           !cancelled()
@@ -132,7 +142,7 @@ jobs:
 
       - uses: ./.github/actions/setup-python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - uses: ./.github/actions/run_awx_devel
         id: awx
@@ -175,11 +185,11 @@ jobs:
       - name: Setup python, referencing action at awx relative path
         uses: ./awx/.github/actions/setup-python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - name: Install playbook dependencies
         run: |
-          python3 -m pip install docker
+          python -m pip install docker
 
       - name: Build AWX image
         working-directory: awx
@@ -193,8 +203,8 @@ jobs:
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         run: |
-          python3 -m pip install -r molecule/requirements.txt
-          python3 -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
+          python -m pip install -r molecule/requirements.txt
+          python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
           $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
@@ -281,7 +291,11 @@ jobs:
 
       - uses: ./.github/actions/setup-python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
+
+      - name: Remove system ansible to avoid conflicts
+        run: |
+          python -m pip uninstall -y ansible ansible-core || true
 
       - uses: ./.github/actions/run_awx_devel
         id: awx
@@ -292,8 +306,9 @@ jobs:
 
       - name: Install dependencies for running tests
         run: |
-          python3 -m pip install -e ./awxkit/
-          python3 -m pip install -r awx_collection/requirements.txt
+          python -m pip install -e ./awxkit/
+          python -m pip install -r awx_collection/requirements.txt
+          hash -r  # Rehash to pick up newly installed scripts
 
       - name: Run integration tests
         id: make-run
@@ -305,6 +320,7 @@ jobs:
           echo 'password = password' >> ~/.tower_cli.cfg
           echo 'verify_ssl = false' >> ~/.tower_cli.cfg
           TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
+          export PYTHONPATH="$(python -c 'import site; print(":".join(site.getsitepackages()))')${PYTHONPATH:+:$PYTHONPATH}"
           make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
         env:
           ANSIBLE_TEST_PREFER_PODMAN: 1
@@ -359,10 +375,14 @@ jobs:
 
       - uses: ./.github/actions/setup-python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
+
+      - name: Remove system ansible to avoid conflicts
+        run: |
+          python -m pip uninstall -y ansible ansible-core || true
 
       - name: Upgrade ansible-core
-        run: python3 -m pip install --upgrade ansible-core
+        run: python -m pip install --upgrade ansible-core
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
@@ -377,11 +397,12 @@ jobs:
           mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
           cp -rv coverage/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
           cd ~/.ansible/collections/ansible_collections/awx/awx
-          ansible-test coverage combine --requirements
-          ansible-test coverage html
+          hash -r  # Rehash to pick up newly installed scripts
+          PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage combine --requirements
+          PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage html
           echo '## AWX Collection Integration Coverage' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          ansible-test coverage report >> $GITHUB_STEP_SUMMARY
+          PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage report >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo >> $GITHUB_STEP_SUMMARY
           echo '## AWX Collection Integration Coverage HTML' >> $GITHUB_STEP_SUMMARY

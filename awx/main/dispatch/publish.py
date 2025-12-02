@@ -5,6 +5,7 @@ import time
 from uuid import uuid4
 
 from dispatcherd.publish import submit_task
+from dispatcherd.processors.blocker import Blocker
 from dispatcherd.utils import resolve_callable
 
 from django_guid import get_guid
@@ -60,13 +61,17 @@ class task:
         print(f"Time I was dispatched: {dispatch_time}")
     """
 
-    def __init__(self, queue=None, bind_kwargs=None):
+    def __init__(self, queue=None, bind_kwargs=None, timeout=None, on_duplicate=None):
         self.queue = queue
         self.bind_kwargs = bind_kwargs
+        self.timeout = timeout
+        self.on_duplicate = on_duplicate
 
     def __call__(self, fn=None):
         queue = self.queue
         bind_kwargs = self.bind_kwargs
+        timeout = self.timeout
+        on_duplicate = self.on_duplicate
 
         class PublisherMixin(object):
             queue = None
@@ -102,7 +107,19 @@ class task:
                     if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
                         # At this point we have the import string, and submit_task wants the method, so back to that
                         actual_task = resolve_callable(cls.name)
-                        return submit_task(actual_task, args=args, kwargs=kwargs, queue=queue, uuid=uuid, **kw)
+                        processor_options = ()
+                        if on_duplicate is not None:
+                            processor_options = (Blocker.Params(on_duplicate=on_duplicate),)
+                        return submit_task(
+                            actual_task,
+                            args=args,
+                            kwargs=kwargs,
+                            queue=queue,
+                            uuid=uuid,
+                            timeout=timeout,
+                            processor_options=processor_options,
+                            **kw,
+                        )
                 except Exception:
                     logger.exception(f"[DISPATCHER] Failed to check for alternative dispatcherd implementation for {cls.name}")
                     # Continue with original implementation if anything fails

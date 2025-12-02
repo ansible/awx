@@ -161,16 +161,14 @@ def get_view_description(view, html=False):
 
 
 def get_default_schema():
-    if settings.DYNACONF.is_development_mode:
-        from awx.api.swagger import schema_view
-
-        return schema_view
-    else:
-        return views.APIView.schema
+    # drf-spectacular is configured via REST_FRAMEWORK['DEFAULT_SCHEMA_CLASS']
+    # Just use the DRF default, which will pick up our CustomAutoSchema
+    return views.APIView.schema
 
 
 class APIView(views.APIView):
-    schema = get_default_schema()
+    # Schema is inherited from DRF's APIView, which uses DEFAULT_SCHEMA_CLASS
+    # No need to override it here - drf-spectacular will handle it
     versioning_class = URLPathVersioning
 
     def initialize_request(self, request, *args, **kwargs):
@@ -1024,6 +1022,9 @@ class CopyAPIView(GenericAPIView):
 class GenericCancelView(RetrieveAPIView):
     # In subclass set model, serializer_class
     obj_permission_type = 'cancel'
+
+    def get(self, request, *args, **kwargs):
+        return super(GenericCancelView, self).get(request, *args, **kwargs)
 
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
