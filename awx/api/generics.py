@@ -40,7 +40,6 @@ from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
 from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
-from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
