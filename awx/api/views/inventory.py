@@ -157,7 +157,7 @@ class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
 class InventoryAccessList(ResourceAccessList):
     model = User  # needs to be User for AccessLists's
     parent_model = Inventory
-    resource_purpose = 'users who accessed the inventory'
+    resource_purpose = 'users who can access the inventory'
 
 
 class InventoryObjectRolesList(SubListAPIView):

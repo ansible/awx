@@ -552,7 +552,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
 class InstanceGroupAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists
     parent_model = models.InstanceGroup
-    resource_purpose = 'users who accessed the instance group'
+    resource_purpose = 'users who can access the instance group'
 
 
 class InstanceGroupObjectRolesList(SubListAPIView):
@@ -842,7 +842,7 @@ class TeamActivityStreamList(SubListAPIView):
 class TeamAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists's
     parent_model = models.Team
-    resource_purpose = 'users who accessed the team'
+    resource_purpose = 'users who can access the team'
 
 
 class ExecutionEnvironmentList(ListCreateAPIView):
@@ -1097,7 +1097,7 @@ class SystemJobEventsList(SubListAPIView):
 class ProjectUpdateCancel(GenericCancelView):
     model = models.ProjectUpdate
     serializer_class = serializers.ProjectUpdateCancelSerializer
-    resource_purpose = 'cancel a project update'
+    resource_purpose = 'cancel for a project update'
 
 
 class ProjectUpdateNotificationsList(SubListAPIView):
@@ -1122,7 +1122,7 @@ class ProjectUpdateScmInventoryUpdates(SubListAPIView):
 class ProjectAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists's
     parent_model = models.Project
-    resource_purpose = 'users who accessed the project'
+    resource_purpose = 'users who can access the project'
 
 
 class ProjectObjectRolesList(SubListAPIView):
@@ -1322,7 +1322,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
 class UserAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists's
     parent_model = models.User
-    resource_purpose = 'users who accessed the user'
+    resource_purpose = 'users who can access the user'
 
 
 class CredentialTypeList(ListCreateAPIView):
@@ -1481,7 +1481,7 @@ class CredentialActivityStreamList(SubListAPIView):
 class CredentialAccessList(ResourceAccessList):
     model = models.User  # needs to be User for AccessLists's
     parent_model = models.Credential
-    resource_purpose = 'users who accessed the credential'
+    resource_purpose = 'users who can access the credential'
 
 
 class CredentialObjectRolesList(SubListAPIView):
@@ -2328,7 +2328,7 @@ class InventoryUpdateCredentialsList(SubListAPIView):
 class InventoryUpdateCancel(GenericCancelView):
     model = models.InventoryUpdate
     serializer_class = serializers.InventoryUpdateCancelSerializer
-    resource_purpose = 'cancel an inventory update'
+    resource_purpose = 'cancel for an inventory update'
 
 
 class InventoryUpdateNotificationsList(SubListAPIView):
@@ -3423,7 +3423,7 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
 class WorkflowJobCancel(GenericCancelView):
     model = models.WorkflowJob
     serializer_class = serializers.WorkflowJobCancelSerializer
-    resource_purpose = 'cancel a workflow job'
+    resource_purpose = 'cancel for a workflow job'
 
     @extend_schema_if_available(extensions={"x-ai-description": "Cancel a workflow job"})
     def post(self, request, *args, **kwargs):
@@ -3593,7 +3593,7 @@ class JobActivityStreamList(SubListAPIView):
 class JobCancel(GenericCancelView):
     model = models.Job
     serializer_class = serializers.JobCancelSerializer
-    resource_purpose = 'cancel a job'
+    resource_purpose = 'cancel for a job'
 
 
 class JobRelaunch(RetrieveAPIView):
@@ -4075,7 +4075,7 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class AdHocCommandCancel(GenericCancelView):
     model = models.AdHocCommand
     serializer_class = serializers.AdHocCommandCancelSerializer
-    resource_purpose = 'cancel an ad hoc command'
+    resource_purpose = 'cancel for an ad hoc command'
 
 
 class AdHocCommandRelaunch(GenericAPIView):
@@ -4221,7 +4221,7 @@ class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 class SystemJobCancel(GenericCancelView):
     model = models.SystemJob
     serializer_class = serializers.SystemJobCancelSerializer
-    resource_purpose = 'cancel a system job'
+    resource_purpose = 'cancel for a system job'
 
 
 class SystemJobNotificationsList(SubListAPIView):

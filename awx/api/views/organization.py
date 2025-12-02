@@ -238,7 +238,7 @@ class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
 class OrganizationAccessList(ResourceAccessList):
     model = User  # needs to be User for AccessLists's
     parent_model = Organization
-    resource_purpose = 'users who accessed the organization'
+    resource_purpose = 'users who can access the organization'
 
 
 class OrganizationObjectRolesList(SubListAPIView):
