@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
+from ._sqlite_helper import dbawaremigrations
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -15,92 +17,92 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='adhoccommandevent',
             new_name='main_adhocc_ad_hoc__1e4d24_idx',
             old_fields=('ad_hoc_command', 'job_created', 'uuid'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='adhoccommandevent',
             new_name='main_adhocc_ad_hoc__e72142_idx',
             old_fields=('ad_hoc_command', 'job_created', 'event'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='adhoccommandevent',
             new_name='main_adhocc_ad_hoc__a57777_idx',
             old_fields=('ad_hoc_command', 'job_created', 'counter'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='inventoryupdateevent',
             new_name='main_invent_invento_f72b21_idx',
             old_fields=('inventory_update', 'job_created', 'uuid'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='inventoryupdateevent',
             new_name='main_invent_invento_364dcb_idx',
             old_fields=('inventory_update', 'job_created', 'counter'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='jobevent',
             new_name='main_jobeve_job_id_40a56d_idx',
             old_fields=('job', 'job_created', 'parent_uuid'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='jobevent',
             new_name='main_jobeve_job_id_3c4a4a_idx',
             old_fields=('job', 'job_created', 'uuid'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='jobevent',
             new_name='main_jobeve_job_id_51c382_idx',
             old_fields=('job', 'job_created', 'counter'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='jobevent',
             new_name='main_jobeve_job_id_0ddc6b_idx',
             old_fields=('job', 'job_created', 'event'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='projectupdateevent',
             new_name='main_projec_project_449bbd_idx',
             old_fields=('project_update', 'job_created', 'uuid'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='projectupdateevent',
             new_name='main_projec_project_69559a_idx',
             old_fields=('project_update', 'job_created', 'counter'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='projectupdateevent',
             new_name='main_projec_project_c44b7c_idx',
             old_fields=('project_update', 'job_created', 'event'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='role',
             new_name='main_rbac_r_content_979bdd_idx',
             old_fields=('content_type', 'object_id'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='roleancestorentry',
             new_name='main_rbac_r_ancesto_b44606_idx',
             old_fields=('ancestor', 'content_type_id', 'role_field'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='roleancestorentry',
             new_name='main_rbac_r_ancesto_22b9f0_idx',
             old_fields=('ancestor', 'content_type_id', 'object_id'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='roleancestorentry',
             new_name='main_rbac_r_ancesto_c87b87_idx',
             old_fields=('ancestor', 'descendent'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='systemjobevent',
             new_name='main_system_system__e39825_idx',
             old_fields=('system_job', 'job_created', 'uuid'),
         ),
-        migrations.RenameIndex(
+        dbawaremigrations.RenameIndex(
             model_name='systemjobevent',
             new_name='main_system_system__73537a_idx',
             old_fields=('system_job', 'job_created', 'counter'),
