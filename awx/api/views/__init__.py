@@ -50,7 +50,7 @@ from rest_framework_yaml.renderers import YAMLRenderer
 # ansi2html
 from ansi2html import Ansi2HTMLConverter
 
-import pytz
+from datetime import timezone as dt_timezone
 from wsgiref.util import FileWrapper
 
 # django-ansible-base
@@ -648,7 +648,7 @@ class SchedulePreview(GenericAPIView):
                     continue
                 schedule.append(event)
 
-            return Response({'local': schedule, 'utc': [s.astimezone(pytz.utc) for s in schedule]})
+            return Response({'local': schedule, 'utc': [s.astimezone(dt_timezone.utc) for s in schedule]})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
