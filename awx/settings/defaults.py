@@ -421,9 +421,6 @@ DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 # sqlite3 based tests will use this
 DISPATCHER_MOCK_PUBLISH = False
 
-# Debugging sockfile for the --status command
-DISPATCHERD_DEBUGGING_SOCKFILE = os.path.join(BASE_DIR, 'dispatcherd.sock')
-
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 REDIS_RETRY_COUNT = 3  # Number of retries for Redis connection errors
 REDIS_BACKOFF_CAP = 1.0  # Maximum backoff delay in seconds for Redis retries

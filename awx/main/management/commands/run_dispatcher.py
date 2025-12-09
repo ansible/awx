@@ -48,10 +48,6 @@ class Command(BaseCommand):
             ),
         )
 
-    def verify_dispatcherd_socket(self):
-        if not os.path.exists(settings.DISPATCHERD_DEBUGGING_SOCKFILE):
-            raise CommandError('Dispatcher is not running locally')
-
     def handle(self, *arg, **options):
         if options.get('status'):
             if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
