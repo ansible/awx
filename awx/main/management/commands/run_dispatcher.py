@@ -2,7 +2,6 @@
 # All Rights Reserved.
 import logging
 import yaml
-import os
 
 import redis
 
