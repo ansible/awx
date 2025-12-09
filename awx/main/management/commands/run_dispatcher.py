@@ -2,11 +2,14 @@
 # All Rights Reserved.
 import logging
 import yaml
+import copy
 
 import redis
 
 from django.conf import settings
+from django.db import connection
 from django.core.management.base import BaseCommand, CommandError
+from django.core.cache import cache as django_cache
 
 from flags.state import flag_enabled
 
@@ -104,6 +107,22 @@ class Command(BaseCommand):
                 return
 
         if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
+            # Apply special log rule for the parent process
+            special_logging = copy.deepcopy(settings.LOGGING)
+            for handler_name, handler_config in special_logging['handlers'].items():
+                if 'dynamic_level_filter' in handler_config.get('filters', []):
+                    handler_config['filters'].remove('dynamic_level_filter')
+                    logger.info(f'Dispatcherd main process replaced log level filter for {handler_name} handler')
+
+            # Apply the custom logging level here, before the asyncio code starts
+            special_logging['loggers']['dispatcherd']['level'] = settings.LOG_AGGREGATOR_LEVEL
+
+            logging.config.dictConfig(special_logging)
+
+            # Close the connection, because the pg_notify broker will create new async connection
+            connection.close()
+            django_cache.close()
+
             dispatcher_setup(get_dispatcherd_config(for_service=True))
             run_service()
         else:
