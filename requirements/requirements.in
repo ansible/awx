@@ -71,7 +71,7 @@ setuptools_scm[toml]
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 django-flags>=5.0.13
-dispatcherd  # tasking system, previously part of AWX code base
+dispatcherd[pg_notify]  # tasking system, previously part of AWX code base
 protobuf>=4.25.8 # CVE-2025-4565
 idna>=3.10 # CVE-2024-3651
 # Temporarily added to use ansible-runner from git branch, to be removed
