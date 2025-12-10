@@ -13,6 +13,9 @@ from datetime import datetime
 from distutils.version import LooseVersion as Version
 from io import StringIO
 
+# dispatcherd
+from dispatcherd.factories import get_control_from_settings
+
 # Runner
 import ansible_runner.cleanup
 import psycopg
@@ -353,6 +356,11 @@ def clear_setting_cache(setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
+
+    if 'LOG_AGGREGATOR_LEVEL' in setting_keys:
+        ctl = get_control_from_settings()
+        ctl.queuename = get_task_queuename()
+        ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
 
 
 @task_awx(queue='tower_broadcast_all', timeout=600)
