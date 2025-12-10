@@ -32,10 +32,8 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
             "process_manager_cls": "ForkServerManager",
             "process_manager_kwargs": {"preload_modules": ['awx.main.dispatch.hazmat']},
         },
-        "brokers": {
-            "socket": {"socket_path": settings.DISPATCHERD_DEBUGGING_SOCKFILE},
-        },
-        "publish": {"default_control_broker": "socket"},
+        "brokers": {},
+        "publish": {},
         "worker": {"worker_cls": "awx.main.dispatch.worker.dispatcherd.AWXTaskWorker"},
     }
 

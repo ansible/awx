@@ -2,7 +2,6 @@
 # All Rights Reserved.
 import logging
 import yaml
-import os
 
 import redis
 
@@ -47,10 +46,6 @@ class Command(BaseCommand):
                 'Only running tasks can be canceled, queued tasks must be started before they can be canceled.'
             ),
         )
-
-    def verify_dispatcherd_socket(self):
-        if not os.path.exists(settings.DISPATCHERD_DEBUGGING_SOCKFILE):
-            raise CommandError('Dispatcher is not running locally')
 
     def handle(self, *arg, **options):
         if options.get('status'):
