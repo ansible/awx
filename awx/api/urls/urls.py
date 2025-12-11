@@ -148,9 +148,6 @@ v2_urls = [
 
 app_name = 'api'
 
-# Import schema views (needed for both development and testing)
-from awx.api.schema import schema_view, swagger_ui_view, redoc_view
-
 urlpatterns = [
     re_path(r'^$', ApiRootView.as_view(), name='api_root_view'),
     re_path(r'^(?P<version>(v2))/', include(v2_urls)),
