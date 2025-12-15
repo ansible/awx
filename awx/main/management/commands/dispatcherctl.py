@@ -20,6 +20,8 @@ from dispatcherd.config import setup as dispatcher_setup
 from dispatcherd.factories import get_control_from_settings
 from dispatcherd.service import control_tasks
 
+from awx.main.dispatch.config import get_dispatcherd_config
+
 logger = logging.getLogger(__name__)
 
 
@@ -65,12 +67,14 @@ class Command(BaseCommand):
 
         env_config = os.getenv('DISPATCHERD_CONFIG_FILE')
         default_config = os.path.abspath(DEFAULT_CONFIG_FILE)
-        if env_config and config_path == default_config:
-            logger.info(f'Using config from environment variable DISPATCHERD_CONFIG_FILE={env_config}')
+        if config_path != default_config:
+            raise CommandError('The config path CLI option is not allowed for the awx-manage command')
+        elif env_config:
+            logger.warning(f'Using config from environment variable DISPATCHERD_CONFIG_FILE={env_config}')
             dispatcher_setup()
         else:
-            logger.info(f'Using config from file {config_path}')
-            dispatcher_setup(file_path=config_path)
+            logger.info('Using config generated from awx.main.dispatch.config.get_dispatcherd_config')
+            dispatcher_setup(get_dispatcherd_config())
 
         schema_namespace = argparse.Namespace(**options)
         data = _build_command_data_from_args(schema_namespace, command)
