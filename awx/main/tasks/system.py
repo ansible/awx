@@ -10,7 +10,7 @@ import time
 from collections import namedtuple
 from contextlib import redirect_stdout
 from datetime import datetime
-from distutils.version import LooseVersion as Version
+from packaging.version import Version
 from io import StringIO
 
 # Runner

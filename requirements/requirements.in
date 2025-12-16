@@ -1,4 +1,4 @@
-aiohttp>=3.9.4 # CVE-2024-30251
+aiohttp>=3.12.14 # CVE-2024-30251
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
 asciichartpy
@@ -65,7 +65,7 @@ urllib3<2.4.0, >=1.26.19 # CVE-2024-37891. capped by kubernetes 34.1.0 reqs
 uWSGI>=2.0.28
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
-pip==21.2.4  # see UPGRADE BLOCKERs
+pip==25.3  # see UPGRADE BLOCKERs
 setuptools==80.9.0  # see UPGRADE BLOCKERs
 setuptools_scm[toml]
 setuptools-rust>=0.11.4  # cryptography build dep

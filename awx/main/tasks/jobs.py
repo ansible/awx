@@ -422,7 +422,7 @@ class BaseTask(object):
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
                     os.close(self.lock_fd)
-                    logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
+                    logger.error("I/O error({0}) while trying to acquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
                     if not emitted_lockfile_log:

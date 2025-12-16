@@ -139,7 +139,7 @@ def test_send_notifications_job_id(mocker):
     mocker.patch('awx.main.models.UnifiedJob.objects.get')
     system.send_notifications([], job_id=1)
     assert UnifiedJob.objects.get.called
-    assert UnifiedJob.objects.get.called_with(id=1)
+    UnifiedJob.objects.get.assert_called_with(id=1)
 
 
 @mock.patch('awx.main.models.UnifiedJob.objects.get')
@@ -156,7 +156,7 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
     assert mock_notifications[0].save.called
 
     assert mock_job.notifications.add.called
-    assert mock_job.notifications.add.called_with(*mock_notifications)
+    mock_job.notifications.add.assert_called_with(*mock_notifications)
 
 
 @pytest.mark.parametrize(
@@ -1508,8 +1508,8 @@ def test_fcntl_ioerror():
 
 
 @mock.patch('os.open')
-@mock.patch('logging.getLogger')
-def test_acquire_lock_open_fail_logged(logging_getLogger, os_open, mock_me):
+@mock.patch('awx.main.tasks.jobs.logger')
+def test_acquire_lock_open_fail_logged(logger_mock, os_open, mock_me):
     err = OSError()
     err.errno = 3
     err.strerror = 'dummy message'
@@ -1519,21 +1519,18 @@ def test_acquire_lock_open_fail_logged(logging_getLogger, os_open, mock_me):
 
     os_open.side_effect = err
 
-    logger = mock.Mock()
-    logging_getLogger.return_value = logger
-
     ProjectUpdate = jobs.RunProjectUpdate()
 
     with pytest.raises(OSError):
         ProjectUpdate.acquire_lock(instance)
-    assert logger.err.called_with("I/O error({0}) while trying to open lock file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
+    logger_mock.error.assert_called_with("I/O error({0}) while trying to open lock file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
 
 
 @mock.patch('os.open')
 @mock.patch('os.close')
-@mock.patch('logging.getLogger')
+@mock.patch('awx.main.tasks.jobs.logger')
 @mock.patch('fcntl.lockf')
-def test_acquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os_close, os_open, mock_me):
+def test_acquire_lock_acquisition_fail_logged(fcntl_lockf, logger_mock, os_close, os_open, mock_me):
     err = IOError()
     err.errno = 3
     err.strerror = 'dummy message'
@@ -1544,16 +1541,15 @@ def test_acquire_lock_acquisition_fail_logged(fcntl_lockf, logging_getLogger, os
 
     os_open.return_value = 3
 
-    logger = mock.Mock()
-    logging_getLogger.return_value = logger
-
     fcntl_lockf.side_effect = err
 
     ProjectUpdate = jobs.RunProjectUpdate()
     with pytest.raises(IOError):
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)
-    assert logger.err.called_with("I/O error({0}) while trying to acquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
+    logger_mock.error.assert_called_with(
+        "I/O error({0}) while trying to acquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message')
+    )
 
 
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])

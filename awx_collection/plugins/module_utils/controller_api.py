@@ -24,9 +24,9 @@ try:
     from ansible.module_utils.compat.version import LooseVersion as Version
 except ImportError:
     try:
-        from distutils.version import LooseVersion as Version
+        from packaging.version import Version
     except ImportError:
-        raise AssertionError('To use this plugin or module with ansible-core 2.11, you need to use Python < 3.12 with distutils.version present')
+        raise AssertionError('To use this plugin or module you need to use Python >= 3.12')
 
 try:
     import yaml

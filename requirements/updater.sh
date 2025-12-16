@@ -16,7 +16,7 @@ _cleanup() {
 generate_requirements() {
   venv="`pwd`/venv"
   echo $venv
-  /usr/bin/python3.11 -m venv "${venv}"
+  /usr/bin/python3.12 -m venv "${venv}"
   # shellcheck disable=SC1090
   source ${venv}/bin/activate
 
