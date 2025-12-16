@@ -88,7 +88,7 @@ class TestSwaggerGeneration:
         JSON['info']['version'] = release
 
         if not request.config.getoption('--genschema'):
-            JSON['modified'] = datetime.datetime.utcnow().isoformat()
+            JSON['modified'] = datetime.datetime.now(datetime.UTC).isoformat()
 
         # Make some basic assertions about the rendered JSON so we can
         # be sure it doesn't break across DRF upgrades and view/serializer

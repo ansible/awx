@@ -364,7 +364,7 @@ def are_same_endpoint(first, second):
 
 def utcnow():
     """Provide a wrapped copy of the built-in utcnow that can be easily mocked."""
-    return datetime.utcnow()
+    return datetime.now(datetime.UTC)
 
 
 class UTC(tzinfo):

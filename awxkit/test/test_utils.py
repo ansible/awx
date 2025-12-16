@@ -379,7 +379,7 @@ class TestUpdatePayload(object):
 
 
 def test_to_ical():
-    now = datetime.utcnow()
+    now = datetime.now(datetime.UTC)
     ical_datetime = utils.to_ical(now)
     date = str(now.date()).replace('-', '')
     time = str(now.time()).split('.')[0].replace(':', '')

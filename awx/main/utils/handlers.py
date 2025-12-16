@@ -50,7 +50,7 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
         # because the alternative is blocking the
         # socket.send() in the Python process, which we definitely don't
         # want to do)
-        dt = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        dt = datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')
         msg = f'{dt} ERROR rsyslogd was unresponsive: '
         exc = traceback.format_exc()
         try:
