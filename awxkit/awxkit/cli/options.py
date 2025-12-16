@@ -6,10 +6,8 @@ import re
 import sys
 import yaml
 
-from distutils.util import strtobool
-
 from .custom import CustomAction
-from .format import add_output_formatting_arguments
+from .format import add_output_formatting_arguments, strtobool
 from .resource import DEPRECATED_RESOURCES_REVERSE
 
 

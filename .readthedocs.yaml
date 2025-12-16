@@ -7,7 +7,7 @@ build:
   os: ubuntu-22.04
   tools:
     python: >-
-      3.11
+      3.12
   commands:
     - pip install --user tox
     - python3 -m tox -e docs --notest -v

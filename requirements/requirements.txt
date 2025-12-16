@@ -475,7 +475,7 @@ service-identity==24.2.0
     # via twisted
 setuptools-rust==1.10.2
     # via -r /awx_devel/requirements/requirements.in
-setuptools-scm[toml]==8.1.0
+setuptools-scm[toml]==9.2.2
     # via -r /awx_devel/requirements/requirements.in
 six==1.17.0
     # via
@@ -542,7 +542,7 @@ uwsgitop==0.12
     # via -r /awx_devel/requirements/requirements.in
 websocket-client==1.8.0
     # via kubernetes
-wheel==0.42.0
+wheel==0.45.1
     # via -r /awx_devel/requirements/requirements.in
 wrapt==1.17.3
     # via opentelemetry-instrumentation
@@ -556,7 +556,7 @@ zstandard==0.25.0
     # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==21.2.4
+pip==25.3
     # via -r /awx_devel/requirements/requirements.in
 setuptools==80.9.0
     # via
