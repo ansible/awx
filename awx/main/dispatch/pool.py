@@ -301,7 +301,7 @@ class WorkerPool(object):
             '\n'
             '{% endfor %}'
         )
-        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        now = datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S UTC')
         return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta, dt=now)
 
     def write(self, preferred_queue, body):
