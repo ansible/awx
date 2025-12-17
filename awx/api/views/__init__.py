@@ -3943,6 +3943,10 @@ class JobJobEventsChildrenSummary(APIView):
 
         prev_non_meta_event = events[0]
         for i, e in enumerate(events):
+            if not e['event']:
+                logging.warning(f'event type missing for event {e}')
+                continue
+
             if not e['event'] in JobJobEventsChildrenSummary.meta_events:
                 prev_non_meta_event = e
             if not e['uuid']:
