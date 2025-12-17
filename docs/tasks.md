@@ -145,14 +145,6 @@ This outputs running and queued task UUIDs handled by a specific dispatcher
 ['eb3b0a83-86da-413d-902a-16d7530a6b25', 'f447266a-23da-42b4-8025-fe379d2db96f']
 ```
 
-Additionally, you can tell the local running dispatcher to recycle all of the
-workers in its pool.  It will wait for any running jobs to finish and exit when
-work has completed, spinning up replacement workers.
-
-```
-awx-manage run_dispatcher --reload
-```
-
 * * *
 
 In the following sections, we will go further into the details regarding AWX tasks.  They are all decorated by `@task()` in [awx/awx/main/tasks.py](https://github.com/ansible/awx/blob/devel/awx/main/tasks.py)

@@ -131,12 +131,6 @@ def _run_dispatch_startup_common():
     m.reset_values()
 
 
-def _legacy_dispatch_startup():
-    """
-    Legacy branch for startup: simply performs reaping of waiting jobs with a zero grace period.
-    """
-    logger.debug("Legacy dispatcher: calling reaper.reap_waiting with grace_period=0")
-    reaper.reap_waiting(grace_period=0)
 
 
 def _dispatcherd_dispatch_startup():
@@ -153,21 +147,16 @@ def dispatch_startup():
     """
     System initialization at startup.
     First, execute the common logic.
-    Then, if FEATURE_DISPATCHERD_ENABLED is enabled, re-submit waiting jobs via the control API;
-    otherwise, fall back to legacy reaping of waiting jobs.
+    Then, re-submit waiting jobs via the control API.
     """
     _run_dispatch_startup_common()
-    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-        _dispatcherd_dispatch_startup()
-    else:
-        _legacy_dispatch_startup()
+    _dispatcherd_dispatch_startup()
 
 
 def inform_cluster_of_shutdown():
     """
     Clean system shutdown that marks the current instance offline.
-    In legacy mode, it also reaps waiting jobs.
-    In dispatcherd mode, it relies on dispatcherd's built-in cleanup.
+    Relies on dispatcherd's built-in cleanup.
     """
     try:
         inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
@@ -176,14 +165,7 @@ def inform_cluster_of_shutdown():
         logger.exception("Cluster host not found: %s", settings.CLUSTER_HOST_ID)
         return
 
-    if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-        logger.debug("Dispatcherd mode: no extra reaping required for instance %s", inst.hostname)
-    else:
-        try:
-            logger.debug("Legacy mode: reaping waiting jobs for instance %s", inst.hostname)
-            reaper.reap_waiting(inst, grace_period=0)
-        except Exception:
-            logger.exception("Failed to reap waiting jobs for %s", inst.hostname)
+    logger.debug("No extra reaping required for instance %s", inst.hostname)
     logger.warning("Normal shutdown processed for instance %s; instance removed from capacity pool.", inst.hostname)
 
 

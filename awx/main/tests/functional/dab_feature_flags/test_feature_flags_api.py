@@ -21,7 +21,7 @@ def test_feature_flags_list_endpoint_override(get, flag_val):
     bob = User.objects.create(username='bob', password='test_user', is_superuser=True)
 
     AAPFlag.objects.all().delete()
-    flag_name = "FEATURE_DISPATCHERD_ENABLED"
+    flag_name = "FEATURE_INDIRECT_NODE_COUNTING_ENABLED"
     setattr(settings, flag_name, flag_val)
     seed_feature_flags()
     url = "/api/v2/feature_flags/states/"

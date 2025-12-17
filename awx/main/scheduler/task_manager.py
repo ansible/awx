@@ -19,9 +19,6 @@ from django.utils.timezone import now as tz_now
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
-# django-flags
-from flags.state import flag_enabled
-
 from ansible_base.lib.utils.models import get_type_for_model
 
 # django-ansible-base
@@ -523,19 +520,7 @@ class TaskManager(TaskBase):
                 task.save()
                 task.log_lifecycle("waiting")
 
-        if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-            self.control_nodes_to_notify.add(task.get_queue_name())
-        else:
-            # apply_async does a NOTIFY to the channel dispatcher is listening to
-            # postgres will treat this as part of the transaction, which is what we want
-            if task.status != 'failed' and type(task) is not WorkflowJob:
-                task_cls = task._get_task_class()
-                task_cls.apply_async(
-                    [task.pk],
-                    opts,
-                    queue=task.get_queue_name(),
-                    uuid=task.celery_task_id,
-                )
+        self.control_nodes_to_notify.add(task.get_queue_name())
 
         # In exception cases, like a job failing pre-start checks, we send the websocket status message.
         # For jobs going into waiting, we omit this because of performance issues, as it should go to running quickly
@@ -729,7 +714,6 @@ class TaskManager(TaskBase):
         for workflow_approval in self.get_expired_workflow_approvals():
             self.timeout_approval_node(workflow_approval)
 
-        if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-            for controller_node in self.control_nodes_to_notify:
-                logger.info(f'Notifying node {controller_node} of new waiting jobs.')
-                dispatch_waiting_jobs.apply_async(queue=controller_node)
+        for controller_node in self.control_nodes_to_notify:
+            logger.info(f'Notifying node {controller_node} of new waiting jobs.')
+            dispatch_waiting_jobs.apply_async(queue=controller_node)
