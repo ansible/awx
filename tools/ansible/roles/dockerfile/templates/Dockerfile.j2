@@ -19,10 +19,10 @@ RUN make ui
 # Build container
 FROM quay.io/centos/centos:stream9 AS builder
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV AWX_LOGGING_MODE stdout
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV AWX_LOGGING_MODE=stdout
 
 
 USER root
@@ -111,10 +111,10 @@ RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_
 # Final container(s)
 FROM quay.io/centos/centos:stream9
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV AWX_LOGGING_MODE stdout
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV AWX_LOGGING_MODE=stdout
 
 USER root
 
