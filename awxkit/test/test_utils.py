@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timezone
 import sys
 
 from unittest import mock
@@ -379,7 +379,7 @@ class TestUpdatePayload(object):
 
 
 def test_to_ical():
-    now = datetime.now(datetime.UTC)
+    now = datetime.now(timezone.utc)
     ical_datetime = utils.to_ical(now)
     date = str(now.date()).replace('-', '')
     time = str(now.time()).split('.')[0].replace(':', '')
