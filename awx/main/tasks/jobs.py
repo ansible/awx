@@ -419,6 +419,19 @@ class BaseTask(object):
                     private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
                 self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
+
+        # Copy vendor collections to private_data_dir for indirect node counting
+        # This makes external query files available to the callback plugin in EEs
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            vendor_src = '/var/lib/awx/vendor_collections'
+            vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
+            if os.path.exists(vendor_src):
+                try:
+                    shutil.copytree(vendor_src, vendor_dest)
+                    logger.debug(f"Copied vendor collections from {vendor_src} to {vendor_dest}")
+                except Exception as e:
+                    logger.warning(f"Failed to copy vendor collections: {e}")
+
         return private_data_files, ssh_key_data
 
     def build_passwords(self, instance, runtime_passwords):
@@ -1142,6 +1155,11 @@ class RunJob(SourceControlMixin, BaseTask):
             env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
             if 'callbacks_enabled' in config_values:
                 env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
+
+            # Add vendor collections path for external query file discovery
+            vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
+            env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
+            logger.debug(f"ANSIBLE_COLLECTIONS_PATH updated for vendor collections: {env['ANSIBLE_COLLECTIONS_PATH']}")
 
         return env
 
