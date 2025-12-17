@@ -5,7 +5,7 @@ import signal
 import sys
 import time
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 import json
 
@@ -301,7 +301,7 @@ class WorkerPool(object):
             '\n'
             '{% endfor %}'
         )
-        now = datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S UTC')
+        now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
         return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta, dt=now)
 
     def write(self, preferred_queue, body):
