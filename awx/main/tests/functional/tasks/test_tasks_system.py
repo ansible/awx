@@ -1,10 +1,12 @@
+import json
 import os
 import tempfile
 import shutil
+from unittest import mock
 
 import pytest
 
-from awx.main.tasks.system import CleanupImagesAndFiles, execution_node_health_check, inspect_established_receptor_connections
+from awx.main.tasks.system import CleanupImagesAndFiles, execution_node_health_check, inspect_established_receptor_connections, clear_setting_cache
 from awx.main.models import Instance, Job, ReceptorAddress, InstanceLink
 
 
@@ -98,3 +100,30 @@ def test_folder_cleanup_multiple_running_jobs(job_folder_factory, me_inst):
     CleanupImagesAndFiles.run(grace_period=0)
 
     assert [os.path.exists(d) for d in dirs] == [True for i in range(num_jobs)]
+
+
+@pytest.mark.django_db
+def test_clear_setting_cache_log_level_branch(settings):
+    settings.LOG_AGGREGATOR_LEVEL = 'DEBUG'
+    settings.CLUSTER_HOST_ID = 'control-node'
+    published_messages = []
+
+    class DummyBroker:
+        def publish_message(self, channel, message):
+            published_messages.append((channel, message))
+
+        def close(self):
+            pass
+
+    dummy_broker = DummyBroker()
+
+    with mock.patch('dispatcherd.control.get_broker', return_value=dummy_broker) as mock_get_broker:
+        clear_setting_cache(['LOG_AGGREGATOR_LEVEL'])
+
+    mock_get_broker.assert_called_once()
+    assert published_messages, 'control command was not sent through the broker'
+    queue, payload = published_messages[-1]
+    assert queue == 'control-node'
+    body = json.loads(payload)
+    assert body['control'] == 'set_log_level'
+    assert body['control_data'] == {'level': 'DEBUG'}
