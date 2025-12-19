@@ -132,6 +132,7 @@ def test_clear_setting_cache_log_level_branch(settings):
     assert body['control_data'] == {'level': 'DEBUG'}
 
 
+@pytest.mark.django_db
 def test_configure_dispatcher_logging_updates_level(settings):
     original_logging_settings = copy.deepcopy(settings.LOGGING)
     settings.LOGGING = {
