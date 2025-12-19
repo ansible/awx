@@ -1,4 +1,6 @@
+import copy
 import json
+import logging
 import os
 import tempfile
 import shutil
@@ -7,6 +9,7 @@ from unittest import mock
 import pytest
 
 from awx.main.tasks.system import CleanupImagesAndFiles, execution_node_health_check, inspect_established_receptor_connections, clear_setting_cache
+from awx.main.management.commands.run_dispatcher import Command
 from awx.main.models import Instance, Job, ReceptorAddress, InstanceLink
 
 
@@ -127,3 +130,36 @@ def test_clear_setting_cache_log_level_branch(settings):
     body = json.loads(payload)
     assert body['control'] == 'set_log_level'
     assert body['control_data'] == {'level': 'DEBUG'}
+
+
+def test_configure_dispatcher_logging_updates_level(settings):
+    original_logging_settings = copy.deepcopy(settings.LOGGING)
+    settings.LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'filters': {
+            'dynamic_level_filter': {
+                '()': 'logging.Filter',
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'filters': ['dynamic_level_filter'],
+                'stream': 'ext://sys.stdout',
+            }
+        },
+        'loggers': {
+            'dispatcherd': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            }
+        },
+    }
+    settings.LOG_AGGREGATOR_LEVEL = 'WARNING'
+
+    Command().configure_dispatcher_logging()
+
+    assert logging.getLogger('dispatcherd').level == logging.WARNING
+    settings.LOGGING = original_logging_settings
