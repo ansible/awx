@@ -20,19 +20,18 @@ In this document, we will go into a bit of detail about how and when AWX runs Py
     - Every node in an AWX cluster runs a periodic task that serves as
       a heartbeat and capacity check
 
-Transition to dispatcherd Library
----------------------------------
+dispatcherd Library
+-------------------
 
-The task system logic is being split out into a new library:
+The task system logic has been split out into a separate library:
 
 https://github.com/ansible/dispatcherd
 
-Currently AWX is in a transitionary period where this is put behind a feature flag.
-The difference can be seen in how the task decorator is imported.
+AWX now uses dispatcherd directly for all task management. Tasks are decorated using:
 
- - old `from awx.main.dispatch.publish import task`
- - transition `from awx.main.dispatch.publish import task as task_awx`
- - new `from dispatcherd.publish import task`
+```python
+from dispatcherd.publish import task
+```
 
 
 Tasks, Queues and Workers
@@ -74,7 +73,7 @@ Defining and Running Tasks
 Tasks are defined in AWX's source code, and generally live in the
 `awx.main.tasks` module.  Tasks can be defined as simple functions:
 
-    from awx.main.dispatch.publish import task as task_awx
+    from dispatcherd.publish import task
 
     @task()
     def add(a, b):

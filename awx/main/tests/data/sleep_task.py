@@ -6,14 +6,13 @@ from dispatcherd.publish import task
 from django.db import connection
 
 from awx.main.dispatch import get_task_queuename
-from awx.main.dispatch.publish import task as old_task
 
 from ansible_base.lib.utils.db import advisory_lock
 
 logger = logging.getLogger(__name__)
 
 
-@old_task(queue=get_task_queuename)
+@task(queue=get_task_queuename)
 def sleep_task(seconds=10, log=False):
     if log:
         logger.info('starting sleep_task')
