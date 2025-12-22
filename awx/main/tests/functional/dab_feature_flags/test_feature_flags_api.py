@@ -26,5 +26,5 @@ def test_feature_flags_list_endpoint_override(get, flag_val):
     seed_feature_flags()
     url = "/api/v2/feature_flags/states/"
     response = get(url, user=bob, expect=200)
-    assert len(response.data["results"]) == 6
+    assert len(response.data["results"]) == 5
     assert flag_state(flag_name) == flag_val
