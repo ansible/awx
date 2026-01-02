@@ -84,7 +84,7 @@ VENV_BOOTSTRAP ?= pip==25.3 setuptools==80.9.0 setuptools_scm[toml]==8.0.4 wheel
 NAME ?= awx
 
 # TAR build parameters
-SDIST_TAR_NAME=$(NAME)-$(VERSION)
+SDIST_TAR_NAME=$(NAME)-'1.01.dev1'
 
 SDIST_COMMAND ?= sdist
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
