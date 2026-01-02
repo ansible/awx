@@ -352,7 +352,7 @@ pkgconfig==1.5.5
     # via -r /awx_devel/requirements/requirements.in
 prometheus-client==0.23.1
     # via -r /awx_devel/requirements/requirements.in
-propcache==0.4.0
+propcache==0.4.1
     # via
     #   aiohttp
     #   yarl
