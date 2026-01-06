@@ -191,6 +191,10 @@ jobs:
         run: |
           python -m pip install docker
 
+      - name: Check Python version
+        run: |
+          make print-PYTHON && $(make print-PYTHON) tools/scripts/scm_version.py
+      
       - name: Build AWX image
         working-directory: awx
         run: |
