@@ -194,7 +194,7 @@ jobs:
       - name: Build AWX image
         working-directory: awx
         run: |
-          VERSION='1.01.dev1' make awx-kube-build
+          VERSION=`make version-for-buildyml` make awx-kube-build
         env:
           COMPOSE_TAG: ci
           DEV_DOCKER_TAG_BASE: local
