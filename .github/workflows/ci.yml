@@ -183,9 +183,9 @@ jobs:
           path: awx-operator
 
       - name: Setup python, referencing action at awx relative path
-        uses: ./awx/.github/actions/setup-python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install playbook dependencies
         run: |
