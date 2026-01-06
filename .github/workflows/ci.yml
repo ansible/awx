@@ -192,6 +192,7 @@ jobs:
           python -m pip install docker
 
       - name: Check Python version
+        working-directory: awx
         run: |
           make print-PYTHON && $(make print-PYTHON) tools/scripts/scm_version.py
       
