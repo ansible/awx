@@ -8,6 +8,7 @@ import logging
 import pytest
 
 from django.conf import settings
+from django.core.cache import cache
 
 from awx.api.versioning import reverse
 
@@ -60,6 +61,7 @@ def live_tmp_folder():
         subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
     if path not in settings.AWX_ISOLATION_SHOW_PATHS:
         settings.AWX_ISOLATION_SHOW_PATHS = settings.AWX_ISOLATION_SHOW_PATHS + [path]
+        cache.delete_many(['AWX_ISOLATION_SHOW_PATHS'])
     return path
 
 

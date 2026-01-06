@@ -120,7 +120,7 @@ cython==3.1.3
     # via -r /awx_devel/requirements/requirements.in
 daphne==4.2.1
     # via -r /awx_devel/requirements/requirements.in
-dispatcherd[pg_notify]==2025.12.10
+dispatcherd[pg_notify]==2025.12.12
     # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
