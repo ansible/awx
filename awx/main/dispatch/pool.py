@@ -304,11 +304,24 @@ class WorkerPool(object):
         now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
         return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta, dt=now)
 
+    def queue_attempt_order(self, preferred_queue):
+        """
+        Return the order in which write() will attempt to assign work.
+        """
+        return sorted(range(len(self.workers)), key=lambda x: -1 if x == preferred_queue else x)
+
     def write(self, preferred_queue, body):
-        queue_order = sorted(range(len(self.workers)), key=lambda x: -1 if x == preferred_queue else x)
+        queue_order = self.queue_attempt_order(preferred_queue)
         write_attempt_order = []
+        skipped_retired = []
+        task_uuid = body.get('uuid') if isinstance(body, dict) else None
         for queue_actual in queue_order:
+            worker = self.workers[queue_actual]
+            if getattr(worker, 'retiring', False):
+                skipped_retired.append(queue_actual)
+                continue
             try:
+                write_attempt_order.append(queue_actual)
                 self.workers[queue_actual].put(body)
                 return queue_actual
             except QueueFull:
@@ -317,7 +330,11 @@ class WorkerPool(object):
                 tb = traceback.format_exc()
                 logger.warning("could not write to queue %s" % preferred_queue)
                 logger.warning("detail: {}".format(tb))
-            write_attempt_order.append(preferred_queue)
+        if skipped_retired and not write_attempt_order:
+            logger.error("All workers are retiring; abandoning task {} after skipping queues: {}".format(task_uuid or 'unknown', skipped_retired))
+            return None
+        if skipped_retired:
+            logger.warning("Skipped retired workers while dispatching task {}: {}".format(task_uuid or 'unknown', skipped_retired))
         logger.error("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
         return None
 
@@ -557,7 +574,7 @@ class AutoscalePool(WorkerPool):
             workers = self.workers[:]
             random.shuffle(workers)
             for w in workers:
-                if not w.busy:
+                if not w.busy and not getattr(w, 'retiring', False):
                     w.put(body)
                     break
             else:

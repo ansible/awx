@@ -1,3 +1,5 @@
+import logging
+import ast
 import datetime
 import multiprocessing
 import random
@@ -11,7 +13,7 @@ import pytest
 
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
-from awx.main.dispatch.pool import StatefulPoolWorker, WorkerPool, AutoscalePool
+from awx.main.dispatch.pool import PoolWorker, StatefulPoolWorker, WorkerPool, AutoscalePool
 from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
 from awx.main.dispatch.periodic import Scheduler
@@ -162,6 +164,28 @@ class TestWorkerPool:
 
         total_handled = sum([worker.messages_sent for worker in self.pool.workers])
         assert total_handled == 10
+
+    def test_queue_attempt_log_contains_actual_workers(self, caplog, monkeypatch):
+        self.pool.init_workers(SimpleWorker().work_loop)
+
+        def always_full(self, body):
+            raise QueueFull("full")
+
+        monkeypatch.setattr(PoolWorker, "put", always_full)
+
+        with caplog.at_level(logging.ERROR, logger='awx.main.dispatch'):
+            self.pool.write(2, {'task': 'noop'})
+
+        log = [record for record in caplog.records if 'could not write payload to any queue' in record.message][0]
+        attempted = ast.literal_eval(log.message.split('attempted order: ')[1])
+        assert attempted == [2, 0, 1]
+
+    def test_retired_worker_not_preferred(self):
+        self.pool.init_workers(SimpleWorker().work_loop)
+        retired_idx = 1
+        self.pool.workers[retired_idx].retiring = True
+        order = self.pool.queue_attempt_order(retired_idx)
+        assert order[0] != retired_idx
 
 
 @pytest.mark.django_db
