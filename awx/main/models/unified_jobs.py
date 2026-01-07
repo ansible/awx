@@ -15,6 +15,9 @@ import subprocess
 import tempfile
 from collections import OrderedDict
 
+# Dispatcher
+from dispatcherd.factories import get_control_from_settings
+
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
@@ -1499,7 +1502,6 @@ class UnifiedJob(
         # Special case for task manager (used during workflow job cancellation)
         if not connection.get_autocommit():
             try:
-                from dispatcherd.factories import get_control_from_settings
 
                 ctl = get_control_from_settings()
                 ctl.control('cancel', data={'uuid': self.celery_task_id})
@@ -1510,7 +1512,6 @@ class UnifiedJob(
         # Standard case with reply
         try:
             timeout = 5
-            from dispatcherd.factories import get_control_from_settings
 
             ctl = get_control_from_settings()
             results = ctl.control_with_reply('cancel', data={'uuid': self.celery_task_id}, expected_replies=1, timeout=timeout)

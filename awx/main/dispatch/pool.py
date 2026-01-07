@@ -1,13 +1,10 @@
 import logging
 import os
-import random
-import signal
 import sys
 import time
 import traceback
 from datetime import datetime, timezone
 from uuid import uuid4
-import json
 
 import collections
 from multiprocessing import Process
@@ -17,27 +14,15 @@ from queue import Full as QueueFull, Empty as QueueEmpty
 from django.conf import settings
 from django.db import connection as django_connection, connections
 from django.core.cache import cache as django_cache
-from django.utils.timezone import now as tz_now
-from django_guid import set_guid
 from jinja2 import Template
 import psutil
 
-from ansible_base.lib.logging.runtime import log_excess_runtime
-
-from awx.main.models import UnifiedJob
-from awx.main.dispatch import reaper
-from awx.main.utils.common import get_mem_effective_capacity, get_corrected_memory, get_corrected_cpu, get_cpu_effective_capacity
-
-# ansible-runner
-from ansible_runner.utils.capacity import get_mem_in_bytes, get_cpu_count
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 else:
     logger = logging.getLogger('awx.main.dispatch')
 
-
-RETIRED_SENTINEL_TASK = "[retired]"
 
 
 class NoOpResultQueue(object):
@@ -94,7 +79,7 @@ class PoolWorker(object):
         if self.retiring:
             uuid = body.get('uuid', 'N/A') if isinstance(body, dict) else 'N/A'
             logger.info(f"Worker pid:{self.pid} is retiring. Refusing new task {uuid}.")
-            raise QueueFull("Worker is retiring and not accepting new tasks")  # AutoscalePool.write handles QueueFull
+            raise QueueFull("Worker is retiring and not accepting new tasks")
         uuid = '?'
         if isinstance(body, dict):
             if not body.get('uuid'):
@@ -164,8 +149,6 @@ class PoolWorker(object):
                 # the purpose of self.managed_tasks is to just track internal
                 # state of which events are *currently* being processed.
                 logger.warning('Event UUID {} appears to be have been duplicated.'.format(uuid))
-            if self.retiring:
-                self.managed_tasks[RETIRED_SENTINEL_TASK] = {'task': RETIRED_SENTINEL_TASK}
 
     @property
     def current_task(self):
@@ -211,10 +194,6 @@ class PoolWorker(object):
     @property
     def idle(self):
         return not self.busy
-
-
-class StatefulPoolWorker(PoolWorker):
-    track_managed_tasks = True
 
 
 class WorkerPool(object):
@@ -328,256 +307,3 @@ class WorkerPool(object):
         except Exception:
             logger.exception('could not kill {}'.format(worker.pid))
 
-
-def get_auto_max_workers():
-    """Method we normally rely on to get max_workers
-
-    Uses almost same logic as Instance.local_health_check
-    The important thing is to be MORE than Instance.capacity
-    so that the task-manager does not over-schedule this node
-
-    Ideally we would just use the capacity from the database plus reserve workers,
-    but this poses some bootstrap problems where OCP task containers
-    register themselves after startup
-    """
-    # Get memory from ansible-runner
-    total_memory_gb = get_mem_in_bytes()
-
-    # This may replace memory calculation with a user override
-    corrected_memory = get_corrected_memory(total_memory_gb)
-
-    # Get same number as max forks based on memory, this function takes memory as bytes
-    mem_capacity = get_mem_effective_capacity(corrected_memory, is_control_node=True)
-
-    # Follow same process for CPU capacity constraint
-    cpu_count = get_cpu_count()
-    corrected_cpu = get_corrected_cpu(cpu_count)
-    cpu_capacity = get_cpu_effective_capacity(corrected_cpu, is_control_node=True)
-
-    # Here is what is different from health checks,
-    auto_max = max(mem_capacity, cpu_capacity)
-
-    # add magic number of extra workers to ensure
-    # we have a few extra workers to run the heartbeat
-    auto_max += 7
-
-    return auto_max
-
-
-class AutoscalePool(WorkerPool):
-    """
-    An extended pool implementation that automatically scales workers up and
-    down based on demand
-    """
-
-    pool_cls = StatefulPoolWorker
-
-    def __init__(self, *args, **kwargs):
-        self.max_workers = kwargs.pop('max_workers', None)
-        self.max_worker_lifetime_seconds = kwargs.pop(
-            'max_worker_lifetime_seconds', getattr(settings, 'WORKER_MAX_LIFETIME_SECONDS', 14400)
-        )  # Default to 4 hours
-        super(AutoscalePool, self).__init__(*args, **kwargs)
-
-        if self.max_workers is None:
-            self.max_workers = get_auto_max_workers()
-
-        # max workers can't be less than min_workers
-        self.max_workers = max(self.min_workers, self.max_workers)
-
-        # the task manager enforces settings.TASK_MANAGER_TIMEOUT on its own
-        # but if the task takes longer than the time defined here, we will force it to stop here
-        self.task_manager_timeout = settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD
-
-        # initialize some things for subsystem metrics periodic gathering
-        # the AutoscalePool class does not save these to redis directly, but reports via produce_subsystem_metrics
-        self.scale_up_ct = 0
-        self.worker_count_max = 0
-
-        # last time we wrote current tasks, to avoid too much log spam
-        self.last_task_list_log = time.monotonic()
-
-    def produce_subsystem_metrics(self, metrics_object):
-        metrics_object.set('dispatcher_pool_scale_up_events', self.scale_up_ct)
-        metrics_object.set('dispatcher_pool_active_task_count', sum(len(w.managed_tasks) for w in self.workers))
-        metrics_object.set('dispatcher_pool_max_worker_count', self.worker_count_max)
-        self.worker_count_max = len(self.workers)
-
-    @property
-    def should_grow(self):
-        if len(self.workers) < self.min_workers:
-            # If we don't have at least min_workers, add more
-            return True
-        # If every worker is busy doing something, add more
-        return all([w.busy for w in self.workers])
-
-    @property
-    def full(self):
-        return len(self.workers) == self.max_workers
-
-    @property
-    def debug_meta(self):
-        return 'min={} max={}'.format(self.min_workers, self.max_workers)
-
-    @log_excess_runtime(logger, debug_cutoff=0.05, cutoff=0.2)
-    def cleanup(self):
-        """
-        Perform some internal account and cleanup.  This is run on
-        every cluster node heartbeat:
-
-        1.  Discover worker processes that exited, and recover messages they
-            were handling.
-        2.  Clean up unnecessary, idle workers.
-
-        IMPORTANT: this function is one of the few places in the dispatcher
-        (aside from setting lookups) where we talk to the database.  As such,
-        if there's an outage, this method _can_ throw various
-        django.db.utils.Error exceptions.  Act accordingly.
-        """
-        orphaned = []
-        for w in self.workers[::]:
-            is_retirement_age = self.max_worker_lifetime_seconds is not None and w.age > self.max_worker_lifetime_seconds
-            if not w.alive:
-                # the worker process has exited
-                # 1. take the task it was running and enqueue the error
-                #    callbacks
-                # 2. take any pending tasks delivered to its queue and
-                #    send them to another worker
-                logger.error('worker pid:{} is gone (exit={})'.format(w.pid, w.exitcode))
-                if w.current_task:
-                    if w.current_task == {'task': RETIRED_SENTINEL_TASK}:
-                        logger.debug('scaling down worker pid:{} due to worker age: {}'.format(w.pid, w.age))
-                        self.workers.remove(w)
-                        continue
-                    if w.current_task != 'QUIT':
-                        try:
-                            for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid']):
-                                reaper.reap_job(j, 'failed')
-                        except Exception:
-                            logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
-                    else:
-                        logger.warning(f'Worker was told to quit but has not, pid={w.pid}')
-                orphaned.extend(w.orphaned_tasks)
-                self.workers.remove(w)
-
-            elif w.idle and len(self.workers) > self.min_workers:
-                # the process has an empty queue (it's idle) and we have
-                # more processes in the pool than we need (> min)
-                # send this process a message so it will exit gracefully
-                # at the next opportunity
-                logger.debug('scaling down worker pid:{}'.format(w.pid))
-                w.quit()
-                self.workers.remove(w)
-
-            elif w.idle and is_retirement_age:
-                logger.debug('scaling down worker pid:{} due to worker age: {}'.format(w.pid, w.age))
-                w.quit()
-                self.workers.remove(w)
-
-            elif is_retirement_age and not w.retiring and not w.idle:
-                logger.info(
-                    f"Worker pid:{w.pid} (age: {w.age:.0f}s) exceeded max lifetime ({self.max_worker_lifetime_seconds:.0f}s). "
-                    "Signaling for graceful retirement."
-                )
-                # Send QUIT signal; worker will finish current task then exit.
-                w.quit()
-                # mark as retiring to reject any future tasks that might be assigned in meantime
-                w.retiring = True
-
-            if w.alive:
-                # if we discover a task manager invocation that's been running
-                # too long, reap it (because otherwise it'll just hold the postgres
-                # advisory lock forever); the goal of this code is to discover
-                # deadlocks or other serious issues in the task manager that cause
-                # the task manager to never do more work
-                current_task = w.current_task
-                if current_task and isinstance(current_task, dict):
-                    endings = ('tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager')
-                    current_task_name = current_task.get('task', '')
-                    if current_task_name.endswith(endings):
-                        if 'started' not in current_task:
-                            w.managed_tasks[current_task['uuid']]['started'] = time.time()
-                        age = time.time() - current_task['started']
-                        w.managed_tasks[current_task['uuid']]['age'] = age
-                        if age > self.task_manager_timeout:
-                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGUSR1 to {w.pid}')
-                            os.kill(w.pid, signal.SIGUSR1)
-
-        for m in orphaned:
-            # if all the workers are dead, spawn at least one
-            if not len(self.workers):
-                self.up()
-            idx = random.choice(range(len(self.workers)))
-            self.write(idx, m)
-
-    def add_bind_kwargs(self, body):
-        bind_kwargs = body.pop('bind_kwargs', [])
-        body.setdefault('kwargs', {})
-        if 'dispatch_time' in bind_kwargs:
-            body['kwargs']['dispatch_time'] = tz_now().isoformat()
-        if 'worker_tasks' in bind_kwargs:
-            worker_tasks = {}
-            for worker in self.workers:
-                worker.calculate_managed_tasks()
-                worker_tasks[worker.pid] = list(worker.managed_tasks.keys())
-            body['kwargs']['worker_tasks'] = worker_tasks
-
-    def up(self):
-        if self.full:
-            # if we can't spawn more workers, just toss this message into a
-            # random worker's backlog
-            idx = random.choice(range(len(self.workers)))
-            return idx, self.workers[idx]
-        else:
-            self.scale_up_ct += 1
-            ret = super(AutoscalePool, self).up()
-            new_worker_ct = len(self.workers)
-            if new_worker_ct > self.worker_count_max:
-                self.worker_count_max = new_worker_ct
-            return ret
-
-    @staticmethod
-    def fast_task_serialization(current_task):
-        try:
-            return str(current_task.get('task')) + ' - ' + str(sorted(current_task.get('args', []))) + ' - ' + str(sorted(current_task.get('kwargs', {})))
-        except Exception:
-            # just make sure this does not make things worse
-            return str(current_task)
-
-    def write(self, preferred_queue, body):
-        if 'guid' in body:
-            set_guid(body['guid'])
-        try:
-            if isinstance(body, dict) and body.get('bind_kwargs'):
-                self.add_bind_kwargs(body)
-            if self.should_grow:
-                self.up()
-            # we don't care about "preferred queue" round robin distribution, just
-            # find the first non-busy worker and claim it
-            workers = self.workers[:]
-            random.shuffle(workers)
-            for w in workers:
-                if not w.busy:
-                    w.put(body)
-                    break
-            else:
-                task_name = 'unknown'
-                if isinstance(body, dict):
-                    task_name = body.get('task')
-                logger.warning(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
-                # Once every 10 seconds write out task list for debugging
-                if time.monotonic() - self.last_task_list_log >= 10.0:
-                    task_counts = {}
-                    for worker in self.workers:
-                        task_slug = self.fast_task_serialization(worker.current_task)
-                        task_counts.setdefault(task_slug, 0)
-                        task_counts[task_slug] += 1
-                    logger.info(f'Running tasks by count:\n{json.dumps(task_counts, indent=2)}')
-                    self.last_task_list_log = time.monotonic()
-                return super(AutoscalePool, self).write(preferred_queue, body)
-        except Exception:
-            for conn in connections.all():
-                # If the database connection has a hiccup, re-establish a new
-                # connection
-                conn.close_if_unusable_or_obsolete()
-            logger.exception('failed to write inbound message')

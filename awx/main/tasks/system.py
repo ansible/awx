@@ -622,40 +622,8 @@ def inspect_execution_and_hop_nodes(instance_list):
                     execution_node_health_check.apply_async([hostname])
 
 
-@task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
-def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
-    """
-    Original implementation for AWX dispatcher.
-    Uses worker_tasks from bind_kwargs to track running tasks.
-    """
-    # Run common instance management logic
-    this_inst, instance_list, lost_instances = _heartbeat_instance_management()
-    if this_inst is None:
-        return  # Early return case from instance management
-
-    # Check versions
-    _heartbeat_check_versions(this_inst, instance_list)
-
-    # Handle lost instances
-    _heartbeat_handle_lost_instances(lost_instances, this_inst)
-
-    # Run local reaper - original implementation using worker_tasks
-    if worker_tasks is not None:
-        active_task_ids = []
-        for task_list in worker_tasks.values():
-            active_task_ids.extend(task_list)
-
-        # Convert dispatch_time to datetime
-        ref_time = datetime.fromisoformat(dispatch_time) if dispatch_time else now()
-
-        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
-
-        if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
-            reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
-
-
 @task(queue=get_task_queuename, bind=True)
-def adispatch_cluster_node_heartbeat(binder):
+def cluster_node_heartbeat(binder):
     """
     Dispatcherd implementation.
     Uses Control API to get running tasks.

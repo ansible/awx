@@ -5,7 +5,7 @@ import pytest
 
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
-from awx.main.dispatch.publish import task
+from dispatcherd.publish import task
 
 '''
 Prevent logger.<warn, debug, error> calls from triggering database operations

@@ -454,7 +454,7 @@ for options in CELERYBEAT_SCHEDULE.values():
     task_name = options['task']
     # Handle the only one exception case of the heartbeat which has a new implementation
     if task_name == 'awx.main.tasks.system.cluster_node_heartbeat':
-        task_name = 'awx.main.tasks.system.adispatch_cluster_node_heartbeat'
+        task_name = 'awx.main.tasks.system.cluster_node_heartbeat'
         new_options['task'] = task_name
     new_options['schedule'] = options['schedule'].total_seconds()
     DISPATCHER_SCHEDULE[task_name] = new_options
