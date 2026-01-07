@@ -183,7 +183,7 @@ jobs:
           path: awx-operator
 
       - name: Setup python, referencing action at awx relative path
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
 
@@ -194,7 +194,7 @@ jobs:
       - name: Check Python version
         working-directory: awx
         run: |
-          make print-PYTHON && $(make print-PYTHON) tools/scripts/scm_version.py
+          make print-PYTHON
       
       - name: Build AWX image
         working-directory: awx
