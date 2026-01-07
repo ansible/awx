@@ -36,4 +36,3 @@ class Control(object):
     @classmethod
     def generate_reply_queue_name(cls):
         return f"reply_to_{str(uuid.uuid4()).replace('-','_')}"
-

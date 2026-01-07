@@ -2,7 +2,7 @@ from django.conf import settings
 
 from ansible_base.lib.utils.db import get_pg_notify_params
 from awx.main.dispatch import get_task_queuename
-from awx.main.dispatch.pool import get_auto_max_workers
+from awx.main.utils.common import get_auto_max_workers
 
 
 def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False) -> dict:

@@ -24,7 +24,6 @@ else:
     logger = logging.getLogger('awx.main.dispatch')
 
 
-
 class NoOpResultQueue(object):
     def put(self, item):
         pass
@@ -306,4 +305,3 @@ class WorkerPool(object):
                 os.kill(worker.pid, signum)
         except Exception:
             logger.exception('could not kill {}'.format(worker.pid))
-
