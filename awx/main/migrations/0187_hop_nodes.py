@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='instance',
             name='peers',
-            field=models.ManyToManyField(related_name='peers_from', through='main.InstanceLink', to='main.instance'),
+            field=models.ManyToManyField(related_name='peers_from', through='main.InstanceLink', through_fields=('source', 'target'), to='main.instance'),
         ),
         migrations.AlterField(
             model_name='instancelink',
