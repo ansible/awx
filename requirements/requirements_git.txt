@@ -1,5 +1,24 @@
-git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
-git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
-awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel#egg=awx-plugins-core[credentials-github-app]
-django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest-filters,jwt_consumer,resource-registry,rbac,feature-flags]
-awx_plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
+# Git-based requirements - installed separately from requirements.txt
+#
+# IMPORTANT: Use PEP 440 format that matches pip-compile's normalized output:
+#   name @ git+https://github.com/org/repo.git@branch
+#
+# Format rules:
+#   - Package name MUST match pip's normalized form (hyphens, not dots/underscores)
+#   - Extras go in the package name: pkg[extra1,extra2] @ git+...
+#   - Extras MUST be sorted alphabetically and use hyphens (not underscores)
+#   - Do NOT use the legacy #egg=name format
+#
+# Example:
+#   WRONG: git+https://github.com/org/repo.git@devel#egg=my-package[foo,bar]
+#   WRONG: my_package[bar,foo] @ git+https://github.com/org/repo.git@devel
+#   RIGHT: my-package[bar,foo] @ git+https://github.com/org/repo.git@devel
+#
+# updater.sh uses these lines to comment out matching entries in requirements.txt
+# so they are not installed twice (once from git, once from PyPI).
+#
+certifi @ git+https://github.com/ansible/system-certifi.git@devel
+ansible-runner @ git+https://github.com/ansible/ansible-runner.git@devel
+awx-plugins-core[credentials-github-app] @ git+https://github.com/ansible/awx-plugins.git@devel
+django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel
+awx-plugins-interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
