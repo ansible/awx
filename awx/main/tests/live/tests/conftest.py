@@ -59,9 +59,14 @@ def live_tmp_folder():
     for dirname in os.listdir(path):
         source_dir = os.path.join(path, dirname)
         subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
+    # force invalidation of key before checking it in case it is stale
+    cache.delete_many(['AWX_ISOLATION_SHOW_PATHS'])
     if path not in settings.AWX_ISOLATION_SHOW_PATHS:
+        logger.info(f'Modifying settings.AWX_ISOLATION_SHOW_PATHS for live test: {settings.AWX_ISOLATION_SHOW_PATHS + [path]}')
         settings.AWX_ISOLATION_SHOW_PATHS = settings.AWX_ISOLATION_SHOW_PATHS + [path]
         cache.delete_many(['AWX_ISOLATION_SHOW_PATHS'])
+    else:
+        logger.info(f'Believed that {path} is already in settings.AWX_ISOLATION_SHOW_PATHS: {settings.AWX_ISOLATION_SHOW_PATHS}')
     return path
 
 
