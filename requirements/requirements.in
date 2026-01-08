@@ -41,7 +41,7 @@ opentelemetry-sdk~=1.37
 opentelemetry-instrumentation-logging
 opentelemetry-exporter-otlp
 pexpect
-prometheus_client
+prometheus-client
 psycopg
 psutil
 pygerduty
@@ -66,11 +66,11 @@ uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
 pip==25.3  # see UPGRADE BLOCKERs
 setuptools==80.9.0  # see UPGRADE BLOCKERs
-setuptools_scm[toml]
+setuptools-scm[toml]
 setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 django-flags>=5.0.13
-dispatcherd[pg_notify]  # tasking system, previously part of AWX code base
+dispatcherd[pg-notify]  # tasking system, previously part of AWX code base
 protobuf>=4.25.8 # CVE-2025-4565
 idna>=3.10 # CVE-2024-3651
 # Temporarily added to use ansible-runner from git branch, to be removed
