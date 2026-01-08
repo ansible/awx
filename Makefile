@@ -578,7 +578,7 @@ docker-compose-build: Dockerfile.dev
 docker-compose-buildx: Dockerfile.dev
 	- docker buildx create --name docker-compose-buildx
 	docker buildx use docker-compose-buildx
-	- docker buildx build \
+	docker buildx build \
 		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -638,7 +638,7 @@ awx-kube-build: Dockerfile
 awx-kube-buildx: Dockerfile
 	- docker buildx create --name awx-kube-buildx
 	docker buildx use awx-kube-buildx
-	- docker buildx build \
+	docker buildx build \
 		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg VERSION=$(VERSION) \
@@ -672,7 +672,7 @@ awx-kube-dev-build: Dockerfile.kube-dev
 awx-kube-dev-buildx: Dockerfile.kube-dev
 	- docker buildx create --name awx-kube-dev-buildx
 	docker buildx use awx-kube-dev-buildx
-	- docker buildx build \
+	docker buildx build \
 		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
