@@ -10,6 +10,7 @@ from unittest import mock
 from flags.state import disable_flag, enable_flag
 from django.utils.timezone import now as tz_now
 import pytest
+from queue import Full as QueueFull
 
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
