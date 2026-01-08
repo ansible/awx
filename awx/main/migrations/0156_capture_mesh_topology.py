@@ -38,6 +38,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instance',
             name='peers',
-            field=models.ManyToManyField(through='main.InstanceLink', through_fields=('source', 'target'), to='main.Instance'),
+            field=models.ManyToManyField(through='main.InstanceLink', to='main.Instance'),
         ),
     ]
