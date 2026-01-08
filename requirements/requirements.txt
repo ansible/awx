@@ -43,9 +43,9 @@ autocommand==2.2.2
     # via jaraco-text
 automat==25.4.16
     # via twisted
-# awx-plugins-core @ git+https://github.com/ansible/awx-plugins.git@devel  # git requirements installed separately
+awx-plugins-core[credentials-github-app] @ git+https://github.com/ansible/awx-plugins.git@devel
     # via -r /awx_devel/requirements/requirements_git.txt
-awx-plugins.interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
+awx-plugins-interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
     # via
     #   -r /awx_devel/requirements/requirements_git.txt
     #   awx-plugins-core
@@ -66,8 +66,6 @@ azure-keyvault-keys==4.11.0
     # via azure-keyvault
 azure-keyvault-secrets==4.10.0
     # via azure-keyvault
-backports-tarfile==1.2.0
-    # via jaraco-context
 boto3==1.40.46
     # via -r /awx_devel/requirements/requirements.in
 botocore==1.40.46
@@ -118,7 +116,7 @@ cython==3.1.3
     # via -r /awx_devel/requirements/requirements.in
 daphne==4.2.1
     # via -r /awx_devel/requirements/requirements.in
-dispatcherd[pg_notify]==2025.12.12
+dispatcherd[pg-notify]==2025.12.12
     # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
@@ -136,7 +134,7 @@ django==5.2.8
     #   django-solo
     #   djangorestframework
     #   drf-spectacular
-# django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
+django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel
     # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.9.0
     # via -r /awx_devel/requirements/requirements.in
@@ -208,8 +206,6 @@ idna==3.10
     #   yarl
 importlib-metadata==8.7.0
     # via opentelemetry-api
-importlib-resources==6.5.2
-    # via irc
 incremental==24.7.2
     # via twisted
 inflection==0.5.1
@@ -362,7 +358,9 @@ protobuf==6.32.1
 psutil==7.1.0
     # via -r /awx_devel/requirements/requirements.in
 psycopg==3.2.10
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   dispatcherd
 ptyprocess==0.7.0
     # via pexpect
 pyasn1==0.6.1
