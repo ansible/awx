@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
+    'sphinxcontrib.redoc',
     'notfound.extension',
     'swagger',
 ]
@@ -60,6 +61,19 @@ language = 'en'
 
 locale_dirs = ['locale/']  # path is example but recommended.
 gettext_compact = False  # optional.
+
+redoc = [
+    {
+        'name': 'AWX API Reference',
+        'page': 'open_api/explorer',
+        'spec': 'rst/open_api/schema.json',
+        'embed': True,
+        'opts': {
+            'suppress-warnings': True,
+            'hide-hostname': True,
+        }
+    }
+]
 
 rst_epilog = """
 .. |atapi| replace:: *AWX API Guide*
