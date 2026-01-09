@@ -65,7 +65,7 @@ gettext_compact = False  # optional.
 
 redoc = [
     {
-        'name': 'AWX API Reference',
+        'name': 'AWX OpenAPI Reference',
         'page': 'open_api/explorer',
         'spec': 'rst/open_api/schema.json',
         'embed': True,
