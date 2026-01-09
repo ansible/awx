@@ -1116,12 +1116,6 @@ ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
 ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = False  # System auditor has always been restricted to users
 ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-defined system-wide roles
 
-# Registry for models tracked by the DAB RBAC system (AWX uses permission_registry.register() instead)
-ANSIBLE_BASE_RBAC_MODEL_REGISTRY = {}
-
-# Registry for managed role definitions (AWX manages roles via data migrations)
-ANSIBLE_BASE_MANAGED_ROLE_REGISTRY = {}
-
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
 
