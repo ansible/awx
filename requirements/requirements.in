@@ -60,7 +60,7 @@ requests
 slack-sdk
 twilio
 twisted[tls]>=24.7.0  # CVE-2024-41810
-urllib3<2.4.0, >=1.26.19 # CVE-2024-37891. capped by kubernetes 34.1.0 reqs
+urllib3>=2.6.3 # CVE-2024-37891. capped by kubernetes 34.1.0 reqs
 uWSGI>=2.0.28
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
