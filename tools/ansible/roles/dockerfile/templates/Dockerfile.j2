@@ -8,8 +8,7 @@
 # UI_next build contaienr
 FROM quay.io/centos/centos:stream9 AS ui-builder
 USER root
-RUN dnf -y update && dnf install -y nodejs make git
-RUN npm install -g n && n 18
+RUN dnf -y update && dnf module -y enable nodejs:18 && dnf module -y install nodejs:18/common && dnf install -y make git
 
 COPY . /tmp/src/
 WORKDIR /tmp/src/
@@ -159,7 +158,8 @@ RUN rm -rf /root/.cache && rm -rf /tmp/*
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 # Install development/test requirements
-RUN dnf -y install \
+RUN dnf module -y enable nodejs:18 && dnf module -y install nodejs:18/common && \
+    dnf -y install \
     crun \
     gdb \
     gtk3 \
@@ -174,7 +174,6 @@ RUN dnf -y install \
     vim \
     nmap-ncat \
     libpq-devel \
-    nodejs \
     nss \
     make \
     patch \
@@ -182,8 +181,7 @@ RUN dnf -y install \
     tmux \
     wget \
     diffutils \
-    unzip && \
-    npm install -g n && n 18 && dnf remove -y nodejs
+    unzip
 
 RUN pip3.12 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
 RUN pip3.12 install -vv black setuptools-scm build
