@@ -77,10 +77,29 @@ class CallbackModule(CallbackBase):
                 'version': candidate.ver,
             }
 
-            query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
-            if query_file.exists():
-                with query_file.open('r') as f:
+            # 1. Check for embedded query file (takes precedence)
+            embedded_query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
+            if embedded_query_file.exists():
+                with embedded_query_file.open('r') as f:
                     collection_print['host_query'] = f.read()
+                self._display.vv(f"Using embedded query for {candidate.fqcn} v{candidate.ver}")
+            else:
+                # 2. Check for external query file if no embedded query file was found
+                try:
+                    external_query_file = (
+                        files('ansible_collections.redhat.indirect_accounting')
+                        / 'extensions'
+                        / 'audit'
+                        / 'external_queries'
+                        / f'{candidate.namespace}.{candidate.name}.{candidate.ver}.yml'
+                    )
+                    if external_query_file.exists():
+                        with external_query_file.open('r') as f:
+                            collection_print['host_query'] = f.read()
+                        self._display.v(f"Using external query for {candidate.fqcn} v{candidate.ver}")
+                except ModuleNotFoundError:
+                    # External query collection not installed - no indirect counting for collections without embedded queries
+                    pass
 
             collections_print[candidate.fqcn] = collection_print
 
