@@ -8,10 +8,10 @@ from importlib import import_module
 sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
 
 project = u'Ansible AWX'
-copyright = u'2024, Red Hat'
+copyright = u'2026, Red Hat'
 author = u'Red Hat'
 
-pubdateshort = '2024-11-22'
+pubdateshort = '2026-01-07'
 pubdate = datetime.strptime(pubdateshort, '%Y-%m-%d').strftime('%B %d, %Y')
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -89,3 +89,4 @@ rst_epilog = """
     pubdateshort,
     pubdate,
 )
+
