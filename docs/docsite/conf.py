@@ -1,6 +1,7 @@
 import sys
 import os
 import shlex
+import warnings
 
 from datetime import datetime
 from importlib import import_module
@@ -74,6 +75,14 @@ redoc = [
         }
     }
 ]
+
+# Suppress pkg_resources deprecation from sphinxcontrib-redoc
+warnings.filterwarnings(
+    'ignore',
+    message='pkg_resources is deprecated',
+    category=UserWarning,
+    module='sphinxcontrib.redoc',
+)
 
 rst_epilog = """
 .. |atapi| replace:: *AWX API Guide*
