@@ -17,7 +17,6 @@ Ansible AWX helps teams manage complex multi-tier deployments by adding control,
    contributor/index
    contributor/DJANGO_REQUIREMENTS
    contributor/API_REQUIREMENTS
-   contributor/openapi_link
 
 
 .. toctree::
@@ -25,4 +24,5 @@ Ansible AWX helps teams manage complex multi-tier deployments by adding control,
    :caption: Developers
 
    rest_api/index
+   open_api/index
 
