@@ -7,6 +7,7 @@ import sys
 import yaml
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import connection
 
 from dispatcherd.cli import (
     CONTROL_ARG_SCHEMAS,
@@ -69,6 +70,8 @@ class Command(BaseCommand):
         default_config = os.path.abspath(DEFAULT_CONFIG_FILE)
         if config_path != default_config:
             raise CommandError('The config path CLI option is not allowed for the awx-manage command')
+        if connection.vendor == 'sqlite':
+            raise CommandError('dispatcherctl is not supported with sqlite3; use a PostgreSQL database')
         elif env_config:
             logger.warning(f'Using config from environment variable DISPATCHERD_CONFIG_FILE={env_config}')
             dispatcher_setup()

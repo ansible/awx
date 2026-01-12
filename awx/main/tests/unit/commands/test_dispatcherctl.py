@@ -11,6 +11,7 @@ from awx.main.management.commands import dispatcherctl
 def clear_dispatcher_env(monkeypatch, mocker):
     monkeypatch.delenv('DISPATCHERD_CONFIG_FILE', raising=False)
     mocker.patch.object(dispatcherctl.logging, 'basicConfig')
+    mocker.patch.object(dispatcherctl, 'connection', mocker.Mock(vendor='postgresql'))
 
 
 def test_dispatcherctl_runs_control_with_generated_config(mocker):
@@ -48,6 +49,21 @@ def test_dispatcherctl_rejects_custom_config_path():
         command.handle(
             command='running',
             config='/tmp/dispatcher.yml',
+            expected_replies=1,
+            log_level='INFO',
+        )
+
+
+def test_dispatcherctl_rejects_sqlite_db(mocker):
+    command = dispatcherctl.Command()
+    command.stdout = io.StringIO()
+
+    mocker.patch.object(dispatcherctl, 'connection', mocker.Mock(vendor='sqlite'))
+
+    with pytest.raises(CommandError, match='sqlite3'):
+        command.handle(
+            command='running',
+            config=dispatcherctl.DEFAULT_CONFIG_FILE,
             expected_replies=1,
             log_level='INFO',
         )
