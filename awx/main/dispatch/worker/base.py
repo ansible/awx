@@ -79,10 +79,10 @@ class AWXConsumerRedis(AWXConsumerBase):
 
 
 class BaseWorker(object):
-    def read(self, queue):
-        return queue.get(block=True, timeout=1)
+    def read(self):
+        raise NotImplemented()
 
-    def work_loop(self, queue, finished, idx, *args):
+    def work_loop(self, idx, *args):
         ppid = os.getppid()
         signal_handler = WorkerSignalHandler()
         set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
@@ -92,7 +92,7 @@ class BaseWorker(object):
             if os.getppid() != ppid:
                 break
             try:
-                body = self.read(queue)
+                body = self.read()
                 if body == 'QUIT':
                     break
             except QueueEmpty:
@@ -108,10 +108,7 @@ class BaseWorker(object):
                 self.perform_work(body, *args)
             except Exception:
                 logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
-            finally:
-                if 'uuid' in body:
-                    uuid = body['uuid']
-                    finished.put(uuid)
+
         logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def perform_work(self, body):

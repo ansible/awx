@@ -8,8 +8,8 @@ from django.core.management.base import BaseCommand, CommandError
 import redis.exceptions
 
 from awx.main.analytics.subsystem_metrics import CallbackReceiverMetricsServer
-from awx.main.dispatch.control import Control
 from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
+from awx.main.utils.redis import get_redis_client
 
 
 class Command(BaseCommand):
@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            print(Control('callback_receiver').status())
+            print(self.status())
             return
         consumer = None
 
@@ -46,3 +46,10 @@ class Command(BaseCommand):
             print('Terminating Callback Receiver')
             if consumer:
                 consumer.stop()
+
+    def status(self, *args, **kwargs):
+        r = get_redis_client()
+        workers = []
+        for key in r.keys('awx_callback_receiver_statistics_*'):
+            workers.append(r.get(key).decode('utf-8'))
+        return '\n'.join(workers)

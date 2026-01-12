@@ -86,7 +86,7 @@ class CallbackBrokerWorker(BaseWorker):
         """This needs to be obtained after forking, or else it will give the parent process"""
         return os.getpid()
 
-    def read(self, queue):
+    def read(self):
         has_redis_error = False
         try:
             res = self.redis.blpop(self.queue_name, timeout=1)
