@@ -69,6 +69,11 @@ DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_devel:$(COMPOSE_TAG)
 IMAGE_KUBE_DEV=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_kube_devel:$(COMPOSE_TAG)
 IMAGE_KUBE=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME):$(COMPOSE_TAG)
 
+# quay.io
+QUAY_OWNER ?= aap
+QUAY_TAG_BASE ?= quay.io/$(QUAY_OWNER)
+QUAY_DEVEL_IMAGE_NAME ?= $(QUAY_TAG_BASE)/$(GIT_REPO_NAME)_devel:$(COMPOSE_TAG)
+
 # Common command to use for running ansible-playbook
 ANSIBLE_PLAYBOOK ?= ansible-playbook -e ansible_python_interpreter=$(PYTHON)
 
@@ -619,6 +624,21 @@ docker-compose-buildx: Dockerfile.dev
 		--tag $(DEVEL_IMAGE_NAME) \
 		-f Dockerfile.dev .
 	- docker buildx rm docker-compose-buildx
+
+.PHONY: docker-compose-buildx-quay
+## Build image and push to quay.io only (reuse ghcr.io image)
+docker-compose-buildx-quay: Dockerfile.dev
+	- docker buildx create --name docker-compose-buildx-quay
+	docker buildx use docker-compose-buildx-quay
+	docker buildx build \
+		--ssh default=$(SSH_AUTH_SOCK) \
+		--push \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEVEL_IMAGE_NAME) \
+		--platform=$(PLATFORMS) \
+		--tag $(QUAY_DEVEL_IMAGE_NAME) \
+		-f Dockerfile.dev .
+	- docker buildx rm docker-compose-buildx-quay
 
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)

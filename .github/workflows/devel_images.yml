@@ -3,6 +3,7 @@ name: Build/Push Development Images
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   DOCKER_CACHE: "--no-cache" # using the cache will not rebuild git requirements and other things
+  DOWNSTREAM_REPO: "ansible-automation-platform/tower"
 on:
   workflow_dispatch:
   push:
@@ -59,6 +60,11 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Log in to Quay
+        run: |
+          echo "${{ secrets.QUAY_TOKEN }}" | docker login quay.io -u ${{ secrets.QUAY_USER }} --password-stdin
+        if: github.repository == env.DOWNSTREAM_REPO
+
       - name: Setup node and npm for the new UI build
         uses: actions/setup-node@v2
         with:
@@ -77,3 +83,8 @@ jobs:
       - name: Build and push AWX devel images
         run: |
           make ${{ matrix.build-targets.make-target }}
+
+      - name: Build and push AWX devel image to Quay
+        run: |
+          make docker-compose-buildx-quay
+        if: github.repository == env.DOWNSTREAM_REPO && matrix.build-targets.image-name == 'awx_devel'
