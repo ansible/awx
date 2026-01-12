@@ -57,7 +57,7 @@ jobs:
         env:
           OWNER: '${{ github.repository_owner }}'
 
-      - name: Overwrite DEV_DOCKER_TAG_BASE for tower_devel
+      - name: Overwrite DEV_DOCKER_TAG_BASE to Quay registry
         run: |
           echo "DEV_DOCKER_TAG_BASE=quay.io/${{ env.QUAY_OWNER }}" >> $GITHUB_ENV
         if: matrix.build-targets.image-name == 'tower_devel'
@@ -71,7 +71,7 @@ jobs:
       - name: Log in to Quay
         run: |
           echo "${{ secrets.QUAY_TOKEN }}" | docker login quay.io -u ${{ secrets.QUAY_USER }} --password-stdin
-        if: github.repository == env.DOWNSTREAM_REPO
+        if: matrix.build-targets.image-name == 'tower_devel'
 
       - name: Setup node and npm for the new UI build
         uses: actions/setup-node@v2
