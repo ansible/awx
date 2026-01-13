@@ -27,7 +27,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
-from flags.state import flag_enabled
 
 # REST Framework
 from rest_framework.exceptions import ParseError

@@ -10,8 +10,6 @@ import time
 from queue import Empty as QueueEmpty
 
 from django import db
-from django.conf import settings
-import redis.exceptions
 
 
 from awx.main.utils.redis import get_redis_client

@@ -3,14 +3,8 @@
 import logging
 import logging.config
 import yaml
-import copy
 
-import redis
-
-from django.conf import settings
-from django.db import connection
 from django.core.management.base import BaseCommand, CommandError
-from django.core.cache import cache as django_cache
 
 from dispatcherd.factories import get_control_from_settings
 from dispatcherd import run_service

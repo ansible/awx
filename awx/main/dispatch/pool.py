@@ -1,29 +1,15 @@
 import logging
 import os
-import sys
 import time
-import traceback
-from datetime import datetime, timezone
-from uuid import uuid4
 
-import collections
 from multiprocessing import Process
 from multiprocessing import Queue as MPQueue
-from queue import Full as QueueFull, Empty as QueueEmpty
 
 from django.conf import settings
-from django.db import connection as django_connection, connections
+from django.db import connection as django_connection
 from django.core.cache import cache as django_cache
-from jinja2 import Template
-import psutil
-
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
-
-
-class NoOpResultQueue(object):
-    def put(self, item):
-        pass
 
 
 class PoolWorker(object):

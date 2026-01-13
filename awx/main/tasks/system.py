@@ -9,7 +9,6 @@ import shutil
 import time
 from collections import namedtuple
 from contextlib import redirect_stdout
-from datetime import datetime
 from packaging.version import Version
 from io import StringIO
 
@@ -76,7 +75,6 @@ from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.main.utils.reload import stop_local_services
-from dispatcherd.publish import task
 
 logger = logging.getLogger('awx.main.tasks.system')
 
