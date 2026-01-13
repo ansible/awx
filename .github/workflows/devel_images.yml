@@ -69,7 +69,7 @@ jobs:
 
       - name: Log in to Quay
         run: |
-          echo "${{ secrets.QUAY_TOKEN }}" | docker login quay.io -u ${{ secrets.QUAY_USER }} --password-stdin
+          echo "${{ secrets.QUAY_TOKEN }}" | docker login quay.io -u ${{ vars.QUAY_USER }} --password-stdin
         if: matrix.build-targets.image-name == 'tower_devel'
 
       - name: Setup node and npm for the new UI build
