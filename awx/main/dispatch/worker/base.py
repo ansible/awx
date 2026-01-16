@@ -5,7 +5,6 @@ import os
 import logging
 import signal
 import sys
-import redis
 import time
 from queue import Empty as QueueEmpty
 
@@ -61,14 +60,12 @@ class AWXConsumerBase(object):
     def stop(self, signum, frame):
         self.should_stop = True
         logger.warning('received {}, stopping'.format(signame(signum)))
-        self.worker.on_stop()
         raise SystemExit()
 
 
 class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
-        self.worker.on_start()
         logger.info(f'Callback receiver started with pid={os.getpid()}')
         db.connection.close()  # logs use database, so close connection
 
@@ -90,7 +87,7 @@ class BaseWorker(object):
             if os.getppid() != ppid:
                 break
             try:
-                body = self.read()
+                body = self.read()  # this is only for the callback, only reading from redis.
                 if body == 'QUIT':
                     break
             except QueueEmpty:

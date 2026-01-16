@@ -3,7 +3,6 @@ import os
 import time
 
 from multiprocessing import Process
-from multiprocessing import Queue as MPQueue
 
 from django.conf import settings
 from django.db import connection as django_connection
@@ -57,11 +56,6 @@ class WorkerPool(object):
     As WorkerPool.write(...) is called (generally, by a kombu consumer
     implementation when it receives an AMQP message), messages are passed to
     one of the multiprocessing Queues where some work can be done on them.
-
-    class MessagePrinter(awx.main.dispatch.worker.BaseWorker):
-
-        def perform_work(self, body):
-            print(body)
 
     pool = WorkerPool(min_workers=4)  # spawn four worker processes
     pool.init_workers(MessagePrint().work_loop)

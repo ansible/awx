@@ -4,10 +4,12 @@ import os
 import signal
 import time
 import datetime
+from queue import Empty as QueueEmpty
 
 from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
+from django import db
 from django.db import transaction, connection as django_connection
 from django_guid import set_guid
 
@@ -16,6 +18,7 @@ import psutil
 import redis
 
 from awx.main.utils.redis import get_redis_client
+from awx.main.utils.db import set_connection_name
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
@@ -23,7 +26,7 @@ from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.tasks.system import events_processed_hook
 import awx.main.analytics.subsystem_metrics as s_metrics
-from .base import BaseWorker
+from .base import BaseWorker, WorkerSignalHandler
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
@@ -80,6 +83,35 @@ class CallbackBrokerWorker(BaseWorker):
         self.prof = AWXProfiler("CallbackBrokerWorker")
         for key in self.redis.keys('awx_callback_receiver_statistics_*'):
             self.redis.delete(key)
+
+    def work_loop(self, idx, *args):
+        ppid = os.getppid()
+        signal_handler = WorkerSignalHandler()
+        set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
+        while not signal_handler.kill_now:
+            # if the parent PID changes, this process has been orphaned
+            # via e.g., segfault or sigkill, we should exit too
+            if os.getppid() != ppid:
+                break
+            try:
+                body = self.read()  # this is only for the callback, only reading from redis.
+                if body == 'QUIT':
+                    break
+            except QueueEmpty:
+                continue
+            except Exception:
+                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
+                continue
+            try:
+                for conn in db.connections.all():
+                    # If the database connection has a hiccup during the prior message, close it
+                    # so we can establish a new connection
+                    conn.close_if_unusable_or_obsolete()
+                self.perform_work(body, *args)
+            except Exception:
+                logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
+
+        logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     @cached_property
     def pid(self):

@@ -14,6 +14,7 @@ from io import StringIO
 
 # dispatcherd
 from dispatcherd.factories import get_control_from_settings
+from dispatcherd.publish import task
 
 # Runner
 import ansible_runner.cleanup
@@ -45,9 +46,6 @@ from django.utils.translation import gettext_noop
 # Django flags
 from flags.state import flag_enabled
 from rest_framework.exceptions import PermissionDenied
-
-# Dispatcherd
-from dispatcherd.publish import task
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -125,7 +123,7 @@ def _run_dispatch_startup_common():
     # no-op.
     #
     apply_cluster_membership_policies()
-    cluster_node_heartbeat()
+    cluster_node_heartbeat(None)
     reaper.startup_reaping()
     m = DispatcherMetrics()
     m.reset_values()
@@ -626,6 +624,7 @@ def cluster_node_heartbeat(binder):
     Dispatcherd implementation.
     Uses Control API to get running tasks.
     """
+
     # Run common instance management logic
     this_inst, instance_list, lost_instances = _heartbeat_instance_management()
     if this_inst is None:
@@ -638,6 +637,9 @@ def cluster_node_heartbeat(binder):
     _heartbeat_handle_lost_instances(lost_instances, this_inst)
 
     # Get running tasks using dispatcherd API
+    if binder is None:
+        logger.debug("Heartbeat finished in startup.")
+        return
     active_task_ids = _get_active_task_ids_from_dispatcherd(binder)
     if active_task_ids is None:
         logger.warning("No active task IDs retrieved from dispatcherd, skipping reaper")
