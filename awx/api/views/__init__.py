@@ -547,11 +547,11 @@ class InstanceGroupList(ListCreateAPIView):
     serializer_class = serializers.InstanceGroupSerializer
     resource_purpose = 'instance groups'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of instance groups."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of instance groups."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new instance group."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create an instance group. Instances in this group determine where a job will be executed"})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -884,11 +884,11 @@ class ExecutionEnvironmentList(ListCreateAPIView):
     swagger_topic = "Execution Environments"
     resource_purpose = 'execution environments'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of execution environments."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of execution environments."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment. Once associated with JT/org/etc"})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -915,11 +915,15 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
                     raise PermissionDenied(_("Only the 'pull' field can be edited for managed execution environments."))
         return super().update(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Update all fields of an execution environment. All fields must be provided in the request body."})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Update all fields of an execution environment. All fields must be provided in the request body."}
+    )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Update specific fields of an execution environment. Only the fields you provide will be updated."})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Update specific fields of an execution environment. Only the fields you provide will be updated."}
+    )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
 
@@ -957,7 +961,7 @@ class ProjectList(ListCreateAPIView):
     serializer_class = serializers.ProjectSerializer
     resource_purpose = 'projects'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of projects."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of projects."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1386,7 +1390,7 @@ class CredentialTypeList(ListCreateAPIView):
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential types'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of credential types"})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of credential types"})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1444,7 +1448,7 @@ class CredentialList(ListCreateAPIView):
     serializer_class = serializers.CredentialSerializerCreate
     resource_purpose = 'credentials'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of credentials"})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of credentials"})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1737,7 +1741,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     serializer_class = serializers.HostSerializer
     resource_purpose = 'hosts'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of hosts."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of hosts."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1884,7 +1888,7 @@ class GroupList(ListCreateAPIView):
     serializer_class = serializers.GroupSerializer
     resource_purpose = 'groups'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of groups."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of groups."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -2442,7 +2446,7 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'job templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of job templates."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of job templates."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -3222,7 +3226,7 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'workflow job templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of workflow job templates."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of workflow job templates."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -3498,7 +3502,7 @@ class WorkflowJobList(ListAPIView):
     serializer_class = serializers.WorkflowJobListSerializer
     resource_purpose = 'workflow jobs'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of workflow jobs."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of workflow jobs."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -3527,7 +3531,7 @@ class WorkflowJobCancel(GenericCancelView):
     serializer_class = serializers.WorkflowJobCancelSerializer
     resource_purpose = 'cancel for a workflow job'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a running workflow job"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a running or pending workflow job"})
     def post(self, request, *args, **kwargs):
         r = super().post(request, *args, **kwargs)
         ScheduleWorkflowManager().schedule()
@@ -3648,7 +3652,7 @@ class JobList(ListAPIView):
     serializer_class = serializers.JobListSerializer
     resource_purpose = 'jobs'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of jobs."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -3701,7 +3705,7 @@ class JobCancel(GenericCancelView):
     serializer_class = serializers.JobCancelSerializer
     resource_purpose = 'cancel for a job'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a running job."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a running or pending job"})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -4504,7 +4508,7 @@ class NotificationTemplateList(ListCreateAPIView):
     serializer_class = serializers.NotificationTemplateSerializer
     resource_purpose = 'notification templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A paginated list of notification templates."})
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of notification templates."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -4607,7 +4611,7 @@ class ActivityStreamList(SimpleListAPIView):
 
     @extend_schema_if_available(
         extensions={
-            "x-ai-description": "A paginated list of activity stream entries. An activity stream entry tracks actions or changes that were previously made to the system."
+            "x-ai-description": "A list of activity stream entries. An activity stream entry tracks actions or changes that were previously made to the system."
         }
     )
     def get(self, request, *args, **kwargs):
