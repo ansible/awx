@@ -13,31 +13,9 @@ logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 class PoolWorker(object):
     """
-    Used to track a worker child process and its pending and finished messages.
+    A simple wrapper around a multiprocessing.Process that tracks a worker child process.
 
-    This class makes use of two distinct multiprocessing.Queues to track state:
-
-    - self.queue: this is a queue which represents pending messages that should
-                  be handled by this worker process; as new AMQP messages come
-                  in, a pool will put() them into this queue; the child
-                  process that is forked will get() from this queue and handle
-                  received messages in an endless loop
-    - self.finished: this is a queue which the worker process uses to signal
-                     that it has finished processing a message
-
-    When a message is put() onto this worker, it is tracked in
-    self.managed_tasks.
-
-    Periodically, the worker will call .calculate_managed_tasks(), which will
-    cause messages in self.finished to be removed from self.managed_tasks.
-
-    In this way, self.managed_tasks represents a view of the messages assigned
-    to a specific process.  The message at [0] is the least-recently inserted
-    message, and it represents what the worker is running _right now_
-    (self.current_task).
-
-    A worker is "busy" when it has at least one message in self.managed_tasks.
-    It is "idle" when self.managed_tasks is empty.
+    The worker process runs the provided target function and tracks its creation time.
     """
 
     def __init__(self, target, args, **kwargs):
@@ -53,16 +31,12 @@ class WorkerPool(object):
     """
     Creates a pool of forked PoolWorkers.
 
-    As WorkerPool.write(...) is called (generally, by a kombu consumer
-    implementation when it receives an AMQP message), messages are passed to
-    one of the multiprocessing Queues where some work can be done on them.
+    Each worker process runs the provided target function in an isolated process.
+    The pool manages spawning, tracking, and stopping worker processes.
 
-    pool = WorkerPool(min_workers=4)  # spawn four worker processes
-    pool.init_workers(MessagePrint().work_loop)
-    pool.write(
-        0,  # preferred worker 0
-        'Hello, World!'
-    )
+    Example:
+        pool = WorkerPool(workers_num=4)  # spawn four worker processes
+        pool.init_workers(worker_instance.work_loop)
     """
 
     pool_cls = PoolWorker
