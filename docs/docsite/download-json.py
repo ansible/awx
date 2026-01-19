@@ -16,4 +16,4 @@ for item in downloads:
             file.write(response.content)
         print(f"JSON file downloaded to {filepath}")
     else:
-        print(f"Request failed with status code: {response.status_code})")
+        print(f"Request failed with status code: {response.status_code}")
