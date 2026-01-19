@@ -36,7 +36,6 @@ class WorkerPool(object):
 
     Example:
         pool = WorkerPool(workers_num=4)  # spawn four worker processes
-        pool.init_workers(worker_instance.work_loop)
     """
 
     pool_cls = PoolWorker

@@ -26,7 +26,7 @@ from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.tasks.system import events_processed_hook
 import awx.main.analytics.subsystem_metrics as s_metrics
-from .base import BaseWorker, WorkerSignalHandler
+from .base import WorkerSignalHandler
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
@@ -57,7 +57,7 @@ def job_stats_wrapup(job_identifier, event=None):
         logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
 
 
-class CallbackBrokerWorker(BaseWorker):
+class CallbackBrokerWorker:
     """
     A worker implementation that deserializes callback event data and persists
     it into the database.
@@ -83,35 +83,6 @@ class CallbackBrokerWorker(BaseWorker):
         self.prof = AWXProfiler("CallbackBrokerWorker")
         for key in self.redis.keys('awx_callback_receiver_statistics_*'):
             self.redis.delete(key)
-
-    def work_loop(self, idx, *args):
-        ppid = os.getppid()
-        signal_handler = WorkerSignalHandler()
-        set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
-        while not signal_handler.kill_now:
-            # if the parent PID changes, this process has been orphaned
-            # via e.g., segfault or sigkill, we should exit too
-            if os.getppid() != ppid:
-                break
-            try:
-                body = self.read()  # this is only for the callback, only reading from redis.
-                if body == 'QUIT':
-                    break
-            except QueueEmpty:
-                continue
-            except Exception:
-                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
-                continue
-            try:
-                for conn in db.connections.all():
-                    # If the database connection has a hiccup during the prior message, close it
-                    # so we can establish a new connection
-                    conn.close_if_unusable_or_obsolete()
-                self.perform_work(body, *args)
-            except Exception:
-                logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
-
-        logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     @cached_property
     def pid(self):
@@ -181,10 +152,37 @@ class CallbackBrokerWorker(BaseWorker):
             filepath = self.prof.stop()
             logger.error(f'profiling is disabled, wrote {filepath}')
 
-    def work_loop(self, *args, **kw):
+    def work_loop(self, idx, *args):
         if settings.AWX_CALLBACK_PROFILE:
             signal.signal(signal.SIGUSR1, self.toggle_profiling)
-        return super(CallbackBrokerWorker, self).work_loop(*args, **kw)
+
+        ppid = os.getppid()
+        signal_handler = WorkerSignalHandler()
+        set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
+        while not signal_handler.kill_now:
+            # if the parent PID changes, this process has been orphaned
+            # via e.g., segfault or sigkill, we should exit too
+            if os.getppid() != ppid:
+                break
+            try:
+                body = self.read()  # this is only for the callback, only reading from redis.
+                if body == 'QUIT':
+                    break
+            except QueueEmpty:
+                continue
+            except Exception:
+                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
+                continue
+            try:
+                for conn in db.connections.all():
+                    # If the database connection has a hiccup during the prior message, close it
+                    # so we can establish a new connection
+                    conn.close_if_unusable_or_obsolete()
+                self.perform_work(body, *args)
+            except Exception:
+                logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
+
+        logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def flush(self, force=False):
         now = tz_now()
