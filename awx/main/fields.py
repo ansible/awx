@@ -40,7 +40,6 @@ from awx.main.validators import validate_ssh_private_key
 from awx.main.constants import ENV_BLOCKLIST
 from awx.main import utils
 
-
 __all__ = [
     'JSONBlob',
     'AutoOneToOneField',

@@ -22,7 +22,6 @@ from awx.main.utils.common import memoize
 from awx.urls import get_urlpatterns
 from awx.main.utils.named_url_graph import reset_counters
 
-
 logger = logging.getLogger('awx.main.middleware')
 perf_logger = logging.getLogger('awx.analytics.performance')
 

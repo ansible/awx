@@ -18,7 +18,6 @@ from awx.main.management.commands import inventory_import
 from awx.main.models import Inventory, Host, Group, InventorySource
 from awx.main.utils.mem_inventory import MemGroup
 
-
 TEST_INVENTORY_CONTENT = {
     "_meta": {"hostvars": {}},
     "all": {"children": ["others", "servers", "ungrouped"], "vars": {"vara": "A"}},

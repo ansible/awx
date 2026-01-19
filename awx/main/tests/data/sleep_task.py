@@ -10,7 +10,6 @@ from awx.main.dispatch.publish import task as old_task
 
 from ansible_base.lib.utils.db import advisory_lock
 
-
 logger = logging.getLogger(__name__)
 
 

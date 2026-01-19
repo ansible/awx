@@ -21,7 +21,7 @@ class NullFieldMixin(object):
     """
 
     def validate_empty_values(self, data):
-        (is_empty_value, data) = super(NullFieldMixin, self).validate_empty_values(data)
+        is_empty_value, data = super(NullFieldMixin, self).validate_empty_values(data)
         if is_empty_value and data is None:
             return (False, data)
         return (is_empty_value, data)

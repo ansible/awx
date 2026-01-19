@@ -13,7 +13,6 @@ from awx.api.views import (
     ProjectUpdateEventsList,
 )
 
-
 urls = [
     re_path(r'^$', ProjectUpdateList.as_view(), name='project_update_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', ProjectUpdateDetail.as_view(), name='project_update_detail'),

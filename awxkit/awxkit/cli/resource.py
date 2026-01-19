@@ -8,7 +8,6 @@ from awxkit.api.pages.api import EXPORTABLE_RESOURCES
 from awxkit.cli.format import format_response, add_formatting_import_export
 from awxkit.cli.utils import CustomRegistryMeta
 
-
 CONTROL_RESOURCES = ['ping', 'config', 'me', 'metrics', 'mesh_visualizer']
 
 DEPRECATED_RESOURCES = {

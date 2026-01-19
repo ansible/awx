@@ -15,7 +15,6 @@ from prometheus_client import (
 from django.conf import settings
 from awx.main.utils.redis import get_redis_client, get_redis_client_async
 
-
 BROADCAST_WEBSOCKET_REDIS_KEY_NAME = 'broadcast_websocket_stats'
 
 

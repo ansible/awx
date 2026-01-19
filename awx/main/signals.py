@@ -27,7 +27,6 @@ from django.utils import timezone
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
-
 # AWX
 from awx.main.models import (
     ActivityStream,

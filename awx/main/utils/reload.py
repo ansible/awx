@@ -6,7 +6,6 @@ import subprocess
 import logging
 import os
 
-
 logger = logging.getLogger('awx.main.utils.reload')
 
 

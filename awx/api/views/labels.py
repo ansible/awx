@@ -28,7 +28,7 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
     resource_purpose = 'labels of a resource'
 
     def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = super().unattach_validate(request)
+        sub_id, res = super().unattach_validate(request)
         if res:
             return res
 

@@ -3,7 +3,6 @@ import time
 import yaml
 from datetime import datetime
 
-
 logger = logging.getLogger('awx.main.dispatch.periodic')
 
 

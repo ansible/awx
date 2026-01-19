@@ -5,7 +5,6 @@ import requests
 from awxkit import exceptions as exc
 from awxkit.config import config
 
-
 log = logging.getLogger(__name__)
 
 

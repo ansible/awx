@@ -11,7 +11,6 @@ from django.http import HttpResponse
 
 from rest_framework import status
 
-
 INSTANCE_KWARGS = dict(hostname='example-host', cpu=6, node_type='execution', memory=36000000000, cpu_capacity=6, mem_capacity=42)
 
 

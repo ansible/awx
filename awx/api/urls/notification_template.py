@@ -11,7 +11,6 @@ from awx.api.views import (
     NotificationTemplateCopy,
 )
 
-
 urls = [
     re_path(r'^$', NotificationTemplateList.as_view(), name='notification_template_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', NotificationTemplateDetail.as_view(), name='notification_template_detail'),

@@ -6,7 +6,6 @@ import logging
 import time
 from urllib.parse import urljoin
 
-
 # Django
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -54,7 +53,6 @@ from awx.main.models.mixins import (
     OpaQueryPathMixin,
 )
 from awx.main.constants import JOB_VARIABLE_PREFIXES
-
 
 logger = logging.getLogger('awx.main.models.jobs')
 

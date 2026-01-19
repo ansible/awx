@@ -6,7 +6,6 @@ import datetime
 import logging
 import re
 
-
 # Django
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError

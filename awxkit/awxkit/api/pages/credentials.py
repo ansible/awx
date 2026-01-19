@@ -21,7 +21,6 @@ from .page import exception_from_status_code
 
 from urllib.parse import urljoin
 
-
 log = logging.getLogger(__name__)
 
 

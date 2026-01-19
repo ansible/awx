@@ -11,7 +11,6 @@ from ansible_base.lib.channels.middleware import DrfAuthMiddlewareStack
 from awx.main.utils.redis import get_redis_client
 from . import consumers
 
-
 logger = logging.getLogger('awx.main.routing')
 _application = None
 

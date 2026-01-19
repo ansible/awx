@@ -3,7 +3,6 @@ from contextlib import contextmanager, suppress
 from awxkit import api, exceptions
 from awxkit.config import config
 
-
 __all__ = ('as_user', 'check_related', 'delete_all', 'uses_sessions')
 
 

@@ -14,7 +14,6 @@ from awx.conf.license import get_license
 from ansible_base.lib.utils.db import advisory_lock
 from awx.main.utils.db import bulk_update_sorted_by_id
 
-
 logger = logging.getLogger('awx.main.tasks.host_metrics')
 
 

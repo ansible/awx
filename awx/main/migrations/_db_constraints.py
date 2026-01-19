@@ -2,7 +2,6 @@ import logging
 
 from django.db.models import Count
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -21,7 +21,6 @@ from awx.main.tests import data
 from awx.main.models import Project, JobTemplate, Organization, Inventory
 from awx.main.tasks.system import clear_setting_cache
 
-
 logger = logging.getLogger(__name__)
 
 

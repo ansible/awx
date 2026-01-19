@@ -15,7 +15,6 @@ from awxkit import api, config, utils, exceptions, WSClient  # noqa
 from awxkit.cli.utils import HelpfulArgumentParser, cprint, disable_color, colored
 from awxkit.awx.utils import uses_sessions  # noqa
 
-
 __version__ = _get_version('awxkit')
 
 

@@ -50,7 +50,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id=1))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.attach_validate(mock_request)
+        sub_id, res = serializer.attach_validate(mock_request)
 
         assert sub_id == 1
         assert res is None
@@ -59,12 +59,12 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id='foobar'))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.attach_validate(mock_request)
+        sub_id, res = serializer.attach_validate(mock_request)
 
         assert type(res) is Response
 
     def test_attach_create_and_associate(self, mocker, get_object_or_400, parent_relationship_factory):
-        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        serializer, mock_parent_relationship = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         create_return_value = mocker.MagicMock(status_code=status.HTTP_201_CREATED)
         serializer.create = mocker.Mock(return_value=create_return_value)
 
@@ -75,7 +75,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_parent_relationship.wife.add.assert_called_with(get_object_or_400.return_value)
 
     def test_attach_associate_only(self, mocker, get_object_or_400, parent_relationship_factory):
-        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        serializer, mock_parent_relationship = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         serializer.create = mocker.Mock(return_value=mocker.MagicMock())
 
         mock_request = mocker.MagicMock(data=dict(id=1))
@@ -88,7 +88,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id=1))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.unattach_validate(mock_request)
+        sub_id, res = serializer.unattach_validate(mock_request)
 
         assert sub_id == 1
         assert res is None
@@ -97,7 +97,7 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict(id='foobar'))
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.unattach_validate(mock_request)
+        sub_id, res = serializer.unattach_validate(mock_request)
 
         assert type(res) is Response
 
@@ -105,13 +105,13 @@ class TestSubListCreateAttachDetachAPIView:
         mock_request = mocker.MagicMock(data=dict())
         serializer = SubListCreateAttachDetachAPIView()
 
-        (sub_id, res) = serializer.unattach_validate(mock_request)
+        sub_id, res = serializer.unattach_validate(mock_request)
 
         assert sub_id is None
         assert type(res) is Response
 
     def test_unattach_by_id_ok(self, mocker, parent_relationship_factory, get_object_or_400):
-        (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
+        serializer, mock_parent_relationship = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         mock_request = mocker.MagicMock()
         mock_sub = mocker.MagicMock(name="object to unattach")
         get_object_or_400.return_value = mock_sub

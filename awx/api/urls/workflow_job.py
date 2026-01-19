@@ -14,7 +14,6 @@ from awx.api.views import (
     WorkflowJobActivityStreamList,
 )
 
-
 urls = [
     re_path(r'^$', WorkflowJobList.as_view(), name='workflow_job_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', WorkflowJobDetail.as_view(), name='workflow_job_detail'),
