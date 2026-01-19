@@ -5,6 +5,8 @@ import time
 import logging
 
 import prometheus_client
+import urllib.error
+import urllib.request
 from prometheus_client.core import GaugeMetricFamily, HistogramMetricFamily
 from prometheus_client.registry import CollectorRegistry
 from django.conf import settings
@@ -398,11 +400,6 @@ class DispatcherMetrics(Metrics):
         SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
         SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
         SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
-        # dispatcher subsystem metrics
-        SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
-        SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
-        SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
-        SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -428,10 +425,32 @@ class CallbackReceiverMetrics(Metrics):
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, *args, **kwargs)
 
 
+def _get_dispatcherd_metrics():
+    metrics_cfg = settings.METRICS_SUBSYSTEM_CONFIG.get('server', {}).get(settings.METRICS_SERVICE_DISPATCHER, {})
+    host = metrics_cfg.get('host', 'localhost')
+    port = metrics_cfg.get('port')
+    if not port:
+        return ''
+    url = f"http://{host}:{port}/metrics"
+    try:
+        with urllib.request.urlopen(url, timeout=1.0) as response:
+            payload = response.read()
+            if not payload:
+                return ''
+            return payload.decode('utf-8')
+    except (urllib.error.URLError, UnicodeError) as exc:
+        logger.debug(f"Failed to collect dispatcherd metrics from {url}: {exc}")
+        return ''
+
+
 def metrics(request):
     output_text = ''
-    for m in [DispatcherMetrics(), CallbackReceiverMetrics()]:
-        output_text += m.generate_metrics(request)
+    output_text += DispatcherMetrics().generate_metrics(request)
+    output_text += CallbackReceiverMetrics().generate_metrics(request)
+
+    dispatcherd_metrics = _get_dispatcherd_metrics()
+    if dispatcherd_metrics:
+        output_text += dispatcherd_metrics
     return output_text
 
 
