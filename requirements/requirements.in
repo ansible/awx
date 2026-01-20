@@ -6,6 +6,7 @@ azure-identity
 azure-keyvault
 boto3
 botocore
+cachetools  # Used by awx/conf/settings.py for TTLCache
 channels
 channels-redis
 cryptography
