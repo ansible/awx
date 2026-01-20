@@ -50,7 +50,7 @@ def test_job_capacity_and_with_inactive_node():
     i.save()
     with override_settings(CLUSTER_HOST_ID=i.hostname):
         with mock.patch.object(redis.client.Redis, 'ping', lambda self: True):
-            cluster_node_heartbeat()
+            cluster_node_heartbeat(None)
         i = Instance.objects.get(id=i.id)
         assert i.capacity == 0
 

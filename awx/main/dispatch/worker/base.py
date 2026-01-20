@@ -6,19 +6,14 @@ import logging
 import signal
 import sys
 import time
-from queue import Empty as QueueEmpty
 
 from django import db
 
 
 from awx.main.utils.redis import get_redis_client
 from awx.main.dispatch.pool import WorkerPool
-from awx.main.utils.db import set_connection_name
 
-if 'run_callback_receiver' in sys.argv:
-    logger = logging.getLogger('awx.main.commands.run_callback_receiver')
-else:
-    logger = logging.getLogger('awx.main.dispatch')
+logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
 def signame(sig):

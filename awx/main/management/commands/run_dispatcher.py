@@ -5,6 +5,8 @@ import logging.config
 import yaml
 
 from django.core.management.base import BaseCommand, CommandError
+from django.core.cache import cache as django_cache
+from django.db import connection
 
 from dispatcherd.factories import get_control_from_settings
 from dispatcherd import run_service
@@ -71,3 +73,18 @@ class Command(BaseCommand):
 
         dispatcher_setup(get_dispatcherd_config(for_service=True))
         run_service()
+
+    def configure_dispatcher_logging(self):
+        # Apply special log rule for the parent process
+        special_logging = copy.deepcopy(settings.LOGGING)
+        for handler_name, handler_config in special_logging.get('handlers', {}).items():
+            filters = handler_config.get('filters', [])
+            if 'dynamic_level_filter' in filters:
+                handler_config['filters'] = [flt for flt in filters if flt != 'dynamic_level_filter']
+                logger.info(f'Dispatcherd main process replaced log level filter for {handler_name} handler')
+
+        # Apply the custom logging level here, before the asyncio code starts
+        special_logging.setdefault('loggers', {}).setdefault('dispatcherd', {})
+        special_logging['loggers']['dispatcherd']['level'] = settings.LOG_AGGREGATOR_LEVEL
+
+        logging.config.dictConfig(special_logging)
