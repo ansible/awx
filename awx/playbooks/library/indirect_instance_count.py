@@ -25,7 +25,6 @@ from importlib.resources import files
 
 from ansible.plugins.callback import CallbackBase
 
-
 # NOTE: in Ansible 1.2 or later general logging is available without
 # this plugin, just set ANSIBLE_LOG_PATH as an environment variable
 # or log_path in the DEFAULTS section of your ansible configuration

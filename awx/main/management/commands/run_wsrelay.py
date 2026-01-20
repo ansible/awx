@@ -19,7 +19,6 @@ from awx.main.analytics.broadcast_websocket import (
 from awx.main.analytics.subsystem_metrics import WebsocketsMetricsServer
 from awx.main.wsrelay import WebSocketRelayManager
 
-
 logger = logging.getLogger('awx.main.wsrelay')
 
 

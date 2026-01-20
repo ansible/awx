@@ -9,7 +9,6 @@ from importlib.metadata import entry_points
 import re
 from types import SimpleNamespace
 
-
 # Django
 from django.apps.config import AppConfig
 from django.apps.registry import Apps
@@ -21,7 +20,6 @@ from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.contrib.auth.models import User
-
 
 # DRF
 from rest_framework.serializers import ValidationError as DRFValidationError
@@ -50,11 +48,9 @@ from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
-
 # DAB
 from ansible_base.resource_registry.tasks.sync import get_resource_server_client
 from ansible_base.resource_registry.utils.settings import resource_server_defined
-
 
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
 

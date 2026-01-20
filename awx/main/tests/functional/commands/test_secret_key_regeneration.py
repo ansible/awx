@@ -12,7 +12,6 @@ from awx.conf.models import Setting
 from awx.main.management.commands import regenerate_secret_key
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value
 
-
 PREFIX = '$encrypted$UTF8$AESCBC$'
 
 

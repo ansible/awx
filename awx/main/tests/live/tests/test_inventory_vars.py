@@ -11,7 +11,6 @@ from awx.main.models.organization import Organization
 from awx.main.models.inventory import Inventory, InventorySource
 from awx.main.tests.live.tests.conftest import wait_for_job
 
-
 NAME_PREFIX = "test-ivu"
 GIT_REPO_FOLDER = "inventory_vars"
 

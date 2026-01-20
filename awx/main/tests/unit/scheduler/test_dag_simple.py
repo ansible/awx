@@ -39,6 +39,6 @@ def simple_cycle_1(node_generator):
 
 
 def test_has_cycle(simple_cycle_1):
-    (g, nodes) = simple_cycle_1
+    g, nodes = simple_cycle_1
 
     assert g.has_cycle() is True

@@ -17,7 +17,6 @@ from rest_framework import fields
 from awx.main import models
 from awx.main.exceptions import PolicyEvaluationError
 
-
 # Monkey patching opa_client.base.BaseClient to fix retries and timeout settings
 _original_opa_base_client_init = BaseClient.__init__
 

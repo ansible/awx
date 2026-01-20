@@ -5,7 +5,6 @@ from django.urls import re_path
 
 from awx.api.views import CredentialTypeList, CredentialTypeDetail, CredentialTypeCredentialList, CredentialTypeActivityStreamList, CredentialTypeExternalTest
 
-
 urls = [
     re_path(r'^$', CredentialTypeList.as_view(), name='credential_type_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', CredentialTypeDetail.as_view(), name='credential_type_detail'),

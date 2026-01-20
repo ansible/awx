@@ -4,7 +4,6 @@ from unittest import mock
 
 from awx.main.utils.analytics_proxy import OIDCClient, TokenType, TokenError
 
-
 MOCK_TOKEN_RESPONSE = {
     'access_token': 'bob-access-token',
     'expires_in': 500,

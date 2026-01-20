@@ -95,11 +95,9 @@ from awx.main.models.workflow import (  # noqa
     WorkflowApprovalTemplate,
 )
 
-
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
 from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors  # noqa
-
 
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)

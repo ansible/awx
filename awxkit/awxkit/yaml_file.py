@@ -3,7 +3,6 @@ import yaml
 import glob
 import logging
 
-
 log = logging.getLogger(__name__)
 
 

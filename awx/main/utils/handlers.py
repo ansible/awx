@@ -27,7 +27,6 @@ from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
 
-
 __all__ = ['RSysLogHandler', 'SpecialInventoryHandler', 'ColorHandler']
 
 

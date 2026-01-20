@@ -28,7 +28,6 @@ from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import AskForField
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 
-
 logger = logging.getLogger('awx.main.models.mixins')
 
 

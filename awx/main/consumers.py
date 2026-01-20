@@ -41,10 +41,10 @@ class WebsocketSecretAuthHelper:
     @classmethod
     def verify_secret(cls, s, nonce_tolerance=300):
         try:
-            (prefix, payload) = s.split(' ')
+            prefix, payload = s.split(' ')
             if prefix != 'HMAC-SHA256':
                 raise ValueError('Unsupported encryption algorithm')
-            (nonce_parsed, secret_parsed) = payload.split(':')
+            nonce_parsed, secret_parsed = payload.split(':')
         except Exception:
             raise ValueError("Failed to parse secret")
 
@@ -106,7 +106,7 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         await self.send(event['text'])
 
     async def receive_json(self, data):
-        (group, message) = unwrap_broadcast_msg(data)
+        group, message = unwrap_broadcast_msg(data)
         if group == "metrics":
             message = json.loads(message['text'])
             await self._redis_conn.set(

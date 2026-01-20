@@ -53,7 +53,6 @@ from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
 
-
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
 
 logger = logging.getLogger('awx.main.models.inventory')

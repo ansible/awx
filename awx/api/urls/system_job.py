@@ -5,7 +5,6 @@ from django.urls import re_path
 
 from awx.api.views import SystemJobList, SystemJobDetail, SystemJobCancel, SystemJobNotificationsList, SystemJobEventsList
 
-
 urls = [
     re_path(r'^$', SystemJobList.as_view(), name='system_job_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', SystemJobDetail.as_view(), name='system_job_detail'),

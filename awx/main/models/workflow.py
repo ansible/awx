@@ -45,7 +45,6 @@ from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.utils import ScheduleWorkflowManager
 
-
 __all__ = [
     'WorkflowJobTemplate',
     'WorkflowJob',
@@ -939,7 +938,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
             return
         for nt in self.workflow_job_template.notification_templates["approvals"]:
             try:
-                (notification_subject, notification_body) = self.build_approval_notification_message(nt, approval_status)
+                notification_subject, notification_body = self.build_approval_notification_message(nt, approval_status)
             except Exception:
                 raise NotImplementedError("build_approval_notification_message() does not exist")
 

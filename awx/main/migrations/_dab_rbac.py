@@ -13,7 +13,6 @@ from awx.main.constants import role_name_to_perm_mapping
 
 from ansible_base.rbac.permission_registry import permission_registry
 
-
 logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 

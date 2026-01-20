@@ -2,7 +2,6 @@ import signal
 import functools
 import logging
 
-
 logger = logging.getLogger('awx.main.tasks.signals')
 
 

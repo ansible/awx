@@ -6,7 +6,6 @@ import pytest
 
 from awx_plugins.interfaces._temporary_private_container_api import get_incontainer_path
 
-
 private_data_dir = '/tmp/pdd_iso/awx_xxx'
 
 

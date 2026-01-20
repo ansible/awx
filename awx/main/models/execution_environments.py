@@ -7,7 +7,6 @@ from awx.api.versioning import reverse
 from awx.main.models.base import CommonModel
 from awx.main.validators import validate_container_image_name
 
-
 __all__ = ['ExecutionEnvironment']
 
 

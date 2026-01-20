@@ -18,7 +18,6 @@ from awx.api.views import (
     GroupAdHocCommandsList,
 )
 
-
 urls = [
     re_path(r'^$', GroupList.as_view(), name='group_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', GroupDetail.as_view(), name='group_detail'),

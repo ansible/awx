@@ -9,7 +9,6 @@ import pytest
 import awx
 from awx.main.db.profiled_pg.base import RecordedQueryLog
 
-
 QUERY = {'sql': 'SELECT * FROM main_job', 'time': '.01'}
 EXPLAIN = 'Seq Scan on public.main_job  (cost=0.00..1.18 rows=18 width=86)'
 

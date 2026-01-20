@@ -8,7 +8,6 @@ from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Schedule
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 
-
 RRULE_EXAMPLE = 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
 
 

@@ -24,7 +24,6 @@ from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
 
-
 logger = logging.getLogger('awx.main.models.schedule')
 
 __all__ = ['Schedule']

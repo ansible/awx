@@ -34,7 +34,7 @@ class RegisterQueue:
     def get_create_update_instance_group(self):
         created = False
         changed = False
-        (ig, created) = InstanceGroup.objects.get_or_create(name=self.queuename)
+        ig, created = InstanceGroup.objects.get_or_create(name=self.queuename)
         if ig.policy_instance_percentage != self.instance_percent:
             ig.policy_instance_percentage = self.instance_percent
             changed = True
@@ -91,14 +91,14 @@ class RegisterQueue:
         with advisory_lock('cluster_policy_lock'):
             with transaction.atomic():
                 changed2 = False
-                (ig, created, changed1) = self.get_create_update_instance_group()
+                ig, created, changed1 = self.get_create_update_instance_group()
                 if created:
                     print("Creating instance group {}".format(ig.name))
                 elif not created:
                     print("Instance Group already registered {}".format(ig.name))
 
                 try:
-                    (instances, changed2) = self.add_instances_to_group(ig)
+                    instances, changed2 = self.add_instances_to_group(ig)
                     for i in instances:
                         print("Added instance {} to {}".format(i.hostname, ig.name))
                 except InstanceNotFound as e:

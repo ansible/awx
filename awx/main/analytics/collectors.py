@@ -487,9 +487,7 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                        OR (main_unifiedjob.finished > '{0}' AND main_unifiedjob.finished <= '{1}'))
                                        AND main_unifiedjob.launch_type != 'sync'
                                  ORDER BY main_unifiedjob.id ASC) TO STDOUT WITH CSV HEADER
-                        '''.format(
-        since.isoformat(), until.isoformat()
-    )
+                        '''.format(since.isoformat(), until.isoformat())
     return _copy_table(table='unified_jobs', query=unified_job_query, path=full_path)
 
 
@@ -550,9 +548,7 @@ def workflow_job_node_table(since, full_path, until, **kwargs):
                                  ) always_nodes ON main_workflowjobnode.id = always_nodes.from_workflowjobnode_id
                                  WHERE (main_workflowjobnode.modified > '{}' AND main_workflowjobnode.modified <= '{}')
                                  ORDER BY main_workflowjobnode.id ASC) TO STDOUT WITH CSV HEADER
-                              '''.format(
-        since.isoformat(), until.isoformat()
-    )
+                              '''.format(since.isoformat(), until.isoformat())
     return _copy_table(table='workflow_job_node', query=workflow_job_node_query, path=full_path)
 
 

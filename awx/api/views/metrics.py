@@ -14,7 +14,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
-
 # AWX
 # from awx.main.analytics import collectors
 import awx.main.analytics.subsystem_metrics as s_metrics
@@ -22,7 +21,6 @@ from awx.main.analytics.metrics import metrics
 from awx.api import renderers
 
 from awx.api.generics import APIView
-
 
 logger = logging.getLogger('awx.analytics')
 

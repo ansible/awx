@@ -764,7 +764,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = self.unattach_validate(request)
+        sub_id, res = self.unattach_validate(request)
         if res:
             return res
         return self.unattach_by_id(request, sub_id)

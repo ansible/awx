@@ -14,7 +14,6 @@ from awx.api.views import (
 )
 from awx.api.views.instance_install_bundle import InstanceInstallBundle
 
-
 urls = [
     re_path(r'^$', InstanceList.as_view(), name='instance_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', InstanceDetail.as_view(), name='instance_detail'),

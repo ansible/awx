@@ -32,7 +32,6 @@ from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSeri
 from awx.conf import settings_registry
 from awx.main.utils.external_logging import reconfigure_rsyslog
 
-
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
 
 

@@ -16,7 +16,6 @@ from ansible_base.lib.logging.runtime import log_excess_runtime
 from awx.main.utils.db import bulk_update_sorted_by_id
 from awx.main.models import Host
 
-
 logger = logging.getLogger('awx.main.tasks.facts')
 system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 

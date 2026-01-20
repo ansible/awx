@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 
 from awxkit.config import config
 
-
 log = logging.getLogger(__name__)
 
 

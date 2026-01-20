@@ -2,7 +2,6 @@ from contextlib import suppress
 
 import awxkit.exceptions as exc
 
-
 notification_endpoints = ("notification_templates", "notification_templates_started", "notification_templates_error", "notification_templates_success")
 wfjt_notification_endpoints = notification_endpoints + ('notification_templates_approvals',)
 
