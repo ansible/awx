@@ -62,5 +62,12 @@ class Command(BaseCommand):
             print(yaml.dump(results, default_flow_style=False))
             return
 
+        self.configure_dispatcher_logging()
+        # Close the connection, because the pg_notify broker will create new async connection
+        connection.close()
+        django_cache.close()
+        dispatcher_setup(get_dispatcherd_config(for_service=True))
+        run_service()
+
         dispatcher_setup(get_dispatcherd_config(for_service=True))
         run_service()

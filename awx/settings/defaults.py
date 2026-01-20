@@ -416,11 +416,6 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 
-# If you set this, nothing will ever be sent to pg_notify
-# this is not practical to use, although periodic schedules may still run slugish but functional tasks
-# sqlite3 based tests will use this
-DISPATCHER_MOCK_PUBLISH = False
-
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 REDIS_RETRY_COUNT = 3  # Number of retries for Redis connection errors
 REDIS_BACKOFF_CAP = 1.0  # Maximum backoff delay in seconds for Redis retries

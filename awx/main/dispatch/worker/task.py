@@ -5,7 +5,6 @@ import time
 
 from django_guid import set_guid
 
-
 logger = logging.getLogger('awx.main.dispatch')
 
 

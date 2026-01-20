@@ -8,7 +8,6 @@ LOCAL_SETTINGS = (
     'CACHES',
     'DEBUG',
     'NAMED_URL_GRAPH',
-    'DISPATCHER_MOCK_PUBLISH',
     # Platform flags are managed by the platform flags system and have environment-specific defaults
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED',
 )
