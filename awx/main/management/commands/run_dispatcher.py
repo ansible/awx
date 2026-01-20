@@ -3,7 +3,9 @@
 import logging
 import logging.config
 import yaml
+import copy
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.core.cache import cache as django_cache
 from django.db import connection

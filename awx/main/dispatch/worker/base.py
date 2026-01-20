@@ -4,7 +4,6 @@
 import os
 import logging
 import signal
-import sys
 import time
 
 from django import db
