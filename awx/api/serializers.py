@@ -963,13 +963,13 @@ class UnifiedJobSerializer(BaseSerializer):
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
     class Meta:
-        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-event_processing_finished')
+        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-event_processing_finished', '-artifacts')
 
     def get_field_names(self, declared_fields, info):
         field_names = super(UnifiedJobListSerializer, self).get_field_names(declared_fields, info)
         # Meta multiple inheritance and -field_name options don't seem to be
         # taking effect above, so remove the undesired fields here.
-        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback', 'event_processing_finished'))
+        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback', 'event_processing_finished', 'artifacts'))
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
