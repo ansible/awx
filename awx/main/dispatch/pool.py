@@ -70,7 +70,7 @@ class WorkerPool(object):
         except Exception:
             logger.exception('could not fork')
         else:
-            logger.debug('scaling up worker pid:{}'.format(worker.pid))
+            logger.debug('scaling up worker pid:{}'.format(worker.process.pid))
         return idx, worker
 
     def stop(self, signum):
