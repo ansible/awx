@@ -35,6 +35,7 @@ maturin  # pydantic-core build dep
 msgpack
 msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
+kubernetes>=35.0.0
 openshift
 opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
 opentelemetry-sdk~=1.37
@@ -60,7 +61,7 @@ requests
 slack-sdk
 twilio
 twisted[tls]>=24.7.0  # CVE-2024-41810
-urllib3>=2.6.3 # CVE-2024-37891. capped by kubernetes 34.1.0 reqs
+urllib3>=2.6.3 # CVE-2024-37891
 uWSGI>=2.0.28
 uwsgitop
 wheel>=0.38.1  # CVE-2022-40898
