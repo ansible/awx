@@ -2,7 +2,7 @@ import requests
 
 downloads = [
     {"url": "https://awx-public-ci-files.s3.amazonaws.com/community-docs/swagger.json", "path": "./docs/docsite/rst/rest_api/_swagger/swagger.json"},
-    {"url": "https://s3.amazonaws.com/awx-public-ci-files/devel/schema.json", "path": "./docs/docsite/rst/open_api/schema.json"},
+    {"url": "https://s3.amazonaws.com/awx-public-ci-files/awx/devel/schema.json", "path": "./docs/docsite/rst/open_api/schema.json"},
 ]
 
 for item in downloads:
