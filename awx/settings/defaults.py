@@ -555,6 +555,12 @@ AUTOMATION_ANALYTICS_LAST_GATHER = None
 # Last gathered entries for expensive Analytics
 AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
 
+# Certificate-based authentication settings for Analytics
+AWX_ANALYTICS_CERTIFICATE_DIR = os.path.join(BASE_DIR, 'var', 'lib', 'awx', 'certificates')
+AWX_ANALYTICS_CERTIFICATE_RENEWAL_THRESHOLD_DAYS = 7
+AWX_ANALYTICS_CANDLEPIN_URL = "https://subscription.rhsm.redhat.com/candlepin"
+AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED = True
+
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.
 AD_HOC_COMMANDS = [
