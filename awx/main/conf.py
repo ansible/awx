@@ -794,6 +794,18 @@ register(
 )
 
 register(
+    'AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL',
+    field_class=fields.IntegerField,
+    label=_('Analytics Certificate Renewal Check Interval'),
+    help_text=_('Interval (in seconds) between analytics certificate renewal checks.'),
+    default=86400,  # every 24 hours
+    min_value=3600,  # every 1 hour
+    category=_('System'),
+    category_slug='system',
+    unit=_('seconds'),
+)
+
+register(
     'IS_K8S',
     field_class=fields.BooleanField,
     read_only=True,

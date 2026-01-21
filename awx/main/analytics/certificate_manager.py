@@ -205,8 +205,116 @@ class CandlepinCertificateManager:
         """Check if certificate should be renewed"""
         cert_path, _ = self._get_cached_certificate()
         if not cert_path:
+            logger.debug("No cached certificate found, renewal needed")
             return True
-        return not self._is_certificate_valid(cert_path)
+        
+        if not os.path.exists(cert_path):
+            logger.debug("Certificate file missing, renewal needed")
+            return True
+            
+        is_valid = self._is_certificate_valid(cert_path)
+        if not is_valid:
+            logger.info("Certificate validation failed or expiry approaching, renewal needed")
+        return not is_valid
+    
+    def get_certificate_info(self) -> dict:
+        """Get detailed certificate information for monitoring"""
+        try:
+            cert_path, key_path = self._get_cached_certificate()
+            if not cert_path or not key_path:
+                return {
+                    "status": "missing",
+                    "message": "No certificate found",
+                    "needs_renewal": True
+                }
+            
+            if not os.path.exists(cert_path) or not os.path.exists(key_path):
+                return {
+                    "status": "missing_files",
+                    "message": "Certificate files not found on disk",
+                    "needs_renewal": True,
+                    "cert_path": cert_path,
+                    "key_path": key_path
+                }
+            
+            # Get certificate details
+            cert_info = {
+                "status": "unknown",
+                "cert_path": cert_path,
+                "key_path": key_path,
+                "needs_renewal": self._should_renew_certificate()
+            }
+            
+            try:
+                from cryptography import x509
+                from cryptography.hazmat.backends import default_backend
+                
+                with open(cert_path, 'rb') as f:
+                    cert = x509.load_pem_x509_certificate(f.read(), default_backend())
+                
+                # Extract certificate details
+                renewal_threshold = getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_RENEWAL_THRESHOLD_DAYS', 7)
+                expiry_threshold = datetime.utcnow() + timedelta(days=renewal_threshold)
+                
+                cert_info.update({
+                    "status": "valid" if cert.not_valid_after > expiry_threshold else "expiring_soon",
+                    "subject": cert.subject.rfc4514_string(),
+                    "issuer": cert.issuer.rfc4514_string(),
+                    "not_valid_before": cert.not_valid_before.isoformat(),
+                    "not_valid_after": cert.not_valid_after.isoformat(),
+                    "days_until_expiry": (cert.not_valid_after - datetime.utcnow()).days,
+                    "serial_number": str(cert.serial_number)
+                })
+                
+                if cert.not_valid_after <= datetime.utcnow():
+                    cert_info["status"] = "expired"
+                elif cert.not_valid_after <= expiry_threshold:
+                    cert_info["status"] = "expiring_soon"
+                    
+            except ImportError:
+                # Fallback without cryptography library
+                cert_info["message"] = "Certificate details unavailable (cryptography library not found)"
+                
+            # Add cached consumer info if available
+            consumer_info = cache.get(self.consumer_cache_key)
+            if consumer_info:
+                cert_info.update({
+                    "consumer_uuid": consumer_info.get('uuid'),
+                    "consumer_name": consumer_info.get('name'),
+                    "organization": consumer_info.get('owner', {}).get('key')
+                })
+            
+            return cert_info
+            
+        except Exception as e:
+            logger.error(f"Failed to get certificate info: {e}")
+            return {
+                "status": "error",
+                "message": str(e),
+                "needs_renewal": True
+            }
+    
+    def force_certificate_renewal(self, username: str, password: str) -> bool:
+        """Force certificate renewal regardless of current status"""
+        logger.info("Forcing certificate renewal")
+        try:
+            # Clear existing cache
+            cache.delete(self.cert_cache_key)
+            cache.delete(self.consumer_cache_key)
+            
+            # Generate new certificate
+            cert_path, key_path = self._generate_new_certificate(username, password)
+            
+            if cert_path and key_path:
+                logger.info("Forced certificate renewal successful")
+                return True
+            else:
+                logger.error("Forced certificate renewal failed")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Forced certificate renewal error: {e}")
+            return False
 
 
 # Global certificate manager instance
@@ -228,27 +336,54 @@ def get_or_generate_client_certificate(username: str, password: str) -> Tuple[Op
     return certificate_manager.get_or_generate_client_certificate(username, password)
 
 
+def get_certificate_info() -> dict:
+    """
+    Get detailed certificate information for monitoring and status
+    
+    Returns:
+        Dict with certificate status, expiry, consumer info, and file paths
+    """
+    return certificate_manager.get_certificate_info()
+
+
+def force_certificate_renewal(username: str, password: str) -> bool:
+    """
+    Force certificate renewal regardless of current status
+    
+    Args:
+        username: Red Hat username for authentication
+        password: Red Hat password for authentication
+    
+    Returns:
+        True if renewal successful, False otherwise
+    """
+    return certificate_manager.force_certificate_renewal(username, password)
+
+
 def check_certificate_health() -> dict:
-    """Health check for analytics certificate status"""
-    try:
-        cert_path, key_path = certificate_manager._get_cached_certificate()
-        if cert_path and certificate_manager._is_certificate_valid(cert_path):
-            # Try to extract expiry date for health status
-            try:
-                from cryptography import x509
-                from cryptography.hazmat.backends import default_backend
-                
-                with open(cert_path, 'rb') as f:
-                    cert = x509.load_pem_x509_certificate(f.read(), default_backend())
-                
-                return {
-                    "status": "healthy", 
-                    "cert_expires": cert.not_valid_after.isoformat(),
-                    "cert_path": cert_path
-                }
-            except ImportError:
-                return {"status": "healthy", "cert_path": cert_path}
-        else:
-            return {"status": "warning", "message": "Certificate renewal needed"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    """
+    Health check for analytics certificate status (simplified interface)
+    
+    Returns:
+        Dict with basic health status for monitoring systems
+    """
+    cert_info = certificate_manager.get_certificate_info()
+    
+    # Simplify status for health check interface
+    status_mapping = {
+        "valid": "healthy",
+        "expiring_soon": "warning",
+        "expired": "critical",
+        "missing": "critical",
+        "missing_files": "critical",
+        "error": "critical",
+        "unknown": "warning"
+    }
+    
+    return {
+        "status": status_mapping.get(cert_info.get("status", "unknown"), "warning"),
+        "message": cert_info.get("message", f"Certificate status: {cert_info.get('status', 'unknown')}"),
+        "needs_renewal": cert_info.get("needs_renewal", True),
+        "days_until_expiry": cert_info.get("days_until_expiry"),
+        "cert_path": cert_info.get("cert_path")
+    }

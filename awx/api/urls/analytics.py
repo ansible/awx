@@ -9,6 +9,8 @@ import awx.api.views.analytics as analytics
 urls = [
     re_path(r'^$', analytics.AnalyticsRootView.as_view(), name='analytics_root_view'),
     re_path(r'^authorized/$', analytics.AnalyticsAuthorizedView.as_view(), name='analytics_authorized'),
+    re_path(r'^certificate_health/$', analytics.AnalyticsCertificateHealthView.as_view(), name='analytics_certificate_health'),
+    re_path(r'^certificate_status/$', analytics.AnalyticsCertificateStatusView.as_view(), name='analytics_certificate_status'),
     re_path(r'^reports/$', analytics.AnalyticsReportsList.as_view(), name='analytics_reports_list'),
     re_path(r'^report/(?P<slug>[\w-]+)/$', analytics.AnalyticsReportDetail.as_view(), name='analytics_report_detail'),
     re_path(r'^report_options/$', analytics.AnalyticsReportOptionsList.as_view(), name='analytics_report_options_list'),

@@ -554,6 +554,8 @@ INSIGHTS_TRACKING_STATE = False
 AUTOMATION_ANALYTICS_LAST_GATHER = None
 # Last gathered entries for expensive Analytics
 AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
+# Last certificate renewal check for Analytics
+AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = None
 
 # Certificate-based authentication settings for Analytics
 AWX_ANALYTICS_CERTIFICATE_DIR = os.path.join(BASE_DIR, 'var', 'lib', 'awx', 'certificates')

@@ -435,6 +435,74 @@ def gather_analytics():
 
 
 @task_awx(queue=get_task_queuename)
+def renew_analytics_certificates():
+    """Background task to renew analytics client certificates before expiry"""
+    from awx.main.analytics.certificate_manager import certificate_manager
+    from awx.main.signals import disable_activity_stream
+    
+    logger = logging.getLogger('awx.main.tasks.renew_analytics_certificates')
+    
+    # Check if it's time to check certificates (similar to gather_analytics pattern)
+    if not is_run_threshold_reached(
+        getattr(settings, 'AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK', None), 
+        settings.AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL
+    ):
+        logger.debug("Certificate check interval not reached, skipping")
+        return
+    
+    try:
+        # Check if certificate authentication is enabled
+        if not getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED', True):
+            logger.debug("Certificate authentication disabled, skipping renewal check")
+            with disable_activity_stream():
+                settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
+            return
+        
+        logger.debug("Checking if analytics certificate renewal is needed")
+        
+        # Check if renewal is needed
+        if not certificate_manager._should_renew_certificate():
+            logger.debug("Certificate renewal not needed")
+            with disable_activity_stream():
+                settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
+            return
+            
+        logger.info("Analytics certificate renewal needed, starting renewal process")
+        
+        # Get stored Red Hat credentials
+        rh_id = getattr(settings, 'REDHAT_USERNAME', None)
+        rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
+        
+        if not (rh_id and rh_secret):
+            rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+            rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        
+        if not (rh_id and rh_secret):
+            logger.error("No Red Hat credentials available for certificate renewal")
+            with disable_activity_stream():
+                settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
+            return
+            
+        # Generate new certificate
+        cert_path, key_path = certificate_manager._generate_new_certificate(rh_id, rh_secret)
+        
+        if cert_path and key_path:
+            logger.info("Analytics certificate renewal successful")
+        else:
+            logger.error("Analytics certificate renewal failed")
+            
+    except Exception as e:
+        logger.error(f"Certificate renewal task failed: {e}")
+    finally:
+        # Always update the last check time
+        try:
+            with disable_activity_stream():
+                settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
+        except Exception as e:
+            logger.error(f"Failed to update certificate check timestamp: {e}")
+
+
+@task_awx(queue=get_task_queuename)
 def purge_old_stdout_files():
     nowtime = time.time()
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
