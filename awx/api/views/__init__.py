@@ -60,7 +60,7 @@ from ansible_base.lib.utils.schema import extend_schema_if_available
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset
+from awx.main.access import check_user_access, check_user_access_with_errors, get_user_queryset
 from awx.api.generics import (
     APIView,
     BaseUsersList,
@@ -769,7 +769,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
 
     def get_queryset(self):
         team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(models.Team, 'read', team):
+        if not check_user_access(self.request.user, models.Team, 'read', team):
             raise PermissionDenied()
         return models.Role.filter_visible_roles(self.request.user, team.member_role.children.all().exclude(pk=team.read_role.pk))
 
@@ -850,7 +850,7 @@ class TeamActivityStreamList(SubListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
 
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
 
         return qs.filter(
             Q(team=parent)
@@ -903,7 +903,7 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         fields_to_check = ['name', 'description', 'organization', 'image', 'credential']
-        if instance.managed and request.user.can_access(models.ExecutionEnvironment, 'change', instance):
+        if instance.managed and check_user_access(request.user, models.ExecutionEnvironment, 'change', instance):
             for field in fields_to_check:
                 if kwargs.get('partial') and field not in request.data:
                     continue
@@ -991,7 +991,7 @@ class ProjectTeamsList(ListAPIView):
 
     def get_queryset(self):
         parent = get_object_or_404(models.Project, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(models.Project, 'read', parent):
+        if not check_user_access(self.request.user, models.Project, 'read', parent):
             raise PermissionDenied()
 
         project_ct = ContentType.objects.get_for_model(parent)
@@ -1041,7 +1041,7 @@ class ProjectActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         if parent is None:
             return qs
         elif parent.credential is None:
@@ -1233,7 +1233,7 @@ class UserTeamsList(SubListAPIView):
 
     def get_queryset(self):
         u = get_object_or_404(models.User, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(models.User, 'read', u):
+        if not check_user_access(self.request.user, models.User, 'read', u):
             raise PermissionDenied()
         return models.Team.accessible_objects(self.request.user, 'read_role').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
@@ -1251,7 +1251,7 @@ class UserRolesList(SubListAttachDetachAPIView):
 
     def get_queryset(self):
         u = get_object_or_404(models.User, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(models.User, 'read', u):
+        if not check_user_access(self.request.user, models.User, 'read', u):
             raise PermissionDenied()
         content_type = ContentType.objects.get_for_model(models.User)
 
@@ -1337,7 +1337,7 @@ class UserActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
 
 
@@ -1349,8 +1349,8 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
     def update_filter(self, request, *args, **kwargs):
         '''make sure non-read-only fields that can only be edited by admins, are only edited by admins'''
         obj = self.get_object()
-        can_change = request.user.can_access(models.User, 'change', obj, request.data)
-        can_admin = request.user.can_access(models.User, 'admin', obj, request.data)
+        can_change = check_user_access(request.user, models.User, 'change', obj, request.data)
+        can_admin = check_user_access(request.user, models.User, 'admin', obj, request.data)
 
         su_only_edit_fields = ('is_superuser', 'is_system_auditor')
         admin_only_edit_fields = ('username', 'is_active')
@@ -1373,7 +1373,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        can_delete = request.user.can_access(models.User, 'delete', obj)
+        can_delete = check_user_access(request.user, models.User, 'delete', obj)
         if not can_delete:
             raise PermissionDenied(_('Cannot delete user.'))
         return super(UserDetail, self).destroy(request, *args, **kwargs)
@@ -1478,7 +1478,7 @@ class CredentialOwnerTeamsList(SubListAPIView):
 
     def get_queryset(self):
         credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        if not self.request.user.can_access(models.Credential, 'read', credential):
+        if not check_user_access(self.request.user, models.Credential, 'read', credential):
             raise PermissionDenied()
 
         content_type = ContentType.objects.get_for_model(self.model)
@@ -1835,7 +1835,7 @@ class HostAllGroupsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model).distinct()
+        qs = get_user_queryset(self.request.user, self.model).distinct()
         sublist_qs = parent.all_groups.distinct()
         return qs & sublist_qs
 
@@ -1867,7 +1867,7 @@ class HostActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
 
@@ -1940,7 +1940,7 @@ class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetac
         if sub_id is not None:
             return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
         parent = self.get_parent_object()
-        if not request.user.can_access(self.model, 'delete', parent):
+        if not check_user_access(request.user, self.model, 'delete', parent):
             raise PermissionDenied()
         parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -1965,7 +1965,7 @@ class GroupPotentialChildrenList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         qs = qs.filter(inventory__pk=parent.inventory.pk)
         except_pks = set([parent.pk])
         except_pks.update(parent.all_parents.values_list('pk', flat=True))
@@ -2011,7 +2011,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
+        qs = get_user_queryset(self.request.user, self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
         return qs & sublist_qs
 
@@ -2035,7 +2035,7 @@ class GroupActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         return qs.filter(Q(group=parent) | Q(host__in=parent.hosts.all()))
 
 
@@ -2046,7 +2046,7 @@ class GroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'delete', obj):
+        if not check_user_access(request.user, self.model, 'delete', obj):
             raise PermissionDenied()
         obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -2073,7 +2073,7 @@ class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
+        qs = get_user_queryset(self.request.user, self.model).distinct()  # need distinct for '&' operator
         return qs & parent.root_groups
 
 
@@ -2455,7 +2455,7 @@ class JobTemplateList(ListCreateAPIView):
             if request.user.is_anonymous:
                 self.permission_denied(request)
             else:
-                can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+                can_access, messages = check_user_access_with_errors(request.user, self.model, 'add', request.data)
                 if not can_access:
                     self.permission_denied(request, message=messages)
 
@@ -2540,7 +2540,7 @@ class JobTemplateLaunch(RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not request.user.can_access(models.JobLaunchConfig, 'add', serializer.validated_data, template=obj):
+        if not check_user_access(request.user, models.JobLaunchConfig, 'add', serializer.validated_data, template=obj):
             raise PermissionDenied()
 
         passwords = serializer.validated_data.pop('credential_passwords', {})
@@ -2614,7 +2614,7 @@ class JobTemplateSurveySpec(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        if not request.user.can_access(self.model, 'change', obj, None):
+        if not check_user_access(request.user, self.model, 'change', obj, None):
             raise PermissionDenied()
         response = self._validate_spec_data(request.data, obj.survey_spec)
         if response:
@@ -2773,7 +2773,7 @@ class JobTemplateSurveySpec(GenericAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Delete job template survey specification"})
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'delete', obj):
+        if not check_user_access(request.user, self.model, 'delete', obj):
             raise PermissionDenied()
         obj.survey_spec = {}
         obj.save()
@@ -3173,10 +3173,10 @@ class WorkflowJobTemplateNodeCreateApproval(RetrieveAPIView):
             raise PermissionDenied()
         obj = self.get_object().workflow_job_template
         if request.method == 'POST':
-            if not request.user.can_access(models.WorkflowJobTemplate, 'change', obj, request.data):
+            if not check_user_access(request.user, models.WorkflowJobTemplate, 'change', obj, request.data):
                 self.permission_denied(request)
         else:
-            if not request.user.can_access(models.WorkflowJobTemplate, 'read', obj):
+            if not check_user_access(request.user, models.WorkflowJobTemplate, 'read', obj):
                 self.permission_denied(request)
 
 
@@ -3235,7 +3235,7 @@ class WorkflowJobTemplateList(ListCreateAPIView):
             if request.user.is_anonymous:
                 self.permission_denied(request)
             else:
-                can_access, messages = request.user.can_access_with_errors(self.model, 'add', request.data)
+                can_access, messages = check_user_access_with_errors(request.user, self.model, 'add', request.data)
                 if not can_access:
                     self.permission_denied(request, message=messages)
 
@@ -3257,9 +3257,9 @@ class WorkflowJobTemplateCopy(CopyAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Get workflow job template copy status"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(obj.__class__, 'read', obj):
+        if not check_user_access(request.user, obj.__class__, 'read', obj):
             raise PermissionDenied()
-        can_copy, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
+        can_copy, messages = check_user_access_with_errors(request.user, self.model, 'copy', obj)
         data = OrderedDict(
             [
                 ('can_copy', can_copy),
@@ -3292,14 +3292,14 @@ class WorkflowJobTemplateCopy(CopyAPIView):
                 if item is None:
                     continue
                 elif field_name in ['inventory']:
-                    if not user.can_access(item.__class__, 'use', item):
+                    if not check_user_access(user, item.__class__, 'use', item):
                         setattr(obj, field_name, None)
                 elif field_name in ['unified_job_template']:
-                    if not user.can_access(item.__class__, 'start', item, validate_license=False):
+                    if not check_user_access(user, item.__class__, 'start', item, validate_license=False):
                         setattr(obj, field_name, None)
                 elif field_name in ['credentials']:
                     for cred in item.all():
-                        if not user.can_access(cred.__class__, 'use', cred):
+                        if not check_user_access(user, cred.__class__, 'use', cred):
                             logger.debug('Deep copy: removing {} from relationship due to permissions'.format(cred))
                             item.remove(cred.pk)
             obj.save()
@@ -3354,7 +3354,7 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not request.user.can_access(models.JobLaunchConfig, 'add', serializer.validated_data, template=obj):
+        if not check_user_access(request.user, models.JobLaunchConfig, 'add', serializer.validated_data, template=obj):
             raise PermissionDenied()
 
         new_job = obj.create_unified_job(**serializer.validated_data)
@@ -3376,7 +3376,7 @@ class WorkflowJobRelaunch(GenericAPIView):
 
     def check_object_permissions(self, request, obj):
         if request.method == 'POST' and obj:
-            relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
+            relaunch_perm, messages = check_user_access_with_errors(request.user, self.model, 'start', obj)
             if not relaunch_perm and 'workflow_job_template' in messages:
                 self.permission_denied(request, message=messages['workflow_job_template'])
         return super(WorkflowJobRelaunch, self).check_object_permissions(request, obj)
@@ -3493,7 +3493,7 @@ class WorkflowJobTemplateActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         return qs.filter(Q(workflow_job_template=parent) | Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
@@ -3738,7 +3738,7 @@ class JobRelaunch(RetrieveAPIView):
 
     def check_object_permissions(self, request, obj):
         if request.method == 'POST' and obj:
-            relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
+            relaunch_perm, messages = check_user_access_with_errors(request.user, self.model, 'start', obj)
             if not relaunch_perm and 'detail' in messages:
                 self.permission_denied(request, message=messages['detail'])
         return super(JobRelaunch, self).check_object_permissions(request, obj)
@@ -3845,7 +3845,7 @@ class JobCreateSchedule(RetrieveAPIView):
             labels=set(config.labels.all()),
             instance_groups=list(config.instance_groups.all()),
         )
-        if not request.user.can_access(models.Schedule, 'add', schedule_data):
+        if not check_user_access(request.user, models.Schedule, 'add', schedule_data):
             raise PermissionDenied()
 
         related_fields = ('credentials', 'labels', 'instance_groups')
@@ -3974,7 +3974,7 @@ class HostJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         parent_obj = self.get_parent_object()
         self.check_parent_access(parent_obj)
-        qs = self.request.user.get_queryset(self.model).filter(host=parent_obj)
+        qs = get_user_queryset(self.request.user, self.model).filter(host=parent_obj)
         return qs
 
 
@@ -4533,7 +4533,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Delete a notification template"})
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'delete', obj):
+        if not check_user_access(request.user, self.model, 'delete', obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         hours_old = now() - dateutil.relativedelta.relativedelta(hours=8)
@@ -4732,7 +4732,7 @@ class RoleTeamsList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if not request.user.can_access(self.parent_model, action, role, team, self.relationship, request.data, skip_sub_obj_read_check=False):
+        if not check_user_access(request.user, self.parent_model, action, role, team, self.relationship, request.data, skip_sub_obj_read_check=False):
             raise PermissionDenied()
         if request.data.get('disassociate', None):
             team.member_role.children.remove(role)
@@ -4793,7 +4793,7 @@ class WorkflowApprovalApprove(RetrieveAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Approve a workflow approval"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+        if not check_user_access(request.user, models.WorkflowApproval, 'approve_or_deny', obj):
             raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
         if obj.status != 'pending':
             return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
@@ -4810,7 +4810,7 @@ class WorkflowApprovalDeny(RetrieveAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Deny a workflow approval"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(models.WorkflowApproval, 'approve_or_deny', obj):
+        if not check_user_access(request.user, models.WorkflowApproval, 'approve_or_deny', obj):
             raise PermissionDenied(detail=_("User does not have permission to approve or deny this workflow."))
         if obj.status != 'pending':
             return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)

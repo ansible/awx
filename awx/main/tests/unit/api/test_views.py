@@ -106,7 +106,7 @@ class TestInventoryInventorySourcesUpdate:
         obj = Inventory(inventory_sources=InventorySources(), kind='')
 
         mock_request = mocker.MagicMock()
-        mock_request.user.can_access.return_value = can_access
+        mocker.patch('awx.api.permissions.check_user_access', return_value=can_access)
 
         mocker.patch.object(InventoryInventorySourcesUpdate, 'get_object', return_value=obj)
         mocker.patch.object(InventoryInventorySourcesUpdate, 'get_serializer_context', return_value=None)

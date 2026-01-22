@@ -294,7 +294,7 @@ class BaseAccess(object):
         if skip_sub_obj_read_check:
             return self.can_change(obj, None)
         else:
-            return bool(self.can_change(obj, None) and self.user.can_access(type(sub_obj), 'read', sub_obj))
+            return bool(self.can_change(obj, None) and check_user_access(self.user, type(sub_obj), 'read', sub_obj))
 
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         self.assure_relationship_exists(obj, relationship)
@@ -339,9 +339,9 @@ class BaseAccess(object):
             if role is None:
                 # Handle special case where resource does not have direct roles
                 if role_field == 'read_role':
-                    return self.user.can_access(type(resource), 'read', resource)
+                    return check_user_access(self.user, type(resource), 'read', resource)
                 access_method_type = {'admin_role': 'change', 'execute_role': 'start'}[role_field]
-                return self.user.can_access(type(resource), access_method_type, resource, None)
+                return check_user_access(self.user, type(resource), access_method_type, resource, None)
             return self.user in role
 
         if new and changed and (not user_has_resource_access(new)):
@@ -562,7 +562,7 @@ class InstanceAccess(BaseAccess):
     prefetch_related = ('rampart_groups',)
 
     def filtered_queryset(self):
-        return Instance.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
+        return Instance.objects.filter(rampart_groups__in=get_user_queryset(self.user, InstanceGroup)).distinct()
 
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
@@ -774,7 +774,7 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
     def can_change(self, obj, data):
         if data and data.get('default_environment'):
             ee = get_object_from_data('default_environment', ExecutionEnvironment, data)
-            if not self.user.can_access(ExecutionEnvironment, 'read', ee):
+            if not check_user_access(self.user, ExecutionEnvironment, 'read', ee):
                 return False
 
         return self.user in obj.admin_role
@@ -1019,7 +1019,7 @@ class InventorySourceAccess(NotificationAttachMixin, UnifiedCredentialsMixin, Ba
         return self.check_related('inventory', Inventory, data)
 
     def can_delete(self, obj):
-        if not self.user.is_superuser and not (obj and obj.inventory and self.user.can_access(Inventory, 'admin', obj.inventory, None)):
+        if not self.user.is_superuser and not (obj and obj.inventory and check_user_access(self.user, Inventory, 'admin', obj.inventory, None)):
             return False
         return True
 
@@ -1027,7 +1027,7 @@ class InventorySourceAccess(NotificationAttachMixin, UnifiedCredentialsMixin, Ba
     def can_change(self, obj, data):
         # Checks for admin change permission on inventory.
         if obj and obj.inventory:
-            return self.user.can_access(Inventory, 'change', obj.inventory, None) and self.check_related(
+            return check_user_access(self.user, Inventory, 'change', obj.inventory, None) and self.check_related(
                 'source_project', Project, data, obj=obj, role_field='use_role'
             )
         # Can't change inventory sources attached to only the inventory, since
@@ -1372,7 +1372,7 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
 
         if data.get('default_environment'):
             ee = get_object_from_data('default_environment', ExecutionEnvironment, data)
-            if not self.user.can_access(ExecutionEnvironment, 'read', ee):
+            if not check_user_access(self.user, ExecutionEnvironment, 'read', ee):
                 return False
 
         return self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True) and self.check_related(
@@ -1383,7 +1383,7 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
     def can_change(self, obj, data):
         if data and data.get('default_environment'):
             ee = get_object_from_data('default_environment', ExecutionEnvironment, data, obj=obj)
-            if not self.user.can_access(ExecutionEnvironment, 'read', ee):
+            if not check_user_access(self.user, ExecutionEnvironment, 'read', ee):
                 return False
 
         return (
@@ -2043,7 +2043,7 @@ class WorkflowJobTemplateAccess(NotificationAttachMixin, BaseAccess):
                     if self.user not in cred.use_role:
                         missing_credentials.append(cred.name)
                 ujt = node.unified_job_template
-                if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
+                if ujt and not check_user_access(self.user, UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     missing_ujt.append(ujt.name)
             if missing_ujt:
                 self.messages['templates_unable_to_copy'] = missing_ujt
@@ -2268,8 +2268,8 @@ class AdHocCommandEventAccess(BaseAccess):
 
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
-        ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
-        host_qs = self.user.get_queryset(Host)
+        ad_hoc_command_qs = get_user_queryset(self.user, AdHocCommand)
+        host_qs = get_user_queryset(self.user, Host)
         return qs.filter(Q(host__isnull=True) | Q(host__in=host_qs), ad_hoc_command__in=ad_hoc_command_qs)
 
     def can_add(self, data):
@@ -2295,8 +2295,8 @@ class JobHostSummaryAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        job_qs = self.user.get_queryset(Job)
-        host_qs = self.user.get_queryset(Host)
+        job_qs = get_user_queryset(self.user, Job)
+        host_qs = get_user_queryset(self.user, Host)
         return self.model.objects.filter(job__in=job_qs, host__in=host_qs)
 
     def can_add(self, data):
@@ -2607,7 +2607,7 @@ class NotificationAccess(BaseAccess):
         ).distinct()
 
     def can_delete(self, obj):
-        return self.user.can_access(NotificationTemplate, 'delete', obj.notification_template)
+        return check_user_access(self.user, NotificationTemplate, 'delete', obj.notification_template)
 
 
 class LabelAccess(BaseAccess):
@@ -2886,7 +2886,7 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
             return self.check_related('workflow_approval_template', UnifiedJobTemplate, role_field='admin_role')
 
     def can_change(self, obj, data):
-        return self.user.can_access(WorkflowJobTemplate, 'change', obj.workflow_job_template, data={})
+        return check_user_access(self.user, WorkflowJobTemplate, 'change', obj.workflow_job_template, data={})
 
     def can_start(self, obj, validate_license=False):
         # for copying WFJTs that contain approval nodes

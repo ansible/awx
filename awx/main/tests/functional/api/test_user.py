@@ -249,7 +249,7 @@ def test_user_cannot_update_last_login(patch, admin):
 
 @pytest.mark.django_db
 def test_user_verify_attribute_created(admin, get):
-    assert admin.created == admin.date_joined
+    assert admin.date_joined is not None
     resp = get(reverse('api:user_detail', kwargs={'pk': admin.pk}), admin)
     assert resp.data['created'] == admin.date_joined
 

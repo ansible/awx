@@ -17,6 +17,7 @@ from rest_framework import status
 from rest_framework import serializers
 
 # AWX
+from awx.main.access import check_user_access, get_user_queryset
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
 
 from ansible_base.lib.utils.schema import extend_schema_if_available
@@ -96,7 +97,7 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'delete', obj):
+        if not check_user_access(request.user, self.model, 'delete', obj):
             raise PermissionDenied()
         self.check_related_active_jobs(obj)  # related jobs mixin
         try:
@@ -145,7 +146,7 @@ class InventoryActivityStreamList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
 
 
@@ -187,7 +188,7 @@ class InventoryJobTemplateList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         return qs.filter(inventory=parent)
 
 

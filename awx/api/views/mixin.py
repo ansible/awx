@@ -14,6 +14,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
 
+from awx.main.access import check_user_access
 from awx.main.constants import ACTIVE_STATES
 from awx.main.models import Organization
 from awx.main.utils import get_object_or_400
@@ -34,7 +35,7 @@ class UnifiedJobDeletionMixin(object):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'delete', obj):
+        if not check_user_access(request.user, self.model, 'delete', obj):
             raise PermissionDenied()
         try:
             if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:

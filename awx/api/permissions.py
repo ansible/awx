@@ -257,7 +257,7 @@ class IsSystemAdminOrAuditor(permissions.BasePermission):
 
 class WebhookKeyPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user.can_access(view.model, 'admin', obj, request.data)
+        return check_user_access(request.user, view.model, 'admin', obj, request.data)
 
 
 class AnalyticsPermission(permissions.BasePermission):

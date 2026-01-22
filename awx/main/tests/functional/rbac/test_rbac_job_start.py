@@ -5,7 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from awx.main.models.inventory import Inventory
 from awx.main.models.credential import Credential
 from awx.main.models.jobs import JobTemplate, Job
-from awx.main.access import UnifiedJobAccess, WorkflowJobAccess, WorkflowJobNodeAccess, JobAccess
+from awx.main.access import JobAccess, UnifiedJobAccess, WorkflowJobAccess, WorkflowJobNodeAccess, check_user_access
 
 
 @pytest.mark.django_db
@@ -13,10 +13,10 @@ from awx.main.access import UnifiedJobAccess, WorkflowJobAccess, WorkflowJobNode
 def test_admin_executing_permissions(deploy_jobtemplate, inventory, machine_credential, user):
     admin_user = user('admin-user', True)
 
-    assert admin_user.can_access(Inventory, 'use', inventory)
-    assert admin_user.can_access(Inventory, 'run_ad_hoc_commands', inventory)  # for ad_hoc
-    assert admin_user.can_access(JobTemplate, 'start', deploy_jobtemplate)
-    assert admin_user.can_access(Credential, 'use', machine_credential)
+    assert check_user_access(admin_user, Inventory, 'use', inventory)
+    assert check_user_access(admin_user, Inventory, 'run_ad_hoc_commands', inventory)  # for ad_hoc
+    assert check_user_access(admin_user, JobTemplate, 'start', deploy_jobtemplate)
+    assert check_user_access(admin_user, Credential, 'use', machine_credential)
 
 
 @pytest.mark.django_db
@@ -29,7 +29,7 @@ def test_admin_executing_permissions_with_limits(deploy_jobtemplate, inventory, 
     inventory.hosts.create(name="Existing host 1")
     inventory.hosts.create(name="Existing host 2")
 
-    assert admin_user.can_access(JobTemplate, 'start', deploy_jobtemplate)
+    assert check_user_access(admin_user, JobTemplate, 'start', deploy_jobtemplate)
 
 
 @pytest.mark.django_db
@@ -38,7 +38,7 @@ def test_job_template_start_access(deploy_jobtemplate, user):
     common_user = user('test-user', False)
     deploy_jobtemplate.execute_role.members.add(common_user)
 
-    assert common_user.can_access(JobTemplate, 'start', deploy_jobtemplate)
+    assert check_user_access(common_user, JobTemplate, 'start', deploy_jobtemplate)
 
 
 @pytest.mark.django_db
@@ -47,7 +47,7 @@ def test_credential_use_access(machine_credential, user):
     common_user = user('test-user', False)
     machine_credential.use_role.members.add(common_user)
 
-    assert common_user.can_access(Credential, 'use', machine_credential)
+    assert check_user_access(common_user, Credential, 'use', machine_credential)
 
 
 @pytest.mark.django_db
@@ -56,7 +56,7 @@ def test_inventory_use_access(inventory, user):
     common_user = user('test-user', False)
     inventory.use_role.members.add(common_user)
 
-    assert common_user.can_access(Inventory, 'use', inventory)
+    assert check_user_access(common_user, Inventory, 'use', inventory)
 
 
 @pytest.mark.django_db
@@ -115,7 +115,7 @@ class TestJobRelaunchAccess:
     def test_normal_relaunch_via_job_template(self, job_no_prompts, rando):
         "Has JT execute_role, job unchanged relative to JT"
         job_no_prompts.job_template.execute_role.members.add(rando)
-        assert rando.can_access(Job, 'start', job_no_prompts)
+        assert check_user_access(rando, Job, 'start', job_no_prompts)
 
     def test_orphan_relaunch_via_organization(self, job_no_prompts, rando, organization):
         "JT for job has been deleted, relevant organization roles will allow management"
@@ -123,13 +123,13 @@ class TestJobRelaunchAccess:
         organization.execute_role.members.add(rando)
         job_no_prompts.job_template.delete()
         job_no_prompts.job_template = None  # Django should do this for us, but it does not
-        assert rando.can_access(Job, 'start', job_no_prompts)
+        assert check_user_access(rando, Job, 'start', job_no_prompts)
 
     def test_no_relaunch_without_prompted_fields_access(self, job_with_prompts, rando):
         "Has JT execute_role but no use_role on inventory & credential - deny relaunch"
         job_with_prompts.job_template.execute_role.members.add(rando)
         with pytest.raises(PermissionDenied) as exc:
-            rando.can_access(Job, 'start', job_with_prompts)
+            check_user_access(rando, Job, 'start', job_with_prompts)
         assert 'Job was launched with prompted fields you do not have access to' in str(exc)
 
     def test_can_relaunch_with_prompted_fields_access(self, job_with_prompts, rando):
@@ -139,7 +139,7 @@ class TestJobRelaunchAccess:
             cred.use_role.members.add(rando)
         job_with_prompts.inventory.use_role.members.add(rando)
         job_with_prompts.created_by = rando
-        assert rando.can_access(Job, 'start', job_with_prompts)
+        assert check_user_access(rando, Job, 'start', job_with_prompts)
 
     def test_no_relaunch_after_limit_change(self, inventory, machine_credential, rando):
         "State of the job contradicts the JT state - deny relaunch based on JT execute"
@@ -150,7 +150,7 @@ class TestJobRelaunchAccess:
         jt.save()
         jt.execute_role.members.add(rando)
         with pytest.raises(PermissionDenied):
-            rando.can_access(Job, 'start', job_with_prompts)
+            check_user_access(rando, Job, 'start', job_with_prompts)
 
     def test_can_relaunch_if_limit_was_prompt(self, job_with_prompts, rando):
         "Job state differs from JT, but only on prompted fields - allow relaunch"
@@ -160,4 +160,4 @@ class TestJobRelaunchAccess:
         job_with_prompts.inventory.use_role.members.add(rando)
         for cred in job_with_prompts.credentials.all():
             cred.use_role.members.add(rando)
-        assert rando.can_access(Job, 'start', job_with_prompts)
+        assert check_user_access(rando, Job, 'start', job_with_prompts)

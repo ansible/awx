@@ -27,6 +27,7 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.access import check_user_access
 from awx.main.models import accepts_json, UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
@@ -214,17 +215,17 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         for field_name in self._get_workflow_job_field_names():
             if field_name == 'credentials':
                 for cred in self.credentials.all():
-                    if user.can_access(Credential, 'use', cred):
+                    if check_user_access(user, Credential, 'use', cred):
                         allowed_creds.append(cred)
                 continue
             item = getattr(self, field_name, None)
             if item is None:
                 continue
             if field_name == 'inventory':
-                if not user.can_access(item.__class__, 'use', item):
+                if not check_user_access(user, item.__class__, 'use', item):
                     continue
             if field_name in ['unified_job_template']:
-                if not user.can_access(item.__class__, 'start', item, validate_license=False):
+                if not check_user_access(user, item.__class__, 'start', item, validate_license=False):
                     continue
             create_kwargs[field_name] = item
         create_kwargs['workflow_job_template'] = workflow_job_template

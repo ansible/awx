@@ -44,7 +44,7 @@ from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_heade
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
 from awx.main.models.rbac import give_creator_permissions
-from awx.main.access import optimize_queryset
+from awx.main.access import check_user_access, get_user_queryset, optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
 from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
@@ -429,14 +429,14 @@ class GenericAPIView(generics.GenericAPIView, APIView):
 
 class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
     def get_queryset(self):
-        return self.request.user.get_queryset(self.model)
+        return get_user_queryset(self.request.user, self.model)
 
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.
 
     def get_queryset(self):
-        return self.request.user.get_queryset(self.model)
+        return get_user_queryset(self.request.user, self.model)
 
     def get_description_context(self):
         if 'username' in get_all_field_names(self.model):
@@ -530,7 +530,7 @@ class ParentMixin(object):
             args = (self.parent_model, parent_access, parent)
         else:
             args = (self.parent_model, parent_access, parent, None)
-        if not self.request.user.can_access(*args):
+        if not check_user_access(self.request.user, *args):
             raise PermissionDenied()
 
 
@@ -564,7 +564,7 @@ class SubListAPIView(ParentMixin, ListAPIView):
         self.check_parent_access(parent)
         if not self.filter_read_permission:
             return optimize_queryset(self.get_sublist_queryset(parent))
-        qs = self.request.user.get_queryset(self.model)
+        qs = get_user_queryset(self.request.user, self.model)
         if hasattr(self, 'parent_key'):
             # This is vastly preferable for ReverseForeignKey relationships
             return qs.filter(**{self.parent_key: parent})
@@ -576,7 +576,7 @@ class SubListAPIView(ParentMixin, ListAPIView):
 
 class DestroyAPIView(generics.DestroyAPIView):
     def has_delete_permission(self, obj):
-        return self.request.user.can_access(self.model, 'delete', obj)
+        return check_user_access(self.request.user, self.model, 'delete', obj)
 
     def perform_destroy(self, instance, check_permission=True):
         if check_permission and not self.has_delete_permission(instance):
@@ -593,7 +593,7 @@ class SubListDestroyAPIView(DestroyAPIView, SubListAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance_list = self.get_queryset()
-        if not self.check_sub_obj_permission and not request.user.can_access(self.parent_model, 'delete', self.get_parent_object()):
+        if not self.check_sub_obj_permission and not check_user_access(request.user, self.parent_model, 'delete', self.get_parent_object()):
             raise PermissionDenied()
         self.perform_list_destroy(instance_list)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -645,7 +645,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Verify we have permission to add the object as given.
-        if not request.user.can_access(self.model, 'add', serializer.validated_data):
+        if not check_user_access(request.user, self.model, 'add', serializer.validated_data):
             raise PermissionDenied()
 
         # save the object through the serializer, reload and returned the saved
@@ -709,7 +709,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         sub = get_object_or_400(self.model, pk=sub_id)
 
         # Verify we have permission to attach.
-        if not request.user.can_access(self.parent_model, 'attach', parent, sub, self.relationship, data, skip_sub_obj_read_check=created):
+        if not check_user_access(request.user, self.parent_model, 'attach', parent, sub, self.relationship, data, skip_sub_obj_read_check=created):
             raise PermissionDenied()
 
         # Verify that the relationship to be added is valid.
@@ -748,7 +748,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         relationship = getattrd(parent, self.relationship)
         sub = get_object_or_400(self.model, pk=sub_id)
 
-        if not request.user.can_access(self.parent_model, 'unattach', parent, sub, self.relationship, request.data):
+        if not check_user_access(request.user, self.parent_model, 'unattach', parent, sub, self.relationship, request.data):
             raise PermissionDenied()
 
         # Verify that removing the relationship is valid.
@@ -978,13 +978,13 @@ class CopyAPIView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(obj.__class__, 'read', obj):
+        if not check_user_access(request.user, obj.__class__, 'read', obj):
             raise PermissionDenied()
         create_kwargs = self._build_create_dict(obj)
         for key in create_kwargs:
             create_kwargs[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
         try:
-            can_copy = request.user.can_access(self.model, 'add', create_kwargs) and request.user.can_access(self.model, 'copy_related', obj)
+            can_copy = check_user_access(request.user, self.model, 'add', create_kwargs) and check_user_access(request.user, self.model, 'copy_related', obj)
         except PermissionDenied:
             return Response({'can_copy': False})
         return Response({'can_copy': can_copy})
@@ -995,9 +995,9 @@ class CopyAPIView(GenericAPIView):
         create_kwargs_check = {}
         for key in create_kwargs:
             create_kwargs_check[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
-        if not request.user.can_access(self.model, 'add', create_kwargs_check):
+        if not check_user_access(request.user, self.model, 'add', create_kwargs_check):
             raise PermissionDenied()
-        if not request.user.can_access(self.model, 'copy_related', obj):
+        if not check_user_access(request.user, self.model, 'copy_related', obj):
             raise PermissionDenied()
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():

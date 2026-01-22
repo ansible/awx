@@ -47,7 +47,7 @@ from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
 
 # AWX
-from awx.main.access import get_user_capabilities
+from awx.main.access import check_user_access, get_user_capabilities, get_user_queryset
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 from awx.main.models import (
     ActivityStream,
@@ -2158,7 +2158,8 @@ class BulkHostDeleteSerializer(serializers.Serializer):
             )
 
         # Getting list of all host objects, filtered by the list of the hosts to delete
-        attrs['host_qs'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts']).only('id', 'inventory_id', 'name')
+        host_base_qs = get_user_queryset(request.user, Host) if request else Host.objects.all()
+        attrs['host_qs'] = host_base_qs.filter(pk__in=attrs['hosts']).only('id', 'inventory_id', 'name')
 
         # Converting the queryset data in a dict. to reduce the number of queries when
         # manipulating the data
@@ -2179,7 +2180,8 @@ class BulkHostDeleteSerializer(serializers.Serializer):
 
         # Checking that the user have permission to all inventories
         errors = dict()
-        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list):
+        inv_base_qs = get_user_queryset(request.user, Inventory) if request else Inventory.objects.all()
+        for inv in inv_base_qs.filter(pk__in=inv_list):
             if request and not request.user.is_superuser:
                 if request.user not in inv.admin_role:
                     errors[inv.name] = "Lack permissions to delete hosts from this inventory."
@@ -2188,7 +2190,7 @@ class BulkHostDeleteSerializer(serializers.Serializer):
 
         # check the inventory type only if the user have permission to it.
         errors = dict()
-        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list):
+        for inv in inv_base_qs.filter(pk__in=inv_list):
             if inv.kind != '':
                 errors[inv.name] = "Hosts can only be deleted from manual inventories."
         if errors != {}:
@@ -2731,7 +2733,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 pass
             if role.content_type is not None:
                 role_dict['user_capabilities'] = {
-                    'unattach': requesting_user.can_access(Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)
+                    'unattach': check_user_access(requesting_user, Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)
                 }
             else:
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
@@ -2765,7 +2767,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     role_dict['resource_type'] = get_type_for_model(role.content_type.model_class())
                     role_dict['related'] = reverse_gfk(role.content_object, self.context.get('request'))
                     role_dict['user_capabilities'] = {
-                        'unattach': requesting_user.can_access(Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)
+                        'unattach': check_user_access(requesting_user, Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)
                     }
                 else:
                     # Singleton roles should not be managed from this view, as per copy/edit rework spec
@@ -3958,7 +3960,7 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
 
     def get_can_approve_or_deny(self, obj):
         request = self.context.get('request', None)
-        allowed = request.user.can_access(WorkflowApproval, 'approve_or_deny', obj)
+        allowed = check_user_access(request.user, WorkflowApproval, 'approve_or_deny', obj)
         return allowed is True and obj.status == 'pending'
 
     def get_related(self, obj):
@@ -4946,7 +4948,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             return
         user = self.context['request'].user
         if role_field is None:  # implies "read" level permission is required
-            access_qs = user.get_queryset(model)
+            access_qs = get_user_queryset(user, model)
         else:
             access_qs = model.accessible_objects(user, role_field)
 
