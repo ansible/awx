@@ -224,6 +224,22 @@ jobs:
           AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
 
+      - name: Collect awx-operator logs on failure/timeout
+        if: steps.awx_operator_test.outcome != 'success'
+        run: |
+          mkdir -p "$DEBUG_OUTPUT_DIR"
+          if command -v kind >/dev/null 2>&1; then
+            for cluster in $(kind get clusters 2>/dev/null); do
+              kind export logs "$DEBUG_OUTPUT_DIR/$cluster" --name "$cluster" || true
+            done
+          fi
+          if command -v kubectl >/dev/null 2>&1; then
+            kubectl get all -A -o wide > "$DEBUG_OUTPUT_DIR/kubectl-get-all.txt" || true
+            kubectl get pods -A -o wide > "$DEBUG_OUTPUT_DIR/kubectl-get-pods.txt" || true
+            kubectl describe pods -A > "$DEBUG_OUTPUT_DIR/kubectl-describe-pods.txt" || true
+          fi
+          docker ps -a > "$DEBUG_OUTPUT_DIR/docker-ps.txt" || true
+
       - name: Upload debug output
         if: always()
         uses: actions/upload-artifact@v4
