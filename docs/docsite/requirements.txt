@@ -16,7 +16,7 @@ charset-normalizer==3.4.0
     # via requests
 docutils==0.21.2
     # via
-    #   -r docs/docsite/requirements.in
+    #   -r requirements.in
     #   sphinx
     #   sphinx-rtd-theme
 idna==3.10
@@ -25,7 +25,7 @@ imagesize==1.4.1
     # via sphinx
 jinja2==3.1.4
     # via
-    #   -r docs/docsite/requirements.in
+    #   -r requirements.in
     #   sphinx
 markupsafe==3.0.2
     # via jinja2
@@ -35,23 +35,23 @@ pygments==2.18.0
     # via
     #   ansible-pygments
     #   sphinx
-pyyaml==6.0.2
-    # via -r docs/docsite/requirements.in
+pyyaml==6.0.3
+    # via -r requirements.in
 requests==2.32.3
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
 sphinx==8.1.3
     # via
-    #   -r docs/docsite/requirements.in
+    #   -r requirements.in
     #   sphinx-ansible-theme
     #   sphinx-notfound-page
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
 sphinx-ansible-theme==0.10.3
-    # via -r docs/docsite/requirements.in
+    # via -r requirements.in
 sphinx-notfound-page==1.0.4
-    # via -r docs/docsite/requirements.in
+    # via -r requirements.in
 sphinx-rtd-theme==3.0.2
     # via sphinx-ansible-theme
 sphinxcontrib-applehelp==2.0.0
