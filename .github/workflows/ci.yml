@@ -208,7 +208,7 @@ jobs:
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         id: awx_operator_test
-        timeout-minutes: 1
+        timeout-minutes: 55
         continue-on-error: true
         run: |
           python -m pip install -r molecule/requirements.txt
@@ -224,8 +224,9 @@ jobs:
           AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
 
-      - name: Collect awx-operator logs on failure/timeout
-        if: steps.awx_operator_test.outcome != 'success'
+      - name: Collect awx-operator logs on timeout
+        # Only run on timeout; normal failures should use molecule's built-in log collection.
+        if: steps.awx_operator_test.outcome == 'cancelled'
         run: |
           mkdir -p "$DEBUG_OUTPUT_DIR"
           if command -v kind >/dev/null 2>&1; then
