@@ -207,6 +207,9 @@ jobs:
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
+        id: awx_operator_test
+        timeout-minutes: 1
+        continue-on-error: true
         run: |
           python -m pip install -r molecule/requirements.txt
           python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
@@ -222,11 +225,15 @@ jobs:
           STORE_DEBUG_OUTPUT: true
 
       - name: Upload debug output
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: awx-operator-debug-output
           path: ${{ env.DEBUG_OUTPUT_DIR }}
+
+      - name: Fail awx-operator check if test deployment failed
+        if: steps.awx_operator_test.outcome != 'success'
+        run: exit 1
 
   collection-sanity:
     name: awx_collection sanity
