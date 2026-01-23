@@ -366,9 +366,7 @@ class ApiV2ConfigView(APIView):
 
         return Response(data)
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Upload a subscription manifest'},
-    )
+    @extend_schema_if_available(extensions={"x-ai-description": "Add or update a subscription manifest license"})
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid subscription data")}, status=status.HTTP_400_BAD_REQUEST)

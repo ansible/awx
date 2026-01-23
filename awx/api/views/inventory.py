@@ -73,6 +73,10 @@ class InventoryList(ListCreateAPIView):
     serializer_class = InventorySerializer
     resource_purpose = 'inventories'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of inventories."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = Inventory

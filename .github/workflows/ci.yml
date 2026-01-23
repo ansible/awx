@@ -207,26 +207,58 @@ jobs:
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
+        id: awx_operator_test
+        timeout-minutes: 60
+        continue-on-error: true
         run: |
-          python -m pip install -r molecule/requirements.txt
-          python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
-          $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
-          ansible-galaxy collection install -r molecule/requirements.yml
-          sudo rm -f $(which kustomize)
-          make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
+          set +e
+          timeout 54m bash -elc '
+            python -m pip install -r molecule/requirements.txt
+            python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
+            $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
+            ansible-galaxy collection install -r molecule/requirements.yml
+            sudo rm -f $(which kustomize)
+            make kustomize
+            KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
+          '
+          rc=$?
+          if [ $rc -eq 124 ]; then
+            echo "timed_out=true" >> "$GITHUB_OUTPUT"
+          fi
+          exit $rc
         env:
           AWX_TEST_IMAGE: local/awx
           AWX_TEST_VERSION: ci
           AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
 
+      - name: Collect awx-operator logs on timeout
+        # Only run on timeout; normal failures should use molecule's built-in log collection.
+        if: steps.awx_operator_test.outputs.timed_out == 'true'
+        run: |
+          mkdir -p "$DEBUG_OUTPUT_DIR"
+          if command -v kind >/dev/null 2>&1; then
+            for cluster in $(kind get clusters 2>/dev/null); do
+              kind export logs "$DEBUG_OUTPUT_DIR/$cluster" --name "$cluster" || true
+            done
+          fi
+          if command -v kubectl >/dev/null 2>&1; then
+            kubectl get all -A -o wide > "$DEBUG_OUTPUT_DIR/kubectl-get-all.txt" || true
+            kubectl get pods -A -o wide > "$DEBUG_OUTPUT_DIR/kubectl-get-pods.txt" || true
+            kubectl describe pods -A > "$DEBUG_OUTPUT_DIR/kubectl-describe-pods.txt" || true
+          fi
+          docker ps -a > "$DEBUG_OUTPUT_DIR/docker-ps.txt" || true
+
       - name: Upload debug output
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: awx-operator-debug-output
           path: ${{ env.DEBUG_OUTPUT_DIR }}
+
+      - name: Fail awx-operator check if test deployment failed
+        if: steps.awx_operator_test.outcome != 'success'
+        run: exit 1
 
   collection-sanity:
     name: awx_collection sanity
