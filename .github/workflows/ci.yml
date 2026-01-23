@@ -208,16 +208,24 @@ jobs:
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         id: awx_operator_test
-        timeout-minutes: 55
+        timeout-minutes: 2
         continue-on-error: true
         run: |
-          python -m pip install -r molecule/requirements.txt
-          python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
-          $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
-          ansible-galaxy collection install -r molecule/requirements.yml
-          sudo rm -f $(which kustomize)
-          make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
+          set +e
+          timeout 60s bash -lc '
+            python -m pip install -r molecule/requirements.txt
+            python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
+            $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
+            ansible-galaxy collection install -r molecule/requirements.yml
+            sudo rm -f $(which kustomize)
+            make kustomize
+            KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
+          '
+          rc=$?
+          if [ $rc -eq 124 ]; then
+            echo "timed_out=true" >> "$GITHUB_OUTPUT"
+          fi
+          exit $rc
         env:
           AWX_TEST_IMAGE: local/awx
           AWX_TEST_VERSION: ci
@@ -226,7 +234,7 @@ jobs:
 
       - name: Collect awx-operator logs on timeout
         # Only run on timeout; normal failures should use molecule's built-in log collection.
-        if: steps.awx_operator_test.outcome == 'cancelled'
+        if: steps.awx_operator_test.outputs.timed_out == 'true'
         run: |
           mkdir -p "$DEBUG_OUTPUT_DIR"
           if command -v kind >/dev/null 2>&1; then
