@@ -93,7 +93,10 @@ def _run_dispatch_startup_common():
 
     # TODO: Enable this on VM installs
     if settings.IS_K8S:
-        write_receptor_config()
+        try:
+            write_receptor_config()
+        except Exception:
+            logger.exception("Failed to write receptor config, skipping.")
 
     try:
         convert_jsonfields()
