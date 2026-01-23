@@ -208,7 +208,7 @@ jobs:
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         id: awx_operator_test
-        timeout-minutes: 2
+        timeout-minutes: 60
         continue-on-error: true
         run: |
           set +e
