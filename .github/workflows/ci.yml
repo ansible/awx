@@ -212,7 +212,7 @@ jobs:
         continue-on-error: true
         run: |
           set +e
-          timeout 60s bash -lc '
+          timeout 54m bash -lc '
             python -m pip install -r molecule/requirements.txt
             python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
             $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)
