@@ -7,7 +7,6 @@ import os
 import re  # noqa
 import tempfile
 import socket
-from datetime import timedelta
 
 DEBUG = True
 SQL_DEBUG = DEBUG
