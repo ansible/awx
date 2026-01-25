@@ -7,7 +7,6 @@ import os
 import re  # noqa
 import tempfile
 import socket
-from datetime import timedelta
 
 DEBUG = True
 SQL_DEBUG = DEBUG
@@ -416,48 +415,33 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 
-# If you set this, nothing will ever be sent to pg_notify
-# this is not practical to use, although periodic schedules may still run slugish but functional tasks
-# sqlite3 based tests will use this
-DISPATCHER_MOCK_PUBLISH = False
-
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 REDIS_RETRY_COUNT = 3  # Number of retries for Redis connection errors
 REDIS_BACKOFF_CAP = 1.0  # Maximum backoff delay in seconds for Redis retries
 REDIS_BACKOFF_BASE = 0.5  # Base for exponential backoff calculation for Redis retries
-CELERYBEAT_SCHEDULE = {
-    'tower_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': timedelta(seconds=30), 'options': {'expires': 20}},
-    'cluster_heartbeat': {
+
+DISPATCHER_SCHEDULE = {
+    'awx.main.tasks.system.awx_periodic_scheduler': {'task': 'awx.main.tasks.system.awx_periodic_scheduler', 'schedule': 30, 'options': {'expires': 20}},
+    'awx.main.tasks.system.cluster_node_heartbeat': {
         'task': 'awx.main.tasks.system.cluster_node_heartbeat',
-        'schedule': timedelta(seconds=CLUSTER_NODE_HEARTBEAT_PERIOD),
+        'schedule': CLUSTER_NODE_HEARTBEAT_PERIOD,
         'options': {'expires': 50},
     },
-    'gather_analytics': {'task': 'awx.main.tasks.system.gather_analytics', 'schedule': timedelta(minutes=5)},
-    'task_manager': {'task': 'awx.main.scheduler.tasks.task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
-    'dependency_manager': {'task': 'awx.main.scheduler.tasks.dependency_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
-    'k8s_reaper': {'task': 'awx.main.tasks.system.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
-    'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
-    'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
-    'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
-    'cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
-    'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
-    'periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': timedelta(minutes=15)},
-    'cleanup_and_save_indirect_host_entries_fallback': {
+    'awx.main.tasks.system.gather_analytics': {'task': 'awx.main.tasks.system.gather_analytics', 'schedule': 300},
+    'awx.main.scheduler.tasks.task_manager': {'task': 'awx.main.scheduler.tasks.task_manager', 'schedule': 20, 'options': {'expires': 20}},
+    'awx.main.scheduler.tasks.dependency_manager': {'task': 'awx.main.scheduler.tasks.dependency_manager', 'schedule': 20, 'options': {'expires': 20}},
+    'awx.main.tasks.system.awx_k8s_reaper': {'task': 'awx.main.tasks.system.awx_k8s_reaper', 'schedule': 60, 'options': {'expires': 50}},
+    'awx.main.tasks.system.awx_receptor_workunit_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': 60},
+    'awx.main.analytics.analytics_tasks.send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': 20},
+    'awx.main.tasks.system.cleanup_images_and_files': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': 10800},
+    'awx.main.tasks.host_metrics.cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': 12600},
+    'awx.main.tasks.host_metrics.host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': 14400},
+    'awx.main.tasks.system.periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': 900},
+    'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback': {
         'task': 'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback',
-        'schedule': timedelta(minutes=60),
+        'schedule': 3600,
     },
 }
-
-DISPATCHER_SCHEDULE = {}
-for options in CELERYBEAT_SCHEDULE.values():
-    new_options = options.copy()
-    task_name = options['task']
-    # Handle the only one exception case of the heartbeat which has a new implementation
-    if task_name == 'awx.main.tasks.system.cluster_node_heartbeat':
-        task_name = 'awx.main.tasks.system.adispatch_cluster_node_heartbeat'
-        new_options['task'] = task_name
-    new_options['schedule'] = options['schedule'].total_seconds()
-    DISPATCHER_SCHEDULE[task_name] = new_options
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
@@ -1149,7 +1133,6 @@ OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OP
 
 # feature flags
 FEATURE_INDIRECT_NODE_COUNTING_ENABLED = False
-FEATURE_DISPATCHERD_ENABLED = False
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired
 # based on age. Note workers will finish their last task before retiring if

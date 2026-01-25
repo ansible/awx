@@ -8,9 +8,7 @@ LOCAL_SETTINGS = (
     'CACHES',
     'DEBUG',
     'NAMED_URL_GRAPH',
-    'DISPATCHER_MOCK_PUBLISH',
     # Platform flags are managed by the platform flags system and have environment-specific defaults
-    'FEATURE_DISPATCHERD_ENABLED',
     'FEATURE_INDIRECT_NODE_COUNTING_ENABLED',
 )
 
@@ -87,12 +85,9 @@ def test_development_defaults_feature_flags(monkeypatch):
     spec.loader.exec_module(development_defaults)
 
     # Also import through the development settings to ensure both paths are tested
-    from awx.settings.development import FEATURE_INDIRECT_NODE_COUNTING_ENABLED, FEATURE_DISPATCHERD_ENABLED
+    from awx.settings.development import FEATURE_INDIRECT_NODE_COUNTING_ENABLED
 
     # Verify the feature flags are set correctly in both the module and settings
     assert hasattr(development_defaults, 'FEATURE_INDIRECT_NODE_COUNTING_ENABLED')
     assert development_defaults.FEATURE_INDIRECT_NODE_COUNTING_ENABLED is True
-    assert hasattr(development_defaults, 'FEATURE_DISPATCHERD_ENABLED')
-    assert development_defaults.FEATURE_DISPATCHERD_ENABLED is True
     assert FEATURE_INDIRECT_NODE_COUNTING_ENABLED is True
-    assert FEATURE_DISPATCHERD_ENABLED is True

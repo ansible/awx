@@ -69,4 +69,3 @@ AWX_DISABLE_TASK_MANAGERS = False
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
 FEATURE_INDIRECT_NODE_COUNTING_ENABLED = True
-FEATURE_DISPATCHERD_ENABLED = True
