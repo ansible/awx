@@ -61,11 +61,6 @@ class TestJobReaper(object):
             ('running', '', '', None, False),  # running, not assigned to the instance
             ('running', 'awx', '', None, True),  # running, has the instance as its execution_node
             ('running', '', 'awx', None, True),  # running, has the instance as its controller_node
-            ('waiting', '', '', None, False),  # waiting, not assigned to the instance
-            ('waiting', 'awx', '', None, False),  # waiting, was edited less than a minute ago
-            ('waiting', '', 'awx', None, False),  # waiting, was edited less than a minute ago
-            ('waiting', 'awx', '', yesterday, False),  # waiting, managed by another node, ignore
-            ('waiting', '', 'awx', yesterday, True),  # waiting, assigned to the controller_node, stale
         ],
     )
     def test_should_reap(self, status, fail, execution_node, controller_node, modified):
@@ -83,7 +78,6 @@ class TestJobReaper(object):
             # (because .save() overwrites it to _now_)
             Job.objects.filter(id=j.id).update(modified=modified)
         reaper.reap(i)
-        reaper.reap_waiting(i)
         job = Job.objects.first()
         if fail:
             assert job.status == 'failed'

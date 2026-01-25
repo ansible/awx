@@ -26,7 +26,6 @@ from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.tasks.system import events_processed_hook
 import awx.main.analytics.subsystem_metrics as s_metrics
-from .base import WorkerSignalHandler
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
@@ -55,6 +54,16 @@ def job_stats_wrapup(job_identifier, event=None):
 
     except Exception:
         logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
+
+
+class WorkerSignalHandler:
+    def __init__(self):
+        self.kill_now = False
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+
+    def exit_gracefully(self, *args, **kwargs):
+        self.kill_now = True
 
 
 class CallbackBrokerWorker:

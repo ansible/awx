@@ -3,7 +3,6 @@
 
 import redis
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 import redis.exceptions
 
@@ -36,11 +35,7 @@ class Command(BaseCommand):
             raise CommandError(f'Callback receiver could not connect to redis, error: {exc}')
 
         try:
-            consumer = AWXConsumerRedis(
-                'callback_receiver',
-                CallbackBrokerWorker(),
-                queues=[getattr(settings, 'CALLBACK_QUEUE', '')],
-            )
+            consumer = AWXConsumerRedis('callback_receiver', CallbackBrokerWorker())
             consumer.run()
         except KeyboardInterrupt:
             print('Terminating Callback Receiver')

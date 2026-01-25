@@ -1,9 +1,6 @@
-from datetime import timedelta
 import logging
 
 from django.db.models import Q
-from django.conf import settings
-from django.utils.timezone import now as tz_now
 from django.contrib.contenttypes.models import ContentType
 
 from awx.main.models import Instance, UnifiedJob, WorkflowJob
@@ -48,26 +45,6 @@ def reap_job(j, status, job_explanation=None):
         j.send_notification_templates('failed')
     j.websocket_emit_status(status)
     logger.error(f'{j.log_format} is no longer {status_before}; reaping')
-
-
-def reap_waiting(instance=None, status='failed', job_explanation=None, grace_period=None, excluded_uuids=None, ref_time=None):
-    """
-    Reap all jobs in waiting for this instance.
-    """
-    if grace_period is None:
-        grace_period = settings.JOB_WAITING_GRACE_PERIOD + settings.TASK_MANAGER_TIMEOUT
-
-    if instance is None:
-        hostname = Instance.objects.my_hostname()
-    else:
-        hostname = instance.hostname
-    if ref_time is None:
-        ref_time = tz_now()
-    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=ref_time - timedelta(seconds=grace_period), controller_node=hostname)
-    if excluded_uuids:
-        jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
-    for j in jobs:
-        reap_job(j, status, job_explanation=job_explanation)
 
 
 def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None, ref_time=None):
