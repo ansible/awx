@@ -2,5 +2,11 @@
 collections:
   - source: ./awx_collection
     type: dir
-  - flowerysong.hvault
-  - community.docker
+  - name: flowerysong.hvault
+    source: https://github.com/flowerysong/ansible-flowerysong.hvault.git
+    type: git
+    version: "v0.3.0"
+  - name: community.docker
+    source: https://github.com/ansible-collections/community.docker.git
+    type: git
+    version: "5.0.5"
