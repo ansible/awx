@@ -12,7 +12,7 @@ from django.db import transaction
 # Django flags
 from flags.state import flag_enabled
 
-from awx.main.dispatch.publish import task
+from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 from awx.main.models.event_query import EventQuery

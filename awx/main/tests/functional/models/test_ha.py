@@ -3,7 +3,7 @@ import pytest
 # AWX
 from awx.main.ha import is_ha_environment
 from awx.main.models.ha import Instance
-from awx.main.dispatch.pool import get_auto_max_workers
+from awx.main.utils.common import get_auto_max_workers
 
 # Django
 from django.test.utils import override_settings

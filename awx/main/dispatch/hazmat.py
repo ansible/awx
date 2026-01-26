@@ -18,7 +18,7 @@ django.setup()  # noqa
 from django.conf import settings
 
 # Preload all periodic tasks so their imports will be in shared memory
-for name, options in settings.CELERYBEAT_SCHEDULE.items():
+for name, options in settings.DISPATCHER_SCHEDULE.items():
     resolve_callable(options['task'])
 
 

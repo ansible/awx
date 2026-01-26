@@ -385,6 +385,14 @@ class InstanceList(ListCreateAPIView):
     ordering = ('id',)
     resource_purpose = 'instances'
 
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Register an execution or hop node instance. Only available on openshift based AAP deployments. Use the install bundle playbook to further provision the instance"
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related('receptor_addresses')
         return qs
@@ -538,6 +546,14 @@ class InstanceGroupList(ListCreateAPIView):
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
     resource_purpose = 'instance groups'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of instance groups."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Create an instance group. Instances in this group determine where a job will be executed"})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -868,6 +884,14 @@ class ExecutionEnvironmentList(ListCreateAPIView):
     swagger_topic = "Execution Environments"
     resource_purpose = 'execution environments'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of execution environments."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment. Once associated with JT/org/etc"})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
     always_allow_superuser = False
@@ -890,6 +914,22 @@ class ExecutionEnvironmentDetail(RetrieveUpdateDestroyAPIView):
                 if left != right:
                     raise PermissionDenied(_("Only the 'pull' field can be edited for managed execution environments."))
         return super().update(request, *args, **kwargs)
+
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Update all fields of an execution environment. All fields must be provided in the request body."}
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Update specific fields of an execution environment. Only the fields you provide will be updated."}
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Delete an execution environment."})
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
 
 
 class ExecutionEnvironmentJobTemplateList(SubListAPIView):
@@ -920,6 +960,10 @@ class ProjectList(ListCreateAPIView):
     model = models.Project
     serializer_class = serializers.ProjectSerializer
     resource_purpose = 'projects'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of projects."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class ProjectDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -1346,11 +1390,27 @@ class CredentialTypeList(ListCreateAPIView):
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential types'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of credential types"})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new custom credential type"})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
     model = models.CredentialType
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential type detail'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Update a custom credential type."})
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Update a custom credential type."})
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1359,6 +1419,10 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
         if instance.credentials.exists():
             raise PermissionDenied(detail=_("Credential types that are in use cannot be deleted"))
         return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Delete a custom credential type. Cannot delete managed types or types currently in use."})
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
 
 
 class CredentialTypeCredentialList(SubListCreateAPIView):
@@ -1383,6 +1447,10 @@ class CredentialList(ListCreateAPIView):
     model = models.Credential
     serializer_class = serializers.CredentialSerializerCreate
     resource_purpose = 'credentials'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of credentials"})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     @extend_schema_if_available(
         extensions={
@@ -1673,6 +1741,10 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     serializer_class = serializers.HostSerializer
     resource_purpose = 'hosts'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of hosts."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         qs = super(HostList, self).get_queryset()
         filter_string = self.request.query_params.get('host_filter', None)
@@ -1815,6 +1887,14 @@ class GroupList(ListCreateAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
     resource_purpose = 'groups'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of groups."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new group."})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 class EnforceParentRelationshipMixin(object):
@@ -2014,6 +2094,10 @@ class HostVariableData(BaseVariableData):
     model = models.Host
     serializer_class = serializers.HostVariableDataSerializer
     resource_purpose = 'variable data for a host'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "The extra variable configuration for this host."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class GroupVariableData(BaseVariableData):
@@ -2302,7 +2386,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
     serializer_class = serializers.InventorySourceUpdateSerializer
     resource_purpose = 'update an inventory source'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Update inventory source"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Sync the inventory source"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(instance=obj, data=request.data)
@@ -2361,6 +2445,10 @@ class JobTemplateList(ListCreateAPIView):
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
     resource_purpose = 'job templates'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of job templates."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def check_permissions(self, request):
         if request.method == 'POST':
@@ -2439,9 +2527,7 @@ class JobTemplateLaunch(RetrieveAPIView):
 
         return modern_data
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Launch a job'},
-    )
+    @extend_schema_if_available(extensions={"x-ai-description": "Launch the job template"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3140,6 +3226,10 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'workflow job templates'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of workflow job templates."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def check_permissions(self, request):
         if request.method == 'POST':
             if request.user.is_anonymous:
@@ -3253,9 +3343,7 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
         return data
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Launch a workflow job'},
-    )
+    @extend_schema_if_available(extensions={"x-ai-description": "Launch the workflow job template."})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3297,9 +3385,7 @@ class WorkflowJobRelaunch(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return Response({})
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Relaunch a workflow job'},
-    )
+    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a workflow job"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.is_sliced_job:
@@ -3416,6 +3502,10 @@ class WorkflowJobList(ListAPIView):
     serializer_class = serializers.WorkflowJobListSerializer
     resource_purpose = 'workflow jobs'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of workflow jobs."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class WorkflowJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.WorkflowJob
@@ -3441,7 +3531,7 @@ class WorkflowJobCancel(GenericCancelView):
     serializer_class = serializers.WorkflowJobCancelSerializer
     resource_purpose = 'cancel for a workflow job'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a workflow job"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a running or pending workflow job"})
     def post(self, request, *args, **kwargs):
         r = super().post(request, *args, **kwargs)
         ScheduleWorkflowManager().schedule()
@@ -3562,6 +3652,10 @@ class JobList(ListAPIView):
     serializer_class = serializers.JobListSerializer
     resource_purpose = 'jobs'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class JobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     model = models.Job
@@ -3611,6 +3705,10 @@ class JobCancel(GenericCancelView):
     serializer_class = serializers.JobCancelSerializer
     resource_purpose = 'cancel for a job'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Cancel a running or pending job"})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 class JobRelaunch(RetrieveAPIView):
     model = models.Job
@@ -3645,9 +3743,7 @@ class JobRelaunch(RetrieveAPIView):
                 self.permission_denied(request, message=messages['detail'])
         return super(JobRelaunch, self).check_object_permissions(request, obj)
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Relaunch a job'},
-    )
+    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a job"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         context = self.get_serializer_context()
@@ -4397,6 +4493,10 @@ class JobStdout(UnifiedJobStdout):
     model = models.Job
     resource_purpose = 'stdout output of a job'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get the standard output for the selected job."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class AdHocCommandStdout(UnifiedJobStdout):
     model = models.AdHocCommand
@@ -4408,11 +4508,27 @@ class NotificationTemplateList(ListCreateAPIView):
     serializer_class = serializers.NotificationTemplateSerializer
     resource_purpose = 'notification templates'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of notification templates."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new notification template."})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
     model = models.NotificationTemplate
     serializer_class = serializers.NotificationTemplateSerializer
     resource_purpose = 'notification template detail'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Update a notification template."})
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Update a notification template."})
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete a notification template"})
     def delete(self, request, *args, **kwargs):
@@ -4492,6 +4608,14 @@ class ActivityStreamList(SimpleListAPIView):
     serializer_class = serializers.ActivityStreamSerializer
     search_fields = ('changes',)
     resource_purpose = 'audit trail entries for tracking system changes'
+
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "A list of activity stream entries. An activity stream entry tracks actions or changes that were previously made to the system."
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class ActivityStreamDetail(RetrieveAPIView):

@@ -4,9 +4,9 @@ import tempfile
 import urllib.parse as urlparse
 
 from django.conf import settings
+from dispatcherd.publish import task
 
 from awx.main.utils.reload import supervisor_service_command
-from awx.main.dispatch.publish import task as task_awx
 
 
 def construct_rsyslog_conf_template(settings=settings):
@@ -139,7 +139,7 @@ def construct_rsyslog_conf_template(settings=settings):
     return tmpl
 
 
-@task_awx(queue='rsyslog_configurer', timeout=600, on_duplicate='queue_one')
+@task(queue='rsyslog_configurer', timeout=600, on_duplicate='queue_one')
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     # Write config to a temp file then move it to preserve atomicity

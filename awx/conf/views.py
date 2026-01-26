@@ -31,6 +31,7 @@ from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry
 from awx.main.utils.external_logging import reconfigure_rsyslog
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
 
@@ -40,6 +41,10 @@ class SettingCategoryList(ListAPIView):
     serializer_class = SettingCategorySerializer
     filter_backends = []
     name = _('Setting Categories')
+
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to settings."})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         setting_categories = []
@@ -61,6 +66,10 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = SettingSingletonSerializer
     filter_backends = []
     name = _('Setting Detail')
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Update system settings."})
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
 
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')

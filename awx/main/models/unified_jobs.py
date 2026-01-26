@@ -15,6 +15,9 @@ import subprocess
 import tempfile
 from collections import OrderedDict
 
+# Dispatcher
+from dispatcherd.factories import get_control_from_settings
+
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
@@ -24,7 +27,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
-from flags.state import flag_enabled
 
 # REST Framework
 from rest_framework.exceptions import ParseError
@@ -39,7 +41,6 @@ from ansible_base.rbac.models import RoleEvaluation
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
 from awx.main.dispatch import get_task_queuename
-from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
 from awx.main.models.rbac import to_permissions
@@ -1497,43 +1498,30 @@ class UnifiedJob(
         if not self.celery_task_id:
             return False
 
-        canceled = []
         # Special case for task manager (used during workflow job cancellation)
         if not connection.get_autocommit():
-            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-                try:
-                    from dispatcherd.factories import get_control_from_settings
+            try:
 
-                    ctl = get_control_from_settings()
-                    ctl.control('cancel', data={'uuid': self.celery_task_id})
-                except Exception:
-                    logger.exception("Error sending cancel command to new dispatcher")
-            else:
-                try:
-                    ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
-                except Exception:
-                    logger.exception("Error sending cancel command to legacy dispatcher")
+                ctl = get_control_from_settings()
+                ctl.control('cancel', data={'uuid': self.celery_task_id})
+            except Exception:
+                logger.exception("Error sending cancel command to dispatcher")
             return True  # task manager itself needs to act under assumption that cancel was received
 
         # Standard case with reply
         try:
             timeout = 5
-            if flag_enabled('FEATURE_DISPATCHERD_ENABLED'):
-                from dispatcherd.factories import get_control_from_settings
 
-                ctl = get_control_from_settings()
-                results = ctl.control_with_reply('cancel', data={'uuid': self.celery_task_id}, expected_replies=1, timeout=timeout)
-                # Check if cancel was successful by checking if we got any results
-                return bool(results and len(results) > 0)
-            else:
-                # Original implementation
-                canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
+            ctl = get_control_from_settings()
+            results = ctl.control_with_reply('cancel', data={'uuid': self.celery_task_id}, expected_replies=1, timeout=timeout)
+            # Check if cancel was successful by checking if we got any results
+            return bool(results and len(results) > 0)
         except socket.timeout:
             logger.error(f'could not reach dispatcher on {self.controller_node} within {timeout}s')
         except Exception:
             logger.exception("error encountered when checking task status")
 
-        return bool(self.celery_task_id in canceled)  # True or False, whether confirmation was obtained
+        return False  # whether confirmation was obtained
 
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:

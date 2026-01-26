@@ -20,6 +20,9 @@ import ansible_runner
 # django-ansible-base
 from ansible_base.lib.utils.db import advisory_lock
 
+# Dispatcherd
+from dispatcherd.publish import task
+
 # AWX
 from awx.main.utils.execution_environments import get_default_pod_spec
 from awx.main.exceptions import ReceptorNodeNotFound
@@ -32,7 +35,6 @@ from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
-from awx.main.dispatch.publish import task as task_awx
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -852,7 +854,7 @@ def reload_receptor():
         raise RuntimeError("Receptor reload failed")
 
 
-@task_awx(on_duplicate='queue_one')
+@task(on_duplicate='queue_one')
 def write_receptor_config():
     """
     This task runs async on each control node, K8S only.
@@ -875,7 +877,7 @@ def write_receptor_config():
             reload_receptor()
 
 
-@task_awx(queue=get_task_queuename, on_duplicate='discard')
+@task(queue=get_task_queuename, on_duplicate='discard')
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
     InstanceLink.objects.filter(target__instance__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)

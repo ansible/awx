@@ -20,19 +20,18 @@ In this document, we will go into a bit of detail about how and when AWX runs Py
     - Every node in an AWX cluster runs a periodic task that serves as
       a heartbeat and capacity check
 
-Transition to dispatcherd Library
----------------------------------
+dispatcherd Library
+-------------------
 
-The task system logic is being split out into a new library:
+The task system logic has been split out into a separate library:
 
 https://github.com/ansible/dispatcherd
 
-Currently AWX is in a transitionary period where this is put behind a feature flag.
-The difference can be seen in how the task decorator is imported.
+AWX now uses dispatcherd directly for all task management. Tasks are decorated using:
 
- - old `from awx.main.dispatch.publish import task`
- - transition `from awx.main.dispatch.publish import task as task_awx`
- - new `from dispatcherd.publish import task`
+```python
+from dispatcherd.publish import task
+```
 
 
 Tasks, Queues and Workers
@@ -74,7 +73,7 @@ Defining and Running Tasks
 Tasks are defined in AWX's source code, and generally live in the
 `awx.main.tasks` module.  Tasks can be defined as simple functions:
 
-    from awx.main.dispatch.publish import task as task_awx
+    from dispatcherd.publish import task
 
     @task()
     def add(a, b):
@@ -143,14 +142,6 @@ This outputs running and queued task UUIDs handled by a specific dispatcher
 [root@awx /]# awx-manage run_dispatcher --running
 2018-09-14 18:39:22,223 WARNING  awx.main.dispatch checking dispatcher running for awx
 ['eb3b0a83-86da-413d-902a-16d7530a6b25', 'f447266a-23da-42b4-8025-fe379d2db96f']
-```
-
-Additionally, you can tell the local running dispatcher to recycle all of the
-workers in its pool.  It will wait for any running jobs to finish and exit when
-work has completed, spinning up replacement workers.
-
-```
-awx-manage run_dispatcher --reload
 ```
 
 * * *

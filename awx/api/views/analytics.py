@@ -52,9 +52,7 @@ class AnalyticsRootView(APIView):
     swagger_topic = 'Automation Analytics'
     resource_purpose = 'automation analytics endpoints'
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Retrieve list of available analytics endpoints'},
-    )
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to analytics"})
     def get(self, request, format=None):
         data = OrderedDict()
         data['authorized'] = reverse('api:analytics_authorized', request=request)

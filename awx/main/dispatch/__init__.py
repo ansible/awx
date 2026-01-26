@@ -77,14 +77,13 @@ class PubSub(object):
             n = psycopg.connection.Notify(pgn.relname.decode(enc), pgn.extra.decode(enc), pgn.be_pid)
             yield n
 
-    def events(self, yield_timeouts=False):
+    def events(self):
         if not self.conn.autocommit:
             raise RuntimeError('Listening for events can only be done in autocommit mode')
 
         while True:
             if select.select([self.conn], [], [], self.select_timeout) == NOT_READY:
-                if yield_timeouts:
-                    yield None
+                yield None
             else:
                 notification_generator = self.current_notifies(self.conn)
                 for notification in notification_generator:
