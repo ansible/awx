@@ -73,17 +73,16 @@ class Command(BaseCommand):
         dispatcher_setup(get_dispatcherd_config(for_service=True))
         run_service()
 
-        dispatcher_setup(get_dispatcherd_config(for_service=True))
-        run_service()
-
     def configure_dispatcher_logging(self):
         # Apply special log rule for the parent process
         special_logging = copy.deepcopy(settings.LOGGING)
+        changed_handlers = []
         for handler_name, handler_config in special_logging.get('handlers', {}).items():
             filters = handler_config.get('filters', [])
             if 'dynamic_level_filter' in filters:
                 handler_config['filters'] = [flt for flt in filters if flt != 'dynamic_level_filter']
-                logger.info(f'Dispatcherd main process replaced log level filter for {handler_name} handler')
+                changed_handlers.append(handler_name)
+        logger.info(f'Dispatcherd main process replaced log level filter for handlers: {changed_handlers}')
 
         # Apply the custom logging level here, before the asyncio code starts
         special_logging.setdefault('loggers', {}).setdefault('dispatcherd', {})
