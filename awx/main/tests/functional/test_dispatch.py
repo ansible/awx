@@ -5,6 +5,7 @@ import pytest
 
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
+from awx.main.tasks import system
 from dispatcherd.publish import task
 
 '''
@@ -85,6 +86,20 @@ class TestJobReaper(object):
             assert job.start_args == ''
         else:
             assert job.status == status
+
+    def test_waiting_job_sent_back_to_pending(self):
+        this_inst = Instance(hostname='awx')
+        this_inst.save()
+        lost_inst = Instance(hostname='lost', node_type=Instance.Types.EXECUTION, node_state=Instance.States.UNAVAILABLE)
+        lost_inst.save()
+        job = Job.objects.create(status='waiting', controller_node=lost_inst.hostname, execution_node='lost')
+
+        system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+        job.refresh_from_db()
+
+        assert job.status == 'pending'
+        assert job.controller_node == ''
+        assert job.execution_node == ''
 
     @pytest.mark.parametrize(
         'excluded_uuids, fail, started',
