@@ -1,7 +1,10 @@
+import pytest
+
 from awx.main.dispatch.config import get_dispatcherd_config
 from awx.main.management.commands.dispatcherd import _hash_config
 
 
+@pytest.mark.django_db
 def test_dispatcherd_config_hash_is_stable(settings, monkeypatch):
     monkeypatch.setenv('AWX_COMPONENT', 'dispatcher')
     settings.CLUSTER_HOST_ID = 'test-node'
