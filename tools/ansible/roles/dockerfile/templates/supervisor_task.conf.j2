@@ -10,7 +10,7 @@ pidfile = /var/run/supervisor/supervisor.task.pid
 command = make dispatcher
 directory = /awx_devel
 {% else %}
-command = awx-manage run_dispatcher
+command = awx-manage dispatcherd
 directory = /var/lib/awx
 {% endif %}
 autorestart = true

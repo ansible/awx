@@ -289,7 +289,7 @@ dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_dispatcher
+	$(PYTHON) manage.py dispatcherd
 
 ## Run to start the zeromq callback receiver
 receiver:
