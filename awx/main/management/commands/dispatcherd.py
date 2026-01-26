@@ -35,6 +35,11 @@ def _hash_config(config):
     return hashlib.sha256(serialized.encode('utf-8')).hexdigest()
 
 
+def ensure_no_dispatcherd_env_config():
+    if os.getenv('DISPATCHERD_CONFIG_FILE'):
+        raise CommandError('DISPATCHERD_CONFIG_FILE is set but awx-manage dispatcherd uses dynamic config from code')
+
+
 class Command(BaseCommand):
     help = (
         'Run the background task service, this is the supported entrypoint since the introduction of dispatcherd as a library. '
@@ -45,8 +50,7 @@ class Command(BaseCommand):
         return
 
     def handle(self, *arg, **options):
-        if os.getenv('DISPATCHERD_CONFIG_FILE'):
-            raise CommandError('DISPATCHERD_CONFIG_FILE is set but awx-manage dispatcherd uses dynamic config from code')
+        ensure_no_dispatcherd_env_config()
 
         self.configure_dispatcher_logging()
         config = get_dispatcherd_config(for_service=True)

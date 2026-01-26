@@ -22,6 +22,7 @@ from dispatcherd.factories import get_control_from_settings
 from dispatcherd.service import control_tasks
 
 from awx.main.dispatch.config import get_dispatcherd_config
+from awx.main.management.commands.dispatcherd import ensure_no_dispatcherd_env_config
 
 logger = logging.getLogger(__name__)
 
@@ -66,15 +67,12 @@ class Command(BaseCommand):
         logging.basicConfig(level=getattr(logging, log_level), stream=sys.stdout)
         logger.debug(f"Configured standard out logging at {log_level} level")
 
-        env_config = os.getenv('DISPATCHERD_CONFIG_FILE')
         default_config = os.path.abspath(DEFAULT_CONFIG_FILE)
+        ensure_no_dispatcherd_env_config()
         if config_path != default_config:
             raise CommandError('The config path CLI option is not allowed for the awx-manage command')
         if connection.vendor == 'sqlite':
             raise CommandError('dispatcherctl is not supported with sqlite3; use a PostgreSQL database')
-        elif env_config:
-            logger.warning(f'Using config from environment variable DISPATCHERD_CONFIG_FILE={env_config}')
-            dispatcher_setup()
         else:
             logger.info('Using config generated from awx.main.dispatch.config.get_dispatcherd_config')
             dispatcher_setup(get_dispatcherd_config())
