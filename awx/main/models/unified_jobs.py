@@ -1487,7 +1487,7 @@ class UnifiedJob(
             return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (self.model_to_str(), self.name, self.id)
         return None
 
-    def cancel_dispatcher_process(self) -> bool:
+    def cancel_dispatcher_process(self):
         """Returns True if dispatcher running this job acknowledged request and sent SIGTERM"""
         if not self.celery_task_id:
             return False
@@ -1498,12 +1498,6 @@ class UnifiedJob(
             ctl.control('cancel', data={'uuid': self.celery_task_id})
         except Exception:
             logger.exception("Error sending cancel command to dispatcher")
-
-        # Special case for task manager (used during workflow job cancellation)
-        if not connection.get_autocommit():
-            return True  # task manager itself needs to act under assumption that cancel was received
-        else:
-            return False  # have not obtained receipt from dispatcher
 
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
