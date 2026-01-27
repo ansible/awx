@@ -53,7 +53,7 @@ class Command(BaseCommand):
             _register_control_arguments(command_parser, CONTROL_ARG_SCHEMAS.get(command))
 
     def handle(self, *args, **options):
-        command = options.get('command')
+        command = options.pop('command', None)
         if not command:
             raise CommandError('No dispatcher control command specified')
 
