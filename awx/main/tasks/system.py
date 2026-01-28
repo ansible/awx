@@ -760,14 +760,16 @@ def _heartbeat_check_versions(this_inst, instance_list):
 
 
 def _heartbeat_handle_lost_instances(lost_instances, this_inst):
-    """Handle lost instances by reaping their jobs and marking them offline."""
+    """Handle lost instances by reaping their running jobs and marking them offline."""
     for other_inst in lost_instances:
         try:
+            # Any jobs marked as running will be marked as error
             explanation = "Job reaped due to instance shutdown"
             reaper.reap(other_inst, job_explanation=explanation)
-            reaper.reap_waiting(other_inst, grace_period=0, job_explanation=explanation)
+            # Any jobs that were waiting to be processed by this node will be handed back to task manager
+            UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
         except Exception:
-            logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
+            logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
         try:
             if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
                 deprovision_hostname = other_inst.hostname

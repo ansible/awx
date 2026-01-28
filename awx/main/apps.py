@@ -82,7 +82,7 @@ class MainConfig(AppConfig):
     def configure_dispatcherd(self):
         """This implements the default configuration for dispatcherd
 
-        If running the tasking service like awx-manage run_dispatcher,
+        If running the tasking service like awx-manage dispatcherd,
         some additional config will be applied on top of this.
         This configuration provides the minimum such that code can submit
         tasks to pg_notify to run those tasks.

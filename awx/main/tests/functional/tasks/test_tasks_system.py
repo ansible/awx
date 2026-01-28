@@ -9,7 +9,7 @@ from unittest import mock
 import pytest
 
 from awx.main.tasks.system import CleanupImagesAndFiles, execution_node_health_check, inspect_established_receptor_connections, clear_setting_cache
-from awx.main.management.commands.run_dispatcher import Command
+from awx.main.management.commands.dispatcherd import Command
 from awx.main.models import Instance, Job, ReceptorAddress, InstanceLink
 
 

@@ -10,7 +10,6 @@ import json
 import logging
 import os
 import re
-import socket
 import subprocess
 import tempfile
 from collections import OrderedDict
@@ -1488,40 +1487,17 @@ class UnifiedJob(
             return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (self.model_to_str(), self.name, self.id)
         return None
 
-    def fallback_cancel(self):
-        if not self.celery_task_id:
-            self.refresh_from_db(fields=['celery_task_id'])
-        self.cancel_dispatcher_process()
-
     def cancel_dispatcher_process(self):
         """Returns True if dispatcher running this job acknowledged request and sent SIGTERM"""
         if not self.celery_task_id:
             return False
 
-        # Special case for task manager (used during workflow job cancellation)
-        if not connection.get_autocommit():
-            try:
-
-                ctl = get_control_from_settings()
-                ctl.control('cancel', data={'uuid': self.celery_task_id})
-            except Exception:
-                logger.exception("Error sending cancel command to dispatcher")
-            return True  # task manager itself needs to act under assumption that cancel was received
-
-        # Standard case with reply
         try:
-            timeout = 5
-
-            ctl = get_control_from_settings()
-            results = ctl.control_with_reply('cancel', data={'uuid': self.celery_task_id}, expected_replies=1, timeout=timeout)
-            # Check if cancel was successful by checking if we got any results
-            return bool(results and len(results) > 0)
-        except socket.timeout:
-            logger.error(f'could not reach dispatcher on {self.controller_node} within {timeout}s')
+            logger.info(f'Sending cancel message to pg_notify channel {self.controller_node} for task {self.celery_task_id}')
+            ctl = get_control_from_settings(default_publish_channel=self.controller_node)
+            ctl.control('cancel', data={'uuid': self.celery_task_id})
         except Exception:
-            logger.exception("error encountered when checking task status")
-
-        return False  # whether confirmation was obtained
+            logger.exception("Error sending cancel command to dispatcher")
 
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
@@ -1544,19 +1520,13 @@ class UnifiedJob(
                 # the job control process will use the cancel_flag to distinguish a shutdown from a cancel
                 self.save(update_fields=cancel_fields)
 
-            controller_notified = False
-            if self.celery_task_id:
-                controller_notified = self.cancel_dispatcher_process()
+            # Be extra sure we have the task id, in case job is transitioning into running right now
+            if not self.celery_task_id:
+                self.refresh_from_db(fields=['celery_task_id', 'controller_node'])
 
-            # If a SIGTERM signal was sent to the control process, and acked by the dispatcher
-            # then we want to let its own cleanup change status, otherwise change status now
-            if not controller_notified:
-                if self.status != 'canceled':
-                    self.status = 'canceled'
-                    self.save(update_fields=['status'])
-                # Avoid race condition where we have stale model from pending state but job has already started,
-                # its checking signal but not cancel_flag, so re-send signal after updating cancel fields
-                self.fallback_cancel()
+            # send pg_notify message to cancel, will not send until transaction completes
+            if self.celery_task_id:
+                self.cancel_dispatcher_process()
 
         return self.cancel_flag
 

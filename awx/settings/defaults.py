@@ -700,7 +700,6 @@ DISABLE_LOCAL_AUTH = False
 TOWER_URL_BASE = "https://platformhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
-INSIGHTS_OIDC_ENDPOINT = "https://sso.example.org/"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
@@ -1027,7 +1026,7 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': r'/api/v[0-9]',
     'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
     'SCHEMA_COERCE_PATH_PK_SUFFIX': True,
-    'CONTACT': {'email': 'controller-eng@redhat.com'},
+    'CONTACT': {'email': 'ansible-community@redhat.com'},
     'LICENSE': {'name': 'Apache License'},
     'TERMS_OF_SERVICE': 'https://www.google.com/policies/terms/',
     # Use our custom schema class that handles swagger_topic and deprecated views

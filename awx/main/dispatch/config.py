@@ -30,7 +30,7 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
             },
             "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID},
             "process_manager_cls": "ForkServerManager",
-            "process_manager_kwargs": {"preload_modules": ['awx.main.dispatch.hazmat']},
+            "process_manager_kwargs": {"preload_modules": ['awx.main.dispatch.prefork']},
         },
         "brokers": {},
         "publish": {},
