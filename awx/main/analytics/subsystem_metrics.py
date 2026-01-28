@@ -5,6 +5,7 @@ import time
 import logging
 
 import prometheus_client
+import socket
 import urllib.error
 import urllib.request
 from prometheus_client.core import GaugeMetricFamily, HistogramMetricFamily
@@ -438,7 +439,7 @@ def _get_dispatcherd_metrics():
             if not payload:
                 return ''
             return payload.decode('utf-8')
-    except (urllib.error.URLError, UnicodeError) as exc:
+    except (urllib.error.URLError, UnicodeError, socket.timeout, TimeoutError) as exc:
         logger.debug(f"Failed to collect dispatcherd metrics from {url}: {exc}")
         return ''
 

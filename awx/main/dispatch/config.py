@@ -60,7 +60,7 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
         if metrics_cfg:
             config["service"]["metrics_kwargs"] = {
                 "host": metrics_cfg.get("host", "localhost"),
-                "port": metrics_cfg["port"],
+                "port": metrics_cfg.get("port", 8015),
             }
 
     return config
