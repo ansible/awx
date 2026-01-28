@@ -119,3 +119,13 @@ def test_dispatcherd_metrics_node_filter_excludes_local(monkeypatch, settings):
     request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-2'}))
 
     assert s_metrics._get_dispatcherd_metrics(request) == ''
+
+
+def test_dispatcherd_metrics_metric_filter_excludes_unrelated(monkeypatch):
+    def fake_urlopen(*args, **kwargs):
+        raise AssertionError("urlopen should not be called when metric filter excludes dispatcherd metrics")
+
+    monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'awx_system_info'}))
+
+    assert s_metrics._get_dispatcherd_metrics(request) == ''

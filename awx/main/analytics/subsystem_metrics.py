@@ -431,12 +431,21 @@ def _get_dispatcherd_metrics(request):
     metrics_cfg = settings.METRICS_SUBSYSTEM_CONFIG.get('server', {}).get(settings.METRICS_SERVICE_DISPATCHER, {})
     host = metrics_cfg.get('host', 'localhost')
     port = metrics_cfg.get('port', 8015)
+    metrics_filter = []
     if request is not None and hasattr(request, "query_params"):
         try:
             nodes_filter = request.query_params.getlist("node")
         except Exception:
             nodes_filter = []
         if nodes_filter and settings.CLUSTER_HOST_ID not in nodes_filter:
+            return ''
+        try:
+            metrics_filter = request.query_params.getlist("metric")
+        except Exception:
+            metrics_filter = []
+    if metrics_filter:
+        dispatcher_metrics = {metric.field for metric in DispatcherMetrics.METRICSLIST}
+        if not dispatcher_metrics.intersection(metrics_filter):
             return ''
     url = f"http://{host}:{port}/metrics"
     try:
