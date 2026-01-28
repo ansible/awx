@@ -1,6 +1,6 @@
 -include awx/ui/Makefile
 
-PYTHON := $(notdir $(shell for i in python3.12 python3; do command -v $$i; done|sed 1q))
+PYTHON := $(notdir $(shell for i in python3.12 python3.11 python3; do command -v $$i; done|sed 1q))
 SHELL := bash
 DOCKER_COMPOSE ?= docker compose
 OFFICIAL ?= no
