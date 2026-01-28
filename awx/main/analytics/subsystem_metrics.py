@@ -3,6 +3,7 @@ import redis
 import json
 import time
 import logging
+import http.client
 
 import prometheus_client
 import socket
@@ -426,12 +427,17 @@ class CallbackReceiverMetrics(Metrics):
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, *args, **kwargs)
 
 
-def _get_dispatcherd_metrics():
+def _get_dispatcherd_metrics(request):
     metrics_cfg = settings.METRICS_SUBSYSTEM_CONFIG.get('server', {}).get(settings.METRICS_SERVICE_DISPATCHER, {})
     host = metrics_cfg.get('host', 'localhost')
-    port = metrics_cfg.get('port')
-    if not port:
-        return ''
+    port = metrics_cfg.get('port', 8015)
+    if request is not None and hasattr(request, "query_params"):
+        try:
+            nodes_filter = request.query_params.getlist("node")
+        except Exception:
+            nodes_filter = []
+        if nodes_filter and settings.CLUSTER_HOST_ID not in nodes_filter:
+            return ''
     url = f"http://{host}:{port}/metrics"
     try:
         with urllib.request.urlopen(url, timeout=1.0) as response:
@@ -439,7 +445,7 @@ def _get_dispatcherd_metrics():
             if not payload:
                 return ''
             return payload.decode('utf-8')
-    except (urllib.error.URLError, UnicodeError, socket.timeout, TimeoutError) as exc:
+    except (urllib.error.URLError, UnicodeError, socket.timeout, TimeoutError, http.client.HTTPException) as exc:
         logger.debug(f"Failed to collect dispatcherd metrics from {url}: {exc}")
         return ''
 
@@ -449,7 +455,7 @@ def metrics(request):
     output_text += DispatcherMetrics().generate_metrics(request)
     output_text += CallbackReceiverMetrics().generate_metrics(request)
 
-    dispatcherd_metrics = _get_dispatcherd_metrics()
+    dispatcherd_metrics = _get_dispatcherd_metrics(request)
     if dispatcherd_metrics:
         output_text += dispatcherd_metrics
     return output_text
