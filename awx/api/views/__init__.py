@@ -1454,7 +1454,7 @@ class CredentialList(ListCreateAPIView):
 
     @extend_schema_if_available(
         extensions={
-            "x-ai-description": "Create a new credential. The `inputs` field contain type-specific input fields. The required fields depend on related `credential_type`. Use GET /v2/credential_types/{id}/ (tool name: controller.credential_types_retrieve) and inspect `inputs` field for the specific credential type's expected schema."
+            "x-ai-description": "Create a new credential. The `inputs` field contain type-specific input fields. The required fields depend on related `credential_type`. Use GET /v2/credential_types/{id}/ (tool name: controller.credential_types_retrieve) and inspect `inputs` field for the specific credential type's expected schema.  The fields `user` and `team` are deprecated and should not be included in the payload."
         }
     )
     def post(self, request, *args, **kwargs):
