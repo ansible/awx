@@ -104,16 +104,17 @@ def populate_claims_for_workload(workload):
     Missing or null attributes are omitted from the returned claims dictionary.
     """
 
-    def safe_get(obj, *attrs):
+    def safe_get(*attrs):
         """Safely traverse object attributes and dictionary keys."""
+        current = workload
         for attr in attrs:
-            if obj is None:
+            if current is None:
                 return None
-            if isinstance(obj, dict):
-                obj = obj.get(attr)
+            if isinstance(current, dict):
+                current = current.get(attr)
             else:
-                obj = getattr(obj, attr, None)
-        return obj
+                current = getattr(current, attr, None)
+        return current
 
     claim_mappings = [
         (AutomationControllerJobScope.CLAIM_JOB_ID, ('id',)),
@@ -141,8 +142,7 @@ def populate_claims_for_workload(workload):
 
     claims = {}
     for claim_key, attr_path in claim_mappings:
-        value = safe_get(workload, *attr_path)
-
+        value = safe_get(*attr_path)
         if value is not None and value != '':
             claims[claim_key] = value
 
