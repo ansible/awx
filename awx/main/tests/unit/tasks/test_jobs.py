@@ -20,6 +20,7 @@ from awx.main.models import (
     Project,
 )
 from awx.main.tasks import jobs
+from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
 
 @pytest.fixture
@@ -188,3 +189,106 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
     with pytest.raises(pytest.fail.Exception):
         if failures:
             pytest.fail(f" {len(failures)} facts cleared failures : {','.join(failures)}")
+
+
+def _mock(id, name=''):
+    obj = mock.Mock()
+    obj.id = id
+    obj.name = name
+    return obj
+
+
+@pytest.mark.parametrize(
+    "job_attrs,expected_claims",
+    [
+        (
+            {
+                'id': 100,
+                'name': 'Test Job',
+                'job_type': 'run',
+                'launch_type': 'manual',
+                'playbook': 'site.yml',
+                'organization': _mock(1, 'Test Org'),
+                'inventory': _mock(2, 'Test Inventory'),
+                'project': _mock(3, 'Test Project'),
+                'execution_environment': _mock(4, 'Test EE'),
+                'job_template': _mock(5, 'Test Job Template'),
+                'unified_job_template': _mock(6, 'Test Unified Job Template'),
+                'instance_group': _mock(7, 'Test Instance Group'),
+                'launched_by': {'id': 10, 'name': 'admin'},
+            },
+            {
+                AutomationControllerJobScope.CLAIM_JOB_ID: 100,
+                AutomationControllerJobScope.CLAIM_JOB_NAME: 'Test Job',
+                AutomationControllerJobScope.CLAIM_JOB_TYPE: 'run',
+                AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: 'manual',
+                AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME: 'site.yml',
+                AutomationControllerJobScope.CLAIM_LAUNCHED_BY_USER_NAME: 'admin',
+                AutomationControllerJobScope.CLAIM_LAUNCHED_BY_USER_ID: 10,
+                AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: 'Test Org',
+                AutomationControllerJobScope.CLAIM_ORGANIZATION_ID: 1,
+                AutomationControllerJobScope.CLAIM_INVENTORY_NAME: 'Test Inventory',
+                AutomationControllerJobScope.CLAIM_INVENTORY_ID: 2,
+                AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_NAME: 'Test EE',
+                AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID: 4,
+                AutomationControllerJobScope.CLAIM_PROJECT_NAME: 'Test Project',
+                AutomationControllerJobScope.CLAIM_PROJECT_ID: 3,
+                AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME: 'Test Job Template',
+                AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_ID: 5,
+                AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_NAME: 'Test Unified Job Template',
+                AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID: 6,
+                AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME: 'Test Instance Group',
+                AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID: 7,
+            },
+        ),
+        (
+            {'id': 100, 'name': 'Minimal', 'job_type': 'run', 'launch_type': 'manual', 'playbook': 'test.yml'},
+            {
+                AutomationControllerJobScope.CLAIM_JOB_ID: 100,
+                AutomationControllerJobScope.CLAIM_JOB_NAME: 'Minimal',
+                AutomationControllerJobScope.CLAIM_JOB_TYPE: 'run',
+                AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: 'manual',
+                AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME: 'test.yml',
+            },
+        ),
+        (
+            {'id': 100, 'name': '', 'job_type': 'run', 'launch_type': 'manual', 'playbook': ''},
+            {
+                AutomationControllerJobScope.CLAIM_JOB_ID: 100,
+                AutomationControllerJobScope.CLAIM_JOB_TYPE: 'run',
+                AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: 'manual',
+            },
+        ),
+        (
+            {'id': 100, 'name': 'Test', 'job_type': 'run', 'launch_type': 'manual', 'organization': _mock(1, '')},
+            {
+                AutomationControllerJobScope.CLAIM_JOB_ID: 100,
+                AutomationControllerJobScope.CLAIM_JOB_NAME: 'Test',
+                AutomationControllerJobScope.CLAIM_JOB_TYPE: 'run',
+                AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: 'manual',
+                AutomationControllerJobScope.CLAIM_ORGANIZATION_ID: 1,
+            },
+        ),
+    ],
+)
+def test_populate_claims_for_workload(job_attrs, expected_claims):
+    job = mock.MagicMock(spec=Job)
+    job.id = None
+    job.name = None
+    job.job_type = None
+    job.launch_type = None
+    job.playbook = None
+    job.organization = None
+    job.inventory = None
+    job.project = None
+    job.execution_environment = None
+    job.job_template = None
+    job.unified_job_template = None
+    job.instance_group = None
+    job.launched_by = None
+
+    for attr, value in job_attrs.items():
+        setattr(job, attr, value)
+
+    claims = jobs.populate_claims_for_workload(job)
+    assert claims == expected_claims

@@ -92,7 +92,61 @@ from awx.main.utils.update_model import update_model
 # Django flags
 from flags.state import flag_enabled
 
+# Workload Identity
+from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
+
 logger = logging.getLogger('awx.main.tasks.jobs')
+
+
+def populate_claims_for_workload(workload):
+    """
+    Extract JWT claims from a Job workload for the aap_controller_automation_job scope.
+    Missing or null attributes are omitted from the returned claims dictionary.
+    """
+
+    def safe_get(obj, *attrs):
+        """Safely traverse object attributes and dictionary keys."""
+        for attr in attrs:
+            if obj is None:
+                return None
+            if isinstance(obj, dict):
+                obj = obj.get(attr)
+            else:
+                obj = getattr(obj, attr, None)
+        return obj
+
+    claim_mappings = [
+        (AutomationControllerJobScope.CLAIM_JOB_ID, ('id',)),
+        (AutomationControllerJobScope.CLAIM_JOB_NAME, ('name',)),
+        (AutomationControllerJobScope.CLAIM_JOB_TYPE, ('job_type',)),
+        (AutomationControllerJobScope.CLAIM_LAUNCH_TYPE, ('launch_type',)),
+        (AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME, ('playbook',)),
+        (AutomationControllerJobScope.CLAIM_LAUNCHED_BY_USER_NAME, ('launched_by', 'name')),
+        (AutomationControllerJobScope.CLAIM_LAUNCHED_BY_USER_ID, ('launched_by', 'id')),
+        (AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME, ('organization', 'name')),
+        (AutomationControllerJobScope.CLAIM_ORGANIZATION_ID, ('organization', 'id')),
+        (AutomationControllerJobScope.CLAIM_INVENTORY_NAME, ('inventory', 'name')),
+        (AutomationControllerJobScope.CLAIM_INVENTORY_ID, ('inventory', 'id')),
+        (AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_NAME, ('execution_environment', 'name')),
+        (AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID, ('execution_environment', 'id')),
+        (AutomationControllerJobScope.CLAIM_PROJECT_NAME, ('project', 'name')),
+        (AutomationControllerJobScope.CLAIM_PROJECT_ID, ('project', 'id')),
+        (AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME, ('job_template', 'name')),
+        (AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_ID, ('job_template', 'id')),
+        (AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_NAME, ('unified_job_template', 'name')),
+        (AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID, ('unified_job_template', 'id')),
+        (AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME, ('instance_group', 'name')),
+        (AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID, ('instance_group', 'id')),
+    ]
+
+    claims = {}
+    for claim_key, attr_path in claim_mappings:
+        value = safe_get(workload, *attr_path)
+
+        if value is not None and value != '':
+            claims[claim_key] = value
+
+    return claims
 
 
 def with_path_cleanup(f):
