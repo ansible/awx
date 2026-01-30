@@ -84,11 +84,6 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 if resp.status_code not in [301, 307]:
                     break
 
-                # we've hit a redirect. extract the redirect URL out of the first response header and try again
-                logger.warning(
-                    f"Received a {resp.status_code} from {url}, trying to reach redirect url {resp.headers.get('Location', None)}; attempt #{retries+1}"
-                )
-
                 # take the first redirect URL in the response header and try that
                 url = resp.headers.get("Location", None)
 
