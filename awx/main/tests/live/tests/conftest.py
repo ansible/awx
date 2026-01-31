@@ -69,7 +69,7 @@ def live_tmp_folder():
         settings._awx_conf_memoizedcache.clear()
         # cache is cleared in test environment, but need to clear in test environment
         clear_setting_cache.delay(['AWX_ISOLATION_SHOW_PATHS'])
-        time.sleep(0.2)  # allow task to finish, we have no real metric to know
+        time.sleep(5.0)  # for _awx_conf_memoizedcache to expire on all workers
     else:
         logger.info(f'Believed that {path} is already in settings.AWX_ISOLATION_SHOW_PATHS: {settings.AWX_ISOLATION_SHOW_PATHS}')
     return path
