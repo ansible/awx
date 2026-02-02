@@ -9,6 +9,47 @@ from drf_spectacular.views import (
 )
 
 
+def filter_credential_type_schema(result, _generator, _request, _public):
+    """
+    Postprocessing hook to filter CredentialType kind enum values.
+
+    For CredentialTypeRequest and PatchedCredentialTypeRequest schemas (POST/PUT/PATCH),
+    filter the 'kind' enum to only show 'cloud' and 'net' values.
+
+    This ensures the OpenAPI schema accurately reflects that only 'cloud' and 'net'
+    credential types can be created or modified via the API, matching the validation
+    in CredentialTypeSerializer.validate().
+
+    Args:
+        result: The OpenAPI schema dict to be modified
+        _generator: Schema generator instance (required by drf-spectacular, unused)
+        _request: Request object (required by drf-spectacular, unused)
+        _public: Public schema flag (required by drf-spectacular, unused)
+
+    Returns:
+        The modified OpenAPI schema dict
+    """
+    schemas = result.get('components', {}).get('schemas', {})
+
+    # Filter CredentialTypeRequest (POST/PUT) - field is required
+    if 'CredentialTypeRequest' in schemas:
+        kind_prop = schemas['CredentialTypeRequest'].get('properties', {}).get('kind', {})
+        if 'enum' in kind_prop:
+            # Filter to only cloud and net (no None - field is required)
+            kind_prop['enum'] = ['cloud', 'net']
+            kind_prop['description'] = "* `cloud` - Cloud\\n* `net` - Network"
+
+    # Filter PatchedCredentialTypeRequest (PATCH) - field is optional
+    if 'PatchedCredentialTypeRequest' in schemas:
+        kind_prop = schemas['PatchedCredentialTypeRequest'].get('properties', {}).get('kind', {})
+        if 'enum' in kind_prop:
+            # Filter to only cloud and net (None allowed - field can be omitted in PATCH)
+            kind_prop['enum'] = ['cloud', 'net', None]
+            kind_prop['description'] = "* `cloud` - Cloud\\n* `net` - Network"
+
+    return result
+
+
 class CustomAutoSchema(AutoSchema):
     """Custom AutoSchema to add swagger_topic to tags and handle deprecated endpoints."""
 
