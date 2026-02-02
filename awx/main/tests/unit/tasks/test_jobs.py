@@ -271,7 +271,7 @@ def _mock(id, name=''):
         ),
     ],
 )
-def test_populate_claims_for_workload(job_attrs, expected_claims):
+def test_populate_claims_for_job(job_attrs, expected_claims):
     job = mock.MagicMock(spec=Job)
     job.id = None
     job.name = None
@@ -290,5 +290,5 @@ def test_populate_claims_for_workload(job_attrs, expected_claims):
     for attr, value in job_attrs.items():
         setattr(job, attr, value)
 
-    claims = jobs.populate_claims_for_workload(job)
+    claims = jobs.populate_claims_for_job(job)
     assert claims == expected_claims
