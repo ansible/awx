@@ -133,7 +133,7 @@ class WebhookReceiverBase(APIView):
 
     @csrf_exempt
     @extend_schema_if_available(extensions={"x-ai-description": "Receive a webhook event and trigger a job"})
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs_in):
         # Ensure that the full contents of the request are captured for multiple uses.
         request.body
 
