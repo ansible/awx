@@ -1230,7 +1230,7 @@ class OrganizationSerializer(BaseSerializer, OpaQueryPathMixin):
         # to a team. This provides a hint to the ui so it can know to not
         # display these roles for team role selection.
         for key in ('admin_role', 'member_role'):
-            if key in summary_dict.get('object_roles', {}):
+            if summary_dict and key in summary_dict.get('object_roles', {}):
                 summary_dict['object_roles'][key]['user_only'] = True
 
         return summary_dict
