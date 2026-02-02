@@ -3527,7 +3527,7 @@ class JobRelaunchSerializer(BaseSerializer):
         choices=NEW_JOB_TYPE_CHOICES,
         write_only=True,
     )
-    credential_passwords = VerbatimField(required=True, write_only=True)
+    credential_passwords = VerbatimField(required=False, write_only=True)
 
     class Meta:
         model = Job

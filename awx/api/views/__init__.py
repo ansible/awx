@@ -378,6 +378,10 @@ class DashboardJobsGraphView(APIView):
 
 
 class InstanceList(ListCreateAPIView):
+    """
+    Creates an instance if used on a Kubernetes or OpenShift deployment of Ansible Automation Platform.
+    """
+
     name = _("Instances")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
@@ -1603,7 +1607,11 @@ class CredentialExternalTest(SubDetailAPIView):
     obj_permission_type = 'use'
     resource_purpose = 'test external credential'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Test update the input values and metadata of an external credential"})
+    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential. 
+        This endpoint supports testing credentials that connect to external secret management systems 
+        such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, 
+        Centrify Vault, Thycotic DevOps Secrets Vault, and GitHub App Installation Access Token Lookup.
+        It does not support standard credential types such as Machine, SCM, and Cloud."""})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         backend_kwargs = {}
@@ -1618,8 +1626,11 @@ class CredentialExternalTest(SubDetailAPIView):
                 obj.credential_type.plugin.backend(**backend_kwargs)
                 return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}'.format(exc.response.status_code)
-            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
+            message = """Test operation is not supported for credential type {}. 
+                This endpoint only supports credentials that connect to 
+                external secret management systems such as CyberArk, HashiCorp 
+                Vault, or cloud-based secret managers.""".format(obj.credential_type.kind)
+            return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
             message = exc.__class__.__name__
             exc_args = getattr(exc, 'args', [])
@@ -2476,7 +2487,13 @@ class JobTemplateLaunch(RetrieveAPIView):
     always_allow_superuser = False
     resource_purpose = 'launch a job from a job template'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Retrieve details for a job template launch'},
+    )
     def update_raw_data(self, data):
+        """
+        Use the ID of a job template to retrieve its launch details.
+        """
         try:
             obj = self.get_object()
         except PermissionDenied:
@@ -3317,7 +3334,13 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
     always_allow_superuser = False
     resource_purpose = 'launch a workflow job from a workflow job template'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Retrieve details for a workflow job template launch'},
+    )
     def update_raw_data(self, data):
+        """
+        Use the ID of a workflow job template to retrieve its launch details.
+        """
         try:
             obj = self.get_object()
         except PermissionDenied:
@@ -3716,7 +3739,11 @@ class JobRelaunch(RetrieveAPIView):
     serializer_class = serializers.JobRelaunchSerializer
     resource_purpose = 'relaunch a job'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Retrieve job relaunch information'},
+    )
     def update_raw_data(self, data):
+        """Use the ID of a job to retrieve data on retry attempts and necessary passwords."""
         data = super(JobRelaunch, self).update_raw_data(data)
         try:
             obj = self.get_object()
