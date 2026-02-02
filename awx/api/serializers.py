@@ -2165,13 +2165,13 @@ class BulkHostDeleteSerializer(serializers.Serializer):
         attrs['hosts_data'] = attrs['host_qs'].values()
 
         if len(attrs['host_qs']) == 0:
-            error_hosts = {host: "Hosts do not exist or you lack permission to delete it" for host in attrs['hosts']}
+            error_hosts = dict.fromkeys(attrs['hosts'], "Hosts do not exist or you lack permission to delete it")
             raise serializers.ValidationError({'hosts': error_hosts})
 
         if len(attrs['host_qs']) < len(attrs['hosts']):
             hosts_exists = [host['id'] for host in attrs['hosts_data']]
             failed_hosts = list(set(attrs['hosts']).difference(hosts_exists))
-            error_hosts = {host: "Hosts do not exist or you lack permission to delete it" for host in failed_hosts}
+            error_hosts = dict.fromkeys(failed_hosts, "Hosts do not exist or you lack permission to delete it")
             raise serializers.ValidationError({'hosts': error_hosts})
 
         # Getting all inventories that the hosts can be in
