@@ -130,6 +130,7 @@ class SettingsRegistry(object):
         unit = field_kwargs.pop('unit', None)
         hidden = field_kwargs.pop('hidden', False)
         warning_text = field_kwargs.pop('warning_text', None)
+        allow_db_override = field_kwargs.pop('allow_db_override', False)
         if getattr(field_kwargs.get('child', None), 'source', None) is not None:
             field_kwargs['child'].source = None
         field_instance = field_class(**field_kwargs)

@@ -59,7 +59,8 @@ def app_post_migration(sender, app_config, **kwargs):
         elif tblname == 'main_systemjobevent':
             unique_columns = "system_job_id integer NOT NULL"
 
-        cur.execute(f"""CREATE TABLE _unpartitioned_{tblname} (
+        cur.execute(
+            f"""CREATE TABLE _unpartitioned_{tblname} (
             id bigint NOT NULL,
             created timestamp with time zone NOT NULL,
             modified timestamp with time zone NOT NULL,
@@ -71,7 +72,8 @@ def app_post_migration(sender, app_config, **kwargs):
             uuid character varying(1024) NOT NULL,
             verbosity integer NOT NULL,
             {unique_columns});
-        """)
+        """
+        )
 
 
 if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':

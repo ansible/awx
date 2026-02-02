@@ -303,9 +303,14 @@ class SettingsWrapper(UserSettingsHolder):
                     except AttributeError:
                         file_default = None
                     if file_default != init_default and file_default is not None:
-                        logger.debug('Setting %s has been marked read-only!', key)
-                        self.registry._registry[key]['read_only'] = True
-                        self.registry._registry[key]['defined_in_file'] = True
+                        # If allow_db_override is True, don't mark this setting as read-only
+                        # even if it was defined in a config file.
+                        if self.registry._registry[key].get('allow_db_override', False):
+                            logger.debug('Setting %s was defined in file but allows DB override.', key)
+                        else:
+                            logger.debug('Setting %s has been marked read-only!', key)
+                            self.registry._registry[key]['read_only'] = True
+                            self.registry._registry[key]['defined_in_file'] = True
                     self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.

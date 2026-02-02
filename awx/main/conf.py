@@ -76,6 +76,7 @@ register(
     ),
     category=_('System'),
     category_slug='system',
+    allow_db_override=True,
 )
 
 register(
