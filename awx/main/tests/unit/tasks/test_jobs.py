@@ -18,6 +18,10 @@ from awx.main.models import (
     Job,
     Organization,
     Project,
+    JobTemplate,
+    UnifiedJobTemplate,
+    InstanceGroup,
+    ExecutionEnvironment,
 )
 from awx.main.tasks import jobs
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
@@ -31,6 +35,11 @@ def private_data_dir():
         os.makedirs(runner_subfolder, exist_ok=True)
     yield private_data
     shutil.rmtree(private_data, True)
+
+
+@pytest.fixture
+def job():
+    return Job(pk=1, id=1, project=Project(local_path='/projects/_23_foo'), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
 
 
 @mock.patch('awx.main.tasks.facts.settings')
@@ -191,13 +200,6 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
             pytest.fail(f" {len(failures)} facts cleared failures : {','.join(failures)}")
 
 
-def _mock(id, name=''):
-    obj = mock.Mock()
-    obj.id = id
-    obj.name = name
-    return obj
-
-
 @pytest.mark.parametrize(
     "job_attrs,expected_claims",
     [
@@ -208,13 +210,13 @@ def _mock(id, name=''):
                 'job_type': 'run',
                 'launch_type': 'manual',
                 'playbook': 'site.yml',
-                'organization': _mock(1, 'Test Org'),
-                'inventory': _mock(2, 'Test Inventory'),
-                'project': _mock(3, 'Test Project'),
-                'execution_environment': _mock(4, 'Test EE'),
-                'job_template': _mock(5, 'Test Job Template'),
-                'unified_job_template': _mock(6, 'Test Unified Job Template'),
-                'instance_group': _mock(7, 'Test Instance Group'),
+                'organization': Organization(id=1, name='Test Org'),
+                'inventory': Inventory(id=2, name='Test Inventory'),
+                'project': Project(id=3, name='Test Project'),
+                'execution_environment': ExecutionEnvironment(id=4, name='Test EE'),
+                'job_template': JobTemplate(id=5, name='Test Job Template'),
+                'unified_job_template': UnifiedJobTemplate(id=6, name='Test Unified Job Template'),
+                'instance_group': InstanceGroup(id=7, name='Test Instance Group'),
                 'launched_by': {'id': 10, 'name': 'admin'},
             },
             {
@@ -260,7 +262,7 @@ def _mock(id, name=''):
             },
         ),
         (
-            {'id': 100, 'name': 'Test', 'job_type': 'run', 'launch_type': 'manual', 'organization': _mock(1, '')},
+            {'id': 100, 'name': 'Test', 'job_type': 'run', 'launch_type': 'manual', 'organization': Organization(id=1, name='')},
             {
                 AutomationControllerJobScope.CLAIM_JOB_ID: 100,
                 AutomationControllerJobScope.CLAIM_JOB_NAME: 'Test',
@@ -271,22 +273,7 @@ def _mock(id, name=''):
         ),
     ],
 )
-def test_populate_claims_for_job(job_attrs, expected_claims):
-    job = mock.MagicMock(spec=Job)
-    job.id = None
-    job.name = None
-    job.job_type = None
-    job.launch_type = None
-    job.playbook = None
-    job.organization = None
-    job.inventory = None
-    job.project = None
-    job.execution_environment = None
-    job.job_template = None
-    job.unified_job_template = None
-    job.instance_group = None
-    job.launched_by = None
-
+def test_populate_claims_for_job(job, job_attrs, expected_claims):
     for attr, value in job_attrs.items():
         setattr(job, attr, value)
 
