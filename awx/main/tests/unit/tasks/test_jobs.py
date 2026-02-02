@@ -37,11 +37,6 @@ def private_data_dir():
     shutil.rmtree(private_data, True)
 
 
-@pytest.fixture
-def job():
-    return Job(pk=1, id=1, project=Project(local_path='/projects/_23_foo'), inventory=Inventory(), job_template=JobTemplate(id=1, name='foo'))
-
-
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
 def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
@@ -217,7 +212,6 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
                 'job_template': JobTemplate(id=5, name='Test Job Template'),
                 'unified_job_template': UnifiedJobTemplate(id=6, name='Test Unified Job Template'),
                 'instance_group': InstanceGroup(id=7, name='Test Instance Group'),
-                'launched_by': {'id': 10, 'name': 'admin'},
             },
             {
                 AutomationControllerJobScope.CLAIM_JOB_ID: 100,
@@ -225,8 +219,6 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
                 AutomationControllerJobScope.CLAIM_JOB_TYPE: 'run',
                 AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: 'manual',
                 AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME: 'site.yml',
-                AutomationControllerJobScope.CLAIM_LAUNCHED_BY_USER_NAME: 'admin',
-                AutomationControllerJobScope.CLAIM_LAUNCHED_BY_USER_ID: 10,
                 AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: 'Test Org',
                 AutomationControllerJobScope.CLAIM_ORGANIZATION_ID: 1,
                 AutomationControllerJobScope.CLAIM_INVENTORY_NAME: 'Test Inventory',
@@ -273,7 +265,9 @@ def test_invalid_host_facts(mock_facts_settings, bulk_update_sorted_by_id, priva
         ),
     ],
 )
-def test_populate_claims_for_job(job, job_attrs, expected_claims):
+def test_populate_claims_for_job(job_attrs, expected_claims):
+    job = Job()
+
     for attr, value in job_attrs.items():
         setattr(job, attr, value)
 
