@@ -918,7 +918,7 @@ class UnifiedJob(
 
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
-        if self.started and self.finished and self.elapsed == 0.0:
+        if self.started and self.finished and self.elapsed == decimal.Decimal(0):
             td = self.finished - self.started
             elapsed = decimal.Decimal(td.total_seconds())
             self.elapsed = elapsed.quantize(dq)
