@@ -61,7 +61,7 @@ body {
 .m1,.m2,.m3 {
     color: #151515;
     width: 100%;
-    font-family: redhat-display-medium;
+    font-family: redhat-display-medium, sans-serif;
 }
 
 .m1 {
