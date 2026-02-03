@@ -315,12 +315,11 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
     )
 
     def __init__(self, *args, **kwargs):
-        r = super(PrimordialModel, self).__init__(*args, **kwargs)
+        super(PrimordialModel, self).__init__(*args, **kwargs)
         if self.pk:
             self._prior_values_store = self._get_fields_snapshot()
         else:
             self._prior_values_store = {}
-        return r
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
