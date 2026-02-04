@@ -98,15 +98,13 @@ from ansible_base.lib.workload_identity.controller import AutomationControllerJo
 logger = logging.getLogger('awx.main.tasks.jobs')
 
 
-def populate_claims_for_job(job):
+def populate_claims_for_workload(workload):
     """
-    Extract JWT claims from a Job for the aap_controller_automation_job scope.
-    Missing or null attributes are omitted from the returned claims dictionary.
+    Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
     """
 
     def safe_get(*attrs):
-        """Safely traverse object attributes and dictionary keys."""
-        current = job
+        current = workload
         for attr in attrs:
             current = current.get(attr) if isinstance(current, dict) else getattr(current, attr, None)
         return current
