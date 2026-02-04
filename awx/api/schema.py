@@ -9,7 +9,12 @@ from drf_spectacular.views import (
 )
 
 
-def filter_credential_type_schema(result, _generator, _request, _public):
+def filter_credential_type_schema(
+    result,
+    generator,  # NOSONAR
+    request,  # NOSONAR
+    public,  # NOSONAR
+):
     """
     Postprocessing hook to filter CredentialType kind enum values.
 
@@ -22,9 +27,7 @@ def filter_credential_type_schema(result, _generator, _request, _public):
 
     Args:
         result: The OpenAPI schema dict to be modified
-        _generator: Schema generator instance (required by drf-spectacular, unused)
-        _request: Request object (required by drf-spectacular, unused)
-        _public: Public schema flag (required by drf-spectacular, unused)
+        generator, request, public: Required by drf-spectacular interface (unused)
 
     Returns:
         The modified OpenAPI schema dict
