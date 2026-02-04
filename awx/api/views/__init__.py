@@ -1607,9 +1607,9 @@ class CredentialExternalTest(SubDetailAPIView):
     obj_permission_type = 'use'
     resource_purpose = 'test external credential'
 
-    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential. 
-        This endpoint supports testing credentials that connect to external secret management systems 
-        such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, 
+    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential.
+        This endpoint supports testing credentials that connect to external secret management systems
+        such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault,
         Centrify Vault, Thycotic DevOps Secrets Vault, and GitHub App Installation Access Token Lookup.
         It does not support standard credential types such as Machine, SCM, and Cloud."""})
     def post(self, request, *args, **kwargs):
@@ -1625,10 +1625,10 @@ class CredentialExternalTest(SubDetailAPIView):
             with set_environ(**settings.AWX_TASK_ENV):
                 obj.credential_type.plugin.backend(**backend_kwargs)
                 return Response({}, status=status.HTTP_202_ACCEPTED)
-        except requests.exceptions.HTTPError as exc:
-            message = """Test operation is not supported for credential type {}. 
-                This endpoint only supports credentials that connect to 
-                external secret management systems such as CyberArk, HashiCorp 
+        except requests.exceptions.HTTPError:
+            message = """Test operation is not supported for credential type {}.
+                This endpoint only supports credentials that connect to
+                external secret management systems such as CyberArk, HashiCorp
                 Vault, or cloud-based secret managers.""".format(obj.credential_type.kind)
             return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
