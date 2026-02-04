@@ -97,36 +97,39 @@ class DummyMetricsResponse:
         return False
 
 
-def test_dispatcherd_metrics_node_filter_match(monkeypatch, settings):
+def test_dispatcherd_metrics_node_filter_match(mocker, settings):
     settings.CLUSTER_HOST_ID = "awx-1"
     payload = b'# HELP test_metric A test metric\n# TYPE test_metric gauge\ntest_metric 1\n'
 
     def fake_urlopen(url, timeout=1.0):
         return DummyMetricsResponse(payload)
 
-    monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
     request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-1'}))
 
     assert get_dispatcherd_metrics(request) == payload.decode('utf-8')
 
 
-def test_dispatcherd_metrics_node_filter_excludes_local(monkeypatch, settings):
+def test_dispatcherd_metrics_node_filter_excludes_local(mocker, settings):
     settings.CLUSTER_HOST_ID = "awx-1"
 
     def fake_urlopen(*args, **kwargs):
         raise AssertionError("urlopen should not be called when node filter excludes local node")
 
-    monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
     request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-2'}))
 
     assert get_dispatcherd_metrics(request) == ''
 
 
-def test_dispatcherd_metrics_metric_filter_excludes_unrelated(monkeypatch):
+def test_dispatcherd_metrics_metric_filter_excludes_unrelated(mocker):
     def fake_urlopen(*args, **kwargs):
         raise AssertionError("urlopen should not be called when metric filter excludes dispatcherd metrics")
 
-    monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
     request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'awx_system_info'}))
 
     assert get_dispatcherd_metrics(request) == ''
