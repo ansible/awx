@@ -6,6 +6,7 @@ from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
 import awx.main.analytics.subsystem_metrics as s_metrics
+from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
 
 EXPECTED_VALUES = {
@@ -106,7 +107,7 @@ def test_dispatcherd_metrics_node_filter_match(monkeypatch, settings):
     monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
     request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-1'}))
 
-    assert s_metrics._get_dispatcherd_metrics(request) == payload.decode('utf-8')
+    assert get_dispatcherd_metrics(request) == payload.decode('utf-8')
 
 
 def test_dispatcherd_metrics_node_filter_excludes_local(monkeypatch, settings):
@@ -118,7 +119,7 @@ def test_dispatcherd_metrics_node_filter_excludes_local(monkeypatch, settings):
     monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
     request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-2'}))
 
-    assert s_metrics._get_dispatcherd_metrics(request) == ''
+    assert get_dispatcherd_metrics(request) == ''
 
 
 def test_dispatcherd_metrics_metric_filter_excludes_unrelated(monkeypatch):
@@ -128,4 +129,4 @@ def test_dispatcherd_metrics_metric_filter_excludes_unrelated(monkeypatch):
     monkeypatch.setattr(s_metrics.urllib.request, 'urlopen', fake_urlopen)
     request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'awx_system_info'}))
 
-    assert s_metrics._get_dispatcherd_metrics(request) == ''
+    assert get_dispatcherd_metrics(request) == ''
