@@ -2480,6 +2480,7 @@ class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIV
     always_allow_superuser = False
     resource_purpose = 'job template detail'
 
+
 @extend_schema_view(
     retrieve=extend_schema(
         extensions={'x-ai-description': 'List job template launch criteria'},
@@ -3327,6 +3328,7 @@ class WorkflowJobTemplateCopy(CopyAPIView):
 class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     parent_model = models.WorkflowJobTemplate
     resource_purpose = 'labels of a workflow job template'
+
 
 @extend_schema_view(
     retrieve=extend_schema(
