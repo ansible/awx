@@ -2479,7 +2479,11 @@ class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIV
     always_allow_superuser = False
     resource_purpose = 'job template detail'
 
-
+@extend_schema_if_available(
+    retrieve=extend_schema(
+        extensions={'x-ai-description': 'List job template launch criteria'},
+    )
+)
 class JobTemplateLaunch(RetrieveAPIView):
     model = models.JobTemplate
     obj_permission_type = 'start'
@@ -2487,9 +2491,6 @@ class JobTemplateLaunch(RetrieveAPIView):
     always_allow_superuser = False
     resource_purpose = 'launch a job from a job template'
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Retrieve details for a job template launch'},
-    )
     def update_raw_data(self, data):
         """
         Use the ID of a job template to retrieve its launch details.
@@ -3326,7 +3327,11 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     parent_model = models.WorkflowJobTemplate
     resource_purpose = 'labels of a workflow job template'
 
-
+@extend_schema_if_available(
+    retrieve=extend_schema(
+        extensions={'x-ai-description': 'List workflow job template launch criteria.'},
+    )
+)
 class WorkflowJobTemplateLaunch(RetrieveAPIView):
     model = models.WorkflowJobTemplate
     obj_permission_type = 'start'
@@ -3334,9 +3339,6 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
     always_allow_superuser = False
     resource_purpose = 'launch a workflow job from a workflow job template'
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Retrieve details for a workflow job template launch'},
-    )
     def update_raw_data(self, data):
         """
         Use the ID of a workflow job template to retrieve its launch details.
@@ -3733,15 +3735,17 @@ class JobCancel(GenericCancelView):
         return super().post(request, *args, **kwargs)
 
 
+@extend_schema_if_available(
+    retrieve=extend_schema(
+        extensions={'x-ai-description': 'List job relaunch criteria'},
+    )
+)
 class JobRelaunch(RetrieveAPIView):
     model = models.Job
     obj_permission_type = 'start'
     serializer_class = serializers.JobRelaunchSerializer
     resource_purpose = 'relaunch a job'
 
-    @extend_schema_if_available(
-        extensions={'x-ai-description': 'Retrieve job relaunch information'},
-    )
     def update_raw_data(self, data):
         """Use the ID of a job to retrieve data on retry attempts and necessary passwords."""
         data = super(JobRelaunch, self).update_raw_data(data)
