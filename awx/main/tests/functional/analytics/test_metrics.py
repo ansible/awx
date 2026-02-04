@@ -5,7 +5,6 @@ from prometheus_client.parser import text_string_to_metric_families
 from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
-import awx.main.analytics.subsystem_metrics as s_metrics
 from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
 
