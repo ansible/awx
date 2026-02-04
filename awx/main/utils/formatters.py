@@ -257,8 +257,7 @@ class LogstashFormatter(LogstashFormatterBase):
         return fields
 
     def format(self, record):
-        stamp = datetime.utcfromtimestamp(record.created)
-        stamp = stamp.replace(tzinfo=tzutc())
+        stamp = datetime.fromtimestamp(record.created, tz=tzutc())
         message = {
             # Field not included, but exist in related logs
             # 'path': record.pathname

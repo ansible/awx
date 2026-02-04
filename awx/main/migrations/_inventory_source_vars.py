@@ -386,7 +386,6 @@ class gce(PluginFileInjector):
         # auth related items
         ret['auth_kind'] = "serviceaccount"
 
-        filters = []
         # TODO: implement gce group_by options
         # gce never processed the group_by field, if it had, we would selectively
         # apply those options here, but it did not, so all groups are added here
@@ -420,8 +419,6 @@ class gce(PluginFileInjector):
 
         if keyed_groups:
             ret['keyed_groups'] = keyed_groups
-        if filters:
-            ret['filters'] = filters
         if compose_dict:
             ret['compose'] = compose_dict
         if inventory_source.source_regions and 'all' not in inventory_source.source_regions:
