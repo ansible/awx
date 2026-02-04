@@ -52,6 +52,7 @@ from ansi2html import Ansi2HTMLConverter
 
 from datetime import timezone as dt_timezone
 from wsgiref.util import FileWrapper
+from drf_spectacular.schema import extend_schema_view
 
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
@@ -2479,7 +2480,7 @@ class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIV
     always_allow_superuser = False
     resource_purpose = 'job template detail'
 
-@extend_schema_if_available(
+@extend_schema_view(
     retrieve=extend_schema(
         extensions={'x-ai-description': 'List job template launch criteria'},
     )
@@ -3327,7 +3328,7 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     parent_model = models.WorkflowJobTemplate
     resource_purpose = 'labels of a workflow job template'
 
-@extend_schema_if_available(
+@extend_schema_view(
     retrieve=extend_schema(
         extensions={'x-ai-description': 'List workflow job template launch criteria.'},
     )
@@ -3735,7 +3736,7 @@ class JobCancel(GenericCancelView):
         return super().post(request, *args, **kwargs)
 
 
-@extend_schema_if_available(
+@extend_schema_view(
     retrieve=extend_schema(
         extensions={'x-ai-description': 'List job relaunch criteria'},
     )
