@@ -1,6 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+import base64
 import json
 import logging
 import requests
@@ -84,20 +85,25 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 if resp.status_code not in [301, 307]:
                     break
 
+                # convert the url to a base64 encoded string for safe logging
+                url_log_safe = base64.b64encode(url.encode('UTF-8'))
+
+                # get the next URL to try
+                url_next = resp.headers.get("Location", None)
+                url_next_log_safe = base64.b64encode(url_next.encode('UTF-8')) if url_next else b'None'
+
                 # we've hit a redirect. extract the redirect URL out of the first response header and try again
-                logger.warning(
-                    f"Received a {resp.status_code} from {url}, trying to reach redirect url {resp.headers.get('Location', None)}; attempt #{retries+1}"
-                )
+                logger.warning(f"Received a {resp.status_code} from {url_log_safe}, trying to reach redirect url {url_next_log_safe}; attempt #{retries+1}")
 
                 # take the first redirect URL in the response header and try that
-                url = resp.headers.get("Location", None)
+                url = url_next
 
                 if url is None:
-                    err = f"Webhook notification received redirect to a blank URL from {url}. Response headers={resp.headers}"
+                    err = f"Webhook notification received redirect to a blank URL from {url_log_safe}. Response headers={resp.headers}"
                     break
             else:
                 # no break condition in the loop encountered; therefore we have hit the maximum number of retries
-                err = f"Webhook notification max number of retries [{self.MAX_RETRIES}] exceeded. Failed to send webhook notification to {url}"
+                err = f"Webhook notification max number of retries [{self.MAX_RETRIES}] exceeded. Failed to send webhook notification to {url_log_safe}"
 
             if resp.status_code >= 400:
                 err = f"Error sending webhook notification: {resp.status_code}"

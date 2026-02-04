@@ -76,10 +76,12 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
             grafana_headers = {}
             if 'started' in m.body:
                 try:
-                    epoch = datetime.datetime.utcfromtimestamp(0)
-                    grafana_data['time'] = grafana_data['timeEnd'] = int((dp.parse(m.body['started']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
+                    epoch = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
+                    grafana_data['time'] = grafana_data['timeEnd'] = int(
+                        (dp.parse(m.body['started']).replace(tzinfo=datetime.timezone.utc) - epoch).total_seconds() * 1000
+                    )
                     if m.body.get('finished'):
-                        grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
+                        grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=datetime.timezone.utc) - epoch).total_seconds() * 1000)
                 except ValueError:
                     logger.error(smart_str(_("Error converting time {} or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
                     if not self.fail_silently:

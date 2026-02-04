@@ -918,7 +918,7 @@ class UnifiedJob(
 
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
-        if self.started and self.finished and self.elapsed == 0.0:
+        if self.started and self.finished and self.elapsed == decimal.Decimal(0):
             td = self.finished - self.started
             elapsed = decimal.Decimal(td.total_seconds())
             self.elapsed = elapsed.quantize(dq)
@@ -1354,8 +1354,6 @@ class UnifiedJob(
                     status_data['instance_group_name'] = None
             elif status in ['successful', 'failed', 'canceled'] and self.finished:
                 status_data['finished'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
-            elif status == 'running':
-                status_data['started'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
             if getattr(self, 'unified_job_template_id', None):

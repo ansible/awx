@@ -50,9 +50,8 @@ class HasPolicyEditsMixin(HasEditsMixin):
         abstract = True
 
     def __init__(self, *args, **kwargs):
-        r = super(BaseModel, self).__init__(*args, **kwargs)
+        super(BaseModel, self).__init__(*args, **kwargs)
         self._prior_values_store = self._get_fields_snapshot()
-        return r
 
     def save(self, *args, **kwargs):
         super(BaseModel, self).save(*args, **kwargs)
