@@ -52,7 +52,7 @@ from ansi2html import Ansi2HTMLConverter
 
 from datetime import timezone as dt_timezone
 from wsgiref.util import FileWrapper
-from drf_spectacular.schema import extend_schema_view
+from drf_spectacular.utils import extend_schema_view, extend_schema
 
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
