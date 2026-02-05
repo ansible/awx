@@ -15,6 +15,7 @@ from rest_framework.request import Request
 from awx.main.consumers import emit_channel_notification
 from awx.main.utils import is_testing
 from awx.main.utils.redis import get_redis_client
+from .dispatcherd_metrics import get_dispatcherd_metrics
 
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')
@@ -398,11 +399,6 @@ class DispatcherMetrics(Metrics):
         SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
         SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
         SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
-        # dispatcher subsystem metrics
-        SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
-        SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
-        SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
-        SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -430,8 +426,12 @@ class CallbackReceiverMetrics(Metrics):
 
 def metrics(request):
     output_text = ''
-    for m in [DispatcherMetrics(), CallbackReceiverMetrics()]:
-        output_text += m.generate_metrics(request)
+    output_text += DispatcherMetrics().generate_metrics(request)
+    output_text += CallbackReceiverMetrics().generate_metrics(request)
+
+    dispatcherd_metrics = get_dispatcherd_metrics(request)
+    if dispatcherd_metrics:
+        output_text += dispatcherd_metrics
     return output_text
 
 
@@ -479,13 +479,6 @@ class CallbackReceiverMetricsServer(MetricsServer):
         registry = CollectorRegistry(auto_describe=True)
         registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
-
-
-class DispatcherMetricsServer(MetricsServer):
-    def __init__(self):
-        registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
-        super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
 
 
 class WebsocketsMetricsServer(MetricsServer):

@@ -14,7 +14,7 @@ $(function() {
   $('span.str').each(function() {
     var s = $(this).html();
     if (s.match(/^\"\/.+\/\"$/) || s.match(/^\"\/.+\/\?.*\"$/)) {
-      $(this).html('"<a href=' + s + '>' + s.replace(/\"/g, '') + '</a>"');
+      $(this).html('"<a href=' + s + '>' + s.replaceAll('"', '') + '</a>"');
     }
   });
 
@@ -27,7 +27,7 @@ $(function() {
     }).each(function() {
       $(this).nextUntil('span.pun:contains("]")').filter('span.str').each(function() {
         if ($(this).text().match(/^\".+\"$/)) {
-          var s = $(this).text().replace(/\"/g, '');
+          var s = $(this).text().replaceAll('"', '');
           $(this).html('"<a href="' + '?host=' + s + '">' + s + '</a>"');
         }
         else if ($(this).text() !== '"') {

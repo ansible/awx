@@ -52,6 +52,7 @@ from ansi2html import Ansi2HTMLConverter
 
 from datetime import timezone as dt_timezone
 from wsgiref.util import FileWrapper
+from drf_spectacular.utils import extend_schema_view, extend_schema
 
 # django-ansible-base
 from ansible_base.lib.utils.requests import get_remote_hosts
@@ -378,6 +379,10 @@ class DashboardJobsGraphView(APIView):
 
 
 class InstanceList(ListCreateAPIView):
+    """
+    Creates an instance if used on a Kubernetes or OpenShift deployment of Ansible Automation Platform.
+    """
+
     name = _("Instances")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
@@ -1603,7 +1608,11 @@ class CredentialExternalTest(SubDetailAPIView):
     obj_permission_type = 'use'
     resource_purpose = 'test external credential'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Test update the input values and metadata of an external credential"})
+    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential.
+        This endpoint supports testing credentials that connect to external secret management systems
+        such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault,
+        Centrify Vault, Thycotic DevOps Secrets Vault, and GitHub App Installation Access Token Lookup.
+        It does not support standard credential types such as Machine, SCM, and Cloud."""})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         backend_kwargs = {}
@@ -1617,13 +1626,16 @@ class CredentialExternalTest(SubDetailAPIView):
             with set_environ(**settings.AWX_TASK_ENV):
                 obj.credential_type.plugin.backend(**backend_kwargs)
                 return Response({}, status=status.HTTP_202_ACCEPTED)
-        except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}'.format(exc.response.status_code)
-            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
+        except requests.exceptions.HTTPError:
+            message = """Test operation is not supported for credential type {}.
+                This endpoint only supports credentials that connect to
+                external secret management systems such as CyberArk, HashiCorp
+                Vault, or cloud-based secret managers.""".format(obj.credential_type.kind)
+            return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
             message = exc.__class__.__name__
-            args = getattr(exc, 'args', [])
-            for a in args:
+            exc_args = getattr(exc, 'args', [])
+            for a in exc_args:
                 if isinstance(getattr(a, 'reason', None), ConnectTimeoutError):
                     message = str(a.reason)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
@@ -1681,8 +1693,8 @@ class CredentialTypeExternalTest(SubDetailAPIView):
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
             message = exc.__class__.__name__
-            args = getattr(exc, 'args', [])
-            for a in args:
+            args_exc = getattr(exc, 'args', [])
+            for a in args_exc:
                 if isinstance(getattr(a, 'reason', None), ConnectTimeoutError):
                     message = str(a.reason)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
@@ -2469,6 +2481,11 @@ class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIV
     resource_purpose = 'job template detail'
 
 
+@extend_schema_view(
+    retrieve=extend_schema(
+        extensions={'x-ai-description': 'List job template launch criteria'},
+    )
+)
 class JobTemplateLaunch(RetrieveAPIView):
     model = models.JobTemplate
     obj_permission_type = 'start'
@@ -2477,6 +2494,9 @@ class JobTemplateLaunch(RetrieveAPIView):
     resource_purpose = 'launch a job from a job template'
 
     def update_raw_data(self, data):
+        """
+        Use the ID of a job template to retrieve its launch details.
+        """
         try:
             obj = self.get_object()
         except PermissionDenied:
@@ -3310,6 +3330,11 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     resource_purpose = 'labels of a workflow job template'
 
 
+@extend_schema_view(
+    retrieve=extend_schema(
+        extensions={'x-ai-description': 'List workflow job template launch criteria.'},
+    )
+)
 class WorkflowJobTemplateLaunch(RetrieveAPIView):
     model = models.WorkflowJobTemplate
     obj_permission_type = 'start'
@@ -3318,6 +3343,9 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
     resource_purpose = 'launch a workflow job from a workflow job template'
 
     def update_raw_data(self, data):
+        """
+        Use the ID of a workflow job template to retrieve its launch details.
+        """
         try:
             obj = self.get_object()
         except PermissionDenied:
@@ -3710,6 +3738,11 @@ class JobCancel(GenericCancelView):
         return super().post(request, *args, **kwargs)
 
 
+@extend_schema_view(
+    retrieve=extend_schema(
+        extensions={'x-ai-description': 'List job relaunch criteria'},
+    )
+)
 class JobRelaunch(RetrieveAPIView):
     model = models.Job
     obj_permission_type = 'start'
@@ -3717,6 +3750,7 @@ class JobRelaunch(RetrieveAPIView):
     resource_purpose = 'relaunch a job'
 
     def update_raw_data(self, data):
+        """Use the ID of a job to retrieve data on retry attempts and necessary passwords."""
         data = super(JobRelaunch, self).update_raw_data(data)
         try:
             obj = self.get_object()
