@@ -1000,9 +1000,15 @@ def getattrd(obj, name, default=NoDefaultProvided):
         raise
 
 
-def getattr_dne(obj, name, notfound=ObjectDoesNotExist):
+empty = object()
+
+
+def getattr_dne(obj, name, default=empty, notfound=ObjectDoesNotExist):
     try:
-        return getattr(obj, name)
+        if default is empty:
+            return getattr(obj, name)
+        else:
+            return getattr(obj, name, default)
     except notfound:
         return None
 
