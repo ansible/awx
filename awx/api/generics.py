@@ -178,7 +178,6 @@ class APIView(views.APIView):
         """
         remote_headers = ['REMOTE_ADDR', 'REMOTE_HOST']
 
-        self.time_started = time.time()
         if getattr(settings, 'SQL_DEBUG', False):
             self.queries_before = len(connection.queries)
 
@@ -272,15 +271,13 @@ class APIView(views.APIView):
                 logger.warning(status_msg)
 
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
-        time_started = getattr(self, 'time_started', None)
         if request.user.is_authenticated:
             response['X-API-Product-Version'] = get_awx_version()
         response['X-API-Product-Name'] = detect_server_product_name()
+        # Note: X-API-Time and X-API-Node are added by ObservabilityMiddleware when profiling is enabled
 
-        response['X-API-Node'] = settings.CLUSTER_HOST_ID
-        if time_started:
-            time_elapsed = time.time() - self.time_started
-            response['X-API-Time'] = '%0.3fs' % time_elapsed
+        # SQL_DEBUG is a legacy setting, kept for backwards compatibility
+        # For production use, enable ANSIBLE_BASE_SQL_PROFILING instead
         if getattr(settings, 'SQL_DEBUG', False):
             queries_before = getattr(self, 'queries_before', 0)
             q_times = [float(q['time']) for q in connection.queries[queries_before:]]

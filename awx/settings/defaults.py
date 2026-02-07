@@ -9,7 +9,8 @@ import tempfile
 import socket
 
 DEBUG = True
-SQL_DEBUG = DEBUG
+# SQL_DEBUG is a legacy setting - use ANSIBLE_BASE_SQL_PROFILING instead
+SQL_DEBUG = False
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
