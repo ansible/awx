@@ -1,4 +1,3 @@
-from datetime import date
 from unittest import mock
 
 import pytest
@@ -253,7 +252,7 @@ def test_user_verify_attribute_created(admin, get):
     resp = get(reverse('api:user_detail', kwargs={'pk': admin.pk}), admin)
     assert resp.data['created'] == admin.date_joined
 
-    past = date(2020, 1, 1).isoformat()
+    past = "2020-01-01T00:00:00Z"
     for op, count in (('gt', 1), ('lt', 0)):
         resp = get(reverse('api:user_list') + f'?created__{op}={past}', admin)
         assert resp.data['count'] == count
