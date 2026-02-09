@@ -113,15 +113,23 @@ def populate_claims_for_workload(unified_job) -> dict:
         AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
         AutomationControllerJobScope.CLAIM_JOB_NAME: unified_job.name,
         AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: unified_job.launch_type,
-        AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: organization.name if organization else None,
-        AutomationControllerJobScope.CLAIM_ORGANIZATION_ID: unified_job.organization_id,
-        AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_NAME: ujt.name if ujt else None,
-        AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID: unified_job.unified_job_template_id,
-        AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME: instance_group.name if instance_group else None,
-        AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID: unified_job.instance_group_id,
     }
 
-    # Related objects on concrete models
+    # Related objects in the UnifiedJob model, applies to all job types
+    # null cases are omitted because of OIDC
+    if organization := getattr_dne(unified_job, 'organization'):
+        claims[AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME] = organization.name
+        claims[AutomationControllerJobScope.CLAIM_ORGANIZATION_ID] = organization.id
+
+    if ujt := getattr_dne(unified_job, 'unified_job_template'):
+        claims[AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_NAME] = ujt.name
+        claims[AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID] = ujt.id
+
+    if instance_group := getattr_dne(unified_job, 'instance_group'):
+        claims[AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME] = instance_group.name
+        claims[AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID] = instance_group.id
+
+    # Related objects on concrete models, may not be valid for type of unified_job
     if inventory := getattr_dne(unified_job, 'inventory', None):
         claims[AutomationControllerJobScope.CLAIM_INVENTORY_NAME] = inventory.name
         claims[AutomationControllerJobScope.CLAIM_INVENTORY_ID] = inventory.id
