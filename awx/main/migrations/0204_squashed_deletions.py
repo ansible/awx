@@ -12,7 +12,7 @@ def update_github_app_kind(apps, schema_editor):
     """
     CredentialType = apps.get_model('main', 'CredentialType')
     db_alias = schema_editor.connection.alias
-    CredentialType.objects.using(db_alias).filter(kind='github_app').update(kind='github_app_lookup')
+    CredentialType.objects.using(db_alias).filter(namespace='github_app').update(namespace='github_app_lookup')
 
 
 # --- END of function merged from 0203_rename_github_app_kind.py ---
