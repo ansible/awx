@@ -363,8 +363,9 @@ psycopg==3.2.10
     #   dispatcherd
 ptyprocess==0.7.0
     # via pexpect
-pyasn1==0.6.1
+pyasn1==0.6.2
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   pyasn1-modules
     #   service-identity
 pyasn1-modules==0.4.2
