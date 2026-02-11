@@ -69,3 +69,6 @@ AWX_DISABLE_TASK_MANAGERS = False
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
 FEATURE_INDIRECT_NODE_COUNTING_ENABLED = True
+
+# Feature flag for workload identity JWT integration (AAP-62693)
+FEATURE_WORKLOAD_IDENTITY_JWT_ENABLED = True

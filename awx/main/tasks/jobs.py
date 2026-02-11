@@ -93,6 +93,13 @@ from awx.main.utils.update_model import update_model
 # Django flags
 from flags.state import flag_enabled
 
+# Workload Identity imports
+from ansible_base.resource_registry.workload_identity_client import (
+    WorkloadIdentityClient,
+    TokenRequestError,
+    get_workload_identity_client,
+)
+
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
@@ -514,6 +521,10 @@ class BaseTask(object):
         # Before task is started, ensure that job_event partitions exist
         create_partition(instance.event_class._meta.db_table, start=instance.created)
 
+        # Request workload identity JWT token if feature is enabled and job needs it
+        if flag_enabled("FEATURE_WORKLOAD_IDENTITY_JWT_ENABLED") and self._job_needs_workload_jwt(instance):
+            self._request_workload_identity_token(instance)
+
     def post_run_hook(self, instance, status):
         """
         Hook for any steps to run before job/task is marked as complete.
@@ -531,6 +542,90 @@ class BaseTask(object):
             ScheduleTaskManager().schedule()
         if instance.spawned_by_workflow:
             ScheduleWorkflowManager().schedule()
+
+    def _job_needs_workload_jwt(self, instance):
+        """
+        Determine if this job needs a workload identity JWT token.
+        
+        Currently checks if the job has any vault credentials, as Vault is the
+        primary use case for workload identity JWTs (ANSTRAT-1558).
+        
+        Args:
+            instance: The UnifiedJob instance being executed
+            
+        Returns:
+            bool: True if job needs a JWT token
+        """
+        # Check if job has credentials attribute (not all job types do)
+        if not hasattr(instance, 'credentials'):
+            return False
+        
+        # Check if any vault credentials are present
+        # TODO: Extend this to check for other credential types that support workload identity
+        # when AAP-62694 (JWT-enabled credential plugin) is implemented
+        vault_creds = instance.credentials.filter(credential_type__kind='vault').exists()
+        
+        if vault_creds:
+            logger.debug(f"Job {instance.id} has vault credentials, will request workload JWT")
+            return True
+        
+        # TODO: Check for other credential types that require workload identity
+        # e.g., AWS, Azure, GCP when those integrations are implemented
+        
+        return False
+
+    def _request_workload_identity_token(self, instance):
+        """
+        Request a workload identity JWT token from Gateway for this job.
+        
+        This method is called during pre_run_hook if the feature flag is enabled
+        and the job needs a JWT (determined by _job_needs_workload_jwt).
+        The JWT token is logged but not currently used for anything (see AAP-62694).
+        
+        Args:
+            instance: The UnifiedJob instance being executed
+        """
+        try:
+            # Populate JWT claims from the job
+            claims = populate_claims_for_workload(instance)
+            
+            # TODO: Make scope and audience configurable
+            # For now, hardcode the scope as defined in the OIDC spec
+            scope = "aap_controller_automation_job"
+            # TODO: Audience should be configured per integration (Vault, AWS, etc.)
+            audience = "https://vault.example.com"
+            
+            # Get the workload identity client (uses service token auth)
+            client = get_workload_identity_client()
+            
+            # Request the JWT token
+            logger.info(f"Requesting workload identity token for job {instance.id} ({instance.name})")
+            response = client.request_workload_jwt(
+                claims=claims,
+                scope=scope,
+                audience=audience
+            )
+            
+            logger.info(
+                f"Successfully obtained workload identity token for job {instance.id}. "
+                f"JWT length: {len(response.jwt)} characters"
+            )
+            logger.debug(f"JWT token: {response.jwt[:50]}...")
+            
+            # TODO (AAP-62694): Store JWT for use by credential plugins
+            # For now, we just log that we got it
+            
+        except TokenRequestError as e:
+            logger.error(
+                f"Failed to obtain workload identity token for job {instance.id}: {e}"
+            )
+            # Don't fail the job if JWT request fails - this is optional functionality
+            
+        except Exception as e:
+            logger.exception(
+                f"Unexpected error requesting workload identity token for job {instance.id}: {e}"
+            )
+            # Don't fail the job on unexpected errors
 
     def should_use_fact_cache(self):
         return False
