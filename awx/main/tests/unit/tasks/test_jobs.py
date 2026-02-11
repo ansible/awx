@@ -427,3 +427,115 @@ def test_populate_claims_for_adhoc_command(workload_attrs, expected_claims):
 
     claims = jobs.populate_claims_for_workload(adhoc_command)
     assert claims == expected_claims
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_request_workload_identity_token_success(mock_get_client, job_template_factory, credential):
+    """Test successful workload identity token request."""
+    # Mock the client and response
+    from ansible_base.resource_registry.workload_identity_client import WorkloadIdentityTokenResponse
+    mock_client = mock.Mock()
+    mock_client.request_workload_jwt.return_value = WorkloadIdentityTokenResponse(
+        jwt='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature'
+    )
+    mock_get_client.return_value = mock_client
+    
+    # Create a test job with vault credential
+    jt = job_template_factory('test-jt')
+    job = jt.create_unified_job()
+    job.id = 123
+    job.name = 'Test Job'
+    job.credentials.add(credential)
+    
+    # Create a BaseTask instance and call the method
+    task = jobs.BaseTask()
+    task._request_workload_identity_token(job)
+    
+    # Verify client was called with claims
+    mock_client.request_workload_jwt.assert_called_once()
+    call_args = mock_client.request_workload_jwt.call_args
+    assert 'claims' in call_args.kwargs
+    assert 'scope' in call_args.kwargs
+    assert 'audience' in call_args.kwargs
+    assert call_args.kwargs['scope'] == 'aap_controller_automation_job'
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.tasks.jobs.flag_enabled')
+@mock.patch('awx.main.tasks.jobs.logger')
+def test_request_workload_identity_token_failure(mock_logger, mock_flag_enabled, mock_get_client):
+    """Test workload identity token request failure handling."""
+    # Enable the feature flag
+    mock_flag_enabled.return_value = True
+    
+    # Mock the client to raise an error
+    from ansible_base.resource_registry.workload_identity_client import TokenRequestError
+    mock_client = mock.Mock()
+    mock_client.request_workload_jwt.side_effect = TokenRequestError("Gateway unavailable")
+    mock_get_client.return_value = mock_client
+    
+    # Create a test job
+    job = Job(id=456, name='Failing Job')
+    
+    # Create a BaseTask instance and call the method
+    task = jobs.BaseTask()
+    task._request_workload_identity_token(job)
+    
+    # Verify error was logged
+    mock_logger.error.assert_called()
+    error_message = mock_logger.error.call_args[0][0]
+    assert 'Failed to obtain workload identity token' in error_message
+    assert '456' in error_message
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.tasks.jobs.flag_enabled')
+def test_request_workload_identity_token_feature_flag_disabled(mock_flag_enabled, mock_get_client):
+    """Test that JWT request is skipped when feature flag is disabled."""
+    # Disable the feature flag
+    mock_flag_enabled.return_value = False
+    
+    # Create a test job
+    job = Job(id=789, name='Test Job')
+    
+    # Create a BaseTask instance and call pre_run_hook
+    task = jobs.BaseTask()
+    task.pre_run_hook(job, '/tmp/private_data')
+    
+    # Verify client was never called
+    mock_get_client.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_job_needs_workload_jwt_with_vault_credential(job_template_factory, vault_credential):
+    """Test that jobs with vault credentials need JWT tokens."""
+    jt = job_template_factory('test-jt')
+    job = jt.create_unified_job()
+    job.credentials.add(vault_credential)
+    
+    task = jobs.BaseTask()
+    assert task._job_needs_workload_jwt(job) is True
+
+
+@pytest.mark.django_db
+def test_job_needs_workload_jwt_without_vault_credential(job_template_factory, machine_credential):
+    """Test that jobs without vault credentials don't need JWT tokens."""
+    jt = job_template_factory('test-jt')
+    job = jt.create_unified_job()
+    job.credentials.add(machine_credential)
+    
+    task = jobs.BaseTask()
+    assert task._job_needs_workload_jwt(job) is False
+
+
+@pytest.mark.django_db
+def test_job_needs_workload_jwt_no_credentials(job_template_factory):
+    """Test that jobs without any credentials don't need JWT tokens."""
+    jt = job_template_factory('test-jt')
+    job = jt.create_unified_job()
+    
+    task = jobs.BaseTask()
+    assert task._job_needs_workload_jwt(job) is False
