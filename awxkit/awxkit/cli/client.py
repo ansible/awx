@@ -221,7 +221,13 @@ class CLI(object):
         if self.resource != 'settings':
             for method in ('list', 'modify', 'create'):
                 if method in parser.parser.choices:
-                    parser.build_query_arguments(method, 'GET' if method == 'list' else 'POST')
+                    if method == 'list':
+                        http_method = 'GET'
+                    elif method == 'modify' and 'PUT' in parser.options:
+                        http_method = 'PUT'
+                    else:
+                        http_method = 'POST'
+                    parser.build_query_arguments(method, http_method)
         if from_sphinx:
             parsed, extra = self.parser.parse_known_args(self.argv)
         else:

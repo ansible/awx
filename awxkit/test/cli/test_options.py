@@ -11,6 +11,24 @@ class ResourceOptionsParser(ResourceOptionsParser):
         self.allowed_options = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
 
+class NoPostResourceOptionsParser(ResourceOptionsParser):
+    """Simulates a user with object-level PUT but no list-level POST."""
+
+    detail_put_actions = {}
+
+    def get_allowed_options(self):
+        self.allowed_options = ['GET', 'PUT', 'PATCH', 'DELETE']
+        # Simulate the logic from the real get_allowed_options that
+        # falls back to the detail endpoint's PUT schema when POST
+        # is not available on the list endpoint.
+        if 'POST' not in self.options and 'PUT' in self.allowed_options:
+            if self.detail_put_actions:
+                self.options['PUT'] = self.detail_put_actions
+
+    def handle_custom_actions(self):
+        pass
+
+
 class OptionsPage(Page):
     def options(self):
         return self
@@ -184,6 +202,30 @@ class TestOptions(unittest.TestCase):
             out = StringIO()
             self.parser.choices[method].print_help(out)
             assert 'positional arguments:\n  id' in out.getvalue()
+
+    def test_modify_without_list_post(self):
+        """User with object-level PUT but no list-level POST can still modify."""
+        page = OptionsPage.from_json(
+            {
+                'actions': {
+                    'GET': {},
+                }
+            }
+        )
+        NoPostResourceOptionsParser.detail_put_actions = {
+            'scm_branch': {'type': 'string', 'help_text': 'SCM branch'},
+            'description': {'type': 'string', 'help_text': 'Description'},
+        }
+        options = NoPostResourceOptionsParser(None, page, 'projects', self.parser)
+
+        assert 'modify' in self.parser.choices
+        assert 'create' not in self.parser.choices
+
+        options.build_query_arguments('modify', 'PUT')
+        out = StringIO()
+        self.parser.choices['modify'].print_help(out)
+        assert '--scm_branch TEXT' in out.getvalue()
+        assert '--description TEXT' in out.getvalue()
 
 
 class TestSettingsOptions(unittest.TestCase):
