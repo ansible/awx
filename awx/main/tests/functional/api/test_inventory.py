@@ -463,6 +463,26 @@ class TestInventorySourceCredential:
         assert 'Cloud-based inventory sources (such as ec2)' in r.data['credential'][0]
         assert 'require credentials for the matching cloud service' in r.data['credential'][0]
 
+    def test_credential_dict_value_returns_400(self, inventory, admin_user, put):
+        """Passing a dict for the credential field should return 400, not 500.
+
+        Reproduces a bug where int() raises TypeError on non-scalar types
+        (dict, list) which was uncaught, resulting in a 500 Internal Server Error.
+        """
+        inv_src = InventorySource.objects.create(name='test-src', inventory=inventory, source='ec2')
+        r = put(
+            url=reverse('api:inventory_source_detail', kwargs={'pk': inv_src.pk}),
+            data={
+                'name': 'test-src',
+                'inventory': inventory.pk,
+                'source': 'ec2',
+                'credential': {'username': 'admin', 'password': 'secret'},
+            },
+            user=admin_user,
+            expect=400,
+        )
+        assert r.status_code == 400
+
     def test_vault_credential_not_allowed(self, project, inventory, vault_credential, admin_user, post):
         """Vault credentials cannot be associated via the deprecated field"""
         # TODO: when feature is added, add tests to use the related credentials

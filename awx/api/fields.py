@@ -89,7 +89,7 @@ class DeprecatedCredentialField(serializers.IntegerField):
     def to_internal_value(self, pk):
         try:
             pk = int(pk)
-        except ValueError:
+        except (ValueError, TypeError):
             self.fail('invalid')
         try:
             Credential.objects.get(pk=pk)
