@@ -66,7 +66,7 @@ twisted[tls]>=24.7.0  # CVE-2024-41810
 urllib3>=2.6.3 # CVE-2024-37891
 uWSGI>=2.0.28
 uwsgitop
-wheel>=0.38.1  # CVE-2022-40898
+wheel>=0.46.2  # CVE-2026-24049
 pip==25.3  # see UPGRADE BLOCKERs
 setuptools==80.9.0  # see UPGRADE BLOCKERs
 setuptools-scm[toml]

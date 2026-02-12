@@ -336,6 +336,7 @@ packaging==25.0
     #   django-guid
     #   opentelemetry-instrumentation
     #   setuptools-scm
+    #   wheel
 pbr==7.0.1
     # via -r /awx_devel/requirements/requirements.in
 pexpect==4.9.0
@@ -534,7 +535,7 @@ uwsgitop==0.12
     # via -r /awx_devel/requirements/requirements.in
 websocket-client==1.8.0
     # via kubernetes
-wheel==0.45.1
+wheel==0.46.3
     # via -r /awx_devel/requirements/requirements.in
 wrapt==1.17.3
     # via opentelemetry-instrumentation
