@@ -25,7 +25,6 @@ import requests
 
 from ansible_base.lib.utils.schema import extend_schema_if_available
 
-from awx import MODE
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
@@ -33,7 +32,7 @@ from awx.main.ha import is_ha_environment
 from awx.main.tasks.system import clear_setting_cache
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import URLPathVersioning, reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
@@ -62,8 +61,6 @@ class ApiRootView(APIView):
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
-        if MODE == 'development':
-            data['docs'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
 
 
