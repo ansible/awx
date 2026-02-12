@@ -44,6 +44,19 @@ def setup_session_auth(cli_args: Optional[List[str]] = None) -> Tuple[CLI, Mock,
     return cli, mock_root, mock_load_session
 
 
+def setup_token_auth(cli_args: Optional[List[str]] = None) -> Tuple[CLI, Mock, Mock]:
+    """Set up CLI with mocked connection for Token auth testing"""
+    cli = CLI()
+    cli.parse_args(cli_args or ['awx', '--conf.token', 'test-token-abc123'])
+
+    mock_root = Mock()
+    mock_connection = Mock()
+    mock_root.connection = mock_connection
+    cli.root = mock_root
+
+    return cli, mock_root, mock_connection
+
+
 def test_basic_auth_enabled(monkeypatch):
     """Test that AWXKIT_FORCE_BASIC_AUTH=true enables Basic authentication"""
     cli, mock_root, mock_connection = setup_basic_auth()

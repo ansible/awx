@@ -47,6 +47,14 @@ def add_authentication_arguments(parser, env):
         metavar='https://example.awx.org',
     )
 
+    # Token authentication (takes precedence over username/password)
+    auth.add_argument(
+        '--conf.token',
+        default=env.get('CONTROLLER_OAUTH_TOKEN', env.get('TOWER_OAUTH_TOKEN', None)),
+        metavar='TEXT',
+        help='OAuth2/Personal Access Token for authentication (takes precedence over username/password)',
+    )
+
     config_username, config_password = get_config_credentials()
     # options configured via cli args take higher precedence than those from the config
     auth.add_argument(
