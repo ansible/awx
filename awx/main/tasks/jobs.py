@@ -84,6 +84,7 @@ from awx.main.utils.common import (
     create_partition,
     ScheduleWorkflowManager,
     ScheduleTaskManager,
+    getattr_dne,
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
@@ -92,7 +93,74 @@ from awx.main.utils.update_model import update_model
 # Django flags
 from flags.state import flag_enabled
 
+# Workload Identity
+from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
+
 logger = logging.getLogger('awx.main.tasks.jobs')
+
+
+def populate_claims_for_workload(unified_job) -> dict:
+    """
+    Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
+    """
+
+    # Related objects in the UnifiedJob model, applies to all job types
+    organization = getattr_dne(unified_job, 'organization')
+    ujt = getattr_dne(unified_job, 'unified_job_template')
+    instance_group = getattr_dne(unified_job, 'instance_group')
+
+    claims = {
+        AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
+        AutomationControllerJobScope.CLAIM_JOB_NAME: unified_job.name,
+        AutomationControllerJobScope.CLAIM_LAUNCH_TYPE: unified_job.launch_type,
+    }
+
+    # Related objects in the UnifiedJob model, applies to all job types
+    # null cases are omitted because of OIDC
+    if organization := getattr_dne(unified_job, 'organization'):
+        claims[AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME] = organization.name
+        claims[AutomationControllerJobScope.CLAIM_ORGANIZATION_ID] = organization.id
+
+    if ujt := getattr_dne(unified_job, 'unified_job_template'):
+        claims[AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_NAME] = ujt.name
+        claims[AutomationControllerJobScope.CLAIM_UNIFIED_JOB_TEMPLATE_ID] = ujt.id
+
+    if instance_group := getattr_dne(unified_job, 'instance_group'):
+        claims[AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_NAME] = instance_group.name
+        claims[AutomationControllerJobScope.CLAIM_INSTANCE_GROUP_ID] = instance_group.id
+
+    # Related objects on concrete models, may not be valid for type of unified_job
+    if inventory := getattr_dne(unified_job, 'inventory', None):
+        claims[AutomationControllerJobScope.CLAIM_INVENTORY_NAME] = inventory.name
+        claims[AutomationControllerJobScope.CLAIM_INVENTORY_ID] = inventory.id
+
+    if execution_environment := getattr_dne(unified_job, 'execution_environment', None):
+        claims[AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_NAME] = execution_environment.name
+        claims[AutomationControllerJobScope.CLAIM_EXECUTION_ENVIRONMENT_ID] = execution_environment.id
+
+    if project := getattr_dne(unified_job, 'project', None):
+        claims[AutomationControllerJobScope.CLAIM_PROJECT_NAME] = project.name
+        claims[AutomationControllerJobScope.CLAIM_PROJECT_ID] = project.id
+
+    if jt := getattr_dne(unified_job, 'job_template', None):
+        claims[AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME] = jt.name
+        claims[AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_ID] = jt.id
+
+    # Only valid for job templates
+    if hasattr(unified_job, 'playbook'):
+        claims[AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME] = unified_job.playbook
+
+    # Not valid for inventory updates and system jobs
+    if hasattr(unified_job, 'job_type'):
+        claims[AutomationControllerJobScope.CLAIM_JOB_TYPE] = unified_job.job_type
+
+    launched_by: dict = unified_job.launched_by
+    if 'name' in launched_by:
+        claims[AutomationControllerJobScope.CLAIM_LAUNCHED_BY_NAME] = launched_by['name']
+    if 'id' in launched_by:
+        claims[AutomationControllerJobScope.CLAIM_LAUNCHED_BY_ID] = launched_by['id']
+
+    return claims
 
 
 def with_path_cleanup(f):

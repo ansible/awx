@@ -1,3 +1,4 @@
+import copy
 import warnings
 from unittest.mock import Mock, patch
 
@@ -8,6 +9,7 @@ from awx.api.schema import (
     AuthenticatedSpectacularAPIView,
     AuthenticatedSpectacularSwaggerView,
     AuthenticatedSpectacularRedocView,
+    filter_credential_type_schema,
 )
 
 
@@ -271,3 +273,152 @@ class TestAuthenticatedSchemaViews:
     def test_authenticated_spectacular_redoc_view_requires_authentication(self):
         """Test that AuthenticatedSpectacularRedocView requires authentication."""
         assert IsAuthenticated in AuthenticatedSpectacularRedocView.permission_classes
+
+
+class TestFilterCredentialTypeSchema:
+    """Unit tests for filter_credential_type_schema postprocessing hook."""
+
+    def test_filters_both_schemas_correctly(self):
+        """Test that both CredentialTypeRequest and PatchedCredentialTypeRequest schemas are filtered."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialTypeRequest': {
+                        'properties': {
+                            'kind': {
+                                'enum': [
+                                    'ssh',
+                                    'vault',
+                                    'net',
+                                    'scm',
+                                    'cloud',
+                                    'registry',
+                                    'token',
+                                    'insights',
+                                    'external',
+                                    'kubernetes',
+                                    'galaxy',
+                                    'cryptography',
+                                    None,
+                                ],
+                                'type': 'string',
+                            }
+                        }
+                    },
+                    'PatchedCredentialTypeRequest': {
+                        'properties': {
+                            'kind': {
+                                'enum': [
+                                    'ssh',
+                                    'vault',
+                                    'net',
+                                    'scm',
+                                    'cloud',
+                                    'registry',
+                                    'token',
+                                    'insights',
+                                    'external',
+                                    'kubernetes',
+                                    'galaxy',
+                                    'cryptography',
+                                    None,
+                                ],
+                                'type': 'string',
+                            }
+                        }
+                    },
+                }
+            }
+        }
+
+        returned = filter_credential_type_schema(result, None, None, None)
+
+        # POST/PUT schema: no None (required field)
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['description'] == "* `cloud` - Cloud\\n* `net` - Network"
+
+        # PATCH schema: includes None (optional field)
+        assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net', None]
+        assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['description'] == "* `cloud` - Cloud\\n* `net` - Network"
+
+        # Other properties should be preserved
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['type'] == 'string'
+
+        # Function should return the result
+        assert returned is result
+
+    def test_handles_empty_result(self):
+        """Test graceful handling when result dict is empty."""
+        result = {}
+        original = copy.deepcopy(result)
+
+        returned = filter_credential_type_schema(result, None, None, None)
+
+        assert result == original
+        assert returned is result
+
+    def test_handles_missing_enum(self):
+        """Test that schemas without enum key are not modified."""
+        result = {'components': {'schemas': {'CredentialTypeRequest': {'properties': {'kind': {'type': 'string', 'description': 'Some description'}}}}}}
+        original = copy.deepcopy(result)
+
+        filter_credential_type_schema(result, None, None, None)
+
+        assert result == original
+
+    def test_filters_only_target_schemas(self):
+        """Test that only CredentialTypeRequest schemas are modified, not others."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'cloud', 'net', None]}}},
+                    'OtherSchema': {'properties': {'kind': {'enum': ['option1', 'option2']}}},
+                }
+            }
+        }
+
+        other_schema_before = copy.deepcopy(result['components']['schemas']['OtherSchema'])
+
+        filter_credential_type_schema(result, None, None, None)
+
+        # CredentialTypeRequest should be filtered (no None for required field)
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+
+        # OtherSchema should be unchanged
+        assert result['components']['schemas']['OtherSchema'] == other_schema_before
+
+    def test_handles_only_one_schema_present(self):
+        """Test that function works when only one target schema is present."""
+        result = {'components': {'schemas': {'CredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'cloud', 'net', None]}}}}}}
+
+        filter_credential_type_schema(result, None, None, None)
+
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+
+    def test_handles_missing_properties(self):
+        """Test graceful handling when schema has no properties key."""
+        result = {'components': {'schemas': {'CredentialTypeRequest': {}}}}
+        original = copy.deepcopy(result)
+
+        filter_credential_type_schema(result, None, None, None)
+
+        assert result == original
+
+    def test_differentiates_required_vs_optional_fields(self):
+        """Test that CredentialTypeRequest excludes None but PatchedCredentialTypeRequest includes it."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'vault', 'net', 'scm', 'cloud', 'registry', None]}}},
+                    'PatchedCredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'vault', 'net', 'scm', 'cloud', 'registry', None]}}},
+                }
+            }
+        }
+
+        filter_credential_type_schema(result, None, None, None)
+
+        # POST/PUT schema: no None (required field)
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+
+        # PATCH schema: includes None (optional field)
+        assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net', None]

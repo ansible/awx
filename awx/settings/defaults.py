@@ -1032,6 +1032,8 @@ SPECTACULAR_SETTINGS = {
     # Use our custom schema class that handles swagger_topic and deprecated views
     'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
     'COMPONENT_SPLIT_REQUEST': True,
+    # Postprocessing hook to filter CredentialType enum values
+    'POSTPROCESSING_HOOKS': ['awx.api.schema.filter_credential_type_schema'],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,

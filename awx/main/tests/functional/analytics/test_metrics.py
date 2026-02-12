@@ -1,8 +1,11 @@
 import pytest
 
+from django.test import RequestFactory
 from prometheus_client.parser import text_string_to_metric_families
+from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
+from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
 
 EXPECTED_VALUES = {
@@ -77,3 +80,55 @@ def test_metrics_http_methods(get, post, patch, put, options, admin):
     assert patch(get_metrics_view_db_only(), user=admin).status_code == 405
     assert post(get_metrics_view_db_only(), user=admin).status_code == 405
     assert options(get_metrics_view_db_only(), user=admin).status_code == 200
+
+
+class DummyMetricsResponse:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def read(self):
+        return self._payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+
+def test_dispatcherd_metrics_node_filter_match(mocker, settings):
+    settings.CLUSTER_HOST_ID = "awx-1"
+    payload = b'# HELP test_metric A test metric\n# TYPE test_metric gauge\ntest_metric 1\n'
+
+    def fake_urlopen(url, timeout=1.0):
+        return DummyMetricsResponse(payload)
+
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-1'}))
+
+    assert get_dispatcherd_metrics(request) == payload.decode('utf-8')
+
+
+def test_dispatcherd_metrics_node_filter_excludes_local(mocker, settings):
+    settings.CLUSTER_HOST_ID = "awx-1"
+
+    def fake_urlopen(*args, **kwargs):
+        raise AssertionError("urlopen should not be called when node filter excludes local node")
+
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'node': 'awx-2'}))
+
+    assert get_dispatcherd_metrics(request) == ''
+
+
+def test_dispatcherd_metrics_metric_filter_excludes_unrelated(mocker):
+    def fake_urlopen(*args, **kwargs):
+        raise AssertionError("urlopen should not be called when metric filter excludes dispatcherd metrics")
+
+    mocker.patch('urllib.request.urlopen', fake_urlopen)
+
+    request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'awx_system_info'}))
+
+    assert get_dispatcherd_metrics(request) == ''

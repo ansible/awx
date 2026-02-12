@@ -173,3 +173,54 @@ class TestMigrationSmoke:
         assert Role.objects.filter(
             singleton_name='system_administrator', role_field='system_administrator'
         ).exists(), "expected to find a system_administrator singleton role"
+
+
+@pytest.mark.django_db
+class TestGithubAppBug:
+    """
+    Tests that `awx-manage createsuperuser` runs successfully after
+    the `github_app` CredentialType kind is updated to `github_app_lookup`
+    via the migration.
+    """
+
+    def test_after_github_app_kind_migration(self, migrator):
+        """
+        Verifies that `createsuperuser` does not raise a KeyError
+        after the 0204_squashed_deletions migration (which includes
+        the `update_github_app_kind` logic) is applied.
+        """
+        # 1. Apply migrations up to the point *before* the 0204_squashed_deletions migration.
+        # This simulates the state where the problematic CredentialType might exist.
+        # We use 0203_remove_team_of_teams as the direct predecessor.
+        old_state = migrator.apply_tested_migration(('main', '0203_remove_team_of_teams'))
+
+        # Get the CredentialType model from the historical state.
+        CredentialType = old_state.apps.get_model('main', 'CredentialType')
+
+        # Create a CredentialType with the old, problematic 'namespace' value
+        CredentialType.objects.create(
+            name='Legacy GitHub App Credential',
+            kind='external',
+            namespace='github_app',  # The namespace that causes the KeyError in the registry lookup
+            managed=True,
+            created=now(),
+            modified=now(),
+        )
+
+        # Apply the migration that includes the fix (0204_squashed_deletions).
+        new_state = migrator.apply_tested_migration(('main', '0204_squashed_deletions'))
+
+        # Verify that the CredentialType with the old 'kind' no longer exists
+        # and the 'kind' has been updated to the new value.
+        CredentialType = new_state.apps.get_model('main', 'CredentialType')  # Get CredentialType model from the new state
+
+        # Assertion 1: The CredentialType with the old 'github_app' kind should no longer exist.
+        assert not CredentialType.objects.filter(
+            namespace='github_app'
+        ).exists(), "CredentialType with old 'github_app' kind should no longer exist after migration."
+
+        # Assertion 2: The CredentialType should now exist with the new 'github_app_lookup' kind
+        # and retain its original name.
+        assert CredentialType.objects.filter(
+            namespace='github_app_lookup', name='Legacy GitHub App Credential'
+        ).exists(), "CredentialType should be updated to 'github_app_lookup' and retain its name."

@@ -38,8 +38,8 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
     }
 
     if mock_publish:
-        config["brokers"]["noop"] = {}
-        config["publish"]["default_broker"] = "noop"
+        config["brokers"]["dispatcherd.testing.brokers.noop"] = {}
+        config["publish"]["default_broker"] = "dispatcherd.testing.brokers.noop"
     else:
         config["brokers"]["pg_notify"] = {
             "config": get_pg_notify_params(),
@@ -56,5 +56,11 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
         }
 
         config["brokers"]["pg_notify"]["channels"] = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]
+        metrics_cfg = settings.METRICS_SUBSYSTEM_CONFIG.get('server', {}).get(settings.METRICS_SERVICE_DISPATCHER)
+        if metrics_cfg:
+            config["service"]["metrics_kwargs"] = {
+                "host": metrics_cfg.get("host", "localhost"),
+                "port": metrics_cfg.get("port", 8015),
+            }
 
     return config

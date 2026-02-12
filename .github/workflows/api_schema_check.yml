@@ -45,15 +45,45 @@ jobs:
           make docker-runner 2>&1 | tee schema-diff.txt
           exit ${PIPESTATUS[0]}
 
-      - name: Add schema diff to job summary
+      - name: Validate OpenAPI schema
+        id: schema-validation
+        continue-on-error: true
+        run: |
+          AWX_DOCKER_ARGS='-e GITHUB_ACTIONS' \
+          AWX_DOCKER_CMD='make validate-openapi-schema' \
+          make docker-runner 2>&1 | tee schema-validation.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Add schema validation and diff to job summary
         if: always()
         # show text and if for some reason, it can't be generated, state that it can't be.
         run: |
-          echo "## API Schema Change Detection Results" >> $GITHUB_STEP_SUMMARY
+          echo "## API Schema Check Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show validation status
+          echo "### OpenAPI Validation" >> $GITHUB_STEP_SUMMARY
+          if [ -f schema-validation.txt ] && grep -q "✓ Schema is valid" schema-validation.txt; then
+            echo "✅ **Status:** PASSED - Schema is valid OpenAPI 3.0.3" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status:** FAILED - Schema validation failed" >> $GITHUB_STEP_SUMMARY
+            if [ -f schema-validation.txt ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "<details><summary>Validation errors</summary>" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat schema-validation.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "</details>" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show schema changes
+          echo "### Schema Changes" >> $GITHUB_STEP_SUMMARY
           if [ -f schema-diff.txt ]; then
             if grep -q "^+" schema-diff.txt || grep -q "^-" schema-diff.txt; then
-              echo "### Schema changes detected" >> $GITHUB_STEP_SUMMARY
+              echo "**Changes detected** between this PR and the base branch" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
               # Truncate to first 1000 lines to stay under GitHub's 1MB summary limit
               TOTAL_LINES=$(wc -l < schema-diff.txt)
@@ -65,8 +95,8 @@ jobs:
               head -n 1000 schema-diff.txt >> $GITHUB_STEP_SUMMARY
               echo '```' >> $GITHUB_STEP_SUMMARY
             else
-              echo "### No schema changes detected" >> $GITHUB_STEP_SUMMARY
+              echo "No schema changes detected" >> $GITHUB_STEP_SUMMARY
             fi
           else
-            echo "### Unable to generate schema diff" >> $GITHUB_STEP_SUMMARY
+            echo "Unable to generate schema diff" >> $GITHUB_STEP_SUMMARY
           fi

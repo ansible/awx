@@ -2,6 +2,7 @@ build
 django-debug-toolbar>=6.0  # Django 5.2 compatibility
 django-test-migrations
 drf-spectacular>=0.27.0  # Modern OpenAPI 3.0 schema generator
+openapi-spec-validator  # OpenAPI 3.0 schema validation
 # pprofile - re-add once https://github.com/vpelletier/pprofile/issues/41 is addressed
 ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
@@ -22,7 +23,7 @@ gprof2dot
 atomicwrites
 flake8
 yamllint
-pip>=21.3,<=24.0 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
+pip>=25.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
 
 # python debuggers
 debugpy

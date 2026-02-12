@@ -21,6 +21,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(setup_tower_managed_defaults),
-        migrations.RunPython(setup_rbac_role_system_administrator),
+        migrations.RunPython(setup_tower_managed_defaults, migrations.RunPython.noop),
+        migrations.RunPython(setup_rbac_role_system_administrator, migrations.RunPython.noop),
     ]
