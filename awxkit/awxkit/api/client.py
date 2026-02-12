@@ -12,6 +12,15 @@ class ConnectionException(exc.Common):
     pass
 
 
+class TokenAuth(requests.auth.AuthBase):
+    def __init__(self, token):
+        self.token = token
+
+    def __call__(self, request):
+        request.headers['Authorization'] = 'Bearer {0.token}'.format(self)
+        return request
+
+
 def log_elapsed(r, *args, **kwargs):  # requests hook to display API elapsed time
     log.debug('"{0.request.method} {0.url}" elapsed: {0.elapsed}'.format(r))
 
