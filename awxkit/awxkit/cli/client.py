@@ -74,7 +74,7 @@ class CLI(object):
 
     def get_config(self, key):
         """Helper method for looking up the value of a --conf.xyz flag"""
-        return getattr(self.args, 'conf.{}'.format(key))
+        return getattr(self.args, 'conf.{}'.format(key), None)
 
     @property
     def help(self):
@@ -83,13 +83,26 @@ class CLI(object):
     def authenticate(self):
         """Configure the current session for authentication.
 
-        Uses Basic authentication when AWXKIT_FORCE_BASIC_AUTH environment variable
-        is set to true, otherwise defaults to session-based authentication.
+        Authentication priority:
+        1. Token authentication (if --conf.token provided)
+        2. Basic authentication (if AWXKIT_FORCE_BASIC_AUTH=true)
+        3. Session-based authentication (default)
 
         For AAP Gateway environments, set AWXKIT_FORCE_BASIC_AUTH=true to bypass
-        session login restrictions.
+        session login restrictions when using username/password.
         """
-        # Check if Basic auth is forced via environment variable
+        # Token authentication (if token is provided)
+        token = self.get_config('token')
+        if token:
+            config.use_sessions = False
+            self.root.connection.login(
+                None,
+                None,
+                token=token,
+            )
+            return
+
+        # Basic authentication (for AAP Gateway environments)
         if config.get('force_basic_auth', False):
             config.use_sessions = False
 
@@ -112,7 +125,7 @@ class CLI(object):
                 raise RuntimeError(f"Basic authentication failed: {str(e)}. " "Verify credentials and network connectivity.") from e
             return
 
-        # Use session-based authentication (default)
+        # Session-based authentication (default)
         config.use_sessions = True
         self.root.load_session().get()
 
