@@ -46,7 +46,7 @@ class Connection(object):
         self.get(config.api_base_path)  # this causes a cookie w/ the CSRF token to be set
         return dict(next=next)
 
-    def login(self, username=None, password=None, **kwargs):
+    def login(self, username=None, password=None, token=None, **kwargs):
         if username and password:
             _next = kwargs.get('next')
             if _next:
@@ -61,6 +61,8 @@ class Connection(object):
                 self.uses_session_cookie = True
             else:
                 self.session.auth = (username, password)
+        elif token:
+            self.session.auth = TokenAuth(token)
         else:
             self.session.auth = None
 

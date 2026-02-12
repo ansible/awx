@@ -59,6 +59,12 @@ def add_authentication_arguments(parser, env):
         default=env.get('CONTROLLER_PASSWORD', env.get('TOWER_PASSWORD', config_password)),
         metavar='TEXT',
     )
+    auth.add_argument(
+        '--conf.token',
+        default=env.get('CONTROLLER_OAUTH_TOKEN', env.get('TOWER_OAUTH_TOKEN', None)),
+        metavar='TEXT',
+        help='OAuth2 token for authentication (takes precedence over username/password)',
+    )
 
     auth.add_argument(
         '-k',
