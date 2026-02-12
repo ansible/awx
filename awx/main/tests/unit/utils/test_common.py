@@ -326,7 +326,7 @@ class TestHostnameRegexValidator:
 
     def test_good_call(self, regex_expr, re_flags):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags)
-        h("192.168.56.101")  # Should not raise ValidationError
+        assert h("192.168.56.101") is None
 
     def test_bad_call(self, regex_expr, re_flags):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags)
@@ -340,4 +340,4 @@ class TestHostnameRegexValidator:
 
     def test_bad_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
-        h("@#$%)$#(TUFAS_DG")  # Should not raise ValidationError
+        assert h("@#$%)$#(TUFAS_DG") is None
