@@ -55,7 +55,6 @@ from wsgiref.util import FileWrapper
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 # django-ansible-base
-from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation
 from ansible_base.lib.utils.schema import extend_schema_if_available
 
@@ -98,6 +97,7 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import compute_cloud_inventory_sources
+from awx.main.utils.proxy import get_first_remote_host_from_headers
 from awx.main.utils.common import memoize
 from awx.main.redact import UriCleaner
 from awx.api.permissions import (
@@ -2877,7 +2877,8 @@ class JobTemplateCallback(GenericAPIView):
         host for the current request.
         """
         # Find the list of remote host names/IPs to check.
-        remote_hosts = set(get_remote_hosts(self.request))
+        # Only consider the first entry from each header (for comma-separated values like X-Forwarded-For)
+        remote_hosts = get_first_remote_host_from_headers(self.request, settings.REMOTE_HOST_HEADERS)
         # Add the reverse lookup of IP addresses.
         for rh in list(remote_hosts):
             try:
