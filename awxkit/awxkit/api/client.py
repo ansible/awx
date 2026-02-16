@@ -58,6 +58,11 @@ class Connection(object):
                         self.session_cookie_name = historical_response.headers.get('X-API-Session-Cookie-Name')
 
                 self.session_id = self.session.cookies.get(self.session_cookie_name, None)
+                if self.session_id is None and config.get("api_base_path") == "/api/controller/":
+                    # Use gateway session cookie name if controller session cookie name is not found
+                    self.session_cookie_name = "gateway_sessionid"
+                    self.session_id = self.session.cookies.get(self.session_cookie_name, None)
+
                 self.uses_session_cookie = True
             else:
                 self.session.auth = (username, password)
