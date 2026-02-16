@@ -84,6 +84,7 @@ from awx.main.utils.common import (
     ScheduleWorkflowManager,
     ScheduleTaskManager,
     getattr_dne,
+    set_environ,
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
@@ -221,6 +222,17 @@ class BaseTask(object):
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
+
+    def _generate_workload_identity_token(self):
+        """Generate workload identity token."""
+        if not flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+            return ''
+        try:
+            # TODO: Sign the claims using django-ansible-base JWT signing
+            return ''
+        except Exception as e:
+            logger.warning(f"Failed to generate workload identity token: {e}")
+            return ''
 
     def write_private_data_file(self, private_data_dir, file_name, data, sub_dir=None, file_permissions=0o600):
         base_path = private_data_dir
@@ -615,34 +627,37 @@ class BaseTask(object):
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
-            # May have to serialize the value
-            private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
-            passwords = self.build_passwords(self.instance, kwargs)
-            self.build_extra_vars_file(self.instance, private_data_dir)
-            args = self.build_args(self.instance, private_data_dir, passwords)
-            env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
-            self.runner_callback.safe_env = build_safe_env(env)
+            # Wrap credential resolution with workload identity token environment variable.
+            # The token is only available during credential resolution, not during job execution.
+            with set_environ(AWX_WORKLOAD_IDENTITY_TOKEN=self._generate_workload_identity_token()):
+                # May have to serialize the value
+                private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
+                passwords = self.build_passwords(self.instance, kwargs)
+                self.build_extra_vars_file(self.instance, private_data_dir)
+                args = self.build_args(self.instance, private_data_dir, passwords)
+                env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
+                self.runner_callback.safe_env = build_safe_env(env)
 
-            self.runner_callback.instance = self.instance
+                self.runner_callback.instance = self.instance
 
-            # store a reference to the parent workflow job (if any) so we can include
-            # it in event data JSON
-            if self.instance.spawned_by_workflow:
-                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
+                # store a reference to the parent workflow job (if any) so we can include
+                # it in event data JSON
+                if self.instance.spawned_by_workflow:
+                    self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
 
-            self.runner_callback.job_created = str(self.instance.created)
+                self.runner_callback.job_created = str(self.instance.created)
 
-            credentials = self.build_credentials_list(self.instance)
+                credentials = self.build_credentials_list(self.instance)
 
-            container_root = None
-            if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
-                container_root = private_data_dir
+                container_root = None
+                if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
+                    container_root = private_data_dir
 
-            for credential in credentials:
-                if credential:
-                    credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir, container_root=container_root)
+                for credential in credentials:
+                    if credential:
+                        credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir, container_root=container_root)
 
-            self.runner_callback.safe_env.update(self.safe_cred_env)
+                self.runner_callback.safe_env.update(self.safe_cred_env)
 
             self.write_args_file(private_data_dir, args)
 
