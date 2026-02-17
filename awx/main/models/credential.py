@@ -2,7 +2,6 @@
 # All Rights Reserved.
 from contextlib import nullcontext
 import functools
-import os
 
 import inspect
 import logging
@@ -244,6 +243,15 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append('vault_password')
         return needed
 
+    @property
+    def context(self):
+        """
+        Hidden property for storing runtime context during credential resolution.
+        """
+        if not hasattr(self, '_context'):
+            self._context = {}
+        return self._context
+
     @cached_property
     def dynamic_input_fields(self):
         # if the credential is not yet saved we can't access the input_sources
@@ -326,7 +334,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         :param default(optional[str]): A default return value to use.
         """
         if self.credential_type.kind != 'external' and field_name in self.dynamic_input_fields:
-            return self._get_dynamic_input(field_name, context=self._populate_credential_context())
+            return self._get_dynamic_input(field_name)
         if field_name in self.credential_type.secret_fields:
             try:
                 return decrypt_field(self, field_name)
@@ -366,19 +374,10 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         """
         return list(set(self.inputs.keys()) | set(self.dynamic_input_fields))
 
-    def _populate_credential_context(self) -> dict:
-        """Build context dict for credential resolution from environment variables."""
-        context = {}
-        if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-            token = os.environ.get('AWX_WORKLOAD_IDENTITY_TOKEN')
-            if token:
-                context = {'workload_identity_token': token}
-        return context
-
-    def _get_dynamic_input(self, field_name, context: dict):
+    def _get_dynamic_input(self, field_name):
         for input_source in self.input_sources.all():
             if input_source.input_field_name == field_name:
-                return input_source.get_input_value(context)
+                return input_source.get_input_value(context=self.context)
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
 
@@ -633,7 +632,15 @@ class CredentialInputSource(PrimordialModel):
             raise ValidationError(_('Input field must be defined on target credential (options are {}).'.format(', '.join(sorted(defined_fields)))))
         return self.input_field_name
 
-    def get_input_value(self, context: dict):
+    def get_input_value(self, context: dict | None = None):
+        """
+        Retrieve the value from the external credential backend.
+
+        Args:
+            context: Optional runtime context dict passed from the target credential.
+        """
+        if context is None:
+            context = {}
         backend = self.source_credential.credential_type.plugin.backend
         backend_kwargs = {}
         for field_name, value in self.source_credential.inputs.items():
@@ -645,7 +652,9 @@ class CredentialInputSource(PrimordialModel):
         backend_kwargs.update(self.metadata)
 
         if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-            backend_kwargs['workload_identity_token'] = context.get('workload_identity_token')
+            workload_identity_token = context.get('workload_identity_token')
+            if workload_identity_token:
+                backend_kwargs['workload_identity_token'] = workload_identity_token
 
         with set_environ(**settings.AWX_TASK_ENV):
             return backend(**backend_kwargs)
