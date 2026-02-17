@@ -435,71 +435,48 @@ def gather_analytics():
 
 
 @task_awx(queue=get_task_queuename)
-def renew_analytics_certificates():
-    """Background task to renew analytics client certificates before expiry"""
+def analytics_certificate_checkin():
+    """
+    Background task to check in with Candlepin and renew certificates if needed.
+
+    Runs every 4 hours (AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL).
+    Adapted from subscription-manager's rhsmcertd pattern:
+    - Any API call to Candlepin resets the consumer's lastCheckin timestamp,
+      preventing the InactiveConsumerCleanerJob from deleting the consumer.
+    - On each check-in, compares local cert serial to server serial and
+      saves new cert if it changed.
+    """
     from awx.main.analytics.certificate_manager import certificate_manager
     from awx.main.signals import disable_activity_stream
-    
-    logger = logging.getLogger('awx.main.tasks.renew_analytics_certificates')
-    
-    # Check if it's time to check certificates (similar to gather_analytics pattern)
+
     if not is_run_threshold_reached(
-        getattr(settings, 'AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK', None), 
-        settings.AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL
+        getattr(settings, 'AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK', None), settings.AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL
     ):
-        logger.debug("Certificate check interval not reached, skipping")
+        logger.debug("Certificate check-in interval not reached, skipping")
         return
-    
+
     try:
-        # Check if certificate authentication is enabled
         if not getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED', True):
-            logger.debug("Certificate authentication disabled, skipping renewal check")
+            logger.debug("Certificate authentication disabled, skipping check-in")
             with disable_activity_stream():
                 settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
             return
-        
-        logger.debug("Checking if analytics certificate renewal is needed")
-        
-        # Check if renewal is needed
-        if not certificate_manager._should_renew_certificate():
-            logger.debug("Certificate renewal not needed")
-            with disable_activity_stream():
-                settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
-            return
-            
-        logger.info("Analytics certificate renewal needed, starting renewal process")
-        
-        # Get stored Red Hat credentials
-        rh_id = getattr(settings, 'REDHAT_USERNAME', None)
-        rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
-        
-        if not (rh_id and rh_secret):
-            rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-            rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
-        
-        if not (rh_id and rh_secret):
-            logger.error("No Red Hat credentials available for certificate renewal")
-            with disable_activity_stream():
-                settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
-            return
-            
-        # Generate new certificate
-        cert_path, key_path = certificate_manager._generate_new_certificate(rh_id, rh_secret)
-        
-        if cert_path and key_path:
-            logger.info("Analytics certificate renewal successful")
+
+        # Check in with Candlepin (resets lastCheckin, checks for cert renewal)
+        success = certificate_manager.checkin_and_renew()
+        if success:
+            logger.info("Analytics certificate check-in successful")
         else:
-            logger.error("Analytics certificate renewal failed")
-            
+            logger.debug("Analytics certificate check-in skipped or failed (no consumer registered)")
+
     except Exception as e:
-        logger.error(f"Certificate renewal task failed: {e}")
+        logger.error("Certificate check-in task failed: %s", e)
     finally:
-        # Always update the last check time
         try:
             with disable_activity_stream():
                 settings.AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = now()
         except Exception as e:
-            logger.error(f"Failed to update certificate check timestamp: {e}")
+            logger.error("Failed to update certificate check-in timestamp: %s", e)
 
 
 @task_awx(queue=get_task_queuename)
@@ -855,7 +832,7 @@ def _heartbeat_instance_management():
             logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
+            changed, this_inst = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
             if changed:
                 logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
             this_inst.local_health_check()
@@ -1037,10 +1014,8 @@ def awx_periodic_scheduler():
                 continue
             if not can_start:
                 new_unified_job.status = 'failed'
-                new_unified_job.job_explanation = gettext_noop(
-                    "Scheduled job could not start because it \
-                    was not in the right state or required manual credentials"
-                )
+                new_unified_job.job_explanation = gettext_noop("Scheduled job could not start because it \
+                    was not in the right state or required manual credentials")
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))

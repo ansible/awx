@@ -558,9 +558,10 @@ AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
 AUTOMATION_ANALYTICS_LAST_CERTIFICATE_CHECK = None
 
 # Certificate-based authentication settings for Analytics
-AWX_ANALYTICS_CERTIFICATE_DIR = os.path.join(BASE_DIR, 'var', 'lib', 'awx', 'certificates')
-AWX_ANALYTICS_CERTIFICATE_RENEWAL_THRESHOLD_DAYS = 7
-AWX_ANALYTICS_CANDLEPIN_URL = "https://subscription.rhsm.redhat.com/candlepin"
+# Adapted from subscription-manager patterns for Candlepin consumer lifecycle
+AWX_ANALYTICS_CERTIFICATE_DIR = '/var/lib/awx/pki/consumer/'
+AWX_ANALYTICS_CERTIFICATE_RENEWAL_THRESHOLD_DAYS = 30
+AWX_ANALYTICS_CANDLEPIN_URL = 'https://subscription.rhsm.redhat.com/candlepin'
 AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED = True
 
 # Default list of modules allowed for ad hoc commands.

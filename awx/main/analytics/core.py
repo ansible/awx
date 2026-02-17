@@ -23,7 +23,7 @@ from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
 from awx.main.utils.analytics_proxy import OIDCClient
-from awx.main.analytics.certificate_manager import get_or_generate_client_certificate
+from awx.main.analytics.certificate_manager import certificate_manager, get_or_generate_client_certificate
 
 __all__ = ['register', 'gather', 'ship']
 
@@ -389,26 +389,23 @@ def ship(path):
         s = requests.Session()
         s.headers = get_awx_http_client_headers()
         s.headers.pop('Content-Type')
-        
+
         with set_environ(**settings.AWX_TASK_ENV):
             try:
-                # First attempt: Certificate-based authentication
+                # First attempt: Certificate-based mTLS authentication (zero-touch)
+                # Uses existing Candlepin identity cert, or registers to get one
                 cert_path, key_path = get_or_generate_client_certificate(rh_id, rh_secret)
                 if cert_path and key_path:
                     logger.debug("Using certificate-based authentication for analytics upload")
-                    response = s.post(url, files=files, 
-                                    cert=(cert_path, key_path),
-                                    verify=settings.INSIGHTS_CERT_PATH, 
-                                    headers=s.headers, 
-                                    timeout=(31, 31))
+                    response = s.post(url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31))
                 else:
                     # Second attempt: OIDC authentication
-                    logger.debug("Certificate unavailable, using OIDC authentication")
+                    logger.debug("Certificate unavailable, falling back to OIDC authentication")
                     client = OIDCClient(rh_id, rh_secret)
                     response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
             except requests.RequestException as e:
-                # Final fallback: Basic authentication
-                logger.error(f"Certificate and OIDC authentication failed ({e}), trying basic auth")
+                # Final fallback: Basic authentication (until fully removed)
+                logger.error("Certificate and OIDC authentication failed (%s), trying basic auth", e)
                 response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
 
         # Accept 2XX status_codes

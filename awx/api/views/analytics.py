@@ -330,6 +330,7 @@ class AnalyticsCertificateHealthView(APIView):
     """
     Certificate health check endpoint for analytics authentication
     """
+
     permission_classes = (AnalyticsPermission,)
     name = _("Certificate Health")
     swagger_topic = 'Automation Analytics'
@@ -341,7 +342,7 @@ class AnalyticsCertificateHealthView(APIView):
         """
         try:
             health = check_certificate_health()
-            
+
             # Return appropriate HTTP status based on health
             if health.get('status') == 'healthy':
                 http_status = status.HTTP_200_OK
@@ -349,18 +350,13 @@ class AnalyticsCertificateHealthView(APIView):
                 http_status = status.HTTP_200_OK  # Warning is still OK
             else:
                 http_status = status.HTTP_503_SERVICE_UNAVAILABLE  # Critical issues
-                
+
             return Response(health, status=http_status)
-            
+
         except Exception as e:
             logger.error(f"Certificate health check failed: {e}")
             return Response(
-                {
-                    "status": "error", 
-                    "message": f"Health check failed: {str(e)}",
-                    "needs_renewal": True
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"status": "error", "message": f"Health check failed: {str(e)}", "needs_renewal": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
@@ -368,6 +364,7 @@ class AnalyticsCertificateStatusView(APIView):
     """
     Detailed certificate status endpoint for analytics authentication
     """
+
     permission_classes = (AnalyticsPermission,)
     name = _("Certificate Status")
     swagger_topic = 'Automation Analytics'
@@ -379,27 +376,20 @@ class AnalyticsCertificateStatusView(APIView):
         """
         try:
             cert_info = get_certificate_info()
-            
+
             # Add authentication configuration status
             cert_info['authentication_config'] = {
                 'certificate_auth_enabled': getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED', True),
                 'candlepin_url': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_URL', 'https://subscription.rhsm.redhat.com/candlepin'),
-                'renewal_threshold_days': getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_RENEWAL_THRESHOLD_DAYS', 7),
-                'has_redhat_credentials': bool(
-                    getattr(settings, 'REDHAT_USERNAME', None) or 
-                    getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-                )
+                'renewal_threshold_days': getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_RENEWAL_THRESHOLD_DAYS', 30),
+                'checkin_interval_seconds': getattr(settings, 'AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL', 14400),
+                'has_redhat_credentials': bool(getattr(settings, 'REDHAT_USERNAME', None) or getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)),
             }
-            
+
             return Response(cert_info, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
             logger.error(f"Certificate status check failed: {e}")
             return Response(
-                {
-                    "status": "error",
-                    "message": f"Status check failed: {str(e)}",
-                    "needs_renewal": True
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"status": "error", "message": f"Status check failed: {str(e)}", "needs_renewal": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

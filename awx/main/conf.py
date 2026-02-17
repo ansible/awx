@@ -796,9 +796,12 @@ register(
 register(
     'AUTOMATION_ANALYTICS_CERTIFICATE_CHECK_INTERVAL',
     field_class=fields.IntegerField,
-    label=_('Analytics Certificate Renewal Check Interval'),
-    help_text=_('Interval (in seconds) between analytics certificate renewal checks.'),
-    default=86400,  # every 24 hours
+    label=_('Analytics Certificate Check-In Interval'),
+    help_text=_(
+        'Interval (in seconds) between Candlepin check-in and certificate renewal checks. '
+        'Check-in prevents the Candlepin InactiveConsumerCleanerJob from deleting the consumer.'
+    ),
+    default=14400,  # every 4 hours (matches subscription-manager certCheckInterval)
     min_value=3600,  # every 1 hour
     category=_('System'),
     category_slug='system',
