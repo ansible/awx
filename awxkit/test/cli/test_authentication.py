@@ -44,6 +44,48 @@ def setup_session_auth(cli_args: Optional[List[str]] = None) -> Tuple[CLI, Mock,
     return cli, mock_root, mock_load_session
 
 
+def setup_token_auth(cli_args: Optional[List[str]] = None) -> Tuple[CLI, Mock, Mock]:
+    """Set up CLI with mocked connection for Token auth testing"""
+    cli = CLI()
+    cli.parse_args(cli_args or ['awx', '--conf.token', 'test-token-abc123'])
+
+    mock_root = Mock()
+    mock_connection = Mock()
+    mock_root.connection = mock_connection
+    cli.root = mock_root
+
+    return cli, mock_root, mock_connection
+
+
+def test_token_auth_preserved(monkeypatch):
+    """
+    REGRESSION TEST: Token authentication must still work (existed in 4.6.12)
+
+    This test documents the customer's working scenario from 4.6.12:
+        awx login --conf.host URL --conf.username USER --conf.password PASS
+        # Returns: {"token": "E*******J"}
+
+        awx --conf.host URL --conf.token E*******J job_templates launch ...
+        # This WORKED in 4.6.12
+
+    BREAKING CHANGE: Version 4.6.21 removed token authentication entirely,
+    causing customer to report: "neither token no username/password are working"
+
+    This test will FAIL with current code and PASS once fixed.
+    """
+    cli, mock_root, mock_connection = setup_token_auth(['awx', '--conf.host', 'https://aap-sbx.testbank.com', '--conf.token', 'E1234567890J'])
+    monkeypatch.setattr(config, 'force_basic_auth', False)
+
+    # Execute authentication
+    cli.authenticate()
+
+    # Token auth should call login with token parameter
+    mock_connection.login.assert_called_once_with(None, None, token='E1234567890J')
+
+    # Should NOT use sessions when token is provided
+    assert not config.use_sessions
+
+
 def test_basic_auth_enabled(monkeypatch):
     """Test that AWXKIT_FORCE_BASIC_AUTH=true enables Basic authentication"""
     cli, mock_root, mock_connection = setup_basic_auth()
