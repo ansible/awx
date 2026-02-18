@@ -84,23 +84,13 @@ class CLI(object):
         """Configure the current session for authentication.
 
         Authentication priority:
-        1. Token authentication (if --conf.token provided)
-        2. Basic authentication (if AWXKIT_FORCE_BASIC_AUTH=true)
-        3. Session-based authentication (default)
-
+        1. Basic authentication (if AWXKIT_FORCE_BASIC_AUTH=true)
+        2. Session-based authentication (default)
 
         For AAP Gateway environments, set AWXKIT_FORCE_BASIC_AUTH=true to bypass
         session login restrictions when using username/password.
 
         """
-        # Token authentication (if token is provided)
-        token = self.get_config('token')
-        if token:
-            config.use_sessions = False
-            self.root.connection.login(None, None, token=token)
-            return
-
-        # Check if Basic auth is forced via environment variable
         if config.get('force_basic_auth', False):
             config.use_sessions = False
 
