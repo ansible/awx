@@ -259,9 +259,14 @@ class BaseTask(object):
             # Check if this credential has any input sources with compatible types
             for input_source in credential.input_sources.all():
                 if input_source.source_credential.credential_type.name in WORKLOAD_IDENTITY_CREDENTIAL_TYPES:
-                    # Set runtime context on credential (transient, not persisted to database)
-                    credential.context["workload_identity_token"] = _get_jwt()
-                    break  # Only need to set once per credential
+                    if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                        # Set runtime context on credential (transient, not persisted to database)
+                        credential.context["workload_identity_token"] = _get_jwt()
+                        break  # Only need to set once per credential
+                    else:
+                        self.instance.job_explanation = f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_source.source_credential.name} used in this job'
+                        self.instance.status = 'error'
+                        self.instance.save()
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
