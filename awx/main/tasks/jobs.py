@@ -249,19 +249,15 @@ class BaseTask(object):
         using compatible external credential types.
         """
 
-        def _get_jwt() -> str:
-            """Generate JWT token from workload claims."""
-            claims = populate_claims_for_workload(self.instance)
-            # TODO: Implement JWT generation
-            return ""
-
         for credential in self._cached_credentials:
             # Check if this credential has any input sources with compatible types
             for input_source in credential.input_sources.all():
                 if input_source.source_credential.credential_type.name in WORKLOAD_IDENTITY_CREDENTIAL_TYPES:
                     if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
                         # Set runtime context on credential (transient, not persisted to database)
-                        credential.context["workload_identity_token"] = _get_jwt()
+                        credential.context["workload_identity_token"] = retrieve_workload_identity_jwt(
+                            self.instance, audience=input_source.source_credential.url, scope="aap_controller_automation_job"
+                        )
                         break  # Only need to set once per credential
                     else:
                         self.instance.job_explanation = f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_source.source_credential.name} used in this job'

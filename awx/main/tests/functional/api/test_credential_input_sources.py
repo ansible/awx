@@ -1,4 +1,7 @@
 import pytest
+from unittest import mock
+
+from flags.state import enable_flag, disable_flag
 
 from awx.main.models import CredentialInputSource
 from awx.api.versioning import reverse
@@ -316,3 +319,60 @@ def test_create_credential_input_source_with_already_used_input_returns_400(post
     ]
     all_responses = [post(list_url, params, admin) for params in all_params]
     assert all_responses.pop().status_code == 400
+
+
+@pytest.mark.django_db
+def test_credential_input_source_passes_workload_identity_token_when_flag_enabled(admin, vault_credential, external_credential):
+    """Test that workload_identity_token is passed to backend when flag is enabled."""
+    enable_flag('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED')
+
+    # Create an input source
+    input_source = CredentialInputSource.objects.create(
+        target_credential=vault_credential,
+        source_credential=external_credential,
+        input_field_name='vault_password',
+        metadata={'key': 'test_key'},
+    )
+
+    # Mock the credential plugin backend
+    with mock.patch.object(external_credential.credential_type.plugin, 'backend') as mock_backend:
+        mock_backend.return_value = 'test_value'
+
+        # Call with context containing workload_identity_token
+        test_context = {'workload_identity_token': 'jwt_token_here'}
+        result = input_source.get_input_value(context=test_context)
+
+        # Verify backend was called with workload_identity_token
+        assert result == 'test_value'
+        call_kwargs = mock_backend.call_args[1]
+        assert call_kwargs['workload_identity_token'] == 'jwt_token_here'
+        assert call_kwargs['key'] == 'test_key'
+
+
+@pytest.mark.django_db
+def test_credential_input_source_skips_workload_identity_token_when_flag_disabled(admin, vault_credential, external_credential):
+    """Test that workload_identity_token is NOT passed when flag is disabled."""
+    # Disable the feature flag
+    disable_flag('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED')
+
+    # Create an input source
+    input_source = CredentialInputSource.objects.create(
+        target_credential=vault_credential,
+        source_credential=external_credential,
+        input_field_name='vault_password',
+        metadata={'key': 'test_key'},
+    )
+
+    # Mock the backend
+    with mock.patch.object(external_credential.credential_type.plugin, 'backend') as mock_backend:
+        mock_backend.return_value = 'test_value'
+
+        # Call with context containing workload_identity_token
+        test_context = {'workload_identity_token': 'jwt_token_here'}
+        result = input_source.get_input_value(context=test_context)
+
+        # Verify backend was called WITHOUT workload_identity_token
+        assert result == 'test_value'
+        call_kwargs = mock_backend.call_args[1]
+        assert 'workload_identity_token' not in call_kwargs
+        assert call_kwargs['key'] == 'test_key'

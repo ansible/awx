@@ -41,6 +41,45 @@ def private_data_dir():
     shutil.rmtree(private_data, True)
 
 
+@pytest.fixture
+def job_template_with_credentials():
+    """
+    Factory fixture that creates a job template with specified credentials.
+
+    Usage:
+        job = job_template_with_credentials(ssh_cred, vault_cred)
+    """
+
+    def _create_job_template(
+        *credentials, org_name='test-org', project_name='test-project', inventory_name='test-inventory', jt_name='test-jt', playbook='test.yml'
+    ):
+        """
+        Create a job template with the given credentials.
+
+        Args:
+            *credentials: Variable number of Credential objects to attach to the job template
+            org_name: Name for the organization
+            project_name: Name for the project
+            inventory_name: Name for the inventory
+            jt_name: Name for the job template
+            playbook: Playbook filename
+
+        Returns:
+            Job instance created from the job template
+        """
+        org = Organization.objects.create(name=org_name)
+        proj = Project.objects.create(name=project_name, organization=org)
+        inv = Inventory.objects.create(name=inventory_name, organization=org)
+        jt = JobTemplate.objects.create(name=jt_name, project=proj, inventory=inv, playbook=playbook)
+
+        if credentials:
+            jt.credentials.add(*credentials)
+
+        return jt.create_unified_job()
+
+    return _create_job_template
+
+
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
 def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
@@ -483,3 +522,10 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
     with pytest.raises(RuntimeError, match="Workload identity client is not configured"):
         jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
+
+
+def test_workload_identity_credential_types_constant():
+    """Test that WORKLOAD_IDENTITY_CREDENTIAL_TYPES constant contains expected types."""
+    assert 'hashivault_kv_oidc' in jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES
+    assert 'hashivault_ssh_oidc' in jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES
+    assert isinstance(jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES, frozenset)
