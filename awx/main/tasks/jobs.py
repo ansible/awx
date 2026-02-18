@@ -522,7 +522,7 @@ class BaseTask(object):
         create_partition(instance.event_class._meta.db_table, start=instance.created)
 
         # Request workload identity JWT token if feature is enabled and job needs it
-        if flag_enabled("FEATURE_WORKLOAD_IDENTITY_JWT_ENABLED") and self._job_needs_workload_jwt(instance):
+        if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED") and self._job_needs_workload_jwt(instance):
             self._request_workload_identity_token(instance)
 
     def post_run_hook(self, instance, status):
