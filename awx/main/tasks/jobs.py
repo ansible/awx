@@ -96,6 +96,10 @@ from flags.state import flag_enabled
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
+from ansible_base.resource_registry.workload_identity_client import (
+    get_workload_identity_client,
+)
+
 logger = logging.getLogger('awx.main.tasks.jobs')
 
 
@@ -161,6 +165,13 @@ def populate_claims_for_workload(unified_job) -> dict:
         claims[AutomationControllerJobScope.CLAIM_LAUNCHED_BY_ID] = launched_by['id']
 
     return claims
+
+
+def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope: str) -> str:
+    """Retrieve JWT token from workload claims."""
+    client = get_workload_identity_client()
+    claims = populate_claims_for_workload(unified_job)
+    return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
 
 
 def with_path_cleanup(f):

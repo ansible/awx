@@ -427,3 +427,50 @@ def test_populate_claims_for_adhoc_command(workload_attrs, expected_claims):
 
     claims = jobs.populate_claims_for_workload(adhoc_command)
     assert claims == expected_claims
+
+
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_retrieve_workload_identity_jwt_returns_jwt_from_client(mock_get_client):
+    """retrieve_workload_identity_jwt returns the JWT string from the client."""
+    mock_client = mock.MagicMock()
+    mock_response = mock.MagicMock()
+    mock_response.jwt = 'eyJ.test.jwt'
+    mock_client.request_workload_jwt.return_value = mock_response
+    mock_get_client.return_value = mock_client
+
+    unified_job = Job()
+    unified_job.id = 42
+    unified_job.name = 'Test Job'
+    unified_job.launch_type = 'manual'
+    unified_job.organization = Organization(id=1, name='Test Org')
+    unified_job.unified_job_template = None
+    unified_job.instance_group = None
+
+    result = jobs.retrieve_workload_identity_jwt(
+        unified_job, audience='https://api.example.com', scope='aap_controller_automation_job'
+    )
+
+    assert result == 'eyJ.test.jwt'
+    mock_client.request_workload_jwt.assert_called_once()
+    call_kwargs = mock_client.request_workload_jwt.call_args[1]
+    assert call_kwargs['audience'] == 'https://api.example.com'
+    assert call_kwargs['scope'] == 'aap_controller_automation_job'
+    assert 'claims' in call_kwargs
+    assert call_kwargs['claims'][AutomationControllerJobScope.CLAIM_JOB_ID] == 42
+    assert call_kwargs['claims'][AutomationControllerJobScope.CLAIM_JOB_NAME] == 'Test Job'
+
+
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_client):
+    """retrieve_workload_identity_jwt passes audience and scope to the client."""
+    mock_client = mock.MagicMock()
+    mock_client.request_workload_jwt.return_value = mock.MagicMock(jwt='token')
+    mock_get_client.return_value = mock_client
+
+    unified_job = mock.MagicMock()
+    audience = 'custom_audience'
+    scope = 'custom_scope'
+    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 1}):
+        jobs.retrieve_workload_identity_jwt(unified_job, audience=audience, scope=scope)
+
+    mock_client.request_workload_jwt.assert_called_once_with(claims={'job_id': 1}, scope=scope, audience=audience)
