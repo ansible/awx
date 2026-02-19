@@ -224,22 +224,19 @@ class BaseTask(object):
     def __init__(self):
         self.instance = None
         self.cleanup_paths = []
-        self._credentials_cache = None
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
 
-    @property
-    def _cached_credentials(self):
+    @functools.cached_property
+    def _credentials(self):
         """
-        Hidden property that caches credentials for the task execution.
+        Credentials for the task execution.
         Fetches credentials once using build_credentials_list() and stores
         them for the duration of the task to avoid redundant database queries.
         """
-        if self._credentials_cache is None:
-            credentials_list = self.build_credentials_list(self.instance)
-            # Convert to list to prevent re-evaluation of QuerySet
-            self._credentials_cache = list(credentials_list)
-        return self._credentials_cache
+        credentials_list = self.build_credentials_list(self.instance)
+        # Convert to list to prevent re-evaluation of QuerySet
+        return list(credentials_list)
 
     def populate_workload_identity_tokens(self):
         """
@@ -248,8 +245,7 @@ class BaseTask(object):
         Sets the context on Credential objects that have input sources
         using compatible external credential types.
         """
-
-        for credential in self._cached_credentials:
+        for credential in self._credentials:
             # Check if this credential has any input sources with compatible types
             for input_source in credential.input_sources.all():
                 if input_source.source_credential.credential_type.name in WORKLOAD_IDENTITY_CREDENTIAL_TYPES:
@@ -680,7 +676,7 @@ class BaseTask(object):
 
             self.runner_callback.job_created = str(self.instance.created)
 
-            credentials = self._cached_credentials
+            credentials = self._credentials
 
             container_root = None
             if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
@@ -975,24 +971,24 @@ class RunJob(SourceControlMixin, BaseTask):
     model = Job
     event_model = JobEvent
 
-    def _get_machine_credential_cached(self):
-        """Get machine credential from cached credentials."""
-        for cred in self._cached_credentials:
+    def _get_machine_credential(self):
+        """Get machine credential."""
+        for cred in self._credentials:
             if cred.credential_type.kind == 'ssh':
                 return cred
         return None
 
-    def _get_vault_credentials_cached(self):
-        """Get vault credentials from cached credentials."""
-        return [cred for cred in self._cached_credentials if cred.credential_type.kind == 'vault']
+    def _get_vault_credentials(self):
+        """Get vault credentials."""
+        return [cred for cred in self._credentials if cred.credential_type.kind == 'vault']
 
-    def _get_network_credentials_cached(self):
-        """Get network credentials from cached credentials."""
-        return [cred for cred in self._cached_credentials if cred.credential_type.kind == 'net']
+    def _get_network_credentials(self):
+        """Get network credentials."""
+        return [cred for cred in self._credentials if cred.credential_type.kind == 'net']
 
-    def _get_cloud_credentials_cached(self):
-        """Get cloud credentials from cached credentials."""
-        return [cred for cred in self._cached_credentials if cred.credential_type.kind == 'cloud']
+    def _get_cloud_credentials(self):
+        """Get cloud credentials."""
+        return [cred for cred in self._credentials if cred.credential_type.kind == 'cloud']
 
     def build_private_data(self, job, private_data_dir):
         """
@@ -1011,7 +1007,7 @@ class RunJob(SourceControlMixin, BaseTask):
         }
         """
         private_data = {'credentials': {}}
-        for credential in self._cached_credentials:
+        for credential in self._credentials:
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
@@ -1027,14 +1023,14 @@ class RunJob(SourceControlMixin, BaseTask):
         and ansible-vault.
         """
         passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = self._get_machine_credential_cached()
+        cred = self._get_machine_credential()
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
-        for cred in self._get_vault_credentials_cached():
+        for cred in self._get_vault_credentials():
             field = 'vault_password'
             vault_id = cred.get_input('vault_id', default=None)
             if vault_id:
@@ -1050,7 +1046,7 @@ class RunJob(SourceControlMixin, BaseTask):
         key unlock over network key unlock.
         '''
         if 'ssh_key_unlock' not in passwords:
-            for cred in self._get_network_credentials_cached():
+            for cred in self._get_network_credentials():
                 if cred.inputs.get('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = runtime_passwords.get('ssh_key_unlock', cred.get_input('ssh_key_unlock', default=''))
                     break
@@ -1085,11 +1081,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in self._get_cloud_credentials_cached():
+        for cloud_cred in self._get_cloud_credentials():
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
                 env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
-        for network_cred in self._get_network_credentials_cached():
+        for network_cred in self._get_network_credentials():
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
             env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
@@ -1139,7 +1135,7 @@ class RunJob(SourceControlMixin, BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         """
-        creds = self._get_machine_credential_cached()
+        creds = self._get_machine_credential()
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:

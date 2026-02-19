@@ -243,14 +243,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append('vault_password')
         return needed
 
-    @property
+    @functools.cached_property
     def context(self):
         """
         Hidden property for storing runtime context during credential resolution.
         """
-        if not hasattr(self, '_context'):
-            self._context = {}
-        return self._context
+        return {}
 
     @cached_property
     def dynamic_input_fields(self):
