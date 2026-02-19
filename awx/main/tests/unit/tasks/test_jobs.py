@@ -446,9 +446,7 @@ def test_retrieve_workload_identity_jwt_returns_jwt_from_client(mock_get_client)
     unified_job.unified_job_template = None
     unified_job.instance_group = None
 
-    result = jobs.retrieve_workload_identity_jwt(
-        unified_job, audience='https://api.example.com', scope='aap_controller_automation_job'
-    )
+    result = jobs.retrieve_workload_identity_jwt(unified_job, audience='https://api.example.com', scope='aap_controller_automation_job')
 
     assert result == 'eyJ.test.jwt'
     mock_client.request_workload_jwt.assert_called_once()
