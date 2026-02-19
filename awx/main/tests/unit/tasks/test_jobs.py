@@ -472,3 +472,14 @@ def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_clien
         jobs.retrieve_workload_identity_jwt(unified_job, audience=audience, scope=scope)
 
     mock_client.request_workload_jwt.assert_called_once_with(claims={'job_id': 1}, scope=scope, audience=audience)
+
+
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_get_client):
+    """retrieve_workload_identity_jwt raises RuntimeError when client is None."""
+    mock_get_client.return_value = None
+
+    unified_job = mock.MagicMock()
+
+    with pytest.raises(RuntimeError, match="Workload identity client is not configured."):
+        jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
