@@ -174,7 +174,7 @@ def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope
     """
     client = get_workload_identity_client()
     if client is None:
-        raise RuntimeError("Workload identity client is not configured.")
+        raise RuntimeError("Workload identity client is not configured")
     claims = populate_claims_for_workload(unified_job)
     return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
 
