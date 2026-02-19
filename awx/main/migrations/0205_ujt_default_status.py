@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0202_delete_token_cleanup_job'),
+        ('main', '0204_squashed_deletions'),
     ]
 
     operations = [
