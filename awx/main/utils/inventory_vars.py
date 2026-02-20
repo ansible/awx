@@ -1,7 +1,7 @@
 import logging
 from typing import TypeAlias, Any
 
-from awx.main.models import InventoryGroupVariablesWithHistory
+from awx.main.models import InventoryGroupVariablesWithHistory, InventoryHostVariablesWithHistory
 
 var_value: TypeAlias = Any
 update_queue: TypeAlias = list[tuple[int, var_value]]
@@ -274,3 +274,58 @@ def update_group_variables(
     logger.debug(f"update_group_variables: after update_from_src {model.variables=}")
     logger.debug(f"update_group_variables({group_id=}, {newvars}): {inv_group_vars}")
     return inv_group_vars
+
+
+def update_host_variables(
+    host_id: int,
+    newvars: dict,
+    dbvars: dict | None,
+    invsrc_id: int,
+    inventory_id: int,
+    overwrite_vars: bool = True,
+    reset: bool = False,
+) -> dict[str, var_value]:
+    """
+    Update the inventory variables of one host.
+
+    This works analogously to `update_group_variables` but for host-level
+    variables.  It tracks variable history per-source, ensuring that when a
+    source removes a variable, it is properly cleaned up while preserving
+    variables contributed by other sources.
+
+    :param int host_id: The host id (pk).
+    :param dict newvars: The variables contained in this update.
+    :param dict dbvars: The variables which are already stored in the database
+        for this host. Can be `None`.
+    :param int invsrc_id: The id of the inventory source for this update.
+    :param int inventory_id: The id of the inventory on which this update is
+        applied.
+    :param bool overwrite_vars: If `True`, delete variables which were merged
+        from the same source in a previous update, but are no longer contained
+        in that source. If `False`, such variables would not be removed.
+        Default is `True`.
+    :param bool reset: If `True`, delete all variables from previous updates,
+        therewith making this update overwrite all history. Default is `False`.
+    :return: The variables and their current values as a dict.
+    :rtype: dict
+    """
+    inv_host_vars = InventoryGroupVariables(host_id)
+    # Restore the existing variables state.
+    try:
+        model = InventoryHostVariablesWithHistory.objects.get(inventory_id=inventory_id, host_id=host_id)
+    except InventoryHostVariablesWithHistory.DoesNotExist:
+        model = InventoryHostVariablesWithHistory(inventory_id=inventory_id, host_id=host_id)
+        if dbvars:
+            inv_host_vars.update_from_src(dbvars, -1)  # Assume -1 as inv_source_id for existing vars.
+    else:
+        inv_host_vars.load_state(model.variables)
+    #
+    logger.debug(f"update_host_variables: before update_from_src {model.variables=}")
+    # Apply the new inventory update onto the host variables.
+    inv_host_vars.update_from_src(newvars, invsrc_id, overwrite_vars, reset)
+    # Save the new variables state.
+    model.variables = inv_host_vars.save_state()
+    model.save()
+    logger.debug(f"update_host_variables: after update_from_src {model.variables=}")
+    logger.debug(f"update_host_variables({host_id=}, {newvars}): {inv_host_vars}")
+    return inv_host_vars

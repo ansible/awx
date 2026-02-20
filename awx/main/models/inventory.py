@@ -1441,3 +1441,39 @@ class InventoryGroupVariablesWithHistory(models.Model):
         on_delete=models.CASCADE,
     )
     variables = models.JSONField()  # The group variables, including their history.
+
+
+class InventoryHostVariablesWithHistory(models.Model):
+    """
+    Represents the inventory variables of one host.
+
+    The purpose of this model is to persist the update history of the host
+    variables. The update history is maintained in the same way as group
+    variables (using `InventoryGroupVariables`), this class here is just a
+    container for the database storage.
+
+    See also: InventoryGroupVariablesWithHistory
+    """
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["inventory", "host"],
+                name="unique_inventory_host",
+                violation_error_message=_("Inventory/Host combination must be unique."),
+            ),
+        ]
+
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='inventory_host_variables',
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    host = models.ForeignKey(
+        'Host',
+        related_name='inventory_host_variables',
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    variables = models.JSONField()  # The host variables, including their history.

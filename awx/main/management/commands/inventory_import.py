@@ -33,7 +33,7 @@ from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
 from awx.main.utils.execution_environments import get_default_execution_environment
-from awx.main.utils.inventory_vars import update_group_variables
+from awx.main.utils.inventory_vars import update_group_variables, update_host_variables
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
@@ -499,11 +499,14 @@ class Command(BaseCommand):
             group_names = all_group_names[offset : (offset + self._batch_size)]
             for group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[group.name]
-                db_variables = group.variables_dict
-                if self.overwrite_vars:
-                    db_variables = mem_group.variables
-                else:
-                    db_variables.update(mem_group.variables)
+                db_variables = update_group_variables(
+                    group_id=group.pk,
+                    newvars=mem_group.variables,
+                    dbvars=group.variables_dict,
+                    invsrc_id=self.inventory_source.id,
+                    inventory_id=self.inventory.id,
+                    overwrite_vars=self.overwrite_vars,
+                )
                 if db_variables != group.variables_dict:
                     group.variables = json.dumps(db_variables)
                     group.save(update_fields=['variables'])
@@ -548,10 +551,14 @@ class Command(BaseCommand):
                 for var in ('remote_{}_enabled', 'remote_{}_id'):
                     mem_variables.pop(var.format(prefix), None)
 
-        if self.overwrite_vars:
-            db_variables = mem_variables
-        else:
-            db_variables.update(mem_variables)
+        db_variables = update_host_variables(
+            host_id=db_host.pk,
+            newvars=mem_variables,
+            dbvars=db_host.variables_dict,
+            invsrc_id=self.inventory_source.id,
+            inventory_id=self.inventory.id,
+            overwrite_vars=self.overwrite_vars,
+        )
 
         if db_variables != db_host.variables_dict:
             db_host.variables = json.dumps(db_variables)

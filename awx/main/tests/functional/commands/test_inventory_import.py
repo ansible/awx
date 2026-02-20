@@ -319,6 +319,154 @@ class TestINIImports:
 
 @pytest.mark.django_db
 @pytest.mark.inventory_import
+@mock.patch.object(inventory_import.Command, 'check_license', new=mock.MagicMock())
+@mock.patch.object(inventory_import.Command, 'set_logging_level', new=mock_logging)
+class TestOverwriteVarsRemoval:
+    """Tests for https://github.com/ansible/awx/issues/16139
+
+    Verify that variables removed from an inventory source are properly
+    removed from hosts and groups when overwrite_vars is enabled.
+    """
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_host_vars_removed_with_overwrite_vars(self, inventory):
+        """When overwrite_vars is True, variables removed from the source
+        should also be removed from the host in AWX."""
+        # First import: host has two variables
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"myhost": {"ansible_python_interpreter": "/usr/bin/python3", "keep_var": "value"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        host = inventory.hosts.get(name='myhost')
+        assert host.variables_dict == {"ansible_python_interpreter": "/usr/bin/python3", "keep_var": "value"}
+
+        # Second import: ansible_python_interpreter removed from source
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"myhost": {"keep_var": "value"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        host.refresh_from_db()
+        assert host.variables_dict == {"keep_var": "value"}, (
+            "ansible_python_interpreter should have been removed when overwrite_vars is True"
+        )
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_host_vars_all_removed_with_overwrite_vars(self, inventory):
+        """When all host vars are removed from source, host should have empty vars."""
+        # First import: host has variables
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"myhost": {"ansible_python_interpreter": "/usr/bin/python3"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        host = inventory.hosts.get(name='myhost')
+        assert host.variables_dict == {"ansible_python_interpreter": "/usr/bin/python3"}
+
+        # Second import: all variables removed
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"myhost": {}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        host.refresh_from_db()
+        assert host.variables_dict == {}, (
+            "All host variables should have been removed when overwrite_vars is True"
+        )
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_group_vars_removed_with_overwrite_vars(self, inventory):
+        """When overwrite_vars is True, variables removed from a group in the
+        source should also be removed from the group in AWX."""
+        # First import: group has two variables
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"myhost": {}}},
+            "all": {"children": ["mygroup"]},
+            "mygroup": {"hosts": ["myhost"], "vars": {"var_a": "a", "var_b": "b"}},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        group = inventory.groups.get(name='mygroup')
+        assert group.variables_dict == {"var_a": "a", "var_b": "b"}
+
+        # Second import: var_a removed from group
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"myhost": {}}},
+            "all": {"children": ["mygroup"]},
+            "mygroup": {"hosts": ["myhost"], "vars": {"var_b": "b"}},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite_vars=True)
+        group.refresh_from_db()
+        assert group.variables_dict == {"var_b": "b"}, (
+            "var_a should have been removed from group when overwrite_vars is True"
+        )
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_host_vars_multi_source_overwrite(self, inventory):
+        """With multiple inventory sources, removing a variable from one source
+        should not affect variables contributed by another source."""
+        inv_src_a = InventorySource.objects.create(
+            inventory=inventory, name='source_a', source='file', overwrite_vars=True
+        )
+        inv_src_b = InventorySource.objects.create(
+            inventory=inventory, name='source_b', source='file', overwrite_vars=True
+        )
+
+        # Source A sets var_a and var_shared
+        data_a = {
+            "_meta": {"hostvars": {"myhost": {"var_a": "from_a", "var_shared": "from_a"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.perform_update(
+            dict(overwrite_vars=True), data_a, inv_src_a.create_unified_job()
+        )
+        host = inventory.hosts.get(name='myhost')
+        assert "var_a" in host.variables_dict
+        assert host.variables_dict["var_shared"] == "from_a"
+
+        # Source B sets var_b and var_shared
+        data_b = {
+            "_meta": {"hostvars": {"myhost": {"var_b": "from_b", "var_shared": "from_b"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.perform_update(
+            dict(overwrite_vars=True), data_b, inv_src_b.create_unified_job()
+        )
+        host.refresh_from_db()
+        assert host.variables_dict["var_a"] == "from_a", "var_a from source A should still be present"
+        assert host.variables_dict["var_b"] == "from_b", "var_b from source B should be present"
+        assert host.variables_dict["var_shared"] == "from_b", "var_shared should have value from latest source"
+
+        # Source A removes var_a, only provides var_shared
+        data_a_updated = {
+            "_meta": {"hostvars": {"myhost": {"var_shared": "from_a_v2"}}},
+            "all": {"children": ["ungrouped"]},
+            "ungrouped": {"hosts": ["myhost"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.perform_update(
+            dict(overwrite_vars=True), data_a_updated, inv_src_a.create_unified_job()
+        )
+        host.refresh_from_db()
+        assert "var_a" not in host.variables_dict, "var_a should have been removed since source A no longer provides it"
+        assert host.variables_dict["var_b"] == "from_b", "var_b from source B should still be present"
+        assert host.variables_dict["var_shared"] == "from_a_v2", "var_shared should have value from latest update"
+
+
 class TestEnabledVar:
     """
     Meaning of return values
