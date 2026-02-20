@@ -526,6 +526,16 @@ class Command(BaseCommand):
             group = self.inventory.groups.update_or_create(name=group_name, defaults={'variables': json.dumps(mem_group.variables), 'description': group_desc})[
                 0
             ]
+            # Initialize variable history under the real source ID so that
+            # future syncs can correctly attribute and remove variables.
+            update_group_variables(
+                group_id=group.pk,
+                newvars=mem_group.variables,
+                dbvars=None,
+                invsrc_id=self.inventory_source.id,
+                inventory_id=self.inventory.id,
+                overwrite_vars=self.overwrite_vars,
+            )
             logger.debug('Group "%s" added', group.name)
             self._batch_add_m2m(self.inventory_source.groups, group)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
@@ -699,6 +709,16 @@ class Command(BaseCommand):
             except ValueError as e:
                 raise ValueError(str(e) + ': {}'.format(mem_host_name))
             db_host = self.inventory.hosts.update_or_create(name=mem_host_name, defaults=host_attrs)[0]
+            # Initialize variable history under the real source ID so that
+            # future syncs can correctly attribute and remove variables.
+            update_host_variables(
+                host_id=db_host.pk,
+                newvars=import_vars,
+                dbvars=None,
+                invsrc_id=self.inventory_source.id,
+                inventory_id=self.inventory.id,
+                overwrite_vars=self.overwrite_vars,
+            )
             if enabled is False:
                 logger.debug('Host "%s" added (disabled)', mem_host_name)
             else:
