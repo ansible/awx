@@ -200,6 +200,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         indexes = [
             models.Index(fields=['identifier']),
         ]
+        ordering = ('pk',)
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_node_detail', kwargs={'pk': self.pk}, request=request)
@@ -286,6 +287,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             models.Index(fields=["identifier", "workflow_job"]),
             models.Index(fields=['identifier']),
         ]
+        ordering = ('pk',)
 
     @property
     def event_processing_finished(self):
