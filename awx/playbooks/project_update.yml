@@ -147,7 +147,7 @@
             insights_url: "{{ insights_url }}"
             username: "{{ scm_username | default(omit) }}"
             password: "{{ scm_password | default(omit) }}"
-            project_update_path: "{{ project_update_path }}"
+            project_path: "{{ project_update_path }}"
             awx_license_type: "{{ awx_license_type }}"
             awx_version: "{{ awx_version }}"
             client_id: "{{ client_id | default(omit) }}"
@@ -184,7 +184,7 @@
         - name: Unpack archive
           project_archive:
             src: "{{ get_archive.dest }}"
-            project_update_path: "{{ project_update_path | quote }}"
+            project_path: "{{ project_update_path | quote }}"
             force: "{{ scm_clean }}"
           when: get_archive.changed or scm_clean
           register: unarchived
@@ -224,7 +224,7 @@
   tasks:
     - name: Verify project content using GPG signature
       verify_project:
-        project_update_path: "{{ project_update_path | quote }}"
+        project_path: "{{ project_update_path | quote }}"
         validation_type: gpg
         gpg_pubkey: "{{ gpg_pubkey }}"
       tags:
@@ -232,7 +232,7 @@
 
     - name: Verify project content against checksum manifest
       verify_project:
-        project_update_path: "{{ project_update_path | quote }}"
+        project_path: "{{ project_update_path | quote }}"
         validation_type: checksum_manifest
       tags:
         - validation_checksum_manifest
