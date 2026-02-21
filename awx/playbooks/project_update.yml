@@ -45,12 +45,14 @@
         - update_insights
         - update_svn
         - update_git
+        - install_roles
+        - install_collections
         - delete
 
 - hosts: localhost
   gather_facts: false
   connection: local
-  name: Update the default working path for automation mesh
+  name: Set the default working path for automation mesh
   tasks:
     - name: Update the default working path for automation mesh
       ansible.builtin.set_fact:

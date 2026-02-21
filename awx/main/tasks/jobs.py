@@ -858,26 +858,18 @@ class SourceControlMixin(BaseTask):
     def spawn_project_sync(self, project, sync_needs, scm_branch=None):
         cn = Instance.objects.my_hostname()
 
-        # Check if project has instance groups configured
-        if project.instance_groups.exists():
-            # Use the project's first instance group
-            project_ig = project.instance_groups.first()
-            # Find an execution node from the instance group with most remaining capacity
-            candidate_instances = project_ig.instances.filter(enabled=True, node_type__in=['execution', 'hybrid'])
-            execution_instance = select_execution_node_by_capacity(candidate_instances)
+        pu_ig = self.instance.instance_group
+        pu_en = cn
 
-            if execution_instance and execution_instance.hostname != cn:
-                # Remote execution on mesh node
-                pu_ig = project_ig
-                pu_en = execution_instance.hostname
-            else:
-                # Fallback to original workflow
-                pu_ig = self.instance.instance_group
-                pu_en = cn
-        else:
-            # No project instance groups - use existing workflow
-            pu_ig = self.instance.instance_group
-            pu_en = cn
+        if project.instance_groups.exists():
+            for project_ig in project.instance_groups.all():
+                candidate_instances = project_ig.instances.filter(enabled=True, node_type__in=['execution', 'hybrid'])
+                execution_instance = select_execution_node_by_capacity(candidate_instances)
+
+                if execution_instance and execution_instance.hostname != cn:
+                    pu_ig = project_ig
+                    pu_en = execution_instance.hostname
+                    break
 
         sync_metafields = dict(
             launch_type="sync",
@@ -1636,7 +1628,7 @@ class RunProjectUpdate(BaseTask):
         """Copy project files from artifacts to projects_root after remote execution."""
         artifacts_project_path = self.runner_callback.project_artifact_path
 
-        if not os.path.exists(artifacts_project_path):
+        if artifacts_project_path is None or not os.path.exists(artifacts_project_path):
             raise PostRunError(
                 f'{instance.log_format} project artifacts not found after remote update: {artifacts_project_path}',
                 status='error',
@@ -1672,7 +1664,7 @@ class RunProjectUpdate(BaseTask):
         for attr, dest_subdir in artifact_mappings:
             artifact_path = getattr(self.runner_callback, attr, None)
 
-            if not os.path.exists(artifact_path):
+            if artifact_path is None or not os.path.exists(artifact_path):
                 logger.debug(f'{instance.log_format} {attr} path does not exist: {artifact_path}')
                 continue
 
