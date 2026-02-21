@@ -1636,20 +1636,25 @@ class RunProjectUpdate(BaseTask):
         """Copy project files from artifacts to projects_root after remote execution."""
         artifacts_project_path = self.runner_callback.project_artifact_path
 
-        if not artifacts_project_path:
-            logger.debug(f'{instance.log_format} no project artifacts to copy')
-            return
-
         if not os.path.exists(artifacts_project_path):
-            logger.warning(f'{instance.log_format} project artifacts not found at: {artifacts_project_path}')
-            return
+            raise PostRunError(
+                f'{instance.log_format} project artifacts not found after remote update: {artifacts_project_path}',
+                status='error',
+            )
 
         project_path = instance.get_project_path(check_if_exists=False)
 
-        if os.path.exists(project_path):
-            shutil.rmtree(project_path)
+        try:
+            if os.path.exists(project_path):
+                shutil.rmtree(project_path)
 
-        shutil.copytree(artifacts_project_path, project_path, symlinks=True)
+            shutil.copytree(artifacts_project_path, project_path, symlinks=True)
+        except Exception:
+            raise PostRunError(
+                f'{instance.log_format} failed to copy project artifacts to {project_path}',
+                status='error',
+                tb=traceback.format_exc(),
+            )
 
         logger.info(f'Copied project from remote execution for {instance.log_format}')
 
@@ -1666,15 +1671,20 @@ class RunProjectUpdate(BaseTask):
 
         for attr, dest_subdir in artifact_mappings:
             artifact_path = getattr(self.runner_callback, attr, None)
-            if not artifact_path:
-                continue
 
             if not os.path.exists(artifact_path):
                 logger.debug(f'{instance.log_format} {attr} path does not exist: {artifact_path}')
                 continue
 
             dest_path = os.path.join(stage_path, dest_subdir)
-            shutil.copytree(artifact_path, dest_path, symlinks=True, dirs_exist_ok=True)
+            try:
+                shutil.copytree(artifact_path, dest_path, symlinks=True, dirs_exist_ok=True)
+            except Exception:
+                raise PostRunError(
+                    f'{instance.log_format} failed to copy {dest_subdir} from remote execution artifacts',
+                    status='error',
+                    tb=traceback.format_exc(),
+                )
 
             logger.info(f'{instance.log_format} copied {dest_subdir} from remote execution artifacts')
 
