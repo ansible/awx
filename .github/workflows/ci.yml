@@ -11,6 +11,8 @@ on:
   push:
     branches:
       - devel  # needed to publish code coverage post-merge
+  schedule:
+    - cron: '0 13,18 * * *'
 jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
