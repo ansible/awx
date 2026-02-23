@@ -335,7 +335,7 @@ def test_credential_input_source_passes_workload_identity_token_when_flag_enable
     )
 
     # Mock the credential plugin backend
-    with mock.patch.object(external_credential.credential_type.plugin, 'backend') as mock_backend:
+    with mock.patch.object(external_credential.credential_type.plugin, 'backend', autospec=True) as mock_backend:
         mock_backend.return_value = 'test_value'
 
         # Call with context containing workload_identity_token
@@ -364,7 +364,7 @@ def test_credential_input_source_skips_workload_identity_token_when_flag_disable
     )
 
     # Mock the backend
-    with mock.patch.object(external_credential.credential_type.plugin, 'backend') as mock_backend:
+    with mock.patch.object(external_credential.credential_type.plugin, 'backend', autospec=True) as mock_backend:
         mock_backend.return_value = 'test_value'
 
         # Call with context containing workload_identity_token

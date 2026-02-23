@@ -556,7 +556,7 @@ class TestGenericRun:
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            with mock.patch.object(task, 'build_credentials_list', return_value=[]):
+            with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
                 env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
@@ -651,7 +651,7 @@ class TestJobCredentials(TestJobExecution):
 
         with mock.patch.object(UnifiedJob, 'credentials', credentials_mock):
             # Mock build_credentials_list to work with the cached credentials mechanism
-            with mock.patch.object(jobs.RunJob, 'build_credentials_list', return_value=job._credentials):
+            with mock.patch.object(jobs.RunJob, 'build_credentials_list', return_value=job._credentials, autospec=True):
                 yield job
 
     @pytest.fixture

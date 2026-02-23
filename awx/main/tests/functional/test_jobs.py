@@ -503,7 +503,7 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
     # Set cached credentials
     task._credentials_cache = [target_cred, ssh_cred]
 
-    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}):
+    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}, autospec=True):
         task.populate_workload_identity_tokens()
 
         # Verify context was set on the credential with input source
@@ -579,7 +579,7 @@ def test_populate_workload_identity_tokens_without_workload_identity_credentials
     # Set cached credentials
     task._credentials_cache = [ssh_cred, vault_cred]
 
-    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}):
+    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}, autospec=True):
         task.populate_workload_identity_tokens()
 
         # Verify no context was set
