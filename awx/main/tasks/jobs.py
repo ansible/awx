@@ -104,8 +104,8 @@ logger = logging.getLogger('awx.main.tasks.jobs')
 # Credential types that support OIDC workload identity authentication
 WORKLOAD_IDENTITY_CREDENTIAL_TYPES = frozenset(
     [
-        'hashivault_kv_oidc',
-        'hashivault_ssh_oidc',
+        'HashiCorp Vault Secret Lookup (OIDC)',
+        'HashiCorp Vault Signed SSH (OIDC)',
     ]
 )
 
@@ -245,20 +245,34 @@ class BaseTask(object):
         Sets the context on Credential objects that have input sources
         using compatible external credential types.
         """
-        for credential in self._credentials:
-            # Check if this credential has any input sources with compatible types
-            for input_source in credential.input_sources.all():
-                if input_source.source_credential.credential_type.name in WORKLOAD_IDENTITY_CREDENTIAL_TYPES:
-                    if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-                        # Set runtime context on credential (transient, not persisted to database)
-                        credential.context["workload_identity_token"] = retrieve_workload_identity_jwt(
-                            self.instance, audience=input_source.source_credential.url, scope="aap_controller_automation_job"
-                        )
-                        break  # Only need to set once per credential
-                    else:
-                        self.instance.job_explanation = f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_source.source_credential.name} used in this job'
-                        self.instance.status = 'error'
-                        self.instance.save()
+        credential_input_sources = (
+            (credential.context, src)
+            for credential in self._credentials
+            for src in credential.input_sources.all()
+            # Whether the credential has any input sources with compatible types:
+            if src.source_credential.credential_type.name in WORKLOAD_IDENTITY_CREDENTIAL_TYPES
+        )
+        for credential_ctx, input_src in credential_input_sources:
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                try:
+                    jwt = retrieve_workload_identity_jwt(
+                        self.instance, audience=input_src.source_credential.get_input('url'), scope="aap_controller_automation_job"
+                    )
+                    # Set runtime context on credential (transient, not persisted to database)
+                    credential_ctx["workload_identity_token"] = jwt
+                    break  # Only need to set once per credential
+                except Exception as e:
+                    self.instance.job_explanation = (
+                        f'Could not generate workload identity token for credential {input_src.source_credential.name} used in this job. Error:\n{e}'
+                    )
+                    self.instance.status = 'error'
+                    self.instance.save()
+            else:
+                self.instance.job_explanation = (
+                    f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_src.source_credential.name} used in this job.'
+                )
+                self.instance.status = 'error'
+                self.instance.save()
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -657,7 +671,10 @@ class BaseTask(object):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                logger.info(f'Generating workload identity tokens for job {self.instance.id}')
                 self.populate_workload_identity_tokens()
+                if self.instance.status == 'error':
+                    raise RuntimeError('not starting %s task' % self.instance.status)
 
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
@@ -971,24 +988,28 @@ class RunJob(SourceControlMixin, BaseTask):
     model = Job
     event_model = JobEvent
 
-    def _get_machine_credential(self):
+    def _extract_credentials_of_kind(self, kind: str):
+        return (cred for cred in self._credentials if cred.credential_type.kind == kind)
+
+    @property
+    def _machine_credential(self) -> object:
         """Get machine credential."""
-        for cred in self._credentials:
-            if cred.credential_type.kind == 'ssh':
-                return cred
-        return None
+        return next(self._extract_credentials_of_kind('ssh'), None)
 
-    def _get_vault_credentials(self):
+    @property
+    def _vault_credentials(self) -> list[object]:
         """Get vault credentials."""
-        return [cred for cred in self._credentials if cred.credential_type.kind == 'vault']
+        return list(self._extract_credentials_of_kind('vault'))
 
-    def _get_network_credentials(self):
+    @property
+    def _network_credentials(self) -> list[object]:
         """Get network credentials."""
-        return [cred for cred in self._credentials if cred.credential_type.kind == 'net']
+        return list(self._extract_credentials_of_kind('net'))
 
-    def _get_cloud_credentials(self):
+    @property
+    def _cloud_credentials(self) -> list[object]:
         """Get cloud credentials."""
-        return [cred for cred in self._credentials if cred.credential_type.kind == 'cloud']
+        return list(self._extract_credentials_of_kind('cloud'))
 
     def build_private_data(self, job, private_data_dir):
         """
@@ -1023,14 +1044,14 @@ class RunJob(SourceControlMixin, BaseTask):
         and ansible-vault.
         """
         passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = self._get_machine_credential()
+        cred = self._machine_credential
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
-        for cred in self._get_vault_credentials():
+        for cred in self._vault_credentials:
             field = 'vault_password'
             vault_id = cred.get_input('vault_id', default=None)
             if vault_id:
@@ -1046,7 +1067,7 @@ class RunJob(SourceControlMixin, BaseTask):
         key unlock over network key unlock.
         '''
         if 'ssh_key_unlock' not in passwords:
-            for cred in self._get_network_credentials():
+            for cred in self._network_credentials:
                 if cred.inputs.get('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = runtime_passwords.get('ssh_key_unlock', cred.get_input('ssh_key_unlock', default=''))
                     break
@@ -1081,11 +1102,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in self._get_cloud_credentials():
+        for cloud_cred in self._cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
                 env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
-        for network_cred in self._get_network_credentials():
+        for network_cred in self._network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
             env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
@@ -1135,7 +1156,7 @@ class RunJob(SourceControlMixin, BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         """
-        creds = self._get_machine_credential()
+        creds = self._machine_credential
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:

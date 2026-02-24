@@ -312,8 +312,8 @@ class TestLaunchConfig:
 
 
 @pytest.mark.django_db
-def test_base_task_cached_credentials_property(job_template_with_credentials):
-    """Test that _cached_credentials property caches credentials and doesn't re-query."""
+def test_base_task_credentials_property(job_template_with_credentials):
+    """Test that _credentials property caches credentials and doesn't re-query."""
     task = jobs.RunJob()
 
     # Create real credentials
@@ -330,18 +330,18 @@ def test_base_task_cached_credentials_property(job_template_with_credentials):
     task.instance = job
 
     # First access should build credentials
-    result1 = task._cached_credentials
+    result1 = task._credentials
     assert len(result1) == 2
     assert isinstance(result1, list)
 
     # Second access should return cached value (we can verify by checking it's the same list object)
-    result2 = task._cached_credentials
+    result2 = task._credentials
     assert result2 is result1  # Same object reference
 
 
 @pytest.mark.django_db
-def test_run_job_get_machine_credential_cached(job_template_with_credentials):
-    """Test _get_machine_credential_cached returns ssh credential from cache."""
+def test_run_job_machine_credential(job_template_with_credentials):
+    """Test _machine_credential returns ssh credential from cache."""
     task = jobs.RunJob()
 
     # Create credentials
@@ -358,17 +358,17 @@ def test_run_job_get_machine_credential_cached(job_template_with_credentials):
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [ssh_cred, vault_cred]
+    task._credentials = [ssh_cred, vault_cred]
 
     # Get machine credential
-    result = task._get_machine_credential_cached()
+    result = task._machine_credential
     assert result == ssh_cred
     assert result.credential_type.kind == 'ssh'
 
 
 @pytest.mark.django_db
-def test_run_job_get_machine_credential_cached_none(job_template_with_credentials):
-    """Test _get_machine_credential_cached returns None when no ssh credential exists."""
+def test_run_job_machine_credential_none(job_template_with_credentials):
+    """Test _machine_credential returns None when no ssh credential exists."""
     task = jobs.RunJob()
 
     # Create only vault credential
@@ -380,16 +380,16 @@ def test_run_job_get_machine_credential_cached_none(job_template_with_credential
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [vault_cred]
+    task._credentials = [vault_cred]
 
     # Get machine credential
-    result = task._get_machine_credential_cached()
+    result = task._machine_credential
     assert result is None
 
 
 @pytest.mark.django_db
-def test_run_job_get_vault_credentials_cached(job_template_with_credentials):
-    """Test _get_vault_credentials_cached returns all vault credentials from cache."""
+def test_run_job_vault_credentials(job_template_with_credentials):
+    """Test _vault_credentials returns all vault credentials from cache."""
     task = jobs.RunJob()
 
     # Create credentials
@@ -406,10 +406,10 @@ def test_run_job_get_vault_credentials_cached(job_template_with_credentials):
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [vault_cred1, ssh_cred, vault_cred2]
+    task._credentials = [vault_cred1, ssh_cred, vault_cred2]
 
     # Get vault credentials
-    result = task._get_vault_credentials_cached()
+    result = task._vault_credentials
     assert len(result) == 2
     assert vault_cred1 in result
     assert vault_cred2 in result
@@ -417,8 +417,8 @@ def test_run_job_get_vault_credentials_cached(job_template_with_credentials):
 
 
 @pytest.mark.django_db
-def test_run_job_get_network_credentials_cached(job_template_with_credentials):
-    """Test _get_network_credentials_cached returns all network credentials from cache."""
+def test_run_job_network_credentials(job_template_with_credentials):
+    """Test _network_credentials returns all network credentials from cache."""
     task = jobs.RunJob()
 
     # Create credentials
@@ -434,17 +434,17 @@ def test_run_job_get_network_credentials_cached(job_template_with_credentials):
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [net_cred, ssh_cred]
+    task._credentials = [net_cred, ssh_cred]
 
     # Get network credentials
-    result = task._get_network_credentials_cached()
+    result = task._network_credentials
     assert len(result) == 1
     assert result[0] == net_cred
 
 
 @pytest.mark.django_db
-def test_run_job_get_cloud_credentials_cached(job_template_with_credentials):
-    """Test _get_cloud_credentials_cached returns all cloud credentials from cache."""
+def test_run_job_cloud_credentials(job_template_with_credentials):
+    """Test _cloud_credentials returns all cloud credentials from cache."""
     task = jobs.RunJob()
 
     # Create credentials
@@ -460,15 +460,16 @@ def test_run_job_get_cloud_credentials_cached(job_template_with_credentials):
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [aws_cred, ssh_cred]
+    task._credentials = [aws_cred, ssh_cred]
 
     # Get cloud credentials
-    result = task._get_cloud_credentials_cached()
+    result = task._cloud_credentials
     assert len(result) == 1
     assert result[0] == aws_cred
 
 
 @pytest.mark.django_db
+@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
 def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_credentials):
     """Test populate_workload_identity_tokens sets context when flag is enabled."""
     enable_flag('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED')
@@ -487,11 +488,10 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
 
     # Create credentials
     ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-    source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source')
+    source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
     target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
 
     # Create input source linking source credential to target credential
-    # Note: Creates the relationship needed for workload identity token population
     CredentialInputSource.objects.create(
         target_credential=target_cred, source_credential=source_cred, input_field_name='password', metadata={'path': 'secret/data/password'}
     )
@@ -500,16 +500,26 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
     job = job_template_with_credentials(target_cred, ssh_cred)
     task.instance = job
 
-    # Set cached credentials
-    task._credentials_cache = [target_cred, ssh_cred]
+    # Override cached_property so the loop uses these exact Python objects
+    task._credentials = [target_cred, ssh_cred]
 
-    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}, autospec=True):
+    # Mock only the HTTP response from the Gateway workload identity endpoint
+    mock_response = mock.MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {'jwt': 'eyJ.test.jwt'}
+
+    with mock.patch('requests.request', return_value=mock_response, autospec=True) as mock_request:
         task.populate_workload_identity_tokens()
+
+        # Verify the HTTP call was made to the correct endpoint
+        mock_request.assert_called_once()
+        call_kwargs = mock_request.call_args.kwargs
+        assert call_kwargs['method'] == 'POST'
+        assert '/api/gateway/v1/workload_identity_tokens' in call_kwargs['url']
 
         # Verify context was set on the credential with input source
         assert 'workload_identity_token' in target_cred.context
-        # TODO: JWT generation is not yet implemented, returns empty string
-        assert target_cred.context['workload_identity_token'] == ''
+        assert target_cred.context['workload_identity_token'] == 'eyJ.test.jwt'
 
 
 @pytest.mark.django_db
@@ -545,7 +555,7 @@ def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [target_cred]
+    task._credentials = [target_cred]
 
     task.populate_workload_identity_tokens()
 
@@ -577,7 +587,7 @@ def test_populate_workload_identity_tokens_without_workload_identity_credentials
     task.instance = job
 
     # Set cached credentials
-    task._credentials_cache = [ssh_cred, vault_cred]
+    task._credentials = [ssh_cred, vault_cred]
 
     with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}, autospec=True):
         task.populate_workload_identity_tokens()

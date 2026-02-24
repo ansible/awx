@@ -246,7 +246,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     @functools.cached_property
     def context(self):
         """
-        Hidden property for storing runtime context during credential resolution.
+        Property for storing runtime context during credential resolution.
         """
         return {}
 
@@ -650,8 +650,7 @@ class CredentialInputSource(PrimordialModel):
         backend_kwargs.update(self.metadata)
 
         if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-            workload_identity_token = context.get('workload_identity_token')
-            if workload_identity_token:
+            if workload_identity_token := context.get('workload_identity_token'):
                 backend_kwargs['workload_identity_token'] = workload_identity_token
 
         with set_environ(**settings.AWX_TASK_ENV):
