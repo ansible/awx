@@ -557,6 +557,7 @@ class BaseTask(object):
         """
         Run the job/task and capture its output.
         """
+
         if not self.instance:  # Used to skip fetch for local runs
             # Load the instance
             self.instance = self.update_model(pk)
@@ -573,7 +574,8 @@ class BaseTask(object):
 
         if self.instance.cancel_flag:
             self.instance = self.update_model(pk, status='canceled')
-            raise RuntimeError('not starting %s task' % self.instance.status)
+            self.instance.websocket_emit_status('canceled')
+            return
 
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
