@@ -26,7 +26,7 @@ def test_inventory_create(run_module, admin_user, organization):
 
     inv = Inventory.objects.get(name='foo-inventory')
     assert inv.variables == '{"foo": "bar", "another-foo": {"barz": "bar2"}}'
-    assert inv.opa_query_path == 'foo/baz'
+    assert inv.opa_query_path == 'foo/bar'
 
     result.pop('module_args', None)
     result.pop('invocation', None)
