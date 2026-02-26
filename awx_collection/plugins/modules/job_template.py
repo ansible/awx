@@ -317,7 +317,7 @@ options:
       type: bool
     opa_query_path:
       description:
-        - The optional path (formatted as package/rule) to an OPA policy to be applied to the Inventory.
+        - The optional path (formatted as package/rule) to an OPA policy to be applied to the Job Template.
       type: str
 
 extends_documentation_fragment: awx.awx.auth
