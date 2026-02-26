@@ -124,7 +124,7 @@ jobs:
           && github.event_name == 'push'
           && env.UPSTREAM_REPOSITORY_ID == github.repository_id
           && github.ref_name == github.event.repository.default_branch
-        uses: ansible/gh-action-record-test-results@cd5956ead39ec66351d0779470c8cff9638dd2b8
+        uses: ansible/gh-action-record-test-results@fc552f81bf7e734cdebe6d04f9f608e2e2b4759e
         with:
           aggregation-server-url: ${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}
           http-auth-password: >-
@@ -298,7 +298,7 @@ jobs:
           && github.event_name == 'push'
           && env.UPSTREAM_REPOSITORY_ID == github.repository_id
           && github.ref_name == github.event.repository.default_branch
-        uses: ansible/gh-action-record-test-results@cd5956ead39ec66351d0779470c8cff9638dd2b8
+        uses: ansible/gh-action-record-test-results@fc552f81bf7e734cdebe6d04f9f608e2e2b4759e
         with:
           aggregation-server-url: ${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}
           http-auth-password: >-
