@@ -30,6 +30,7 @@ from awx.main.models import (
 from awx.main.tasks import jobs
 from ansible_base.lib.testing.util import feature_flag_enabled, feature_flag_disabled
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
+from ansible_base.resource_registry.workload_identity_client import TokenRequestError
 
 
 @pytest.fixture
@@ -630,3 +631,76 @@ def test_run_skips_token_retrieval_when_flag_disabled(
 
     # Assert: retrieve_workload_identity_jwt was never called
     mock_retrieve_jwt.assert_not_called()
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
+@mock.patch('awx.main.tasks.jobs.build_safe_env')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_project_dir')
+@mock.patch('awx.main.tasks.jobs.evaluate_policy')
+@mock.patch('awx.main.tasks.jobs.BaseTask.pre_run_hook')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data_dir')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data_files')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_passwords')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_extra_vars_file')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_args')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_env')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_credentials_list')
+@mock.patch('awx.main.tasks.jobs.os.path.exists', return_value=True)
+def test_run_raises_exception_when_token_request_fails(
+    mock_path_exists,
+    mock_build_creds,
+    mock_build_env,
+    mock_build_args,
+    mock_build_extra_vars,
+    mock_build_passwords,
+    mock_build_private_data,
+    mock_build_private_data_files,
+    mock_build_private_data_dir,
+    mock_pre_run_hook,
+    mock_evaluate_policy,
+    mock_build_project_dir,
+    mock_build_safe_env,
+    mock_retrieve_jwt,
+):
+    """When retrieve_workload_identity_jwt raises TokenRequestError, the exception propagates."""
+    # Setup: create a mock job
+    mock_job = mock.MagicMock(spec=Job)
+    mock_job.id = 456
+    mock_job.status = 'running'
+    mock_job.cancel_flag = False
+    mock_job.is_container_group_task = False
+    mock_job.created = mock.MagicMock()
+    mock_job.spawned_by_workflow = False
+
+    # Setup mock return values
+    mock_retrieve_jwt.side_effect = TokenRequestError("Failed to obtain token")
+    mock_build_private_data.return_value = ('/tmp/private_data', {})
+    mock_build_private_data_dir.return_value = '/tmp/private_data'
+    mock_build_private_data_files.return_value = ({}, None)
+    mock_build_passwords.return_value = {}
+    mock_build_args.return_value = []
+    mock_build_env.return_value = {}
+    mock_build_safe_env.return_value = {}
+    mock_build_creds.return_value = []
+
+    # Create task
+    task = jobs.BaseTask()
+    task.instance = mock_job
+    task.update_model = mock.Mock(return_value=mock_job)
+    task.runner_callback = mock.MagicMock()
+
+    # Execute with feature flag enabled and expect an exception to be raised
+    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+        exception_raised = False
+        try:
+            task.run(mock_job.id)
+        except Exception:
+            # We expect this to fail due to TokenRequestError
+            exception_raised = True
+
+    # Assert: retrieve_workload_identity_jwt was called
+    mock_retrieve_jwt.assert_called_once()
+    # Assert: an exception was raised
+    assert exception_raised, "Expected an exception to be raised when token request fails"
