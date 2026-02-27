@@ -1077,7 +1077,7 @@ class RunJob(SourceControlMixin, BaseTask):
             env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
             if 'callbacks_enabled' in config_values:
                 env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
-                
+
             # Add vendor collections path for external query file discovery
             vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
             env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
