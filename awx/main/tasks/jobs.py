@@ -643,7 +643,7 @@ class BaseTask(object):
                     _ = retrieve_workload_identity_jwt(self.instance, 'test-audience', AutomationControllerJobScope.name)  # type: ignore
                     logger.info(f'Retrieved workload identity token for task id {self.instance.id}')
                 except Exception as exc:
-                    logger.error(f'Failed to retrieve workload identity token for task id {self.instance.id}: {exc.strerror}')
+                    logger.error(f'Failed to retrieve workload identity token for task id {self.instance.id}: {exc}')
                     raise RuntimeError(f'Unable to retrieve workload identity token for task id {self.instance.id}')
             #### END Workload Identity Token integration
 

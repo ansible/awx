@@ -483,3 +483,149 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
     with pytest.raises(RuntimeError, match="Workload identity client is not configured"):
         jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
+
+
+# Tests for workload identity token integration in BaseTask.run()
+
+
+@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True)
+@mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
+@mock.patch('awx.main.tasks.jobs.build_safe_env')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_project_dir')
+@mock.patch('awx.main.tasks.jobs.evaluate_policy')
+@mock.patch('awx.main.tasks.jobs.BaseTask.pre_run_hook')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data_dir')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data_files')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_passwords')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_extra_vars_file')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_args')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_env')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_credentials_list')
+@mock.patch('awx.main.tasks.jobs.os.path.exists', return_value=True)
+def test_run_retrieves_workload_identity_token_when_flag_enabled(
+    mock_path_exists,
+    mock_build_creds,
+    mock_build_env,
+    mock_build_args,
+    mock_build_extra_vars,
+    mock_build_passwords,
+    mock_build_private_data,
+    mock_build_private_data_files,
+    mock_build_private_data_dir,
+    mock_pre_run_hook,
+    mock_evaluate_policy,
+    mock_build_project_dir,
+    mock_build_safe_env,
+    mock_retrieve_jwt,
+    mock_flag_enabled,
+):
+    """When FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is True, run() retrieves workload identity token."""
+    # Setup: create a mock job
+    mock_job = mock.MagicMock(spec=Job)
+    mock_job.id = 123
+    mock_job.status = 'running'
+    mock_job.cancel_flag = False
+    mock_job.is_container_group_task = False
+    mock_job.created = mock.MagicMock()
+    mock_job.spawned_by_workflow = False
+
+    # Setup mock return values
+    mock_retrieve_jwt.return_value = 'eyJ.test.jwt'
+    mock_build_private_data.return_value = ('/tmp/private_data', {})
+    mock_build_private_data_dir.return_value = '/tmp/private_data'
+    mock_build_private_data_files.return_value = ({}, None)
+    mock_build_passwords.return_value = {}
+    mock_build_args.return_value = []
+    mock_build_env.return_value = {}
+    mock_build_safe_env.return_value = {}
+    mock_build_creds.return_value = []
+
+    # Create a minimal task that will fail early (before actual runner execution)
+    task = jobs.BaseTask()
+    task.instance = mock_job
+    task.update_model = mock.Mock(return_value=mock_job)
+    task.runner_callback = mock.MagicMock()
+
+    # Execute with feature flag enabled - expect it to fail at some point but after token retrieval
+    try:
+        task.run(mock_job.id)
+    except Exception:
+        # We expect this to fail at some point, we just care about the token retrieval
+        pass
+
+    # Assert: retrieve_workload_identity_jwt was called with correct parameters
+    mock_retrieve_jwt.assert_called_once()
+    call_args = mock_retrieve_jwt.call_args
+    assert call_args[0][0] == mock_job
+    assert call_args[0][1] == 'test-audience'
+    assert call_args[0][2] == AutomationControllerJobScope.name
+
+
+@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False)
+@mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
+@mock.patch('awx.main.tasks.jobs.build_safe_env')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_project_dir')
+@mock.patch('awx.main.tasks.jobs.evaluate_policy')
+@mock.patch('awx.main.tasks.jobs.BaseTask.pre_run_hook')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data_dir')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data_files')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_private_data')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_passwords')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_extra_vars_file')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_args')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_env')
+@mock.patch('awx.main.tasks.jobs.BaseTask.build_credentials_list')
+@mock.patch('awx.main.tasks.jobs.os.path.exists', return_value=True)
+def test_run_skips_token_retrieval_when_flag_disabled(
+    mock_path_exists,
+    mock_build_creds,
+    mock_build_env,
+    mock_build_args,
+    mock_build_extra_vars,
+    mock_build_passwords,
+    mock_build_private_data,
+    mock_build_private_data_files,
+    mock_build_private_data_dir,
+    mock_pre_run_hook,
+    mock_evaluate_policy,
+    mock_build_project_dir,
+    mock_build_safe_env,
+    mock_retrieve_jwt,
+    mock_flag_enabled,
+):
+    """When FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is False, run() does not retrieve workload identity token."""
+    # Setup: create a mock job
+    mock_job = mock.MagicMock(spec=Job)
+    mock_job.id = 789
+    mock_job.status = 'running'
+    mock_job.cancel_flag = False
+    mock_job.is_container_group_task = False
+    mock_job.created = mock.MagicMock()
+    mock_job.spawned_by_workflow = False
+
+    # Setup mock return values
+    mock_build_private_data.return_value = ('/tmp/private_data', {})
+    mock_build_private_data_dir.return_value = '/tmp/private_data'
+    mock_build_private_data_files.return_value = ({}, None)
+    mock_build_passwords.return_value = {}
+    mock_build_args.return_value = []
+    mock_build_env.return_value = {}
+    mock_build_safe_env.return_value = {}
+    mock_build_creds.return_value = []
+
+    # Create task
+    task = jobs.BaseTask()
+    task.instance = mock_job
+    task.update_model = mock.Mock(return_value=mock_job)
+    task.runner_callback = mock.MagicMock()
+
+    # Execute with feature flag disabled
+    try:
+        task.run(mock_job.id)
+    except Exception:
+        # We expect this to fail at some point, we just care that token retrieval was skipped
+        pass
+
+    # Assert: retrieve_workload_identity_jwt was never called
+    mock_retrieve_jwt.assert_not_called()
