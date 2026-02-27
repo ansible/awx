@@ -632,6 +632,12 @@ class BaseTask(object):
 
             self.runner_callback.job_created = str(self.instance.created)
 
+            if flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+                workload_identity_token = retrieve_workload_identity_jwt(self.instance, # type: ignore
+                                                                         'test-audience',
+                                                                         AutomationControllerJobScope.name)
+                logger.info(f'Retrieved token {workload_identity_token}')
+
             credentials = self.build_credentials_list(self.instance)
 
             container_root = None
