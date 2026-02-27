@@ -632,11 +632,20 @@ class BaseTask(object):
 
             self.runner_callback.job_created = str(self.instance.created)
 
+            ### BEGIN Workload Identity Token integration
+            # This code obtains a workload identity token for the current job from the token issuer.
+            #
+            # The implementation will be extended once the credential interface is finalized. In its current
+            # state the goal is to make sure the integration with the token issuer is working as expected
+            # when FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is True
             if flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
-                workload_identity_token = retrieve_workload_identity_jwt(self.instance, # type: ignore
-                                                                         'test-audience',
-                                                                         AutomationControllerJobScope.name)
-                logger.info(f'Retrieved token {workload_identity_token}')
+                try:
+                    _ = retrieve_workload_identity_jwt(self.instance, 'test-audience', AutomationControllerJobScope.name)  # type: ignore
+                    logger.info(f'Retrieved workload identity token for task id {self.instance.id}')
+                except Exception as exc:
+                    logger.error(f'Failed to retrieve workload identity token for task id {self.instance.id}: {exc.strerror}')
+                    raise RuntimeError(f'Unable to retrieve workload identity token for task id {self.instance.id}')
+            #### END Workload Identity Token integration
 
             credentials = self.build_credentials_list(self.instance)
 
