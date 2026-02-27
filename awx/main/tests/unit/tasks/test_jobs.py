@@ -28,6 +28,7 @@ from awx.main.models import (
     AdHocCommand,
 )
 from awx.main.tasks import jobs
+from ansible_base.lib.testing.util import feature_flag_enabled, feature_flag_disabled
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
 
@@ -488,7 +489,7 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 # Tests for workload identity token integration in BaseTask.run()
 
 
-@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True)
+@pytest.mark.django_db
 @mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
 @mock.patch('awx.main.tasks.jobs.build_safe_env')
 @mock.patch('awx.main.tasks.jobs.BaseTask.build_project_dir')
@@ -518,7 +519,6 @@ def test_run_retrieves_workload_identity_token_when_flag_enabled(
     mock_build_project_dir,
     mock_build_safe_env,
     mock_retrieve_jwt,
-    mock_flag_enabled,
 ):
     """When FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is True, run() retrieves workload identity token."""
     # Setup: create a mock job
@@ -548,11 +548,12 @@ def test_run_retrieves_workload_identity_token_when_flag_enabled(
     task.runner_callback = mock.MagicMock()
 
     # Execute with feature flag enabled - expect it to fail at some point but after token retrieval
-    try:
-        task.run(mock_job.id)
-    except Exception:
-        # We expect this to fail at some point, we just care about the token retrieval
-        pass
+    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+        try:
+            task.run(mock_job.id)
+        except Exception:
+            # We expect this to fail at some point, we just care about the token retrieval
+            pass
 
     # Assert: retrieve_workload_identity_jwt was called with correct parameters
     mock_retrieve_jwt.assert_called_once()
@@ -562,7 +563,7 @@ def test_run_retrieves_workload_identity_token_when_flag_enabled(
     assert call_args[0][2] == AutomationControllerJobScope.name
 
 
-@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False)
+@pytest.mark.django_db
 @mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
 @mock.patch('awx.main.tasks.jobs.build_safe_env')
 @mock.patch('awx.main.tasks.jobs.BaseTask.build_project_dir')
@@ -592,7 +593,6 @@ def test_run_skips_token_retrieval_when_flag_disabled(
     mock_build_project_dir,
     mock_build_safe_env,
     mock_retrieve_jwt,
-    mock_flag_enabled,
 ):
     """When FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is False, run() does not retrieve workload identity token."""
     # Setup: create a mock job
@@ -621,11 +621,12 @@ def test_run_skips_token_retrieval_when_flag_disabled(
     task.runner_callback = mock.MagicMock()
 
     # Execute with feature flag disabled
-    try:
-        task.run(mock_job.id)
-    except Exception:
-        # We expect this to fail at some point, we just care that token retrieval was skipped
-        pass
+    with feature_flag_disabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+        try:
+            task.run(mock_job.id)
+        except Exception:
+            # We expect this to fail at some point, we just care that token retrieval was skipped
+            pass
 
     # Assert: retrieve_workload_identity_jwt was never called
     mock_retrieve_jwt.assert_not_called()
