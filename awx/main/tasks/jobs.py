@@ -107,11 +107,6 @@ def populate_claims_for_workload(unified_job) -> dict:
     Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
     """
 
-    # Related objects in the UnifiedJob model, applies to all job types
-    organization = getattr_dne(unified_job, 'organization')
-    ujt = getattr_dne(unified_job, 'unified_job_template')
-    instance_group = getattr_dne(unified_job, 'instance_group')
-
     claims = {
         AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
         AutomationControllerJobScope.CLAIM_JOB_NAME: unified_job.name,
