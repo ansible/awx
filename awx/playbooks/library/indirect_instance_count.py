@@ -21,7 +21,10 @@ DOCUMENTATION = '''
 
 import os
 import json
+import re
 from importlib.resources import files
+
+from packaging.version import Version, InvalidVersion
 
 from ansible.plugins.callback import CallbackBase
 
@@ -31,15 +34,101 @@ from ansible.plugins.callback import CallbackBase
 # file.  This callback is an example of per hosts logging for those
 # that want it.
 
-
-# Taken from https://github.com/ansible/ansible/blob/devel/lib/ansible/cli/galaxy.py#L1624
-
 from ansible.cli.galaxy import with_collection_artifacts_manager
 from ansible.release import __version__
 
 from ansible.galaxy.collection import find_existing_collections
 from ansible.utils.collection_loader import AnsibleCollectionConfig
 import ansible.constants as C
+
+# External query discovery constants
+EXTERNAL_QUERY_COLLECTION = 'ansible_collections.redhat.indirect_accounting'
+EXTERNAL_QUERY_PATH = 'extensions/audit/external_queries'
+
+
+def list_external_queries(namespace, name):
+    """List all available external query versions for a collection.
+
+    Args:
+        namespace: Collection namespace (e.g., 'community')
+        name: Collection name (e.g., 'vmware')
+
+    Returns:
+        List of Version objects for all available query files
+        matching the namespace.name pattern.
+    """
+    versions = []
+
+    try:
+        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
+    except ModuleNotFoundError:
+        return versions
+
+    # Pattern: namespace.name.X.Y.Z.yml where X.Y.Z is the version
+    pattern = re.compile(rf'^{re.escape(namespace)}\.{re.escape(name)}\.(.+)\.yml$')
+
+    for query_file in queries_dir.iterdir():
+        match = pattern.match(query_file.name)
+        if match:
+            version_str = match.group(1)
+            try:
+                versions.append(Version(version_str))
+            except InvalidVersion:
+                # Skip files with invalid version strings
+                pass
+
+    return versions
+
+
+def find_external_query_with_fallback(namespace, name, installed_version):
+    """Find external query file with semantic version fallback.
+
+    Args:
+        namespace: Collection namespace (e.g., 'community')
+        name: Collection name (e.g., 'vmware')
+        installed_version: Version string of installed collection (e.g., '4.5.0')
+
+    Returns:
+        Tuple of (query_content, fallback_used, fallback_version) or (None, False, None)
+        - query_content: The query file content if found
+        - fallback_used: True if a fallback version was used instead of exact match
+        - fallback_version: The version string used (for logging)
+    """
+    try:
+        installed_version_object = Version(installed_version)
+    except InvalidVersion:
+        return None, False, None
+
+    try:
+        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
+    except ModuleNotFoundError:
+        return None, False, None
+
+    # 1. Try exact version match first
+    exact_file = queries_dir / f'{namespace}.{name}.{installed_version}.yml'
+    if exact_file.exists():
+        with exact_file.open('r') as f:
+            return f.read(), False, installed_version
+
+    # 2. Find compatible fallback (same major version, nearest lower version)
+    available_versions = list_external_queries(namespace, name)
+    if not available_versions:
+        return None, False, None
+
+    # Filter to same major version and versions <= installed version
+    compatible_versions = [v for v in available_versions if v.major == installed_version_object.major and v <= installed_version_object]
+    if not compatible_versions:
+        return None, False, None
+
+    # Select nearest lower version - highest compatible version
+    fallback_version_object = max(compatible_versions)
+    fallback_version_str = str(fallback_version_object)
+    fallback_file = queries_dir / f'{namespace}.{name}.{fallback_version_str}.yml'
+    if fallback_file.exists():
+        with fallback_file.open('r') as f:
+            return f.read(), True, fallback_version_str
+
+    return None, False, None
 
 
 @with_collection_artifacts_manager
@@ -84,22 +173,14 @@ class CallbackModule(CallbackBase):
                     collection_print['host_query'] = f.read()
                 self._display.vv(f"Using embedded query for {candidate.fqcn} v{candidate.ver}")
             else:
-                # 2. Check for external query file if no embedded query file was found
-                try:
-                    external_query_file = (
-                        files('ansible_collections.redhat.indirect_accounting')
-                        / 'extensions'
-                        / 'audit'
-                        / 'external_queries'
-                        / f'{candidate.namespace}.{candidate.name}.{candidate.ver}.yml'
-                    )
-                    if external_query_file.exists():
-                        with external_query_file.open('r') as f:
-                            collection_print['host_query'] = f.read()
+                # 2. Check for external query file with version fallback
+                query_content, fallback_used, matched_version = find_external_query_with_fallback(candidate.namespace, candidate.name, candidate.ver)
+                if query_content:
+                    collection_print['host_query'] = query_content
+                    if fallback_used:
+                        self._display.v(f"Using external query for {candidate.fqcn} v{candidate.ver} " f"(fallback from v{matched_version})")
+                    else:
                         self._display.v(f"Using external query for {candidate.fqcn} v{candidate.ver}")
-                except ModuleNotFoundError:
-                    # External query collection not installed - no indirect counting for collections without embedded queries
-                    pass
 
             collections_print[candidate.fqcn] = collection_print
 
