@@ -27,6 +27,10 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
             "pool_kwargs": {
                 "min_workers": settings.JOB_EVENT_WORKERS,
                 "max_workers": max_workers,
+                # This must be less than max_workers to make sense, which is usually 4
+                # With reserve of 1, after a burst of tasks, load needs to down to 4-1=3
+                # before we return to min_workers
+                "scaledown_reserve": 1,
             },
             "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID},
             "process_manager_cls": "ForkServerManager",
