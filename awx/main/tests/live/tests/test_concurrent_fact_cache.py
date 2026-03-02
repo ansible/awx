@@ -1,0 +1,238 @@
+"""Tests for concurrent fact caching with --limit.
+
+Reproduces bugs where concurrent jobs targeting different hosts via --limit
+incorrectly modify (clear or revert) facts for hosts outside their limit.
+
+Customer report: concurrent jobs on the same job template with different limits
+cause facts set by an earlier-finishing job to be rolled back when the
+later-finishing job completes.
+
+See: https://github.com/jritter/concurrent-aap-fact-caching
+"""
+
+import logging
+
+import pytest
+
+from django.utils.timezone import now
+
+from awx.api.versioning import reverse
+from awx.main.models import Inventory, Host, JobTemplate
+from awx.main.tests.live.tests.conftest import wait_for_job, wait_to_leave_status
+
+logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def concurrent_facts_inventory(default_org):
+    """Inventory with two hosts for concurrent fact cache testing."""
+    inv_name = 'test_concurrent_fact_cache'
+    Inventory.objects.filter(organization=default_org, name=inv_name).delete()
+    inv = Inventory.objects.create(organization=default_org, name=inv_name)
+    inv.hosts.create(name='cc_host_0')
+    inv.hosts.create(name='cc_host_1')
+    return inv
+
+
+@pytest.fixture
+def concurrent_facts_jt(concurrent_facts_inventory, live_tmp_folder, post, admin, project_factory):
+    """Job template configured for concurrent fact-cached runs."""
+    proj = project_factory(scm_url=f'file://{live_tmp_folder}/facts')
+    if proj.current_job:
+        wait_for_job(proj.current_job)
+    assert 'gather_slow.yml' in proj.playbooks, f'gather_slow.yml not in {proj.playbooks}'
+
+    jt_name = 'test_concurrent_fact_cache JT'
+    existing_jt, _ = JobTemplate.objects.get_or_create(name=jt_name)
+    if existing_jt:
+        existing_jt.delete()
+    result = post(
+        reverse('api:job_template_list'),
+        {
+            'name': jt_name,
+            'project': proj.id,
+            'playbook': 'gather_slow.yml',
+            'inventory': concurrent_facts_inventory.id,
+            'use_fact_cache': True,
+            'allow_simultaneous': True,
+        },
+        admin,
+        expect=201,
+    )
+    return JobTemplate.objects.get(id=result.data['id'])
+
+
+def test_concurrent_limit_does_not_clear_facts(concurrent_facts_inventory, concurrent_facts_jt):
+    """Concurrent jobs with different --limit must not clear each other's facts.
+
+    Scenario:
+      - Inventory has cc_host_0 and cc_host_1, neither has prior facts
+      - Job A runs gather_slow.yml with limit=cc_host_0
+      - While Job A is still running (sleeping), Job B launches with limit=cc_host_1
+      - Both jobs set cacheable facts, but only for their respective limited host
+      - After both complete, BOTH hosts should have populated facts
+
+    The bug: get_hosts_for_fact_cache() returns ALL inventory hosts regardless
+    of --limit.  start_fact_cache records them all in hosts_cached but writes
+    no fact files (no prior facts).  When the later-finishing job runs
+    finish_fact_cache, it sees a missing fact file for the other job's host
+    and clears that host's facts.
+    """
+    inv = concurrent_facts_inventory
+    jt = concurrent_facts_jt
+
+    # Launch Job A targeting cc_host_0
+    job_a = jt.create_unified_job()
+    job_a.limit = 'cc_host_0'
+    job_a.save(update_fields=['limit'])
+    job_a.signal_start()
+
+    # Wait for Job A to reach running (it will sleep inside the playbook)
+    wait_to_leave_status(job_a, 'pending')
+    wait_to_leave_status(job_a, 'waiting')
+    logger.info(f'Job A (id={job_a.id}) is now running with limit=cc_host_0')
+
+    # Launch Job B targeting cc_host_1 while Job A is still running
+    job_b = jt.create_unified_job()
+    job_b.limit = 'cc_host_1'
+    job_b.save(update_fields=['limit'])
+    job_b.signal_start()
+
+    # Verify that Job A is still running when Job B starts,
+    # otherwise the overlap that triggers the bug did not happen.
+    wait_to_leave_status(job_b, 'pending')
+    wait_to_leave_status(job_b, 'waiting')
+    job_a.refresh_from_db()
+    if job_a.status != 'running':
+        pytest.skip('Job A finished before Job B started running; overlap did not occur')
+    logger.info(f'Job B (id={job_b.id}) is now running with limit=cc_host_1 (concurrent with Job A)')
+
+    # Wait for both to complete
+    wait_for_job(job_a)
+    wait_for_job(job_b)
+
+    # Verify facts survived concurrent execution
+    host_0 = inv.hosts.get(name='cc_host_0')
+    host_1 = inv.hosts.get(name='cc_host_1')
+
+    discovered_foos = [host_0.ansible_facts.get('foo'), host_1.ansible_facts.get('foo')]
+    assert all(discovered_foos), f'Unexpected facts on cc_host_0 or _1: {discovered_foos}'
+
+
+def test_concurrent_limit_does_not_revert_facts(concurrent_facts_inventory, concurrent_facts_jt, live_tmp_folder, run_job_from_playbook):
+    """Concurrent jobs must not revert facts that a prior concurrent job just set.
+
+    Scenario:
+      - First, populate both hosts with initial facts (foo=bar) via a
+        non-concurrent gather run
+      - Then run two concurrent jobs with different limits, each setting
+        a new value (foo=bar_v2 via extra_vars)
+      - After both complete, BOTH hosts should have foo=bar_v2
+
+    The bug: start_fact_cache writes the OLD facts (foo=bar) into each job's
+    artifact dir for ALL hosts.  If ansible's cache plugin rewrites a non-limited
+    host's fact file with the stale content (updating the mtime), finish_fact_cache
+    treats it as a legitimate update and overwrites the DB with old values.
+    """
+    inv = concurrent_facts_inventory
+    jt = concurrent_facts_jt
+
+    # --- Seed both hosts with initial facts via a non-concurrent run ---
+    scm_url = f'file://{live_tmp_folder}/facts'
+    run_job_from_playbook(
+        'seed_facts_for_revert_test',
+        'gather.yml',
+        scm_url=scm_url,
+        jt_params={'use_fact_cache': True, 'inventory': inv.id},
+    )
+    for host in inv.hosts.all():
+        assert host.ansible_facts.get('foo') == 'bar', f'Seed run failed to set facts on {host.name}: {host.ansible_facts}'
+
+    # Sanity assertion, sometimes this would give problems from the Django rel cache
+    assert jt.project
+
+    # --- Run two concurrent jobs that write a new value ---
+    # Update the JT to pass extra_vars that change the fact value
+    jt.extra_vars = '{"extra_value": "_v2"}'
+    jt.save(update_fields=['extra_vars'])
+
+    job_a = jt.create_unified_job()
+    job_a.limit = 'cc_host_0'
+    job_a.save(update_fields=['limit'])
+    job_a.signal_start()
+
+    wait_to_leave_status(job_a, 'pending')
+    wait_to_leave_status(job_a, 'waiting')
+
+    job_b = jt.create_unified_job()
+    job_b.limit = 'cc_host_1'
+    job_b.save(update_fields=['limit'])
+    job_b.signal_start()
+
+    wait_to_leave_status(job_b, 'pending')
+    wait_to_leave_status(job_b, 'waiting')
+    job_a.refresh_from_db()
+    if job_a.status != 'running':
+        pytest.skip('Job A finished before Job B started running; overlap did not occur')
+
+    wait_for_job(job_a)
+    wait_for_job(job_b)
+
+    host_0 = inv.hosts.get(name='cc_host_0')
+    host_1 = inv.hosts.get(name='cc_host_1')
+
+    # Both hosts should have the UPDATED value, not the old seed value
+    assert (
+        host_0.ansible_facts.get('foo') == 'bar_v2'
+    ), f'cc_host_0 facts were reverted to stale values by the concurrent job. Expected foo=bar_v2, got {host_0.ansible_facts!r}'
+    assert (
+        host_1.ansible_facts.get('foo') == 'bar_v2'
+    ), f'cc_host_1 facts were reverted to stale values by the concurrent job. Expected foo=bar_v2, got {host_1.ansible_facts!r}'
+
+
+def test_fact_cache_scoped_to_inventory(live_tmp_folder, default_org, run_job_from_playbook):
+    """finish_fact_cache must not modify hosts in other inventories.
+
+    Bug: finish_fact_cache queries Host.objects.filter(name__in=host_names)
+    without an inventory_id filter, so hosts with the same name in different
+    inventories get their facts cross-contaminated.
+    """
+    shared_name = 'scope_shared_host'
+
+    # Prepare for test by deleting junk from last run
+    for inv_name in ('test_fact_scope_inv1', 'test_fact_scope_inv2'):
+        inv = Inventory.objects.filter(name=inv_name).first()
+        if inv:
+            inv.delete()
+
+    inv1 = Inventory.objects.create(organization=default_org, name='test_fact_scope_inv1')
+    inv1.hosts.create(name=shared_name)
+
+    inv2 = Inventory.objects.create(organization=default_org, name='test_fact_scope_inv2')
+    host2 = inv2.hosts.create(name=shared_name)
+
+    # Give inv2's host distinct facts that should not be touched
+    original_facts = {'source': 'inventory_2', 'untouched': True}
+    host2.ansible_facts = original_facts
+    host2.ansible_facts_modified = now()
+    host2.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
+
+    # Run a fact-gathering job against inv1 only
+    run_job_from_playbook(
+        'test_fact_scope',
+        'gather.yml',
+        scm_url=f'file://{live_tmp_folder}/facts',
+        jt_params={'use_fact_cache': True, 'inventory': inv1.id},
+    )
+
+    # inv1's host should have facts
+    host1 = inv1.hosts.get(name=shared_name)
+    assert host1.ansible_facts, f'inv1 host should have facts after gather: {host1.ansible_facts}'
+
+    # inv2's host must NOT have been touched
+    host2.refresh_from_db()
+    assert host2.ansible_facts == original_facts, (
+        f'Host in a different inventory was modified by a fact cache operation '
+        f'on another inventory sharing the same hostname. '
+        f'Expected {original_facts!r}, got {host2.ansible_facts!r}'
+    )
