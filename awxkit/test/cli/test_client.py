@@ -69,13 +69,13 @@ class TestHelpHandling:
         assert result == ['users', 'list']
 
     def test_get_non_option_args_with_flags(self):
-        """Test _get_non_option_args ignores option flags"""
+        """Test _get_non_option_args ignores option flags and their values"""
         cli = CLI()
         cli.argv = ['awx', '--conf.host', 'example.com', 'jobs', 'create', '--name', 'test']
 
         result = cli._get_non_option_args()
-        # Should include all non-option arguments (including flag values) except 'awx'
-        assert result == ['example.com', 'jobs', 'create', 'test']
+        # Should only include positional arguments, not option values
+        assert result == ['jobs', 'create']
 
     def test_get_non_option_args_before_help(self):
         """Test _get_non_option_args with before_help=True stops at help flag"""
@@ -188,3 +188,155 @@ class TestHelpHandling:
         assert len(help_actions) == 1
         assert '-h' in help_actions[0].option_strings
         assert '--help' in help_actions[0].option_strings
+
+    def test_get_non_option_args_with_equals_format(self):
+        """Test _get_non_option_args handles --opt=val format correctly"""
+        cli = CLI()
+        cli.argv = ['awx', 'users', 'create', '--email=john@example.com', '--name=john']
+
+        result = cli._get_non_option_args()
+        assert result == ['users', 'create']
+
+    def test_get_non_option_args_mixed_option_formats(self):
+        """Test _get_non_option_args handles mixed --opt=val and --opt val formats"""
+        cli = CLI()
+        cli.argv = ['awx', 'jobs', 'launch', '--job-template=5', '--extra-vars', '{"key": "value"}', 'extra_arg']
+
+        result = cli._get_non_option_args()
+        assert result == ['jobs', 'launch', 'extra_arg']
+
+    def test_get_non_option_args_short_options(self):
+        """Test _get_non_option_args handles short options correctly"""
+        cli = CLI()
+        cli.argv = ['awx', '-v', '-f', 'json', 'projects', 'list']
+
+        result = cli._get_non_option_args()
+        assert result == ['projects', 'list']
+
+    def test_get_non_option_args_consecutive_options(self):
+        """Test _get_non_option_args with consecutive options"""
+        cli = CLI()
+        cli.argv = ['awx', '--conf.host', 'example.com', '--conf.username', 'admin', 'teams', 'create']
+
+        result = cli._get_non_option_args()
+        assert result == ['teams', 'create']
+
+    def test_get_non_option_args_option_at_end(self):
+        """Test _get_non_option_args with option at the end"""
+        cli = CLI()
+        cli.argv = ['awx', 'users', 'list', '--format', 'table']
+
+        result = cli._get_non_option_args()
+        assert result == ['users', 'list']
+
+    def test_get_non_option_args_flag_only_options(self):
+        """Test _get_non_option_args with flag-only options (no values)"""
+        cli = CLI()
+        # More realistic: flags at the end or grouped together
+        cli.argv = ['awx', 'organizations', 'list', '--verbose', '--insecure', '--monitor']
+
+        result = cli._get_non_option_args()
+        assert result == ['organizations', 'list']
+
+    def test_get_non_option_args_option_value_looks_like_option(self):
+        """Test _get_non_option_args when option value starts with dash"""
+        cli = CLI()
+        cli.argv = ['awx', 'jobs', 'create', '--description', '-some-description-with-dashes', 'template']
+
+        result = cli._get_non_option_args()
+        # Values starting with '-' are treated as options, and 'template' becomes the value for that "option"
+        # Users should use --description="-some-value" format for values starting with dash
+        assert result == ['jobs', 'create']
+
+    def test_get_non_option_args_complex_scenario(self):
+        """Test _get_non_option_args with complex mixed arguments"""
+        cli = CLI()
+        cli.argv = [
+            'awx',
+            '--conf.host=https://example.com',
+            'job_templates',
+            'create',
+            '--name',
+            'my-template',
+            '--job-type=run',
+            '--inventory',
+            '1',
+            '--project=2',
+            '--verbose',
+        ]
+
+        result = cli._get_non_option_args()
+        assert result == ['job_templates', 'create']
+
+    def test_get_non_option_args_before_help_with_options(self):
+        """Test _get_non_option_args before_help=True with options before help"""
+        cli = CLI()
+        cli.argv = ['awx', '--conf.host', 'example.com', 'users', 'create', '--name=test', '--help', 'ignored']
+
+        result = cli._get_non_option_args(before_help=True)
+        assert result == ['users', 'create']
+
+    def test_get_non_option_args_before_help_only_options(self):
+        """Test _get_non_option_args before_help=True with only options before help"""
+        cli = CLI()
+        cli.argv = ['awx', '--verbose', '--conf.host=example.com', '--help', 'users', 'list']
+
+        result = cli._get_non_option_args(before_help=True)
+        assert result == []
+
+    def test_is_main_help_request_with_options_before_help(self):
+        """Test _is_main_help_request with options but no subcommands before help"""
+        cli = CLI()
+        cli.argv = ['awx', '--conf.host=example.com', '--verbose', '--help']
+
+        result = cli._is_main_help_request()
+        assert result is True
+
+    def test_is_main_help_request_false_with_subcommand_and_options(self):
+        """Test _is_main_help_request returns False when subcommand present with options"""
+        cli = CLI()
+        cli.argv = ['awx', '--conf.host', 'example.com', 'users', '--format=json', '--help']
+
+        result = cli._is_main_help_request()
+        assert result is False
+
+    def test_is_main_help_request_false_option_value_looks_like_subcommand(self):
+        """Test _is_main_help_request doesn't mistake option values for subcommands"""
+        cli = CLI()
+        cli.argv = ['awx', '--conf.host', 'users', '--help']  # 'users' is option value, not subcommand
+
+        result = cli._is_main_help_request()
+        assert result is True  # Should be True since 'users' is just an option value
+
+    def test_is_main_help_request_complex_option_scenario(self):
+        """Test _is_main_help_request with complex option scenario"""
+        cli = CLI()
+        cli.argv = ['awx', '--conf.username=admin', '--conf.password', 'secret', 'job_templates', '--help']
+
+        result = cli._is_main_help_request()
+        assert result is False  # 'job_templates' is a real subcommand, not an option value
+
+    def test_empty_args_handling(self):
+        """Test _get_non_option_args handles minimal arguments"""
+        cli = CLI()
+        cli.argv = ['awx']
+
+        result = cli._get_non_option_args()
+        assert result == []
+
+    def test_only_awx_and_options(self):
+        """Test _get_non_option_args with only awx and options"""
+        cli = CLI()
+        cli.argv = ['awx', '--verbose', '--conf.host=example.com']
+
+        result = cli._get_non_option_args()
+        assert result == []
+
+    def test_get_non_option_args_dash_value_with_equals(self):
+        """Test _get_non_option_args handles dash values correctly with equals format"""
+        cli = CLI()
+        cli.argv = ['awx', 'jobs', 'create', '--description=-some-description-with-dashes', 'template']
+
+        result = cli._get_non_option_args()
+        # Using --opt=val format correctly handles values starting with dash
+        assert result == ['jobs', 'create', 'template']

@@ -89,7 +89,32 @@ class CLI(object):
         else:
             args_to_check = self.argv
 
-        return [arg for arg in args_to_check if not arg.startswith('-') and arg != 'awx']
+        non_option_args = []
+        i = 0
+        while i < len(args_to_check):
+            arg = args_to_check[i]
+
+            if arg == 'awx':
+                # Skip 'awx' token
+                i += 1
+            elif arg.startswith('-'):
+                # This is an option
+                if '=' in arg:
+                    # Long option with value: --opt=val
+                    i += 1
+                else:
+                    # Option without embedded value: --opt or -o
+                    i += 1
+                    # Only consume next argument if it exists AND doesn't start with '-'
+                    # This naturally handles flag-only options (like --verbose)
+                    if i < len(args_to_check) and not args_to_check[i].startswith('-'):
+                        i += 1
+            else:
+                # This is a positional argument
+                non_option_args.append(arg)
+                i += 1
+
+        return non_option_args
 
     def _is_main_help_request(self):
         """
