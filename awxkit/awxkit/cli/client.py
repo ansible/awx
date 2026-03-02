@@ -290,13 +290,6 @@ class CLI(object):
                 pass
             parsed, extra = self.parser.parse_known_args(self.argv)
         else:
-            # Try to parse to determine if help is requested for a specific action
-            try:
-                self.parser.parse_known_args()[0]
-            except SystemExit:
-                # This happens when required arguments are missing, which is expected behavior
-                # Let argparse handle it and show the appropriate help
-                raise
             parsed, extra = self.parser.parse_known_args()
 
         if extra and self.verbose:
