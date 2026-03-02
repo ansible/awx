@@ -12,8 +12,27 @@ on:
     branches:
       - devel  # needed to publish code coverage post-merge
   schedule:
-    - cron: '0 13,18 * * *'
+    - cron: '0 12,18 * * 1-5'
+  workflow_dispatch: {}
 jobs:
+  trigger-release-branches:
+    name: "Dispatch CI to release branches"
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger CI on release_4.6
+        run: gh workflow run ci.yml --ref release_4.6
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+      - name: Trigger CI on stable-2.6 
+        run: gh workflow run ci.yml --ref stable-2.6
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+
   common-tests:
     name: ${{ matrix.tests.name }}
     runs-on: ubuntu-latest
