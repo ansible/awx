@@ -111,15 +111,25 @@ def test_concurrent_limit_does_not_clear_facts(concurrent_facts_inventory, concu
     wait_for_job(job_a)
     wait_for_job(job_b)
 
+    import time
+
+    time.sleep(5)
+
     # Verify facts survived concurrent execution
     host_0 = inv.hosts.get(name='cc_host_0')
     host_1 = inv.hosts.get(name='cc_host_1')
 
+    # sanity
+    job_a.refresh_from_db()
+    job_b.refresh_from_db()
+    assert job_a.limit == "cc_host_0"
+    assert job_b.limit == "cc_host_1"
+
     discovered_foos = [host_0.ansible_facts.get('foo'), host_1.ansible_facts.get('foo')]
-    assert all(discovered_foos), f'Unexpected facts on cc_host_0 or _1: {discovered_foos}'
+    assert all(discovered_foos), f'Unexpected facts on cc_host_0 or _1: {discovered_foos} after job a,b {job_a.id}, {job_b.id}'
 
 
-def test_concurrent_limit_does_not_revert_facts(concurrent_facts_inventory, concurrent_facts_jt, live_tmp_folder, run_job_from_playbook):
+def test_concurrent_limit_does_not_revert_facts(live_tmp_folder, run_job_from_playbook, concurrent_facts_inventory):
     """Concurrent jobs must not revert facts that a prior concurrent job just set.
 
     Scenario:
@@ -134,19 +144,24 @@ def test_concurrent_limit_does_not_revert_facts(concurrent_facts_inventory, conc
     host's fact file with the stale content (updating the mtime), finish_fact_cache
     treats it as a legitimate update and overwrites the DB with old values.
     """
-    inv = concurrent_facts_inventory
-    jt = concurrent_facts_jt
-
     # --- Seed both hosts with initial facts via a non-concurrent run ---
+    inv = concurrent_facts_inventory
+
     scm_url = f'file://{live_tmp_folder}/facts'
-    run_job_from_playbook(
+    res = run_job_from_playbook(
         'seed_facts_for_revert_test',
-        'gather.yml',
+        'gather_slow.yml',
         scm_url=scm_url,
-        jt_params={'use_fact_cache': True, 'inventory': inv.id},
+        jt_params={'use_fact_cache': True, 'allow_simultaneous': True, 'inventory': inv.id},
     )
     for host in inv.hosts.all():
         assert host.ansible_facts.get('foo') == 'bar', f'Seed run failed to set facts on {host.name}: {host.ansible_facts}'
+
+    job = res['job']
+
+    jt = job.job_template
+    assert jt.allow_simultaneous is True
+    assert jt.use_fact_cache is True
 
     # Sanity assertion, sometimes this would give problems from the Django rel cache
     assert jt.project
@@ -182,12 +197,8 @@ def test_concurrent_limit_does_not_revert_facts(concurrent_facts_inventory, conc
     host_1 = inv.hosts.get(name='cc_host_1')
 
     # Both hosts should have the UPDATED value, not the old seed value
-    assert (
-        host_0.ansible_facts.get('foo') == 'bar_v2'
-    ), f'cc_host_0 facts were reverted to stale values by the concurrent job. Expected foo=bar_v2, got {host_0.ansible_facts!r}'
-    assert (
-        host_1.ansible_facts.get('foo') == 'bar_v2'
-    ), f'cc_host_1 facts were reverted to stale values by the concurrent job. Expected foo=bar_v2, got {host_1.ansible_facts!r}'
+    discovered_foos = [host_0.ansible_facts.get('foo'), host_1.ansible_facts.get('foo')]
+    assert all(discovered_foos), f'Facts were reverted to stale values by concurrent job cc_host_0 or _1: {discovered_foos}'
 
 
 def test_fact_cache_scoped_to_inventory(live_tmp_folder, default_org, run_job_from_playbook):

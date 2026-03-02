@@ -95,7 +95,7 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         return
 
     host_names = summary.get('hosts_cached', [])
-    hosts_cached = Host.objects.filter(name__in=host_names).order_by('id').iterator()
+    hosts_cached = Host.objects.filter(name__in=host_names, inventory_id=inventory_id).order_by('id').iterator()
     # Path where individual fact files were written
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
     hosts_to_update = []
@@ -149,3 +149,4 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
             hosts_to_update = []
 
     bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
+    logger.info(f'Updated {len(hosts_to_update)} host facts for inventory {inventory_id} in job {job_id}')
