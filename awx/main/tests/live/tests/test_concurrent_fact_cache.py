@@ -62,14 +62,21 @@ def concurrent_facts_jt(concurrent_facts_inventory, live_tmp_folder, post, admin
     return JobTemplate.objects.get(id=result.data['id'])
 
 
-def test_serial_limit_populates_all_hosts(concurrent_facts_inventory, concurrent_facts_jt):
+def test_serial_limit_populates_all_hosts(concurrent_facts_inventory, live_tmp_folder, run_job_from_playbook):
     """Sanity: two jobs with different limits run in series must populate both hosts.
 
     This is the non-concurrent baseline for test_concurrent_limit_does_not_clear_facts.
     If this test fails, the bug is in the single-job fact cache path (not a concurrency issue).
     """
     inv = concurrent_facts_inventory
-    jt = concurrent_facts_jt
+    scm_url = f'file://{live_tmp_folder}/facts'
+    jt_params = {'use_fact_cache': True, 'inventory': inv.id}
+
+    res = run_job_from_playbook('serial_limit_facts', 'gather.yml', scm_url=scm_url, jt_params=jt_params)
+    jt = res['job_template']
+
+    # Clear facts from the initial (unlimited) run so the limited runs start fresh
+    inv.hosts.update(ansible_facts={}, ansible_facts_modified=None)
 
     job_a = jt.create_unified_job()
     job_a.limit = 'cc_host_0'
