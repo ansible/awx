@@ -1306,6 +1306,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
+                job_created=job.created,
             )
 
     def final_run_hook(self, job, status, private_data_dir):

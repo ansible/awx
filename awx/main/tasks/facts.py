@@ -74,7 +74,7 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     msg='Inventory {inventory_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
     add_log_data=True,
 )
-def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=None):
+def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, job_created=None, log_data=None):
     log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['updated_ct'] = 0
@@ -110,6 +110,21 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
             # If the file changed since we wrote the last facts file, pre-playbook run...
             modified = os.path.getmtime(filepath)
             if not facts_write_time or modified >= facts_write_time:
+                # Zipfile (used for artifact transfer) truncates timestamps to 2-second
+                # resolution (DOS time format).  When the playbook writes facts very
+                # quickly after job start, the fact file and the summary file can be
+                # rounded to the same even second, making it impossible to tell whether
+                # the playbook actually touched the file or it is an unchanged reference.
+                if facts_write_time and (modified - facts_write_time) < 2 and modified % 1.0 == 0.0 and facts_write_time % 1.0 == 0.0:
+                    logger.warning(
+                        f'Ambiguous fact file timestamp for host {smart_str(host.name)} '
+                        f'in job {job_id} inventory {inventory_id}: '
+                        f'fact_mtime={modified}, summary_mtime={facts_write_time}, '
+                        f'delta={modified - facts_write_time:.1f}s. '
+                        f'Both timestamps lack fractional seconds, consistent with '
+                        f'zipfile 2-second rounding. Cannot reliably determine if '
+                        f'the file was modified by the playbook.'
+                    )
                 try:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         ansible_facts = json.load(f)
@@ -138,11 +153,21 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         else:
             # if the file goes missing, ansible removed it (likely via clear_facts)
             # if the file goes missing, but the host has not started facts, then we should not clear the facts
-            host.ansible_facts = {}
-            host.ansible_facts_modified = now()
-            hosts_to_update.append(host)
-            logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
-            log_data['cleared_ct'] += 1
+            if job_created and host.ansible_facts_modified and host.ansible_facts_modified > job_created:
+                logger.warning(
+                    f'Skipping fact clear for host {smart_str(host.name)} in job {job_id} '
+                    f'inventory {inventory_id}: host ansible_facts_modified '
+                    f'({host.ansible_facts_modified.isoformat()}) is after this job\'s '
+                    f'created time ({job_created.isoformat()}). '
+                    f'A concurrent job likely updated this host\'s facts while this job was running.'
+                )
+                log_data['unmodified_ct'] += 1
+            else:
+                host.ansible_facts = {}
+                host.ansible_facts_modified = now()
+                hosts_to_update.append(host)
+                logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
+                log_data['cleared_ct'] += 1
 
         if len(hosts_to_update) >= 100:
             bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
