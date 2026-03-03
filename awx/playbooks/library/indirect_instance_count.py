@@ -98,11 +98,6 @@ def find_external_query_with_fallback(namespace, name, installed_version):
         - fallback_version: The version string used (for logging)
     """
     try:
-        installed_version_object = Version(installed_version)
-    except InvalidVersion:
-        return None, False, None
-
-    try:
         queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
     except ModuleNotFoundError:
         return None, False, None
@@ -114,6 +109,11 @@ def find_external_query_with_fallback(namespace, name, installed_version):
             return f.read(), False, installed_version
 
     # 2. Find compatible fallback (same major version, nearest lower version)
+    try:
+        installed_version_object = Version(installed_version)
+    except InvalidVersion:
+        # Can't do version comparison for fallback
+        return None, False, None
     available_versions = list_external_queries(namespace, name)
     if not available_versions:
         return None, False, None
