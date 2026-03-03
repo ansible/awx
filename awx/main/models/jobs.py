@@ -845,6 +845,21 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
+    def get_source_hosts_for_constructed_inventory(self):
+        """Return a QuerySet of the source (input inventory) hosts for a constructed inventory.
+
+        Constructed inventory hosts have an instance_id pointing to the real
+        host in the input inventory.  This resolves those references and returns
+        a proper QuerySet (never a list), suitable for use with finish_fact_cache.
+        """
+        Host = JobHostSummary._meta.get_field('host').related_model
+        if not self.inventory_id:
+            return Host.objects.none()
+        id_field = Host._meta.get_field('id')
+        return Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field))).only(
+            *HOST_FACTS_FIELDS
+        )
+
     def get_hosts_for_fact_cache(self):
         """
         Builds the queryset to use for writing or finalizing the fact cache
@@ -852,17 +867,15 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         For constructed inventories, that means the original (input inventory) hosts
         when slicing, that means only returning hosts in that slice
         """
-        Host = JobHostSummary._meta.get_field('host').related_model
         if not self.inventory_id:
+            Host = JobHostSummary._meta.get_field('host').related_model
             return Host.objects.none()
 
         if self.inventory.kind == 'constructed':
-            id_field = Host._meta.get_field('id')
-            host_qs = Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field)))
+            host_qs = self.get_source_hosts_for_constructed_inventory()
         else:
-            host_qs = self.inventory.hosts
+            host_qs = self.inventory.hosts.only(*HOST_FACTS_FIELDS)
 
-        host_qs = host_qs.only(*HOST_FACTS_FIELDS)
         host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
         return host_qs
 

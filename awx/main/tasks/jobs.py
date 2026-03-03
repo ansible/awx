@@ -1303,7 +1303,7 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             if job.inventory.kind == 'constructed':
-                hosts_qs = job.get_hosts_for_fact_cache()
+                hosts_qs = job.get_source_hosts_for_constructed_inventory()
             else:
                 hosts_qs = job.inventory.hosts
             finish_fact_cache(
