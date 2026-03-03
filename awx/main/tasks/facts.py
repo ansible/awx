@@ -74,7 +74,7 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     msg='Inventory {inventory_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
     add_log_data=True,
 )
-def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, job_created=None, log_data=None):
+def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, job_created=None, log_data=None):
     log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['updated_ct'] = 0
@@ -95,7 +95,7 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, job_created
         return
 
     host_names = summary.get('hosts_cached', [])
-    hosts_cached = Host.objects.filter(name__in=host_names, inventory_id=inventory_id).order_by('id').iterator()
+    hosts_cached = host_qs.filter(name__in=host_names).order_by('id').iterator()
     # Path where individual fact files were written
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
     hosts_to_update = []
@@ -174,4 +174,4 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, job_created
             hosts_to_update = []
 
     bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
-    logger.info(f'Updated {len(hosts_to_update)} host facts for inventory {inventory_id} in job {job_id}')
+    logger.debug(f'Updated {len(hosts_to_update)} host facts for inventory {inventory_id} in job {job_id}')

@@ -17,7 +17,7 @@ import pytest
 from django.utils.timezone import now
 
 from awx.api.versioning import reverse
-from awx.main.models import Inventory, JobTemplate
+from awx.main.models import Host, Inventory, JobTemplate
 from awx.main.tests.live.tests.conftest import wait_for_job, wait_to_leave_status
 
 logger = logging.getLogger(__name__)
@@ -274,4 +274,93 @@ def test_fact_cache_scoped_to_inventory(live_tmp_folder, default_org, run_job_fr
         f'Host in a different inventory was modified by a fact cache operation '
         f'on another inventory sharing the same hostname. '
         f'Expected {original_facts!r}, got {host2.ansible_facts!r}'
+    )
+
+
+def test_constructed_inventory_facts_saved_to_source_host(live_tmp_folder, default_org, run_job_from_playbook):
+    """Facts from a constructed inventory job must be saved to the source host.
+
+    Constructed inventories contain hosts that are references (via instance_id)
+    to 'real' hosts in input inventories.  start_fact_cache correctly resolves
+    source hosts via get_hosts_for_fact_cache(), but finish_fact_cache must also
+    write facts back to the source hosts, not the constructed inventory's copies.
+
+    Scenario:
+      - Two input inventories each have a host named 'ci_shared_host'
+      - A constructed inventory uses both as inputs
+      - The inventory sync picks one source host (via instance_id) for the
+        constructed host — which one depends on input processing order
+      - Both source hosts start with distinct pre-existing facts
+      - A fact-gathering job runs against the constructed inventory
+      - After completion, the targeted source host should have the job's facts
+      - The OTHER source host must retain its original facts untouched
+      - The constructed host itself must NOT have facts stored on it
+        (constructed hosts are transient — recreated on each inventory sync)
+    """
+    shared_name = 'ci_shared_host'
+
+    # Cleanup from prior runs
+    for inv_name in ('test_ci_facts_input1', 'test_ci_facts_input2', 'test_ci_facts_constructed'):
+        Inventory.objects.filter(name=inv_name).delete()
+
+    # --- Create two input inventories, each with an identically-named host ---
+    inv1 = Inventory.objects.create(organization=default_org, name='test_ci_facts_input1')
+    source_host1 = inv1.hosts.create(name=shared_name)
+
+    inv2 = Inventory.objects.create(organization=default_org, name='test_ci_facts_input2')
+    source_host2 = inv2.hosts.create(name=shared_name)
+
+    # Give both hosts distinct pre-existing facts so we can detect cross-contamination
+    host1_original_facts = {'source': 'inventory_1'}
+    source_host1.ansible_facts = host1_original_facts
+    source_host1.ansible_facts_modified = now()
+    source_host1.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
+
+    host2_original_facts = {'source': 'inventory_2'}
+    source_host2.ansible_facts = host2_original_facts
+    source_host2.ansible_facts_modified = now()
+    source_host2.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
+
+    source_hosts_by_id = {source_host1.id: source_host1, source_host2.id: source_host2}
+    original_facts_by_id = {source_host1.id: host1_original_facts, source_host2.id: host2_original_facts}
+
+    # --- Create constructed inventory (sync will create hosts from inputs) ---
+    constructed_inv = Inventory.objects.create(
+        organization=default_org,
+        name='test_ci_facts_constructed',
+        kind='constructed',
+    )
+    constructed_inv.input_inventories.add(inv1)
+    constructed_inv.input_inventories.add(inv2)
+
+    # --- Run a fact-gathering job against the constructed inventory ---
+    # The job launch triggers an inventory sync which creates the constructed
+    # host with instance_id pointing to one of the source hosts.
+    scm_url = f'file://{live_tmp_folder}/facts'
+    run_job_from_playbook(
+        'test_ci_facts',
+        'gather.yml',
+        scm_url=scm_url,
+        jt_params={'use_fact_cache': True, 'inventory': constructed_inv.id},
+    )
+
+    # --- Determine which source host the constructed host points to ---
+    constructed_host = constructed_inv.hosts.get(name=shared_name)
+    target_id = int(constructed_host.instance_id)
+    other_id = (set(source_hosts_by_id.keys()) - {target_id}).pop()
+
+    target_host = source_hosts_by_id[target_id]
+    other_host = source_hosts_by_id[other_id]
+
+    target_host.refresh_from_db()
+    other_host.refresh_from_db()
+    constructed_host.refresh_from_db()
+
+    actual = [target_host.ansible_facts.get('foo'), other_host.ansible_facts, constructed_host.ansible_facts]
+    expected = ['bar', original_facts_by_id[other_id], {}]
+    assert actual == expected, (
+        f'Constructed inventory fact cache wrote to wrong host(s). '
+        f'target source host (id={target_id}) foo={actual[0]!r}, '
+        f'other source host (id={other_id}) facts={actual[1]!r}, '
+        f'constructed host facts={actual[2]!r}; expected {expected!r}'
     )

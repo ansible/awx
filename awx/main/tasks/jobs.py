@@ -1302,7 +1302,12 @@ class RunJob(SourceControlMixin, BaseTask):
             return
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
+            if job.inventory.kind == 'constructed':
+                hosts_qs = job.get_hosts_for_fact_cache()
+            else:
+                hosts_qs = job.inventory.hosts
             finish_fact_cache(
+                hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
