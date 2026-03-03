@@ -4,7 +4,7 @@ env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DEV_DOCKER_OWNER: ${{ github.repository_owner }}
-  COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
+  COMPOSE_TAG: ${{ github.base_ref || github.ref_name || 'devel' }}
   UPSTREAM_REPOSITORY_ID: 91594105
 on:
   pull_request:
@@ -12,8 +12,38 @@ on:
     branches:
       - devel  # needed to publish code coverage post-merge
   schedule:
-    - cron: '0 13,18 * * *'
+    - cron: '0 12,18 * * 1-5'
+  workflow_dispatch: {}
 jobs:
+  trigger-release-branches:
+    name: "Dispatch CI to release branches"
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger CI on release_4.6
+        id: dispatch_release_46
+        continue-on-error: true
+        run: gh workflow run ci.yml --ref release_4.6
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+      - name: Trigger CI on stable-2.6
+        id: dispatch_stable_26
+        continue-on-error: true
+        run: gh workflow run ci.yml --ref stable-2.6
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+      - name: Check dispatch results
+        if: steps.dispatch_release_46.outcome == 'failure' || steps.dispatch_stable_26.outcome == 'failure'
+        run: |
+          echo "One or more dispatches failed:"
+          echo "  release_4.6: ${{ steps.dispatch_release_46.outcome }}"
+          echo "  stable-2.6: ${{ steps.dispatch_stable_26.outcome }}"
+          exit 1
+
   common-tests:
     name: ${{ matrix.tests.name }}
     runs-on: ubuntu-latest
