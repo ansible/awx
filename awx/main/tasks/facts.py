@@ -115,7 +115,7 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
                 # quickly after job start, the fact file and the summary file can be
                 # rounded to the same even second, making it impossible to tell whether
                 # the playbook actually touched the file or it is an unchanged reference.
-                if facts_write_time and (modified - facts_write_time) < 2 and modified % 1.0 == 0.0 and facts_write_time % 1.0 == 0.0:
+                if facts_write_time and (modified - facts_write_time) < 2 and modified % 1.0 < 1e-6 and facts_write_time % 1.0 < 1e-6:
                     logger.warning(
                         f'Ambiguous fact file timestamp for host {smart_str(host.name)} '
                         f'in job {job_id} inventory {inventory_id}: '
