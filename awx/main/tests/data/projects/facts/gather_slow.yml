@@ -6,9 +6,6 @@
   gather_facts: false
   connection: local
   tasks:
-    # - name: escape zipfile 2-second timestamp rounding window
-    #   wait_for:
-    #     timeout: 2
     - name: set a custom fact
       set_fact:
         foo: "bar{{ extra_value }}"
@@ -20,4 +17,4 @@
         cacheable: true
     - name: sleep to create overlap window for concurrent job testing
       wait_for:
-        timeout: 20
+        timeout: 2
