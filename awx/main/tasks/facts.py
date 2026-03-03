@@ -51,7 +51,14 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
                 os.chmod(f.name, 0o600)
                 json.dump(host.ansible_facts, f)
                 log_data['written_ct'] += 1
-                last_write_time = os.path.getmtime(filepath)
+            # Backdate the file by 2 seconds so finish_fact_cache can reliably
+            # distinguish these reference files from files updated by ansible.
+            # This guarantees fact file mtime < summary file mtime even with
+            # zipfile's 2-second timestamp rounding during artifact transfer.
+            mtime = os.path.getmtime(filepath)
+            backdated = mtime - 2
+            os.utime(filepath, (backdated, backdated))
+            last_write_time = backdated
         except IOError:
             logger.error(f'facts for host {smart_str(host.name)} could not be cached')
             continue
@@ -110,21 +117,6 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
             # If the file changed since we wrote the last facts file, pre-playbook run...
             modified = os.path.getmtime(filepath)
             if not facts_write_time or modified >= facts_write_time:
-                # Zipfile (used for artifact transfer) truncates timestamps to 2-second
-                # resolution (DOS time format).  When the playbook writes facts very
-                # quickly after job start, the fact file and the summary file can be
-                # rounded to the same even second, making it impossible to tell whether
-                # the playbook actually touched the file or it is an unchanged reference.
-                if facts_write_time and (modified - facts_write_time) < 2 and modified % 1.0 < 1e-6 and facts_write_time % 1.0 < 1e-6:
-                    logger.warning(
-                        f'Ambiguous fact file timestamp for host {smart_str(host.name)} '
-                        f'in job {job_id} inventory {inventory_id}: '
-                        f'fact_mtime={modified}, summary_mtime={facts_write_time}, '
-                        f'delta={modified - facts_write_time:.1f}s. '
-                        f'Both timestamps lack fractional seconds, consistent with '
-                        f'zipfile 2-second rounding. Cannot reliably determine if '
-                        f'the file was modified by the playbook.'
-                    )
                 try:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         ansible_facts = json.load(f)

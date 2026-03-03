@@ -130,7 +130,7 @@ def test_concurrent_limit_does_not_clear_facts(concurrent_facts_inventory, concu
     assert job_b.limit == "cc_host_1"
 
     discovered_foos = [host_0.ansible_facts.get('foo'), host_1.ansible_facts.get('foo')]
-    assert all(discovered_foos), f'Unexpected facts on cc_host_0 or _1: {discovered_foos} after job a,b {job_a.id}, {job_b.id}'
+    assert discovered_foos == ['bar'] * 2, f'Unexpected facts on cc_host_0 or _1: {discovered_foos} after job a,b {job_a.id}, {job_b.id}'
 
 
 def test_concurrent_limit_does_not_revert_facts(live_tmp_folder, run_job_from_playbook, concurrent_facts_inventory):
@@ -164,6 +164,13 @@ def test_concurrent_limit_does_not_revert_facts(live_tmp_folder, run_job_from_pl
         assert host.ansible_facts.get('foo') == 'bar', f'Seed run failed to set facts on {host.name}: {host.ansible_facts}'
 
     job = res['job']
+    wait_for_job(job)
+
+    # sanity, jobs should be set up to both have facts with just bar
+    host_0 = inv.hosts.get(name='cc_host_0')
+    host_1 = inv.hosts.get(name='cc_host_1')
+    discovered_foos = [host_0.ansible_facts.get('foo'), host_1.ansible_facts.get('foo')]
+    assert discovered_foos == ['bar'] * 2, f'Facts did not get expected initial values: {discovered_foos}'
 
     jt = job.job_template
     assert jt.allow_simultaneous is True
@@ -204,7 +211,7 @@ def test_concurrent_limit_does_not_revert_facts(live_tmp_folder, run_job_from_pl
 
     # Both hosts should have the UPDATED value, not the old seed value
     discovered_foos = [host_0.ansible_facts.get('foo'), host_1.ansible_facts.get('foo')]
-    assert all(discovered_foos), f'Facts were reverted to stale values by concurrent job cc_host_0 or _1: {discovered_foos}'
+    assert discovered_foos == ['bar_v2'] * 2, f'Facts were reverted to stale values by concurrent job cc_host_0 or cc_host_1: {discovered_foos}'
 
 
 def test_fact_cache_scoped_to_inventory(live_tmp_folder, default_org, run_job_from_playbook):
