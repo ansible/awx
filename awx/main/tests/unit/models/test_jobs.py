@@ -105,7 +105,7 @@ def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
 
     start_fact_cache(hosts, artifacts_dir=artifacts_dir, timeout=0, inventory_id=inventory_id)
 
-    bulk_update = mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+    mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
 
     # Remove the fact file for hosts[1] to simulate ansible's clear_facts
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')

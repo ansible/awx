@@ -17,7 +17,7 @@ import pytest
 from django.utils.timezone import now
 
 from awx.api.versioning import reverse
-from awx.main.models import Host, Inventory, JobTemplate
+from awx.main.models import Inventory, JobTemplate
 from awx.main.tests.live.tests.conftest import wait_for_job, wait_to_leave_status
 
 logger = logging.getLogger(__name__)
