@@ -45,7 +45,7 @@ def concurrent_facts_jt(concurrent_facts_inventory, live_tmp_folder, post, admin
     assert 'gather_slow.yml' in proj.playbooks, f'gather_slow.yml not in {proj.playbooks}'
 
     jt_name = 'test_concurrent_fact_cache JT'
-    existing_jt, _ = JobTemplate.objects.get_or_create(name=jt_name)
+    existing_jt = JobTemplate.objects.filter(name=jt_name).first()
     if existing_jt:
         existing_jt.delete()
     result = post(

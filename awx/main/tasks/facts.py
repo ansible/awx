@@ -166,4 +166,4 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
             hosts_to_update = []
 
     bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
-    logger.debug(f'Updated {len(hosts_to_update)} host facts for inventory {inventory_id} in job {job_id}')
+    logger.debug(f'Updated {log_data["updated_ct"]} host facts for inventory {inventory_id} in job {job_id}')
