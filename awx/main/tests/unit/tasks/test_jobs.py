@@ -526,6 +526,6 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
 def test_workload_identity_credential_types_constant():
     """Test that WORKLOAD_IDENTITY_CREDENTIAL_TYPES constant contains expected types."""
-    assert 'hashivault_kv_oidc' in jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES
-    assert 'hashivault_ssh_oidc' in jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES
+    assert 'HashiCorp Vault Secret Lookup (OIDC)' in jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES
+    assert 'HashiCorp Vault Signed SSH (OIDC)' in jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES
     assert isinstance(jobs.WORKLOAD_IDENTITY_CREDENTIAL_TYPES, frozenset)

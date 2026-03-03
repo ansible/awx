@@ -256,11 +256,11 @@ class BaseTask(object):
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
                 try:
                     jwt = retrieve_workload_identity_jwt(
-                        self.instance, audience=input_src.source_credential.get_input('url'), scope="aap_controller_automation_job"
+                        self.instance, audience=input_src.source_credential.get_input('jwt_aud'), scope=AutomationControllerJobScope.name
                     )
-                    # Set runtime context on credential (transient, not persisted to database)
-                    credential_ctx["workload_identity_token"] = jwt
-                    break  # Only need to set once per credential
+                    # Store token keyed by input source PK, since a credential can have
+                    # multiple input sources (one per field), each potentially with a different audience
+                    credential_ctx[input_src.pk] = {"workload_identity_token": jwt}
                 except Exception as e:
                     self.instance.job_explanation = (
                         f'Could not generate workload identity token for credential {input_src.source_credential.name} used in this job. Error:\n{e}'

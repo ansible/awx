@@ -247,6 +247,22 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def context(self):
         """
         Property for storing runtime context during credential resolution.
+
+        The context is a dict keyed by CredentialInputSource PK, where each value
+        is a dict of runtime fields for that input source. Example::
+
+            {
+                <input_source_pk>: {
+                    "workload_identity_token": "<jwt_token>"
+                },
+                <another_input_source_pk>: {
+                    "workload_identity_token": "<different_jwt_token>"
+                },
+            }
+
+        This structure allows each input source to have its own set of runtime
+        values, avoiding conflicts when a credential has multiple input sources
+        with different configurations (e.g., different JWT audiences).
         """
         return {}
 
@@ -649,9 +665,16 @@ class CredentialInputSource(PrimordialModel):
 
         backend_kwargs.update(self.metadata)
 
-        if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-            if workload_identity_token := context.get('workload_identity_token'):
-                backend_kwargs['workload_identity_token'] = workload_identity_token
+        # Resolve internal fields from the per-input-source context.
+        # The context dict is keyed by input source PK, e.g.:
+        #   {42: {"workload_identity_token": "eyJ..."}, 43: {"workload_identity_token": "eyX..."}}
+        # This allows each input source to carry its own runtime values.
+        input_source_context = context.get(self.pk, {})
+        for field in self.source_credential.credential_type.inputs.get('fields', []):
+            if field.get('internal'):
+                value = input_source_context.get(field['id'])
+                if value is not None:
+                    backend_kwargs[field['id']] = value
 
         with set_environ(**settings.AWX_TASK_ENV):
             return backend(**backend_kwargs)
