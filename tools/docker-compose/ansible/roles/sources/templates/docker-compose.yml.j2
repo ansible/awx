@@ -112,7 +112,7 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
-    image: mirror.gcr.io/library/haproxy:2.8.18
+    image: mirror.gcr.io/library/haproxy:2.3
     user: "{{ ansible_user_uid }}"
     volumes:
       - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:Z"
@@ -130,7 +130,7 @@ services:
 {% endif %}
 {% if enable_splunk|bool %}
   splunk:
-    image: mirror.gcr.io/splunk/splunk:10.2.1-rhel9
+    image: mirror.gcr.io/splunk/splunk:9.4.2
     container_name: tools_splunk_1
     hostname: splunk
     networks:
