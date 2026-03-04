@@ -445,8 +445,8 @@ class TaskManager(TaskBase):
     def process_job_dep_failures(self, task):
         """If job depends on a job that has failed, mark as failed and handle misc stuff."""
         for dep in task.dependent_jobs.all():
-            # if we detect a failed or error dependency, go ahead and fail this task.
-            if dep.status in ("error", "failed"):
+            # if we detect a failed, error, or canceled dependency, go ahead and fail this task.
+            if dep.status in ("error", "failed", "canceled"):
                 task.status = 'failed'
                 logger.warning(f'Previous task failed task: {task.id} dep: {dep.id} task manager')
                 task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
