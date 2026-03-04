@@ -44,9 +44,8 @@ from ansible.galaxy.collection import find_existing_collections
 from ansible.utils.collection_loader import AnsibleCollectionConfig
 import ansible.constants as C
 
-# External query discovery constants
+# External query path constants
 EXTERNAL_QUERY_COLLECTION = 'ansible_collections.redhat.indirect_accounting'
-EXTERNAL_QUERY_PATH = 'extensions/audit/external_queries'
 
 
 def _get_query_file_dir():
