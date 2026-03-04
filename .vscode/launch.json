@@ -96,7 +96,7 @@
       "type": "debugpy",
       "request": "launch",
       "program": "/usr/bin/awx-manage",
-      "args": ["runserver", "127.0.0.1:8013"],
+      "args": ["runserver", "--noasgi", "127.0.0.1:8013"],
       "django": true,
       "preLaunchTask": "stop aap-dev-uwsgi",
       "postDebugTask": "start aap-dev-uwsgi"
