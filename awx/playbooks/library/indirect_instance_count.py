@@ -49,6 +49,17 @@ EXTERNAL_QUERY_COLLECTION = 'ansible_collections.redhat.indirect_accounting'
 EXTERNAL_QUERY_PATH = 'extensions/audit/external_queries'
 
 
+def _get_query_file_dir():
+    """Return the query file directory or None."""
+    try:
+        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
+    except ModuleNotFoundError:
+        return None
+    if not queries_dir.is_dir():
+        return None
+    return queries_dir
+
+
 def list_external_queries(namespace, name):
     """List all available external query versions for a collection.
 
@@ -62,9 +73,7 @@ def list_external_queries(namespace, name):
     """
     versions = []
 
-    try:
-        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
-    except ModuleNotFoundError:
+    if not (queries_dir := _get_query_file_dir()):
         return versions
 
     # Pattern: namespace.name.X.Y.Z.yml where X.Y.Z is the version
@@ -97,9 +106,7 @@ def find_external_query_with_fallback(namespace, name, installed_version):
         - fallback_used: True if a fallback version was used instead of exact match
         - fallback_version: The version string used (for logging)
     """
-    try:
-        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
-    except ModuleNotFoundError:
+    if not (queries_dir := _get_query_file_dir()):
         return None, False, None
 
     # 1. Try exact version match first

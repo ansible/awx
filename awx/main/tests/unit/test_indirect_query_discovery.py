@@ -126,8 +126,8 @@ class TestListExternalQueries:
 class TestVersionFallback:
     """Tests for version fallback logic (AC7.4-AC7.9)."""
 
-    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
-    def test_exact_match_preferred(self, mock_files):
+    @mock.patch('awx.playbooks.library.indirect_instance_count._get_query_file_dir')
+    def test_exact_match_preferred(self, mock_get_dir):
         """AC7.4: Exact version match is preferred over fallback version."""
         from awx.playbooks.library.indirect_instance_count import find_external_query_with_fallback
 
@@ -136,8 +136,7 @@ class TestVersionFallback:
         mock_exact_file.open.return_value.__enter__ = mock.Mock(return_value=StringIO('exact_version_query'))
         mock_exact_file.open.return_value.__exit__ = mock.Mock(return_value=False)
 
-        queries_dir = create_queries_dir_mock(lambda f: mock_exact_file)
-        mock_files.return_value = create_chainable_path_mock(queries_dir)
+        mock_get_dir.return_value = create_queries_dir_mock(lambda f: mock_exact_file)
 
         content, fallback_used, version = find_external_query_with_fallback('demo', 'external', '2.5.0')
 
@@ -146,8 +145,8 @@ class TestVersionFallback:
         assert version == '2.5.0'
 
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_external_queries')
-    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
-    def test_fallback_nearest_lower_same_major(self, mock_files, mock_list):
+    @mock.patch('awx.playbooks.library.indirect_instance_count._get_query_file_dir')
+    def test_fallback_nearest_lower_same_major(self, mock_get_dir, mock_list):
         """AC7.5: Fallback selects nearest lower version within same major version.
 
         When installed is 4.5.0 and 4.0.0/4.1.0 are available, selects 4.1.0.
@@ -165,8 +164,7 @@ class TestVersionFallback:
         def file_lookup(filename):
             return mock_fallback_file if '4.1.0' in filename else mock_exact_file
 
-        queries_dir = create_queries_dir_mock(file_lookup)
-        mock_files.return_value = create_chainable_path_mock(queries_dir)
+        mock_get_dir.return_value = create_queries_dir_mock(file_lookup)
 
         content, fallback_used, version = find_external_query_with_fallback('community', 'vmware', '4.5.0')
 
@@ -175,8 +173,8 @@ class TestVersionFallback:
         assert version == '4.1.0'
 
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_external_queries')
-    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
-    def test_fallback_respects_major_version_boundary(self, mock_files, mock_list):
+    @mock.patch('awx.playbooks.library.indirect_instance_count._get_query_file_dir')
+    def test_fallback_respects_major_version_boundary(self, mock_get_dir, mock_list):
         """Test that fallback does NOT cross major version boundaries.
 
         When installed version is 6.0.0 and only 5.0.0 query exists,
@@ -198,8 +196,7 @@ class TestVersionFallback:
         def file_lookup(filename):
             return mock_fallback_file if '5.0.0' in filename else mock_exact_file
 
-        queries_dir = create_queries_dir_mock(file_lookup)
-        mock_files.return_value = create_chainable_path_mock(queries_dir)
+        mock_get_dir.return_value = create_queries_dir_mock(file_lookup)
 
         content, fallback_used, version = find_external_query_with_fallback('community', 'vmware', '6.0.0')
 
@@ -208,8 +205,8 @@ class TestVersionFallback:
         assert fallback_used is False
 
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_external_queries')
-    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
-    def test_no_fallback_when_incompatible(self, mock_files, mock_list):
+    @mock.patch('awx.playbooks.library.indirect_instance_count._get_query_file_dir')
+    def test_no_fallback_when_incompatible(self, mock_get_dir, mock_list):
         """AC7.7: No fallback when all available versions are higher than installed.
 
         When installed version is 3.8.0 and only 4.0.0 and 5.0.0 exist,
@@ -233,8 +230,7 @@ class TestVersionFallback:
                 return mock_available_file
             return mock_exact_file
 
-        queries_dir = create_queries_dir_mock(file_lookup)
-        mock_files.return_value = create_chainable_path_mock(queries_dir)
+        mock_get_dir.return_value = create_queries_dir_mock(file_lookup)
 
         content, fallback_used, version = find_external_query_with_fallback('community', 'vmware', '3.8.0')
 
@@ -243,8 +239,8 @@ class TestVersionFallback:
         assert fallback_used is False
 
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_external_queries')
-    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
-    def test_fallback_selection_logic(self, mock_files, mock_list):
+    @mock.patch('awx.playbooks.library.indirect_instance_count._get_query_file_dir')
+    def test_fallback_selection_logic(self, mock_get_dir, mock_list):
         """AC7.9: Complex fallback scenario with multiple candidates.
 
         When installed is 4.5.0 and 4.0.0, 4.1.0, 5.0.0 are available,
@@ -263,8 +259,7 @@ class TestVersionFallback:
         def file_lookup(filename):
             return mock_fallback_file if '4.1.0' in filename else mock_exact_file
 
-        queries_dir = create_queries_dir_mock(file_lookup)
-        mock_files.return_value = create_chainable_path_mock(queries_dir)
+        mock_get_dir.return_value = create_queries_dir_mock(file_lookup)
 
         content, fallback_used, version = find_external_query_with_fallback('community', 'vmware', '4.5.0')
 
