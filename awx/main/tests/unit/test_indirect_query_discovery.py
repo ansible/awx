@@ -7,6 +7,7 @@ import sys
 from io import StringIO
 from unittest import mock
 
+import pytest
 from packaging.version import Version
 
 
@@ -46,17 +47,27 @@ class MockCallbackBase:
 _mock_callback_module = mock.MagicMock()
 _mock_callback_module.CallbackBase = MockCallbackBase
 
-sys.modules['ansible'] = mock.MagicMock()
-sys.modules['ansible.plugins'] = mock.MagicMock()
-sys.modules['ansible.plugins.callback'] = _mock_callback_module
-sys.modules['ansible.cli'] = mock.MagicMock()
-sys.modules['ansible.cli.galaxy'] = mock.MagicMock()
-sys.modules['ansible.release'] = mock.MagicMock(__version__='2.16.0')
-sys.modules['ansible.galaxy'] = mock.MagicMock()
-sys.modules['ansible.galaxy.collection'] = mock.MagicMock()
-sys.modules['ansible.utils'] = mock.MagicMock()
-sys.modules['ansible.utils.collection_loader'] = mock.MagicMock()
-sys.modules['ansible.constants'] = mock.MagicMock()
+
+@pytest.fixture(autouse=True)
+def _mock_ansible_modules():
+    """Temporarily inject fake ansible modules so the callback plugin can be imported."""
+    with mock.patch.dict(
+        sys.modules,
+        {
+            'ansible': mock.MagicMock(),
+            'ansible.plugins': mock.MagicMock(),
+            'ansible.plugins.callback': _mock_callback_module,
+            'ansible.cli': mock.MagicMock(),
+            'ansible.cli.galaxy': mock.MagicMock(),
+            'ansible.release': mock.MagicMock(__version__='2.16.0'),
+            'ansible.galaxy': mock.MagicMock(),
+            'ansible.galaxy.collection': mock.MagicMock(),
+            'ansible.utils': mock.MagicMock(),
+            'ansible.utils.collection_loader': mock.MagicMock(),
+            'ansible.constants': mock.MagicMock(),
+        },
+    ):
+        yield
 
 
 class TestListExternalQueries:
