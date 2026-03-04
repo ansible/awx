@@ -18,7 +18,7 @@ import time
 import yaml
 
 import pytest
-from flags.state import enable_flag, disable_flag
+from flags.state import enable_flag, disable_flag, flag_enabled
 
 from awx.main.tests.live.tests.conftest import wait_for_events, unified_job_stdout
 from awx.main.tasks.host_indirect import save_indirect_host_entries
@@ -51,11 +51,19 @@ VENDOR_COLLECTIONS_BASE = '/var/lib/awx/vendor_collections'
 
 @pytest.fixture
 def enable_indirect_host_counting():
-    """Enable FEATURE_INDIRECT_NODE_COUNTING_ENABLED flag for the test."""
+    """Enable FEATURE_INDIRECT_NODE_COUNTING_ENABLED flag for the test.
+
+    Only creates a FlagState DB record if the flag isn't already enabled
+    (e.g. via development_defaults.py), to avoid UniqueViolation errors
+    and to avoid leaking state to other tests.
+    """
     flag_name = "FEATURE_INDIRECT_NODE_COUNTING_ENABLED"
-    enable_flag(flag_name)
+    was_enabled = flag_enabled(flag_name)
+    if not was_enabled:
+        enable_flag(flag_name)
     yield
-    disable_flag(flag_name)
+    if not was_enabled:
+        disable_flag(flag_name)
 
 
 @pytest.fixture
