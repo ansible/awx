@@ -115,10 +115,6 @@ def test_concurrent_limit_does_not_clear_facts(concurrent_facts_inventory, concu
     wait_for_job(job_a)
     wait_for_job(job_b)
 
-    import time
-
-    time.sleep(5)
-
     # Verify facts survived concurrent execution
     host_0 = inv.hosts.get(name='cc_host_0')
     host_1 = inv.hosts.get(name='cc_host_1')
