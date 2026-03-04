@@ -55,6 +55,8 @@ def construct_rsyslog_conf_template(settings=settings):
     )
 
     def escape_quotes(x):
+        if x is None:
+            return ''
         return x.replace('"', '\\"')
 
     if not enabled:
