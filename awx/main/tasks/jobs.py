@@ -101,14 +101,6 @@ from ansible_base.resource_registry.workload_identity_client import (
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
-# Credential types that support OIDC workload identity authentication
-WORKLOAD_IDENTITY_CREDENTIAL_TYPES = frozenset(
-    [
-        'HashiCorp Vault Secret Lookup (OIDC)',
-        'HashiCorp Vault Signed SSH (OIDC)',
-    ]
-)
-
 
 def populate_claims_for_workload(unified_job) -> dict:
     """
@@ -249,8 +241,10 @@ class BaseTask(object):
             (credential.context, src)
             for credential in self._credentials
             for src in credential.input_sources.all()
-            # Whether the credential has any input sources with compatible types:
-            if src.source_credential.credential_type.name in WORKLOAD_IDENTITY_CREDENTIAL_TYPES
+            if any(
+                field.get('id') == 'workload_identity_token' and field.get('internal')
+                for field in src.source_credential.credential_type.inputs.get('fields', [])
+            )
         )
         for credential_ctx, input_src in credential_input_sources:
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):

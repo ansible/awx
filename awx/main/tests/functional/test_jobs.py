@@ -484,7 +484,12 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
             name='HashiCorp Vault Secret Lookup (OIDC)',
             kind='cloud',
             managed=False,
-            inputs={'fields': [{'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'}]},
+            inputs={
+                'fields': [
+                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                ]
+            },
         )
         hashivault_type.save()
 
@@ -539,7 +544,12 @@ def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_
             name='HashiCorp Vault Secret Lookup (OIDC)',
             kind='cloud',
             managed=False,
-            inputs={'fields': [{'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'}]},
+            inputs={
+                'fields': [
+                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                ]
+            },
         )
         hashivault_type.save()
 
@@ -586,7 +596,12 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
             name='HashiCorp Vault Secret Lookup (OIDC)',
             kind='cloud',
             managed=False,
-            inputs={'fields': [{'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'}]},
+            inputs={
+                'fields': [
+                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                ]
+            },
         )
         hashivault_kv_type.save()
 
@@ -594,7 +609,12 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
             name='HashiCorp Vault Signed SSH (OIDC)',
             kind='cloud',
             managed=False,
-            inputs={'fields': [{'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'}]},
+            inputs={
+                'fields': [
+                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                ]
+            },
         )
         hashivault_ssh_type.save()
 

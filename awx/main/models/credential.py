@@ -20,7 +20,6 @@ from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.contrib.auth.models import User
-from flags.state import flag_enabled
 
 # DRF
 from rest_framework.serializers import ValidationError as DRFValidationError

@@ -19,6 +19,6 @@
 #
 certifi @ git+https://github.com/ansible/system-certifi.git@devel
 ansible-runner @ git+https://github.com/ansible/ansible-runner.git@devel
-awx-plugins-core[credentials-github-app,hashivault-kv-oidc,hashivault-ssh-oidc] @ git+https://github.com/pablohiro/awx-plugins.git@feature/oidc-credentials
+awx-plugins-core[credentials-github-app] @ git+https://github.com/ansible/awx-plugins.git@devel
 django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel
 awx-plugins-interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git

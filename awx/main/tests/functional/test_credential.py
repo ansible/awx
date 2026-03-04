@@ -93,6 +93,8 @@ def test_default_cred_types():
             'gpg_public_key',
             'hashivault_kv',
             'hashivault_ssh',
+            'hashivault-kv-oidc',
+            'hashivault-ssh-oidc',
             'hcp_terraform',
             'insights',
             'kubernetes_bearer_token',
