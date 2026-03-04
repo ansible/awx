@@ -112,6 +112,8 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
+    # NOTE: upgrading past 2.3 requires updating haproxy.cfg (deprecated httpchk syntax)
+    # and may require adding 'no strict-limits' to the global section.
     image: mirror.gcr.io/library/haproxy:2.3
     user: "{{ ansible_user_uid }}"
     volumes:
@@ -130,6 +132,7 @@ services:
 {% endif %}
 {% if enable_splunk|bool %}
   splunk:
+    # NOTE: upgrading to 10.x requires adding SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
     image: mirror.gcr.io/splunk/splunk:9.4.2
     container_name: tools_splunk_1
     hostname: splunk
