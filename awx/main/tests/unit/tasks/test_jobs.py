@@ -550,5 +550,3 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
     with pytest.raises(RuntimeError, match="Workload identity client is not configured"):
         jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
-
-
