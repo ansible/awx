@@ -177,7 +177,7 @@ def retrieve_workload_identity_jwt(
         raise RuntimeError("Workload identity client is not configured")
     claims = populate_claims_for_workload(unified_job)
     kwargs = {"claims": claims, "scope": scope, "audience": audience}
-    if workload_ttl_seconds is not None:
+    if workload_ttl_seconds:
         kwargs["workload_ttl_seconds"] = workload_ttl_seconds
     return client.request_workload_jwt(**kwargs).jwt
 
