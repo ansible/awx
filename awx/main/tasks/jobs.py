@@ -164,7 +164,12 @@ def populate_claims_for_workload(unified_job) -> dict:
     return claims
 
 
-def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope: str) -> str:
+def retrieve_workload_identity_jwt(
+    unified_job: UnifiedJob,
+    audience: str,
+    scope: str,
+    workload_ttl_seconds: int | None = None,
+) -> str:
     """Retrieve JWT token from workload claims.
     Raises:
         RuntimeError: if the workload identity client is not configured.
@@ -173,7 +178,10 @@ def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope
     if client is None:
         raise RuntimeError("Workload identity client is not configured")
     claims = populate_claims_for_workload(unified_job)
-    return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
+    kwargs = {"claims": claims, "scope": scope, "audience": audience}
+    if workload_ttl_seconds is not None:
+        kwargs["workload_ttl_seconds"] = workload_ttl_seconds
+    return client.request_workload_jwt(**kwargs).jwt
 
 
 def with_path_cleanup(f):
@@ -611,16 +619,18 @@ class BaseTask(object):
         Called during pre_run_hook when feature is enabled and job needs a JWT.
         """
         try:
-            claims = populate_claims_for_workload(instance)
-            scope = "aap_controller_automation_job"
-            audience = "https://vault.example.com"
             client = get_workload_identity_client()
             if client is None:
                 return
             logger.info(f"Requesting workload identity token for job {instance.id} ({instance.name})")
             workload_ttl = min(instance.timeout, WORKLOAD_TTL_MAX_SECONDS) if instance.timeout else None
-            response = client.request_workload_jwt(claims=claims, scope=scope, audience=audience, workload_ttl_seconds=workload_ttl)
-            logger.debug(f"Successfully obtained workload identity token for job {instance.id}. JWT length: {len(response.jwt)} characters")
+            jwt = retrieve_workload_identity_jwt(
+                instance,
+                audience="https://vault.example.com",
+                scope="aap_controller_automation_job",
+                workload_ttl_seconds=workload_ttl,
+            )
+            logger.debug(f"Successfully obtained workload identity token for job {instance.id}. JWT length: {len(jwt)} characters")
         except TokenRequestError as e:
             logger.error(f"Failed to obtain workload identity token for job {instance.id}: {e}")
         except Exception as e:
