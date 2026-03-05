@@ -620,6 +620,19 @@ def test_request_workload_identity_token_workload_ttl(mock_get_client, job_templ
 
 @pytest.mark.django_db
 @mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_request_workload_identity_token_uses_effective_timeout(mock_get_client, job_template_factory, credential, settings):
+    """JWT TTL uses get_instance_timeout (global fallback when job.timeout=0)."""
+    settings.DEFAULT_JOB_TIMEOUT = 1800
+    mock_get_client.return_value = _mock_workload_client('token')
+    job = _job_from_factory(job_template_factory, credential=credential, timeout=0)
+
+    jobs.BaseTask()._request_workload_identity_token(job)
+
+    assert mock_get_client.return_value.request_workload_jwt.call_args.kwargs['workload_ttl_seconds'] == 1800
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
 @mock.patch('awx.main.tasks.jobs.logger')
 def test_request_workload_identity_token_failure(mock_logger, mock_get_client):
     """TokenRequestError is logged and does not raise."""

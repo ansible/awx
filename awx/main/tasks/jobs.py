@@ -623,11 +623,13 @@ class BaseTask(object):
             if client is None:
                 return
             logger.info(f"Requesting workload identity token for job {instance.id} ({instance.name})")
-            workload_ttl = min(instance.timeout, WORKLOAD_TTL_MAX_SECONDS) if instance.timeout else None
+            effective_timeout = self.get_instance_timeout(instance)
+            workload_ttl = min(effective_timeout, WORKLOAD_TTL_MAX_SECONDS) if effective_timeout else None
+            audience = settings.WORKLOAD_IDENTITY_VAULT_AUDIENCE
             jwt = retrieve_workload_identity_jwt(
                 instance,
-                audience="https://vault.example.com",
-                scope="aap_controller_automation_job",
+                audience=audience,
+                scope=AutomationControllerJobScope.name,
                 workload_ttl_seconds=workload_ttl,
             )
             logger.debug(f"Successfully obtained workload identity token for job {instance.id}. JWT length: {len(jwt)} characters")
