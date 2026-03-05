@@ -392,7 +392,7 @@ pyopenssl==25.3.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   twisted
-pyparsing==2.4.7
+pyparsing==3.3.2
     # via -r /awx_devel/requirements/requirements.in
 python-daemon==3.1.2
     # via
