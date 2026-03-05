@@ -79,13 +79,9 @@ def credentialtype_ssh(db):
 
 @pytest.fixture
 def credential(credentialtype_ssh):
-    return Credential.objects.create(
-        credential_type=credentialtype_ssh, name='test-cred', inputs={'username': 'u', 'password': 'p'}
-    )
+    return Credential.objects.create(credential_type=credentialtype_ssh, name='test-cred', inputs={'username': 'u', 'password': 'p'})
 
 
 @pytest.fixture
 def vault_credential(credentialtype_vault):
-    return Credential.objects.create(
-        credential_type=credentialtype_vault, name='test-vault-cred', inputs={'vault_password': 'secret'}
-    )
+    return Credential.objects.create(credential_type=credentialtype_vault, name='test-vault-cred', inputs={'vault_password': 'secret'})

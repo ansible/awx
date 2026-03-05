@@ -619,9 +619,7 @@ class BaseTask(object):
                 return
             logger.info(f"Requesting workload identity token for job {instance.id} ({instance.name})")
             workload_ttl = min(instance.timeout, WORKLOAD_TTL_MAX_SECONDS) if instance.timeout else None
-            response = client.request_workload_jwt(
-                claims=claims, scope=scope, audience=audience, workload_ttl_seconds=workload_ttl
-            )
+            response = client.request_workload_jwt(claims=claims, scope=scope, audience=audience, workload_ttl_seconds=workload_ttl)
             logger.debug(f"Successfully obtained workload identity token for job {instance.id}. JWT length: {len(response.jwt)} characters")
         except TokenRequestError as e:
             logger.error(f"Failed to obtain workload identity token for job {instance.id}: {e}")
