@@ -80,10 +80,9 @@ def job_template_with_credentials():
     return _create_job_template
 
 
-@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False)
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
-def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, mock_flag_enabled, private_data_dir, execution_environment):
+def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
     # Create mocked inventory and host queryset
     inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
     host1 = mock.MagicMock(spec=Host, id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
@@ -139,10 +138,9 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, moc
 
 
 @mock.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
-@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False)
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
-def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, mock_flag_enabled, mock_bulk_update_sorted_by_id, private_data_dir, execution_environment):
+def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, mock_bulk_update_sorted_by_id, private_data_dir, execution_environment):
     # Fully mocked inventory
     mock_inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
 

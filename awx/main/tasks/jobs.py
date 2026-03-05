@@ -94,9 +94,6 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-from ansible_base.lib.workload_identity.workload_identity_tokens import (
-    WORKLOAD_TTL_MAX_SECONDS,
-)
 from ansible_base.resource_registry.workload_identity_client import get_workload_identity_client
 
 logger = logging.getLogger('awx.main.tasks.jobs')
@@ -173,6 +170,10 @@ def retrieve_workload_identity_jwt(
     """
     client = get_workload_identity_client()
     if client is None:
+        logger.warning(
+            "Workload identity client is not configured; cannot obtain JWT for job %s.",
+            getattr(unified_job, 'id', '?'),
+        )
         raise RuntimeError("Workload identity client is not configured")
     claims = populate_claims_for_workload(unified_job)
     kwargs = {"claims": claims, "scope": scope, "audience": audience}
@@ -249,10 +250,10 @@ class BaseTask(object):
                 for field in src.source_credential.credential_type.inputs.get('fields', [])
             )
         )
-        effective_timeout = self.get_instance_timeout(self.instance)
-        workload_ttl = min(effective_timeout, WORKLOAD_TTL_MAX_SECONDS) if effective_timeout else None
         for credential_ctx, input_src in credential_input_sources:
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                effective_timeout = self.get_instance_timeout(self.instance)
+                workload_ttl = effective_timeout if effective_timeout else None
                 try:
                     jwt = retrieve_workload_identity_jwt(
                         self.instance,
