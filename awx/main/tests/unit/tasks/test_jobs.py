@@ -583,9 +583,9 @@ def _mock_workload_client(jwt='eyJ.test.signature'):
 @pytest.mark.django_db
 @mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
 def test_request_workload_identity_token_success(mock_get_client, job_template_factory, credential):
-    """_request_workload_identity_token calls client with workload_ttl_seconds."""
+    """_request_workload_identity_token calls client; workload_ttl_seconds present when job has timeout."""
     mock_get_client.return_value = _mock_workload_client()
-    job = _job_from_factory(job_template_factory, credential=credential)
+    job = _job_from_factory(job_template_factory, credential=credential, timeout=3600)
     job.id = TEST_JOB_ID
     job.name = 'Test Job'
 
@@ -593,7 +593,7 @@ def test_request_workload_identity_token_success(mock_get_client, job_template_f
 
     mock_client = mock_get_client.return_value
     mock_client.request_workload_jwt.assert_called_once()
-    assert 'workload_ttl_seconds' in mock_client.request_workload_jwt.call_args.kwargs
+    assert mock_client.request_workload_jwt.call_args.kwargs['workload_ttl_seconds'] == 3600
     assert mock_client.request_workload_jwt.call_args.kwargs['scope'] == 'aap_controller_automation_job'
 
 
@@ -601,17 +601,21 @@ def test_request_workload_identity_token_success(mock_get_client, job_template_f
 @pytest.mark.parametrize(
     "job_timeout,expected_ttl",
     [(3600, 3600), (0, None), (86401, 86400)],
-    ids=["timeout-passed", "no-timeout-sends-none", "exceeds-max-capped"],
+    ids=["timeout-passed", "no-timeout-omits-ttl", "exceeds-max-capped"],
 )
 @mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
 def test_request_workload_identity_token_workload_ttl(mock_get_client, job_template_factory, credential, job_timeout, expected_ttl):
-    """Job timeout is forwarded as workload_ttl_seconds; 0->None, excess capped."""
+    """Job timeout is forwarded as workload_ttl_seconds; 0->omitted (platform fallback), excess capped."""
     mock_get_client.return_value = _mock_workload_client('token')
     job = _job_from_factory(job_template_factory, credential=credential, timeout=job_timeout)
 
     jobs.BaseTask()._request_workload_identity_token(job)
 
-    assert mock_get_client.return_value.request_workload_jwt.call_args.kwargs['workload_ttl_seconds'] == expected_ttl
+    call_kwargs = mock_get_client.return_value.request_workload_jwt.call_args.kwargs
+    if expected_ttl is None:
+        assert 'workload_ttl_seconds' not in call_kwargs
+    else:
+        assert call_kwargs['workload_ttl_seconds'] == expected_ttl
 
 
 @pytest.mark.django_db
