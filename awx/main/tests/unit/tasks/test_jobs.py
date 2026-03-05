@@ -29,6 +29,10 @@ from awx.main.models import (
 )
 from awx.main.tasks import jobs
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
+from ansible_base.resource_registry.workload_identity_client import (
+    TokenRequestError,
+    WorkloadIdentityTokenResponse,
+)
 
 
 @pytest.fixture
@@ -526,3 +530,111 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
     with pytest.raises(RuntimeError, match="Workload identity client is not configured"):
         jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
+
+
+TEST_JOB_ID = 456  # Arbitrary ID for workload identity tests that need a known job id
+
+
+def _job_from_factory(job_template_factory, credential=None, timeout=None):
+    """Create a job from factory, optionally with credential and timeout."""
+    jt = job_template_factory('test-jt')
+    job = jt.job_template.create_unified_job()
+    if credential is not None:
+        job.credentials.add(credential)
+    if timeout is not None:
+        job.timeout = timeout
+    return job
+
+
+def _mock_workload_client(jwt='eyJ.test.signature'):
+    """Create a mock workload identity client that returns the given JWT."""
+    mock_client = mock.Mock()
+    mock_client.request_workload_jwt.return_value = WorkloadIdentityTokenResponse(jwt=jwt)
+    return mock_client
+
+
+# _request_workload_identity_token and _job_needs_workload_jwt
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_request_workload_identity_token_success(mock_get_client, job_template_factory, credential):
+    """_request_workload_identity_token calls client with workload_ttl_seconds."""
+    mock_get_client.return_value = _mock_workload_client()
+    job = _job_from_factory(job_template_factory, credential=credential)
+    job.id = TEST_JOB_ID
+    job.name = 'Test Job'
+
+    jobs.BaseTask()._request_workload_identity_token(job)
+
+    mock_client = mock_get_client.return_value
+    mock_client.request_workload_jwt.assert_called_once()
+    assert 'workload_ttl_seconds' in mock_client.request_workload_jwt.call_args.kwargs
+    assert mock_client.request_workload_jwt.call_args.kwargs['scope'] == 'aap_controller_automation_job'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "job_timeout,expected_ttl",
+    [(3600, 3600), (0, None), (86401, 86400)],
+    ids=["timeout-passed", "no-timeout-sends-none", "exceeds-max-capped"],
+)
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_request_workload_identity_token_workload_ttl(mock_get_client, job_template_factory, credential, job_timeout, expected_ttl):
+    """Job timeout is forwarded as workload_ttl_seconds; 0->None, excess capped."""
+    mock_get_client.return_value = _mock_workload_client('token')
+    job = _job_from_factory(job_template_factory, credential=credential, timeout=job_timeout)
+
+    jobs.BaseTask()._request_workload_identity_token(job)
+
+    assert mock_get_client.return_value.request_workload_jwt.call_args.kwargs['workload_ttl_seconds'] == expected_ttl
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.tasks.jobs.logger')
+def test_request_workload_identity_token_failure(mock_logger, mock_get_client):
+    """TokenRequestError is logged and does not raise."""
+    mock_client = mock.Mock()
+    mock_client.request_workload_jwt.side_effect = TokenRequestError("Gateway unavailable")
+    mock_get_client.return_value = mock_client
+
+    job = Job(id=TEST_JOB_ID, name='Failing Job')
+
+    jobs.BaseTask()._request_workload_identity_token(job)
+
+    mock_logger.error.assert_called()
+    assert str(TEST_JOB_ID) in mock_logger.error.call_args[0][0]
+
+
+@mock.patch('awx.main.tasks.jobs.flag_enabled')
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_pre_run_hook_skips_jwt_when_flag_disabled(mock_get_client, mock_flag_enabled):
+    """pre_run_hook does not request JWT when feature flag is disabled."""
+    mock_flag_enabled.return_value = False
+
+    job = Job(id=TEST_JOB_ID, name='Test Job')
+
+    jobs.BaseTask().pre_run_hook(job, '/tmp/private_data')
+
+    mock_get_client.assert_not_called()
+
+
+# Kept as separate tests rather than parametrized for readability.
+@pytest.mark.django_db
+def test_job_needs_workload_jwt_with_vault(job_template_factory, vault_credential):
+    """Job with vault credential needs workload JWT."""
+    job = _job_from_factory(job_template_factory, credential=vault_credential)
+    assert jobs.BaseTask()._job_needs_workload_jwt(job) is True
+
+
+@pytest.mark.django_db
+def test_job_needs_workload_jwt_without_vault(job_template_factory, credential):
+    """Job without vault credential does not need workload JWT."""
+    job = _job_from_factory(job_template_factory, credential=credential)
+    assert jobs.BaseTask()._job_needs_workload_jwt(job) is False
+
+
+@pytest.mark.django_db
+def test_job_needs_workload_jwt_no_credentials(job_template_factory):
+    """Job with no credentials does not need workload JWT."""
+    job = _job_from_factory(job_template_factory)
+    assert jobs.BaseTask()._job_needs_workload_jwt(job) is False

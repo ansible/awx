@@ -94,8 +94,11 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-
+from ansible_base.lib.workload_identity.workload_identity_tokens import (
+    WORKLOAD_TTL_MAX_SECONDS,
+)
 from ansible_base.resource_registry.workload_identity_client import (
+    TokenRequestError,
     get_workload_identity_client,
 )
 
@@ -586,6 +589,44 @@ class BaseTask(object):
 
         # Before task is started, ensure that job_event partitions exist
         create_partition(instance.event_class._meta.db_table, start=instance.created)
+
+        # Request workload identity JWT token if feature is enabled and job needs it
+        if flag_enabled("FEATURE_WORKLOAD_IDENTITY_JWT_ENABLED") and self._job_needs_workload_jwt(instance):
+            self._request_workload_identity_token(instance)
+
+    def _job_needs_workload_jwt(self, instance):
+        """
+        Determine if this job needs a workload identity JWT token.
+
+        Currently checks if the job has any vault credentials, as Vault is the
+        primary use case for workload identity JWTs.
+        """
+        if not hasattr(instance, 'credentials'):
+            return False
+        return instance.credentials.filter(credential_type__kind='vault').exists()
+
+    def _request_workload_identity_token(self, instance):
+        """
+        Request a workload identity JWT token from Gateway for this job.
+        Called during pre_run_hook when feature is enabled and job needs a JWT.
+        """
+        try:
+            claims = populate_claims_for_workload(instance)
+            scope = "aap_controller_automation_job"
+            audience = "https://vault.example.com"
+            client = get_workload_identity_client()
+            if client is None:
+                return
+            logger.info(f"Requesting workload identity token for job {instance.id} ({instance.name})")
+            workload_ttl = min(instance.timeout, WORKLOAD_TTL_MAX_SECONDS) if instance.timeout else None
+            response = client.request_workload_jwt(
+                claims=claims, scope=scope, audience=audience, workload_ttl_seconds=workload_ttl
+            )
+            logger.debug(f"Successfully obtained workload identity token for job {instance.id}. JWT length: {len(response.jwt)} characters")
+        except TokenRequestError as e:
+            logger.error(f"Failed to obtain workload identity token for job {instance.id}: {e}")
+        except Exception as e:
+            logger.exception(f"Unexpected error requesting workload identity token for job {instance.id}: {e}")
 
     def post_run_hook(self, instance, status):
         """

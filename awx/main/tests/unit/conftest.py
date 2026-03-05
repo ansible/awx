@@ -5,6 +5,7 @@ from unittest.mock import PropertyMock
 
 from awx.api.urls import urlpatterns as api_patterns
 from awx.main.models import ExecutionEnvironment
+from awx.main.models.credential import Credential, CredentialType
 
 # Django
 from django.urls import URLResolver, URLPattern
@@ -58,4 +59,33 @@ def dummy_log_record():
         'User joe logged in',  # msg
         tuple(),  # args,
         None,  # exc_info
+    )
+
+
+# Credential fixtures for workload identity tests
+@pytest.fixture
+def credentialtype_vault(db):
+    vault_type = CredentialType.defaults['vault']()
+    vault_type.save()
+    return vault_type
+
+
+@pytest.fixture
+def credentialtype_ssh(db):
+    ssh_type = CredentialType.defaults['ssh']()
+    ssh_type.save()
+    return ssh_type
+
+
+@pytest.fixture
+def credential(credentialtype_ssh):
+    return Credential.objects.create(
+        credential_type=credentialtype_ssh, name='test-cred', inputs={'username': 'u', 'password': 'p'}
+    )
+
+
+@pytest.fixture
+def vault_credential(credentialtype_vault):
+    return Credential.objects.create(
+        credential_type=credentialtype_vault, name='test-vault-cred', inputs={'vault_password': 'secret'}
     )
