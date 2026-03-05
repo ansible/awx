@@ -140,7 +140,9 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
 @mock.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
-def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, mock_bulk_update_sorted_by_id, private_data_dir, execution_environment):
+def test_pre_post_run_hook_facts_deleted_sliced(
+    mock_create_partition, mock_facts_settings, mock_bulk_update_sorted_by_id, private_data_dir, execution_environment
+):
     # Fully mocked inventory
     mock_inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
 
