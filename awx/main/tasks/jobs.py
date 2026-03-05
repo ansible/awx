@@ -97,10 +97,7 @@ from ansible_base.lib.workload_identity.controller import AutomationControllerJo
 from ansible_base.lib.workload_identity.workload_identity_tokens import (
     WORKLOAD_TTL_MAX_SECONDS,
 )
-from ansible_base.resource_registry.workload_identity_client import (
-    TokenRequestError,
-    get_workload_identity_client,
-)
+from ansible_base.resource_registry.workload_identity_client import get_workload_identity_client
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -252,11 +249,16 @@ class BaseTask(object):
                 for field in src.source_credential.credential_type.inputs.get('fields', [])
             )
         )
+        effective_timeout = self.get_instance_timeout(self.instance)
+        workload_ttl = min(effective_timeout, WORKLOAD_TTL_MAX_SECONDS) if effective_timeout else None
         for credential_ctx, input_src in credential_input_sources:
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
                 try:
                     jwt = retrieve_workload_identity_jwt(
-                        self.instance, audience=input_src.source_credential.get_input('jwt_aud'), scope=AutomationControllerJobScope.name
+                        self.instance,
+                        audience=input_src.source_credential.get_input('jwt_aud'),
+                        scope=AutomationControllerJobScope.name,
+                        workload_ttl_seconds=workload_ttl,
                     )
                     # Store token keyed by input source PK, since a credential can have
                     # multiple input sources (one per field), each potentially with a different audience
@@ -597,46 +599,6 @@ class BaseTask(object):
 
         # Before task is started, ensure that job_event partitions exist
         create_partition(instance.event_class._meta.db_table, start=instance.created)
-
-        # Request workload identity JWT token if feature is enabled and job needs it
-        if flag_enabled("FEATURE_WORKLOAD_IDENTITY_JWT_ENABLED") and self._job_needs_workload_jwt(instance):
-            self._request_workload_identity_token(instance)
-
-    def _job_needs_workload_jwt(self, instance):
-        """
-        Determine if this job needs a workload identity JWT token.
-
-        Currently checks if the job has any vault credentials, as Vault is the
-        primary use case for workload identity JWTs.
-        """
-        if not hasattr(instance, 'credentials'):
-            return False
-        return instance.credentials.filter(credential_type__kind='vault').exists()
-
-    def _request_workload_identity_token(self, instance):
-        """
-        Request a workload identity JWT token from Gateway for this job.
-        Called during pre_run_hook when feature is enabled and job needs a JWT.
-        """
-        try:
-            client = get_workload_identity_client()
-            if client is None:
-                return
-            logger.info(f"Requesting workload identity token for job {instance.id} ({instance.name})")
-            effective_timeout = self.get_instance_timeout(instance)
-            workload_ttl = min(effective_timeout, WORKLOAD_TTL_MAX_SECONDS) if effective_timeout else None
-            audience = settings.WORKLOAD_IDENTITY_VAULT_AUDIENCE
-            jwt = retrieve_workload_identity_jwt(
-                instance,
-                audience=audience,
-                scope=AutomationControllerJobScope.name,
-                workload_ttl_seconds=workload_ttl,
-            )
-            logger.debug(f"Successfully obtained workload identity token for job {instance.id}. JWT length: {len(jwt)} characters")
-        except TokenRequestError as e:
-            logger.error(f"Failed to obtain workload identity token for job {instance.id}: {e}")
-        except Exception as e:
-            logger.exception(f"Unexpected error requesting workload identity token for job {instance.id}: {e}")
 
     def post_run_hook(self, instance, status):
         """
