@@ -1587,7 +1587,8 @@ def test_managed_injector_redaction(injector_cls):
     assert 'very_secret_value' not in str(build_safe_env(env))
 
 
-def test_job_run_no_ee(mock_me, mock_create_partition):
+@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False)
+def test_job_run_no_ee(mock_flag_enabled, mock_me, mock_create_partition, private_data_dir):
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))
