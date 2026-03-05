@@ -3,9 +3,9 @@ from functools import reduce
 
 from django.core.exceptions import FieldDoesNotExist
 from pyparsing import (
-    infixNotation,
-    opAssoc,
-    Optional,
+    infix_notation,
+    OpAssoc,
+    Opt,
     Literal,
     CharsNotIn,
     ParseException,
@@ -339,22 +339,22 @@ class SmartFilter(object):
         unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
         atom = CharsNotIn(unicode_spaces_other)
         atom_inside_quotes = CharsNotIn(u'"')
-        atom_quoted = Literal('"') + Optional(atom_inside_quotes) + Literal('"')
+        atom_quoted = Literal('"') + Opt(atom_inside_quotes) + Literal('"')
         EQUAL = Literal('=')
 
-        grammar = (atom_quoted | atom) + EQUAL + Optional((atom_quoted | atom))
-        grammar.setParseAction(cls.BoolOperand)
+        grammar = (atom_quoted | atom) + EQUAL + Opt((atom_quoted | atom))
+        grammar.set_parse_action(cls.BoolOperand)
 
-        boolExpr = infixNotation(
+        boolExpr = infix_notation(
             grammar,
             [
-                ("and", 2, opAssoc.LEFT, cls.BoolAnd),
-                ("or", 2, opAssoc.LEFT, cls.BoolOr),
+                ("and", 2, OpAssoc.LEFT, cls.BoolAnd),
+                ("or", 2, OpAssoc.LEFT, cls.BoolOr),
             ],
         )
 
         try:
-            res = boolExpr.parseString('(' + filter_string + ')')
+            res = boolExpr.parse_string('(' + filter_string + ')')
         except (ParseException, FieldDoesNotExist):
             raise RuntimeError(u"Invalid query %s" % filter_string_raw)
 
