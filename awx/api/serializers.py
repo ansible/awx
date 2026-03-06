@@ -1852,6 +1852,7 @@ class HostSerializer(BaseSerializerWithVariables):
                 # Use pre-annotated data from the queryset (no extra query)
                 summary = type('AnnotatedSummary', (), {
                     'id': obj._latest_summary_id,
+                    'pk': obj._latest_summary_id,
                     'failed': obj._latest_summary_failed,
                     'host_name': obj._latest_summary_host_name,
                     'job_id': obj._latest_summary_job_id,
@@ -1864,6 +1865,8 @@ class HostSerializer(BaseSerializerWithVariables):
                         'status': obj._latest_job_status,
                         'failed': obj._latest_job_failed,
                         'finished': obj._latest_job_finished,
+                        'job_template_id': getattr(obj, '_latest_job_template_id', None),
+                        'job_template_name': getattr(obj, '_latest_job_template_name', None),
                     }
                 obj._cached_last_summary = summary
             elif hasattr(obj, '_latest_summary_id'):
@@ -1886,7 +1889,12 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job_host_summary']['failed'] = last_summary.failed
             if hasattr(last_summary, 'job_data') and last_summary.job_data.get('id'):
                 # Use pre-annotated job data (no extra query)
-                d['last_job'] = OrderedDict(last_summary.job_data)
+                job_data = OrderedDict(last_summary.job_data)
+                # Remove job_template fields if null (job had no template)
+                if job_data.get('job_template_id') is None:
+                    job_data.pop('job_template_id', None)
+                    job_data.pop('job_template_name', None)
+                d['last_job'] = job_data
             elif hasattr(last_summary, 'job'):
                 # Fallback: fetch job from DB (detail view or non-annotated)
                 try:

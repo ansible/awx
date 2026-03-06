@@ -140,19 +140,18 @@ def _annotate_host_latest_summary(qs):
     This avoids N+1 queries in HostSerializer by pushing the data into
     the queryset as subquery annotations (resolved in a single SQL query).
     """
-    from awx.main.models import UnifiedJob
-
     latest_summary = models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id')
-    latest_job = UnifiedJob.objects.filter(pk=OuterRef('_latest_summary_job_id'))
     return qs.annotate(
         _latest_summary_id=Subquery(latest_summary.values('id')[:1]),
         _latest_summary_failed=Subquery(latest_summary.values('failed')[:1]),
         _latest_summary_host_name=Subquery(latest_summary.values('host_name')[:1]),
         _latest_summary_job_id=Subquery(latest_summary.values('job_id')[:1]),
-        _latest_job_name=Subquery(latest_job.values('name')[:1]),
-        _latest_job_status=Subquery(latest_job.values('status')[:1]),
-        _latest_job_failed=Subquery(latest_job.values('failed')[:1]),
-        _latest_job_finished=Subquery(latest_job.values('finished')[:1]),
+        _latest_job_name=Subquery(latest_summary.values('job__name')[:1]),
+        _latest_job_status=Subquery(latest_summary.values('job__status')[:1]),
+        _latest_job_failed=Subquery(latest_summary.values('job__failed')[:1]),
+        _latest_job_finished=Subquery(latest_summary.values('job__finished')[:1]),
+        _latest_job_template_id=Subquery(latest_summary.values('job__job_template_id')[:1]),
+        _latest_job_template_name=Subquery(latest_summary.values('job__job_template__name')[:1]),
     )
 
 
@@ -2018,6 +2017,9 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     filter_read_permission = False
     resource_purpose = 'hosts of an inventory'
 
+    def get_queryset(self):
+        return _annotate_host_latest_summary(super().get_queryset())
+
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
     '''the list of groups a host is directly a member of'''
@@ -2201,6 +2203,9 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     relationship = 'hosts'
     resource_purpose = 'hosts of a group'
 
+    def get_queryset(self):
+        return _annotate_host_latest_summary(super().get_queryset())
+
     def update_raw_data(self, data):
         data.pop('inventory', None)
         return super(GroupHostsList, self).update_raw_data(data)
@@ -2232,7 +2237,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
-        return qs & sublist_qs
+        return _annotate_host_latest_summary(qs & sublist_qs)
 
 
 class GroupInventorySourcesList(SubListAPIView):
@@ -2524,6 +2529,9 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     relationship = 'hosts'
     check_sub_obj_permission = False
     resource_purpose = 'hosts of an inventory source'
+
+    def get_queryset(self):
+        return _annotate_host_latest_summary(super().get_queryset())
 
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
