@@ -1605,7 +1605,6 @@ def fetch_workload_identity_token(cred: models.Credential):
     scope = AutomationControllerJobScope.name
     audience = cred.get_input('jwt_aud')
     return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
-    return ''
 
 class CredentialExternalTest(SubDetailAPIView):
     """
@@ -1637,14 +1636,19 @@ class CredentialExternalTest(SubDetailAPIView):
         # TODO: check the feature flag
         # Now, if we have an 'internal' field with id 'workload_identity_token', get a JWT and inject that
         # Here we have to check the credential TYPE and not the actual credential
+        response_dict = {}
         for field in obj.credential_type.inputs['fields']:
             if field.get('internal') and field.get('id') == 'workload_identity_token':
                 workload_identity_token = fetch_workload_identity_token(obj)
+                # for the payload, decode that token but don't send the signature
+                # really we just want to know what claims are being sent
+                import jwt
+                response_dict['sent_jwt_payload'] = jwt.decode(workload_identity_token, algorithms=["RS256"], options={"verify_signature": False})
                 backend_kwargs['workload_identity_token'] = workload_identity_token
         try:
             with set_environ(**settings.AWX_TASK_ENV):
                 obj.credential_type.plugin.backend(**backend_kwargs)
-                return Response({}, status=status.HTTP_202_ACCEPTED)
+                return Response(response_dict, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
             logger.info(f'Exception {exc}')
             message = """Test operation is not supported for credential type {}.
