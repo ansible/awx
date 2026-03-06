@@ -2933,26 +2933,27 @@ class CredentialTypeSerializer(BaseSerializer):
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
 
-        # if the type is internal, filter it out so that we don't expect the user to provide it
+        # Deep copy inputs to avoid modifying the original model data
         if value.get('inputs'):
-          found_wit_field = False
-          fields = value.get('inputs', {}).get('fields', [])
-          found_wit_field = 'workload_identity_token' in [f.get('id') for f in fields]
-          # Hmm. For some reason this is preventing the workload identity token from being int he model objec tinputs
-          # Obviously it's getting saved
-          fields = [f for f in fields if not f.get('internal')]
-          value['inputs']['fields'] = fields
+            value['inputs'] = copy.deepcopy(value['inputs'])
 
-          # and if needed, add a job_template to the metadata
-          if found_wit_field:
-              metadata  = value.get('inputs', {}).get('metadata', [])
-              metadata.append({
-                "id": "job_template_id",
-                "label": "ID of a Job Template",
-                "type": "string",
-                "help_text": "Job template ID to use when generating a token."
-              })
-              value['inputs']['metadata'] = metadata
+            found_wit_field = False
+            fields = value['inputs'].get('fields', [])
+            found_wit_field = 'workload_identity_token' in [f.get('id') for f in fields]
+
+            # Filter out internal fields from the API response
+            value['inputs']['fields'] = [f for f in fields if not f.get('internal')]
+
+            # If workload identity token field exists, add job_template to metadata
+            if found_wit_field:
+                metadata = value['inputs'].get('metadata', [])
+                metadata.append({
+                    "id": "job_template_id",
+                    "label": "ID of a Job Template",
+                    "type": "string",
+                    "help_text": "Job template ID to use when generating a token."
+                })
+                value['inputs']['metadata'] = metadata
         return value
 
     def filter_field_metadata(self, fields, method):
