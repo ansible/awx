@@ -21,7 +21,7 @@ from urllib3.exceptions import ConnectTimeoutError
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, Subquery, OuterRef
 from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.db.models.fields.related import ManyToManyField, ForeignKey
 from django.db.models.functions import Trunc
@@ -134,6 +134,28 @@ from awx.main.utils import set_environ
 logger = logging.getLogger('awx.api.views')
 
 
+def _annotate_host_latest_summary(qs):
+    """Annotate a Host queryset with latest JobHostSummary + Job fields.
+
+    This avoids N+1 queries in HostSerializer by pushing the data into
+    the queryset as subquery annotations (resolved in a single SQL query).
+    """
+    from awx.main.models import UnifiedJob
+
+    latest_summary = models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id')
+    latest_job = UnifiedJob.objects.filter(pk=OuterRef('_latest_summary_job_id'))
+    return qs.annotate(
+        _latest_summary_id=Subquery(latest_summary.values('id')[:1]),
+        _latest_summary_failed=Subquery(latest_summary.values('failed')[:1]),
+        _latest_summary_host_name=Subquery(latest_summary.values('host_name')[:1]),
+        _latest_summary_job_id=Subquery(latest_summary.values('job_id')[:1]),
+        _latest_job_name=Subquery(latest_job.values('name')[:1]),
+        _latest_job_status=Subquery(latest_job.values('status')[:1]),
+        _latest_job_failed=Subquery(latest_job.values('failed')[:1]),
+        _latest_job_finished=Subquery(latest_job.values('finished')[:1]),
+    )
+
+
 def unpartitioned_event_horizon(cls):
     with connection.cursor() as cursor:
         cursor.execute(f"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '_unpartitioned_{cls._meta.db_table}';")
@@ -210,7 +232,10 @@ class DashboardView(APIView):
         data['groups'] = {'url': reverse('api:group_list', request=request), 'total': user_groups.count(), 'inventory_failed': groups_inventory_failed}
 
         user_hosts = get_user_queryset(request.user, models.Host)
-        user_hosts_failed = user_hosts.filter(last_job_host_summary__failed=True)
+        latest_summary_failed = Subquery(
+            models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1]
+        )
+        user_hosts_failed = user_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
         data['hosts'] = {
             'url': reverse('api:host_list', request=request),
             'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
@@ -1941,6 +1966,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
+        qs = _annotate_host_latest_summary(qs)
         return qs.distinct()
 
     def list(self, *args, **kwargs):
@@ -1955,6 +1981,9 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'host detail'
+
+    def get_queryset(self):
+        return _annotate_host_latest_summary(super().get_queryset())
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete a host"})
     def delete(self, request, *args, **kwargs):

@@ -1837,19 +1837,74 @@ class HostSerializer(BaseSerializerWithVariables):
             res['ansible_facts'] = self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.instance_id})
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.last_job:
-            res['last_job'] = self.reverse('api:job_detail', kwargs={'pk': obj.last_job.pk})
-        if obj.last_job_host_summary:
-            res['last_job_host_summary'] = self.reverse('api:job_host_summary_detail', kwargs={'pk': obj.last_job_host_summary.pk})
+        last_summary = self._get_last_summary(obj)
+        if last_summary:
+            res['last_job_host_summary'] = self.reverse('api:job_host_summary_detail', kwargs={'pk': last_summary.pk})
+            if last_summary.job_id:
+                res['last_job'] = self.reverse('api:job_detail', kwargs={'pk': last_summary.job_id})
         return res
+
+    @staticmethod
+    def _get_last_summary(obj):
+        """Get the latest JobHostSummary, using queryset annotations when available."""
+        if not hasattr(obj, '_cached_last_summary'):
+            if hasattr(obj, '_latest_summary_id') and obj._latest_summary_id is not None:
+                # Use pre-annotated data from the queryset (no extra query)
+                summary = type('AnnotatedSummary', (), {
+                    'id': obj._latest_summary_id,
+                    'failed': obj._latest_summary_failed,
+                    'host_name': obj._latest_summary_host_name,
+                    'job_id': obj._latest_summary_job_id,
+                })()
+                # Attach job data if annotated
+                if hasattr(obj, '_latest_job_name'):
+                    summary.job_data = {
+                        'id': obj._latest_summary_job_id,
+                        'name': obj._latest_job_name,
+                        'status': obj._latest_job_status,
+                        'failed': obj._latest_job_failed,
+                        'finished': obj._latest_job_finished,
+                    }
+                obj._cached_last_summary = summary
+            elif hasattr(obj, '_latest_summary_id'):
+                # Annotated but null — no summary exists
+                obj._cached_last_summary = None
+            else:
+                # Fallback for non-annotated querysets (e.g. nested serializers)
+                obj._cached_last_summary = JobHostSummary.latest_for_host(obj.id)
+        return obj._cached_last_summary
 
     def get_summary_fields(self, obj):
         d = super(HostSerializer, self).get_summary_fields(obj)
-        try:
-            d['last_job']['job_template_id'] = obj.last_job.job_template.id
-            d['last_job']['job_template_name'] = obj.last_job.job_template.name
-        except (KeyError, AttributeError):
-            pass
+        # Override last_job/last_job_host_summary from parent (which uses stale FK)
+        # with fresh data derived from JobHostSummary
+        last_summary = self._get_last_summary(obj)
+        if last_summary:
+            d['last_job_host_summary'] = OrderedDict()
+            d['last_job_host_summary']['id'] = last_summary.id
+            d['last_job_host_summary']['name'] = last_summary.host_name
+            d['last_job_host_summary']['failed'] = last_summary.failed
+            if hasattr(last_summary, 'job_data') and last_summary.job_data.get('id'):
+                # Use pre-annotated job data (no extra query)
+                d['last_job'] = OrderedDict(last_summary.job_data)
+            elif hasattr(last_summary, 'job'):
+                # Fallback: fetch job from DB (detail view or non-annotated)
+                try:
+                    last_job = last_summary.job
+                    d['last_job'] = OrderedDict()
+                    d['last_job']['id'] = last_job.id
+                    d['last_job']['name'] = last_job.name
+                    d['last_job']['status'] = last_job.status
+                    d['last_job']['failed'] = last_job.failed
+                    d['last_job']['finished'] = last_job.finished
+                    if last_job.job_template:
+                        d['last_job']['job_template_id'] = last_job.job_template.id
+                        d['last_job']['job_template_name'] = last_job.job_template.name
+                except ObjectDoesNotExist:
+                    pass
+        else:
+            d.pop('last_job', None)
+            d.pop('last_job_host_summary', None)
         if has_model_field_prefetched(obj, 'groups'):
             group_list = sorted([{'id': g.id, 'name': g.name} for g in obj.groups.all()], key=lambda x: x['id'])[:5]
         else:
@@ -1924,14 +1979,16 @@ class HostSerializer(BaseSerializerWithVariables):
             return ret
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'last_job' in ret and not obj.last_job:
+        last_summary = self._get_last_summary(obj)
+        if 'last_job' in ret and not last_summary:
             ret['last_job'] = None
-        if 'last_job_host_summary' in ret and not obj.last_job_host_summary:
+        if 'last_job_host_summary' in ret and not last_summary:
             ret['last_job_host_summary'] = None
         return ret
 
     def get_has_active_failures(self, obj):
-        return bool(obj.last_job_host_summary and obj.last_job_host_summary.failed)
+        last_summary = self._get_last_summary(obj)
+        return bool(last_summary and last_summary.failed)
 
     def get_has_inventory_sources(self, obj):
         return obj.inventory_sources.exists()

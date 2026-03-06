@@ -18,7 +18,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.urls import resolve
 from django.utils.timezone import now
-from django.db.models import Q
+from django.db.models import Q, Subquery, OuterRef
 
 # REST Framework
 from rest_framework.exceptions import ParseError
@@ -386,7 +386,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         logger.debug("Going to update inventory computed fields, pk={0}".format(self.pk))
         start_time = time.time()
         active_hosts = self.hosts
-        failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
+        from awx.main.models.jobs import JobHostSummary  # circular import: inventory.py loads before jobs.py
+        latest_summary_failed = Subquery(
+            JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1]
+        )
+        failed_hosts = active_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
         active_groups = self.groups
         if self.kind == 'smart':
             active_groups = active_groups.none()
