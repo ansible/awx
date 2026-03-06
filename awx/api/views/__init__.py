@@ -1409,6 +1409,10 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential type detail'
 
+    def get(self, request, *args, **kwargs):
+        r = super().get(request, *args, **kwargs)
+        return r
+
     @extend_schema_if_available(extensions={"x-ai-description": "Update a custom credential type."})
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
@@ -1595,12 +1599,13 @@ class CredentialCopy(CopyAPIView):
     resource_purpose = 'copy of a credential'
 
 
-def fetch_workload_identity_token(cred: models.Credential):
+def fetch_workload_identity_token(cred: models.Credential, job_template_name: str):
     from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
     from ansible_base.resource_registry.workload_identity_client import get_workload_identity_client
     client = get_workload_identity_client()
     claims = {
-        AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: cred.organization.name
+        AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: cred.organization.name,
+        AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME: job_template_name
     }
     scope = AutomationControllerJobScope.name
     audience = cred.get_input('jwt_aud')
@@ -1639,7 +1644,9 @@ class CredentialExternalTest(SubDetailAPIView):
         response_dict = {}
         for field in obj.credential_type.inputs['fields']:
             if field.get('internal') and field.get('id') == 'workload_identity_token':
-                workload_identity_token = fetch_workload_identity_token(obj)
+                # TODO: Make sure requesting user has access to this Job Template
+                jt = models.JobTemplate.objects.get(id=int(backend_kwargs['job_template_id']))
+                workload_identity_token = fetch_workload_identity_token(obj, jt.name)
                 # for the payload, decode that token but don't send the signature
                 # really we just want to know what claims are being sent
                 import jwt
