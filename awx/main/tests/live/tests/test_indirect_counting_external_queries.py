@@ -111,8 +111,8 @@ def vendor_collections_dir():
 
     yield base
 
-    # Cleanup
-    shutil.rmtree(VENDOR_COLLECTIONS_BASE, ignore_errors=True)
+    # Cleanup: only remove the collection we created, not the entire vendor root
+    shutil.rmtree(base, ignore_errors=True)
 
 
 @pytest.fixture(autouse=True)
