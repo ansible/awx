@@ -387,9 +387,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         start_time = time.time()
         active_hosts = self.hosts
         from awx.main.models.jobs import JobHostSummary  # circular import: inventory.py loads before jobs.py
-        latest_summary_failed = Subquery(
-            JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1]
-        )
+
+        latest_summary_failed = Subquery(JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
         failed_hosts = active_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
         active_groups = self.groups
         if self.kind == 'smart':

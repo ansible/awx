@@ -1850,13 +1850,17 @@ class HostSerializer(BaseSerializerWithVariables):
         if not hasattr(obj, '_cached_last_summary'):
             if hasattr(obj, '_latest_summary_id') and obj._latest_summary_id is not None:
                 # Use pre-annotated data from the queryset (no extra query)
-                summary = type('AnnotatedSummary', (), {
-                    'id': obj._latest_summary_id,
-                    'pk': obj._latest_summary_id,
-                    'failed': obj._latest_summary_failed,
-                    'host_name': obj._latest_summary_host_name,
-                    'job_id': obj._latest_summary_job_id,
-                })()
+                summary = type(
+                    'AnnotatedSummary',
+                    (),
+                    {
+                        'id': obj._latest_summary_id,
+                        'pk': obj._latest_summary_id,
+                        'failed': obj._latest_summary_failed,
+                        'host_name': obj._latest_summary_host_name,
+                        'job_id': obj._latest_summary_job_id,
+                    },
+                )()
                 # Attach job data if annotated
                 if hasattr(obj, '_latest_job_name'):
                     summary.job_data = {
