@@ -237,7 +237,6 @@ class DashboardView(APIView):
         user_hosts_failed = user_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
         data['hosts'] = {
             'url': reverse('api:host_list', request=request),
-            'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
             'total': user_hosts.count(),
             'failed': user_hosts_failed.count(),
         }
