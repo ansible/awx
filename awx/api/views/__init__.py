@@ -1409,10 +1409,6 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential type detail'
 
-    def get(self, request, *args, **kwargs):
-        r = super().get(request, *args, **kwargs)
-        return r
-
     @extend_schema_if_available(extensions={"x-ai-description": "Update a custom credential type."})
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
