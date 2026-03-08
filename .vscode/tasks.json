@@ -67,12 +67,12 @@
             "command": "supervisorctl start tower-processes:awx-uwsgi"
         },
         {
-            "label": "stop aap-dev-uwsgi",
+            "label": "stop platform-uwsgi",
             "type": "shell",
             "command": "supervisorctl -c /etc/supervisord_web.conf stop tower-processes:uwsgi"
         },
         {
-            "label": "start aap-dev-uwsgi",
+            "label": "start platform-uwsgi",
             "type": "shell",
             "command": "supervisorctl -c /etc/supervisord_web.conf start tower-processes:uwsgi"
         },
