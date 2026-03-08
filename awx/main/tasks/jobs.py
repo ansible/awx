@@ -107,11 +107,6 @@ def populate_claims_for_workload(unified_job) -> dict:
     Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
     """
 
-    # Related objects in the UnifiedJob model, applies to all job types
-    organization = getattr_dne(unified_job, 'organization')
-    ujt = getattr_dne(unified_job, 'unified_job_template')
-    instance_group = getattr_dne(unified_job, 'instance_group')
-
     claims = {
         AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
         AutomationControllerJobScope.CLAIM_JOB_NAME: unified_job.name,
@@ -419,6 +414,19 @@ class BaseTask(object):
                     private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
                 self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
+
+        # Copy vendor collections to private_data_dir for indirect node counting
+        # This makes external query files available to the callback plugin in EEs
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            vendor_src = '/var/lib/awx/vendor_collections'
+            vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
+            if os.path.exists(vendor_src):
+                try:
+                    shutil.copytree(vendor_src, vendor_dest)
+                    logger.debug(f"Copied vendor collections from {vendor_src} to {vendor_dest}")
+                except Exception as e:
+                    logger.warning(f"Failed to copy vendor collections: {e}")
+
         return private_data_files, ssh_key_data
 
     def build_passwords(self, instance, runtime_passwords):
@@ -1143,6 +1151,11 @@ class RunJob(SourceControlMixin, BaseTask):
             if 'callbacks_enabled' in config_values:
                 env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
 
+            # Add vendor collections path for external query file discovery
+            vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
+            env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
+            logger.debug(f"ANSIBLE_COLLECTIONS_PATH updated for vendor collections: {env['ANSIBLE_COLLECTIONS_PATH']}")
+
         return env
 
     def build_args(self, job, private_data_dir, passwords):
@@ -1302,10 +1315,16 @@ class RunJob(SourceControlMixin, BaseTask):
             return
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
+            if job.inventory.kind == 'constructed':
+                hosts_qs = job.get_source_hosts_for_constructed_inventory()
+            else:
+                hosts_qs = job.inventory.hosts
             finish_fact_cache(
+                hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
+                job_created=job.created,
             )
 
     def final_run_hook(self, job, status, private_data_dir):

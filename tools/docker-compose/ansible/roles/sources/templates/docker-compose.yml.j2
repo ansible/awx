@@ -100,7 +100,7 @@ services:
       - "3000:3001"  # used by the UI dev env
 {% endif %}
   redis_{{ container_postfix }}:
-    image: mirror.gcr.io/library/redis:latest
+    image: mirror.gcr.io/library/redis:7.4.8
     container_name: tools_redis_{{ container_postfix }}
     volumes:
       - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
@@ -112,6 +112,8 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
+    # NOTE: upgrading past 2.3 requires updating haproxy.cfg (deprecated httpchk syntax)
+    # and may require adding 'no strict-limits' to the global section.
     image: mirror.gcr.io/library/haproxy:2.3
     user: "{{ ansible_user_uid }}"
     volumes:
@@ -130,7 +132,8 @@ services:
 {% endif %}
 {% if enable_splunk|bool %}
   splunk:
-    image: mirror.gcr.io/splunk/splunk:latest
+    # NOTE: upgrading to 10.x requires adding SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+    image: mirror.gcr.io/splunk/splunk:9.4.2
     container_name: tools_splunk_1
     hostname: splunk
     networks:
@@ -145,7 +148,7 @@ services:
 {% endif %}
 {% if enable_prometheus|bool %}
   prometheus:
-    image: mirror.gcr.io/prom/prometheus:latest
+    image: mirror.gcr.io/prom/prometheus:v3.10.0
     container_name: tools_prometheus_1
     hostname: prometheus
     networks:
@@ -158,7 +161,7 @@ services:
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
-    image: mirror.gcr.io/grafana/grafana-enterprise:latest
+    image: mirror.gcr.io/grafana/grafana-enterprise:12.3.4
     container_name: tools_grafana_1
     hostname: grafana
     networks:
@@ -199,7 +202,7 @@ services:
        - "${AWX_PG_PORT:-5441}:5432"
 {% if enable_pgbouncer|bool %}
   pgbouncer:
-    image: mirror.gcr.io/bitnami/pgbouncer:latest
+    image: mirror.gcr.io/bitnami/pgbouncer:1.24.0
     container_name: tools_pgbouncer_1
     hostname: pgbouncer
     networks:

@@ -94,7 +94,11 @@ jobs:
         run: |
           if [ -f "reports/coverage.xml" ]; then
             sed -i '2i<!-- PR ${{ github.event.pull_request.number }} -->' reports/coverage.xml
-            echo "Injected PR number ${{ github.event.pull_request.number }} into coverage.xml"
+            echo "Injected PR number ${{ github.event.pull_request.number }} into reports/coverage.xml"
+          fi
+          if [ -f "awxkit/coverage.xml" ]; then
+            sed -i '2i<!-- PR ${{ github.event.pull_request.number }} -->' awxkit/coverage.xml
+            echo "Injected PR number ${{ github.event.pull_request.number }} into awxkit/coverage.xml"
           fi
 
       - name: Upload test coverage to Codecov
@@ -141,7 +145,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.tests.name }}-artifacts
-          path: reports/coverage.xml
+          path: |
+            reports/coverage.xml
+            awxkit/coverage.xml
           retention-days: 5
 
       - name: >-
@@ -154,7 +160,7 @@ jobs:
           && github.event_name == 'push'
           && env.UPSTREAM_REPOSITORY_ID == github.repository_id
           && github.ref_name == github.event.repository.default_branch
-        uses: ansible/gh-action-record-test-results@fc552f81bf7e734cdebe6d04f9f608e2e2b4759e
+        uses: ansible/gh-action-record-test-results@3784db66a1b7fb3809999a7251c8a7203a7ffbe8
         with:
           aggregation-server-url: ${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}
           http-auth-password: >-
@@ -328,7 +334,7 @@ jobs:
           && github.event_name == 'push'
           && env.UPSTREAM_REPOSITORY_ID == github.repository_id
           && github.ref_name == github.event.repository.default_branch
-        uses: ansible/gh-action-record-test-results@fc552f81bf7e734cdebe6d04f9f608e2e2b4759e
+        uses: ansible/gh-action-record-test-results@3784db66a1b7fb3809999a7251c8a7203a7ffbe8
         with:
           aggregation-server-url: ${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}
           http-auth-password: >-

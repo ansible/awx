@@ -51,7 +51,14 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
                 os.chmod(f.name, 0o600)
                 json.dump(host.ansible_facts, f)
                 log_data['written_ct'] += 1
-                last_write_time = os.path.getmtime(filepath)
+            # Backdate the file by 2 seconds so finish_fact_cache can reliably
+            # distinguish these reference files from files updated by ansible.
+            # This guarantees fact file mtime < summary file mtime even with
+            # zipfile's 2-second timestamp rounding during artifact transfer.
+            mtime = os.path.getmtime(filepath)
+            backdated = mtime - 2
+            os.utime(filepath, (backdated, backdated))
+            last_write_time = backdated
         except IOError:
             logger.error(f'facts for host {smart_str(host.name)} could not be cached')
             continue
@@ -74,7 +81,7 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     msg='Inventory {inventory_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
     add_log_data=True,
 )
-def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=None):
+def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, job_created=None, log_data=None):
     log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['updated_ct'] = 0
@@ -95,7 +102,7 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         return
 
     host_names = summary.get('hosts_cached', [])
-    hosts_cached = Host.objects.filter(name__in=host_names).order_by('id').iterator()
+    hosts_cached = host_qs.filter(name__in=host_names).order_by('id').iterator()
     # Path where individual fact files were written
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
     hosts_to_update = []
@@ -138,14 +145,25 @@ def finish_fact_cache(artifacts_dir, job_id=None, inventory_id=None, log_data=No
         else:
             # if the file goes missing, ansible removed it (likely via clear_facts)
             # if the file goes missing, but the host has not started facts, then we should not clear the facts
-            host.ansible_facts = {}
-            host.ansible_facts_modified = now()
-            hosts_to_update.append(host)
-            logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
-            log_data['cleared_ct'] += 1
+            if job_created and host.ansible_facts_modified and host.ansible_facts_modified > job_created:
+                logger.warning(
+                    f'Skipping fact clear for host {smart_str(host.name)} in job {job_id} '
+                    f'inventory {inventory_id}: host ansible_facts_modified '
+                    f'({host.ansible_facts_modified.isoformat()}) is after this job\'s '
+                    f'created time ({job_created.isoformat()}). '
+                    f'A concurrent job likely updated this host\'s facts while this job was running.'
+                )
+                log_data['unmodified_ct'] += 1
+            else:
+                host.ansible_facts = {}
+                host.ansible_facts_modified = now()
+                hosts_to_update.append(host)
+                logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
+                log_data['cleared_ct'] += 1
 
         if len(hosts_to_update) >= 100:
             bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
             hosts_to_update = []
 
     bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
+    logger.debug(f'Updated {log_data["updated_ct"]} host facts for inventory {inventory_id} in job {job_id}')

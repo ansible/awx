@@ -84,7 +84,7 @@ def job_template_with_credentials():
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
 def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
     # Create mocked inventory and host queryset
-    inventory = mock.MagicMock(spec=Inventory, pk=1)
+    inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
     host1 = mock.MagicMock(spec=Host, id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
     host2 = mock.MagicMock(spec=Host, id=2, name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
 
@@ -107,6 +107,8 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
         job_slice_number=1,
         job_slice_count=1,
         inventory=inventory,
+        inventory_id=inventory.pk,
+        created=now(),
         execution_environment=execution_environment,
     )
     job.get_hosts_for_fact_cache = Job.get_hosts_for_fact_cache.__get__(job)
@@ -140,7 +142,7 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
 def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
     # Fully mocked inventory
-    mock_inventory = mock.MagicMock(spec=Inventory)
+    mock_inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
 
     # Create 999 mocked Host instances
     hosts = []
@@ -173,6 +175,8 @@ def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_fact
     job.job_slice_count = 3
     job.execution_environment = execution_environment
     job.inventory = mock_inventory
+    job.inventory_id = mock_inventory.pk
+    job.created = now()
     job.job_env.get.return_value = private_data_dir
 
     # Bind actual method for host filtering

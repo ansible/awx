@@ -625,6 +625,11 @@ class TestAdhocRun(TestJobExecution):
 
 
 class TestJobCredentials(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
     @pytest.fixture
     def job(self, execution_environment):
         job = Job(pk=1, inventory=Inventory(pk=1), project=Project(pk=1))
@@ -1158,6 +1163,11 @@ class TestProjectUpdateRefspec(TestJobExecution):
 
 
 class TestInventoryUpdateCredentials(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
     @pytest.fixture
     def inventory_update(self, execution_environment):
         return InventoryUpdate(pk=1, execution_environment=execution_environment, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
