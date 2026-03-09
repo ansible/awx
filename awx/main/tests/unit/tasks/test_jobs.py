@@ -522,8 +522,8 @@ def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_clien
 @mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_passes_workload_ttl(mock_get_client):
     """retrieve_workload_identity_jwt passes workload_ttl_seconds when provided."""
-    mock_client = mock.MagicMock()
-    mock_client.request_workload_jwt.return_value = mock.MagicMock(jwt='token')
+    mock_client = mock.Mock()
+    mock_client.request_workload_jwt.return_value = mock.Mock(jwt='token')
     mock_get_client.return_value = mock_client
 
     unified_job = mock.MagicMock()
@@ -552,3 +552,42 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
     with pytest.raises(RuntimeError, match="Workload identity client is not configured"):
         jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
+
+
+@pytest.mark.parametrize('effective_timeout,expected_ttl', [(3600, 3600), (0, None)])
+@mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
+@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True)
+def test_populate_workload_identity_tokens_passes_get_instance_timeout_to_client(mock_flag_enabled, mock_retrieve_jwt, effective_timeout, expected_ttl):
+    """populate_workload_identity_tokens passes get_instance_timeout() value as workload_ttl_seconds to retrieve_workload_identity_jwt."""
+    mock_retrieve_jwt.return_value = 'eyJ.test.jwt'
+
+    task = jobs.RunJob()
+    task.instance = mock.MagicMock()
+
+    # Minimal credential with workload identity input source
+    credential_ctx = {}
+    input_src = mock.MagicMock()
+    input_src.pk = 1
+    input_src.source_credential = mock.MagicMock()
+    input_src.source_credential.get_input.return_value = 'https://vault.example.com'
+    input_src.source_credential.name = 'vault-cred'
+    input_src.source_credential.credential_type = mock.MagicMock()
+    input_src.source_credential.credential_type.inputs = {'fields': [{'id': 'workload_identity_token', 'internal': True}]}
+
+    credential = mock.MagicMock()
+    credential.context = credential_ctx
+    credential.input_sources = mock.MagicMock()
+    credential.input_sources.all.return_value = [input_src]
+
+    task._credentials = [credential]
+
+    with mock.patch.object(task, 'get_instance_timeout', return_value=effective_timeout):
+        task.populate_workload_identity_tokens()
+
+    mock_flag_enabled.assert_called_once_with("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED")
+    mock_retrieve_jwt.assert_called_once_with(
+        task.instance,
+        audience='https://vault.example.com',
+        scope=AutomationControllerJobScope.name,
+        workload_ttl_seconds=expected_ttl,
+    )
