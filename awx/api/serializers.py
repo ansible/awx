@@ -1846,36 +1846,17 @@ class HostSerializer(BaseSerializerWithVariables):
 
     @staticmethod
     def _get_last_summary(obj):
-        """Get the latest JobHostSummary, using queryset annotations when available."""
+        """Get the latest JobHostSummary, using prefetched or annotated data when available."""
         if not hasattr(obj, '_cached_last_summary'):
-            if hasattr(obj, '_latest_summary_id') and obj._latest_summary_id is not None:
-                # Use pre-annotated data from the queryset (no extra query)
-                summary = type(
-                    'AnnotatedSummary',
-                    (),
-                    {
-                        'id': obj._latest_summary_id,
-                        'pk': obj._latest_summary_id,
-                        'failed': obj._latest_summary_failed,
-                        'host_name': obj._latest_summary_host_name,
-                        'job_id': obj._latest_summary_job_id,
-                    },
-                )()
-                # Attach job data if annotated
-                if hasattr(obj, '_latest_job_name'):
-                    summary.job_data = {
-                        'id': obj._latest_summary_job_id,
-                        'name': obj._latest_job_name,
-                        'status': obj._latest_job_status,
-                        'failed': obj._latest_job_failed,
-                        'finished': obj._latest_job_finished,
-                        'job_template_id': getattr(obj, '_latest_job_template_id', None),
-                        'job_template_name': getattr(obj, '_latest_job_template_name', None),
-                    }
-                obj._cached_last_summary = summary
+            if hasattr(obj, '_prefetched_latest_summary'):
+                # Bulk-prefetched full JobHostSummary object (list views)
+                obj._cached_last_summary = obj._prefetched_latest_summary
             elif hasattr(obj, '_latest_summary_id'):
-                # Annotated but null — no summary exists
-                obj._cached_last_summary = None
+                if obj._latest_summary_id is not None:
+                    # Annotated but not prefetched (detail view) — single fetch
+                    obj._cached_last_summary = JobHostSummary.objects.filter(id=obj._latest_summary_id).select_related('job', 'job__job_template').first()
+                else:
+                    obj._cached_last_summary = None
             else:
                 # Fallback for non-annotated querysets (e.g. nested serializers)
                 obj._cached_last_summary = JobHostSummary.latest_for_host(obj.id)
@@ -1891,29 +1872,19 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job_host_summary']['id'] = last_summary.id
             d['last_job_host_summary']['name'] = last_summary.host_name
             d['last_job_host_summary']['failed'] = last_summary.failed
-            if hasattr(last_summary, 'job_data') and last_summary.job_data.get('id'):
-                # Use pre-annotated job data (no extra query)
-                job_data = OrderedDict(last_summary.job_data)
-                # Remove job_template fields if null (job had no template)
-                if job_data.get('job_template_id') is None:
-                    job_data.pop('job_template_id', None)
-                    job_data.pop('job_template_name', None)
-                d['last_job'] = job_data
-            elif hasattr(last_summary, 'job'):
-                # Fallback: fetch job from DB (detail view or non-annotated)
-                try:
-                    last_job = last_summary.job
-                    d['last_job'] = OrderedDict()
-                    d['last_job']['id'] = last_job.id
-                    d['last_job']['name'] = last_job.name
-                    d['last_job']['status'] = last_job.status
-                    d['last_job']['failed'] = last_job.failed
-                    d['last_job']['finished'] = last_job.finished
-                    if last_job.job_template:
-                        d['last_job']['job_template_id'] = last_job.job_template.id
-                        d['last_job']['job_template_name'] = last_job.job_template.name
-                except ObjectDoesNotExist:
-                    pass
+            try:
+                last_job = last_summary.job
+                d['last_job'] = OrderedDict()
+                d['last_job']['id'] = last_job.id
+                d['last_job']['name'] = last_job.name
+                d['last_job']['status'] = last_job.status
+                d['last_job']['failed'] = last_job.failed
+                d['last_job']['finished'] = last_job.finished
+                if last_job.job_template:
+                    d['last_job']['job_template_id'] = last_job.job_template.id
+                    d['last_job']['job_template_name'] = last_job.job_template.name
+            except ObjectDoesNotExist:
+                pass
         else:
             d.pop('last_job', None)
             d.pop('last_job_host_summary', None)
@@ -1992,10 +1963,10 @@ class HostSerializer(BaseSerializerWithVariables):
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
         last_summary = self._get_last_summary(obj)
-        if 'last_job' in ret and not last_summary:
-            ret['last_job'] = None
-        if 'last_job_host_summary' in ret and not last_summary:
-            ret['last_job_host_summary'] = None
+        if 'last_job' in ret:
+            ret['last_job'] = last_summary.job_id if last_summary else None
+        if 'last_job_host_summary' in ret:
+            ret['last_job_host_summary'] = last_summary.pk if last_summary else None
         return ret
 
     def get_has_active_failures(self, obj):

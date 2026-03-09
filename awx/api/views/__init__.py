@@ -135,24 +135,50 @@ logger = logging.getLogger('awx.api.views')
 
 
 def _annotate_host_latest_summary(qs):
-    """Annotate a Host queryset with latest JobHostSummary + Job fields.
+    """Annotate a Host queryset with the latest JobHostSummary ID.
 
-    This avoids N+1 queries in HostSerializer by pushing the data into
-    the queryset as subquery annotations (resolved in a single SQL query).
+    Only annotates the ID — the full objects are bulk-fetched after
+    pagination by _prefetch_latest_summaries().
     """
     latest_summary = models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id')
     return qs.annotate(
         _latest_summary_id=Subquery(latest_summary.values('id')[:1]),
-        _latest_summary_failed=Subquery(latest_summary.values('failed')[:1]),
-        _latest_summary_host_name=Subquery(latest_summary.values('host_name')[:1]),
-        _latest_summary_job_id=Subquery(latest_summary.values('job_id')[:1]),
-        _latest_job_name=Subquery(latest_summary.values('job__name')[:1]),
-        _latest_job_status=Subquery(latest_summary.values('job__status')[:1]),
-        _latest_job_failed=Subquery(latest_summary.values('job__failed')[:1]),
-        _latest_job_finished=Subquery(latest_summary.values('job__finished')[:1]),
-        _latest_job_template_id=Subquery(latest_summary.values('job__job_template_id')[:1]),
-        _latest_job_template_name=Subquery(latest_summary.values('job__job_template__name')[:1]),
     )
+
+
+def _prefetch_latest_summaries(hosts):
+    """Bulk-fetch latest JobHostSummary objects and attach to Host instances.
+
+    Call this after pagination to avoid N+1 queries. Each host gets a
+    _prefetched_latest_summary attribute (a full JobHostSummary with
+    select_related job and job_template, or None).
+    """
+    summary_ids = [h._latest_summary_id for h in hosts if getattr(h, '_latest_summary_id', None) is not None]
+    if not summary_ids:
+        for host in hosts:
+            host._prefetched_latest_summary = None
+        return
+    summaries = models.JobHostSummary.objects.filter(id__in=summary_ids).select_related('job', 'job__job_template')
+    summary_map = {s.id: s for s in summaries}
+    for host in hosts:
+        sid = getattr(host, '_latest_summary_id', None)
+        host._prefetched_latest_summary = summary_map.get(sid) if sid else None
+
+
+class HostSummaryPrefetchMixin:
+    """Mixin that bulk-prefetches latest JobHostSummary after pagination."""
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            _prefetch_latest_summaries(page)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        results = list(queryset)
+        _prefetch_latest_summaries(results)
+        serializer = self.get_serializer(results, many=True)
+        return Response(serializer.data)
 
 
 def unpartitioned_event_horizon(cls):
@@ -1946,7 +1972,7 @@ class HostMetricSummaryMonthlyList(ListAPIView):
         return self.model.objects.all()
 
 
-class HostList(HostRelatedSearchMixin, ListCreateAPIView):
+class HostList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
     model = models.Host
     serializer_class = serializers.HostSerializer
@@ -2005,7 +2031,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
         return super().get(request, *args, **kwargs)
 
 
-class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
+class InventoryHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     parent_model = models.Inventory
@@ -2191,7 +2217,7 @@ class GroupPotentialChildrenList(SubListAPIView):
         return qs.exclude(pk__in=except_pks)
 
 
-class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
+class GroupHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     '''the list of hosts directly below a group'''
 
     model = models.Host
@@ -2220,7 +2246,7 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
         return super(GroupHostsList, self).create(request, *args, **kwargs)
 
 
-class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
+class GroupAllHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListAPIView):
     '''the list of all hosts below a group, even including subgroups'''
 
     model = models.Host
@@ -2519,7 +2545,7 @@ class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificatio
     resource_purpose = 'notification templates triggered on inventory source update success'
 
 
-class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
+class InventorySourceHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListDestroyAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     parent_model = models.InventorySource
