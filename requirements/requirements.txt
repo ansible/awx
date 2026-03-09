@@ -337,8 +337,6 @@ packaging==25.0
     #   opentelemetry-instrumentation
     #   setuptools-scm
     #   wheel
-pbr==7.0.1
-    # via -r /awx_devel/requirements/requirements.in
 pexpect==4.9.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -556,6 +554,5 @@ setuptools==80.9.0
     #   -r /awx_devel/requirements/requirements.in
     #   autobahn
     #   incremental
-    #   pbr
     #   setuptools-rust
     #   setuptools-scm
