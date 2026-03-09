@@ -170,10 +170,6 @@ def retrieve_workload_identity_jwt(
     """
     client = get_workload_identity_client()
     if client is None:
-        logger.warning(
-            "Workload identity client is not configured; cannot obtain JWT for job %s.",
-            getattr(unified_job, 'id', '?'),
-        )
         raise RuntimeError("Workload identity client is not configured")
     claims = populate_claims_for_workload(unified_job)
     kwargs = {"claims": claims, "scope": scope, "audience": audience}
