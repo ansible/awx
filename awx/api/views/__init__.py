@@ -1941,7 +1941,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs.distinct()
+        return qs.distinct().with_latest_summary_id()
 
     def list(self, *args, **kwargs):
         try:
@@ -1955,6 +1955,9 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'host detail'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete a host"})
     def delete(self, request, *args, **kwargs):
@@ -1988,6 +1991,9 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     parent_key = 'inventory'
     filter_read_permission = False
     resource_purpose = 'hosts of an inventory'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2171,6 +2177,9 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     parent_model = models.Group
     relationship = 'hosts'
     resource_purpose = 'hosts of a group'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2495,6 +2504,9 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     relationship = 'hosts'
     check_sub_obj_permission = False
     resource_purpose = 'hosts of an inventory source'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()

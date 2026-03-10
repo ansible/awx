@@ -1855,7 +1855,7 @@ class HostSerializer(BaseSerializerWithVariables):
             try:
                 last_job = last_summary.job
                 d['last_job'] = OrderedDict()
-                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed'):
+                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error', 'canceled_on'):
                     if hasattr(last_job, field):
                         d['last_job'][field] = getattr(last_job, field)
                 if last_job.job_template:

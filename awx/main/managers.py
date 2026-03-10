@@ -98,7 +98,7 @@ class HostManager(models.Manager.from_queryset(HostLatestSummaryQuerySet)):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
-        qs = super().get_queryset().with_latest_summary_id()
+        qs = super().get_queryset()
 
         if hasattr(self, 'instance') and hasattr(self.instance, 'host_filter') and hasattr(self.instance, 'kind'):
             if self.instance.kind == 'smart' and self.instance.host_filter is not None:
