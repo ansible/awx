@@ -510,6 +510,7 @@ class BaseTask(object):
         return []
 
     def get_instance_timeout(self, instance):
+        """Return the effective job timeout in seconds."""
         global_timeout_setting_name = instance._global_timeout_setting()
         if global_timeout_setting_name:
             global_timeout = getattr(settings, global_timeout_setting_name, 0)
