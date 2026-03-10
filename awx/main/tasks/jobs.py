@@ -684,7 +684,7 @@ class BaseTask(object):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-                logger.info(f'Generating workload identity tokens for job {self.instance.id}')
+                logger.info(f'Generating workload identity tokens for {self.instance.log_format}')
                 self.populate_workload_identity_tokens()
                 if self.instance.status == 'error':
                     raise RuntimeError('not starting %s task' % self.instance.status)
