@@ -585,6 +585,23 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
 
     objects = HostManager()
 
+    @property
+    def latest_summary(self):
+        if hasattr(self, '_latest_summary_cache'):
+            return self._latest_summary_cache
+        from awx.main.models.jobs import JobHostSummary
+
+        summary = JobHostSummary.objects.filter(host_id=self.pk).order_by('-id').select_related('job', 'job__job_template').first()
+        self._latest_summary_cache = summary
+        return summary
+
+    @property
+    def latest_job(self):
+        summary = self.latest_summary
+        if summary is None:
+            return None
+        return summary.job
+
     def get_absolute_url(self, request=None):
         return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
 

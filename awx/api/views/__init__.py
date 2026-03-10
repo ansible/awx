@@ -134,53 +134,6 @@ from awx.main.utils import set_environ
 logger = logging.getLogger('awx.api.views')
 
 
-def _annotate_host_latest_summary(qs):
-    """Annotate a Host queryset with the latest JobHostSummary ID.
-
-    Only annotates the ID — the full objects are bulk-fetched after
-    pagination by _prefetch_latest_summaries().
-    """
-    latest_summary = models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id')
-    return qs.annotate(
-        _latest_summary_id=Subquery(latest_summary.values('id')[:1]),
-    )
-
-
-def _prefetch_latest_summaries(hosts):
-    """Bulk-fetch latest JobHostSummary objects and attach to Host instances.
-
-    Call this after pagination to avoid N+1 queries. Each host gets a
-    _prefetched_latest_summary attribute (a full JobHostSummary with
-    select_related job and job_template, or None).
-    """
-    summary_ids = [h._latest_summary_id for h in hosts if getattr(h, '_latest_summary_id', None) is not None]
-    if not summary_ids:
-        for host in hosts:
-            host._prefetched_latest_summary = None
-        return
-    summaries = models.JobHostSummary.objects.filter(id__in=summary_ids).select_related('job', 'job__job_template')
-    summary_map = {s.id: s for s in summaries}
-    for host in hosts:
-        sid = getattr(host, '_latest_summary_id', None)
-        host._prefetched_latest_summary = summary_map.get(sid) if sid else None
-
-
-class HostSummaryPrefetchMixin:
-    """Mixin that bulk-prefetches latest JobHostSummary after pagination."""
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            _prefetch_latest_summaries(page)
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        results = list(queryset)
-        _prefetch_latest_summaries(results)
-        serializer = self.get_serializer(results, many=True)
-        return Response(serializer.data)
-
-
 def unpartitioned_event_horizon(cls):
     with connection.cursor() as cursor:
         cursor.execute(f"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '_unpartitioned_{cls._meta.db_table}';")
@@ -1972,7 +1925,7 @@ class HostMetricSummaryMonthlyList(ListAPIView):
         return self.model.objects.all()
 
 
-class HostList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, ListCreateAPIView):
+class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
     model = models.Host
     serializer_class = serializers.HostSerializer
@@ -1988,7 +1941,6 @@ class HostList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, ListCreateAPIVi
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        qs = _annotate_host_latest_summary(qs)
         return qs.distinct()
 
     def list(self, *args, **kwargs):
@@ -2003,9 +1955,6 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'host detail'
-
-    def get_queryset(self):
-        return _annotate_host_latest_summary(super().get_queryset())
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete a host"})
     def delete(self, request, *args, **kwargs):
@@ -2031,7 +1980,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
         return super().get(request, *args, **kwargs)
 
 
-class InventoryHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
+class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     parent_model = models.Inventory
@@ -2039,9 +1988,6 @@ class InventoryHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubLi
     parent_key = 'inventory'
     filter_read_permission = False
     resource_purpose = 'hosts of an inventory'
-
-    def get_queryset(self):
-        return _annotate_host_latest_summary(super().get_queryset())
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2217,7 +2163,7 @@ class GroupPotentialChildrenList(SubListAPIView):
         return qs.exclude(pk__in=except_pks)
 
 
-class GroupHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
+class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     '''the list of hosts directly below a group'''
 
     model = models.Host
@@ -2225,9 +2171,6 @@ class GroupHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListCr
     parent_model = models.Group
     relationship = 'hosts'
     resource_purpose = 'hosts of a group'
-
-    def get_queryset(self):
-        return _annotate_host_latest_summary(super().get_queryset())
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2246,7 +2189,7 @@ class GroupHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListCr
         return super(GroupHostsList, self).create(request, *args, **kwargs)
 
 
-class GroupAllHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListAPIView):
+class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
     '''the list of all hosts below a group, even including subgroups'''
 
     model = models.Host
@@ -2260,7 +2203,7 @@ class GroupAllHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubLis
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
-        return _annotate_host_latest_summary(qs & sublist_qs)
+        return (qs & sublist_qs).with_latest_summary_id()
 
 
 class GroupInventorySourcesList(SubListAPIView):
@@ -2545,16 +2488,13 @@ class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificatio
     resource_purpose = 'notification templates triggered on inventory source update success'
 
 
-class InventorySourceHostsList(HostSummaryPrefetchMixin, HostRelatedSearchMixin, SubListDestroyAPIView):
+class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     parent_model = models.InventorySource
     relationship = 'hosts'
     check_sub_obj_permission = False
     resource_purpose = 'hosts of an inventory source'
-
-    def get_queryset(self):
-        return _annotate_host_latest_summary(super().get_queryset())
 
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()
