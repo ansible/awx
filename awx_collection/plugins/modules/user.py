@@ -78,7 +78,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add user
-  user:
+  awx.awx.user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -88,7 +88,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add user as a system administrator
-  user:
+  awx.awx.user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -97,7 +97,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add user as a system auditor
-  user:
+  awx.awx.user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -106,7 +106,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add user as a member of an organization (permissions on the organization are required)
-  user:
+  awx.awx.user:
     username: jdoe
     password: foobarbaz
     email: jdoe@example.org
@@ -114,7 +114,7 @@ EXAMPLES = '''
     state: present
 
 - name: Delete user
-  user:
+  awx.awx.user:
     username: jdoe
     email: jdoe@example.org
     state: absent

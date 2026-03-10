@@ -59,7 +59,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Give Bob JT permissions
-  role_user_assignment:
+  awx.awx.role_user_assignment:
     role_definition: launch JT
     object_id: 1
     user: bob

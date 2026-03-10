@@ -1,17 +1,5 @@
 # AWX Ansible Collection
 
-[comment]: # (*******************************************************)
-[comment]: # (*                                                     *)
-[comment]: # (*             WARNING                                 *)
-[comment]: # (*                                                     *)
-[comment]: # (*  This file is templated and not to be               *)
-[comment]: # (*  edited directly! Instead modify:                   *)
-[comment]: # (*  tools/roles/template_galaxy/templates/README.md.j2 *)
-[comment]: # (*                                                     *)
-[comment]: # (*  Changes to the base README.md file are refreshed   *)
-[comment]: # (*  upon build of the collection                       *)
-[comment]: # (*******************************************************)
-
 This Ansible collection allows for easy interaction with an AWX server via Ansible playbooks.
 
 This source for this collection lives in the `awx_collection` folder inside of the
@@ -32,7 +20,7 @@ Installing the `tar.gz` involves no special instructions.
 ## Running
 
 Non-deprecated modules in this collection have no Python requirements, but
-may require the AWX CLI
+may require the official [AWX CLI](https://pypi.org/project/awxkit/)
 in the future. The `DOCUMENTATION` for each module will report this.
 
 You can specify authentication by host, username, and password.
@@ -42,6 +30,7 @@ These can be specified via (from highest to lowest precedence):
  - direct module parameters
  - environment variables (most useful when running against localhost)
  - a config file path specified by the `tower_config_file` parameter
+ - a config file at `./tower_cli.cfg`, i.e. in the current directory
  - a config file at `~/.tower_cli.cfg`
  - a config file at `/etc/tower/tower_cli.cfg`
 
@@ -55,9 +44,17 @@ username = foo
 password = bar
 ```
 
+or like this:
+
+```
+host: https://localhost:8043
+verify_ssl: true
+oauth_token: <token>
+```
+
 ## Release and Upgrade Notes
 
-Notable releases of the `awx.awx` collection:
+Notable releases of the Galaxy vendored collection:
 
  - 7.0.0 is intended to be identical to the content prior to the migration, aside from changes necessary to function as a collection.
  - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/).

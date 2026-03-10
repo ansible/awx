@@ -53,7 +53,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create Role Definition
-  role_definition:
+  awx.awx.role_definition:
     name: test_view_jt
     permissions:
       - awx.view_jobtemplate

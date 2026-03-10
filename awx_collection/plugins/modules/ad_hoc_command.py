@@ -96,7 +96,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch an Ad Hoc Command waiting for it to finish
-  ad_hoc_command:
+  awx.awx.ad_hoc_command:
     inventory: Demo Inventory
     credential: Demo Credential
     module_name: command

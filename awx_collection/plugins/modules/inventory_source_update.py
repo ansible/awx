@@ -58,13 +58,13 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Update a single inventory source
-  inventory_source_update:
+  awx.awx.inventory_source_update:
     name: "Example Inventory Source"
     inventory: "My Inventory"
     organization: Default
 
 - name: Update all inventory sources
-  inventory_source_update:
+  awx.awx.inventory_source_update:
     name: "{{ item }}"
     inventory: "My Other Inventory"
   loop: "{{ query('awx.awx.controller_api', 'inventory_sources', query_params={ 'inventory': 30 }, return_ids=True ) }}"

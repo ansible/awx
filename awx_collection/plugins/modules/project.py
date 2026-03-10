@@ -172,7 +172,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add project
-  project:
+  awx.awx.project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
@@ -180,7 +180,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add Project with cache timeout
-  project:
+  awx.awx.project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
@@ -190,7 +190,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Copy project
-  project:
+  awx.awx.project:
     name: copy
     copy_from: test
     description: Foo copy project

@@ -36,7 +36,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Cancel job
-  job_cancel:
+  awx.awx.job_cancel:
     job_id: job.id
 '''
 

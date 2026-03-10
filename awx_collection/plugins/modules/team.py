@@ -51,7 +51,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create team
-  team:
+  awx.awx.team:
     name: Team Name
     description: Team Description
     organization: test-org

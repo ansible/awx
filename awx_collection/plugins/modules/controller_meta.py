@@ -49,7 +49,7 @@ version:
 
 
 EXAMPLES = '''
-- controller_meta:
+- awx.awx.controller_meta:
   register: result
 
 - name: Show details about the collection
@@ -66,9 +66,9 @@ from ..module_utils.controller_api import ControllerAPIModule
 
 def main():
     module = ControllerAPIModule(argument_spec={})
-    namespace = {'awx': 'awx', 'controller': 'ansible'}.get(module._COLLECTION_TYPE, 'unknown')
-    namespace_name = '{0}.{1}'.format(namespace, module._COLLECTION_TYPE)
-    module.exit_json(prefix=namespace_name, name=module._COLLECTION_TYPE, namespace=namespace, version=module._COLLECTION_VERSION)
+    fqcn = module._COLLECTION_FQCN
+    namespace, name = fqcn.split('.')
+    module.exit_json(prefix=fqcn, name=name, namespace=namespace, version=module._COLLECTION_VERSION)
 
 
 if __name__ == '__main__':

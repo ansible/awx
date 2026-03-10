@@ -49,20 +49,20 @@ RETURN = ''' # '''
 
 EXAMPLES = '''
 - name: Set the license using a file
-  license:
+  awx.awx.license:
     manifest: "/tmp/my_manifest.zip"
 
 - name: Use the subscriptions module to fetch subscriptions from Red Hat or Red Hat Satellite
-  subscriptions:
+  awx.awx.subscriptions:
     username: "my_satellite_username"
     password: "my_satellite_password"
 
 - name: Attach to a subscription (requires fetching subscriptions at least once before)
-  license:
+  awx.awx.license:
     subscription_id: 123456
 
 - name: Remove license
-  license:
+  awx.awx.license:
     state: absent
 '''
 

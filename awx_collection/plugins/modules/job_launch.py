@@ -134,12 +134,12 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch a job
-  job_launch:
+  awx.awx.job_launch:
     job_template: "My Job Template"
   register: job
 
 - name: Launch a job template with extra_vars on remote controller instance
-  job_launch:
+  awx.awx.job_launch:
     job_template: "My Job Template"
     extra_vars:
       var1: "My First Variable"
@@ -148,7 +148,7 @@ EXAMPLES = '''
     job_type: run
 
 - name: Launch a job with inventory and credential
-  job_launch:
+  awx.awx.job_launch:
     job_template: "My Job Template"
     inventory: "My Inventory"
     credentials:
@@ -156,7 +156,7 @@ EXAMPLES = '''
       - "suplementary cred"
   register: job
 - name: Wait for job max 120s
-  job_wait:
+  awx.awx.job_wait:
     job_id: "{{ job.id }}"
     timeout: 120
 '''

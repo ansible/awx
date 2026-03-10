@@ -59,7 +59,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Give Team A JT permissions
-  role_team_assignment:
+  awx.awx.role_team_assignment:
     role_definition: launch JT
     object_id: 1
     team: Team A

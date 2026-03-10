@@ -154,7 +154,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Build a schedule for Demo Job Template
-  schedule:
+  awx.awx.schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -162,7 +162,7 @@ EXAMPLES = '''
   register: result
 
 - name: Build the same schedule using the rrule plugin
-  schedule:
+  awx.awx.schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -170,7 +170,7 @@ EXAMPLES = '''
   register: result
 
 - name: Build a complex schedule for every day except sunday using the rruleset plugin
-  schedule:
+  awx.awx.schedule:
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
@@ -185,7 +185,7 @@ EXAMPLES = '''
         include: false
 
 - name: Delete 'my_schedule' schedule for my_workflow
-  schedule:
+  awx.awx.schedule:
     name: "my_schedule"
     state: absent
     unified_job_template: my_workflow

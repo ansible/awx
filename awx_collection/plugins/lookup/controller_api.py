@@ -79,7 +79,7 @@ EXAMPLES = """
 
 - name: Report the usernames of all users with admin privs
   debug:
-    msg: "Admin users: {{ query('awx.awx.controller_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
+    msg: "Admins: {{ query('awx.awx.controller_api', 'users', query_params={ 'is_superuser': true }) | map(attribute='username') | join(', ') }}"
 
 - name: debug all organizations in a loop  # use query to return a list
   debug:
@@ -89,14 +89,14 @@ EXAMPLES = """
     label: "{{ item['name'] }}"
 
 - name: Make sure user 'john' is an org admin of the default org if the user exists
-  role:
+  awx.awx.role:
     organization: Default
     role: admin
     user: john
   when: "lookup('awx.awx.controller_api', 'users', query_params={ 'username': 'john' }) | length == 1"
 
 - name: Create an inventory group with all 'foo' hosts
-  group:
+  awx.awx.group:
     name: "Foo Group"
     inventory: "Demo Inventory"
     hosts: >-

@@ -45,7 +45,7 @@ import pytest
 def test_controller_api_build_url(collection_import, collection_type, env_prefix, controller_host, app_key, endpoint, expected):
     controller_api_class = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
     controller_api = controller_api_class(argument_spec={}, direct_params=dict(controller_host=controller_host))
-    controller_api._COLLECTION_TYPE = collection_type
+    controller_api._COLLECTION_FQCN = {"awx": "awx.awx", "controller": "ansible.controller"}[collection_type]
     if env_prefix:
         with mock.patch.dict(os.environ, {"CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX": env_prefix}):
             request_url = controller_api.build_url(endpoint, app_key=app_key).geturl()

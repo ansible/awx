@@ -42,13 +42,13 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Set the value of AWX_ISOLATION_BASE_PATH
-  settings:
+  awx.awx.settings:
     name: AWX_ISOLATION_BASE_PATH
     value: "/tmp"
   register: testing_settings
 
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS
-  settings:
+  awx.awx.settings:
     name: "AWX_ISOLATION_SHOW_PATHS"
     value: "'/var/lib/awx/projects/', '/tmp'"
   register: testing_settings

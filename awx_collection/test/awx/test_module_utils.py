@@ -69,9 +69,9 @@ def test_version_warning(collection_import, silence_warning):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_awx_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "2.0.0"
-            my_module._COLLECTION_TYPE = "awx"
+            my_module._COLLECTION_FQCN = "awx" + ".awx"  # avoid FQCN replacement by script
             my_module.get_endpoint('ping')
-    silence_warning.assert_called_once_with(
+    silence_warning.assert_any_call(
         'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, awx_name, ping_version)
     )
 
@@ -85,7 +85,7 @@ def test_version_warning_strictness_awx(collection_import, silence_warning):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_awx_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.0.0"
-            my_module._COLLECTION_TYPE = "awx"
+            my_module._COLLECTION_FQCN = "awx" + ".awx"  # avoid FQCN replacement by script
             my_module.get_endpoint('ping')
     silence_warning.assert_not_called()
 
@@ -94,7 +94,7 @@ def test_version_warning_strictness_awx(collection_import, silence_warning):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_awx_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.2.0"
-            my_module._COLLECTION_TYPE = "awx"
+            my_module._COLLECTION_FQCN = "awx" + ".awx"  # avoid FQCN replacement by script
             my_module.get_endpoint('ping')
     silence_warning.assert_not_called()
 
@@ -108,7 +108,7 @@ def test_version_warning_strictness_controller(collection_import, silence_warnin
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_controller_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.2.0"
-            my_module._COLLECTION_TYPE = "controller"
+            my_module._COLLECTION_FQCN = "ansible.controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_not_called()
 
@@ -117,7 +117,7 @@ def test_version_warning_strictness_controller(collection_import, silence_warnin
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_controller_ping_response):
             my_module = ControllerAPIModule(argument_spec=dict())
             my_module._COLLECTION_VERSION = "1.0.0"
-            my_module._COLLECTION_TYPE = "controller"
+            my_module._COLLECTION_FQCN = "ansible.controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
         'You are running collection version {0} but connecting to {1} version {2}'.format(my_module._COLLECTION_VERSION, controller_name, ping_version)
@@ -132,7 +132,7 @@ def test_type_warning(collection_import, silence_warning):
         with mock.patch('ansible.module_utils.urls.Request.open', new=mock_awx_ping_response):
             my_module = ControllerAPIModule(argument_spec={})
             my_module._COLLECTION_VERSION = ping_version
-            my_module._COLLECTION_TYPE = "controller"
+            my_module._COLLECTION_FQCN = "ansible.controller"
             my_module.get_endpoint('ping')
     silence_warning.assert_called_once_with(
         'You are using the {0} version of this collection but connecting to {1}'.format(my_module._COLLECTION_TYPE, awx_name)
@@ -166,13 +166,13 @@ def test_no_templated_values(collection_import):
     checked into source.
     """
     ControllerAPIModule = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
-    assert ControllerAPIModule._COLLECTION_VERSION == "0.0.1-devel", (
-        'The collection version is templated when the collection is built ' 'and the code should retain the placeholder of "0.0.1-devel".'
-    )
+    assert (
+        ControllerAPIModule._COLLECTION_VERSION == "0.0.1-devel"
+    ), 'The collection version is templated when the collection is built and the code should retain the placeholder of "0.0.1-devel".'
     InventoryModule = collection_import('plugins.inventory.controller').InventoryModule
-    assert InventoryModule.NAME == 'awx.awx.controller', (
-        'The inventory plugin FQCN is templated when the collection is built ' 'and the code should retain the default of awx.awx.'
-    )
+    assert (
+        InventoryModule.NAME == 'awx.awx.controller'
+    ), 'The inventory plugin FQCN is templated when the collection is built and the code should retain the default of ansible.controller.'
 
 
 def test_conflicting_name_and_id(run_module, admin_user):

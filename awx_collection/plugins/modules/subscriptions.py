@@ -61,17 +61,17 @@ subscriptions:
 
 EXAMPLES = '''
 - name: Get subscriptions
-  subscriptions:
+  awx.awx.subscriptions:
     client_id: "00000000-0000-0000-0000-000000000000"
     client_secret: "your-client-secret-here"
 
 - name: Get subscriptions with username and password
-  subscriptions:
+  awx.awx.subscriptions:
     username: "my_username"
     password: "my_password"
 
 - name: Get subscriptions with a filter
-  subscriptions:
+  awx.awx.subscriptions:
     client_id: "00000000-0000-0000-0000-000000000000"
     client_secret: "your-client-secret-here"
     filters:

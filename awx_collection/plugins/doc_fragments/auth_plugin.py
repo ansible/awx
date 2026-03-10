@@ -104,6 +104,13 @@ options:
     env:
     - name: AAP_RETRY_BACKOFF_FACTOR
     aliases: [ aap_retry_backoff_factor ]
+  api_prefix:
+    description:
+    - Override the API URL prefix for this request.
+    - Defaults to /api/ for AWX or /api/controller/ for Automation Controller.
+    type: str
+    env:
+    - name: CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library
   defaults to find your host information.

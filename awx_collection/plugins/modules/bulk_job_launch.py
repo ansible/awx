@@ -175,7 +175,7 @@ job_info:
 
 EXAMPLES = '''
 - name: Launch bulk jobs
-  bulk_job_launch:
+  awx.awx.bulk_job_launch:
     name: My Bulk Job Launch
     jobs:
       - unified_job_template: 7
@@ -196,7 +196,7 @@ EXAMPLES = '''
     inventory: Demo Inventory
 
 - name: Launch bulk jobs with lookup plugin
-  bulk_job_launch:
+  awx.awx.bulk_job_launch:
     name: My Bulk Job Launch
     jobs:
       - unified_job_template: 7

@@ -64,7 +64,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Add EE to the controller instance
-  execution_environment:
+  awx.awx.execution_environment:
     name: "My EE"
     image: quay.io/ansible/awx-ee
 '''

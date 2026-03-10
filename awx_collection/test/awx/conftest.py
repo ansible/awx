@@ -197,7 +197,11 @@ def _parse_and_handle_module_result(module_stdout):
 
 
 @pytest.fixture
-def run_module(request, collection_import, mocker):
+def run_module(request, collection_import, mocker, monkeypatch):
+    # Force /api/ prefix so modules don't try /api/controller/ against the
+    # standalone AWX test server which only serves /api/.
+    monkeypatch.setenv('CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX', '/api/')
+
     def rf(module_name, module_params, request_user):
 
         def new_request(self, method, url, **kwargs):

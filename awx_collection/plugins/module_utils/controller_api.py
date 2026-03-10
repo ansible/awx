@@ -120,6 +120,7 @@ class ControllerModule(AnsibleModule):
         'max_retries': 'max_retries',
         'retry_backoff_factor': 'retry_backoff_factor',
         'aap_token': 'aap_token',
+        'api_prefix': 'api_prefix',
     }
     host = '127.0.0.1'
     username = None
@@ -129,6 +130,7 @@ class ControllerModule(AnsibleModule):
     request_timeout = 10
     max_retries = 5
     retry_backoff_factor = 2
+    api_prefix = None
     authenticated = False
     config_name = 'tower_cli.cfg'
     version_checked = False
@@ -357,13 +359,22 @@ class ControllerAPIModule(ControllerModule):
     # TODO: Move the collection version check into controller_module.py
     # This gets set by the make process so whatever is in here is irrelevant
     _COLLECTION_VERSION = "0.0.1-devel"
-    _COLLECTION_TYPE = "awx"
-    # This maps the collections type (awx/tower) to the values returned by the API
+    # The FQCN is the canonical identifier for this collection.
+    # On upstream (awx) this is "awx.awx"; on downstream (tower) the
+    # replace_fqcn.sh script converts it to "ansible.controller".
+    # _COLLECTION_TYPE is derived from the FQCN automatically.
+    _COLLECTION_FQCN = "awx.awx"
+    # This maps the collections type (awx/controller) to the values returned by the API
     # Those values can be found in awx/api/generics.py line 204
     collection_to_version = {
         'awx': 'AWX',
         'controller': 'Red Hat Ansible Automation Platform',
     }
+
+    @property
+    def _COLLECTION_TYPE(self):
+        return self._COLLECTION_FQCN.split('.')[1]
+
     session = None
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
     ENCRYPTED_STRING = "$encrypted$"
@@ -754,6 +765,8 @@ class ControllerAPIModule(ControllerModule):
 
     def api_path(self, app_key=None):
 
+        if self.api_prefix:
+            return self.api_prefix
         default_api_path = "/api/"
         if self._COLLECTION_TYPE != "awx" or app_key is not None:
             if app_key is None:

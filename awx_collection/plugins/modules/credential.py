@@ -121,7 +121,7 @@ notes:
 
 EXAMPLES = '''
 - name: Add machine credential
-  credential:
+  awx.awx.credential:
     name: Team Name
     description: Team Description
     organization: test-org
@@ -130,7 +130,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Create a valid SCM credential from a private_key file
-  credential:
+  awx.awx.credential:
     name: SCM Credential
     organization: Default
     state: present
@@ -147,7 +147,7 @@ EXAMPLES = '''
   register: aws_ssh_key
 
 - name: Add Credential
-  credential:
+  awx.awx.credential:
     name: Workshop Credential
     credential_type: Machine
     organization: Default
@@ -157,7 +157,7 @@ EXAMPLES = '''
   delegate_to: localhost
 
 - name: Add Credential with Custom Credential Type
-  credential:
+  awx.awx.credential:
     name: Workshop Credential
     credential_type: MyCloudCredential
     organization: Default
@@ -166,7 +166,7 @@ EXAMPLES = '''
     controller_host: https://localhost
 
 - name: Create a Vault credential (example for notes)
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -175,7 +175,7 @@ EXAMPLES = '''
       vault_id: 'My ID'
 
 - name: Bad password update (will replace vault_id)
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -183,14 +183,14 @@ EXAMPLES = '''
       vault_password: 'new_password'
 
 - name: Another bad password update (will replace vault_id)
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
     vault_password: 'new_password'
 
 - name: A safe way to update a password and keep vault_id
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -199,7 +199,7 @@ EXAMPLES = '''
       vault_id: 'My ID'
 
 - name: Copy Credential
-  credential:
+  awx.awx.credential:
     name: Copy password
     copy_from: Example password
     credential_type: Vault

@@ -3,6 +3,8 @@ name: Promote Release
 
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+  COLLECTION_NAMESPACE: ${{ github.repository == 'ansible/tower' && 'ansible' || 'awx' }}
+  COLLECTION_PACKAGE: ${{ github.repository == 'ansible/tower' && 'controller' || 'awx' }}
 
 on:
   release:
@@ -17,7 +19,7 @@ permissions:
 
 jobs:
   promote:
-    if: endsWith(github.repository, '/awx')
+    if: github.repository_owner == 'ansible'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -42,41 +44,23 @@ jobs:
         run: |
           python${{ env.py_version }} -m pip install wheel twine setuptools-scm
 
-      - name: Set official collection namespace
-        run: echo collection_namespace=awx >> $GITHUB_ENV
-        if: ${{ github.repository_owner == 'ansible' }}
-
-      - name: Set unofficial collection namespace
-        run: echo collection_namespace=${{ github.repository_owner }} >> $GITHUB_ENV
-        if: ${{ github.repository_owner != 'ansible' }}
-
       - name: Build collection and publish to galaxy
         env:
-          COLLECTION_NAMESPACE: ${{ env.collection_namespace }}
           COLLECTION_VERSION: ${{ env.TAG_NAME }}
-          COLLECTION_TEMPLATE_VERSION: true
         run: |
           sudo apt-get install jq
           make build_collection
-          count=$(curl -s https://galaxy.ansible.com/api/v3/plugin/ansible/search/collection-versions/\?namespace\=${COLLECTION_NAMESPACE}\&name\=awx\&version\=${COLLECTION_VERSION} | jq .meta.count)
+          count=$(curl -s https://galaxy.ansible.com/api/v3/plugin/ansible/search/collection-versions/\?namespace\=${COLLECTION_NAMESPACE}\&name\=${COLLECTION_PACKAGE}\&version\=${COLLECTION_VERSION} | jq .meta.count)
           if [[ "$count" == "1" ]]; then
               echo "Galaxy release already done";
           elif [[ "$count" == "0" ]]; then
               ansible-galaxy collection publish \
                 --token=${{ secrets.GALAXY_TOKEN }} \
-                awx_collection_build/${COLLECTION_NAMESPACE}-awx-${COLLECTION_VERSION}.tar.gz;
+                awx_collection_build/${COLLECTION_NAMESPACE}-${COLLECTION_PACKAGE}-${COLLECTION_VERSION}.tar.gz;
           else
               echo "Unexpected count from galaxy search: $count";
               exit 1;
           fi
-
-      - name: Set official pypi info
-        run: echo pypi_repo=pypi >> $GITHUB_ENV
-        if: ${{ github.repository_owner == 'ansible' }}
-
-      - name: Set unofficial pypi info
-        run: echo pypi_repo=testpypi >> $GITHUB_ENV
-        if: ${{ github.repository_owner != 'ansible' }}
 
       - name: Build awxkit and upload to pypi
         env:
@@ -85,7 +69,7 @@ jobs:
           git reset --hard
           cd awxkit && python3 setup.py sdist bdist_wheel
           twine upload \
-            -r ${{ env.pypi_repo }} \
+            -r pypi \
             -u ${{ secrets.PYPI_USERNAME }} \
             -p ${{ secrets.PYPI_PASSWORD }} \
             dist/*

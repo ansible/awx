@@ -56,7 +56,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Bulk host create
-  bulk_host_create:
+  awx.awx.bulk_host_create:
     inventory: 1
     hosts:
       - name: foobar.org

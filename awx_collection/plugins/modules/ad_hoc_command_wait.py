@@ -41,14 +41,14 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Launch an ad hoc command
-  ad_hoc_command:
+  awx.awx.ad_hoc_command:
     inventory: "Demo Inventory"
     credential: "Demo Credential"
     wait: false
   register: command
 
 - name: Wait for ad joc command max 120s
-  ad_hoc_command_wait:
+  awx.awx.ad_hoc_command_wait:
     command_id: "{{ command.id }}"
     timeout: 120
 '''
