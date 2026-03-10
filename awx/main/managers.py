@@ -49,12 +49,18 @@ class HostLatestSummaryQuerySet(models.QuerySet):
     def _fetch_all(self):
         super()._fetch_all()
 
-        if self._awx_latest_summary_attached or self._result_cache is None:
+        if self._awx_latest_summary_attached or not self._result_cache:
+            return
+
+        # Only bulk-attach if the queryset was annotated via with_latest_summary_id().
+        # Without this guard, we'd set _latest_summary_cache=None on every host,
+        # masking the per-object fallback query in Host.latest_summary.
+        if not hasattr(self._result_cache[0], '_latest_summary_id'):
             return
 
         from awx.main.models.jobs import JobHostSummary
 
-        latest_summary_ids = [host._latest_summary_id for host in self._result_cache if getattr(host, '_latest_summary_id', None) is not None]
+        latest_summary_ids = [host._latest_summary_id for host in self._result_cache if host._latest_summary_id is not None]
 
         if latest_summary_ids:
             summaries_by_id = JobHostSummary.objects.select_related('job', 'job__job_template').in_bulk(latest_summary_ids)
