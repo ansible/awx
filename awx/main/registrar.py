@@ -35,8 +35,11 @@ class ActivityStreamRegistrar(object):
             self.models.remove(model)
 
             for m2mfield in model._meta.many_to_many:
-                m2m_attr = getattr(model, m2mfield.name)
-                m2m_changed.disconnect(dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
+                try:
+                    m2m_attr = getattr(model, m2mfield.name)
+                    m2m_changed.disconnect(dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
+                except AttributeError:
+                    pass
 
 
 activity_stream_registrar = ActivityStreamRegistrar()
