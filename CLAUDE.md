@@ -76,6 +76,8 @@ Django settings live in `awx/settings/`:
 - `awx/settings/development.py` — development overrides
 - `awx/main/tests/settings_for_test.py` — test-specific settings (SQLite, etc.)
 
+See [Settings Management](https://docs.ansible.com/projects/awx/en/latest/contributor/DJANGO_REQUIREMENTS.html#settings-management) in the Django Development Requirements for configuration patterns and external secret loading.
+
 ---
 
 ## Running Tests
@@ -153,6 +155,8 @@ make test_migrations
 
 This runs pytest with `--migrations -m migration_test --create-db`.
 
+See [Migration Management](https://docs.ansible.com/projects/awx/en/latest/contributor/DJANGO_REQUIREMENTS.html#migration-management) in the Django Development Requirements — the key rule is: **do not rewrite migrations**, and include a reverse migration where possible.
+
 ### Test Coverage
 
 ```bash
@@ -161,6 +165,8 @@ make test_coverage
 
 This adds `--cov --cov-report=xml --junitxml=reports/junit.xml` and rebuilds the DB.
 Reports are written to `reports/coverage.xml` and `reports/junit.xml`.
+
+See [Coverage Requirements](https://docs.ansible.com/projects/awx/en/latest/contributor/DJANGO_REQUIREMENTS.html#coverage-requirements) — targets are 75% overall, 95% for test code, and 100% for new patches.
 
 ### Collection and awxkit Tests
 
@@ -236,6 +242,12 @@ AWX_IGNORE_BLACK=1 git commit -m "..."
 | `awx/main/migrations/` | Database migrations |
 | `awx/main/urls.py` | URL routing for the API |
 
+When working on these components, consult:
+- [Model Design](https://docs.ansible.com/projects/awx/en/latest/contributor/DJANGO_REQUIREMENTS.html#model-design) — abstract base models, mixin architecture, domain-based file organization
+- [REST API Design Standards](https://docs.ansible.com/projects/awx/en/latest/contributor/API_REQUIREMENTS.html#rest-api-design-standards) — URL patterns, HTTP method usage, response time targets
+- [Serialization and Data Validation](https://docs.ansible.com/projects/awx/en/latest/contributor/API_REQUIREMENTS.html#serialization-and-data-validation) — base serializer patterns, custom field types, validation
+- [Authentication and Authorization](https://docs.ansible.com/projects/awx/en/latest/contributor/API_REQUIREMENTS.html#authentication-and-authorization) — RBAC, permission classes, logging requirements
+
 ### Configuration
 
 | Path | Purpose |
@@ -281,6 +293,18 @@ grep -r "def task_name" awx/main/tasks/
 
 ---
 
+## AI Agent Permissions
+
+A list of commands that may be run automatically and commands that require explicit user confirmation
+is maintained in [`docs/development/ai-agent-commands.md`](docs/development/ai-agent-commands.md).
+
+**Key rules:**
+- Most read, test, lint, and inspect commands are safe to run without asking.
+- Live tests must run inside the `tools_awx_1` container (they require a running PostgreSQL instance).
+- Never run `git push`, `git reset --hard`, `git restore`, or any `gh` (GitHub CLI) command without explicit user approval.
+
+---
+
 ## Contributing
 
 1. **Fork and branch** from `devel`
@@ -293,6 +317,10 @@ grep -r "def task_name" awx/main/tasks/
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full contribution guidelines, including the DCO
 agreement, PR process, and coding standards.
 
+Before opening a PR, ensure your changes comply with:
+- [API Development Requirements](https://docs.ansible.com/projects/awx/en/latest/contributor/API_REQUIREMENTS.html) — for any changes to views, serializers, authentication, or API endpoints
+- [Django Development Requirements](https://docs.ansible.com/projects/awx/en/latest/contributor/DJANGO_REQUIREMENTS.html) — for changes to models, settings, migrations, middleware, or project structure
+
 ---
 
 ## Further Reading
@@ -304,3 +332,5 @@ agreement, PR process, and coding standards.
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution guidelines and DCO |
 | [`docs/development/collection-awxkit-tests.md`](docs/development/collection-awxkit-tests.md) | Collection and awxkit test guide |
 | [`docs/`](docs/) | Architecture, debugging, and feature documentation |
+| [API Development Requirements](https://docs.ansible.com/projects/awx/en/latest/contributor/API_REQUIREMENTS.html) | Standards for DRF API design, authentication, serialization, performance, and security |
+| [Django Development Requirements](https://docs.ansible.com/projects/awx/en/latest/contributor/DJANGO_REQUIREMENTS.html) | Standards for project structure, models, settings, migrations, middleware, and testing |
