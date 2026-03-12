@@ -28,6 +28,7 @@ from rest_framework.serializers import ValidationError as DRFValidationError
 from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
+from awx.main.constants import OIDC_CREDENTIAL_TYPE_NAMESPACES
 from awx.api.versioning import reverse
 from awx.main.fields import (
     ImplicitRoleField,
@@ -458,13 +459,15 @@ class CredentialType(CommonModelNameNotUnique):
     def from_db(cls, db, field_names, values):
         instance = super(CredentialType, cls).from_db(db, field_names, values)
         if instance.managed and instance.namespace and instance.kind != "external":
-            native = ManagedCredentialType.registry[instance.namespace]
-            instance.inputs = native.inputs
-            instance.injectors = native.injectors
-            instance.custom_injectors = getattr(native, 'custom_injectors', None)
+            native = ManagedCredentialType.registry.get(instance.namespace)
+            if native:
+                instance.inputs = native.inputs
+                instance.injectors = native.injectors
+                instance.custom_injectors = getattr(native, 'custom_injectors', None)
         elif instance.namespace and instance.kind == "external":
-            native = ManagedCredentialType.registry[instance.namespace]
-            instance.inputs = native.inputs
+            native = ManagedCredentialType.registry.get(instance.namespace)
+            if native:
+                instance.inputs = native.inputs
 
         return instance
 
@@ -683,13 +686,20 @@ class CredentialInputSource(PrimordialModel):
         return reverse(view_name, kwargs={'pk': self.pk}, request=request)
 
 
-def load_credentials():
+def _is_oidc_namespace_disabled(ns):
+    """Check if a credential namespace should be skipped based on the OIDC feature flag."""
+    return ns in OIDC_CREDENTIAL_TYPE_NAMESPACES and not getattr(settings, 'FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED', False)
 
+
+def load_credentials():
     awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
     supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
     plugin_entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
 
     for ns, ep in plugin_entry_points.items():
+        if _is_oidc_namespace_disabled(ns):
+            continue
+
         cred_plugin = ep.load()
         if not hasattr(cred_plugin, 'inputs'):
             setattr(cred_plugin, 'inputs', {})
@@ -708,5 +718,8 @@ def load_credentials():
         credential_plugins = {}
 
     for ns, ep in credential_plugins.items():
+        if _is_oidc_namespace_disabled(ns):
+            continue
+
         plugin = ep.load()
         CredentialType.load_plugin(ns, plugin)
