@@ -1,11 +1,27 @@
 import locale
 import json
-from distutils.util import strtobool
-
 import yaml
 
 from awxkit.cli.utils import colored
 from awxkit import config
+
+
+def strtobool(val):
+    """Convert a string representation of truth to true (1) or false (0).
+
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'.
+    False values are 'n', 'no', 'f', 'false', 'off', and '0'.
+    Raises ValueError if 'val' is anything else.
+
+    This replaces the deprecated distutils.util.strtobool removed in Python 3.12.
+    """
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError(f"invalid truth value {val!r}")
 
 
 def get_config_credentials():
@@ -29,12 +45,6 @@ def add_authentication_arguments(parser, env):
         '--conf.host',
         default=env.get('CONTROLLER_HOST', env.get('TOWER_HOST', 'https://127.0.0.1:443')),
         metavar='https://example.awx.org',
-    )
-    auth.add_argument(
-        '--conf.token',
-        default=env.get('CONTROLLER_OAUTH_TOKEN', env.get('CONTROLLER_TOKEN', env.get('TOWER_OAUTH_TOKEN', env.get('TOWER_TOKEN', '')))),
-        help='an OAuth2.0 token (get one by using `awx login`)',
-        metavar='TEXT',
     )
 
     config_username, config_password = get_config_credentials()

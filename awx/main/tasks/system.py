@@ -1,74 +1,78 @@
 # Python
-from collections import namedtuple
 import functools
 import importlib
 import itertools
 import json
 import logging
 import os
-import psycopg
-from io import StringIO
-from contextlib import redirect_stdout
 import shutil
 import time
-from distutils.version import LooseVersion as Version
-from datetime import datetime
+from collections import namedtuple
+from contextlib import redirect_stdout
+from packaging.version import Version
+from io import StringIO
 
-# Django
-from django.conf import settings
-from django.db import connection, transaction, DatabaseError, IntegrityError
-from django.db.models.fields.related import ForeignKey
-from django.utils.timezone import now, timedelta
-from django.utils.encoding import smart_str
-from django.contrib.auth.models import User
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import gettext_noop
-from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
-
-# Django-CRUM
-from crum import impersonate
-
+# dispatcherd
+from dispatcherd.factories import get_control_from_settings
+from dispatcherd.publish import task
 
 # Runner
 import ansible_runner.cleanup
-
-# dateutil
-from dateutil.parser import parse as parse_date
+import psycopg
+from ansible_base.lib.utils.db import advisory_lock
 
 # django-ansible-base
 from ansible_base.resource_registry.tasks.sync import SyncExecutor
 
+# Django-CRUM
+from crum import impersonate
+
+# dateutil
+from dateutil.parser import parse as parse_date
+
+# Django
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError, connection, transaction
+from django.db.models.fields.related import ForeignKey
+from django.db.models.query import QuerySet
+from django.utils.encoding import smart_str
+from django.utils.timezone import now, timedelta
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_noop
+
+# Django flags
+from flags.state import flag_enabled
+from rest_framework.exceptions import PermissionDenied
+
 # AWX
 from awx import __version__ as awx_application_version
+from awx.conf import settings_registry
+from awx.main import analytics
 from awx.main.access import access_registry
+from awx.main.analytics.subsystem_metrics import DispatcherMetrics
+from awx.main.constants import ACTIVE_STATES, ERROR_STATES
+from awx.main.consumers import emit_channel_notification
+from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.models import (
-    Schedule,
-    TowerScheduleState,
     Instance,
     InstanceGroup,
-    UnifiedJob,
-    Notification,
     Inventory,
-    SmartInventoryMembership,
     Job,
+    Notification,
+    Schedule,
+    SmartInventoryMembership,
+    TowerScheduleState,
+    UnifiedJob,
     convert_jsonfields,
 )
-from awx.main.constants import ACTIVE_STATES, ERROR_STATES
-from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_task_queuename, reaper
-from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
-
-from awx.main.utils.reload import stop_local_services
-from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.helpers import is_run_threshold_reached
-from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
-from awx.main.consumers import emit_channel_notification
-from awx.main import analytics
-from awx.conf import settings_registry
-from awx.main.analytics.subsystem_metrics import DispatcherMetrics
-
-from rest_framework.exceptions import PermissionDenied
+from awx.main.tasks.host_indirect import save_indirect_host_entries
+from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
+from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.reload import stop_local_services
 
 logger = logging.getLogger('awx.main.tasks.system')
 
@@ -79,24 +83,32 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
 
-def dispatch_startup():
+def _run_dispatch_startup_common():
+    """
+    Execute the common startup initialization steps.
+    This includes updating schedules, syncing instance membership, and starting
+    local reaping and resetting metrics.
+    """
     startup_logger = logging.getLogger('awx.main.tasks')
 
     # TODO: Enable this on VM installs
     if settings.IS_K8S:
-        write_receptor_config()
+        try:
+            write_receptor_config()
+        except Exception:
+            logger.exception("Failed to write receptor config, skipping.")
 
     try:
         convert_jsonfields()
     except Exception:
-        logger.exception("Failed json field conversion, skipping.")
+        logger.exception("Failed JSON field conversion, skipping.")
 
-    startup_logger.debug("Syncing Schedules")
+    startup_logger.debug("Syncing schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
         except Exception:
-            logger.exception("Failed to rebuild schedule {}.".format(sch))
+            logger.exception("Failed to rebuild schedule %s.", sch)
 
     #
     # When the dispatcher starts, if the instance cannot be found in the database,
@@ -114,27 +126,49 @@ def dispatch_startup():
     # no-op.
     #
     apply_cluster_membership_policies()
-    cluster_node_heartbeat()
+    cluster_node_heartbeat(None)
     reaper.startup_reaping()
-    reaper.reap_waiting(grace_period=0)
     m = DispatcherMetrics()
     m.reset_values()
 
 
+def _dispatcherd_dispatch_startup():
+    """
+    New dispatcherd branch for startup: uses the control API to re-submit waiting jobs.
+    """
+    logger.debug("Dispatcherd enabled: dispatching waiting jobs via control channel")
+    from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+    dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
+
+
+def dispatch_startup():
+    """
+    System initialization at startup.
+    First, execute the common logic.
+    Then, re-submit waiting jobs via the control API.
+    """
+    _run_dispatch_startup_common()
+    _dispatcherd_dispatch_startup()
+
+
 def inform_cluster_of_shutdown():
+    """
+    Clean system shutdown that marks the current instance offline.
+    Relies on dispatcherd's built-in cleanup.
+    """
     try:
-        this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
-        this_inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
-        try:
-            reaper.reap_waiting(this_inst, grace_period=0)
-        except Exception:
-            logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
-        logger.warning('Normal shutdown signal for instance {}, removed self from capacity pool.'.format(this_inst.hostname))
-    except Exception:
-        logger.exception('Encountered problem with normal shutdown signal.')
+        inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
+        inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
+    except Instance.DoesNotExist:
+        logger.exception("Cluster host not found: %s", settings.CLUSTER_HOST_ID)
+        return
+
+    logger.debug("No extra reaping required for instance %s", inst.hostname)
+    logger.warning("Normal shutdown processed for instance %s; instance removed from capacity pool.", inst.hostname)
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600 * 5)
 def migrate_jsonfield(table, pkfield, columns):
     batchsize = 10000
     with advisory_lock(f'json_migration_{table}', wait=False) as acquired:
@@ -180,7 +214,7 @@ def migrate_jsonfield(table, pkfield, columns):
         logger.warning(f"Migration of {table} to jsonb is finished.")
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600, on_duplicate='queue_one')
 def apply_cluster_membership_policies():
     from awx.main.signals import disable_activity_stream
 
@@ -292,7 +326,7 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_settings_change')
+@task(queue='tower_settings_change', timeout=600)
 def clear_setting_cache(setting_keys):
     # log that cache is being cleared
     logger.info(f"clear_setting_cache of keys {setting_keys}")
@@ -304,8 +338,13 @@ def clear_setting_cache(setting_keys):
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
 
+    if 'LOG_AGGREGATOR_LEVEL' in setting_keys:
+        ctl = get_control_from_settings()
+        ctl.queuename = get_task_queuename()
+        ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
 
-@task(queue='tower_broadcast_all')
+
+@task(queue='tower_broadcast_all', timeout=600)
 def delete_project_files(project_path):
     # TODO: possibly implement some retry logic
     lock_file = project_path + '.lock'
@@ -333,7 +372,7 @@ def profile_sql(threshold=1, minutes=1):
         logger.error('SQL QUERIES >={}s ENABLED FOR {} MINUTE(S)'.format(threshold, minutes))
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=1800)
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -364,13 +403,27 @@ def send_notifications(notification_list, job_id=None):
                 logger.exception('Error saving notification {} result.'.format(notification.id))
 
 
-@task(queue=get_task_queuename)
+def events_processed_hook(unified_job):
+    """This method is intended to be called for every unified job
+    after the playbook_on_stats/EOF event is processed and final status is saved
+    Either one of these events could happen before the other, or there may be no events"""
+    unified_job.send_notification_templates('succeeded' if unified_job.status == 'successful' else 'failed')
+    if isinstance(unified_job, Job) and flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        if unified_job.event_queries_processed is True:
+            # If this is called from callback receiver, it likely does not have updated model data
+            # a refresh now is formally robust
+            unified_job.refresh_from_db(fields=['event_queries_processed'])
+        if unified_job.event_queries_processed is False:
+            save_indirect_host_entries.delay(unified_job.id)
+
+
+@task(queue=get_task_queuename, timeout=3600 * 5, on_duplicate='discard')
 def gather_analytics():
     if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=600, on_duplicate='queue_one')
 def purge_old_stdout_files():
     nowtime = time.time()
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
@@ -379,70 +432,71 @@ def purge_old_stdout_files():
             logger.debug("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT, f)))
 
 
-def _cleanup_images_and_files(**kwargs):
-    if settings.IS_K8S:
-        return
-    this_inst = Instance.objects.me()
-    runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
-    if runner_cleanup_kwargs:
-        stdout = ''
-        with StringIO() as buffer:
-            with redirect_stdout(buffer):
-                ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
-                stdout = buffer.getvalue()
-        if '(changed: True)' in stdout:
-            logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+class CleanupImagesAndFiles:
+    @classmethod
+    def get_first_control_instance(cls) -> Instance | None:
+        return (
+            Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+            .order_by('-hostname')
+            .first()
+        )
 
-    # if we are the first instance alphabetically, then run cleanup on execution nodes
-    checker_instance = (
-        Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
-        .order_by('-hostname')
-        .first()
-    )
-    if checker_instance and this_inst.hostname == checker_instance.hostname:
-        for inst in Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0):
-            runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
-            if not runner_cleanup_kwargs:
-                continue
-            try:
-                stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
-                if '(changed: True)' in stdout:
-                    logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
-            except RuntimeError:
-                logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+    @classmethod
+    def get_execution_instances(cls) -> QuerySet[Instance]:
+        return Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+
+    @classmethod
+    def run_local(cls, this_inst: Instance, **kwargs):
+        if settings.IS_K8S:
+            return
+        runner_cleanup_kwargs = this_inst.get_cleanup_task_kwargs(**kwargs)
+        if runner_cleanup_kwargs:
+            stdout = ''
+            with StringIO() as buffer:
+                with redirect_stdout(buffer):
+                    ansible_runner.cleanup.run_cleanup(runner_cleanup_kwargs)
+                    stdout = buffer.getvalue()
+            if '(changed: True)' in stdout:
+                logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
+
+    @classmethod
+    def run_remote(cls, this_inst: Instance, **kwargs):
+        # if we are the first instance alphabetically, then run cleanup on execution nodes
+        checker_instance = cls.get_first_control_instance()
+
+        if checker_instance and this_inst.hostname == checker_instance.hostname:
+            for inst in cls.get_execution_instances():
+                runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
+                if not runner_cleanup_kwargs:
+                    continue
+                try:
+                    stdout = worker_cleanup(inst.hostname, runner_cleanup_kwargs)
+                    if '(changed: True)' in stdout:
+                        logger.info(f'Performed cleanup on execution node {inst.hostname} with output:\n{stdout}')
+                except RuntimeError:
+                    logger.exception(f'Error running cleanup on execution node {inst.hostname}')
+
+    @classmethod
+    def run(cls, **kwargs):
+        if settings.IS_K8S:
+            return
+        this_inst = Instance.objects.me()
+        cls.run_local(this_inst, **kwargs)
+        cls.run_remote(this_inst, **kwargs)
 
 
-@task(queue='tower_broadcast_all')
+@task(queue='tower_broadcast_all', timeout=3600)
 def handle_removed_image(remove_images=None):
     """Special broadcast invocation of this method to handle case of deleted EE"""
-    _cleanup_images_and_files(remove_images=remove_images, file_pattern='')
+    CleanupImagesAndFiles.run(remove_images=remove_images, file_pattern='')
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600, on_duplicate='queue_one')
 def cleanup_images_and_files():
-    _cleanup_images_and_files(image_prune=True)
+    CleanupImagesAndFiles.run(image_prune=True)
 
 
-@task(queue=get_task_queuename)
-def cluster_node_health_check(node):
-    """
-    Used for the health check endpoint, refreshes the status of the instance, but must be ran on target node
-    """
-    if node == '':
-        logger.warning('Local health check incorrectly called with blank string')
-        return
-    elif node != settings.CLUSTER_HOST_ID:
-        logger.warning(f'Local health check for {node} incorrectly sent to {settings.CLUSTER_HOST_ID}')
-        return
-    try:
-        this_inst = Instance.objects.me()
-    except Instance.DoesNotExist:
-        logger.warning(f'Instance record for {node} missing, could not check capacity.')
-        return
-    this_inst.local_health_check()
-
-
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=600, on_duplicate='queue_one')
 def execution_node_health_check(node):
     if node == '':
         logger.warning('Remote health check incorrectly called with blank string')
@@ -510,8 +564,16 @@ def inspect_established_receptor_connections(mesh_status):
 def inspect_execution_and_hop_nodes(instance_list):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        ctl = get_receptor_ctl()
-        mesh_status = ctl.simple_command('status')
+        try:
+            ctl = get_receptor_ctl()
+        except FileNotFoundError:
+            logger.error('Receptor daemon not running, skipping execution node check')
+            return
+        try:
+            mesh_status = ctl.simple_command('status')
+        except ValueError as exc:
+            logger.error(f'Error running receptorctl status command, error: {str(exc)}')
+            return
 
         inspect_established_receptor_connections(mesh_status)
 
@@ -559,8 +621,81 @@ def inspect_execution_and_hop_nodes(instance_list):
                     execution_node_health_check.apply_async([hostname])
 
 
-@task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
-def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
+@task(queue=get_task_queuename, bind=True)
+def cluster_node_heartbeat(binder):
+    """
+    Dispatcherd implementation.
+    Uses Control API to get running tasks.
+    """
+
+    # Run common instance management logic
+    this_inst, instance_list, lost_instances = _heartbeat_instance_management()
+    if this_inst is None:
+        return  # Early return case from instance management
+
+    # Check versions
+    _heartbeat_check_versions(this_inst, instance_list)
+
+    # Handle lost instances
+    _heartbeat_handle_lost_instances(lost_instances, this_inst)
+
+    # Get running tasks using dispatcherd API
+    if binder is None:
+        logger.debug("Heartbeat finished in startup.")
+        return
+    active_task_ids = _get_active_task_ids_from_dispatcherd(binder)
+    if active_task_ids is None:
+        logger.warning("No active task IDs retrieved from dispatcherd, skipping reaper")
+        return  # Failed to get task IDs, don't attempt reaping
+
+    # Run local reaper using tasks from dispatcherd
+    ref_time = now()  # No dispatch_time in dispatcherd version
+    logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
+    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    # If waiting jobs are hanging out, resubmit them
+    if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
+        from awx.main.tasks.jobs import dispatch_waiting_jobs
+
+        dispatch_waiting_jobs.apply_async(queue=get_task_queuename())
+
+
+def _get_active_task_ids_from_dispatcherd(binder):
+    """
+    Retrieve active task IDs from the dispatcherd control API.
+
+    Returns:
+        list: List of active task UUIDs
+        None: If there was an error retrieving the data
+    """
+    active_task_ids = []
+    try:
+
+        logger.debug("Querying dispatcherd API for running tasks")
+        data = binder.control('running')
+
+        # Extract UUIDs from the running data
+        # Process running data: first item is a dict with node_id and task entries
+        data.pop('node_id', None)
+
+        # Extract task UUIDs from data structure
+        for task_key, task_value in data.items():
+            if isinstance(task_value, dict) and 'uuid' in task_value:
+                active_task_ids.append(task_value['uuid'])
+                logger.debug(f"Found active task with UUID: {task_value['uuid']}")
+            elif isinstance(task_key, str):
+                # Handle case where UUID might be the key
+                active_task_ids.append(task_key)
+                logger.debug(f"Found active task with key: {task_key}")
+
+        logger.debug(f"Retrieved {len(active_task_ids)} active task IDs from dispatcherd")
+        return active_task_ids
+    except Exception:
+        logger.exception("Failed to get running tasks from dispatcherd")
+        return None
+
+
+def _heartbeat_instance_management():
+    """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
     instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
@@ -587,20 +722,26 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
         this_inst.local_health_check()
         if startup_event and this_inst.capacity != 0:
             logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
-            return
+            return None, None, None  # Early return case
         elif not last_last_seen:
             logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
         elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
             logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
+            changed, this_inst = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
             if changed:
                 logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
             this_inst.local_health_check()
         else:
-            raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
-    # IFF any node has a greater version than we do, then we'll shutdown services
+            logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+            return None, None, None
+
+    return this_inst, instance_list, lost_instances
+
+
+def _heartbeat_check_versions(this_inst, instance_list):
+    """Check versions across instances and determine if shutdown is needed."""
     for other_inst in instance_list:
         if other_inst.node_type in ('execution', 'hop'):
             continue
@@ -617,13 +758,18 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             stop_local_services(communicate=False)
             raise RuntimeError("Shutting down.")
 
+
+def _heartbeat_handle_lost_instances(lost_instances, this_inst):
+    """Handle lost instances by reaping their running jobs and marking them offline."""
     for other_inst in lost_instances:
         try:
+            # Any jobs marked as running will be marked as error
             explanation = "Job reaped due to instance shutdown"
             reaper.reap(other_inst, job_explanation=explanation)
-            reaper.reap_waiting(other_inst, grace_period=0, job_explanation=explanation)
+            # Any jobs that were waiting to be processed by this node will be handed back to task manager
+            UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
         except Exception:
-            logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
+            logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
         try:
             if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
                 deprovision_hostname = other_inst.hostname
@@ -647,17 +793,8 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             else:
                 logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
 
-    # Run local reaper
-    if worker_tasks is not None:
-        active_task_ids = []
-        for task_list in worker_tasks.values():
-            active_task_ids.extend(task_list)
-        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
-        if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
-            reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
 
-
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
 def awx_receptor_workunit_reaper():
     """
     When an AWX job is launched via receptor, files such as status, stdin, and stdout are created
@@ -680,8 +817,16 @@ def awx_receptor_workunit_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
     logger.debug("Checking for unreleased receptor work units")
-    receptor_ctl = get_receptor_ctl()
-    receptor_work_list = receptor_ctl.simple_command("work list")
+    try:
+        receptor_ctl = get_receptor_ctl()
+    except FileNotFoundError:
+        logger.info('Receptorctl sockfile not found for workunit reaper, doing nothing')
+        return
+    try:
+        receptor_work_list = receptor_ctl.simple_command("work list")
+    except ValueError as exc:
+        logger.info(f'Error getting work list for workunit reaper, error: {str(exc)}')
+        return
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
@@ -695,7 +840,7 @@ def awx_receptor_workunit_reaper():
     administrative_workunit_reaper(receptor_work_list)
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
 def awx_k8s_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
@@ -718,7 +863,7 @@ def awx_k8s_reaper():
                 logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600 * 5, on_duplicate='discard')
 def awx_periodic_scheduler():
     lock_session_timeout_milliseconds = settings.TASK_MANAGER_LOCK_TIMEOUT * 1000
     with advisory_lock('awx_periodic_scheduler_lock', lock_session_timeout_milliseconds=lock_session_timeout_milliseconds, wait=False) as acquired:
@@ -768,16 +913,14 @@ def awx_periodic_scheduler():
                 continue
             if not can_start:
                 new_unified_job.status = 'failed'
-                new_unified_job.job_explanation = gettext_noop(
-                    "Scheduled job could not start because it \
-                    was not in the right state or required manual credentials"
-                )
+                new_unified_job.job_explanation = gettext_noop("Scheduled job could not start because it \
+                    was not in the right state or required manual credentials")
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600)
 def handle_failure_notifications(task_ids):
     """A task-ified version of the method that sends notifications."""
     found_task_ids = set()
@@ -792,7 +935,7 @@ def handle_failure_notifications(task_ids):
         logger.warning(f'Could not send notifications for {deleted_tasks} because they were not found in the database')
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600 * 5)
 def update_inventory_computed_fields(inventory_id):
     """
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -842,7 +985,7 @@ def update_smart_memberships_for_inventory(smart_inventory):
     return False
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600, on_duplicate='queue_one')
 def update_host_smart_inventory_memberships():
     smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
     changed_inventories = set([])
@@ -858,7 +1001,7 @@ def update_host_smart_inventory_memberships():
         smart_inventory.update_computed_fields()
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600 * 5)
 def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
     if user_id is None:
@@ -920,7 +1063,7 @@ def _reconstruct_relationships(copy_mapping):
         new_obj.save()
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=600)
 def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, permission_check_func=None):
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
 
@@ -975,7 +1118,7 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, p
         update_inventory_computed_fields.delay(new_obj.id)
 
 
-@task(queue=get_task_queuename)
+@task(queue=get_task_queuename, timeout=3600, on_duplicate='discard')
 def periodic_resource_sync():
     if not getattr(settings, 'RESOURCE_SERVER', None):
         logger.debug("Skipping periodic resource_sync, RESOURCE_SERVER not configured")

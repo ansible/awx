@@ -10,6 +10,8 @@ import time
 import sys
 import signal
 
+import redis
+
 # Django
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _, gettext_noop
@@ -18,6 +20,9 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 from ansible_base.lib.utils.models import get_type_for_model
+
+# django-ansible-base
+from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
 from awx.main.dispatch.reaper import reap_job
@@ -34,7 +39,6 @@ from awx.main.models import (
     WorkflowJobTemplate,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
-from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import (
     ScheduleTaskManager,
     ScheduleWorkflowManager,
@@ -44,9 +48,9 @@ from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.scheduler.task_manager_models import TaskManagerModels
+from awx.main.tasks.jobs import dispatch_waiting_jobs
 import awx.main.analytics.subsystem_metrics as s_metrics
 from awx.main.utils import decrypt_field
-
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -118,6 +122,8 @@ class TaskBase:
                     self.subsystem_metrics.pipe_execute()
                 else:
                     logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            except redis.exceptions.ConnectionError as exc:
+                logger.warning(f"Redis connection error saving metrics for {self.prefix}, error: {exc}")
             except Exception:
                 logger.exception(f"Error saving metrics for {self.prefix}")
 
@@ -389,8 +395,8 @@ class DependencyManager(TaskBase):
             if job_deps:
                 dependencies += job_deps
                 with disable_activity_stream():
-                    task.dependent_jobs.add(*dependencies)
-                logger.debug(f'Linked {[dep.log_format for dep in dependencies]} as dependencies of {task.log_format}')
+                    task.dependent_jobs.add(*job_deps)
+                logger.debug(f'Linked {[dep.log_format for dep in job_deps]} as dependencies of {task.log_format}')
 
         UnifiedJob.objects.filter(pk__in=[task.pk for task in undeped_tasks]).update(dependencies_processed=True)
 
@@ -425,6 +431,7 @@ class TaskManager(TaskBase):
         # 5 minutes to start pending jobs. If this limit is reached, pending jobs
         # will no longer be started and will be started on the next task manager cycle.
         self.time_delta_job_explanation = timedelta(seconds=30)
+        self.control_nodes_to_notify: set[str] = set()
         super().__init__(prefix="task_manager")
 
     def after_lock_init(self):
@@ -487,7 +494,7 @@ class TaskManager(TaskBase):
 
         task.status = 'waiting'
 
-        (start_status, opts) = task.pre_start()
+        start_status, opts = task.pre_start()
         if not start_status:
             task.status = 'failed'
             if task.job_explanation:
@@ -513,16 +520,7 @@ class TaskManager(TaskBase):
                 task.save()
                 task.log_lifecycle("waiting")
 
-        # apply_async does a NOTIFY to the channel dispatcher is listening to
-        # postgres will treat this as part of the transaction, which is what we want
-        if task.status != 'failed' and type(task) is not WorkflowJob:
-            task_cls = task._get_task_class()
-            task_cls.apply_async(
-                [task.pk],
-                opts,
-                queue=task.get_queue_name(),
-                uuid=task.celery_task_id,
-            )
+        self.control_nodes_to_notify.add(task.get_queue_name())
 
         # In exception cases, like a job failing pre-start checks, we send the websocket status message.
         # For jobs going into waiting, we omit this because of performance issues, as it should go to running quickly
@@ -715,3 +713,7 @@ class TaskManager(TaskBase):
 
         for workflow_approval in self.get_expired_workflow_approvals():
             self.timeout_approval_node(workflow_approval)
+
+        for controller_node in self.control_nodes_to_notify:
+            logger.info(f'Notifying node {controller_node} of new waiting jobs.')
+            dispatch_waiting_jobs.apply_async(queue=controller_node)

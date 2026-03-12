@@ -9,7 +9,6 @@ from awx.main.models.base import VarsDictProperty
 
 from ._inventory_source_vars import FrozenInjectors
 
-
 logger = logging.getLogger('awx.main.migrations')
 
 

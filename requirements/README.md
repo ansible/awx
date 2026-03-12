@@ -49,38 +49,18 @@ Make sure to delete the old tarball if it is an upgrade.
 Anything pinned in `*.in` files involves additional manual work in
 order to upgrade. Some information related to that work is outlined here.
 
-### social-auth-app-django
+### pip, setuptools and setuptools_scm, wheel, cython
 
-django-social keeps a list of backends in memory that it gathers
-based on the value of `settings.AUTHENTICATION_BACKENDS` *at import time*:
-https://github.com/python-social-auth/social-app-django/blob/c1e2795b00b753d58a81fa6a0261d8dae1d9c73d/social_django/utils.py#L13
+If modifying these libraries make sure testing with the offline build is performed to confirm 
+they are functionally working. Versions need to match the versions used in the pip bootstrapping
+ step in the top-level Makefile.
 
-Our `settings.AUTHENTICATION_BACKENDS` can *change*
-dynamically as settings are changed (i.e., if somebody
-configures Github OAuth2 integration), so we need to
-_overwrite_ this in-memory value at the top of every request so
-that we have the latest version
+Verify ansible-runner's build dependency doesn't conflict with the changes made.
 
-### django-oauth-toolkit
+### OPA-python-client
+OPA-python-client v2.0.3+ requires urllib3 v2.5.0+ but has other compatibility issues that need investigation.
 
-Versions later than 1.4.1 throw an error about id_token_id, due to the
-OpenID Connect work that was done in
-https://github.com/jazzband/django-oauth-toolkit/pull/915.  This may
-be fixable by creating a migration on our end?
-
-### pip, setuptools and setuptools_scm
-
-If modifying these libraries make sure testing with the offline build is performed to confirm they are functionally working.
-Versions need to match the versions used in the pip bootstrapping step
-in the top-level Makefile.
-
-### cryptography
-
-If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.
-
-## Library Notes
-
-### pexpect
-
-Version 4.8 makes us a little bit nervous with changes to `searchwindowsize` https://github.com/pexpect/pexpect/pull/579/files
-Pin to `pexpect==4.7.x` until we have more time to move to `4.8` and test.
+## djangorestframework
+Upgrading to 3.16.1 introduced errors on the tests around CredentialInputSource. We have several
+fields on that model set to default=null but in the serializer they're set to required: true which causes
+a conflict.

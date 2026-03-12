@@ -74,7 +74,7 @@ class TestWebsocketEventConsumer:
         connected, _ = await server.connect()
         assert connected is False, "Anonymous user should NOT be allowed to login."
 
-    @pytest.mark.skip(reason="Ran out of coding time.")
+    @pytest.mark.xfail(reason="Ran out of coding time.")
     async def test_authorized(self, websocket_server_generator, application, admin):
         server = websocket_server_generator('/websocket/')
 

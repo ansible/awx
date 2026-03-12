@@ -13,8 +13,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldDoesNotExist
 from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
-from django.http import QueryDict
-from django.shortcuts import get_object_or_404
+from django.http import QueryDict, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -30,10 +30,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
+# Shared code for the AWX platform
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
+
 # django-ansible-base
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
-from ansible_base.lib.utils.requests import get_remote_host
+from ansible_base.lib.utils.requests import get_remote_host, is_proxied_request
 from ansible_base.rbac.models import RoleEvaluation, RoleDefinition
 from ansible_base.rbac.permission_registry import permission_registry
 from ansible_base.jwt_consumer.common.util import validate_x_trusted_proxy_header
@@ -43,7 +46,6 @@ from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credenti
 from awx.main.models.rbac import give_creator_permissions
 from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
-from awx.main.utils.licensing import server_product_name
 from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
@@ -79,7 +81,14 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):
+
     def get(self, request, *args, **kwargs):
+        if is_proxied_request():
+            next = request.GET.get('next', "")
+            if next:
+                next = f"?next={next}"
+            return redirect(f"/{next}")
+
         # The django.auth.contrib login form doesn't perform the content
         # negotiation we've come to expect from DRF; add in code to catch
         # situations where Accept != text/html (or */*) and reply with
@@ -95,6 +104,15 @@ class LoggedLoginView(auth_views.LoginView):
         return super(LoggedLoginView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        if is_proxied_request():
+            # Give a message, saying to login via AAP
+            return JsonResponse(
+                {
+                    'detail': _('Please log in via Platform Authentication.'),
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
         if request.user.is_authenticated:
@@ -113,10 +131,21 @@ class LoggedLoginView(auth_views.LoginView):
 
 
 class LoggedLogoutView(auth_views.LogoutView):
-
+    # Override http_method_names to allow GET requests (Django 5.2+ defaults to POST only)
+    http_method_names = ["get", "post", "options"]
     success_url_allowed_hosts = set(settings.LOGOUT_ALLOWED_HOSTS.split(",")) if settings.LOGOUT_ALLOWED_HOSTS else set()
 
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests for logout (for backward compatibility)."""
+        return self.post(request, *args, **kwargs)
+
     def dispatch(self, request, *args, **kwargs):
+        if is_proxied_request():
+            # 1) We intentionally don't obey ?next= here, just always redirect to platform login
+            # 2) Hack to prevent rewrites of Location header
+            qs = "?__gateway_no_rewrite__=1&next=/"
+            return redirect(f"/api/gateway/v1/logout/{qs}")
+
         original_user = getattr(request, 'user', None)
         ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
@@ -138,16 +167,14 @@ def get_view_description(view, html=False):
 
 
 def get_default_schema():
-    if settings.SETTINGS_MODULE == 'awx.settings.development':
-        from awx.api.swagger import AutoSchema
-
-        return AutoSchema()
-    else:
-        return views.APIView.schema
+    # drf-spectacular is configured via REST_FRAMEWORK['DEFAULT_SCHEMA_CLASS']
+    # Just use the DRF default, which will pick up our CustomAutoSchema
+    return views.APIView.schema
 
 
 class APIView(views.APIView):
-    schema = get_default_schema()
+    # Schema is inherited from DRF's APIView, which uses DEFAULT_SCHEMA_CLASS
+    # No need to override it here - drf-spectacular will handle it
     versioning_class = URLPathVersioning
 
     def initialize_request(self, request, *args, **kwargs):
@@ -244,7 +271,8 @@ class APIView(views.APIView):
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
-                response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
+                if response.data and 'detail' in response.data:
+                    response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
                 logger.warning(status_msg)
@@ -253,7 +281,7 @@ class APIView(views.APIView):
         time_started = getattr(self, 'time_started', None)
         if request.user.is_authenticated:
             response['X-API-Product-Version'] = get_awx_version()
-        response['X-API-Product-Name'] = server_product_name()
+        response['X-API-Product-Name'] = detect_server_product_name()
 
         response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
@@ -349,12 +377,6 @@ class APIView(views.APIView):
             if 'version' in kwargs:
                 kwargs.pop('version')
         return super(APIView, self).dispatch(request, *args, **kwargs)
-
-    def check_permissions(self, request):
-        if request.method not in ('GET', 'OPTIONS', 'HEAD'):
-            if 'write' not in getattr(request.user, 'oauth_scopes', ['write']):
-                raise PermissionDenied()
-        return super(APIView, self).check_permissions(request)
 
 
 class GenericAPIView(generics.GenericAPIView, APIView):
@@ -748,7 +770,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = self.unattach_validate(request)
+        sub_id, res = self.unattach_validate(request)
         if res:
             return res
         return self.unattach_by_id(request, sub_id)
@@ -826,7 +848,7 @@ class ResourceAccessList(ParentMixin, ListAPIView):
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
             ancestors = set(RoleEvaluation.objects.filter(content_type_id=content_type.id, object_id=obj.id).values_list('role_id', flat=True))
             qs = User.objects.filter(has_roles__in=ancestors) | User.objects.filter(is_superuser=True)
-            auditor_role = RoleDefinition.objects.filter(name="System Auditor").first()
+            auditor_role = RoleDefinition.objects.filter(name="Platform Auditor").first()
             if auditor_role:
                 qs |= User.objects.filter(role_assignments__role_definition=auditor_role)
             return qs.distinct()
@@ -1006,6 +1028,9 @@ class CopyAPIView(GenericAPIView):
 class GenericCancelView(RetrieveAPIView):
     # In subclass set model, serializer_class
     obj_permission_type = 'cancel'
+
+    def get(self, request, *args, **kwargs):
+        return super(GenericCancelView, self).get(request, *args, **kwargs)
 
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):

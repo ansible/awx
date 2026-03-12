@@ -33,6 +33,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
+from awx.main.utils.redis import get_redis_client
 from awx.main.models.mixins import RelatedJobsMixin, ResourceMixin
 from awx.main.models.receptor_address import ReceptorAddress
 
@@ -49,9 +50,8 @@ class HasPolicyEditsMixin(HasEditsMixin):
         abstract = True
 
     def __init__(self, *args, **kwargs):
-        r = super(BaseModel, self).__init__(*args, **kwargs)
+        super(BaseModel, self).__init__(*args, **kwargs)
         self._prior_values_store = self._get_fields_snapshot()
-        return r
 
     def save(self, *args, **kwargs):
         super(BaseModel, self).save(*args, **kwargs)
@@ -160,7 +160,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=100,
         editable=False,
     )
-    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
+    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(Decimal(0.0))])
     enabled = models.BooleanField(default=True)
     managed_by_policy = models.BooleanField(default=True)
 
@@ -397,7 +397,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
-            redis.Redis.from_url(settings.BROKER_URL).ping()
+            get_redis_client().ping()
         except redis.ConnectionError:
             errors = _('Failed to connect to Redis')
 
@@ -485,6 +485,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMi
 
     class Meta:
         app_label = 'main'
+        ordering = ('pk',)
         permissions = [('use_instancegroup', 'Can use instance group in a preference list of a resource')]
         # Since this has no direct organization field only superuser can add, so remove add permission
         default_permissions = ('change', 'delete', 'view')

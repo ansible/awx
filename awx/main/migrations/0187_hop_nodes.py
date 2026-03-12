@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='instancelink',
-            constraint=models.CheckConstraint(check=models.Q(('source', models.F('target')), _negated=True), name='source_and_target_can_not_be_equal'),
+            constraint=models.CheckConstraint(condition=models.Q(('source', models.F('target')), _negated=True), name='source_and_target_can_not_be_equal'),
         ),
         migrations.RunPython(automatically_peer_from_control_plane),
     ]

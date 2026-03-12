@@ -150,8 +150,8 @@ EXAMPLES = '''
     description: Source for inventory
     inventory: previously-created-inventory
     credential: previously-created-credential
-    overwrite: True
-    update_on_launch: True
+    overwrite: true
+    update_on_launch: true
     organization: Default
     source_vars:
       private: false
@@ -230,7 +230,11 @@ def main():
     inventory_object = module.get_one('inventories', name_or_id=inventory, data=lookup_data)
 
     if not inventory_object:
-        module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
+        # if the inventory does not exist, then it can't have sources.
+        if state == 'absent':
+            module.exit_json(**module.json_output)
+        else:
+            module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
 
     inventory_source_object = module.get_one(
         'inventory_sources',

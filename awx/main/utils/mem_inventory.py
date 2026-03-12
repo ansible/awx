@@ -6,7 +6,6 @@ import re
 import logging
 from collections import OrderedDict
 
-
 # Logger is used for any data-related messages so that the log level
 # can be adjusted on command invocation
 logger = logging.getLogger('awx.main.commands.inventory_import')

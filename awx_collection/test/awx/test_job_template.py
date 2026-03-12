@@ -240,7 +240,7 @@ def test_job_template_with_survey_encrypted_default(run_module, admin_user, proj
 
     assert result.get('changed', False), result  # not actually desired, but assert for sanity
 
-    silence_warning.assert_called_once_with(
+    silence_warning.assert_any_call(
         "The field survey_spec of job_template {0} has encrypted data and " "may inaccurately report task is changed.".format(result['id'])
     )
 

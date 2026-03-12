@@ -5,7 +5,6 @@ from awxkit.api.resources import resources
 from . import base
 from . import page
 
-
 log = logging.getLogger(__name__)
 
 

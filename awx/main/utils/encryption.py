@@ -9,7 +9,6 @@ from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from django.utils.encoding import smart_str, smart_bytes
 
-
 __all__ = ['get_encryption_key', 'encrypt_field', 'decrypt_field', 'encrypt_value', 'decrypt_value', 'encrypt_dict']
 
 logger = logging.getLogger('awx.main.utils.encryption')

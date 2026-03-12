@@ -92,7 +92,7 @@ setup(
         'requests',
         'setuptools',
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     extras_require={'formatting': ['jq'], 'websockets': ['websocket-client==0.57.0'], 'crypto': ['cryptography']},
     license='Apache 2.0',
     classifiers=[
@@ -104,7 +104,8 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration',
     ],

@@ -1,5 +1,6 @@
 import json
 import logging
+from collections import defaultdict
 
 from django.apps import apps as global_apps
 from django.db.models import ForeignKey
@@ -12,12 +13,18 @@ from awx.main.constants import role_name_to_perm_mapping
 
 from ansible_base.rbac.permission_registry import permission_registry
 
-
 logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 
 def create_permissions_as_operation(apps, schema_editor):
+    logger.info('Running data migration create_permissions_as_operation')
+    # NOTE: the DAB ContentType changes adjusted how they fire
+    # before they would fire on every app config, like contenttypes
     create_dab_permissions(global_apps.get_app_config("main"), apps=apps)
+    # This changed to only fire once and do a global creation
+    # so we need to call it for specifically the dab_rbac app
+    # multiple calls will not hurt anything
+    create_dab_permissions(global_apps.get_app_config("dab_rbac"), apps=apps)
 
 
 """
@@ -112,7 +119,12 @@ def get_descendents(f, children_map):
 
 def get_permissions_for_role(role_field, children_map, apps):
     Permission = apps.get_model('dab_rbac', 'DABPermission')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    try:
+        # After migration for remote permissions
+        ContentType = apps.get_model('dab_rbac', 'DABContentType')
+    except LookupError:
+        # If using DAB from before remote permissions are implemented
+        ContentType = apps.get_model('contenttypes', 'ContentType')
 
     perm_list = []
     for child_field in get_descendents(role_field, children_map):
@@ -155,10 +167,14 @@ def migrate_to_new_rbac(apps, schema_editor):
     This method moves the assigned permissions from the old rbac.py models
     to the new RoleDefinition and ObjectRole models
     """
+    logger.info('Running data migration migrate_to_new_rbac')
     Role = apps.get_model('main', 'Role')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
     Permission = apps.get_model('dab_rbac', 'DABPermission')
+
+    if Permission.objects.count() == 0:
+        raise RuntimeError('Running migrate_to_new_rbac requires DABPermission objects created first')
 
     # remove add premissions that are not valid for migrations from old versions
     for perm_str in ('add_organization', 'add_jobtemplate'):
@@ -177,7 +193,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     # NOTE: this import is expected to break at some point, and then just move the data here
     from awx.main.models.rbac import role_descriptions
 
-    for role in Role.objects.prefetch_related('members', 'parents').iterator():
+    for role in Role.objects.prefetch_related('members', 'parents').iterator(chunk_size=1000):
         if role.singleton_name:
             continue  # only bothering to migrate object roles
 
@@ -239,10 +255,13 @@ def migrate_to_new_rbac(apps, schema_editor):
 
     # Create new replacement system auditor role
     new_system_auditor, created = RoleDefinition.objects.get_or_create(
-        name='System Auditor',
+        name='Platform Auditor',
         defaults={'description': 'Migrated singleton role giving read permission to everything', 'managed': True},
     )
     new_system_auditor.permissions.add(*list(Permission.objects.filter(codename__startswith='view')))
+
+    if created:
+        logger.info(f'Created RoleDefinition {new_system_auditor.name} pk={new_system_auditor.pk} with {new_system_auditor.permissions.count()} permissions')
 
     # migrate is_system_auditor flag, because it is no longer handled by a system role
     old_system_auditor = Role.objects.filter(singleton_name='system_auditor').first()
@@ -272,8 +291,9 @@ def get_or_create_managed(name, description, ct, permissions, RoleDefinition):
 
 def setup_managed_role_definitions(apps, schema_editor):
     """
-    Idepotent method to create or sync the managed role definitions
+    Idempotent method to create or sync the managed role definitions
     """
+    logger.info('Running data migration setup_managed_role_definitions')
     to_create = {
         'object_admin': '{cls.__name__} Admin',
         'org_admin': 'Organization Admin',
@@ -281,7 +301,13 @@ def setup_managed_role_definitions(apps, schema_editor):
         'special': '{cls.__name__} {action}',
     }
 
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    try:
+        # After migration for remote permissions
+        ContentType = apps.get_model('dab_rbac', 'DABContentType')
+    except LookupError:
+        # If using DAB from before remote permissions are implemented
+        ContentType = apps.get_model('contenttypes', 'ContentType')
+
     Permission = apps.get_model('dab_rbac', 'DABPermission')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     Organization = apps.get_model(settings.ANSIBLE_BASE_ORGANIZATION_MODEL)
@@ -309,16 +335,6 @@ def setup_managed_role_definitions(apps, schema_editor):
                     to_create['object_admin'].format(cls=cls), f'Has all permissions to a single {cls._meta.verbose_name}', ct, indiv_perms, RoleDefinition
                 )
             )
-            if cls_name == 'team':
-                managed_role_definitions.append(
-                    get_or_create_managed(
-                        'Controller Team Admin',
-                        f'Has all permissions to a single {cls._meta.verbose_name}',
-                        ct,
-                        indiv_perms,
-                        RoleDefinition,
-                    )
-                )
 
         if 'org_children' in to_create and (cls_name not in ('organization', 'instancegroup', 'team')):
             org_child_perms = object_perms.copy()
@@ -359,32 +375,11 @@ def setup_managed_role_definitions(apps, schema_editor):
                         RoleDefinition,
                     )
                 )
-                if action == 'member' and cls_name in ('organization', 'team'):
-                    suffix = to_create['special'].format(cls=cls, action=action.title())
-                    rd_name = f'Controller {suffix}'
-                    managed_role_definitions.append(
-                        get_or_create_managed(
-                            rd_name,
-                            f'Has {action} permissions to a single {cls._meta.verbose_name}',
-                            ct,
-                            perm_list,
-                            RoleDefinition,
-                        )
-                    )
 
     if 'org_admin' in to_create:
         managed_role_definitions.append(
             get_or_create_managed(
                 to_create['org_admin'].format(cls=Organization),
-                'Has all permissions to a single organization and all objects inside of it',
-                org_ct,
-                org_perms,
-                RoleDefinition,
-            )
-        )
-        managed_role_definitions.append(
-            get_or_create_managed(
-                'Controller Organization Admin',
                 'Has all permissions to a single organization and all objects inside of it',
                 org_ct,
                 org_perms,
@@ -431,3 +426,115 @@ def setup_managed_role_definitions(apps, schema_editor):
     for role_definition in unexpected_role_definitions:
         logger.info(f'Deleting old managed role definition {role_definition.name}, pk={role_definition.pk}')
         role_definition.delete()
+
+
+def get_team_to_team_relationships(apps, team_member_role):
+    """
+    Find all team-to-team relationships where one team is a member of another.
+    Returns a dict mapping parent_team_id -> [child_team_id, ...]
+    """
+    team_to_team_relationships = defaultdict(list)
+
+    # Find all team assignments with the Team Member role
+    RoleTeamAssignment = apps.get_model('dab_rbac', 'RoleTeamAssignment')
+    team_assignments = RoleTeamAssignment.objects.filter(role_definition=team_member_role).select_related('team')
+
+    for assignment in team_assignments:
+        parent_team_id = int(assignment.object_id)
+        child_team_id = assignment.team.id
+        team_to_team_relationships[parent_team_id].append(child_team_id)
+
+    return team_to_team_relationships
+
+
+def get_all_user_members_of_team(apps, team_member_role, team_id, team_to_team_map, visited=None):
+    """
+    Recursively find all users who are members of a team, including through nested teams.
+    """
+    if visited is None:
+        visited = set()
+
+    if team_id in visited:
+        return set()  # Avoid infinite recursion
+
+    visited.add(team_id)
+    all_users = set()
+
+    # Get direct user assignments to this team
+    RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
+    user_assignments = RoleUserAssignment.objects.filter(role_definition=team_member_role, object_id=team_id).select_related('user')
+
+    for assignment in user_assignments:
+        all_users.add(assignment.user)
+
+    # Get team-to-team assignments and recursively find their users
+    child_team_ids = team_to_team_map.get(team_id, [])
+    for child_team_id in child_team_ids:
+        nested_users = get_all_user_members_of_team(apps, team_member_role, child_team_id, team_to_team_map, visited.copy())
+        all_users.update(nested_users)
+
+    return all_users
+
+
+def remove_team_to_team_assignment(apps, team_member_role, parent_team_id, child_team_id):
+    """
+    Remove team-to-team memberships.
+    """
+    Team = apps.get_model('main', 'Team')
+    RoleTeamAssignment = apps.get_model('dab_rbac', 'RoleTeamAssignment')
+
+    parent_team = Team.objects.get(id=parent_team_id)
+    child_team = Team.objects.get(id=child_team_id)
+
+    # Remove all team-to-team RoleTeamAssignments
+    RoleTeamAssignment.objects.filter(role_definition=team_member_role, object_id=parent_team_id, team=child_team).delete()
+
+    # Check mirroring Team model for children under member_role
+    parent_team.member_role.children.filter(object_id=child_team_id).delete()
+
+
+def consolidate_indirect_user_roles(apps, schema_editor):
+    """
+    A user should have a member role for every team they were indirectly
+    a member of. ex. Team A is a member of Team B. All users in Team A
+    previously were only members of Team A. They should now be members of
+    Team A and Team B.
+    """
+
+    # get models for membership on teams
+    RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+    Team = apps.get_model('main', 'Team')
+
+    team_member_role = RoleDefinition.objects.get(name='Team Member')
+
+    team_to_team_map = get_team_to_team_relationships(apps, team_member_role)
+
+    if not team_to_team_map:
+        return  # No team-to-team relationships to consolidate
+
+    # Get content type for Team - needed for give_permissions
+    try:
+        from django.contrib.contenttypes.models import ContentType
+
+        team_content_type = ContentType.objects.get_for_model(Team)
+    except ImportError:
+        # Fallback if ContentType is not available
+        ContentType = apps.get_model('contenttypes', 'ContentType')
+        team_content_type = ContentType.objects.get_for_model(Team)
+
+    # Get all users who should be direct members of a team
+    for parent_team_id, child_team_ids in team_to_team_map.items():
+        all_users = get_all_user_members_of_team(apps, team_member_role, parent_team_id, team_to_team_map)
+
+        # Create direct RoleUserAssignments for all users
+        if all_users:
+            give_permissions(apps=apps, rd=team_member_role, users=list(all_users), object_id=parent_team_id, content_type_id=team_content_type.id)
+
+        # Mirror assignments to Team model
+        parent_team = Team.objects.get(id=parent_team_id)
+        for user in all_users:
+            parent_team.member_role.members.add(user.id)
+
+        # Remove all team-to-team assignments for parent team
+        for child_team_id in child_team_ids:
+            remove_team_to_team_assignment(apps, team_member_role, parent_team_id, child_team_id)

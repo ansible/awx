@@ -4,10 +4,12 @@ import os
 import signal
 import time
 import datetime
+from queue import Empty as QueueEmpty
 
 from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
+from django import db
 from django.db import transaction, connection as django_connection
 from django_guid import set_guid
 
@@ -15,13 +17,15 @@ import psutil
 
 import redis
 
+from awx.main.utils.redis import get_redis_client
+from awx.main.utils.db import set_connection_name
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
+from awx.main.tasks.system import events_processed_hook
 import awx.main.analytics.subsystem_metrics as s_metrics
-from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
@@ -46,13 +50,23 @@ def job_stats_wrapup(job_identifier, event=None):
         # If the status was a finished state before this update was made, send notifications
         # If not, we will send notifications when the status changes
         if uj.status not in ACTIVE_STATES:
-            uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
+            events_processed_hook(uj)
 
     except Exception:
         logger.exception('Worker failed to save stats or emit notifications: Job {}'.format(job_identifier))
 
 
-class CallbackBrokerWorker(BaseWorker):
+class WorkerSignalHandler:
+    def __init__(self):
+        self.kill_now = False
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+
+    def exit_gracefully(self, *args, **kwargs):
+        self.kill_now = True
+
+
+class CallbackBrokerWorker:
     """
     A worker implementation that deserializes callback event data and persists
     it into the database.
@@ -71,7 +85,7 @@ class CallbackBrokerWorker(BaseWorker):
 
     def __init__(self):
         self.buff = {}
-        self.redis = redis.Redis.from_url(settings.BROKER_URL)
+        self.redis = get_redis_client()
         self.subsystem_metrics = s_metrics.CallbackReceiverMetrics(auto_pipe_execute=False)
         self.queue_pop = 0
         self.queue_name = settings.CALLBACK_QUEUE
@@ -84,7 +98,8 @@ class CallbackBrokerWorker(BaseWorker):
         """This needs to be obtained after forking, or else it will give the parent process"""
         return os.getpid()
 
-    def read(self, queue):
+    def read(self):
+        has_redis_error = False
         try:
             res = self.redis.blpop(self.queue_name, timeout=1)
             if res is None:
@@ -94,14 +109,21 @@ class CallbackBrokerWorker(BaseWorker):
             self.subsystem_metrics.inc('callback_receiver_events_popped_redis', 1)
             self.subsystem_metrics.inc('callback_receiver_events_in_memory', 1)
             return json.loads(res[1])
+        except redis.exceptions.ConnectionError as exc:
+            # Low noise log, because very common and many workers will write this
+            logger.error(f"redis connection error: {exc}")
+            has_redis_error = True
+            time.sleep(5)
         except redis.exceptions.RedisError:
             logger.exception("encountered an error communicating with redis")
+            has_redis_error = True
             time.sleep(1)
         except (json.JSONDecodeError, KeyError):
             logger.exception("failed to decode JSON message from redis")
         finally:
-            self.record_statistics()
-            self.record_read_metrics()
+            if not has_redis_error:
+                self.record_statistics()
+                self.record_read_metrics()
 
         return {'event': 'FLUSH'}
 
@@ -139,10 +161,37 @@ class CallbackBrokerWorker(BaseWorker):
             filepath = self.prof.stop()
             logger.error(f'profiling is disabled, wrote {filepath}')
 
-    def work_loop(self, *args, **kw):
+    def work_loop(self, idx, *args):
         if settings.AWX_CALLBACK_PROFILE:
             signal.signal(signal.SIGUSR1, self.toggle_profiling)
-        return super(CallbackBrokerWorker, self).work_loop(*args, **kw)
+
+        ppid = os.getppid()
+        signal_handler = WorkerSignalHandler()
+        set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
+        while not signal_handler.kill_now:
+            # if the parent PID changes, this process has been orphaned
+            # via e.g., segfault or sigkill, we should exit too
+            if os.getppid() != ppid:
+                break
+            try:
+                body = self.read()  # this is only for the callback, only reading from redis.
+                if body == 'QUIT':
+                    break
+            except QueueEmpty:
+                continue
+            except Exception:
+                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
+                continue
+            try:
+                for conn in db.connections.all():
+                    # If the database connection has a hiccup during the prior message, close it
+                    # so we can establish a new connection
+                    conn.close_if_unusable_or_obsolete()
+                self.perform_work(body, *args)
+            except Exception:
+                logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
+
+        logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def flush(self, force=False):
         now = tz_now()

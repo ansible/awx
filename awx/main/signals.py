@@ -27,7 +27,6 @@ from django.utils import timezone
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
-
 # AWX
 from awx.main.models import (
     ActivityStream,
@@ -38,8 +37,6 @@ from awx.main.models import (
     InventorySource,
     Job,
     JobHostSummary,
-    JobTemplate,
-    OAuth2AccessToken,
     Organization,
     Project,
     Role,
@@ -54,14 +51,10 @@ from awx.main.models import (
     WorkflowApprovalTemplate,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
 )
-from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
-from awx.main.fields import (
-    is_implicit_parent,
-    update_role_parentage_for_instance,
-)
+from awx.main.fields import is_implicit_parent
 
 from awx.main import consumers
 
@@ -194,31 +187,6 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
             label.delete()
 
 
-def save_related_job_templates(sender, instance, **kwargs):
-    """save_related_job_templates loops through all of the
-    job templates that use an Inventory that have had their
-    Organization updated. This triggers the rebuilding of the RBAC hierarchy
-    and ensures the proper access restrictions.
-    """
-    if sender is not Inventory:
-        raise ValueError('This signal callback is only intended for use with Project or Inventory')
-
-    update_fields = kwargs.get('update_fields', None)
-    if (update_fields and not ('organization' in update_fields or 'organization_id' in update_fields)) or kwargs.get('created', False):
-        return
-
-    if instance._prior_values_store.get('organization_id') != instance.organization_id:
-        jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
-        for jt in jtq:
-            parents_added, parents_removed = update_role_parentage_for_instance(jt)
-            if parents_added or parents_removed:
-                logger.info(
-                    'Permissions on JT {} changed due to inventory {} organization change from {} to {}.'.format(
-                        jt.pk, instance.pk, instance._prior_values_store.get('organization_id'), instance.organization_id
-                    )
-                )
-
-
 def connect_computed_field_signals():
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -232,7 +200,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-post_save.connect(save_related_job_templates, sender=Inventory)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
@@ -400,8 +367,6 @@ def model_serializer_mapping():
         models.WorkflowApproval: serializers.WorkflowApprovalActivityStreamSerializer,
         models.WorkflowApprovalTemplate: serializers.WorkflowApprovalTemplateSerializer,
         models.WorkflowJob: serializers.WorkflowJobSerializer,
-        models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,
-        models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
     }
 
 
@@ -443,8 +408,6 @@ def activity_stream_create(sender, instance, created, **kwargs):
             changes['labels'] = [label.name for label in instance.labels.iterator()]
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
-        if type(instance) == OAuth2AccessToken:
-            changes['token'] = CENSOR_VALUE
         activity_entry = get_activity_stream_class()(operation='create', object1=object1, changes=json.dumps(changes), actor=get_current_user_or_none())
         # TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
@@ -506,8 +469,6 @@ def activity_stream_delete(sender, instance, **kwargs):
         return
     changes.update(model_to_dict(instance, model_serializer_mapping()))
     object1 = camelcase_to_underscore(instance.__class__.__name__)
-    if type(instance) == OAuth2AccessToken:
-        changes['token'] = CENSOR_VALUE
     activity_entry = get_activity_stream_class()(operation='delete', changes=json.dumps(changes), object1=object1, actor=get_current_user_or_none())
     activity_entry.save()
     connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
@@ -669,13 +630,3 @@ def save_user_session_membership(sender, **kwargs):
             membership.delete()
         if len(expired):
             consumers.emit_channel_notification('control-limit_reached_{}'.format(user_id), dict(group_name='control', reason='limit_reached'))
-
-
-@receiver(post_save, sender=OAuth2AccessToken)
-def create_access_token_user_if_missing(sender, **kwargs):
-    obj = kwargs['instance']
-    if obj.application and obj.application.user:
-        obj.user = obj.application.user
-        post_save.disconnect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
-        obj.save()
-        post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)

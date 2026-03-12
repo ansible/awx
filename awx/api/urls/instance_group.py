@@ -12,7 +12,6 @@ from awx.api.views import (
     InstanceGroupObjectRolesList,
 )
 
-
 urls = [
     re_path(r'^$', InstanceGroupList.as_view(), name='instance_group_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', InstanceGroupDetail.as_view(), name='instance_group_detail'),

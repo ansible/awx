@@ -82,7 +82,7 @@ job runs. It will populate the cache id set by the last "check" type update.
 
 For details on how Galaxy servers are configured in Ansible in general see:
 
-https://docs.ansible.com/ansible/devel/user_guide/collections_using.html
+https://docs.ansible.com/projects/ansible/devel/user_guide/collections_using.html
 (if "devel" link goes stale in the future, it is for Ansible 2.9)
 
 You can specify a list of zero or more servers to download roles and

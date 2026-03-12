@@ -15,7 +15,6 @@ from awxkit.api.resources import resources
 from awxkit.config import config
 import awxkit.exceptions as exc
 
-
 log = logging.getLogger(__name__)
 
 

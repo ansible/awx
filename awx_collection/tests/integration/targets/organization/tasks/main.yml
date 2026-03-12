@@ -139,7 +139,7 @@
   organization:
     name: Default
     validate_certs: true
-  ignore_errors: true
+  ignore_errors: yes
   register: check_ssl_is_used
 
 - name: Check that connection failed

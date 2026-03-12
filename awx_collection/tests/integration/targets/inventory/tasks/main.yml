@@ -8,7 +8,6 @@
   set_fact:
     inv_name1: "AWX-Collection-tests-inventory-inv1-{{ test_id }}"
     inv_name2: "AWX-Collection-tests-inventory-inv2-{{ test_id }}"
-    cred_name1: "AWX-Collection-tests-inventory-cred1-{{ test_id }}"
     group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
 
 - block:
@@ -16,21 +15,6 @@
     - name: Create an Instance Group
       instance_group:
         name: "{{ group_name1 }}"
-        state: present
-      register: result
-
-    - assert:
-        that:
-          - "result is changed"
-
-    - name: Create an Insights Credential
-      credential:
-        name: "{{ cred_name1 }}"
-        organization: Default
-        credential_type: Insights
-        inputs:
-          username: joe
-          password: secret
         state: present
       register: result
 
@@ -143,7 +127,7 @@
         organization: Default
         kind: smart
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
@@ -203,13 +187,15 @@
         organization: test-non-existing-org
         state: present
       register: result
-      ignore_errors: true
+      ignore_errors: yes
 
     - assert:
         that:
           - "result is failed"
           - "result is not changed"
-          - "'test-non-existing-org' in result.msg"
+          - >-
+            'test-non-existing-org' in result.msg and
+            'returned 0 items, expected 1' in result.msg
           - "result.total_results == 0"
 
   always:
@@ -226,11 +212,4 @@
     - name: Delete the instance groups
       instance_group:
         name: "{{ group_name1 }}"
-        state: absent
-
-    - name: Delete Insights Credential
-      credential:
-        name: "{{ cred_name1 }}"
-        organization: "Default"
-        credential_type: Insights
         state: absent

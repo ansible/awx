@@ -21,7 +21,6 @@ from .page import exception_from_status_code
 
 from urllib.parse import urljoin
 
-
 log = logging.getLogger(__name__)
 
 
@@ -31,6 +30,8 @@ credential_input_fields = (
     'become_password',
     'become_username',
     'client',
+    'client_id',
+    'client_secret',
     'cloud_environment',
     'domain',
     'host',
@@ -132,6 +133,8 @@ def get_payload_field_and_value_from_kwargs_or_config_cred(field, kind, kwargs, 
         config_field = 'ad_user'
     elif field == 'client':
         config_field = 'client_id'
+    elif field == 'client_id' and 'azure' in kind:  # Needed to avoid service account client_id collision
+        config_field = ''
     elif field == 'authorize_password':
         config_field = 'authorize'
     else:

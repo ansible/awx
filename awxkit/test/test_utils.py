@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timezone
 import sys
 
 from unittest import mock
@@ -93,7 +93,12 @@ def test_random_titles_generates_correct_characters(non_ascii):
     title = utils.random_title(non_ascii=non_ascii)
     if non_ascii:
         with pytest.raises(UnicodeEncodeError):
-            title.encode('ascii')
+            # There is a tiny (flaky) chance that random_title will just happen
+            # to generate unicode that is also valid ascii
+            # so we repeat a few times, just to be sure we get non-ascii
+            for i in range(4):
+                title = utils.random_title(non_ascii=non_ascii)
+                title.encode('ascii')
         title.encode('utf-8')
     else:
         title.encode('ascii')
@@ -379,7 +384,7 @@ class TestUpdatePayload(object):
 
 
 def test_to_ical():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     ical_datetime = utils.to_ical(now)
     date = str(now.date()).replace('-', '')
     time = str(now.time()).split('.')[0].replace(':', '')

@@ -6,11 +6,11 @@ import urllib.parse as urlparse
 from collections import OrderedDict
 
 # Django
-from django.core.validators import URLValidator, _lazy_re_compile
+from django.core.validators import URLValidator, DomainNameValidator, _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
-from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField  # noqa
+from rest_framework.fields import BooleanField, CharField, ChoiceField, DictField, DateTimeField, EmailField, IntegerField, ListField, FloatField  # noqa
 from rest_framework.serializers import PrimaryKeyRelatedField  # noqa
 
 # AWX
@@ -160,10 +160,11 @@ class StringListIsolatedPathField(StringListField):
 class URLField(CharField):
     # these lines set up a custom regex that allow numbers in the
     # top-level domain
+
     tld_re = (
         r'\.'  # dot
         r'(?!-)'  # can't start with a dash
-        r'(?:[a-z' + URLValidator.ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
+        r'(?:[a-z' + DomainNameValidator.ul + r'0-9' + '-]{2,63}'  # domain label, this line was changed from the original URLValidator
         r'|xn--[a-z0-9]{1,59})'  # or punycode label
         r'(?<!-)'  # can't end with a dash
         r'\.?'  # may have a trailing dot
@@ -207,7 +208,8 @@ class URLField(CharField):
         if self.allow_plain_hostname:
             try:
                 url_parts = urlparse.urlsplit(value)
-                if url_parts.hostname and '.' not in url_parts.hostname:
+                looks_like_ipv6 = bool(url_parts.netloc and url_parts.netloc.startswith('[') and url_parts.netloc.endswith(']'))
+                if not looks_like_ipv6 and url_parts.hostname and '.' not in url_parts.hostname:
                     netloc = '{}.local'.format(url_parts.hostname)
                     if url_parts.port:
                         netloc = '{}:{}'.format(netloc, url_parts.port)

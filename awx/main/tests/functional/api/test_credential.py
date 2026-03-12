@@ -12,18 +12,6 @@ from awx.api.versioning import reverse
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nxyz==\n-----END PRIVATE KEY-----'
 
-
-@pytest.mark.django_db
-def test_idempotent_credential_type_setup():
-    assert CredentialType.objects.count() == 0
-    CredentialType.setup_tower_managed_defaults()
-    total = CredentialType.objects.count()
-    assert total > 0
-
-    CredentialType.setup_tower_managed_defaults()
-    assert CredentialType.objects.count() == total
-
-
 #
 # user credential creation
 #
@@ -297,6 +285,72 @@ def test_sa_grant_private_credential_to_team_through_role_teams(post, credential
     # not even a system admin can grant a private cred to a team though
     response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, admin)
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_grant_credential_to_team_different_organization_through_role_teams(post, get, credential, organizations, admin, org_admin, team, team_member):
+    # # Test that credential from different org can be assigned to team by a superuser through role_teams_list endpoint
+    orgs = organizations(2)
+    credential.organization = orgs[0]
+    credential.save()
+    team.organization = orgs[1]
+    team.save()
+
+    # Non-superuser (org_admin) trying cross-org assignment should be denied
+    response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, org_admin)
+    assert response.status_code == 400
+    assert (
+        "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
+        in response.data['msg']
+    )
+
+    # Superuser (admin) can do cross-org assignment
+    response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, admin)
+    assert response.status_code == 204
+
+    assert credential.use_role in team.member_role.children.all()
+    assert team_member in credential.read_role
+    assert team_member in credential.use_role
+    assert team_member not in credential.admin_role
+
+
+@pytest.mark.django_db
+def test_grant_credential_to_team_different_organization(post, get, credential, organizations, admin, org_admin, team, team_member):
+    # Test that credential from different org can be assigned to team by a superuser
+    orgs = organizations(2)
+    credential.organization = orgs[0]
+    credential.save()
+    team.organization = orgs[1]
+    team.save()
+
+    # Non-superuser (org_admin, ...) trying cross-org assignment should be denied
+    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
+    assert response.status_code == 400
+    assert (
+        "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
+        in response.data['msg']
+    )
+
+    # Superuser (system admin) can do cross-org assignment
+    response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
+    assert response.status_code == 204
+
+    assert credential.use_role in team.member_role.children.all()
+
+    assert team_member in credential.read_role
+    assert team_member in credential.use_role
+    assert team_member not in credential.admin_role
+
+    # Team member can see the credential in API
+    response = get(reverse('api:team_credentials_list', kwargs={'pk': team.id}), team_member)
+    assert response.status_code == 200
+    assert response.data['count'] == 1
+    assert response.data['results'][0]['id'] == credential.id
+
+    # Team member can see the credential in general credentials API
+    response = get(reverse('api:credential_list'), team_member)
+    assert response.status_code == 200
+    assert any(cred['id'] == credential.id for cred in response.data['results'])
 
 
 @pytest.mark.django_db
@@ -1234,6 +1288,30 @@ def test_custom_credential_type_create(get, post, organization, admin):
     cred = Credential.objects.all()[:1].get()
     assert cred.inputs['api_token'].startswith('$encrypted$UTF8$AES')
     assert decrypt_field(cred, 'api_token') == 'secret'
+
+
+@pytest.mark.django_db
+def test_galaxy_create_ok(post, organization, admin):
+    params = {
+        'credential_type': 1,
+        'name': 'Galaxy credential',
+        'inputs': {
+            'url': 'https://galaxy.ansible.com',
+            'token': 'some_galaxy_token',
+        },
+    }
+    galaxy = CredentialType.defaults['galaxy_api_token']()
+    galaxy.save()
+    params['user'] = admin.id
+    params['credential_type'] = galaxy.pk
+    response = post(reverse('api:credential_list'), params, admin)
+    assert response.status_code == 201
+
+    assert Credential.objects.count() == 1
+    cred = Credential.objects.all()[:1].get()
+    assert cred.credential_type == galaxy
+    assert cred.inputs['url'] == 'https://galaxy.ansible.com'
+    assert decrypt_field(cred, 'token') == 'some_galaxy_token'
 
 
 #

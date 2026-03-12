@@ -2,9 +2,12 @@ class Common(Exception):
     def __init__(self, status_string='', message=''):
         if isinstance(status_string, Exception):
             self.status_string = ''
-            return super(Common, self).__init__(*status_string)
-        self.status_string = status_string
-        self.msg = message
+            self.msg = message
+            super().__init__(*status_string.args)
+        else:
+            self.status_string = status_string
+            self.msg = message
+            super().__init__(status_string, message)
 
     def __getitem__(self, val):
         return (self.status_string, self.msg)[val]

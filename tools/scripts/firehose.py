@@ -30,8 +30,7 @@ import datetime
 import itertools
 import json
 import multiprocessing
-import pkg_resources
-import random
+import site
 import subprocess
 import sys
 from io import StringIO
@@ -132,7 +131,7 @@ def cleanup(sql):
 
 def generate_jobs(jobs, batch_size, time_delta):
     print(f'inserting {jobs} job(s)')
-    sys.path.insert(0, pkg_resources.get_distribution('awx').module_path)
+    sys.path[:0] = site.getsitepackages()
     from awx import prepare_env
 
     prepare_env()
@@ -311,12 +310,12 @@ if __name__ == '__main__':
                 if events > 0:
                     for k_id in created_job_ids:
                         generate_events(events, str(k_id), time_delta)
-                print(datetime.datetime.utcnow().isoformat())
+                print(datetime.datetime.now(datetime.UTC).isoformat())
         conn.close()
 
     finally:
         # restore all indexes
-        print(datetime.datetime.utcnow().isoformat())
+        print(datetime.datetime.now(datetime.UTC).isoformat())
         print('restoring indexes and constraints (this may take awhile)')
 
         workers = []
@@ -344,4 +343,4 @@ if __name__ == '__main__':
             sql = f'ALTER TABLE main_jobevent ADD CONSTRAINT {conname} {condef}'
             cleanup(sql)
 
-        print(datetime.datetime.utcnow().isoformat())
+        print(datetime.datetime.now(datetime.UTC).isoformat())

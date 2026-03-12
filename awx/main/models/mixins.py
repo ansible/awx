@@ -28,7 +28,6 @@ from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import AskForField
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 
-
 logger = logging.getLogger('awx.main.models.mixins')
 
 
@@ -42,6 +41,7 @@ __all__ = [
     'TaskManagerInventoryUpdateMixin',
     'ExecutionEnvironmentMixin',
     'CustomVirtualEnvMixin',
+    'OpaQueryPathMixin',
 ]
 
 
@@ -85,7 +85,7 @@ class ResourceMixin(models.Model):
             raise RuntimeError(f'Role filters only valid for users and ancestor role, received {accessor}')
 
         if content_types is None:
-            ct_kwarg = dict(content_type_id=ContentType.objects.get_for_model(cls).id)
+            ct_kwarg = dict(content_type=ContentType.objects.get_for_model(cls))
         else:
             ct_kwarg = dict(content_type_id__in=content_types)
 
@@ -188,6 +188,16 @@ class SurveyJobTemplateMixin(models.Model):
                             runtime_extra_vars.pop(variable_key)
 
                 if default is not None:
+                    # do not add variables that contain an empty string, are not required and are not present in extra_vars
+                    # password fields must be skipped, because default values have special behaviour
+                    if (
+                        default == ''
+                        and not survey_element.get('required')
+                        and survey_element.get('type') != 'password'
+                        and variable_key not in runtime_extra_vars
+                    ):
+                        continue
+
                     decrypted_default = default
                     if survey_element['type'] == "password" and isinstance(decrypted_default, str) and decrypted_default.startswith('$encrypted$'):
                         decrypted_default = decrypt_value(get_encryption_key('value', pk=None), decrypted_default)
@@ -692,3 +702,16 @@ class WebhookMixin(models.Model):
             logger.debug("Webhook status update sent.")
         else:
             logger.error("Posting webhook status failed, code: {}\n" "{}\nPayload sent: {}".format(response.status_code, response.text, json.dumps(data)))
+
+
+class OpaQueryPathMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    opa_query_path = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        default=None,
+        help_text=_("The query path for the OPA policy to evaluate prior to job execution. The query path should be formatted as package/rule."),
+    )

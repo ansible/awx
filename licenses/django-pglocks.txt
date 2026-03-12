@@ -1,3 +1,0 @@
-Copyright (c) 2013 Christophe Pettus
-
-Licensed under the MIT License.

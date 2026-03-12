@@ -20,6 +20,19 @@ In this document, we will go into a bit of detail about how and when AWX runs Py
     - Every node in an AWX cluster runs a periodic task that serves as
       a heartbeat and capacity check
 
+dispatcherd Library
+-------------------
+
+The task system logic has been split out into a separate library:
+
+https://github.com/ansible/dispatcherd
+
+AWX now uses dispatcherd directly for all task management. Tasks are decorated using:
+
+```python
+from dispatcherd.publish import task
+```
+
 
 Tasks, Queues and Workers
 ----------------
@@ -60,7 +73,7 @@ Defining and Running Tasks
 Tasks are defined in AWX's source code, and generally live in the
 `awx.main.tasks` module.  Tasks can be defined as simple functions:
 
-    from awx.main.dispatch.publish import task
+    from dispatcherd.publish import task
 
     @task()
     def add(a, b):
@@ -97,7 +110,7 @@ associated Python code:
 
 Dispatcher Implementation
 -------------------------
-Every node in an AWX install runs `awx-manage run_dispatcher`, a Python process
+Every node in an AWX install runs `awx-manage dispatcherd`, a Python process
 that uses the `kombu` library to consume messages from the appropriate queues
 for that node (the default shared queue, a queue specific to the node's
 hostname, and the broadcast queue).  The Dispatcher process manages a pool of
@@ -108,11 +121,11 @@ the associated Python code.
 
 Debugging
 ---------
-`awx-manage run_dispatcher` includes a few flags that allow interaction and
+`awx-manage dispatcherctl` includes a few flags that allow interaction and
 debugging:
 
 ```
-[root@awx /]# awx-manage run_dispatcher --status
+[root@awx /]# awx-manage dispatcherctl status
 2018-09-14 18:39:22,223 WARNING  awx.main.dispatch checking dispatcher status for awx
 awx[pid:9610] workers total=4 min=4 max=60
 .  worker[pid:9758] sent=12 finished=12 qsize=0 rss=106.730MB [IDLE]
@@ -126,17 +139,9 @@ This outputs running and queued task UUIDs handled by a specific dispatcher
 (which corresponds to `main_unifiedjob.celery_task_id` in the database):
 
 ```
-[root@awx /]# awx-manage run_dispatcher --running
+[root@awx /]# awx-manage dispatcherctl running
 2018-09-14 18:39:22,223 WARNING  awx.main.dispatch checking dispatcher running for awx
 ['eb3b0a83-86da-413d-902a-16d7530a6b25', 'f447266a-23da-42b4-8025-fe379d2db96f']
-```
-
-Additionally, you can tell the local running dispatcher to recycle all of the
-workers in its pool.  It will wait for any running jobs to finish and exit when
-work has completed, spinning up replacement workers.
-
-```
-awx-manage run_dispatcher --reload
 ```
 
 * * *

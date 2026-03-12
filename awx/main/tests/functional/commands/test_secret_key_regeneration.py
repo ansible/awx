@@ -12,7 +12,6 @@ from awx.conf.models import Setting
 from awx.main.management.commands import regenerate_secret_key
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value
 
-
 PREFIX = '$encrypted$UTF8$AESCBC$'
 
 
@@ -146,22 +145,6 @@ class TestKeyRegeneration:
         # verify that the new SECRET_KEY *does* work
         with override_settings(SECRET_KEY=new_key):
             assert json.loads(new_job.decrypted_extra_vars())['secret_key'] == 'donttell'
-
-    def test_oauth2_application_client_secret(self, oauth_application):
-        # test basic decryption
-        secret = oauth_application.client_secret
-        assert len(secret) == 128
-
-        # re-key the client_secret
-        new_key = regenerate_secret_key.Command().handle()
-
-        # verify that the old SECRET_KEY doesn't work
-        with pytest.raises(InvalidToken):
-            models.OAuth2Application.objects.get(pk=oauth_application.pk).client_secret
-
-        # verify that the new SECRET_KEY *does* work
-        with override_settings(SECRET_KEY=new_key):
-            assert models.OAuth2Application.objects.get(pk=oauth_application.pk).client_secret == secret
 
     def test_use_custom_key_with_tower_secret_key_env_var(self):
         custom_key = 'MXSq9uqcwezBOChl/UfmbW1k4op+bC+FQtwPqgJ1u9XV'

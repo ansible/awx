@@ -1,0 +1,57 @@
+---
+
+codecov:
+  notify:
+    after_n_builds: 9  # Number of test matrix+lint jobs uploading coverage
+    wait_for_ci: false
+
+  require_ci_to_pass: false
+
+  token: >-  # repo-scoped, upload-only, needed for stability in PRs from forks
+    2b8c7a7a-7293-4a00-bf02-19bd55a1389b
+
+comment:
+  require_changes: true
+
+coverage:
+  range: 100..100
+  status:
+    patch:
+      default:
+        target: 100%
+      pytest:
+        target: 100%
+        flags:
+          - pytest
+      typing:
+        flags:
+          - MyPy
+    project:
+      default:
+        target: 75%
+      lib:
+        flags:
+          - pytest
+        paths:
+          - awx/
+        target: 75%
+      tests:
+        flags:
+          - pytest
+        paths:
+          - tests/
+          - >-
+            **/test/
+          - >-
+            **/tests/
+          - >-
+            **/test/**
+          - >-
+            **/tests/**
+        target: 95%
+      typing:
+        flags:
+          - MyPy
+        target: 100%
+
+...

@@ -162,7 +162,7 @@ is the ability to assign multiple Vault credentials to a Job Template run.
 
 This specific use case covers Ansible's support for multiple Vault passwords for
 a playbook run (since Ansible 2.4):
-http://docs.ansible.com/ansible/latest/vault.html#vault-ids-and-multiple-vault-passwords
+https://docs.ansible.com/projects/ansible/latest/vault.html#vault-ids-and-multiple-vault-passwords
 
 Vault credentials in AWX now have an optional field, `vault_id`, which is
 analogous to the `--vault-id` argument to `ansible-playbook`.  To run

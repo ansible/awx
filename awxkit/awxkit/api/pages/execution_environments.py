@@ -11,7 +11,6 @@ from awxkit.utils import random_title, PseudoNamespace, filter_by_class
 from . import base
 from . import page
 
-
 log = logging.getLogger(__name__)
 
 

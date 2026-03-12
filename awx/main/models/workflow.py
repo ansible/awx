@@ -45,7 +45,6 @@ from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.utils import ScheduleWorkflowManager
 
-
 __all__ = [
     'WorkflowJobTemplate',
     'WorkflowJob',
@@ -58,6 +57,8 @@ __all__ = [
 
 
 logger = logging.getLogger('awx.main.models.workflow')
+
+WORKFLOW_BASE_URL = "{}/jobs/workflow/{}"
 
 
 class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
@@ -199,6 +200,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         indexes = [
             models.Index(fields=['identifier']),
         ]
+        ordering = ('pk',)
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_node_detail', kwargs={'pk': self.pk}, request=request)
@@ -285,6 +287,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             models.Index(fields=["identifier", "workflow_job"]),
             models.Index(fields=['identifier']),
         ]
+        ordering = ('pk',)
 
     @property
     def event_processing_finished(self):
@@ -690,7 +693,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         return reverse('api:workflow_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, '/#/jobs/workflow/{}'.format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def notification_data(self):
         result = super(WorkflowJob, self).notification_data()
@@ -784,7 +787,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def cancel_dispatcher_process(self):
         # WorkflowJobs don't _actually_ run anything in the dispatcher, so
         # there's no point in asking the dispatcher if it knows about this task
-        return True
+        return
 
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
@@ -873,7 +876,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return None
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, '/#/jobs/workflow/{}'.format(self.workflow_job.id))
+        return urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
 
     def _get_parent_field_name(self):
         return 'workflow_approval_template'
@@ -937,7 +940,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
             return
         for nt in self.workflow_job_template.notification_templates["approvals"]:
             try:
-                (notification_subject, notification_body) = self.build_approval_notification_message(nt, approval_status)
+                notification_subject, notification_body = self.build_approval_notification_message(nt, approval_status)
             except Exception:
                 raise NotImplementedError("build_approval_notification_message() does not exist")
 
@@ -986,7 +989,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return (msg, body)
 
     def context(self, approval_status):
-        workflow_url = urljoin(settings.TOWER_URL_BASE, '/#/jobs/workflow/{}'.format(self.workflow_job.id))
+        workflow_url = urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
         return {
             'approval_status': approval_status,
             'approval_node_name': self.workflow_approval_template.name,

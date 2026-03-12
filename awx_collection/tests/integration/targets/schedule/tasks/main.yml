@@ -1,11 +1,11 @@
 ---
 - name: Generate a random string for test
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
-- name: generate random string for schedule
-  set_fact:
+- name: Generate random string for schedule
+  ansible.builtin.set_fact:
     org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
     sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
     sched2: "AWX-Collection-tests-schedule-sched2-{{ test_id }}"
@@ -23,7 +23,8 @@
     host_name: "AWX-Collection-tests-schedule-host-{{ test_id }}"
     slice_num: 10
 
-- block:
+- name: Assert blocks
+  block:
     - name: Try to create without an rrule
       schedule:
         name: "{{ sched1 }}"
@@ -33,7 +34,8 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result is failed
+      ansible.builtin.assert:
         that:
           - result is failed
           - "'Unable to create schedule '~ sched1 in result.msg"
@@ -59,7 +61,8 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Unable to create schedule
+      ansible.builtin.assert:
         that:
           - result is failed
           - "'Unable to create schedule '~ sched1 in result.msg"
@@ -72,16 +75,17 @@
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
-    - assert:
+    - name: Assert result is changed
+      ansible.builtin.assert:
         that:
           - result is changed
 
     - name: Use lookup to check that schedules was enabled
       ansible.builtin.set_fact:
-        schedules_enabled_test: "lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled"
+        schedules_enabled_test: "{{lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled | bool}}"
 
     - name: Newly created schedules should have API default value for enabled
-      assert:
+      ansible.builtin.assert:
         that:
           - schedules_enabled_test
 
@@ -93,7 +97,8 @@
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
-    - assert:
+    - name: Assert result did not change
+      ansible.builtin.assert:
         that:
           - result is not changed
 
@@ -105,7 +110,8 @@
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - result is changed
 
@@ -117,7 +123,8 @@
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - result is changed
 
@@ -129,7 +136,8 @@
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - result is not changed
 
@@ -189,7 +197,8 @@
         state: present
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
@@ -264,7 +273,8 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
@@ -281,7 +291,8 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
@@ -293,7 +304,8 @@
         enabled: "false"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - result is changed
 
@@ -322,7 +334,8 @@
       register: result
       ignore_errors: true
 
-    - assert:
+    - name: Assert result failed
+      ansible.builtin.assert:
         that:
           - result is failed
 
@@ -333,7 +346,8 @@
         unified_job_template: "{{ jt2 }}"
       register: result
 
-    - assert:
+    - name: Assert result changed
+      ansible.builtin.assert:
         that:
           - result is changed
 
@@ -345,7 +359,7 @@
       loop:
         - "{{ sched1 }}"
         - "{{ sched2 }}"
-      ignore_errors: True
+      failed_when: false
 
     - name: Delete the jt1
       job_template:
@@ -353,7 +367,10 @@
         project: "{{ proj1 }}"
         playbook: hello_world.yml
         state: absent
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the jt2
       job_template:
@@ -361,7 +378,10 @@
         project: "{{ proj2 }}"
         playbook: hello_world.yml
         state: absent
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete the Project2
       project:
@@ -370,7 +390,11 @@
         state: absent
         scm_type: git
         scm_url: https://github.com/ansible/ansible-tower-samples.git
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
+      failed_when: false
 
     - name: Delete the Project1
       project:
@@ -379,7 +403,10 @@
         state: absent
         scm_type: git
         scm_url: https://github.com/ansible/ansible-tower-samples.git
-      ignore_errors: True
+      register: del_res
+      until: del_res is succeeded
+      retries: 5
+      delay: 3
 
     - name: Delete Credential1
       credential:
@@ -387,7 +414,7 @@
         organization: Default
         credential_type: Red Hat Ansible Automation Platform
         state: absent
-      ignore_errors: True
+      failed_when: false
 
     # Labels can not be deleted
 
@@ -396,7 +423,7 @@
         name: "{{ ee1 }}"
         image: "junk"
         state: absent
-      ignore_errors: True
+      failed_when: false
 
     - name: Delete instance groups
       instance_group:
@@ -405,20 +432,20 @@
       loop:
         - "{{ ig1 }}"
         - "{{ ig2 }}"
-      ignore_errors: True
+      failed_when: false
 
-    - name: "Remove the organization"
+    - name: Remove the organization
       organization:
         name: "{{ org_name }}"
         state: absent
-      ignore_errors: True
+      failed_when: false
 
-    - name: "Delete slice inventory"
+    - name: Delete slice inventory
       inventory:
         name: "{{ slice_inventory }}"
         organization: "{{ org_name }}"
         state: absent
-      ignore_errors: True
+      failed_when: false
 
     - name: Delete slice hosts
       host:
@@ -426,4 +453,4 @@
         inventory: "{{ slice_inventory }}"
         state: absent
       loop: "{{ range(slice_num)|list }}"
-      ignore_errors: True
+      failed_when: false

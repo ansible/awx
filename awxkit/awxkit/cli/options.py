@@ -6,12 +6,9 @@ import re
 import sys
 import yaml
 
-from distutils.util import strtobool
-
 from .custom import CustomAction
-from .format import add_output_formatting_arguments
+from .format import add_output_formatting_arguments, strtobool
 from .resource import DEPRECATED_RESOURCES_REVERSE
-
 
 UNIQUENESS_RULES = {
     'me': ('id', 'username'),
@@ -105,6 +102,18 @@ class ResourceOptionsParser(object):
         if '299' in warning and 'deprecated' in warning:
             self.deprecated = True
         self.allowed_options = options.headers.get('Allow', '').split(', ')
+        # If the user can PUT on the detail endpoint but doesn't have
+        # POST on the list endpoint, use the detail endpoint's
+        # action schema so that 'modify' fields are populated.
+        if 'POST' not in self.options and 'PUT' in self.allowed_options:
+            try:
+                detail_actions = options.json().get('actions', {})
+            except Exception:
+                detail_actions = {}
+            if 'PUT' in detail_actions:
+                self.options['PUT'] = detail_actions['PUT']
+            elif 'GET' in detail_actions:
+                self.options['PUT'] = detail_actions['GET']
 
     def build_list_actions(self):
         action_map = {
@@ -112,8 +121,12 @@ class ResourceOptionsParser(object):
             'POST': 'create',
         }
         for method, action in self.options.items():
+            # Skip 'PUT', which may be added by get_allowed_options
+            # and is handled separately by build_detail_actions
+            if method not in action_map:
+                continue
             method = action_map[method]
-            parser = self.parser.add_parser(method, help='')
+            parser = self.parser.add_parser(method, help='', add_help=True)
             if method == 'list':
                 parser.add_argument(
                     '--all',
@@ -139,7 +152,7 @@ class ResourceOptionsParser(object):
         if 'DELETE' in self.allowed_options:
             allowed.append('delete')
         for method in allowed:
-            parser = self.parser.add_parser(method, help='')
+            parser = self.parser.add_parser(method, help='', add_help=True)
             self.parser.choices[method].add_argument(
                 'id', type=functools.partial(pk_or_name, self.v2, self.resource), help='the ID (or unique name) of the resource'
             )

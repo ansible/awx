@@ -1,0 +1,12 @@
+---
+- name: Perform an action with a different hostname via aap_hostname
+  inventory:
+    name: "Demo Inventory"
+    organization: Default
+    aap_hostname: https://foohostbar.invalid
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - "'foohostbar' in result.msg"

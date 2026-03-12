@@ -17,6 +17,10 @@ DOCUMENTATION = '''
 module: role
 author: "Wayne Witzel III (@wwitzel3)"
 short_description: grant or revoke an Automation Platform Controller role.
+deprecated:
+    removed_in: '25.0.0'
+    why: Endpoints corresponding to module will be removed in the API
+    alternative: Use the role_user_assignment and role_team_assignment modules instead.
 description:
     - Roles are used for access control, this module is for managing user access to server resources.
     - Grant or revoke Automation Platform Controller roles to users. See U(https://www.ansible.com/tower) for an overview.
@@ -268,7 +272,7 @@ def main():
         for resource in value:
             # Attempt to look up project based on the provided name, ID, or named URL and lookup data
             lookup_key = key
-            if key == 'organizations' or key == 'users':
+            if key == 'organizations' or key == 'users' or key == 'teams':
                 lookup_data_populated = {}
             else:
                 lookup_data_populated = lookup_data

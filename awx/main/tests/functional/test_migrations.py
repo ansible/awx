@@ -8,7 +8,6 @@ Most tests that live in here can probably be deleted at some point. They are mai
 for a developer. When AWX versions that users upgrade from falls out of support that
 is when migration tests can be deleted. This is also a good time to squash. Squashing
 will likely mess with the tests that live here.
-
 The smoke test should be kept in here. The smoke test ensures that our migrations
 continue to work when sqlite is the backing database (vs. the default DB of postgres).
 """
@@ -19,27 +18,22 @@ class TestMigrationSmoke:
     def test_happy_path(self, migrator):
         """
         This smoke test runs all the migrations.
-
         Example of how to use django-test-migration to invoke particular migration(s)
         while weaving in object creation and assertions.
-
         Note that this is more than just an example. It is a smoke test because it runs ALL
         the migrations. Our "normal" unit tests subvert the migrations running because it is slow.
         """
         migration_nodes = all_migrations('default')
         migration_tuples = nodes_to_tuples(migration_nodes)
         final_migration = migration_tuples[-1]
-
         migrator.apply_initial_migration(('main', None))
         # I just picked a newish migration at the time of writing this.
         # If someone from the future finds themselves here because the are squashing migrations
         # it is fine to change the 0180_... below to some other newish migration
         intermediate_state = migrator.apply_tested_migration(('main', '0180_add_hostmetric_fields'))
-
         Instance = intermediate_state.apps.get_model('main', 'Instance')
         # Create any old object in the database
         Instance.objects.create(hostname='foobar', node_type='control')
-
         final_state = migrator.apply_tested_migration(final_migration)
         Instance = final_state.apps.get_model('main', 'Instance')
         assert Instance.objects.filter(hostname='foobar').count() == 1
@@ -52,20 +46,16 @@ class TestMigrationSmoke:
         foo = Instance.objects.create(hostname='foo', node_type='execution', listener_port=1234)
         bar = Instance.objects.create(hostname='bar', node_type='execution', listener_port=None)
         bar.peers.add(foo)
-
         new_state = migrator.apply_tested_migration(
             ('main', '0189_inbound_hop_nodes'),
         )
         Instance = new_state.apps.get_model('main', 'Instance')
         ReceptorAddress = new_state.apps.get_model('main', 'ReceptorAddress')
-
         # We can now test how our migration worked, new field is there:
         assert ReceptorAddress.objects.filter(address='foo', port=1234).count() == 1
         assert not ReceptorAddress.objects.filter(address='bar').exists()
-
         bar = Instance.objects.get(hostname='bar')
         fooaddr = ReceptorAddress.objects.get(address='foo')
-
         bar_peers = bar.peers.all()
         assert len(bar_peers) == 1
         assert fooaddr in bar_peers
@@ -75,7 +65,6 @@ class TestMigrationSmoke:
         Organization = old_state.apps.get_model('main', 'Organization')
         Team = old_state.apps.get_model('main', 'Team')
         User = old_state.apps.get_model('auth', 'User')
-
         org = Organization.objects.create(name='arbitrary-org', created=now(), modified=now())
         user = User.objects.create(username='random-user')
         org.read_role.members.add(user)
@@ -87,11 +76,10 @@ class TestMigrationSmoke:
         new_state = migrator.apply_tested_migration(
             ('main', '0192_custom_roles'),
         )
-
         RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
         assert RoleUserAssignment.objects.filter(user=user.id, object_id=org.id).exists()
-        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Controller Organization Member', object_id=org.id).exists()
-        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Controller Team Member', object_id=team.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Organization Member', object_id=org.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Team Member', object_id=team.id).exists()
 
         # Regression testing for bug that comes from current vs past models mismatch
         RoleDefinition = new_state.apps.get_model('dab_rbac', 'RoleDefinition')
@@ -99,10 +87,140 @@ class TestMigrationSmoke:
         # Test special cases in managed role creation
         assert not RoleDefinition.objects.filter(name='Organization Team Admin').exists()
         assert not RoleDefinition.objects.filter(name='Organization InstanceGroup Admin').exists()
-
         # Test that a removed EE model permission has been deleted
         new_state = migrator.apply_tested_migration(
             ('main', '0195_EE_permissions'),
         )
         DABPermission = new_state.apps.get_model('dab_rbac', 'DABPermission')
         assert not DABPermission.objects.filter(codename='view_executionenvironment').exists()
+
+        # Test create a Project with a duplicate name
+        Organization = new_state.apps.get_model('main', 'Organization')
+        Project = new_state.apps.get_model('main', 'Project')
+        WorkflowJobTemplate = new_state.apps.get_model('main', 'WorkflowJobTemplate')
+        org = Organization.objects.create(name='duplicate-obj-organization', created=now(), modified=now())
+        proj_ids = []
+        for i in range(3):
+            proj = Project.objects.create(name='duplicate-project-name', organization=org, created=now(), modified=now())
+            proj_ids.append(proj.id)
+
+        # Test create WorkflowJobTemplate with duplicate names
+        wfjt_ids = []
+        for i in range(3):
+            wfjt = WorkflowJobTemplate.objects.create(name='duplicate-workflow-name', organization=org, created=now(), modified=now())
+            wfjt_ids.append(wfjt.id)
+
+        # The uniqueness rules will not apply to InventorySource
+        Inventory = new_state.apps.get_model('main', 'Inventory')
+        InventorySource = new_state.apps.get_model('main', 'InventorySource')
+        inv = Inventory.objects.create(name='migration-test-inv', organization=org, created=now(), modified=now())
+        InventorySource.objects.create(name='migration-test-src', source='file', inventory=inv, organization=org, created=now(), modified=now())
+
+        # Apply migration 0200 which should rename duplicates
+        new_state = migrator.apply_tested_migration(
+            ('main', '0200_template_name_constraint'),
+        )
+
+        # Get the models from the new state for verification
+        Project = new_state.apps.get_model('main', 'Project')
+        WorkflowJobTemplate = new_state.apps.get_model('main', 'WorkflowJobTemplate')
+        InventorySource = new_state.apps.get_model('main', 'InventorySource')
+
+        for i, proj_id in enumerate(proj_ids):
+            proj = Project.objects.get(id=proj_id)
+            if i == 0:
+                assert proj.name == 'duplicate-project-name'
+            else:
+                assert proj.name != 'duplicate-project-name'
+                assert proj.name.startswith('duplicate-project-name')
+
+        # Verify WorkflowJobTemplate duplicates are renamed
+        for i, wfjt_id in enumerate(wfjt_ids):
+            wfjt = WorkflowJobTemplate.objects.get(id=wfjt_id)
+            if i == 0:
+                assert wfjt.name == 'duplicate-workflow-name'
+            else:
+                assert wfjt.name != 'duplicate-workflow-name'
+                assert wfjt.name.startswith('duplicate-workflow-name')
+
+        # The inventory source had this field set to avoid the constrains
+        inv_src = InventorySource.objects.get(name='migration-test-src')
+        assert inv_src.org_unique is False
+        for proj in Project.objects.all():
+            assert proj.org_unique is True
+
+        # Piggyback test for the new credential types
+        validate_exists = ['GitHub App Installation Access Token Lookup', 'Terraform backend configuration']
+        CredentialType = new_state.apps.get_model('main', 'CredentialType')
+        # simulate an upgrade by deleting existing types with these names
+        for expected_name in validate_exists:
+            ct = CredentialType.objects.filter(name=expected_name).first()
+            if ct:
+                ct.delete()
+
+        new_state = migrator.apply_tested_migration(
+            ('main', '0201_create_managed_creds'),
+        )
+
+        CredentialType = new_state.apps.get_model('main', 'CredentialType')
+        for expected_name in validate_exists:
+            assert CredentialType.objects.filter(
+                name=expected_name
+            ).exists(), f'Could not find {expected_name} credential type name, all names: {list(CredentialType.objects.values_list("name", flat=True))}'
+
+        # Verify the system_administrator role exists
+        Role = new_state.apps.get_model('main', 'Role')
+        assert Role.objects.filter(
+            singleton_name='system_administrator', role_field='system_administrator'
+        ).exists(), "expected to find a system_administrator singleton role"
+
+
+@pytest.mark.django_db
+class TestGithubAppBug:
+    """
+    Tests that `awx-manage createsuperuser` runs successfully after
+    the `github_app` CredentialType kind is updated to `github_app_lookup`
+    via the migration.
+    """
+
+    def test_after_github_app_kind_migration(self, migrator):
+        """
+        Verifies that `createsuperuser` does not raise a KeyError
+        after the 0204_squashed_deletions migration (which includes
+        the `update_github_app_kind` logic) is applied.
+        """
+        # 1. Apply migrations up to the point *before* the 0204_squashed_deletions migration.
+        # This simulates the state where the problematic CredentialType might exist.
+        # We use 0203_remove_team_of_teams as the direct predecessor.
+        old_state = migrator.apply_tested_migration(('main', '0203_remove_team_of_teams'))
+
+        # Get the CredentialType model from the historical state.
+        CredentialType = old_state.apps.get_model('main', 'CredentialType')
+
+        # Create a CredentialType with the old, problematic 'namespace' value
+        CredentialType.objects.create(
+            name='Legacy GitHub App Credential',
+            kind='external',
+            namespace='github_app',  # The namespace that causes the KeyError in the registry lookup
+            managed=True,
+            created=now(),
+            modified=now(),
+        )
+
+        # Apply the migration that includes the fix (0204_squashed_deletions).
+        new_state = migrator.apply_tested_migration(('main', '0204_squashed_deletions'))
+
+        # Verify that the CredentialType with the old 'kind' no longer exists
+        # and the 'kind' has been updated to the new value.
+        CredentialType = new_state.apps.get_model('main', 'CredentialType')  # Get CredentialType model from the new state
+
+        # Assertion 1: The CredentialType with the old 'github_app' kind should no longer exist.
+        assert not CredentialType.objects.filter(
+            namespace='github_app'
+        ).exists(), "CredentialType with old 'github_app' kind should no longer exist after migration."
+
+        # Assertion 2: The CredentialType should now exist with the new 'github_app_lookup' kind
+        # and retain its original name.
+        assert CredentialType.objects.filter(
+            namespace='github_app_lookup', name='Legacy GitHub App Credential'
+        ).exists(), "CredentialType should be updated to 'github_app_lookup' and retain its name."

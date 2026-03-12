@@ -6,7 +6,6 @@ import logging
 import time
 from urllib.parse import urljoin
 
-
 # Django
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -51,9 +50,9 @@ from awx.main.models.mixins import (
     RelatedJobsMixin,
     WebhookMixin,
     WebhookTemplateMixin,
+    OpaQueryPathMixin,
 )
 from awx.main.constants import JOB_VARIABLE_PREFIXES
-
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -192,7 +191,9 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin):
+class JobTemplate(
+    UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin
+):
     """
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -355,26 +356,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 update_fields.append('organization_id')
         return super(JobTemplate, self).save(*args, **kwargs)
 
-    def validate_unique(self, exclude=None):
-        """Custom over-ride for JT specifically
-        because organization is inferred from project after full_clean is finished
-        thus the organization field is not yet set when validation happens
-        """
-        errors = []
-        for ut in JobTemplate.SOFT_UNIQUE_TOGETHER:
-            kwargs = {'name': self.name}
-            if self.project:
-                kwargs['organization'] = self.project.organization_id
-            else:
-                kwargs['organization'] = None
-            qs = JobTemplate.objects.filter(**kwargs)
-            if self.pk:
-                qs = qs.exclude(pk=self.pk)
-            if qs.exists():
-                errors.append('%s with this (%s) combination already exists.' % (JobTemplate.__name__, ', '.join(set(ut) - {'polymorphic_ctype'})))
-        if errors:
-            raise ValidationError(errors)
-
     def create_unified_job(self, **kwargs):
         prevent_slicing = kwargs.pop('_prevent_slicing', False)
         slice_ct = self.get_effective_slice_ct(kwargs)
@@ -400,6 +381,26 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 create_kwargs = dict(workflow_job=job, unified_job_template=self, ancestor_artifacts=dict(job_slice=idx + 1))
                 WorkflowJobNode.objects.create(**create_kwargs)
         return job
+
+    def validate_unique(self, exclude=None):
+        """Custom over-ride for JT specifically
+        because organization is inferred from project after full_clean is finished
+        thus the organization field is not yet set when validation happens
+        """
+        errors = []
+        for ut in JobTemplate.SOFT_UNIQUE_TOGETHER:
+            kwargs = {'name': self.name}
+            if self.project:
+                kwargs['organization'] = self.project.organization_id
+            else:
+                kwargs['organization'] = None
+            qs = JobTemplate.objects.filter(**kwargs)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                errors.append('%s with this (%s) combination already exists.' % (JobTemplate.__name__, ', '.join(set(ut) - {'polymorphic_ctype'})))
+        if errors:
+            raise ValidationError(errors)
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -607,6 +608,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=1,
         help_text=_("If ran as part of sliced jobs, the total number of slices. If 1, job is not part of a sliced job."),
     )
+    event_queries_processed = models.BooleanField(
+        default=True,
+        help_text=_("Events of this job have been queried for indirect host information, or do not need processing."),
+    )
 
     def _get_parent_field_name(self):
         return 'job_template'
@@ -628,7 +633,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return reverse('api:job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/playbook/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/playbook/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def _set_default_dependencies_processed(self):
         """
@@ -840,6 +845,21 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
+    def get_source_hosts_for_constructed_inventory(self):
+        """Return a QuerySet of the source (input inventory) hosts for a constructed inventory.
+
+        Constructed inventory hosts have an instance_id pointing to the real
+        host in the input inventory.  This resolves those references and returns
+        a proper QuerySet (never a list), suitable for use with finish_fact_cache.
+        """
+        Host = JobHostSummary._meta.get_field('host').related_model
+        if not self.inventory_id:
+            return Host.objects.none()
+        id_field = Host._meta.get_field('id')
+        return Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field))).only(
+            *HOST_FACTS_FIELDS
+        )
+
     def get_hosts_for_fact_cache(self):
         """
         Builds the queryset to use for writing or finalizing the fact cache
@@ -847,17 +867,15 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         For constructed inventories, that means the original (input inventory) hosts
         when slicing, that means only returning hosts in that slice
         """
-        Host = JobHostSummary._meta.get_field('host').related_model
         if not self.inventory_id:
+            Host = JobHostSummary._meta.get_field('host').related_model
             return Host.objects.none()
 
         if self.inventory.kind == 'constructed':
-            id_field = Host._meta.get_field('id')
-            host_qs = Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field)))
+            host_qs = self.get_source_hosts_for_constructed_inventory()
         else:
-            host_qs = self.inventory.hosts
+            host_qs = self.inventory.hosts.only(*HOST_FACTS_FIELDS)
 
-        host_qs = host_qs.only(*HOST_FACTS_FIELDS)
         host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
         return host_qs
 
@@ -1145,7 +1163,6 @@ class SystemJobOptions(BaseModel):
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
         ('cleanup_sessions', _('Removes expired browser sessions from the database')),
-        ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens')),
     ]
 
     class Meta:
@@ -1275,7 +1292,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return reverse('api:system_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/system/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/management/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     @property
     def event_class(self):

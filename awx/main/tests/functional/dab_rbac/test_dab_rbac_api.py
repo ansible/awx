@@ -1,21 +1,20 @@
 import pytest
 
-from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse as django_reverse
-from django.test.utils import override_settings
 
 from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Inventory, Organization
 from awx.main.access import JobTemplateAccess, WorkflowJobTemplateAccess
 
 from ansible_base.rbac.models import RoleDefinition
+from ansible_base.rbac import permission_registry
 
 
 @pytest.mark.django_db
 def test_managed_roles_created(setup_managed_roles):
     "Managed RoleDefinitions are created in post_migration signal, we expect to see them here"
     for cls in (JobTemplate, Inventory):
-        ct = ContentType.objects.get_for_model(cls)
+        ct = permission_registry.content_type_model.objects.get_for_model(cls)
         rds = list(RoleDefinition.objects.filter(content_type=ct))
         assert len(rds) > 1
         assert f'{cls.__name__} Admin' in [rd.name for rd in rds]
@@ -27,17 +26,20 @@ def test_managed_roles_created(setup_managed_roles):
 def test_custom_read_role(admin_user, post, setup_managed_roles):
     rd_url = django_reverse('roledefinition-list')
     resp = post(
-        url=rd_url, data={"name": "read role made for test", "content_type": "awx.inventory", "permissions": ['view_inventory']}, user=admin_user, expect=201
+        url=rd_url,
+        data={"name": "read role made for test", "content_type": "awx.inventory", "permissions": ['awx.view_inventory']},
+        user=admin_user,
+        expect=201,
     )
     rd_id = resp.data['id']
     rd = RoleDefinition.objects.get(id=rd_id)
-    assert rd.content_type == ContentType.objects.get_for_model(Inventory)
+    assert rd.content_type == permission_registry.content_type_model.objects.get_for_model(Inventory)
 
 
 @pytest.mark.django_db
 def test_custom_system_roles_prohibited(admin_user, post):
     rd_url = django_reverse('roledefinition-list')
-    resp = post(url=rd_url, data={"name": "read role made for test", "content_type": None, "permissions": ['view_inventory']}, user=admin_user, expect=400)
+    resp = post(url=rd_url, data={"name": "read role made for test", "content_type": None, "permissions": ['awx.view_inventory']}, user=admin_user, expect=400)
     assert 'System-wide roles are not enabled' in str(resp.data)
 
 
@@ -72,7 +74,7 @@ def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
     rd, _ = RoleDefinition.objects.get_or_create(
         name='inventory-delete',
         permissions=['delete_inventory', 'view_inventory', 'change_inventory'],
-        content_type=ContentType.objects.get_for_model(Inventory),
+        content_type=permission_registry.content_type_model.objects.get_for_model(Inventory),
     )
     rd.give_permission(rando, inventory)
     inv_id = inventory.pk
@@ -86,7 +88,9 @@ def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
 @pytest.mark.django_db
 def test_assign_custom_add_role(admin_user, rando, organization, post, setup_managed_roles):
     rd, _ = RoleDefinition.objects.get_or_create(
-        name='inventory-add', permissions=['add_inventory', 'view_organization'], content_type=ContentType.objects.get_for_model(Organization)
+        name='inventory-add',
+        permissions=['add_inventory', 'view_organization'],
+        content_type=permission_registry.content_type_model.objects.get_for_model(Organization),
     )
     rd.give_permission(rando, organization)
     url = reverse('api:inventory_list')
@@ -148,15 +152,6 @@ def test_assign_credential_to_user_of_another_org(setup_managed_roles, credentia
 
 
 @pytest.mark.django_db
-@override_settings(ALLOW_LOCAL_ASSIGNING_JWT_ROLES=False)
-def test_team_member_role_not_assignable(team, rando, post, admin_user, setup_managed_roles):
-    member_rd = RoleDefinition.objects.get(name='Organization Member')
-    url = django_reverse('roleuserassignment-list')
-    r = post(url, data={'object_id': team.id, 'role_definition': member_rd.id, 'user': rando.id}, user=admin_user, expect=400)
-    assert 'Not managed locally' in str(r.data)
-
-
-@pytest.mark.django_db
 def test_adding_user_to_org_member_role(setup_managed_roles, organization, admin, bob, post, get):
     '''
     Adding user to organization member role via the legacy RBAC endpoints
@@ -175,10 +170,17 @@ def test_adding_user_to_org_member_role(setup_managed_roles, organization, admin
 @pytest.mark.django_db
 @pytest.mark.parametrize('actor', ['user', 'team'])
 @pytest.mark.parametrize('role_name', ['Organization Admin', 'Organization Member', 'Team Admin', 'Team Member'])
-def test_prevent_adding_actor_to_platform_roles(setup_managed_roles, role_name, actor, organization, team, admin, bob, post):
+def test_adding_actor_to_platform_roles(setup_managed_roles, role_name, actor, organization, team, admin, bob, post):
     '''
-    Prevent user or team from being added to platform-level roles
+    Allow user to be added to platform-level roles
+    Exceptions:
+    - Team cannot be added to Organization Member or Admin role
+    - Team cannot be added to Team Admin or Team Member role
     '''
+    if actor == 'team':
+        expect = 400
+    else:
+        expect = 201
     rd = RoleDefinition.objects.get(name=role_name)
     endpoint = 'roleuserassignment-list' if actor == 'user' else 'roleteamassignment-list'
     url = django_reverse(endpoint)
@@ -186,37 +188,9 @@ def test_prevent_adding_actor_to_platform_roles(setup_managed_roles, role_name, 
     data = {'object_id': object_id, 'role_definition': rd.id}
     actor_id = bob.id if actor == 'user' else team.id
     data[actor] = actor_id
-    r = post(url, data=data, user=admin, expect=400)
-    assert 'Not managed locally' in str(r.data)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('role_name', ['Controller Team Admin', 'Controller Team Member'])
-def test_adding_user_to_controller_team_roles(setup_managed_roles, role_name, team, admin, bob, post, get):
-    '''
-    Allow user to be added to Controller Team Admin or Controller Team Member
-    '''
-    url_detail = reverse('api:team_detail', kwargs={'pk': team.id})
-    get(url_detail, user=bob, expect=403)
-
-    rd = RoleDefinition.objects.get(name=role_name)
-    url = django_reverse('roleuserassignment-list')
-    post(url, data={'object_id': team.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
-
-    get(url_detail, user=bob, expect=200)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('role_name', ['Controller Organization Admin', 'Controller Organization Member'])
-def test_adding_user_to_controller_organization_roles(setup_managed_roles, role_name, organization, admin, bob, post, get):
-    '''
-    Allow user to be added to Controller Organization Admin or Controller Organization Member
-    '''
-    url_detail = reverse('api:organization_detail', kwargs={'pk': organization.id})
-    get(url_detail, user=bob, expect=403)
-
-    rd = RoleDefinition.objects.get(name=role_name)
-    url = django_reverse('roleuserassignment-list')
-    post(url, data={'object_id': organization.id, 'role_definition': rd.id, 'user': bob.id}, user=admin, expect=201)
-
-    get(url, user=bob, expect=200)
+    r = post(url, data=data, user=admin, expect=expect)
+    if expect == 400:
+        if 'Organization' in role_name:
+            assert 'Assigning organization member permission to teams is not allowed' in str(r.data)
+        if 'Team' in role_name:
+            assert 'Assigning team permissions to other teams is not allowed' in str(r.data)

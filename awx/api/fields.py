@@ -9,7 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 # AWX
-from awx.conf import fields
 from awx.main.models import Credential
 
 __all__ = ['BooleanNullField', 'CharNullField', 'ChoiceNullField', 'VerbatimField']
@@ -22,7 +21,7 @@ class NullFieldMixin(object):
     """
 
     def validate_empty_values(self, data):
-        (is_empty_value, data) = super(NullFieldMixin, self).validate_empty_values(data)
+        is_empty_value, data = super(NullFieldMixin, self).validate_empty_values(data)
         if is_empty_value and data is None:
             return (False, data)
         return (is_empty_value, data)
@@ -79,19 +78,6 @@ class VerbatimField(serializers.Field):
         return value
 
 
-class OAuth2ProviderField(fields.DictField):
-    default_error_messages = {'invalid_key_names': _('Invalid key names: {invalid_key_names}')}
-    valid_key_names = {'ACCESS_TOKEN_EXPIRE_SECONDS', 'AUTHORIZATION_CODE_EXPIRE_SECONDS', 'REFRESH_TOKEN_EXPIRE_SECONDS'}
-    child = fields.IntegerField(min_value=1)
-
-    def to_internal_value(self, data):
-        data = super(OAuth2ProviderField, self).to_internal_value(data)
-        invalid_flags = set(data.keys()) - self.valid_key_names
-        if invalid_flags:
-            self.fail('invalid_key_names', invalid_key_names=', '.join(list(invalid_flags)))
-        return data
-
-
 class DeprecatedCredentialField(serializers.IntegerField):
     def __init__(self, **kwargs):
         kwargs['allow_null'] = True
@@ -103,7 +89,7 @@ class DeprecatedCredentialField(serializers.IntegerField):
     def to_internal_value(self, pk):
         try:
             pk = int(pk)
-        except ValueError:
+        except (ValueError, TypeError):
             self.fail('invalid')
         try:
             Credential.objects.get(pk=pk)

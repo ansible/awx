@@ -10,9 +10,12 @@ from awx.api.generics import APIView, Response
 from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
 from awx.main.utils import get_awx_version
+from awx.main.utils.analytics_proxy import OIDCClient
 from rest_framework import status
 
 from collections import OrderedDict
+
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 AUTOMATION_ANALYTICS_API_URL_PATH = "/api/tower-analytics/v1"
 AWX_ANALYTICS_API_PREFIX = 'analytics'
@@ -37,6 +40,8 @@ class MissingSettings(Exception):
 
 
 class GetNotAllowedMixin(object):
+    skip_ai_description = True
+
     def get(self, request, format=None):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -45,7 +50,9 @@ class AnalyticsRootView(APIView):
     permission_classes = (AnalyticsPermission,)
     name = _('Automation Analytics')
     swagger_topic = 'Automation Analytics'
+    resource_purpose = 'automation analytics endpoints'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to analytics"})
     def get(self, request, format=None):
         data = OrderedDict()
         data['authorized'] = reverse('api:analytics_authorized', request=request)
@@ -97,6 +104,8 @@ class AnalyticsGenericView(APIView):
 
         return Response(response.json(), status=response.status_code)
     """
+
+    resource_purpose = 'base view for analytics api proxy'
 
     permission_classes = (AnalyticsPermission,)
 
@@ -179,33 +188,59 @@ class AnalyticsGenericView(APIView):
 
         return Response(response.content, status=response.status_code)
 
+    @staticmethod
+    def _base_auth_request(request: requests.Request, method: str, url: str, user: str, pw: str, headers: dict[str, str]) -> requests.Response:
+        response = requests.request(
+            method,
+            url,
+            auth=(user, pw),
+            verify=settings.INSIGHTS_CERT_PATH,
+            params=getattr(request, 'query_params', {}),
+            headers=headers,
+            json=getattr(request, 'data', {}),
+            timeout=(31, 31),
+        )
+        return response
+
     def _send_to_analytics(self, request, method):
         try:
             headers = self._request_headers(request)
 
             self._get_setting('INSIGHTS_TRACKING_STATE', False, ERROR_UPLOAD_NOT_ENABLED)
-            url = self._get_analytics_url(request.path)
-            rh_user = self._get_setting('REDHAT_USERNAME', None, ERROR_MISSING_USER)
-            rh_password = self._get_setting('REDHAT_PASSWORD', None, ERROR_MISSING_PASSWORD)
-
             if method not in ["GET", "POST", "OPTIONS"]:
                 return self._error_response(ERROR_UNSUPPORTED_METHOD, method, remote=False, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                response = requests.request(
+            url = self._get_analytics_url(request.path)
+            using_subscriptions_credentials = False
+            try:
+                rh_user = getattr(settings, 'REDHAT_USERNAME', None)
+                rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+                if not (rh_user and rh_password):
+                    rh_user = self._get_setting('SUBSCRIPTIONS_CLIENT_ID', None, ERROR_MISSING_USER)
+                    rh_password = self._get_setting('SUBSCRIPTIONS_CLIENT_SECRET', None, ERROR_MISSING_PASSWORD)
+                    using_subscriptions_credentials = True
+
+                client = OIDCClient(rh_user, rh_password)
+                response = client.make_request(
                     method,
                     url,
-                    auth=(rh_user, rh_password),
-                    verify=settings.INSIGHTS_CERT_PATH,
-                    params=request.query_params,
                     headers=headers,
-                    json=request.data,
+                    verify=settings.INSIGHTS_CERT_PATH,
+                    params=getattr(request, 'query_params', {}),
+                    json=getattr(request, 'data', {}),
                     timeout=(31, 31),
                 )
+            except requests.RequestException:
+                # subscriptions credentials are not valid for basic auth, so just return 401
+                if using_subscriptions_credentials:
+                    response = Response(status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    logger.error("Automation Analytics API request failed, trying base auth method")
+                    response = self._base_auth_request(request, method, url, rh_user, rh_password, headers)
             #
             # Missing or wrong user/pass
             #
             if response.status_code == status.HTTP_401_UNAUTHORIZED:
-                text = (response.text or '').rstrip("\n")
+                text = response.get('text', '').rstrip("\n")
                 return self._error_response(ERROR_UNAUTHORIZED, text, remote=True, remote_status_code=response.status_code)
             #
             # Not found, No entitlement or No data in Analytics
@@ -230,67 +265,91 @@ class AnalyticsGenericView(APIView):
 
 
 class AnalyticsGenericListView(AnalyticsGenericView):
+    resource_purpose = 'analytics api proxy list view'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Get analytics data from Red Hat Insights"})
     def get(self, request, format=None):
         return self._send_to_analytics(request, method="GET")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Post query to Red Hat Insights analytics"})
     def post(self, request, format=None):
         return self._send_to_analytics(request, method="POST")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get analytics endpoint options"})
     def options(self, request, format=None):
         return self._send_to_analytics(request, method="OPTIONS")
 
 
 class AnalyticsGenericDetailView(AnalyticsGenericView):
+    resource_purpose = 'analytics api proxy detail view'
+
+    @extend_schema_if_available(extensions={"x-ai-description": "Get specific analytics resource from Red Hat Insights"})
     def get(self, request, slug, format=None):
         return self._send_to_analytics(request, method="GET")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Post query for specific analytics resource to Red Hat Insights"})
     def post(self, request, slug, format=None):
         return self._send_to_analytics(request, method="POST")
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Get options for specific analytics resource"})
     def options(self, request, slug, format=None):
         return self._send_to_analytics(request, method="OPTIONS")
 
 
+@extend_schema_if_available(
+    extensions={'x-ai-description': 'Check if the user has access to Red Hat Insights'},
+)
 class AnalyticsAuthorizedView(AnalyticsGenericListView):
     name = _("Authorized")
+    resource_purpose = 'red hat insights authorization status'
 
 
 class AnalyticsReportsList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Reports")
     swagger_topic = "Automation Analytics"
+    resource_purpose = 'automation analytics reports'
 
 
 class AnalyticsReportDetail(AnalyticsGenericDetailView):
     name = _("Report")
+    resource_purpose = 'automation analytics report detail'
 
 
 class AnalyticsReportOptionsList(AnalyticsGenericListView):
     name = _("Report Options")
+    resource_purpose = 'automation analytics report options'
 
 
 class AnalyticsAdoptionRateList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Adoption Rate")
+    resource_purpose = 'automation analytics adoption rate data'
 
 
 class AnalyticsEventExplorerList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Event Explorer")
+    resource_purpose = 'automation analytics event explorer data'
 
 
 class AnalyticsHostExplorerList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Host Explorer")
+    resource_purpose = 'automation analytics host explorer data'
 
 
 class AnalyticsJobExplorerList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Job Explorer")
+    resource_purpose = 'automation analytics job explorer data'
 
 
 class AnalyticsProbeTemplatesList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Probe Templates")
+    resource_purpose = 'automation analytics probe templates'
 
 
 class AnalyticsProbeTemplateForHostsList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Probe Template For Hosts")
+    resource_purpose = 'automation analytics probe templates for hosts'
 
 
 class AnalyticsRoiTemplatesList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("ROI Templates")
+    resource_purpose = 'automation analytics roi templates'

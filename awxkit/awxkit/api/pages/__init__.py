@@ -4,13 +4,11 @@ from .base import *  # NOQA
 from .bulk import *  # NOQA
 from .access_list import *  # NOQA
 from .api import *  # NOQA
-from .authtoken import *  # NOQA
 from .roles import *  # NOQA
 from .organizations import *  # NOQA
 from .notifications import *  # NOQA
 from .notification_templates import *  # NOQA
 from .users import *  # NOQA
-from .applications import *  # NOQA
 from .teams import *  # NOQA
 from .credentials import *  # NOQA
 from .unified_jobs import *  # NOQA

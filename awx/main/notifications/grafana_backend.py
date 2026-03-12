@@ -53,8 +53,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     ):
         super(GrafanaBackend, self).__init__(fail_silently=fail_silently)
         self.grafana_key = grafana_key
-        self.dashboardId = int(dashboardId) if dashboardId is not None else None
-        self.panelId = int(panelId) if panelId is not None else None
+        self.dashboardId = int(dashboardId) if dashboardId != '' else None
+        self.panelId = int(panelId) if panelId != '' else None
         self.annotation_tags = annotation_tags if annotation_tags is not None else []
         self.grafana_no_verify_ssl = grafana_no_verify_ssl
         self.isRegion = isRegion
@@ -76,10 +76,12 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
             grafana_headers = {}
             if 'started' in m.body:
                 try:
-                    epoch = datetime.datetime.utcfromtimestamp(0)
-                    grafana_data['time'] = grafana_data['timeEnd'] = int((dp.parse(m.body['started']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
+                    epoch = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
+                    grafana_data['time'] = grafana_data['timeEnd'] = int(
+                        (dp.parse(m.body['started']).replace(tzinfo=datetime.timezone.utc) - epoch).total_seconds() * 1000
+                    )
                     if m.body.get('finished'):
-                        grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=None) - epoch).total_seconds() * 1000)
+                        grafana_data['timeEnd'] = int((dp.parse(m.body['finished']).replace(tzinfo=datetime.timezone.utc) - epoch).total_seconds() * 1000)
                 except ValueError:
                     logger.error(smart_str(_("Error converting time {} or timeEnd {} to int.").format(m.body['started'], m.body['finished'])))
                     if not self.fail_silently:
@@ -97,6 +99,7 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
             r = requests.post(
                 "{}/api/annotations".format(m.recipients()[0]), json=grafana_data, headers=grafana_headers, verify=(not self.grafana_no_verify_ssl)
             )
+
             if r.status_code >= 400:
                 logger.error(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
                 if not self.fail_silently:

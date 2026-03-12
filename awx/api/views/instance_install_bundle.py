@@ -10,9 +10,10 @@ import time
 import re
 
 import asn1
+from ansible_base.lib.utils.schema import extend_schema_if_available
 from awx.api import serializers
 from awx.api.generics import GenericAPIView, Response
-from awx.api.permissions import IsSystemAdminOrAuditor
+from awx.api.permissions import IsSystemAdmin
 from awx.main import models
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -48,8 +49,10 @@ class InstanceInstallBundle(GenericAPIView):
     name = _('Install Bundle')
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
-    permission_classes = (IsSystemAdminOrAuditor,)
+    permission_classes = (IsSystemAdmin,)
+    resource_purpose = 'install bundle'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Generate and download install bundle for an instance"})
     def get(self, request, *args, **kwargs):
         instance_obj = self.get_object()
 
@@ -195,8 +198,8 @@ def generate_receptor_tls(instance_obj):
         .issuer_name(ca_cert.issuer)
         .public_key(csr.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.utcnow())
-        .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=3650))
+        .not_valid_before(datetime.datetime.now(datetime.UTC))
+        .not_valid_after(datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3650))
         .add_extension(
             csr.extensions.get_extension_for_class(x509.SubjectAlternativeName).value,
             critical=csr.extensions.get_extension_for_class(x509.SubjectAlternativeName).critical,

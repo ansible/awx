@@ -1,6 +1,7 @@
 import sys
 import os
 import shlex
+import warnings
 
 from datetime import datetime
 from importlib import import_module
@@ -8,10 +9,10 @@ from importlib import import_module
 sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
 
 project = u'Ansible AWX'
-copyright = u'2023, Red Hat'
+copyright = u'2026, Red Hat'
 author = u'Red Hat'
 
-pubdateshort = '2023-08-04'
+pubdateshort = '2026-01-07'
 pubdate = datetime.strptime(pubdateshort, '%Y-%m-%d').strftime('%B %d, %Y')
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -35,8 +36,13 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
+    'sphinxcontrib.redoc',
+    'notfound.extension',
     'swagger',
 ]
+
+notfound_urls_prefix = "/projects/awx/en/latest/"
+notfound_template = "404.rst"
 
 html_theme = 'sphinx_ansible_theme'
 html_theme_path = ["_static"]
@@ -57,20 +63,33 @@ language = 'en'
 locale_dirs = ['locale/']  # path is example but recommended.
 gettext_compact = False  # optional.
 
+redoc = [
+    {
+        'name': 'AWX OpenAPI Reference',
+        'page': 'open_api/explorer',
+        'spec': 'rst/open_api/schema.json',
+        'embed': True,
+        'opts': {
+            'suppress-warnings': True,
+            'hide-hostname': True,
+        }
+    }
+]
+
+# Suppress pkg_resources deprecation from sphinxcontrib-redoc
+warnings.filterwarnings(
+    'ignore',
+    message='pkg_resources is deprecated',
+    category=UserWarning,
+    module='sphinxcontrib.redoc',
+)
+
 rst_epilog = """
-.. |atqi| replace:: *AWX Quick Installation Guide*
-.. |atqs| replace:: *AWX Quick Setup Guide*
-.. |atir| replace:: *AWX Installation and Reference Guide*
-.. |ata| replace:: *AWX Administration Guide*
-.. |atu| replace:: *AWX User Guide*
-.. |atumg| replace:: *AWX Upgrade and Migration Guide*
 .. |atapi| replace:: *AWX API Guide*
 .. |atrn| replace:: *AWX Release Notes*
 .. |aa| replace:: Ansible Automation
-.. |AA| replace:: Automation Analytics
 .. |aap| replace:: Ansible Automation Platform
 .. |ab| replace:: ansible-builder
-.. |ap| replace:: Automation Platform
 .. |at| replace:: AWX
 .. |At| replace:: AWX
 .. |ah| replace:: Automation Hub
@@ -93,3 +112,4 @@ rst_epilog = """
     pubdateshort,
     pubdate,
 )
+

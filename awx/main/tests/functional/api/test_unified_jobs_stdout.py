@@ -83,7 +83,7 @@ def test_ansi_stdout_filtering(sqlite_copy, Parent, Child, relation, view, downl
     job = Parent()
     job.save()
     for i in range(3):
-        Child(**{relation: job, 'stdout': '\x1B[0;36mTesting {}\x1B[0m\n'.format(i), 'start_line': i}).save()
+        Child(**{relation: job, 'stdout': '\x1b[0;36mTesting {}\x1b[0m\n'.format(i), 'start_line': i}).save()
     url = reverse(view, kwargs={'pk': job.pk})
 
     # ansi codes in ?format=txt should get filtered
@@ -96,7 +96,7 @@ def test_ansi_stdout_filtering(sqlite_copy, Parent, Child, relation, view, downl
     # ask for ansi and you'll get it
     fmt = "?format={}".format("ansi_download" if download else "ansi")
     response = get(url + fmt, user=admin, expect=200)
-    assert smart_str(response.content).splitlines() == ['\x1B[0;36mTesting %d\x1B[0m' % i for i in range(3)]
+    assert smart_str(response.content).splitlines() == ['\x1b[0;36mTesting %d\x1b[0m' % i for i in range(3)]
     has_download_header = response.has_header('Content-Disposition')
     assert has_download_header if download else not has_download_header
 
@@ -115,7 +115,7 @@ def test_colorized_html_stdout(sqlite_copy, Parent, Child, relation, view, get, 
     job = Parent()
     job.save()
     for i in range(3):
-        Child(**{relation: job, 'stdout': '\x1B[0;36mTesting {}\x1B[0m\n'.format(i), 'start_line': i}).save()
+        Child(**{relation: job, 'stdout': '\x1b[0;36mTesting {}\x1b[0m\n'.format(i), 'start_line': i}).save()
     url = reverse(view, kwargs={'pk': job.pk}) + '?format=html'
 
     response = get(url, user=admin, expect=200)

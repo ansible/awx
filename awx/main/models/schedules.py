@@ -24,15 +24,81 @@ from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
 
-import pytz
-
-
 logger = logging.getLogger('awx.main.models.schedule')
 
 __all__ = ['Schedule']
 
 
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
+
+
+def _assert_timezone_id_is_valid(rrules) -> None:
+    broken_rrules = [str(rrule) for rrule in rrules if rrule._dtstart and rrule._dtstart.tzinfo is None]
+    if not broken_rrules:
+        return
+    raise ValueError(
+        f'A valid TZID must be provided (e.g., America/New_York). Invalid: {broken_rrules}',
+    ) from None
+
+
+def _fast_forward_rrules(rrules, ref_dt=None):
+    for i, rule in enumerate(rrules):
+        rrules[i] = _fast_forward_rrule(rule, ref_dt=ref_dt)
+    return rrules
+
+
+def _fast_forward_rrule(rrule, ref_dt=None):
+    '''
+    Utility to fast forward an rrule, maintaining consistency in the resulting
+    occurrences.
+
+    Uses the .replace() method to update the rrule with a newer dtstart
+    The operation ensures that the original occurrences (based on the original dtstart)
+    will match the occurrences after changing the dtstart.
+
+    All datetime operations (subtracting dates and adding timedeltas) should be
+    in UTC to avoid DST issues. As such, the rrule dtstart is converted to UTC
+    then back to the original timezone at the end.
+
+    Returns a new rrule with a new dtstart
+    '''
+
+    if rrule._freq not in {dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY}:
+        return rrule
+
+    if rrule._count:
+        return rrule
+
+    if ref_dt is None:
+        ref_dt = now()
+
+    ref_dt = ref_dt.astimezone(datetime.timezone.utc)
+
+    rrule_dtstart_utc = rrule._dtstart.astimezone(datetime.timezone.utc)
+    if rrule_dtstart_utc > ref_dt:
+        return rrule
+
+    interval = rrule._interval if rrule._interval else 1
+    if rrule._freq == dateutil.rrule.HOURLY:
+        interval *= 60 * 60
+    elif rrule._freq == dateutil.rrule.MINUTELY:
+        interval *= 60
+
+    # if after converting to seconds the interval is still a fraction,
+    # just return original rrule
+    if isinstance(interval, float) and not interval.is_integer():
+        return rrule
+
+    seconds_since_dtstart = (ref_dt - rrule_dtstart_utc).total_seconds()
+
+    # it is important to fast forward by a number that is divisible by
+    # interval. For example, if interval is 7 hours, we fast forward by 7, 14, 21, etc. hours.
+    # Otherwise, the occurrences after the fast forward might not match the ones before.
+    # x // y is integer division, lopping off any remainder, so that we get the outcome we want.
+    interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
+    new_start = rrule_dtstart_utc + interval_aligned_offset
+    new_rrule = rrule.replace(dtstart=new_start.astimezone(rrule._dtstart.tzinfo))
+    return new_rrule
 
 
 class ScheduleFilterMethods(object):
@@ -186,7 +252,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
 
                     # Coerce the datetime to UTC and format it as a string w/ Zulu format
                     # utc_until = UNTIL=20200601T220000Z
-                    utc_until = 'UNTIL=' + localized_until.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+                    utc_until = 'UNTIL=' + localized_until.astimezone(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
 
                     # rule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
                     # rule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
@@ -194,41 +260,26 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return " ".join(rules)
 
     @classmethod
-    def rrulestr(cls, rrule, fast_forward=True, **kwargs):
+    def rrulestr(cls, rrule, ref_dt=None, **kwargs):
         """
         Apply our own custom rrule parsing requirements
         """
         rrule = Schedule.coerce_naive_until(rrule)
         kwargs['forceset'] = True
-        x = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
+        rruleset = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
 
-        for r in x._rrule:
-            if r._dtstart and r._dtstart.tzinfo is None:
-                raise ValueError('A valid TZID must be provided (e.g., America/New_York)')
+        _assert_timezone_id_is_valid(rruleset._rrule)
+        _assert_timezone_id_is_valid(rruleset._exrule)
 
         # Fast forward is a way for us to limit the number of events in the rruleset
-        # If we are fastforwading and we don't have a count limited rule that is minutely or hourley
-        # We will modify the start date of the rule to last week to prevent a large number of entries
-        if fast_forward:
-            try:
-                # All rules in a ruleset will have the same dtstart value
-                #   so lets compare the first event to now to see if its > 7 days old
-                first_event = x[0]
-                if (now() - first_event).days > 7:
-                    for rule in x._rrule:
-                        # If any rule has a minutely or hourly rule without a count...
-                        if rule._freq in [dateutil.rrule.MINUTELY, dateutil.rrule.HOURLY] and not rule._count:
-                            # hourly/minutely rrules with far-past DTSTART values
-                            # are *really* slow to precompute
-                            # start *from* one week ago to speed things up drastically
-                            new_start = (now() - datetime.timedelta(days=7)).strftime('%Y%m%d')
-                            # Now we want to repalce the DTSTART:<value>T with the new date (which includes the T)
-                            new_rrule = re.sub('(DTSTART[^:]*):[^T]+T', r'\1:{0}T'.format(new_start), rrule)
-                            return Schedule.rrulestr(new_rrule, fast_forward=False)
-            except IndexError:
-                pass
+        # If we are fast forwarding and we don't have a count limited rule that is minutely or hourly
+        # We will modify the start date of the rule to bring as close to the current date as possible
+        # Even though the API restricts each rrule to have the same dtstart, each rrule in the rruleset
+        # can fast forward to a difference dtstart. This is required in order to get stable occurrences.
+        rruleset._rrule = _fast_forward_rrules(rruleset._rrule, ref_dt=ref_dt)
+        rruleset._exrule = _fast_forward_rrules(rruleset._exrule, ref_dt=ref_dt)
 
-        return x
+        return rruleset
 
     def __str__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
@@ -256,7 +307,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         # If we made it this far we should have an end date and can ask the ruleset what the last date is
         # However, if the until/count is before dtstart we will get an IndexError when trying to get [-1]
         try:
-            return ruleset[-1].astimezone(pytz.utc)
+            return ruleset[-1].astimezone(datetime.timezone.utc)
         except IndexError:
             return None
 
@@ -274,15 +325,16 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 if not datetime_exists(next_run_actual):
                     # skip imaginary dates, like 2:30 on DST boundaries
                     next_run_actual = future_rs.after(next_run_actual)
-                next_run_actual = next_run_actual.astimezone(pytz.utc)
+                next_run_actual = next_run_actual.astimezone(datetime.timezone.utc)
         else:
             next_run_actual = None
 
         self.next_run = next_run_actual
-        try:
-            self.dtstart = future_rs[0].astimezone(pytz.utc)
-        except IndexError:
-            self.dtstart = None
+        if not self.dtstart:
+            try:
+                self.dtstart = future_rs[0].astimezone(datetime.timezone.utc)
+            except IndexError:
+                self.dtstart = None
         self.dtend = Schedule.get_end_date(future_rs)
 
         changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)

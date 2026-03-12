@@ -97,10 +97,13 @@ def _ctit_db_wrapper(trans_safe=False):
     except DatabaseError as e:
         if trans_safe:
             cause = e.__cause__
-            if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = getattr(cause, 'sqlstate', None)
+            if cause and sqlstate:
                 sqlstate = cause.sqlstate
                 sqlstate_str = psycopg.errors.lookup(sqlstate)
                 logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+            else:
+                logger.error(f'Error reading something related to database settings: {str(e)}.')
         else:
             logger.exception('Error modifying something related to database settings.')
     finally:

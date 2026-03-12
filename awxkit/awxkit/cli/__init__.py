@@ -11,7 +11,6 @@ from awxkit.utils import to_str
 from awxkit.exceptions import Unauthorized, Common
 from awxkit.cli.utils import cprint
 
-
 # you'll only see these warnings if you've explicitly *disabled* SSL
 # verification, so they're a little annoying, redundant
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

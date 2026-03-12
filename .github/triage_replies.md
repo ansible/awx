@@ -1,5 +1,4 @@
 ## General
-- For the roundup of all the different mailing lists available from AWX, Ansible, and beyond visit: https://docs.ansible.com/ansible/latest/community/communication.html
 - Hello, we think your question is answered in our FAQ. Does this: https://www.ansible.com/products/awx-project/faq cover your question?
 - You can find the latest documentation here: https://ansible.readthedocs.io/projects/awx/en/latest/userguide/index.html
 
@@ -71,10 +70,10 @@ Thank you for your submission and for supporting AWX!
 - Hello, we'd love to help, but we need a little more information about the problem you're having. Screenshots, log outputs, or any reproducers would be very helpful.
 
 ### Code of Conduct
-- Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/ansible/latest/community/code_of_conduct.html
+- Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html
 
 ### EE Contents / Community General
-- Hello. The awx-ee contains the collections and dependencies needed for supported AWX features to function. Anything beyond that (like the community.general package) will require you to build your own EE. For information on how to do that, see https://ansible-builder.readthedocs.io/en/stable/ \
+- Hello. The awx-ee contains the collections and dependencies needed for supported AWX features to function. Anything beyond that (like the community.general package) will require you to build your own EE. For information on how to do that, see https://docs.ansible.com/projects/builder/en/stable/ \
 \
 The Ansible Community is looking at building an EE that corresponds to all of the collections inside the ansible package. That may help you if and when it happens; see https://github.com/ansible-community/community-topics/issues/31 for details.
 
@@ -83,18 +82,18 @@ The Ansible Community is looking at building an EE that corresponds to all of th
 ## Mailing List Triage
 
 ### Create an issue
-- Hello, thanks for reaching out on list. We think this merits an issue on our Github, https://github.com/ansible/awx/issues. If you could open an issue up on Github it will get tagged and integrated into our planning and workflow. All future work will be tracked there. Issues should include as much information as possible, including screenshots, log outputs, or any reproducers.
+- Hello, thanks for reaching out on list. We think this merits an issue on our GitHub, https://github.com/ansible/awx/issues. If you could open an issue up on GitHub it will get tagged and integrated into our planning and workflow. All future work will be tracked there. Issues should include as much information as possible, including screenshots, log outputs, or any reproducers.
 
 ### Create a Pull Request
 - Hello, we think your idea is good! Please consider contributing a PR for this following our contributing guidelines: https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md
 
 ### Receptor
-- You can find the receptor docs here: https://receptor.readthedocs.io/en/latest/
+- You can find the receptor docs here: https://docs.ansible.com/projects/receptor/en/latest/
 - Hello, your issue seems related to receptor. Could you please open an issue in the receptor repository? https://github.com/ansible/receptor. Thanks!
 
 ### Ansible Engine not AWX
-- Hello, your question seems to be about Ansible development, not about AWX. Try asking on the Ansible-devel specific mailing list: https://groups.google.com/g/ansible-devel
-- Hello, your question seems to be about using Ansible, not about AWX. https://groups.google.com/g/ansible-project is the best place to visit for user questions about Ansible. Thanks!
+- Hello, your question seems to be about Ansible development, not about AWX. Try asking on in the Forum https://forum.ansible.com/tag/development
+- Hello, your question seems to be about using Ansible Core, not about AWX. https://forum.ansible.com/tag/ansible-core is the best place to visit for user questions about Ansible. Thanks!
 
 ### Ansible Galaxy not AWX
 - Hey there. That sounds like an FAQ question. Did this: https://www.ansible.com/products/awx-project/faq cover your question?
@@ -104,7 +103,7 @@ The Ansible Community is looking at building an EE that corresponds to all of th
 - AWX-Operator: https://github.com/ansible/awx-operator/blob/devel/CONTRIBUTING.md
 
 ### Oracle AWX
-We'd be happy to help if you can reproduce this with AWX since we do not have Oracle's Linux Automation Manager. If you need help with this specific version of Oracles Linux Automation Manager you will need to contact your Oracle for support. 
+We'd be happy to help if you can reproduce this with AWX since we do not have Oracle's Linux Automation Manager. If you need help with this specific version of Oracles Linux Automation Manager you will need to contact your Oracle for support.
 
 ### Community Resolved
 Hi,

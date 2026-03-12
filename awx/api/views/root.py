@@ -8,6 +8,8 @@ import operator
 from collections import OrderedDict
 
 from django.conf import settings
+from django.core.cache import cache
+from django.db import connection
 from django.utils.encoding import smart_str
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -21,17 +23,20 @@ from rest_framework import status
 
 import requests
 
-from awx import MODE
+from ansible_base.lib.utils.schema import extend_schema_if_available
+
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
+from awx.main.tasks.system import clear_setting_cache
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import URLPathVersioning, is_optional_api_urlpattern_prefix_request, reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
+from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
 
 logger = logging.getLogger('awx.api.views.root')
@@ -42,8 +47,10 @@ class ApiRootView(APIView):
     name = _('REST API')
     versioning_class = URLPathVersioning
     swagger_topic = 'Versioning'
+    resource_purpose = 'api root and version information'
 
     @method_decorator(ensure_csrf_cookie)
+    @extend_schema_if_available(extensions={"x-ai-description": "List supported API versions"})
     def get(self, request, format=None):
         '''List supported API versions'''
         v2 = reverse('api:api_v2_root_view', request=request, kwargs={'version': 'v2'})
@@ -51,34 +58,18 @@ class ApiRootView(APIView):
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
         data['available_versions'] = dict(v2=v2)
-        if not is_optional_api_urlpattern_prefix_request(request):
-            data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
-        if MODE == 'development':
-            data['swagger'] = drf_reverse('api:schema-swagger-ui')
-        return Response(data)
-
-
-class ApiOAuthAuthorizationRootView(APIView):
-    permission_classes = (AllowAny,)
-    name = _("API OAuth 2 Authorization Root")
-    versioning_class = None
-    swagger_topic = 'Authentication'
-
-    def get(self, request, format=None):
-        data = OrderedDict()
-        data['authorize'] = drf_reverse('api:authorize')
-        data['token'] = drf_reverse('api:token')
-        data['revoke_token'] = drf_reverse('api:revoke-token')
         return Response(data)
 
 
 class ApiVersionRootView(APIView):
     permission_classes = (AllowAny,)
     swagger_topic = 'Versioning'
+    resource_purpose = 'api top-level resources'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List top-level API resources"})
     def get(self, request, format=None):
         '''List top level resources'''
         data = OrderedDict()
@@ -99,8 +90,6 @@ class ApiVersionRootView(APIView):
         data['credentials'] = reverse('api:credential_list', request=request)
         data['credential_types'] = reverse('api:credential_type_list', request=request)
         data['credential_input_sources'] = reverse('api:credential_input_source_list', request=request)
-        data['applications'] = reverse('api:o_auth2_application_list', request=request)
-        data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['constructed_inventory'] = reverse('api:constructed_inventory_list', request=request)
@@ -140,6 +129,7 @@ class ApiVersionRootView(APIView):
 
 class ApiV2RootView(ApiVersionRootView):
     name = _('Version 2')
+    resource_purpose = 'api v2 root'
 
 
 class ApiV2PingView(APIView):
@@ -151,7 +141,11 @@ class ApiV2PingView(APIView):
     authentication_classes = ()
     name = _('Ping')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'basic instance information'
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Return basic information about this instance'},
+    )
     def get(self, request, format=None):
         """Return some basic information about this instance
 
@@ -186,27 +180,64 @@ class ApiV2SubscriptionView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Subscriptions')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'aap subscription validation'
 
     def check_permissions(self, request):
         super(ApiV2SubscriptionView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'List valid AAP subscriptions'},
+    )
     def post(self, request):
         data = request.data.copy()
-        if data.get('subscriptions_password') == '$encrypted$':
-            data['subscriptions_password'] = settings.SUBSCRIPTIONS_PASSWORD
+
         try:
-            user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
+            user = None
+            pw = None
+            basic_auth = False
+            # determine if the credentials are for basic auth or not
+            if data.get('subscriptions_client_id'):
+                user, pw = data.get('subscriptions_client_id'), data.get('subscriptions_client_secret')
+                if pw == '$encrypted$':
+                    pw = settings.SUBSCRIPTIONS_CLIENT_SECRET
+            elif data.get('subscriptions_username'):
+                user, pw = data.get('subscriptions_username'), data.get('subscriptions_password')
+                if pw == '$encrypted$':
+                    pw = settings.SUBSCRIPTIONS_PASSWORD
+                basic_auth = True
+
+            if not user or not pw:
+                return Response({"error": _("Missing subscription credentials")}, status=status.HTTP_400_BAD_REQUEST)
+
             with set_environ(**settings.AWX_TASK_ENV):
-                validated = get_licenser().validate_rh(user, pw)
-            if user:
-                settings.SUBSCRIPTIONS_USERNAME = data['subscriptions_username']
-            if pw:
-                settings.SUBSCRIPTIONS_PASSWORD = data['subscriptions_password']
+                validated = get_licenser().validate_rh(user, pw, basic_auth)
+
+            # update settings if the credentials were valid
+            if basic_auth:
+                if user:
+                    settings.SUBSCRIPTIONS_USERNAME = user
+                if pw:
+                    settings.SUBSCRIPTIONS_PASSWORD = pw
+                # mutual exclusion for basic auth and service account
+                # only one should be set at a given time so that
+                # config/attach/ knows which credentials to use
+                settings.SUBSCRIPTIONS_CLIENT_ID = ""
+                settings.SUBSCRIPTIONS_CLIENT_SECRET = ""
+            else:
+                if user:
+                    settings.SUBSCRIPTIONS_CLIENT_ID = user
+                if pw:
+                    settings.SUBSCRIPTIONS_CLIENT_SECRET = pw
+                # mutual exclusion for basic auth and service account
+                settings.SUBSCRIPTIONS_USERNAME = ""
+                settings.SUBSCRIPTIONS_PASSWORD = ""
         except Exception as exc:
             msg = _("Invalid Subscription")
-            if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
+            if isinstance(exc, TokenError) or (
+                isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401
+            ):
                 msg = _("The provided credentials are invalid (HTTP 401).")
             elif isinstance(exc, requests.exceptions.ProxyError):
                 msg = _("Unable to connect to proxy server.")
@@ -225,24 +256,37 @@ class ApiV2AttachView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Attach Subscription')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'subscription attachment'
 
     def check_permissions(self, request):
         super(ApiV2AttachView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Attach a subscription'},
+    )
     def post(self, request):
         data = request.data.copy()
-        pool_id = data.get('pool_id', None)
-        if not pool_id:
-            return Response({"error": _("No subscription pool ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
-        user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-        pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-        if pool_id and user and pw:
+        subscription_id = data.get('subscription_id', None)
+        if not subscription_id:
+            return Response({"error": _("No subscription ID provided.")}, status=status.HTTP_400_BAD_REQUEST)
+        # Ensure we always use the latest subscription credentials
+        cache.delete_many(['SUBSCRIPTIONS_CLIENT_ID', 'SUBSCRIPTIONS_CLIENT_SECRET', 'SUBSCRIPTIONS_USERNAME', 'SUBSCRIPTIONS_PASSWORD'])
+        user = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+        pw = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+        basic_auth = False
+        if not (user and pw):
+            user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+            pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+            basic_auth = True
+        if not (user and pw):
+            return Response({"error": _("Missing subscription credentials")}, status=status.HTTP_400_BAD_REQUEST)
+        if subscription_id and user and pw:
             data = request.data.copy()
             try:
                 with set_environ(**settings.AWX_TASK_ENV):
-                    validated = get_licenser().validate_rh(user, pw)
+                    validated = get_licenser().validate_rh(user, pw, basic_auth)
             except Exception as exc:
                 msg = _("Invalid Subscription")
                 if isinstance(exc, requests.exceptions.HTTPError) and getattr(getattr(exc, 'response', None), 'status_code', None) == 401:
@@ -256,10 +300,12 @@ class ApiV2AttachView(APIView):
                 else:
                     logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
+
         for sub in validated:
-            if sub['pool_id'] == pool_id:
+            if sub['subscription_id'] == subscription_id:
                 sub['valid_key'] = True
                 settings.LICENSE = sub
+                connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
                 return Response(sub)
 
         return Response({"error": _("Error processing subscription metadata.")}, status=status.HTTP_400_BAD_REQUEST)
@@ -269,17 +315,20 @@ class ApiV2ConfigView(APIView):
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'
+    resource_purpose = 'system configuration and license management'
 
     def check_permissions(self, request):
         super(ApiV2ConfigView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head', 'get'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Return various configuration settings'},
+    )
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''
 
         license_data = get_licenser().validate()
-
         if not license_data.get('valid_key', False):
             license_data = {}
 
@@ -294,15 +343,6 @@ class ApiV2ConfigView(APIView):
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
-
-        # If LDAP is enabled, user_ldap_fields will return a list of field
-        # names that are managed by LDAP and should be read-only for users with
-        # a non-empty ldap_dn attribute.
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            user_ldap_fields = ['username', 'password']
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            data['user_ldap_fields'] = user_ldap_fields
 
         if (
             request.user.is_superuser
@@ -323,6 +363,7 @@ class ApiV2ConfigView(APIView):
 
         return Response(data)
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Add or update a subscription manifest license"})
     def post(self, request):
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid subscription data")}, status=status.HTTP_400_BAD_REQUEST)
@@ -352,6 +393,7 @@ class ApiV2ConfigView(APIView):
 
             try:
                 license_data_validated = get_licenser().license_from_manifest(license_data)
+                connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
             except Exception:
                 logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
@@ -367,9 +409,13 @@ class ApiV2ConfigView(APIView):
         logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid subscription")}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema_if_available(
+        extensions={'x-ai-description': 'Remove the current subscription'},
+    )
     def delete(self, request):
         try:
             settings.LICENSE = {}
+            connection.on_commit(lambda: clear_setting_cache.delay(['LICENSE']))
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # FIX: Log

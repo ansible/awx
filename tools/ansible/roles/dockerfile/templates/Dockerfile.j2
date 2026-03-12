@@ -8,8 +8,7 @@
 # UI_next build contaienr
 FROM quay.io/centos/centos:stream9 AS ui-builder
 USER root
-RUN dnf -y update && dnf install -y nodejs make git
-RUN npm install -g n && n 18
+RUN dnf -y update && dnf module -y enable nodejs:18 && dnf module -y install nodejs:18/common && dnf install -y make git
 
 COPY . /tmp/src/
 WORKDIR /tmp/src/
@@ -19,10 +18,10 @@ RUN make ui
 # Build container
 FROM quay.io/centos/centos:stream9 AS builder
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV AWX_LOGGING_MODE stdout
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV AWX_LOGGING_MODE=stdout
 
 
 USER root
@@ -34,6 +33,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
     dnf -y install \
+    openssh-clients \
     iputils \
     gcc \
     gcc-c++ \
@@ -44,24 +44,25 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     libtool-ltdl-devel \
     make \
     nss \
-    openldap-devel \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
     patch \
     postgresql \
     postgresql-devel \
-    python3.11 \
-    "python3.11-devel" \
-    "python3.11-pip" \
-    "python3.11-setuptools" \
-    "python3.11-packaging" \
-    "python3.11-psycopg2" \
+    python3.12 \
+    "python3.12-devel" \
+    "python3.12-pip" \
+    "python3.12-setuptools" \
+    "python3.12-packaging" \
+    "python3.12-psycopg2" \
     swig \
     unzip \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3.11 install -vv build
+# Add github.com to known hosts
+RUN mkdir -p ~/.ssh && chmod 0700 ~/.ssh
+RUN ssh-keyscan github.com > ~/.ssh/known_hosts
+
+RUN pip3.12 install -vv build
 
 {% if image_architecture == 'ppc64le'  %}
     RUN dnf -y update && dnf install -y wget && \
@@ -79,7 +80,7 @@ ADD requirements/requirements.txt \
     requirements/requirements_git.txt \
     /tmp/requirements/
 
-RUN cd /tmp && make requirements_awx
+RUN --mount=type=ssh cd /tmp && make requirements_awx
 
 ARG VERSION
 ARG SETUPTOOLS_SCM_PRETEND_VERSION
@@ -100,18 +101,23 @@ COPY --from=ui-builder /tmp/src/awx/ui/build /tmp/src/awx/ui/build
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
-RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+RUN AWX_MODE=defaults \
+    SKIP_SECRET_KEY_CHECK=yes \
+    SKIP_PG_VERSION_CHECK=yes \
+    AWX_SKIP_CREDENTIAL_TYPES_DISCOVER=yes \
+    /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 {% endif %}
 
 {% endif %}
+
 
 # Final container(s)
 FROM quay.io/centos/centos:stream9
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV AWX_LOGGING_MODE stdout
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV AWX_LOGGING_MODE=stdout
 
 USER root
 
@@ -129,18 +135,15 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     glibc-langpack-en \
     krb5-workstation \
     nginx \
-    "openldap >= 2.6.2-3" \
-    # pin to older openssl, see jira AAP-23449
-    openssl-3.0.7 \
     postgresql \
-    python3.11 \
-    "python3.11-devel" \
-    "python3.11-pip*" \
-    "python3.11-setuptools" \
-    "python3.11-packaging" \
-    "python3.11-psycopg2" \
+    python3.12 \
+    "python3.12-devel" \
+    "python3.12-pip*" \
+    "python3.12-setuptools" \
+    "python3.12-packaging" \
+    "python3.12-psycopg2" \
     rsync \
-    rsyslog-8.2102.0-106.el9 \
+    rsyslog \
     subversion \
     sudo \
     vim-minimal \
@@ -149,13 +152,14 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN pip3.11 install -vv virtualenv supervisor dumb-init build
+RUN pip3.12 install -vv virtualenv supervisor dumb-init build
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 # Install development/test requirements
-RUN dnf -y install \
+RUN dnf module -y enable nodejs:18 && dnf module -y install nodejs:18/common && \
+    dnf -y install \
     crun \
     gdb \
     gtk3 \
@@ -170,7 +174,6 @@ RUN dnf -y install \
     vim \
     nmap-ncat \
     libpq-devel \
-    nodejs \
     nss \
     make \
     patch \
@@ -178,11 +181,10 @@ RUN dnf -y install \
     tmux \
     wget \
     diffutils \
-    unzip && \
-    npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
+    unzip
 
-RUN pip3.11 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
-RUN pip3.11 install -vv black setuptools-scm build
+RUN pip3.12 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
+RUN pip3.12 install -vv black setuptools-scm build
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
@@ -251,8 +253,8 @@ ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
-RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.11/site-packages/awx.egg-link
-RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.11/site-packages/awx.pth
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.12/site-packages/awx.egg-link
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.12/site-packages/awx.pth
 RUN ln -sf /awx_devel/tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 RUN ln -sf /awx_devel/tools/scripts/awx-python /usr/bin/awx-python
 RUN ln -sf /awx_devel/tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
@@ -284,8 +286,8 @@ RUN for dir in \
       /var/lib/awx/.local \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
-      /var/lib/awx/venv/awx/lib/python3.11 \
-      /var/lib/awx/venv/awx/lib/python3.11/site-packages \
+      /var/lib/awx/venv/awx/lib/python3.12 \
+      /var/lib/awx/venv/awx/lib/python3.12/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \

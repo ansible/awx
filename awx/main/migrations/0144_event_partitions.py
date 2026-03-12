@@ -237,7 +237,7 @@ class Migration(migrations.Migration):
                 db_index=False, editable=False, on_delete=models.deletion.DO_NOTHING, related_name='system_job_events', to='main.SystemJob'
             ),
         ),
-        migrations.AlterIndexTogether(
+        dbawaremigrations.AlterIndexTogether(
             name='adhoccommandevent',
             index_together={
                 ('ad_hoc_command', 'job_created', 'event'),
@@ -245,11 +245,11 @@ class Migration(migrations.Migration):
                 ('ad_hoc_command', 'job_created', 'uuid'),
             },
         ),
-        migrations.AlterIndexTogether(
+        dbawaremigrations.AlterIndexTogether(
             name='inventoryupdateevent',
             index_together={('inventory_update', 'job_created', 'counter'), ('inventory_update', 'job_created', 'uuid')},
         ),
-        migrations.AlterIndexTogether(
+        dbawaremigrations.AlterIndexTogether(
             name='jobevent',
             index_together={
                 ('job', 'job_created', 'counter'),
@@ -258,7 +258,7 @@ class Migration(migrations.Migration):
                 ('job', 'job_created', 'parent_uuid'),
             },
         ),
-        migrations.AlterIndexTogether(
+        dbawaremigrations.AlterIndexTogether(
             name='projectupdateevent',
             index_together={
                 ('project_update', 'job_created', 'uuid'),
@@ -266,7 +266,7 @@ class Migration(migrations.Migration):
                 ('project_update', 'job_created', 'counter'),
             },
         ),
-        migrations.AlterIndexTogether(
+        dbawaremigrations.AlterIndexTogether(
             name='systemjobevent',
             index_together={('system_job', 'job_created', 'uuid'), ('system_job', 'job_created', 'counter')},
         ),

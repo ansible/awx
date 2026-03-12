@@ -9,10 +9,13 @@ from prometheus_client.core import GaugeMetricFamily, HistogramMetricFamily
 from prometheus_client.registry import CollectorRegistry
 from django.conf import settings
 from django.http import HttpRequest
+import redis.exceptions
 from rest_framework.request import Request
 
 from awx.main.consumers import emit_channel_notification
 from awx.main.utils import is_testing
+from awx.main.utils.redis import get_redis_client
+from .dispatcherd_metrics import get_dispatcherd_metrics
 
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')
@@ -43,11 +46,12 @@ class MetricsServer(MetricsServerSettings):
 
 
 class BaseM:
-    def __init__(self, field, help_text):
+    def __init__(self, field, help_text, labels=None):
         self.field = field
         self.help_text = help_text
         self.current_value = 0
         self.metric_has_changed = False
+        self.labels = labels or {}
 
     def reset_value(self, conn):
         conn.hset(root_key, self.field, 0)
@@ -68,12 +72,16 @@ class BaseM:
         value = conn.hget(root_key, self.field)
         return self.decode_value(value)
 
-    def to_prometheus(self, instance_data):
+    def to_prometheus(self, instance_data, namespace=None):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
             if self.field in instance_data[instance]:
+                # Build label string
+                labels = f'node="{instance}"'
+                if namespace:
+                    labels += f',subsystem="{namespace}"'
                 # on upgrade, if there are stale instances, we can end up with issues where new metrics are not present
-                output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
+                output_text += f'{self.field}{{{labels}}} {instance_data[instance][self.field]}\n'
         return output_text
 
 
@@ -166,14 +174,17 @@ class HistogramM(BaseM):
         self.sum.store_value(conn)
         self.inf.store_value(conn)
 
-    def to_prometheus(self, instance_data):
+    def to_prometheus(self, instance_data, namespace=None):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} histogram\n"
         for instance in instance_data:
+            # Build label string
+            node_label = f'node="{instance}"'
+            subsystem_label = f',subsystem="{namespace}"' if namespace else ''
             for i, b in enumerate(self.buckets):
-                output_text += f'{self.field}_bucket{{le="{b}",node="{instance}"}} {sum(instance_data[instance][self.field]["counts"][0:i+1])}\n'
-            output_text += f'{self.field}_bucket{{le="+Inf",node="{instance}"}} {instance_data[instance][self.field]["inf"]}\n'
-            output_text += f'{self.field}_count{{node="{instance}"}} {instance_data[instance][self.field]["inf"]}\n'
-            output_text += f'{self.field}_sum{{node="{instance}"}} {instance_data[instance][self.field]["sum"]}\n'
+                output_text += f'{self.field}_bucket{{le="{b}",{node_label}{subsystem_label}}} {sum(instance_data[instance][self.field]["counts"][0:i+1])}\n'
+            output_text += f'{self.field}_bucket{{le="+Inf",{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
+            output_text += f'{self.field}_count{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
+            output_text += f'{self.field}_sum{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["sum"]}\n'
         return output_text
 
 
@@ -189,8 +200,8 @@ class Metrics(MetricsNamespace):
     def __init__(self, namespace, auto_pipe_execute=False, instance_name=None, metrics_have_changed=True, **kwargs):
         MetricsNamespace.__init__(self, namespace)
 
-        self.pipe = redis.Redis.from_url(settings.BROKER_URL).pipeline()
-        self.conn = redis.Redis.from_url(settings.BROKER_URL)
+        self.conn = get_redis_client()
+        self.pipe = self.conn.pipeline()
         self.last_pipe_execute = time.time()
         # track if metrics have been modified since last saved to redis
         # start with True so that we get an initial save to redis
@@ -272,26 +283,32 @@ class Metrics(MetricsNamespace):
 
     def pipe_execute(self):
         if self.metrics_have_changed is True:
-            duration_to_save = time.perf_counter()
+            duration_pipe_exec = time.perf_counter()
             for m in self.METRICS:
                 self.METRICS[m].store_value(self.pipe)
             self.pipe.execute()
             self.last_pipe_execute = time.time()
             self.metrics_have_changed = False
-            duration_to_save = time.perf_counter() - duration_to_save
-            self.METRICS['subsystem_metrics_pipe_execute_seconds'].inc(duration_to_save)
-            self.METRICS['subsystem_metrics_pipe_execute_calls'].inc(1)
+            duration_pipe_exec = time.perf_counter() - duration_pipe_exec
 
-            duration_to_save = time.perf_counter()
+            duration_send_metrics = time.perf_counter()
             self.send_metrics()
-            duration_to_save = time.perf_counter() - duration_to_save
-            self.METRICS['subsystem_metrics_send_metrics_seconds'].inc(duration_to_save)
+            duration_send_metrics = time.perf_counter() - duration_send_metrics
+
+            # Increment operational metrics
+            self.METRICS['subsystem_metrics_pipe_execute_seconds'].inc(duration_pipe_exec)
+            self.METRICS['subsystem_metrics_pipe_execute_calls'].inc(1)
+            self.METRICS['subsystem_metrics_send_metrics_seconds'].inc(duration_send_metrics)
 
     def send_metrics(self):
         # more than one thread could be calling this at the same time, so should
         # acquire redis lock before sending metrics
-        lock = self.conn.lock(root_key + '-' + self._namespace + '_lock')
-        if not lock.acquire(blocking=False):
+        try:
+            lock = self.conn.lock(root_key + '-' + self._namespace + '_lock')
+            if not lock.acquire(blocking=False):
+                return
+        except redis.exceptions.ConnectionError as exc:
+            logger.warning(f'Connection error in send_metrics: {exc}')
             return
         try:
             current_time = time.time()
@@ -347,7 +364,13 @@ class Metrics(MetricsNamespace):
         if instance_data:
             for field in self.METRICS:
                 if len(metrics_filter) == 0 or field in metrics_filter:
-                    output_text += self.METRICS[field].to_prometheus(instance_data)
+                    # Add subsystem label only for operational metrics
+                    namespace = (
+                        self._namespace
+                        if field in ['subsystem_metrics_pipe_execute_seconds', 'subsystem_metrics_pipe_execute_calls', 'subsystem_metrics_send_metrics_seconds']
+                        else None
+                    )
+                    output_text += self.METRICS[field].to_prometheus(instance_data, namespace)
         return output_text
 
 
@@ -376,11 +399,6 @@ class DispatcherMetrics(Metrics):
         SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
         SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
         SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
-        # dispatcher subsystem metrics
-        SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
-        SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
-        SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
-        SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -408,8 +426,12 @@ class CallbackReceiverMetrics(Metrics):
 
 def metrics(request):
     output_text = ''
-    for m in [DispatcherMetrics(), CallbackReceiverMetrics()]:
-        output_text += m.generate_metrics(request)
+    output_text += DispatcherMetrics().generate_metrics(request)
+    output_text += CallbackReceiverMetrics().generate_metrics(request)
+
+    dispatcherd_metrics = get_dispatcherd_metrics(request)
+    if dispatcherd_metrics:
+        output_text += dispatcherd_metrics
     return output_text
 
 
@@ -435,7 +457,10 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
             logger.debug(f"No metric data not found in redis for metric namespace '{self._metrics._namespace}'")
             return None
 
-        host_metrics = instance_data.get(my_hostname)
+        if not (host_metrics := instance_data.get(my_hostname)):
+            logger.debug(f"Metric data for this node '{my_hostname}' not found in redis for metric namespace '{self._metrics._namespace}'")
+            return None
+
         for _, metric in self._metrics.METRICS.items():
             entry = host_metrics.get(metric.field)
             if not entry:
@@ -452,15 +477,8 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
 class CallbackReceiverMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
-        super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
-
-
-class DispatcherMetricsServer(MetricsServer):
-    def __init__(self):
-        registry = CollectorRegistry(auto_describe=True)
         registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
-        super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
+        super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
 
 
 class WebsocketsMetricsServer(MetricsServer):

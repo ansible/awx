@@ -2,8 +2,8 @@ from __future__ import print_function
 
 import logging
 import os
-import pkg_resources
 import sys
+from importlib.metadata import version as _get_version
 
 from requests.exceptions import RequestException
 
@@ -15,8 +15,7 @@ from awxkit import api, config, utils, exceptions, WSClient  # noqa
 from awxkit.cli.utils import HelpfulArgumentParser, cprint, disable_color, colored
 from awxkit.awx.utils import uses_sessions  # noqa
 
-
-__version__ = pkg_resources.get_distribution('awxkit').version
+__version__ = _get_version('awxkit')
 
 
 class CLI(object):
@@ -81,18 +80,88 @@ class CLI(object):
     def help(self):
         return '--help' in self.argv or '-h' in self.argv
 
-    def authenticate(self):
-        """Configure the current session (or OAuth2.0 token)"""
-        token = self.get_config('token')
-        if token:
-            self.root.connection.login(
-                None,
-                None,
-                token=token,
-            )
+    def _get_non_option_args(self, before_help=False):
+        """Extract non-option arguments from argv, optionally only those before help flag."""
+        if before_help and self.help:
+            # Find position of help flag
+            help_pos = next((i for i, arg in enumerate(self.argv) if arg in ('--help', '-h')), len(self.argv))
+            args_to_check = self.argv[:help_pos]
         else:
-            config.use_sessions = True
-            self.root.load_session().get()
+            args_to_check = self.argv
+
+        non_option_args = []
+        i = 0
+        while i < len(args_to_check):
+            arg = args_to_check[i]
+
+            if arg == 'awx':
+                # Skip 'awx' token
+                i += 1
+            elif arg.startswith('-'):
+                # This is an option
+                if '=' in arg:
+                    # Long option with value: --opt=val
+                    i += 1
+                else:
+                    # Option without embedded value: --opt or -o
+                    i += 1
+                    # Only consume next argument if it exists AND doesn't start with '-'
+                    # This naturally handles flag-only options (like --verbose)
+                    if i < len(args_to_check) and not args_to_check[i].startswith('-'):
+                        i += 1
+            else:
+                # This is a positional argument
+                non_option_args.append(arg)
+                i += 1
+
+        return non_option_args
+
+    def _is_main_help_request(self):
+        """
+        Determine if help request is for main CLI (awx --help) vs subcommand (awx users create --help).
+        Returns True if this is a main CLI help request that should exit early.
+        """
+        if not self.help:
+            return False
+
+        # If there are non-option arguments before help flag, this is subcommand help
+        return len(self._get_non_option_args(before_help=True)) == 0
+
+    def authenticate(self):
+        """Configure the current session for authentication.
+
+        Uses Basic authentication when AWXKIT_FORCE_BASIC_AUTH environment variable
+        is set to true, otherwise defaults to session-based authentication.
+
+        For AAP Gateway environments, set AWXKIT_FORCE_BASIC_AUTH=true to bypass
+        session login restrictions.
+        """
+        # Check if Basic auth is forced via environment variable
+        if config.get('force_basic_auth', False):
+            config.use_sessions = False
+
+            # Validate credentials are provided
+            username = self.get_config('username')
+            password = self.get_config('password')
+
+            if not username or not password:
+                raise ValueError(
+                    "Basic authentication requires both username and password. "
+                    "Provide --conf.username and --conf.password or set "
+                    "CONTROLLER_USERNAME and CONTROLLER_PASSWORD environment variables."
+                )
+
+            # Apply Basic auth credentials to the session
+            try:
+                self.root.connection.login(username, password)
+                self.root.get()
+            except Exception as e:
+                raise RuntimeError(f"Basic authentication failed: {str(e)}. " "Verify credentials and network connectivity.") from e
+            return
+
+        # Use session-based authentication (default)
+        config.use_sessions = True
+        self.root.load_session().get()
 
     def connect(self):
         """Fetch top-level resources from /api/v2"""
@@ -141,7 +210,7 @@ class CLI(object):
         """Attempt to parse the <resource> (e.g., jobs) specified on the CLI
 
         If a valid resource is discovered, the user will be authenticated
-        (either via an OAuth2.0 token or session-based auth) and the remaining
+        (via session-based auth) and the remaining
         CLI arguments will be processed (to determine the requested action
         e.g., list, create, delete)
 
@@ -202,6 +271,16 @@ class CLI(object):
         subparsers = self.subparsers[self.resource].add_subparsers(dest='action', metavar='action')
         subparsers.required = True
 
+        # Add manual help handling for resource-level help
+        # since we disabled add_help=False for resource subparsers
+        if self.help:
+            # Check if this is resource-level help (no action specified)
+            non_option_args = self._get_non_option_args()
+            if len(non_option_args) == 1 and non_option_args[0] == self.resource:
+                # Only resource specified, no action - show resource-level help
+                self.subparsers[self.resource].print_help()
+                return
+
         # parse the action from OPTIONS
         parser = ResourceOptionsParser(self.v2, page, self.resource, subparsers)
         if parser.deprecated:
@@ -209,6 +288,18 @@ class CLI(object):
             if not from_sphinx:
                 description = colored(description, 'yellow')
             self.subparsers[self.resource].description = description
+
+        # parse any action arguments FIRST before attempting to parse
+        if self.resource != 'settings':
+            for method in ('list', 'modify', 'create'):
+                if method in parser.parser.choices:
+                    if method == 'list':
+                        http_method = 'GET'
+                    elif method == 'modify' and 'PUT' in parser.options:
+                        http_method = 'PUT'
+                    else:
+                        http_method = 'POST'
+                    parser.build_query_arguments(method, http_method)
 
         if from_sphinx:
             # Our Sphinx plugin runs `parse_action` for *every* available
@@ -222,15 +313,6 @@ class CLI(object):
                 self.parser.parse_known_args(self.argv)[0]
             except SystemExit:
                 pass
-        else:
-            self.parser.parse_known_args()[0]
-
-        # parse any action arguments
-        if self.resource != 'settings':
-            for method in ('list', 'modify', 'create'):
-                if method in parser.parser.choices:
-                    parser.build_query_arguments(method, 'GET' if method == 'list' else 'POST')
-        if from_sphinx:
             parsed, extra = self.parser.parse_known_args(self.argv)
         else:
             parsed, extra = self.parser.parse_known_args()
@@ -285,6 +367,7 @@ class CLI(object):
         self.argv = argv
         self.parser = HelpfulArgumentParser(add_help=False)
         self.parser.add_argument(
+            '-h',
             '--help',
             action='store_true',
             help='prints usage information for the awx tool',
@@ -294,6 +377,13 @@ class CLI(object):
         add_output_formatting_arguments(self.parser, env)
 
         self.args = self.parser.parse_known_args(self.argv)[0]
+
+        # Early return for help to avoid server connection, but only for main CLI help
+        # Allow subcommand help (like 'awx users create --help') to continue processing
+        if self.help and self._is_main_help_request():
+            self.parser.print_help()
+            sys.exit(0)
+
         self.verbose = self.get_config('verbose')
         if self.verbose:
             logging.basicConfig(level='DEBUG')

@@ -5,6 +5,7 @@ from django.conf import settings
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from awx.api.generics import APIView
+from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 
@@ -14,7 +15,9 @@ class TaskManagerDebugView(APIView):
     exclude_from_schema = True
     permission_classes = [AllowAny]
     prefix = 'Task'
+    resource_purpose = 'debug task manager'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Trigger task manager scheduling"})
     def get(self, request):
         TaskManager().schedule()
         if not settings.AWX_DISABLE_TASK_MANAGERS:
@@ -29,7 +32,9 @@ class DependencyManagerDebugView(APIView):
     exclude_from_schema = True
     permission_classes = [AllowAny]
     prefix = 'Dependency'
+    resource_purpose = 'debug dependency manager'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Trigger dependency manager scheduling"})
     def get(self, request):
         DependencyManager().schedule()
         if not settings.AWX_DISABLE_TASK_MANAGERS:
@@ -44,7 +49,9 @@ class WorkflowManagerDebugView(APIView):
     exclude_from_schema = True
     permission_classes = [AllowAny]
     prefix = 'Workflow'
+    resource_purpose = 'debug workflow manager'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "Trigger workflow manager scheduling"})
     def get(self, request):
         WorkflowManager().schedule()
         if not settings.AWX_DISABLE_TASK_MANAGERS:
@@ -58,7 +65,9 @@ class DebugRootView(APIView):
     _ignore_model_permissions = True
     exclude_from_schema = True
     permission_classes = [AllowAny]
+    resource_purpose = 'debug endpoints root'
 
+    @extend_schema_if_available(extensions={"x-ai-description": "List available debug endpoints"})
     def get(self, request, format=None):
         '''List of available debug urls'''
         data = OrderedDict()

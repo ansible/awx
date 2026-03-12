@@ -5,8 +5,6 @@ import time
 import ssl
 import logging
 
-import irc.client
-
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 
@@ -14,6 +12,19 @@ from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
 
 logger = logging.getLogger('awx.main.notifications.irc_backend')
+
+
+def _irc():
+    """
+    Prime the real jaraco namespace before importing irc.* so that
+    setuptools' vendored 'setuptools._vendor.jaraco' doesn't shadow
+    external 'jaraco.*' packages (e.g., jaraco.stream).
+    """
+    import jaraco.stream  # ensure the namespace package is established  # noqa: F401
+    import irc.client as irc_client
+    import irc.connection as irc_connection
+
+    return irc_client, irc_connection
 
 
 class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
@@ -40,12 +51,15 @@ class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
     def open(self):
         if self.connection is not None:
             return False
+
+        irc_client, irc_connection = _irc()
+
         if self.use_ssl:
-            connection_factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
+            connection_factory = irc_connection.Factory(wrapper=ssl.wrap_socket)
         else:
-            connection_factory = irc.connection.Factory()
+            connection_factory = irc_connection.Factory()
         try:
-            self.reactor = irc.client.Reactor()
+            self.reactor = irc_client.Reactor()
             self.connection = self.reactor.server().connect(
                 self.server,
                 self.port,
@@ -53,7 +67,7 @@ class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 password=self.password,
                 connect_factory=connection_factory,
             )
-        except irc.client.ServerConnectionError as e:
+        except irc_client.ServerConnectionError as e:
             logger.error(smart_str(_("Exception connecting to irc server: {}").format(e)))
             if not self.fail_silently:
                 raise
@@ -65,8 +79,9 @@ class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
         self.connection = None
 
     def on_connect(self, connection, event):
+        irc_client, _ = _irc()
         for c in self.channels:
-            if irc.client.is_channel(c):
+            if irc_client.is_channel(c):
                 connection.join(c)
             else:
                 for m in self.channels[c]:

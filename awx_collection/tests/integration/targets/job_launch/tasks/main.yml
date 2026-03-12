@@ -37,7 +37,7 @@
     job_template: "Non_Existing_Job_Template"
     inventory: "Demo Inventory"
   register: result
-  ignore_errors: true
+  ignore_errors: yes
 
 - assert:
     that:
@@ -124,7 +124,7 @@
     extra_vars:
       basic_name: My First Variable
       option_true_false: 'no'
-  ignore_errors: true
+  ignore_errors: yes
   register: result
 
 - assert:
@@ -145,7 +145,7 @@
       basic_name: My First Variable
       var1: My First Variable
       var2: My Second Variable
-  ignore_errors: true
+  ignore_errors: yes
   register: result
 
 - assert:
