@@ -585,6 +585,7 @@ class WebhookTemplateMixin(models.Model):
         ('github', "GitHub"),
         ('gitlab', "GitLab"),
         ('bitbucket_dc', "BitBucket DataCenter"),
+        ('bitbucket_cloud', "BitBucket Cloud"),
     ]
 
     webhook_service = models.CharField(max_length=16, choices=SERVICES, blank=True, help_text=_('Service that webhook requests will be accepted from'))
@@ -646,6 +647,7 @@ class WebhookMixin(models.Model):
             'github': ('Authorization', 'token {}'),
             'gitlab': ('PRIVATE-TOKEN', '{}'),
             'bitbucket_dc': ('Authorization', 'Bearer {}'),
+            'bitbucket_cloud': ('Authorization', 'Bearer {}'),
         }
         service_statuses = {
             'github': {
@@ -671,6 +673,14 @@ class WebhookMixin(models.Model):
                 'error': 'FAILED',
                 'canceled': 'FAILED',
             },
+            'bitbucket_cloud': {
+                'pending': 'INPROGRESS',  # Bitbucket Cloud doesn't have any other statuses distinct from INPROGRESS, SUCCESSFUL, FAILED and STOPPED
+                'running': 'INPROGRESS',
+                'successful': 'SUCCESSFUL',
+                'failed': 'FAILED',
+                'error': 'FAILED',
+                'canceled': 'STOPPED',
+            },
         }
 
         statuses = service_statuses[self.webhook_service]
@@ -681,6 +691,13 @@ class WebhookMixin(models.Model):
             license_type = get_licenser().validate().get('license_type')
             if self.webhook_service == 'bitbucket_dc':
                 data = {
+                    'state': statuses[status],
+                    'key': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                    'url': self.get_ui_url(),
+                }
+            elif self.webhook_service == 'bitbucket_cloud':
+                data = {
+                    'type': 'build',
                     'state': statuses[status],
                     'key': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
                     'url': self.get_ui_url(),

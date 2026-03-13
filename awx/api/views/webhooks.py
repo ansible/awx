@@ -314,3 +314,56 @@ class BitbucketDcWebhookReceiver(WebhookReceiverBase):
             raise PermissionDenied
         hash_alg, signature = header_sig.split('=')
         return hash_alg, force_bytes(signature)
+
+
+class BitbucketCloudWebhookReceiver(WebhookReceiverBase):
+    service = 'bitbucket_cloud'
+
+    ref_keys = {
+        'repo:push': 'push.changes.0.target.hash',
+        'pullrequest:created': 'pullrequest.source.commit.hash',
+        'pullrequest:updated': 'pullrequest.source.commit.hash',
+        'pullrequest:fulfilled': 'pullrequest.source.commit.hash',
+    }
+
+    def get_event_type(self):
+        return self.request.META.get('HTTP_X_EVENT_KEY')
+
+    def get_event_guid(self):
+        return self.request.META.get('HTTP_X_REQUEST_UUID')
+
+    def get_event_status_api(self):
+        # <bitbucket-base-url>/commit/<commit-hash>/statuses/build
+        if self.get_event_type() not in self.ref_keys.keys():
+            return
+        if self.get_event_ref() is None:
+            return
+        any_url = None
+        if 'repository' in self.request.data:
+            any_url = self.request.data['repository'].get('links', {}).get('self')
+        if any_url is None:
+            return
+        any_url = any_url.get('href')
+        if any_url is None:
+            return
+        return "{}/commit/{}/statuses/build".format(any_url, self.get_event_ref())
+
+    def is_ignored_request(self):
+        return self.get_event_type() not in [
+            'repo:push',
+            'pullrequest:created',
+            'pullrequest:updated',
+            'pullrequest:fulfilled',
+        ]
+
+    def must_check_signature(self):
+        # Bitbucket does not sign ping requests...
+        return self.get_event_type() != 'diagnostics:ping'
+
+    def get_signature(self):
+        header_sig = self.request.META.get('HTTP_X_HUB_SIGNATURE')
+        if not header_sig:
+            logger.debug("Expected signature missing from header key X_HUB_SIGNATURE")
+            raise PermissionDenied
+        hash_alg, signature = header_sig.split('=')
+        return hash_alg, force_bytes(signature)
