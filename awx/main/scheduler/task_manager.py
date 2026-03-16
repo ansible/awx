@@ -190,6 +190,10 @@ class WorkflowManager(TaskBase):
                 workflow_job.workflow_nodes.filter(do_not_run=False, job__isnull=True).update(do_not_run=True)
                 logger.debug('Canceling spawned jobs of %s due to cancel flag.', workflow_job.log_format)
                 cancel_finished = dag.cancel_node_jobs()
+                if not cancel_finished:
+                    # Speed-up: schedule the task manager so it can process the
+                    # canceled pending jobs without waiting for the next cycle.
+                    ScheduleTaskManager().schedule()
                 if cancel_finished:
                     logger.info('Marking %s as canceled, all spawned jobs have concluded.', workflow_job.log_format)
                     workflow_job.status = 'canceled'
@@ -443,23 +447,32 @@ class TaskManager(TaskBase):
         self.controlplane_ig = self.tm_models.instance_groups.controlplane_ig
 
     def process_job_dep_failures(self, task):
-        """If job depends on a job that has failed, mark as failed and handle misc stuff."""
+        """If job depends on a job that has failed or been canceled, mark as failed.
+
+        Returns a list containing the task if a dep failure was found, empty list otherwise.
+        """
         for dep in task.dependent_jobs.all():
             # if we detect a failed, error, or canceled dependency, go ahead and fail this task.
             if dep.status in ("error", "failed", "canceled"):
                 task.status = 'failed'
-                logger.warning(f'Previous task failed task: {task.id} dep: {dep.id} task manager')
-                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(dep)),
-                    dep.name,
-                    dep.id,
-                )
-                task.save(update_fields=['status', 'job_explanation'])
-                task.websocket_emit_status('failed')
+                if dep.status == 'canceled':
+                    logger.warning(f'Previous task canceled, failing task: {task.id} dep: {dep.id} task manager')
+                    task.job_explanation = 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                        get_type_for_model(type(dep)),
+                        dep.name,
+                        dep.id,
+                    )
+                else:
+                    logger.warning(f'Previous task failed, failing task: {task.id} dep: {dep.id} task manager')
+                    task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                        get_type_for_model(type(dep)),
+                        dep.name,
+                        dep.id,
+                    )
                 self.pre_start_failed.append(task.id)
-                return True
+                return [task]
 
-        return False
+        return []
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -538,6 +551,7 @@ class TaskManager(TaskBase):
     @timeit
     def process_pending_tasks(self, pending_tasks):
         tasks_to_update_job_explanation = []
+        tasks_to_cancel = []
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
@@ -545,8 +559,16 @@ class TaskManager(TaskBase):
                 logger.warning("Task manager has reached time out while processing pending jobs, exiting loop early")
                 break
 
-            has_failed = self.process_job_dep_failures(task)
-            if has_failed:
+            if task.cancel_flag:
+                task.status = 'canceled'
+                task.job_explanation = gettext_noop("This job was canceled before it started.")
+                tasks_to_cancel.append(task)
+                logger.debug(f"Canceling pending task {task.log_format} because cancel_flag is set")
+                continue
+
+            dep_failures = self.process_job_dep_failures(task)
+            if dep_failures:
+                tasks_to_cancel.extend(dep_failures)
                 continue
 
             blocked_by = self.job_blocked_by(task)
@@ -636,6 +658,13 @@ class TaskManager(TaskBase):
             if not found_acceptable_queue:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
         UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
+        if tasks_to_cancel:
+            UnifiedJob.objects.bulk_update(tasks_to_cancel, ['status', 'job_explanation'])
+            for task in tasks_to_cancel:
+                task.websocket_emit_status(task.status)
+            # Speed-up: schedule the workflow manager so it can finalize any
+            # parent workflows without waiting for the next cycle.
+            ScheduleWorkflowManager().schedule()
 
     def task_needs_capacity(self, task, tasks_to_update_job_explanation):
         task.log_lifecycle("needs_capacity")
