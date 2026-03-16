@@ -33,8 +33,6 @@ def scm_on_launch_objects(job_template_factory):
     p = objects.project
     p.scm_update_on_launch = True
     p.scm_update_cache_timeout = 0
-    p.scm_type = "git"
-    p.scm_url = "http://github.com/ansible/ansible.git"
     p.save(skip_update=True)
     return objects
 
