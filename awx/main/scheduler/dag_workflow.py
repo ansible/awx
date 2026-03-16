@@ -3,6 +3,7 @@ from django.utils.encoding import smart_str
 
 # Python
 from awx.main.models import (
+    WorkflowApproval,
     WorkflowJobTemplateNode,
     WorkflowJobNode,
 )
@@ -122,8 +123,15 @@ class WorkflowDAG(SimpleDAG):
             if not job:
                 continue
             elif job.can_cancel:
-                cancel_finished = False
                 job.cancel()
+                # WorkflowApprovals are excluded from TaskManager processing,
+                # so we must transition them directly here.
+                if isinstance(job.get_real_instance(), WorkflowApproval):
+                    job.status = 'canceled'
+                    job.save(update_fields=['status'])
+                    job.websocket_emit_status('canceled')
+                else:
+                    cancel_finished = False
         return cancel_finished
 
     def is_workflow_done(self):

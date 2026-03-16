@@ -1,16 +1,26 @@
-# Test file for cancel + dependency chain behavior
+# Test file for cancel + dependency chain behavior and workflow cancel propagation.
 #
-# These tests verify behavior when canceling jobs that have dependency chain
-# project updates (created by DependencyManager for projects with
-# scm_update_on_launch=True), and when the task manager encounters pending
-# jobs with cancel_flag set.
+# These tests verify:
+#
+# 1. Cancel propagation through hard dependencies (dependent_jobs M2M) created
+#    by DependencyManager for projects with scm_update_on_launch=True.
+#
+# 2. TaskManager.process_job_dep_failures() correctly distinguishes canceled vs
+#    failed dependencies in the job_explanation message.
+#
+# 3. TaskManager.process_pending_tasks() transitions pending jobs with
+#    cancel_flag=True directly to canceled status.
+#
+# 4. WorkflowManager + TaskManager together cancel all spawned jobs in a
+#    workflow and finalize the workflow as canceled.
 
 import pytest
 from unittest import mock
 
 from awx.api.versioning import reverse
-from awx.main.scheduler import TaskManager, DependencyManager
-from awx.main.models import ProjectUpdate
+from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
+from awx.main.models import JobTemplate, ProjectUpdate, WorkflowApproval, WorkflowJobTemplate
+from awx.main.models.workflow import WorkflowApprovalTemplate
 from . import create_job
 
 
@@ -145,10 +155,11 @@ class TestCancelWithApiAndTaskManager:
         assert j.cancel_flag is True
         assert pu.cancel_flag is True
 
-    def test_cancel_job_dep_canceled_then_task_manager_fails_job(self, controlplane_instance_group, scm_on_launch_objects, post, admin_user):
+    def test_cancel_job_dep_canceled_then_task_manager_cancels_job(self, controlplane_instance_group, scm_on_launch_objects, post, admin_user):
         """Cancel a job while its dependency is running. The cancel propagates
-        to the dependency. When the task manager runs, it sees the canceled
-        dependency and fails the job with 'Previous Task Canceled'."""
+        to the dependency. When the task manager runs, it sees cancel_flag on
+        the job and transitions it directly to canceled (the cancel_flag check
+        takes priority over process_job_dep_failures)."""
         j, pu = _create_job_with_dependency(scm_on_launch_objects)
         _simulate_dependency_running(pu)
 
@@ -168,8 +179,10 @@ class TestCancelWithApiAndTaskManager:
             TaskManager().schedule()
 
         j.refresh_from_db()
-        assert j.status == 'failed'
-        assert 'Previous Task Canceled' in j.job_explanation
+        # cancel_flag check fires before dep failure check, so the job is
+        # canceled directly rather than failed due to its dependency
+        assert j.status == 'canceled'
+        assert 'canceled before it started' in j.job_explanation
         assert not mock_start.called
 
 
@@ -247,3 +260,114 @@ class TestTaskManagerCancelsPendingJobsWithCancelFlag:
             assert j.status == 'canceled', f"Job {j.id} should be canceled but is {j.status}"
             assert 'canceled before it started' in j.job_explanation
         assert not mock_start.called
+
+
+@pytest.mark.django_db
+class TestWorkflowCancelFinalizesWorkflow:
+    """When a workflow job is canceled, the WorkflowManager cancels spawned child
+    jobs (setting cancel_flag), the TaskManager transitions those pending jobs to
+    canceled, and a final WorkflowManager pass finalizes the workflow as canceled."""
+
+    def test_cancel_workflow_with_parallel_nodes(self, inventory, project, controlplane_instance_group):
+        """Create a workflow with parallel nodes, cancel it after one job is
+        running, and verify all jobs and the workflow reach canceled status."""
+        jt = JobTemplate.objects.create(allow_simultaneous=False, inventory=inventory, project=project, playbook='helloworld.yml')
+        wfjt = WorkflowJobTemplate.objects.create(name='test-cancel-wf')
+        for _ in range(4):
+            wfjt.workflow_nodes.create(unified_job_template=jt)
+
+        wj = wfjt.create_unified_job()
+        wj.signal_start()
+
+        # TaskManager transitions workflow job to running via start_task
+        TaskManager().schedule()
+        wj.refresh_from_db()
+        assert wj.status == 'running'
+
+        # WorkflowManager spawns jobs for all 4 nodes
+        WorkflowManager().schedule()
+        assert jt.jobs.count() == 4
+
+        # Simulate one job running (blocking the others via allow_simultaneous=False)
+        first_job = jt.jobs.order_by('created').first()
+        first_job.status = 'running'
+        first_job.celery_task_id = 'fake-task-id'
+        first_job.controller_node = 'test-node'
+        first_job.save(update_fields=['status', 'celery_task_id', 'controller_node'])
+
+        # Cancel the workflow
+        wj.cancel_flag = True
+        wj.save(update_fields=['cancel_flag'])
+
+        # WorkflowManager sees cancel_flag, calls cancel_node_jobs() which sets
+        # cancel_flag on all child jobs
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJob.cancel_dispatcher_process'):
+            WorkflowManager().schedule()
+
+        # The running job won't actually stop in tests (no dispatcher), simulate it
+        first_job.status = 'canceled'
+        first_job.save(update_fields=['status'])
+
+        # TaskManager processes remaining pending jobs with cancel_flag set
+        with mock.patch("awx.main.scheduler.TaskManager.start_task") as mock_start:
+            DependencyManager().schedule()
+            TaskManager().schedule()
+
+        for job in jt.jobs.all():
+            job.refresh_from_db()
+            assert job.status == 'canceled', f"Job {job.id} should be canceled but is {job.status}"
+        assert not mock_start.called
+
+        # Final WorkflowManager pass finalizes the workflow
+        WorkflowManager().schedule()
+        wj.refresh_from_db()
+        assert wj.status == 'canceled'
+
+    def test_cancel_workflow_with_approval_node(self, controlplane_instance_group):
+        """Create a workflow with a pending approval node and a downstream job
+        node. Cancel the workflow and verify the approval is directly canceled
+        by the WorkflowManager (since approvals are excluded from TaskManager),
+        the downstream node is marked do_not_run, and the workflow finalizes."""
+        approval_template = WorkflowApprovalTemplate.objects.create(name='test-approval', timeout=0)
+        wfjt = WorkflowJobTemplate.objects.create(name='test-cancel-approval-wf')
+        approval_node = wfjt.workflow_nodes.create(unified_job_template=approval_template)
+
+        # Add a downstream node (just another approval to keep it simple)
+        downstream_template = WorkflowApprovalTemplate.objects.create(name='test-downstream', timeout=0)
+        downstream_node = wfjt.workflow_nodes.create(unified_job_template=downstream_template)
+        approval_node.success_nodes.add(downstream_node)
+
+        wj = wfjt.create_unified_job()
+        wj.signal_start()
+
+        # TaskManager transitions workflow to running
+        TaskManager().schedule()
+        wj.refresh_from_db()
+        assert wj.status == 'running'
+
+        # WorkflowManager spawns the approval (root node only, downstream waits)
+        WorkflowManager().schedule()
+        assert WorkflowApproval.objects.filter(unified_job_node__workflow_job=wj).count() == 1
+
+        approval_job = WorkflowApproval.objects.get(unified_job_node__workflow_job=wj)
+        assert approval_job.status == 'pending'
+
+        # Cancel the workflow
+        wj.cancel_flag = True
+        wj.save(update_fields=['cancel_flag'])
+
+        # WorkflowManager should cancel the approval directly and mark
+        # the downstream node as do_not_run
+        WorkflowManager().schedule()
+
+        approval_job.refresh_from_db()
+        assert approval_job.status == 'canceled', f"Approval should be canceled directly by WorkflowManager but is {approval_job.status}"
+
+        # Downstream node should be marked do_not_run with no job spawned
+        downstream_wj_node = wj.workflow_nodes.get(unified_job_template=downstream_template)
+        assert downstream_wj_node.do_not_run is True
+        assert downstream_wj_node.job is None
+
+        # Workflow should finalize as canceled in the same pass
+        wj.refresh_from_db()
+        assert wj.status == 'canceled'
