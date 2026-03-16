@@ -190,16 +190,16 @@ class WorkflowManager(TaskBase):
                 workflow_job.workflow_nodes.filter(do_not_run=False, job__isnull=True).update(do_not_run=True)
                 logger.debug('Canceling spawned jobs of %s due to cancel flag.', workflow_job.log_format)
                 cancel_finished = dag.cancel_node_jobs()
-                if not cancel_finished:
-                    # Speed-up: schedule the task manager so it can process the
-                    # canceled pending jobs without waiting for the next cycle.
-                    ScheduleTaskManager().schedule()
                 if cancel_finished:
                     logger.info('Marking %s as canceled, all spawned jobs have concluded.', workflow_job.log_format)
                     workflow_job.status = 'canceled'
                     workflow_job.start_args = ''  # blank field to remove encrypted passwords
                     workflow_job.save(update_fields=['status', 'start_args'])
                     status_changed = True
+                else:
+                    # Speed-up: schedule the task manager so it can process the
+                    # canceled pending jobs without waiting for the next cycle.
+                    ScheduleTaskManager().schedule()
             else:
                 dnr_nodes = dag.mark_dnr_nodes()
                 WorkflowJobNode.objects.bulk_update(dnr_nodes, ['do_not_run'])
@@ -462,6 +462,7 @@ class TaskManager(TaskBase):
                         dep.name,
                         dep.id,
                     )
+                    ScheduleWorkflowManager().schedule()  # speedup for dependency chains in workflow, on workflow cancel
                 else:
                     logger.warning(f'Previous task failed, failing task: {task.id} dep: {dep.id} task manager')
                     task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
@@ -470,9 +471,8 @@ class TaskManager(TaskBase):
                         dep.id,
                     )
                 task.save(update_fields=['status', 'job_explanation'])
-                task.websocket_emit_status(task.status)
+                task.websocket_emit_status('failed')
                 self.pre_start_failed.append(task.id)
-                ScheduleWorkflowManager().schedule()
                 return True
 
         return False
@@ -562,12 +562,13 @@ class TaskManager(TaskBase):
                 break
 
             if task.cancel_flag:
+                logger.debug(f"Canceling pending task {task.log_format} because cancel_flag is set")
                 task.status = 'canceled'
                 task.job_explanation = gettext_noop("This job was canceled before it started.")
                 task.save(update_fields=['status', 'job_explanation'])
-                task.websocket_emit_status(task.status)
+                task.websocket_emit_status('failed')
+                self.pre_start_failed.append(task.id)
                 ScheduleWorkflowManager().schedule()
-                logger.debug(f"Canceling pending task {task.log_format} because cancel_flag is set")
                 continue
 
             if self.process_job_dep_failures(task):

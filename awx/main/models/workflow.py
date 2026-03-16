@@ -923,11 +923,11 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         # input) and are excluded from TaskManager processing, so the base
         # cancel() would only set cancel_flag without ever transitioning the
         # status.  We call super() for the flag, then transition directly.
+        has_already_canceled = bool(self.status == 'canceled')
         super().cancel(job_explanation=job_explanation, is_chain=is_chain)
-        if self.status != 'canceled':
+        if self.status != 'canceled' and not has_already_canceled:
             self.status = 'canceled'
             self.save(update_fields=['status'])
-            self.websocket_emit_status('canceled')
 
     def signal_start(self, **kwargs):
         can_start = super(WorkflowApproval, self).signal_start(**kwargs)
