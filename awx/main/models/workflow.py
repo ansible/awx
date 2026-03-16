@@ -918,6 +918,17 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
 
+    def cancel(self, job_explanation=None, is_chain=False):
+        # WorkflowApprovals have no dispatcher process (they wait for human
+        # input) and are excluded from TaskManager processing, so the base
+        # cancel() would only set cancel_flag without ever transitioning the
+        # status.  We call super() for the flag, then transition directly.
+        super().cancel(job_explanation=job_explanation, is_chain=is_chain)
+        if self.status != 'canceled':
+            self.status = 'canceled'
+            self.save(update_fields=['status'])
+            self.websocket_emit_status('canceled')
+
     def signal_start(self, **kwargs):
         can_start = super(WorkflowApproval, self).signal_start(**kwargs)
         self.started = self.created
