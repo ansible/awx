@@ -2,22 +2,18 @@
 #
 # These tests verify:
 #
-# 1. Cancel propagation through hard dependencies (dependent_jobs M2M) created
-#    by DependencyManager for projects with scm_update_on_launch=True.
-#
-# 2. TaskManager.process_job_dep_failures() correctly distinguishes canceled vs
+# 1. TaskManager.process_job_dep_failures() correctly distinguishes canceled vs
 #    failed dependencies in the job_explanation message.
 #
-# 3. TaskManager.process_pending_tasks() transitions pending jobs with
+# 2. TaskManager.process_pending_tasks() transitions pending jobs with
 #    cancel_flag=True directly to canceled status.
 #
-# 4. WorkflowManager + TaskManager together cancel all spawned jobs in a
+# 3. WorkflowManager + TaskManager together cancel all spawned jobs in a
 #    workflow and finalize the workflow as canceled.
 
 import pytest
 from unittest import mock
 
-from awx.api.versioning import reverse
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 from awx.main.models import JobTemplate, ProjectUpdate, WorkflowApproval, WorkflowJobTemplate
 from awx.main.models.workflow import WorkflowApprovalTemplate
@@ -57,50 +53,6 @@ def _create_job_with_dependency(objects):
     return j, pu
 
 
-def _simulate_dependency_running(pu):
-    """Transition a project update to running with fake dispatcher fields."""
-    ProjectUpdate.objects.filter(pk=pu.pk).update(
-        status='running',
-        celery_task_id='fake-task-id',
-        controller_node='test-node',
-    )
-    pu.refresh_from_db()
-
-
-@pytest.mark.django_db
-class TestCancelPropagatesToDependency:
-    """When a job is canceled, its dependency project updates (linked via
-    dependent_jobs M2M) should also be canceled."""
-
-    def test_cancel_job_cancels_dependency_project_update(self, controlplane_instance_group, scm_on_launch_objects):
-        """Cancel a job whose dependency project update is running and verify
-        cancel_flag propagates to the dependency."""
-        j, pu = _create_job_with_dependency(scm_on_launch_objects)
-        _simulate_dependency_running(pu)
-
-        j.refresh_from_db()
-        assert j.can_cancel
-        with mock.patch('awx.main.models.unified_jobs.UnifiedJob.cancel_dispatcher_process'):
-            j.cancel()
-
-        j.refresh_from_db()
-        pu.refresh_from_db()
-
-        assert j.cancel_flag is True
-        assert pu.cancel_flag is True
-
-    def test_get_jobs_fail_chain_includes_dependent_jobs(self, controlplane_instance_group, scm_on_launch_objects):
-        """Verify that Job.get_jobs_fail_chain() includes entries
-        from the dependent_jobs M2M relationship."""
-        j, pu = _create_job_with_dependency(scm_on_launch_objects)
-
-        # project_update FK is not set (only set by the runner during pre_run_hook)
-        assert j.project_update_id is None
-
-        chain = j.get_jobs_fail_chain()
-        assert pu in chain
-
-
 @pytest.mark.django_db
 class TestCanceledDependencyFailsBlockedJob:
     """When a dependency project update is canceled or failed, the task manager
@@ -133,57 +85,6 @@ class TestCanceledDependencyFailsBlockedJob:
         j.refresh_from_db()
         assert j.status == 'failed'
         assert 'Previous Task Failed' in j.job_explanation
-
-
-@pytest.mark.django_db
-class TestCancelWithApiAndTaskManager:
-    """End-to-end tests using API cancel endpoint + task manager."""
-
-    def test_cancel_job_via_api_cancels_dependency(self, controlplane_instance_group, scm_on_launch_objects, post, admin_user):
-        """Cancel a pending job via the API cancel endpoint and verify the
-        dependency project update is also canceled."""
-        j, pu = _create_job_with_dependency(scm_on_launch_objects)
-        _simulate_dependency_running(pu)
-
-        url = reverse('api:job_cancel', kwargs={'pk': j.pk})
-        with mock.patch('awx.main.models.unified_jobs.UnifiedJob.cancel_dispatcher_process'):
-            post(url, user=admin_user, expect=202)
-
-        j.refresh_from_db()
-        pu.refresh_from_db()
-
-        assert j.cancel_flag is True
-        assert pu.cancel_flag is True
-
-    def test_cancel_job_dep_canceled_then_task_manager_cancels_job(self, controlplane_instance_group, scm_on_launch_objects, post, admin_user):
-        """Cancel a job while its dependency is running. The cancel propagates
-        to the dependency. When the task manager runs, it sees cancel_flag on
-        the job and transitions it directly to canceled (the cancel_flag check
-        takes priority over process_job_dep_failures)."""
-        j, pu = _create_job_with_dependency(scm_on_launch_objects)
-        _simulate_dependency_running(pu)
-
-        url = reverse('api:job_cancel', kwargs={'pk': j.pk})
-        with mock.patch('awx.main.models.unified_jobs.UnifiedJob.cancel_dispatcher_process'):
-            post(url, user=admin_user, expect=202)
-
-        j.refresh_from_db()
-        pu.refresh_from_db()
-        assert j.cancel_flag is True
-        assert pu.cancel_flag is True
-
-        # Simulate the project update finishing as canceled
-        ProjectUpdate.objects.filter(pk=pu.pk).update(status='canceled')
-
-        with mock.patch("awx.main.scheduler.TaskManager.start_task") as mock_start:
-            TaskManager().schedule()
-
-        j.refresh_from_db()
-        # cancel_flag check fires before dep failure check, so the job is
-        # canceled directly rather than failed due to its dependency
-        assert j.status == 'canceled'
-        assert 'canceled before it started' in j.job_explanation
-        assert not mock_start.called
 
 
 @pytest.mark.django_db

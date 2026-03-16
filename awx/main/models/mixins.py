@@ -450,11 +450,9 @@ class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
         abstract = True
 
     def get_jobs_fail_chain(self):
-        chain = list(self.dependent_jobs.all())
         if self.project_update_id:
-            if self.project_update not in chain:
-                chain.append(self.project_update)
-        return chain
+            return [self.project_update]
+        return []
 
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
