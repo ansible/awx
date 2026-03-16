@@ -449,7 +449,7 @@ class TaskManager(TaskBase):
     def process_job_dep_failures(self, task):
         """If job depends on a job that has failed or been canceled, mark as failed.
 
-        Returns a list containing the task if a dep failure was found, empty list otherwise.
+        Returns True if a dep failure was found, False otherwise.
         """
         for dep in task.dependent_jobs.all():
             # if we detect a failed, error, or canceled dependency, go ahead and fail this task.
@@ -469,10 +469,13 @@ class TaskManager(TaskBase):
                         dep.name,
                         dep.id,
                     )
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status(task.status)
                 self.pre_start_failed.append(task.id)
-                return [task]
+                ScheduleWorkflowManager().schedule()
+                return True
 
-        return []
+        return False
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -551,7 +554,6 @@ class TaskManager(TaskBase):
     @timeit
     def process_pending_tasks(self, pending_tasks):
         tasks_to_update_job_explanation = []
-        tasks_to_cancel = []
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
@@ -562,13 +564,13 @@ class TaskManager(TaskBase):
             if task.cancel_flag:
                 task.status = 'canceled'
                 task.job_explanation = gettext_noop("This job was canceled before it started.")
-                tasks_to_cancel.append(task)
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status(task.status)
+                ScheduleWorkflowManager().schedule()
                 logger.debug(f"Canceling pending task {task.log_format} because cancel_flag is set")
                 continue
 
-            dep_failures = self.process_job_dep_failures(task)
-            if dep_failures:
-                tasks_to_cancel.extend(dep_failures)
+            if self.process_job_dep_failures(task):
                 continue
 
             blocked_by = self.job_blocked_by(task)
@@ -658,13 +660,6 @@ class TaskManager(TaskBase):
             if not found_acceptable_queue:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
         UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
-        if tasks_to_cancel:
-            UnifiedJob.objects.bulk_update(tasks_to_cancel, ['status', 'job_explanation'])
-            for task in tasks_to_cancel:
-                task.websocket_emit_status(task.status)
-            # Speed-up: schedule the workflow manager so it can finalize any
-            # parent workflows without waiting for the next cycle.
-            ScheduleWorkflowManager().schedule()
 
     def task_needs_capacity(self, task, tasks_to_update_job_explanation):
         task.log_lifecycle("needs_capacity")
