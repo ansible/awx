@@ -208,8 +208,8 @@ class DashboardView(APIView):
         data['hosts'] = {
             'url': reverse('api:host_list', request=request),
             'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
-            'total': user_hosts.count(),
-            'failed': user_hosts_failed.count(),
+            'total': user_hosts.values('name').distinct().count(),
+            'failed': user_hosts_failed.values('name').distinct().count(),
         }
 
         user_projects = get_user_queryset(request.user, models.Project)
