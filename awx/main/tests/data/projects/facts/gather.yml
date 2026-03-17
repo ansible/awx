@@ -14,5 +14,4 @@
             b:
               - "c"
               - "d"
-      args:
         cacheable: true
