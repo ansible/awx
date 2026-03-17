@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import tempfile
-import shutil
 
 import pytest
 from unittest import mock
@@ -32,13 +30,12 @@ from ansible_base.lib.workload_identity.controller import AutomationControllerJo
 
 
 @pytest.fixture
-def private_data_dir():
-    private_data = tempfile.mkdtemp(prefix='awx_')
+def private_data_dir(tmp_path):
+    private_data = tmp_path / 'awx_pdd'
+    private_data.mkdir()
     for subfolder in ('inventory', 'env'):
-        runner_subfolder = os.path.join(private_data, subfolder)
-        os.makedirs(runner_subfolder, exist_ok=True)
-    yield private_data
-    shutil.rmtree(private_data, True)
+        (private_data / subfolder).mkdir()
+    return str(private_data)
 
 
 @pytest.fixture
@@ -101,6 +98,8 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
     proj = mock.MagicMock(spec=Project, pk=1, organization=org)
     job = mock.MagicMock(
         spec=Job,
+        pk=1,
+        id=1,
         use_fact_cache=True,
         project=proj,
         organization=org,
@@ -170,6 +169,8 @@ def test_pre_post_run_hook_facts_deleted_sliced(
 
     # Mock job object
     job = mock.MagicMock(spec=Job)
+    job.pk = 2
+    job.id = 2
     job.use_fact_cache = True
     job.project = proj
     job.organization = org
