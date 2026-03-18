@@ -1850,12 +1850,11 @@ class HostSerializer(BaseSerializerWithVariables):
         if last_summary:
             d['last_job_host_summary'] = OrderedDict()
             d['last_job_host_summary']['id'] = last_summary.id
-            d['last_job_host_summary']['name'] = last_summary.host_name
             d['last_job_host_summary']['failed'] = last_summary.failed
             try:
                 last_job = last_summary.job
                 d['last_job'] = OrderedDict()
-                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error', 'canceled_on'):
+                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error'):
                     if hasattr(last_job, field):
                         d['last_job'][field] = getattr(last_job, field)
                 if last_job.job_template:
