@@ -463,7 +463,6 @@ class TaskManager(TaskBase):
                         dep.id,
                     )
                     ScheduleWorkflowManager().schedule()  # speedup for dependency chains in workflow, on workflow cancel
-                    task.websocket_emit_status('canceled')
                 else:
                     logger.warning(f'Previous task failed, failing task: {task.id} dep: {dep.id} task manager')
                     task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
@@ -471,8 +470,8 @@ class TaskManager(TaskBase):
                         dep.name,
                         dep.id,
                     )
-                    task.websocket_emit_status('failed')
                 task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status('failed')
                 self.pre_start_failed.append(task.id)
                 return True
 
