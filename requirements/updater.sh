@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -ue
 
 requirements_in="$(readlink -f ./requirements.in)"
@@ -18,12 +18,29 @@ generate_requirements() {
   local input_reqs="$1"
   venv="$(pwd)/venv"
   echo "$venv"
-  /usr/bin/python3.12 -m venv "${venv}"
+  _python312=$( [ -x /usr/bin/python3.12 ] && echo /usr/bin/python3.12 || echo python3.12 )
+  "${_python312}" -m venv "${venv}"
   # shellcheck disable=SC1090
   source "${venv}/bin/activate"
 
   # pip version must match the version used in AWX venv (see README.md UPGRADE BLOCKERs)
-  "${venv}/bin/python3" -m pip install -U 'pip==25.3' pip-tools
+  "${venv}/bin/python3" -m pip install -U 'pip==25.3'
+
+  _pip_compile_bin=""
+  if _found=$(find "${PYENV_ROOT:-$HOME/.pyenv}/versions" -name pip-compile -path "*/3.12*" 2>/dev/null | head -1) && [[ -n "${_found}" ]]; then
+    _pip_compile_bin="${_found}"
+  elif _found=$(pyenv which pip-compile 2>/dev/null) && [[ -n "${_found}" ]]; then
+    _pip_compile_bin="${_found}"
+  elif _found=$(command -v pip-compile 2>/dev/null) && [[ -n "${_found}" ]]; then
+    _pip_compile_bin="${_found}"
+  fi
+  if [[ -n "${_pip_compile_bin}" ]]; then
+    # Use external pip-compile (same Python version), re-apply flags from global pip_compile
+    _extra_flags="${pip_compile#pip-compile}"
+    pip_compile="${_pip_compile_bin}${_extra_flags}"
+  else
+    "${venv}/bin/python3" -m pip install pip-tools
+  fi
 
   ${pip_compile} ${input_reqs} --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps
@@ -48,7 +65,7 @@ main() {
   dest_requirements="${requirements}"
   input_requirements="${requirements_in} ${requirements_git}"
 
-  _tmp=$(python -c "import tempfile; print(tempfile.mkdtemp(suffix='.awx-requirements', dir='/tmp'))")
+  _tmp=$(python3 -c "import tempfile; print(tempfile.mkdtemp(suffix='.awx-requirements', dir='/tmp'))")
 
   trap _cleanup INT TERM EXIT
 
@@ -90,11 +107,6 @@ main() {
     echo "dev       Pin the development requirements file"
     echo ""
     exit
-  fi
-
-  if [[ ! -d /awx_devel ]] ; then
-      echo "This script should be run inside the awx container" >&2
-      exit
   fi
 
   if [[ ! -z "$(tail -c 1 "${requirements_git}")" ]]
