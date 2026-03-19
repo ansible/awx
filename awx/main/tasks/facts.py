@@ -96,10 +96,31 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
     try:
         with open(summary_path, 'r', encoding='utf-8') as f:
             summary = json.load(f)
-        facts_write_time = os.path.getmtime(summary_path)  # After successful read
     except (json.JSONDecodeError, OSError) as e:
         logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
+
+    # Check if ansible-runner provided a list of modified fact files
+    # This is the preferred method as it eliminates timezone issues
+    modified_facts_file = os.path.join(artifacts_dir, 'fact_cache_modified.json')
+    modified_files_set = None
+    if os.path.exists(modified_facts_file):
+        try:
+            with open(modified_facts_file, 'r', encoding='utf-8') as f:
+                modified_data = json.load(f)
+                modified_files_list = modified_data.get('modified_files', [])
+                # Handle case where modified_files is null/None
+                if modified_files_list is not None:
+                    modified_files_set = set(modified_files_list)
+                    logger.debug(f'Using ansible-runner modified files list: {modified_files_set}')
+                else:
+                    logger.warning('fact_cache_modified.json has null modified_files, falling back to timestamp comparison')
+        except (json.JSONDecodeError, OSError, TypeError) as e:
+            logger.warning(f'Could not read fact_cache_modified.json: {e}, falling back to timestamp comparison')
+
+    # Fallback: Get the timestamp that was saved during start_fact_cache()
+    # This is the mtime of the last fact file written, NOT the summary file's mtime
+    facts_write_time = summary.get('last_write_time')
 
     host_names = summary.get('hosts_cached', [])
     hosts_cached = host_qs.filter(name__in=host_names).order_by('id').iterator()
@@ -114,9 +135,17 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
             continue
 
         if os.path.exists(filepath):
-            # If the file changed since we wrote the last facts file, pre-playbook run...
-            modified = os.path.getmtime(filepath)
-            if not facts_write_time or modified >= facts_write_time:
+            # Determine if file was modified using ansible-runner list or timestamp comparison
+            if modified_files_set is not None:
+                # Preferred: Use ansible-runner's modification detection
+                was_modified = host.name in modified_files_set
+            else:
+                # Fallback: Use timestamp comparison (has timezone issues)
+                modified = os.path.getmtime(filepath)
+                was_modified = not facts_write_time or modified >= facts_write_time
+
+            # Only read the file if it was modified
+            if was_modified:
                 try:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
                         ansible_facts = json.load(f)
@@ -141,6 +170,7 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
                 else:
                     log_data['unmodified_ct'] += 1
             else:
+                # File exists but wasn't modified since playbook start - count as unmodified
                 log_data['unmodified_ct'] += 1
         else:
             # if the file goes missing, ansible removed it (likely via clear_facts)
