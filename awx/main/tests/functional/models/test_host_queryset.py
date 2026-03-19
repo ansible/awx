@@ -14,10 +14,7 @@ class TestHostLatestSummaryQuerySet:
     def _create_inventory_with_hosts(self, count=5):
         inventory = Inventory()
         inventory.save()
-        Host.objects.bulk_create([
-            Host(created=now(), modified=now(), name=f'host-{i}', inventory_id=inventory.id)
-            for i in range(count)
-        ])
+        Host.objects.bulk_create([Host(created=now(), modified=now(), name=f'host-{i}', inventory_id=inventory.id) for i in range(count)])
         return inventory
 
     def _run_job(self, inventory, host_names=None):
@@ -33,8 +30,13 @@ class TestHostLatestSummaryQuerySet:
             event='playbook_on_stats',
             event_data={
                 'ok': {name: 1 for name in host_names},
-                'changed': {}, 'dark': {}, 'failures': {},
-                'ignored': {}, 'processed': {}, 'rescued': {}, 'skipped': {},
+                'changed': {},
+                'dark': {},
+                'failures': {},
+                'ignored': {},
+                'processed': {},
+                'rescued': {},
+                'skipped': {},
             },
             host_map=host_map,
         ).save()
@@ -181,12 +183,7 @@ class TestHostLatestSummaryQuerySet:
         inventory = self._create_inventory_with_hosts(5)
         self._run_job(inventory)
 
-        hosts = list(
-            Host.objects.filter(inventory=inventory)
-            .with_latest_summary_id()
-            .filter(name__startswith='host-')
-            .order_by('name')
-        )
+        hosts = list(Host.objects.filter(inventory=inventory).with_latest_summary_id().filter(name__startswith='host-').order_by('name'))
         assert len(hosts) == 5
         for host in hosts:
             assert hasattr(host, '_latest_summary_cache')
