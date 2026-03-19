@@ -54,7 +54,7 @@ class TestHostLatestSummaryQuerySet:
 
     def test_with_latest_summary_id_returns_most_recent(self):
         inventory = self._create_inventory_with_hosts(1)
-        job1 = self._run_job(inventory)
+        self._run_job(inventory)
         job2 = self._run_job(inventory)
 
         host = Host.objects.filter(inventory=inventory).with_latest_summary_id().first()
@@ -192,8 +192,8 @@ class TestHostLatestSummaryQuerySet:
     def test_multiple_jobs_latest_wins(self):
         """After multiple jobs, latest_summary should return the most recent."""
         inventory = self._create_inventory_with_hosts(1)
-        job1 = self._run_job(inventory)
-        job2 = self._run_job(inventory)
+        self._run_job(inventory)
+        self._run_job(inventory)
         job3 = self._run_job(inventory)
 
         host = Host.objects.filter(inventory=inventory).with_latest_summary_id().first()
