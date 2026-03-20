@@ -6,6 +6,7 @@ from collections import deque
 from typing import Tuple, Optional
 
 from awx.main.models.event_query import EventQuery
+from awx.main.tasks.host_indirect import save_indirect_host_entries
 
 # Django
 from django.conf import settings
@@ -300,6 +301,14 @@ class RunnerCallback:
                 self.delay_update(ansible_version=query_file_contents['ansible_version'])
             else:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
+
+            # Dispatch save_indirect_host_entries to process the EventQuery
+            # records created above. handle_success_and_failure_notifications
+            # may have already run and skipped dispatching because
+            # event_queries_processed defaults to True and artifacts_handler
+            # can run after the notification handler. The task's
+            # select_for_update lock prevents duplicate processing.
+            save_indirect_host_entries.delay(self.instance.id)
 
         self.artifacts_processed = True
 
