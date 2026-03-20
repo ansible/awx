@@ -6,7 +6,6 @@ from collections import deque
 from typing import Tuple, Optional
 
 from awx.main.models.event_query import EventQuery
-from awx.main.tasks.host_indirect import save_indirect_host_entries
 
 # Django
 from django.conf import settings
@@ -302,26 +301,22 @@ class RunnerCallback:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
 
             # Write event_queries_processed and installed_collections directly
-            # to the DB rather than using delay_update alone.  delay_update
-            # only writes when the final job status is saved, but
-            # save_indirect_host_entries needs both values in the DB
-            # immediately: event_queries_processed=False to pass the
-            # select_for_update gate, and installed_collections to find
-            # matching EventQuery records via fetch_job_event_query.
+            # to the DB instead of using delay_update.  delay_update defers
+            # writes until the final job status save, but
+            # events_processed_hook (called from both the task runner after
+            # the final save and the callback receiver after the wrapup
+            # event) needs event_queries_processed=False visible in the DB
+            # to dispatch save_indirect_host_entries.  The field defaults to
+            # True, so without a direct write the hook would see True and
+            # skip the dispatch.  installed_collections is also written
+            # directly so it is available if the callback receiver
+            # dispatches before the final save.
             from awx.main.models import Job
 
             db_updates = {'event_queries_processed': False}
             if 'installed_collections' in query_file_contents:
                 db_updates['installed_collections'] = query_file_contents['installed_collections']
             Job.objects.filter(id=self.instance.id).update(**db_updates)
-
-            # Dispatch save_indirect_host_entries to process the EventQuery
-            # records created above. handle_success_and_failure_notifications
-            # may have already run and skipped dispatching because
-            # event_queries_processed defaults to True and artifacts_handler
-            # can run after the notification handler. The task's
-            # select_for_update lock prevents duplicate processing.
-            save_indirect_host_entries.delay(self.instance.id)
 
         self.artifacts_processed = True
 
