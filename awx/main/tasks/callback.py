@@ -301,14 +301,19 @@ class RunnerCallback:
             else:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
 
-            # Write event_queries_processed=False directly to the DB rather
-            # than using delay_update, because delay_update only writes when
-            # the final job status is saved.  save_indirect_host_entries
-            # checks this column under select_for_update and would bail out
-            # if it still saw the default (True).
+            # Write event_queries_processed and installed_collections directly
+            # to the DB rather than using delay_update alone.  delay_update
+            # only writes when the final job status is saved, but
+            # save_indirect_host_entries needs both values in the DB
+            # immediately: event_queries_processed=False to pass the
+            # select_for_update gate, and installed_collections to find
+            # matching EventQuery records via fetch_job_event_query.
             from awx.main.models import Job
 
-            Job.objects.filter(id=self.instance.id).update(event_queries_processed=False)
+            db_updates = {'event_queries_processed': False}
+            if 'installed_collections' in query_file_contents:
+                db_updates['installed_collections'] = query_file_contents['installed_collections']
+            Job.objects.filter(id=self.instance.id).update(**db_updates)
 
             # Dispatch save_indirect_host_entries to process the EventQuery
             # records created above. handle_success_and_failure_notifications
