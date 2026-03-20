@@ -278,7 +278,6 @@ class RunnerCallback:
     def artifacts_handler(self, artifact_dir):
         success, query_file_contents = try_load_query_file(artifact_dir)
         if success:
-            self.delay_update(event_queries_processed=False)
             collections_info = collect_queries(query_file_contents)
             for collection, data in collections_info.items():
                 version = data['version']
@@ -301,6 +300,15 @@ class RunnerCallback:
                 self.delay_update(ansible_version=query_file_contents['ansible_version'])
             else:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
+
+            # Write event_queries_processed=False directly to the DB rather
+            # than using delay_update, because delay_update only writes when
+            # the final job status is saved.  save_indirect_host_entries
+            # checks this column under select_for_update and would bail out
+            # if it still saw the default (True).
+            from awx.main.models import Job
+
+            Job.objects.filter(id=self.instance.id).update(event_queries_processed=False)
 
             # Dispatch save_indirect_host_entries to process the EventQuery
             # records created above. handle_success_and_failure_notifications
