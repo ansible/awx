@@ -531,6 +531,7 @@ class CredentialType(CommonModelNameNotUnique):
             existing = ct_class.objects.filter(name=default.name, kind=default.kind).first()
             if existing is not None:
                 existing.namespace = default.namespace
+                existing.description = getattr(default, 'description', '')
                 existing.inputs = {}
                 existing.injectors = {}
                 existing.save()
@@ -570,7 +571,14 @@ class CredentialType(CommonModelNameNotUnique):
     @classmethod
     def load_plugin(cls, ns, plugin):
         # TODO: User "side-loaded" credential custom_injectors isn't supported
-        ManagedCredentialType.registry[ns] = SimpleNamespace(namespace=ns, name=plugin.name, kind='external', inputs=plugin.inputs, backend=plugin.backend)
+        ManagedCredentialType.registry[ns] = SimpleNamespace(
+            namespace=ns,
+            name=plugin.name,
+            kind='external',
+            inputs=plugin.inputs,
+            backend=plugin.backend,
+            description=getattr(plugin, 'plugin_description', ''),
+        )
 
     def inject_credential(self, credential, env, safe_env, args, private_data_dir, container_root=None):
         from awx_plugins.interfaces._temporary_private_inject_api import inject_credential
@@ -582,7 +590,13 @@ class CredentialTypeHelper:
     @classmethod
     def get_creation_params(cls, cred_type):
         if cred_type.kind == 'external':
-            return dict(namespace=cred_type.namespace, kind=cred_type.kind, name=cred_type.name, managed=True)
+            return {
+                'namespace': cred_type.namespace,
+                'kind': cred_type.kind,
+                'name': cred_type.name,
+                'managed': True,
+                'description': getattr(cred_type, 'description', ''),
+            }
         return dict(
             namespace=cred_type.namespace,
             kind=cred_type.kind,
