@@ -1386,9 +1386,13 @@ class RunProjectUpdate(BaseTask):
         """
         passwords = super(RunProjectUpdate, self).build_passwords(project_update, runtime_passwords)
         if project_update.credential:
-            passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
-            passwords['scm_username'] = project_update.credential.get_input('username', default='')
-            passwords['scm_password'] = project_update.credential.get_input('password', default='')
+            if self.instance:
+                credential = next((c for c in self._credentials if c.pk == project_update.credential.pk), project_update.credential)
+            else:
+                credential = project_update.credential
+            passwords['scm_key_unlock'] = credential.get_input('ssh_key_unlock', default='')
+            passwords['scm_username'] = credential.get_input('username', default='')
+            passwords['scm_password'] = credential.get_input('password', default='')
         return passwords
 
     def build_env(self, project_update, private_data_dir, private_data_files=None):
@@ -1682,7 +1686,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
     def build_credentials_list(self, project_update):
-        if project_update.scm_type == 'insights' and project_update.credential:
+        if project_update.credential:
             return [project_update.credential]
         return []
 
