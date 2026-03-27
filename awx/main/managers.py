@@ -28,6 +28,14 @@ class HostLatestSummaryQuerySet(models.QuerySet):
     """Queryset that annotates and bulk-attaches the latest JobHostSummary
     at queryset evaluation time, similar to prefetch_related().
 
+    Why not use Django's Prefetch?
+    Django's Prefetch with [:1] slicing fetches 1 record globally, not per-host
+    (Django ticket #26780). Window-function workarounds require Django 4.2+ and
+    are more complex. Prefetching all summaries then filtering in Python wastes
+    memory for hosts with many job runs. The approach here — annotate the latest
+    ID via Subquery, then in_bulk() only those IDs — is the same 2-query pattern
+    prefetch_related uses internally, customized for "latest per group."
+
     Not streaming-safe: relies on _result_cache existing after _fetch_all().
     """
 
