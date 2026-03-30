@@ -476,7 +476,7 @@ class NullablePromptPseudoField:
         return instance.char_prompts.get(self.field_name, None)
 
     def __set__(self, instance, value):
-        if value in (None, {}, ''):
+        if value in (None, {}):
             instance.char_prompts.pop(self.field_name, None)
         else:
             instance.char_prompts[self.field_name] = value

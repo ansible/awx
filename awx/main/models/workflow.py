@@ -335,7 +335,9 @@ class WorkflowJobNode(WorkflowNodeBase):
             # or labels, because they do not propogate WFJT-->node at all
 
             # Combine WFJT prompts with node here, WFJT at higher level
-            node_prompts_data.update(wj_prompts_data)
+            # Empty string values on the workflow job (e.g. from IaC setting limit: "")
+            # should not override a node's explicit non-empty prompt value
+            node_prompts_data.update({k: v for k, v in wj_prompts_data.items() if v != ''})
             accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**node_prompts_data)
             if errors:
                 logger.info(
