@@ -139,7 +139,7 @@ class WebsocketRelayConnection:
                 except json.JSONDecodeError:
                     logmsg = "Failed to decode message from web node"
                     if logger.isEnabledFor(logging.DEBUG):
-                        logmsg = "{} {}".format(logmsg, payload)
+                        logmsg = "{} {}".format(logmsg, msg.data)
                     logger.warning(logmsg)
                     continue
 
@@ -242,7 +242,7 @@ class WebSocketRelayManager(object):
                 except json.JSONDecodeError:
                     logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
                     if logger.isEnabledFor(logging.DEBUG):
-                        logmsg = "{} {}".format(logmsg, payload)
+                        logmsg = "{} {}".format(logmsg, notif.payload)
                     logger.warning(logmsg)
                     continue
 

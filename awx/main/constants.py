@@ -11,6 +11,7 @@ __all__ = [
     'CAN_CANCEL',
     'ACTIVE_STATES',
     'STANDARD_INVENTORY_UPDATE_ENV',
+    'OIDC_CREDENTIAL_TYPE_NAMESPACES',
 ]
 
 PRIVILEGE_ESCALATION_METHODS = [
@@ -140,3 +141,6 @@ org_role_to_permission = {
     'execution_environment_admin_role': 'add_executionenvironment',
     'auditor_role': 'view_project',  # TODO: also doesnt really work
 }
+
+# OIDC credential type namespaces for feature flag filtering
+OIDC_CREDENTIAL_TYPE_NAMESPACES = ['hashivault-kv-oidc', 'hashivault-ssh-oidc']

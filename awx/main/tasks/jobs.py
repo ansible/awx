@@ -94,10 +94,7 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-
-from ansible_base.resource_registry.workload_identity_client import (
-    get_workload_identity_client,
-)
+from ansible_base.resource_registry.workload_identity_client import get_workload_identity_client
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -106,11 +103,6 @@ def populate_claims_for_workload(unified_job) -> dict:
     """
     Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
     """
-
-    # Related objects in the UnifiedJob model, applies to all job types
-    organization = getattr_dne(unified_job, 'organization')
-    ujt = getattr_dne(unified_job, 'unified_job_template')
-    instance_group = getattr_dne(unified_job, 'instance_group')
 
     claims = {
         AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
@@ -166,7 +158,12 @@ def populate_claims_for_workload(unified_job) -> dict:
     return claims
 
 
-def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope: str) -> str:
+def retrieve_workload_identity_jwt(
+    unified_job: UnifiedJob,
+    audience: str,
+    scope: str,
+    workload_ttl_seconds: int | None = None,
+) -> str:
     """Retrieve JWT token from workload claims.
     Raises:
         RuntimeError: if the workload identity client is not configured.
@@ -175,7 +172,10 @@ def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope
     if client is None:
         raise RuntimeError("Workload identity client is not configured")
     claims = populate_claims_for_workload(unified_job)
-    return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
+    kwargs = {"claims": claims, "scope": scope, "audience": audience}
+    if workload_ttl_seconds:
+        kwargs["workload_ttl_seconds"] = workload_ttl_seconds
+    return client.request_workload_jwt(**kwargs).jwt
 
 
 def with_path_cleanup(f):
@@ -218,6 +218,60 @@ class BaseTask(object):
         self.cleanup_paths = []
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
+
+    @functools.cached_property
+    def _credentials(self):
+        """
+        Credentials for the task execution.
+        Fetches credentials once using build_credentials_list() and stores
+        them for the duration of the task to avoid redundant database queries.
+        """
+        credentials_list = self.build_credentials_list(self.instance)
+        # Convert to list to prevent re-evaluation of QuerySet
+        return list(credentials_list)
+
+    def populate_workload_identity_tokens(self):
+        """
+        Populate credentials with workload identity tokens.
+
+        Sets the context on Credential objects that have input sources
+        using compatible external credential types.
+        """
+        credential_input_sources = (
+            (credential.context, src)
+            for credential in self._credentials
+            for src in credential.input_sources.all()
+            if any(
+                field.get('id') == 'workload_identity_token' and field.get('internal')
+                for field in src.source_credential.credential_type.inputs.get('fields', [])
+            )
+        )
+        for credential_ctx, input_src in credential_input_sources:
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                effective_timeout = self.get_instance_timeout(self.instance)
+                workload_ttl = effective_timeout if effective_timeout else None
+                try:
+                    jwt = retrieve_workload_identity_jwt(
+                        self.instance,
+                        audience=input_src.source_credential.get_input('jwt_aud'),
+                        scope=AutomationControllerJobScope.name,
+                        workload_ttl_seconds=workload_ttl,
+                    )
+                    # Store token keyed by input source PK, since a credential can have
+                    # multiple input sources (one per field), each potentially with a different audience
+                    credential_ctx[input_src.pk] = {"workload_identity_token": jwt}
+                except Exception as e:
+                    self.instance.job_explanation = (
+                        f'Could not generate workload identity token for credential {input_src.source_credential.name} used in this job. Error:\n{e}'
+                    )
+                    self.instance.status = 'error'
+                    self.instance.save()
+            else:
+                self.instance.job_explanation = (
+                    f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_src.source_credential.name} used in this job.'
+                )
+                self.instance.status = 'error'
+                self.instance.save()
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -370,6 +424,19 @@ class BaseTask(object):
                     private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
                 self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
+
+        # Copy vendor collections to private_data_dir for indirect node counting
+        # This makes external query files available to the callback plugin in EEs
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            vendor_src = '/var/lib/awx/vendor_collections'
+            vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
+            if os.path.exists(vendor_src):
+                try:
+                    shutil.copytree(vendor_src, vendor_dest)
+                    logger.debug(f"Copied vendor collections from {vendor_src} to {vendor_dest}")
+                except Exception as e:
+                    logger.warning(f"Failed to copy vendor collections: {e}")
+
         return private_data_files, ssh_key_data
 
     def build_passwords(self, instance, runtime_passwords):
@@ -443,6 +510,7 @@ class BaseTask(object):
         return []
 
     def get_instance_timeout(self, instance):
+        """Return the effective job timeout in seconds."""
         global_timeout_setting_name = instance._global_timeout_setting()
         if global_timeout_setting_name:
             global_timeout = getattr(settings, global_timeout_setting_name, 0)
@@ -615,6 +683,12 @@ class BaseTask(object):
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                logger.info(f'Generating workload identity tokens for {self.instance.log_format}')
+                self.populate_workload_identity_tokens()
+                if self.instance.status == 'error':
+                    raise RuntimeError('not starting %s task' % self.instance.status)
+
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
             passwords = self.build_passwords(self.instance, kwargs)
@@ -632,7 +706,7 @@ class BaseTask(object):
 
             self.runner_callback.job_created = str(self.instance.created)
 
-            credentials = self.build_credentials_list(self.instance)
+            credentials = self._credentials
 
             container_root = None
             if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
@@ -927,6 +1001,29 @@ class RunJob(SourceControlMixin, BaseTask):
     model = Job
     event_model = JobEvent
 
+    def _extract_credentials_of_kind(self, kind: str):
+        return (cred for cred in self._credentials if cred.credential_type.kind == kind)
+
+    @property
+    def _machine_credential(self) -> object:
+        """Get machine credential."""
+        return next(self._extract_credentials_of_kind('ssh'), None)
+
+    @property
+    def _vault_credentials(self) -> list[object]:
+        """Get vault credentials."""
+        return list(self._extract_credentials_of_kind('vault'))
+
+    @property
+    def _network_credentials(self) -> list[object]:
+        """Get network credentials."""
+        return list(self._extract_credentials_of_kind('net'))
+
+    @property
+    def _cloud_credentials(self) -> list[object]:
+        """Get cloud credentials."""
+        return list(self._extract_credentials_of_kind('cloud'))
+
     def build_private_data(self, job, private_data_dir):
         """
         Returns a dict of the form
@@ -944,7 +1041,7 @@ class RunJob(SourceControlMixin, BaseTask):
         }
         """
         private_data = {'credentials': {}}
-        for credential in job.credentials.prefetch_related('input_sources__source_credential').all():
+        for credential in self._credentials:
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
@@ -960,14 +1057,14 @@ class RunJob(SourceControlMixin, BaseTask):
         and ansible-vault.
         """
         passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = job.machine_credential
+        cred = self._machine_credential
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
-        for cred in job.vault_credentials:
+        for cred in self._vault_credentials:
             field = 'vault_password'
             vault_id = cred.get_input('vault_id', default=None)
             if vault_id:
@@ -983,7 +1080,7 @@ class RunJob(SourceControlMixin, BaseTask):
         key unlock over network key unlock.
         '''
         if 'ssh_key_unlock' not in passwords:
-            for cred in job.network_credentials:
+            for cred in self._network_credentials:
                 if cred.inputs.get('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = runtime_passwords.get('ssh_key_unlock', cred.get_input('ssh_key_unlock', default=''))
                     break
@@ -1018,11 +1115,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in job.cloud_credentials:
+        for cloud_cred in self._cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
                 env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
-        for network_cred in job.network_credentials:
+        for network_cred in self._network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
             env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
@@ -1065,6 +1162,11 @@ class RunJob(SourceControlMixin, BaseTask):
             if 'callbacks_enabled' in config_values:
                 env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
 
+            # Add vendor collections path for external query file discovery
+            vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
+            env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
+            logger.debug(f"ANSIBLE_COLLECTIONS_PATH updated for vendor collections: {env['ANSIBLE_COLLECTIONS_PATH']}")
+
         return env
 
     def build_args(self, job, private_data_dir, passwords):
@@ -1072,7 +1174,7 @@ class RunJob(SourceControlMixin, BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         """
-        creds = job.machine_credential
+        creds = self._machine_credential
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
@@ -1224,10 +1326,16 @@ class RunJob(SourceControlMixin, BaseTask):
             return
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
+            if job.inventory.kind == 'constructed':
+                hosts_qs = job.get_source_hosts_for_constructed_inventory()
+            else:
+                hosts_qs = job.inventory.hosts
             finish_fact_cache(
+                hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
+                job_created=job.created,
             )
 
     def final_run_hook(self, job, status, private_data_dir):

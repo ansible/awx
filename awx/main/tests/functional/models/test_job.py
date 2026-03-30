@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory, Project, Organization
+from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory, Host, Project, Organization
 
 
 @pytest.mark.django_db
@@ -87,3 +87,47 @@ class TestSlicingModels:
 
         unified_job = job_template.create_unified_job(job_slice_count=2)
         assert isinstance(unified_job, Job)
+
+
+@pytest.mark.django_db
+class TestGetSourceHostsForConstructedInventory:
+    """Tests for Job.get_source_hosts_for_constructed_inventory"""
+
+    def test_returns_source_hosts_via_instance_id(self):
+        """Constructed hosts with instance_id pointing to source hosts are resolved correctly."""
+        org = Organization.objects.create(name='test-org')
+        inv_input = Inventory.objects.create(organization=org, name='input-inv')
+        source_host1 = inv_input.hosts.create(name='host1')
+        source_host2 = inv_input.hosts.create(name='host2')
+
+        inv_constructed = Inventory.objects.create(organization=org, name='constructed-inv', kind='constructed')
+        inv_constructed.input_inventories.add(inv_input)
+        Host.objects.create(inventory=inv_constructed, name='host1', instance_id=str(source_host1.id))
+        Host.objects.create(inventory=inv_constructed, name='host2', instance_id=str(source_host2.id))
+
+        job = Job.objects.create(name='test-job', inventory=inv_constructed)
+        result = job.get_source_hosts_for_constructed_inventory()
+
+        assert set(result.values_list('id', flat=True)) == {source_host1.id, source_host2.id}
+
+    def test_no_inventory_returns_empty(self):
+        """A job with no inventory returns an empty queryset."""
+        job = Job.objects.create(name='test-job')
+        result = job.get_source_hosts_for_constructed_inventory()
+        assert result.count() == 0
+
+    def test_ignores_hosts_without_instance_id(self):
+        """Hosts with empty instance_id are excluded from the result."""
+        org = Organization.objects.create(name='test-org')
+        inv_input = Inventory.objects.create(organization=org, name='input-inv')
+        source_host = inv_input.hosts.create(name='host1')
+
+        inv_constructed = Inventory.objects.create(organization=org, name='constructed-inv', kind='constructed')
+        inv_constructed.input_inventories.add(inv_input)
+        Host.objects.create(inventory=inv_constructed, name='host1', instance_id=str(source_host.id))
+        Host.objects.create(inventory=inv_constructed, name='host-no-ref', instance_id='')
+
+        job = Job.objects.create(name='test-job', inventory=inv_constructed)
+        result = job.get_source_hosts_for_constructed_inventory()
+
+        assert list(result.values_list('id', flat=True)) == [source_host.id]

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-import shutil
-import tempfile
 from pathlib import Path
 
 import fcntl
@@ -60,14 +58,12 @@ class TestJobExecution(object):
 
 
 @pytest.fixture
-def private_data_dir():
-    private_data = tempfile.mkdtemp(prefix='awx_')
+def private_data_dir(tmp_path):
+    private_data = tmp_path / 'awx_pdd'
+    private_data.mkdir()
     for subfolder in ('inventory', 'env'):
-        runner_subfolder = os.path.join(private_data, subfolder)
-        if not os.path.exists(runner_subfolder):
-            os.mkdir(runner_subfolder)
-    yield private_data
-    shutil.rmtree(private_data, True)
+        (private_data / subfolder).mkdir()
+    return str(private_data)
 
 
 @pytest.fixture
@@ -556,7 +552,8 @@ class TestGenericRun:
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            env = task.build_env(job, private_data_dir)
+            with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+                env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
 
@@ -624,6 +621,11 @@ class TestAdhocRun(TestJobExecution):
 
 
 class TestJobCredentials(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
     @pytest.fixture
     def job(self, execution_environment):
         job = Job(pk=1, inventory=Inventory(pk=1), project=Project(pk=1))
@@ -649,7 +651,9 @@ class TestJobCredentials(TestJobExecution):
         )
 
         with mock.patch.object(UnifiedJob, 'credentials', credentials_mock):
-            yield job
+            # Mock build_credentials_list to work with the cached credentials mechanism
+            with mock.patch.object(jobs.RunJob, 'build_credentials_list', return_value=job._credentials, autospec=True):
+                yield job
 
     @pytest.fixture
     def update_model_wrapper(self, job):
@@ -1155,6 +1159,11 @@ class TestProjectUpdateRefspec(TestJobExecution):
 
 
 class TestInventoryUpdateCredentials(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
     @pytest.fixture
     def inventory_update(self, execution_environment):
         return InventoryUpdate(pk=1, execution_environment=execution_environment, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
@@ -1574,7 +1583,7 @@ def test_managed_injector_redaction(injector_cls):
     assert 'very_secret_value' not in str(build_safe_env(env))
 
 
-def test_job_run_no_ee(mock_me, mock_create_partition):
+def test_job_run_no_ee(mock_me, mock_create_partition, private_data_dir):
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))

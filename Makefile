@@ -581,7 +581,7 @@ detect-schema-change: genschema
 
 validate-openapi-schema: genschema
 	@echo "Validating OpenAPI schema from schema.json..."
-	@python3 -c "from openapi_spec_validator import validate; import json; spec = json.load(open('schema.json')); validate(spec); print('✓ OpenAPI Schema is valid!')"
+	@python3 -c "from openapi_spec_validator import validate; import json; spec = json.load(open('schema.json')); validate(spec); print('✓ Schema is valid')"
 
 docker-compose-clean: awx/projects
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml rm -sf

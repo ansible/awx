@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-import tempfile
-import shutil
-
 import pytest
 from unittest import mock
 
@@ -32,20 +28,58 @@ from ansible_base.lib.workload_identity.controller import AutomationControllerJo
 
 
 @pytest.fixture
-def private_data_dir():
-    private_data = tempfile.mkdtemp(prefix='awx_')
+def private_data_dir(tmp_path):
+    private_data = tmp_path / 'awx_pdd'
+    private_data.mkdir()
     for subfolder in ('inventory', 'env'):
-        runner_subfolder = os.path.join(private_data, subfolder)
-        os.makedirs(runner_subfolder, exist_ok=True)
-    yield private_data
-    shutil.rmtree(private_data, True)
+        (private_data / subfolder).mkdir()
+    return str(private_data)
+
+
+@pytest.fixture
+def job_template_with_credentials():
+    """
+    Factory fixture that creates a job template with specified credentials.
+
+    Usage:
+        job = job_template_with_credentials(ssh_cred, vault_cred)
+    """
+
+    def _create_job_template(
+        *credentials, org_name='test-org', project_name='test-project', inventory_name='test-inventory', jt_name='test-jt', playbook='test.yml'
+    ):
+        """
+        Create a job template with the given credentials.
+
+        Args:
+            *credentials: Variable number of Credential objects to attach to the job template
+            org_name: Name for the organization
+            project_name: Name for the project
+            inventory_name: Name for the inventory
+            jt_name: Name for the job template
+            playbook: Playbook filename
+
+        Returns:
+            Job instance created from the job template
+        """
+        org = Organization.objects.create(name=org_name)
+        proj = Project.objects.create(name=project_name, organization=org)
+        inv = Inventory.objects.create(name=inventory_name, organization=org)
+        jt = JobTemplate.objects.create(name=jt_name, project=proj, inventory=inv, playbook=playbook)
+
+        if credentials:
+            jt.credentials.add(*credentials)
+
+        return jt.create_unified_job()
+
+    return _create_job_template
 
 
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
 def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
     # Create mocked inventory and host queryset
-    inventory = mock.MagicMock(spec=Inventory, pk=1)
+    inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
     host1 = mock.MagicMock(spec=Host, id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
     host2 = mock.MagicMock(spec=Host, id=2, name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
 
@@ -62,12 +96,16 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
     proj = mock.MagicMock(spec=Project, pk=1, organization=org)
     job = mock.MagicMock(
         spec=Job,
+        pk=1,
+        id=1,
         use_fact_cache=True,
         project=proj,
         organization=org,
         job_slice_number=1,
         job_slice_count=1,
         inventory=inventory,
+        inventory_id=inventory.pk,
+        created=now(),
         execution_environment=execution_environment,
     )
     job.get_hosts_for_fact_cache = Job.get_hosts_for_fact_cache.__get__(job)
@@ -99,9 +137,11 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
 @mock.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
 @mock.patch('awx.main.tasks.facts.settings')
 @mock.patch('awx.main.tasks.jobs.create_partition', return_value=True)
-def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_facts_settings, private_data_dir, execution_environment):
+def test_pre_post_run_hook_facts_deleted_sliced(
+    mock_create_partition, mock_facts_settings, mock_bulk_update_sorted_by_id, private_data_dir, execution_environment
+):
     # Fully mocked inventory
-    mock_inventory = mock.MagicMock(spec=Inventory)
+    mock_inventory = mock.MagicMock(spec=Inventory, pk=1, kind='')
 
     # Create 999 mocked Host instances
     hosts = []
@@ -127,6 +167,8 @@ def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_fact
 
     # Mock job object
     job = mock.MagicMock(spec=Job)
+    job.pk = 2
+    job.id = 2
     job.use_fact_cache = True
     job.project = proj
     job.organization = org
@@ -134,6 +176,8 @@ def test_pre_post_run_hook_facts_deleted_sliced(mock_create_partition, mock_fact
     job.job_slice_count = 3
     job.execution_environment = execution_environment
     job.inventory = mock_inventory
+    job.inventory_id = mock_inventory.pk
+    job.created = now()
     job.job_env.get.return_value = private_data_dir
 
     # Bind actual method for host filtering
@@ -475,6 +519,30 @@ def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_clien
 
 
 @mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+def test_retrieve_workload_identity_jwt_passes_workload_ttl(mock_get_client):
+    """retrieve_workload_identity_jwt passes workload_ttl_seconds when provided."""
+    mock_client = mock.Mock()
+    mock_client.request_workload_jwt.return_value = mock.Mock(jwt='token')
+    mock_get_client.return_value = mock_client
+
+    unified_job = mock.MagicMock()
+    with mock.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 1}):
+        jobs.retrieve_workload_identity_jwt(
+            unified_job,
+            audience='https://vault.example.com',
+            scope='aap_controller_automation_job',
+            workload_ttl_seconds=3600,
+        )
+
+    mock_client.request_workload_jwt.assert_called_once_with(
+        claims={'job_id': 1},
+        scope='aap_controller_automation_job',
+        audience='https://vault.example.com',
+        workload_ttl_seconds=3600,
+    )
+
+
+@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_get_client):
     """retrieve_workload_identity_jwt raises RuntimeError when client is None."""
     mock_get_client.return_value = None
@@ -483,3 +551,42 @@ def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_g
 
     with pytest.raises(RuntimeError, match="Workload identity client is not configured"):
         jobs.retrieve_workload_identity_jwt(unified_job, audience='test_audience', scope='test_scope')
+
+
+@pytest.mark.parametrize('effective_timeout,expected_ttl', [(3600, 3600), (0, None)])
+@mock.patch('awx.main.tasks.jobs.retrieve_workload_identity_jwt')
+@mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True)
+def test_populate_workload_identity_tokens_passes_get_instance_timeout_to_client(mock_flag_enabled, mock_retrieve_jwt, effective_timeout, expected_ttl):
+    """populate_workload_identity_tokens passes get_instance_timeout() value as workload_ttl_seconds to retrieve_workload_identity_jwt."""
+    mock_retrieve_jwt.return_value = 'eyJ.test.jwt'
+
+    task = jobs.RunJob()
+    task.instance = mock.MagicMock()
+
+    # Minimal credential with workload identity input source
+    credential_ctx = {}
+    input_src = mock.MagicMock()
+    input_src.pk = 1
+    input_src.source_credential = mock.MagicMock()
+    input_src.source_credential.get_input.return_value = 'https://vault.example.com'
+    input_src.source_credential.name = 'vault-cred'
+    input_src.source_credential.credential_type = mock.MagicMock()
+    input_src.source_credential.credential_type.inputs = {'fields': [{'id': 'workload_identity_token', 'internal': True}]}
+
+    credential = mock.MagicMock()
+    credential.context = credential_ctx
+    credential.input_sources = mock.MagicMock()
+    credential.input_sources.all.return_value = [input_src]
+
+    task._credentials = [credential]
+
+    with mock.patch.object(task, 'get_instance_timeout', return_value=effective_timeout):
+        task.populate_workload_identity_tokens()
+
+    mock_flag_enabled.assert_called_once_with("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED")
+    mock_retrieve_jwt.assert_called_once_with(
+        task.instance,
+        audience='https://vault.example.com',
+        scope=AutomationControllerJobScope.name,
+        workload_ttl_seconds=expected_ttl,
+    )

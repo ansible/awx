@@ -251,3 +251,24 @@ class TestSettingsOptions(unittest.TestCase):
         out = StringIO()
         self.parser.choices['modify'].print_help(out)
         assert 'modify [-h] key value' in out.getvalue()
+
+
+class TestHelpParameterChanges(unittest.TestCase):
+    """Test that add_help parameter changes work correctly"""
+
+    def test_add_help_parameter_handling(self):
+        """Test that add_help=True and add_help=False work as expected"""
+        # Test add_help=True (for action parsers like list, create)
+        parser = argparse.ArgumentParser()
+        subparsers = parser.add_subparsers(dest='action')
+
+        list_parser = subparsers.add_parser('list', help='', add_help=True)
+        out = StringIO()
+        list_parser.print_help(out)
+        help_text = out.getvalue()
+        assert 'show this help message and exit' in help_text
+
+        # Test add_help=False (for resource parsers like users, jobs)
+        resource_parser = subparsers.add_parser('users', help='', add_help=False)
+        help_actions = [action for action in resource_parser._actions if '--help' in action.option_strings]
+        assert len(help_actions) == 0  # Should be 0 because add_help=False

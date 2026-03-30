@@ -200,6 +200,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         indexes = [
             models.Index(fields=['identifier']),
         ]
+        ordering = ('pk',)
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_template_node_detail', kwargs={'pk': self.pk}, request=request)
@@ -286,6 +287,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             models.Index(fields=["identifier", "workflow_job"]),
             models.Index(fields=['identifier']),
         ]
+        ordering = ('pk',)
 
     @property
     def event_processing_finished(self):
@@ -915,6 +917,17 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.websocket_emit_status(self.status)
         ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
+
+    def cancel(self, job_explanation=None, is_chain=False):
+        # WorkflowApprovals have no dispatcher process (they wait for human
+        # input) and are excluded from TaskManager processing, so the base
+        # cancel() would only set cancel_flag without ever transitioning the
+        # status.  We call super() for the flag, then transition directly.
+        has_already_canceled = bool(self.status == 'canceled')
+        super().cancel(job_explanation=job_explanation, is_chain=is_chain)
+        if self.status != 'canceled' and not has_already_canceled:
+            self.status = 'canceled'
+            self.save(update_fields=['status'])
 
     def signal_start(self, **kwargs):
         can_start = super(WorkflowApproval, self).signal_start(**kwargs)

@@ -2,6 +2,7 @@
 import json
 import os
 import pytest
+from unittest import mock
 
 from awx.main.models import (
     Inventory,
@@ -99,52 +100,55 @@ def test_start_job_fact_cache_within_timeout(hosts, tmpdir):
 
 
 def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
-    fact_cache = os.path.join(tmpdir, 'facts')
-    start_fact_cache(hosts, fact_cache, timeout=0)
+    artifacts_dir = str(tmpdir.mkdir("artifacts"))
+    inventory_id = 5
 
-    bulk_update = mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+    start_fact_cache(hosts, artifacts_dir=artifacts_dir, timeout=0, inventory_id=inventory_id)
 
-    # Mock the os.path.exists behavior for host deletion
-    # Let's assume the fact file for hosts[1] is missing.
-    mocker.patch('os.path.exists', side_effect=lambda path: hosts[1].name not in path)
+    mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
 
-    # Simulate one host's fact file getting deleted manually
-    host_to_delete_filepath = os.path.join(fact_cache, hosts[1].name)
+    # Remove the fact file for hosts[1] to simulate ansible's clear_facts
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
+    os.remove(os.path.join(fact_cache_dir, hosts[1].name))
 
-    # Simulate the file being removed by checking existence first, to avoid FileNotFoundError
-    if os.path.exists(host_to_delete_filepath):
-        os.remove(host_to_delete_filepath)
+    hosts_qs = mock.MagicMock()
+    hosts_qs.filter.return_value.order_by.return_value.iterator.return_value = iter(hosts)
 
-    finish_fact_cache(fact_cache)
+    finish_fact_cache(hosts_qs, artifacts_dir=artifacts_dir, inventory_id=inventory_id)
 
-    # Simulate side effects that would normally be applied during bulk update
-    hosts[1].ansible_facts = {}
-    hosts[1].ansible_facts_modified = now()
+    # hosts[1] should have had its facts cleared (file was missing, job_created=None)
+    assert hosts[1].ansible_facts == {}
+    assert hosts[1].ansible_facts_modified > ref_time
 
-    # Verify facts are preserved for hosts with valid cache files
+    # Other hosts should be unmodified (fact files exist but weren't changed by ansible)
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
         assert host.ansible_facts_modified == ref_time
-    assert hosts[1].ansible_facts_modified > ref_time
-
-    # Current implementation skips the call entirely if hosts_to_update == []
-    bulk_update.assert_not_called()
 
 
 def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
-    fact_cache = os.path.join(tmpdir, 'facts')
-    start_fact_cache(hosts, fact_cache, timeout=0)
+    artifacts_dir = str(tmpdir.mkdir("artifacts"))
+    inventory_id = 5
 
-    bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
+    start_fact_cache(hosts, artifacts_dir=artifacts_dir, timeout=0, inventory_id=inventory_id)
 
+    bulk_update = mocker.patch('awx.main.tasks.facts.bulk_update_sorted_by_id')
+
+    # Overwrite fact files with invalid JSON and set future mtime
+    fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
     for h in hosts:
-        filepath = os.path.join(fact_cache, h.name)
+        filepath = os.path.join(fact_cache_dir, h.name)
         with open(filepath, 'w') as f:
             f.write('not valid json!')
             f.flush()
             new_modification_time = time.time() + 3600
             os.utime(filepath, (new_modification_time, new_modification_time))
 
-    finish_fact_cache(fact_cache)
+    hosts_qs = mock.MagicMock()
+    hosts_qs.filter.return_value.order_by.return_value.iterator.return_value = iter(hosts)
 
-    bulk_update.assert_not_called()
+    finish_fact_cache(hosts_qs, artifacts_dir=artifacts_dir, inventory_id=inventory_id)
+
+    # Invalid JSON should be skipped — no hosts updated
+    updated_hosts = bulk_update.call_args[0][1]
+    assert updated_hosts == []

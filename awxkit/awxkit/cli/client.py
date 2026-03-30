@@ -80,6 +80,53 @@ class CLI(object):
     def help(self):
         return '--help' in self.argv or '-h' in self.argv
 
+    def _get_non_option_args(self, before_help=False):
+        """Extract non-option arguments from argv, optionally only those before help flag."""
+        if before_help and self.help:
+            # Find position of help flag
+            help_pos = next((i for i, arg in enumerate(self.argv) if arg in ('--help', '-h')), len(self.argv))
+            args_to_check = self.argv[:help_pos]
+        else:
+            args_to_check = self.argv
+
+        non_option_args = []
+        i = 0
+        while i < len(args_to_check):
+            arg = args_to_check[i]
+
+            if arg == 'awx':
+                # Skip 'awx' token
+                i += 1
+            elif arg.startswith('-'):
+                # This is an option
+                if '=' in arg:
+                    # Long option with value: --opt=val
+                    i += 1
+                else:
+                    # Option without embedded value: --opt or -o
+                    i += 1
+                    # Only consume next argument if it exists AND doesn't start with '-'
+                    # This naturally handles flag-only options (like --verbose)
+                    if i < len(args_to_check) and not args_to_check[i].startswith('-'):
+                        i += 1
+            else:
+                # This is a positional argument
+                non_option_args.append(arg)
+                i += 1
+
+        return non_option_args
+
+    def _is_main_help_request(self):
+        """
+        Determine if help request is for main CLI (awx --help) vs subcommand (awx users create --help).
+        Returns True if this is a main CLI help request that should exit early.
+        """
+        if not self.help:
+            return False
+
+        # If there are non-option arguments before help flag, this is subcommand help
+        return len(self._get_non_option_args(before_help=True)) == 0
+
     def authenticate(self):
         """Configure the current session for authentication.
 
@@ -224,6 +271,16 @@ class CLI(object):
         subparsers = self.subparsers[self.resource].add_subparsers(dest='action', metavar='action')
         subparsers.required = True
 
+        # Add manual help handling for resource-level help
+        # since we disabled add_help=False for resource subparsers
+        if self.help:
+            # Check if this is resource-level help (no action specified)
+            non_option_args = self._get_non_option_args()
+            if len(non_option_args) == 1 and non_option_args[0] == self.resource:
+                # Only resource specified, no action - show resource-level help
+                self.subparsers[self.resource].print_help()
+                return
+
         # parse the action from OPTIONS
         parser = ResourceOptionsParser(self.v2, page, self.resource, subparsers)
         if parser.deprecated:
@@ -231,6 +288,18 @@ class CLI(object):
             if not from_sphinx:
                 description = colored(description, 'yellow')
             self.subparsers[self.resource].description = description
+
+        # parse any action arguments FIRST before attempting to parse
+        if self.resource != 'settings':
+            for method in ('list', 'modify', 'create'):
+                if method in parser.parser.choices:
+                    if method == 'list':
+                        http_method = 'GET'
+                    elif method == 'modify' and 'PUT' in parser.options:
+                        http_method = 'PUT'
+                    else:
+                        http_method = 'POST'
+                    parser.build_query_arguments(method, http_method)
 
         if from_sphinx:
             # Our Sphinx plugin runs `parse_action` for *every* available
@@ -244,21 +313,6 @@ class CLI(object):
                 self.parser.parse_known_args(self.argv)[0]
             except SystemExit:
                 pass
-        else:
-            self.parser.parse_known_args()[0]
-
-        # parse any action arguments
-        if self.resource != 'settings':
-            for method in ('list', 'modify', 'create'):
-                if method in parser.parser.choices:
-                    if method == 'list':
-                        http_method = 'GET'
-                    elif method == 'modify' and 'PUT' in parser.options:
-                        http_method = 'PUT'
-                    else:
-                        http_method = 'POST'
-                    parser.build_query_arguments(method, http_method)
-        if from_sphinx:
             parsed, extra = self.parser.parse_known_args(self.argv)
         else:
             parsed, extra = self.parser.parse_known_args()
@@ -313,6 +367,7 @@ class CLI(object):
         self.argv = argv
         self.parser = HelpfulArgumentParser(add_help=False)
         self.parser.add_argument(
+            '-h',
             '--help',
             action='store_true',
             help='prints usage information for the awx tool',
@@ -322,6 +377,13 @@ class CLI(object):
         add_output_formatting_arguments(self.parser, env)
 
         self.args = self.parser.parse_known_args(self.argv)[0]
+
+        # Early return for help to avoid server connection, but only for main CLI help
+        # Allow subcommand help (like 'awx users create --help') to continue processing
+        if self.help and self._is_main_help_request():
+            self.parser.print_help()
+            sys.exit(0)
+
         self.verbose = self.get_config('verbose')
         if self.verbose:
             logging.basicConfig(level='DEBUG')

@@ -196,6 +196,10 @@ class WorkflowManager(TaskBase):
                     workflow_job.start_args = ''  # blank field to remove encrypted passwords
                     workflow_job.save(update_fields=['status', 'start_args'])
                     status_changed = True
+                else:
+                    # Speed-up: schedule the task manager so it can process the
+                    # canceled pending jobs without waiting for the next cycle.
+                    ScheduleTaskManager().schedule()
             else:
                 dnr_nodes = dag.mark_dnr_nodes()
                 WorkflowJobNode.objects.bulk_update(dnr_nodes, ['do_not_run'])
@@ -443,17 +447,29 @@ class TaskManager(TaskBase):
         self.controlplane_ig = self.tm_models.instance_groups.controlplane_ig
 
     def process_job_dep_failures(self, task):
-        """If job depends on a job that has failed, mark as failed and handle misc stuff."""
+        """If job depends on a job that has failed or been canceled, mark as failed.
+
+        Returns True if a dep failure was found, False otherwise.
+        """
         for dep in task.dependent_jobs.all():
-            # if we detect a failed or error dependency, go ahead and fail this task.
-            if dep.status in ("error", "failed"):
+            # if we detect a failed, error, or canceled dependency, go ahead and fail this task.
+            if dep.status in ("error", "failed", "canceled"):
                 task.status = 'failed'
-                logger.warning(f'Previous task failed task: {task.id} dep: {dep.id} task manager')
-                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(dep)),
-                    dep.name,
-                    dep.id,
-                )
+                if dep.status == 'canceled':
+                    logger.warning(f'Previous task canceled, failing task: {task.id} dep: {dep.id} task manager')
+                    task.job_explanation = 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                        get_type_for_model(type(dep)),
+                        dep.name,
+                        dep.id,
+                    )
+                    ScheduleWorkflowManager().schedule()  # speedup for dependency chains in workflow, on workflow cancel
+                else:
+                    logger.warning(f'Previous task failed, failing task: {task.id} dep: {dep.id} task manager')
+                    task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                        get_type_for_model(type(dep)),
+                        dep.name,
+                        dep.id,
+                    )
                 task.save(update_fields=['status', 'job_explanation'])
                 task.websocket_emit_status('failed')
                 self.pre_start_failed.append(task.id)
@@ -545,8 +561,17 @@ class TaskManager(TaskBase):
                 logger.warning("Task manager has reached time out while processing pending jobs, exiting loop early")
                 break
 
-            has_failed = self.process_job_dep_failures(task)
-            if has_failed:
+            if task.cancel_flag:
+                logger.debug(f"Canceling pending task {task.log_format} because cancel_flag is set")
+                task.status = 'canceled'
+                task.job_explanation = gettext_noop("This job was canceled before it started.")
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status('canceled')
+                self.pre_start_failed.append(task.id)
+                ScheduleWorkflowManager().schedule()
+                continue
+
+            if self.process_job_dep_failures(task):
                 continue
 
             blocked_by = self.job_blocked_by(task)

@@ -44,33 +44,35 @@ from ansible.galaxy.collection import find_existing_collections
 from ansible.utils.collection_loader import AnsibleCollectionConfig
 import ansible.constants as C
 
-
-@with_collection_artifacts_manager
-def list_collections(artifacts_manager=None):
-    artifacts_manager.require_build_metadata = False
-
-    default_collections_path = set(C.COLLECTIONS_PATHS)
-    collections_search_paths = default_collections_path | set(AnsibleCollectionConfig.collection_paths)
-    collections = list(find_existing_collections(list(collections_search_paths), artifacts_manager, dedupe=False))
-    return collections
-
-
 # External query path constants
 EXTERNAL_QUERY_COLLECTION = 'ansible_collections.redhat.indirect_accounting'
-EXTERNAL_QUERY_PATH = 'extensions/audit/external_queries'
+
+
+def _get_query_file_dir():
+    """Return the query file directory or None."""
+    try:
+        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
+    except ModuleNotFoundError:
+        return None
+    if not queries_dir.is_dir():
+        return None
+    return queries_dir
 
 
 def list_external_queries(namespace, name):
     """List all available external query versions for a collection.
 
-    Returns a list of Version objects for all available query files
-    matching the namespace.name pattern.
+    Args:
+        namespace: Collection namespace (e.g., 'community')
+        name: Collection name (e.g., 'vmware')
+
+    Returns:
+        List of Version objects for all available query files
+        matching the namespace.name pattern.
     """
     versions = []
 
-    try:
-        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
-    except ModuleNotFoundError:
+    if not (queries_dir := _get_query_file_dir()):
         return versions
 
     # Pattern: namespace.name.X.Y.Z.yml where X.Y.Z is the version
@@ -89,14 +91,13 @@ def list_external_queries(namespace, name):
     return versions
 
 
-def find_external_query_with_fallback(namespace, name, installed_version, display=None):
+def find_external_query_with_fallback(namespace, name, installed_version):
     """Find external query file with semantic version fallback.
 
     Args:
         namespace: Collection namespace (e.g., 'community')
         name: Collection name (e.g., 'vmware')
         installed_version: Version string of installed collection (e.g., '4.5.0')
-        display: Ansible display object for logging
 
     Returns:
         Tuple of (query_content, fallback_used, fallback_version) or (None, False, None)
@@ -104,32 +105,31 @@ def find_external_query_with_fallback(namespace, name, installed_version, displa
         - fallback_used: True if a fallback version was used instead of exact match
         - fallback_version: The version string used (for logging)
     """
-    try:
-        installed_version_object = Version(installed_version)
-    except InvalidVersion:
-        # Invalid version string - can't do version comparison
-        return None, False, None
-    try:
-        queries_dir = files(EXTERNAL_QUERY_COLLECTION) / 'extensions' / 'audit' / 'external_queries'
-    except ModuleNotFoundError:
+    if not (queries_dir := _get_query_file_dir()):
         return None, False, None
 
-    # 1. Try exact version match first (AC5.2)
+    # 1. Try exact version match first
     exact_file = queries_dir / f'{namespace}.{name}.{installed_version}.yml'
     if exact_file.exists():
         with exact_file.open('r') as f:
             return f.read(), False, installed_version
 
     # 2. Find compatible fallback (same major version, nearest lower version)
+    try:
+        installed_version_object = Version(installed_version)
+    except InvalidVersion:
+        # Can't do version comparison for fallback
+        return None, False, None
     available_versions = list_external_queries(namespace, name)
     if not available_versions:
         return None, False, None
-    # Filter to same major version and versions <= installed version (AC5.3, AC5.5)
+
+    # Filter to same major version and versions <= installed version
     compatible_versions = [v for v in available_versions if v.major == installed_version_object.major and v <= installed_version_object]
     if not compatible_versions:
-        # No compatible fallback exists (AC5.7)
         return None, False, None
-    # Select nearest lower version - highest compatible version (AC5.4)
+
+    # Select nearest lower version - highest compatible version
     fallback_version_object = max(compatible_versions)
     fallback_version_str = str(fallback_version_object)
     fallback_file = queries_dir / f'{namespace}.{name}.{fallback_version_str}.yml'
@@ -138,6 +138,16 @@ def find_external_query_with_fallback(namespace, name, installed_version, displa
             return f.read(), True, fallback_version_str
 
     return None, False, None
+
+
+@with_collection_artifacts_manager
+def list_collections(artifacts_manager=None):
+    artifacts_manager.require_build_metadata = False
+
+    default_collections_path = set(C.COLLECTIONS_PATHS)
+    collections_search_paths = default_collections_path | set(AnsibleCollectionConfig.collection_paths)
+    collections = list(find_existing_collections(list(collections_search_paths), artifacts_manager, dedupe=False))
+    return collections
 
 
 class CallbackModule(CallbackBase):
@@ -165,9 +175,10 @@ class CallbackModule(CallbackBase):
                 'version': candidate.ver,
             }
 
-            query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
-            if query_file.exists():
-                with query_file.open('r') as f:
+            # 1. Check for embedded query file (takes precedence)
+            embedded_query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
+            if embedded_query_file.exists():
+                with embedded_query_file.open('r') as f:
                     collection_print['host_query'] = f.read()
                 self._display.vv(f"Using embedded query for {candidate.fqcn} v{candidate.ver}")
             else:

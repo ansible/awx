@@ -131,7 +131,13 @@ class LoggedLoginView(auth_views.LoginView):
 
 
 class LoggedLogoutView(auth_views.LogoutView):
+    # Override http_method_names to allow GET requests (Django 5.2+ defaults to POST only)
+    http_method_names = ["get", "post", "options"]
     success_url_allowed_hosts = set(settings.LOGOUT_ALLOWED_HOSTS.split(",")) if settings.LOGOUT_ALLOWED_HOSTS else set()
+
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests for logout (for backward compatibility)."""
+        return self.post(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         if is_proxied_request():
