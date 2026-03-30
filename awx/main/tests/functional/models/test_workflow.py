@@ -291,6 +291,33 @@ class TestWorkflowJob:
         assert set(data['labels']) == set(node_labels)  # as exception, WFJT labels not applied
         assert data['limit'] == 'wj_limit'
 
+    def test_node_limit_not_overridden_by_empty_string_wj_limit(self, project, inventory):
+        """
+        When the workflow job has an empty string limit (e.g., set via IaC with limit: ""),
+        the node-level limit should still be passed to the spawned job, not silently suppressed.
+        """
+        jt = JobTemplate.objects.create(
+            project=project,
+            inventory=inventory,
+            ask_limit_on_launch=True,
+        )
+        # Simulate a workflow job whose WFJT was created via IaC with `limit: ""`
+        # (e.g. awx.awx.workflow_job_template: ... limit: "")
+        # This stores '' in char_prompts instead of treating it as None/"no limit".
+        wj = WorkflowJob.objects.create(name='test-wf-job')
+        wj.limit = ''  # stores {'limit': ''} in char_prompts - the IaC bug scenario
+        wj.save()
+
+        node = WorkflowJobNode.objects.create(workflow_job=wj, unified_job_template=jt)
+        node.limit = 'web_servers'
+        node.save()
+
+        data = node.get_job_kwargs()
+        # The node-level limit should be applied; the WJ's empty string limit is not meaningful
+        assert data.get('limit') == 'web_servers', (
+            "Node-level limit 'web_servers' was not passed to the job. " "Likely caused by an empty string WJ limit overriding the node limit"
+        )
+
 
 @pytest.mark.django_db
 class TestWorkflowJobTemplate:
