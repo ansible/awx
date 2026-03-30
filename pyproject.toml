@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2,<10"]
 build-backend = "setuptools.build_meta"
 
 # Do not uncomment the line below. We need to be able to override the version via a file, and this
