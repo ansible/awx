@@ -366,14 +366,18 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['survey_passwords'] = password_dict
         # process extra_vars
         extra_vars = data.get('extra_vars', {})
+
+        # Workflow Job extra_vars applied first (lower precedence)
+        extra_vars.update(wj_special_vars)
+
+        # Ancestor artifacts (set_stats data from upstream nodes) override
+        # workflow extra_vars, which may contain stale artifacts inherited
+        # from a parent workflow's extra_vars
         if ujt_obj and isinstance(ujt_obj, (JobTemplate, WorkflowJobTemplate)):
             if aa_dict:
                 functional_aa_dict = copy(aa_dict)
                 functional_aa_dict.pop('_ansible_no_log', None)
                 extra_vars.update(functional_aa_dict)
-
-        # Workflow Job extra_vars higher precedence than ancestor artifacts
-        extra_vars.update(wj_special_vars)
         if extra_vars:
             data['extra_vars'] = extra_vars
 
