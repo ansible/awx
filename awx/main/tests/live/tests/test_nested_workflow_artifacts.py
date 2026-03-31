@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from awx.main.tests.live.tests.conftest import wait_for_job, unified_job_stdout
+from awx.main.tests.live.tests.conftest import wait_for_job
 
 from awx.main.models import JobTemplate, WorkflowJobTemplate, WorkflowJobTemplateNode
 
