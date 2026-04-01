@@ -123,3 +123,74 @@ def test_nested_workflow_set_stats_precedence(live_tmp_folder, demo_inv, project
 
     # var3: only set by inner job_second — should propagate normally
     assert reader_extra_vars.get('var3') == 'inner-only', f'var3: expected "inner-only" (inner-only artifact), ' f'got "{reader_extra_vars.get("var3")}"'
+
+
+@pytest.mark.django_db(transaction=True)
+def test_workflow_extra_vars_override_artifacts(live_tmp_folder, demo_inv, project_factory, default_org):
+    """Workflow extra_vars should take precedence over set_stats artifacts
+    within a single (non-nested) workflow.
+
+    WF (extra_vars: my_var="from-wf-extra-vars"):
+        [job_setter] --success--> [job_reader]
+
+    job_setter sets my_var="from-set-stats" via set_stats
+    job_reader should see my_var="from-wf-extra-vars" because workflow
+    extra_vars are higher precedence than ancestor artifacts.
+    """
+    wft_name = 'artifact-test-wf-extra-vars-precedence'
+    jt_names = ('artifact-test-setter', 'artifact-test-checker')
+
+    for wft in WorkflowJobTemplate.objects.filter(name=wft_name):
+        wft.delete()
+    for name in jt_names:
+        for jt in JobTemplate.objects.filter(name=name):
+            jt.delete()
+
+    proj = project_factory(scm_url=f'file://{live_tmp_folder}/debug')
+    if proj.current_job:
+        wait_for_job(proj.current_job)
+
+    jt_setter = JobTemplate.objects.create(
+        name='artifact-test-setter',
+        project=proj,
+        playbook='set_stats.yml',
+        inventory=demo_inv,
+        extra_vars=json.dumps({'stats_data': {'my_var': 'from-set-stats'}}),
+    )
+    jt_checker = JobTemplate.objects.create(
+        name='artifact-test-checker',
+        project=proj,
+        playbook='debug.yml',
+        inventory=demo_inv,
+    )
+
+    wft = WorkflowJobTemplate.objects.create(
+        name=wft_name,
+        organization=default_org,
+        extra_vars=json.dumps({'my_var': 'from-wf-extra-vars'}),
+    )
+    node_1 = WorkflowJobTemplateNode.objects.create(
+        workflow_job_template=wft,
+        unified_job_template=jt_setter,
+        identifier='setter',
+    )
+    node_2 = WorkflowJobTemplateNode.objects.create(
+        workflow_job_template=wft,
+        unified_job_template=jt_checker,
+        identifier='checker',
+    )
+    node_1.success_nodes.add(node_2)
+
+    wfj = wft.create_unified_job()
+    wfj.signal_start()
+    wait_for_job(wfj, running_timeout=120)
+
+    checker_node = wfj.workflow_job_nodes.get(identifier='checker')
+    assert checker_node.job is not None, 'Checker job was never created'
+
+    checker_extra_vars = json.loads(checker_node.job.extra_vars)
+    assert checker_extra_vars.get('my_var') == 'from-wf-extra-vars', (
+        f'Expected my_var="from-wf-extra-vars" (workflow extra_vars should override artifacts), '
+        f'got my_var="{checker_extra_vars.get("my_var")}". '
+        f'checker node ancestor_artifacts={checker_node.ancestor_artifacts}'
+    )

@@ -366,18 +366,19 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['survey_passwords'] = password_dict
         # process extra_vars
         extra_vars = data.get('extra_vars', {})
-
-        # Workflow Job extra_vars applied first (lower precedence)
-        extra_vars.update(wj_special_vars)
-
-        # Ancestor artifacts (set_stats data from upstream nodes) override
-        # workflow extra_vars, which may contain stale artifacts inherited
-        # from a parent workflow's extra_vars
-        if ujt_obj and isinstance(ujt_obj, (JobTemplate, WorkflowJobTemplate)):
+        if ujt_obj and isinstance(ujt_obj, JobTemplate):
             if aa_dict:
                 functional_aa_dict = copy(aa_dict)
                 functional_aa_dict.pop('_ansible_no_log', None)
                 extra_vars.update(functional_aa_dict)
+        elif ujt_obj and isinstance(ujt_obj, WorkflowJobTemplate):
+            # For nested workflows, ancestor artifacts are applied to root nodes
+            # of the child workflow (in the task manager) instead of being baked
+            # into extra_vars where they would override the child's own set_stats
+            pass
+
+        # Workflow Job extra_vars higher precedence than ancestor artifacts
+        extra_vars.update(wj_special_vars)
         if extra_vars:
             data['extra_vars'] = extra_vars
 
@@ -737,6 +738,18 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             ancestors.append(wj.workflow_job_template)
             wj = wj.get_workflow_job()
         return ancestors
+
+    def seed_root_ancestor_artifacts(self, artifacts):
+        """Apply parent workflow artifacts to root nodes so they propagate
+        through the normal ancestor_artifacts channel instead of being
+        baked into this workflow's extra_vars."""
+        self.workflow_job_nodes.exclude(
+            workflowjobnodes_success__isnull=False,
+        ).exclude(
+            workflowjobnodes_failure__isnull=False,
+        ).exclude(
+            workflowjobnodes_always__isnull=False,
+        ).update(ancestor_artifacts=artifacts)
 
     def get_effective_artifacts(self, **kwargs):
         """
