@@ -25,18 +25,23 @@ def strtobool(val):
 
 
 def get_config_credentials():
-    """Load username and password from config.credentials.default.
+    """Load username, password, and token from config.credentials.default.
 
     In order to respect configurations from AWXKIT_CREDENTIAL_FILE.
     """
     default_username = 'admin'
     default_password = 'password'
+    default_token = None
 
     if not hasattr(config, 'credentials'):
-        return default_username, default_password
+        return default_username, default_password, default_token
 
     default = config.credentials.get('default', {})
-    return (default.get('username', default_username), default.get('password', default_password))
+    return (
+        default.get('username', default_username),
+        default.get('password', default_password),
+        default.get('token', default_token),
+    )
 
 
 def add_authentication_arguments(parser, env):
@@ -47,7 +52,7 @@ def add_authentication_arguments(parser, env):
         metavar='https://example.awx.org',
     )
 
-    config_username, config_password = get_config_credentials()
+    config_username, config_password, config_token = get_config_credentials()
     # options configured via cli args take higher precedence than those from the config
     auth.add_argument(
         '--conf.username',
@@ -58,6 +63,12 @@ def add_authentication_arguments(parser, env):
         '--conf.password',
         default=env.get('CONTROLLER_PASSWORD', env.get('TOWER_PASSWORD', config_password)),
         metavar='TEXT',
+    )
+    auth.add_argument(
+        "--conf.token",
+        default=env.get("CONTROLLER_OAUTH_TOKEN", env.get("TOWER_OAUTH_TOKEN", config_token)),
+        help="OAuth2 token for authentication (overrides username/password)",
+        metavar="TEXT",
     )
 
     auth.add_argument(

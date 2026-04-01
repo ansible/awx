@@ -44,6 +44,21 @@ def setup_session_auth(cli_args: Optional[List[str]] = None) -> Tuple[CLI, Mock,
     return cli, mock_root, mock_load_session
 
 
+def setup_token_auth(cli_args: Optional[List[str]] = None) -> Tuple[CLI, Mock, Mock]:
+    """Set up CLI with mocked connection for OAuth2 token auth testing"""
+    cli = CLI()
+    cli.parse_args(cli_args or ['awx', '--conf.token', 'my_oauth_token'])
+
+    mock_root = Mock()
+    mock_connection = Mock()
+    mock_connection.session.headers = {}
+    mock_root.connection = mock_connection
+    mock_root.load_session.return_value = mock_root
+    cli.root = mock_root
+
+    return cli, mock_root, mock_connection
+
+
 def test_basic_auth_enabled(monkeypatch):
     """Test that AWXKIT_FORCE_BASIC_AUTH=true enables Basic authentication"""
     cli, mock_root, mock_connection = setup_basic_auth()
@@ -101,3 +116,69 @@ def test_connection_failure(monkeypatch):
 
     mock_connection.login.assert_called_once_with('testuser', 'testpass')
     assert not config.use_sessions
+
+
+def test_oauth_token_auth():
+    """Test that providing an OAuth2 token sets the Bearer header"""
+    cli, mock_root, mock_connection = setup_token_auth()
+    cli.authenticate()
+
+    assert mock_connection.session.headers['Authorization'] == 'Bearer my_oauth_token'
+    mock_connection.login.assert_not_called()
+    mock_root.load_session.assert_not_called()
+
+
+def test_oauth_token_from_cli_flag():
+    """Test that --conf.token CLI flag sets Bearer auth"""
+    cli, mock_root, mock_connection = setup_token_auth(
+        ['awx', '--conf.token', 'cli_token_value']
+    )
+    cli.authenticate()
+
+    assert mock_connection.session.headers['Authorization'] == 'Bearer cli_token_value'
+    mock_connection.login.assert_not_called()
+
+
+def test_oauth_token_from_env_var():
+    """Test that CONTROLLER_OAUTH_TOKEN env var sets Bearer auth"""
+    cli = CLI()
+    cli.parse_args(['awx'], env={'CONTROLLER_OAUTH_TOKEN': 'env_token_value'})
+
+    mock_root = Mock()
+    mock_connection = Mock()
+    mock_connection.session.headers = {}
+    mock_root.connection = mock_connection
+    cli.root = mock_root
+
+    cli.authenticate()
+
+    assert mock_connection.session.headers['Authorization'] == 'Bearer env_token_value'
+    mock_connection.login.assert_not_called()
+
+
+def test_oauth_token_precedence_over_basic_auth(monkeypatch):
+    """Test that OAuth2 token takes precedence over Basic auth"""
+    cli, mock_root, mock_connection = setup_token_auth(
+        ['awx', '--conf.token', 'my_token', '--conf.username', 'user', '--conf.password', 'pass']
+    )
+    monkeypatch.setattr(config, 'force_basic_auth', True)
+    cli.authenticate()
+
+    assert mock_connection.session.headers['Authorization'] == 'Bearer my_token'
+    mock_connection.login.assert_not_called()
+
+
+def test_empty_token_falls_through_to_session_auth():
+    """Test that an empty token falls through to session-based auth"""
+    cli = CLI()
+    cli.parse_args(['awx', '--conf.token', '', '--conf.username', 'testuser', '--conf.password', 'testpass'])
+
+    mock_root = Mock()
+    mock_load_session = Mock()
+    mock_root.load_session.return_value = mock_load_session
+    cli.root = mock_root
+
+    cli.authenticate()
+
+    mock_root.load_session.assert_called_once()
+    mock_load_session.get.assert_called_once()

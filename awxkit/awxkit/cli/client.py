@@ -130,12 +130,21 @@ class CLI(object):
     def authenticate(self):
         """Configure the current session for authentication.
 
+        If an OAuth2 token is provided (via --conf.token or CONTROLLER_OAUTH_TOKEN),
+        it is sent as a Bearer token in the Authorization header.
+
         Uses Basic authentication when AWXKIT_FORCE_BASIC_AUTH environment variable
         is set to true, otherwise defaults to session-based authentication.
 
         For AAP Gateway environments, set AWXKIT_FORCE_BASIC_AUTH=true to bypass
         session login restrictions.
         """
+        # Check if an OAuth2 token is provided
+        token = self.get_config('token')
+        if token:
+            self.root.connection.session.headers['Authorization'] = f'Bearer {token}'
+            return
+
         # Check if Basic auth is forced via environment variable
         if config.get('force_basic_auth', False):
             config.use_sessions = False

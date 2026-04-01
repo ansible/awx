@@ -108,6 +108,73 @@ def test_config_file():
     assert config.credentials.default.password == 'secret'
 
 
+def test_oauth_token_from_controller_env():
+    """Test CONTROLLER_OAUTH_TOKEN is picked up from environment"""
+    cli = CLI()
+    cli.parse_args(["awx"], env={"CONTROLLER_OAUTH_TOKEN": "my_token"})
+    assert cli.get_config("token") == "my_token"
+
+
+def test_oauth_token_from_tower_env():
+    """Test TOWER_OAUTH_TOKEN fallback is picked up from environment"""
+    cli = CLI()
+    cli.parse_args(["awx"], env={"TOWER_OAUTH_TOKEN": "tower_token"})
+    assert cli.get_config("token") == "tower_token"
+
+
+def test_oauth_token_controller_takes_precedence_over_tower():
+    """Test CONTROLLER_OAUTH_TOKEN takes precedence over TOWER_OAUTH_TOKEN"""
+    cli = CLI()
+    cli.parse_args(
+        ["awx"],
+        env={
+            "CONTROLLER_OAUTH_TOKEN": "controller_token",
+            "TOWER_OAUTH_TOKEN": "tower_token",
+        },
+    )
+    assert cli.get_config("token") == "controller_token"
+
+
+def test_oauth_token_cli_overrides_env():
+    """Test --conf.token CLI flag overrides CONTROLLER_OAUTH_TOKEN env var"""
+    cli = CLI()
+    cli.parse_args(
+        ["awx", "--conf.token", "cli_token"],
+        env={"CONTROLLER_OAUTH_TOKEN": "env_token"},
+    )
+    assert cli.get_config("token") == "cli_token"
+
+
+def test_oauth_token_default_none():
+    """Test that token defaults to None when not provided"""
+    cli = CLI()
+    cli.parse_args(["awx"], env={})
+    assert cli.get_config("token") is None
+
+
+def test_oauth_token_from_credential_file(monkeypatch):
+    """Test that token is read from AWXKIT_CREDENTIAL_FILE."""
+    monkeypatch.setattr(config, 'credentials', {'default': {'username': 'mary', 'password': 'secret', 'token': 'file_token'}})
+
+    cli = CLI()
+    cli.parse_args(['awx'], env={})
+    assert cli.get_config('token') == 'file_token'
+
+
+def test_oauth_token_env_overrides_credential_file(monkeypatch):
+    """Test that CONTROLLER_OAUTH_TOKEN overrides token from credential file."""
+    monkeypatch.setattr(config, 'credentials', {'default': {'token': 'file_token'}})
+
+    cli = CLI()
+    cli.parse_args(
+        ['awx'],
+        env={
+            'CONTROLLER_OAUTH_TOKEN': 'env_token',
+        },
+    )
+    assert cli.get_config('token') == 'env_token'
+
+
 def test_controller_optional_api_urlpattern_prefix():
     """Tests that CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX is honored when set."""
     cli = CLI()
