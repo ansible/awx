@@ -104,6 +104,16 @@ def test_nested_workflow_set_stats_precedence(live_tmp_folder, demo_inv, project
     inner_wfj = inner_wf_node.job
     assert inner_wfj is not None, 'Inner workflow job was never created'
 
+    # Check that root node of inner WF (job_second) received outer artifacts
+    second_node = inner_wfj.workflow_job_nodes.get(identifier='second')
+    assert second_node.job is not None, 'Second job was never created'
+    second_extra_vars = json.loads(second_node.job.extra_vars)
+    assert second_extra_vars.get('var1') == 'outer-only', (
+        f'Root node var1: expected "outer-only" (outer artifact should be available to root node), '
+        f'got "{second_extra_vars.get("var1")}". '
+        f'Outer artifacts are not reaching root nodes of child workflows.'
+    )
+
     reader_node = inner_wfj.workflow_job_nodes.get(identifier='reader')
     assert reader_node.job is not None, 'Reader job was never created'
 
