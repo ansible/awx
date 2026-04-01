@@ -88,6 +88,7 @@ from awx.main.utils.common import (
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.utils.update_model import update_model
+from awx.main.tasks.prep import TaskPrepData
 
 # Django flags
 from flags.state import flag_enabled
@@ -217,62 +218,51 @@ class BaseTask(object):
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
 
-    @functools.cached_property
-    def _credentials(self):
+    def populate_workload_identity_tokens(self, prep):
         """
-        Credentials for the task execution.
-        Fetches credentials once using build_credentials_list() and stores
-        them for the duration of the task to avoid redundant database queries.
-        """
-        credentials_list = self.build_credentials_list(self.instance)
-        # Convert to list to prevent re-evaluation of QuerySet
-        return list(credentials_list)
+        Populate prep.workload_tokens with workload identity JWTs.
 
-    def populate_workload_identity_tokens(self, additional_credentials=None):
+        Writes JWTs keyed by CredentialInputSource PK. These tokens are
+        later consumed by PreparedCredential.get_input() when resolving
+        dynamic fields via the shared workload_tokens dict.
         """
-        Populate credentials with workload identity tokens.
-
-        Sets the context on Credential objects that have input sources
-        using compatible external credential types.
-        """
-        credentials = list(self._credentials)
-        if additional_credentials:
-            credentials.extend(additional_credentials)
+        instance = prep._instance
+        all_credentials = list(prep.credentials) + list(prep.galaxy_credentials)
         credential_input_sources = (
-            (credential.context, src)
-            for credential in credentials
+            src
+            for credential in all_credentials
             for src in credential.input_sources.all()
             if any(
                 field.get('id') == 'workload_identity_token' and field.get('internal')
                 for field in src.source_credential.credential_type.inputs.get('fields', [])
             )
         )
-        for credential_ctx, input_src in credential_input_sources:
+        for input_src in credential_input_sources:
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-                effective_timeout = self.get_instance_timeout(self.instance)
+                effective_timeout = self.get_instance_timeout(prep)
                 workload_ttl = effective_timeout if effective_timeout else None
                 try:
                     jwt = retrieve_workload_identity_jwt(
-                        self.instance,
-                        audience=input_src.source_credential.get_input('url'),
+                        instance,
+                        audience=input_src.source_credential.get_input('jwt_aud'),
                         scope=AutomationControllerJobScope.name,
                         workload_ttl_seconds=workload_ttl,
                     )
                     # Store token keyed by input source PK, since a credential can have
                     # multiple input sources (one per field), each potentially with a different audience
-                    credential_ctx[input_src.pk] = {"workload_identity_token": jwt}
+                    prep.workload_tokens[input_src.pk] = {"workload_identity_token": jwt}
                 except Exception as e:
-                    self.instance.job_explanation = (
+                    instance.job_explanation = (
                         f'Could not generate workload identity token for credential {input_src.source_credential.name} used in this job. Error:\n{e}'
                     )
-                    self.instance.status = 'error'
-                    self.instance.save()
+                    instance.status = 'error'
+                    instance.save()
             else:
-                self.instance.job_explanation = (
+                instance.job_explanation = (
                     f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_src.source_credential.name} used in this job.'
                 )
-                self.instance.status = 'error'
-                self.instance.save()
+                instance.status = 'error'
+                instance.save()
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -357,17 +347,17 @@ class BaseTask(object):
                     params['container_volume_mounts'].append(f'{this_path}:{this_path}:z')
         return params
 
-    def build_private_data(self, instance, private_data_dir):
+    def build_private_data(self, prep, private_data_dir):
         """
         Return SSH private key data (only if stored in DB as ssh_key_data).
         Return structure is a dict of the form:
         """
 
-    def build_private_data_dir(self, instance):
+    def build_private_data_dir(self, prep):
         """
         Create a temporary directory for job-related files.
         """
-        path = tempfile.mkdtemp(prefix=JOB_FOLDER_PREFIX % instance.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
+        path = tempfile.mkdtemp(prefix=JOB_FOLDER_PREFIX % prep.pk, dir=settings.AWX_ISOLATION_BASE_PATH)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         if settings.AWX_CLEANUP_PATHS:
             self.cleanup_paths.append(path)
@@ -378,7 +368,7 @@ class BaseTask(object):
                 os.mkdir(runner_subfolder)
         return path
 
-    def build_project_dir(self, instance, private_data_dir):
+    def build_project_dir(self, prep, private_data_dir):
         """
         Create the ansible-runner project subdirectory. In many cases this is the source checkout.
         In cases that do not even need the source checkout, we create an empty dir to be the workdir.
@@ -387,7 +377,7 @@ class BaseTask(object):
         if not os.path.exists(project_dir):
             os.mkdir(project_dir)
 
-    def build_private_data_files(self, instance, private_data_dir):
+    def build_private_data_files(self, prep, private_data_dir):
         """
         Creates temporary files containing the private data.
         Returns a dictionary i.e.,
@@ -405,7 +395,7 @@ class BaseTask(object):
             }
         }
         """
-        private_data = self.build_private_data(instance, private_data_dir)
+        private_data = self.build_private_data(prep, private_data_dir)
         private_data_files = {'credentials': {}}
         ssh_key_data = None
         if private_data is not None:
@@ -424,7 +414,7 @@ class BaseTask(object):
                 else:
                     private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
-                self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
+                self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(prep.id)))
 
         # Copy vendor collections to private_data_dir for indirect node counting
         # This makes external query files available to the callback plugin in EEs
@@ -440,7 +430,7 @@ class BaseTask(object):
 
         return private_data_files, ssh_key_data
 
-    def build_passwords(self, instance, runtime_passwords):
+    def build_passwords(self, prep, runtime_passwords):
         """
         Build a dictionary of passwords for responding to prompts.
         """
@@ -450,7 +440,7 @@ class BaseTask(object):
             '': '',
         }
 
-    def build_extra_vars_file(self, instance, private_data_dir):
+    def build_extra_vars_file(self, prep, private_data_dir):
         """
         Build ansible yaml file filled with extra vars to be passed via -e@file.yml
         """
@@ -462,7 +452,7 @@ class BaseTask(object):
             content = safe_dump(vars, safe_dict)
         return self.write_private_data_file(private_data_dir, 'extravars', content, sub_dir='env')
 
-    def build_env(self, instance, private_data_dir, private_data_files=None):
+    def build_env(self, prep, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible-playbook.
         """
@@ -479,7 +469,7 @@ class BaseTask(object):
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
-        if self.instance.execution_environment is None:
+        if prep.execution_environment is None:
             raise RuntimeError(f'The {self.model.__name__} could not run because there is no Execution Environment.')
 
         return env
@@ -493,22 +483,19 @@ class BaseTask(object):
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
-    def build_inventory(self, instance, private_data_dir):
+    def build_inventory(self, prep, private_data_dir):
         script_params = dict(hostvars=True, towervars=True)
-        if hasattr(instance, 'job_slice_number'):
-            script_params['slice_number'] = instance.job_slice_number
-            script_params['slice_count'] = instance.job_slice_count
+        if hasattr(prep, 'job_slice_number'):
+            script_params['slice_number'] = prep.job_slice_number
+            script_params['slice_count'] = prep.job_slice_count
 
-        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
+        return self.write_inventory_file(prep.inventory, private_data_dir, 'hosts', script_params)
 
-    def build_args(self, instance, private_data_dir, passwords):
+    def build_args(self, prep, private_data_dir, passwords):
         raise NotImplementedError
 
     def write_args_file(self, private_data_dir, args):
         return self.write_private_data_file(private_data_dir, 'cmdline', ansible_runner.utils.args2cmdline(*args), sub_dir='env')
-
-    def build_credentials_list(self, instance):
-        return []
 
     def get_instance_timeout(self, instance):
         """Return the effective job timeout in seconds."""
@@ -597,14 +584,14 @@ class BaseTask(object):
         if waiting_time > 1.0:
             logger.info(f'Job {unified_job_id} waited {waiting_time} to acquire lock for local source tree for path {lock_path}.')
 
-    def pre_run_hook(self, instance, private_data_dir):
+    def pre_run_hook(self, prep, private_data_dir):
         """
         Hook for any steps to run before the job/task starts
         """
-        instance.log_lifecycle("pre_run")
+        prep.log_lifecycle("pre_run")
 
         # Before task is started, ensure that job_event partitions exist
-        create_partition(instance.event_class._meta.db_table, start=instance.created)
+        create_partition(prep.event_class._meta.db_table, start=prep.created)
 
     def post_run_hook(self, instance, status):
         """
@@ -624,7 +611,7 @@ class BaseTask(object):
         if instance.spawned_by_workflow:
             ScheduleWorkflowManager().schedule()
 
-    def should_use_fact_cache(self):
+    def should_use_fact_cache(self, prep):
         return False
 
     @with_path_cleanup
@@ -635,25 +622,26 @@ class BaseTask(object):
         """
 
         if not self.instance:  # Used to skip fetch for local runs
-            # Load the instance
             self.instance = self.update_model(pk)
+
+        instance = self.instance
 
         # status should be "running" from dispatch_waiting_jobs,
         # but may still be "waiting" if the worker picked this up before the status update landed.
-        if self.instance.status == 'waiting':
+        if instance.status == 'waiting':
             UnifiedJob.objects.filter(pk=pk).update(status="running", start_args='')
-            self.instance.refresh_from_db()
+            instance.refresh_from_db()
 
-        if self.instance.status != 'running':
-            logger.error(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
+        if instance.status != 'running':
+            logger.error(f'Not starting {instance.status} task pk={pk} because its status "{instance.status}" is not expected')
             return
 
-        if self.instance.cancel_flag:
+        if instance.cancel_flag:
             self.instance = self.update_model(pk, status='canceled')
             self.instance.websocket_emit_status('canceled')
             return
 
-        self.instance.websocket_emit_status("running")
+        instance.websocket_emit_status("running")
         status, rc = 'error', None
         self.runner_callback.event_ct = 0
 
@@ -665,62 +653,61 @@ class BaseTask(object):
         private_data_dir = None
 
         try:
-            if self.instance.execution_environment_id is None:
-                from awx.main.signals import disable_activity_stream
+            instance.send_notification_templates("running")
 
-                with disable_activity_stream():
-                    self.instance = self.update_model(self.instance.pk, execution_environment=self.instance.resolve_execution_environment())
+            # Create the prep data structure - resolves EE, loads credentials
+            # once, owns them with their in-memory context (OIDC JWTs etc.)
+            # for the prep phase.
+            prep = TaskPrepData.from_instance(instance)
 
-            self.instance.send_notification_templates("running")
-            private_data_dir = self.build_private_data_dir(self.instance)
-            self.pre_run_hook(self.instance, private_data_dir)
-            evaluate_policy(self.instance)
-            self.build_project_dir(self.instance, private_data_dir)
-            self.instance.log_lifecycle("preparing_playbook")
-            if self.instance.cancel_flag or signal_callback():
-                logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
-                self.instance = self.update_model(self.instance.pk, status='canceled')
+            private_data_dir = self.build_private_data_dir(prep)
+            self.pre_run_hook(prep, private_data_dir)
+            evaluate_policy(prep._instance)
+            self.build_project_dir(prep, private_data_dir)
+            prep.log_lifecycle("preparing_playbook")
+            if prep.cancel_flag or signal_callback():
+                logger.debug(f'detected pre-run cancel flag for {prep.log_format}')
+                self.update_model(prep.pk, status='canceled')
 
-            if self.instance.status != 'running':
+            instance.refresh_from_db(fields=['status', 'cancel_flag'])
+            if instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
                 # already been canceled.
-                self.instance = self.update_model(pk)
-                status = self.instance.status
-                raise RuntimeError('not starting %s task' % self.instance.status)
+                status = instance.status
+                raise RuntimeError('not starting %s task' % instance.status)
 
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-                logger.info(f'Generating workload identity tokens for {self.instance.log_format}')
-                self.populate_workload_identity_tokens()
-                if self.instance.status == 'error':
-                    raise RuntimeError('not starting %s task' % self.instance.status)
+                logger.info(f'Generating workload identity tokens for {prep.log_format}')
+                self.populate_workload_identity_tokens(prep)
+                instance.refresh_from_db(fields=['status'])
+                if instance.status == 'error':
+                    raise RuntimeError('not starting %s task' % instance.status)
 
-            # May have to serialize the value
-            private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
-            passwords = self.build_passwords(self.instance, kwargs)
-            self.build_extra_vars_file(self.instance, private_data_dir)
-            args = self.build_args(self.instance, private_data_dir, passwords)
-            env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
+            # Build all prep-phase artifacts: private data files, passwords,
+            # extra vars, args, and environment.  All of these use prep (not
+            # the instance) so credentials come from the owned list.
+            private_data_files, ssh_key_data = self.build_private_data_files(prep, private_data_dir)
+            passwords = self.build_passwords(prep, kwargs)
+            self.build_extra_vars_file(prep, private_data_dir)
+            args = self.build_args(prep, private_data_dir, passwords)
+            env = self.build_env(prep, private_data_dir, private_data_files=private_data_files)
             self.runner_callback.safe_env = build_safe_env(env)
 
-            self.runner_callback.instance = self.instance
+            self.runner_callback.instance = prep._instance
 
-            # store a reference to the parent workflow job (if any) so we can include
-            # it in event data JSON
-            if self.instance.spawned_by_workflow:
-                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
+            if prep.parent_workflow_job_id:
+                self.runner_callback.parent_workflow_job_id = prep.parent_workflow_job_id
 
-            self.runner_callback.job_created = str(self.instance.created)
-
-            credentials = self._credentials
+            self.runner_callback.job_created = str(prep.created)
 
             container_root = None
-            if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
+            if settings.IS_K8S and prep.task_kind == 'project':
                 container_root = private_data_dir
 
-            for credential in credentials:
+            for credential in prep.get_credentials_for_injection():
                 if credential:
                     credential.credential_type.inject_credential(credential, env, self.safe_cred_env, args, private_data_dir, container_root=container_root)
 
@@ -732,10 +719,10 @@ class BaseTask(object):
             expect_passwords = self.create_expect_passwords_data_struct(password_prompts, passwords)
 
             params = {
-                'ident': self.instance.id,
+                'ident': prep.id,
                 'private_data_dir': private_data_dir,
-                'playbook': self.build_playbook_path_relative_to_cwd(self.instance, private_data_dir),
-                'inventory': self.build_inventory(self.instance, private_data_dir),
+                'playbook': self.build_playbook_path_relative_to_cwd(prep, private_data_dir),
+                'inventory': self.build_inventory(prep, private_data_dir),
                 'passwords': expect_passwords,
                 'suppress_env_files': getattr(settings, 'AWX_RUNNER_OMIT_ENV_FILES', True),
                 'envvars': env,
@@ -744,19 +731,16 @@ class BaseTask(object):
             if ssh_key_data is not None:
                 params['ssh_key'] = ssh_key_data
 
-            if isinstance(self.instance, AdHocCommand):
-                params['module'] = self.build_module_name(self.instance)
-                params['module_args'] = self.build_module_args(self.instance)
+            if prep.task_kind == 'adhoc':
+                params['module'] = self.build_module_name(prep)
+                params['module_args'] = self.build_module_args(prep)
 
-            # TODO: refactor into a better BasTask method
-            if self.should_use_fact_cache():
-                # Enable Ansible fact cache.
+            if self.should_use_fact_cache(prep):
                 params['fact_cache_type'] = 'jsonfile'
             else:
-                # Disable Ansible fact cache.
                 params['fact_cache_type'] = ''
 
-            if self.instance.is_container_group_task or settings.IS_K8S:
+            if prep.is_container_group_task or settings.IS_K8S:
                 params['envvars'].pop('HOME', None)
 
             '''
@@ -767,7 +751,7 @@ class BaseTask(object):
                     del params[v]
 
             runner_settings = {
-                'job_timeout': self.get_instance_timeout(self.instance),
+                'job_timeout': self.get_instance_timeout(prep),
                 'suppress_ansible_output': True,
                 'suppress_output_file': getattr(settings, 'AWX_RUNNER_SUPPRESS_OUTPUT_FILE', True),
             }
@@ -779,8 +763,11 @@ class BaseTask(object):
             # Write out our own settings file
             self.write_private_data_file(private_data_dir, 'settings', json.dumps(runner_settings), sub_dir='env')
 
-            self.instance.log_lifecycle("running_playbook")
-            if isinstance(self.instance, SystemJob):
+            # Prep phase complete
+            del prep
+
+            instance.log_lifecycle("running_playbook")
+            if isinstance(instance, SystemJob):
                 res = ansible_runner.interface.run(
                     project_dir=settings.BASE_DIR,
                     event_handler=self.runner_callback.event_handler,
@@ -805,8 +792,8 @@ class BaseTask(object):
                 if status == 'timeout':
                     status = 'failed'
             elif status == 'canceled':
-                self.instance = self.update_model(pk)
-                cancel_flag_value = getattr(self.instance, 'cancel_flag', False)
+                instance = self.update_model(pk)
+                cancel_flag_value = getattr(instance, 'cancel_flag', False)
                 if cancel_flag_value is False:
                     self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="Task was canceled due to receiving a shutdown signal.")
                     status = 'failed'
@@ -817,12 +804,12 @@ class BaseTask(object):
         except Exception:
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
-            logger.exception('%s Exception occurred while running task', self.instance.log_format)
+            logger.exception('%s Exception occurred while running task', instance.log_format)
         finally:
-            logger.debug('%s finished running, producing %s events.', self.instance.log_format, self.runner_callback.event_ct)
+            logger.debug('%s finished running, producing %s events.', instance.log_format, self.runner_callback.event_ct)
 
         try:
-            self.post_run_hook(self.instance, status)
+            self.post_run_hook(instance, status)
         except PostRunError as exc:
             if status == 'successful':
                 status = exc.status
@@ -830,30 +817,30 @@ class BaseTask(object):
                 if exc.tb:
                     self.runner_callback.delay_update(result_traceback=exc.tb)
         except Exception:
-            logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
+            logger.exception('{} Post run hook errored.'.format(instance.log_format))
 
-        self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
+        instance = self.update_model(pk)
+        instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
 
         # Field host_status_counts is used as a metric to check if event processing is finished
         # we send notifications if it is, if not, callback receiver will send them
-        if not self.instance:
+        if not instance:
             logger.error(f'Unified job pk={pk} appears to be deleted while running')
             return
-        if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            events_processed_hook(self.instance)
+        if (instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
+            events_processed_hook(instance)
 
         try:
-            self.final_run_hook(self.instance, status, private_data_dir)
+            self.final_run_hook(instance, status, private_data_dir)
         except Exception:
-            logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
+            logger.exception('{} Final run hook errored.'.format(instance.log_format))
 
-        self.instance.websocket_emit_status(status)
+        instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
-                raise AwxTaskError.TaskCancel(self.instance, rc)
+                raise AwxTaskError.TaskCancel(instance, rc)
             else:
-                raise AwxTaskError.TaskError(self.instance, rc)
+                raise AwxTaskError.TaskError(instance, rc)
 
 
 class SourceControlMixin(BaseTask):
@@ -1036,30 +1023,7 @@ class RunJob(SourceControlMixin, BaseTask):
     model = Job
     event_model = JobEvent
 
-    def _extract_credentials_of_kind(self, kind: str):
-        return (cred for cred in self._credentials if cred.credential_type.kind == kind)
-
-    @property
-    def _machine_credential(self) -> object:
-        """Get machine credential."""
-        return next(self._extract_credentials_of_kind('ssh'), None)
-
-    @property
-    def _vault_credentials(self) -> list[object]:
-        """Get vault credentials."""
-        return list(self._extract_credentials_of_kind('vault'))
-
-    @property
-    def _network_credentials(self) -> list[object]:
-        """Get network credentials."""
-        return list(self._extract_credentials_of_kind('net'))
-
-    @property
-    def _cloud_credentials(self) -> list[object]:
-        """Get cloud credentials."""
-        return list(self._extract_credentials_of_kind('cloud'))
-
-    def build_private_data(self, job, private_data_dir):
+    def build_private_data(self, prep, private_data_dir):
         """
         Returns a dict of the form
         {
@@ -1076,7 +1040,7 @@ class RunJob(SourceControlMixin, BaseTask):
         }
         """
         private_data = {'credentials': {}}
-        for credential in self._credentials:
+        for credential in prep.credentials:
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
@@ -1086,20 +1050,20 @@ class RunJob(SourceControlMixin, BaseTask):
 
         return private_data
 
-    def build_passwords(self, job, runtime_passwords):
+    def build_passwords(self, prep, runtime_passwords):
         """
         Build a dictionary of passwords for SSH private key, SSH user, sudo/su
         and ansible-vault.
         """
-        passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = self._machine_credential
+        passwords = super(RunJob, self).build_passwords(prep, runtime_passwords)
+        cred = next(iter(prep.credentials_of_kind('ssh')), None)
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
-        for cred in self._vault_credentials:
+        for cred in prep.credentials_of_kind('vault'):
             field = 'vault_password'
             vault_id = cred.get_input('vault_id', default=None)
             if vault_id:
@@ -1115,26 +1079,26 @@ class RunJob(SourceControlMixin, BaseTask):
         key unlock over network key unlock.
         '''
         if 'ssh_key_unlock' not in passwords:
-            for cred in self._network_credentials:
+            for cred in prep.credentials_of_kind('net'):
                 if cred.inputs.get('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = runtime_passwords.get('ssh_key_unlock', cred.get_input('ssh_key_unlock', default=''))
                     break
 
         return passwords
 
-    def build_env(self, job, private_data_dir, private_data_files=None):
+    def build_env(self, prep, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible-playbook.
         """
-        env = super(RunJob, self).build_env(job, private_data_dir, private_data_files=private_data_files)
+        env = super(RunJob, self).build_env(prep, private_data_dir, private_data_files=private_data_files)
         if private_data_files is None:
             private_data_files = {}
         # Set environment variables needed for inventory and job event
         # callbacks to work.
-        env['JOB_ID'] = str(job.pk)
-        env['INVENTORY_ID'] = str(job.inventory.pk)
-        if job.project:
-            env['PROJECT_REVISION'] = job.project.scm_revision
+        env['JOB_ID'] = str(prep.pk)
+        env['INVENTORY_ID'] = str(prep.inventory.pk)
+        if prep.project:
+            env['PROJECT_REVISION'] = prep.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
@@ -1150,11 +1114,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in self._cloud_credentials:
+        for cloud_cred in prep.credentials_of_kind('cloud'):
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
                 env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
-        for network_cred in self._network_credentials:
+        for network_cred in prep.credentials_of_kind('net'):
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
             env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
@@ -1204,12 +1168,12 @@ class RunJob(SourceControlMixin, BaseTask):
 
         return env
 
-    def build_args(self, job, private_data_dir, passwords):
+    def build_args(self, prep, private_data_dir, passwords):
         """
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         """
-        creds = self._machine_credential
+        creds = next(iter(prep.credentials_of_kind('ssh')), None)
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
@@ -1225,14 +1189,14 @@ class RunJob(SourceControlMixin, BaseTask):
         # the current user.
         ssh_username = ssh_username or 'root'
         args = []
-        if job.job_type == 'check':
+        if prep.job_type == 'check':
             args.append('--check')
         args.extend(['-u', sanitize_jinja(ssh_username)])
         if 'ssh_password' in passwords:
             args.append('--ask-pass')
-        if job.become_enabled:
+        if prep.become_enabled:
             args.append('--become')
-        if job.diff_mode:
+        if prep.diff_mode:
             args.append('--diff')
         if become_method:
             args.extend(['--become-method', sanitize_jinja(become_method)])
@@ -1252,40 +1216,40 @@ class RunJob(SourceControlMixin, BaseTask):
                     args.append('--vault-id')
                     args.append('{}@prompt'.format(vault_id))
 
-        if job.forks:
-            if settings.MAX_FORKS > 0 and job.forks > settings.MAX_FORKS:
+        if prep.forks:
+            if settings.MAX_FORKS > 0 and prep.forks > settings.MAX_FORKS:
                 logger.warning(f'Maximum number of forks ({settings.MAX_FORKS}) exceeded.')
                 args.append('--forks=%d' % settings.MAX_FORKS)
             else:
-                args.append('--forks=%d' % job.forks)
-        if job.force_handlers:
+                args.append('--forks=%d' % prep.forks)
+        if prep.force_handlers:
             args.append('--force-handlers')
-        if job.limit:
-            args.extend(['-l', job.limit])
-        if job.verbosity:
-            args.append('-%s' % ('v' * min(5, job.verbosity)))
-        if job.job_tags:
-            args.extend(['-t', job.job_tags])
-        if job.skip_tags:
-            args.append('--skip-tags=%s' % job.skip_tags)
-        if job.start_at_task:
-            args.append('--start-at-task=%s' % job.start_at_task)
+        if prep.limit:
+            args.extend(['-l', prep.limit])
+        if prep.verbosity:
+            args.append('-%s' % ('v' * min(5, prep.verbosity)))
+        if prep.job_tags:
+            args.extend(['-t', prep.job_tags])
+        if prep.skip_tags:
+            args.append('--skip-tags=%s' % prep.skip_tags)
+        if prep.start_at_task:
+            args.append('--start-at-task=%s' % prep.start_at_task)
 
         return args
 
-    def should_use_fact_cache(self):
-        return self.instance.use_fact_cache
+    def should_use_fact_cache(self, prep):
+        return prep.use_fact_cache
 
-    def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
-        return job.playbook
+    def build_playbook_path_relative_to_cwd(self, prep, private_data_dir):
+        return prep.playbook
 
-    def build_extra_vars_file(self, job, private_data_dir):
+    def build_extra_vars_file(self, prep, private_data_dir):
         extra_vars = dict()
         # load in JT extra vars
-        if job.extra_vars_dict:
-            extra_vars.update(json.loads(job.decrypted_extra_vars()))
+        if prep.extra_vars_dict:
+            extra_vars.update(json.loads(prep.decrypted_extra_vars()))
         # load in meta vars, overriding any variable set in JT extra vars
-        extra_vars.update(job.awx_meta_vars())
+        extra_vars.update(prep.awx_meta_vars())
 
         # By default, all extra vars disallow Jinja2 template usage for
         # security reasons; top level key-values defined in JT.extra_vars, however,
@@ -1293,13 +1257,10 @@ class RunJob(SourceControlMixin, BaseTask):
         # higher levels of privilege - those that have the ability create and
         # edit Job Templates)
         safe_dict = {}
-        if job.job_template and settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
-            safe_dict = job.job_template.extra_vars_dict
+        if prep.job_template and settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
+            safe_dict = prep.job_template.extra_vars_dict
 
         return self._write_extra_vars_file(private_data_dir, extra_vars, safe_dict)
-
-    def build_credentials_list(self, job):
-        return job.credentials.prefetch_related('input_sources__source_credential').all()
 
     def get_password_prompts(self, passwords={}):
         d = super(RunJob, self).get_password_prompts(passwords)
@@ -1319,36 +1280,37 @@ class RunJob(SourceControlMixin, BaseTask):
                 d[r'Vault password \({}\):\s*?$'.format(vault_id)] = k
         return d
 
-    def pre_run_hook(self, job, private_data_dir):
-        super(RunJob, self).pre_run_hook(job, private_data_dir)
-        if job.inventory is None:
+    def pre_run_hook(self, prep, private_data_dir):
+        super(RunJob, self).pre_run_hook(prep, private_data_dir)
+        if prep.inventory is None:
             error = _('Job could not start because it does not have a valid inventory.')
-            self.update_model(job.pk, status='failed', job_explanation=error)
+            self.update_model(prep.pk, status='failed', job_explanation=error)
             raise RuntimeError(error)
-        elif job.project is None:
+        elif prep.project is None:
             error = _('Job could not start because it does not have a valid project.')
-            self.update_model(job.pk, status='failed', job_explanation=error)
+            self.update_model(prep.pk, status='failed', job_explanation=error)
             raise RuntimeError(error)
-        elif job.execution_environment is None:
+        elif prep.execution_environment is None:
             error = _('Job could not start because no Execution Environment could be found.')
-            self.update_model(job.pk, status='error', job_explanation=error)
+            self.update_model(prep.pk, status='error', job_explanation=error)
             raise RuntimeError(error)
 
-        if job.inventory.kind == 'smart':
+        if prep.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
             # ran inside of the event saving code
-            update_smart_memberships_for_inventory(job.inventory)
+            update_smart_memberships_for_inventory(prep.inventory)
 
         # Fetch "cached" fact data from prior runs and put on the disk
         # where ansible expects to find it
-        if self.should_use_fact_cache():
-            job.log_lifecycle("start_job_fact_cache")
+        self._use_fact_cache = self.should_use_fact_cache(prep)
+        if self._use_fact_cache:
+            prep.log_lifecycle("start_job_fact_cache")
             self.hosts_with_facts_cached = start_fact_cache(
-                job.get_hosts_for_fact_cache(), artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)), inventory_id=job.inventory_id
+                prep.get_hosts_for_fact_cache(), artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(prep.id)), inventory_id=prep.inventory_id
             )
 
-    def build_project_dir(self, job, private_data_dir):
-        self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
+    def build_project_dir(self, prep, private_data_dir):
+        self.sync_and_copy(prep.project, private_data_dir, scm_branch=prep.scm_branch)
 
     def post_run_hook(self, job, status):
         super(RunJob, self).post_run_hook(job, status)
@@ -1359,7 +1321,7 @@ class RunJob(SourceControlMixin, BaseTask):
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
             return
-        if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
+        if getattr(self, '_use_fact_cache', False) and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             if job.inventory.kind == 'constructed':
                 hosts_qs = job.get_source_hosts_for_constructed_inventory()
@@ -1395,7 +1357,7 @@ class RunProjectUpdate(BaseTask):
         super(RunProjectUpdate, self).__init__(*args, **kwargs)
         self.job_private_data_dir = job_private_data_dir
 
-    def build_private_data(self, project_update, private_data_dir):
+    def build_private_data(self, prep, private_data_dir):
         """
         Return SSH private key data needed for this project update.
 
@@ -1409,29 +1371,29 @@ class RunProjectUpdate(BaseTask):
         }
         """
         private_data = {'credentials': {}}
-        if project_update.credential:
-            credential = project_update.credential
+        for credential in prep.credentials:
             if credential.has_input('ssh_key_data'):
                 private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
         return private_data
 
-    def build_passwords(self, project_update, runtime_passwords):
+    def build_passwords(self, prep, runtime_passwords):
         """
         Build a dictionary of passwords for SSH private key unlock and SCM
         username/password.
         """
-        passwords = super(RunProjectUpdate, self).build_passwords(project_update, runtime_passwords)
-        if project_update.credential:
-            passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
-            passwords['scm_username'] = project_update.credential.get_input('username', default='')
-            passwords['scm_password'] = project_update.credential.get_input('password', default='')
+        passwords = super(RunProjectUpdate, self).build_passwords(prep, runtime_passwords)
+        cred = prep.credentials[0] if prep.credentials else None
+        if cred:
+            passwords['scm_key_unlock'] = cred.get_input('ssh_key_unlock', default='')
+            passwords['scm_username'] = cred.get_input('username', default='')
+            passwords['scm_password'] = cred.get_input('password', default='')
         return passwords
 
-    def build_env(self, project_update, private_data_dir, private_data_files=None):
+    def build_env(self, prep, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible-playbook.
         """
-        env = super(RunProjectUpdate, self).build_env(project_update, private_data_dir, private_data_files=private_data_files)
+        env = super(RunProjectUpdate, self).build_env(prep, private_data_dir, private_data_files=private_data_files)
         env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_BECOME_ASK_PASS'] = str(False)
@@ -1439,42 +1401,42 @@ class RunProjectUpdate(BaseTask):
         # give ansible a hint about the intended tmpdir to work around issues
         # like https://github.com/ansible/ansible/issues/30064
         env['TMP'] = settings.AWX_ISOLATION_BASE_PATH
-        env['PROJECT_UPDATE_ID'] = str(project_update.pk)
+        env['PROJECT_UPDATE_ID'] = str(prep.pk)
         if settings.GALAXY_IGNORE_CERTS:
             env['ANSIBLE_GALAXY_IGNORE'] = str(True)
 
         # build out env vars for Galaxy credentials (in order)
         galaxy_server_list = []
-        if project_update.project.organization:
-            for i, cred in enumerate(project_update.project.organization.galaxy_credentials.all()):
-                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
-                auth_url = cred.get_input('auth_url', default=None)
-                token = cred.get_input('token', default=None)
-                if token:
-                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
-                if auth_url:
-                    env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
-                galaxy_server_list.append(f'server{i}')
+        for i, cred in enumerate(prep.galaxy_credentials):
+            env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_URL'] = cred.get_input('url')
+            auth_url = cred.get_input('auth_url', default=None)
+            token = cred.get_input('token', default=None)
+            if token:
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_TOKEN'] = token
+            if auth_url:
+                env[f'ANSIBLE_GALAXY_SERVER_SERVER{i}_AUTH_URL'] = auth_url
+            galaxy_server_list.append(f'server{i}')
 
         if galaxy_server_list:
             env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
 
         return env
 
-    def _build_scm_url_extra_vars(self, project_update):
+    def _build_scm_url_extra_vars(self, prep):
         """
         Helper method to build SCM url and extra vars with parameters needed
         for authentication.
         """
         extra_vars = {}
-        if project_update.credential:
-            scm_username = project_update.credential.get_input('username', default='')
-            scm_password = project_update.credential.get_input('password', default='')
+        cred = prep.credentials[0] if prep.credentials else None
+        if cred:
+            scm_username = cred.get_input('username', default='')
+            scm_password = cred.get_input('password', default='')
         else:
             scm_username = ''
             scm_password = ''
-        scm_type = project_update.scm_type
-        scm_url = update_scm_url(scm_type, project_update.scm_url, check_special_cases=False)
+        scm_type = prep.scm_type
+        scm_url = update_scm_url(scm_type, prep.scm_url, check_special_cases=False)
         scm_url_parts = urlparse.urlsplit(scm_url)
         # Prefer the username/password in the URL, if provided.
         scm_username = scm_url_parts.username or scm_username
@@ -1501,10 +1463,10 @@ class RunProjectUpdate(BaseTask):
 
         return scm_url, extra_vars
 
-    def build_inventory(self, instance, private_data_dir):
+    def build_inventory(self, prep, private_data_dir):
         return 'localhost,'
 
-    def build_args(self, project_update, private_data_dir, passwords):
+    def build_args(self, prep, private_data_dir, passwords):
         """
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
@@ -1512,63 +1474,63 @@ class RunProjectUpdate(BaseTask):
         args = []
         if getattr(settings, 'PROJECT_UPDATE_VVV', False):
             args.append('-vvv')
-        if project_update.job_tags:
-            args.extend(['-t', project_update.job_tags])
+        if prep.job_tags:
+            args.extend(['-t', prep.job_tags])
         return args
 
-    def build_extra_vars_file(self, project_update, private_data_dir):
+    def build_extra_vars_file(self, prep, private_data_dir):
         extra_vars = {}
-        scm_url, extra_vars_new = self._build_scm_url_extra_vars(project_update)
+        scm_url, extra_vars_new = self._build_scm_url_extra_vars(prep)
         extra_vars.update(extra_vars_new)
 
-        scm_branch = project_update.scm_branch
-        if project_update.job_type == 'run' and (not project_update.branch_override):
-            if project_update.project.scm_revision:
-                scm_branch = project_update.project.scm_revision
+        scm_branch = prep.scm_branch
+        if prep.job_type == 'run' and (not prep.branch_override):
+            if prep.project.scm_revision:
+                scm_branch = prep.project.scm_revision
             elif not scm_branch:
                 raise RuntimeError('Could not determine a revision to run from project.')
         elif not scm_branch:
             scm_branch = 'HEAD'
 
-        galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
+        galaxy_creds_are_defined = bool(prep.galaxy_credentials)
         if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
-            logger.warning(f'Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
+            logger.warning(f'Galaxy role/collection syncing is enabled, but no credentials are configured for {prep.project.organization}.')
 
         extra_vars.update(
             {
                 'projects_root': settings.PROJECTS_ROOT.rstrip('/'),
-                'local_path': os.path.basename(project_update.project.local_path),
-                'project_path': project_update.get_project_path(check_if_exists=False),  # deprecated
+                'local_path': os.path.basename(prep.project.local_path),
+                'project_path': prep.get_project_path(check_if_exists=False),  # deprecated
                 'insights_url': settings.INSIGHTS_URL_BASE,
                 'awx_license_type': get_license().get('license_type', 'UNLICENSED'),
                 'awx_version': get_awx_version(),
                 'scm_url': scm_url,
                 'scm_branch': scm_branch,
-                'scm_clean': project_update.scm_clean,
-                'scm_track_submodules': project_update.scm_track_submodules,
+                'scm_clean': prep.scm_clean,
+                'scm_track_submodules': prep.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
                 'galaxy_task_env': settings.GALAXY_TASK_ENV,
             }
         )
         # apply custom refspec from user for PR refs and the like
-        if project_update.scm_refspec:
-            extra_vars['scm_refspec'] = project_update.scm_refspec
-        elif project_update.project.allow_override:
+        if prep.scm_refspec:
+            extra_vars['scm_refspec'] = prep.scm_refspec
+        elif prep.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
             extra_vars['scm_refspec'] = '+refs/heads/*:refs/remotes/origin/*'
 
-        if project_update.scm_type == 'archive':
+        if prep.scm_type == 'archive':
             # for raw archive, prevent error moving files between volumes
-            extra_vars['ansible_remote_tmp'] = os.path.join(project_update.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
+            extra_vars['ansible_remote_tmp'] = os.path.join(prep.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
 
-        if project_update.project.signature_validation_credential is not None:
-            pubkey = project_update.project.signature_validation_credential.get_input('gpg_public_key')
+        if prep.project.signature_validation_credential is not None:
+            pubkey = prep.project.signature_validation_credential.get_input('gpg_public_key')
             extra_vars['gpg_pubkey'] = pubkey
 
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
-    def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
+    def build_playbook_path_relative_to_cwd(self, prep, private_data_dir):
         return os.path.join('project_update.yml')
 
     def get_password_prompts(self, passwords={}):
@@ -1583,24 +1545,24 @@ class RunProjectUpdate(BaseTask):
         d[r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$'] = 'yes'
         return d
 
-    def pre_run_hook(self, instance, private_data_dir):
-        super(RunProjectUpdate, self).pre_run_hook(instance, private_data_dir)
+    def pre_run_hook(self, prep, private_data_dir):
+        super(RunProjectUpdate, self).pre_run_hook(prep, private_data_dir)
         # re-create root project folder if a natural disaster has destroyed it
-        project_path = instance.project.get_project_path(check_if_exists=False)
+        project_path = prep.project.get_project_path(check_if_exists=False)
 
-        if instance.launch_type != 'sync':
-            self.acquire_lock(instance.project, instance.id)
+        if prep.launch_type != 'sync':
+            self.acquire_lock(prep.project, prep.id)
 
         if not os.path.exists(project_path):
             os.makedirs(project_path)  # used as container mount
 
-        stage_path = os.path.join(instance.get_cache_path(), 'stage')
+        stage_path = os.path.join(prep.get_cache_path(), 'stage')
         if os.path.exists(stage_path):
             logger.warning('{0} unexpectedly existed before update'.format(stage_path))
             shutil.rmtree(stage_path)
         os.makedirs(stage_path)  # presence of empty cache indicates lack of roles or collections
 
-    def build_project_dir(self, instance, private_data_dir):
+    def build_project_dir(self, prep, private_data_dir):
         # the project update playbook is not in a git repo, but uses a vendoring directory
         # to be consistent with the ansible-runner model,
         # that is moved into the runner project folder here
@@ -1715,11 +1677,6 @@ class RunProjectUpdate(BaseTask):
         )
         return params
 
-    def build_credentials_list(self, project_update):
-        if project_update.credential:
-            return [project_update.credential]
-        return []
-
 
 @task(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
@@ -1727,7 +1684,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     event_model = InventoryUpdateEvent
     callback_class = RunnerCallbackForInventoryUpdate
 
-    def build_private_data(self, inventory_update, private_data_dir):
+    def build_private_data(self, prep, private_data_dir):
         """
         Return private data needed for inventory update.
 
@@ -1742,41 +1699,47 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         If no private data is needed, return None.
         """
-        if inventory_update.source in InventorySource.injectors:
-            injector = InventorySource.injectors[inventory_update.source]()
-            return injector.build_private_data(inventory_update, private_data_dir)
+        if prep.source in InventorySource.injectors:
+            injector = InventorySource.injectors[prep.source]()
+            # Pass prep as the inventory_update duck-type: injectors call
+            # get_cloud_credential() which on prep returns from the owned
+            # credentials list, preserving OIDC context.
+            return injector.build_private_data(prep, private_data_dir)
 
-    def build_env(self, inventory_update, private_data_dir, private_data_files=None):
+    def build_env(self, prep, private_data_dir, private_data_files=None):
         """Build environment dictionary for ansible-inventory.
 
         Most environment variables related to credentials or configuration
         are accomplished by the inventory source injectors (in this method)
         or custom credential type injectors (in main run method).
         """
-        env = super(RunInventoryUpdate, self).build_env(inventory_update, private_data_dir, private_data_files=private_data_files)
+        env = super(RunInventoryUpdate, self).build_env(prep, private_data_dir, private_data_files=private_data_files)
 
         if private_data_files is None:
             private_data_files = {}
         # Pass inventory source ID to inventory script.
-        env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
-        env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
+        env['INVENTORY_SOURCE_ID'] = str(prep.inventory_source_id)
+        env['INVENTORY_UPDATE_ID'] = str(prep.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
 
+        # prep duck-types as inventory_update: its get_cloud_credential()
+        # returns from the owned credentials list, preserving OIDC context.
+        # No lambda hack needed.
         injector = None
-        if inventory_update.source in InventorySource.injectors:
-            injector = InventorySource.injectors[inventory_update.source]()
+        if prep.source in InventorySource.injectors:
+            injector = InventorySource.injectors[prep.source]()
 
         if injector is not None:
-            env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
+            env = injector.build_env(prep, env, private_data_dir, private_data_files)
 
-        if inventory_update.source == 'scm':
-            for env_k in inventory_update.source_vars_dict:
+        if prep.source == 'scm':
+            for env_k in prep.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLOCKED:
-                    env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
-        elif inventory_update.source == 'file':
+                    env[str(env_k)] = str(prep.source_vars_dict[env_k])
+        elif prep.source == 'file':
             raise NotImplementedError('Cannot update file sources through the task system.')
 
-        if inventory_update.source == 'scm' and inventory_update.source_project_update:
+        if prep.source == 'scm' and prep.source_project_update:
             env_key = 'ANSIBLE_COLLECTIONS_PATH'
             config_setting = 'collections_paths'
             folder = 'requirements_collections'
@@ -1807,12 +1770,12 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     def write_args_file(self, private_data_dir, args):
         return self.write_private_data_file(private_data_dir, 'args', ' '.join(args))
 
-    def build_args(self, inventory_update, private_data_dir, passwords):
+    def build_args(self, prep, private_data_dir, passwords):
         """Build the command line argument list for running an inventory
         import.
         """
         # Get the inventory source and inventory.
-        inventory_source = inventory_update.inventory_source
+        inventory_source = prep.inventory_source
         inventory = inventory_source.inventory
 
         if inventory is None:
@@ -1822,9 +1785,9 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         # special case for constructed inventories, we pass source inventories from database
         # these must come in order, and in order _before_ the constructed inventory itself
-        if inventory_update.inventory.kind == 'constructed':
-            inventory_update.log_lifecycle("start_job_fact_cache")
-            for input_inventory in inventory_update.inventory.input_inventories.all():
+        if prep.inventory.kind == 'constructed':
+            prep.log_lifecycle("start_job_fact_cache")
+            for input_inventory in prep.inventory.input_inventories.all():
                 args.append('-i')
                 script_params = dict(hostvars=True, towervars=True)
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
@@ -1832,12 +1795,12 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                 # Include any facts from input inventories so they can be used in filters
                 start_fact_cache(
                     input_inventory.hosts.only(*HOST_FACTS_FIELDS),
-                    artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(inventory_update.id)),
+                    artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(prep.id)),
                     inventory_id=input_inventory.id,
                 )
 
         # Add arguments for the source inventory file/script/thing
-        rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
+        rel_path = self.pseudo_build_inventory(prep, private_data_dir)
         container_location = os.path.join(CONTAINER_ROOT, rel_path)
         source_location = os.path.join(private_data_dir, rel_path)
 
@@ -1845,12 +1808,12 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         args.append(container_location)
         # Added this in order to allow older versions of ansible-inventory https://github.com/ansible/ansible/pull/79596
         # limit should be usable in ansible-inventory 2.15+
-        if inventory_update.limit:
+        if prep.limit:
             args.append('--limit')
-            args.append(inventory_update.limit)
+            args.append(prep.limit)
 
         args.append('--output')
-        args.append(os.path.join(CONTAINER_ROOT, 'artifacts', str(inventory_update.id), 'output.json'))
+        args.append(os.path.join(CONTAINER_ROOT, 'artifacts', str(prep.id), 'output.json'))
 
         if os.path.isdir(source_location):
             playbook_dir = container_location
@@ -1858,77 +1821,57 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             playbook_dir = os.path.dirname(container_location)
         args.extend(['--playbook-dir', playbook_dir])
 
-        if inventory_update.verbosity:
-            args.append('-' + 'v' * min(5, inventory_update.verbosity * 2 + 1))
+        if prep.verbosity:
+            args.append('-' + 'v' * min(5, prep.verbosity * 2 + 1))
 
         return args
 
-    def should_use_fact_cache(self):
-        return bool(self.instance.source == 'constructed')
+    def should_use_fact_cache(self, prep):
+        return bool(prep.source == 'constructed')
 
-    def build_inventory(self, inventory_update, private_data_dir):
+    def build_inventory(self, prep, private_data_dir):
         return None  # what runner expects in order to not deal with inventory
 
-    def pseudo_build_inventory(self, inventory_update, private_data_dir):
+    def pseudo_build_inventory(self, prep, private_data_dir):
         """Inventory imports are ran through a management command
         we pass the inventory in args to that command, so this is not considered
         to be "Ansible" inventory (by runner) even though it is
         Eventually, we would like to cut out the management command,
         and thus use this as the real inventory
         """
-        src = inventory_update.source
+        src = prep.source
 
         injector = None
-        if inventory_update.source in InventorySource.injectors:
+        if prep.source in InventorySource.injectors:
             injector = InventorySource.injectors[src]()
 
         if injector is not None:
-            content = injector.inventory_contents(inventory_update, private_data_dir)
+            # Pass prep as the inventory_update duck-type so injectors
+            # get credentials from the owned list via get_cloud_credential().
+            content = injector.inventory_contents(prep, private_data_dir)
             # must be a statically named file
             self.write_private_data_file(private_data_dir, injector.filename, content, sub_dir='inventory', file_permissions=0o700)
             rel_path = os.path.join('inventory', injector.filename)
         elif src == 'scm':
-            rel_path = os.path.join('project', inventory_update.source_path)
+            rel_path = os.path.join('project', prep.source_path)
 
         return rel_path
 
-    def build_playbook_path_relative_to_cwd(self, inventory_update, private_data_dir):
+    def build_playbook_path_relative_to_cwd(self, prep, private_data_dir):
         return None
 
-    def build_credentials_list(self, inventory_update):
-        # All credentials not used by inventory source injector
-        return inventory_update.get_extra_credentials()
-
-    def populate_workload_identity_tokens(self, additional_credentials=None):
-        """Also generate OIDC tokens for the cloud credential.
-
-        The cloud credential is not in _credentials (it is handled by the
-        inventory source injector), but it may still need a workload identity
-        token generated for it.
-        """
-        cloud_cred = self.instance.get_cloud_credential()
-        creds = list(additional_credentials or [])
-        if cloud_cred:
-            creds.append(cloud_cred)
-        super().populate_workload_identity_tokens(additional_credentials=creds or None)
-        # Override get_cloud_credential on this instance so the injector
-        # uses the credential with OIDC context instead of doing a fresh
-        # DB fetch that would lose it.
-        if cloud_cred and cloud_cred.context:
-            self.instance.get_cloud_credential = lambda: cloud_cred
-
-    def build_project_dir(self, inventory_update, private_data_dir):
+    def build_project_dir(self, prep, private_data_dir):
         source_project = None
-        if inventory_update.inventory_source:
-            source_project = inventory_update.inventory_source.source_project
+        if prep.inventory_source:
+            source_project = prep.inventory_source.source_project
 
-        if inventory_update.source == 'scm':
+        if prep.source == 'scm':
             if not source_project:
                 raise RuntimeError('Could not find project to run SCM inventory update from.')
-            self.sync_and_copy(source_project, private_data_dir, scm_branch=inventory_update.inventory_source.scm_branch)
+            self.sync_and_copy(source_project, private_data_dir, scm_branch=prep.inventory_source.scm_branch)
         else:
             # If source is not SCM make an empty project directory, content is built inside inventory folder
-            super(RunInventoryUpdate, self).build_project_dir(inventory_update, private_data_dir)
+            super(RunInventoryUpdate, self).build_project_dir(prep, private_data_dir)
 
     def post_run_hook(self, inventory_update, status):
         super(RunInventoryUpdate, self).post_run_hook(inventory_update, status)
@@ -1973,7 +1916,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             self.runner_callback.event_handler,
             signal_callback,
             verbosity=inventory_update.verbosity,
-            job_timeout=self.get_instance_timeout(self.instance),
+            job_timeout=self.get_instance_timeout(inventory_update),
             start_time=inventory_update.started,
             counter=self.runner_callback.event_ct,
             initial_line=self.runner_callback.end_line,
@@ -2012,7 +1955,7 @@ class RunAdHocCommand(BaseTask):
     event_model = AdHocCommandEvent
     callback_class = RunnerCallbackForAdHocCommand
 
-    def build_private_data(self, ad_hoc_command, private_data_dir):
+    def build_private_data(self, prep, private_data_dir):
         """
         Return SSH private key data needed for this ad hoc command (only if
         stored in DB as ssh_key_data).
@@ -2033,21 +1976,21 @@ class RunAdHocCommand(BaseTask):
         """
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
-        creds = ad_hoc_command.credential
         private_data = {'credentials': {}}
-        if creds and creds.has_input('ssh_key_data'):
-            private_data['credentials'][creds] = creds.get_input('ssh_key_data', default='')
-        if creds and creds.has_input('ssh_public_key_data'):
-            private_data.setdefault('certificates', {})[creds] = creds.get_input('ssh_public_key_data', default='')
+        for cred in prep.credentials:
+            if cred.has_input('ssh_key_data'):
+                private_data['credentials'][cred] = cred.get_input('ssh_key_data', default='')
+            if cred.has_input('ssh_public_key_data'):
+                private_data.setdefault('certificates', {})[cred] = cred.get_input('ssh_public_key_data', default='')
         return private_data
 
-    def build_passwords(self, ad_hoc_command, runtime_passwords):
+    def build_passwords(self, prep, runtime_passwords):
         """
         Build a dictionary of passwords for SSH private key, SSH user and
         sudo/su.
         """
-        passwords = super(RunAdHocCommand, self).build_passwords(ad_hoc_command, runtime_passwords)
-        cred = ad_hoc_command.credential
+        passwords = super(RunAdHocCommand, self).build_passwords(prep, runtime_passwords)
+        cred = prep.credentials[0] if prep.credentials else None
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
@@ -2055,27 +1998,27 @@ class RunAdHocCommand(BaseTask):
                     passwords[field] = value
         return passwords
 
-    def build_env(self, ad_hoc_command, private_data_dir, private_data_files=None):
+    def build_env(self, prep, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible.
         """
-        env = super(RunAdHocCommand, self).build_env(ad_hoc_command, private_data_dir, private_data_files=private_data_files)
+        env = super(RunAdHocCommand, self).build_env(prep, private_data_dir, private_data_files=private_data_files)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
-        env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
-        env['INVENTORY_ID'] = str(ad_hoc_command.inventory.pk)
+        env['AD_HOC_COMMAND_ID'] = str(prep.pk)
+        env['INVENTORY_ID'] = str(prep.inventory.pk)
         env['INVENTORY_HOSTVARS'] = str(True)
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
 
         return env
 
-    def build_args(self, ad_hoc_command, private_data_dir, passwords):
+    def build_args(self, prep, private_data_dir, passwords):
         """
         Build command line argument list for running ansible, optionally using
         ssh-agent for public/private key authentication.
         """
-        creds = ad_hoc_command.credential
+        creds = prep.credentials[0] if prep.credentials else None
         ssh_username, become_username, become_method = '', '', ''
         if creds:
             ssh_username = creds.get_input('username', default='')
@@ -2090,14 +2033,14 @@ class RunAdHocCommand(BaseTask):
         # current user.
         ssh_username = ssh_username or 'root'
         args = []
-        if ad_hoc_command.job_type == 'check':
+        if prep.job_type == 'check':
             args.append('--check')
         args.extend(['-u', sanitize_jinja(ssh_username)])
         if 'ssh_password' in passwords:
             args.append('--ask-pass')
         # We only specify sudo/su user and password if explicitly given by the
         # credential.  Credential should never specify both sudo and su.
-        if ad_hoc_command.become_enabled:
+        if prep.become_enabled:
             args.append('--become')
         if become_method:
             args.extend(['--become-method', sanitize_jinja(become_method)])
@@ -2106,40 +2049,40 @@ class RunAdHocCommand(BaseTask):
         if 'become_password' in passwords:
             args.append('--ask-become-pass')
 
-        if ad_hoc_command.forks:  # FIXME: Max limit?
-            args.append('--forks=%d' % ad_hoc_command.forks)
-        if ad_hoc_command.diff_mode:
+        if prep.forks:  # FIXME: Max limit?
+            args.append('--forks=%d' % prep.forks)
+        if prep.diff_mode:
             args.append('--diff')
-        if ad_hoc_command.verbosity:
-            args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
+        if prep.verbosity:
+            args.append('-%s' % ('v' * min(5, prep.verbosity)))
 
-        if ad_hoc_command.limit:
-            args.append(ad_hoc_command.limit)
+        if prep.limit:
+            args.append(prep.limit)
         else:
             args.append('all')
 
         return args
 
-    def build_extra_vars_file(self, ad_hoc_command, private_data_dir):
+    def build_extra_vars_file(self, prep, private_data_dir):
         extra_vars = dict()
-        if ad_hoc_command.extra_vars_dict:
-            redacted_extra_vars, removed_vars = extract_ansible_vars(ad_hoc_command.extra_vars_dict)
+        if prep.extra_vars_dict:
+            redacted_extra_vars, removed_vars = extract_ansible_vars(prep.extra_vars_dict)
             if removed_vars:
                 raise ValueError(_("{} are prohibited from use in ad hoc commands.").format(", ".join(removed_vars)))
-            extra_vars.update(ad_hoc_command.extra_vars_dict)
-        extra_vars.update(ad_hoc_command.awx_meta_vars())
+            extra_vars.update(prep.extra_vars_dict)
+        extra_vars.update(prep.awx_meta_vars())
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
-    def build_module_name(self, ad_hoc_command):
-        return ad_hoc_command.module_name
+    def build_module_name(self, prep):
+        return prep.module_name
 
-    def build_module_args(self, ad_hoc_command):
-        module_args = ad_hoc_command.module_args
+    def build_module_args(self, prep):
+        module_args = prep.module_args
         if settings.ALLOW_JINJA_IN_EXTRA_VARS != 'always':
             module_args = sanitize_jinja(module_args)
         return module_args
 
-    def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
+    def build_playbook_path_relative_to_cwd(self, prep, private_data_dir):
         return None
 
     def get_password_prompts(self, passwords={}):
@@ -2164,42 +2107,42 @@ class RunSystemJob(BaseTask):
     def build_execution_environment_params(self, system_job, private_data_dir):
         return {}
 
-    def build_args(self, system_job, private_data_dir, passwords):
-        args = ['awx-manage', system_job.job_type]
+    def build_args(self, prep, private_data_dir, passwords):
+        args = ['awx-manage', prep.job_type]
         try:
             # System Job extra_vars can be blank, must be JSON if not blank
-            if system_job.extra_vars == '':
+            if prep.extra_vars == '':
                 json_vars = {}
             else:
-                json_vars = json.loads(system_job.extra_vars)
-            if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+                json_vars = json.loads(prep.extra_vars)
+            if prep.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
                 if 'days' in json_vars:
                     args.extend(['--days', str(json_vars.get('days', 60))])
                 if 'batch_size' in json_vars:
                     args.extend(['--batch-size', str(json_vars['batch_size'])])
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
-            if system_job.job_type == 'cleanup_jobs':
+            if prep.job_type == 'cleanup_jobs':
                 args.extend(
                     ['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands', '--workflow-jobs', '--notifications']
                 )
         except Exception:
-            logger.exception("{} Failed to parse system job".format(system_job.log_format))
+            logger.exception("{} Failed to parse system job".format(prep.log_format))
         return args
 
     def write_args_file(self, private_data_dir, args):
         return self.write_private_data_file(private_data_dir, 'args', ' '.join(args))
 
-    def build_env(self, instance, private_data_dir, private_data_files=None):
-        base_env = super(RunSystemJob, self).build_env(instance, private_data_dir, private_data_files=private_data_files)
+    def build_env(self, prep, private_data_dir, private_data_files=None):
+        base_env = super(RunSystemJob, self).build_env(prep, private_data_dir, private_data_files=private_data_files)
         # TODO: this is able to run by turning off isolation
         # the goal is to run it a container instead
         env = dict(os.environ.items())
         env.update(base_env)
         return env
 
-    def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
+    def build_playbook_path_relative_to_cwd(self, prep, private_data_dir):
         return None
 
-    def build_inventory(self, instance, private_data_dir):
+    def build_inventory(self, prep, private_data_dir):
         return None

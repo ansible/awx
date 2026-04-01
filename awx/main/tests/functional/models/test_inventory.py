@@ -227,15 +227,15 @@ class TestRelatedJobs:
 
 @pytest.mark.django_db
 class TestInventorySourceInjectors:
-    def test_extra_credentials(self, project, credential):
+    def test_injector_credential_kind(self, project, credential):
         inventory_source = InventorySource.objects.create(name='foo', source='scm', source_project=project)
         inventory_source.credentials.add(credential)
         assert inventory_source.get_cloud_credential() == credential  # for serializer
-        assert inventory_source.get_extra_credentials() == [credential]
+        assert inventory_source.injector_credential_kind() is None  # scm has no dedicated injector
 
         inventory_source.source = 'ec2'
         assert inventory_source.get_cloud_credential() == credential
-        assert inventory_source.get_extra_credentials() == []
+        assert inventory_source.injector_credential_kind() == 'aws'
 
     def test_all_cloud_sources_covered(self):
         """Code in several places relies on the fact that the older
