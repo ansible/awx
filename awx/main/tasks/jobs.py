@@ -1682,7 +1682,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
     def build_credentials_list(self, project_update):
-        if project_update.scm_type == 'insights' and project_update.credential:
+        if project_update.credential:
             return [project_update.credential]
         return []
 
