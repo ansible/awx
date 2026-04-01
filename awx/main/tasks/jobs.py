@@ -1728,6 +1728,16 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
 
+        # The injector's _get_shared_env() calls inventory_update.get_cloud_credential()
+        # which does a fresh DB fetch, losing the OIDC context populated by
+        # populate_workload_identity_tokens(). Override it on this instance to return
+        # the credential from self._credentials which already has the context.
+        cloud_cred = inventory_update.get_cloud_credential()
+        if cloud_cred and self._credentials:
+            contexted_cred = next((c for c in self._credentials if c.pk == cloud_cred.pk), None)
+            if contexted_cred is not None:
+                inventory_update.get_cloud_credential = lambda _cred=contexted_cred: _cred
+
         injector = None
         if inventory_update.source in InventorySource.injectors:
             injector = InventorySource.injectors[inventory_update.source]()
@@ -1862,8 +1872,10 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         return None
 
     def build_credentials_list(self, inventory_update):
-        # All credentials not used by inventory source injector
-        return inventory_update.get_extra_credentials()
+        # Include all credentials (cloud + extra) with prefetch so that
+        # populate_workload_identity_tokens() can generate OIDC JWTs for
+        # credentials whose input sources reference an OIDC external credential.
+        return inventory_update.credentials.prefetch_related('input_sources__source_credential').all()
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None
