@@ -56,7 +56,7 @@ OTEL ?= false
 LOKI ?= false
 # Path to the awx-tui repo for `make awx-tui`
 AWX_TUI_PATH ?= $(shell cd .. && pwd)/awx-tui
-AWX_TUI_REPO ?= git@github.com:ansible-community/awx-tui.git
+AWX_TUI_REPO ?= https://github.com/ansible-community/awx-tui.git
 # If set to true docker-compose will install editable dependencies
 EDITABLE_DEPENDENCIES ?= false
 # If set to true, use tls for postgres connection
@@ -588,7 +588,7 @@ awx-tui:
 	PYTHONPATH=$(AWX_TUI_PATH) \
 	AWX_HOST=https://localhost:8043 \
 	AWX_USER=admin \
-	AWX_PASSWORD=$$(grep -oP "admin_password: '\K[^']*" tools/docker-compose/_sources/secrets/admin_password.yml 2>/dev/null || echo "admin") \
+	AWX_PASSWORD=$$(awk -F"'" '/^admin_password:/{print $$2}' tools/docker-compose/_sources/secrets/admin_password.yml 2>/dev/null || echo "admin") \
 	AWX_VERIFY_SSL=false \
 	$(PYTHON) -m awx_tui.main --no-verify-ssl --host https://localhost:8043
 
