@@ -130,9 +130,7 @@ def test_oauth_token_auth():
 
 def test_oauth_token_from_cli_flag():
     """Test that --conf.token CLI flag sets Bearer auth"""
-    cli, mock_root, mock_connection = setup_token_auth(
-        ['awx', '--conf.token', 'cli_token_value']
-    )
+    cli, mock_root, mock_connection = setup_token_auth(['awx', '--conf.token', 'cli_token_value'])
     cli.authenticate()
 
     assert mock_connection.session.headers['Authorization'] == 'Bearer cli_token_value'
@@ -158,9 +156,7 @@ def test_oauth_token_from_env_var():
 
 def test_oauth_token_precedence_over_basic_auth(monkeypatch):
     """Test that OAuth2 token takes precedence over Basic auth"""
-    cli, mock_root, mock_connection = setup_token_auth(
-        ['awx', '--conf.token', 'my_token', '--conf.username', 'user', '--conf.password', 'pass']
-    )
+    cli, mock_root, mock_connection = setup_token_auth(['awx', '--conf.token', 'my_token', '--conf.username', 'user', '--conf.password', 'pass'])
     monkeypatch.setattr(config, 'force_basic_auth', True)
     cli.authenticate()
 
