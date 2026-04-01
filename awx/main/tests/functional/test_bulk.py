@@ -445,3 +445,49 @@ def get_inventory_hosts(get, inv_id, use_user):
     data = get(reverse('api:inventory_hosts_list', kwargs={'pk': inv_id}), use_user, expect=200).data
     results = [host['id'] for host in data['results']]
     return results
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_respects_settings_limit(job_template, organization, inventory, project, post, patch, get, user):
+    """Test that bulk job launch respects BULK_JOB_MAX_LAUNCH setting."""
+    from django.conf import settings
+    from unittest import mock
+
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+
+    jt = JobTemplate.objects.create(
+        name='bulk-test-jt',
+        ask_inventory_on_launch=True,
+        project=project,
+        playbook='helloworld.yml',
+        allow_simultaneous=True,
+    )
+    jt.execute_role.members.add(normal_user)
+    inventory.use_role.members.add(normal_user)
+
+    # Test with limit set to 3
+    with mock.patch.object(settings, 'BULK_JOB_MAX_LAUNCH', 3):
+        # Attempt to launch 5 jobs when limit is 3 - should fail
+        jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(5)]
+        resp = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Test', 'jobs': jobs},
+            normal_user,
+            expect=400,
+        )
+        assert 'Number of requested jobs exceeds system setting' in str(resp.data)
+
+    # Test with limit increased to 10
+    with mock.patch.object(settings, 'BULK_JOB_MAX_LAUNCH', 10):
+        # Now launching 5 jobs should succeed
+        jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(5)]
+        resp = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Test', 'jobs': jobs},
+            normal_user,
+            expect=201,
+        )
+        bulk_job = get(resp.data['url'], normal_user, expect=200).data
+        # Verify the workflow job was created
+        assert bulk_job['name'] == 'Bulk Job Test'
