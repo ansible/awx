@@ -374,10 +374,7 @@ class WorkflowJobNode(WorkflowNodeBase):
                 functional_aa_dict.pop('_ansible_no_log', None)
                 extra_vars.update(functional_aa_dict)
         elif ujt_obj and isinstance(ujt_obj, WorkflowJobTemplate):
-            # For nested workflows, ancestor artifacts are applied to root nodes
-            # of the child workflow (in the task manager) instead of being baked
-            # into extra_vars where they would override the child's own set_stats
-            pass
+            pass  # artifacts are applied via seed_root_ancestor_artifacts in the task manager
 
         # Workflow Job extra_vars higher precedence than ancestor artifacts
         extra_vars.update(wj_special_vars)
