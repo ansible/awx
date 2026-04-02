@@ -95,3 +95,6 @@ A few of the most important ones are:
 
 ``--conf.password, CONTROLLER_PASSWORD``
     the AWX password to use for authentication
+
+``--conf.token, -t, CONTROLLER_OAUTH_TOKEN``
+    an OAuth2 personal access token for authentication (overrides username/password)
