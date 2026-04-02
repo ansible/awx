@@ -1056,16 +1056,18 @@ class InventorySourceOptions(BaseModel):
                     break
         return credential
 
-    def get_extra_credentials(self):
+    def get_extra_credentials(self, base_qs=None):
         """Return all credentials that are not used by the inventory source injector.
         These are all credentials that should run their own inject_credential logic.
         """
+        if base_qs is None:
+            base_qs = self.credentials.all()
         special_cred = None
         if self.source in discover_available_cloud_provider_plugin_names():
             # these have special injection logic associated with them
             special_cred = self.get_cloud_credential()
         extra_creds = []
-        for cred in self.credentials.all():
+        for cred in base_qs:
             if special_cred is None or cred.pk != special_cred.pk:
                 extra_creds.append(cred)
         return extra_creds

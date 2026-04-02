@@ -1872,10 +1872,19 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         return None
 
     def build_credentials_list(self, inventory_update):
-        # Include all credentials (cloud + extra) with prefetch so that
-        # populate_workload_identity_tokens() can generate OIDC JWTs for
-        # credentials whose input sources reference an OIDC external credential.
-        return inventory_update.credentials.prefetch_related('input_sources__source_credential').all()
+        # Use prefetched queryset so populate_workload_identity_tokens() can
+        # access input_sources for OIDC JWT generation.
+        base_qs = inventory_update.credentials.prefetch_related('input_sources__source_credential').all()
+        creds = inventory_update.get_extra_credentials(base_qs=base_qs)
+        # The cloud credential is excluded by get_extra_credentials() but must
+        # be in _credentials so populate_workload_identity_tokens() can generate
+        # an OIDC JWT for it when it has an external credential input source.
+        cloud_cred = inventory_update.get_cloud_credential()
+        if cloud_cred and cloud_cred.pk not in {c.pk for c in creds}:
+            # Use the prefetched instance so input_sources are already loaded
+            prefetched = next((c for c in base_qs if c.pk == cloud_cred.pk), cloud_cred)
+            creds.append(prefetched)
+        return creds
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None
