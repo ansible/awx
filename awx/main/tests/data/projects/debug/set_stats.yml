@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Set artifacts via set_stats
+      ansible.builtin.set_stats:
+        data: "{{ stats_data }}"
+        per_host: false
+        aggregate: false
+      when: stats_data is defined
