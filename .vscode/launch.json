@@ -92,6 +92,16 @@
       "postDebugTask": "start awx-uwsgi"
     },
     {
+      "name": "runserver(platform uwsgi alternative)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "/usr/bin/awx-manage",
+      "args": ["runserver", "--noasgi", "127.0.0.1:8013"],
+      "django": true,
+      "preLaunchTask": "stop platform-uwsgi",
+      "postDebugTask": "start platform-uwsgi"
+    },
+    {
       "name": "runserver_plus(uwsgi alternative)",
       "type": "debugpy",
       "request": "launch",

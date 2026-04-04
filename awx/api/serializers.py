@@ -2932,6 +2932,28 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
+
+        # Deep copy inputs to avoid modifying the original model data
+        if value.get('inputs'):
+            value['inputs'] = copy.deepcopy(value['inputs'])
+
+            found_wit_field = False
+            fields = value['inputs'].get('fields', [])
+            found_wit_field = 'workload_identity_token' in [f.get('id') for f in fields]
+
+            # Filter out internal fields from the API response
+            value['inputs']['fields'] = [f for f in fields if not f.get('internal')]
+
+            # If workload identity token field exists, add job_template to metadata
+            if found_wit_field:
+                metadata = value['inputs'].get('metadata', [])
+                metadata.append({
+                    "id": "job_template_id",
+                    "label": "ID of a Job Template",
+                    "type": "string",
+                    "help_text": "Job template ID to use when generating a token."
+                })
+                value['inputs']['metadata'] = metadata
         return value
 
     def filter_field_metadata(self, fields, method):
