@@ -122,7 +122,6 @@ from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.signals import update_inventory_computed_fields
 
-
 from awx.main.validators import vars_validate_or_raise
 
 from awx.api.versioning import reverse
@@ -2932,6 +2931,19 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
+
+        # Deep copy inputs to avoid modifying the original model data
+        inputs = value.get('inputs')
+        if not isinstance(inputs, dict):
+            inputs = {}
+        value['inputs'] = copy.deepcopy(inputs)
+        fields = value['inputs'].get('fields', [])
+        if not isinstance(fields, list):
+            fields = []
+
+        # Normalize fields and filter out internal fields
+        value['inputs']['fields'] = [f for f in fields if not f.get('internal')]
+
         return value
 
     def filter_field_metadata(self, fields, method):

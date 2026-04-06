@@ -94,7 +94,7 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-from ansible_base.resource_registry.workload_identity_client import get_workload_identity_client
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -168,14 +168,12 @@ def retrieve_workload_identity_jwt(
     Raises:
         RuntimeError: if the workload identity client is not configured.
     """
-    client = get_workload_identity_client()
-    if client is None:
-        raise RuntimeError("Workload identity client is not configured")
-    claims = populate_claims_for_workload(unified_job)
-    kwargs = {"claims": claims, "scope": scope, "audience": audience}
-    if workload_ttl_seconds:
-        kwargs["workload_ttl_seconds"] = workload_ttl_seconds
-    return client.request_workload_jwt(**kwargs).jwt
+    return retrieve_workload_identity_jwt_with_claims(
+        populate_claims_for_workload(unified_job),
+        audience,
+        scope,
+        workload_ttl_seconds,
+    )
 
 
 def with_path_cleanup(f):
