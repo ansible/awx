@@ -241,6 +241,8 @@ class WorkflowManager(TaskBase):
                     job = spawn_node.unified_job_template.create_unified_job(**kv)
                     spawn_node.job = job
                     spawn_node.save()
+                    if spawn_node.ancestor_artifacts and isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
+                        job.seed_root_ancestor_artifacts(spawn_node.ancestor_artifacts)
                     logger.debug('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
                     can_start = True
                     if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
