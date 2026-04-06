@@ -473,7 +473,7 @@ def test_populate_claims_for_adhoc_command(workload_attrs, expected_claims):
     assert claims == expected_claims
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_returns_jwt_from_client(mock_get_client):
     """retrieve_workload_identity_jwt returns the JWT string from the client."""
     mock_client = mock.MagicMock()
@@ -502,7 +502,7 @@ def test_retrieve_workload_identity_jwt_returns_jwt_from_client(mock_get_client)
     assert call_kwargs['claims'][AutomationControllerJobScope.CLAIM_JOB_NAME] == 'Test Job'
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_client):
     """retrieve_workload_identity_jwt passes audience and scope to the client."""
     mock_client = mock.MagicMock()
@@ -518,7 +518,7 @@ def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_clien
     mock_client.request_workload_jwt.assert_called_once_with(claims={'job_id': 1}, scope=scope, audience=audience)
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_passes_workload_ttl(mock_get_client):
     """retrieve_workload_identity_jwt passes workload_ttl_seconds when provided."""
     mock_client = mock.Mock()
@@ -542,7 +542,7 @@ def test_retrieve_workload_identity_jwt_passes_workload_ttl(mock_get_client):
     )
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_get_client):
     """retrieve_workload_identity_jwt raises RuntimeError when client is None."""
     mock_get_client.return_value = None
