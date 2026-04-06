@@ -1710,7 +1710,7 @@ class OIDCCredentialTestMixin:
         job_template = self._validate_and_get_job_template(job_template_id)
 
         # Check user access
-        if not self.request.user.can_access(models.JobTemplate, 'read', job_template):
+        if not self.request.user.can_access(models.JobTemplate, 'start', job_template):
             raise PermissionDenied(_('You do not have access to job template with id: %(id)s.') % {'id': job_template.id})
 
         # Generate workload identity token
