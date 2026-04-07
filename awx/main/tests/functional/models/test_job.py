@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory, Project, Organization, JobLaunchConfig
+from awx.main.models import JobTemplate, Job, Host, JobHostSummary, WorkflowJob, Inventory, Project, Organization, JobLaunchConfig
 
 
 @pytest.mark.django_db
