@@ -16,6 +16,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse as django_reverse
+from django.contrib.contenttypes.models import ContentType
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -35,6 +36,7 @@ from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import URLPathVersioning, reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
+from awx.main.models.rbac import RoleAncestorEntry
 from awx.main.utils import set_environ
 from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
@@ -344,13 +346,17 @@ class ApiV2ConfigView(APIView):
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 
-        if (
-            request.user.is_superuser
-            or request.user.is_system_auditor
-            or Organization.accessible_objects(request.user, 'admin_role').exists()
-            or Organization.accessible_objects(request.user, 'auditor_role').exists()
-            or Organization.accessible_objects(request.user, 'project_admin_role').exists()
-        ):
+        # Check superuser/auditor first (no DB query needed)
+        if request.user.is_superuser or request.user.is_system_auditor:
+            has_org_access = True
+        else:
+            # Single query checking all three organization role types at once
+            org_ct = ContentType.objects.get_for_model(Organization)
+            has_org_access = RoleAncestorEntry.objects.filter(
+                ancestor__in=request.user.roles.all(), role_field__in=['admin_role', 'auditor_role', 'project_admin_role'], content_type=org_ct
+            ).exists()
+
+        if has_org_access:
             data.update(
                 dict(
                     project_base_dir=settings.PROJECTS_ROOT,
@@ -358,8 +364,10 @@ class ApiV2ConfigView(APIView):
                     custom_virtualenvs=get_custom_venv_choices(),
                 )
             )
-        elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
-            data['custom_virtualenvs'] = get_custom_venv_choices()
+        else:
+            # Only check JobTemplate access if org check failed
+            if JobTemplate.accessible_objects(request.user, 'admin_role').exists():
+                data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)
 
