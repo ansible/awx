@@ -65,7 +65,7 @@ from ansible_base.lib.workload_identity.controller import AutomationControllerJo
 from flags.state import flag_enabled
 
 # AWX
-from awx.main.tasks.jobs import retrieve_workload_identity_jwt_with_claims
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset
 from awx.api.generics import (
