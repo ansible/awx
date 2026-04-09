@@ -1,5 +1,6 @@
 import datetime
 import pytest
+from unittest import mock
 
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
@@ -9,6 +10,22 @@ from awx.main.models import JobTemplate, Schedule
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 
 RRULE_EXAMPLE = 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
+
+# This rrule triggers ValueError in _fast_forward_rrule when the dtstart is in
+# the past and the fast-forwarded dtstart conflicts with the BYxxx constraints.
+# The DTSTART hour (13 = 1 mod 4) aligns with all BYHOUR values (1,5,9,13,17,21
+# are all 1 mod 4) during EST (UTC-5). But during EDT (UTC-4), the 1-hour shift
+# causes the fast-forwarded local hour to be 0 mod 4 (e.g., 10), which has no
+# overlap with BYHOUR, so dateutil raises "Invalid rrule byxxx generates an
+# empty set."
+RRULE_INVALID_BYXXX = 'DTSTART;TZID=America/New_York:20251211T130000 RRULE:FREQ=HOURLY;INTERVAL=4;WKST=MO;BYDAY=MO,TU,WE,TH,FR;BYHOUR=1,5,9,13,17,21;BYMINUTE=0'
+
+# Same constraints but with a future dtstart, used to test the pathway where
+# a schedule is created when dtstart is in the future (fast-forward skipped)
+# and only breaks later when time passes and fast-forward kicks in during EDT.
+RRULE_INVALID_BYXXX_FUTURE = (
+    'DTSTART;TZID=America/New_York:20351211T130000 RRULE:FREQ=HOURLY;INTERVAL=4;WKST=MO;BYDAY=MO,TU,WE,TH,FR;BYHOUR=1,5,9,13,17,21;BYMINUTE=0'
+)
 
 
 def get_rrule(tz=None):
@@ -595,3 +612,68 @@ def test_normal_user_can_create_inventory_update_schedule(options, post, invento
     inventory_source.inventory.update_role.members.add(alice)
     assert 'POST' in options(url, user=alice).data['actions'].keys()
     post(url, params, alice, expect=201)
+
+
+@pytest.mark.django_db
+def test_patch_invalid_byxxx_accepted_during_est_crashes_during_edt(post, patch, get, admin_user, project, inventory):
+    """PATCH with the problematic rrule succeeds during EST (when fast-forward
+    hour alignment holds) but a subsequent GET during EDT crashes because
+    the DST offset shifts the fast-forwarded hour out of the BYHOUR constraint.
+
+    This demonstrates that PATCH does go through serializer validation, but
+    the validation is time-dependent: during EST the fast-forward preserves
+    BYHOUR alignment, so the rrule passes. During EDT the 1-hour DST shift
+    breaks alignment, causing ValueError on any code path that calls
+    Schedule.rrulestr() (GET serialization, periodic scheduler, etc.).
+    """
+    job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
+
+    # Create a valid schedule first
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    r = post(url, {'name': 'test-schedule', 'rrule': RRULE_EXAMPLE}, admin_user, expect=201)
+    schedule_id = r.data['id']
+    detail_url = reverse('api:schedule_detail', kwargs={'pk': schedule_id})
+
+    # PATCH with the problematic rrule during EST (Jan 15, 2026, 18:00 UTC = 1 PM EST)
+    # Fast-forward lands on 1 PM EST (hour 13, which is 1 mod 4), matching BYHOUR.
+    est_now = datetime.datetime(2026, 1, 15, 18, 0, 0, tzinfo=datetime.timezone.utc)
+    with mock.patch('awx.main.models.schedules.now', return_value=est_now):
+        patch(detail_url, {'rrule': RRULE_INVALID_BYXXX}, admin_user, expect=200)
+
+    # Verify the problematic rrule is now in the database
+    schedule = Schedule.objects.get(pk=schedule_id)
+    assert 'BYHOUR' in schedule.rrule
+
+    # GET during EDT (Jul 1, 2026, 14:00 UTC = 10 AM EDT)
+    # Fast-forward lands on hour 10 (0 mod 4), no overlap with BYHOUR → ValueError
+    edt_now = datetime.datetime(2026, 7, 1, 14, 0, 0, tzinfo=datetime.timezone.utc)
+    with mock.patch('awx.main.models.schedules.now', return_value=edt_now):
+        r = get(detail_url, admin_user, expect=200)
+        assert r.data['id'] == schedule_id
+
+
+@pytest.mark.django_db
+def test_future_dtstart_created_successfully_crashes_on_get_during_edt(post, get, admin_user, project, inventory):
+    """A schedule with conflicting BYxxx + BYHOUR constraints passes API
+    validation when dtstart is in the future (fast-forward is skipped entirely).
+    After dtstart passes, GET during EDT crashes because the DST hour shift
+    breaks alignment with the BYHOUR values.
+    """
+    job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+
+    # Create with future dtstart — fast-forward is skipped, validation passes
+    r = post(url, {'name': 'future-schedule', 'rrule': RRULE_INVALID_BYXXX_FUTURE}, admin_user, expect=201)
+    schedule_id = r.data['id']
+
+    # Verify schedule was created with the problematic rrule
+    schedule = Schedule.objects.get(pk=schedule_id)
+    assert 'BYHOUR' in schedule.rrule
+
+    # GET during EDT when dtstart is now in the past — fast-forward kicks in
+    # and the DST shift breaks the BYHOUR alignment
+    edt_now = datetime.datetime(2036, 7, 1, 14, 0, 0, tzinfo=datetime.timezone.utc)
+    detail_url = reverse('api:schedule_detail', kwargs={'pk': schedule_id})
+    with mock.patch('awx.main.models.schedules.now', return_value=edt_now):
+        r = get(detail_url, admin_user, expect=200)
+        assert r.data['id'] == schedule_id

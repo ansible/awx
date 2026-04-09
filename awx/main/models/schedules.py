@@ -91,7 +91,17 @@ def _fast_forward_rrule(rrule, ref_dt=None):
 
     interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
     new_start = rrule._dtstart + interval_aligned_offset
-    new_rrule = rrule.replace(dtstart=new_start)
+    try:
+        new_rrule = rrule.replace(dtstart=new_start)
+    except ValueError:
+        logger.warning(
+            "Fast-forward of rrule failed due to invalid byxxx constraint "
+            "with new dtstart=%s (original dtstart=%s). "
+            "Returning original rrule without fast-forward.",
+            new_start,
+            rrule._dtstart,
+        )
+        return rrule
     return new_rrule
 
 
@@ -311,7 +321,18 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         for field_name in affects_fields:
             starting_values[field_name] = getattr(self, field_name)
 
-        future_rs = Schedule.rrulestr(self.rrule)
+        try:
+            future_rs = Schedule.rrulestr(self.rrule)
+        except ValueError:
+            logger.error(
+                "Schedule id=%s has an invalid rrule that cannot be parsed: %s. Setting next_run to None to prevent further errors.",
+                self.id,
+                self.rrule,
+            )
+            self.next_run = None
+            self.dtend = None
+            changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
+            return changed
 
         if self.enabled:
             next_run_actual = future_rs.after(now())

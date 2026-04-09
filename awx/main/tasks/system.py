@@ -902,7 +902,10 @@ def awx_periodic_scheduler():
 
         old_schedules = Schedule.objects.enabled().before(last_run)
         for schedule in old_schedules:
-            schedule.update_computed_fields()
+            try:
+                schedule.update_computed_fields()
+            except Exception:
+                logger.exception("Failed to update computed fields for schedule %s.", schedule)
         schedules = Schedule.objects.enabled().between(last_run, run_now)
 
         invalid_license = False
@@ -913,7 +916,11 @@ def awx_periodic_scheduler():
 
         for schedule in schedules:
             template = schedule.unified_job_template
-            schedule.update_computed_fields()  # To update next_run timestamp.
+            try:
+                schedule.update_computed_fields()  # To update next_run timestamp.
+            except Exception:
+                logger.exception("Failed to update computed fields for schedule %s.", schedule)
+                continue
             if template.cache_timeout_blocked:
                 logger.warning("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
                 continue
