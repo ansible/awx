@@ -5,7 +5,7 @@ name: Repo Owns Branch
 # owns the current branch for push operations.
 #
 # Ownership rules:
-#   - Repos ending in /awx own: devel, feature_*
+#   - ansible/awx owns: devel, feature_*
 #   - ansible/tower owns: stable-*, release_*
 #   - workflow_dispatch is always allowed
 #
@@ -37,8 +37,8 @@ jobs:
             exit 0
           fi
 
-          # Repos ending in /awx own devel and feature_* branches
-          if [[ "$REPO" == */awx ]] && [[ "$BRANCH" == "devel" || "$BRANCH" == feature_* ]]; then
+          # ansible/awx owns devel and feature_* branches
+          if [[ "$REPO" == "ansible/awx" ]] && [[ "$BRANCH" == "devel" || "$BRANCH" == feature_* ]]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "Repository '$REPO' owns branch '$BRANCH'"
             exit 0
