@@ -615,49 +615,59 @@ def test_normal_user_can_create_inventory_update_schedule(options, post, invento
 
 
 @pytest.mark.django_db
-def test_patch_invalid_byxxx_accepted_during_est_crashes_during_edt(post, patch, get, admin_user, project, inventory):
-    """PATCH with the problematic rrule succeeds during EST (when fast-forward
-    hour alignment holds) but a subsequent GET during EDT crashes because
-    the DST offset shifts the fast-forwarded hour out of the BYHOUR constraint.
-
-    This demonstrates that PATCH does go through serializer validation, but
-    the validation is time-dependent: during EST the fast-forward preserves
-    BYHOUR alignment, so the rrule passes. During EDT the 1-hour DST shift
-    breaks alignment, causing ValueError on any code path that calls
-    Schedule.rrulestr() (GET serialization, periodic scheduler, etc.).
+def test_patch_invalid_byxxx_rejected_during_edt(post, patch, admin_user, project, inventory):
+    """PATCH with the problematic rrule during EDT is rejected by validation.
+    The fast-forward shifts the hour out of BYHOUR alignment, causing
+    ValueError which validate_rrule catches and returns as a 400.
     """
     job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
-
-    # Create a valid schedule first
     url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
     r = post(url, {'name': 'test-schedule', 'rrule': RRULE_EXAMPLE}, admin_user, expect=201)
-    schedule_id = r.data['id']
-    detail_url = reverse('api:schedule_detail', kwargs={'pk': schedule_id})
+    detail_url = reverse('api:schedule_detail', kwargs={'pk': r.data['id']})
 
-    # PATCH with the problematic rrule during EST (Jan 15, 2026, 18:00 UTC = 1 PM EST)
-    # Fast-forward lands on 1 PM EST (hour 13, which is 1 mod 4), matching BYHOUR.
-    est_now = datetime.datetime(2026, 1, 15, 18, 0, 0, tzinfo=datetime.timezone.utc)
-    with mock.patch('awx.main.models.schedules.now', return_value=est_now):
-        patch(detail_url, {'rrule': RRULE_INVALID_BYXXX}, admin_user, expect=200)
-
-    # Verify the problematic rrule is now in the database
-    schedule = Schedule.objects.get(pk=schedule_id)
-    assert 'BYHOUR' in schedule.rrule
-
-    # GET during EDT (Jul 1, 2026, 14:00 UTC = 10 AM EDT)
-    # Fast-forward lands on hour 10 (0 mod 4), no overlap with BYHOUR → ValueError
+    # During EDT (Jul 1, 2026), fast-forward lands on hour 10 (0 mod 4),
+    # no overlap with BYHOUR=1,5,9,13,17,21 → ValueError → 400
     edt_now = datetime.datetime(2026, 7, 1, 14, 0, 0, tzinfo=datetime.timezone.utc)
     with mock.patch('awx.main.models.schedules.now', return_value=edt_now):
-        r = get(detail_url, admin_user, expect=200)
-        assert r.data['id'] == schedule_id
+        r = patch(detail_url, {'rrule': RRULE_INVALID_BYXXX}, admin_user, expect=400)
+        assert 'rrule' in r.data
 
 
 @pytest.mark.django_db
-def test_future_dtstart_created_successfully_crashes_on_get_during_edt(post, get, admin_user, project, inventory):
+def test_get_survives_invalid_byxxx_already_in_db(get, admin_user, project, inventory):
+    """GET on a schedule whose rrule was accepted during EST but now fails
+    fast-forward during EDT should not 500. The timezone and until properties
+    catch the ValueError and return fallback values.
+    """
+    job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
+
+    # Create a valid schedule, then inject the bad rrule at the DB level
+    # (simulates data accepted during EST that breaks during EDT)
+    schedule = Schedule.objects.create(
+        name='bad-byxxx-schedule',
+        rrule='DTSTART:20251211T130000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1',
+        unified_job_template=job_template,
+    )
+    Schedule.objects.filter(pk=schedule.pk).update(rrule=RRULE_INVALID_BYXXX)
+
+    # GET during EDT — timezone/until properties catch ValueError gracefully
+    edt_now = datetime.datetime(2026, 7, 1, 14, 0, 0, tzinfo=datetime.timezone.utc)
+    with mock.patch('awx.main.models.schedules.now', return_value=edt_now):
+        url = reverse('api:schedule_list')
+        r = get(url, admin_user, expect=200)
+        assert r.data['count'] >= 1
+
+        detail_url = reverse('api:schedule_detail', kwargs={'pk': schedule.pk})
+        r = get(detail_url, admin_user, expect=200)
+        assert r.data['id'] == schedule.pk
+
+
+@pytest.mark.django_db
+def test_future_dtstart_created_and_get_survives_edt(post, get, admin_user, project, inventory):
     """A schedule with conflicting BYxxx + BYHOUR constraints passes API
     validation when dtstart is in the future (fast-forward is skipped entirely).
-    After dtstart passes, GET during EDT crashes because the DST hour shift
-    breaks alignment with the BYHOUR values.
+    After dtstart passes, GET during EDT should not crash — the timezone and
+    until properties catch the ValueError from the DST hour shift.
     """
     job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
     url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
@@ -666,12 +676,9 @@ def test_future_dtstart_created_successfully_crashes_on_get_during_edt(post, get
     r = post(url, {'name': 'future-schedule', 'rrule': RRULE_INVALID_BYXXX_FUTURE}, admin_user, expect=201)
     schedule_id = r.data['id']
 
-    # Verify schedule was created with the problematic rrule
-    schedule = Schedule.objects.get(pk=schedule_id)
-    assert 'BYHOUR' in schedule.rrule
-
     # GET during EDT when dtstart is now in the past — fast-forward kicks in
-    # and the DST shift breaks the BYHOUR alignment
+    # and the DST shift breaks the BYHOUR alignment, but timezone/until
+    # properties catch it gracefully
     edt_now = datetime.datetime(2036, 7, 1, 14, 0, 0, tzinfo=datetime.timezone.utc)
     detail_url = reverse('api:schedule_detail', kwargs={'pk': schedule_id})
     with mock.patch('awx.main.models.schedules.now', return_value=edt_now):
