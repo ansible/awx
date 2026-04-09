@@ -20,12 +20,13 @@ on:
       - release_*
   workflow_dispatch: # Allow manual triggering for testing
 jobs:
+  check-ownership:
+    uses: ./.github/workflows/_repo-owns-branch.yml
+
   sync-openapi-spec:
+    needs: check-ownership
+    if: needs.check-ownership.outputs.should_run == 'true'
     name: Sync OpenAPI spec to central repo
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (endsWith(github.repository, '/awx') && github.ref_name == 'devel') ||
-      (github.repository == 'ansible/tower' && (startsWith(github.ref_name, 'stable-') || startsWith(github.ref_name, 'release_')))
     runs-on: ubuntu-latest
     permissions:
       packages: write
