@@ -16,10 +16,16 @@ on:
   push:
     branches:
       - devel
+      - stable-*
+      - release_*
   workflow_dispatch: # Allow manual triggering for testing
 jobs:
   sync-openapi-spec:
     name: Sync OpenAPI spec to central repo
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (endsWith(github.repository, '/awx') && github.ref_name == 'devel') ||
+      (github.repository == 'ansible/tower' && (startsWith(github.ref_name, 'stable-') || startsWith(github.ref_name, 'release_')))
     runs-on: ubuntu-latest
     permissions:
       packages: write
