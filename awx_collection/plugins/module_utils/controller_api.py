@@ -95,7 +95,7 @@ class ControllerModule(AnsibleModule):
             type='int',
             aliases=['aap_retry_backoff_factor'],
             required=False,
-            fallback=(env_fallback, ['AAP_RETRY_BACKOUT_FACTOR']),
+            fallback=(env_fallback, ['AAP_RETRY_BACKOFF_FACTOR']),
             default=2 ),
         aap_token=dict(
             type='raw',
