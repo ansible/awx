@@ -334,15 +334,14 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             future_rs = Schedule.rrulestr(self.rrule)
         except ValueError as e:
             logger.error(
-                "Schedule id=%s has an invalid rrule that cannot be parsed: %s. Setting next_run to None to prevent further errors. Error: %s",
+                "Schedule id=%s has an invalid rrule that cannot be parsed: %s. Error: %s",
                 self.id,
                 self.rrule,
                 e,
             )
             self.next_run = None
             self.dtend = None
-            changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
-            return changed
+            raise
 
         if self.enabled:
             next_run_actual = future_rs.after(now())
