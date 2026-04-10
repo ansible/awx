@@ -590,3 +590,67 @@ def test_populate_workload_identity_tokens_passes_get_instance_timeout_to_client
         scope=AutomationControllerJobScope.name,
         workload_ttl_seconds=expected_ttl,
     )
+
+
+class TestRunInventoryUpdatePopulateWorkloadIdentityTokens:
+    """Tests for RunInventoryUpdate.populate_workload_identity_tokens."""
+
+    def test_cloud_credential_passed_as_additional_credential(self):
+        """The cloud credential is forwarded to super().populate_workload_identity_tokens via additional_credentials."""
+        cloud_cred = mock.MagicMock(name='cloud_cred')
+        cloud_cred.context = {}
+
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = cloud_cred
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens()
+
+        mock_super.assert_called_once_with(additional_credentials=[cloud_cred])
+
+    def test_no_cloud_credential_calls_super_with_none(self):
+        """When there is no cloud credential, super() is called with additional_credentials=None."""
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = None
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens()
+
+        mock_super.assert_called_once_with(additional_credentials=None)
+
+    def test_additional_credentials_combined_with_cloud_credential(self):
+        """Caller-supplied additional_credentials are combined with the cloud credential."""
+        cloud_cred = mock.MagicMock(name='cloud_cred')
+        cloud_cred.context = {}
+        extra_cred = mock.MagicMock(name='extra_cred')
+
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = cloud_cred
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens(additional_credentials=[extra_cred])
+
+        mock_super.assert_called_once_with(additional_credentials=[extra_cred, cloud_cred])
+
+    def test_cloud_credential_override_after_context_set(self):
+        """After OIDC processing, get_cloud_credential is overridden on the instance when context is populated."""
+        cloud_cred = mock.MagicMock(name='cloud_cred')
+        # Simulate that super().populate_workload_identity_tokens populates context
+        cloud_cred.context = {'workload_identity_token': 'eyJ.test.jwt'}
+
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = cloud_cred
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens'):
+            task.populate_workload_identity_tokens()
+
+        # The instance's get_cloud_credential should now return the same object with context
+        assert task.instance.get_cloud_credential() is cloud_cred
