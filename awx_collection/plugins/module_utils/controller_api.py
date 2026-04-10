@@ -536,7 +536,7 @@ class ControllerAPIModule(ControllerModule):
             return True
 
         # --- POST/PATCH on 500/504: safe UNLESS the endpoint triggers execution ---
-        if method in ('POST', 'PATCH') and status_code in (500, 504, 403):
+        if method in ('POST', 'PATCH') and status_code in (500, 504):
 
             # /launch, /relaunch, /callback etc. — retrying would double-execute
             # Catches: /job_templates/1/launch/, /workflow_job_templates/1/launch/,
@@ -571,21 +571,19 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to AWX (if not already done so)
-        if not self.authenticated:
-            # This method will set a cookie in the cookie jar for us
+        # Authenticate to AWX (if we don't have a token and if not already done so)
+        if not self.oauth_token and not self.authenticated:
             self.authenticate(**kwargs)
-
-        headers['Authorization'] = self._get_basic_authorization_header()
+        if self.oauth_token:
+            headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
             kwargs['headers'] = headers
 
-        data = None  # Important, if content type is not JSON, this should not be dict type
+        data = None
         if headers.get('Content-Type', '') == 'application/json':
             data = dumps(kwargs.get('data', {}))
-
 
         # ----------------------------------------------------------------
         # Retry loop — wraps only the session.open() + HTTPError handling
@@ -632,14 +630,9 @@ class ControllerAPIModule(ControllerModule):
                 # ---- Retryable HTTP errors ----
                 if self.is_retryable(he.code, method, url.path):
                     last_response = he.code
+                    # Exhausted retries on a retryable error go on to regualar failure checks.
                     if attempt < max_retries:
                         continue
-                    # Exhausted retries on a retryable error
-                    self.fail_json(
-                        msg='The {0} request to {1} failed after {2} retries with status {3}'.format(
-                            method, url.path, max_retries, he.code
-                        )
-                    )
 
                 # ---- Non-retryable HTTP errors (existing behaviour preserved) ----
                 if he.code >= 500:
