@@ -54,6 +54,9 @@ VAULT_TLS ?= false
 OTEL ?= false
 # If set to true docker-compose will also start a Loki instance
 LOKI ?= false
+# Path to the awx-tui repo for `make awx-tui`
+AWX_TUI_PATH ?= $(shell cd .. && pwd)/awx-tui
+AWX_TUI_REPO ?= https://github.com/ansible-community/awx-tui.git
 # If set to true docker-compose will install editable dependencies
 EDITABLE_DEPENDENCIES ?= false
 # If set to true, use tls for postgres connection
@@ -570,6 +573,24 @@ docker-compose-runtest: awx/projects docker-compose-sources
 
 docker-compose-build-schema: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 make genschema
+
+awx-tui:
+	@if [ ! -d "$(AWX_TUI_PATH)" ]; then \
+	    echo "awx-tui not found at $(AWX_TUI_PATH), cloning..."; \
+	    git clone $(AWX_TUI_REPO) $(AWX_TUI_PATH); \
+	else \
+	    echo "Updating awx-tui at $(AWX_TUI_PATH)..."; \
+	    git -C $(AWX_TUI_PATH) pull --ff-only 2>/dev/null || echo "Could not fast-forward, using existing checkout"; \
+	fi
+	@echo "Installing awx-tui dependencies..."
+	$(PYTHON) -m pip install -r $(AWX_TUI_PATH)/requirements.txt -q
+	@echo "Launching awx-tui..."
+	PYTHONPATH=$(AWX_TUI_PATH) \
+	AWX_HOST=https://localhost:8043 \
+	AWX_USER=admin \
+	AWX_PASSWORD=$$(awk -F"'" '/^admin_password:/{print $$2}' tools/docker-compose/_sources/secrets/admin_password.yml 2>/dev/null || echo "admin") \
+	AWX_VERIFY_SSL=false \
+	$(PYTHON) -m awx_tui.main --no-verify-ssl --host https://localhost:8043
 
 SCHEMA_DIFF_BASE_FOLDER ?= awx
 SCHEMA_DIFF_BASE_BRANCH ?= devel
