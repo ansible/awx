@@ -1,4 +1,3 @@
-import os
 import sys
 
 from argparse import RawDescriptionHelpFormatter
@@ -9,13 +8,14 @@ from awx.main.utils.candlepin.client import CandlepinClient
 from awx.main.utils.candlepin.lifecycle import (
     get_candlepin_ca,
     get_candlepin_url,
+    get_proxy_url,
     get_renewal_days,
     needs_renewal,
     parse_cert,
 )
 from awx.main.utils.licensing import (
     CANDLEPIN_UUID_PLACEHOLDER,
-    _fetch_candlepin_lifecycle_from_db,
+    _fetch_candlepin_cert_from_db,
     _fetch_registration_credentials_from_db,
     _save_candlepin_cert_to_db,
     _save_candlepin_registration_to_db,
@@ -45,22 +45,24 @@ class Command(BaseCommand):
                     'SUBCOMMANDS',
                     '',
                     '  register  Register this instance as a Candlepin consumer.',
-                    '            Credentials are read from AWX conf_setting by default',
+                    '            Credentials are read from AWX database by default',
                     '            (SUBSCRIPTIONS_USERNAME, SUBSCRIPTIONS_PASSWORD,',
                     '            LICENSE.account_number).  Pass --username / --password /  ',
                     '            --org to override.',
                     '',
                     '  renew     Perform a manual check-in and proactive cert renewal.',
-                    '            Reads the stored cert/key/UUID from conf_setting.',
+                    '            Reads the stored cert/key/UUID from database.',
                     '            Use --force to renew even if the cert is not near expiry.',
                     '',
-                    'ENVIRONMENT',
+                    'CONFIGURATION',
                     '',
-                    '  METRICS_UTILITY_CANDLEPIN_URL      Candlepin base URL',
-                    '                                     (default: https://subscription.rhsm.redhat.com/subscription)',
-                    '  METRICS_UTILITY_CANDLEPIN_CA       Path to Candlepin CA cert for TLS verification',
-                    '  METRICS_UTILITY_CANDLEPIN_RENEWAL_DAYS  Days before expiry to trigger renewal (default: 30)',
-                    '  METRICS_UTILITY_PROXY_URL          HTTP/HTTPS proxy for Candlepin API calls',
+                    '  Settings can be configured via Django settings (awx/settings/defaults.py):',
+                    '',
+                    '  AWX_ANALYTICS_CANDLEPIN_URL              Candlepin base URL',
+                    '                                           (default: https://subscription.rhsm.redhat.com/subscription)',
+                    '  AWX_ANALYTICS_CANDLEPIN_CA               Path to Candlepin CA cert for TLS verification',
+                    '  AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS  Days before expiry to trigger renewal (default: 90)',
+                    '  AWX_ANALYTICS_CANDLEPIN_PROXY_URL        HTTP/HTTPS proxy for Candlepin API calls',
                 ]
             ),
             **kwargs,
@@ -76,14 +78,14 @@ class Command(BaseCommand):
             help='Register this instance as a Candlepin consumer',
             formatter_class=RawDescriptionHelpFormatter,
         )
-        reg.add_argument('--username', help='Red Hat subscription username (overrides SUBSCRIPTIONS_USERNAME from conf_setting)')
-        reg.add_argument('--password', help='Red Hat subscription password (overrides SUBSCRIPTIONS_PASSWORD from conf_setting)')
-        reg.add_argument('--org', help='Candlepin owner/org key (overrides LICENSE.account_number from conf_setting)')
-        reg.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides METRICS_UTILITY_CANDLEPIN_URL)')
-        reg.add_argument('--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification')
-        reg.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides METRICS_UTILITY_PROXY_URL)')
-        reg.add_argument('--force', action='store_true', help='Re-register even if a certificate already exists in conf_setting')
-        reg.add_argument('--dry-run', dest='dry_run', action='store_true', help='Perform registration but do not save the result to conf_setting')
+        reg.add_argument('--username', help='Red Hat subscription username (overrides SUBSCRIPTIONS_USERNAME from database)')
+        reg.add_argument('--password', help='Red Hat subscription password (overrides SUBSCRIPTIONS_PASSWORD from database)')
+        reg.add_argument('--org', help='Candlepin owner/org key (overrides LICENSE.account_number from database)')
+        reg.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
+        reg.add_argument('--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)')
+        reg.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides AWX_ANALYTICS_CANDLEPIN_PROXY_URL setting)')
+        reg.add_argument('--force', action='store_true', help='Re-register even if a certificate already exists in database')
+        reg.add_argument('--dry-run', dest='dry_run', action='store_true', help='Perform registration but do not save the result to database')
 
         # --- renew ---
         ren = subparsers.add_parser(
@@ -91,12 +93,12 @@ class Command(BaseCommand):
             help='Check in and renew the Candlepin identity certificate',
             formatter_class=RawDescriptionHelpFormatter,
         )
-        ren.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides METRICS_UTILITY_CANDLEPIN_URL)')
-        ren.add_argument('--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification')
-        ren.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides METRICS_UTILITY_PROXY_URL)')
+        ren.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
+        ren.add_argument('--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)')
+        ren.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides AWX_ANALYTICS_CANDLEPIN_PROXY_URL setting)')
         ren.add_argument('--force', action='store_true', help='Renew the certificate even if it is not near expiry')
         ren.add_argument(
-            '--dry-run', dest='dry_run', action='store_true', help='Perform check-in and renewal but do not save the result to conf_setting'
+            '--dry-run', dest='dry_run', action='store_true', help='Perform check-in and renewal but do not save the result to database'
         )
 
     def handle(self, *args, **options):
@@ -130,11 +132,11 @@ class Command(BaseCommand):
 
         missing = []
         if not username:
-            missing.append('username (pass --username or set SUBSCRIPTIONS_USERNAME in conf_setting)')
+            missing.append('username (pass --username or set SUBSCRIPTIONS_USERNAME in database)')
         if not password:
-            missing.append('password (pass --password or set SUBSCRIPTIONS_PASSWORD in conf_setting)')
+            missing.append('password (pass --password or set SUBSCRIPTIONS_PASSWORD in database)')
         if not org:
-            missing.append('org (pass --org or ensure LICENSE.account_number is set in conf_setting)')
+            missing.append('org (pass --org or ensure LICENSE.account_number is set in database)')
         if missing:
             for m in missing:
                 self.stderr.write(f'Missing required value: {m}')
@@ -147,12 +149,12 @@ class Command(BaseCommand):
         force = options['force']
 
         # Check whether a cert is already stored unless --force.
-        existing_cert, existing_key, _ = _fetch_candlepin_lifecycle_from_db()
+        existing_cert, existing_key, _ = _fetch_candlepin_cert_from_db()
         if existing_cert and existing_key and not force:
-            self.stdout.write('A Candlepin identity certificate is already stored in conf_setting. Use --force to re-register and replace it.')
+            self.stdout.write('A Candlepin identity certificate is already stored in database. Use --force to re-register and replace it.')
             return True
 
-        # Resolve credentials: CLI flags take precedence over conf_setting.
+        # Resolve credentials: CLI flags take precedence over database.
         resolved = self._resolve_and_validate_credentials(options)
         if resolved is None:
             return False
@@ -160,7 +162,7 @@ class Command(BaseCommand):
 
         candlepin_url = options.get('candlepin_url') or get_candlepin_url()
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
-        proxy = options.get('proxy') or os.getenv('METRICS_UTILITY_PROXY_URL')
+        proxy = options.get('proxy') or get_proxy_url()
 
         client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy)
 
@@ -179,10 +181,10 @@ class Command(BaseCommand):
         self.stdout.write(f'  Valid until   : {info["not_after"]} ({info["days_remaining"]} days remaining)')
 
         if dry_run:
-            self.stdout.write('[dry-run] Registration result NOT saved to conf_setting.')
+            self.stdout.write('[dry-run] Registration result NOT saved to database.')
         else:
             _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid)
-            self.stdout.write('Certificate, key, and consumer UUID saved to conf_setting.')
+            self.stdout.write('Certificate, key, and consumer UUID saved to database.')
 
         return True
 
@@ -194,10 +196,10 @@ class Command(BaseCommand):
         dry_run = options['dry_run']
         force = options['force']
 
-        cert_pem, key_pem, consumer_uuid = _fetch_candlepin_lifecycle_from_db()
+        cert_pem, key_pem, consumer_uuid = _fetch_candlepin_cert_from_db()
 
         if not cert_pem or not key_pem:
-            self.stderr.write('No Candlepin identity certificate found in conf_setting. Run the register subcommand first.')
+            self.stderr.write('No Candlepin identity certificate found in database. Run the register subcommand first.')
             return False
 
         if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER:
@@ -212,7 +214,7 @@ class Command(BaseCommand):
 
         candlepin_url = options.get('candlepin_url') or get_candlepin_url()
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
-        proxy = options.get('proxy') or os.getenv('METRICS_UTILITY_PROXY_URL')
+        proxy = options.get('proxy') or get_proxy_url()
         renewal_days = get_renewal_days()
 
         client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy)
@@ -240,9 +242,9 @@ class Command(BaseCommand):
         self.stdout.write(f'  Valid until   : {new_info["not_after"]} ({new_info["days_remaining"]} days remaining)')
 
         if dry_run:
-            self.stdout.write('[dry-run] Renewed certificate NOT saved to conf_setting.')
+            self.stdout.write('[dry-run] Renewed certificate NOT saved to database.')
         else:
             _save_candlepin_cert_to_db(new_cert_pem, new_key_pem)
-            self.stdout.write('Renewed certificate and key saved to conf_setting.')
+            self.stdout.write('Renewed certificate and key saved to database.')
 
         return True

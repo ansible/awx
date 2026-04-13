@@ -11,7 +11,7 @@ from awx.main.utils.licensing import (
     CANDLEPIN_UUID_PLACEHOLDER,
     SUBSCRIPTIONS_USERNAME_SETTING_KEY,
     SUBSCRIPTIONS_PASSWORD_SETTING_KEY,
-    _fetch_candlepin_lifecycle_from_db,
+    _fetch_candlepin_cert_from_db,
     _fetch_registration_credentials_from_db,
     _save_candlepin_cert_to_db,
     _save_candlepin_registration_to_db,
@@ -33,7 +33,7 @@ class TestCandlepinLicensing:
         assert SUBSCRIPTIONS_PASSWORD_SETTING_KEY == 'SUBSCRIPTIONS_PASSWORD'
 
     @mock.patch('awx.main.utils.licensing.connection')
-    def test_fetch_candlepin_lifecycle_from_db(self, mock_connection):
+    def test_fetch_candlepin_cert_from_db(self, mock_connection):
         """Test fetching Candlepin lifecycle data from database."""
         mock_cursor = mock.Mock()
         mock_cursor.fetchall.return_value = [
@@ -43,20 +43,20 @@ class TestCandlepinLicensing:
         ]
         mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
 
-        cert, key, uuid = _fetch_candlepin_lifecycle_from_db()
+        cert, key, uuid = _fetch_candlepin_cert_from_db()
 
         assert cert == 'cert-pem-data'
         assert key == 'key-pem-data'
         assert uuid == 'test-uuid'
 
     @mock.patch('awx.main.utils.licensing.connection')
-    def test_fetch_candlepin_lifecycle_missing_data(self, mock_connection):
+    def test_fetch_candlepin_cert_missing_data(self, mock_connection):
         """Test fetching Candlepin data when not present."""
         mock_cursor = mock.Mock()
         mock_cursor.fetchall.return_value = []
         mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
 
-        cert, key, uuid = _fetch_candlepin_lifecycle_from_db()
+        cert, key, uuid = _fetch_candlepin_cert_from_db()
 
         assert cert is None
         assert key is None

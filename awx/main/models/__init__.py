@@ -94,6 +94,7 @@ from awx.main.models.workflow import (  # noqa
     WorkflowApproval,
     WorkflowApprovalTemplate,
 )
+from awx.main.models.candlepin import CandlepinCertificate  # noqa
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa

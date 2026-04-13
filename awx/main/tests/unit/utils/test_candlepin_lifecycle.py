@@ -1,9 +1,8 @@
 # Copyright (c) 2026 Ansible, Inc.
 # All Rights Reserved.
 
-import os
 import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from unittest import mock
 
 from awx.main.utils.candlepin.lifecycle import (
@@ -14,7 +13,7 @@ from awx.main.utils.candlepin.lifecycle import (
     get_candlepin_url,
     get_renewal_days,
     get_candlepin_ca,
-    RENEWAL_DAYS_DEFAULT,
+    get_proxy_url,
 )
 
 
@@ -32,47 +31,64 @@ CgKCAQEA0a7Y3l3X4L7pKq3xDl8vCRrRK6qU5dF7r3xQH5YRz4hZJN9wE3xW0qDT
 class TestCandlepinLifecycle:
     """Tests for Candlepin lifecycle functions."""
 
-    def test_get_candlepin_url_default(self):
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_candlepin_url_default(self, mock_settings):
         """Test default Candlepin URL."""
-        with mock.patch.dict(os.environ, {}, clear=True):
-            url = get_candlepin_url()
-            assert url == 'https://subscription.rhsm.redhat.com/subscription'
+        # Simulate setting not being set (getattr returns default)
+        mock_settings.configure_mock(**{})
+        del mock_settings.AWX_ANALYTICS_CANDLEPIN_URL
+        url = get_candlepin_url()
+        assert url == 'https://subscription.rhsm.redhat.com/subscription'
 
-    def test_get_candlepin_url_from_env(self):
-        """Test Candlepin URL from environment variable."""
-        with mock.patch.dict(os.environ, {'METRICS_UTILITY_CANDLEPIN_URL': 'https://custom.example.com'}):
-            url = get_candlepin_url()
-            assert url == 'https://custom.example.com'
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_candlepin_url_from_settings(self, mock_settings):
+        """Test Candlepin URL from Django settings."""
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_URL = 'https://custom.example.com'
+        url = get_candlepin_url()
+        assert url == 'https://custom.example.com'
 
-    def test_get_renewal_days_default(self):
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_renewal_days_default(self, mock_settings):
         """Test default renewal days."""
-        with mock.patch.dict(os.environ, {}, clear=True):
-            days = get_renewal_days()
-            assert days == RENEWAL_DAYS_DEFAULT
+        # Simulate setting not being set (getattr returns default)
+        del mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS
+        days = get_renewal_days()
+        assert days == 30
 
-    def test_get_renewal_days_from_env(self):
-        """Test renewal days from environment variable."""
-        with mock.patch.dict(os.environ, {'METRICS_UTILITY_CANDLEPIN_RENEWAL_DAYS': '45'}):
-            days = get_renewal_days()
-            assert days == 45
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_renewal_days_from_settings(self, mock_settings):
+        """Test renewal days from Django settings."""
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS = 45
+        days = get_renewal_days()
+        assert days == 45
 
-    def test_get_renewal_days_invalid(self):
-        """Test invalid renewal days falls back to default."""
-        with mock.patch.dict(os.environ, {'METRICS_UTILITY_CANDLEPIN_RENEWAL_DAYS': 'invalid'}):
-            days = get_renewal_days()
-            assert days == RENEWAL_DAYS_DEFAULT
-
-    def test_get_candlepin_ca_none(self):
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_candlepin_ca_none(self, mock_settings):
         """Test Candlepin CA returns None when not set."""
-        with mock.patch.dict(os.environ, {}, clear=True):
-            ca = get_candlepin_ca()
-            assert ca is None
+        del mock_settings.AWX_ANALYTICS_CANDLEPIN_CA
+        ca = get_candlepin_ca()
+        assert ca is None
 
-    def test_get_candlepin_ca_from_env(self):
-        """Test Candlepin CA from environment variable."""
-        with mock.patch.dict(os.environ, {'METRICS_UTILITY_CANDLEPIN_CA': '/path/to/ca.pem'}):
-            ca = get_candlepin_ca()
-            assert ca == '/path/to/ca.pem'
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_candlepin_ca_from_settings(self, mock_settings):
+        """Test Candlepin CA from Django settings."""
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_CA = '/path/to/ca.pem'
+        ca = get_candlepin_ca()
+        assert ca == '/path/to/ca.pem'
+
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_proxy_url_none(self, mock_settings):
+        """Test proxy URL returns None when not set."""
+        del mock_settings.AWX_ANALYTICS_CANDLEPIN_PROXY_URL
+        proxy = get_proxy_url()
+        assert proxy is None
+
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_proxy_url_from_settings(self, mock_settings):
+        """Test proxy URL from Django settings."""
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_PROXY_URL = 'http://proxy.example.com:8080'
+        proxy = get_proxy_url()
+        assert proxy == 'http://proxy.example.com:8080'
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.x509.load_pem_x509_certificate')
     def test_parse_cert(self, mock_load_cert):

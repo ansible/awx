@@ -23,6 +23,7 @@ from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
 from awx.main.utils.analytics_proxy import OIDCClient
+from awx.main.utils.licensing import get_or_generate_candlepin_certificate
 
 __all__ = ['register', 'gather', 'ship']
 
@@ -388,13 +389,71 @@ def ship(path):
         s = requests.Session()
         s.headers = get_awx_http_client_headers()
         s.headers.pop('Content-Type')
+
         with set_environ(**settings.AWX_TASK_ENV):
+            cert_path = None
+            key_path = None
+
             try:
-                client = OIDCClient(rh_id, rh_secret)
-                response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
+                # First attempt: Certificate-based mTLS authentication (zero-touch)
+                # Uses existing Candlepin identity cert, or registers to get one
+                cert_path, key_path = get_or_generate_candlepin_certificate(rh_id, rh_secret)
+
+                if cert_path and key_path:
+                    logger.debug("Using certificate-based authentication for analytics upload")
+                    try:
+                        response = s.post(
+                            url,
+                            files=files,
+                            cert=(cert_path, key_path),
+                            verify=settings.INSIGHTS_CERT_PATH,
+                            headers=s.headers,
+                            timeout=(31, 31)
+                        )
+                    except requests.RequestException as e:
+                        logger.warning(f"Certificate-based authentication failed: {e}, falling back to basic auth")
+                        # Fall through to basic auth attempt
+                        cert_path, key_path = None, None
+                        raise
+                else:
+                    # No certificate available, skip to basic auth
+                    logger.debug("No Candlepin certificate available, falling back to basic authentication")
+                    raise requests.RequestException("No certificate available")
+
             except requests.RequestException:
-                logger.error("Automation Analytics API request failed, trying base auth method")
-                response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
+                # Second attempt: Basic authentication
+                try:
+                    logger.debug("Attempting basic authentication for analytics upload")
+                    response = s.post(
+                        url,
+                        files=files,
+                        verify=settings.INSIGHTS_CERT_PATH,
+                        auth=(rh_id, rh_secret),
+                        headers=s.headers,
+                        timeout=(31, 31)
+                    )
+                except requests.RequestException as e:
+                    # Final fallback: OIDC authentication
+                    logger.error(f"Basic authentication failed: {e}, trying OIDC method")
+                    client = OIDCClient(rh_id, rh_secret)
+                    response = client.make_request(
+                        "POST",
+                        url,
+                        headers=s.headers,
+                        files=files,
+                        verify=settings.INSIGHTS_CERT_PATH,
+                        timeout=(31, 31)
+                    )
+            finally:
+                # Clean up temporary certificate files
+                if cert_path or key_path:
+                    try:
+                        if cert_path and os.path.exists(cert_path):
+                            os.remove(cert_path)
+                        if key_path and os.path.exists(key_path):
+                            os.remove(key_path)
+                    except Exception as e:
+                        logger.warning(f"Failed to clean up temporary certificate files: {e}")
 
         # Accept 2XX status_codes
         if response.status_code >= 300:
