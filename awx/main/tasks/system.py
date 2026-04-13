@@ -906,6 +906,7 @@ def awx_periodic_scheduler():
                 schedule.update_computed_fields()
             except Exception:
                 logger.exception("Failed to update computed fields for schedule %s.", schedule)
+                Schedule.objects.filter(pk=schedule.pk).update(next_run=None, dtend=None)
         schedules = Schedule.objects.enabled().between(last_run, run_now)
 
         invalid_license = False
@@ -920,6 +921,7 @@ def awx_periodic_scheduler():
                 schedule.update_computed_fields()  # To update next_run timestamp.
             except Exception:
                 logger.exception("Failed to update computed fields for schedule %s.", schedule)
+                Schedule.objects.filter(pk=schedule.pk).update(next_run=None, dtend=None)
                 continue
             if template.cache_timeout_blocked:
                 logger.warning("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))

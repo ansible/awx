@@ -339,8 +339,6 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 self.rrule,
                 e,
             )
-            self.next_run = None
-            self.dtend = None
             raise
 
         if self.enabled:
