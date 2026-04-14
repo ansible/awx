@@ -15,6 +15,7 @@ from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionEr
 from base64 import b64encode
 from socket import getaddrinfo, IPPROTO_TCP
 import time
+import random
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd, environ, getenv
@@ -43,7 +44,7 @@ ALWAYS_RETRYABLE = {
     503: ['GET', 'POST', 'PATCH', 'DELETE'],  # Service Unavailable
     403: ['GET', 'POST', 'PATCH', 'DELETE'],  # API Overload/Unauthenticated
 }
- 
+
 # 500/504: idempotent methods only — GETs are reads, PATCH/DELETE are
 # idempotent by definition; POST is excluded unless we know it's safe.
 IDEMPOTENT_RETRYABLE = {
@@ -571,11 +572,12 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to AWX (if we don't have a token and if not already done so)
-        if not self.oauth_token and not self.authenticated:
+        # Authenticate to AWX (if not already done so)
+        if not self.authenticated:
+            # This method will set a cookie in the cookie jar for us
             self.authenticate(**kwargs)
-        if self.oauth_token:
-            headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
+
+        headers['Authorization'] = self._get_basic_authorization_header()
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -596,7 +598,7 @@ class ControllerAPIModule(ControllerModule):
         for attempt in range(max_retries + 1):  # attempt 0 = first try
 
             if attempt > 0:
-                sleep_time = backoff_factor ** (attempt - 1)  # 1, 2, 4, 8, 16...
+                sleep_time = (backoff_factor ** (attempt - 1)) * (0.5 + random.random())
                 self.warn(
                     'Retrying {0} {1} (attempt {2}/{3}) after {4}s due to status {5}'.format(
                         method, url.path, attempt, max_retries, sleep_time,
@@ -624,20 +626,23 @@ class ControllerAPIModule(ControllerModule):
                 last_response = 'ConnectionError'
                 if attempt < max_retries:
                     continue
-                self.fail_json(msg="There was a network error of some kind trying to connect to your host ({1}): {0}.".format(url.netloc, con_err))
+                self.fail_json(msg="There was a network error of some kind trying to connect to your host ({0}): {1}.".format(con_err, url.netloc))
 
             except (HTTPError) as he:
                 # ---- Retryable HTTP errors ----
                 if self.is_retryable(he.code, method, url.path):
                     last_response = he.code
-                    # Exhausted retries on a retryable error go on to regualar failure checks.
+                    # Exhausted retries on a retryable error go on to regular failure checks.
                     if attempt < max_retries:
                         continue
-
+                    self.fail_json(
+                        msg="Request to {0} failed with status {1} after {2} retries. "  
+                            "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)  
+                    )
                 # ---- Non-retryable HTTP errors (existing behaviour preserved) ----
                 if he.code >= 500:
                     self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
-                if he.code == 401:
+                elif he.code == 401:
                     self.fail_json(msg='Invalid authentication credentials for {0} (HTTP 401).'.format(url.path))
                 elif he.code == 403:
                     err_msg = he.fp.read().decode('utf-8')
