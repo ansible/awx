@@ -106,6 +106,12 @@ else
  DOCKER_KUBE_CACHE_FLAG=$(DOCKER_CACHE)
 endif
 
+# AWX TUI variables
+AWX_HOST ?= https://localhost:8043
+AWX_USER ?= admin
+AWX_PASSWORD ?= $$(awk -F"'" '/^admin_password:/{print $$2}' tools/docker-compose/_sources/secrets/admin_password.yml 2>/dev/null || echo "admin")
+AWX_VERIFY_SSL ?= false
+
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	update_requirements upgrade_requirements update_requirements_dev \
 	docker_update_requirements docker_upgrade_requirements docker_update_requirements_dev \
@@ -570,6 +576,20 @@ docker-compose-runtest: awx/projects docker-compose-sources
 
 docker-compose-build-schema: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 make genschema
+
+awx-tui:
+	@if ! command -v awx-tui > /dev/null 2>&1; then \
+		$(PYTHON) -m pip install awx-tui; \
+	fi
+	@if [ -f "$(HOME)/.config/awx-tui/config.yaml" ]; then \
+		$(PYTHON) -m awx_tui.main; \
+	else \
+		AWX_HOST=$(AWX_HOST) \
+		AWX_USER=$(AWX_USER) \
+		AWX_PASSWORD=$(AWX_PASSWORD) \
+		AWX_VERIFY_SSL=$(AWX_VERIFY_SSL) \
+		$(PYTHON) -m awx_tui.main --host $(AWX_HOST); \
+	fi
 
 SCHEMA_DIFF_BASE_FOLDER ?= awx
 SCHEMA_DIFF_BASE_BRANCH ?= devel
