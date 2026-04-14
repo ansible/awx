@@ -439,6 +439,7 @@ class TestGenericRun:
         job = Job(pk=1, status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
         job.send_notification_templates = mock.Mock()
+        job.refresh_from_db = mock.Mock()
         job.execution_environment = execution_environment
 
         task = jobs.RunJob()
