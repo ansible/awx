@@ -632,13 +632,32 @@ class ControllerAPIModule(ControllerModule):
                 # ---- Retryable HTTP errors ----
                 if self.is_retryable(he.code, method, url.path):
                     last_response = he.code
-                    # Exhausted retries on a retryable error go on to regular failure checks.
-                    if attempt < max_retries:
-                        continue
-                    self.fail_json(
-                        msg="Request to {0} failed with status {1} after {2} retries. "  
-                            "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)  
-                    )
+                    # 403 block to check for database errror
+                    if he.code == 403:
+                        try:
+                            body = he.read()
+                            raw = body.decode('utf-8') if isinstance(body, bytes) else str(body)
+                            try:
+                                parsed = loads(body)
+                            except Exception:
+                                parsed = raw
+                        except Exception as read_err:
+                            parsed = "Could not read body: {0}".format(read_err)
+                        if 'unable to connect to database' in raw.lower():
+                            if attempt < max_retries:
+                                continue
+                            self.fail_json(
+                                msg="Request to {0} failed with status 403 (database unavailable) after {2} retries.".format(url.path, he.code, max_retries),
+                            )
+                    else:
+                        # Exhausted retries on a retryable error go on to regular failure checks.
+                        if attempt < max_retries:
+                            continue
+                        # Exhausted retries - provide informative message  
+                        self.fail_json(
+                            msg="Request to {0} failed with status {1} after {2} retries. "  
+                                "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)  
+                        )
                 # ---- Non-retryable HTTP errors (existing behaviour preserved) ----
                 if he.code >= 500:
                     self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
