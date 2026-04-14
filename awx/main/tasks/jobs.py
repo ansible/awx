@@ -228,16 +228,19 @@ class BaseTask(object):
         # Convert to list to prevent re-evaluation of QuerySet
         return list(credentials_list)
 
-    def populate_workload_identity_tokens(self):
+    def populate_workload_identity_tokens(self, additional_credentials=None):
         """
         Populate credentials with workload identity tokens.
 
         Sets the context on Credential objects that have input sources
         using compatible external credential types.
         """
+        credentials = list(self._credentials)
+        if additional_credentials:
+            credentials.extend(additional_credentials)
         credential_input_sources = (
             (credential.context, src)
-            for credential in self._credentials
+            for credential in credentials
             for src in credential.input_sources.all()
             if any(
                 field.get('id') == 'workload_identity_token' and field.get('internal')
@@ -1862,6 +1865,24 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     def build_credentials_list(self, inventory_update):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """Also generate OIDC tokens for the cloud credential.
+
+        The cloud credential is not in _credentials (it is handled by the
+        inventory source injector), but it may still need a workload identity
+        token generated for it.
+        """
+        cloud_cred = self.instance.get_cloud_credential()
+        creds = list(additional_credentials or [])
+        if cloud_cred:
+            creds.append(cloud_cred)
+        super().populate_workload_identity_tokens(additional_credentials=creds or None)
+        # Override get_cloud_credential on this instance so the injector
+        # uses the credential with OIDC context instead of doing a fresh
+        # DB fetch that would lose it.
+        if cloud_cred and cloud_cred.context:
+            self.instance.get_cloud_credential = lambda: cloud_cred
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None

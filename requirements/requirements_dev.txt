@@ -24,6 +24,7 @@ atomicwrites
 flake8
 yamllint
 pip>=25.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
+awx-tui
 
 # python debuggers
 debugpy
