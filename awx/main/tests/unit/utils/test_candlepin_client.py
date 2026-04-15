@@ -2,8 +2,6 @@
 # All Rights Reserved.
 
 import os
-import pytest
-import tempfile
 from unittest import mock
 
 from awx.main.utils.candlepin.client import CandlepinClient

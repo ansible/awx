@@ -1,7 +1,6 @@
 # Copyright (c) 2026 Ansible, Inc.
 # All Rights Reserved.
 
-import pytest
 from datetime import datetime, timezone
 from unittest import mock
 
