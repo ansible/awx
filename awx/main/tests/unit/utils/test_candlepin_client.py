@@ -107,6 +107,58 @@ class TestCandlepinClient:
         result = client.checkin('test-uuid', cert_pem, key_pem)
         assert result is True
 
+    @mock.patch('awx.main.utils.candlepin.client.requests.get')
+    def test_get_consumer_success(self, mock_get):
+        """Test successful consumer retrieval."""
+        mock_response = mock.Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'uuid': 'test-consumer-uuid',
+            'name': 'aap-12345678',
+            'idCert': {
+                'cert': '-----BEGIN CERTIFICATE-----\nserver_cert\n-----END CERTIFICATE-----',
+                'serial': {
+                    'serial': 123456789
+                }
+            }
+        }
+        mock_get.return_value = mock_response
+
+        client = CandlepinClient()
+        cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
+        key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
+
+        result = client.get_consumer('test-uuid', cert_pem, key_pem)
+        assert result is not None
+        assert result['uuid'] == 'test-consumer-uuid'
+        assert 'idCert' in result
+
+    @mock.patch('awx.main.utils.candlepin.client.requests.get')
+    def test_get_consumer_failure(self, mock_get):
+        """Test consumer retrieval with non-200 status."""
+        mock_response = mock.Mock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
+
+        client = CandlepinClient()
+        cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
+        key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
+
+        result = client.get_consumer('test-uuid', cert_pem, key_pem)
+        assert result is None
+
+    @mock.patch('awx.main.utils.candlepin.client.requests.get')
+    def test_get_consumer_exception(self, mock_get):
+        """Test consumer retrieval with network exception."""
+        mock_get.side_effect = Exception('Network error')
+
+        client = CandlepinClient()
+        cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
+        key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
+
+        result = client.get_consumer('test-uuid', cert_pem, key_pem)
+        assert result is None
+
     @mock.patch('awx.main.utils.candlepin.client.requests.post')
     def test_regenerate_cert_success(self, mock_post):
         """Test successful certificate regeneration."""
