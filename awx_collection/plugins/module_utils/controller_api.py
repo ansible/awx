@@ -52,6 +52,7 @@ IDEMPOTENT_RETRYABLE = {
     504: ['GET', 'PATCH', 'DELETE'],  # Gateway Timeout
 }
 
+
 class ConfigFileException(Exception):
     pass
 
@@ -90,14 +91,12 @@ class ControllerModule(AnsibleModule):
             type='int',
             aliases=['aap_max_retries'],
             required=False,
-            fallback=(env_fallback, ['AAP_MAX_RETRIES']),
-            default=5),
+            fallback=(env_fallback, ['AAP_MAX_RETRIES'])),
         retry_backoff_factor=dict(
             type='int',
             aliases=['aap_retry_backoff_factor'],
             required=False,
-            fallback=(env_fallback, ['AAP_RETRY_BACKOFF_FACTOR']),
-            default=2 ),
+            fallback=(env_fallback, ['AAP_RETRY_BACKOFF_FACTOR'])),
         aap_token=dict(
             type='raw',
             no_log=True,
@@ -637,26 +636,22 @@ class ControllerAPIModule(ControllerModule):
                         try:
                             body = he.read()
                             raw = body.decode('utf-8') if isinstance(body, bytes) else str(body)
-                            try:
-                                parsed = loads(body)
-                            except Exception:
-                                parsed = raw
                         except Exception as read_err:
-                            parsed = "Could not read body: {0}".format(read_err)
+                            self.fail_json(msg="Could not read body: {0}, Status code: 403".format(read_err))
                         if 'unable to connect to database' in raw.lower():
                             if attempt < max_retries:
                                 continue
                             self.fail_json(
-                                msg="Request to {0} failed with status 403 (database unavailable) after {2} retries.".format(url.path, he.code, max_retries),
+                                msg="Request to {0} failed with status 403 (database unavailable) after {1} retries.".format(url.path, max_retries),
                             )
                     else:
                         # Exhausted retries on a retryable error go on to regular failure checks.
                         if attempt < max_retries:
                             continue
-                        # Exhausted retries - provide informative message  
+                        # Exhausted retries - provide informative message
                         self.fail_json(
-                            msg="Request to {0} failed with status {1} after {2} retries. "  
-                                "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)  
+                            msg="Request to {0} failed with status {1} after {2} retries. "
+                                "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)
                         )
                 # ---- Non-retryable HTTP errors (existing behaviour preserved) ----
                 if he.code >= 500:
