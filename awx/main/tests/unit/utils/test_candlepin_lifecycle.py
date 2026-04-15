@@ -53,7 +53,7 @@ class TestCandlepinLifecycle:
         # Simulate setting not being set (getattr returns default)
         del mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS
         days = get_renewal_days()
-        assert days == 30
+        assert days == 90
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_renewal_days_from_settings(self, mock_settings):
@@ -154,6 +154,7 @@ class TestCandlepinLifecycle:
 
         mock_client = mock.Mock()
         mock_client.checkin.return_value = True
+        mock_client.get_consumer.return_value = None  # Skip serial comparison
         mock_client_class.return_value = mock_client
 
         cert_pem, key_pem = run_candlepin_lifecycle(
@@ -171,22 +172,96 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_run_candlepin_lifecycle_with_renewal(self, mock_parse, mock_client_class):
         """Test lifecycle when renewal is needed."""
-        # First call for old cert, second for new cert
+        # parse_cert is called multiple times:
+        # 1. Parse original cert
+        # 2. In needs_renewal() to check expiry
+        # 3. Parse new cert after renewal for logging
         mock_parse.side_effect = [
-            {'serial': '123', 'cn': 'test', 'not_after': '2026-02-01', 'days_remaining': 10},
-            {'serial': '456', 'cn': 'test', 'not_after': '2027-02-01', 'days_remaining': 365}
+            {'serial': '123', 'cn': 'test', 'not_after': '2026-02-01', 'days_remaining': 10},  # Original cert
+            {'serial': '123', 'cn': 'test', 'not_after': '2026-02-01', 'days_remaining': 10},  # needs_renewal check
+            {'serial': '456', 'cn': 'test', 'not_after': '2027-02-01', 'days_remaining': 365}  # New cert
         ]
 
         mock_client = mock.Mock()
         mock_client.checkin.return_value = True
+        mock_client.get_consumer.return_value = None  # Skip serial comparison
         mock_client.regenerate_cert.return_value = ('new-cert', 'new-key')
         mock_client_class.return_value = mock_client
 
         cert_pem, key_pem = run_candlepin_lifecycle(
             'old-cert', 'old-key', 'consumer-uuid',
-            renewal_days=30
+            renewal_days=90
         )
 
         assert cert_pem == 'new-cert'
         assert key_pem == 'new-key'
         mock_client.regenerate_cert.assert_called_once()
+
+    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
+    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
+    def test_run_candlepin_lifecycle_serial_mismatch(self, mock_parse, mock_client_class):
+        """Test lifecycle when server cert serial differs from local cert."""
+        # parse_cert is called:
+        # 1. Parse local cert
+        # 2. Parse server cert from get_consumer
+        # 3. Parse new cert after regeneration for logging
+        mock_parse.side_effect = [
+            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Local cert
+            {'serial': '456', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Server cert (different serial!)
+            {'serial': '789', 'cn': 'test', 'not_after': '2027-02-01', 'days_remaining': 130},  # Regenerated cert
+        ]
+
+        mock_client = mock.Mock()
+        mock_client.checkin.return_value = True
+        mock_client.get_consumer.return_value = {
+            'uuid': 'consumer-uuid',
+            'idCert': {
+                'cert': 'server-cert-pem'
+            }
+        }
+        mock_client.regenerate_cert.return_value = ('regenerated-cert', 'regenerated-key')
+        mock_client_class.return_value = mock_client
+
+        cert_pem, key_pem = run_candlepin_lifecycle(
+            'local-cert', 'local-key', 'consumer-uuid',
+            renewal_days=30
+        )
+
+        # Should return regenerated cert due to serial mismatch
+        assert cert_pem == 'regenerated-cert'
+        assert key_pem == 'regenerated-key'
+        mock_client.regenerate_cert.assert_called_once()
+
+    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
+    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
+    def test_run_candlepin_lifecycle_serial_match(self, mock_parse, mock_client_class):
+        """Test lifecycle when server cert serial matches local cert (no action needed)."""
+        # parse_cert is called:
+        # 1. Parse local cert
+        # 2. Parse server cert from get_consumer (same serial)
+        # 3. In needs_renewal() - cert is healthy, no renewal
+        mock_parse.side_effect = [
+            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Local cert
+            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Server cert (same serial)
+            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # needs_renewal check
+        ]
+
+        mock_client = mock.Mock()
+        mock_client.checkin.return_value = True
+        mock_client.get_consumer.return_value = {
+            'uuid': 'consumer-uuid',
+            'idCert': {
+                'cert': 'server-cert-pem'
+            }
+        }
+        mock_client_class.return_value = mock_client
+
+        cert_pem, key_pem = run_candlepin_lifecycle(
+            'local-cert', 'local-key', 'consumer-uuid',
+            renewal_days=30
+        )
+
+        # Should return original cert since serial matches and cert is healthy
+        assert cert_pem == 'local-cert'
+        assert key_pem == 'local-key'
+        mock_client.regenerate_cert.assert_not_called()

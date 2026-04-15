@@ -2,12 +2,10 @@
 # All Rights Reserved.
 
 import pytest
+from datetime import datetime, timezone
 from unittest import mock
 
 from awx.main.utils.licensing import (
-    CANDLEPIN_CERT_SETTING_KEY,
-    CANDLEPIN_KEY_SETTING_KEY,
-    CANDLEPIN_UUID_SETTING_KEY,
     CANDLEPIN_UUID_PLACEHOLDER,
     SUBSCRIPTIONS_USERNAME_SETTING_KEY,
     SUBSCRIPTIONS_PASSWORD_SETTING_KEY,
@@ -25,23 +23,19 @@ class TestCandlepinLicensing:
 
     def test_constants(self):
         """Test Candlepin constants are defined."""
-        assert CANDLEPIN_CERT_SETTING_KEY == 'CANDLEPIN_CONSUMER_CERT'
-        assert CANDLEPIN_KEY_SETTING_KEY == 'CANDLEPIN_CONSUMER_KEY'
-        assert CANDLEPIN_UUID_SETTING_KEY == 'CANDLEPIN_CONSUMER_UUID'
         assert CANDLEPIN_UUID_PLACEHOLDER == '00000000-0000-0000-0000-000000000000'
         assert SUBSCRIPTIONS_USERNAME_SETTING_KEY == 'SUBSCRIPTIONS_USERNAME'
         assert SUBSCRIPTIONS_PASSWORD_SETTING_KEY == 'SUBSCRIPTIONS_PASSWORD'
 
-    @mock.patch('awx.main.utils.licensing.connection')
-    def test_fetch_candlepin_cert_from_db(self, mock_connection):
-        """Test fetching Candlepin lifecycle data from database."""
-        mock_cursor = mock.Mock()
-        mock_cursor.fetchall.return_value = [
-            ('CANDLEPIN_CONSUMER_CERT', '"cert-pem-data"'),
-            ('CANDLEPIN_CONSUMER_KEY', '"key-pem-data"'),
-            ('CANDLEPIN_CONSUMER_UUID', '"test-uuid"'),
-        ]
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
+    @mock.patch('awx.main.models.CandlepinCertificate')
+    def test_fetch_candlepin_cert_from_db(self, mock_cert_model):
+        """Test fetching Candlepin cert from CandlepinCertificate model."""
+        mock_instance = mock.Mock()
+        mock_instance.cert_pem = 'cert-pem-data'
+        mock_instance.key_pem = 'key-pem-data'
+        mock_instance.consumer_uuid = 'test-uuid'
+        mock_instance.has_valid_data.return_value = True
+        mock_cert_model.get_instance.return_value = mock_instance
 
         cert, key, uuid = _fetch_candlepin_cert_from_db()
 
@@ -49,12 +43,23 @@ class TestCandlepinLicensing:
         assert key == 'key-pem-data'
         assert uuid == 'test-uuid'
 
-    @mock.patch('awx.main.utils.licensing.connection')
-    def test_fetch_candlepin_cert_missing_data(self, mock_connection):
-        """Test fetching Candlepin data when not present."""
-        mock_cursor = mock.Mock()
-        mock_cursor.fetchall.return_value = []
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
+    @mock.patch('awx.main.models.CandlepinCertificate')
+    def test_fetch_candlepin_cert_missing_data(self, mock_cert_model):
+        """Test fetching Candlepin cert when not present."""
+        mock_cert_model.get_instance.return_value = None
+
+        cert, key, uuid = _fetch_candlepin_cert_from_db()
+
+        assert cert is None
+        assert key is None
+        assert uuid is None
+
+    @mock.patch('awx.main.models.CandlepinCertificate')
+    def test_fetch_candlepin_cert_invalid_data(self, mock_cert_model):
+        """Test fetching Candlepin cert with invalid/placeholder data."""
+        mock_instance = mock.Mock()
+        mock_instance.has_valid_data.return_value = False
+        mock_cert_model.get_instance.return_value = mock_instance
 
         cert, key, uuid = _fetch_candlepin_cert_from_db()
 
@@ -81,31 +86,50 @@ class TestCandlepinLicensing:
         assert org == 'test_org'
         assert install_uuid == 'test-install-uuid'
 
-    @mock.patch('awx.main.utils.licensing._upsert_conf_settings')
-    def test_save_candlepin_cert_to_db(self, mock_upsert):
-        """Test saving Candlepin cert to database."""
-        mock_upsert.return_value = True
+    @mock.patch('awx.main.utils.licensing.parse_cert')
+    @mock.patch('awx.main.models.CandlepinCertificate')
+    def test_save_candlepin_cert_to_db(self, mock_cert_model, mock_parse_cert):
+        """Test saving Candlepin cert to CandlepinCertificate model."""
+        mock_instance = mock.Mock()
+        mock_cert_model.get_or_create_instance.return_value = mock_instance
+
+        mock_parse_cert.return_value = {
+            'serial': '123456',
+            'expires_at': '2027-01-01T00:00:00+00:00',
+        }
 
         _save_candlepin_cert_to_db('new-cert', 'new-key')
 
-        mock_upsert.assert_called_once()
-        call_args = mock_upsert.call_args[0][0]
-        assert ('CANDLEPIN_CONSUMER_CERT', 'new-cert') in list(call_args)
-        assert ('CANDLEPIN_CONSUMER_KEY', 'new-key') in list(call_args)
+        mock_cert_model.get_or_create_instance.assert_called_once()
+        mock_instance.update_certificate.assert_called_once()
+        call_kwargs = mock_instance.update_certificate.call_args[1]
+        assert call_kwargs['cert_pem'] == 'new-cert'
+        assert call_kwargs['key_pem'] == 'new-key'
+        assert call_kwargs['serial_number'] == '123456'
+        assert 'expires_at' in call_kwargs
 
-    @mock.patch('awx.main.utils.licensing._upsert_conf_settings')
-    def test_save_candlepin_registration_to_db(self, mock_upsert):
-        """Test saving Candlepin registration to database."""
-        mock_upsert.return_value = True
+    @mock.patch('awx.main.utils.licensing.parse_cert')
+    @mock.patch('awx.main.models.CandlepinCertificate')
+    def test_save_candlepin_registration_to_db(self, mock_cert_model, mock_parse_cert):
+        """Test saving Candlepin registration to CandlepinCertificate model."""
+        mock_instance = mock.Mock()
+        mock_cert_model.get_or_create_instance.return_value = mock_instance
+
+        mock_parse_cert.return_value = {
+            'serial': '789012',
+            'expires_at': '2027-01-01T00:00:00+00:00',
+        }
 
         _save_candlepin_registration_to_db('cert', 'key', 'uuid')
 
-        mock_upsert.assert_called_once()
-        call_args = mock_upsert.call_args[0][0]
-        call_list = list(call_args)
-        assert ('CANDLEPIN_CONSUMER_CERT', 'cert') in call_list
-        assert ('CANDLEPIN_CONSUMER_KEY', 'key') in call_list
-        assert ('CANDLEPIN_CONSUMER_UUID', 'uuid') in call_list
+        mock_cert_model.get_or_create_instance.assert_called_once()
+        mock_instance.update_certificate.assert_called_once()
+        call_kwargs = mock_instance.update_certificate.call_args[1]
+        assert call_kwargs['cert_pem'] == 'cert'
+        assert call_kwargs['key_pem'] == 'key'
+        assert call_kwargs['consumer_uuid'] == 'uuid'
+        assert call_kwargs['serial_number'] == '789012'
+        assert 'expires_at' in call_kwargs
 
     @mock.patch('awx.main.utils.licensing._save_candlepin_registration_to_db')
     @mock.patch('awx.main.utils.licensing.CandlepinClient')

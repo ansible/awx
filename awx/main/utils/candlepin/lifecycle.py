@@ -220,7 +220,7 @@ def get_certificate_info():
         info['consumer_uuid'] = consumer_uuid
 
     if not cert_pem or not key_pem:
-        info['message'] = 'No certificate found in conf_setting'
+        info['message'] = 'No certificate found in database'
         info['needs_renewal'] = True
         return info
 

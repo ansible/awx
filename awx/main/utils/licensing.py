@@ -41,7 +41,6 @@ from django.utils.translation import gettext_lazy as _
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
-from awx.main.models import CandlepinCertificate
 from awx.main.utils.analytics_proxy import OIDCClient
 from awx.main.utils.candlepin.client import CandlepinClient
 from awx.main.utils.candlepin.lifecycle import (
@@ -573,7 +572,12 @@ def get_licenser(*args, **kwargs):
 # Placeholder UUID used before a real consumer is registered.
 # Treat it the same as an absent UUID so we never attempt a Candlepin
 # lifecycle call with a non-functional consumer identity.
+CANDLEPIN_CERT_SETTING_KEY = 'CANDLEPIN_CONSUMER_CERT'
+CANDLEPIN_KEY_SETTING_KEY = 'CANDLEPIN_CONSUMER_KEY'
+CANDLEPIN_UUID_SETTING_KEY = 'CANDLEPIN_CONSUMER_UUID'
 CANDLEPIN_UUID_PLACEHOLDER = '00000000-0000-0000-0000-000000000000'
+SUBSCRIPTIONS_USERNAME_SETTING_KEY = 'SUBSCRIPTIONS_USERNAME'
+SUBSCRIPTIONS_PASSWORD_SETTING_KEY = 'SUBSCRIPTIONS_PASSWORD'
 
 
 def _fetch_candlepin_cert_from_db():
@@ -583,6 +587,8 @@ def _fetch_candlepin_cert_from_db():
     model instance doesn't exist or has no valid data. Best-effort: failures are
     logged as warnings and never propagate.
     """
+    from awx.main.models import CandlepinCertificate
+
     try:
         instance = CandlepinCertificate.get_instance()
         if not instance or not instance.has_valid_data():
@@ -600,6 +606,8 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
     Updates the existing instance if present, creates a new one if needed.
     Best-effort: failures are logged as errors but never propagate.
     """
+    from awx.main.models import CandlepinCertificate
+
     try:
         # Get or create the instance
         instance = CandlepinCertificate.get_or_create_instance()
@@ -609,18 +617,18 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
             from datetime import datetime
-            not_valid_after = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
+            expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
-            not_valid_after = None
+            expires_at = None
 
         # Update the certificate data
         instance.update_certificate(
             cert_pem=cert_pem,
             key_pem=key_pem,
             serial_number=serial_number,
-            not_valid_after=not_valid_after,
+            expires_at=expires_at,
         )
         logger.info('Renewed Candlepin cert and key saved to database.')
     except Exception as e:
@@ -668,6 +676,8 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
     Updates the existing instance if present, creates a new one if needed.
     Best-effort: failures are logged as errors but never propagate.
     """
+    from awx.main.models import CandlepinCertificate
+
     try:
         # Get or create the instance
         instance = CandlepinCertificate.get_or_create_instance()
@@ -677,11 +687,11 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
             from datetime import datetime
-            not_valid_after = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
+            expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
-            not_valid_after = None
+            expires_at = None
 
         # Update the certificate data with new consumer UUID
         instance.update_certificate(
@@ -689,7 +699,7 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
             key_pem=key_pem,
             consumer_uuid=consumer_uuid,
             serial_number=serial_number,
-            not_valid_after=not_valid_after,
+            expires_at=expires_at,
         )
         logger.info(f'Candlepin consumer registration saved to database (uuid={consumer_uuid}).')
     except Exception as e:
