@@ -5,7 +5,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from awx.main.models.base import PasswordFieldsModel
 
-
 __all__ = ['CandlepinCertificate']
 
 
@@ -112,9 +111,4 @@ class CandlepinCertificate(PasswordFieldsModel):
         """
         Check if the instance has valid certificate data (not placeholder).
         """
-        return (
-            self.consumer_uuid and
-            self.consumer_uuid != '00000000-0000-0000-0000-000000000000' and
-            self.cert_pem and
-            self.key_pem
-        )
+        return self.consumer_uuid and self.consumer_uuid != '00000000-0000-0000-0000-000000000000' and self.cert_pem and self.key_pem

@@ -16,7 +16,6 @@ from awx.main.utils.candlepin.lifecycle import (
     get_proxy_url,
 )
 
-
 # Sample test certificate (expires far in the future for testing)
 SAMPLE_CERT_PEM = """-----BEGIN CERTIFICATE-----
 MIIDXTCCAkWgAwIBAgIJAKJ5VZ2cPQE5MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
@@ -124,9 +123,7 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_needs_renewal_true(self, mock_parse):
         """Test needs_renewal returns True when cert is expiring soon."""
-        mock_parse.return_value = {
-            'days_remaining': 10
-        }
+        mock_parse.return_value = {'days_remaining': 10}
 
         result = needs_renewal('fake-cert', days_before_expiry=30)
         assert result is True
@@ -134,9 +131,7 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_needs_renewal_false(self, mock_parse):
         """Test needs_renewal returns False when cert has time remaining."""
-        mock_parse.return_value = {
-            'days_remaining': 100
-        }
+        mock_parse.return_value = {'days_remaining': 100}
 
         result = needs_renewal('fake-cert', days_before_expiry=30)
         assert result is False
@@ -145,23 +140,14 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_run_candlepin_lifecycle_no_renewal_needed(self, mock_parse, mock_client_class):
         """Test lifecycle when no renewal is needed."""
-        mock_parse.return_value = {
-            'serial': '123',
-            'cn': 'test',
-            'not_after': '2027-01-01T00:00:00+00:00',
-            'days_remaining': 100
-        }
+        mock_parse.return_value = {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01T00:00:00+00:00', 'days_remaining': 100}
 
         mock_client = mock.Mock()
         mock_client.checkin.return_value = True
         mock_client.get_consumer.return_value = None  # Skip serial comparison
         mock_client_class.return_value = mock_client
 
-        cert_pem, key_pem = run_candlepin_lifecycle(
-            'cert-pem', 'key-pem', 'consumer-uuid',
-            candlepin_url='https://test.example.com',
-            renewal_days=30
-        )
+        cert_pem, key_pem = run_candlepin_lifecycle('cert-pem', 'key-pem', 'consumer-uuid', candlepin_url='https://test.example.com', renewal_days=30)
 
         assert cert_pem == 'cert-pem'
         assert key_pem == 'key-pem'
@@ -179,7 +165,7 @@ class TestCandlepinLifecycle:
         mock_parse.side_effect = [
             {'serial': '123', 'cn': 'test', 'not_after': '2026-02-01', 'days_remaining': 10},  # Original cert
             {'serial': '123', 'cn': 'test', 'not_after': '2026-02-01', 'days_remaining': 10},  # needs_renewal check
-            {'serial': '456', 'cn': 'test', 'not_after': '2027-02-01', 'days_remaining': 365}  # New cert
+            {'serial': '456', 'cn': 'test', 'not_after': '2027-02-01', 'days_remaining': 365},  # New cert
         ]
 
         mock_client = mock.Mock()
@@ -188,10 +174,7 @@ class TestCandlepinLifecycle:
         mock_client.regenerate_cert.return_value = ('new-cert', 'new-key')
         mock_client_class.return_value = mock_client
 
-        cert_pem, key_pem = run_candlepin_lifecycle(
-            'old-cert', 'old-key', 'consumer-uuid',
-            renewal_days=90
-        )
+        cert_pem, key_pem = run_candlepin_lifecycle('old-cert', 'old-key', 'consumer-uuid', renewal_days=90)
 
         assert cert_pem == 'new-cert'
         assert key_pem == 'new-key'
@@ -213,19 +196,11 @@ class TestCandlepinLifecycle:
 
         mock_client = mock.Mock()
         mock_client.checkin.return_value = True
-        mock_client.get_consumer.return_value = {
-            'uuid': 'consumer-uuid',
-            'idCert': {
-                'cert': 'server-cert-pem'
-            }
-        }
+        mock_client.get_consumer.return_value = {'uuid': 'consumer-uuid', 'idCert': {'cert': 'server-cert-pem'}}
         mock_client.regenerate_cert.return_value = ('regenerated-cert', 'regenerated-key')
         mock_client_class.return_value = mock_client
 
-        cert_pem, key_pem = run_candlepin_lifecycle(
-            'local-cert', 'local-key', 'consumer-uuid',
-            renewal_days=30
-        )
+        cert_pem, key_pem = run_candlepin_lifecycle('local-cert', 'local-key', 'consumer-uuid', renewal_days=30)
 
         # Should return regenerated cert due to serial mismatch
         assert cert_pem == 'regenerated-cert'
@@ -248,18 +223,10 @@ class TestCandlepinLifecycle:
 
         mock_client = mock.Mock()
         mock_client.checkin.return_value = True
-        mock_client.get_consumer.return_value = {
-            'uuid': 'consumer-uuid',
-            'idCert': {
-                'cert': 'server-cert-pem'
-            }
-        }
+        mock_client.get_consumer.return_value = {'uuid': 'consumer-uuid', 'idCert': {'cert': 'server-cert-pem'}}
         mock_client_class.return_value = mock_client
 
-        cert_pem, key_pem = run_candlepin_lifecycle(
-            'local-cert', 'local-key', 'consumer-uuid',
-            renewal_days=30
-        )
+        cert_pem, key_pem = run_candlepin_lifecycle('local-cert', 'local-key', 'consumer-uuid', renewal_days=30)
 
         # Should return original cert since serial matches and cert is healthy
         assert cert_pem == 'local-cert'

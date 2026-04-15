@@ -402,14 +402,7 @@ def ship(path):
                 if cert_path and key_path:
                     logger.debug("Using certificate-based authentication for analytics upload")
                     try:
-                        response = s.post(
-                            url,
-                            files=files,
-                            cert=(cert_path, key_path),
-                            verify=settings.INSIGHTS_CERT_PATH,
-                            headers=s.headers,
-                            timeout=(31, 31)
-                        )
+                        response = s.post(url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31))
                     except requests.RequestException as e:
                         logger.warning(f"Certificate-based authentication failed: {e}, falling back to basic auth")
                         # Fall through to basic auth attempt
@@ -424,26 +417,12 @@ def ship(path):
                 # Second attempt: Basic authentication
                 try:
                     logger.debug("Attempting basic authentication for analytics upload")
-                    response = s.post(
-                        url,
-                        files=files,
-                        verify=settings.INSIGHTS_CERT_PATH,
-                        auth=(rh_id, rh_secret),
-                        headers=s.headers,
-                        timeout=(31, 31)
-                    )
+                    response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
                 except requests.RequestException as e:
                     # Final fallback: OIDC authentication
                     logger.error(f"Basic authentication failed: {e}, trying OIDC method")
                     client = OIDCClient(rh_id, rh_secret)
-                    response = client.make_request(
-                        "POST",
-                        url,
-                        headers=s.headers,
-                        files=files,
-                        verify=settings.INSIGHTS_CERT_PATH,
-                        timeout=(31, 31)
-                    )
+                    response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
             finally:
                 # Clean up temporary certificate files
                 if cert_path or key_path:

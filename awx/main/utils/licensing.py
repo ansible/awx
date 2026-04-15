@@ -617,6 +617,7 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
             from datetime import datetime
+
             expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
@@ -687,6 +688,7 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
             from datetime import datetime
+
             expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
@@ -722,10 +724,7 @@ def _register_candlepin_consumer():
     username, password, org, install_uuid = _fetch_registration_credentials_from_db()
 
     if not username or not password:
-        logger.warning(
-            'Candlepin registration is enabled but SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD '
-            'are not set; skipping registration.'
-        )
+        logger.warning('Candlepin registration is enabled but SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD ' 'are not set; skipping registration.')
         return None, None, None
 
     if not org:
@@ -757,9 +756,7 @@ def _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid):
     """
     if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER:
         logger.warning(
-            'Candlepin lifecycle is enabled but consumer UUID is not set '
-            '(or still contains the placeholder value); '
-            'skipping check-in and renewal.'
+            'Candlepin lifecycle is enabled but consumer UUID is not set ' '(or still contains the placeholder value); ' 'skipping check-in and renewal.'
         )
         return cert_pem, key_pem
 

@@ -414,9 +414,7 @@ class AnalyticsCertificateStatusView(APIView):
                 'certificate_auth_enabled': getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED', True),
                 'candlepin_url': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_URL', 'https://subscription.rhsm.redhat.com/subscription'),
                 'renewal_threshold_days': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS', 90),
-                'has_redhat_credentials': bool(
-                    getattr(settings, 'REDHAT_USERNAME', None) or getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-                ),
+                'has_redhat_credentials': bool(getattr(settings, 'REDHAT_USERNAME', None) or getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)),
             }
 
             return Response(cert_info, status=status.HTTP_200_OK)

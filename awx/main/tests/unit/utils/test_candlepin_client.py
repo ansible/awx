@@ -40,18 +40,12 @@ class TestCandlepinClient:
     def test_proxy_configuration(self):
         """Test proxy configuration."""
         client = CandlepinClient(proxy='http://proxy.example.com:8080')
-        assert client.proxies == {
-            'https': 'http://proxy.example.com:8080',
-            'http': 'http://proxy.example.com:8080'
-        }
+        assert client.proxies == {'https': 'http://proxy.example.com:8080', 'http': 'http://proxy.example.com:8080'}
 
     def test_https_proxy_configuration(self):
         """Test HTTPS proxy configuration."""
         client = CandlepinClient(proxy='https://proxy.example.com:8443')
-        assert client.proxies == {
-            'https': 'https://proxy.example.com:8443',
-            'http': 'http://proxy.example.com:8443'
-        }
+        assert client.proxies == {'https': 'https://proxy.example.com:8443', 'http': 'http://proxy.example.com:8443'}
 
     def test_temp_cert_files_cleanup(self):
         """Test temporary certificate files are created and cleaned up."""
@@ -79,15 +73,13 @@ class TestCandlepinClient:
             'uuid': 'test-consumer-uuid',
             'idCert': {
                 'cert': '-----BEGIN CERTIFICATE-----\ncert_data\n-----END CERTIFICATE-----',
-                'key': '-----BEGIN PRIVATE KEY-----\nkey_data\n-----END PRIVATE KEY-----'
-            }
+                'key': '-----BEGIN PRIVATE KEY-----\nkey_data\n-----END PRIVATE KEY-----',
+            },
         }
         mock_post.return_value = mock_response
 
         client = CandlepinClient()
-        cert_pem, key_pem, consumer_uuid = client.register_consumer(
-            'test_user', 'test_pass', 'test_org', install_uuid='test-install-uuid'
-        )
+        cert_pem, key_pem, consumer_uuid = client.register_consumer('test_user', 'test_pass', 'test_org', install_uuid='test-install-uuid')
 
         assert consumer_uuid == 'test-consumer-uuid'
         assert '-----BEGIN CERTIFICATE-----' in cert_pem
@@ -115,12 +107,7 @@ class TestCandlepinClient:
         mock_response.json.return_value = {
             'uuid': 'test-consumer-uuid',
             'name': 'aap-12345678',
-            'idCert': {
-                'cert': '-----BEGIN CERTIFICATE-----\nserver_cert\n-----END CERTIFICATE-----',
-                'serial': {
-                    'serial': 123456789
-                }
-            }
+            'idCert': {'cert': '-----BEGIN CERTIFICATE-----\nserver_cert\n-----END CERTIFICATE-----', 'serial': {'serial': 123456789}},
         }
         mock_get.return_value = mock_response
 
@@ -167,7 +154,7 @@ class TestCandlepinClient:
         mock_response.json.return_value = {
             'idCert': {
                 'cert': '-----BEGIN CERTIFICATE-----\nnew_cert\n-----END CERTIFICATE-----',
-                'key': '-----BEGIN PRIVATE KEY-----\nnew_key\n-----END PRIVATE KEY-----'
+                'key': '-----BEGIN PRIVATE KEY-----\nnew_key\n-----END PRIVATE KEY-----',
             }
         }
         mock_post.return_value = mock_response

@@ -82,7 +82,9 @@ class Command(BaseCommand):
         reg.add_argument('--password', help='Red Hat subscription password (overrides SUBSCRIPTIONS_PASSWORD from database)')
         reg.add_argument('--org', help='Candlepin owner/org key (overrides LICENSE.account_number from database)')
         reg.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
-        reg.add_argument('--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)')
+        reg.add_argument(
+            '--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)'
+        )
         reg.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides AWX_ANALYTICS_CANDLEPIN_PROXY_URL setting)')
         reg.add_argument('--force', action='store_true', help='Re-register even if a certificate already exists in database')
         reg.add_argument('--dry-run', dest='dry_run', action='store_true', help='Perform registration but do not save the result to database')
@@ -94,12 +96,12 @@ class Command(BaseCommand):
             formatter_class=RawDescriptionHelpFormatter,
         )
         ren.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
-        ren.add_argument('--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)')
+        ren.add_argument(
+            '--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)'
+        )
         ren.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides AWX_ANALYTICS_CANDLEPIN_PROXY_URL setting)')
         ren.add_argument('--force', action='store_true', help='Renew the certificate even if it is not near expiry')
-        ren.add_argument(
-            '--dry-run', dest='dry_run', action='store_true', help='Perform check-in and renewal but do not save the result to database'
-        )
+        ren.add_argument('--dry-run', dest='dry_run', action='store_true', help='Perform check-in and renewal but do not save the result to database')
 
     def handle(self, *args, **options):
         subcommand = options['subcommand']

@@ -13,10 +13,10 @@ from cryptography import x509
 from django.conf import settings
 
 import logging
+
 logger = logging.getLogger('awx.main.utils.candlepin')
 
 from .client import CandlepinClient
-
 
 # ---------------------------------------------------------------------------
 # Certificate helpers
@@ -162,9 +162,7 @@ def run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid, *, candlepin_url=N
 
     # Step 4: Proactive renewal if within the renewal window (or already expired).
     if needs_renewal(cert_pem, renewal_days):
-        logger.info(
-            f'Candlepin cert expires in {info["days_remaining"]} days (threshold: {renewal_days}); requesting renewal for consumer {consumer_uuid}'
-        )
+        logger.info(f'Candlepin cert expires in {info["days_remaining"]} days (threshold: {renewal_days}); requesting renewal for consumer {consumer_uuid}')
         new_cert_pem, new_key_pem = client.regenerate_cert(consumer_uuid, cert_pem, key_pem)
 
         try:

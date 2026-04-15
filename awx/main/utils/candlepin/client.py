@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import requests
 
 import logging
+
 logger = logging.getLogger('awx.main.utils.candlepin')
 
 
