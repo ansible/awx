@@ -1966,7 +1966,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise
         except Exception:
             logger.exception('Exception saving {} content, rolling back changes.'.format(inventory_update.log_format))
-            raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
+            raise PostRunError('Error occurred while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
 @task(queue=get_task_queuename)
