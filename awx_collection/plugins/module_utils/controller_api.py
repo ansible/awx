@@ -42,7 +42,6 @@ CONTROLLER_BASE_PATH_ENV_VAR = "CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX"
 ALWAYS_RETRYABLE = {
     502: ['GET', 'POST', 'PATCH', 'DELETE'],  # Bad Gateway
     503: ['GET', 'POST', 'PATCH', 'DELETE'],  # Service Unavailable
-    403: ['GET', 'POST', 'PATCH', 'DELETE'],  # API Overload/Unauthenticated
 }
 
 # 500/504: idempotent methods only — GETs are reads, PATCH/DELETE are
@@ -117,6 +116,9 @@ class ControllerModule(AnsibleModule):
         'password': 'controller_password',
         'verify_ssl': 'validate_certs',
         'request_timeout': 'request_timeout',
+        'max_retries': 'max_retries',
+        'retry_backoff_factor': 'retry_backoff_factor',
+        'oauth_token': 'controller_oauthtoken',
     }
     host = '127.0.0.1'
     username = None
