@@ -83,7 +83,7 @@ options:
     - This will not work with the export or import modules.
     type: int
     env:
-    - name: AAP_MAX_RETRIES    
+    - name: AAP_MAX_RETRIES
     aliases: [ aap_max_retries ]
   retry_backoff_factor:
     description:
