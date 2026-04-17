@@ -541,7 +541,7 @@ class ControllerAPIModule(ControllerModule):
             # /launch, /relaunch, /callback etc. — retrying would double-execute
             # Catches: /job_templates/1/launch/, /workflow_job_templates/1/launch/,
             #          /jobs/1/relaunch/, /ad_hoc_commands/1/relaunch/ …
-            launch_keywords = ('/launch', '/relaunch', '/callback', '/ad_hoc_commands')
+            launch_keywords = ('/launch', '/relaunch', '/callback')
             if any(kw in endpoint for kw in launch_keywords):
                 return False
 
@@ -618,7 +618,7 @@ class ControllerAPIModule(ControllerModule):
 
             except (SSLValidationError) as ssl_err:
                 # SSL errors are never retryable — cert problems won't fix themselves
-                self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(url.netloc, ssl_err))
+                self.fail_json(msg="Could not establish a secure connection to your host ({0}): {1}.".format(url.netloc, ssl_err))
 
             except (ConnectionError) as con_err:
                 # Connection errors may be transient — retry if we have attempts left
@@ -630,35 +630,31 @@ class ControllerAPIModule(ControllerModule):
             except (HTTPError) as he:
                 # ---- Retryable HTTP errors ----
                 if self.is_retryable(he.code, method, url.path):
-                    last_response = he.code
-                    # 403 block to check for database errror
-                    if he.code == 403:
-                        try:
-                            body = he.read()
-                            raw = body.decode('utf-8') if isinstance(body, bytes) else str(body)
-                        except Exception as read_err:
-                            self.fail_json(msg="Could not read body: {0}, Status code: 403".format(read_err))
-                        if 'unable to connect to database' in raw.lower():
-                            if attempt < max_retries:
-                                continue
-                            self.fail_json(
-                                msg="Request to {0} failed with status 403 (database unavailable) after {1} retries.".format(url.path, max_retries),
-                            )
-                    else:
-                        # Exhausted retries on a retryable error go on to regular failure checks.
-                        if attempt < max_retries:
-                            continue
-                        # Exhausted retries - provide informative message
-                        self.fail_json(
-                            msg="Request to {0} failed with status {1} after {2} retries. "
-                                "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)
-                        )
+                    # Exhausted retries on a retryable error go on to regular failure checks.
+                    if attempt < max_retries:
+                        continue
+                    # Exhausted retries - provide informative message
+                    self.fail_json(
+                        msg="Request to {0} failed with status {1} after {2} retries. "
+                            "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)
+                    )
                 # ---- Non-retryable HTTP errors (existing behaviour preserved) ----
                 if he.code >= 500:
                     self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
                 elif he.code == 401:
                     self.fail_json(msg='Invalid authentication credentials for {0} (HTTP 401).'.format(url.path))
                 elif he.code == 403:
+                    try:
+                        body = he.read()
+                        raw = body.decode('utf-8') if isinstance(body, bytes) else str(body)
+                    except Exception as read_err:
+                        self.fail_json(msg="Could not read body: {0}, Status code: 403".format(read_err))
+                    if 'unable to connect to database' in raw.lower():
+                        if attempt < max_retries:
+                            continue
+                        self.fail_json(
+                            msg="Request to {0} failed with status 403 (database unavailable) after {1} retries.".format(url.path, max_retries),
+                        )
                     err_msg = he.fp.read().decode('utf-8')
                     try:
                         err_msg = loads(err_msg)
@@ -680,8 +676,6 @@ class ControllerAPIModule(ControllerModule):
                         return {'status_code': he.code, 'json': loads(page_data)}
                     except ValueError:
                         return {'status_code': he.code, 'text': page_data}
-                elif he.code == 204 and method == 'DELETE':
-                    pass
                 else:
                     self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(url.geturl(), he))
 
