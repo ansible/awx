@@ -263,10 +263,10 @@ class ControllerModule(AnsibleModule):
                             pass
 
                 except Exception as e:
-                    raise_from(ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e)), e)
+                    raise_from(ConfigFileException("An unknown exception occurred trying to ini load config file: {0}".format(e)), e)
 
         except Exception as e:
-            raise_from(ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)), e)
+            raise_from(ConfigFileException("An unknown exception occurred trying to load config file: {0}".format(e)), e)
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
         for honorred_setting in self.short_params:
