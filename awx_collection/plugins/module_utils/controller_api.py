@@ -15,6 +15,7 @@ from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionEr
 from base64 import b64encode
 from socket import getaddrinfo, IPPROTO_TCP
 import time
+import random
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd, environ, getenv
@@ -36,6 +37,19 @@ except ImportError:
     HAS_YAML = False
 
 CONTROLLER_BASE_PATH_ENV_VAR = "CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX"
+
+# 502/503: request never reached the server — always safe to retry any method
+ALWAYS_RETRYABLE = {
+    502: ['GET', 'POST', 'PATCH', 'DELETE'],  # Bad Gateway
+    503: ['GET', 'POST', 'PATCH', 'DELETE'],  # Service Unavailable
+}
+
+# 500/504: idempotent methods only — GETs are reads, PATCH/DELETE are
+# idempotent by definition; POST is excluded unless we know it's safe.
+IDEMPOTENT_RETRYABLE = {
+    500: ['GET', 'PATCH', 'DELETE'],  # Internal Server Error
+    504: ['GET', 'PATCH', 'DELETE'],  # Gateway Timeout
+}
 
 
 class ConfigFileException(Exception):
@@ -72,6 +86,16 @@ class ControllerModule(AnsibleModule):
             aliases=['aap_request_timeout'],
             required=False,
             fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT', 'AAP_REQUEST_TIMEOUT'])),
+        max_retries=dict(
+            type='int',
+            aliases=['aap_max_retries'],
+            required=False,
+            fallback=(env_fallback, ['AAP_MAX_RETRIES'])),
+        retry_backoff_factor=dict(
+            type='int',
+            aliases=['aap_retry_backoff_factor'],
+            required=False,
+            fallback=(env_fallback, ['AAP_RETRY_BACKOFF_FACTOR'])),
         aap_token=dict(
             type='raw',
             no_log=True,
@@ -92,12 +116,16 @@ class ControllerModule(AnsibleModule):
         'password': 'controller_password',
         'verify_ssl': 'validate_certs',
         'request_timeout': 'request_timeout',
+        'max_retries': 'max_retries',
+        'retry_backoff_factor': 'retry_backoff_factor',
     }
     host = '127.0.0.1'
     username = None
     password = None
     verify_ssl = True
     request_timeout = 10
+    max_retries = 5
+    retry_backoff_factor = 2
     authenticated = False
     config_name = 'tower_cli.cfg'
     version_checked = False
@@ -488,6 +516,49 @@ class ControllerAPIModule(ControllerModule):
     def resolve_name_to_id(self, endpoint, name_or_id):
         return self.get_exactly_one(endpoint, name_or_id)['id']
 
+    def is_retryable(self, status_code, method, endpoint):
+        """
+        Determine whether a failed request is safe to retry.
+
+        Args:
+            status_code (int):  HTTP status code returned by the server.
+            method      (str):  HTTP verb in uppercase ('GET', 'POST', etc.).
+            endpoint    (str):  The API endpoint path (e.g. '/api/v2/job_templates/1/launch/').
+
+        Returns:
+            bool: True if the request can safely be retried.
+        """
+        # --- Always safe: 502/503 mean the request never reached AWX ---
+        if method in ALWAYS_RETRYABLE.get(status_code, []):
+            return True
+
+        # --- Safe for inherently idempotent methods (GET, PATCH, DELETE) ---
+        if method in IDEMPOTENT_RETRYABLE.get(status_code, []):
+            return True
+
+        # --- POST/PATCH on 500/504: safe UNLESS the endpoint triggers execution ---
+        if method in ('POST', 'PATCH') and status_code in (500, 504):
+
+            # /launch, /relaunch, /callback etc. — retrying would double-execute
+            # Catches: /job_templates/1/launch/, /workflow_job_templates/1/launch/,
+            #          /jobs/1/relaunch/, /ad_hoc_commands/1/relaunch/ …
+            launch_keywords = ('/launch', '/relaunch', '/callback')
+            if any(kw in endpoint for kw in launch_keywords):
+                return False
+
+            # POST to the ad_hoc_commands collection root creates AND immediately
+            # executes the command — not safe to retry.
+            # PATCH to /ad_hoc_commands/<id>/ is fine (handled by PATCH branch above
+            # but would also pass through here correctly).
+            if method == 'POST' and endpoint.rstrip('/').endswith('/ad_hoc_commands'):
+                return False
+
+            # All other POST/PATCH endpoints (create resource, update resource) are
+            # safe: a 500/504 before the DB transaction commits means no side-effect.
+            return True
+
+        return False
+
     def make_request(self, method, endpoint, *args, **kwargs):
         # In case someone is calling us directly; make sure we were given a method, let's not just assume a GET
         if not method:
@@ -512,121 +583,155 @@ class ControllerAPIModule(ControllerModule):
             headers.setdefault('Content-Type', 'application/json')
             kwargs['headers'] = headers
 
-        data = None  # Important, if content type is not JSON, this should not be dict type
+        data = None
         if headers.get('Content-Type', '') == 'application/json':
             data = dumps(kwargs.get('data', {}))
 
-        try:
-            response = self.session.open(
-                method, url.geturl(),
-                headers=headers,
-                timeout=self.request_timeout,
-                validate_certs=self.verify_ssl,
-                follow_redirects=True,
-                data=data
-            )
-        except (SSLValidationError) as ssl_err:
-            self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(url.netloc, ssl_err))
-        except (ConnectionError) as con_err:
-            self.fail_json(msg="There was a network error of some kind trying to connect to your host ({1}): {0}.".format(url.netloc, con_err))
-        except (HTTPError) as he:
-            # Sanity check: Did the server send back some kind of internal error?
-            if he.code >= 500:
-                self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
-            # Sanity check: Did we fail to authenticate properly?  If so, fail out now; this is always a failure.
-            elif he.code == 401:
-                self.fail_json(msg='Invalid authentication credentials for {0} (HTTP 401).'.format(url.path))
-            # Sanity check: Did we get a forbidden response, which means that the user isn't allowed to do this? Report that.
-            elif he.code == 403:
-                # Hack: Tell the customer to use the platform supported collection when interacting with Org, Team, User Controller endpoints
-                err_msg = he.fp.read().decode('utf-8')
-                try:
-                    # Defensive coding. Handle json responses and non-json responses
-                    err_msg = loads(err_msg)
-                    err_msg = err_msg['detail']
-                # JSONDecodeError only available on Python 3.5+
-                except ValueError:
-                    pass
-                prepend_msg = " Use the collection ansible.platform to modify resources Organization, User, or Team." if (
-                    "this resource via the platform ingress") in err_msg else ""
-                self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).{2}".format(url.path, method, prepend_msg))
-            # Sanity check: Did we get a 404 response?
-            # Requests with primary keys will return a 404 if there is no response, and we want to consistently trap these.
-            elif he.code == 404:
-                if kwargs.get('return_none_on_404', False):
-                    return None
-                self.fail_json(msg='The requested object could not be found at {0}.'.format(url.path))
-            # Sanity check: Did we get a 405 response?
-            # A 405 means we used a method that isn't allowed. Usually this is a bad request, but it requires special treatment because the
-            # API sends it as a logic error in a few situations (e.g. trying to cancel a job that isn't running).
-            elif he.code == 405:
-                self.fail_json(msg="Cannot make a request with the {0} method to this endpoint {1}".format(method, url.path))
-            # Sanity check: Did we get some other kind of error?  If so, write an appropriate error message.
-            elif he.code >= 400:
-                # We are going to return a 400 so the module can decide what to do with it
-                page_data = he.read()
-                try:
-                    return {'status_code': he.code, 'json': loads(page_data)}
-                # JSONDecodeError only available on Python 3.5+
-                except ValueError:
-                    return {'status_code': he.code, 'text': page_data}
-            elif he.code == 204 and method == 'DELETE':
-                # A 204 is a normal response for a delete function
-                pass
-            else:
-                self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(url.geturl(), he))
-        except (Exception) as e:
-            self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, url.geturl()))
+        # ----------------------------------------------------------------
+        # Retry loop — wraps only the session.open() + HTTPError handling
+        # Everything above (auth, URL building) happens once before the loop
+        # ----------------------------------------------------------------
+        max_retries = self.max_retries
+        backoff_factor = self.retry_backoff_factor
+        last_response = None
 
-        if not self.version_checked:
-            # In PY2 we get back an HTTPResponse object but PY2 is returning an addinfourl
-            # First try to get the headers in PY3 format and then drop down to PY2.
-            try:
-                controller_type = response.getheader('X-API-Product-Name', None)
-                controller_version = response.getheader('X-API-Product-Version', None)
-            except Exception:
-                controller_type = response.info().getheader('X-API-Product-Name', None)
-                controller_version = response.info().getheader('X-API-Product-Version', None)
+        for attempt in range(max_retries + 1):  # attempt 0 = first try
 
-            parsed_collection_version = Version(self._COLLECTION_VERSION).version
-            if controller_version:
-                parsed_controller_version = Version(controller_version).version
-                if controller_type == 'AWX':
-                    collection_compare_ver = parsed_collection_version[0]
-                    controller_compare_ver = parsed_controller_version[0]
-                else:
-                    collection_compare_ver = "{0}.{1}".format(parsed_collection_version[0], parsed_collection_version[1])
-                    controller_compare_ver = '{0}.{1}'.format(parsed_controller_version[0], parsed_controller_version[1])
-
-                if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != controller_type:
-                    self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, controller_type))
-                elif collection_compare_ver != controller_compare_ver:
-                    self.warn(
-                        "You are running collection version {0} but connecting to {2} version {1}".format(
-                            self._COLLECTION_VERSION, controller_version, controller_type
-                        )
+            if attempt > 0:
+                sleep_time = (backoff_factor ** (attempt - 1)) * (0.5 + random.random())
+                self.warn(
+                    'Retrying {0} {1} (attempt {2}/{3}) after {4}s due to status {5}'.format(
+                        method, url.path, attempt, max_retries, sleep_time,
+                        last_response if last_response else 'connection error'
                     )
+                )
+                time.sleep(sleep_time)
 
-            self.version_checked = True
-
-        response_body = ''
-        try:
-            response_body = response.read()
-        except (Exception) as e:
-            self.fail_json(msg="Failed to read response body: {0}".format(e))
-
-        response_json = {}
-        if response_body and response_body != '':
             try:
-                response_json = loads(response_body)
-            except (Exception) as e:
-                self.fail_json(msg="Failed to parse the response json: {0}".format(e))
+                response = self.session.open(
+                    method, url.geturl(),
+                    headers=headers,
+                    timeout=self.request_timeout,
+                    validate_certs=self.verify_ssl,
+                    follow_redirects=True,
+                    data=data
+                )
 
-        if PY2:
-            status_code = response.getcode()
-        else:
-            status_code = response.status
-        return {'status_code': status_code, 'json': response_json}
+            except (SSLValidationError) as ssl_err:
+                # SSL errors are never retryable — cert problems won't fix themselves
+                self.fail_json(msg="Could not establish a secure connection to your host ({0}): {1}.".format(url.netloc, ssl_err))
+
+            except (ConnectionError) as con_err:
+                # Connection errors may be transient — retry if we have attempts left
+                last_response = 'ConnectionError'
+                if attempt < max_retries:
+                    continue
+                self.fail_json(msg="There was a network error of some kind trying to connect to your host ({0}): {1}.".format(url.netloc, con_err))
+
+            except (HTTPError) as he:
+                # ---- Retryable HTTP errors ----
+                if self.is_retryable(he.code, method, url.path):
+                    # Exhausted retries on a retryable error go on to regular failure checks.
+                    if attempt < max_retries:
+                        continue
+                    # Exhausted retries - provide informative message
+                    self.fail_json(
+                        msg="Request to {0} failed with status {1} after {2} retries. "
+                            "This may indicate the server is overloaded.".format(url.path, he.code, max_retries)
+                    )
+                # ---- Non-retryable HTTP errors (existing behaviour preserved) ----
+                if he.code >= 500:
+                    self.fail_json(msg='The host sent back a server error ({1}): {0}. Please check the logs and try again later'.format(url.path, he))
+                elif he.code == 401:
+                    self.fail_json(msg='Invalid authentication credentials for {0} (HTTP 401).'.format(url.path))
+                elif he.code == 403:
+                    body = he.read()
+                    raw = body.decode('utf-8') if isinstance(body, bytes) else str(body)
+                    if 'unable to connect to database' in raw.lower():
+                        if attempt < max_retries:
+                            continue
+                        self.fail_json(
+                            msg="Request to {0} failed with status 403 (database unavailable) after {1} retries.".format(url.path, max_retries),
+                        )
+                    # Reuse raw instead of reading again
+                    try:
+                        err_msg = loads(raw)
+                        err_msg = err_msg['detail']
+                    except (ValueError, KeyError):
+                        err_msg = raw
+                    prepend_msg = " Use the collection ansible.platform to modify resources Organization, User, or Team." if (
+                        "this resource via the platform ingress") in err_msg else ""
+                    self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).{2}".format(url.path, method, prepend_msg))
+                elif he.code == 404:
+                    if kwargs.get('return_none_on_404', False):
+                        return None
+                    self.fail_json(msg='The requested object could not be found at {0}.'.format(url.path))
+                elif he.code == 405:
+                    self.fail_json(msg="Cannot make a request with the {0} method to this endpoint {1}".format(method, url.path))
+                elif he.code >= 400:
+                    page_data = he.read()
+                    try:
+                        return {'status_code': he.code, 'json': loads(page_data)}
+                    except ValueError:
+                        return {'status_code': he.code, 'text': page_data}
+                else:
+                    self.fail_json(msg="Unexpected return code when calling {0}: {1}".format(url.geturl(), he))
+
+            except (Exception) as e:
+                self.fail_json(msg="There was an unknown error when trying to connect to {2}: {0} {1}".format(type(e).__name__, e, url.geturl()))
+
+            # ----------------------------------------------------------------
+            # Successful response — fall through from session.open()
+            # The version check and response parsing happen once on success
+            # ----------------------------------------------------------------
+            if not self.version_checked:
+                try:
+                    controller_type = response.getheader('X-API-Product-Name', None)
+                    controller_version = response.getheader('X-API-Product-Version', None)
+                except Exception:
+                    controller_type = response.info().getheader('X-API-Product-Name', None)
+                    controller_version = response.info().getheader('X-API-Product-Version', None)
+
+                parsed_collection_version = Version(self._COLLECTION_VERSION).version
+                if controller_version:
+                    parsed_controller_version = Version(controller_version).version
+                    if controller_type == 'AWX':
+                        collection_compare_ver = parsed_collection_version[0]
+                        controller_compare_ver = parsed_controller_version[0]
+                    else:
+                        collection_compare_ver = "{0}.{1}".format(parsed_collection_version[0], parsed_collection_version[1])
+                        controller_compare_ver = '{0}.{1}'.format(parsed_controller_version[0], parsed_controller_version[1])
+
+                    if self._COLLECTION_TYPE not in self.collection_to_version or self.collection_to_version[self._COLLECTION_TYPE] != controller_type:
+                        self.warn("You are using the {0} version of this collection but connecting to {1}".format(self._COLLECTION_TYPE, controller_type))
+                    elif collection_compare_ver != controller_compare_ver:
+                        self.warn(
+                            "You are running collection version {0} but connecting to {2} version {1}".format(
+                                self._COLLECTION_VERSION, controller_version, controller_type
+                            )
+                        )
+
+                self.version_checked = True
+
+            response_body = ''
+            try:
+                response_body = response.read()
+            except (Exception) as e:
+                self.fail_json(msg="Failed to read response body: {0}".format(e))
+
+            response_json = {}
+            if response_body and response_body != '':
+                try:
+                    response_json = loads(response_body)
+                except (Exception) as e:
+                    self.fail_json(msg="Failed to parse the response json: {0}".format(e))
+
+            if PY2:
+                status_code = response.getcode()
+            else:
+                status_code = response.status
+
+            return {'status_code': status_code, 'json': response_json}
 
     def api_path(self, app_key=None):
 
