@@ -220,7 +220,11 @@ class TaskManagerInstanceGroups:
             # hybrid nodes _always_ control their own tasks
             if add_hybrid_control_cost and i.node_type == 'hybrid':
                 would_be_remaining -= self.control_task_impact
-            if would_be_remaining >= 0 and (instance_most_capacity is None or would_be_remaining > most_remaining_capacity):
+            if would_be_remaining >= 0 and (
+                instance_most_capacity is None
+                or would_be_remaining > most_remaining_capacity
+                or (would_be_remaining == most_remaining_capacity and i.jobs_running < instance_most_capacity.jobs_running)
+            ):
                 instance_most_capacity = i
                 most_remaining_capacity = would_be_remaining
         return instance_most_capacity

@@ -177,10 +177,21 @@ class TestSelectBestInstanceForTask(object):
         'task,instances,instance_fit_index,reason',
         [
             (Job(task_impact=100), Is([100]), 0, "Only one, pick it"),
-            (Job(task_impact=100), Is([100, 100]), 0, "Two equally good fits, pick the first"),
+            (Job(task_impact=100), Is([100, 100]), 0, "Two equally good fits and equal jobs_running, pick the first"),
             (Job(task_impact=100), Is([50, 100]), 1, "First instance not as good as second instance"),
             (Job(task_impact=100), Is([50, 0, 20, 100, 100, 100, 30, 20]), 3, "Pick Instance [3] as it is the first that the task fits in."),
             (Job(task_impact=100), Is([50, 0, 20, 99, 11, 1, 5, 99]), None, "The task don't a fit, you must a quit!"),
+            # Tie-breaking: equal would_be_remaining but different jobs_running
+            # capacity=243 with 1 running (impact 43) → remaining 200 → would_be 100
+            # capacity=200 with 0 running → remaining 200 → would_be 100
+            (Job(task_impact=100), Is([(1, 243), (0, 200)]), 1, "Equal would_be_remaining, pick instance with fewer jobs running"),
+            # Three-way tie: capacities chosen so that remaining after consumption yields equal would_be
+            # (2 running, cap 286): remaining=286-86=200, would_be=100
+            # (0 running, cap 200): remaining=200, would_be=100
+            # (1 running, cap 243): remaining=243-43=200, would_be=100
+            (Job(task_impact=100), Is([(2, 286), (0, 200), (1, 243)]), 1, "Three-way tie, pick instance with fewest jobs running"),
+            (Job(task_impact=100), Is([(0, 200), (0, 300)]), 1, "Different capacity, pick higher capacity regardless of jobs"),
+            (Job(task_impact=100), Is([(0, 300), (5, 200)]), 0, "Higher remaining capacity wins even with more jobs running"),
         ],
     )
     def test_fit_task_to_most_remaining_capacity_instance(self, task, instances, instance_fit_index, reason):
