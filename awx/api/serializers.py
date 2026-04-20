@@ -2080,25 +2080,15 @@ class BulkHostCreateSerializer(serializers.Serializer):
                 raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
 
         # Performance optimization (AAP-67978): Instead of loading ALL host names from
-        # the inventory (which can be 500k+ hosts taking 60+ seconds), only check if
-        # the specific new names already exist in the database.
+        # the inventory, only check if the specific new names already exist in the database.
         from collections import Counter
 
         new_names = [host['name'] for host in attrs['hosts']]
 
-        # Check for duplicates within the new batch itself (O(n) with Counter)
         new_name_counts = Counter(new_names)
         duplicates_in_new = [name for name, count in new_name_counts.items() if count > 1]
 
-        # Check for duplicates against existing database hosts (single targeted query)
-        # This only checks the specific names being added, not all hosts in inventory
-        existing_duplicates = list(
-            Host.objects
-            .filter(inventory=inv, name__in=new_names)
-            .values_list('name', flat=True)
-        )
-
-        # Combine both types of duplicates
+        existing_duplicates = list(Host.objects.filter(inventory=inv, name__in=new_names).values_list('name', flat=True))
         duplicate_new_names = list(set(duplicates_in_new + existing_duplicates))
 
         if duplicate_new_names:
