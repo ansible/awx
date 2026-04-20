@@ -32,6 +32,7 @@ from awx.main.models.unified_jobs import (
 from awx.main.models.jobs import Job
 from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 from awx.main.utils import update_scm_url, polymorphic
+from awx.main.utils.encryption import encrypt_field
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
 from awx.main.fields import ImplicitRoleField
@@ -133,6 +134,16 @@ class ProjectOptions(models.Model):
         blank=True,
         default=0,
         help_text=_("The amount of time (in seconds) to run before the task is canceled."),
+    )
+    proxy = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_(
+            'Proxy URL to use when running project updates '
+            '(sets http_proxy/https_proxy/HTTP_PROXY/HTTPS_PROXY). '
+            'Overrides the global proxy set in Extra Environment Variables.'
+        ),
     )
 
     def clean_scm_type(self):
@@ -375,6 +386,12 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             self.local_path = u'_%d__%s' % (int(self.pk), slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
+        # Encrypt the proxy field before saving.
+        if self.proxy:
+            self.proxy = encrypt_field(self, 'proxy')
+            if 'proxy' not in update_fields and update_fields:
+                update_fields.append('proxy')
+
         # Do the actual save.
         super(Project, self).save(*args, **kwargs)
         if new_instance:
@@ -537,6 +554,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     """
     Internal job for tracking project updates from SCM.
     """
+
+    PASSWORD_FIELDS = ('start_args', 'proxy')
 
     class Meta:
         app_label = 'main'

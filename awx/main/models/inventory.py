@@ -50,6 +50,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import _inventory_updates
+from awx.main.utils.encryption import encrypt_field
 from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
 
@@ -938,6 +939,16 @@ class InventorySourceOptions(BaseModel):
         default='',
         help_text=_('Inventory source variables in YAML or JSON format.'),
     )
+    proxy = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_(
+            'Proxy URL to use when running inventory updates '
+            '(sets http_proxy/https_proxy/HTTP_PROXY/HTTPS_PROXY). '
+            'Overrides the global proxy set in Extra Environment Variables.'
+        ),
+    )
     scm_branch = models.CharField(
         max_length=1024,
         default='',
@@ -1148,6 +1159,12 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             if 'name' not in update_fields:
                 update_fields.append('name')
 
+        # Encrypt the proxy field before saving.
+        if self.proxy:
+            self.proxy = encrypt_field(self, 'proxy')
+            if 'proxy' not in update_fields and update_fields:
+                update_fields.append('proxy')
+
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
 
@@ -1261,6 +1278,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     """
     Internal job for tracking inventory updates from external sources.
     """
+
+    PASSWORD_FIELDS = ('start_args', 'proxy')
 
     class Meta:
         app_label = 'main'
