@@ -10,7 +10,19 @@ from django.db.models.signals import post_save
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.signals import on_post_save_setting
-from awx.main.models import UnifiedJob, Credential, NotificationTemplate, Job, JobTemplate, WorkflowJob, WorkflowJobTemplate, InventorySource, Project
+from awx.main.models import (
+    UnifiedJob,
+    Credential,
+    NotificationTemplate,
+    Job,
+    JobTemplate,
+    WorkflowJob,
+    WorkflowJobTemplate,
+    InventorySource,
+    InventoryUpdate,
+    Project,
+    ProjectUpdate,
+)
 from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value, decrypt_value, get_encryption_key
 
 
@@ -84,7 +96,7 @@ class Command(BaseCommand):
                 setting.save()
 
     def _proxy_fields(self):
-        for model in (InventorySource, Project):
+        for model in (InventorySource, InventoryUpdate, Project, ProjectUpdate):
             for obj in model.objects.exclude(proxy='').iterator():
                 obj.proxy = decrypt_field(obj, 'proxy', secret_key=self.old_key)
                 obj.proxy = encrypt_field(obj, 'proxy', secret_key=self.new_key)

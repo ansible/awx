@@ -1159,14 +1159,24 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             if 'name' not in update_fields:
                 update_fields.append('name')
 
-        # Encrypt the proxy field before saving.
-        if self.proxy:
+        # Defer proxy encryption for new instances (pk is None, which
+        # would produce a different encryption key than decrypt expects).
+        pending_proxy = None
+        if is_new_instance and self.proxy:
+            pending_proxy = self.proxy
+            self.proxy = ''
+        elif self.proxy:
             self.proxy = encrypt_field(self, 'proxy')
             if 'proxy' not in update_fields and update_fields:
                 update_fields.append('proxy')
 
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
+
+        if pending_proxy:
+            self.proxy = pending_proxy
+            self.proxy = encrypt_field(self, 'proxy')
+            super(InventorySource, self).save(update_fields=['proxy'])
 
         # Add the PK to the name.
         if replace_text in self.name:

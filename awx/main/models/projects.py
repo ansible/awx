@@ -386,8 +386,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             self.local_path = u'_%d__%s' % (int(self.pk), slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
-        # Encrypt the proxy field before saving.
-        if self.proxy:
+        # Defer proxy encryption for new instances (pk is None, which
+        # would produce a different encryption key than decrypt expects).
+        pending_proxy = None
+        if new_instance and self.proxy:
+            pending_proxy = self.proxy
+            self.proxy = ''
+        elif self.proxy:
             self.proxy = encrypt_field(self, 'proxy')
             if 'proxy' not in update_fields and update_fields:
                 update_fields.append('proxy')
@@ -396,6 +401,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         super(Project, self).save(*args, **kwargs)
         if new_instance:
             update_fields = []
+            if pending_proxy:
+                self.proxy = pending_proxy
+                self.proxy = encrypt_field(self, 'proxy')
+                update_fields.append('proxy')
             # Generate local_path for SCM after initial save (so we have a PK).
             if self.scm_type and not self.local_path.startswith('_'):
                 update_fields.append('local_path')

@@ -1762,6 +1762,13 @@ class TestMaskProxyPassword:
 
         assert _mask_proxy_password('socks5://proxy.example.com:1080') == 'socks5://proxy.example.com:1080'
 
+    def test_socks_proxy_with_credentials(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        result = _mask_proxy_password('socks5://user:s3cret@proxy.example.com:1080')
+        assert result == 'socks5://user:$encrypted$@proxy.example.com:1080'
+        assert 's3cret' not in result
+
 
 @pytest.mark.usefixtures("patch_Organization")
 class TestInventoryUpdateProxy(TestJobExecution):
@@ -1782,7 +1789,7 @@ class TestInventoryUpdateProxy(TestJobExecution):
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, _ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
@@ -1796,7 +1803,7 @@ class TestInventoryUpdateProxy(TestJobExecution):
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, _ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
@@ -1810,7 +1817,7 @@ class TestInventoryUpdateProxy(TestJobExecution):
         inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
         inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
 
-        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        private_data_files, _ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
         env = task.build_env(inventory_update, private_data_dir, private_data_files)
 
         for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):

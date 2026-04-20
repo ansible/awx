@@ -1313,8 +1313,7 @@ class ProjectOptionsSerializer(BaseSerializer):
                 if _mask_proxy_password(db_proxy) == value:
                     return db_proxy
             raise serializers.ValidationError(_('Proxy password must be provided in plain text, not as $encrypted$.'))
-        if not (value.startswith('http://') or value.startswith('https://') or value.startswith('socks')):
-            raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
+        _validate_proxy_url(value)
         return value
 
     def to_representation(self, obj):
@@ -2292,23 +2291,36 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
         model = Group
 
 
+_VALID_PROXY_SCHEMES = ('http', 'https', 'socks', 'socks4', 'socks4a', 'socks5', 'socks5h')
+
+
+def _validate_proxy_url(value):
+    """Validate that *value* is a well-formed proxy URL (scheme + hostname)."""
+    parsed = urllib.parse.urlsplit(value)
+    if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES or parsed.hostname is None:
+        raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
+    try:
+        parsed.port
+    except ValueError:
+        raise serializers.ValidationError(_('Proxy URL has an invalid port.'))
+
+
 def _mask_proxy_password(proxy_url):
     """Mask credentials embedded in a proxy URL for safe API display."""
     if not proxy_url:
         return ''
-    if not (proxy_url.startswith('http://') or proxy_url.startswith('https://')):
-        return proxy_url
     parsed = urllib.parse.urlsplit(proxy_url)
+    if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES:
+        return proxy_url
     if not parsed.username and not parsed.password:
         return proxy_url
+    host = parsed.netloc.rsplit('@', 1)[-1]
     if parsed.username and parsed.password:
-        masked_netloc = '{}:{}@{}'.format(parsed.username, REPLACE_STR, parsed.hostname)
+        masked_netloc = '{}:{}@{}'.format(parsed.username, REPLACE_STR, host)
     elif parsed.password:
-        masked_netloc = '{}@{}'.format(REPLACE_STR, parsed.hostname)
+        masked_netloc = '{}@{}'.format(REPLACE_STR, host)
     else:
-        masked_netloc = '{}@{}'.format(parsed.username, parsed.hostname)
-    if parsed.port:
-        masked_netloc += ':{}'.format(parsed.port)
+        masked_netloc = '{}@{}'.format(parsed.username, host)
     return urllib.parse.urlunsplit((parsed.scheme, masked_netloc, parsed.path, parsed.query, parsed.fragment))
 
 
@@ -2367,8 +2379,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
                 if _mask_proxy_password(db_proxy) == value:
                     return db_proxy
             raise serializers.ValidationError(_('Proxy password must be provided in plain text, not as $encrypted$.'))
-        if not (value.startswith('http://') or value.startswith('https://') or value.startswith('socks')):
-            raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
+        _validate_proxy_url(value)
         return value
 
     def to_representation(self, obj):
