@@ -626,7 +626,7 @@ class ControllerAPIModule(ControllerModule):
                 last_response = 'ConnectionError'
                 if attempt < max_retries:
                     continue
-                self.fail_json(msg="There was a network error of some kind trying to connect to your host ({0}): {1}.".format(con_err, url.netloc))
+                self.fail_json(msg="There was a network error of some kind trying to connect to your host ({0}): {1}.".format(url.netloc, con_err))
 
             except (HTTPError) as he:
                 # ---- Retryable HTTP errors ----
