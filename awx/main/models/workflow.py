@@ -812,6 +812,7 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
     FIELDS_TO_PRESERVE_AT_COPY = [
         'description',
         'timeout',
+        'notification_templates_approvals',
     ]
 
     class Meta:
@@ -821,6 +822,11 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
         blank=True,
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
+    )
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_approvals',
     )
 
     @classmethod
@@ -965,9 +971,13 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     def send_approval_notification(self, approval_status):
         from awx.main.tasks.system import send_notifications  # avoid circular import
 
+        # Orphaned approvals (WFJT deleted) must not dispatch notifications,
+        # even when node-level templates are configured on the approval template.
         if self.workflow_job_template is None:
             return
-        for nt in self.workflow_job_template.notification_templates["approvals"]:
+        node_templates = list(self.workflow_approval_template.notification_templates_approvals.all()) if self.workflow_approval_template else []
+        notification_templates = node_templates or self.workflow_job_template.notification_templates.get("approvals", [])
+        for nt in notification_templates:
             try:
                 notification_subject, notification_body = self.build_approval_notification_message(nt, approval_status)
             except Exception:
