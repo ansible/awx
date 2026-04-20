@@ -2296,13 +2296,16 @@ _VALID_PROXY_SCHEMES = ('http', 'https', 'socks', 'socks4', 'socks4a', 'socks5',
 
 def _validate_proxy_url(value):
     """Validate that *value* is a well-formed proxy URL (scheme + hostname)."""
-    parsed = urllib.parse.urlsplit(value)
+    try:
+        parsed = urllib.parse.urlsplit(value)
+    except ValueError:
+        raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.')) from None
     if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES or parsed.hostname is None:
         raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
     try:
-        parsed.port
+        _ = parsed.port
     except ValueError:
-        raise serializers.ValidationError(_('Proxy URL has an invalid port.'))
+        raise serializers.ValidationError(_('Proxy URL has an invalid port.')) from None
 
 
 def _mask_proxy_password(proxy_url):

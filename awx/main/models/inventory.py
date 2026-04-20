@@ -50,7 +50,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import _inventory_updates
-from awx.main.utils.encryption import encrypt_field
+from awx.main.utils.encryption import decrypt_field, encrypt_field
 from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
 
@@ -1221,6 +1221,12 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         return self.create_unified_job(**kwargs)
 
     def create_unified_job(self, **kwargs):
+        # Proxy is stored encrypted under the source's pk; pass the
+        # plaintext so PasswordFieldsModel.save() re-encrypts it with
+        # the update's own pk.
+        if self.proxy and 'proxy' not in kwargs:
+            kwargs['proxy'] = decrypt_field(self, 'proxy')
+
         # Use special name, if name not already specified
         if self.inventory:
             if '_eager_fields' not in kwargs:

@@ -32,7 +32,7 @@ from awx.main.models.unified_jobs import (
 from awx.main.models.jobs import Job
 from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 from awx.main.utils import update_scm_url, polymorphic
-from awx.main.utils.encryption import encrypt_field
+from awx.main.utils.encryption import decrypt_field, encrypt_field
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
 from awx.main.fields import ImplicitRoleField
@@ -456,6 +456,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
+
+    def create_unified_job(self, **kwargs):
+        # Proxy is stored encrypted under the project's pk; pass the
+        # plaintext so PasswordFieldsModel.save() re-encrypts it with
+        # the update's own pk.
+        if self.proxy and 'proxy' not in kwargs:
+            kwargs['proxy'] = decrypt_field(self, 'proxy')
+        return super().create_unified_job(**kwargs)
 
     @property
     def cache_timeout_blocked(self):
