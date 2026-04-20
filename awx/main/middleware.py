@@ -99,7 +99,7 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
 
 class URLModificationMiddleware(MiddlewareMixin):
     @staticmethod
-    def _hijack_for_old_jt_name(node, kwargs, named_url):
+    def _hijack_for_old_jt_name(node, kwargs, named_url, user=None):
         try:
             int(named_url)
             return False
@@ -107,10 +107,12 @@ class URLModificationMiddleware(MiddlewareMixin):
             pass
         JobTemplate = node.model
         name = urllib.parse.unquote(named_url)
+        if user is not None and user.is_authenticated:
+            return user.get_queryset(JobTemplate).filter(name=name).order_by('organization__created').first()
         return JobTemplate.objects.filter(name=name).order_by('organization__created').first()
 
     @classmethod
-    def _named_url_to_pk(cls, node, resource, named_url):
+    def _named_url_to_pk(cls, node, resource, named_url, user=None):
         kwargs = {}
         reset_counters()
         if node.populate_named_url_query_kwargs(kwargs, named_url):
@@ -132,13 +134,13 @@ class URLModificationMiddleware(MiddlewareMixin):
         if resource == 'job_templates' and '++' not in named_url:
             # special case for deprecated job template case
             # will not raise a 404 on its own
-            jt = cls._hijack_for_old_jt_name(node, kwargs, named_url)
+            jt = cls._hijack_for_old_jt_name(node, kwargs, named_url, user=user)
             if jt:
                 return str(jt.pk)
         return named_url
 
     @classmethod
-    def _convert_named_url(cls, url_path):
+    def _convert_named_url(cls, url_path, user=None):
         default_prefix = PurePosixPath('/api/v2/')
         optional_prefix = PurePosixPath(f'/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}/v2/')
 
@@ -163,7 +165,7 @@ class URLModificationMiddleware(MiddlewareMixin):
 
         resource = resource_path.parts[0]
         if resource in settings.NAMED_URL_MAPPINGS:
-            pk = PurePosixPath(cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, name))
+            pk = PurePosixPath(cls._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]], resource, name, user=user))
         else:
             return url_path_original
 
@@ -172,7 +174,7 @@ class URLModificationMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         old_path = request.path_info
-        new_path = self._convert_named_url(old_path)
+        new_path = self._convert_named_url(old_path, user=getattr(request, 'user', None))
         if request.path_info != new_path:
             request.environ['awx.named_url_rewritten'] = request.path
             request.path = request.path.replace(request.path_info, new_path)

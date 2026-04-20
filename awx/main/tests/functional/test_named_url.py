@@ -206,6 +206,115 @@ def test_403_vs_404(get):
 
 
 @pytest.mark.django_db
+class TestOldStyleJTNamedUrlPermissions:
+    """Test the deprecated old-style named URL for job templates (name only, no org).
+
+    The middleware has a special _hijack_for_old_jt_name path that resolves
+    /api/v2/job_templates/<name>/ without requiring the ++org_name suffix.
+    This does an unscoped DB query (ignoring user permissions) to find the JT.
+    """
+
+    def test_old_style_url_no_access(self, get):
+        """User with no access to any JT should not resolve an old-style named URL."""
+        org = Organization.objects.create(name='test_org')
+        JobTemplate.objects.create(name='secret_jt', organization=org)
+        rando = User.objects.create(username='rando', password='rando')
+
+        old_url = '/api/v2/job_templates/secret_jt/'
+        resolved = URLModificationMiddleware._convert_named_url(old_url, user=rando)
+        # With user-scoped filtering, the JT is not visible so the name
+        # is returned as-is (no rewrite), which results in a 404.
+        assert resolved == old_url
+
+    def test_old_style_url_resolves_to_accessible_jt(self, get):
+        """When two JTs share a name, old-style URL resolves to the one
+        the user can actually access, not an arbitrary pick by org age.
+        """
+        org_old = Organization.objects.create(name='org_old')
+        org_new = Organization.objects.create(name='org_new')
+        JobTemplate.objects.create(name='shared_jt', organization=org_old)
+        jt_new = JobTemplate.objects.create(name='shared_jt', organization=org_new)
+
+        rando = User.objects.create(username='rando', password='rando')
+
+        # Give rando read access to org_new's JT only
+        jt_new.read_role.members.add(rando)
+
+        # The old-style URL should resolve to jt_new (the one rando can see)
+        old_url = '/api/v2/job_templates/shared_jt/'
+        resolved = URLModificationMiddleware._convert_named_url(old_url, user=rando)
+        assert resolved == f'/api/v2/job_templates/{jt_new.pk}/'
+
+        response = get(resolved, user=rando, expect=200)
+        assert response.data['id'] == jt_new.pk
+        assert response.data['organization'] == org_new.pk
+
+    def test_old_style_url_each_user_sees_own_jt(self, get):
+        """Each user resolves the old-style URL to a JT they have access to."""
+        org_a = Organization.objects.create(name='alpha_org')
+        org_b = Organization.objects.create(name='beta_org')
+
+        jt_a = JobTemplate.objects.create(name='patching', organization=org_a)
+        jt_b = JobTemplate.objects.create(name='patching', organization=org_b)
+
+        user_a = User.objects.create(username='user_a', password='user_a')
+        user_b = User.objects.create(username='user_b', password='user_b')
+
+        jt_a.read_role.members.add(user_a)
+        jt_b.read_role.members.add(user_b)
+
+        old_url = '/api/v2/job_templates/patching/'
+
+        resolved_a = URLModificationMiddleware._convert_named_url(old_url, user=user_a)
+        assert resolved_a == f'/api/v2/job_templates/{jt_a.pk}/'
+        response_a = get(resolved_a, user=user_a, expect=200)
+        assert response_a.data['organization'] == org_a.pk
+
+        resolved_b = URLModificationMiddleware._convert_named_url(old_url, user=user_b)
+        assert resolved_b == f'/api/v2/job_templates/{jt_b.pk}/'
+        response_b = get(resolved_b, user=user_b, expect=200)
+        assert response_b.data['organization'] == org_b.pk
+
+    def test_old_style_url_without_user_falls_back_to_unscoped(self):
+        """Without a user (e.g. direct classmethod call), old behavior is preserved."""
+        org = Organization.objects.create(name='test_org')
+        jt = JobTemplate.objects.create(name='test_jt', organization=org)
+
+        old_url = '/api/v2/job_templates/test_jt/'
+        resolved = URLModificationMiddleware._convert_named_url(old_url)
+        assert resolved == f'/api/v2/job_templates/{jt.pk}/'
+
+    def test_org_admin_sees_jt_via_old_style_url(self, get):
+        """An org admin can view JTs in their org through implicit grant."""
+        org = Organization.objects.create(name='test_org')
+        jt = JobTemplate.objects.create(name='patching', organization=org)
+        admin_user = User.objects.create(username='org_admin', password='org_admin')
+
+        org.admin_role.members.add(admin_user)
+
+        old_url = '/api/v2/job_templates/patching/'
+        resolved = URLModificationMiddleware._convert_named_url(old_url, user=admin_user)
+        assert resolved == f'/api/v2/job_templates/{jt.pk}/'
+
+        response = get(resolved, user=admin_user, expect=200)
+        assert response.data['id'] == jt.pk
+
+    def test_org_member_cannot_see_jt_via_old_style_url(self):
+        """An org member does NOT automatically get JT view access.
+        The old-style URL should not resolve to the JT.
+        """
+        org = Organization.objects.create(name='test_org')
+        JobTemplate.objects.create(name='patching', organization=org)
+        member = User.objects.create(username='member', password='member')
+
+        org.member_role.members.add(member)
+
+        old_url = '/api/v2/job_templates/patching/'
+        resolved = URLModificationMiddleware._convert_named_url(old_url, user=member)
+        assert resolved == old_url
+
+
+@pytest.mark.django_db
 class TestConvertNamedUrl:
     @pytest.mark.parametrize(
         "url",
