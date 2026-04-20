@@ -79,7 +79,7 @@ options:
   max_retries:
     description:
     - Specify the max retries to be used with some connection issues.
-    - Defaults to 5 seconds
+    - Defaults to 5.
     - This will not work with the export or import modules.
     type: int
     env:
@@ -88,7 +88,7 @@ options:
   retry_backoff_factor:
     description:
     - Backoff factor used when retrying connections.
-    - Defaults to 2 seconds
+    - Defaults to 2.
     - This will not work with the export or import modules.
     type: int
     env:
