@@ -2303,7 +2303,7 @@ def _validate_proxy_url(value):
     if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES or parsed.hostname is None:
         raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
     try:
-        _ = parsed.port
+        _port = parsed.port
     except ValueError:
         raise serializers.ValidationError(_('Proxy URL has an invalid port.')) from None
 
@@ -2315,15 +2315,17 @@ def _mask_proxy_password(proxy_url):
     parsed = urllib.parse.urlsplit(proxy_url)
     if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES:
         return proxy_url
-    if not parsed.username and not parsed.password:
+    if '@' not in parsed.netloc:
         return proxy_url
-    host = parsed.netloc.rsplit('@', 1)[-1]
-    if parsed.username and parsed.password:
-        masked_netloc = '{}:{}@{}'.format(parsed.username, REPLACE_STR, host)
-    elif parsed.password:
-        masked_netloc = '{}@{}'.format(REPLACE_STR, host)
+    userinfo, host = parsed.netloc.rsplit('@', 1)
+    if not userinfo:
+        return proxy_url
+    if ':' in userinfo:
+        username = userinfo.split(':', 1)[0]
+        masked_userinfo = '{}:{}'.format(username, REPLACE_STR) if username else ':{}'.format(REPLACE_STR)
     else:
-        masked_netloc = '{}@{}'.format(parsed.username, host)
+        masked_userinfo = REPLACE_STR
+    masked_netloc = '{}@{}'.format(masked_userinfo, host)
     return urllib.parse.urlunsplit((parsed.scheme, masked_netloc, parsed.path, parsed.query, parsed.fragment))
 
 

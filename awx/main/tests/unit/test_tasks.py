@@ -1769,6 +1769,13 @@ class TestMaskProxyPassword:
         assert result == 'socks5://user:$encrypted$@proxy.example.com:1080'
         assert 's3cret' not in result
 
+    def test_token_as_username(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        result = _mask_proxy_password('http://mytoken@proxy.example.com:3128')
+        assert 'mytoken' not in result
+        assert '$encrypted$@proxy.example.com:3128' in result
+
 
 @pytest.mark.usefixtures("patch_Organization")
 class TestInventoryUpdateProxy(TestJobExecution):
