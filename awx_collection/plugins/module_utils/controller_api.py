@@ -118,7 +118,6 @@ class ControllerModule(AnsibleModule):
         'request_timeout': 'request_timeout',
         'max_retries': 'max_retries',
         'retry_backoff_factor': 'retry_backoff_factor',
-        'oauth_token': 'controller_oauthtoken',
     }
     host = '127.0.0.1'
     username = None
@@ -649,23 +648,21 @@ class ControllerAPIModule(ControllerModule):
                     try:
                         body = he.read()
                         raw = body.decode('utf-8') if isinstance(body, bytes) else str(body)
-                    except Exception as read_err:
-                        self.fail_json(msg="Could not read body: {0}, Status code: 403".format(read_err))
-                    if 'unable to connect to database' in raw.lower():
-                        if attempt < max_retries:
-                            continue
-                        self.fail_json(
-                            msg="Request to {0} failed with status 403 (database unavailable) after {1} retries.".format(url.path, max_retries),
-                        )
-                    err_msg = he.fp.read().decode('utf-8')
-                    try:
-                        err_msg = loads(err_msg)
-                        err_msg = err_msg['detail']
-                    except ValueError:
-                        pass
-                    prepend_msg = " Use the collection ansible.platform to modify resources Organization, User, or Team." if (
-                        "this resource via the platform ingress") in err_msg else ""
-                    self.fail_json(msg="You don't have permission to {1} to {0} (HTTP 403).{2}".format(url.path, method, prepend_msg))
+                        if 'unable to connect to database' in raw.lower():
+                            if attempt < max_retries:
+                                continue
+                            self.fail_json(
+                                msg="Request to {0} failed with status 403 (database unavailable) after {1} retries.".format(url.path, max_retries),
+                            )
+                        # Reuse raw instead of reading again
+                        try:
+                            err_msg = loads(raw)
+                            err_msg = err_msg['detail']
+                        except (ValueError, KeyError):
+                            err_msg = raw
+                        prepend_msg = " Use the collection ansible.platform to modify resources Organization, User, or Team." if (
+                            "this resource via the platform ingress") in err_msg else ""
+                        self.fail_json(msg="You don't have permission to {0} to {1} (HTTP 403).{2}".format(method, url.path, prepend_msg))
                 elif he.code == 404:
                     if kwargs.get('return_none_on_404', False):
                         return None
