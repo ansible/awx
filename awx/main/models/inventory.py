@@ -290,11 +290,22 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         non-ideal because it's easy to get wrong, but I think the only way
         around it is to force the queryset which has memory implications for
         large inventories.
+
+        Performance: When no slicing is requested (slice_count=1), we apply
+        a safety limit of 10,000 hosts to prevent performance issues on large
+        inventories. API consumers should use the subset parameter for pagination
+        on large inventories (AAP-67978).
         """
 
         if slice_count > 1 and slice_number > 0:
             offset = slice_number - 1
             host_queryset = host_queryset[offset::slice_count]
+        else:
+            # Apply safety limit when no slicing requested to prevent 60+ second queries
+            # on large inventories. Addresses AAP-67978.
+            from django.conf import settings
+            max_hosts = getattr(settings, 'INVENTORY_SCRIPT_MAX_HOSTS', 10000)
+            host_queryset = host_queryset[:max_hosts]
         return host_queryset
 
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
@@ -517,6 +528,11 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         app_label = 'main'
         unique_together = (("name", "inventory"),)  # FIXME: Add ('instance_id', 'inventory') after migration.
         ordering = ('name',)
+        indexes = [
+            # Performance optimization for inventory host queries (AAP-67978)
+            # Supports queries filtering by inventory_id and enabled, ordered by name
+            models.Index(fields=['inventory', 'enabled', 'name'], name='main_host_inv_enabled_name_idx'),
+        ]
 
     inventory = models.ForeignKey(
         'Inventory',

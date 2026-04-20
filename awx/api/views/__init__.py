@@ -1981,6 +1981,18 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
 
 
 class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
+    """
+    API endpoint for listing and managing hosts within a specific inventory.
+
+    GET /api/v2/inventories/{id}/hosts/
+    Returns paginated list of hosts (default 25 per page via REST_FRAMEWORK settings).
+    Pagination is automatically enabled through ListAPIView base class to prevent
+    performance issues on large inventories (AAP-67978).
+
+    Use query parameters for pagination:
+    - ?page=2 (next page)
+    - ?page_size=100 (adjust page size, max 200)
+    """
     model = models.Host
     serializer_class = serializers.HostSerializer
     parent_model = models.Inventory
