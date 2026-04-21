@@ -13,7 +13,12 @@ on:
       - feature_**
       - stable-**
 jobs:
+  check-ownership:
+    uses: ./.github/workflows/_repo-owns-branch.yml
+
   push:
+    needs: check-ownership
+    if: needs.check-ownership.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:

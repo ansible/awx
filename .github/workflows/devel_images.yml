@@ -12,7 +12,12 @@ on:
       - feature_*
       - stable-*
 jobs:
+  check-ownership:
+    uses: ./.github/workflows/_repo-owns-branch.yml
+
   push-development-images:
+    needs: check-ownership
+    if: needs.check-ownership.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -29,12 +34,6 @@ jobs:
           - image-name: awx
             make-target: awx-kube-buildx
     steps:
-
-      - name: Skipping build of awx image for non-awx repository
-        run: |
-          echo "Skipping build of awx image for non-awx repository"
-          exit 0
-        if: matrix.build-targets.image-name == 'awx' && !endsWith(github.repository, '/awx')
 
       - uses: actions/checkout@v4
         with:

@@ -1,0 +1,55 @@
+---
+name: Repo Owns Branch
+
+# Reusable workflow that determines whether the current repository
+# owns the current branch for push operations.
+#
+# Ownership rules:
+#   - ansible/awx owns: devel, feature_*
+#   - ansible/tower owns: stable-*, release_*
+#   - workflow_dispatch is always allowed
+#
+# All other repo/branch combinations are skipped.
+
+on:
+  workflow_call:
+    outputs:
+      should_run:
+        description: Whether this repo owns the current branch
+        value: ${{ jobs.check.outputs.should_run }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check branch ownership
+        id: check
+        run: |
+          REPO="${{ github.repository }}"
+          BRANCH="${{ github.ref_name }}"
+          EVENT="${{ github.event_name }}"
+
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "Manual trigger — allowed"
+            exit 0
+          fi
+
+          # ansible/awx owns devel and feature_* branches
+          if [[ "$REPO" == "ansible/awx" ]] && [[ "$BRANCH" == "devel" || "$BRANCH" == feature_* ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "Repository '$REPO' owns branch '$BRANCH'"
+            exit 0
+          fi
+
+          # ansible/tower owns stable-* and release_* branches
+          if [[ "$REPO" == "ansible/tower" ]] && [[ "$BRANCH" == stable-* || "$BRANCH" == release_* ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "Repository '$REPO' owns branch '$BRANCH'"
+            exit 0
+          fi
+
+          echo "should_run=false" >> $GITHUB_OUTPUT
+          echo "Repository '$REPO' does not own branch '$BRANCH' — skipping"
