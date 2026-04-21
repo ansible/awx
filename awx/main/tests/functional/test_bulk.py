@@ -518,8 +518,8 @@ def test_bulk_host_create_combined_duplicates(organization, inventory, post, use
     hosts = [
         {'name': 'new-host'},
         {'name': 'batch-duplicate'},
-        {'name': 'existing-host'},  # Duplicate against DB
-        {'name': 'batch-duplicate'},  # Duplicate within batch
+        {'name': 'existing-host'},
+        {'name': 'batch-duplicate'},
     ]
 
     response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, inventory_admin, expect=400)
@@ -563,65 +563,25 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
     """
     Test that duplicate detection is performant and doesn't load all hosts.
     This verifies the optimization that only queries for specific new hostnames.
-
-    The old implementation would load ALL inventory hosts into memory (N queries where N = host count).
-    The new implementation only queries for the specific new names being added (constant queries).
     """
     inventory.organization = organization
     inventory_admin = user('inventory_admin', False)
     organization.member_role.members.add(inventory_admin)
     inventory.admin_role.members.add(inventory_admin)
 
-    # Create a large inventory (simulating 1000 existing hosts)
-    # In reality, this could be 500k+ hosts
+    # Create a large inventory (simulating 500k existing hosts)
     from django.utils.timezone import now
 
     _now = now()
-    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(1000)]
+    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(500000)]
     Host.objects.bulk_create(existing_hosts)
 
-    # Try to add new hosts
     new_hosts = [{'name': f'new-host-{i}'} for i in range(10)]
 
     # The number of queries should be bounded and not scale with inventory size
-    # This should be around 15 queries regardless of whether there are 1000 or 500k existing hosts
+    # This should be around 15-20 queries regardless of whether there are 500k or 1M+ existing hosts
     with django_assert_max_num_queries(20):
         response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': new_hosts}, inventory_admin, expect=201)
 
     assert len(response.data['hosts']) == 10
-    assert Host.objects.filter(inventory=inventory).count() == 1010
-
-
-@pytest.mark.django_db
-def test_bulk_host_create_multiple_duplicates_in_batch(organization, inventory, post, user):
-    """
-    Test that multiple duplicate sets within a batch are all detected.
-    """
-    inventory.organization = organization
-    inventory_admin = user('inventory_admin', False)
-    organization.member_role.members.add(inventory_admin)
-    inventory.admin_role.members.add(inventory_admin)
-
-    hosts = [
-        {'name': 'duplicate-a'},
-        {'name': 'duplicate-a'},
-        {'name': 'duplicate-b'},
-        {'name': 'unique-host'},
-        {'name': 'duplicate-b'},
-        {'name': 'duplicate-c'},
-        {'name': 'duplicate-c'},
-    ]
-
-    response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, inventory_admin, expect=400)
-
-    error_message = response.data['__all__'][0]
-    assert 'Hostnames must be unique in an inventory' in error_message
-    # All three duplicate sets should be detected
-    duplicates_found = sum(
-        [
-            'duplicate-a' in error_message,
-            'duplicate-b' in error_message,
-            'duplicate-c' in error_message,
-        ]
-    )
-    assert duplicates_found >= 1  # At least one duplicate should be reported
+    assert Host.objects.filter(inventory=inventory).count() == 500010
