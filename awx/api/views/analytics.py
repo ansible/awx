@@ -50,7 +50,6 @@ class GetNotAllowedMixin(object):
 class AnalyticsRootView(APIView):
     permission_classes = (AnalyticsPermission,)
     name = _('Automation Analytics')
-    swagger_topic = 'Automation Analytics'
     resource_purpose = 'automation analytics endpoints'
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to analytics"})
@@ -309,7 +308,6 @@ class AnalyticsAuthorizedView(AnalyticsGenericListView):
 
 class AnalyticsReportsList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Reports")
-    swagger_topic = "Automation Analytics"
     resource_purpose = 'automation analytics reports'
 
 
@@ -365,7 +363,6 @@ class AnalyticsCertificateHealthView(APIView):
 
     permission_classes = (AnalyticsPermission,)
     name = _("Certificate Health")
-    swagger_topic = 'Automation Analytics'
 
     def get(self, request, format=None):
         """
@@ -399,7 +396,6 @@ class AnalyticsCertificateStatusView(APIView):
 
     permission_classes = (AnalyticsPermission,)
     name = _("Certificate Status")
-    swagger_topic = 'Automation Analytics'
 
     def get(self, request, format=None):
         """
@@ -411,10 +407,9 @@ class AnalyticsCertificateStatusView(APIView):
 
             # Add authentication configuration status
             cert_info['authentication_config'] = {
-                'certificate_auth_enabled': getattr(settings, 'AWX_ANALYTICS_CERTIFICATE_AUTH_ENABLED', True),
                 'candlepin_url': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_URL', 'https://subscription.rhsm.redhat.com/subscription'),
                 'renewal_threshold_days': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS', 90),
-                'has_redhat_credentials': bool(getattr(settings, 'REDHAT_USERNAME', None) or getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)),
+                'has_redhat_credentials': bool(getattr(settings, 'REDHAT_USERNAME', None)),
             }
 
             return Response(cert_info, status=status.HTTP_200_OK)

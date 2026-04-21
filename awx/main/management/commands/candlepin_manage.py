@@ -46,7 +46,7 @@ class Command(BaseCommand):
                     '',
                     '  register  Register this instance as a Candlepin consumer.',
                     '            Credentials are read from AWX database by default',
-                    '            (SUBSCRIPTIONS_USERNAME, SUBSCRIPTIONS_PASSWORD,',
+                    '            (REDHAT_USERNAME, REDHAT_PASSWORD,',
                     '            LICENSE.account_number).  Pass --username / --password /  ',
                     '            --org to override.',
                     '',
@@ -78,8 +78,8 @@ class Command(BaseCommand):
             help='Register this instance as a Candlepin consumer',
             formatter_class=RawDescriptionHelpFormatter,
         )
-        reg.add_argument('--username', help='Red Hat subscription username (overrides SUBSCRIPTIONS_USERNAME from database)')
-        reg.add_argument('--password', help='Red Hat subscription password (overrides SUBSCRIPTIONS_PASSWORD from database)')
+        reg.add_argument('--username', help='Red Hat subscription username (overrides REDHAT_USERNAME from database)')
+        reg.add_argument('--password', help='Red Hat subscription password (overrides REDHAT_PASSWORD from database)')
         reg.add_argument('--org', help='Candlepin owner/org key (overrides LICENSE.account_number from database)')
         reg.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
         reg.add_argument(
@@ -134,9 +134,9 @@ class Command(BaseCommand):
 
         missing = []
         if not username:
-            missing.append('username (pass --username or set SUBSCRIPTIONS_USERNAME in database)')
+            missing.append('username (pass --username or set REDHAT_USERNAME in database)')
         if not password:
-            missing.append('password (pass --password or set SUBSCRIPTIONS_PASSWORD in database)')
+            missing.append('password (pass --password or set REDHAT_PASSWORD in database)')
         if not org:
             missing.append('org (pass --org or ensure LICENSE.account_number is set in database)')
         if missing:
@@ -175,18 +175,27 @@ class Command(BaseCommand):
             self.stderr.write(f'Registration failed: {e}')
             return False
 
-        info = parse_cert(cert_pem)
         self.stdout.write('Registered successfully.')
         self.stdout.write(f'  Consumer UUID : {consumer_uuid}')
-        self.stdout.write(f'  Cert serial   : {info["serial"]}')
-        self.stdout.write(f'  Cert CN       : {info["cn"]}')
-        self.stdout.write(f'  Valid until   : {info["not_after"]} ({info["days_remaining"]} days remaining)')
 
+        # Save to database first, before attempting to parse certificate metadata for display
         if dry_run:
             self.stdout.write('[dry-run] Registration result NOT saved to database.')
         else:
-            _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid)
-            self.stdout.write('Certificate, key, and consumer UUID saved to database.')
+            if _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
+                self.stdout.write('Certificate, key, and consumer UUID saved to database.')
+            else:
+                self.stderr.write('Failed to save registration to database.')
+                return False
+
+        # Best-effort certificate metadata display
+        try:
+            info = parse_cert(cert_pem)
+            self.stdout.write(f'  Cert serial   : {info["serial"]}')
+            self.stdout.write(f'  Cert CN       : {info["cn"]}')
+            self.stdout.write(f'  Valid until   : {info["not_after"]} ({info["days_remaining"]} days remaining)')
+        except ValueError as e:
+            self.stdout.write(f'Certificate metadata unavailable: {e}')
 
         return True
 
@@ -208,11 +217,15 @@ class Command(BaseCommand):
             self.stderr.write('CANDLEPIN_CONSUMER_UUID is not set (or is still the placeholder value). Run the register subcommand first.')
             return False
 
-        info = parse_cert(cert_pem)
-        self.stdout.write('Current certificate:')
-        self.stdout.write(f'  Serial        : {info["serial"]}')
-        self.stdout.write(f'  CN            : {info["cn"]}')
-        self.stdout.write(f'  Valid until   : {info["not_after"]} ({info["days_remaining"]} days remaining)')
+        try:
+            info = parse_cert(cert_pem)
+            self.stdout.write('Current certificate:')
+            self.stdout.write(f'  Serial        : {info["serial"]}')
+            self.stdout.write(f'  CN            : {info["cn"]}')
+            self.stdout.write(f'  Valid until   : {info["not_after"]} ({info["days_remaining"]} days remaining)')
+        except ValueError as e:
+            self.stdout.write('Current certificate:')
+            self.stdout.write(f'  Certificate metadata unavailable: {e}')
 
         candlepin_url = options.get('candlepin_url') or get_candlepin_url()
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
@@ -222,7 +235,14 @@ class Command(BaseCommand):
         client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy)
 
         self.stdout.write(f'Checking in with Candlepin at {candlepin_url} (consumer={consumer_uuid}) ...')
-        client.checkin(consumer_uuid, cert_pem, key_pem)
+        checkin_success = client.checkin(consumer_uuid, cert_pem, key_pem)
+
+        if not checkin_success:
+            self.stderr.write('Check-in with Candlepin failed. Unable to verify certificate status.')
+            self.stderr.write('Certificate renewal may still be needed. Use --force to renew anyway, or check logs for details.')
+            return False
+
+        self.stdout.write('Check-in successful.')
 
         renewal_needed = force or needs_renewal(cert_pem, renewal_days)
         if not renewal_needed:
@@ -237,16 +257,25 @@ class Command(BaseCommand):
             self.stderr.write(f'Certificate renewal failed: {e}')
             return False
 
-        new_info = parse_cert(new_cert_pem)
         self.stdout.write('Certificate renewed successfully.')
-        self.stdout.write(f'  Old serial    : {info["serial"]}')
-        self.stdout.write(f'  New serial    : {new_info["serial"]}')
-        self.stdout.write(f'  Valid until   : {new_info["not_after"]} ({new_info["days_remaining"]} days remaining)')
 
+        # Save to database first, before attempting to parse certificate metadata for display
         if dry_run:
             self.stdout.write('[dry-run] Renewed certificate NOT saved to database.')
         else:
-            _save_candlepin_cert_to_db(new_cert_pem, new_key_pem)
-            self.stdout.write('Renewed certificate and key saved to database.')
+            if _save_candlepin_cert_to_db(new_cert_pem, new_key_pem):
+                self.stdout.write('Renewed certificate and key saved to database.')
+            else:
+                self.stderr.write('Failed to save renewed certificate to database.')
+                return False
+
+        # Best-effort certificate metadata display
+        try:
+            new_info = parse_cert(new_cert_pem)
+            self.stdout.write(f'  Old serial    : {info["serial"]}')
+            self.stdout.write(f'  New serial    : {new_info["serial"]}')
+            self.stdout.write(f'  Valid until   : {new_info["not_after"]} ({new_info["days_remaining"]} days remaining)')
+        except ValueError as e:
+            self.stdout.write(f'Certificate metadata unavailable: {e}')
 
         return True

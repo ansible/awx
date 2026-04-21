@@ -14,7 +14,10 @@ class Migration(migrations.Migration):
             name='CandlepinCertificate',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('consumer_uuid', models.CharField(help_text='Candlepin consumer UUID', max_length=255, unique=True)),
+                (
+                    'consumer_uuid',
+                    models.CharField(blank=True, default='00000000-0000-0000-0000-000000000000', help_text='Candlepin consumer UUID', max_length=255),
+                ),
                 ('cert_pem', models.TextField(blank=True, default='', help_text='PEM-encoded certificate (encrypted)')),
                 ('key_pem', models.TextField(blank=True, default='', help_text='PEM-encoded private key (encrypted)')),
                 ('serial_number', models.CharField(blank=True, default='', help_text='Certificate serial number for tracking', max_length=255)),

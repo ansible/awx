@@ -8,6 +8,7 @@ import pathlib
 import shutil
 import tarfile
 import tempfile
+from contextlib import contextmanager
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -29,6 +30,41 @@ __all__ = ['register', 'gather', 'ship']
 
 
 logger = logging.getLogger('awx.main.analytics')
+
+
+@contextmanager
+def _temp_cert_files(cert_pem, key_pem):
+    """
+    Context manager to create temporary cert/key files from PEM strings.
+    Automatically cleans up on exit.
+    """
+    cert_path = None
+    key_path = None
+    try:
+        # Create temp files with secure permissions
+        cert_fd, cert_path = tempfile.mkstemp(prefix='candlepin_cert_', suffix='.pem')
+        key_fd, key_path = tempfile.mkstemp(prefix='candlepin_key_', suffix='.pem')
+
+        # Write cert
+        with open(cert_fd, 'w', closefd=True) as f:
+            f.write(cert_pem)
+        os.chmod(cert_path, 0o644)  # Certificate can be world-readable
+
+        # Write key
+        with open(key_fd, 'w', closefd=True) as f:
+            f.write(key_pem)
+        os.chmod(key_path, 0o600)  # Private key: owner read+write only
+
+        yield cert_path, key_path
+
+    finally:
+        # Clean up temp files
+        for path in (cert_path, key_path):
+            if path:
+                try:
+                    os.unlink(path)
+                except Exception:
+                    pass
 
 
 def _valid_license():
@@ -391,48 +427,37 @@ def ship(path):
         s.headers.pop('Content-Type')
 
         with set_environ(**settings.AWX_TASK_ENV):
-            cert_path = None
-            key_path = None
-
-            try:
-                # First attempt: Certificate-based mTLS authentication (zero-touch)
-                # Uses existing Candlepin identity cert, or registers to get one
-                cert_path, key_path = get_or_generate_candlepin_certificate(rh_id, rh_secret)
-
-                if cert_path and key_path:
-                    logger.debug("Using certificate-based authentication for analytics upload")
-                    try:
-                        response = s.post(url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31))
-                    except requests.RequestException as e:
-                        logger.warning(f"Certificate-based authentication failed: {e}, falling back to basic auth")
-                        # Fall through to basic auth attempt
-                        cert_path, key_path = None, None
-                        raise
-                else:
-                    # No certificate available, skip to basic auth
-                    logger.debug("No Candlepin certificate available, falling back to basic authentication")
-                    raise requests.RequestException("No certificate available")
-
-            except requests.RequestException:
-                # Second attempt: Basic authentication
+            # Try 1: Certificate-based mTLS authentication (zero-touch)
+            cert_pem, key_pem = get_or_generate_candlepin_certificate(rh_id, rh_secret)
+            if cert_pem and key_pem:
+                logger.debug("Using certificate-based authentication for analytics upload")
                 try:
-                    logger.debug("Attempting basic authentication for analytics upload")
-                    response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
+                    with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
+                        response = s.post(url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31))
+                        if response.status_code < 300:
+                            return True
                 except requests.RequestException as e:
-                    # Final fallback: OIDC authentication
-                    logger.error(f"Basic authentication failed: {e}, trying OIDC method")
-                    client = OIDCClient(rh_id, rh_secret)
-                    response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
-            finally:
-                # Clean up temporary certificate files
-                if cert_path or key_path:
-                    try:
-                        if cert_path and os.path.exists(cert_path):
-                            os.remove(cert_path)
-                        if key_path and os.path.exists(key_path):
-                            os.remove(key_path)
-                    except Exception as e:
-                        logger.warning(f"Failed to clean up temporary certificate files: {e}")
+                    logger.warning(f"Certificate-based authentication failed: {e}, falling back to basic auth")
+
+            # Try 2: Basic authentication
+            logger.debug("Attempting basic authentication for analytics upload")
+            f.seek(0)
+            try:
+                response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
+                if response.status_code < 300:
+                    return True
+            except requests.RequestException as e:
+                logger.warning(f"Basic authentication failed: {e}, trying OIDC method")
+
+            # Try 3: OIDC authentication
+            logger.debug("Attempting OIDC authentication for analytics upload")
+            f.seek(0)
+            try:
+                client = OIDCClient(rh_id, rh_secret)
+                response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
+            except requests.RequestException as e:
+                logger.error(f"OIDC authentication failed: {e}")
+                return False
 
         # Accept 2XX status_codes
         if response.status_code >= 300:

@@ -3,12 +3,17 @@
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from solo.models import SingletonModel
 from awx.main.models.base import PasswordFieldsModel
 
 __all__ = ['CandlepinCertificate']
 
+# Placeholder UUID used before a real consumer is registered
+# This constant is also defined in awx.main.utils.licensing for use outside the model
+CANDLEPIN_UUID_PLACEHOLDER = '00000000-0000-0000-0000-000000000000'
 
-class CandlepinCertificate(PasswordFieldsModel):
+
+class CandlepinCertificate(SingletonModel, PasswordFieldsModel):
     """
     Model to store Candlepin consumer identity certificate for analytics authentication.
 
@@ -17,7 +22,7 @@ class CandlepinCertificate(PasswordFieldsModel):
     uploading analytics data. Both cert_pem and key_pem are encrypted at rest.
 
     Only one instance should exist (singleton pattern) - the certificate for this AWX
-    instance's Candlepin consumer.
+    instance's Candlepin consumer. This is enforced by inheriting from SingletonModel.
     """
 
     PASSWORD_FIELDS = ('cert_pem', 'key_pem')
@@ -30,7 +35,8 @@ class CandlepinCertificate(PasswordFieldsModel):
 
     consumer_uuid = models.CharField(
         max_length=255,
-        unique=True,
+        blank=True,
+        default=CANDLEPIN_UUID_PLACEHOLDER,
         help_text=_('Candlepin consumer UUID'),
     )
 
@@ -66,25 +72,20 @@ class CandlepinCertificate(PasswordFieldsModel):
     def get_instance(cls):
         """
         Get the singleton instance of the Candlepin certificate.
-        Returns None if not registered yet.
+        Returns the singleton instance (creates it with placeholder values if it doesn't exist).
+
+        This is a compatibility wrapper around SingletonModel's get_solo() method.
         """
-        return cls.objects.first()
+        return cls.get_solo()
 
     @classmethod
     def get_or_create_instance(cls):
         """
         Get or create the singleton instance.
-        If multiple instances exist (shouldn't happen), returns the first one.
+
+        This is a compatibility wrapper around SingletonModel's get_solo() method.
         """
-        instance = cls.objects.first()
-        if not instance:
-            # Create a placeholder instance that will be updated during registration
-            instance = cls.objects.create(
-                consumer_uuid='00000000-0000-0000-0000-000000000000',
-                cert_pem='',
-                key_pem='',
-            )
-        return instance
+        return cls.get_solo()
 
     def update_certificate(self, cert_pem, key_pem, consumer_uuid=None, serial_number=None, expires_at=None):
         """
@@ -111,4 +112,4 @@ class CandlepinCertificate(PasswordFieldsModel):
         """
         Check if the instance has valid certificate data (not placeholder).
         """
-        return self.consumer_uuid and self.consumer_uuid != '00000000-0000-0000-0000-000000000000' and self.cert_pem and self.key_pem
+        return self.consumer_uuid and self.consumer_uuid != CANDLEPIN_UUID_PLACEHOLDER and self.cert_pem and self.key_pem

@@ -10,9 +10,9 @@ from awx.main.utils.candlepin.client import CandlepinClient
 class TestCandlepinClient:
     """Tests for CandlepinClient."""
 
-    def test_default_url(self):
-        """Test default Candlepin URL is set correctly."""
-        client = CandlepinClient()
+    def test_base_url_required(self):
+        """Test base_url parameter is required."""
+        client = CandlepinClient(base_url='https://subscription.rhsm.redhat.com/subscription')
         assert client.base_url == 'https://subscription.rhsm.redhat.com/subscription'
 
     def test_custom_url(self):
@@ -22,32 +22,32 @@ class TestCandlepinClient:
 
     def test_verify_tls_enabled_by_default(self):
         """Test TLS verification is enabled by default."""
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         assert client.verify is True
 
     def test_verify_tls_with_ca(self):
         """Test TLS verification with custom CA."""
-        client = CandlepinClient(candlepin_ca='/path/to/ca.pem')
+        client = CandlepinClient(base_url='https://test.example.com', candlepin_ca='/path/to/ca.pem')
         assert client.verify == '/path/to/ca.pem'
 
     def test_verify_tls_disabled(self):
         """Test TLS verification can be explicitly disabled."""
-        client = CandlepinClient(verify_tls=False)
+        client = CandlepinClient(base_url='https://test.example.com', verify_tls=False)
         assert client.verify is False
 
     def test_proxy_configuration(self):
         """Test proxy configuration."""
-        client = CandlepinClient(proxy='http://proxy.example.com:8080')
+        client = CandlepinClient(base_url='https://test.example.com', proxy='http://proxy.example.com:8080')
         assert client.proxies == {'https': 'http://proxy.example.com:8080', 'http': 'http://proxy.example.com:8080'}
 
     def test_https_proxy_configuration(self):
         """Test HTTPS proxy configuration."""
-        client = CandlepinClient(proxy='https://proxy.example.com:8443')
+        client = CandlepinClient(base_url='https://test.example.com', proxy='https://proxy.example.com:8443')
         assert client.proxies == {'https': 'https://proxy.example.com:8443', 'http': 'http://proxy.example.com:8443'}
 
     def test_temp_cert_files_cleanup(self):
         """Test temporary certificate files are created and cleaned up."""
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         cert_pem = '-----BEGIN CERTIFICATE-----\ntest_cert\n-----END CERTIFICATE-----'
         key_pem = '-----BEGIN PRIVATE KEY-----\ntest_key\n-----END PRIVATE KEY-----'
 
@@ -76,7 +76,7 @@ class TestCandlepinClient:
         }
         mock_post.return_value = mock_response
 
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         cert_pem, key_pem, consumer_uuid = client.register_consumer('test_user', 'test_pass', 'test_org', install_uuid='test-install-uuid')
 
         assert consumer_uuid == 'test-consumer-uuid'
@@ -90,7 +90,7 @@ class TestCandlepinClient:
         mock_response.status_code = 200
         mock_put.return_value = mock_response
 
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
         key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
 
@@ -109,7 +109,7 @@ class TestCandlepinClient:
         }
         mock_get.return_value = mock_response
 
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
         key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
 
@@ -125,7 +125,7 @@ class TestCandlepinClient:
         mock_response.status_code = 404
         mock_get.return_value = mock_response
 
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
         key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
 
@@ -137,7 +137,7 @@ class TestCandlepinClient:
         """Test consumer retrieval with network exception."""
         mock_get.side_effect = Exception('Network error')
 
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         cert_pem = '-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'
         key_pem = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
 
@@ -157,7 +157,7 @@ class TestCandlepinClient:
         }
         mock_post.return_value = mock_response
 
-        client = CandlepinClient()
+        client = CandlepinClient(base_url='https://test.example.com')
         old_cert = '-----BEGIN CERTIFICATE-----\nold\n-----END CERTIFICATE-----'
         old_key = '-----BEGIN PRIVATE KEY-----\nold\n-----END PRIVATE KEY-----'
 

@@ -1,11 +1,8 @@
 import os
 import tempfile
 import uuid as _uuid_mod
-
 from datetime import datetime, timezone
-
 import requests
-
 import logging
 
 logger = logging.getLogger('awx.main.utils.candlepin')
@@ -25,10 +22,8 @@ class CandlepinClient:
     and never in production.
     """
 
-    DEFAULT_CANDLEPIN_URL = 'https://subscription.rhsm.redhat.com/subscription'
-
-    def __init__(self, base_url=None, candlepin_ca=None, proxy=None, verify_tls=True):
-        self.base_url = (base_url or self.DEFAULT_CANDLEPIN_URL).rstrip('/')
+    def __init__(self, base_url, candlepin_ca=None, proxy=None, verify_tls=True):
+        self.base_url = base_url.rstrip('/')
         if candlepin_ca:
             self.verify = candlepin_ca
         elif verify_tls:
@@ -56,13 +51,13 @@ class CandlepinClient:
     def register_consumer(self, username, password, org, install_uuid=None):
         """POST /consumers?owner={org} — register a new AAP consumer with basic auth.
 
-        Uses the customer's Red Hat subscription credentials (SUBSCRIPTIONS_USERNAME /
-        SUBSCRIPTIONS_PASSWORD from AWX conf_setting) to register this controller
+        Uses the customer's Red Hat subscription credentials (REDHAT_USERNAME /
+        REDHAT_PASSWORD from AWX conf_setting) to register this controller
         instance as a Candlepin consumer and obtain an identity certificate for mTLS.
 
         Args:
-            username:     Red Hat subscription username (from SUBSCRIPTIONS_USERNAME).
-            password:     Red Hat subscription password (from SUBSCRIPTIONS_PASSWORD).
+            username:     Red Hat subscription username (from REDHAT_USERNAME).
+            password:     Red Hat subscription password (from REDHAT_PASSWORD).
             org:          Candlepin owner/org key (from LICENSE.account_number).
             install_uuid: AWX INSTALL_UUID used as the consumer's aap.instance_uuid
                           fact; falls back to a random UUID if not provided.

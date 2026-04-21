@@ -11,7 +11,6 @@ The Licenser class can do the following:
 
 import base64
 import configparser
-from django.db import connection
 from datetime import datetime, timezone
 import collections
 import copy
@@ -48,9 +47,11 @@ from awx.main.utils.candlepin.lifecycle import (
     get_candlepin_url,
     get_proxy_url,
     get_renewal_days,
+    is_cert_valid,
     parse_cert,
     run_candlepin_lifecycle,
 )
+from awx.main.utils.encryption import decrypt_field
 
 MAX_INSTANCES = 9999999
 
@@ -572,29 +573,25 @@ def get_licenser(*args, **kwargs):
 # Placeholder UUID used before a real consumer is registered.
 # Treat it the same as an absent UUID so we never attempt a Candlepin
 # lifecycle call with a non-functional consumer identity.
-CANDLEPIN_CERT_SETTING_KEY = 'CANDLEPIN_CONSUMER_CERT'
-CANDLEPIN_KEY_SETTING_KEY = 'CANDLEPIN_CONSUMER_KEY'
-CANDLEPIN_UUID_SETTING_KEY = 'CANDLEPIN_CONSUMER_UUID'
 CANDLEPIN_UUID_PLACEHOLDER = '00000000-0000-0000-0000-000000000000'
-SUBSCRIPTIONS_USERNAME_SETTING_KEY = 'SUBSCRIPTIONS_USERNAME'
-SUBSCRIPTIONS_PASSWORD_SETTING_KEY = 'SUBSCRIPTIONS_PASSWORD'
 
 
 def _fetch_candlepin_cert_from_db():
     """Read cert PEM, key PEM, and consumer UUID from CandlepinCertificate model.
 
-    Returns (cert_pem, key_pem, consumer_uuid), any of which may be None if the
-    model instance doesn't exist or has no valid data. Best-effort: failures are
-    logged as warnings and never propagate.
+    Returns (cert_pem, key_pem, consumer_uuid) if valid certificate data exists,
+    or (None, None, None) if the instance only contains placeholder/unregistered data.
+    Best-effort: failures are logged as warnings and never propagate.
     """
     from awx.main.models import CandlepinCertificate
 
     try:
         instance = CandlepinCertificate.get_instance()
-        if not instance or not instance.has_valid_data():
+        # get_instance() always returns a singleton; check if it has real data vs placeholder
+        if not instance.has_valid_data():
             return None, None, None
 
-        return instance.cert_pem, instance.key_pem, instance.consumer_uuid
+        return decrypt_field(instance, 'cert_pem'), decrypt_field(instance, 'key_pem'), instance.consumer_uuid
     except Exception as e:
         logger.warning(f'Could not fetch Candlepin lifecycle data from DB: {e}')
         return None, None, None
@@ -604,7 +601,9 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
     """Persist a renewed Candlepin identity cert and key to the CandlepinCertificate model.
 
     Updates the existing instance if present, creates a new one if needed.
-    Best-effort: failures are logged as errors but never propagate.
+
+    Returns:
+        bool: True if save succeeded, False on any error.
     """
     from awx.main.models import CandlepinCertificate
 
@@ -616,8 +615,6 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
         try:
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
-            from datetime import datetime
-
             expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
@@ -632,42 +629,32 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
             expires_at=expires_at,
         )
         logger.info('Renewed Candlepin cert and key saved to database.')
+        return True
     except Exception as e:
         logger.error(f'Could not save renewed Candlepin cert to database: {e}')
+        return False
 
 
 def _fetch_registration_credentials_from_db():
     """Read Candlepin registration credentials from AWX settings.
 
-    Reads SUBSCRIPTIONS_USERNAME, SUBSCRIPTIONS_PASSWORD (set by AWX when the
+    Reads REDHAT_USERNAME, REDHAT_PASSWORD (set by AWX when the
     customer configures their Red Hat subscription), LICENSE.account_number (org
     key for the Candlepin /consumers endpoint), and INSTALL_UUID (used as the
     consumer's aap.instance_uuid fact).
 
     Returns (username, password, org, install_uuid), any of which may be None
-    if the corresponding row is absent or on any DB error.  Best-effort: failures
-    are logged as warnings and never propagate.
+    if the corresponding setting is not configured.
     """
-    keys = ['SUBSCRIPTIONS_USERNAME', 'SUBSCRIPTIONS_PASSWORD', 'LICENSE', 'INSTALL_UUID']
     try:
-        placeholders = ', '.join(['%s'] * len(keys))
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'SELECT key, value FROM conf_setting WHERE key IN ({placeholders})',
-                keys,
-            )
-            rows = {key: json.loads(value) for key, value in cursor.fetchall() if value}
-
-        license_data = rows.get('LICENSE', {})
+        username = getattr(settings, 'REDHAT_USERNAME', None)
+        password = getattr(settings, 'REDHAT_PASSWORD', None)
+        install_uuid = getattr(settings, 'INSTALL_UUID', None)
+        license_data = getattr(settings, 'LICENSE', {})
         org = license_data.get('account_number') if isinstance(license_data, dict) else None
-        return (
-            rows.get(SUBSCRIPTIONS_USERNAME_SETTING_KEY),
-            rows.get(SUBSCRIPTIONS_PASSWORD_SETTING_KEY),
-            org,
-            rows.get('INSTALL_UUID'),
-        )
+        return username, password, org, install_uuid
     except Exception as e:
-        logger.warning(f'Could not fetch Candlepin registration credentials from DB: {e}')
+        logger.warning(f'Could not fetch Candlepin registration credentials from settings: {e}')
         return None, None, None, None
 
 
@@ -675,7 +662,9 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
     """Persist a new Candlepin consumer registration (cert, key, UUID) to the CandlepinCertificate model.
 
     Updates the existing instance if present, creates a new one if needed.
-    Best-effort: failures are logged as errors but never propagate.
+
+    Returns:
+        bool: True if save succeeded, False on any error.
     """
     from awx.main.models import CandlepinCertificate
 
@@ -687,8 +676,6 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
         try:
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
-            from datetime import datetime
-
             expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
@@ -704,8 +691,10 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
             expires_at=expires_at,
         )
         logger.info(f'Candlepin consumer registration saved to database (uuid={consumer_uuid}).')
+        return True
     except Exception as e:
         logger.error(f'Could not save Candlepin registration to database: {e}')
+        return False
 
 
 def _register_candlepin_consumer():
@@ -713,7 +702,7 @@ def _register_candlepin_consumer():
 
     Called when no identity cert exists in the DB.
 
-    Reads SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD and the org key from
+    Reads REDHAT_USERNAME / REDHAT_PASSWORD and the org key from
     LICENSE.account_number, then calls POST /consumers on Candlepin to obtain an
     identity certificate.  On success the cert, key, and consumer UUID are
     persisted to the CandlepinCertificate model.
@@ -724,7 +713,7 @@ def _register_candlepin_consumer():
     username, password, org, install_uuid = _fetch_registration_credentials_from_db()
 
     if not username or not password:
-        logger.warning('Candlepin registration is enabled but SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD ' 'are not set; skipping registration.')
+        logger.warning('Candlepin registration is enabled but REDHAT_USERNAME / REDHAT_PASSWORD are not set; skipping registration.')
         return None, None, None
 
     if not org:
@@ -742,7 +731,9 @@ def _register_candlepin_consumer():
         logger.error(f'Candlepin consumer registration failed: {e}')
         return None, None, None
 
-    _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid)
+    if not _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
+        logger.error('Candlepin consumer registration succeeded but failed to save to database.')
+        return None, None, None
     return cert_pem, key_pem, consumer_uuid
 
 
@@ -776,7 +767,8 @@ def _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid):
             proxy=proxy,
         )
         if (new_cert_pem, new_key_pem) != (cert_pem, key_pem):
-            _save_candlepin_cert_to_db(new_cert_pem, new_key_pem)
+            if not _save_candlepin_cert_to_db(new_cert_pem, new_key_pem):
+                logger.warning('Renewed certificate will be used for this request, but failed to persist to database for future use.')
         return new_cert_pem, new_key_pem
     except Exception as e:
         logger.error(f'Candlepin lifecycle (check-in / renewal) failed: {e}; will attempt mTLS with existing cert')
@@ -791,18 +783,15 @@ def get_or_generate_candlepin_certificate(username, password):
     It will:
     1. Check for existing certificate in the CandlepinCertificate model
     2. If missing, attempt to register with Candlepin
-    3. If exists, check for renewal needs
-    4. Write cert/key to secure temporary files
-    5. Return paths to temporary files
+    3. If exists, check for renewal needs and refresh if needed
+    4. Return the certificate and key as PEM strings
 
     Args:
-        username: Red Hat subscription username (SUBSCRIPTIONS_USERNAME or REDHAT_USERNAME)
-        password: Red Hat subscription password (SUBSCRIPTIONS_PASSWORD or REDHAT_PASSWORD)
+        username: Red Hat subscription username (REDHAT_USERNAME)
+        password: Red Hat subscription password (REDHAT_PASSWORD)
 
     Returns:
-        Tuple (cert_path, key_path) if certificate is available, (None, None) otherwise.
-        The temporary files are created with secure permissions and should be cleaned up
-        by the caller when no longer needed.
+        Tuple (cert_pem, key_pem) as strings if certificate is available, (None, None) otherwise.
 
     Adapted from PR 16240's get_or_generate_client_certificate() but uses Django model
     instead of file-based storage.
@@ -823,43 +812,9 @@ def get_or_generate_candlepin_certificate(username, password):
         cert_pem, key_pem = _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid)
 
     # Validate certificate is still usable
-    from awx.main.utils.candlepin.lifecycle import is_cert_valid
-
     if not is_cert_valid(cert_pem):
         logger.warning('Candlepin certificate is not valid (expired or not yet valid)')
         return None, None
 
-    # Write to secure temporary files for use with requests library
-    try:
-        # Create temp files with secure permissions
-        cert_fd, cert_path = tempfile.mkstemp(prefix='candlepin_cert_', suffix='.pem')
-        key_fd, key_path = tempfile.mkstemp(prefix='candlepin_key_', suffix='.pem')
-
-        try:
-            # Write cert
-            with open(cert_fd, 'w', closefd=True) as f:
-                f.write(cert_pem)
-            os.chmod(cert_path, 0o644)  # Certificate can be world-readable
-
-            # Write key
-            with open(key_fd, 'w', closefd=True) as f:
-                f.write(key_pem)
-            os.chmod(key_path, 0o600)  # Private key: owner read+write only
-
-            logger.debug(f'Candlepin certificate written to temporary files: {cert_path}, {key_path}')
-            return cert_path, key_path
-
-        except Exception as e:
-            # Clean up on failure
-            try:
-                if os.path.exists(cert_path):
-                    os.unlink(cert_path)
-                if os.path.exists(key_path):
-                    os.unlink(key_path)
-            except Exception:
-                pass
-            raise e
-
-    except Exception as e:
-        logger.error(f'Failed to write Candlepin certificate to temporary files: {e}')
-        return None, None
+    # Return raw PEM strings - caller will create temp files if needed
+    return cert_pem, key_pem

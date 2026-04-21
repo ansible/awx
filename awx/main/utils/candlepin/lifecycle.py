@@ -85,7 +85,7 @@ def needs_renewal(pem_text, days_before_expiry):
     Raises ``ValueError`` if the PEM cannot be parsed.
     """
     info = parse_cert(pem_text)
-    return info['days_remaining'] < days_before_expiry
+    return info['days_remaining'] <= days_before_expiry
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +106,7 @@ def run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid, *, candlepin_url=N
         candlepin_url:   Candlepin base URL (defaults to prod).
         renewal_days:    Renew if expiry is within this many days (default 90).
         candlepin_ca:    Path to Candlepin CA cert for server verification
-                         (default None → verify=False).
+                         (default None → uses system trust store).
         proxy:           Optional HTTP/HTTPS proxy URL string.
 
     Returns:
@@ -179,22 +179,22 @@ def run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid, *, candlepin_url=N
 
 def get_candlepin_url():
     """Get Candlepin base URL from Django settings."""
-    return getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_URL', CandlepinClient.DEFAULT_CANDLEPIN_URL)
+    return settings.AWX_ANALYTICS_CANDLEPIN_URL
 
 
 def get_renewal_days():
     """Get certificate renewal threshold in days from Django settings."""
-    return getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS', 90)
+    return settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS
 
 
 def get_candlepin_ca():
     """Get Candlepin CA certificate path from Django settings."""
-    return getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_CA', None)
+    return settings.AWX_ANALYTICS_CANDLEPIN_CA
 
 
 def get_proxy_url():
     """Get proxy URL from Django settings."""
-    return getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_PROXY_URL', None)
+    return settings.AWX_ANALYTICS_CANDLEPIN_PROXY_URL
 
 
 def get_certificate_info():

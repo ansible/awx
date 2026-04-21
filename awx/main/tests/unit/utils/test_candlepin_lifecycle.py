@@ -31,16 +31,14 @@ class TestCandlepinLifecycle:
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_candlepin_url_default(self, mock_settings):
-        """Test default Candlepin URL."""
-        # Simulate setting not being set (getattr returns default)
-        mock_settings.configure_mock(**{})
-        del mock_settings.AWX_ANALYTICS_CANDLEPIN_URL
+        """Test default Candlepin URL from defaults.py."""
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_URL = 'https://subscription.rhsm.redhat.com/subscription/'
         url = get_candlepin_url()
-        assert url == 'https://subscription.rhsm.redhat.com/subscription'
+        assert url == 'https://subscription.rhsm.redhat.com/subscription/'
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
-    def test_get_candlepin_url_from_settings(self, mock_settings):
-        """Test Candlepin URL from Django settings."""
+    def test_get_candlepin_url_custom(self, mock_settings):
+        """Test custom Candlepin URL from Django settings."""
         mock_settings.AWX_ANALYTICS_CANDLEPIN_URL = 'https://custom.example.com'
         url = get_candlepin_url()
         assert url == 'https://custom.example.com'
@@ -48,8 +46,7 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_renewal_days_default(self, mock_settings):
         """Test default renewal days."""
-        # Simulate setting not being set (getattr returns default)
-        del mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS = 90
         days = get_renewal_days()
         assert days == 90
 
@@ -63,7 +60,7 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_candlepin_ca_none(self, mock_settings):
         """Test Candlepin CA returns None when not set."""
-        del mock_settings.AWX_ANALYTICS_CANDLEPIN_CA
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_CA = None
         ca = get_candlepin_ca()
         assert ca is None
 
@@ -77,7 +74,7 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_proxy_url_none(self, mock_settings):
         """Test proxy URL returns None when not set."""
-        del mock_settings.AWX_ANALYTICS_CANDLEPIN_PROXY_URL
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_PROXY_URL = None
         proxy = get_proxy_url()
         assert proxy is None
 
