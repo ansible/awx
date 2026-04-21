@@ -1,0 +1,20 @@
+---
+name: Close Dependabot PRs on non-AWX repos
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  close-dependabot:
+    if: github.actor == 'dependabot[bot]' && github.repository != 'ansible/awx'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Close PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr close "$PR_URL" --comment "Dependabot PRs are only accepted in ansible/awx. Closing automatically."
