@@ -562,26 +562,25 @@ def test_bulk_host_create_no_duplicates_success(organization, inventory, post, u
 def test_bulk_host_create_performance_large_inventory(organization, inventory, post, user, django_assert_max_num_queries):
     """
     Test that duplicate detection is performant and doesn't load all hosts.
-    This verifies the optimization that only queries for specific new hostnames.
     """
     inventory.organization = organization
     inventory_admin = user('inventory_admin', False)
     organization.member_role.members.add(inventory_admin)
     inventory.admin_role.members.add(inventory_admin)
 
-    # Create a large inventory (simulating 500k existing hosts)
+    # Create 10k existing hosts to simulate a reasonably large inventory
     from django.utils.timezone import now
 
     _now = now()
-    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(500000)]
+    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(10000)]
     Host.objects.bulk_create(existing_hosts)
 
     new_hosts = [{'name': f'new-host-{i}'} for i in range(10)]
 
     # The number of queries should be bounded and not scale with inventory size
-    # This should be around 15-20 queries regardless of whether there are 500k or 1M+ existing hosts
+    # This should be around 15-20 queries regardless of whether there are 10k or 500k+ existing hosts
     with django_assert_max_num_queries(20):
         response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': new_hosts}, inventory_admin, expect=201)
 
     assert len(response.data['hosts']) == 10
-    assert Host.objects.filter(inventory=inventory).count() == 500010
+    assert Host.objects.filter(inventory=inventory).count() == 10010

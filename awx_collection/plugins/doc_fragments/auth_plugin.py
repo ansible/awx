@@ -76,6 +76,24 @@ options:
         why: Support for AAP variables
         alternatives: 'AAP_REQUEST_TIMEOUT'
     aliases: [ aap_request_timeout ]
+  max_retries:
+    description:
+    - Specify the max retries to be used with some connection issues.
+    - Defaults to 5.
+    - This will not work with the export or import modules.
+    type: int
+    env:
+    - name: AAP_MAX_RETRIES
+    aliases: [ aap_max_retries ]
+  retry_backoff_factor:
+    description:
+    - Backoff factor used when retrying connections.
+    - Defaults to 2.
+    - This will not work with the export or import modules.
+    type: int
+    env:
+    - name: AAP_RETRY_BACKOFF_FACTOR
+    aliases: [ aap_retry_backoff_factor ]
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library
   defaults to find your host information.
