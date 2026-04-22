@@ -118,14 +118,18 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
                 continue  # not an expected host for this job
 
             filepath = os.path.join(fact_cache_dir, filename)
-            if not os.path.realpath(filepath).startswith(fact_cache_dir):
+            if os.path.islink(filepath):
                 logger.error(f'Invalid path for facts file: {filepath}')
                 continue
             if not os.path.isfile(filepath):
                 continue
 
             seen_in_dir.add(filename)
-            modified = os.path.getmtime(filepath)
+            try:
+                modified = os.path.getmtime(filepath)
+            except OSError as e:
+                logger.warning(f'Could not stat facts file {filepath}: {e}')
+                continue
             if modified >= facts_write_time:
                 try:
                     with codecs.open(filepath, 'r', encoding='utf-8') as f:
