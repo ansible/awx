@@ -16,7 +16,6 @@ from django.db.models.signals import (
     post_save,
     pre_delete,
     post_delete,
-    m2m_changed,
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
@@ -51,7 +50,6 @@ from awx.main.models import (
     WorkflowJobTemplateNode,
     WorkflowApproval,
     WorkflowApprovalTemplate,
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
 )
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
@@ -100,57 +98,6 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     else:
         if inventory is not None:
             connection.on_commit(lambda: update_inventory_computed_fields.delay(inventory.id))
-
-
-def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
-    'When a role parent is added or removed, update our role hierarchy list'
-    if action == 'post_add':
-        if reverse:
-            model.rebuild_role_ancestor_list(list(pk_set), [])
-        else:
-            model.rebuild_role_ancestor_list([instance.id], [])
-
-    if action in ['post_remove', 'post_clear']:
-        if reverse:
-            model.rebuild_role_ancestor_list([], list(pk_set))
-        else:
-            model.rebuild_role_ancestor_list([], [instance.id])
-
-
-def sync_superuser_status_to_rbac(instance, **kwargs):
-    'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
-    if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-        return
-    update_fields = kwargs.get('update_fields', None)
-    if update_fields and 'is_superuser' not in update_fields:
-        return
-    if instance.is_superuser:
-        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
-    else:
-        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
-
-
-def sync_rbac_to_superuser_status(instance, sender, **kwargs):
-    'When the is_superuser flag is false but a user has the System Admin role, update the database to reflect that'
-    if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-        return
-    if kwargs['action'] in ['post_add', 'post_remove', 'post_clear']:
-        new_status_value = bool(kwargs['action'] == 'post_add')
-        if hasattr(instance, 'singleton_name'):  # duck typing, role.members.add() vs user.roles.add()
-            role = instance
-            if role.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR:
-                if kwargs['pk_set']:
-                    kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).update(is_superuser=new_status_value)
-                elif kwargs['action'] == 'post_clear':
-                    kwargs['model'].objects.all().update(is_superuser=False)
-        else:
-            user = instance
-            if kwargs['action'] == 'post_clear':
-                user.is_superuser = False
-                user.save(update_fields=['is_superuser'])
-            elif kwargs['model'].objects.filter(pk__in=kwargs['pk_set'], singleton_name=ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).exists():
-                user.is_superuser = new_status_value
-                user.save(update_fields=['is_superuser'])
 
 
 def _record_role_assignment_activity_stream(instance, operation):
@@ -253,9 +200,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
-post_save.connect(sync_superuser_status_to_rbac, sender=User)
-m2m_changed.connect(sync_rbac_to_superuser_status, Role.members.through)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 
