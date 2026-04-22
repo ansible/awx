@@ -1,9 +1,9 @@
 import logging
 from time import time
 
-from django.db.models import Subquery, OuterRef, F
+from django.db.models import Subquery, OuterRef
 
-from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
+from awx.main.models.rbac import Role
 
 logger = logging.getLogger('rbac_migrations')
 
@@ -32,10 +32,9 @@ def create_roles(apps, schema_editor):
         ]
     ]
 
-    with batch_role_ancestor_rebuilding():
-        for model in models:
-            for obj in model.objects.iterator():
-                obj.save()
+    for model in models:
+        for obj in model.objects.iterator():
+            obj.save()
 
 
 def delete_all_user_roles(apps, schema_editor):
@@ -166,66 +165,8 @@ def migrate_ujt_organization_backward(apps, schema_editor):
 
 
 def _restore_inventory_admins(apps, schema_editor, backward=False):
-    """With the JT.organization changes, admins of organizations connected to
-    job templates via inventory will have their permissions demoted.
-    This maintains current permissions over the migration by granting the
-    permissions they used to have explicitly on the JT itself.
-    """
-    start = time()
-    JobTemplate = apps.get_model('main', 'JobTemplate')
-    User = apps.get_model('auth', 'User')
-    changed_ct = 0
-    jt_qs = JobTemplate.objects.filter(inventory__isnull=False)
-    jt_qs = jt_qs.exclude(inventory__organization=F('project__organization'))
-    jt_qs = jt_qs.only('id', 'admin_role_id', 'execute_role_id', 'inventory_id')
-    for jt in jt_qs.iterator():
-        org = jt.inventory.organization
-        for jt_role, org_roles in (
-            (
-                'admin_role',
-                (
-                    'admin_role',
-                    'job_template_admin_role',
-                ),
-            ),
-            ('execute_role', ('execute_role',)),
-        ):
-            role_id = getattr(jt, '{}_id'.format(jt_role))
-
-            user_qs = User.objects
-            if not backward:
-                # In this specific case, the name for the org role and JT roles were the same
-                org_role_ids = [getattr(org, '{}_id'.format(role_name)) for role_name in org_roles]
-                user_qs = user_qs.filter(roles__in=org_role_ids)
-                # bizarre migration behavior - ancestors / descendents of
-                # migration version of Role model is reversed, using current model briefly
-                ancestor_ids = list(Role.objects.filter(descendents=role_id).values_list('id', flat=True))
-                # same as Role.__contains__, filter for "user in jt.admin_role"
-                user_qs = user_qs.exclude(roles__in=ancestor_ids)
-            else:
-                # use the database to filter intersection of users without access
-                # to the JT role and either organization role
-                user_qs = user_qs.filter(roles__in=[org.admin_role_id, org.execute_role_id])
-                # in reverse, intersection of users who have both
-                user_qs = user_qs.filter(roles=role_id)
-
-            user_ids = list(user_qs.values_list('id', flat=True))
-            if not user_ids:
-                continue
-
-            role = getattr(jt, jt_role)
-            logger.debug(
-                '{} {} on jt {} for users {} via inventory.organization {}'.format('Removing' if backward else 'Setting', jt_role, jt.pk, user_ids, org.pk)
-            )
-            if not backward:
-                # in reverse, explit role becomes redundant
-                role.members.add(*user_ids)
-            else:
-                role.members.remove(*user_ids)
-            changed_ct += len(user_ids)
-
-    if changed_ct:
-        logger.info('{} explicit JT permission for {} users in {:.4f} seconds'.format('Removed' if backward else 'Added', changed_ct, time() - start))
+    """Not used after DAB RBAC migration, ancestors table has been removed"""
+    pass
 
 
 def restore_inventory_admins(apps, schema_editor):

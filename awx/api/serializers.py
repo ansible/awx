@@ -2824,103 +2824,64 @@ class ResourceAccessListElementSerializer(UserSerializer):
         gfk_kwargs = dict(content_type_id=content_type.id, object_id=obj.id)
         direct_permissive_role_ids = Role.objects.filter(**gfk_kwargs).values_list('id', flat=True)
 
-        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            ret['summary_fields']['direct_access'] = []
-            ret['summary_fields']['indirect_access'] = []
+        ret['summary_fields']['direct_access'] = []
+        ret['summary_fields']['indirect_access'] = []
 
-            new_roles_seen = set()
-            all_team_roles = set()
-            all_permissive_role_ids = set()
-            for evaluation in RoleEvaluation.objects.filter(role__in=user.has_roles.all(), **gfk_kwargs).prefetch_related('role'):
-                new_role = evaluation.role
-                if new_role.id in new_roles_seen:
-                    continue
-                new_roles_seen.add(new_role.id)
-                old_role = get_role_from_object_role(new_role)
-                all_permissive_role_ids.add(old_role.id)
+        new_roles_seen = set()
+        all_team_roles = set()
+        all_permissive_role_ids = set()
+        for evaluation in RoleEvaluation.objects.filter(role__in=user.has_roles.all(), **gfk_kwargs).prefetch_related('role'):
+            new_role = evaluation.role
+            if new_role.id in new_roles_seen:
+                continue
+            new_roles_seen.add(new_role.id)
+            old_role = get_role_from_object_role(new_role)
+            all_permissive_role_ids.add(old_role.id)
 
-                if int(new_role.object_id) == obj.id and new_role.content_type_id == content_type.id:
-                    ret['summary_fields']['direct_access'].append(format_role_perm(old_role))
-                elif new_role.content_type_id == team_content_type.id:
-                    all_team_roles.add(old_role)
-                else:
-                    ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
+            if int(new_role.object_id) == obj.id and new_role.content_type_id == content_type.id:
+                ret['summary_fields']['direct_access'].append(format_role_perm(old_role))
+            elif new_role.content_type_id == team_content_type.id:
+                all_team_roles.add(old_role)
+            else:
+                ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
 
-            # Lazy role creation gives us a big problem, where some intermediate roles are not easy to find
-            # like when a team has indirect permission, so here we get all roles the users teams have
-            # these contribute to all potential permission-granting roles of the object
-            user_teams_qs = permission_registry.team_model.objects.filter(member_roles__in=ObjectRole.objects.filter(users=user))
-            team_obj_roles = ObjectRole.objects.filter(teams__in=user_teams_qs)
-            for evaluation in RoleEvaluation.objects.filter(role__in=team_obj_roles, **gfk_kwargs).prefetch_related('role'):
-                new_role = evaluation.role
-                if new_role.id in new_roles_seen:
-                    continue
-                new_roles_seen.add(new_role.id)
-                old_role = get_role_from_object_role(new_role)
-                all_permissive_role_ids.add(old_role.id)
+        user_teams_qs = permission_registry.team_model.objects.filter(member_roles__in=ObjectRole.objects.filter(users=user))
+        team_obj_roles = ObjectRole.objects.filter(teams__in=user_teams_qs)
+        for evaluation in RoleEvaluation.objects.filter(role__in=team_obj_roles, **gfk_kwargs).prefetch_related('role'):
+            new_role = evaluation.role
+            if new_role.id in new_roles_seen:
+                continue
+            new_roles_seen.add(new_role.id)
+            old_role = get_role_from_object_role(new_role)
+            all_permissive_role_ids.add(old_role.id)
 
-            # In DAB RBAC, superuser is strictly a user flag, and global roles are not in the RoleEvaluation table
-            if user.is_superuser:
-                ret['summary_fields'].setdefault('indirect_access', [])
-                all_role_names = [field.name for field in obj._meta.get_fields() if isinstance(field, ImplicitRoleField)]
-                ret['summary_fields']['indirect_access'].append(
-                    {
-                        "role": {
-                            "id": None,
-                            "name": _("System Administrator"),
-                            "description": _("Can manage all aspects of the system"),
-                            "user_capabilities": {"unattach": False},
-                        },
-                        "descendant_roles": all_role_names,
-                    }
-                )
-            elif user.is_system_auditor:
-                ret['summary_fields'].setdefault('indirect_access', [])
-                ret['summary_fields']['indirect_access'].append(
-                    {
-                        "role": {
-                            "id": None,
-                            "name": _("Platform Auditor"),
-                            "description": _("Can view all aspects of the system"),
-                            "user_capabilities": {"unattach": False},
-                        },
-                        "descendant_roles": ["read_role"],
-                    }
-                )
+        if user.is_superuser:
+            all_role_names = [field.name for field in obj._meta.get_fields() if isinstance(field, ImplicitRoleField)]
+            ret['summary_fields']['indirect_access'].append(
+                {
+                    "role": {
+                        "id": None,
+                        "name": _("System Administrator"),
+                        "description": _("Can manage all aspects of the system"),
+                        "user_capabilities": {"unattach": False},
+                    },
+                    "descendant_roles": all_role_names,
+                }
+            )
+        elif user.is_system_auditor:
+            ret['summary_fields']['indirect_access'].append(
+                {
+                    "role": {
+                        "id": None,
+                        "name": _("Platform Auditor"),
+                        "description": _("Can view all aspects of the system"),
+                        "user_capabilities": {"unattach": False},
+                    },
+                    "descendant_roles": ["read_role"],
+                }
+            )
 
-            ret['summary_fields']['direct_access'].extend([y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in all_team_roles) for y in x])
-
-            return ret
-
-        all_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('ancestors__id', flat=True)
-
-        direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
-
-        direct_team_roles = Role.objects.filter(content_type=team_content_type, members=user, children__in=direct_permissive_role_ids)
-        if content_type == team_content_type:
-            # When looking at the access list for a team, exclude the entries
-            # for that team. This exists primarily so we don't list the read role
-            # as a direct role when a user is a member or admin of a team
-            direct_team_roles = direct_team_roles.exclude(children__content_type=team_content_type, children__object_id=obj.id)
-
-        indirect_team_roles = Role.objects.filter(content_type=team_content_type, members=user, children__in=all_permissive_role_ids).exclude(
-            id__in=direct_team_roles
-        )
-
-        indirect_access_roles = (
-            user.roles.filter(id__in=all_permissive_role_ids)
-            .exclude(id__in=direct_permissive_role_ids)
-            .exclude(id__in=direct_team_roles)
-            .exclude(id__in=indirect_team_roles)
-        )
-
-        ret['summary_fields']['direct_access'] = (
-            [format_role_perm(r) for r in direct_access_roles.distinct()]
-            + [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()) for y in x]
-            + [y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()) for y in x]
-        )
-
-        ret['summary_fields']['indirect_access'] = [format_role_perm(r) for r in indirect_access_roles.distinct()]
+        ret['summary_fields']['direct_access'].extend([y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in all_team_roles) for y in x])
 
         return ret
 

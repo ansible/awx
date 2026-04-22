@@ -708,17 +708,11 @@ class UserAccess(BaseAccess):
             if not allow_orphans:
                 # in these cases only superusers can modify orphan users
                 return False
-            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-                target_perms = set(
-                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(obj)).values_list('object_id', 'content_type_id', 'codename').distinct()
-                )
-                user_perms = set(
-                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(self.user))
-                    .values_list('object_id', 'content_type_id', 'codename')
-                    .distinct()
-                )
-                return not (target_perms - user_perms)
-            return not obj.roles.all().exclude(ancestors__in=self.user.roles.all()).exists()
+            target_perms = set(RoleEvaluation.objects.filter(role__in=obj.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct())
+            user_perms = set(
+                RoleEvaluation.objects.filter(role__in=self.user.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+            )
+            return not (target_perms - user_perms)
         else:
             return self.is_all_org_admin(obj)
 
@@ -1328,12 +1322,8 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_change(self, obj, data):
         if obj and obj.organization_id is None:
             raise PermissionDenied
-        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            if not self.user.has_obj_perm(obj, 'change'):
-                return False
-        else:
-            if self.user not in obj.organization.execution_environment_admin_role:
-                raise PermissionDenied
+        if not self.user.has_obj_perm(obj, 'change'):
+            return False
         if not self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role'):
             return False
         # Special case that check_related does not catch, org users can not remove the organization from the EE
@@ -2552,9 +2542,7 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
         if not JobLaunchConfigAccess(self.user).can_add(data):
             return False
         if not data:
-            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-                return self.user.has_roles.filter(permission_partials__codename__in=['execute_jobtemplate', 'update_project', 'update_inventory']).exists()
-            return Role.objects.filter(role_field__in=['update_role', 'execute_role'], ancestors__in=self.user.roles.all()).exists()
+            return self.user.has_roles.filter(permission_partials__codename__in=['execute_jobtemplate', 'update_project', 'update_inventory']).exists()
 
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
 
@@ -2582,11 +2570,7 @@ class NotificationTemplateAccess(BaseAccess):
     prefetch_related = ('created_by', 'modified_by', 'organization')
 
     def filtered_queryset(self):
-        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            return self.model.access_qs(self.user, 'view')
-        return self.model.objects.filter(
-            Q(organization__in=Organization.access_qs(self.user, 'add_notificationtemplate')) | Q(organization__in=Organization.access_qs(self.user, 'audit'))
-        ).distinct()
+        return self.model.access_qs(self.user, 'view')
 
     @check_superuser
     def can_add(self, data):

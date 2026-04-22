@@ -1,7 +1,7 @@
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models import Role
+from awx.main.models import Role, Organization, Project, JobTemplate
 
 
 @pytest.mark.django_db
@@ -55,3 +55,43 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
 
     admin_entry = admin_res['summary_fields']['indirect_access'][0]['role']
     assert admin_entry['name'] == Role.singleton('system_administrator').name
+
+
+@pytest.mark.django_db
+def test_cross_org_jt_access_list(get, user, admin):
+    """Regression test: the access list endpoint should not reference the removed
+    ancestors/descendents fields on the Role model."""
+    org1 = Organization.objects.create(name='org1')
+    org2 = Organization.objects.create(name='org2')
+    project = Project.objects.create(name='test-project', organization=org1)
+    jt = JobTemplate.objects.create(name='test-jt', project=project)
+
+    org1_admin = user('org1-admin')
+    org1.admin_role.members.add(org1_admin)
+
+    org2_admin = user('org2-admin')
+    org2.admin_role.members.add(org2_admin)
+
+    result = get(reverse('api:job_template_access_list', kwargs={'pk': jt.id}), admin)
+    assert result.status_code == 200
+
+    result = get(reverse('api:job_template_access_list', kwargs={'pk': jt.id}), org1_admin)
+    assert result.status_code == 200
+
+    org1_admin_entry = [r for r in result.data['results'] if r['id'] == org1_admin.id]
+    assert len(org1_admin_entry) == 1
+
+
+@pytest.mark.django_db
+def test_cross_org_jt_object_roles(get, user, admin):
+    """Regression test: listing object_roles should work without the ancestors table."""
+    org = Organization.objects.create(name='test-org')
+    project = Project.objects.create(name='test-project', organization=org)
+    jt = JobTemplate.objects.create(name='test-jt', project=project)
+
+    org_admin = user('org-admin')
+    org.admin_role.members.add(org_admin)
+
+    result = get(reverse('api:job_template_object_roles_list', kwargs={'pk': jt.id}), org_admin)
+    assert result.status_code == 200
+    assert result.data['count'] > 0
