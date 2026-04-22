@@ -215,6 +215,9 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
+# Minimum number of workers for the dispatcher (dispatcherd) process pool
+DISPATCHER_MIN_WORKERS = 4
+
 # The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
 JOB_EVENT_BUFFER_SECONDS = 1
