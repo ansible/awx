@@ -2078,9 +2078,17 @@ class BulkHostCreateSerializer(serializers.Serializer):
         if request and not request.user.is_superuser:
             if request.user not in inv.admin_role:
                 raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
-        current_hostnames = set(inv.hosts.values_list('name', flat=True))
+
+        # Performance optimization (AAP-67978): Instead of loading ALL host names from
+        # the inventory, only check if the specific new names already exist in the database.
         new_names = [host['name'] for host in attrs['hosts']]
-        duplicate_new_names = [n for n in new_names if n in current_hostnames or new_names.count(n) > 1]
+
+        new_name_counts = Counter(new_names)
+        duplicates_in_new = [name for name, count in new_name_counts.items() if count > 1]
+        unique_new_names = list(new_name_counts.keys())
+        existing_duplicates = list(Host.objects.filter(inventory=inv, name__in=unique_new_names).values_list('name', flat=True))
+        duplicate_new_names = list(set(duplicates_in_new + existing_duplicates))
+
         if duplicate_new_names:
             raise serializers.ValidationError(_(f'Hostnames must be unique in an inventory. Duplicates found: {duplicate_new_names}'))
 
