@@ -3,8 +3,6 @@ from time import time
 
 from django.db.models import Subquery, OuterRef
 
-from awx.main.models.rbac import Role
-
 logger = logging.getLogger('rbac_migrations')
 
 

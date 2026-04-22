@@ -2822,7 +2822,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
             return ret
 
         gfk_kwargs = dict(content_type_id=content_type.id, object_id=obj.id)
-        direct_permissive_role_ids = Role.objects.filter(**gfk_kwargs).values_list('id', flat=True)
 
         ret['summary_fields']['direct_access'] = []
         ret['summary_fields']['indirect_access'] = []
