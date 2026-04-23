@@ -801,23 +801,6 @@ class TeamRolesList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
-        if role.content_type == credential_content_type:
-            if not role.content_object.organization:
-                data = dict(
-                    msg=_("You cannot grant access to a credential that is not assigned to an organization (private credentials cannot be assigned to teams)")
-                )
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            elif role.content_object.organization.id != team.organization.id:
-                if not request.user.is_superuser:
-                    data = dict(
-                        msg=_(
-                            "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
-                        )
-                    )
-                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
 
@@ -1274,20 +1257,6 @@ class UserRolesList(SubListAttachDetachAPIView):
         sub_id = request.data.get('id', None)
         if not sub_id:
             return super(UserRolesList, self).post(request)
-
-        user = get_object_or_400(models.User, pk=self.kwargs['pk'])
-        role = get_object_or_400(models.Role, pk=sub_id)
-
-        content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        credential_content_type = content_types[models.Credential]
-        if role.content_type == credential_content_type:
-            if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
-                data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-            if not role.content_object.organization and not request.user.is_superuser:
-                data = dict(msg=_("You cannot grant private credential access to another user"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -4888,20 +4857,6 @@ class RoleUsersList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(RoleUsersList, self).post(request)
 
-        user = get_object_or_400(models.User, pk=sub_id)
-        role = self.get_parent_object()
-
-        content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        credential_content_type = content_types[models.Credential]
-        if role.content_type == credential_content_type:
-            if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
-                data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-            if not role.content_object.organization and not request.user.is_superuser:
-                data = dict(msg=_("You cannot grant private credential access to another user"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
@@ -4932,24 +4887,6 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         if role.content_type == organization_content_type and role.role_field in ['member_role', 'admin_role']:
             data = dict(msg=_("You cannot assign an Organization participation role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
-        if role.content_type == credential_content_type:
-            # Private credentials (no organization) are never allowed for teams
-            if not role.content_object.organization:
-                data = dict(
-                    msg=_("You cannot grant access to a credential that is not assigned to an organization (private credentials cannot be assigned to teams)")
-                )
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            # Cross-organization credentials are only allowed for superusers
-            elif role.content_object.organization.id != team.organization.id:
-                if not request.user.is_superuser:
-                    data = dict(
-                        msg=_(
-                            "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
-                        )
-                    )
-                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         action = 'attach'
         if request.data.get('disassociate', None):
