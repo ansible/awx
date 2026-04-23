@@ -1854,9 +1854,10 @@ class HostSerializer(BaseSerializerWithVariables):
             try:
                 last_job = last_summary.job
                 d['last_job'] = OrderedDict()
-                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error'):
-                    if hasattr(last_job, field):
-                        d['last_job'][field] = getattr(last_job, field)
+                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'canceled_on'):
+                    fval = getattr(last_job, field, None)
+                    if fval is not None:
+                        d['last_job'][field] = fval
                 if last_job.job_template:
                     d['last_job']['job_template_id'] = last_job.job_template.id
                     d['last_job']['job_template_name'] = last_job.job_template.name
