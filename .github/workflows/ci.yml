@@ -124,8 +124,9 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.test-result-files != ''
-        uses: codecov/test-results-action@v1.2.1
+        uses: codecov/codecov-action@v6
         with:
+          report-type: test_results
           fail_ci_if_error: >-
             ${{
               toJSON(env.UPSTREAM_REPOSITORY_ID == github.repository_id)
