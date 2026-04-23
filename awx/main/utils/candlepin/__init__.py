@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Ansible, Inc.
+# All Rights Reserved.
+
 """
 Candlepin integration for mTLS-based authentication.
 
@@ -6,6 +9,298 @@ enabling AAP controller instances to authenticate analytics uploads using
 mTLS instead of service account credentials.
 """
 
-from .lifecycle import check_certificate_health, get_certificate_info
+import logging
+from datetime import datetime
+import requests
 
-__all__ = ['check_certificate_health', 'get_certificate_info']
+from django.conf import settings
+
+from .client import CandlepinClient
+from .lifecycle import (
+    get_candlepin_ca,
+    get_candlepin_url,
+    get_proxy_url,
+    get_renewal_days,
+    is_cert_valid,
+    parse_cert,
+    run_candlepin_lifecycle,
+)
+
+logger = logging.getLogger('awx.main.utils.candlepin')
+
+# Placeholder UUID used before a real consumer is registered.
+# Treat it the same as an absent UUID so we never attempt a Candlepin
+# lifecycle call with a non-functional consumer identity.
+CANDLEPIN_UUID_PLACEHOLDER = '00000000-0000-0000-0000-000000000000'
+
+
+def _fetch_candlepin_cert_from_db():
+    """Read cert PEM, key PEM, and consumer UUID from AWX conf_settings.
+
+    Returns (cert_pem, key_pem, consumer_uuid) if valid certificate data exists,
+    or (None, None, None) if placeholder/unregistered data.
+    Best-effort: failures are logged as warnings and never propagate.
+    """
+    try:
+        consumer_uuid = getattr(settings, 'CANDLEPIN_CONSUMER_UUID', CANDLEPIN_UUID_PLACEHOLDER)
+        cert_pem = getattr(settings, 'CANDLEPIN_CERT_PEM', '')
+        key_pem = getattr(settings, 'CANDLEPIN_KEY_PEM', '')
+
+        # Check if we have valid data (not placeholder)
+        if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER or not cert_pem or not key_pem:
+            return None, None, None
+
+        return cert_pem, key_pem, consumer_uuid
+    except Exception as e:
+        logger.warning(f'Could not fetch Candlepin lifecycle data from settings: {e}')
+        return None, None, None
+
+
+def _save_candlepin_cert_to_db(cert_pem, key_pem):
+    """Persist a renewed Candlepin identity cert and key to AWX conf_settings.
+
+    Returns:
+        bool: True if save succeeded, False on any error.
+    """
+    from awx.conf.models import Setting
+
+    try:
+        # Parse certificate to extract metadata
+        try:
+            cert_info = parse_cert(cert_pem)
+            serial_number = cert_info.get('serial', '')
+            expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
+        except Exception as e:
+            logger.warning(f'Could not parse certificate metadata: {e}')
+            serial_number = ''
+            expires_at = None
+
+        # Update conf_settings
+        Setting.objects.update_or_create(key='CANDLEPIN_CERT_PEM', defaults={'value': cert_pem})
+        Setting.objects.update_or_create(key='CANDLEPIN_KEY_PEM', defaults={'value': key_pem})
+        Setting.objects.update_or_create(key='CANDLEPIN_SERIAL_NUMBER', defaults={'value': serial_number})
+        if expires_at:
+            Setting.objects.update_or_create(key='CANDLEPIN_EXPIRES_AT', defaults={'value': expires_at})
+
+        logger.info('Renewed Candlepin cert and key saved to conf_settings.')
+        return True
+    except Exception as e:
+        logger.error(f'Could not save renewed Candlepin cert to conf_settings: {e}')
+        return False
+
+
+def _discover_org(candlepin_url, username, password):
+    """Discover org key via GET /users/{username}/owners.
+
+    Returns:
+        str: Organization key if found, None on any failure.
+    """
+    try:
+        url = f"{candlepin_url}/users/{username}/owners"
+        candlepin_ca = get_candlepin_ca()
+        verify = candlepin_ca if candlepin_ca else True
+
+        resp = requests.get(url, auth=(username, password), verify=verify, timeout=30)
+        resp.raise_for_status()
+
+        owners = resp.json()
+        if not owners:
+            logger.warning(f'No organizations found for user {username}')
+            return None
+
+        org = owners[0].get('key')
+        if not org:
+            logger.warning(f'Organization key missing in response for user {username}')
+            return None
+
+        logger.info(f'Discovered organization: {org} ({owners[0].get("displayName", "")}) for user {username}')
+        return org
+    except requests.exceptions.RequestException as e:
+        logger.warning(f'Failed to discover organization for user {username}: {e}')
+        return None
+    except Exception as e:
+        logger.warning(f'Unexpected error discovering organization for user {username}: {e}')
+        return None
+
+
+def _fetch_registration_credentials_from_db():
+    """Read Candlepin registration credentials from AWX settings.
+
+    Reads REDHAT_USERNAME, REDHAT_PASSWORD (set by AWX when the
+    customer configures their Red Hat subscription), LICENSE.account_number (org
+    key for the Candlepin /consumers endpoint), and INSTALL_UUID (used as the
+    consumer's aap.instance_uuid fact).
+
+    Returns (username, password, org, install_uuid), any of which may be None
+    if the corresponding setting is not configured.
+    """
+    candlepin_url = get_candlepin_url()
+    try:
+        username = getattr(settings, 'REDHAT_USERNAME', None)
+        password = getattr(settings, 'REDHAT_PASSWORD', None)
+        install_uuid = getattr(settings, 'INSTALL_UUID', None)
+        org = _discover_org(candlepin_url, settings.SUBSCRIPTIONS_USERNAME, settings.SUBSCRIPTIONS_PASSWORD)
+        return username, password, org, install_uuid
+    except Exception as e:
+        logger.warning(f'Could not fetch Candlepin registration credentials from settings: {e}')
+        return None, None, None, None
+
+
+def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
+    """Persist a new Candlepin consumer registration (cert, key, UUID) to AWX conf_settings.
+
+    Returns:
+        bool: True if save succeeded, False on any error.
+    """
+    from awx.conf.models import Setting
+
+    try:
+        # Parse certificate to extract metadata
+        try:
+            cert_info = parse_cert(cert_pem)
+            serial_number = cert_info.get('serial', '')
+            expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
+        except Exception as e:
+            logger.warning(f'Could not parse certificate metadata: {e}')
+            serial_number = ''
+            expires_at = None
+
+        # Update conf_settings with all registration data
+        Setting.objects.update_or_create(key='CANDLEPIN_CONSUMER_UUID', defaults={'value': consumer_uuid})
+        Setting.objects.update_or_create(key='CANDLEPIN_CERT_PEM', defaults={'value': cert_pem})
+        Setting.objects.update_or_create(key='CANDLEPIN_KEY_PEM', defaults={'value': key_pem})
+        Setting.objects.update_or_create(key='CANDLEPIN_SERIAL_NUMBER', defaults={'value': serial_number})
+        if expires_at:
+            Setting.objects.update_or_create(key='CANDLEPIN_EXPIRES_AT', defaults={'value': expires_at})
+
+        logger.info(f'Candlepin consumer registration saved to conf_settings (uuid={consumer_uuid}).')
+        return True
+    except Exception as e:
+        logger.error(f'Could not save Candlepin registration to conf_settings: {e}')
+        return False
+
+
+def _register_candlepin_consumer():
+    """Register a new Candlepin consumer using credentials from AWX settings.
+
+    Called when no identity cert exists in the DB.
+
+    Reads REDHAT_USERNAME / REDHAT_PASSWORD and the org key from
+    LICENSE.account_number, then calls POST /consumers on Candlepin to obtain an
+    identity certificate.  On success the cert, key, and consumer UUID are
+    persisted to conf_settings.
+
+    Returns (cert_pem, key_pem, consumer_uuid) on success, (None, None, None) on
+    any failure.  Best-effort: logs errors but never propagates.
+    """
+    username, password, org, install_uuid = _fetch_registration_credentials_from_db()
+
+    if not username or not password:
+        logger.warning('Candlepin registration is enabled but REDHAT_USERNAME / REDHAT_PASSWORD are not set; skipping registration.')
+        return None, None, None
+
+    if not org:
+        logger.warning('Candlepin registration is enabled but LICENSE.account_number is not available; skipping registration.')
+        return None, None, None
+
+    candlepin_url = get_candlepin_url()
+    candlepin_ca = get_candlepin_ca()
+    proxy = get_proxy_url()
+    client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy)
+
+    try:
+        cert_pem, key_pem, consumer_uuid = client.register_consumer(username, password, org, install_uuid)
+    except Exception as e:
+        logger.error(f'Candlepin consumer registration failed: {e}')
+        return None, None, None
+
+    if not _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
+        logger.error('Candlepin consumer registration succeeded but failed to save to database.')
+        return None, None, None
+    return cert_pem, key_pem, consumer_uuid
+
+
+def _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid):
+    """Orchestrate Candlepin check-in and proactive cert renewal.
+
+    Returns the (possibly renewed) (cert_pem, key_pem) tuple. If renewal fails, the
+    original cert is returned so the caller can still attempt mTLS (which
+    will then fall back to service-account auth via the existing SSLError
+    handler).
+    """
+    if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER:
+        logger.warning(
+            'Candlepin lifecycle is enabled but consumer UUID is not set ' '(or still contains the placeholder value); ' 'skipping check-in and renewal.'
+        )
+        return cert_pem, key_pem
+
+    candlepin_url = get_candlepin_url()
+    renewal_days = get_renewal_days()
+    candlepin_ca = get_candlepin_ca()
+    proxy = get_proxy_url()
+
+    try:
+        new_cert_pem, new_key_pem = run_candlepin_lifecycle(
+            cert_pem,
+            key_pem,
+            consumer_uuid,
+            candlepin_url=candlepin_url,
+            renewal_days=renewal_days,
+            candlepin_ca=candlepin_ca,
+            proxy=proxy,
+        )
+        if (new_cert_pem, new_key_pem) != (cert_pem, key_pem):
+            if not _save_candlepin_cert_to_db(new_cert_pem, new_key_pem):
+                logger.warning('Renewed certificate will be used for this request, but failed to persist to database for future use.')
+        return new_cert_pem, new_key_pem
+    except Exception as e:
+        logger.error(f'Candlepin lifecycle (check-in / renewal) failed: {e}; will attempt mTLS with existing cert')
+        return cert_pem, key_pem
+
+
+def get_or_generate_candlepin_certificate(username, password):
+    """
+    Get or generate Candlepin certificate for analytics authentication.
+
+    This function provides certificate-based authentication for analytics uploads.
+    It will:
+    1. Check for existing certificate in conf_settings
+    2. If missing, attempt to register with Candlepin
+    3. If exists, check for renewal needs and refresh if needed
+    4. Return the certificate and key as PEM strings
+
+    Args:
+        username: Red Hat subscription username (REDHAT_USERNAME)
+        password: Red Hat subscription password (REDHAT_PASSWORD)
+
+    Returns:
+        Tuple (cert_pem, key_pem) as strings if certificate is available, (None, None) otherwise.
+    """
+    cert_pem, key_pem, consumer_uuid = _fetch_candlepin_cert_from_db()
+
+    # If no certificate exists, attempt registration
+    if not cert_pem or not key_pem:
+        logger.info('No Candlepin certificate found, attempting registration')
+        cert_pem, key_pem, consumer_uuid = _register_candlepin_consumer()
+
+        if not cert_pem or not key_pem:
+            logger.debug('Candlepin certificate registration failed or not configured')
+            return None, None
+
+    # Run lifecycle (check-in and renewal if needed)
+    if consumer_uuid and consumer_uuid != CANDLEPIN_UUID_PLACEHOLDER:
+        cert_pem, key_pem = _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid)
+
+    # Validate certificate is still usable
+    if not is_cert_valid(cert_pem):
+        logger.warning('Candlepin certificate is not valid (expired or not yet valid)')
+        return None, None
+
+    # Return raw PEM strings - caller will create temp files if needed
+    return cert_pem, key_pem
+
+
+__all__ = [
+    'CANDLEPIN_UUID_PLACEHOLDER',
+    'get_or_generate_candlepin_certificate',
+]

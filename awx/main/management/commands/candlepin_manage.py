@@ -13,7 +13,7 @@ from awx.main.utils.candlepin.lifecycle import (
     needs_renewal,
     parse_cert,
 )
-from awx.main.utils.licensing import (
+from awx.main.utils.candlepin import (
     CANDLEPIN_UUID_PLACEHOLDER,
     _fetch_candlepin_cert_from_db,
     _fetch_registration_credentials_from_db,
@@ -46,9 +46,9 @@ class Command(BaseCommand):
                     '',
                     '  register  Register this instance as a Candlepin consumer.',
                     '            Credentials are read from AWX database by default',
-                    '            (REDHAT_USERNAME, REDHAT_PASSWORD,',
-                    '            LICENSE.account_number).  Pass --username / --password /  ',
-                    '            --org to override.',
+                    '            (REDHAT_USERNAME, REDHAT_PASSWORD). The organization is',
+                    '            discovered automatically from the Candlepin account.',
+                    '            Pass --username / --password / --org to override.',
                     '',
                     '  renew     Perform a manual check-in and proactive cert renewal.',
                     '            Reads the stored cert/key/UUID from database.',
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         )
         reg.add_argument('--username', help='Red Hat subscription username (overrides REDHAT_USERNAME from database)')
         reg.add_argument('--password', help='Red Hat subscription password (overrides REDHAT_PASSWORD from database)')
-        reg.add_argument('--org', help='Candlepin owner/org key (overrides LICENSE.account_number from database)')
+        reg.add_argument('--org', help='Candlepin owner/org key (overrides auto-discovered organization)')
         reg.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
         reg.add_argument(
             '--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)'
@@ -138,7 +138,7 @@ class Command(BaseCommand):
         if not password:
             missing.append('password (pass --password or set REDHAT_PASSWORD in database)')
         if not org:
-            missing.append('org (pass --org or ensure LICENSE.account_number is set in database)')
+            missing.append('org (pass --org or ensure SUBSCRIPTIONS_USERNAME/PASSWORD are configured for auto-discovery)')
         if missing:
             for m in missing:
                 self.stderr.write(f'Missing required value: {m}')
@@ -166,7 +166,7 @@ class Command(BaseCommand):
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
         proxy = options.get('proxy') or get_proxy_url()
 
-        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy)
+        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=False)
 
         self.stdout.write(f'Registering with Candlepin at {candlepin_url} (org={org}) ...')
         try:
@@ -232,7 +232,7 @@ class Command(BaseCommand):
         proxy = options.get('proxy') or get_proxy_url()
         renewal_days = get_renewal_days()
 
-        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy)
+        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=False)
 
         self.stdout.write(f'Checking in with Candlepin at {candlepin_url} (consumer={consumer_uuid}) ...')
         checkin_success = client.checkin(consumer_uuid, cert_pem, key_pem)

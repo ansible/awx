@@ -24,7 +24,7 @@ from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
 from awx.main.utils.analytics_proxy import OIDCClient
-from awx.main.utils.licensing import get_or_generate_candlepin_certificate
+from awx.main.utils.candlepin import get_or_generate_candlepin_certificate
 
 __all__ = ['register', 'gather', 'ship']
 
