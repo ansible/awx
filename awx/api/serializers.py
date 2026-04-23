@@ -4149,6 +4149,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         requested_prompt_fields = incoming_attr_keys & ask_mapping_keys
         if 'extra_data' in incoming_attr_keys:
             requested_prompt_fields.add('extra_vars')
+            requested_prompt_fields.add('survey_passwords')
 
         # prompts_dict() pulls persisted M2M state (labels, credentials,
         # instance_groups) via the instance pk.  Only re-validate the full prompt
