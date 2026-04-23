@@ -11,7 +11,6 @@ from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
 from awx.main.utils import get_awx_version
 from awx.main.utils.analytics_proxy import OIDCClient
-from awx.main.utils.candlepin import check_certificate_health, get_certificate_info
 from rest_framework import status
 
 from collections import OrderedDict
@@ -56,8 +55,6 @@ class AnalyticsRootView(APIView):
     def get(self, request, format=None):
         data = OrderedDict()
         data['authorized'] = reverse('api:analytics_authorized', request=request)
-        data['certificate_health'] = reverse('api:analytics_certificate_health', request=request)
-        data['certificate_status'] = reverse('api:analytics_certificate_status', request=request)
         data['reports'] = reverse('api:analytics_reports_list', request=request)
         data['report_options'] = reverse('api:analytics_report_options_list', request=request)
         data['adoption_rate'] = reverse('api:analytics_adoption_rate', request=request)
@@ -354,68 +351,3 @@ class AnalyticsProbeTemplateForHostsList(GetNotAllowedMixin, AnalyticsGenericLis
 class AnalyticsRoiTemplatesList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("ROI Templates")
     resource_purpose = 'automation analytics roi templates'
-
-
-class AnalyticsCertificateHealthView(APIView):
-    """
-    Certificate health check endpoint for analytics authentication
-    """
-
-    permission_classes = (AnalyticsPermission,)
-    name = _("Certificate Health")
-
-    def get(self, request, format=None):
-        """
-        Check analytics certificate health status
-        Returns simplified health status for monitoring systems
-        """
-        try:
-            health = check_certificate_health()
-
-            # Return appropriate HTTP status based on health
-            if health.get('status') == 'healthy':
-                http_status = status.HTTP_200_OK
-            elif health.get('status') == 'warning':
-                http_status = status.HTTP_200_OK  # Warning is still OK
-            else:
-                http_status = status.HTTP_503_SERVICE_UNAVAILABLE  # Critical issues
-
-            return Response(health, status=http_status)
-
-        except Exception as e:
-            logger.error(f"Certificate health check failed: {e}")
-            return Response(
-                {"status": "error", "message": f"Health check failed: {str(e)}", "needs_renewal": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class AnalyticsCertificateStatusView(APIView):
-    """
-    Detailed certificate status endpoint for analytics authentication
-    """
-
-    permission_classes = (AnalyticsPermission,)
-    name = _("Certificate Status")
-
-    def get(self, request, format=None):
-        """
-        Get detailed analytics certificate status and information
-        Returns comprehensive certificate details for administration
-        """
-        try:
-            cert_info = get_certificate_info()
-
-            # Add authentication configuration status
-            cert_info['authentication_config'] = {
-                'candlepin_url': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_URL', 'https://subscription.rhsm.redhat.com/subscription'),
-                'renewal_threshold_days': getattr(settings, 'AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS', 90),
-                'has_redhat_credentials': bool(getattr(settings, 'REDHAT_USERNAME', None)),
-            }
-
-            return Response(cert_info, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            logger.error(f"Certificate status check failed: {e}")
-            return Response(
-                {"status": "error", "message": f"Status check failed: {str(e)}", "needs_renewal": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )

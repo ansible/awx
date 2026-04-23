@@ -825,6 +825,69 @@ register(
 )
 
 register(
+    'CANDLEPIN_CONSUMER_UUID',
+    field_class=fields.CharField,
+    default='00000000-0000-0000-0000-000000000000',
+    allow_blank=True,
+    encrypted=False,
+    label=_('Candlepin Consumer UUID'),
+    help_text=_('UUID of the registered Candlepin consumer for this AAP instance.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_CERT_PEM',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    label=_('Candlepin Identity Certificate'),
+    help_text=_('PEM-encoded Candlepin identity certificate for mTLS authentication.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_KEY_PEM',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=True,
+    label=_('Candlepin Identity Key'),
+    help_text=_('PEM-encoded private key for Candlepin identity certificate.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_SERIAL_NUMBER',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    encrypted=False,
+    label=_('Candlepin Certificate Serial Number'),
+    help_text=_('Serial number of the Candlepin identity certificate for tracking.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
+    'CANDLEPIN_EXPIRES_AT',
+    field_class=fields.DateTimeField,
+    allow_null=True,
+    label=_('Candlepin Certificate Expiry'),
+    help_text=_('Expiry timestamp of the Candlepin identity certificate.'),
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
     'IS_K8S',
     field_class=fields.BooleanField,
     read_only=True,
