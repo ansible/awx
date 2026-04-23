@@ -801,6 +801,12 @@ class TeamRolesList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+        if 'disassociate' not in request.data:
+            team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(team, role_definition=None, requesting_user=request.user)
+
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
 
@@ -1257,6 +1263,13 @@ class UserRolesList(SubListAttachDetachAPIView):
         sub_id = request.data.get('id', None)
         if not sub_id:
             return super(UserRolesList, self).post(request)
+
+        if 'disassociate' not in request.data:
+            role = get_object_or_400(models.Role, pk=sub_id)
+            user = get_object_or_400(models.User, pk=self.kwargs['pk'])
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(user, role_definition=None, requesting_user=request.user)
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -4857,6 +4870,13 @@ class RoleUsersList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(RoleUsersList, self).post(request)
 
+        if 'disassociate' not in request.data:
+            user = get_object_or_400(models.User, pk=sub_id)
+            role = self.get_parent_object()
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(user, role_definition=None, requesting_user=request.user)
+
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
@@ -4895,6 +4915,11 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         if role.is_singleton() and action == 'attach':
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if action == 'attach':
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(team, role_definition=None, requesting_user=request.user)
 
         if not request.user.can_access(self.parent_model, action, role, team, self.relationship, request.data, skip_sub_obj_read_check=False):
             raise PermissionDenied()

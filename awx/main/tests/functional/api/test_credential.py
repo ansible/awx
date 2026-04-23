@@ -204,7 +204,7 @@ def test_grant_org_credential_to_non_org_user_through_role_users(post, credentia
     credential.organization = organization
     credential.save()
     response = post(reverse('api:role_users_list', kwargs={'pk': credential.use_role.id}), {'id': alice.id}, org_admin)
-    assert response.status_code == 204
+    assert response.status_code == 400
 
 
 @pytest.mark.django_db
@@ -213,7 +213,7 @@ def test_grant_org_credential_to_non_org_user_through_user_roles(post, credentia
     credential.organization = organization
     credential.save()
     response = post(reverse('api:user_roles_list', kwargs={'pk': alice.id}), {'id': credential.use_role.id}, org_admin)
-    assert response.status_code == 204
+    assert response.status_code == 400
 
 
 @pytest.mark.django_db
@@ -300,7 +300,8 @@ def test_grant_credential_to_team_different_organization_through_role_teams(post
 
     # Non-superuser (org_admin) trying cross-org assignment should be denied
     response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, org_admin)
-    assert response.status_code == 403
+    assert response.status_code == 400
+    assert "You cannot grant credential access to a Team not in the credentials' organization" in str(response.data['detail'])
 
     # Superuser (admin) can do cross-org assignment
     response = post(reverse('api:role_teams_list', kwargs={'pk': credential.use_role.id}), {'id': team.id}, admin)
@@ -323,7 +324,8 @@ def test_grant_credential_to_team_different_organization(post, get, credential, 
 
     # Non-superuser (org_admin) trying cross-org assignment should be denied
     response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, org_admin)
-    assert response.status_code == 403
+    assert response.status_code == 400
+    assert "You cannot grant credential access to a Team not in the credentials' organization" in str(response.data['detail'])
 
     # Superuser (system admin) can do cross-org assignment
     response = post(reverse('api:team_roles_list', kwargs={'pk': team.id}), {'id': credential.use_role.id}, admin)
