@@ -105,7 +105,7 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.cov-report-files != ''
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: >-
             ${{
@@ -124,7 +124,7 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.test-result-files != ''
-        uses: codecov/test-results-action@v1
+        uses: codecov/test-results-action@v1.2.1
         with:
           fail_ci_if_error: >-
             ${{
@@ -404,7 +404,7 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.cov-report-files != ''
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: >-
             ${{
