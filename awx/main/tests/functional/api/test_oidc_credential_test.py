@@ -257,3 +257,12 @@ def test_credential_type_test_success_returns_jwt_payload(mock_flag, post, admin
     assert response.status_code == 202
     assert 'details' in response.data
     assert 'sent_jwt_payload' in response.data['details']
+
+
+@pytest.mark.django_db
+def test_credential_external_test_returns_400_for_non_external_credential(post, admin, credential):
+    # credential fixture creates a non-external credential (e.g. SSH/vault kind)
+    url = reverse('api:credential_external_test', kwargs={'pk': credential.pk})
+    response = post(url, {'metadata': {}}, admin)
+    assert response.status_code == 400
+    assert 'not testable' in response.data.get('detail', '').lower()
