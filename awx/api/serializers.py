@@ -2303,7 +2303,7 @@ def _validate_proxy_url(value):
     if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES or parsed.hostname is None:
         raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
     try:
-        _port = parsed.port
+        _port = parsed.port  # noqa: F841 – access triggers ValueError for invalid ports
     except ValueError:
         raise serializers.ValidationError(_('Proxy URL has an invalid port.')) from None
 
