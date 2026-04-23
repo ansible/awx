@@ -4142,10 +4142,12 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                             attrs['extra_data'][key] = db_extra_data[key]
 
         # Build unsaved version of this config, use it to detect prompts errors
+        # Capture keys before _build_mock_obj pops pseudo-fields from attrs
+        incoming_attr_keys = set(attrs.keys())
         mock_obj = self._build_mock_obj(attrs)
         ask_mapping_keys = set(ujt.get_ask_mapping().keys())
-        requested_prompt_fields = set(attrs.keys()) & ask_mapping_keys
-        if 'extra_data' in attrs:
+        requested_prompt_fields = incoming_attr_keys & ask_mapping_keys
+        if 'extra_data' in incoming_attr_keys:
             requested_prompt_fields.add('extra_vars')
 
         # prompts_dict() pulls persisted M2M state (labels, credentials,
