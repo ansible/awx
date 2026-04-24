@@ -801,7 +801,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        if 'disassociate' not in request.data:
+        if not request.data.get('disassociate'):
             team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
             content_object = role.content_object
             if hasattr(content_object, 'validate_role_assignment'):
@@ -1264,7 +1264,7 @@ class UserRolesList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(UserRolesList, self).post(request)
 
-        if 'disassociate' not in request.data:
+        if not request.data.get('disassociate'):
             role = get_object_or_400(models.Role, pk=sub_id)
             user = get_object_or_400(models.User, pk=self.kwargs['pk'])
             content_object = role.content_object
@@ -4870,7 +4870,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(RoleUsersList, self).post(request)
 
-        if 'disassociate' not in request.data:
+        if not request.data.get('disassociate'):
             user = get_object_or_400(models.User, pk=sub_id)
             role = self.get_parent_object()
             content_object = role.content_object
