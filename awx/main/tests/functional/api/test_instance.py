@@ -62,6 +62,54 @@ def test_health_check_usage(get, post, admin_user):
     assert r.data['msg'] == f"Health check is running for {instance.hostname}."
 
 
+@pytest.mark.django_db
+def test_health_check_control_node(get, post, admin_user):
+    kwargs = dict(hostname='control-node', cpu=6, node_type='control', memory=36000000000, cpu_capacity=6, mem_capacity=42)
+    instance = Instance.objects.create(**kwargs)
+    url = reverse('api:instance_health_check', kwargs={'pk': instance.pk})
+    get(url=url, user=admin_user, expect=200)
+    r = post(url=url, user=admin_user, expect=200)
+    assert r.data['msg'] == f"Health check is running for {instance.hostname}."
+
+
+@pytest.mark.django_db
+def test_health_check_hybrid_node(get, post, admin_user):
+    kwargs = dict(hostname='hybrid-node', cpu=6, node_type='hybrid', memory=36000000000, cpu_capacity=6, mem_capacity=42)
+    instance = Instance.objects.create(**kwargs)
+    url = reverse('api:instance_health_check', kwargs={'pk': instance.pk})
+    get(url=url, user=admin_user, expect=200)
+    r = post(url=url, user=admin_user, expect=200)
+    assert r.data['msg'] == f"Health check is running for {instance.hostname}."
+
+
+@pytest.mark.django_db
+def test_health_check_hop_node_excluded(get, post, admin_user):
+    kwargs = dict(hostname='hop-node', cpu=0, node_type='hop', memory=0, cpu_capacity=0, mem_capacity=0)
+    instance = Instance.objects.create(**kwargs)
+    url = reverse('api:instance_health_check', kwargs={'pk': instance.pk})
+    get(url=url, user=admin_user, expect=404)
+    post(url=url, user=admin_user, expect=404)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ['execution', 'control', 'hybrid'])
+def test_health_check_link_present(get, admin_user, node_type):
+    kwargs = dict(hostname=f'{node_type}-node', cpu=6, node_type=node_type, memory=36000000000, cpu_capacity=6, mem_capacity=42)
+    instance = Instance.objects.create(**kwargs)
+    url = reverse('api:instance_detail', kwargs={'pk': instance.pk})
+    r = get(url=url, user=admin_user, expect=200)
+    assert 'health_check' in r.data['related']
+
+
+@pytest.mark.django_db
+def test_health_check_link_absent_for_hop(get, admin_user):
+    kwargs = dict(hostname='hop-node', cpu=0, node_type='hop', memory=0, cpu_capacity=0, mem_capacity=0)
+    instance = Instance.objects.create(**kwargs)
+    url = reverse('api:instance_detail', kwargs={'pk': instance.pk})
+    r = get(url=url, user=admin_user, expect=200)
+    assert 'health_check' not in r.data['related']
+
+
 def test_custom_hostname_regex(post, admin_user):
     url = reverse('api:instance_list')
     with override_settings(IS_K8S=True):
