@@ -42,6 +42,7 @@ services:
       DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
       UWSGI_MOUNT_PATH: {{ ingress_path }}
       DJANGO_COLORS: "${DJANGO_COLORS:-}"
+      SETUPTOOLS_SCM_PRETEND_VERSION: "${SETUPTOOLS_SCM_PRETEND_VERSION:-}"
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
