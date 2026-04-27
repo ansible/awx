@@ -254,7 +254,7 @@ class BaseTask(object):
                 try:
                     jwt = retrieve_workload_identity_jwt(
                         self.instance,
-                        audience=input_src.source_credential.get_input('jwt_aud'),
+                        audience=input_src.source_credential.get_input('url'),
                         scope=AutomationControllerJobScope.name,
                         workload_ttl_seconds=workload_ttl,
                     )

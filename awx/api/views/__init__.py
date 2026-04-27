@@ -1610,12 +1610,12 @@ class OIDCCredentialTestMixin:
     """
 
     @staticmethod
-    def _get_workload_identity_token(job_template: models.JobTemplate, jwt_aud: str) -> str:
+    def _get_workload_identity_token(job_template: models.JobTemplate, audience: str) -> str:
         """Generate a workload identity token for a job template.
 
         Args:
             job_template: The JobTemplate instance to generate claims for
-            jwt_aud: The JWT audience claim value
+            audience: The JWT audience claim value
 
         Returns:
             str: The generated JWT token
@@ -1631,7 +1631,7 @@ class OIDCCredentialTestMixin:
         }
         return retrieve_workload_identity_jwt_with_claims(
             claims=claims,
-            audience=jwt_aud,
+            audience=audience,
             scope=AutomationControllerJobScope.name,
         )
 
@@ -1714,7 +1714,7 @@ class OIDCCredentialTestMixin:
             raise PermissionDenied(_('You do not have access to job template with id: %(id)s.') % {'id': job_template.id})
 
         # Generate workload identity token
-        jwt_token = self._get_workload_identity_token(job_template, backend_kwargs.pop('jwt_aud', None))
+        jwt_token = self._get_workload_identity_token(job_template, backend_kwargs.get('url'))
         backend_kwargs['workload_identity_token'] = jwt_token
 
         return {'details': {'sent_jwt_payload': self._decode_jwt_payload_for_display(jwt_token)}}
@@ -1782,11 +1782,15 @@ class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
     obj_permission_type = 'use'
     resource_purpose = 'test external credential'
 
-    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential.
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": """Test update the input values and metadata of an external credential.
         This endpoint supports testing credentials that connect to external secret management systems
         such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault,
         Centrify Vault, Thycotic DevOps Secrets Vault, and GitHub App Installation Access Token Lookup.
-        It does not support standard credential types such as Machine, SCM, and Cloud."""})
+        It does not support standard credential types such as Machine, SCM, and Cloud."""
+        }
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.credential_type.kind != 'external':
