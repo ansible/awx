@@ -212,7 +212,7 @@ class TestCandlepinLicensing:
     @mock.patch('awx.main.utils.candlepin._discover_org')
     @mock.patch('awx.main.utils.candlepin.settings')
     def test_fetch_registration_credentials_missing_settings(self, mock_settings, mock_discover_org):
-        """Test fetching credentials when settings are not configured."""
+        """Test fetching credentials when REDHAT settings are not configured but SUBSCRIPTIONS are."""
         mock_settings.REDHAT_USERNAME = None
         mock_settings.REDHAT_PASSWORD = None
         mock_settings.INSTALL_UUID = None
@@ -222,11 +222,54 @@ class TestCandlepinLicensing:
 
         username, password, org, install_uuid = _fetch_registration_credentials_from_db()
 
-        # Should return None for missing/unconfigured values
+        # Should fall back to SUBSCRIPTIONS credentials
+        assert username == 'subs_user'
+        assert password == 'subs_pass'
+        assert org is None
+        assert install_uuid is None
+
+    @mock.patch('awx.main.utils.candlepin._discover_org')
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_fetch_registration_credentials_client_id_fallback(self, mock_settings, mock_discover_org):
+        """Test fetching credentials falls back to CLIENT_ID/SECRET when others missing."""
+        mock_settings.REDHAT_USERNAME = None
+        mock_settings.REDHAT_PASSWORD = None
+        mock_settings.SUBSCRIPTIONS_USERNAME = None
+        mock_settings.SUBSCRIPTIONS_PASSWORD = None
+        mock_settings.SUBSCRIPTIONS_CLIENT_ID = 'client_id'
+        mock_settings.SUBSCRIPTIONS_CLIENT_SECRET = 'client_secret'
+        mock_settings.INSTALL_UUID = 'test-install-uuid'
+        mock_discover_org.return_value = 'test_org'
+
+        username, password, org, install_uuid = _fetch_registration_credentials_from_db()
+
+        # Should fall back to CLIENT_ID/SECRET credentials
+        assert username == 'client_id'
+        assert password == 'client_secret'
+        assert org == 'test_org'
+        assert install_uuid == 'test-install-uuid'
+
+    @mock.patch('awx.main.utils.candlepin._discover_org')
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_fetch_registration_credentials_all_missing(self, mock_settings, mock_discover_org):
+        """Test fetching credentials when all credential settings are not configured."""
+        mock_settings.REDHAT_USERNAME = None
+        mock_settings.REDHAT_PASSWORD = None
+        mock_settings.SUBSCRIPTIONS_USERNAME = None
+        mock_settings.SUBSCRIPTIONS_PASSWORD = None
+        mock_settings.SUBSCRIPTIONS_CLIENT_ID = None
+        mock_settings.SUBSCRIPTIONS_CLIENT_SECRET = None
+        mock_settings.INSTALL_UUID = None
+
+        username, password, org, install_uuid = _fetch_registration_credentials_from_db()
+
+        # Should return None for all values when no credentials found
         assert username is None
         assert password is None
         assert org is None
         assert install_uuid is None
+        # _discover_org should not be called when credentials are missing
+        mock_discover_org.assert_not_called()
 
     @mock.patch('awx.main.utils.candlepin._discover_org')
     @mock.patch('awx.main.utils.candlepin.settings')
@@ -510,7 +553,7 @@ class TestCandlepinLicensing:
         mock_lifecycle.return_value = ('cert-pem', 'key-pem')
         mock_is_valid.return_value = True
 
-        cert, key = get_or_generate_candlepin_certificate('user', 'pass')
+        cert, key = get_or_generate_candlepin_certificate()
 
         assert cert == 'cert-pem'
         assert key == 'key-pem'
@@ -527,7 +570,7 @@ class TestCandlepinLicensing:
         mock_lifecycle.return_value = ('new-cert', 'new-key')
         mock_is_valid.return_value = True
 
-        cert, key = get_or_generate_candlepin_certificate('user', 'pass')
+        cert, key = get_or_generate_candlepin_certificate()
 
         assert cert == 'new-cert'
         assert key == 'new-key'
@@ -541,7 +584,7 @@ class TestCandlepinLicensing:
         mock_fetch.return_value = (None, None, None)
         mock_register.return_value = (None, None, None)
 
-        cert, key = get_or_generate_candlepin_certificate('user', 'pass')
+        cert, key = get_or_generate_candlepin_certificate()
 
         assert cert is None
         assert key is None
@@ -555,7 +598,7 @@ class TestCandlepinLicensing:
         mock_lifecycle.return_value = ('cert-pem', 'key-pem')
         mock_is_valid.return_value = False
 
-        cert, key = get_or_generate_candlepin_certificate('user', 'pass')
+        cert, key = get_or_generate_candlepin_certificate()
 
         assert cert is None
         assert key is None
@@ -568,7 +611,7 @@ class TestCandlepinLicensing:
         mock_fetch.return_value = ('cert-pem', 'key-pem', CANDLEPIN_UUID_PLACEHOLDER)
         mock_is_valid.return_value = True
 
-        cert, key = get_or_generate_candlepin_certificate('user', 'pass')
+        cert, key = get_or_generate_candlepin_certificate()
 
         # Should not call lifecycle with placeholder UUID
         mock_lifecycle.assert_not_called()
