@@ -540,7 +540,7 @@ AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
 
 # Candlepin integration settings for analytics authentication
 AWX_ANALYTICS_CANDLEPIN_URL = 'https://subscription.rhsm.redhat.com/subscription/'
-AWX_ANALYTICS_CANDLEPIN_CA = None  # Path to Candlepin CA certificate for TLS verification
+AWX_ANALYTICS_CANDLEPIN_CA = '/etc/rhsm/ca/redhat-uep.pem'  # Path to Candlepin CA certificate for TLS verification
 AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS = 90  # Days before expiry to trigger certificate renewal
 AWX_ANALYTICS_CANDLEPIN_PROXY_URL = None  # HTTP/HTTPS proxy URL for Candlepin API calls
 

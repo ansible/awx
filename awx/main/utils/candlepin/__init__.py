@@ -15,6 +15,8 @@ import requests
 
 from django.conf import settings
 
+from awx.main.analytics.core import _get_insights_credentials
+
 from .client import CandlepinClient
 from .lifecycle import (
     get_candlepin_ca,
@@ -126,8 +128,8 @@ def _discover_org(candlepin_url, username, password):
 def _fetch_registration_credentials_from_db():
     """Read Candlepin registration credentials from AWX settings.
 
-    Reads REDHAT_USERNAME, REDHAT_PASSWORD (set by AWX when the
-    customer configures their Red Hat subscription), LICENSE.account_number (org
+    Tries several options to retrieve the Candlepin credentials (set by AWX when the
+    customer configures their Red Hat subscription), and to discover the org (org
     key for the Candlepin /consumers endpoint), and INSTALL_UUID (used as the
     consumer's aap.instance_uuid fact).
 
@@ -136,10 +138,9 @@ def _fetch_registration_credentials_from_db():
     """
     candlepin_url = get_candlepin_url()
     try:
-        username = getattr(settings, 'REDHAT_USERNAME', None)
-        password = getattr(settings, 'REDHAT_PASSWORD', None)
+        username, password = _get_insights_credentials()
         install_uuid = getattr(settings, 'INSTALL_UUID', None)
-        org = _discover_org(candlepin_url, settings.SUBSCRIPTIONS_USERNAME, settings.SUBSCRIPTIONS_PASSWORD)
+        org = _discover_org(candlepin_url, username, password)
         return username, password, org, install_uuid
     except Exception as e:
         logger.warning(f'Could not fetch Candlepin registration credentials from settings: {e}')
@@ -185,10 +186,9 @@ def _register_candlepin_consumer():
 
     Called when no identity cert exists in the DB.
 
-    Reads REDHAT_USERNAME / REDHAT_PASSWORD and the org key from
-    LICENSE.account_number, then calls POST /consumers on Candlepin to obtain an
-    identity certificate.  On success the cert, key, and consumer UUID are
-    persisted to conf_settings.
+    Reads the Candlepin credentials and the org key and then calls
+    POST /consumers on Candlepin to obtain an identity certificate.
+    On success the cert, key, and consumer UUID are persisted to conf_settings.
 
     Returns (cert_pem, key_pem, consumer_uuid) on success, (None, None, None) on
     any failure.  Best-effort: logs errors but never propagates.
@@ -196,11 +196,11 @@ def _register_candlepin_consumer():
     username, password, org, install_uuid = _fetch_registration_credentials_from_db()
 
     if not username or not password:
-        logger.warning('Candlepin registration is enabled but REDHAT_USERNAME / REDHAT_PASSWORD are not set; skipping registration.')
+        logger.warning('Candlepin registration is enabled but credentials are not set; skipping registration.')
         return None, None, None
 
     if not org:
-        logger.warning('Candlepin registration is enabled but LICENSE.account_number is not available; skipping registration.')
+        logger.warning('Candlepin registration is enabled but subscription org is not available; skipping registration.')
         return None, None, None
 
     candlepin_url = get_candlepin_url()
@@ -270,8 +270,8 @@ def get_or_generate_candlepin_certificate(username, password):
     4. Return the certificate and key as PEM strings
 
     Args:
-        username: Red Hat subscription username (REDHAT_USERNAME)
-        password: Red Hat subscription password (REDHAT_PASSWORD)
+        username: Red Hat subscription username
+        password: Red Hat subscription password
 
     Returns:
         Tuple (cert_pem, key_pem) as strings if certificate is available, (None, None) otherwise.

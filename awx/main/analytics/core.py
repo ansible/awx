@@ -78,6 +78,41 @@ def _valid_license():
     return True
 
 
+def _get_insights_credentials():
+    """
+    Get Red Hat Insights credentials from settings.
+
+    Attempts to retrieve credentials in the following priority order:
+    1. REDHAT_USERNAME / REDHAT_PASSWORD
+    2. SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD
+    3. SUBSCRIPTIONS_CLIENT_ID / SUBSCRIPTIONS_CLIENT_SECRET
+
+    Returns:
+        tuple: (username, password) if credentials are found, (None, None) otherwise
+    """
+    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
+    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
+
+    if rh_id and rh_secret:
+        return rh_id, rh_secret
+
+    # Try SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD
+    rh_id = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+    rh_secret = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+
+    if rh_id and rh_secret:
+        return rh_id, rh_secret
+
+    # Try SUBSCRIPTIONS_CLIENT_ID / SUBSCRIPTIONS_CLIENT_SECRET
+    rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+    rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+
+    if rh_id and rh_secret:
+        return rh_id, rh_secret
+
+    return None, None
+
+
 def all_collectors():
     from awx.main.analytics import collectors
 
@@ -405,19 +440,14 @@ def ship(path):
         logger.error('AUTOMATION_ANALYTICS_URL is not set')
         return False
 
-    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
-    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
-
-    if not (rh_id and rh_secret):
-        rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-        rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+    rh_id, rh_secret = _get_insights_credentials()
 
     if not rh_id:
-        logger.error('Neither REDHAT_USERNAME nor SUBSCRIPTIONS_CLIENT_ID are set')
+        logger.error('No valid username found. Tried: REDHAT_USERNAME, SUBSCRIPTIONS_USERNAME, SUBSCRIPTIONS_CLIENT_ID')
         return False
 
     if not rh_secret:
-        logger.error('Neither REDHAT_PASSWORD nor SUBSCRIPTIONS_CLIENT_SECRET are set')
+        logger.error('No valid password found. Tried: REDHAT_PASSWORD, SUBSCRIPTIONS_PASSWORD, SUBSCRIPTIONS_CLIENT_SECRET')
         return False
 
     with open(path, 'rb') as f:
@@ -427,31 +457,23 @@ def ship(path):
         s.headers.pop('Content-Type')
 
         with set_environ(**settings.AWX_TASK_ENV):
-            # Try 1: Certificate-based mTLS authentication (zero-touch)
-            cert_pem, key_pem = get_or_generate_candlepin_certificate(rh_id, rh_secret)
+            # Try Certificate-based mTLS authentication (zero-touch)
+            cert_pem, key_pem = get_or_generate_candlepin_certificate()
             if cert_pem and key_pem:
-                logger.debug("Using certificate-based authentication for analytics upload")
+                logger.debug("Attempting certificate-based authentication for analytics upload")
                 try:
                     with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
-                        response = s.post(url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31))
-                        if response.status_code < 300:
+                        response_certificate = s.post(
+                            url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
+                        )
+                        if response_certificate.status_code < 300:
                             return True
                 except requests.RequestException as e:
-                    logger.warning(f"Certificate-based authentication failed: {e}, falling back to basic auth")
+                    logger.warning(f"Certificate-based authentication failed: {e}, falling back to OIDC auth")
 
-            # Try 2: Basic authentication
-            logger.debug("Attempting basic authentication for analytics upload")
-            f.seek(0)
-            try:
-                response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
-                if response.status_code < 300:
-                    return True
-            except requests.RequestException as e:
-                logger.warning(f"Basic authentication failed: {e}, trying OIDC method")
-
-            # Try 3: OIDC authentication
+            # Try OIDC authentication
             logger.debug("Attempting OIDC authentication for analytics upload")
-            f.seek(0)
+            f.seek(0)  # requests POST may read from the handler, so seek to beginning of file for the next POST attempt
             try:
                 client = OIDCClient(rh_id, rh_secret)
                 response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
@@ -461,7 +483,10 @@ def ship(path):
 
         # Accept 2XX status_codes
         if response.status_code >= 300:
-            logger.error('Upload failed with status {}, {}'.format(response.status_code, response.text))
+            logger.error(
+                'Upload attempt with certificate authentication failed with status {}, {}'.format(response_certificate.status_code, response_certificate.text)
+            )
+            logger.error('Upload attempt with service account authentication failed with status {}, {}'.format(response.status_code, response.text))
             return False
 
         return True

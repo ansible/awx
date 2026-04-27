@@ -166,6 +166,20 @@ class Command(BaseCommand):
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
         proxy = options.get('proxy') or get_proxy_url()
 
+        # If dry-run, display what would happen and exit early before any Candlepin operations
+        if dry_run:
+            self.stdout.write('[dry-run] Would register with Candlepin:')
+            self.stdout.write(f'  URL           : {candlepin_url}')
+            self.stdout.write(f'  Organization  : {org}')
+            self.stdout.write(f'  Username      : {username}')
+            self.stdout.write(f'  Install UUID  : {db_install_uuid}')
+            if candlepin_ca:
+                self.stdout.write(f'  CA cert       : {candlepin_ca}')
+            if proxy:
+                self.stdout.write(f'  Proxy         : {proxy}')
+            self.stdout.write('[dry-run] No Candlepin operations performed.')
+            return True
+
         client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=False)
 
         self.stdout.write(f'Registering with Candlepin at {candlepin_url} (org={org}) ...')
@@ -178,15 +192,12 @@ class Command(BaseCommand):
         self.stdout.write('Registered successfully.')
         self.stdout.write(f'  Consumer UUID : {consumer_uuid}')
 
-        # Save to database first, before attempting to parse certificate metadata for display
-        if dry_run:
-            self.stdout.write('[dry-run] Registration result NOT saved to database.')
+        # Save to database
+        if _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
+            self.stdout.write('Certificate, key, and consumer UUID saved to database.')
         else:
-            if _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
-                self.stdout.write('Certificate, key, and consumer UUID saved to database.')
-            else:
-                self.stderr.write('Failed to save registration to database.')
-                return False
+            self.stderr.write('Failed to save registration to database.')
+            return False
 
         # Best-effort certificate metadata display
         try:
@@ -226,11 +237,36 @@ class Command(BaseCommand):
         except ValueError as e:
             self.stdout.write('Current certificate:')
             self.stdout.write(f'  Certificate metadata unavailable: {e}')
+            info = None
 
         candlepin_url = options.get('candlepin_url') or get_candlepin_url()
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
         proxy = options.get('proxy') or get_proxy_url()
         renewal_days = get_renewal_days()
+
+        # Check if renewal is needed (without force, just check cert expiry locally)
+        renewal_needed = force or needs_renewal(cert_pem, renewal_days)
+
+        # If dry-run, display what would happen and exit early before any Candlepin operations
+        if dry_run:
+            self.stdout.write('[dry-run] Would perform the following operations:')
+            self.stdout.write(f'  URL           : {candlepin_url}')
+            self.stdout.write(f'  Consumer UUID : {consumer_uuid}')
+            if candlepin_ca:
+                self.stdout.write(f'  CA cert       : {candlepin_ca}')
+            if proxy:
+                self.stdout.write(f'  Proxy         : {proxy}')
+            self.stdout.write('  1. Check in with Candlepin')
+            if renewal_needed:
+                reason = 'forced via --force' if force else f'expiry within {renewal_days} days'
+                self.stdout.write(f'  2. Renew certificate ({reason})')
+            else:
+                if info:
+                    self.stdout.write(f'  2. No renewal needed ({info["days_remaining"]} days remaining, threshold: {renewal_days} days)')
+                else:
+                    self.stdout.write(f'  2. No renewal needed (threshold: {renewal_days} days)')
+            self.stdout.write('[dry-run] No Candlepin operations performed.')
+            return True
 
         client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=False)
 
@@ -244,9 +280,11 @@ class Command(BaseCommand):
 
         self.stdout.write('Check-in successful.')
 
-        renewal_needed = force or needs_renewal(cert_pem, renewal_days)
         if not renewal_needed:
-            self.stdout.write(f'Certificate has {info["days_remaining"]} days remaining (renewal threshold: {renewal_days} days). No renewal needed.')
+            if info:
+                self.stdout.write(f'Certificate has {info["days_remaining"]} days remaining (renewal threshold: {renewal_days} days). No renewal needed.')
+            else:
+                self.stdout.write(f'Certificate renewal threshold is {renewal_days} days. No renewal needed.')
             return True
 
         reason = 'forced via --force' if force else f'expiry within {renewal_days} days'
@@ -259,20 +297,18 @@ class Command(BaseCommand):
 
         self.stdout.write('Certificate renewed successfully.')
 
-        # Save to database first, before attempting to parse certificate metadata for display
-        if dry_run:
-            self.stdout.write('[dry-run] Renewed certificate NOT saved to database.')
+        # Save to database
+        if _save_candlepin_cert_to_db(new_cert_pem, new_key_pem):
+            self.stdout.write('Renewed certificate and key saved to database.')
         else:
-            if _save_candlepin_cert_to_db(new_cert_pem, new_key_pem):
-                self.stdout.write('Renewed certificate and key saved to database.')
-            else:
-                self.stderr.write('Failed to save renewed certificate to database.')
-                return False
+            self.stderr.write('Failed to save renewed certificate to database.')
+            return False
 
         # Best-effort certificate metadata display
         try:
             new_info = parse_cert(new_cert_pem)
-            self.stdout.write(f'  Old serial    : {info["serial"]}')
+            if info:
+                self.stdout.write(f'  Old serial    : {info["serial"]}')
             self.stdout.write(f'  New serial    : {new_info["serial"]}')
             self.stdout.write(f'  Valid until   : {new_info["not_after"]} ({new_info["days_remaining"]} days remaining)')
         except ValueError as e:

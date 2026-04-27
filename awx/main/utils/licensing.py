@@ -17,10 +17,8 @@ import copy
 import io
 import json
 import logging
-import os
 import re
 import requests
-import tempfile
 import time
 import zipfile
 

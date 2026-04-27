@@ -214,6 +214,52 @@ register(
 )
 
 register(
+    'AWX_ANALYTICS_CANDLEPIN_URL',
+    field_class=fields.URLField,
+    default='https://subscription.rhsm.redhat.com/subscription/',
+    schemes=('http', 'https'),
+    allow_plain_hostname=True,
+    label=_('Candlepin API Base URL'),
+    help_text=_('Base URL for Red Hat Subscription Management (Candlepin) API used for certificate-based analytics authentication.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'AWX_ANALYTICS_CANDLEPIN_CA',
+    field_class=fields.CharField,
+    default='/etc/rhsm/ca/redhat-uep.pem',
+    allow_blank=True,
+    label=_('Candlepin CA Certificate Path'),
+    help_text=_('Path to the CA certificate file for verifying TLS connections to Candlepin. Leave blank to use system certificates.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS',
+    field_class=fields.IntegerField,
+    default=90,
+    min_value=1,
+    label=_('Candlepin Certificate Renewal Threshold'),
+    help_text=_('Number of days before certificate expiry to trigger automatic renewal of Candlepin identity certificates.'),
+    category=_('System'),
+    category_slug='system',
+    unit=_('days'),
+)
+
+register(
+    'AWX_ANALYTICS_CANDLEPIN_PROXY_URL',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    label=_('Candlepin Proxy URL'),
+    help_text=_('HTTP/HTTPS proxy URL for Candlepin API requests (e.g., http://proxy.example.com:8080). Leave blank for no proxy.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'INSTALL_UUID',
     field_class=fields.CharField,
     label=_('Unique identifier for an installation'),
