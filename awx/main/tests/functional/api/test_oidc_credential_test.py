@@ -170,6 +170,27 @@ def test_credential_test_success_returns_jwt_payload(mock_flag, post, admin, oid
 
 @pytest.mark.django_db
 @mock.patch('awx.api.views.flag_enabled', return_value=True)
+def test_credential_test_response_does_not_contain_secret_value(mock_flag, post, admin, oidc_credential, job_template, mock_oidc_backend):
+    """
+    the OIDC credential test endpoint must not echo the resolved Vault secret back to the caller.
+    """
+    url = reverse('api:credential_external_test', kwargs={'pk': oidc_credential.pk})
+    data = {'metadata': {'secret_path': 'test/secret', 'job_template_id': str(job_template.id)}}
+
+    credential_secret_value = 'CREDENTIAL_SECRET'
+    mock_oidc_backend['backend'].backend.return_value = credential_secret_value
+
+    response = post(url, data, admin)
+
+    assert response.status_code == 202
+    assert 'details' in response.data
+    assert 'sent_jwt_payload' in response.data['details']
+    assert 'secret_value' not in response.data['details']
+    assert credential_secret_value not in str(response.data)
+
+
+@pytest.mark.django_db
+@mock.patch('awx.api.views.flag_enabled', return_value=True)
 def test_credential_test_backend_failure_returns_jwt_and_error(mock_flag, post, admin, oidc_credential, job_template, mock_oidc_backend):
     """Test that backend failure still returns JWT payload along with error message."""
     url = reverse('api:credential_external_test', kwargs={'pk': oidc_credential.pk})
@@ -224,6 +245,29 @@ def test_credential_test_job_template_id_not_passed_to_backend(mock_flag, post, 
 
 
 # --- Tests for CredentialTypeExternalTest endpoint ---
+
+
+@pytest.mark.django_db
+@mock.patch('awx.api.views.flag_enabled', return_value=True)
+def test_credential_type_test_response_does_not_contain_secret_value(mock_flag, post, admin, oidc_credentialtype, job_template, mock_oidc_backend):
+    """
+    the credential-type variant of the test endpoint should not return the secret value
+    """
+    url = reverse('api:credential_type_external_test', kwargs={'pk': oidc_credentialtype.pk})
+    data = {
+        'inputs': {'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role', 'jwt_aud': 'vault'},
+        'metadata': {'secret_path': 'test/secret', 'job_template_id': str(job_template.id)},
+    }
+
+    credential_type_seret_value = 'CREDENTIAL_TYPE_SECRET'
+    mock_oidc_backend['backend'].backend.return_value = credential_type_seret_value
+    response = post(url, data, admin)
+
+    assert response.status_code == 202
+    assert 'details' in response.data
+    assert 'sent_jwt_payload' in response.data['details']
+    assert 'secret_value' not in response.data['details']
+    assert credential_type_seret_value not in str(response.data)
 
 
 @pytest.mark.django_db
