@@ -15,8 +15,6 @@ import requests
 
 from django.conf import settings
 
-from awx.main.analytics.core import _get_insights_credentials
-
 from .client import CandlepinClient
 from .lifecycle import (
     get_candlepin_ca,
@@ -138,9 +136,20 @@ def _fetch_registration_credentials_from_db():
     """
     candlepin_url = get_candlepin_url()
     try:
-        username, password = _get_insights_credentials()
+        # Try multiple credential sources in priority order
+        username = getattr(settings, 'REDHAT_USERNAME', None)
+        password = getattr(settings, 'REDHAT_PASSWORD', None)
+
+        if not (username and password):
+            username = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+            password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+
+        if not (username and password):
+            username = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+            password = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+
         install_uuid = getattr(settings, 'INSTALL_UUID', None)
-        org = _discover_org(candlepin_url, username, password)
+        org = _discover_org(candlepin_url, username, password) if username and password else None
         return username, password, org, install_uuid
     except Exception as e:
         logger.warning(f'Could not fetch Candlepin registration credentials from settings: {e}')
@@ -258,23 +267,24 @@ def _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid):
         return cert_pem, key_pem
 
 
-def get_or_generate_candlepin_certificate(username, password):
+def get_or_generate_candlepin_certificate():
     """
     Get or generate Candlepin certificate for analytics authentication.
 
     This function provides certificate-based authentication for analytics uploads.
     It will:
     1. Check for existing certificate in conf_settings
-    2. If missing, attempt to register with Candlepin
+    2. If missing, attempt to register with Candlepin (credentials from settings)
     3. If exists, check for renewal needs and refresh if needed
     4. Return the certificate and key as PEM strings
 
-    Args:
-        username: Red Hat subscription username
-        password: Red Hat subscription password
-
     Returns:
         Tuple (cert_pem, key_pem) as strings if certificate is available, (None, None) otherwise.
+
+    Note:
+        Credentials for registration are retrieved from Django settings internally
+        (REDHAT_USERNAME/PASSWORD, SUBSCRIPTIONS_USERNAME/PASSWORD, or
+        SUBSCRIPTIONS_CLIENT_ID/CLIENT_SECRET in priority order).
     """
     cert_pem, key_pem, consumer_uuid = _fetch_candlepin_cert_from_db()
 
