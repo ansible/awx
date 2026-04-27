@@ -90,23 +90,40 @@ class HostManager(models.Manager.from_queryset(HostLatestSummaryQuerySet)):
         Construction of query involves:
          - remove any ordering specified in model's Meta
          - Exclude hosts sourced from another Tower
+         - Exclude hosts in constructed inventories (these are shadow rows of source-inventory hosts)
          - Restrict the query to only return the name column
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(inventory_sources__source='controller').values(name_lower=Lower('name')).distinct().count()
+        return (
+            self.order_by()
+            .exclude(inventory_sources__source='controller')
+            .exclude(inventory__kind='constructed')
+            .values(name_lower=Lower('name'))
+            .distinct()
+            .count()
+        )
 
     def org_active_count(self, org_id):
         """Return count of active, unique hosts used by an organization.
         Construction of query involves:
          - remove any ordering specified in model's Meta
          - Exclude hosts sourced from another Tower
+         - Exclude hosts in constructed inventories (these are shadow rows of source-inventory hosts)
          - Consider only hosts where the canonical inventory is owned by the organization
          - Restrict the query to only return the name column
          - Only consider results that are unique
          - Return the count of this query
         """
-        return self.order_by().exclude(inventory_sources__source='controller').filter(inventory__organization=org_id).values('name').distinct().count()
+        return (
+            self.order_by()
+            .exclude(inventory_sources__source='controller')
+            .exclude(inventory__kind='constructed')
+            .filter(inventory__organization=org_id)
+            .values('name')
+            .distinct()
+            .count()
+        )
 
     def get_queryset(self):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
