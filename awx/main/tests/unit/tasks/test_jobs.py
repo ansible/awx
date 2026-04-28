@@ -83,11 +83,15 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
     host1 = mock.MagicMock(spec=Host, id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
     host2 = mock.MagicMock(spec=Host, id=2, name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
 
-    # Mock hosts queryset
+    # Mock hosts queryset — must support .only().filter().order_by().iterator() chain
     hosts = [host1, host2]
     qs_hosts = mock.MagicMock(spec=QuerySet)
     qs_hosts._result_cache = hosts
-    qs_hosts.only.return_value = hosts
+    qs_hosts.__iter__ = lambda self: iter(self._result_cache)
+    qs_hosts.only.return_value = qs_hosts
+    qs_hosts.filter.return_value = qs_hosts
+    qs_hosts.order_by.return_value = qs_hosts
+    qs_hosts.iterator.side_effect = lambda: iter(qs_hosts._result_cache)
     qs_hosts.count.side_effect = lambda: len(qs_hosts._result_cache)
     inventory.hosts = qs_hosts
 
@@ -154,9 +158,12 @@ def test_pre_post_run_hook_facts_deleted_sliced(
         host.inventory = mock_inventory
         hosts.append(host)
 
-    # Mock inventory.hosts behavior
+    # Mock inventory.hosts behavior — must support .only().filter().order_by().iterator() chain
     mock_qs_hosts = mock.MagicMock()
-    mock_qs_hosts.only.return_value = hosts
+    mock_qs_hosts.only.return_value = mock_qs_hosts
+    mock_qs_hosts.filter.return_value = mock_qs_hosts
+    mock_qs_hosts.order_by.return_value = mock_qs_hosts
+    mock_qs_hosts.iterator.side_effect = lambda: iter(hosts)
     mock_qs_hosts.count.return_value = 999
     mock_inventory.hosts = mock_qs_hosts
 

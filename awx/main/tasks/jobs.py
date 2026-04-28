@@ -1331,6 +1331,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 hosts_qs = job.get_source_hosts_for_constructed_inventory()
             else:
                 hosts_qs = job.inventory.hosts
+            hosts_qs = hosts_qs.only(*HOST_FACTS_FIELDS)
             finish_fact_cache(
                 hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
