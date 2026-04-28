@@ -211,10 +211,15 @@ class DashboardView(APIView):
 
         user_hosts = get_user_queryset(request.user, models.Host)
         user_hosts_failed = user_hosts.filter(last_job_host_summary__failed=True)
+
+        # Exclude virtual inventory hosts to prevent duplicate counting
+        base_user_hosts = user_hosts.exclude(inventory__kind__in=['smart', 'constructed'])
+        user_hosts_failed = base_user_hosts.filter(last_job_host_summary__failed=True)
+
         data['hosts'] = {
             'url': reverse('api:host_list', request=request),
             'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
-            'total': user_hosts.count(),
+            'total': base_user_hosts.count(),
             'failed': user_hosts_failed.count(),
         }
 
