@@ -65,7 +65,8 @@ DEV_DOCKER_OWNER ?= ansible
 # Docker will only accept lowercase, so github names like Paul need to be paul
 DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
 DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
-DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_devel:$(COMPOSE_TAG)
+# DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_devel:$(COMPOSE_TAG)
+DEVEL_IMAGE_NAME ?= $(GIT_REPO_NAME)_devel
 IMAGE_KUBE_DEV=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME)_kube_devel:$(COMPOSE_TAG)
 IMAGE_KUBE=$(DEV_DOCKER_TAG_BASE)/$(GIT_REPO_NAME):$(COMPOSE_TAG)
 
@@ -177,7 +178,7 @@ virtualenv: virtualenv_awx
 virtualenv_awx:
 	if [ "$(VENV_BASE)" ]; then \
 		if [ ! -d "$(VENV_BASE)" ]; then \
-			mkdir $(VENV_BASE); \
+			mkdir -p $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			$(PYTHON) -m venv $(VENV_BASE)/awx; \

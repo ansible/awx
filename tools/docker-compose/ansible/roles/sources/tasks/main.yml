@@ -24,7 +24,7 @@
   template:
     src: 'secrets.yml.j2'
     dest: '{{ sources_dest }}/secrets/{{ item.item }}.yml'
-    mode: '0600'
+    mode: '0640'
   when: not lookup('vars', item.item, default='') and not item.stat.exists
   loop: "{{ secrets.results }}"
   loop_control:
@@ -56,7 +56,7 @@
   template:
     src: "{{ item }}.j2"
     dest: "{{ sources_dest }}/{{ item }}"
-    mode: '0600'
+    mode: '0640'
   with_items:
     - "database.py"
     - "local_settings.py"
@@ -129,34 +129,34 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ sources_dest }}/{{ compose_name }}"
-    mode: '0600'
+    mode: '0640'
 
 - name: Render Receptor Config(s) for Control Plane
   template:
     src: "receptor-awx.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
-    mode: '0600'
+    mode: '0640'
   with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Create Receptor Config Lock File
   file:
     path: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf.lock"
     state: touch
-    mode: '0600'
+    mode: '0640'
   with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Render Receptor Config(s) for Control Plane
   template:
     src: "receptor-awx.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
-    mode: '0600'
+    mode: '0640'
   with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Render Receptor Hop Config
   template:
     src: "receptor-hop.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-hop.conf"
-    mode: '0600'
+    mode: '0640'
   when:
     - execution_node_count | int > 0
 
@@ -164,7 +164,7 @@
   template:
     src: "receptor-worker.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-worker-{{ item }}.conf"
-    mode: '0600'
+    mode: '0640'
   with_sequence: start=1 end={{ execution_node_count if execution_node_count | int > 0 else 1}}
   when: execution_node_count | int > 0
 
