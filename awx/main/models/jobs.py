@@ -1140,6 +1140,22 @@ class JobHostSummary(CreatedModifiedModel):
             self.skipped,
         )
 
+    @classmethod
+    def latest_for_host(cls, host_id):
+        """Return the most recent JobHostSummary for a given host, or None."""
+        return cls.objects.filter(host_id=host_id).order_by('-id').first()
+
+    @classmethod
+    def latest_job_for_host(cls, host_id):
+        """Return the Job from the most recent JobHostSummary for a host, or None."""
+        summary = cls.latest_for_host(host_id)
+        if summary:
+            try:
+                return summary.job
+            except cls.job.field.related_model.DoesNotExist:
+                return None
+        return None
+
     def get_absolute_url(self, request=None):
         return reverse('api:job_host_summary_detail', kwargs={'pk': self.pk}, request=request)
 
