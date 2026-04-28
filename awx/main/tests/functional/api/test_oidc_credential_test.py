@@ -28,7 +28,6 @@ def oidc_credentialtype():
             {'id': 'url', 'label': 'Vault URL', 'type': 'string', 'help_text': 'The Vault server URL.'},
             {'id': 'auth_path', 'label': 'Auth Path', 'type': 'string', 'help_text': 'JWT auth mount path.'},
             {'id': 'role_id', 'label': 'Role ID', 'type': 'string', 'help_text': 'Vault role.'},
-            {'id': 'jwt_aud', 'label': 'JWT Audience', 'type': 'string', 'help_text': 'Expected audience.'},
             {'id': 'workload_identity_token', 'label': 'Workload Identity Token', 'type': 'string', 'secret': True, 'internal': True},
         ],
         'metadata': [
@@ -56,7 +55,7 @@ def oidc_credential(oidc_credentialtype):
     return Credential.objects.create(
         credential_type=oidc_credentialtype,
         name='oidc-vault-cred',
-        inputs={'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role', 'jwt_aud': 'vault'},
+        inputs={'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role'},
     )
 
 
@@ -230,17 +229,17 @@ def test_credential_test_jwt_generation_failure(mock_flag, post, admin, oidc_cre
 @pytest.mark.django_db
 @mock.patch('awx.api.views.flag_enabled', return_value=True)
 def test_credential_test_job_template_id_not_passed_to_backend(mock_flag, post, admin, oidc_credential, job_template, mock_oidc_backend):
-    """Test that job_template_id and jwt_aud are removed from backend_kwargs."""
+    """Test that job_template_id is removed from backend_kwargs."""
     url = reverse('api:credential_external_test', kwargs={'pk': oidc_credential.pk})
     data = {'metadata': {'secret_path': 'test/secret', 'job_template_id': str(job_template.id)}}
 
     response = post(url, data, admin)
     assert response.status_code == 202
 
-    # Check that backend was called without job_template_id or jwt_aud
+    # Check that backend was called without job_template_id but with url and workload_identity_token
     call_kwargs = mock_oidc_backend['backend'].backend.call_args[1]
     assert 'job_template_id' not in call_kwargs
-    assert 'jwt_aud' not in call_kwargs
+    assert 'url' in call_kwargs
     assert 'workload_identity_token' in call_kwargs
 
 
@@ -276,7 +275,7 @@ def test_credential_type_test_missing_job_template_id(mock_flag, post, admin, oi
     """Test that missing job_template_id returns 400 for credential type test endpoint."""
     url = reverse('api:credential_type_external_test', kwargs={'pk': oidc_credentialtype.pk})
     data = {
-        'inputs': {'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role', 'jwt_aud': 'vault'},
+        'inputs': {'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role'},
         'metadata': {'secret_path': 'test/secret'},
     }
 
@@ -293,7 +292,7 @@ def test_credential_type_test_success_returns_jwt_payload(mock_flag, post, admin
     """Test that successful credential type test returns JWT payload."""
     url = reverse('api:credential_type_external_test', kwargs={'pk': oidc_credentialtype.pk})
     data = {
-        'inputs': {'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role', 'jwt_aud': 'vault'},
+        'inputs': {'url': 'http://vault.example.com:8200', 'auth_path': 'jwt', 'role_id': 'test-role'},
         'metadata': {'secret_path': 'test/secret', 'job_template_id': str(job_template.id)},
     }
 

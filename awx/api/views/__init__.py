@@ -1610,12 +1610,12 @@ class OIDCCredentialTestMixin:
     """
 
     @staticmethod
-    def _get_workload_identity_token(job_template: models.JobTemplate, jwt_aud: str) -> str:
+    def _get_workload_identity_token(job_template: models.JobTemplate, audience: str) -> str:
         """Generate a workload identity token for a job template.
 
         Args:
             job_template: The JobTemplate instance to generate claims for
-            jwt_aud: The JWT audience claim value
+            audience: The JWT audience claim value
 
         Returns:
             str: The generated JWT token
@@ -1631,7 +1631,7 @@ class OIDCCredentialTestMixin:
         }
         return retrieve_workload_identity_jwt_with_claims(
             claims=claims,
-            audience=jwt_aud,
+            audience=audience,
             scope=AutomationControllerJobScope.name,
         )
 
@@ -1714,7 +1714,7 @@ class OIDCCredentialTestMixin:
             raise PermissionDenied(_('You do not have access to job template with id: %(id)s.') % {'id': job_template.id})
 
         # Generate workload identity token
-        jwt_token = self._get_workload_identity_token(job_template, backend_kwargs.pop('jwt_aud', None))
+        jwt_token = self._get_workload_identity_token(job_template, backend_kwargs.get('url'))
         backend_kwargs['workload_identity_token'] = jwt_token
 
         return {'details': {'sent_jwt_payload': self._decode_jwt_payload_for_display(jwt_token)}}
