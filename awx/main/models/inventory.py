@@ -18,7 +18,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.urls import resolve
 from django.utils.timezone import now
-from django.db.models import Q
+from django.db.models import Q, Subquery, OuterRef
 
 # REST Framework
 from rest_framework.exceptions import ParseError
@@ -386,7 +386,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         logger.debug("Going to update inventory computed fields, pk={0}".format(self.pk))
         start_time = time.time()
         active_hosts = self.hosts
-        failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
+        from awx.main.models.jobs import JobHostSummary  # circular import: inventory.py loads before jobs.py
+
+        latest_summary_failed = Subquery(JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
+        failed_hosts = active_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
         active_groups = self.groups
         if self.kind == 'smart':
             active_groups = active_groups.none()
@@ -581,6 +584,23 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     )
 
     objects = HostManager()
+
+    @property
+    def latest_summary(self):
+        if hasattr(self, '_latest_summary_cache'):
+            return self._latest_summary_cache
+        from awx.main.models.jobs import JobHostSummary
+
+        summary = JobHostSummary.objects.filter(host_id=self.pk).order_by('-id').select_related('job', 'job__job_template').first()
+        self._latest_summary_cache = summary
+        return summary
+
+    @property
+    def latest_job(self):
+        summary = self.latest_summary
+        if summary is None:
+            return None
+        return summary.job
 
     def get_absolute_url(self, request=None):
         return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)

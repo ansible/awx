@@ -897,8 +897,6 @@ class HostAccess(BaseAccess):
         'created_by',
         'modified_by',
         'inventory',
-        'last_job__job_template',
-        'last_job_host_summary__job',
     )
     prefetch_related = ('groups', 'inventory_sources')
 

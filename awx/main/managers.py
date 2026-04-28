@@ -5,6 +5,7 @@ import logging
 import uuid
 from django.db import models
 from django.conf import settings
+from django.db.models import OuterRef, Subquery
 from django.db.models.functions import Lower
 
 from ansible_base.lib.utils.db import advisory_lock
@@ -23,7 +24,65 @@ class DeferJobCreatedManager(models.Manager):
         return super(DeferJobCreatedManager, self).get_queryset().defer('job_created')
 
 
-class HostManager(models.Manager):
+class HostLatestSummaryQuerySet(models.QuerySet):
+    """Queryset that annotates and bulk-attaches the latest JobHostSummary
+    at queryset evaluation time, similar to prefetch_related().
+
+    Why not use Django's Prefetch?
+    Django's Prefetch with [:1] slicing fetches 1 record globally, not per-host
+    (Django ticket #26780). Window-function workarounds require Django 4.2+ and
+    are more complex. Prefetching all summaries then filtering in Python wastes
+    memory for hosts with many job runs. The approach here — annotate the latest
+    ID via Subquery, then in_bulk() only those IDs — is the same 2-query pattern
+    prefetch_related uses internally, customized for "latest per group."
+
+    Not streaming-safe: relies on _result_cache existing after _fetch_all().
+    """
+
+    _awx_latest_summary_attached = False
+
+    def _clone(self):
+        clone = super()._clone()
+        clone._awx_latest_summary_attached = self._awx_latest_summary_attached
+        return clone
+
+    def with_latest_summary_id(self):
+        from awx.main.models.jobs import JobHostSummary
+
+        latest_summary = JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id')
+        return self.annotate(
+            _latest_summary_id=Subquery(latest_summary.values('id')[:1]),
+        )
+
+    def _fetch_all(self):
+        super()._fetch_all()
+
+        if self._awx_latest_summary_attached or not self._result_cache:
+            return
+
+        # Only bulk-attach if the queryset was annotated via with_latest_summary_id().
+        # Without this guard, we'd set _latest_summary_cache=None on every host,
+        # masking the per-object fallback query in Host.latest_summary.
+        if not hasattr(self._result_cache[0], '_latest_summary_id'):
+            return
+
+        from awx.main.models.jobs import JobHostSummary
+
+        latest_summary_ids = [host._latest_summary_id for host in self._result_cache if host._latest_summary_id is not None]
+
+        if latest_summary_ids:
+            summaries_by_id = JobHostSummary.objects.select_related('job', 'job__job_template').in_bulk(latest_summary_ids)
+        else:
+            summaries_by_id = {}
+
+        for host in self._result_cache:
+            latest_summary_id = getattr(host, '_latest_summary_id', None)
+            host._latest_summary_cache = summaries_by_id.get(latest_summary_id)
+
+        self._awx_latest_summary_attached = True
+
+
+class HostManager(models.Manager.from_queryset(HostLatestSummaryQuerySet)):
     """Custom manager class for Hosts model."""
 
     def active_count(self):
@@ -53,16 +112,7 @@ class HostManager(models.Manager):
         """When the parent instance of the host query set has a `kind=smart` and a `host_filter`
         set. Use the `host_filter` to generate the queryset for the hosts.
         """
-        qs = (
-            super(HostManager, self)
-            .get_queryset()
-            .defer(
-                'last_job__extra_vars',
-                'last_job_host_summary__job__extra_vars',
-                'last_job__artifacts',
-                'last_job_host_summary__job__artifacts',
-            )
-        )
+        qs = super().get_queryset()
 
         if hasattr(self, 'instance') and hasattr(self.instance, 'host_filter') and hasattr(self.instance, 'kind'):
             if self.instance.kind == 'smart' and self.instance.host_filter is not None:
