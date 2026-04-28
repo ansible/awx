@@ -10,6 +10,7 @@ KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_REPO_NAME ?= $(shell basename `git rev-parse --show-toplevel`)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+GIT_IS_WORKTREE := $(shell test -f .git && echo yes)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
 
@@ -112,6 +113,9 @@ AWX_USER ?= admin
 AWX_PASSWORD ?= $$(awk -F"'" '/^admin_password:/{print $$2}' tools/docker-compose/_sources/secrets/admin_password.yml 2>/dev/null || echo "admin")
 AWX_VERIFY_SSL ?= false
 
+# For git worktree to find the referenced git dir
+GIT_COMMON_DIR := $(shell git rev-parse --git-common-dir 2>/dev/null || echo .git)
+
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	update_requirements upgrade_requirements update_requirements_dev \
 	docker_update_requirements docker_upgrade_requirements docker_update_requirements_dev \
@@ -119,7 +123,7 @@ AWX_VERIFY_SSL ?= false
 	receiver test test_unit test_coverage coverage_html \
 	sdist \
 	VERSION PYTHON_VERSION docker-compose-sources \
-	.git/hooks/pre-commit
+	pre-commit
 
 clean-tmp:
 	rm -rf tmp/
@@ -348,11 +352,10 @@ black: reports
 	@command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
 	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
 
-.git/hooks/pre-commit:
-	@echo "if [ -x pre-commit.sh ]; then" > .git/hooks/pre-commit
-	@echo "    ./pre-commit.sh;" >> .git/hooks/pre-commit
-	@echo "fi" >> .git/hooks/pre-commit
-	@chmod +x .git/hooks/pre-commit
+$(GIT_COMMON_DIR)/hooks/pre-commit:
+	ln -sf ../../pre-commit.sh $(GIT_COMMON_DIR)/hooks/pre-commit
+
+pre-commit: $(GIT_COMMON_DIR)/hooks/pre-commit
 
 genschema: awx-link reports
 	@if [ "$(VENV_BASE)" ]; then \
@@ -527,7 +530,7 @@ ifneq ($(ADMIN_PASSWORD),)
 	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
 endif
 
-docker-compose-sources: .git/hooks/pre-commit
+docker-compose-sources:
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
 	    $(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
@@ -559,7 +562,7 @@ docker-compose: awx/projects docker-compose-sources
 	$(MAKE) docker-compose-up
 
 docker-compose-up:
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
+	$(if $(GIT_IS_WORKTREE),SETUPTOOLS_SCM_PRETEND_VERSION="$(VERSION)") $(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-down:
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) down --remove-orphans
