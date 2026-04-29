@@ -188,7 +188,7 @@ EXAMPLES = '''
     limit: bar
     credentials:
       - "My Credential"
-      - "suplementary cred"
+      - "supplementary cred"
     extra_vars: # these override / extend extra_data at the job level
       food: grape
       animal: owl

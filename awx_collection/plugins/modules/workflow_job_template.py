@@ -170,7 +170,7 @@ options:
       elements: str
     workflow_nodes:
       description:
-        - A json list of nodes and their coresponding options. The following suboptions describe a single node.
+        - A json list of nodes and their corresponding options. The following suboptions describe a single node.
       type: list
       elements: dict
       aliases:
@@ -217,7 +217,7 @@ options:
           type: str
         skip_tags:
           description:
-            - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
+            - Tags to skip, applied as a prompt, if job template prompts for job tags
           type: str
         limit:
           description:
@@ -465,7 +465,7 @@ EXAMPLES = '''
           always_nodes: []
           credentials:
             - local_cred
-            - suplementary cred
+            - supplementary cred
       - identifier: node201
         unified_job_template:
           organization:

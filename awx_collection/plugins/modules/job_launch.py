@@ -153,7 +153,7 @@ EXAMPLES = '''
     inventory: "My Inventory"
     credentials:
       - "My Credential"
-      - "suplementary cred"
+      - "supplementary cred"
   register: job
 - name: Wait for job max 120s
   job_wait:
