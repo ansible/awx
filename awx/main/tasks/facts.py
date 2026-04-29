@@ -147,7 +147,7 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
     # Phase 2: Stream updated facts to database in batches
     if hosts_with_updates:
         hosts_to_save = []
-        expected_updates = 0
+        total_rows_updated = 0
         for host in host_qs.filter(name__in=list(hosts_with_updates)).select_related('inventory').iterator():
             filepath = os.path.join(fact_cache_dir, host.name)
             try:
@@ -175,17 +175,16 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
                 log_data['unmodified_ct'] += 1
 
             if len(hosts_to_save) >= 100:
-                rows = bulk_update_sorted_by_id(Host, hosts_to_save, fields=['ansible_facts', 'ansible_facts_modified'])
-                expected_updates += len(hosts_to_save)
+                total_rows_updated += bulk_update_sorted_by_id(Host, hosts_to_save, fields=['ansible_facts', 'ansible_facts_modified'])
                 hosts_to_save = []
 
         if hosts_to_save:
-            rows = bulk_update_sorted_by_id(Host, hosts_to_save, fields=['ansible_facts', 'ansible_facts_modified'])
-            expected_updates += len(hosts_to_save)
+            total_rows_updated += bulk_update_sorted_by_id(Host, hosts_to_save, fields=['ansible_facts', 'ansible_facts_modified'])
 
-        if expected_updates != log_data['updated_ct']:
+        # Mismatch means a concurrent process changed or deleted hosts between our read and bulk update
+        if total_rows_updated != log_data['updated_ct']:
             logger.warning(
-                f'Fact update for inventory {inventory_id} job {job_id}: expected to update {log_data["updated_ct"]} hosts but {expected_updates} were sent to bulk update'
+                f'Fact update for inventory {inventory_id} job {job_id}: expected to update {log_data["updated_ct"]} hosts but {total_rows_updated} rows were changed'
             )
 
     # Phase 3: Clear facts for hosts whose files were removed by Ansible
