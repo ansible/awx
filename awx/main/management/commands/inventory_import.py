@@ -1021,6 +1021,7 @@ class Command(BaseCommand):
             # If using with transaction.atomic() with try ... catch,
             # with transaction.atomic() must be inside the try section of the code as per Django docs
             try:
+                license_fail = False
                 # Ensure that this is managed as an atomic SQL transaction,
                 # and thus properly rolled back if there is an issue.
                 with transaction.atomic():
