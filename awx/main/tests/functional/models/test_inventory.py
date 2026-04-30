@@ -108,6 +108,28 @@ class TestActiveCount:
         source.hosts.create(name='remotely-managed-host', inventory=inventory)
         assert Host.objects.active_count() == 1
 
+    def test_active_count_minus_constructed(self, organization):
+        """
+        Active hosts do not include duplicated hosts from construted inventories.
+        """
+        inv = Inventory.objects.create(name='source-inv', organization=organization)
+        inv.hosts.create(name='host1')
+        assert Host.objects.active_count() == 1
+
+        constructed = Inventory.objects.create(name='constructed-inv', kind='constructed', organization=organization)
+        Host.objects.create(name='host1', inventory=constructed)
+        assert Host.objects.active_count() == 1
+
+    def test_org_active_count_minus_constructed(self, organization):
+        """Org-scoped count must also exclude constructed-inventory shadow rows."""
+        inv = Inventory.objects.create(name='source-inv', organization=organization)
+        inv.hosts.create(name='host1')
+        assert Host.objects.org_active_count(organization.id) == 1
+
+        constructed = Inventory.objects.create(name='constructed-inv', kind='constructed', organization=organization)
+        Host.objects.create(name='host1', inventory=constructed)
+        assert Host.objects.org_active_count(organization.id) == 1
+
     def test_host_case_insensitivity(self, organization):
         inv1 = Inventory.objects.create(name='inv1', organization=organization)
         inv2 = Inventory.objects.create(name='inv2', organization=organization)

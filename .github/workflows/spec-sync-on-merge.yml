@@ -16,9 +16,16 @@ on:
   push:
     branches:
       - devel
+      - 'stable-2.[6-9]'
+      - 'stable-2.[1-9][0-9]'
   workflow_dispatch: # Allow manual triggering for testing
 jobs:
+  check-ownership:
+    uses: ./.github/workflows/_repo-owns-branch.yml
+
   sync-openapi-spec:
+    needs: check-ownership
+    if: needs.check-ownership.outputs.should_run == 'true'
     name: Sync OpenAPI spec to central repo
     runs-on: ubuntu-latest
     permissions:

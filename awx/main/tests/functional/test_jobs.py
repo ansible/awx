@@ -486,7 +486,7 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -495,7 +495,7 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
 
         # Create credentials
         ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'jwt_aud': 'https://vault.example.com'})
+        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
         target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
 
         # Create input source linking source credential to target credential
@@ -530,6 +530,55 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
 
 
 @pytest.mark.django_db
+@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
+def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(job_template_with_credentials, mocker):
+    """Test populate_workload_identity_tokens passes workload_ttl_seconds from get_instance_timeout to the client."""
+    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+        task = jobs.RunJob()
+
+        ssh_type = CredentialType.defaults['ssh']()
+        ssh_type.save()
+
+        hashivault_type = CredentialType(
+            name='HashiCorp Vault Secret Lookup (OIDC)',
+            kind='cloud',
+            managed=False,
+            inputs={
+                'fields': [
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
+                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                ]
+            },
+        )
+        hashivault_type.save()
+
+        ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
+        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
+        target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
+
+        CredentialInputSource.objects.create(
+            target_credential=target_cred, source_credential=source_cred, input_field_name='password', metadata={'path': 'secret/data/password'}
+        )
+
+        job = job_template_with_credentials(target_cred, ssh_cred)
+        job.timeout = 3600
+        job.save()
+        task.instance = job
+        task._credentials = [target_cred, ssh_cred]
+
+        mock_response = mocker.Mock(status_code=200)
+        mock_response.json.return_value = {'jwt': 'eyJ.test.jwt'}
+        mock_request = mocker.patch('requests.request', return_value=mock_response, autospec=True)
+
+        task.populate_workload_identity_tokens()
+
+        call_kwargs = mock_request.call_args.kwargs
+        assert call_kwargs['method'] == 'POST'
+        json_body = call_kwargs.get('json', {})
+        assert json_body.get('workload_ttl_seconds') == 3600
+
+
+@pytest.mark.django_db
 def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_credentials):
     """Test populate_workload_identity_tokens sets error status when flag is disabled."""
     with feature_flag_disabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
@@ -546,7 +595,7 @@ def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -598,7 +647,7 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -611,7 +660,7 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -619,11 +668,9 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
         hashivault_ssh_type.save()
 
         # Create source credentials with different audiences
-        source_cred_kv = Credential.objects.create(
-            credential_type=hashivault_kv_type, name='vault-kv-source', inputs={'jwt_aud': 'https://vault-kv.example.com'}
-        )
+        source_cred_kv = Credential.objects.create(credential_type=hashivault_kv_type, name='vault-kv-source', inputs={'url': 'https://vault-kv.example.com'})
         source_cred_ssh = Credential.objects.create(
-            credential_type=hashivault_ssh_type, name='vault-ssh-source', inputs={'jwt_aud': 'https://vault-ssh.example.com'}
+            credential_type=hashivault_ssh_type, name='vault-ssh-source', inputs={'url': 'https://vault-ssh.example.com'}
         )
 
         # Create target credential that uses both sources for different fields

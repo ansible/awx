@@ -116,7 +116,7 @@ cython==3.1.3
     # via -r /awx_devel/requirements/requirements.in
 daphne==4.2.1
     # via -r /awx_devel/requirements/requirements.in
-dispatcherd[pg-notify]==2026.02.26
+dispatcherd[pg-notify]==2026.3.25
     # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
@@ -337,8 +337,6 @@ packaging==25.0
     #   opentelemetry-instrumentation
     #   setuptools-scm
     #   wheel
-pbr==7.0.1
-    # via -r /awx_devel/requirements/requirements.in
 pexpect==4.9.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -556,6 +554,5 @@ setuptools==80.9.0
     #   -r /awx_devel/requirements/requirements.in
     #   autobahn
     #   incremental
-    #   pbr
     #   setuptools-rust
     #   setuptools-scm

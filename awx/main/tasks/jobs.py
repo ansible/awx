@@ -94,10 +94,7 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-
-from ansible_base.resource_registry.workload_identity_client import (
-    get_workload_identity_client,
-)
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -161,16 +158,22 @@ def populate_claims_for_workload(unified_job) -> dict:
     return claims
 
 
-def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope: str) -> str:
+def retrieve_workload_identity_jwt(
+    unified_job: UnifiedJob,
+    audience: str,
+    scope: str,
+    workload_ttl_seconds: int | None = None,
+) -> str:
     """Retrieve JWT token from workload claims.
     Raises:
         RuntimeError: if the workload identity client is not configured.
     """
-    client = get_workload_identity_client()
-    if client is None:
-        raise RuntimeError("Workload identity client is not configured")
-    claims = populate_claims_for_workload(unified_job)
-    return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
+    return retrieve_workload_identity_jwt_with_claims(
+        populate_claims_for_workload(unified_job),
+        audience,
+        scope,
+        workload_ttl_seconds,
+    )
 
 
 def with_path_cleanup(f):
@@ -225,16 +228,19 @@ class BaseTask(object):
         # Convert to list to prevent re-evaluation of QuerySet
         return list(credentials_list)
 
-    def populate_workload_identity_tokens(self):
+    def populate_workload_identity_tokens(self, additional_credentials=None):
         """
         Populate credentials with workload identity tokens.
 
         Sets the context on Credential objects that have input sources
         using compatible external credential types.
         """
+        credentials = list(self._credentials)
+        if additional_credentials:
+            credentials.extend(additional_credentials)
         credential_input_sources = (
             (credential.context, src)
-            for credential in self._credentials
+            for credential in credentials
             for src in credential.input_sources.all()
             if any(
                 field.get('id') == 'workload_identity_token' and field.get('internal')
@@ -243,9 +249,14 @@ class BaseTask(object):
         )
         for credential_ctx, input_src in credential_input_sources:
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                effective_timeout = self.get_instance_timeout(self.instance)
+                workload_ttl = effective_timeout if effective_timeout else None
                 try:
                     jwt = retrieve_workload_identity_jwt(
-                        self.instance, audience=input_src.source_credential.get_input('jwt_aud'), scope=AutomationControllerJobScope.name
+                        self.instance,
+                        audience=input_src.source_credential.get_input('url'),
+                        scope=AutomationControllerJobScope.name,
+                        workload_ttl_seconds=workload_ttl,
                     )
                     # Store token keyed by input source PK, since a credential can have
                     # multiple input sources (one per field), each potentially with a different audience
@@ -500,6 +511,7 @@ class BaseTask(object):
         return []
 
     def get_instance_timeout(self, instance):
+        """Return the effective job timeout in seconds."""
         global_timeout_setting_name = instance._global_timeout_setting()
         if global_timeout_setting_name:
             global_timeout = getattr(settings, global_timeout_setting_name, 0)
@@ -673,7 +685,7 @@ class BaseTask(object):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
             if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
-                logger.info(f'Generating workload identity tokens for job {self.instance.id}')
+                logger.info(f'Generating workload identity tokens for {self.instance.log_format}')
                 self.populate_workload_identity_tokens()
                 if self.instance.status == 'error':
                     raise RuntimeError('not starting %s task' % self.instance.status)
@@ -1319,6 +1331,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 hosts_qs = job.get_source_hosts_for_constructed_inventory()
             else:
                 hosts_qs = job.inventory.hosts
+            hosts_qs = hosts_qs.only(*HOST_FACTS_FIELDS)
             finish_fact_cache(
                 hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
@@ -1671,7 +1684,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
     def build_credentials_list(self, project_update):
-        if project_update.scm_type == 'insights' and project_update.credential:
+        if project_update.credential:
             return [project_update.credential]
         return []
 
@@ -1853,6 +1866,24 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     def build_credentials_list(self, inventory_update):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """Also generate OIDC tokens for the cloud credential.
+
+        The cloud credential is not in _credentials (it is handled by the
+        inventory source injector), but it may still need a workload identity
+        token generated for it.
+        """
+        cloud_cred = self.instance.get_cloud_credential()
+        creds = list(additional_credentials or [])
+        if cloud_cred:
+            creds.append(cloud_cred)
+        super().populate_workload_identity_tokens(additional_credentials=creds or None)
+        # Override get_cloud_credential on this instance so the injector
+        # uses the credential with OIDC context instead of doing a fresh
+        # DB fetch that would lose it.
+        if cloud_cred and cloud_cred.context:
+            self.instance.get_cloud_credential = lambda: cloud_cred
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None

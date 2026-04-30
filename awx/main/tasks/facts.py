@@ -25,7 +25,8 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['written_ct'] = 0
-    hosts_cached = []
+    # Dict mapping host name -> bool (True if a fact file was written)
+    hosts_cached = {}
 
     # Create the fact_cache directory inside artifacts_dir
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
@@ -37,13 +38,14 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     last_write_time = None
 
     for host in hosts:
-        hosts_cached.append(host.name)
         if not host.ansible_facts_modified or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
+            hosts_cached[host.name] = False
             continue  # facts are expired - do not write them
 
         filepath = os.path.join(fact_cache_dir, host.name)
         if not os.path.realpath(filepath).startswith(fact_cache_dir):
             logger.error(f'facts for host {smart_str(host.name)} could not be cached')
+            hosts_cached[host.name] = False
             continue
 
         try:
@@ -59,8 +61,10 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
             backdated = mtime - 2
             os.utime(filepath, (backdated, backdated))
             last_write_time = backdated
+            hosts_cached[host.name] = True
         except IOError:
             logger.error(f'facts for host {smart_str(host.name)} could not be cached')
+            hosts_cached[host.name] = False
             continue
 
     # Write summary file directly to the artifacts_dir
@@ -69,7 +73,6 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
         summary_data = {
             'last_write_time': last_write_time,
             'hosts_cached': hosts_cached,
-            'written_ct': log_data['written_ct'],
         }
         with open(summary_file, 'w', encoding='utf-8') as f:
             json.dump(summary_data, f, indent=2)
@@ -101,7 +104,8 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
         logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
 
-    host_names = summary.get('hosts_cached', [])
+    hosts_cached_map = summary.get('hosts_cached', {})
+    host_names = list(hosts_cached_map.keys())
     hosts_cached = host_qs.filter(name__in=host_names).order_by('id').iterator()
     # Path where individual fact files were written
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
@@ -143,6 +147,14 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
             else:
                 log_data['unmodified_ct'] += 1
         else:
+            # File is missing. Only interpret this as "ansible cleared facts" if
+            # start_fact_cache actually wrote a file for this host (i.e. the host
+            # had valid, non-expired facts before the job ran).  If no file was
+            # ever written, the missing file is expected and not a clear signal.
+            if not hosts_cached_map.get(host.name):
+                log_data['unmodified_ct'] += 1
+                continue
+
             # if the file goes missing, ansible removed it (likely via clear_facts)
             # if the file goes missing, but the host has not started facts, then we should not clear the facts
             if job_created and host.ansible_facts_modified and host.ansible_facts_modified > job_created:

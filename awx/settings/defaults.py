@@ -1134,6 +1134,7 @@ OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OP
 
 # feature flags
 FEATURE_INDIRECT_NODE_COUNTING_ENABLED = False
+FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED = False
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired
 # based on age. Note workers will finish their last task before retiring if

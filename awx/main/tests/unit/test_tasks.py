@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-import shutil
-import tempfile
 from pathlib import Path
 
 import fcntl
@@ -60,14 +58,12 @@ class TestJobExecution(object):
 
 
 @pytest.fixture
-def private_data_dir():
-    private_data = tempfile.mkdtemp(prefix='awx_')
+def private_data_dir(tmp_path):
+    private_data = tmp_path / 'awx_pdd'
+    private_data.mkdir()
     for subfolder in ('inventory', 'env'):
-        runner_subfolder = os.path.join(private_data, subfolder)
-        if not os.path.exists(runner_subfolder):
-            os.mkdir(runner_subfolder)
-    yield private_data
-    shutil.rmtree(private_data, True)
+        (private_data / subfolder).mkdir()
+    return str(private_data)
 
 
 @pytest.fixture
@@ -1587,7 +1583,7 @@ def test_managed_injector_redaction(injector_cls):
     assert 'very_secret_value' not in str(build_safe_env(env))
 
 
-def test_job_run_no_ee(mock_me, mock_create_partition):
+def test_job_run_no_ee(mock_me, mock_create_partition, private_data_dir):
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))

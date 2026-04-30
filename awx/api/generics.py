@@ -272,7 +272,10 @@ class APIView(views.APIView):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
                 if response.data and 'detail' in response.data:
-                    response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
+                    if getattr(settings, 'RESOURCE_SERVER__URL', None):
+                        response.data['detail'] += _(' Direct access is not allowed, authenticate via the platform gateway.')
+                    else:
+                        response.data['detail'] += _(' To establish a login session, visit') + ' /api/login/.'
                 logger.info(status_msg)
             else:
                 logger.warning(status_msg)

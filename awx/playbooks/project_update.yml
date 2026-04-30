@@ -236,7 +236,7 @@
           changed_when: "'was installed successfully' in galaxy_result.stdout"
           when:
             - roles_enabled | bool
-            - req_file
+            - req_file | length > 0
           tags:
             - install_roles
 
@@ -255,7 +255,7 @@
           when:
             - "ansible_version.full is version_compare('2.9', '>=')"
             - collections_enabled | bool
-            - req_file
+            - req_file | length > 0
           tags:
             - install_collections
 
@@ -276,7 +276,7 @@
             - "ansible_version.full is version_compare('2.10', '>=')"
             - collections_enabled | bool
             - roles_enabled | bool
-            - req_file
+            - req_file | length > 0
           tags:
             - install_collections
             - install_roles

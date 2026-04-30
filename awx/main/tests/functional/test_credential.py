@@ -74,47 +74,62 @@ GLqbpJyX2r3p/Rmo6mLY71SqpA==
 
 @pytest.mark.django_db
 def test_default_cred_types():
-    assert sorted(CredentialType.defaults.keys()) == sorted(
-        [
-            'aim',
-            'aws',
-            'aws_secretsmanager_credential',
-            'azure_kv',
-            'azure_rm',
-            'bitbucket_dc_token',
-            'centrify_vault_kv',
-            'conjur',
-            'controller',
-            'galaxy_api_token',
-            'gce',
-            'github_token',
-            'github_app_lookup',
-            'gitlab_token',
-            'gpg_public_key',
-            'hashivault_kv',
-            'hashivault_ssh',
-            'hashivault-kv-oidc',
-            'hashivault-ssh-oidc',
-            'hcp_terraform',
-            'insights',
-            'kubernetes_bearer_token',
-            'net',
-            'openstack',
-            'registry',
-            'rhv',
-            'satellite6',
-            'scm',
-            'ssh',
-            'terraform',
-            'thycotic_dsv',
-            'thycotic_tss',
-            'vault',
-            'vmware',
-        ]
-    )
+    expected = [
+        'aim',
+        'aws',
+        'aws_secretsmanager_credential',
+        'azure_kv',
+        'azure_rm',
+        'bitbucket_dc_token',
+        'centrify_vault_kv',
+        'conjur',
+        'controller',
+        'galaxy_api_token',
+        'gce',
+        'github_token',
+        'github_app_lookup',
+        'gitlab_token',
+        'gpg_public_key',
+        'hashivault_kv',
+        'hashivault_ssh',
+        'hcp_terraform',
+        'insights',
+        'kubernetes_bearer_token',
+        'net',
+        'openstack',
+        'registry',
+        'rhv',
+        'satellite6',
+        'scm',
+        'ssh',
+        'terraform',
+        'thycotic_dsv',
+        'thycotic_tss',
+        'vault',
+        'vmware',
+    ]
+    assert sorted(CredentialType.defaults.keys()) == sorted(expected)
+    assert 'hashivault-kv-oidc' not in CredentialType.defaults
+    assert 'hashivault-ssh-oidc' not in CredentialType.defaults
 
     for type_ in CredentialType.defaults.values():
         assert type_().managed is True
+
+
+@pytest.mark.django_db
+def test_default_cred_types_with_oidc_enabled():
+    from django.test import override_settings
+    from awx.main.models.credential import load_credentials, ManagedCredentialType
+
+    original_registry = ManagedCredentialType.registry.copy()
+    try:
+        with override_settings(FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED=True):
+            ManagedCredentialType.registry.clear()
+            load_credentials()
+            assert 'hashivault-kv-oidc' in CredentialType.defaults
+            assert 'hashivault-ssh-oidc' in CredentialType.defaults
+    finally:
+        ManagedCredentialType.registry = original_registry
 
 
 @pytest.mark.django_db
