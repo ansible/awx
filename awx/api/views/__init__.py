@@ -1720,12 +1720,10 @@ class OIDCCredentialTestMixin:
         return {'details': {'sent_jwt_payload': self._decode_jwt_payload_for_display(jwt_token)}}
 
     def _call_backend_with_error_handling(self, plugin, backend_kwargs, response_body):
-        """Call credential backend and handle errors, adding secret_value to response if OIDC details present."""
+        """Call credential backend and handle errors."""
         try:
             with set_environ(**settings.AWX_TASK_ENV):
-                secret_value = plugin.backend(**backend_kwargs)
-                if 'details' in response_body:
-                    response_body['details']['secret_value'] = secret_value
+                plugin.backend(**backend_kwargs)
                 return Response(response_body, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
             message = self._extract_http_error_message(exc)
@@ -1791,6 +1789,8 @@ class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
         It does not support standard credential types such as Machine, SCM, and Cloud."""})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.credential_type.kind != 'external':
+            raise ParseError(_('Credential is not testable.'))
         backend_kwargs = {}
         for field_name, value in obj.inputs.items():
             backend_kwargs[field_name] = obj.get_input(field_name)
@@ -1858,6 +1858,8 @@ class CredentialTypeExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Test a complete set of input values for an external credential"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.kind != 'external':
+            raise ParseError(_('Credential type is not testable.'))
         backend_kwargs = request.data.get('inputs', {})
         backend_kwargs.update(request.data.get('metadata', {}))
 
