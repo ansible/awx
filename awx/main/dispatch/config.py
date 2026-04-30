@@ -31,6 +31,7 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
                 # With reserve of 1, after a burst of tasks, load needs to down to 4-1=3
                 # before we return to min_workers
                 "scaledown_reserve": 1,
+                "worker_max_lifetime_seconds": settings.WORKER_MAX_LIFETIME_SECONDS,
             },
             "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID},
             "process_manager_cls": "ForkServerManager",
