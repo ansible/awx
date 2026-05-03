@@ -90,7 +90,6 @@ setup(
     install_requires=[
         'PyYAML',
         'requests',
-        'setuptools',
     ],
     python_requires=">=3.11",
     extras_require={'formatting': ['jq'], 'websockets': ['websocket-client==0.57.0'], 'crypto': ['cryptography']},
