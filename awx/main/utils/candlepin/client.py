@@ -8,6 +8,58 @@ import logging
 logger = logging.getLogger('awx.main.utils.candlepin')
 
 
+class _temp_cert_files:
+    """
+    Context manager: writes cert + key to secure temp files, auto-deletes on exit.
+
+    Uses NamedTemporaryFile with delete=True for better cleanup on process termination.
+    Files are unlinked immediately on Unix systems, providing better security against
+    orphaned private keys in /tmp.
+    """
+
+    def __init__(self, cert_pem, key_pem):
+        self._cert_pem = cert_pem
+        self._key_pem = key_pem
+        self._cert_file = None
+        self._key_file = None
+
+    def __enter__(self):
+        try:
+            # Create temp file for certificate
+            self._cert_file = tempfile.NamedTemporaryFile(mode='w', prefix='candlepin_cert_', suffix='.pem', delete=True)
+            self._cert_file.write(self._cert_pem)
+            self._cert_file.flush()
+            os.chmod(self._cert_file.name, 0o600)
+
+            # Create temp file for private key
+            self._key_file = tempfile.NamedTemporaryFile(mode='w', prefix='candlepin_key_', suffix='.pem', delete=True)
+            self._key_file.write(self._key_pem)
+            self._key_file.flush()
+            os.chmod(self._key_file.name, 0o600)
+
+            return self._cert_file.name, self._key_file.name
+        except Exception:
+            # Clean up on error
+            if self._cert_file:
+                self._cert_file.close()
+            if self._key_file:
+                self._key_file.close()
+            raise
+
+    def __exit__(self, *_):
+        # Closing NamedTemporaryFile automatically deletes it
+        if self._cert_file:
+            try:
+                self._cert_file.close()
+            except Exception as e:
+                logger.warning(f'Error closing cert temp file: {e}')
+        if self._key_file:
+            try:
+                self._key_file.close()
+            except Exception as e:
+                logger.warning(f'Error closing key temp file: {e}')
+
+
 class CandlepinClient:
     """
     Minimal Candlepin REST client for certificate lifecycle operations.
@@ -122,7 +174,7 @@ class CandlepinClient:
         """
         url = f'{self.base_url}/consumers/{consumer_uuid}'
         try:
-            with self._temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
+            with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
                 resp = requests.get(
                     url,
                     cert=(cert_path, key_path),
@@ -149,7 +201,7 @@ class CandlepinClient:
         """
         url = f'{self.base_url}/consumers/{consumer_uuid}'
         try:
-            with self._temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
+            with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
                 resp = requests.put(
                     url,
                     cert=(cert_path, key_path),
@@ -176,7 +228,7 @@ class CandlepinClient:
         decide whether to fall back to service-account auth.
         """
         url = f'{self.base_url}/consumers/{consumer_uuid}'
-        with self._temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
+        with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
             try:
                 resp = requests.post(
                     url,
@@ -204,57 +256,3 @@ class CandlepinClient:
 
         logger.info(f'Candlepin cert regenerated successfully for consumer {consumer_uuid}')
         return new_cert_pem, new_key_pem
-
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def _write_temp_pem(content):
-        """Write PEM content to a secure temp file. Returns (fd, path)."""
-        fd, path = tempfile.mkstemp(prefix='candlepin_', suffix='.pem')
-        try:
-            os.chmod(path, 0o600)
-            with os.fdopen(fd, 'w') as f:
-                f.write(content)
-            fd = None
-        except Exception:
-            if fd is not None:
-                try:
-                    os.close(fd)
-                except OSError:
-                    pass
-            if os.path.exists(path):
-                os.unlink(path)
-            raise
-        return path
-
-    @staticmethod
-    def _unlink_safe(path):
-        try:
-            if path and os.path.exists(path):
-                os.unlink(path)
-        except OSError as e:
-            logger.warning(f'Could not remove temp cert file {path}: {e}')
-
-    class _temp_cert_files:
-        """Context manager: writes cert + key to secure temp files, cleans up on exit."""
-
-        def __init__(self, cert_pem, key_pem):
-            self._cert_pem = cert_pem
-            self._key_pem = key_pem
-            self._cert_path = None
-            self._key_path = None
-
-        def __enter__(self):
-            self._cert_path = CandlepinClient._write_temp_pem(self._cert_pem)
-            try:
-                self._key_path = CandlepinClient._write_temp_pem(self._key_pem)
-            except Exception:
-                CandlepinClient._unlink_safe(self._cert_path)
-                raise
-            return self._cert_path, self._key_path
-
-        def __exit__(self, *_):
-            CandlepinClient._unlink_safe(self._cert_path)
-            CandlepinClient._unlink_safe(self._key_path)

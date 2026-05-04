@@ -14,11 +14,10 @@ from awx.main.utils.candlepin.lifecycle import (
     parse_cert,
 )
 from awx.main.utils.candlepin import (
-    CANDLEPIN_UUID_PLACEHOLDER,
     _fetch_candlepin_cert_from_db,
-    _fetch_registration_credentials_from_db,
     _save_candlepin_cert_to_db,
     _save_candlepin_registration_to_db,
+    resolve_registration_credentials,
 )
 
 
@@ -48,7 +47,8 @@ class Command(BaseCommand):
                     '            Credentials are read from AWX database by default',
                     '            (REDHAT_USERNAME, REDHAT_PASSWORD). The organization is',
                     '            discovered automatically from the Candlepin account.',
-                    '            Pass --username / --password / --org to override.',
+                    '            Pass --username / --password-stdin / --org to override.',
+                    '            Example: echo "password" | awx-manage candlepin_cert register --username user --password-stdin',
                     '',
                     '  renew     Perform a manual check-in and proactive cert renewal.',
                     '            Reads the stored cert/key/UUID from database.',
@@ -79,13 +79,16 @@ class Command(BaseCommand):
             formatter_class=RawDescriptionHelpFormatter,
         )
         reg.add_argument('--username', help='Red Hat subscription username (overrides REDHAT_USERNAME from database)')
-        reg.add_argument('--password', help='Red Hat subscription password (overrides REDHAT_PASSWORD from database)')
+        reg.add_argument(
+            '--password-stdin', dest='password_stdin', action='store_true', help='Read password from stdin (overrides REDHAT_PASSWORD from database)'
+        )
         reg.add_argument('--org', help='Candlepin owner/org key (overrides auto-discovered organization)')
         reg.add_argument('--candlepin-url', dest='candlepin_url', help='Candlepin base URL (overrides AWX_ANALYTICS_CANDLEPIN_URL setting)')
         reg.add_argument(
             '--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)'
         )
         reg.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides AWX_ANALYTICS_CANDLEPIN_PROXY_URL setting)')
+        reg.add_argument('--no-verify-tls', dest='no_verify_tls', action='store_true', help='Disable TLS certificate verification for Candlepin API calls')
         reg.add_argument('--force', action='store_true', help='Re-register even if a certificate already exists in database')
         reg.add_argument('--dry-run', dest='dry_run', action='store_true', help='Perform registration but do not save the result to database')
 
@@ -100,6 +103,7 @@ class Command(BaseCommand):
             '--candlepin-ca', dest='candlepin_ca', help='Path to Candlepin CA cert for TLS verification (overrides AWX_ANALYTICS_CANDLEPIN_CA setting)'
         )
         ren.add_argument('--proxy', help='HTTP/HTTPS proxy URL (overrides AWX_ANALYTICS_CANDLEPIN_PROXY_URL setting)')
+        ren.add_argument('--no-verify-tls', dest='no_verify_tls', action='store_true', help='Disable TLS certificate verification for Candlepin API calls')
         ren.add_argument('--force', action='store_true', help='Renew the certificate even if it is not near expiry')
         ren.add_argument('--dry-run', dest='dry_run', action='store_true', help='Perform check-in and renewal but do not save the result to database')
 
@@ -126,25 +130,29 @@ class Command(BaseCommand):
         Returns ``(username, password, org, db_install_uuid)`` on success, or ``None``
         if any required field is missing (errors are written to ``self.stderr``).
         """
-        db_username, db_password, db_org, db_install_uuid = _fetch_registration_credentials_from_db()
+        username_override = options.get('username')
+        org_override = options.get('org')
 
-        username = options.get('username') or db_username
-        password = options.get('password') or db_password
-        org = options.get('org') or db_org
+        # Read password from stdin if --password-stdin is set
+        if options.get('password_stdin'):
+            password_override = sys.stdin.read().strip()
+            if not password_override:
+                self.stderr.write('--password-stdin specified but no password provided on stdin')
+                return None
+        else:
+            password_override = None
 
-        missing = []
-        if not username:
-            missing.append('username (pass --username or set REDHAT_USERNAME in database)')
-        if not password:
-            missing.append('password (pass --password or set REDHAT_PASSWORD in database)')
-        if not org:
-            missing.append('org (pass --org or ensure SUBSCRIPTIONS_USERNAME/PASSWORD are configured for auto-discovery)')
-        if missing:
-            for m in missing:
-                self.stderr.write(f'Missing required value: {m}')
+        # Use shared resolution and validation function
+        username, password, org, install_uuid, errors = resolve_registration_credentials(
+            username_override=username_override, password_override=password_override, org_override=org_override
+        )
+
+        if errors:
+            for error in errors:
+                self.stderr.write(f'Missing required value: {error}')
             return None
 
-        return username, password, org, db_install_uuid
+        return username, password, org, install_uuid
 
     def _handle_register(self, options):
         dry_run = options['dry_run']
@@ -165,6 +173,7 @@ class Command(BaseCommand):
         candlepin_url = options.get('candlepin_url') or get_candlepin_url()
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
         proxy = options.get('proxy') or get_proxy_url()
+        verify_tls = not options.get('no_verify_tls', False)
 
         # If dry-run, display what would happen and exit early before any Candlepin operations
         if dry_run:
@@ -177,10 +186,11 @@ class Command(BaseCommand):
                 self.stdout.write(f'  CA cert       : {candlepin_ca}')
             if proxy:
                 self.stdout.write(f'  Proxy         : {proxy}')
+            self.stdout.write(f'  Verify TLS    : {verify_tls}')
             self.stdout.write('[dry-run] No Candlepin operations performed.')
             return True
 
-        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=False)
+        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=verify_tls)
 
         self.stdout.write(f'Registering with Candlepin at {candlepin_url} (org={org}) ...')
         try:
@@ -224,8 +234,8 @@ class Command(BaseCommand):
             self.stderr.write('No Candlepin identity certificate found in database. Run the register subcommand first.')
             return False
 
-        if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER:
-            self.stderr.write('CANDLEPIN_CONSUMER_UUID is not set (or is still the placeholder value). Run the register subcommand first.')
+        if not consumer_uuid:
+            self.stderr.write('CANDLEPIN_CONSUMER_UUID is not set. Run the register subcommand first.')
             return False
 
         try:
@@ -242,6 +252,7 @@ class Command(BaseCommand):
         candlepin_url = options.get('candlepin_url') or get_candlepin_url()
         candlepin_ca = options.get('candlepin_ca') or get_candlepin_ca()
         proxy = options.get('proxy') or get_proxy_url()
+        verify_tls = not options.get('no_verify_tls', False)
         renewal_days = get_renewal_days()
 
         # Check if renewal is needed (without force, just check cert expiry locally)
@@ -256,6 +267,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'  CA cert       : {candlepin_ca}')
             if proxy:
                 self.stdout.write(f'  Proxy         : {proxy}')
+            self.stdout.write(f'  Verify TLS    : {verify_tls}')
             self.stdout.write('  1. Check in with Candlepin')
             if renewal_needed:
                 reason = 'forced via --force' if force else f'expiry within {renewal_days} days'
@@ -268,7 +280,7 @@ class Command(BaseCommand):
             self.stdout.write('[dry-run] No Candlepin operations performed.')
             return True
 
-        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=False)
+        client = CandlepinClient(base_url=candlepin_url, candlepin_ca=candlepin_ca, proxy=proxy, verify_tls=verify_tls)
 
         self.stdout.write(f'Checking in with Candlepin at {candlepin_url} (consumer={consumer_uuid}) ...')
         checkin_success = client.checkin(consumer_uuid, cert_pem, key_pem)

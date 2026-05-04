@@ -214,18 +214,6 @@ register(
 )
 
 register(
-    'AWX_ANALYTICS_CANDLEPIN_URL',
-    field_class=fields.URLField,
-    default='https://subscription.rhsm.redhat.com/subscription/',
-    schemes=('http', 'https'),
-    allow_plain_hostname=True,
-    label=_('Candlepin API Base URL'),
-    help_text=_('Base URL for Red Hat Subscription Management (Candlepin) API used for certificate-based analytics authentication.'),
-    category=_('System'),
-    category_slug='system',
-)
-
-register(
     'AWX_ANALYTICS_CANDLEPIN_CA',
     field_class=fields.CharField,
     default='/etc/rhsm/ca/redhat-uep.pem',
@@ -873,9 +861,10 @@ register(
 register(
     'CANDLEPIN_CONSUMER_UUID',
     field_class=fields.CharField,
-    default='00000000-0000-0000-0000-000000000000',
+    default='',
     allow_blank=True,
     encrypted=False,
+    read_only=True,
     label=_('Candlepin Consumer UUID'),
     help_text=_('UUID of the registered Candlepin consumer for this AAP instance.'),
     category=_('System'),
@@ -889,6 +878,7 @@ register(
     default='',
     allow_blank=True,
     encrypted=True,
+    read_only=True,
     label=_('Candlepin Identity Certificate'),
     help_text=_('PEM-encoded Candlepin identity certificate for mTLS authentication.'),
     category=_('System'),
@@ -902,6 +892,7 @@ register(
     default='',
     allow_blank=True,
     encrypted=True,
+    read_only=True,
     label=_('Candlepin Identity Key'),
     help_text=_('PEM-encoded private key for Candlepin identity certificate.'),
     category=_('System'),
@@ -915,6 +906,7 @@ register(
     default='',
     allow_blank=True,
     encrypted=False,
+    read_only=True,
     label=_('Candlepin Certificate Serial Number'),
     help_text=_('Serial number of the Candlepin identity certificate for tracking.'),
     category=_('System'),
@@ -926,6 +918,7 @@ register(
     'CANDLEPIN_EXPIRES_AT',
     field_class=fields.DateTimeField,
     allow_null=True,
+    read_only=True,
     label=_('Candlepin Certificate Expiry'),
     help_text=_('Expiry timestamp of the Candlepin identity certificate.'),
     category=_('System'),

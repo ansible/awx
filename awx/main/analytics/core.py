@@ -8,7 +8,6 @@ import pathlib
 import shutil
 import tarfile
 import tempfile
-from contextlib import contextmanager
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -25,46 +24,12 @@ from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
 from awx.main.utils.analytics_proxy import OIDCClient
 from awx.main.utils.candlepin import get_or_generate_candlepin_certificate
+from awx.main.utils.candlepin.client import _temp_cert_files
 
 __all__ = ['register', 'gather', 'ship']
 
 
 logger = logging.getLogger('awx.main.analytics')
-
-
-@contextmanager
-def _temp_cert_files(cert_pem, key_pem):
-    """
-    Context manager to create temporary cert/key files from PEM strings.
-    Automatically cleans up on exit.
-    """
-    cert_path = None
-    key_path = None
-    try:
-        # Create temp files with secure permissions
-        cert_fd, cert_path = tempfile.mkstemp(prefix='candlepin_cert_', suffix='.pem')
-        key_fd, key_path = tempfile.mkstemp(prefix='candlepin_key_', suffix='.pem')
-
-        # Write cert
-        with open(cert_fd, 'w', closefd=True) as f:
-            f.write(cert_pem)
-        os.chmod(cert_path, 0o644)  # Certificate can be world-readable
-
-        # Write key
-        with open(key_fd, 'w', closefd=True) as f:
-            f.write(key_pem)
-        os.chmod(key_path, 0o600)  # Private key: owner read+write only
-
-        yield cert_path, key_path
-
-    finally:
-        # Clean up temp files
-        for path in (cert_path, key_path):
-            if path:
-                try:
-                    os.unlink(path)
-                except Exception:
-                    pass
 
 
 def _valid_license():
@@ -256,10 +221,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             logger.log(log_level, "Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
             return None
 
-        if not (
-            settings.AUTOMATION_ANALYTICS_URL
-            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_CLIENT_ID and settings.SUBSCRIPTIONS_CLIENT_SECRET))
-        ):
+        rh_id, rh_secret = _get_insights_credentials()
+        if not (settings.AUTOMATION_ANALYTICS_URL and rh_id and rh_secret):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
 
@@ -458,17 +421,18 @@ def ship(path):
 
         with set_environ(**settings.AWX_TASK_ENV):
             # Try Certificate-based mTLS authentication (zero-touch)
+            cert_auth_response = None
             cert_pem, key_pem = get_or_generate_candlepin_certificate()
             if cert_pem and key_pem:
                 logger.debug("Attempting certificate-based authentication for analytics upload")
                 try:
                     with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
-                        response_certificate = s.post(
+                        cert_auth_response = s.post(
                             url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
                         )
-                        if response_certificate.status_code < 300:
+                        if cert_auth_response.status_code < 300:
                             return True
-                except requests.RequestException as e:
+                except Exception as e:
                     logger.warning(f"Certificate-based authentication failed: {e}, falling back to OIDC auth")
 
             # Try OIDC authentication
@@ -483,9 +447,10 @@ def ship(path):
 
         # Accept 2XX status_codes
         if response.status_code >= 300:
-            logger.error(
-                'Upload attempt with certificate authentication failed with status {}, {}'.format(response_certificate.status_code, response_certificate.text)
-            )
+            if cert_auth_response:
+                logger.error(
+                    'Upload attempt with certificate authentication failed with status {}, {}'.format(cert_auth_response.status_code, cert_auth_response.text)
+                )
             logger.error('Upload attempt with service account authentication failed with status {}, {}'.format(response.status_code, response.text))
             return False
 

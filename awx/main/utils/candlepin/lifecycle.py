@@ -127,12 +127,27 @@ def run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid, *, candlepin_url=N
     logger.info(f'Candlepin cert: serial={info["serial"]}, CN={info["cn"]}, expires={info["not_after"]}, days_remaining={info["days_remaining"]}')
 
     # Step 2: Check-in (best-effort, never raises).
-    client.checkin(consumer_uuid, cert_pem, key_pem)
+    checkin_success = client.checkin(consumer_uuid, cert_pem, key_pem)
+    if not checkin_success:
+        logger.warning(
+            f'Candlepin check-in failed for consumer {consumer_uuid}. '
+            f'Consumer may have been deleted server-side or certificate is invalid. '
+            f'Lifecycle will continue but may fail.'
+        )
 
     # Step 3: Compare local cert serial with server's serial.
     # If they differ, the server has issued a new cert (e.g., admin regenerated it).
     consumer_data = client.get_consumer(consumer_uuid, cert_pem, key_pem)
-    if consumer_data:
+    if not consumer_data:
+        if not checkin_success:
+            logger.error(
+                f'Both check-in and get_consumer failed for consumer {consumer_uuid}. '
+                f'Consumer was likely deleted from Candlepin server. '
+                f'Re-registration may be required. Will attempt cert renewal anyway.'
+            )
+        else:
+            logger.warning(f'Could not retrieve consumer data for {consumer_uuid} but check-in succeeded. Continuing lifecycle.')
+    else:
         server_cert_pem = consumer_data.get('idCert', {}).get('cert')
         if server_cert_pem:
             try:

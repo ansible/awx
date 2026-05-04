@@ -10,7 +10,6 @@ mTLS instead of service account credentials.
 """
 
 import logging
-from datetime import datetime
 import requests
 
 from django.conf import settings
@@ -28,11 +27,6 @@ from .lifecycle import (
 
 logger = logging.getLogger('awx.main.utils.candlepin')
 
-# Placeholder UUID used before a real consumer is registered.
-# Treat it the same as an absent UUID so we never attempt a Candlepin
-# lifecycle call with a non-functional consumer identity.
-CANDLEPIN_UUID_PLACEHOLDER = '00000000-0000-0000-0000-000000000000'
-
 
 def _fetch_candlepin_cert_from_db():
     """Read cert PEM, key PEM, and consumer UUID from AWX conf_settings.
@@ -42,12 +36,12 @@ def _fetch_candlepin_cert_from_db():
     Best-effort: failures are logged as warnings and never propagate.
     """
     try:
-        consumer_uuid = getattr(settings, 'CANDLEPIN_CONSUMER_UUID', CANDLEPIN_UUID_PLACEHOLDER)
+        consumer_uuid = getattr(settings, 'CANDLEPIN_CONSUMER_UUID', '')
         cert_pem = getattr(settings, 'CANDLEPIN_CERT_PEM', '')
         key_pem = getattr(settings, 'CANDLEPIN_KEY_PEM', '')
 
-        # Check if we have valid data (not placeholder)
-        if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER or not cert_pem or not key_pem:
+        # Check if we have valid data
+        if not consumer_uuid or not cert_pem or not key_pem:
             return None, None, None
 
         return cert_pem, key_pem, consumer_uuid
@@ -69,7 +63,7 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
         try:
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
-            expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
+            expires_at = cert_info.get('not_after', None)
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
@@ -108,12 +102,15 @@ def _discover_org(candlepin_url, username, password):
             logger.warning(f'No organizations found for user {username}')
             return None
 
-        org = owners[0].get('key')
+        # Pick the first org, but warn if multiple exist
+        if len(owners) > 1:
+            logger.warning(f'User {username} has access to {len(owners)} organizations. Using first: {owners[0]}')
+        first_org = owners[0]
+        org = first_org.get('key')
         if not org:
-            logger.warning(f'Organization key missing in response for user {username}')
+            logger.warning(f'Organization key missing in first org entry for user {username}')
             return None
 
-        logger.info(f'Discovered organization: {org} ({owners[0].get("displayName", "")}) for user {username}')
         return org
     except requests.exceptions.RequestException as e:
         logger.warning(f'Failed to discover organization for user {username}: {e}')
@@ -149,11 +146,53 @@ def _fetch_registration_credentials_from_db():
             password = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
 
         install_uuid = getattr(settings, 'INSTALL_UUID', None)
-        org = _discover_org(candlepin_url, username, password) if username and password else None
+
+        # Organization discovery requires SUBSCRIPTIONS credentials specifically
+        subs_username = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+        subs_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+        org = _discover_org(candlepin_url, subs_username, subs_password) if subs_username and subs_password else None
+
         return username, password, org, install_uuid
     except Exception as e:
         logger.warning(f'Could not fetch Candlepin registration credentials from settings: {e}')
         return None, None, None, None
+
+
+def resolve_registration_credentials(username_override=None, password_override=None, org_override=None):
+    """Resolve Candlepin registration credentials with optional overrides.
+
+    Fetches credentials from database settings and merges with any provided overrides.
+    Validates that all required fields are present.
+
+    Args:
+        username_override: Optional username to use instead of database value
+        password_override: Optional password to use instead of database value
+        org_override: Optional org to use instead of auto-discovered value
+
+    Returns:
+        Tuple (username, password, org, install_uuid) if all required fields present,
+        or (None, None, None, None, error_messages) if validation fails.
+        error_messages is a list of strings describing missing values.
+    """
+    db_username, db_password, db_org, db_install_uuid = _fetch_registration_credentials_from_db()
+
+    username = username_override or db_username
+    password = password_override or db_password
+    org = org_override or db_org
+
+    # Validate all required fields are present
+    missing = []
+    if not username:
+        missing.append('username (provide --username or set REDHAT_USERNAME in database)')
+    if not password:
+        missing.append('password (provide password or set REDHAT_PASSWORD in database)')
+    if not org:
+        missing.append('org (provide --org or ensure SUBSCRIPTIONS_USERNAME/PASSWORD are configured for auto-discovery)')
+
+    if missing:
+        return None, None, None, None, missing
+
+    return username, password, org, db_install_uuid, None
 
 
 def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
@@ -169,7 +208,7 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
         try:
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
-            expires_at = datetime.fromisoformat(cert_info['not_after']) if cert_info.get('not_after') else None
+            expires_at = cert_info.get('not_after', None)
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
@@ -237,10 +276,8 @@ def _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid):
     will then fall back to service-account auth via the existing SSLError
     handler).
     """
-    if not consumer_uuid or consumer_uuid == CANDLEPIN_UUID_PLACEHOLDER:
-        logger.warning(
-            'Candlepin lifecycle is enabled but consumer UUID is not set ' '(or still contains the placeholder value); ' 'skipping check-in and renewal.'
-        )
+    if not consumer_uuid:
+        logger.warning('Candlepin lifecycle is enabled but consumer UUID is not set; skipping check-in and renewal.')
         return cert_pem, key_pem
 
     candlepin_url = get_candlepin_url()
@@ -298,7 +335,7 @@ def get_or_generate_candlepin_certificate():
             return None, None
 
     # Run lifecycle (check-in and renewal if needed)
-    if consumer_uuid and consumer_uuid != CANDLEPIN_UUID_PLACEHOLDER:
+    if consumer_uuid:
         cert_pem, key_pem = _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid)
 
     # Validate certificate is still usable
@@ -311,6 +348,6 @@ def get_or_generate_candlepin_certificate():
 
 
 __all__ = [
-    'CANDLEPIN_UUID_PLACEHOLDER',
     'get_or_generate_candlepin_certificate',
+    'resolve_registration_credentials',
 ]
