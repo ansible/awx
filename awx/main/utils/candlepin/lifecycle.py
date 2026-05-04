@@ -7,6 +7,7 @@ needs_renewal   — check whether a cert is within the renewal window
 run_candlepin_lifecycle — orchestrate check-in + proactive renewal per gather run
 """
 
+import os
 from datetime import datetime, timezone
 
 from cryptography import x509
@@ -203,8 +204,16 @@ def get_renewal_days():
 
 
 def get_candlepin_ca():
-    """Get Candlepin CA certificate path from Django settings."""
-    return settings.AWX_ANALYTICS_CANDLEPIN_CA
+    """Get Candlepin CA certificate path from Django settings.
+
+    Returns:
+        str: Path to CA certificate file if configured and exists, None otherwise.
+    """
+    ca_path = settings.AWX_ANALYTICS_CANDLEPIN_CA
+    if ca_path and not os.path.isfile(ca_path):
+        logger.warning(f'Configured Candlepin CA certificate not found at {ca_path}, using system default CA bundle')
+        return None
+    return ca_path
 
 
 def get_proxy_url():

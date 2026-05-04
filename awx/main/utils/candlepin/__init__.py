@@ -79,16 +79,25 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
         return False
 
 
-def _discover_org(candlepin_url, username, password):
+def _discover_org(candlepin_url, username, password, verify_tls=True):
     """Discover org key via GET /users/{username}/owners.
+
+    Args:
+        candlepin_url: Candlepin base URL
+        username: Username for authentication
+        password: Password for authentication
+        verify_tls: Whether to verify TLS certificates (default: True)
 
     Returns:
         str: Organization key if found, None on any failure.
     """
     try:
         url = f"{candlepin_url}/users/{username}/owners"
-        candlepin_ca = get_candlepin_ca()
-        verify = candlepin_ca if candlepin_ca else True
+        if verify_tls:
+            candlepin_ca = get_candlepin_ca()
+            verify = candlepin_ca if candlepin_ca else True
+        else:
+            verify = False
 
         resp = requests.get(url, auth=(username, password), verify=verify, timeout=30)
         resp.raise_for_status()
@@ -116,13 +125,16 @@ def _discover_org(candlepin_url, username, password):
         return None
 
 
-def _fetch_registration_credentials_from_db():
+def _fetch_registration_credentials_from_db(verify_tls=True):
     """Read Candlepin registration credentials from AWX settings.
 
     Tries several options to retrieve the Candlepin credentials (set by AWX when the
     customer configures their Red Hat subscription), and to discover the org (org
     key for the Candlepin /consumers endpoint), and INSTALL_UUID (used as the
     consumer's aap.instance_uuid fact).
+
+    Args:
+        verify_tls: Whether to verify TLS certificates during org discovery (default: True)
 
     Returns (username, password, org, install_uuid), any of which may be None
     if the corresponding setting is not configured.
@@ -146,7 +158,7 @@ def _fetch_registration_credentials_from_db():
         # Organization discovery requires SUBSCRIPTIONS credentials specifically
         subs_username = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
         subs_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-        org = _discover_org(candlepin_url, subs_username, subs_password) if subs_username and subs_password else None
+        org = _discover_org(candlepin_url, subs_username, subs_password, verify_tls=verify_tls) if subs_username and subs_password else None
 
         return username, password, org, install_uuid
     except Exception as e:
@@ -154,7 +166,7 @@ def _fetch_registration_credentials_from_db():
         return None, None, None, None
 
 
-def resolve_registration_credentials(username_override=None, password_override=None, org_override=None):
+def resolve_registration_credentials(username_override=None, password_override=None, org_override=None, verify_tls=True):
     """Resolve Candlepin registration credentials with optional overrides.
 
     Fetches credentials from database settings and merges with any provided overrides.
@@ -164,13 +176,14 @@ def resolve_registration_credentials(username_override=None, password_override=N
         username_override: Optional username to use instead of database value
         password_override: Optional password to use instead of database value
         org_override: Optional org to use instead of auto-discovered value
+        verify_tls: Whether to verify TLS certificates during org discovery (default: True)
 
     Returns:
         Tuple (username, password, org, install_uuid) if all required fields present,
         or (None, None, None, None, error_messages) if validation fails.
         error_messages is a list of strings describing missing values.
     """
-    db_username, db_password, db_org, db_install_uuid = _fetch_registration_credentials_from_db()
+    db_username, db_password, db_org, db_install_uuid = _fetch_registration_credentials_from_db(verify_tls=verify_tls)
 
     username = username_override or db_username
     password = password_override or db_password

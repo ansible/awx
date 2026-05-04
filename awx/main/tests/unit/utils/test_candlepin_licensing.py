@@ -64,6 +64,24 @@ class TestCandlepinLicensing:
         )
 
     @mock.patch('awx.main.utils.candlepin.requests.get')
+    def test_discover_org_no_verify_tls(self, mock_requests_get):
+        """Test organization discovery with TLS verification disabled."""
+        mock_response = mock.Mock()
+        mock_response.json.return_value = [{'key': 'test_org', 'displayName': 'Test Organization'}]
+        mock_requests_get.return_value = mock_response
+
+        org = _discover_org('https://candlepin.example.com', 'test_user', 'test_pass', verify_tls=False)
+
+        assert org == 'test_org'
+        # Should use False for verify when verify_tls=False
+        mock_requests_get.assert_called_once_with(
+            'https://candlepin.example.com/users/test_user/owners',
+            auth=('test_user', 'test_pass'),
+            verify=False,
+            timeout=30,
+        )
+
+    @mock.patch('awx.main.utils.candlepin.requests.get')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
     def test_discover_org_empty_list(self, mock_get_ca, mock_requests_get):
         """Test organization discovery when user has no organizations."""
@@ -358,6 +376,28 @@ class TestCandlepinLicensing:
         assert org is None
         assert install_uuid == 'test-install-uuid'
 
+    @mock.patch('awx.main.utils.candlepin._discover_org')
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_fetch_registration_credentials_no_verify_tls(self, mock_settings, mock_discover_org):
+        """Test fetching credentials passes verify_tls=False to _discover_org."""
+        mock_settings.REDHAT_USERNAME = 'test_user'
+        mock_settings.REDHAT_PASSWORD = 'test_pass'
+        mock_settings.INSTALL_UUID = 'test-install-uuid'
+        mock_settings.SUBSCRIPTIONS_USERNAME = 'subs_user'
+        mock_settings.SUBSCRIPTIONS_PASSWORD = 'subs_pass'
+        mock_discover_org.return_value = 'test_org'
+
+        username, password, org, install_uuid = _fetch_registration_credentials_from_db(verify_tls=False)
+
+        assert username == 'test_user'
+        assert password == 'test_pass'
+        assert org == 'test_org'
+        assert install_uuid == 'test-install-uuid'
+        # Verify _discover_org was called with verify_tls=False
+        mock_discover_org.assert_called_once()
+        call_kwargs = mock_discover_org.call_args[1]
+        assert call_kwargs['verify_tls'] is False
+
     @mock.patch('awx.main.utils.candlepin._fetch_registration_credentials_from_db')
     def test_resolve_registration_credentials_no_overrides(self, mock_fetch):
         """Test resolve_registration_credentials with no overrides."""
@@ -415,6 +455,21 @@ class TestCandlepinLicensing:
         assert 'username' in errors[0]
         assert 'password' in errors[1]
         assert 'org' in errors[2]
+
+    @mock.patch('awx.main.utils.candlepin._fetch_registration_credentials_from_db')
+    def test_resolve_registration_credentials_verify_tls_false(self, mock_fetch):
+        """Test resolve_registration_credentials passes verify_tls=False to fetch function."""
+        mock_fetch.return_value = ('db_user', 'db_pass', 'db_org', 'install-uuid')
+
+        username, password, org, install_uuid, errors = resolve_registration_credentials(verify_tls=False)
+
+        # Verify _fetch_registration_credentials_from_db was called with verify_tls=False
+        mock_fetch.assert_called_once_with(verify_tls=False)
+        assert username == 'db_user'
+        assert password == 'db_pass'
+        assert org == 'db_org'
+        assert install_uuid == 'install-uuid'
+        assert errors is None
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
     @mock.patch('awx.conf.models.Setting')

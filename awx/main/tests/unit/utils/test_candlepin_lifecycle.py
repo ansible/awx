@@ -66,12 +66,23 @@ class TestCandlepinLifecycle:
         ca = get_candlepin_ca()
         assert ca is None
 
+    @mock.patch('awx.main.utils.candlepin.lifecycle.os.path.isfile')
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
-    def test_get_candlepin_ca_from_settings(self, mock_settings):
-        """Test Candlepin CA from Django settings."""
+    def test_get_candlepin_ca_from_settings(self, mock_settings, mock_isfile):
+        """Test Candlepin CA from Django settings when file exists."""
         mock_settings.AWX_ANALYTICS_CANDLEPIN_CA = '/path/to/ca.pem'
+        mock_isfile.return_value = True
         ca = get_candlepin_ca()
         assert ca == '/path/to/ca.pem'
+
+    @mock.patch('awx.main.utils.candlepin.lifecycle.os.path.isfile')
+    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
+    def test_get_candlepin_ca_file_not_found(self, mock_settings, mock_isfile):
+        """Test Candlepin CA returns None when configured path doesn't exist."""
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_CA = '/path/to/missing.pem'
+        mock_isfile.return_value = False
+        ca = get_candlepin_ca()
+        assert ca is None
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_proxy_url_none(self, mock_settings):

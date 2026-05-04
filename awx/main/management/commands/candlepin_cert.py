@@ -132,6 +132,7 @@ class Command(BaseCommand):
         """
         username_override = options.get('username')
         org_override = options.get('org')
+        verify_tls = not options.get('no_verify_tls', False)
 
         # Read password from stdin if --password-stdin is set
         if options.get('password_stdin'):
@@ -144,7 +145,7 @@ class Command(BaseCommand):
 
         # Use shared resolution and validation function
         username, password, org, install_uuid, errors = resolve_registration_credentials(
-            username_override=username_override, password_override=password_override, org_override=org_override
+            username_override=username_override, password_override=password_override, org_override=org_override, verify_tls=verify_tls
         )
 
         if errors:
