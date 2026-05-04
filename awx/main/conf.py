@@ -915,18 +915,6 @@ register(
 )
 
 register(
-    'CANDLEPIN_EXPIRES_AT',
-    field_class=fields.DateTimeField,
-    allow_null=True,
-    read_only=True,
-    label=_('Candlepin Certificate Expiry'),
-    help_text=_('Expiry timestamp of the Candlepin identity certificate.'),
-    category=_('System'),
-    category_slug='system',
-    hidden=True,
-)
-
-register(
     'IS_K8S',
     field_class=fields.BooleanField,
     read_only=True,

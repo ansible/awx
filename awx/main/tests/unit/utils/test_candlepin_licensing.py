@@ -432,14 +432,13 @@ class TestCandlepinLicensing:
 
         assert result is True
         # Verify update_or_create was called for each setting
-        assert mock_setting.objects.update_or_create.call_count == 4
+        assert mock_setting.objects.update_or_create.call_count == 3
         calls = mock_setting.objects.update_or_create.call_args_list
-        # Check that cert, key, serial, and expires_at were all saved
+        # Check that cert, key, and serial were all saved
         keys_saved = {call[1]['key'] for call in calls}
         assert 'CANDLEPIN_CERT_PEM' in keys_saved
         assert 'CANDLEPIN_KEY_PEM' in keys_saved
         assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
-        assert 'CANDLEPIN_EXPIRES_AT' in keys_saved
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
     @mock.patch('awx.conf.models.Setting')
@@ -457,7 +456,7 @@ class TestCandlepinLicensing:
 
         assert result is True
         # Verify update_or_create was called for each setting (including consumer_uuid)
-        assert mock_setting.objects.update_or_create.call_count == 5
+        assert mock_setting.objects.update_or_create.call_count == 4
         calls = mock_setting.objects.update_or_create.call_args_list
         # Check that all registration data was saved
         keys_saved = {call[1]['key'] for call in calls}
@@ -465,7 +464,6 @@ class TestCandlepinLicensing:
         assert 'CANDLEPIN_CERT_PEM' in keys_saved
         assert 'CANDLEPIN_KEY_PEM' in keys_saved
         assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
-        assert 'CANDLEPIN_EXPIRES_AT' in keys_saved
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
     @mock.patch('awx.conf.models.Setting')
@@ -476,7 +474,7 @@ class TestCandlepinLicensing:
         result = _save_candlepin_cert_to_db('new-cert', 'new-key')
 
         assert result is True
-        # Should still save cert, key, and serial (empty), but not expires_at
+        # Should still save cert, key, and serial (empty)
         assert mock_setting.objects.update_or_create.call_count == 3
         calls = mock_setting.objects.update_or_create.call_args_list
         keys_saved = {call[1]['key'] for call in calls}
@@ -487,27 +485,6 @@ class TestCandlepinLicensing:
         for call in calls:
             if call[1]['key'] == 'CANDLEPIN_SERIAL_NUMBER':
                 assert call[1]['defaults']['value'] == ''
-
-    @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_cert_to_db_no_expiry(self, mock_setting, mock_parse_cert):
-        """Test saving Candlepin cert when not_after is missing."""
-        mock_parse_cert.return_value = {
-            'serial': '123456',
-            'cn': 'test-consumer',
-        }
-
-        result = _save_candlepin_cert_to_db('new-cert', 'new-key')
-
-        assert result is True
-        # Should save cert, key, and serial, but not expires_at
-        assert mock_setting.objects.update_or_create.call_count == 3
-        calls = mock_setting.objects.update_or_create.call_args_list
-        keys_saved = {call[1]['key'] for call in calls}
-        assert 'CANDLEPIN_CERT_PEM' in keys_saved
-        assert 'CANDLEPIN_KEY_PEM' in keys_saved
-        assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
-        assert 'CANDLEPIN_EXPIRES_AT' not in keys_saved
 
     @mock.patch('awx.conf.models.Setting')
     def test_save_candlepin_cert_to_db_failure(self, mock_setting):
@@ -527,7 +504,7 @@ class TestCandlepinLicensing:
         result = _save_candlepin_registration_to_db('cert', 'key', 'uuid')
 
         assert result is True
-        # Should still save uuid, cert, key, and serial (empty), but not expires_at
+        # Should still save uuid, cert, key, and serial (empty)
         assert mock_setting.objects.update_or_create.call_count == 4
         calls = mock_setting.objects.update_or_create.call_args_list
         keys_saved = {call[1]['key'] for call in calls}
@@ -539,28 +516,6 @@ class TestCandlepinLicensing:
         for call in calls:
             if call[1]['key'] == 'CANDLEPIN_SERIAL_NUMBER':
                 assert call[1]['defaults']['value'] == ''
-
-    @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_registration_to_db_no_expiry(self, mock_setting, mock_parse_cert):
-        """Test saving Candlepin registration when not_after is missing."""
-        mock_parse_cert.return_value = {
-            'serial': '789012',
-            'cn': 'test-consumer',
-        }
-
-        result = _save_candlepin_registration_to_db('cert', 'key', 'uuid')
-
-        assert result is True
-        # Should save uuid, cert, key, and serial, but not expires_at
-        assert mock_setting.objects.update_or_create.call_count == 4
-        calls = mock_setting.objects.update_or_create.call_args_list
-        keys_saved = {call[1]['key'] for call in calls}
-        assert 'CANDLEPIN_CONSUMER_UUID' in keys_saved
-        assert 'CANDLEPIN_CERT_PEM' in keys_saved
-        assert 'CANDLEPIN_KEY_PEM' in keys_saved
-        assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
-        assert 'CANDLEPIN_EXPIRES_AT' not in keys_saved
 
     @mock.patch('awx.conf.models.Setting')
     def test_save_candlepin_registration_to_db_failure(self, mock_setting):

@@ -63,18 +63,14 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
         try:
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
-            expires_at = cert_info.get('not_after', None)
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
-            expires_at = None
 
         # Update conf_settings
         Setting.objects.update_or_create(key='CANDLEPIN_CERT_PEM', defaults={'value': cert_pem})
         Setting.objects.update_or_create(key='CANDLEPIN_KEY_PEM', defaults={'value': key_pem})
         Setting.objects.update_or_create(key='CANDLEPIN_SERIAL_NUMBER', defaults={'value': serial_number})
-        if expires_at:
-            Setting.objects.update_or_create(key='CANDLEPIN_EXPIRES_AT', defaults={'value': expires_at})
 
         logger.info('Renewed Candlepin cert and key saved to conf_settings.')
         return True
@@ -208,19 +204,15 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
         try:
             cert_info = parse_cert(cert_pem)
             serial_number = cert_info.get('serial', '')
-            expires_at = cert_info.get('not_after', None)
         except Exception as e:
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
-            expires_at = None
 
         # Update conf_settings with all registration data
         Setting.objects.update_or_create(key='CANDLEPIN_CONSUMER_UUID', defaults={'value': consumer_uuid})
         Setting.objects.update_or_create(key='CANDLEPIN_CERT_PEM', defaults={'value': cert_pem})
         Setting.objects.update_or_create(key='CANDLEPIN_KEY_PEM', defaults={'value': key_pem})
         Setting.objects.update_or_create(key='CANDLEPIN_SERIAL_NUMBER', defaults={'value': serial_number})
-        if expires_at:
-            Setting.objects.update_or_create(key='CANDLEPIN_EXPIRES_AT', defaults={'value': expires_at})
 
         logger.info(f'Candlepin consumer registration saved to conf_settings (uuid={consumer_uuid}).')
         return True
