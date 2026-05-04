@@ -14,13 +14,14 @@ import sys
 import time
 from base64 import b64encode
 from collections import OrderedDict
+from jwt import decode as _jwt_decode
 
 from urllib3.exceptions import ConnectTimeoutError
 
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, Subquery, OuterRef
 from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.db.models.fields.related import ManyToManyField, ForeignKey
 from django.db.models.functions import Trunc
@@ -58,8 +59,13 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from ansible_base.lib.utils.requests import get_remote_hosts
 from ansible_base.rbac.models import RoleEvaluation
 from ansible_base.lib.utils.schema import extend_schema_if_available
+from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
+
+# flags
+from flags.state import flag_enabled
 
 # AWX
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset
 from awx.api.generics import (
@@ -203,11 +209,12 @@ class DashboardView(APIView):
         groups_inventory_failed = models.Group.objects.filter(inventory_sources__last_job_failed=True).count()
         data['groups'] = {'url': reverse('api:group_list', request=request), 'total': user_groups.count(), 'inventory_failed': groups_inventory_failed}
 
-        user_hosts = get_user_queryset(request.user, models.Host)
-        user_hosts_failed = user_hosts.filter(last_job_host_summary__failed=True)
+        user_hosts = get_user_queryset(request.user, models.Host).exclude(inventory__kind='constructed')
+        latest_summary_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
+        user_hosts_failed = user_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
+
         data['hosts'] = {
             'url': reverse('api:host_list', request=request),
-            'failures_url': reverse('api:host_list', request=request) + "?last_job_host_summary__failed=True",
             'total': user_hosts.count(),
             'failed': user_hosts_failed.count(),
         }
@@ -1595,7 +1602,175 @@ class CredentialCopy(CopyAPIView):
     resource_purpose = 'copy of a credential'
 
 
-class CredentialExternalTest(SubDetailAPIView):
+class OIDCCredentialTestMixin:
+    """
+    Mixin to add OIDC workload identity token support to credential test endpoints.
+
+    This mixin provides methods to handle OIDC-enabled external credentials that use
+    workload identity tokens for authentication.
+    """
+
+    @staticmethod
+    def _get_workload_identity_token(job_template: models.JobTemplate, audience: str) -> str:
+        """Generate a workload identity token for a job template.
+
+        Args:
+            job_template: The JobTemplate instance to generate claims for
+            audience: The JWT audience claim value
+
+        Returns:
+            str: The generated JWT token
+        """
+        claims = {
+            AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME: job_template.organization.name,
+            AutomationControllerJobScope.CLAIM_ORGANIZATION_ID: job_template.organization.id,
+            AutomationControllerJobScope.CLAIM_PROJECT_NAME: job_template.project.name,
+            AutomationControllerJobScope.CLAIM_PROJECT_ID: job_template.project.id,
+            AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME: job_template.name,
+            AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_ID: job_template.id,
+            AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME: job_template.playbook,
+        }
+        return retrieve_workload_identity_jwt_with_claims(
+            claims=claims,
+            audience=audience,
+            scope=AutomationControllerJobScope.name,
+        )
+
+    @staticmethod
+    def _decode_jwt_payload_for_display(jwt_token):
+        """Decode JWT payload for display purposes only (signature not verified).
+
+        This is safe because the JWT was just created by AWX and is only decoded
+        to show the user what claims are being sent to the external system.
+        The external system will perform proper signature verification.
+
+        Args:
+            jwt_token: The JWT token to decode
+
+        Returns:
+            dict: The decoded JWT payload
+        """
+        return _jwt_decode(jwt_token, algorithms=["RS256"], options={"verify_signature": False})  # NOSONAR python:S5659
+
+    def _has_workload_identity_token(self, credential_type_inputs):
+        """Check if credential type has an internal workload_identity_token field.
+
+        Args:
+            credential_type_inputs: The inputs dict from a credential type
+
+        Returns:
+            bool: True if the credential type has a workload_identity_token field marked as internal
+        """
+        fields = credential_type_inputs.get('fields', []) if isinstance(credential_type_inputs, dict) else []
+        return any(field.get('internal') and field.get('id') == 'workload_identity_token' for field in fields)
+
+    def _validate_and_get_job_template(self, job_template_id):
+        """Validate job template ID and return the JobTemplate instance.
+
+        Args:
+            job_template_id: The job template ID from metadata
+
+        Returns:
+            JobTemplate instance
+
+        Raises:
+            ParseError: If job_template_id is invalid or not found
+        """
+        if job_template_id is None:
+            raise ParseError(_('Job template ID is required.'))
+
+        try:
+            return models.JobTemplate.objects.get(id=int(job_template_id))
+        except ValueError:
+            raise ParseError(_('Job template ID must be an integer.'))
+        except models.JobTemplate.DoesNotExist:
+            raise ParseError(_('Job template with ID %(id)s does not exist.') % {'id': job_template_id})
+
+    def _handle_oidc_credential_test(self, backend_kwargs):
+        """
+        Handle OIDC workload identity token generation for external credential test endpoints.
+
+        This method should only be called when FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is enabled
+        and the credential type has a workload_identity_token field.
+
+        Args:
+            backend_kwargs: The kwargs dict to pass to the backend (will be modified in place)
+
+        Returns:
+            dict: Response body containing details with the sent JWT payload
+
+        Raises:
+            PermissionDenied: If user lacks access to the job template (re-raised for 403 response)
+
+            All other exceptions are caught and converted to 400 responses with error details.
+
+            Modifies backend_kwargs in place to add workload_identity_token.
+        """
+        # Validate job template
+        job_template_id = backend_kwargs.pop('job_template_id', None)
+        job_template = self._validate_and_get_job_template(job_template_id)
+
+        # Check user access
+        if not self.request.user.can_access(models.JobTemplate, 'start', job_template):
+            raise PermissionDenied(_('You do not have access to job template with id: %(id)s.') % {'id': job_template.id})
+
+        # Generate workload identity token
+        jwt_token = self._get_workload_identity_token(job_template, backend_kwargs.get('url'))
+        backend_kwargs['workload_identity_token'] = jwt_token
+
+        return {'details': {'sent_jwt_payload': self._decode_jwt_payload_for_display(jwt_token)}}
+
+    def _call_backend_with_error_handling(self, plugin, backend_kwargs, response_body):
+        """Call credential backend and handle errors."""
+        try:
+            with set_environ(**settings.AWX_TASK_ENV):
+                plugin.backend(**backend_kwargs)
+                return Response(response_body, status=status.HTTP_202_ACCEPTED)
+        except requests.exceptions.HTTPError as exc:
+            message = self._extract_http_error_message(exc)
+            self._add_error_to_response(response_body, message)
+            return Response(response_body, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as exc:
+            message = self._extract_generic_error_message(exc)
+            self._add_error_to_response(response_body, message)
+            return Response(response_body, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def _extract_http_error_message(exc):
+        """Extract error message from HTTPError, checking response JSON and text."""
+        message = str(exc)
+        if not hasattr(exc, 'response') or exc.response is None:
+            return message
+
+        try:
+            error_data = exc.response.json()
+            if 'errors' in error_data and error_data['errors']:
+                return ', '.join(error_data['errors'])
+            if 'error' in error_data:
+                return error_data['error']
+        except (ValueError, KeyError):
+            if exc.response.text:
+                return exc.response.text
+        return message
+
+    @staticmethod
+    def _extract_generic_error_message(exc):
+        """Extract error message from exception, handling ConnectTimeoutError specially."""
+        message = str(exc) if str(exc) else exc.__class__.__name__
+        for arg in getattr(exc, 'args', []):
+            if isinstance(getattr(arg, 'reason', None), ConnectTimeoutError):
+                return str(arg.reason)
+        return message
+
+    @staticmethod
+    def _add_error_to_response(response_body, message):
+        """Add error message to both 'detail' and 'details.error_message' fields."""
+        response_body['detail'] = message
+        if 'details' in response_body:
+            response_body['details']['error_message'] = message
+
+
+class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
     """
     Test updates to the input values and metadata of an external credential
     before saving them.
@@ -1615,6 +1790,8 @@ class CredentialExternalTest(SubDetailAPIView):
         It does not support standard credential types such as Machine, SCM, and Cloud."""})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.credential_type.kind != 'external':
+            raise ParseError(_('Credential is not testable.'))
         backend_kwargs = {}
         for field_name, value in obj.inputs.items():
             backend_kwargs[field_name] = obj.get_input(field_name)
@@ -1622,23 +1799,22 @@ class CredentialExternalTest(SubDetailAPIView):
             if value != '$encrypted$':
                 backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
-        try:
-            with set_environ(**settings.AWX_TASK_ENV):
-                obj.credential_type.plugin.backend(**backend_kwargs)
-                return Response({}, status=status.HTTP_202_ACCEPTED)
-        except requests.exceptions.HTTPError:
-            message = """Test operation is not supported for credential type {}.
-                This endpoint only supports credentials that connect to
-                external secret management systems such as CyberArk, HashiCorp
-                Vault, or cloud-based secret managers.""".format(obj.credential_type.kind)
-            return Response({'detail': message}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as exc:
-            message = exc.__class__.__name__
-            exc_args = getattr(exc, 'args', [])
-            for a in exc_args:
-                if isinstance(getattr(a, 'reason', None), ConnectTimeoutError):
-                    message = str(a.reason)
-            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Handle OIDC workload identity token generation if enabled
+        response_body = {}
+        if flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED') and self._has_workload_identity_token(obj.credential_type.inputs):
+            try:
+                oidc_response_body = self._handle_oidc_credential_test(backend_kwargs)
+                response_body.update(oidc_response_body)
+            except PermissionDenied:
+                raise
+            except Exception as exc:
+                error_message = str(exc.detail) if hasattr(exc, 'detail') else str(exc)
+                response_body['detail'] = error_message
+                response_body['details'] = {'error_message': error_message}
+                return Response(response_body, status=status.HTTP_400_BAD_REQUEST)
+
+        return self._call_backend_with_error_handling(obj.credential_type.plugin, backend_kwargs, response_body)
 
 
 class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
@@ -1668,7 +1844,7 @@ class CredentialInputSourceSubList(SubListCreateAPIView):
     parent_key = 'target_credential'
 
 
-class CredentialTypeExternalTest(SubDetailAPIView):
+class CredentialTypeExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
     """
     Test a complete set of input values for an external credential before
     saving it.
@@ -1683,21 +1859,26 @@ class CredentialTypeExternalTest(SubDetailAPIView):
     @extend_schema_if_available(extensions={"x-ai-description": "Test a complete set of input values for an external credential"})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.kind != 'external':
+            raise ParseError(_('Credential type is not testable.'))
         backend_kwargs = request.data.get('inputs', {})
         backend_kwargs.update(request.data.get('metadata', {}))
-        try:
-            obj.plugin.backend(**backend_kwargs)
-            return Response({}, status=status.HTTP_202_ACCEPTED)
-        except requests.exceptions.HTTPError as exc:
-            message = 'HTTP {}'.format(exc.response.status_code)
-            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as exc:
-            message = exc.__class__.__name__
-            args_exc = getattr(exc, 'args', [])
-            for a in args_exc:
-                if isinstance(getattr(a, 'reason', None), ConnectTimeoutError):
-                    message = str(a.reason)
-            return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Handle OIDC workload identity token generation if enabled
+        response_body = {}
+        if flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED') and self._has_workload_identity_token(obj.inputs):
+            try:
+                oidc_response_body = self._handle_oidc_credential_test(backend_kwargs)
+                response_body.update(oidc_response_body)
+            except PermissionDenied:
+                raise
+            except Exception as exc:
+                error_message = str(exc.detail) if hasattr(exc, 'detail') else str(exc)
+                response_body['detail'] = error_message
+                response_body['details'] = {'error_message': error_message}
+                return Response(response_body, status=status.HTTP_400_BAD_REQUEST)
+
+        return self._call_backend_with_error_handling(obj.plugin, backend_kwargs, response_body)
 
 
 class HostRelatedSearchMixin(object):
@@ -1763,7 +1944,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs.distinct()
+        return qs.distinct().with_latest_summary_id()
 
     def list(self, *args, **kwargs):
         try:
@@ -1777,6 +1958,9 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'host detail'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete a host"})
     def delete(self, request, *args, **kwargs):
@@ -1810,6 +1994,9 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     parent_key = 'inventory'
     filter_read_permission = False
     resource_purpose = 'hosts of an inventory'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -1994,6 +2181,9 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     relationship = 'hosts'
     resource_purpose = 'hosts of a group'
 
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
+
     def update_raw_data(self, data):
         data.pop('inventory', None)
         return super(GroupHostsList, self).update_raw_data(data)
@@ -2025,7 +2215,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
-        return qs & sublist_qs
+        return (qs & sublist_qs).with_latest_summary_id()
 
 
 class GroupInventorySourcesList(SubListAPIView):
@@ -2317,6 +2507,9 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     relationship = 'hosts'
     check_sub_obj_permission = False
     resource_purpose = 'hosts of an inventory source'
+
+    def get_queryset(self):
+        return super().get_queryset().with_latest_summary_id()
 
     def perform_list_destroy(self, instance_list):
         inv_source = self.get_parent_object()

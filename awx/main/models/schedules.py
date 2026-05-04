@@ -72,10 +72,10 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     if ref_dt is None:
         ref_dt = now()
 
-    ref_dt = ref_dt.astimezone(datetime.timezone.utc)
+    dtstart_tz = rrule._dtstart.tzinfo
+    ref_dt = ref_dt.astimezone(dtstart_tz)
 
-    rrule_dtstart_utc = rrule._dtstart.astimezone(datetime.timezone.utc)
-    if rrule_dtstart_utc > ref_dt:
+    if rrule._dtstart > ref_dt:
         return rrule
 
     interval = rrule._interval if rrule._interval else 1
@@ -84,20 +84,14 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     elif rrule._freq == dateutil.rrule.MINUTELY:
         interval *= 60
 
-    # if after converting to seconds the interval is still a fraction,
-    # just return original rrule
     if isinstance(interval, float) and not interval.is_integer():
         return rrule
 
-    seconds_since_dtstart = (ref_dt - rrule_dtstart_utc).total_seconds()
+    seconds_since_dtstart = (ref_dt - rrule._dtstart).total_seconds()
 
-    # it is important to fast forward by a number that is divisible by
-    # interval. For example, if interval is 7 hours, we fast forward by 7, 14, 21, etc. hours.
-    # Otherwise, the occurrences after the fast forward might not match the ones before.
-    # x // y is integer division, lopping off any remainder, so that we get the outcome we want.
     interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
-    new_start = rrule_dtstart_utc + interval_aligned_offset
-    new_rrule = rrule.replace(dtstart=new_start.astimezone(rrule._dtstart.tzinfo))
+    new_start = rrule._dtstart + interval_aligned_offset
+    new_rrule = rrule.replace(dtstart=new_start)
     return new_rrule
 
 

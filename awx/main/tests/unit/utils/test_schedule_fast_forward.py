@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from awx.main.models.schedules import _fast_forward_rrule, Schedule
 from dateutil.rrule import HOURLY, MINUTELY, MONTHLY
 
-REF_DT = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
+REF_DT = datetime.datetime(2026, 4, 16, tzinfo=datetime.timezone.utc)
 
 
 @pytest.mark.parametrize(
@@ -19,6 +19,10 @@ REF_DT = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
         pytest.param(
             'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=MINUTELY;INTERVAL=5;WKST=SU;BYMONTH=2,3;BYMONTHDAY=18;BYHOUR=5;BYMINUTE=35;BYSECOND=0',
             id='every-5-minutes-at-5:35:00-am-on-the-18th-day-of-feb-or-march-with-week-starting-on-sundays',
+        ),
+        pytest.param(
+            'DTSTART;TZID=America/New_York:20251211T130000 RRULE:FREQ=HOURLY;INTERVAL=4;WKST=MO;BYDAY=MO,TU,WE,TH,FR;BYHOUR=1,5,9,13,17,21;BYMINUTE=0',
+            id='every-4-hours-at-1-5-9-13-17-21-am-on-monday-through-friday-with-week-starting-on-monday',
         ),
         pytest.param(
             'DTSTART;TZID=America/New_York:20201118T200000 RRULE:FREQ=HOURLY;INTERVAL=5;WKST=SU;BYMONTH=2,3;BYHOUR=5',
@@ -48,6 +52,7 @@ def test_fast_forwarded_rrule_matches_original_occurrence(rrulestr):
     [
         pytest.param(datetime.datetime(2024, 12, 1, 0, 0, tzinfo=datetime.timezone.utc), id='ref-dt-out-of-dst'),
         pytest.param(datetime.datetime(2024, 6, 1, 0, 0, tzinfo=datetime.timezone.utc), id='ref-dt-in-dst'),
+        pytest.param(datetime.datetime(2024, 11, 3, 6, 30, tzinfo=datetime.timezone.utc), id='ref-dt-fall-back-day'),
     ],
 )
 @pytest.mark.parametrize(
@@ -58,6 +63,8 @@ def test_fast_forwarded_rrule_matches_original_occurrence(rrulestr):
         pytest.param(
             'DTSTART;TZID=Europe/Lisbon:20230703T005800 RRULE:INTERVAL=10;FREQ=MINUTELY;BYHOUR=9,10,11,12,13,14,15,16,17,18,19,20,21', id='rrule-in-dst-by-hour'
         ),
+        pytest.param('DTSTART;TZID=America/New_York:20230313T005800 RRULE:FREQ=MINUTELY;INTERVAL=7', id='rrule-post-dst-7min'),
+        pytest.param('DTSTART;TZID=America/New_York:20230313T005800 RRULE:FREQ=MINUTELY;INTERVAL=13', id='rrule-post-dst-13min'),
     ],
 )
 def test_fast_forward_across_dst(rrulestr, ref_dt):
