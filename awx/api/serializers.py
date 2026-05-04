@@ -1021,7 +1021,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 
 class UserSerializer(BaseSerializer):
-    password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
+    password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
