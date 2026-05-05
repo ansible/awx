@@ -277,7 +277,6 @@ class RunnerCallback:
     def artifacts_handler(self, artifact_dir):
         success, query_file_contents = try_load_query_file(artifact_dir)
         if success:
-            self.delay_update(event_queries_processed=False)
             collections_info = collect_queries(query_file_contents)
             for collection, data in collections_info.items():
                 version = data['version']
@@ -300,6 +299,24 @@ class RunnerCallback:
                 self.delay_update(ansible_version=query_file_contents['ansible_version'])
             else:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
+
+            # Write event_queries_processed and installed_collections directly
+            # to the DB instead of using delay_update.  delay_update defers
+            # writes until the final job status save, but
+            # events_processed_hook (called from both the task runner after
+            # the final save and the callback receiver after the wrapup
+            # event) needs event_queries_processed=False visible in the DB
+            # to dispatch save_indirect_host_entries.  The field defaults to
+            # True, so without a direct write the hook would see True and
+            # skip the dispatch.  installed_collections is also written
+            # directly so it is available if the callback receiver
+            # dispatches before the final save.
+            from awx.main.models import Job
+
+            db_updates = {'event_queries_processed': False}
+            if 'installed_collections' in query_file_contents:
+                db_updates['installed_collections'] = query_file_contents['installed_collections']
+            Job.objects.filter(id=self.instance.id).update(**db_updates)
 
         self.artifacts_processed = True
 
