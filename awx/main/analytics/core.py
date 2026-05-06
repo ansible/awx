@@ -457,7 +457,6 @@ def ship(path):
 
         with set_environ(**settings.AWX_TASK_ENV):
             # Try Certificate-based mTLS authentication (zero-touch)
-            cert_auth_response = None
             cert_pem, key_pem = get_or_generate_candlepin_certificate()
             if cert_pem and key_pem:
                 # Use cert. subdomain for mTLS uploads
@@ -465,11 +464,15 @@ def ship(path):
                 logger.debug("Attempting certificate-based authentication for analytics upload")
                 try:
                     with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
-                        cert_auth_response = s.post(
+                        response = s.post(
                             cert_url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
                         )
-                        if cert_auth_response.status_code < 300:
+                        if response.status_code < 300:
                             return True
+                        else:
+                            logger.warning(
+                                f'Certificate-based authentication failed with status {response.status_code}, {response.text}. Falling back to OIDC auth'
+                            )
                 except Exception as e:
                     logger.warning(f"Certificate-based authentication failed: {e}, falling back to OIDC auth")
 
@@ -479,17 +482,12 @@ def ship(path):
             try:
                 client = OIDCClient(rh_id, rh_secret)
                 response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
+
+                if response.status_code < 300:
+                    return True
+                else:
+                    logger.error(f'OIDC authentication failed with status {response.status_code}, {response.text}')
+                    return False
             except requests.RequestException as e:
                 logger.error(f"OIDC authentication failed: {e}")
                 return False
-
-        # Accept 2XX status_codes
-        if response.status_code >= 300:
-            if cert_auth_response:
-                logger.error(
-                    'Upload attempt with certificate authentication failed with status {}, {}'.format(cert_auth_response.status_code, cert_auth_response.text)
-                )
-            logger.error('Upload attempt with service account authentication failed with status {}, {}'.format(response.status_code, response.text))
-            return False
-
-        return True
