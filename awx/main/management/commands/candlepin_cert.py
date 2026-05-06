@@ -59,7 +59,7 @@ class Command(BaseCommand):
                     '  Settings can be configured via Django settings (awx/settings/defaults.py):',
                     '',
                     '  AWX_ANALYTICS_CANDLEPIN_URL              Candlepin base URL',
-                    '                                           (default: https://subscription.rhsm.redhat.com/subscription)',
+                    '                                           (default: https://subscription.example.com/candlepin)',
                     '  AWX_ANALYTICS_CANDLEPIN_CA               Path to Candlepin CA cert for TLS verification',
                     '  AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS  Days before expiry to trigger renewal (default: 90)',
                     '  AWX_ANALYTICS_CANDLEPIN_PROXY_URL        HTTP/HTTPS proxy for Candlepin API calls',

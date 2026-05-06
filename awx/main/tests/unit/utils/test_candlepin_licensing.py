@@ -472,8 +472,8 @@ class TestCandlepinLicensing:
         assert errors is None
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_cert_to_db(self, mock_setting, mock_parse_cert):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_cert_to_db(self, mock_settings, mock_parse_cert):
         """Test saving Candlepin cert to conf_settings."""
         mock_parse_cert.return_value = {
             'serial': '123456',
@@ -486,18 +486,14 @@ class TestCandlepinLicensing:
         result = _save_candlepin_cert_to_db('new-cert', 'new-key')
 
         assert result is True
-        # Verify update_or_create was called for each setting
-        assert mock_setting.objects.update_or_create.call_count == 3
-        calls = mock_setting.objects.update_or_create.call_args_list
-        # Check that cert, key, and serial were all saved
-        keys_saved = {call[1]['key'] for call in calls}
-        assert 'CANDLEPIN_CERT_PEM' in keys_saved
-        assert 'CANDLEPIN_KEY_PEM' in keys_saved
-        assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
+        # Verify settings were assigned
+        assert mock_settings.CANDLEPIN_CERT_PEM == 'new-cert'
+        assert mock_settings.CANDLEPIN_KEY_PEM == 'new-key'
+        assert mock_settings.CANDLEPIN_SERIAL_NUMBER == '123456'
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_registration_to_db(self, mock_setting, mock_parse_cert):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_registration_to_db(self, mock_settings, mock_parse_cert):
         """Test saving Candlepin registration to conf_settings."""
         mock_parse_cert.return_value = {
             'serial': '789012',
@@ -510,72 +506,56 @@ class TestCandlepinLicensing:
         result = _save_candlepin_registration_to_db('cert', 'key', 'uuid')
 
         assert result is True
-        # Verify update_or_create was called for each setting (including consumer_uuid)
-        assert mock_setting.objects.update_or_create.call_count == 4
-        calls = mock_setting.objects.update_or_create.call_args_list
-        # Check that all registration data was saved
-        keys_saved = {call[1]['key'] for call in calls}
-        assert 'CANDLEPIN_CONSUMER_UUID' in keys_saved
-        assert 'CANDLEPIN_CERT_PEM' in keys_saved
-        assert 'CANDLEPIN_KEY_PEM' in keys_saved
-        assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
+        # Verify all registration data was saved
+        assert mock_settings.CANDLEPIN_CONSUMER_UUID == 'uuid'
+        assert mock_settings.CANDLEPIN_CERT_PEM == 'cert'
+        assert mock_settings.CANDLEPIN_KEY_PEM == 'key'
+        assert mock_settings.CANDLEPIN_SERIAL_NUMBER == '789012'
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_cert_to_db_parse_failure(self, mock_setting, mock_parse_cert):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_cert_to_db_parse_failure(self, mock_settings, mock_parse_cert):
         """Test saving Candlepin cert when parse_cert fails."""
         mock_parse_cert.side_effect = Exception('Parse error')
 
         result = _save_candlepin_cert_to_db('new-cert', 'new-key')
 
         assert result is True
-        # Should still save cert, key, and serial (empty)
-        assert mock_setting.objects.update_or_create.call_count == 3
-        calls = mock_setting.objects.update_or_create.call_args_list
-        keys_saved = {call[1]['key'] for call in calls}
-        assert 'CANDLEPIN_CERT_PEM' in keys_saved
-        assert 'CANDLEPIN_KEY_PEM' in keys_saved
-        assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
-        # Verify serial_number was saved as empty string
-        for call in calls:
-            if call[1]['key'] == 'CANDLEPIN_SERIAL_NUMBER':
-                assert call[1]['defaults']['value'] == ''
+        # Should still save cert, key, and serial (empty string)
+        assert mock_settings.CANDLEPIN_CERT_PEM == 'new-cert'
+        assert mock_settings.CANDLEPIN_KEY_PEM == 'new-key'
+        assert mock_settings.CANDLEPIN_SERIAL_NUMBER == ''
 
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_cert_to_db_failure(self, mock_setting):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_cert_to_db_failure(self, mock_settings):
         """Test saving Candlepin cert returns False on exception."""
-        mock_setting.objects.update_or_create.side_effect = Exception('DB error')
+        # Simulate settings assignment raising an exception
+        type(mock_settings).CANDLEPIN_CERT_PEM = mock.PropertyMock(side_effect=Exception('Settings error'))
 
         result = _save_candlepin_cert_to_db('cert', 'key')
 
         assert result is False
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_registration_to_db_parse_failure(self, mock_setting, mock_parse_cert):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_registration_to_db_parse_failure(self, mock_settings, mock_parse_cert):
         """Test saving Candlepin registration when parse_cert fails."""
         mock_parse_cert.side_effect = Exception('Parse error')
 
         result = _save_candlepin_registration_to_db('cert', 'key', 'uuid')
 
         assert result is True
-        # Should still save uuid, cert, key, and serial (empty)
-        assert mock_setting.objects.update_or_create.call_count == 4
-        calls = mock_setting.objects.update_or_create.call_args_list
-        keys_saved = {call[1]['key'] for call in calls}
-        assert 'CANDLEPIN_CONSUMER_UUID' in keys_saved
-        assert 'CANDLEPIN_CERT_PEM' in keys_saved
-        assert 'CANDLEPIN_KEY_PEM' in keys_saved
-        assert 'CANDLEPIN_SERIAL_NUMBER' in keys_saved
-        # Verify serial_number was saved as empty string
-        for call in calls:
-            if call[1]['key'] == 'CANDLEPIN_SERIAL_NUMBER':
-                assert call[1]['defaults']['value'] == ''
+        # Should still save uuid, cert, key, and serial (empty string)
+        assert mock_settings.CANDLEPIN_CONSUMER_UUID == 'uuid'
+        assert mock_settings.CANDLEPIN_CERT_PEM == 'cert'
+        assert mock_settings.CANDLEPIN_KEY_PEM == 'key'
+        assert mock_settings.CANDLEPIN_SERIAL_NUMBER == ''
 
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_registration_to_db_failure(self, mock_setting):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_registration_to_db_failure(self, mock_settings):
         """Test saving Candlepin registration returns False on exception."""
-        mock_setting.objects.update_or_create.side_effect = Exception('DB error')
+        # Simulate settings assignment raising an exception
+        type(mock_settings).CANDLEPIN_CONSUMER_UUID = mock.PropertyMock(side_effect=Exception('Settings error'))
 
         result = _save_candlepin_registration_to_db('cert', 'key', 'uuid')
 
@@ -935,35 +915,34 @@ class TestCandlepinLicensing:
         assert org is None
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_cert_to_db_cert_parse_failure(self, mock_setting, mock_parse_cert):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_cert_to_db_cert_parse_failure(self, mock_settings, mock_parse_cert):
         """Test _save_candlepin_cert_to_db handles cert parsing failure gracefully."""
         # Cert parsing fails
         mock_parse_cert.side_effect = ValueError('Invalid certificate format')
-
-        # Mock Setting.objects.update_or_create
-        mock_setting.objects.update_or_create.return_value = (mock.Mock(), True)
 
         result = _save_candlepin_cert_to_db('invalid-cert', 'key-pem')
 
         # Should still save cert even if parsing fails
         assert result is True
-        # Serial should be empty string when parsing fails
-        assert mock_setting.objects.update_or_create.call_count >= 3  # CERT_PEM, KEY_PEM, SERIAL_NUMBER at minimum
+        # Verify cert, key, and serial (empty string) were saved
+        assert mock_settings.CANDLEPIN_CERT_PEM == 'invalid-cert'
+        assert mock_settings.CANDLEPIN_KEY_PEM == 'key-pem'
+        assert mock_settings.CANDLEPIN_SERIAL_NUMBER == ''
 
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-    @mock.patch('awx.conf.models.Setting')
-    def test_save_candlepin_registration_to_db_cert_parse_failure(self, mock_setting, mock_parse_cert):
+    @mock.patch('awx.main.utils.candlepin.settings')
+    def test_save_candlepin_registration_to_db_cert_parse_failure(self, mock_settings, mock_parse_cert):
         """Test _save_candlepin_registration_to_db handles cert parsing failure gracefully."""
         # Cert parsing fails
         mock_parse_cert.side_effect = ValueError('Invalid certificate format')
-
-        # Mock Setting.objects.update_or_create
-        mock_setting.objects.update_or_create.return_value = (mock.Mock(), True)
 
         result = _save_candlepin_registration_to_db('invalid-cert', 'key-pem', 'consumer-uuid')
 
         # Should still save registration even if parsing fails
         assert result is True
-        # Should save UUID, cert, key, and serial (at minimum)
-        assert mock_setting.objects.update_or_create.call_count >= 4
+        # Verify UUID, cert, key, and serial (empty string) were saved
+        assert mock_settings.CANDLEPIN_CONSUMER_UUID == 'consumer-uuid'
+        assert mock_settings.CANDLEPIN_CERT_PEM == 'invalid-cert'
+        assert mock_settings.CANDLEPIN_KEY_PEM == 'key-pem'
+        assert mock_settings.CANDLEPIN_SERIAL_NUMBER == ''

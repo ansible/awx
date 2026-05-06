@@ -15,8 +15,8 @@ class TestCandlepinClient:
 
     def test_base_url_required(self):
         """Test base_url parameter is required."""
-        client = CandlepinClient(base_url='https://subscription.rhsm.redhat.com/subscription')
-        assert client.base_url == 'https://subscription.rhsm.redhat.com/subscription'
+        client = CandlepinClient(base_url='https://subscription.example.com/candlepin')
+        assert client.base_url == 'https://subscription.example.com/candlepin'
 
     def test_custom_url(self):
         """Test custom Candlepin URL."""

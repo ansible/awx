@@ -56,8 +56,6 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
     Returns:
         bool: True if save succeeded, False on any error.
     """
-    from awx.conf.models import Setting
-
     try:
         # Parse certificate to extract metadata
         try:
@@ -67,10 +65,10 @@ def _save_candlepin_cert_to_db(cert_pem, key_pem):
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
 
-        # Update conf_settings
-        Setting.objects.update_or_create(key='CANDLEPIN_CERT_PEM', defaults={'value': cert_pem})
-        Setting.objects.update_or_create(key='CANDLEPIN_KEY_PEM', defaults={'value': key_pem})
-        Setting.objects.update_or_create(key='CANDLEPIN_SERIAL_NUMBER', defaults={'value': serial_number})
+        # Update conf_settings via settings wrapper
+        settings.CANDLEPIN_CERT_PEM = cert_pem
+        settings.CANDLEPIN_KEY_PEM = key_pem
+        settings.CANDLEPIN_SERIAL_NUMBER = serial_number
 
         logger.info('Renewed Candlepin cert and key saved to conf_settings.')
         return True
@@ -210,8 +208,6 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
     Returns:
         bool: True if save succeeded, False on any error.
     """
-    from awx.conf.models import Setting
-
     try:
         # Parse certificate to extract metadata
         try:
@@ -221,11 +217,11 @@ def _save_candlepin_registration_to_db(cert_pem, key_pem, consumer_uuid):
             logger.warning(f'Could not parse certificate metadata: {e}')
             serial_number = ''
 
-        # Update conf_settings with all registration data
-        Setting.objects.update_or_create(key='CANDLEPIN_CONSUMER_UUID', defaults={'value': consumer_uuid})
-        Setting.objects.update_or_create(key='CANDLEPIN_CERT_PEM', defaults={'value': cert_pem})
-        Setting.objects.update_or_create(key='CANDLEPIN_KEY_PEM', defaults={'value': key_pem})
-        Setting.objects.update_or_create(key='CANDLEPIN_SERIAL_NUMBER', defaults={'value': serial_number})
+        # Update conf_settings with all registration data via settings wrapper
+        settings.CANDLEPIN_CONSUMER_UUID = consumer_uuid
+        settings.CANDLEPIN_CERT_PEM = cert_pem
+        settings.CANDLEPIN_KEY_PEM = key_pem
+        settings.CANDLEPIN_SERIAL_NUMBER = serial_number
 
         logger.info(f'Candlepin consumer registration saved to conf_settings (uuid={consumer_uuid}).')
         return True

@@ -8,6 +8,7 @@ import pathlib
 import shutil
 import tarfile
 import tempfile
+from urllib.parse import urlparse, urlunparse
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -41,6 +42,41 @@ def _valid_license():
         logger.exception("A valid license was not found:")
         return False
     return True
+
+
+def _get_cert_upload_url(url):
+    """
+    Convert analytics URL to use 'cert.' subdomain for mTLS uploads.
+
+    Some analytics services use different hostnames for different auth methods:
+    - cert.example.com - for mTLS (certificate-based) uploads
+    - example.com - for OIDC (token-based) uploads
+
+    Args:
+        url: Original analytics URL
+
+    Returns:
+        URL with 'cert.' prepended to hostname if not already present
+    """
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname
+
+        # Only modify if hostname doesn't already start with 'cert.'
+        if hostname and not hostname.startswith('cert.'):
+            new_hostname = f'cert.{hostname}'
+            # Reconstruct URL with new hostname
+            netloc = new_hostname
+            if parsed.port:
+                netloc = f'{new_hostname}:{parsed.port}'
+
+            new_parsed = parsed._replace(netloc=netloc)
+            return urlunparse(new_parsed)
+
+        return url
+    except Exception as e:
+        logger.warning(f'Could not modify URL for cert upload: {e}, using original URL')
+        return url
 
 
 def _get_insights_credentials():
@@ -424,11 +460,13 @@ def ship(path):
             cert_auth_response = None
             cert_pem, key_pem = get_or_generate_candlepin_certificate()
             if cert_pem and key_pem:
+                # Use cert. subdomain for mTLS uploads
+                cert_url = _get_cert_upload_url(url)
                 logger.debug("Attempting certificate-based authentication for analytics upload")
                 try:
                     with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
                         cert_auth_response = s.post(
-                            url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
+                            cert_url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
                         )
                         if cert_auth_response.status_code < 300:
                             return True

@@ -34,9 +34,9 @@ class TestCandlepinLifecycle:
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_candlepin_url_default(self, mock_settings):
         """Test default Candlepin URL from defaults.py."""
-        mock_settings.AWX_ANALYTICS_CANDLEPIN_URL = 'https://subscription.rhsm.redhat.com/subscription/'
+        mock_settings.AWX_ANALYTICS_CANDLEPIN_URL = 'https://subscription.example.com/candlepin/'
         url = get_candlepin_url()
-        assert url == 'https://subscription.rhsm.redhat.com/subscription/'
+        assert url == 'https://subscription.example.com/candlepin/'
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_candlepin_url_custom(self, mock_settings):
