@@ -53,7 +53,7 @@ pyopenssl
 pyparsing==2.4.7 # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon
 python-dsv-sdk>=1.0.4
-python-tss-sdk>=1.2.1
+python-tss-sdk>=2.0.0
 pyyaml>=6.0.2  # require packing fix for cython 3 or higher
 pyzstd  # otel collector log file compression library
 receptorctl
