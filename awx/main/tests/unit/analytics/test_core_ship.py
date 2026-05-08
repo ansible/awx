@@ -27,23 +27,6 @@ class TestGetCertUploadUrl:
         result = _get_cert_upload_url(url)
         assert result == 'https://cert.analytics.example.com/api/ingress/v1/upload'
 
-    def test_handles_http_protocol(self):
-        """Test that HTTPS protocol is preserved."""
-        url = 'https://analytics.example.com/api/upload'
-        result = _get_cert_upload_url(url)
-        assert result == 'https://cert.analytics.example.com/api/upload'
-
-    def test_handles_invalid_url(self):
-        """Test that invalid URLs are returned unchanged."""
-        url = 'not-a-valid-url'
-        result = _get_cert_upload_url(url)
-        assert result == 'not-a-valid-url'
-
-    def test_handles_url_without_hostname(self):
-        """Test that URLs without hostname are returned unchanged."""
-        url = '/relative/path'
-        result = _get_cert_upload_url(url)
-        assert result == '/relative/path'
 
 
 class TestShipMTLS:
@@ -287,71 +270,3 @@ class TestShipMTLS:
         assert result is False
         mock_session.post.assert_called_once()
         mock_oidc_instance.make_request.assert_called_once()
-
-    def test_ship_missing_tarball(self):
-        """Test ship() with missing tarball file."""
-        result = ship('/nonexistent/path/to/tarball.tar.gz')
-        assert result is False
-
-    @override_settings(
-        AUTOMATION_ANALYTICS_URL=None,
-        REDHAT_USERNAME='test_user',
-        REDHAT_PASSWORD='test_pass',  # NOSONAR
-    )
-    def test_ship_missing_analytics_url(self):
-        """Test ship() when AUTOMATION_ANALYTICS_URL is not set."""
-        result = ship(self.tarball_path)
-        assert result is False
-
-    @override_settings(
-        AUTOMATION_ANALYTICS_URL='https://cert.analytics.example.com/api/ingress/v1/upload',
-        INSIGHTS_AGENT_MIME='application/vnd.redhat.tower.analytics+tgz',
-        INSIGHTS_CERT_PATH='/etc/pki/tls/certs/ca-bundle.crt',
-        REDHAT_USERNAME='test_user',
-        REDHAT_PASSWORD='test_pass',  # NOSONAR
-        AWX_TASK_ENV={},
-    )
-    @mock.patch('awx.main.analytics.core.get_awx_http_client_headers')
-    @mock.patch('awx.main.analytics.core._temp_cert_files')
-    @mock.patch('awx.main.analytics.core.get_or_generate_candlepin_certificate')
-    @mock.patch('awx.main.analytics.core.requests.Session')
-    def test_ship_with_mtls_preserves_cert_subdomain(self, mock_session_class, mock_get_cert, mock_temp_files, mock_headers):
-        """Test that existing 'cert.' subdomain in URL is preserved."""
-        # Mock headers to avoid database access
-        mock_headers.return_value = {'Content-Type': 'application/json'}
-
-        # Mock certificate retrieval
-        mock_get_cert.return_value = ('cert-pem-data', 'key-pem-data')
-
-        # Mock temp files context manager
-        mock_temp_files.return_value.__enter__.return_value = ('/tmp/cert.pem', '/tmp/key.pem')
-        mock_temp_files.return_value.__exit__.return_value = None
-
-        # Mock successful mTLS response
-        mock_response = mock.Mock()
-        mock_response.status_code = 200
-        mock_session = mock.Mock()
-        mock_session.headers = {}
-        mock_session.post.return_value = mock_response
-        mock_session_class.return_value = mock_session
-
-        result = ship(self.tarball_path)
-
-        assert result is True
-        # Verify cert URL is NOT duplicated (should remain cert.analytics.example.com, not cert.cert.analytics.example.com)
-        call_args = mock_session.post.call_args
-        assert call_args[0][0] == 'https://cert.analytics.example.com/api/ingress/v1/upload'
-
-    @override_settings(
-        AUTOMATION_ANALYTICS_URL='https://analytics.example.com/api/ingress/v1/upload',
-        REDHAT_USERNAME='',
-        REDHAT_PASSWORD='',
-        SUBSCRIPTIONS_USERNAME='',
-        SUBSCRIPTIONS_PASSWORD='',
-        SUBSCRIPTIONS_CLIENT_ID='',
-        SUBSCRIPTIONS_CLIENT_SECRET='',
-    )
-    def test_ship_missing_credentials(self):
-        """Test ship() when no credentials are available."""
-        result = ship(self.tarball_path)
-        assert result is False

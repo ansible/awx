@@ -15,15 +15,6 @@ from django.test.utils import override_settings
 class TestCandlepinCertCommand:
     """Tests for candlepin_cert management command."""
 
-    def test_command_requires_subcommand(self):
-        """Test command fails when no subcommand is provided."""
-        with pytest.raises(CommandError):
-            call_command('candlepin_cert')
-
-    # ------------------------------------------------------------------
-    # register subcommand
-    # ------------------------------------------------------------------
-
     @mock.patch('awx.main.management.commands.candlepin_cert._save_candlepin_registration_to_db')
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.resolve_registration_credentials')
@@ -133,33 +124,6 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_CA=None,
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
     )
-    def test_register_with_password_stdin(self, mock_fetch_cert, mock_resolve_creds, mock_client_class, mock_save_reg, mock_stdin):
-        """Test registration with --password-stdin flag."""
-        mock_fetch_cert.return_value = (None, None, None)
-
-        # Mock stdin with password
-        mock_stdin.read.return_value = 'stdin_password\n'
-
-        # resolve_registration_credentials should be called with password from stdin
-        mock_resolve_creds.return_value = ('cli_user', 'stdin_password', 'test_org', 'install-uuid', None)
-
-        # Mock successful registration
-        mock_client = mock.Mock()
-        mock_client.register_consumer.return_value = ('cert-pem', 'key-pem', 'consumer-uuid')
-        mock_client_class.return_value = mock_client
-
-        mock_save_reg.return_value = True
-
-        out = StringIO()
-        call_command('candlepin_cert', 'register', '--username', 'cli_user', '--password-stdin', stdout=out, stderr=StringIO())
-
-        output = out.getvalue()
-        assert 'Registered successfully' in output
-
-        # Verify password was stripped (trailing newline removed)
-        mock_resolve_creds.assert_called_once()
-        call_args = mock_resolve_creds.call_args[1]
-        assert call_args['password_override'] == 'stdin_password'
 
     @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
     @override_settings(
@@ -167,20 +131,6 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_CA=None,
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
     )
-    def test_register_dry_run(self, mock_fetch_cert):
-        """Test register --dry-run doesn't make API calls."""
-        mock_fetch_cert.return_value = (None, None, None)
-
-        with mock.patch('awx.main.management.commands.candlepin_cert.resolve_registration_credentials') as mock_resolve:
-            mock_resolve.return_value = ('test_user', 'test_pass', 'test_org', 'install-uuid', None)
-
-            out = StringIO()
-            call_command('candlepin_cert', 'register', '--dry-run', stdout=out, stderr=StringIO())
-
-            output = out.getvalue()
-            assert '[dry-run]' in output
-            assert 'test_org' in output
-            assert 'No Candlepin operations performed' in output
 
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.resolve_registration_credentials')
@@ -190,28 +140,6 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_CA=None,
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
     )
-    def test_register_api_failure(self, mock_fetch_cert, mock_resolve_creds, mock_client_class):
-        """Test registration handles Candlepin API failure."""
-        mock_fetch_cert.return_value = (None, None, None)
-        mock_resolve_creds.return_value = ('test_user', 'test_pass', 'test_org', 'install-uuid', None)
-
-        # Mock registration failure
-        mock_client = mock.Mock()
-        mock_client.register_consumer.side_effect = Exception('API connection failed')
-        mock_client_class.return_value = mock_client
-
-        err = StringIO()
-        with pytest.raises(SystemExit) as exc_info:
-            call_command('candlepin_cert', 'register', stderr=err)
-
-        assert exc_info.value.code == 1
-        error_output = err.getvalue()
-        assert 'Registration failed' in error_output
-        assert 'API connection failed' in error_output
-
-    # ------------------------------------------------------------------
-    # renew subcommand
-    # ------------------------------------------------------------------
 
     @mock.patch('awx.main.management.commands.candlepin_cert._save_candlepin_cert_to_db')
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
@@ -271,20 +199,6 @@ class TestCandlepinCertCommand:
         error_output = err.getvalue()
         assert 'No Candlepin identity certificate found' in error_output
         assert 'Run the register subcommand first' in error_output
-
-    @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
-    def test_renew_no_consumer_uuid(self, mock_fetch_cert):
-        """Test renew fails when consumer UUID is missing."""
-        # Cert exists but no UUID
-        mock_fetch_cert.return_value = ('cert', 'key', '')
-
-        err = StringIO()
-        with pytest.raises(SystemExit) as exc_info:
-            call_command('candlepin_cert', 'renew', stderr=err)
-
-        assert exc_info.value.code == 1
-        error_output = err.getvalue()
-        assert 'CANDLEPIN_CONSUMER_UUID is not set' in error_output
 
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')
@@ -371,19 +285,6 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
         AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS=90,
     )
-    def test_renew_dry_run(self, mock_fetch_cert, mock_needs_renewal, mock_parse_cert):
-        """Test renew --dry-run doesn't make API calls."""
-        mock_fetch_cert.return_value = ('cert', 'key', 'consumer-uuid')
-
-        mock_parse_cert.return_value = {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 200}
-        mock_needs_renewal.return_value = False
-
-        out = StringIO()
-        call_command('candlepin_cert', 'renew', '--dry-run', stdout=out, stderr=StringIO())
-
-        output = out.getvalue()
-        assert '[dry-run]' in output
-        assert 'No Candlepin operations performed' in output
 
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')

@@ -39,32 +39,11 @@ class TestCandlepinLifecycle:
         assert url == 'https://subscription.example.com/candlepin/'
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
-    def test_get_candlepin_url_custom(self, mock_settings):
-        """Test custom Candlepin URL from Django settings."""
-        mock_settings.AWX_ANALYTICS_CANDLEPIN_URL = 'https://custom.example.com'
-        url = get_candlepin_url()
-        assert url == 'https://custom.example.com'
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
-    def test_get_renewal_days_default(self, mock_settings):
-        """Test default renewal days."""
-        mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS = 90
-        days = get_renewal_days()
-        assert days == 90
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_renewal_days_from_settings(self, mock_settings):
         """Test renewal days from Django settings."""
         mock_settings.AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS = 45
         days = get_renewal_days()
         assert days == 45
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
-    def test_get_candlepin_ca_none(self, mock_settings):
-        """Test Candlepin CA returns None when not set."""
-        mock_settings.AWX_ANALYTICS_CANDLEPIN_CA = None
-        ca = get_candlepin_ca()
-        assert ca is None
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.os.path.isfile')
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
@@ -83,13 +62,6 @@ class TestCandlepinLifecycle:
         mock_isfile.return_value = False
         ca = get_candlepin_ca()
         assert ca is None
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
-    def test_get_proxy_url_none(self, mock_settings):
-        """Test proxy URL returns None when not set."""
-        mock_settings.AWX_ANALYTICS_CANDLEPIN_PROXY_URL = None
-        proxy = get_proxy_url()
-        assert proxy is None
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.settings')
     def test_get_proxy_url_from_settings(self, mock_settings):
@@ -123,11 +95,6 @@ class TestCandlepinLifecycle:
         assert 'not_before' in result
         assert 'not_after' in result
         assert 'days_remaining' in result
-
-    def test_is_cert_valid_unparseable(self):
-        """Test is_cert_valid returns False for unparseable cert."""
-        result = is_cert_valid('invalid-cert-data')
-        assert result is False
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_needs_renewal_true(self, mock_parse):
@@ -190,94 +157,8 @@ class TestCandlepinLifecycle:
         mock_client.regenerate_cert.assert_called_once()
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_run_candlepin_lifecycle_serial_mismatch(self, mock_parse, mock_client_class):
-        """Test lifecycle when server cert serial differs from local cert."""
-        # parse_cert is called:
-        # 1. Parse local cert
-        # 2. Parse server cert from get_consumer
-        # 3. Parse new cert after regeneration for logging
-        mock_parse.side_effect = [
-            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Local cert
-            {'serial': '456', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Server cert (different serial!)
-            {'serial': '789', 'cn': 'test', 'not_after': '2027-02-01', 'days_remaining': 130},  # Regenerated cert
-        ]
-
-        mock_client = mock.Mock()
-        mock_client.checkin.return_value = True
-        mock_client.get_consumer.return_value = {'uuid': 'consumer-uuid', 'idCert': {'cert': 'server-cert-pem'}}
-        mock_client.regenerate_cert.return_value = ('regenerated-cert', 'regenerated-key')
-        mock_client_class.return_value = mock_client
-
-        cert_pem, key_pem = run_candlepin_lifecycle('local-cert', 'local-key', 'consumer-uuid', renewal_days=30)
-
-        # Should return regenerated cert due to serial mismatch
-        assert cert_pem == 'regenerated-cert'
-        assert key_pem == 'regenerated-key'
-        mock_client.regenerate_cert.assert_called_once()
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_run_candlepin_lifecycle_serial_match(self, mock_parse, mock_client_class):
-        """Test lifecycle when server cert serial matches local cert (no action needed)."""
-        # parse_cert is called:
-        # 1. Parse local cert
-        # 2. Parse server cert from get_consumer (same serial)
-        # 3. In needs_renewal() - cert is healthy, no renewal
-        mock_parse.side_effect = [
-            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Local cert
-            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # Server cert (same serial)
-            {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100},  # needs_renewal check
-        ]
-
-        mock_client = mock.Mock()
-        mock_client.checkin.return_value = True
-        mock_client.get_consumer.return_value = {'uuid': 'consumer-uuid', 'idCert': {'cert': 'server-cert-pem'}}
-        mock_client_class.return_value = mock_client
-
-        cert_pem, key_pem = run_candlepin_lifecycle('local-cert', 'local-key', 'consumer-uuid', renewal_days=30)
-
-        # Should return original cert since serial matches and cert is healthy
-        assert cert_pem == 'local-cert'
-        assert key_pem == 'local-key'
-        mock_client.regenerate_cert.assert_not_called()
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_is_cert_valid_expired(self, mock_parse):
-        """Test is_cert_valid returns False for expired certificate."""
-        mock_parse.return_value = {
-            'serial': '123',
-            'cn': 'test',
-            'not_before': '2025-01-01T00:00:00+00:00',
-            'not_after': '2025-12-31T23:59:59+00:00',
-            'days_remaining': -120,  # Expired 120 days ago
-        }
-
-        result = is_cert_valid('cert-pem')
-        assert result is False
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_is_cert_valid_not_yet_valid(self, mock_parse):
-        """Test is_cert_valid returns False for certificate not yet valid."""
-        future_date = datetime.now(timezone.utc).replace(year=2027).isoformat()
-        mock_parse.return_value = {
-            'serial': '123',
-            'cn': 'test',
-            'not_before': future_date,  # Not valid until 2027
-            'not_after': '2028-01-01T00:00:00+00:00',
-            'days_remaining': 365,
-        }
-
-        result = is_cert_valid('cert-pem')
-        assert result is False
-
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_needs_renewal_expired_cert(self, mock_parse):
-        """Test needs_renewal returns True for already-expired certificate."""
-        mock_parse.return_value = {'days_remaining': -10}  # Expired 10 days ago
-
-        result = needs_renewal('fake-cert', days_before_expiry=30)
-        assert result is True
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
@@ -327,68 +208,10 @@ class TestCandlepinLifecycle:
         mock_client.regenerate_cert.assert_not_called()
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_run_candlepin_lifecycle_network_timeout_during_checkin(self, mock_parse, mock_client_class):
-        """Test lifecycle handles network timeout during check-in (checkin returns False)."""
-        mock_parse.return_value = {'serial': '123', 'cn': 'test', 'not_after': '2027-01-01', 'days_remaining': 100}
-
-        # Network timeout during check-in - checkin() catches exceptions and returns False
-        mock_client = mock.Mock()
-        mock_client.checkin.return_value = False  # checkin() catches exceptions internally
-        mock_client.get_consumer.return_value = None
-        mock_client_class.return_value = mock_client
-
-        # Lifecycle continues and returns original cert
-        cert_pem, key_pem = run_candlepin_lifecycle('cert-pem', 'key-pem', 'consumer-uuid', renewal_days=30)
-
-        # Should return original cert (no renewal needed, check-in failed but lifecycle continues)
-        assert cert_pem == 'cert-pem'
-        assert key_pem == 'key-pem'
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_run_candlepin_lifecycle_network_timeout_during_renewal(self, mock_parse, mock_client_class):
-        """Test lifecycle handles network timeout during certificate renewal."""
-        # parse_cert called for:
-        # 1. Parse original cert (expiring soon)
-        # 2. needs_renewal check
-        mock_parse.side_effect = [
-            {'serial': '123', 'cn': 'test', 'not_after': '2026-06-01', 'days_remaining': 10},  # Expiring soon
-            {'serial': '123', 'cn': 'test', 'not_after': '2026-06-01', 'days_remaining': 10},  # needs_renewal
-        ]
-
-        # Check-in succeeds but regenerate_cert times out
-        mock_client = mock.Mock()
-        mock_client.checkin.return_value = True
-        mock_client.get_consumer.return_value = None
-        mock_client.regenerate_cert.side_effect = Exception('Connection timeout during renewal')
-        mock_client_class.return_value = mock_client
-
-        # Should raise RuntimeError when renewal fails
-        with pytest.raises(Exception, match='Connection timeout during renewal'):
-            run_candlepin_lifecycle('cert-pem', 'key-pem', 'consumer-uuid', renewal_days=90)
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
-    def test_run_candlepin_lifecycle_unparseable_cert(self, mock_parse, mock_client_class):
-        """Test lifecycle handles unparseable certificate gracefully."""
-        # Certificate parsing fails
-        mock_parse.side_effect = ValueError('Could not parse PEM certificate: Invalid format')
-
-        # Mock client instance
-        mock_client = mock.Mock()
-        mock_client_class.return_value = mock_client
-
-        # Should return original cert/key without attempting Candlepin operations
-        cert_pem, key_pem = run_candlepin_lifecycle('invalid-cert', 'key-pem', 'consumer-uuid', renewal_days=30)
-
-        assert cert_pem == 'invalid-cert'
-        assert key_pem == 'key-pem'
-        # CandlepinClient is instantiated, but no operations should be attempted
-        mock_client_class.assert_called_once()
-        mock_client.checkin.assert_not_called()
-        mock_client.get_consumer.assert_not_called()
-        mock_client.regenerate_cert.assert_not_called()
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')

@@ -79,7 +79,7 @@ def _get_cert_upload_url(url):
         return url
 
 
-def _get_insights_credentials():
+def _get_analytics_credentials():
     """
     Get Red Hat Insights credentials from settings.
 
@@ -257,7 +257,7 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             logger.log(log_level, "Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
             return None
 
-        rh_id, rh_secret = _get_insights_credentials()
+        rh_id, rh_secret = _get_analytics_credentials()
         if not (settings.AUTOMATION_ANALYTICS_URL and rh_id and rh_secret):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
@@ -439,7 +439,7 @@ def ship(path):
         logger.error('AUTOMATION_ANALYTICS_URL is not set')
         return False
 
-    rh_id, rh_secret = _get_insights_credentials()
+    rh_id, rh_secret = _get_analytics_credentials()
 
     if not rh_id:
         logger.error('No valid username found. Tried: REDHAT_USERNAME, SUBSCRIPTIONS_USERNAME, SUBSCRIPTIONS_CLIENT_ID')
