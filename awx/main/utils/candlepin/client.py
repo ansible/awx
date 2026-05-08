@@ -110,7 +110,7 @@ class CandlepinClient:
         Args:
             username:     Red Hat subscription username (from REDHAT_USERNAME).
             password:     Red Hat subscription password (from REDHAT_PASSWORD).
-            org:          Candlepin owner/org key (from LICENSE.account_number).
+            org:          Candlepin owner/org key (retrieved with subscription credentials).
             install_uuid: AWX INSTALL_UUID used as the consumer's aap.instance_uuid
                           fact; falls back to a random UUID if not provided.
 

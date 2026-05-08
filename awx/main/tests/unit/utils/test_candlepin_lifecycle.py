@@ -157,8 +157,6 @@ class TestCandlepinLifecycle:
         mock_client.regenerate_cert.assert_called_once()
 
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_run_candlepin_lifecycle_expired_cert_renewal(self, mock_parse, mock_client_class):
         """Test lifecycle renews an expired certificate."""
@@ -205,9 +203,6 @@ class TestCandlepinLifecycle:
         # Regeneration should not be attempted since get_consumer indicates consumer doesn't exist
         mock_client.regenerate_cert.assert_not_called()
 
-    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
     @mock.patch('awx.main.utils.candlepin.lifecycle.CandlepinClient')
     @mock.patch('awx.main.utils.candlepin.lifecycle.parse_cert')
     def test_run_candlepin_lifecycle_consumer_deleted_server_side(self, mock_parse, mock_client_class):

@@ -131,6 +131,10 @@ def _fetch_registration_credentials_from_db(verify_tls=True):
     key for the Candlepin /consumers endpoint), and INSTALL_UUID (used as the
     consumer's aap.instance_uuid fact).
 
+    Priority for authentication credentials:
+    - If both REDHAT_USERNAME and SUBSCRIPTIONS_USERNAME exist: use REDHAT_USERNAME
+    - If only SUBSCRIPTIONS_USERNAME exists: use SUBSCRIPTIONS_USERNAME
+
     Args:
         verify_tls: Whether to verify TLS certificates during org discovery (default: True)
 
@@ -139,7 +143,6 @@ def _fetch_registration_credentials_from_db(verify_tls=True):
     """
     candlepin_url = get_candlepin_url()
     try:
-        # Try multiple credential sources in priority order
         username = getattr(settings, 'REDHAT_USERNAME', None)
         password = getattr(settings, 'REDHAT_PASSWORD', None)
 
@@ -147,16 +150,9 @@ def _fetch_registration_credentials_from_db(verify_tls=True):
             username = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
             password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
 
-        if not (username and password):
-            username = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-            password = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
-
         install_uuid = getattr(settings, 'INSTALL_UUID', None)
 
-        # Organization discovery requires SUBSCRIPTIONS credentials specifically
-        subs_username = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
-        subs_password = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
-        org = _discover_org(candlepin_url, subs_username, subs_password, verify_tls=verify_tls) if subs_username and subs_password else None
+        org = _discover_org(candlepin_url, username, password, verify_tls=verify_tls) if username and password else None
 
         return username, password, org, install_uuid
     except Exception as e:

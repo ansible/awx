@@ -97,7 +97,11 @@ class TestCandlepinCertificateRegistration:
     @mock.patch('awx.main.utils.candlepin._discover_org')
     @mock.patch('awx.main.utils.candlepin.settings')
     def test_fetch_registration_credentials_from_db(self, mock_settings, mock_discover_org):
-        """Test fetching registration credentials from settings."""
+        """Test fetching registration credentials from settings.
+
+        When both REDHAT and SUBSCRIPTIONS credentials exist, REDHAT takes priority
+        for both authentication and org discovery.
+        """
         mock_settings.REDHAT_USERNAME = 'test_user'
         mock_settings.REDHAT_PASSWORD = 'test_pass'
         mock_settings.INSTALL_UUID = 'test-install-uuid'
@@ -111,22 +115,19 @@ class TestCandlepinCertificateRegistration:
         assert password == 'test_pass'
         assert org == 'test_org'
         assert install_uuid == 'test-install-uuid'
-        # Verify _discover_org was called with SUBSCRIPTIONS credentials
+        # Verify _discover_org was called with REDHAT credentials (takes priority)
         assert mock_discover_org.call_count == 1
         args = mock_discover_org.call_args[0]
-        assert args[1] == 'subs_user'  # SUBSCRIPTIONS_USERNAME
-        assert args[2] == 'subs_pass'  # SUBSCRIPTIONS_PASSWORD
+        assert args[1] == 'test_user'  # REDHAT_USERNAME (selected)
+        assert args[2] == 'test_pass'  # REDHAT_PASSWORD (selected)
 
-    @mock.patch('awx.main.utils.candlepin._discover_org')
-    @mock.patch('awx.main.utils.candlepin._discover_org')
-    @mock.patch('awx.main.utils.candlepin._discover_org')
-    @mock.patch('awx.main.utils.candlepin._discover_org')
-    @mock.patch('awx.main.utils.candlepin._discover_org')
-    @mock.patch('awx.main.utils.candlepin._discover_org')
     @mock.patch('awx.main.utils.candlepin._discover_org')
     @mock.patch('awx.main.utils.candlepin.settings')
     def test_fetch_registration_credentials_no_verify_tls(self, mock_settings, mock_discover_org):
-        """Test fetching credentials passes verify_tls=False to _discover_org."""
+        """Test fetching credentials passes verify_tls=False to _discover_org.
+
+        Also verifies that selected credentials (REDHAT in this case) are used for org discovery.
+        """
         mock_settings.REDHAT_USERNAME = 'test_user'
         mock_settings.REDHAT_PASSWORD = 'test_pass'
         mock_settings.INSTALL_UUID = 'test-install-uuid'
@@ -140,9 +141,12 @@ class TestCandlepinCertificateRegistration:
         assert password == 'test_pass'
         assert org == 'test_org'
         assert install_uuid == 'test-install-uuid'
-        # Verify _discover_org was called with verify_tls=False
+        # Verify _discover_org was called with verify_tls=False and REDHAT credentials
         mock_discover_org.assert_called_once()
-        call_kwargs = mock_discover_org.call_args[1]
+        call_args = mock_discover_org.call_args
+        assert call_args[0][1] == 'test_user'  # REDHAT_USERNAME (selected)
+        assert call_args[0][2] == 'test_pass'  # REDHAT_PASSWORD (selected)
+        call_kwargs = call_args[1]
         assert call_kwargs['verify_tls'] is False
 
     @mock.patch('awx.main.utils.candlepin._fetch_registration_credentials_from_db')
@@ -265,12 +269,6 @@ class TestCandlepinCertificateRegistration:
         assert key is None
         assert uuid is None
 
-    @mock.patch('awx.main.utils.candlepin._save_candlepin_registration_to_db')
-    @mock.patch('awx.main.utils.candlepin.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin._fetch_registration_credentials_from_db')
-    @mock.patch('awx.main.utils.candlepin.get_proxy_url')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
-    @mock.patch('awx.main.utils.candlepin._save_candlepin_cert_to_db')
     @mock.patch('awx.main.utils.candlepin._save_candlepin_cert_to_db')
     @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
@@ -293,10 +291,6 @@ class TestCandlepinCertificateRegistration:
         mock_lifecycle.assert_called_once()
         mock_save.assert_called_once_with('new-cert', 'new-key')
 
-    @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.get_proxy_url')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
-    @mock.patch('awx.main.utils.candlepin.get_renewal_days')
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin._fetch_candlepin_cert_from_db')
@@ -358,10 +352,6 @@ class TestCandlepinCertificateRegistration:
 
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.is_cert_valid')
-    @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.is_cert_valid')
-    @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin._fetch_candlepin_cert_from_db')
     def test_get_or_generate_candlepin_certificate_expired_cert_renewed_successfully(self, mock_fetch, mock_lifecycle, mock_is_valid):
         """Test get_or_generate with expired certificate that is successfully renewed."""
@@ -377,28 +367,6 @@ class TestCandlepinCertificateRegistration:
         assert key == 'new-key'
         mock_lifecycle.assert_called_once_with('expired-cert', 'old-key', 'consumer-uuid')
 
-    @mock.patch('awx.main.utils.candlepin.is_cert_valid')
-    @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.is_cert_valid')
-    @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.CandlepinClient')
-    @mock.patch('awx.main.utils.candlepin.get_proxy_url')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_url')
-    @mock.patch('awx.main.utils.candlepin._save_candlepin_registration_to_db')
-    @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.get_proxy_url')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
-    @mock.patch('awx.main.utils.candlepin.get_renewal_days')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_url')
-    @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
-    @mock.patch('awx.main.utils.candlepin.get_proxy_url')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
-    @mock.patch('awx.main.utils.candlepin.get_renewal_days')
-    @mock.patch('awx.main.utils.candlepin.get_candlepin_url')
-    @mock.patch('awx.main.utils.candlepin.requests.get')
-    @mock.patch('awx.main.utils.candlepin.requests.get')
-    @mock.patch('awx.main.utils.candlepin.parse_cert')
     @mock.patch('awx.main.utils.candlepin.parse_cert')
     @mock.patch('awx.main.utils.candlepin.settings')
     def test_save_candlepin_registration_to_db_cert_parse_failure(self, mock_settings, mock_parse_cert):
