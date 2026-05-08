@@ -57,7 +57,7 @@ python-dsv-sdk>=1.0.4
 python-tss-sdk>=2.0.0
 pyyaml>=6.0.2  # require packing fix for cython 3 or higher
 pyzstd  # otel collector log file compression library
-receptorctl
+receptorctl==1.6.5
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
 redis[hiredis]>=7.0  # requires 7.0+ for retry functionality on connection errors
 requests

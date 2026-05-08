@@ -100,7 +100,7 @@ channels-redis==4.3.0
     # via -r /awx_devel/requirements/requirements.in
 charset-normalizer==3.4.3
     # via requests
-click==8.1.8
+click==8.3.3
     # via receptorctl
 constantly==23.10.4
     # via twisted
@@ -428,7 +428,7 @@ pyyaml==6.0.3
     #   receptorctl
 pyzstd==0.18.0
     # via -r /awx_devel/requirements/requirements.in
-receptorctl==1.6.0
+receptorctl==1.6.5
     # via -r /awx_devel/requirements/requirements.in
 redis[hiredis]==7.0.1
     # via
