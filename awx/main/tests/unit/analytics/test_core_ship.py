@@ -28,7 +28,6 @@ class TestGetCertUploadUrl:
         assert result == 'https://cert.analytics.example.com/api/ingress/v1/upload'
 
 
-
 class TestShipMTLS:
     """Test ship() function's mTLS authentication path."""
 

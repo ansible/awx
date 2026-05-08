@@ -124,14 +124,12 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_CA=None,
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
     )
-
     @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
     @override_settings(
         AWX_ANALYTICS_CANDLEPIN_URL='https://test.example.com',
         AWX_ANALYTICS_CANDLEPIN_CA=None,
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
     )
-
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.resolve_registration_credentials')
     @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
@@ -140,7 +138,6 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_CA=None,
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
     )
-
     @mock.patch('awx.main.management.commands.candlepin_cert._save_candlepin_cert_to_db')
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')
@@ -285,7 +282,6 @@ class TestCandlepinCertCommand:
         AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
         AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS=90,
     )
-
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')
     @mock.patch('awx.main.management.commands.candlepin_cert.needs_renewal')

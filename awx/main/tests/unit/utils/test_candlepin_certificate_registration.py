@@ -18,8 +18,8 @@ from awx.main.utils.candlepin import (
 )
 
 
-class TestCandlepinLicensing:
-    """Tests for Candlepin integration in licensing module."""
+class TestCandlepinCertificateRegistration:
+    """Tests for Candlepin integration in certificate registration module."""
 
     @mock.patch('awx.main.utils.candlepin.requests.get')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
@@ -118,17 +118,11 @@ class TestCandlepinLicensing:
         assert args[2] == 'subs_pass'  # SUBSCRIPTIONS_PASSWORD
 
     @mock.patch('awx.main.utils.candlepin._discover_org')
-
     @mock.patch('awx.main.utils.candlepin._discover_org')
-
     @mock.patch('awx.main.utils.candlepin._discover_org')
-
     @mock.patch('awx.main.utils.candlepin._discover_org')
-
     @mock.patch('awx.main.utils.candlepin._discover_org')
-
     @mock.patch('awx.main.utils.candlepin._discover_org')
-
     @mock.patch('awx.main.utils.candlepin._discover_org')
     @mock.patch('awx.main.utils.candlepin.settings')
     def test_fetch_registration_credentials_no_verify_tls(self, mock_settings, mock_discover_org):
@@ -276,9 +270,7 @@ class TestCandlepinLicensing:
     @mock.patch('awx.main.utils.candlepin._fetch_registration_credentials_from_db')
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
-
     @mock.patch('awx.main.utils.candlepin._save_candlepin_cert_to_db')
-
     @mock.patch('awx.main.utils.candlepin._save_candlepin_cert_to_db')
     @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
@@ -305,7 +297,6 @@ class TestCandlepinLicensing:
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
     @mock.patch('awx.main.utils.candlepin.get_renewal_days')
-
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin._fetch_candlepin_cert_from_db')
@@ -367,10 +358,8 @@ class TestCandlepinLicensing:
 
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin._fetch_candlepin_cert_from_db')
@@ -390,34 +379,26 @@ class TestCandlepinLicensing:
 
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-
     @mock.patch('awx.main.utils.candlepin.is_cert_valid')
     @mock.patch('awx.main.utils.candlepin._run_candlepin_lifecycle')
-
     @mock.patch('awx.main.utils.candlepin.CandlepinClient')
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_url')
     @mock.patch('awx.main.utils.candlepin._save_candlepin_registration_to_db')
-
     @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
     @mock.patch('awx.main.utils.candlepin.get_renewal_days')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_url')
-
     @mock.patch('awx.main.utils.candlepin.run_candlepin_lifecycle')
     @mock.patch('awx.main.utils.candlepin.get_proxy_url')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_ca')
     @mock.patch('awx.main.utils.candlepin.get_renewal_days')
     @mock.patch('awx.main.utils.candlepin.get_candlepin_url')
-
     @mock.patch('awx.main.utils.candlepin.requests.get')
-
     @mock.patch('awx.main.utils.candlepin.requests.get')
-
     @mock.patch('awx.main.utils.candlepin.parse_cert')
-
     @mock.patch('awx.main.utils.candlepin.parse_cert')
     @mock.patch('awx.main.utils.candlepin.settings')
     def test_save_candlepin_registration_to_db_cert_parse_failure(self, mock_settings, mock_parse_cert):
