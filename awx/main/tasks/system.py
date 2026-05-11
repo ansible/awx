@@ -71,8 +71,11 @@ from awx.main.models import (
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
-from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal, load_all_entry_points_for
+from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
+
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 logger = logging.getLogger('awx.main.tasks.system')
 
@@ -81,6 +84,40 @@ It looks like you're trying to use a private key in OpenSSH format, which \
 isn't supported by the installed version of OpenSSH on this instance. \
 Try upgrading OpenSSH or providing your private key in an different format. \
 '''
+
+
+def load_inventory_plugins():
+    from awx.main.models.inventory import InventorySourceOptions
+
+    with advisory_lock('load_inventory_plugins', wait=False) as acquired:
+        if not acquired:
+            return
+
+        is_awx = detect_server_product_name() == 'AWX'
+        extra_entry_point_groups = () if is_awx else ('inventory.supported',)
+        entry_points = load_all_entry_points_for(['inventory', *extra_entry_point_groups])
+
+        for entry_point_name, entry_point in entry_points.items():
+            cls = entry_point.load()
+            InventorySourceOptions.injectors[entry_point_name] = cls
+
+
+def load_credential_types_feature():
+    from django.apps import apps
+
+    from awx.main.models.credential import CredentialType, load_credentials
+
+    if os.environ.get('AWX_SKIP_CREDENTIAL_TYPES_DISCOVER', None):
+        logger.info('Credential type loading disabled, skipping')
+        return
+
+    with advisory_lock('load_credential_types', wait=False) as acquired:
+        if not acquired:
+            return
+
+        load_credentials()
+        if is_database_synchronized():
+            CredentialType.setup_tower_managed_defaults(app_config=apps.get_app_config('main'))
 
 
 def _run_dispatch_startup_common():
@@ -99,9 +136,11 @@ def _run_dispatch_startup_common():
             logger.exception("Failed to write receptor config, skipping.")
 
     try:
+        load_inventory_plugins()
+        load_credential_types_feature()
         convert_jsonfields()
     except Exception:
-        logger.exception("Failed JSON field conversion, skipping.")
+        logger.exception("Failed plugin loading or JSON field conversion, skipping.")
 
     startup_logger.debug("Syncing schedules")
     for sch in Schedule.objects.all():

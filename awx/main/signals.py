@@ -52,7 +52,6 @@ from awx.main.models import (
 )
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
-from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
 from awx.main.fields import is_implicit_parent
 
 from awx.main import consumers
@@ -98,6 +97,8 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         pass
     else:
         if inventory is not None:
+            from awx.main.tasks.system import update_inventory_computed_fields
+
             connection.on_commit(lambda: update_inventory_computed_fields.delay(inventory.id))
 
 
@@ -555,6 +556,8 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
 def _handle_image_cleanup(removed_image, pk):
     if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
         return  # if other EE objects reference the tag, then do not purge it
+    from awx.main.tasks.system import handle_removed_image
+
     handle_removed_image.delay(remove_images=[removed_image])
 
 

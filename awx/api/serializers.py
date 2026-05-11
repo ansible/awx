@@ -120,7 +120,7 @@ from awx.main.utils.named_url_graph import reset_counters
 from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
-from awx.main.signals import update_inventory_computed_fields
+from awx.main.tasks.system import update_inventory_computed_fields
 
 from awx.main.validators import vars_validate_or_raise
 
