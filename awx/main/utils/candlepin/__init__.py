@@ -269,9 +269,8 @@ def _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid):
     """Orchestrate Candlepin check-in and proactive cert renewal.
 
     Returns the (possibly renewed) (cert_pem, key_pem) tuple. If renewal fails, the
-    original cert is returned so the caller can still attempt mTLS (which
-    will then fall back to service-account auth via the existing SSLError
-    handler).
+    original cert is returned and the caller will validate it with is_cert_valid().
+    If invalid, the caller skips mTLS and falls back directly to OIDC authentication.
     """
     if not consumer_uuid:
         logger.warning('Candlepin lifecycle is enabled but consumer UUID is not set; skipping check-in and renewal.')

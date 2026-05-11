@@ -4,11 +4,8 @@
 from datetime import datetime, timezone
 from unittest import mock
 
-import pytest
-
 from awx.main.utils.candlepin.lifecycle import (
     parse_cert,
-    is_cert_valid,
     needs_renewal,
     run_candlepin_lifecycle,
     get_candlepin_url,

@@ -3,8 +3,6 @@
 
 from unittest import mock
 
-import requests
-
 from awx.main.utils.candlepin import (
     _discover_org,
     _fetch_candlepin_cert_from_db,

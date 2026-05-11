@@ -8,7 +8,6 @@ from unittest import mock
 
 import pytest
 from django.core.management import call_command
-from django.core.management.base import CommandError
 from django.test.utils import override_settings
 
 
@@ -114,30 +113,6 @@ class TestCandlepinCertCommand:
         error_output = err.getvalue()
         assert 'Missing required value' in error_output
 
-    @mock.patch('awx.main.management.commands.candlepin_cert.sys.stdin')
-    @mock.patch('awx.main.management.commands.candlepin_cert._save_candlepin_registration_to_db')
-    @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
-    @mock.patch('awx.main.management.commands.candlepin_cert.resolve_registration_credentials')
-    @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
-    @override_settings(
-        AWX_ANALYTICS_CANDLEPIN_URL='https://test.example.com',
-        AWX_ANALYTICS_CANDLEPIN_CA=None,
-        AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
-    )
-    @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
-    @override_settings(
-        AWX_ANALYTICS_CANDLEPIN_URL='https://test.example.com',
-        AWX_ANALYTICS_CANDLEPIN_CA=None,
-        AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
-    )
-    @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
-    @mock.patch('awx.main.management.commands.candlepin_cert.resolve_registration_credentials')
-    @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
-    @override_settings(
-        AWX_ANALYTICS_CANDLEPIN_URL='https://test.example.com',
-        AWX_ANALYTICS_CANDLEPIN_CA=None,
-        AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
-    )
     @mock.patch('awx.main.management.commands.candlepin_cert._save_candlepin_cert_to_db')
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')
@@ -273,15 +248,6 @@ class TestCandlepinCertCommand:
 
         mock_client.regenerate_cert.assert_called_once()
 
-    @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')
-    @mock.patch('awx.main.management.commands.candlepin_cert.needs_renewal')
-    @mock.patch('awx.main.management.commands.candlepin_cert._fetch_candlepin_cert_from_db')
-    @override_settings(
-        AWX_ANALYTICS_CANDLEPIN_URL='https://test.example.com',
-        AWX_ANALYTICS_CANDLEPIN_CA=None,
-        AWX_ANALYTICS_CANDLEPIN_PROXY_URL=None,
-        AWX_ANALYTICS_CANDLEPIN_RENEWAL_THRESHOLD_DAYS=90,
-    )
     @mock.patch('awx.main.management.commands.candlepin_cert.CandlepinClient')
     @mock.patch('awx.main.management.commands.candlepin_cert.parse_cert')
     @mock.patch('awx.main.management.commands.candlepin_cert.needs_renewal')

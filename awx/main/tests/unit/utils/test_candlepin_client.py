@@ -4,9 +4,6 @@
 import os
 from unittest import mock
 
-import pytest
-import requests
-
 from awx.main.utils.candlepin.client import CandlepinClient, _temp_cert_files
 
 
