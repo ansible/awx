@@ -53,15 +53,6 @@ register(
 )
 
 register(
-    'ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES',
-    field_class=fields.BooleanField,
-    label=_('Enable Custom Team Roles'),
-    help_text=_('Controls whether custom roles that include team-level permissions can be created.'),
-    category=_('System'),
-    category_slug='system',
-)
-
-register(
     'TOWER_URL_BASE',
     field_class=fields.URLField,
     schemes=('http', 'https'),

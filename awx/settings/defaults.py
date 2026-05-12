@@ -1099,6 +1099,13 @@ ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 
 ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
 
 # Currently features are enabled to keep compatibility with old system, except custom roles
+#
+# DO NOT register these settings with the conf system (awx/main/conf.py) or
+# expose them via the /api/v2/settings/ API. Changing these at runtime creates
+# RBAC data (e.g. custom team role definitions) that django-ansible-base data
+# migrations may not account for, risking migration failures or cross-org
+# permission spillage. If a deployment must override a value, use a local
+# settings file (e.g. custom.py) so the change is deliberate and auditable.
 ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN = False
 # ANSIBLE_BASE_ALLOW_CUSTOM_ROLES = True
 ANSIBLE_BASE_ALLOW_TEAM_PARENTS = False
