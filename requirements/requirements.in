@@ -10,7 +10,7 @@ botocore
 cachetools  # Used by awx/conf/settings.py for TTLCache
 channels
 channels-redis
-cryptography>=46.0.5 # CVE-2026-26007
+cryptography>=46.0.7 # CVE-2026-39892
 Cython
 daphne
 distro
