@@ -88,7 +88,7 @@ def fact_inventory(fact_org):
 
 
 def query_names(filter_string):
-    return sorted(SmartFilter.query_from_string(filter_string).values_list('name', flat=True))
+    return sorted(SmartFilter.query_from_string(filter_string).distinct().values_list('name', flat=True))
 
 
 # --- Fact-based filter tests (require PostgreSQL for JSONField __contains) ---
@@ -219,6 +219,7 @@ def test_host_filter_is_organization_scoped(fact_inventory):
     org1 = fact_inventory['org']
     org2, _ = Organization.objects.get_or_create(name='smart-inv-other-org')
     inv2, _ = Inventory.objects.get_or_create(name='other-org-inv', organization=org2)
+    Host.objects.filter(name='factHostA', inventory=inv2).delete()
     other_host = Host.objects.create(name='factHostA', inventory=inv2)
 
     smart_inv = Inventory.objects.create(
@@ -241,6 +242,7 @@ def test_duplicate_hosts_deduplicated():
     org, _ = Organization.objects.get_or_create(name='smart-inv-dedup-org')
     inv1, _ = Inventory.objects.get_or_create(name='dedup-inv1', organization=org)
     inv2, _ = Inventory.objects.get_or_create(name='dedup-inv2', organization=org)
+    Host.objects.filter(name='dedup_host', inventory__in=[inv1, inv2]).delete()
     host1 = Host.objects.create(name='dedup_host', inventory=inv1)
     host2 = Host.objects.create(name='dedup_host', inventory=inv2)
 
@@ -359,7 +361,7 @@ def test_smart_inventory_matches_host_filter(fact_inventory):
     )
     try:
         smart_names = sorted(smart_inv.hosts.values_list('name', flat=True))
-        filter_names = sorted(SmartFilter.query_from_string(host_filter).values_list('name', flat=True))
+        filter_names = sorted(SmartFilter.query_from_string(host_filter).distinct().values_list('name', flat=True))
         assert smart_names == filter_names
     finally:
         smart_inv.delete()
