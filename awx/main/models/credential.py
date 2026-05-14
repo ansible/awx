@@ -49,10 +49,6 @@ from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
-# DAB
-from ansible_base.resource_registry.tasks.sync import get_resource_server_client
-from ansible_base.resource_registry.utils.settings import resource_server_defined
-
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
@@ -78,46 +74,6 @@ def build_safe_env(env):
         elif type(v) == str and urlpass_re.match(v):
             safe_env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
     return safe_env
-
-
-def check_resource_server_for_user_in_organization(user, organization, requesting_user):
-    if not resource_server_defined():
-        return False
-
-    if not requesting_user:
-        return False
-
-    client = get_resource_server_client(settings.RESOURCE_SERVICE_PATH, jwt_user_id=str(requesting_user.resource.ansible_id), raise_if_bad_request=False)
-    # need to get the organization object_id in resource server, by querying with ansible_id
-    response = client._make_request(path=f'resources/?ansible_id={str(organization.resource.ansible_id)}', method='GET')
-    response_json = response.json()
-    if response.status_code != 200:
-        logger.error(f'Failed to get organization object_id in resource server: {response_json.get("detail", "")}')
-        return False
-
-    if response_json.get('count', 0) == 0:
-        return False
-    org_id_in_resource_server = response_json['results'][0]['object_id']
-
-    client.base_url = client.base_url.replace('/api/gateway/v1/service-index/', '/api/gateway/v1/')
-    # find role assignments with:
-    # - roles Organization Member or Organization Admin
-    # - user ansible id
-    # - organization object id
-
-    response = client._make_request(
-        path=f'role_user_assignments/?role_definition__name__in=Organization Member,Organization Admin&user__resource__ansible_id={str(user.resource.ansible_id)}&object_id={org_id_in_resource_server}',
-        method='GET',
-    )
-    response_json = response.json()
-    if response.status_code != 200:
-        logger.error(f'Failed to get role user assignments in resource server: {response_json.get("detail", "")}')
-        return False
-
-    if response_json.get('count', 0) > 0:
-        return True
-
-    return False
 
 
 class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
@@ -396,15 +352,14 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             raise ValueError('{} is not a dynamic input field'.format(field_name))
 
     def validate_role_assignment(self, actor, role_definition, **kwargs):
+        requesting_user = kwargs.get('requesting_user', None)
+        if requesting_user and requesting_user.is_superuser:
+            return
         if self.organization:
             if isinstance(actor, User):
                 if actor.is_superuser:
                     return
                 if Organization.access_qs(actor, 'member').filter(id=self.organization.id).exists():
-                    return
-
-                requesting_user = kwargs.get('requesting_user', None)
-                if check_resource_server_for_user_in_organization(actor, self.organization, requesting_user):
                     return
             if isinstance(actor, Team):
                 if actor.organization == self.organization:
