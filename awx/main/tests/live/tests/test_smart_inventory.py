@@ -112,7 +112,8 @@ def host_factory():
 
     yield _factory
     for host in reversed(created):
-        host.delete()
+        if host.pk is not None:
+            host.delete()
 
 
 @pytest.fixture
