@@ -538,6 +538,9 @@ AUTOMATION_ANALYTICS_LAST_GATHER = None
 # Last gathered entries for expensive Analytics
 AUTOMATION_ANALYTICS_LAST_ENTRIES = ''
 
+# Candlepin integration settings for analytics authentication
+AWX_ANALYTICS_CANDLEPIN_URL = 'https://subscription.rhsm.redhat.com/subscription/'
+
 # Default list of modules allowed for ad hoc commands.
 # Note: This setting may be overridden by database settings.
 AD_HOC_COMMANDS = [
