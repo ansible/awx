@@ -1,7 +1,7 @@
 from unittest import mock
 
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode, WorkflowApprovalTemplate, Job, User, Project, JobTemplate, Inventory
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.constants import get_job_variable_prefixes
 
 
 def test_incorrectly_formatted_variables():
@@ -50,7 +50,7 @@ class TestMetaVars:
         maker = User(username='joe', pk=47, id=47)
         inv = Inventory(name='example-inv', id=45)
         result_hash = {}
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             result_hash['{}_job_id'.format(name)] = 42
             result_hash['{}_job_launch_type'.format(name)] = 'manual'
             result_hash['{}_user_name'.format(name)] = 'joe'
@@ -75,8 +75,48 @@ class TestMetaVars:
             project=Project(name='jobs-sync', scm_revision='12345444'),
             job_template=JobTemplate(name='jobs-jt', id=92, pk=92),
         ).awx_meta_vars()
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert data['{}_project_revision'.format(name)] == '12345444'
             assert '{}_job_template_id'.format(name) in data
             assert data['{}_job_template_id'.format(name)] == 92
             assert data['{}_job_template_name'.format(name)] == 'jobs-jt'
+
+
+class TestGetJobVariablePrefixes:
+    """Tests for the get_job_variable_prefixes() helper function."""
+
+    def test_default_returns_both(self):
+        with mock.patch('awx.main.constants.settings') as mock_settings:
+            mock_settings.JOB_VARIABLE_PREFIXES = 'both'
+            assert get_job_variable_prefixes() == ['awx', 'tower']
+
+    def test_awx_only(self):
+        with mock.patch('awx.main.constants.settings') as mock_settings:
+            mock_settings.JOB_VARIABLE_PREFIXES = 'awx'
+            assert get_job_variable_prefixes() == ['awx']
+
+    def test_tower_only(self):
+        with mock.patch('awx.main.constants.settings') as mock_settings:
+            mock_settings.JOB_VARIABLE_PREFIXES = 'tower'
+            assert get_job_variable_prefixes() == ['tower']
+
+    def test_fallback_when_setting_not_available(self):
+        """When setting is not available, falls back to both."""
+        with mock.patch('awx.main.constants.settings', spec=[]):
+            assert get_job_variable_prefixes() == ['awx', 'tower']
+
+    def test_job_metavars_awx_only(self):
+        """With 'awx' setting, awx_meta_vars only produces awx_ prefixed variables."""
+        with mock.patch('awx.main.constants.settings') as mock_settings:
+            mock_settings.JOB_VARIABLE_PREFIXES = 'awx'
+            data = Job(name='fake-job', pk=1, id=1, launch_type='manual').awx_meta_vars()
+            assert 'awx_job_id' in data
+            assert 'tower_job_id' not in data
+
+    def test_job_metavars_tower_only(self):
+        """With 'tower' setting, awx_meta_vars only produces tower_ prefixed variables."""
+        with mock.patch('awx.main.constants.settings') as mock_settings:
+            mock_settings.JOB_VARIABLE_PREFIXES = 'tower'
+            data = Job(name='fake-job', pk=1, id=1, launch_type='manual').awx_meta_vars()
+            assert 'tower_job_id' in data
+            assert 'awx_job_id' not in data

@@ -37,7 +37,7 @@ from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
 from awx.main.utils.licensing import Licenser
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.constants import get_job_variable_prefixes
 
 from receptorctl.socket_interface import ReceptorControl
 
@@ -372,12 +372,12 @@ class TestExtraVarSanitation(TestJobExecution):
             extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             for variable_name in ['_job_template_name', '_user_name', '_job_launch_type', '_project_revision', '_inventory_name']:
                 assert hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
         # ensure that non-strings are marked as safe
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             for variable_name in ['_job_template_id', '_job_id', '_user_id', '_inventory_id']:
                 assert not hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
@@ -524,7 +524,7 @@ class TestGenericRun:
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars, safe_dict = call_args
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
@@ -615,7 +615,7 @@ class TestAdhocRun(TestJobExecution):
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars = call_args
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 

@@ -58,7 +58,7 @@ from awx.main.utils.common import (
 )
 from awx.main.utils.encryption import encrypt_dict, decrypt_field
 from awx.main.utils import polymorphic
-from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
+from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, get_job_variable_prefixes
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import AskForField, OrderedManyToManyField
@@ -1568,7 +1568,7 @@ class UnifiedJob(
         by AWX, for purposes of client playbook hooks
         """
         r = {}
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             r['{}_job_id'.format(name)] = self.pk
             r['{}_job_launch_type'.format(name)] = self.launch_type
 
@@ -1577,7 +1577,7 @@ class UnifiedJob(
         wj = self.get_workflow_job()
         if wj:
             schedule = getattr_dne(wj, 'schedule')
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in get_job_variable_prefixes():
                 r['{}_workflow_job_id'.format(name)] = wj.pk
                 r['{}_workflow_job_name'.format(name)] = wj.name
                 r['{}_workflow_job_launch_type'.format(name)] = wj.launch_type
@@ -1588,12 +1588,12 @@ class UnifiedJob(
         if not created_by:
             schedule = getattr_dne(self, 'schedule')
             if schedule:
-                for name in JOB_VARIABLE_PREFIXES:
+                for name in get_job_variable_prefixes():
                     r['{}_schedule_id'.format(name)] = schedule.pk
                     r['{}_schedule_name'.format(name)] = schedule.name
 
         if created_by:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in get_job_variable_prefixes():
                 r['{}_user_id'.format(name)] = created_by.pk
                 r['{}_user_name'.format(name)] = created_by.username
                 r['{}_user_email'.format(name)] = created_by.email
@@ -1602,7 +1602,7 @@ class UnifiedJob(
 
         inventory = getattr_dne(self, 'inventory')
         if inventory:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in get_job_variable_prefixes():
                 r['{}_inventory_id'.format(name)] = inventory.pk
                 r['{}_inventory_name'.format(name)] = inventory.name
 

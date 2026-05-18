@@ -326,6 +326,27 @@ register(
 )
 
 register(
+    'JOB_VARIABLE_PREFIXES',
+    field_class=fields.ChoiceField,
+    choices=[
+        ('both', _('Both (AWX and Tower)')),
+        ('awx', _('AWX only')),
+        ('tower', _('Tower only')),
+    ],
+    default='both',
+    label=_('Job Variable Prefixes'),
+    help_text=_(
+        'Determines which variable name prefixes are used for auto-generated '
+        'job variables (e.g., webhook payload, job metadata). '
+        '"Both" sends duplicate variables with awx_ and tower_ prefixes for '
+        'backward compatibility. Choose "AWX only" or "Tower only" to '
+        'eliminate duplicate variables in job extra_vars.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_ISOLATION_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),
