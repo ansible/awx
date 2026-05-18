@@ -1,4 +1,7 @@
 aiohttp>=3.13.3 # CVE-2025-69223
+ansible-runner==2.4.3
+# Temporarily added to use ansible-runner from git branch, to be removed
+# when ansible-runner moves from requirements_git.txt to here
 Brotli>=1.2  # required by aiohttp[speedups]>=3.13.3
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature

@@ -18,8 +18,8 @@ aiosignal==1.4.0
     # via aiohttp
 ansi2html==1.9.2
     # via -r /awx_devel/requirements/requirements.in
-# ansible-runner @ git+https://github.com/ansible/ansible-runner.git@devel  # git requirements installed separately
-    # via -r /awx_devel/requirements/requirements_git.txt
+ansible-runner==2.4.3
+    # via -r /awx_devel/requirements/requirements.in
 asgiref==3.11.0
     # via
     #   channels

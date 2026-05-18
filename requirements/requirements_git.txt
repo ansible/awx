@@ -18,7 +18,6 @@
 # so they are not installed twice (once from git, once from PyPI).
 #
 certifi @ git+https://github.com/ansible/system-certifi.git@devel
-ansible-runner @ git+https://github.com/ansible/ansible-runner.git@devel
 awx-plugins-core[credentials-github-app] @ git+https://github.com/ansible/awx-plugins.git@devel
 django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel
 awx-plugins-interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
