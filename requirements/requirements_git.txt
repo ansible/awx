@@ -19,5 +19,5 @@
 #
 certifi @ git+https://github.com/ansible/system-certifi.git@devel
 awx-plugins-core[credentials-github-app] @ git+https://github.com/ansible/awx-plugins.git@devel
-django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible-automation-platform/django-ansible-base@stable-2.7
+django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+ssh://git@github.com/ansible-automation-platform/django-ansible-base@stable-2.7
 awx-plugins-interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git
