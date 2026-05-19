@@ -918,6 +918,54 @@ class TestJobCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+class TestCallbacksEnabled(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
+    def test_callbacks_enabled_default(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count'
+
+    def test_callbacks_enabled_preserves_user_config(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.read_ansible_config', return_value={'callbacks_enabled': 'custom_callback,another_callback'}):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,custom_callback,another_callback'
+
+    def test_callbacks_enabled_uses_comma_delimiter(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.read_ansible_config', return_value={'callbacks_enabled': 'my_callback'}):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,my_callback'
+
+
 @pytest.mark.usefixtures("patch_Organization")
 class TestProjectUpdateGalaxyCredentials(TestJobExecution):
     @pytest.fixture
