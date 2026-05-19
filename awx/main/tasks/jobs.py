@@ -1616,7 +1616,7 @@ class RunProjectUpdate(BaseTask):
             os.mkdir(pdd_plugins_path)
         from awx.playbooks import library
 
-        plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
+        plugin_file_source = os.path.join(library.__path__[0], 'indirect_instance_count.py')
         plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
         shutil.copyfile(plugin_file_source, plugin_file_dest)
 
