@@ -1142,7 +1142,7 @@ class RunJob(SourceControlMixin, BaseTask):
             ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
         )
 
-        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
+        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)) + ['callbacks_enabled'])
 
         for env_key, config_setting, folder, default in path_vars:
             paths = default.split(':')
