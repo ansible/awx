@@ -1159,7 +1159,7 @@ class RunJob(SourceControlMixin, BaseTask):
 
         env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
         if 'callbacks_enabled' in config_values:
-            env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
+            env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
 
         if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
             # Add vendor collections path for external query file discovery
