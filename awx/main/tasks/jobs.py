@@ -1162,6 +1162,7 @@ class RunJob(SourceControlMixin, BaseTask):
             env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
 
         if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            env['AWX_COLLECT_HOST_QUERIES'] = '1'
             # Add vendor collections path for external query file discovery
             vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
             env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"

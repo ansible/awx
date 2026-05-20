@@ -168,29 +168,28 @@ class CallbackModule(CallbackBase):
         if not artifact_dir:
             raise RuntimeError('Only suitable in AWX, did not find private_data_dir')
 
+        collect_host_queries = os.getenv('AWX_COLLECT_HOST_QUERIES') == '1'
+
         collections_print = {}
-        # Loop over collections, from ansible-core these are Candidate objects
         for candidate in list_collections():
             collection_print = {
                 'version': candidate.ver,
             }
 
-            # 1. Check for embedded query file (takes precedence)
-            embedded_query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
-            if embedded_query_file.exists():
-                with embedded_query_file.open('r') as f:
-                    collection_print['host_query'] = f.read()
-                self._display.vv(f"Using embedded query for {candidate.fqcn} v{candidate.ver}")
-            else:
-                # 2. Check for external query file with version fallback
-                query_content, fallback_used, version_used = find_external_query_with_fallback(candidate.namespace, candidate.name, candidate.ver)
-                if query_content:
-                    collection_print['host_query'] = query_content
-                    if fallback_used:
-                        # AC5.6: Log when fallback is used
-                        self._display.v(f"Using external query {version_used} for {candidate.fqcn} v{candidate.ver}.")
-                    else:
-                        self._display.v(f"Using external query for {candidate.fqcn} v{candidate.ver}")
+            if collect_host_queries:
+                embedded_query_file = files(f'ansible_collections.{candidate.namespace}.{candidate.name}') / 'extensions' / 'audit' / 'event_query.yml'
+                if embedded_query_file.exists():
+                    with embedded_query_file.open('r') as f:
+                        collection_print['host_query'] = f.read()
+                    self._display.vv(f"Using embedded query for {candidate.fqcn} v{candidate.ver}")
+                else:
+                    query_content, fallback_used, version_used = find_external_query_with_fallback(candidate.namespace, candidate.name, candidate.ver)
+                    if query_content:
+                        collection_print['host_query'] = query_content
+                        if fallback_used:
+                            self._display.v(f"Using external query {version_used} for {candidate.fqcn} v{candidate.ver}.")
+                        else:
+                            self._display.v(f"Using external query for {candidate.fqcn} v{candidate.ver}")
 
             collections_print[candidate.fqcn] = collection_print
 
