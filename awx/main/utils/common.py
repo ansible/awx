@@ -775,18 +775,17 @@ def get_cpu_effective_capacity(cpu_count, is_control_node=False):
 
 
 def get_job_variable_prefixes():
-    """Return the list of active job variable prefixes based on INCLUDE_AWX_VAR_PREFIX setting.
+    """Return the list of active job variable prefixes based on USE_TOWER_VAR_PREFIX setting.
 
-    When True (default), returns both 'awx' and 'tower' prefixes for backward compatibility.
-    When False, returns only 'tower'. The 'awx' prefix is deprecated and will be removed
-    in a future release.
+    When True (default), returns ['tower'].
+    When False, returns ['awx'] (deprecated, will be removed in a future release).
     """
     from django.conf import settings
 
-    include_awx = getattr(settings, 'INCLUDE_AWX_VAR_PREFIX', True)
-    if include_awx:
-        return ['awx', 'tower']
-    return ['tower']
+    use_tower = getattr(settings, 'USE_TOWER_VAR_PREFIX', True)
+    if use_tower:
+        return ['tower']
+    return ['awx']
 
 
 def convert_mem_str_to_bytes(mem_str):

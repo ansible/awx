@@ -85,36 +85,36 @@ class TestMetaVars:
 class TestGetJobVariablePrefixes:
     """Tests for the get_job_variable_prefixes() helper function."""
 
-    def test_include_legacy_true(self):
+    def test_use_tower_prefix(self):
         from django.conf import settings
 
-        with mock.patch.object(settings, 'INCLUDE_AWX_VAR_PREFIX', True, create=True):
-            assert get_job_variable_prefixes() == ['awx', 'tower']
-
-    def test_include_legacy_false(self):
-        from django.conf import settings
-
-        with mock.patch.object(settings, 'INCLUDE_AWX_VAR_PREFIX', False, create=True):
+        with mock.patch.object(settings, 'USE_TOWER_VAR_PREFIX', True, create=True):
             assert get_job_variable_prefixes() == ['tower']
 
-    def test_fallback_when_setting_not_available(self):
-        """When setting is not available, falls back to True (both prefixes)."""
-        assert get_job_variable_prefixes() == ['awx', 'tower']
-
-    def test_job_metavars_tower_only(self):
-        """With INCLUDE_AWX_VAR_PREFIX=False, only tower_ prefixed variables."""
+    def test_use_awx_prefix(self):
         from django.conf import settings
 
-        with mock.patch.object(settings, 'INCLUDE_AWX_VAR_PREFIX', False, create=True):
+        with mock.patch.object(settings, 'USE_TOWER_VAR_PREFIX', False, create=True):
+            assert get_job_variable_prefixes() == ['awx']
+
+    def test_fallback_defaults_to_tower(self):
+        """When setting is not available, falls back to tower prefix."""
+        assert get_job_variable_prefixes() == ['tower']
+
+    def test_job_metavars_tower_prefix(self):
+        """With USE_TOWER_VAR_PREFIX=True, only tower_ prefixed variables."""
+        from django.conf import settings
+
+        with mock.patch.object(settings, 'USE_TOWER_VAR_PREFIX', True, create=True):
             data = Job(name='fake-job', pk=1, id=1, launch_type='manual').awx_meta_vars()
             assert 'tower_job_id' in data
             assert 'awx_job_id' not in data
 
-    def test_job_metavars_both_prefixes(self):
-        """With INCLUDE_AWX_VAR_PREFIX=True, both awx_ and tower_ variables."""
+    def test_job_metavars_awx_prefix(self):
+        """With USE_TOWER_VAR_PREFIX=False, only awx_ prefixed variables."""
         from django.conf import settings
 
-        with mock.patch.object(settings, 'INCLUDE_AWX_VAR_PREFIX', True, create=True):
+        with mock.patch.object(settings, 'USE_TOWER_VAR_PREFIX', False, create=True):
             data = Job(name='fake-job', pk=1, id=1, launch_type='manual').awx_meta_vars()
             assert 'awx_job_id' in data
-            assert 'tower_job_id' in data
+            assert 'tower_job_id' not in data

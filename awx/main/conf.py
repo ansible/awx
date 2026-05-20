@@ -326,15 +326,16 @@ register(
 )
 
 register(
-    'INCLUDE_AWX_VAR_PREFIX',
+    'USE_TOWER_VAR_PREFIX',
     field_class=fields.BooleanField,
     default=True,
-    label=_('Include Legacy AWX Variable Prefix'),
+    label=_('Use Tower Variable Prefix'),
     help_text=_(
-        'When enabled, auto-generated job variables (e.g., webhook payload, '
-        'job metadata) are emitted with both awx_ and tower_ prefixes for '
-        'backward compatibility. When disabled, only the tower_ prefix is used. '
-        'The awx_ prefix is deprecated and will be removed in a future release.'
+        'When enabled (default), auto-generated job variables (e.g., webhook '
+        'payload, job metadata) use the tower_ prefix (e.g., tower_job_id). '
+        'When disabled, the deprecated awx_ prefix is used instead (e.g., '
+        'awx_job_id). The awx_ prefix is deprecated and will be removed in a '
+        'future release.'
     ),
     category=_('Jobs'),
     category_slug='jobs',
