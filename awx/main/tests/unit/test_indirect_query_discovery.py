@@ -39,6 +39,13 @@ def create_queries_dir_mock(file_lookup_func):
 class MockCallbackBase:
     def __init__(self):
         self._display = mock.MagicMock()
+        self._plugin_options = {}
+
+    def get_option(self, key):
+        return self._plugin_options.get(key)
+
+    def set_option(self, key, value):
+        self._plugin_options[key] = value
 
     def v2_playbook_on_stats(self, stats):
         pass
@@ -274,7 +281,7 @@ class TestExternalQueryDiscovery:
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
     @mock.patch('awx.playbooks.library.indirect_instance_count.files')
     @mock.patch('awx.playbooks.library.indirect_instance_count.find_external_query_with_fallback')
-    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts', 'AWX_COLLECT_HOST_QUERIES': '1'})
+    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
     def test_precedence_embedded_over_external(self, mock_fallback, mock_files, mock_list_collections):
         """AC7.1: Embedded query takes precedence when both embedded and external exist."""
         from awx.playbooks.library.indirect_instance_count import CallbackModule
@@ -289,6 +296,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -300,7 +308,7 @@ class TestExternalQueryDiscovery:
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
     @mock.patch('awx.playbooks.library.indirect_instance_count.files')
     @mock.patch('awx.playbooks.library.indirect_instance_count.find_external_query_with_fallback')
-    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts', 'AWX_COLLECT_HOST_QUERIES': '1'})
+    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
     def test_external_query_when_embedded_missing(self, mock_fallback, mock_files, mock_list_collections):
         """AC7.2: External query is discovered when embedded query is missing."""
         from awx.playbooks.library.indirect_instance_count import CallbackModule
@@ -318,6 +326,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -329,7 +338,7 @@ class TestExternalQueryDiscovery:
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
     @mock.patch('awx.playbooks.library.indirect_instance_count.files')
     @mock.patch('awx.playbooks.library.indirect_instance_count.find_external_query_with_fallback')
-    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts', 'AWX_COLLECT_HOST_QUERIES': '1'})
+    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
     def test_no_query_when_both_missing(self, mock_fallback, mock_files, mock_list_collections):
         """AC7.3: No query is used when both embedded and external queries are missing."""
         from awx.playbooks.library.indirect_instance_count import CallbackModule
@@ -342,6 +351,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -352,7 +362,7 @@ class TestExternalQueryDiscovery:
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
     @mock.patch('awx.playbooks.library.indirect_instance_count.files')
     @mock.patch('awx.playbooks.library.indirect_instance_count.find_external_query_with_fallback')
-    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts', 'AWX_COLLECT_HOST_QUERIES': '1'})
+    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
     def test_info_log_on_fallback(self, mock_fallback, mock_files, mock_list_collections):
         """AC7.8: Log message is emitted when fallback version is used.
 
@@ -372,6 +382,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):

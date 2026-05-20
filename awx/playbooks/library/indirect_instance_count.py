@@ -17,6 +17,13 @@ DOCUMENTATION = '''
     requirements:
      - Whitelist in configuration
      - Set AWX_ISOLATED_DATA_DIR, AWX will do this
+    options:
+      collect_host_queries:
+        description: When enabled, scan collections for host query files used in indirect node counting.
+        type: bool
+        default: false
+        env:
+          - name: AWX_COLLECT_HOST_QUERIES
 '''
 
 import os
@@ -168,7 +175,7 @@ class CallbackModule(CallbackBase):
         if not artifact_dir:
             raise RuntimeError('Only suitable in AWX, did not find private_data_dir')
 
-        collect_host_queries = os.getenv('AWX_COLLECT_HOST_QUERIES') == '1'
+        collect_host_queries = self.get_option('collect_host_queries')
 
         collections_print = {}
         for candidate in list_collections():
