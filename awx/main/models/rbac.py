@@ -648,7 +648,10 @@ def give_creator_permissions(user, obj):
     assignment = RoleDefinition.objects.give_creator_permissions(user, obj)
     if assignment:
         with disable_rbac_sync():
-            old_role = get_role_from_object_role(assignment.object_role)
+            try:
+                old_role = get_role_from_object_role(assignment.object_role)
+            except AttributeError:
+                return
             old_role.members.add(user)
 
 
