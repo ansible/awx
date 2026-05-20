@@ -160,7 +160,13 @@ class TestMetaVars:
         job = Job.objects.create(name='job', created_by=admin_user)
         job.save()
 
-        user_vars = ['_'.join(x) for x in itertools.product(get_job_variable_prefixes(), ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name'])]
+        user_vars = [
+            '_'.join(x)
+            for x in itertools.product(
+                get_job_variable_prefixes(),
+                ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name'],
+            )
+        ]
 
         for key in user_vars:
             assert key in job.awx_meta_vars()
