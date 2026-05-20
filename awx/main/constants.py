@@ -106,22 +106,6 @@ JOB_VARIABLE_PREFIXES = [
 ]
 
 
-def get_job_variable_prefixes():
-    """Return the list of active job variable prefixes based on the configured setting.
-
-    Maps the JOB_VARIABLE_PREFIXES ChoiceField setting value to the
-    corresponding list of prefix strings.
-    """
-    from django.conf import settings
-
-    setting = getattr(settings, 'JOB_VARIABLE_PREFIXES', 'both')
-    if setting == 'awx':
-        return ['awx']
-    elif setting == 'tower':
-        return ['tower']
-    return ['awx', 'tower']
-
-
 # Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
 # Importing a library just for this message seemed like overkill
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (

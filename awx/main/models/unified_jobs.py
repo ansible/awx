@@ -58,7 +58,8 @@ from awx.main.utils.common import (
 )
 from awx.main.utils.encryption import encrypt_dict, decrypt_field
 from awx.main.utils import polymorphic
-from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, get_job_variable_prefixes
+from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
+from awx.main.utils.common import get_job_variable_prefixes
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import AskForField, OrderedManyToManyField

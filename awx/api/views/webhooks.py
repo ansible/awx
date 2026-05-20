@@ -17,7 +17,7 @@ from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
 from awx.main.models import Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
-from awx.main.constants import get_job_variable_prefixes
+from awx.main.utils.common import get_job_variable_prefixes
 
 logger = logging.getLogger('awx.api.views.webhooks')
 

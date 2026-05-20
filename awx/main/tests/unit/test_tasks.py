@@ -37,7 +37,7 @@ from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
 from awx.main.utils.licensing import Licenser
-from awx.main.constants import get_job_variable_prefixes
+from awx.main.utils.common import get_job_variable_prefixes
 
 from receptorctl.socket_interface import ReceptorControl
 

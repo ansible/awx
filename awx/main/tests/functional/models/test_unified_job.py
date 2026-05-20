@@ -8,7 +8,7 @@ from crum import impersonate
 # AWX
 from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule, Credential
 from awx.api.versioning import reverse
-from awx.main.constants import get_job_variable_prefixes
+from awx.main.utils.common import get_job_variable_prefixes
 
 
 @pytest.mark.django_db

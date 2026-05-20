@@ -52,7 +52,7 @@ from awx.main.models.mixins import (
     WebhookTemplateMixin,
     OpaQueryPathMixin,
 )
-from awx.main.constants import get_job_variable_prefixes
+from awx.main.utils.common import get_job_variable_prefixes
 
 logger = logging.getLogger('awx.main.models.jobs')
 
