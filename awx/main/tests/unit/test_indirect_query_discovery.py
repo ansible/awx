@@ -393,6 +393,28 @@ class TestExternalQueryDiscovery:
         assert '4.1.0' in call_args
         assert 'community.vmware' in call_args
 
+    @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
+    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
+    @mock.patch('awx.playbooks.library.indirect_instance_count.find_external_query_with_fallback')
+    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
+    def test_queries_not_collected_when_option_disabled(self, mock_fallback, mock_files, mock_list_collections):
+        """Host query scanning is skipped when collect_host_queries is disabled."""
+        from awx.playbooks.library.indirect_instance_count import CallbackModule
+
+        mock_list_collections.return_value = [mock.Mock(namespace='demo', name='query', ver='1.0.0', fqcn='demo.query')]
+
+        callback = CallbackModule()
+        callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', False)
+
+        with mock.patch('builtins.open', mock.mock_open()):
+            with mock.patch('json.dumps', return_value='{}'):
+                callback.v2_playbook_on_stats(mock.Mock())
+
+        mock_list_collections.assert_called_once()
+        mock_files.assert_not_called()
+        mock_fallback.assert_not_called()
+
 
 class TestPrivateDataDirIntegration:
     """Tests for vendor collection copying (AC7.10-AC7.11)."""
