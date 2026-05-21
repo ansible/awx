@@ -99,7 +99,8 @@ class TestGetJobVariablePrefixes:
 
     def test_fallback_when_setting_not_available(self):
         """When setting is not available, falls back to both prefixes for backward compatibility."""
-        with mock.patch('awx.main.utils.common.settings', spec=[]):
+        fake_settings = mock.MagicMock(spec=[])
+        with mock.patch('django.conf.settings', fake_settings):
             assert get_job_variable_prefixes() == ['awx', 'tower']
 
     def test_job_metavars_both_prefixes(self):
