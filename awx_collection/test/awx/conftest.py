@@ -121,11 +121,9 @@ def _process_request_data(kwargs_copy, kwargs):
     if 'data' in kwargs:
         if isinstance(kwargs['data'], dict):
             kwargs_copy['data'] = kwargs['data']
-        elif kwargs['data'] is None:
-            pass
         elif isinstance(kwargs['data'], str):
             kwargs_copy['data'] = json.loads(kwargs['data'])
-        else:
+        elif kwargs['data'] is not None:
             raise RuntimeError('Expected data to be dict or str, got {0}, data: {1}'.format(type(kwargs['data']), kwargs['data']))
 
 
@@ -178,13 +176,13 @@ def _parse_and_handle_module_result(module_stdout):
     """Helper to parse module output and handle exceptions."""
     try:
         result = json.loads(module_stdout)
-    except Exception as e:
-        raise_from(Exception('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout)), e)
+    except ValueError as e:
+        raise_from(RuntimeError('Module did not write valid JSON, error: {0}, stdout:\n{1}'.format(str(e), module_stdout)), e)
 
     if 'exception' in result:
         if "ModuleNotFoundError: No module named 'tower_cli'" in result['exception']:
             pytest.skip('The tower-cli library is needed to run this test, module no longer supported.')
-        raise Exception('Module encountered error:\n{0}'.format(result['exception']))
+        raise RuntimeError('Module encountered error:\n{0}'.format(result['exception']))
     return result
 
 
@@ -353,14 +351,14 @@ def notification_template(organization):
         name='test-notification_template',
         organization=organization,
         notification_type="webhook",
-        notification_configuration=dict(
-            url="http://localhost",
-            username="",
-            password="",
-            headers={
+        notification_configuration={
+            "url": "http://localhost",
+            "username": "",
+            "password": "",
+            "headers": {
                 "Test": "Header",
             },
-        ),
+        },
     )
 
 
