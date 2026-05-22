@@ -146,6 +146,11 @@ class TaskManagerInstances:
             self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance, **kwargs)
 
     def consume_capacity(self, task):
+        """Subtract a task's capacity from its execution and control instances.
+
+        For the control instance, jobs_running is only incremented when the controller
+        differs from the execution node to avoid double-counting on hybrid nodes.
+        """
         control_instance = self.instances_by_hostname.get(task.controller_node, '')
         execution_instance = self.instances_by_hostname.get(task.execution_node, '')
         if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
@@ -209,6 +214,11 @@ class TaskManagerInstanceGroups:
         return self.instance_groups[group_name].instances
 
     def fit_task_to_most_remaining_capacity_instance(self, task, instance_group_name, impact=None, capacity_type=None, add_hybrid_control_cost=False):
+        """Select the instance with the most remaining capacity after absorbing the task.
+
+        When two or more instances would have equal remaining capacity, prefer the
+        instance with fewer jobs_running to balance controller load during bursts.
+        """
         impact = impact if impact else task.task_impact
         capacity_type = capacity_type if capacity_type else task.capacity_type
         instance_most_capacity = None
