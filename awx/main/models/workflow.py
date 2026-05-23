@@ -350,13 +350,11 @@ class WorkflowJobNode(WorkflowNodeBase):
         # from the parent workflow); exclude job_slice which is internal
         # metadata handled separately below
         aa_dict = {k: v for k, v in self.ancestor_artifacts.items() if k != 'job_slice'} if self.ancestor_artifacts else {}
-        is_root_node = True
         for parent_node in self.get_parent_nodes():
-            is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
             if parent_node.job:
                 aa_dict.update(parent_node.job.get_effective_artifacts(parents_set=set([self.workflow_job_id])))
-        if aa_dict and not is_root_node:
+        if aa_dict:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
         # process password list
@@ -388,9 +386,10 @@ class WorkflowJobNode(WorkflowNodeBase):
         if self.workflow_job and self.workflow_job.created_by:
             data['_eager_fields']['created_by'] = self.workflow_job.created_by
         # Extra processing in the case that this is a slice job
-        if 'job_slice' in self.ancestor_artifacts and is_root_node:
+        if self.workflow_job.is_sliced_job:
+            # _eager_fields used to establish that these are not user prompts
             data['_eager_fields']['allow_simultaneous'] = True
-            data['_eager_fields']['job_slice_number'] = self.ancestor_artifacts['job_slice']
+            data['_eager_fields']['job_slice_number'] = int(self.identifier)
             data['_eager_fields']['job_slice_count'] = self.workflow_job.workflow_job_nodes.count()
             data['_prevent_slicing'] = True
         return data
@@ -455,7 +454,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
 
     def create_relaunch_workflow_job(self):
         new_workflow_job = self.copy_unified_job()
-        if self.unified_job_template_id is None:
+        if self.workflow_nodes.exists() and (not new_workflow_job.workflow_nodes.exists()):
             new_workflow_job.copy_nodes_from_original(original=self)
         return new_workflow_job
 
@@ -514,10 +513,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     @property
     def workflow_nodes(self):
         return self.workflow_job_template_nodes
-
-    @classmethod
-    def _get_unified_job_class(cls):
-        return WorkflowJob
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
@@ -643,6 +638,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WebhookMixin):
+    PARENT_FIELD_NAME = 'workflow_job_template'  # only used for create_unified_job, bypassed for sliced jobs
+
     class Meta:
         app_label = 'main'
         ordering = ('id',)
@@ -681,12 +678,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     @property
     def has_unpartitioned_events(self):
         return False  # workflow jobs do not have events
-
-    def _get_parent_field_name(self):
-        if self.job_template_id:
-            # This is a workflow job which is a container for slice jobs
-            return 'job_template'
-        return 'workflow_job_template'
 
     @classmethod
     def _get_unified_job_template_class(cls):
@@ -774,22 +765,11 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         return artifacts
 
     def prompts_dict(self, *args, **kwargs):
-        if self.job_template_id:
-            # HACK: Exception for sliced jobs here, this is bad
-            # when sliced jobs were introduced, workflows did not have all the prompted JT fields
-            # so to support prompting with slicing, we abused the workflow job launch config
-            # these would be more properly saved on the workflow job, but it gets the wrong fields now
-            try:
-                wj_config = self.launch_config
-                r = wj_config.prompts_dict(*args, **kwargs)
-            except ObjectDoesNotExist:
-                r = {}
-        else:
-            r = super().prompts_dict(*args, **kwargs)
+        r = super().prompts_dict(*args, **kwargs)
+        if not self.is_sliced_job:
             # Workflow labels and job labels are treated separately
             # that means that they do not propogate from WFJT / workflow job to jobs in workflow
             r.pop('labels', None)
-
         return r
 
     def get_notification_templates(self):
@@ -797,6 +777,17 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     def get_notification_friendly_name(self):
         return "Workflow Job"
+
+    def launch_prompts(self):
+        prompts = super().launch_prompts()
+        if self.is_sliced_job and (prompts is None):
+            prompts = self.prompts_dict()
+        return prompts
+
+    def _get_parent_instance(self):
+        if self.is_sliced_job:
+            return self.job_template
+        return super()._get_parent_instance()
 
     @property
     def preferred_instance_groups(self):
@@ -824,10 +815,6 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
     )
 
     @classmethod
-    def _get_unified_job_class(cls):
-        return WorkflowApproval
-
-    @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'timeout']
 
@@ -847,6 +834,8 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
 
 
 class WorkflowApproval(UnifiedJob, JobNotificationMixin):
+    PARENT_FIELD_NAME = 'workflow_approval_template'
+
     class Meta:
         app_label = 'main'
 
@@ -895,9 +884,6 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, WORKFLOW_BASE_URL.format(settings.OPTIONAL_UI_URL_PREFIX, self.workflow_job.id))
-
-    def _get_parent_field_name(self):
-        return 'workflow_approval_template'
 
     def save(self, *args, **kwargs):
         update_fields = list(kwargs.get('update_fields', []))

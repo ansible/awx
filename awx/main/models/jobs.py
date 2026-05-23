@@ -284,10 +284,6 @@ class JobTemplate(
     )
 
     @classmethod
-    def _get_unified_job_class(cls):
-        return Job
-
-    @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
             [
@@ -328,12 +324,6 @@ class JobTemplate(
             raise ValidationError(_(f'Maximum number of forks ({settings.MAX_FORKS}) exceeded.'))
         return self.forks
 
-    def create_job(self, **kwargs):
-        """
-        Create a new job based on this template.
-        """
-        return self.create_unified_job(**kwargs)
-
     def get_effective_slice_ct(self, kwargs):
         actual_inventory = self.inventory
         if self.ask_inventory_on_launch and 'inventory' in kwargs:
@@ -356,31 +346,43 @@ class JobTemplate(
                 update_fields.append('organization_id')
         return super(JobTemplate, self).save(*args, **kwargs)
 
-    def create_unified_job(self, **kwargs):
-        prevent_slicing = kwargs.pop('_prevent_slicing', False)
-        slice_ct = self.get_effective_slice_ct(kwargs)
-        slice_event = bool(slice_ct > 1 and (not prevent_slicing))
-        if slice_event:
-            # A Slice Job Template will generate a WorkflowJob rather than a Job
-            from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
+    def create_sliced_workflow_job(self, slice_ct, _eager_fields=None, survey_passwords=None, **prompts):
+        """
+        A Slice Job Template will generate a WorkflowJob rather than a Job
+        Implementation is different from create_unified_job because we care to copy
+        prompts but not the JT fields themselves.
+        """
+        from awx.main.models.workflow import WorkflowJob
 
-            kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
-            kwargs['_parent_field_name'] = "job_template"
-            kwargs.setdefault('_eager_fields', {})
-            kwargs['_eager_fields']['is_sliced_job'] = True
-        elif self.job_slice_count > 1 and (not prevent_slicing):
-            # Unique case where JT was set to slice but hosts not available
-            kwargs.setdefault('_eager_fields', {})
-            kwargs['_eager_fields']['job_slice_count'] = 1
-        elif prevent_slicing:
-            kwargs.setdefault('_eager_fields', {})
-            kwargs['_eager_fields'].setdefault('job_slice_count', 1)
-        job = super(JobTemplate, self).create_unified_job(**kwargs)
+        workflow_job = WorkflowJob(name=self.name, description=self.description)
+        if _eager_fields:
+            for fd, val in _eager_fields.items():
+                setattr(workflow_job, fd, val)
+        workflow_job.job_template = self
+        workflow_job.unified_job_template = self
+        workflow_job.is_sliced_job = True
+        workflow_job.survey_passwords = self.handle_launch_passwords(prompts.get('extra_vars', {}), survey_passwords)
+        # independent slices run in parallel by design, so simultaneity is enforced by workflow
+        workflow_job.allow_simultaneous = self.allow_simultaneous
+        workflow_job.save_prompts_data(self, onto_self=True, **prompts)  # also saves
+        for idx in range(slice_ct):
+            workflow_job.workflow_job_nodes.create(unified_job_template=self, identifier=str(idx + 1))
+        return workflow_job
+
+    def create_unified_job(self, _prevent_slicing=False, **prompts):
+        slice_ct = self.get_effective_slice_ct(prompts)
+        slice_event = bool(slice_ct > 1 and (not _prevent_slicing))
         if slice_event:
-            for idx in range(slice_ct):
-                create_kwargs = dict(workflow_job=job, unified_job_template=self, ancestor_artifacts=dict(job_slice=idx + 1))
-                WorkflowJobNode.objects.create(**create_kwargs)
-        return job
+            return self.create_sliced_workflow_job(slice_ct=slice_ct, **prompts)
+        elif self.job_slice_count > 1 and (not _prevent_slicing):
+            # Unique case where JT was set to slice but hosts not available
+            prompts.setdefault('_eager_fields', {})
+            prompts['_eager_fields']['job_slice_count'] = 1
+        elif _prevent_slicing:
+            # This job is, itself, a sub-job of a sliced workflow job
+            prompts.setdefault('_eager_fields', {})
+            prompts['_eager_fields'].setdefault('job_slice_count', 1)
+        return super(JobTemplate, self).create_unified_job(**prompts)
 
     def validate_unique(self, exclude=None):
         """Custom over-ride for JT specifically
@@ -450,17 +452,17 @@ class JobTemplate(
             new_value = kwargs[field_name]
             old_value = getattr(self, field_name)
 
-            field = self._meta.get_field(field_name)
-            if isinstance(field, models.ManyToManyField):
-                if field_name == 'instance_groups':
-                    # Instance groups are ordered so we can't make a set out of them
-                    old_value = old_value.all()
-                elif field_name == 'credentials':
-                    # Credentials have a weird pattern because of how they are layered
-                    old_value = set(old_value.all())
-                    new_value = set(kwargs[field_name]) - old_value
-                    if not new_value:
-                        continue
+            if field_name == 'instance_groups':
+                # Instance groups do not have a corresponding field on the parent, only skip not-provided
+                old_value = []
+                if not new_value:
+                    continue
+            elif field_name in ('credentials', 'labels'):
+                # Credentials have a weird pattern because of how they are layered
+                old_value = set(old_value.all())
+                new_value = set(kwargs[field_name]) - old_value
+                if not new_value:
+                    continue
 
             if new_value == old_value:
                 # no-op case: Fields the same as template's value
@@ -564,6 +566,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     given parameters.
     """
 
+    PARENT_FIELD_NAME = 'job_template'
+
     class Meta:
         app_label = 'main'
         ordering = ('id',)
@@ -612,9 +616,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=True,
         help_text=_("Events of this job have been queried for indirect host information, or do not need processing."),
     )
-
-    def _get_parent_field_name(self):
-        return 'job_template'
 
     @classmethod
     def _get_task_class(cls):
@@ -1197,10 +1198,6 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         app_label = 'main'
 
     @classmethod
-    def _get_unified_job_class(cls):
-        return SystemJob
-
-    @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'organization', 'job_type', 'extra_vars']
 
@@ -1266,6 +1263,8 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
 
 class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
+    PARENT_FIELD_NAME = 'system_job_template'
+
     class Meta:
         app_label = 'main'
         ordering = ('id',)
@@ -1290,10 +1289,6 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def _set_default_dependencies_processed(self):
         self.dependencies_processed = True
-
-    @classmethod
-    def _get_parent_field_name(cls):
-        return 'system_job_template'
 
     @classmethod
     def _get_task_class(cls):
