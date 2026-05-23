@@ -6,7 +6,7 @@ from uuid import uuid4
 from crum import impersonate
 
 # AWX
-from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule, Credential
+from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, WorkflowApprovalTemplate, Project, WorkflowJob, Schedule, Credential
 from awx.api.versioning import reverse
 from awx.main.constants import JOB_VARIABLE_PREFIXES
 
@@ -288,6 +288,47 @@ class TestUpdateParentInstance:
         self.run_update(project, status='failed')
         assert project.last_job == pu_check
         assert project.status == 'successful'
+
+    def test_delete_last_job_no_error(self):
+        wat = WorkflowApprovalTemplate.objects.create(name='foo')
+        aj1 = wat.create_unified_job()
+        aj1.signal_start()
+        aj1.status = 'successful'
+        aj1.save()
+
+        wat = WorkflowApprovalTemplate.objects.get(pk=wat.id)
+        aj1.delete()
+        aj2 = wat.create_unified_job()
+        aj2.signal_start()
+
+    def test_approval_template_last_fields(self):
+        wat = WorkflowApprovalTemplate.objects.create(name='foo')
+
+        aj1 = wat.create_unified_job()
+        aj1.signal_start()
+        assert aj1.status == 'pending'
+        wat.refresh_from_db()
+        assert wat.current_job == aj1
+
+        aj1.status = 'successful'
+        aj1.save()
+        wat.refresh_from_db()
+        assert wat.current_job is None
+        assert wat.last_job == aj1
+        assert wat.status == 'successful'
+
+        aj2 = wat.create_unified_job()
+        aj2.signal_start()
+        wat.refresh_from_db()
+        assert wat.current_job == aj2
+        assert wat.last_job == aj1
+
+        aj2.status = 'failed'
+        aj2.save()
+        wat.refresh_from_db()
+        assert wat.current_job is None
+        assert wat.last_job == aj2
+        assert wat.status == 'failed'
 
 
 @pytest.mark.django_db
