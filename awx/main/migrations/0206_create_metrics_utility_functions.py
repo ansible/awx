@@ -12,9 +12,11 @@ CREATE_FUNCTIONS_SQL = """
     DECLARE
         line_re text;
         field_re text;
+        escaped_field text;
     BEGIN
         field_re := ' *[:=] *(.+?) *$';
-        line_re := '(?n)^' || field || field_re;
+        escaped_field := regexp_replace(field, '[.+*?^${}()|\\[\\]\\\\]', '\\\\&', 'g');
+        line_re := '(?n)^' || escaped_field || field_re;
         RETURN trim(both '"' from substring(str from line_re));
     END;
     $$
@@ -27,7 +29,7 @@ CREATE_FUNCTIONS_SQL = """
     BEGIN
         RETURN (p_json::json IS NOT NULL);
     EXCEPTION
-        WHEN others
+        WHEN invalid_text_representation
         THEN RETURN false;
     END;
     $$
