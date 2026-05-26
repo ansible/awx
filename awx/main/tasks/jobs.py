@@ -1138,12 +1138,11 @@ class RunJob(SourceControlMixin, BaseTask):
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
         ]
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            path_vars.append(
-                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
-            )
+        path_vars.append(
+            ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+        )
 
-        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
+        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)) + ['callbacks_enabled'])
 
         for env_key, config_setting, folder, default in path_vars:
             paths = default.split(':')
@@ -1158,11 +1157,12 @@ class RunJob(SourceControlMixin, BaseTask):
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
-            if 'callbacks_enabled' in config_values:
-                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
+        env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+        if 'callbacks_enabled' in config_values:
+            env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
 
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            env['AWX_COLLECT_HOST_QUERIES'] = '1'
             # Add vendor collections path for external query file discovery
             vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
             env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
@@ -1612,16 +1612,14 @@ class RunProjectUpdate(BaseTask):
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            # copy the special callback (not stdout type) plugin to get list of collections
-            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
-            if not os.path.exists(pdd_plugins_path):
-                os.mkdir(pdd_plugins_path)
-            from awx.playbooks import library
+        pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+        if not os.path.exists(pdd_plugins_path):
+            os.mkdir(pdd_plugins_path)
+        from awx.playbooks import library
 
-            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
-            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
-            shutil.copyfile(plugin_file_source, plugin_file_dest)
+        plugin_file_source = os.path.join(library.__path__[0], 'indirect_instance_count.py')
+        plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+        shutil.copyfile(plugin_file_source, plugin_file_dest)
 
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)

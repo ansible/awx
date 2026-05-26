@@ -52,7 +52,7 @@ spec:
     - name: aap-dev-component-source-name
       value: "controller"
     - name: pytest-number-of-parallel-processes
-      value: "2"
+      value: "6"
 
   workspaces:
     - name: workspace
