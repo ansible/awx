@@ -93,6 +93,7 @@ __all__ = [
     'get_event_partition_epoch',
     'cleanup_new_process',
     'unified_job_class_to_event_table_name',
+    'get_job_variable_prefixes',
 ]
 
 
@@ -771,6 +772,21 @@ def get_cpu_effective_capacity(cpu_count, is_control_node=False):
         forkcpu = 4
 
     return max(1, int(cpu_count * forkcpu))
+
+
+def get_job_variable_prefixes():
+    """Return the list of active job variable prefixes based on INCLUDE_DEPRECATED_AWX_VAR_PREFIX setting.
+
+    When True (default), returns both 'awx' and 'tower' prefixes for backward compatibility.
+    When False, returns only 'tower'. The 'awx' prefix is deprecated and this setting
+    will default to False in a future release.
+    """
+    from django.conf import settings
+
+    include_awx = getattr(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', True)
+    if include_awx:
+        return ['awx', 'tower']
+    return ['tower']
 
 
 def convert_mem_str_to_bytes(mem_str):

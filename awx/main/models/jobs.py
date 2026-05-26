@@ -52,7 +52,7 @@ from awx.main.models.mixins import (
     WebhookTemplateMixin,
     OpaQueryPathMixin,
 )
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -817,19 +817,20 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def awx_meta_vars(self):
         r = super(Job, self).awx_meta_vars()
+        prefixes = get_job_variable_prefixes()
         if self.project:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_project_revision'.format(name)] = self.project.scm_revision
                 r['{}_project_scm_branch'.format(name)] = self.project.scm_branch
         if self.scm_branch:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_job_scm_branch'.format(name)] = self.scm_branch
         if self.job_template:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
                 r['{}_job_template_name'.format(name)] = self.job_template.name
         if self.execution_node:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_execution_node'.format(name)] = self.execution_node
         return r
 
