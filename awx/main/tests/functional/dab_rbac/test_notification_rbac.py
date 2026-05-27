@@ -154,3 +154,87 @@ def test_list_filtered_by_permissions(rando, admin_user, organization, post, get
     visible_names = {item['name'] for item in r.data['results']}
     assert 'rando-nt' in visible_names
     assert 'admin-nt' not in visible_names
+
+
+@pytest.mark.django_db
+def test_creator_access_list_with_add_only_role(rando, organization, post, get, nt_add_role):
+    """User with add_only role creates a notification template and can access its access_list endpoint"""
+    from ansible_base.rbac.models import DABContentType
+
+    nt_add_role.give_permission(rando, organization)
+
+    r = post(
+        reverse('api:notification_template_list'),
+        dict(name='rando-nt', organization=organization.id, **NT_DATA),
+        user=rando,
+        expect=201,
+    )
+    nt = NotificationTemplate.objects.get(pk=r.data['id'])
+
+    # Revoke org-level role so only creator permissions remain
+    nt_add_role.remove_permission(rando, organization)
+
+    # Creator should be able to access the access_list endpoint for their own notification template
+    # Use the DAB access_list endpoint pattern: /api/v2/role_user_access/{model_name}/{pk}/
+    ct = DABContentType.objects.get_for_model(NotificationTemplate)
+    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/'
+    r = get(access_list_url, user=rando, expect=200)
+
+    # The creator should be listed in the access list
+    usernames = {user['username'] for user in r.data['results']}
+    assert rando.username in usernames
+
+
+@pytest.mark.django_db
+def test_unpermissioned_user_cannot_access_access_list(rando, organization, post, admin_user, get, setup_managed_roles):
+    """User without view permission cannot access the access_list endpoint"""
+    from ansible_base.rbac.models import DABContentType
+
+    # Create a notification template as admin
+    r = post(
+        reverse('api:notification_template_list'),
+        dict(name='admin-nt', organization=organization.id, **NT_DATA),
+        user=admin_user,
+        expect=201,
+    )
+    nt = NotificationTemplate.objects.get(pk=r.data['id'])
+
+    ct = DABContentType.objects.get_for_model(NotificationTemplate)
+    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/'
+    # rando has no permissions on this notification template, so they can't see it or its access list
+    # The endpoint returns 404 (not found) instead of 403 when user can't view the resource
+    get(access_list_url, user=rando, expect=404)
+
+
+@pytest.mark.django_db
+def test_access_list_shows_creator(rando, organization, post, get, nt_add_role, setup_managed_roles):
+    """Access list shows the creator with direct permissions"""
+    from ansible_base.rbac.models import DABContentType
+    from ansible_base.rbac.models import RoleDefinition
+
+    nt_add_role.give_permission(rando, organization)
+
+    # rando creates a notification template
+    r = post(
+        reverse('api:notification_template_list'),
+        dict(name='rando-nt', organization=organization.id, **NT_DATA),
+        user=rando,
+        expect=201,
+    )
+    nt = NotificationTemplate.objects.get(pk=r.data['id'])
+
+    # Now assign them the object admin role directly too
+    rd = RoleDefinition.objects.get(name='NotificationTemplate Admin')
+    rd.give_permission(rando, nt)
+
+    ct = DABContentType.objects.get_for_model(NotificationTemplate)
+    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/'
+    r = get(access_list_url, user=rando, expect=200)
+
+    # rando should be listed with direct permissions from both creator and object role assignment
+    user_data = {item['username']: item for item in r.data['results']}
+    assert rando.username in user_data
+
+    # Verify they have direct role assignments
+    assert len(user_data[rando.username]['object_role_assignments']) > 0
+    assert any(assign.get('type') == 'direct' for assign in user_data[rando.username]['object_role_assignments'])
