@@ -180,6 +180,7 @@ services:
     volumes:
       - "../../grafana:/etc/grafana/provisioning"
       - "grafana_storage:/var/lib/grafana:rw"
+{% if enable_prometheus|bool or enable_loki|bool or enable_tempo|bool %}
     depends_on:
 {% if enable_prometheus|bool %}
       - prometheus
@@ -189,6 +190,7 @@ services:
 {% endif %}
 {% if enable_tempo|bool %}
       - tempo
+{% endif %}
 {% endif %}
 {% endif %}
   postgres:
