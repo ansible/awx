@@ -57,6 +57,7 @@ class HostManager(models.Manager):
             super(HostManager, self)
             .get_queryset()
             .defer(
+                'ansible_facts',
                 'last_job__extra_vars',
                 'last_job_host_summary__job__extra_vars',
                 'last_job__artifacts',
