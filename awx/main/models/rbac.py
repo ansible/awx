@@ -613,7 +613,7 @@ def get_role_from_object_role(object_role):
         model_name, role_name = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
-    return getattr(object_role.content_object, role_name)
+    return getattr(object_role.content_object, role_name, None)
 
 
 def give_or_remove_permission(role, actor, giving=True, rd=None):
@@ -648,9 +648,8 @@ def give_creator_permissions(user, obj):
     assignment = RoleDefinition.objects.give_creator_permissions(user, obj)
     if assignment:
         with disable_rbac_sync():
-            try:
-                old_role = get_role_from_object_role(assignment.object_role)
-            except AttributeError:
+            old_role = get_role_from_object_role(assignment.object_role)
+            if old_role is None:
                 return
             old_role.members.add(user)
 
