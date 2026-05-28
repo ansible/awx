@@ -16,6 +16,8 @@
 
 AWX provides a web-based user interface, REST API, and task engine built on top of [Ansible](https://github.com/ansible/ansible). It is one of the upstream projects for [Red Hat Ansible Automation Platform](https://www.ansible.com/products/automation-platform).
 
+This is a test change for PR demonstration purposes.
+
 To install AWX, please view the [Install guide](./INSTALL.md).
 
 To learn more about using AWX, view the [AWX docs site](https://docs.ansible.com/projects/awx/en/latest/).
