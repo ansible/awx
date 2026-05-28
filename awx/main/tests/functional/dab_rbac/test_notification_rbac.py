@@ -177,7 +177,7 @@ def test_creator_access_list_with_add_only_role(rando, organization, post, get, 
     # Creator should be able to access the access_list endpoint for their own notification template
     # Use the DAB access_list endpoint pattern: /api/v2/role_user_access/{model_name}/{pk}/
     ct = DABContentType.objects.get_for_model(NotificationTemplate)
-    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/'
+    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/?order_by=id'
     r = get(access_list_url, user=rando, expect=200)
 
     # The creator should be listed in the access list
@@ -200,7 +200,7 @@ def test_unpermissioned_user_cannot_access_access_list(rando, organization, post
     nt = NotificationTemplate.objects.get(pk=r.data['id'])
 
     ct = DABContentType.objects.get_for_model(NotificationTemplate)
-    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/'
+    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/?order_by=id'
     # rando has no permissions on this notification template, so they can't see it or its access list
     # The endpoint returns 404 (not found) instead of 403 when user can't view the resource
     get(access_list_url, user=rando, expect=404)
@@ -228,7 +228,7 @@ def test_access_list_shows_creator(rando, organization, post, get, nt_add_role, 
     rd.give_permission(rando, nt)
 
     ct = DABContentType.objects.get_for_model(NotificationTemplate)
-    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/'
+    access_list_url = f'/api/v2/role_user_access/{ct.api_slug}/{nt.pk}/?order_by=id'
     r = get(access_list_url, user=rando, expect=200)
 
     # rando should be listed with direct permissions from both creator and object role assignment
