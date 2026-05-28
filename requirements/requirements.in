@@ -38,8 +38,8 @@ msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
 kubernetes>=35.0.0
 openshift
-opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
-opentelemetry-sdk~=1.37
+opentelemetry-api>=1.39.0     # django-ansible-base[observability] requires LogRecordExporter added in 1.39.0
+opentelemetry-sdk>=1.39.0
 opentelemetry-instrumentation-logging
 opentelemetry-exporter-otlp
 pexpect

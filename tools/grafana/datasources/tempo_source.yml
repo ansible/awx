@@ -1,0 +1,31 @@
+---
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      httpMethod: GET
+      tracesToLogs:
+        datasourceUid: 'P8E80F9AEF21F6940'
+        # Map trace attributes to Loki log labels
+        mapTagNamesEnabled: true
+        mappedTags:
+          - key: 'service.name'
+            value: 'service_name'
+          - key: 'service.instance.id'
+            value: 'service_instance_id'
+        # Include trace/span IDs in log query if available
+        filterByTraceID: true
+        filterBySpanID: true
+        # Expand time range to catch logs around span boundaries
+        spanStartTimeShift: '-5m'
+        spanEndTimeShift: '5m'
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      serviceMap:
+        datasourceUid: 'awx_prometheus'

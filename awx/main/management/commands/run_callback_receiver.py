@@ -6,6 +6,7 @@ import redis
 from django.core.management.base import BaseCommand, CommandError
 import redis.exceptions
 
+from ansible_base.observability import setup_observability
 from awx.main.analytics.subsystem_metrics import CallbackReceiverMetricsServer
 from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
 from awx.main.utils.redis import get_redis_client
@@ -24,6 +25,7 @@ class Command(BaseCommand):
         parser.add_argument('--status', dest='status', action='store_true', help='print the internal state of any running dispatchers')
 
     def handle(self, *arg, **options):
+        setup_observability(service_name="aap-controller-callback-receiver")
         if options.get('status'):
             print(self.status())
             return

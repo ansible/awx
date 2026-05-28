@@ -8,6 +8,7 @@ import sys
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
+from ansible_base.observability import setup_observability
 from awx.main.dispatch import pg_bus_conn
 
 logger = logging.getLogger('awx.main.commands.run_ws_heartbeat')
@@ -37,6 +38,7 @@ class Command(BaseCommand):
             time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 
     def handle(self, *arg, **options):
+        setup_observability(service_name="aap-controller-heartbeat")
         signal.signal(signal.SIGTERM, self.notify_listener_and_exit)
         signal.signal(signal.SIGINT, self.notify_listener_and_exit)
 

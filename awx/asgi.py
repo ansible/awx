@@ -11,6 +11,8 @@ from channels.routing import get_default_application  # noqa
 
 prepare_env()  # NOQA
 
+from ansible_base.observability import setup_observability
+
 
 """
 ASGI config for AWX project.
@@ -33,6 +35,8 @@ if MODE == 'production':
         logger.error("Missing or incorrect metadata for controller version.  Ensure controller was installed using the setup playbook.")
         raise Exception("Missing or incorrect metadata for controller version.  Ensure controller was installed using the setup playbook.") from e
 
+
+setup_observability(service_name="aap-controller-daphne")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings")
 django.setup()
