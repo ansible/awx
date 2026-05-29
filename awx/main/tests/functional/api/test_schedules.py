@@ -139,6 +139,7 @@ def test_survey_password_default(post, patch, admin_user, project, inventory, su
         ("DTSTART:20300308T050000Z", "One or more rule required in rrule"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1; EXDATE:20220401", "EXDATE not allowed in rrule"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=MONTHLY;INTERVAL=1; RDATE:20220401", "RDATE not allowed in rrule"),
+        ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=0;BYDAY=MO", "INTERVAL must be a positive integer"),
         ("DTSTART:20300308T050000Z RRULE:FREQ=SECONDLY;INTERVAL=5;COUNT=6", "SECONDLY is not supported"),
         # Individual rule test
         ("DTSTART:20300308T050000Z RRULE:NONSENSE", "INTERVAL required in rrule"),
