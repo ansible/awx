@@ -203,6 +203,7 @@ def test_multiple_invalid_rrules(post, admin_user, project, inventory):
         "rrule": [
             "Multiple DTSTART is not supported.",
             "INTERVAL required in rrule: RULE:FREQ=SECONDLY",
+            "SECONDLY is not supported: RULE:FREQ=SECONDLY",
             "RRULE may not contain both COUNT and UNTIL: RULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5;UNTIL=20220101",
             "rrule parsing failed validation: 'NoneType' object has no attribute 'group'",
         ]
