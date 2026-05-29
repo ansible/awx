@@ -1149,7 +1149,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         is_new_instance = not bool(self.pk)
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
