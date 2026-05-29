@@ -38,14 +38,14 @@ jobs:
           fi
 
           # ansible/awx owns devel and feature_* branches
-          if [[ "$REPO" == "ansible/awx" ]] && [[ "$BRANCH" == "devel" || "$BRANCH" == feature_* ]]; then
+          if [[ "$REPO" == "ansible/awx" ]] && ( [[ "$BRANCH" == "devel" ]] || [[ "$BRANCH" == feature_* ]] ); then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "Repository '$REPO' owns branch '$BRANCH'"
             exit 0
           fi
 
           # ansible/tower owns stable-* and release_* branches
-          if [[ "$REPO" == "ansible/tower" ]] && [[ "$BRANCH" == stable-* || "$BRANCH" == release_* ]]; then
+          if [[ "$REPO" == "ansible/tower" ]] && ( [[ "$BRANCH" == stable-* ]] || [[ "$BRANCH" == release_* ]] ); then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "Repository '$REPO' owns branch '$BRANCH'"
             exit 0
