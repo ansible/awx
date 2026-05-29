@@ -448,7 +448,7 @@ DISPATCHER_SCHEDULE = {
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
-CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
+CACHES = {'default': {'BACKEND': 'ansible_base.lib.cache.redis_cache.DABRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
 
 ROLE_SINGLETON_USER_RELATIONSHIP = ''
 ROLE_SINGLETON_TEAM_RELATIONSHIP = ''
