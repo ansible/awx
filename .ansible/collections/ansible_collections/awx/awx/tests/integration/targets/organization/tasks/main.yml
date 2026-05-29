@@ -1,0 +1,153 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate an org name
+  set_fact:
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
+
+- name: Make sure {{ org_name }} is not there
+  organization:
+    name: "{{ org_name }}"
+    state: absent
+  register: result
+
+- name: "Create a new organization"
+  organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+  register: result
+
+- assert:
+    that: "result is changed"
+
+- name: "Create a new organization with exists"
+  organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+    state: exists
+  register: result
+
+- assert:
+    that: "result is not changed"
+
+- name: "Delete a new organization"
+  organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+    state: absent
+  register: result
+
+- assert:
+    that: "result is changed"
+
+- name: "Create a new organization with exists"
+  organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+    state: exists
+  register: result
+
+- assert:
+    that: "result is changed"
+
+- name: "Make sure making the same org is not a change"
+  organization:
+    name: "{{ org_name }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Create an Instance Group
+  instance_group:
+    name: "{{ group_name1 }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: "Pass in all parameters"
+  organization:
+    name: "{{ org_name }}"
+    description: "A description"
+    instance_groups:
+      - "{{ group_name1 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: "Change the description"
+  organization:
+    name: "{{ org_name }}"
+    description: "A new description"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the instance groups
+  instance_group:
+    name: "{{ group_name1 }}"
+    state: absent
+
+- name: "Rename the organization"
+  organization:
+    name: "{{ org_name }}"
+    new_name: "{{ org_name }}a"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: "Remove the organization"
+  organization:
+    name: "{{ org_name }}a"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: "Remove a missing organization"
+  organization:
+    name: "{{ org_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+# Test behaviour common to all controller modules
+- name: Check that SSL is available and verify_ssl is enabled (task must fail)
+  organization:
+    name: Default
+    validate_certs: true
+  ignore_errors: true
+  register: check_ssl_is_used
+
+- name: Check that connection failed
+  assert:
+    that:
+      - "'CERTIFICATE_VERIFY_FAILED' in check_ssl_is_used['msg']"
+
+- name: Check that verify_ssl is disabled (task must not fail)
+  organization:
+    name: Default
+    validate_certs: false

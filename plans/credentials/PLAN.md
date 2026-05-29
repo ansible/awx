@@ -1,0 +1,1 @@
+what is the surface area of credentials and credential types integration?

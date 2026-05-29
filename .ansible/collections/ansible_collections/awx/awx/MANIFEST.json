@@ -1,0 +1,36 @@
+{
+ "collection_info": {
+  "namespace": "awx",
+  "name": "awx",
+  "version": "0.0.1-devel",
+  "authors": [
+   "AWX Project Contributors <awx-project@googlegroups.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "cloud",
+   "infrastructure",
+   "awx",
+   "ansible",
+   "automation"
+  ],
+  "description": "Ansible content that interacts with the AWX or Automation Platform Controller API.",
+  "license": [
+   "GPL-3.0-or-later"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "https://github.com/ansible/awx",
+  "documentation": "https://github.com/ansible/awx/blob/devel/awx_collection/README.md",
+  "homepage": "https://www.ansible.com/",
+  "issues": "https://github.com/ansible/awx/issues?q=is%3Aissue+label%3Acomponent%3Aawx_collection"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "975f80cf34e08a024d5d502a776440fb939fb00fe5a7a278f8bfb4cfa188653a",
+  "format": 1
+ },
+ "format": 1
+}

@@ -1,0 +1,164 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate random string for template and project
+  set_fact:
+    jt_name: "AWX-Collection-tests-job_wait-long_running-{{ test_id }}"
+    proj_name: "AWX-Collection-tests-job_wait-long_running-{{ test_id }}"
+
+- block:
+    - name: Create a project
+      project:
+        name: "{{ proj_name }}"
+        scm_type: 'git'
+        scm_url: 'https://github.com/ansible/test-playbooks.git'
+        scm_update_on_launch: true
+        organization: Default
+
+    - name: Create a job template
+      job_template:
+        name: "{{ jt_name }}"
+        playbook: "sleep.yml"
+        job_type: run
+        project: "{{ proj_name }}"
+        inventory: "Demo Inventory"
+        extra_vars:
+          sleep_interval: 600
+
+    - name: Check module fails with correct msg
+      job_wait:
+        job_id: "99999999"
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "result.msg =='Unable to wait, no job_id 99999999 found: The requested object could not be found.' or
+            'Unable to wait on job 99999999; that ID does not exist.'"
+
+    - name: Launch Demo Job Template (take happy path)
+      job_launch:
+        job_template: "Demo Job Template"
+      register: job
+
+    - assert:
+        that:
+          - job is changed
+
+    - name: Wait for the Job to finish
+      job_wait:
+        job_id: "{{ job.id }}"
+      register: wait_results
+
+    # Make sure it worked and that we have some data in our results
+    - assert:
+        that:
+          - wait_results is successful
+          - "'elapsed' in wait_results"
+          - "'id' in wait_results"
+
+    - name: Launch a long running job
+      job_launch:
+        job_template: "{{ jt_name }}"
+      register: job
+
+    - assert:
+        that:
+          - job is changed
+
+    - name: Timeout waiting for the job to complete
+      job_wait:
+        job_id: "{{ job.id }}"
+        timeout: 5
+      ignore_errors: true
+      register: wait_results
+
+    # Make sure that we failed and that we have some data in our results
+    - assert:
+        that:
+          - "wait_results.msg == 'Monitoring aborted due to timeout' or 'Timeout waiting for job to finish.'"
+          - "'id' in wait_results"
+
+    - name: Async cancel the long running job
+      job_cancel:
+        job_id: "{{ job.id }}"
+      async: 3600
+      poll: 0
+
+    - name: Wait for the job to exit on cancel
+      job_wait:
+        job_id: "{{ job.id }}"
+      register: wait_results
+      ignore_errors: true
+
+    - assert:
+        that:
+          - wait_results is failed
+          - 'wait_results.status == "canceled"'
+          - "'Job with id ~ job.id failed' or 'Job with id= ~ job.id failed, error: Job failed.' is in wait_results.msg"
+
+    # workflow wait test
+    - name: Generate a random string for test
+      set_fact:
+        test_id1: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+      when: test_id1 is not defined
+
+    - name: Generate names
+      set_fact:
+        wfjt_name2: "AWX-Collection-tests-workflow_launch--wfjt1-{{ test_id1 }}"
+
+    - name: Create our workflow
+      workflow_job_template:
+        name: "{{ wfjt_name2 }}"
+        state: present
+
+    - name: Add a node
+      workflow_job_template_node:
+        workflow_job_template: "{{ wfjt_name2 }}"
+        unified_job_template: "Demo Job Template"
+        identifier: leaf
+      register: new_node
+
+    - name: Kick off a workflow
+      workflow_launch:
+        workflow_template: "{{ wfjt_name2 }}"
+      ignore_errors: true
+      register: workflow
+
+    - name: Wait for the Workflow Job to finish
+      job_wait:
+        job_id: "{{ workflow.job_info.id }}"
+        job_type: "workflow_jobs"
+      register: wait_workflow_results
+
+    # Make sure it worked and that we have some data in our results
+    - assert:
+        that:
+          - wait_workflow_results is successful
+          - "'elapsed' in wait_workflow_results"
+          - "'id' in wait_workflow_results"
+
+  always:
+    - name: Clean up test workflow
+      workflow_job_template:
+        name: "{{ wfjt_name2 }}"
+        state: absent
+
+    - name: Delete the job template
+      job_template:
+        name: "{{ jt_name }}"
+        playbook: "sleep.yml"
+        job_type: run
+        project: "{{ proj_name }}"
+        inventory: "Demo Inventory"
+        state: absent
+
+    - name: Delete the project
+      project:
+        name: "{{ proj_name }}"
+        organization: Default
+        state: absent

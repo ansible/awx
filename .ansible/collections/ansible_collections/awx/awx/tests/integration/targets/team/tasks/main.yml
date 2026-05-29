@@ -1,0 +1,95 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    team_name: "AWX-Collection-tests-team-team-{{ test_id }}"
+
+- name: Attempt to add a team to a non-existant Organization
+  team:
+    name: Test Team
+    organization: Missing_Organization
+    state: present
+  register: result
+  ignore_errors: true
+
+- name: Assert a meaningful error was provided for the failed team creation
+  assert:
+    that:
+      - "result is failed"
+      - "result is not changed"
+      - "'Missing_Organization' in result.msg"
+      - "result.total_results == 0"
+
+- name: Create a team
+  team:
+    name: "{{ team_name }}"
+    organization: Default
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a team with exists
+  team:
+    name: "{{ team_name }}"
+    organization: Default
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete a team
+  team:
+    name: "{{ team_name }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a team with exists
+  team:
+    name: "{{ team_name }}"
+    organization: Default
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete a team
+  team:
+    name: "{{ team_name }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check module fails with correct msg
+  team:
+    name: "{{ team_name }}"
+    organization: Non_Existing_Org
+    state: present
+  register: result
+  ignore_errors: true
+
+- name: Lookup of the related organization should cause a failure
+  assert:
+    that:
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_Existing_Org' in result.msg"
+      - "result.total_results == 0"

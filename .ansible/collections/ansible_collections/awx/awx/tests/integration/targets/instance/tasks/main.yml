@@ -1,0 +1,133 @@
+---
+- name: Generate a test ID
+  ansible.builtin.set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate hostnames
+  ansible.builtin.set_fact:
+    hostname1: "AWX-Collection-tests-instance1.{{ test_id }}.example.com"
+    hostname2: "AWX-Collection-tests-instance2.{{ test_id }}.example.com"
+    hostname3: "AWX-Collection-tests-instance3.{{ test_id }}.example.com"
+  register: facts
+
+- name: Get the k8s setting
+  ansible.builtin.set_fact:
+    IS_K8S: "{{ controller_settings['IS_K8S'] | default(False) }}"
+  vars:
+    controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/all') }}"
+
+- ansible.builtin.debug:
+    msg: "Skipping instance test since this is instance is not running on a K8s platform"
+  when: not IS_K8S
+
+- block:
+    - name: Create an instance
+      awx.awx.instance:
+        hostname: "{{ item }}"
+        node_type: execution
+        node_state: installed
+      with_items:
+        - "{{ hostname1 }}"
+        - "{{ hostname2 }}"
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+    - name: Create an instance with non-default config
+      awx.awx.instance:
+        hostname: "{{ hostname3 }}"
+        node_type: execution
+        node_state: installed
+        capacity_adjustment: 0.4
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+    - name: Update an instance
+      awx.awx.instance:
+        hostname: "{{ hostname1 }}"
+        capacity_adjustment: 0.7
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+  always:
+    - name: Deprovision the instances
+      awx.awx.instance:
+        hostname: "{{ item }}"
+        node_state: deprovisioning
+      with_items:
+        - "{{ hostname1 }}"
+        - "{{ hostname2 }}"
+        - "{{ hostname3 }}"
+
+  when: IS_K8S
+
+- block:
+    - name: Create hop node 1
+      awx.awx.instance:
+        hostname: "{{ hostname1 }}"
+        node_type: hop
+        node_state: installed
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+    - name: Create hop node 2
+      awx.awx.instance:
+        hostname: "{{ hostname2 }}"
+        node_type: hop
+        node_state: installed
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+    - name: Create execution node
+      awx.awx.instance:
+        hostname: "{{ hostname3 }}"
+        node_type: execution
+        node_state: installed
+        peers:
+          - "{{ hostname1 }}"
+          - "{{ hostname2 }}"
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+    - name: Remove execution node peers
+      awx.awx.instance:
+        hostname: "{{ hostname3 }}"
+        node_type: execution
+        node_state: installed
+        peers: []
+      register: result
+
+    - ansible.builtin.assert:
+        that:
+          - result is changed
+
+  always:
+    - name: Deprovision the instances
+      awx.awx.instance:
+        hostname: "{{ item }}"
+        node_state: deprovisioning
+      with_items:
+        - "{{ hostname1 }}"
+        - "{{ hostname2 }}"
+        - "{{ hostname3 }}"
+
+
+  when: IS_K8S

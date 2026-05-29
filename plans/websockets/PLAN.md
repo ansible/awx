@@ -1,0 +1,1 @@
+websockets use django channels. Replace daphne and django channels with `starlette`.

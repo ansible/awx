@@ -1,0 +1,287 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    slack_not: "AWX-Collection-tests-notification_template-slack-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-notification_template-wehbook-not-{{ test_id }}"
+    email_not: "AWX-Collection-tests-notification_template-email-not-{{ test_id }}"
+    twillo_not: "AWX-Collection-tests-notification_template-twillo-not-{{ test_id }}"
+    pd_not: "AWX-Collection-tests-notification_template-pd-not-{{ test_id }}"
+    irc_not: "AWX-Collection-tests-notification_template-irc-not-{{ test_id }}"
+
+- name: Create Slack notification with custom messages
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Create Slack notification with custom messages with exists
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - result is not changed
+
+- name: Delete Slack notification with custom messages
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Create Slack notification with custom messages with exists
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete Slack notification
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add webhook notification
+  notification_template:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    notification_configuration:
+      url: http://www.example.com/hook
+      headers:
+        X-Custom-Header: value123
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete webhook notification
+  notification_template:
+    name: "{{ webhook_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add email notification
+  notification_template:
+    name: "{{ email_not }}"
+    organization: Default
+    notification_type: email
+    notification_configuration:
+      username: user
+      password: s3cr3t
+      sender: tower@example.com
+      recipients:
+        - user1@example.com
+      host: smtp.example.com
+      port: 25
+      use_tls: false
+      use_ssl: false
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Copy email notification
+  notification_template:
+    name: "copy_{{ email_not }}"
+    copy_from: "{{ email_not }}"
+    organization: Default
+  register: result
+
+- assert:
+    that:
+      - result.copied
+
+- name: Delete copied email notification
+  notification_template:
+    name: "copy_{{ email_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete email notification
+  notification_template:
+    name: "{{ email_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add twilio notification
+  notification_template:
+    name: "{{ twillo_not }}"
+    organization: Default
+    notification_type: twilio
+    notification_configuration:
+      account_token: a_token
+      account_sid: a_sid
+      from_number: '+15551112222'
+      to_numbers:
+        - '+15553334444'
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete twilio notification
+  notification_template:
+    name: "{{ twillo_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add PagerDuty notification
+  notification_template:
+    name: "{{ pd_not }}"
+    organization: Default
+    notification_type: pagerduty
+    notification_configuration:
+      token: a_token
+      subdomain: sub
+      client_name: client
+      service_key: a_key
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete PagerDuty notification
+  notification_template:
+    name: "{{ pd_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Add IRC notification
+  notification_template:
+    name: "{{ irc_not }}"
+    organization: Default
+    notification_type: irc
+    notification_configuration:
+      nickname: tower
+      password: s3cr3t
+      targets:
+        - user1
+      port: 8080
+      server: irc.example.com
+      use_ssl: false
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete IRC notification
+  notification_template:
+    name: "{{ irc_not }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed

@@ -1,0 +1,51 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate a unique name
+  set_fact:
+    bulk_inv_name: "AWX-Collection-tests-bulk_host_create-{{ test_id }}"
+
+- name: Get our collection package
+  controller_meta:
+  register: controller_meta
+
+- name: Generate the name of our plugin
+  set_fact:
+    plugin_name: "{{ controller_meta.prefix }}.controller_api"
+
+
+- name: Create an inventory
+  inventory:
+    name: "{{ bulk_inv_name }}"
+    organization: Default
+    state: present
+  register: inventory_result
+
+
+- name: Bulk Host Create
+  bulk_host_create:
+    hosts:
+      - name: "123.456.789.123"
+        description: "myhost1"
+        variables:
+          food: carrot
+          color: orange
+      - name: example.dns.gg
+        description: "myhost2"
+        enabled: false
+    inventory: "{{ bulk_inv_name }}"
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
+# cleanup
+- name: Delete inventory
+  inventory:
+    name: "{{ bulk_inv_name }}"
+    organization: Default
+    state: absent

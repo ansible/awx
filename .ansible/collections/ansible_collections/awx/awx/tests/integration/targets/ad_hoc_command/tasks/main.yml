@@ -1,0 +1,142 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    inv_name: "AWX-Collection-tests-ad_hoc_command-inventory-{{ test_id }}"
+    ssh_cred_name: "AWX-Collection-tests-ad_hoc_command-ssh-cred-{{ test_id }}"
+    org_name: "AWX-Collection-tests-ad_hoc_command-org-{{ test_id }}"
+    ee_name: "AWX-Collection-tests-ad_hoc_command-ee-{{ test_id }}"
+
+- name: Create a New Organization
+  organization:
+    name: "{{ org_name }}"
+
+- name: Create an Inventory
+  inventory:
+    name: "{{ inv_name }}"
+    organization: "{{ org_name }}"
+    state: present
+
+- name: Add localhost to the Inventory
+  host:
+    name: localhost
+    inventory: "{{ inv_name }}"
+    variables:
+      ansible_connection: local
+
+- name: Create a Credential
+  credential:
+    name: "{{ ssh_cred_name }}"
+    organization: "{{ org_name }}"
+    credential_type: 'Machine'
+    state: present
+
+- name: Create an Execution Environment
+  execution_environment:
+    name: "{{ ee_name }}"
+    organization: "{{ org_name }}"
+    description: "EE for Testing"
+    image: quay.io/ansible/awx-ee
+    pull: always
+    state: present
+  register: result_ee
+
+- name: Launch an Ad Hoc Command waiting for it to finish
+  ad_hoc_command:
+    inventory: "{{ inv_name }}"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "command"
+    module_args: "echo I <3 Ansible"
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'successful'"
+
+- name: Launch an Ad Hoc Command without module argument
+  ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "ping"
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'successful'"
+
+- name: Launch an Ad Hoc Command with extra_vars
+  ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "ping"
+    extra_vars:
+      var1: "test var"
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'successful'"
+
+- name: Launch an Ad Hoc Command with Execution Environment specified
+  ad_hoc_command:
+    inventory: "Demo Inventory"
+    credential: "{{ ssh_cred_name }}"
+    execution_environment: "{{ ee_name }}"
+    module_name: "ping"
+    wait: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'successful'"
+      - "lookup('awx.awx.controller_api', 'ad_hoc_commands/' ~  result.id)['execution_environment'] == result_ee.id"
+
+- name: Check module fails with correct msg
+  ad_hoc_command:
+    inventory: "{{ inv_name }}"
+    credential: "{{ ssh_cred_name }}"
+    module_name: "Does not exist"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+      - "result is not changed"
+      - "'Does not exist' in result.response['json']['module_name'][0]"
+
+- name: Delete the Execution Environment
+  execution_environment:
+    name: "{{ ee_name }}"
+    organization: "{{ org_name }}"
+    image: quay.io/ansible/awx-ee
+    state: absent
+
+- name: Delete the Credential
+  credential:
+    name: "{{ ssh_cred_name }}"
+    organization: "{{ org_name }}"
+    credential_type: 'Machine'
+    state: absent
+
+- name: Delete the Inventory
+  inventory:
+    name: "{{ inv_name }}"
+    organization: "{{ org_name }}"
+    state: absent
+
+- name: Remove the Organization
+  organization:
+    name: "{{ org_name }}"
+    state: absent

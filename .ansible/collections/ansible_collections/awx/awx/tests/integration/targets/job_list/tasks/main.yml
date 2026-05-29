@@ -1,0 +1,38 @@
+---
+- name: Launch a Job Template
+  job_launch:
+    job_template: "Demo Job Template"
+  register: job
+
+- assert:
+    that:
+      - "job is changed"
+      - "job.status == 'pending'"
+
+- name: List jobs w/ a matching primary key
+  job_list:
+    query: {"id": "{{ job.id }}"}
+  register: matching_jobs
+
+- assert:
+    that:
+      - matching_jobs.count == 1
+
+- name: List failed jobs (which don't exist)
+  job_list:
+    status: failed
+    query: {"id": "{{ job.id }}"}
+  register: successful_jobs
+
+- assert:
+    that:
+      - successful_jobs.count == 0
+
+- name: Get ALL result pages!
+  job_list:
+    all_pages: true
+  register: all_page_query
+
+- assert:
+    that:
+      - 'not all_page_query.next'

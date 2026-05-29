@@ -1,0 +1,80 @@
+---
+- name: "Generate a random string for test"
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: "test_id is not defined"
+
+- name: "Generate a unique name"
+  set_fact:
+    bulk_inv_name: "AWX-Collection-tests-bulk_host_create-{{ test_id }}"
+
+- name: "Get our collection package"
+  controller_meta:
+  register: "controller_meta"
+
+- name: "Generate the name of our plugin"
+  set_fact:
+    plugin_name: "{{ controller_meta.prefix }}.controller_api"
+
+- name: "Create an inventory"
+  inventory:
+    name: "{{ bulk_inv_name }}"
+    organization: "Default"
+    state: "present"
+  register: "inventory_result"
+
+- name: "Bulk Host Create"
+  bulk_host_create:
+    hosts:
+      - name: "123.456.789.123"
+        description: "myhost1"
+        variables:
+          food: "carrot"
+          color: "orange"
+      - name: "example.dns.gg"
+        description: "myhost2"
+        enabled: "false"
+    inventory: "{{ bulk_inv_name }}"
+  register: "result"
+
+- assert:
+    that:
+      - "result is not failed"
+
+- name: "Get our collection package"
+  controller_meta:
+  register: "controller_meta"
+
+- name: "Generate the name of our plugin"
+  set_fact:
+    plugin_name: "{{ controller_meta.prefix }}.controller_api"
+
+- name: "Setting the inventory hosts endpoint"
+  set_fact:
+    endpoint: "inventories/{{ inventory_result.id }}/hosts/"
+
+- name: "Get hosts information from inventory"
+  set_fact:
+    hosts_created: "{{ query(plugin_name, endpoint, return_objects=True) }}"
+    host_id_list: []
+
+- name: "Extract host IDs from hosts information"
+  set_fact:
+    host_id_list: "{{ host_id_list + [item.id] }}"
+  loop: "{{ hosts_created }}"
+
+- name: "Bulk Host Delete"
+  bulk_host_delete:
+    hosts: "{{ host_id_list }}"
+  register: "result"
+
+- assert:
+    that:
+      - "result is not failed"
+
+# cleanup
+- name: "Delete inventory"
+  inventory:
+    name: "{{ bulk_inv_name }}"
+    organization: "Default"
+    state: "absent"

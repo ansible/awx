@@ -1,0 +1,254 @@
+---
+- name: Generate a test id
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    username: "AWX-Collection-tests-role-user-{{ test_id }}"
+    project_name: "AWX-Collection-tests-role-project-1-{{ test_id }}"
+    jt1: "AWX-Collection-tests-role-jt1-{{ test_id }}"
+    jt2: "AWX-Collection-tests-role-jt2-{{ test_id }}"
+    wfjt_name: "AWX-Collection-tests-role-project-wfjt-{{ test_id }}"
+    team_name: "AWX-Collection-tests-team-team-{{ test_id }}"
+    team2_name: "AWX-Collection-tests-team-team-{{ test_id }}2"
+
+- block:
+    - name: Create a User
+      user:
+        first_name: Joe
+        last_name: User
+        username: "{{ username }}"
+        password: "{{ 65535 | random | to_uuid }}"
+        email: joe@example.org
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a 2nd User
+      user:
+        first_name: Joe
+        last_name: User
+        username: "{{ username }}2"
+        password: "{{ 65535 | random | to_uuid }}"
+        email: joe@example.org
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create teams
+      team:
+        name: "{{ item }}"
+        organization: Default
+      register: result
+      loop:
+        - "{{ team_name }}"
+        - "{{ team2_name }}"
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a project
+      project:
+        name: "{{ project_name }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+      register: project_info
+
+    - assert:
+        that:
+          - project_info is changed
+
+    - name: Create job templates
+      job_template:
+        name: "{{ item }}"
+        project: "{{ project_name }}"
+        inventory: "Demo Inventory"
+        playbook: become.yml
+      with_items:
+        - jt1
+        - jt2
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Joe and teams to the update role of the default Project with lookup Organization
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        teams:
+          - "{{ team_name }}"
+          - "{{ team2_name }}"
+        role: update
+        lookup_organization: Default
+        project: "Demo Project"
+        state: "{{ item }}"
+      register: result
+      with_items:
+        - "present"
+        - "absent"
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Joe to the new project by ID
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        teams:
+          - "{{ team_name }}"
+          - "{{ team2_name }}"
+        role: update
+        project: "{{ project_info['id'] }}"
+        state: "{{ item }}"
+      register: result
+      with_items:
+        - "present"
+        - "absent"
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Joe as execution admin to Default Org.
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        role: execution_environment_admin
+        organizations: Default
+        state: "{{ item }}"
+      register: result
+      with_items:
+        - "present"
+        - "absent"
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a workflow
+      workflow_job_template:
+        name: test-role-workflow
+        organization: Default
+        state: present
+
+    - name: Add Joe to workflow execute role
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        role: execute
+        workflow: test-role-workflow
+        job_templates:
+          - jt1
+          - jt2
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Joe to nonexistant job template execute role
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        role: execute
+        workflow: test-role-workflow
+        job_templates:
+          - non existant temp
+        state: present
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "'There were 1 missing items, missing items' in result.msg"
+          - "'non existant temp' in result.msg"
+
+    - name: Add Joe to workflow execute role, no-op
+      role:
+        user: "{{ username }}"
+        users:
+          - "{{ username }}2"
+        role: execute
+        workflow: test-role-workflow
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Add Joe to workflow approve role
+      role:
+        users:
+          - "{{ username }}2"
+        role: approval
+        workflow: test-role-workflow
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+  always:
+    - name: Delete a User
+      user:
+        username: "{{ username }}"
+        email: joe@example.org
+        state: absent
+      register: result
+
+    - name: Delete a 2nd User
+      user:
+        username: "{{ username }}2"
+        email: joe@example.org
+        state: absent
+      register: result
+
+    - name: Delete teams
+      team:
+        name: "{{ item }}"
+        organization: Default
+        state: absent
+      register: result
+      loop:
+        - "{{ team_name }}"
+        - "{{ team2_name }}"
+
+    - name: Delete job templates
+      job_template:
+        name: "{{ item }}"
+        project: "{{ project_name }}"
+        inventory: "Demo Inventory"
+        playbook: debug.yml
+        state: absent
+      with_items:
+        - jt1
+        - jt2
+      register: result
+
+    - name: Delete the project
+      project:
+        name: "{{ project_name }}"
+        organization: Default
+        state: absent
+      register: result

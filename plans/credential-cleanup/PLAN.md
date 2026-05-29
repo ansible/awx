@@ -1,0 +1,1 @@
+credential types have been externalized and the interface is `inject_credential()`. There are still residual coupling. Identify the coupling.

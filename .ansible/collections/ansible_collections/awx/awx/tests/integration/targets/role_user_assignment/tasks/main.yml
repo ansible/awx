@@ -1,0 +1,63 @@
+---
+- name: Create User
+  user:
+    username: testing_user
+    first_name: testing
+    last_name: user
+    password: password
+
+- name: Create Job Template
+  job_template:
+    name: Demo Job Template
+    job_type: run
+    inventory: Demo Inventory
+    project: Demo Project
+    playbook: hello_world.yml
+  register: job_template
+
+- name: Create Role Definition
+  role_definition:
+    name: test_view_jt
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+
+- name: Create Role User Assignment
+  role_user_assignment:
+    role_definition: test_view_jt
+    user: testing_user
+    object_id: "{{ job_template.id }}"
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete Role User Assigment
+  role_user_assignment:
+    role_definition: test_view_jt
+    user: testing_user
+    object_id: "{{ job_template.id }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Create Role Definition
+  role_definition:
+    name: test_view_jt
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+    state: absent
+
+- name: Delete User
+  user:
+    username: testing_user
+    state: absent

@@ -1,0 +1,113 @@
+---
+- name: Generate test id
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
+    group_name2: "AWX-Collection-tests-instance_group-group2-{{ test_id }}"
+    cred_name1: "AWX-Collection-tests-instance_group-cred1-{{ test_id }}"
+
+- block:
+    - name: Create an OpenShift Credential
+      credential:
+        name: "{{ cred_name1 }}"
+        organization: "Default"
+        credential_type: "OpenShift or Kubernetes API Bearer Token"
+        inputs:
+          host: "https://openshift.org"
+          bearer_token: "asdf1234"
+          verify_ssl: false
+      register: cred_result
+
+    - assert:
+        that:
+          - "cred_result is changed"
+
+    - name: Create an Instance Group
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Instance Group with exists
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete an Instance Group
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Instance Group with exists
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Update an Instance Group
+      instance_group:
+        name: "{{ result.id }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 24
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a container group
+      instance_group:
+        name: "{{ group_name2 }}"
+        credential: "{{ cred_result.id }}"
+        is_container_group: true
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+  always:
+    - name: Delete the instance groups
+      instance_group:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ group_name1 }}"
+        - "{{ group_name2 }}"
+
+    - name: Delete the credential
+      credential:
+        name: "{{ cred_name1 }}"
+        organization: "Default"
+        credential_type: "OpenShift or Kubernetes API Bearer Token"

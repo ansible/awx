@@ -1,0 +1,114 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    host_name: "AWX-Collection-tests-host-host-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-host-inv-{{ test_id }}"
+
+- name: Create an Inventory
+  inventory:
+    name: "{{ inv_name }}"
+    organization: Default
+    state: present
+  register: result
+
+- name: Create a Host
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ result.id }}"
+    state: present
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a Host with exists
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Modify the host as a no-op
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete a Host
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a Host with exists
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Use lookup to check that host was enabled
+  ansible.builtin.set_fact:
+    host_enabled_test: "lookup('awx.awx.controller_api', 'hosts/{{result.id}}/').enabled"
+
+- name: Newly created host should have API default value for enabled
+  assert:
+    that:
+      - host_enabled_test
+
+- name: Delete a Host
+  host:
+    name: "{{ result.id }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Check module fails with correct msg
+  host:
+    name: test-host
+    description: Host Description
+    inventory: test-non-existing-inventory
+    state: present
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+      - "'test-non-existing-inventory' in result.msg"
+      - "result.total_results == 0"

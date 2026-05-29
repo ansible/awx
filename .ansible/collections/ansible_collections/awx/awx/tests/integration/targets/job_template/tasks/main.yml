@@ -1,0 +1,520 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: generate random string for project
+  set_fact:
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
+    cred1: "AWX-Collection-tests-job_template-cred1-{{ test_id }}"
+    cred2: "AWX-Collection-tests-job_template-cred2-{{ test_id }}"
+    cred3: "AWX-Collection-tests-job_template-cred3-{{ test_id }}"
+    inv1: "AWX-Collection-tests-job_template-inv-{{ test_id }}"
+    proj1: "AWX-Collection-tests-job_template-proj-{{ test_id }}"
+    jt1: "AWX-Collection-tests-job_template-jt1-{{ test_id }}"
+    jt2: "AWX-Collection-tests-job_template-jt2-{{ test_id }}"
+    lab1: "AWX-Collection-tests-job_template-lab1-{{ test_id }}"
+    email_not: "AWX-Collection-tests-job_template-email-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-notification_template-wehbook-not-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
+
+- name: "Create a new organization"
+  organization:
+    name: "{{ org_name }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+  register: result
+
+- name: Create an inventory
+  inventory:
+    name: "{{ inv1 }}"
+    organization: "{{ org_name }}"
+
+- name: Create a Demo Project
+  project:
+    name: "{{ proj1 }}"
+    organization: Default
+    state: present
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+  register: proj_result
+
+- name: Create Credential1
+  credential:
+    name: "{{ cred1 }}"
+    organization: Default
+    credential_type: Red Hat Ansible Automation Platform
+  register: cred1_result
+
+- name: Create Credential2
+  credential:
+    name: "{{ cred2 }}"
+    organization: Default
+    credential_type: Machine
+
+- name: Create Credential3
+  credential:
+    name: "{{ cred3 }}"
+    organization: Default
+    credential_type: Machine
+
+- name: Create Labels
+  label:
+    name: "{{ lab1 }}"
+    organization: "{{ item }}"
+  loop:
+    - Default
+    - "{{ org_name }}"
+
+- name: Create an Instance Group
+  instance_group:
+    name: "{{ group_name1 }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Add email notification
+  notification_template:
+    name: "{{ email_not }}"
+    organization: Default
+    notification_type: email
+    notification_configuration:
+      username: user
+      password: s3cr3t
+      sender: tower@example.com
+      recipients:
+        - user1@example.com
+      host: smtp.example.com
+      port: 25
+      use_tls: false
+      use_ssl: false
+    state: present
+
+- name: Add webhook notification
+  notification_template:
+    name: "{{ webhook_not }}"
+    organization: Default
+    notification_type: webhook
+    notification_configuration:
+      url: http://www.example.com/hook
+      headers:
+        X-Custom-Header: value123
+    state: present
+  register: result
+
+- name: Create Job Template 1
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: present
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is changed"
+
+- name: Create Job Template 1 with exists
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: exists
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is not changed"
+
+- name: Delete Job Template 1
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: absent
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is changed"
+
+- name: Create Job Template 1 with exists
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: exists
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is changed"
+
+- name: Add a credential to this JT
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj_result.id }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1_result.id }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Try to add the same credential to this JT
+  job_template:
+    name: "{{ jt1_result.id }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add another credential to this JT
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove a credential for this JT
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove all credentials from this JT
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    playbook: hello_world.yml
+    credentials: []
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Copy Job Template
+  job_template:
+    name: "copy_{{ jt1 }}"
+    copy_from: "{{ jt1 }}"
+    state: "present"
+
+- name: Delete copied Job Template
+  job_template:
+    name: "copy_{{ jt1 }}"
+    job_type: run
+    state: absent
+  register: result
+
+# This doesnt work if you include the credentials parameter
+- name: Delete Job Template 1
+  job_template:
+    name: "{{ jt1 }}"
+    playbook: hello_world.yml
+    job_type: run
+    project: "Does Not Exist"
+    inventory: "Does Not Exist"
+    webhook_credential: "Does Not Exist"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    organization: Default
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credential: "{{ cred3 }}"
+    job_type: run
+    labels:
+      - "{{ lab1 }}"
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: add bad label to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    organization: Default
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credential: "{{ cred3 }}"
+    job_type: run
+    labels:
+      - label_bad
+    state: present
+  register: bad_label_results
+  ignore_errors: true
+
+- assert:
+    that:
+      - "bad_label_results.msg == 'Could not find label entry with name label_bad'"
+
+- name: Add survey to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: true
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: "Q1"
+          question_description: "The first question"
+          required: true
+          type: "text"
+          variable: "q1"
+          min: 5
+          max: 15
+          default: "hello"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re Add survey to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: true
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: "Q1"
+          question_description: "The first question"
+          required: true
+          type: "text"
+          variable: "q1"
+          min: 5
+          max: 15
+          default: "hello"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add question to survey to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: true
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: "Q1"
+          question_description: "The first question"
+          required: true
+          type: "text"
+          variable: "q1"
+          min: 5
+          max: 15
+          default: "hello"
+          choices: ""
+        - question_name: "Q2"
+          type: "text"
+          variable: "q2"
+          required: false
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove survey from Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    survey_enabled: false
+    survey_spec: {}
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Add started notifications to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Re Add started notifications to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Add success notifications to Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    notification_templates_success:
+      - "{{ email_not }}"
+      - "{{ webhook_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Remove "on start" webhook notification from Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    notification_templates_started:
+      - "{{ email_not }}"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+
+- name: Delete Job Template 2
+  job_template:
+    name: "{{ jt2 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credential: "{{ cred3 }}"
+    job_type: run
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the Demo Project
+  project:
+    name: "{{ proj1 }}"
+    organization: Default
+    state: absent
+    scm_type: git
+    scm_url: https://github.com/ansible/ansible-tower-samples.git
+  register: result
+
+- name: Delete Credential1
+  credential:
+    name: "{{ cred1 }}"
+    organization: Default
+    credential_type: Red Hat Ansible Automation Platform
+    state: absent
+
+- name: Delete Credential2
+  credential:
+    name: "{{ cred2 }}"
+    organization: Default
+    credential_type: Machine
+    state: absent
+
+- name: Delete Credential3
+  credential:
+    name: "{{ cred3 }}"
+    organization: Default
+    credential_type: Machine
+    state: absent
+
+# You can't delete a label directly so no cleanup needed
+
+- name: Delete email notification
+  notification_template:
+    name: "{{ email_not }}"
+    organization: Default
+    state: absent
+
+- name: Delete the instance groups
+  instance_group:
+    name: "{{ group_name1 }}"
+    state: absent
+
+- name: Delete webhook notification
+  notification_template:
+    name: "{{ webhook_not }}"
+    organization: Default
+    state: absent
+
+- name: Delete an inventory
+  inventory:
+    name: "{{ inv1 }}"
+    organization: "{{ org_name }}"
+    state: absent
+
+- name: "Remove the organization"
+  organization:
+    name: "{{ org_name }}"
+    state: absent
+  register: result

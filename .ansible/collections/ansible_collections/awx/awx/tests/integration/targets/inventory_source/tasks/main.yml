@@ -1,0 +1,143 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    openstack_cred: "AWX-Collection-tests-inventory_source-cred-openstack-{{ test_id }}"
+    openstack_inv: "AWX-Collection-tests-inventory_source-inv-openstack-{{ test_id }}"
+    openstack_inv_source: "AWX-Collection-tests-inventory_source-inv-source-openstack-{{ test_id }}"
+
+- name: Add a credential
+  credential:
+    description: Credentials for Openstack Test project
+    name: "{{ openstack_cred }}"
+    credential_type: OpenStack
+    organization: Default
+    inputs:
+      project: Test
+      username: admin
+      host: https://example.org:5000
+      password: passw0rd
+      domain: test
+  register: credential_result
+
+- name: Add an inventory
+  inventory:
+    description: Test inventory
+    organization: Default
+    name: "{{ openstack_inv }}"
+
+- name: Create an source inventory
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create an source inventory with exists
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete an source inventory
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create an source inventory with exists
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the inventory source with an invalid cred and source_project specified
+  inventory_source:
+    name: "{{ result.id }}"
+    inventory: "{{ openstack_inv }}"
+    credential: "Does Not Exit"
+    source_project: "Does Not Exist"
+    state: absent
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the credential
+  credential:
+    description: Credentials for Openstack Test project
+    name: "{{ openstack_cred }}"
+    credential_type: OpenStack
+    organization: Default
+    inputs:
+      project: Test
+      username: admin
+      host: https://example.org:5000
+      password: passw0rd
+      domain: test
+    state: absent
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the inventory
+  inventory:
+    description: Test inventory
+    organization: Default
+    name: "{{ openstack_inv }}"
+    state: absent
+
+- assert:
+    that:
+      - "result is changed"

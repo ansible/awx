@@ -1,0 +1,8 @@
+# This is a cross-platform list tracking distribution packages needed by tests;
+# see https://docs.openstack.org/infra/bindep/ for additional information.
+
+python38-pytz [platform:centos-8 platform:rhel-8]
+
+# awxkit
+python38-requests [platform:centos-8 platform:rhel-8]
+python38-pyyaml [platform:centos-8 platform:rhel-8]

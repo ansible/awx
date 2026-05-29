@@ -1,0 +1,91 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    cred_type_name: "AWX-Collection-tests-credential_type-cred-type-{{ test_id }}"
+
+- block:
+    - name: Add Tower credential type
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Tower credential type with exists
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete the credential type
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Tower credential type with exists
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Rename Tower credential type
+      credential_type:
+        name: "{{ cred_type_name }}"
+        new_name: "{{ cred_type_name }}a"
+        kind: cloud
+
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+  always:
+    - name: Remove a Tower credential type
+      credential_type:
+        name: "{{ item }}"
+        state: absent
+      register: result
+      loop:
+        - "{{ cred_type_name }}"
+        - "{{ cred_type_name }}a"
+
+    - assert:
+        that:
+          - "result is changed"

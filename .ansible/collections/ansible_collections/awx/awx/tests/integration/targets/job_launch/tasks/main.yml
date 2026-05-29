@@ -1,0 +1,232 @@
+---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate names
+  set_fact:
+    jt_name1: "AWX-Collection-tests-job_launch-jt1-{{ test_id }}"
+    jt_name2: "AWX-Collection-tests-job_launch-jt2-{{ test_id }}"
+    proj_name: "AWX-Collection-tests-job_launch-project-{{ test_id }}"
+
+- name: Launch a Job Template
+  job_launch:
+    job_template: "Demo Job Template"
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'pending'"
+
+- name: Wait for a job template to complete
+  job_wait:
+    job_id: "{{ result.id }}"
+    interval: 10
+    timeout: 120
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+      - "result.status == 'successful'"
+
+- name: Check module fails with correct msg
+  job_launch:
+    job_template: "Non_Existing_Job_Template"
+    inventory: "Demo Inventory"
+  register: result
+  ignore_errors: true
+
+- assert:
+    that:
+      - "result is failed"
+      - "result is not changed"
+      - "'Non_Existing_Job_Template' in result.msg"
+
+- name: Create a Job Template for testing prompt on launch
+  job_template:
+    name: "{{ jt_name1 }}"
+    project: Demo Project
+    playbook: hello_world.yml
+    job_type: run
+    ask_credential: true
+    ask_inventory: true
+    ask_tags_on_launch: true
+    ask_skip_tags_on_launch: true
+    state: present
+  register: result
+
+- name: Launch job template with inventory and credential for prompt on launch
+  job_launch:
+    job_template: "{{ jt_name1 }}"
+    inventory: "Demo Inventory"
+    credential: "Demo Credential"
+    tags:
+      - sometimes
+    skip_tags:
+      - always
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+      - "result.status == 'pending'"
+
+- name: Create a project for testing extra_vars
+  project:
+    name: "{{ proj_name }}"
+    organization: Default
+    scm_type: git
+    scm_url: https://github.com/ansible/test-playbooks
+
+- name: Create the job template with survey
+  job_template:
+    name: "{{ jt_name2 }}"
+    project: "{{ proj_name }}"
+    playbook: debug.yml
+    job_type: run
+    state: present
+    inventory: "Demo Inventory"
+    survey_enabled: true
+    ask_variables_on_launch: false
+    survey_spec:
+      name: ''
+      description: ''
+      spec:
+        - question_name: Basic Name
+          question_description: Name
+          required: true
+          type: text
+          variable: basic_name
+          min: 0
+          max: 1024
+          default: ''
+          choices: ''
+          new_question: true
+        - question_name: Choose yes or no?
+          question_description: Choosing yes or no.
+          required: false
+          type: multiplechoice
+          variable: option_true_false
+          min:
+          max:
+          default: 'yes'
+          choices: |-
+            yes
+            no
+          new_question: true
+
+- name: Kick off a job template with survey
+  job_launch:
+    job_template: "{{ jt_name2 }}"
+    extra_vars:
+      basic_name: My First Variable
+      option_true_false: 'no'
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
+- name: Prompt the job templates extra_vars on launch
+  job_template:
+    name: "{{ jt_name2 }}"
+    state: present
+    ask_variables_on_launch: true
+
+
+- name: Kick off a job template with extra_vars
+  job_launch:
+    job_template: "{{ jt_name2 }}"
+    extra_vars:
+      basic_name: My First Variable
+      var1: My First Variable
+      var2: My Second Variable
+  ignore_errors: true
+  register: result
+
+- assert:
+    that:
+      - result is not failed
+
+- name: Create a Job Template for testing extra_vars
+  job_template:
+    name: "{{ jt_name2 }}"
+    project: "{{ proj_name }}"
+    playbook: debug.yml
+    job_type: run
+    survey_enabled: false
+    state: present
+    inventory: "Demo Inventory"
+    extra_vars:
+      foo: bar
+  register: result
+
+- name: Launch job template with inventory and credential for prompt on launch
+  job_launch:
+    job_template: "{{ jt_name2 }}"
+    organization: Default
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Wait for a job template to complete
+  job_wait:
+    job_id: "{{ result.id }}"
+    interval: 10
+    timeout: 120
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+      - "result.status == 'successful'"
+
+- name: Get the job
+  job_list:
+    query: {"id": "{{result.id}}"}
+  register: result
+
+- assert:
+    that:
+      - '{"foo": "bar"} | to_json in result.results[0].extra_vars'
+
+- name: Delete the first jt
+  job_template:
+    name: "{{ jt_name1 }}"
+    project: Demo Project
+    playbook: hello_world.yml
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the second jt
+  job_template:
+    name: "{{ jt_name2 }}"
+    project: "{{ proj_name }}"
+    playbook: debug.yml
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Delete the extra_vars project
+  project:
+    name: "{{ proj_name }}"
+    organization: Default
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"

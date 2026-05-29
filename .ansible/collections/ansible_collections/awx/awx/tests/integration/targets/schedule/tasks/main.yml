@@ -1,0 +1,429 @@
+---
+- name: Generate a random string for test
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: generate random string for schedule
+  set_fact:
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
+    sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
+    sched2: "AWX-Collection-tests-schedule-sched2-{{ test_id }}"
+    cred1: "AWX-Collection-tests-schedule-cred1-{{ test_id }}"
+    proj1: "AWX-Collection-tests-schedule-proj1-{{ test_id }}"
+    proj2: "AWX-Collection-tests-schedule-proj2-{{ test_id }}"
+    jt1: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
+    jt2: "AWX-Collection-tests-schedule-jt1-{{ test_id }}"
+    ee1: "AWX-Collection-tests-schedule-ee1-{{ test_id }}"
+    label1: "AWX-Collection-tests-schedule-l1-{{ test_id }}"
+    label2: "AWX-Collection-tests-schedule-l2-{{ test_id }}"
+    ig1: "AWX-Collection-tests-schedule-ig1-{{ test_id }}"
+    ig2: "AWX-Collection-tests-schedule-ig2-{{ test_id }}"
+    slice_inventory: "AWX-Collection-tests-schedule-slice-inv-{{ test_id }}"
+    host_name: "AWX-Collection-tests-schedule-host-{{ test_id }}"
+    slice_num: 10
+
+- block:
+    - name: Try to create without an rrule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        enabled: true
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'Unable to create schedule '~ sched1 in result.msg"
+
+    - name: Create with options that the JT does not support
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+        description: "This hopefully will not work"
+        extra_data:
+          some: var
+        inventory: Demo Inventory
+        scm_branch: asdf1234
+        job_type: run
+        job_tags: other_tags
+        skip_tags: some_tags
+        limit: node1
+        diff_mode: true
+        verbosity: 4
+        enabled: true
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'Unable to create schedule '~ sched1 in result.msg"
+
+    - name: Build a real schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Use lookup to check that schedules was enabled
+      ansible.builtin.set_fact:
+        schedules_enabled_test: "lookup('awx.awx.controller_api', 'schedules/{{result.id}}/').enabled"
+
+    - name: Newly created schedules should have API default value for enabled
+      assert:
+        that:
+          - schedules_enabled_test
+
+    - name: Build a real schedule with exists
+      schedule:
+        name: "{{ sched1 }}"
+        state: exists
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
+    - name: Delete a real schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: absent
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Build a real schedule with exists
+      schedule:
+        name: "{{ sched1 }}"
+        state: exists
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Rebuild the same schedule
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
+    - name: Create a Demo Project
+      project:
+        name: "{{ proj1 }}"
+        organization: Default
+        allow_override: true
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+
+    - name: "Create a new organization"
+      organization:
+        name: "{{ org_name }}"
+
+    - name: Create a Demo Project in another org
+      project:
+        name: "{{ proj2 }}"
+        organization: "{{ org_name }}"
+        allow_override: true
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+
+    - name: Create Credential1
+      credential:
+        name: "{{ cred1 }}"
+        organization: Default
+        credential_type: Red Hat Ansible Automation Platform
+      register: cred1_result
+
+    - name: Create Job Template with all prompts
+      job_template:
+        name: "{{ jt1 }}"
+        organization: Default
+        project: "{{ proj1 }}"
+        inventory: Demo Inventory
+        playbook: hello_world.yml
+        ask_variables_on_launch: true
+        ask_inventory_on_launch: true
+        ask_scm_branch_on_launch: true
+        ask_credential_on_launch: true
+        ask_job_type_on_launch: true
+        ask_tags_on_launch: true
+        ask_skip_tags_on_launch: true
+        ask_limit_on_launch: true
+        ask_diff_mode_on_launch: true
+        ask_verbosity_on_launch: true
+        ask_execution_environment_on_launch: true
+        ask_forks_on_launch: true
+        ask_instance_groups_on_launch: true
+        ask_job_slice_count_on_launch: true
+        ask_labels_on_launch: true
+        ask_timeout_on_launch: true
+        job_type: run
+        state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create labels
+      label:
+        name: "{{ item }}"
+        organization: "{{ org_name }}"
+      loop:
+        - "{{ label1 }}"
+        - "{{ label2 }}"
+
+    - name: Create an execution environment
+      execution_environment:
+        name: "{{ ee1 }}"
+        image: "junk"
+
+    - name: Create instance groups
+      instance_group:
+        name: "{{ item }}"
+      loop:
+        - "{{ ig1 }}"
+        - "{{ ig2 }}"
+
+    - name: Create proper inventory for slice count
+      inventory:
+        name: "{{ slice_inventory }}"
+        organization: "{{ org_name }}"
+        state: present
+      register: result
+
+    - name: Create a Host
+      host:
+        name: "{{ host_name }}-{{ item }}"
+        inventory: "{{ slice_inventory }}"
+        state: present
+        variables:
+          ansible_connection: local
+      loop: "{{ range(slice_num)|list }}"
+      register: result
+
+    - name: Create with options that the JT does support
+      schedule:
+        name: "{{ sched2 }}"
+        state: present
+        organization: Default
+        unified_job_template: "{{ jt1 }}"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+        description: "This hopefully will work"
+        extra_data:
+          some: var
+        inventory: "{{ slice_inventory }}"
+        scm_branch: asdf1234
+        credentials:
+          - "{{ cred1 }}"
+        job_type: run
+        job_tags: other_tags
+        skip_tags: some_tags
+        limit: node1
+        diff_mode: true
+        verbosity: 4
+        enabled: true
+        execution_environment: "{{ ee1 }}"
+        forks: 10
+        instance_groups:
+          - "{{ ig1 }}"
+          - "{{ ig2 }}"
+        job_slice_count: "{{ slice_num }}"
+        labels:
+          - "{{ label1 }}"
+          - "{{ label2 }}"
+        timeout: 10
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Reset some options
+      schedule:
+        name: "{{ sched2 }}"
+        state: present
+        execution_environment: ""
+        forks: 1
+        instance_groups: []
+        job_slice_count: 1
+        labels: []
+        timeout: 60
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Disable a schedule
+      schedule:
+        name: "{{ sched1 }}"
+        unified_job_template: "Demo Job Template"
+        state: present
+        enabled: "false"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create a second Job Template in new org
+      job_template:
+        name: "{{ jt2 }}"
+        project: "{{ proj2 }}"
+        inventory: Demo Inventory
+        playbook: hello_world.yml
+        job_type: run
+        state: present
+
+    - name: Build a schedule with a job template's name in two orgs
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        unified_job_template: "{{ jt2 }}"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - name: Verify we can't find the schedule without the UJT lookup
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        rrule: "DTSTART:20201219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+
+    - name: Verify we can find the schedule with the UJT lookup and delete it
+      schedule:
+        name: "{{ sched1 }}"
+        state: absent
+        unified_job_template: "{{ jt2 }}"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+  always:
+    - name: Delete the schedules
+      schedule:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ sched1 }}"
+        - "{{ sched2 }}"
+      ignore_errors: True
+
+    - name: Delete the jt1
+      job_template:
+        name: "{{ jt1 }}"
+        project: "{{ proj1 }}"
+        playbook: hello_world.yml
+        state: absent
+      ignore_errors: True
+
+    - name: Delete the jt2
+      job_template:
+        name: "{{ jt2 }}"
+        project: "{{ proj2 }}"
+        playbook: hello_world.yml
+        state: absent
+      ignore_errors: True
+
+    - name: Delete the Project2
+      project:
+        name: "{{ proj2 }}"
+        organization: "{{ org_name }}"
+        state: absent
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+      ignore_errors: True
+
+    - name: Delete the Project1
+      project:
+        name: "{{ proj1 }}"
+        organization: Default
+        state: absent
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+      ignore_errors: True
+
+    - name: Delete Credential1
+      credential:
+        name: "{{ cred1 }}"
+        organization: Default
+        credential_type: Red Hat Ansible Automation Platform
+        state: absent
+      ignore_errors: True
+
+    # Labels can not be deleted
+
+    - name: Delete an execution environment
+      execution_environment:
+        name: "{{ ee1 }}"
+        image: "junk"
+        state: absent
+      ignore_errors: True
+
+    - name: Delete instance groups
+      instance_group:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ ig1 }}"
+        - "{{ ig2 }}"
+      ignore_errors: True
+
+    - name: "Remove the organization"
+      organization:
+        name: "{{ org_name }}"
+        state: absent
+      ignore_errors: True
+
+    - name: "Delete slice inventory"
+      inventory:
+        name: "{{ slice_inventory }}"
+        organization: "{{ org_name }}"
+        state: absent
+      ignore_errors: True
+
+    - name: Delete slice hosts
+      host:
+        name: "{{ host_name }}-{{ item }}"
+        inventory: "{{ slice_inventory }}"
+        state: absent
+      loop: "{{ range(slice_num)|list }}"
+      ignore_errors: True
