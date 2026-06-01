@@ -327,18 +327,20 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
+def _resolve_setting_dependents(key):
+    return settings_registry.get_dependent_settings(key)
+
+
+def _post_setting_invalidation(invalidated_keys):
+    if 'LOG_AGGREGATOR_LEVEL' in invalidated_keys:
+        ctl = get_control_from_settings()
+        ctl.queuename = get_task_queuename()
+        ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
+
+
 @task(queue='tower_settings_change', timeout=600)
 def clear_setting_cache(setting_keys):
-    def _resolve_dependents(key):
-        return settings_registry.get_dependent_settings(key)
-
-    def _post_invalidation(invalidated_keys):
-        if 'LOG_AGGREGATOR_LEVEL' in invalidated_keys:
-            ctl = get_control_from_settings()
-            ctl.queuename = get_task_queuename()
-            ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
-
-    dab_clear_cache(setting_keys, _resolve_dependents, _post_invalidation)
+    dab_clear_cache(setting_keys, _resolve_setting_dependents, _post_setting_invalidation)
 
 
 @task(queue='tower_broadcast_all', timeout=600)
