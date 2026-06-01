@@ -243,7 +243,7 @@ class AnalyticsGenericView(APIView):
             # Missing or wrong user/pass
             #
             if response.status_code == status.HTTP_401_UNAUTHORIZED:
-                text = response.get('text', '').rstrip("\n")
+                text = getattr(response, 'text', '').rstrip("\n")
                 return self._error_response(ERROR_UNAUTHORIZED, text, remote=True, remote_status_code=response.status_code)
             #
             # Not found, No entitlement or No data in Analytics

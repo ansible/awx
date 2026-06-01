@@ -145,6 +145,7 @@ class OIDCClient:
                 'scope': self.scopes,
             },
             'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
+            'timeout': (31, 31),
         }
         proxies = getproxies()
         if proxies:
