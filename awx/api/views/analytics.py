@@ -1,6 +1,8 @@
-import requests
 import logging
 import urllib.parse as urlparse
+from urllib.request import getproxies
+
+import requests
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -189,16 +191,18 @@ class AnalyticsGenericView(APIView):
 
     @staticmethod
     def _base_auth_request(request: requests.Request, method: str, url: str, user: str, pw: str, headers: dict[str, str]) -> requests.Response:
-        response = requests.request(
-            method,
-            url,
-            auth=(user, pw),
-            verify=settings.INSIGHTS_CERT_PATH,
-            params=getattr(request, 'query_params', {}),
-            headers=headers,
-            json=getattr(request, 'data', {}),
-            timeout=(31, 31),
-        )
+        kwargs = {
+            'auth': (user, pw),
+            'verify': settings.INSIGHTS_CERT_PATH,
+            'params': getattr(request, 'query_params', {}),
+            'headers': headers,
+            'json': getattr(request, 'data', {}),
+            'timeout': (31, 31),
+        }
+        proxies = getproxies()
+        if proxies:
+            kwargs['proxies'] = proxies
+        response = requests.request(method, url, **kwargs)
         return response
 
     def _send_to_analytics(self, request, method):

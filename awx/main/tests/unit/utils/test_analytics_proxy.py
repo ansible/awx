@@ -77,6 +77,7 @@ def test_make_request(oidc_client, token):
     with (
         mock.patch.object(oidc_client, '_generate_access_token', side_effect=fake_generate_access_token),
         mock.patch('awx.main.utils.analytics_proxy.requests.request') as mock_request,
+        mock.patch('awx.main.utils.analytics_proxy.getproxies', return_value={}),
     ):
         oidc_client.make_request('GET', 'https://does_not_exist.com')
 
@@ -99,6 +100,7 @@ def test_make_request_existing_token(oidc_client, token):
     with (
         mock.patch.object(oidc_client, '_generate_access_token', side_effect=RuntimeError('expected not to be called')),
         mock.patch('awx.main.utils.analytics_proxy.requests.request') as mock_request,
+        mock.patch('awx.main.utils.analytics_proxy.getproxies', return_value={}),
     ):
         oidc_client.make_request('GET', 'https://does_not_exist.com')
 
@@ -110,3 +112,53 @@ def test_make_request_existing_token(oidc_client, token):
                 'Accept': 'application/json',
             },
         )
+
+
+class TestOIDCClientProxy:
+    def test_make_request_passes_proxies(self, oidc_client, token):
+        """OIDCClient._make_request passes proxies from getproxies() to requests."""
+        oidc_client.token = token
+        fake_proxies = {'https': 'http://proxy:8443', 'http': 'http://proxy:8080'}
+
+        with (
+            mock.patch.object(oidc_client, '_generate_access_token'),
+            mock.patch('awx.main.utils.analytics_proxy.requests.request') as mock_request,
+            mock.patch('awx.main.utils.analytics_proxy.getproxies', return_value=fake_proxies),
+        ):
+            mock_request.return_value = mock.Mock(status_code=200)
+            oidc_client.make_request('GET', 'https://analytics.example.com/api/v1/report')
+
+            call_kwargs = mock_request.call_args
+            assert call_kwargs.kwargs.get('proxies') == fake_proxies
+
+    def test_make_request_no_proxies_when_env_unset(self, oidc_client, token):
+        """OIDCClient._make_request does not pass proxies when getproxies() returns empty."""
+        oidc_client.token = token
+
+        with (
+            mock.patch.object(oidc_client, '_generate_access_token'),
+            mock.patch('awx.main.utils.analytics_proxy.requests.request') as mock_request,
+            mock.patch('awx.main.utils.analytics_proxy.getproxies', return_value={}),
+        ):
+            mock_request.return_value = mock.Mock(status_code=200)
+            oidc_client.make_request('GET', 'https://analytics.example.com/api/v1/report')
+
+            call_kwargs = mock_request.call_args
+            assert 'proxies' not in (call_kwargs.kwargs or {})
+
+    def test_generate_access_token_passes_proxies(self, oidc_client):
+        """OIDCClient._generate_access_token passes proxies from getproxies() to requests.post."""
+        fake_proxies = {'https': 'http://proxy:8443'}
+
+        with (
+            mock.patch('awx.main.utils.analytics_proxy.requests.post') as mock_post,
+            mock.patch('awx.main.utils.analytics_proxy.getproxies', return_value=fake_proxies),
+        ):
+            mock_post.return_value = mock.Mock(
+                json=lambda: MOCK_TOKEN_RESPONSE,
+                raise_for_status=mock.Mock(return_value=None),
+            )
+            oidc_client._generate_access_token()
+
+            call_kwargs = mock_post.call_args
+            assert call_kwargs.kwargs.get('proxies') == fake_proxies

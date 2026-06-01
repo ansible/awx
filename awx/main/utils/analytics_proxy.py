@@ -3,10 +3,9 @@ Proxy requests Analytics requests
 '''
 
 import time
-
 from enum import Enum
-
 from typing import Optional, Any
+from urllib.request import getproxies
 
 import requests
 
@@ -96,6 +95,14 @@ class Token:
 class OIDCClient:
     '''
     Wraps requests library make_request() and manages OIDC access token.
+
+    Proxy env vars (HTTP_PROXY, HTTPS_PROXY, etc.) are explicitly read via
+    getproxies() and passed to requests calls. While requests does read these
+    env vars automatically via Session.merge_environment_settings(), bare
+    requests.post()/requests.request() calls create ephemeral sessions that
+    have been observed to not pick up proxy env vars reliably in AWX's
+    containerized deployment. Passing proxies explicitly ensures consistent
+    behavior.
     '''
 
     def __init__(
@@ -130,16 +137,19 @@ class OIDCClient:
         '''
         Fetches the initial access token using client credentials.
         '''
-        response = requests.post(
-            self.token_url,
-            data={
+        kwargs = {
+            'data': {
                 'grant_type': 'client_credentials',
                 'client_id': self.client_id,
                 'client_secret': self.client_secret,
                 'scope': self.scopes,
             },
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-        )
+            'headers': {'Content-Type': 'application/x-www-form-urlencoded'},
+        }
+        proxies = getproxies()
+        if proxies:
+            kwargs['proxies'] = proxies
+        response = requests.post(self.token_url, **kwargs)
         try:
             response.raise_for_status()
         except requests.RequestException as e:
@@ -162,6 +172,10 @@ class OIDCClient:
         Actually make an API call.
         '''
         self._add_headers(headers)
+        if 'proxies' not in kwargs:
+            proxies = getproxies()
+            if proxies:
+                kwargs['proxies'] = proxies
         return requests.request(method, url, headers=headers, **kwargs)
 
     def make_request(self, method: str, endpoint: str, **kwargs: Any) -> requests.Response:

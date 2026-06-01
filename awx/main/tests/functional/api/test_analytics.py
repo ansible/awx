@@ -257,3 +257,62 @@ class TestAnalyticsGenericView:
                 else:
                     # assert mock_base_auth_request not called
                     mock_base_auth_request.assert_not_called()
+
+    @pytest.mark.django_db
+    def test__send_to_analytics_base_auth_passes_proxies(self):
+        """_base_auth_request should pass proxy settings from getproxies() to requests calls."""
+        settings_map = {
+            'INSIGHTS_TRACKING_STATE': True,
+            'AUTOMATION_ANALYTICS_URL': 'https://example.com',
+            'REDHAT_USERNAME': 'redhat_user',
+            'REDHAT_PASSWORD': 'redhat_pass',
+            'SUBSCRIPTIONS_CLIENT_ID': '',
+            'SUBSCRIPTIONS_CLIENT_SECRET': '',
+        }
+        fake_proxies = {'https': '192.168.50.100:1234'}
+        with override_settings(**settings_map):
+            request = RequestFactory().post('/some/path')
+            view = AnalyticsGenericView()
+
+            with mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client, mock.patch(
+                'awx.api.views.analytics.requests.request'
+            ) as mock_requests, mock.patch('awx.api.views.analytics.getproxies', return_value=fake_proxies):
+                mock_client_instance = mock.Mock()
+                mock_oidc_client.return_value = mock_client_instance
+                mock_client_instance.make_request.side_effect = requests.RequestException("OIDC failed")
+                mock_requests.return_value = mock.Mock(status_code=200)
+
+                response = view._send_to_analytics(request, 'POST')
+                assert response.status_code == 200
+                mock_requests.assert_called_once()
+                call_kwargs = mock_requests.call_args
+                assert call_kwargs.kwargs.get('proxies') == fake_proxies
+
+    @pytest.mark.django_db
+    def test__send_to_analytics_no_proxies_when_env_unset(self):
+        """When getproxies() returns empty, no proxies should be passed to _base_auth_request."""
+        settings_map = {
+            'INSIGHTS_TRACKING_STATE': True,
+            'AUTOMATION_ANALYTICS_URL': 'https://example.com',
+            'REDHAT_USERNAME': 'redhat_user',
+            'REDHAT_PASSWORD': 'redhat_pass',
+            'SUBSCRIPTIONS_CLIENT_ID': '',
+            'SUBSCRIPTIONS_CLIENT_SECRET': '',
+        }
+        with override_settings(**settings_map):
+            request = RequestFactory().post('/some/path')
+            view = AnalyticsGenericView()
+
+            with mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client, mock.patch(
+                'awx.api.views.analytics.requests.request'
+            ) as mock_requests, mock.patch('awx.api.views.analytics.getproxies', return_value={}):
+                mock_client_instance = mock.Mock()
+                mock_oidc_client.return_value = mock_client_instance
+                mock_client_instance.make_request.side_effect = requests.RequestException("OIDC failed")
+                mock_requests.return_value = mock.Mock(status_code=200)
+
+                response = view._send_to_analytics(request, 'POST')
+                assert response.status_code == 200
+                mock_requests.assert_called_once()
+                call_kwargs = mock_requests.call_args
+                assert 'proxies' not in call_kwargs.kwargs
