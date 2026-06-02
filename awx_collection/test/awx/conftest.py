@@ -236,6 +236,7 @@ def run_module(request, collection_import, mocker):
 
         with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
             mocker.patch('ansible.module_utils.basic._ANSIBLE_PROFILE', 'legacy')
+            mocker.patch('ansible.module_utils.basic._PARSED_MODULE_ARGS', {'_ansible_inject_invocation': True}, create=True)
 
             with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
                 with _get_tower_cli_mgr(new_request):
