@@ -688,6 +688,17 @@ class TaskManager(TaskBase):
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
 
+        # Reset waiting jobs whose controller_node was deprovisioned (e.g. K8s pod replaced).
+        # These jobs will never be picked up because no live node is listening for them.
+        registered_control_nodes = Instance.objects.filter(node_type__in=('control', 'hybrid')).values_list('hostname', flat=True)
+        orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=registered_control_nodes)
+        for j in orphaned_waiting:
+            logger.warning(f'{j.controller_node} is not a registered instance; resetting {j.log_format} to pending')
+            j.status = 'pending'
+            j.controller_node = ''
+            j.execution_node = ''
+            j.save(update_fields=['status', 'controller_node', 'execution_node'])
+
     def process_tasks(self):
         # maintain a list of jobs that went to an early failure state,
         # meaning the dispatcher never got these jobs,
