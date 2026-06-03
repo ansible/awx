@@ -347,7 +347,7 @@ class JobTemplate(
             return actual_slice_count
 
     def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         # if project is deleted for some reason, then keep the old organization
         # to retain ownership for organization admins
         if self.project and self.project.organization_id != self.organization_id:
@@ -1165,7 +1165,7 @@ class JobHostSummary(CreatedModifiedModel):
         # if it hasn't been specified, then we're just doing a normal save.
         if self.host is not None:
             self.host_name = self.host.name
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         self.failed = bool(self.dark or self.failures)
         update_fields.append('failed')
         super(JobHostSummary, self).save(*args, **kwargs)

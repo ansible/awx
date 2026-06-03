@@ -305,7 +305,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         # Update status and last_updated fields.
         if not getattr(_inventory_updates, 'is_updating', False):
             updated_fields = self._set_status_and_last_job_run(save=False)
@@ -877,7 +877,7 @@ class UnifiedJob(
         """
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
 
         # Get status before save...
         status_before = self.status or 'new'
