@@ -25,7 +25,7 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
         "version": 2,
         "service": {
             "pool_kwargs": {
-                "min_workers": settings.JOB_EVENT_WORKERS,
+                "min_workers": settings.DISPATCHER_MIN_WORKERS,
                 "max_workers": max_workers,
                 # This must be less than max_workers to make sense, which is usually 4
                 # With reserve of 1, after a burst of tasks, load needs to down to 4-1=3
