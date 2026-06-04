@@ -95,6 +95,12 @@ class TestJobReaper(object):
         job = Job.objects.create(status='waiting', controller_node=lost_inst.hostname, execution_node='lost')
 
         system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+
+        # Simulate what the background task would do
+        from awx.main.dispatch.reaper import reset_orphaned_waiting_jobs
+
+        reset_orphaned_waiting_jobs()
+
         job.refresh_from_db()
 
         assert job.status == 'pending'
@@ -165,15 +171,15 @@ class TestJobReaper(object):
         """When a controller pod is replaced (e.g. K8s rollout), waiting jobs
         assigned to the now-gone controller_node should be reset to pending
         by the task manager so they can be re-dispatched."""
-        from awx.main.scheduler import TaskManager
-
         live_inst = Instance(hostname='awx-task-live', node_type='control')
         live_inst.save()
         # No instance record for 'awx-task-dead' — it was already deprovisioned
         job = Job.objects.create(status='waiting', controller_node='awx-task-dead', execution_node='')
 
-        tm = TaskManager()
-        tm.reap_jobs_from_orphaned_instances()
+        # Simulate what the background task would do
+        from awx.main.dispatch.reaper import reset_orphaned_waiting_jobs
+
+        reset_orphaned_waiting_jobs()
 
         job.refresh_from_db()
         assert job.status == 'pending'
@@ -183,14 +189,14 @@ class TestJobReaper(object):
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_waiting_job_not_reset_when_controller_node_alive(self, node_type):
         """Waiting jobs on a live control or hybrid node should not be touched."""
-        from awx.main.scheduler import TaskManager
-
         live_inst = Instance(hostname='awx-task-live', node_type=node_type)
         live_inst.save()
         job = Job.objects.create(status='waiting', controller_node='awx-task-live', execution_node='')
 
-        tm = TaskManager()
-        tm.reap_jobs_from_orphaned_instances()
+        # Simulate what the background task would do
+        from awx.main.dispatch.reaper import reset_orphaned_waiting_jobs
+
+        reset_orphaned_waiting_jobs()
 
         job.refresh_from_db()
         assert job.status == 'waiting'

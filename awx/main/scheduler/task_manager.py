@@ -25,7 +25,7 @@ from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
-from awx.main.dispatch.reaper import reap_job
+from awx.main.dispatch.reaper import reap_job, get_orphaned_running_jobs_query, reap_orphaned_jobs, reset_orphaned_waiting_jobs
 from awx.main.models import (
     Instance,
     InventorySource,
@@ -675,28 +675,42 @@ class TaskManager(TaskBase):
                 tasks_to_update_job_explanation.append(task)
         logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
-    def reap_jobs_from_orphaned_instances(self):
-        # discover jobs that are in running state but aren't on an execution node
-        # that we know about; this is a fairly rare event, but it can occur if you,
-        # for example, SQL backup an awx install with running jobs and restore it
-        # elsewhere
-        for j in UnifiedJob.objects.filter(
-            status__in=['pending', 'waiting', 'running'],
-        ).exclude(execution_node__in=Instance.objects.exclude(node_type='hop').values_list('hostname', flat=True)):
-            if j.execution_node and not j.is_container_group_task:
-                logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
-                reap_job(j, 'failed')
+    def queue_orphaned_job_reaping(self):
+        """Queue background tasks to reap orphaned jobs if any are detected.
 
-        # Reset waiting jobs whose controller_node was deprovisioned (e.g. K8s pod replaced).
-        # These jobs will never be picked up because no live node is listening for them.
-        registered_control_nodes = Instance.objects.filter(node_type__in=('control', 'hybrid')).values_list('hostname', flat=True)
-        orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=registered_control_nodes)
-        for j in orphaned_waiting:
-            logger.warning(f'{j.controller_node} is not a registered instance; resetting {j.log_format} to pending')
-            j.status = 'pending'
-            j.controller_node = ''
-            j.execution_node = ''
-            j.save(update_fields=['status', 'controller_node', 'execution_node'])
+        Detection checks:
+        1. In-memory check for waiting jobs (already loaded by get_tasks) on orphaned controllers
+        2. Existence check for running jobs on orphaned execution nodes
+
+        Queues idempotent background tasks to do the actual reaping work.
+        """
+        assert hasattr(self, 'tm_models'), "queue_orphaned_job_reaping() called before after_lock_init()"
+        assert hasattr(self, 'all_tasks'), "queue_orphaned_job_reaping() called before get_tasks()"
+
+        # Build sets of valid instance hostnames from in-memory data
+        valid_execution_nodes = set(
+            hostname for hostname, inst in self.tm_models.instances.instances_by_hostname.items() if inst.node_type in ('hybrid', 'execution')
+        )
+
+        valid_controller_nodes = set(
+            hostname for hostname, inst in self.tm_models.instances.instances_by_hostname.items() if inst.node_type in ('hybrid', 'control')
+        )
+
+        # Check waiting jobs in memory (already loaded by get_tasks)
+        orphaned_waiting_exists = any(
+            task.status == 'waiting' and task.controller_node and task.controller_node not in valid_controller_nodes for task in self.all_tasks
+        )
+
+        if orphaned_waiting_exists:
+            logger.warning('Detected orphaned waiting jobs; queueing reset task')
+            reset_orphaned_waiting_jobs.delay()
+
+        # Check if running jobs on orphaned execution nodes exist (without fetching them)
+        orphaned_running_exists = get_orphaned_running_jobs_query(valid_execution_nodes).exists()
+
+        if orphaned_running_exists:
+            logger.warning('Detected orphaned running jobs; queueing reaping task')
+            reap_orphaned_jobs.delay()
 
     def process_tasks(self):
         # maintain a list of jobs that went to an early failure state,
@@ -743,7 +757,7 @@ class TaskManager(TaskBase):
         self.get_tasks(dict(status__in=["pending", "waiting", "running"], dependencies_processed=True))
 
         self.after_lock_init()
-        self.reap_jobs_from_orphaned_instances()
+        self.queue_orphaned_job_reaping()
 
         if len(self.all_tasks) > 0:
             self.process_tasks()
