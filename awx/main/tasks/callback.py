@@ -54,9 +54,6 @@ def try_load_query_file(artifact_dir) -> Tuple[bool, Optional[dict]]:
     returns the contents of ansible_data.json if present
     """
 
-    if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-        return False, None
-
     queries_path = os.path.join(artifact_dir, COLLECTION_FILENAME)
     if not os.path.isfile(queries_path):
         logger.info(f"no query file found: {queries_path}")
@@ -277,20 +274,6 @@ class RunnerCallback:
     def artifacts_handler(self, artifact_dir):
         success, query_file_contents = try_load_query_file(artifact_dir)
         if success:
-            self.delay_update(event_queries_processed=False)
-            collections_info = collect_queries(query_file_contents)
-            for collection, data in collections_info.items():
-                version = data['version']
-                event_query = data['host_query']
-                instance = EventQuery(fqcn=collection, collection_version=version, event_query=event_query)
-                try:
-                    instance.validate_unique()
-                    instance.save()
-
-                    logger.info(f"eventy query for collection {collection}, version {version} created")
-                except ValidationError as e:
-                    logger.info(e)
-
             if 'installed_collections' in query_file_contents:
                 self.delay_update(installed_collections=query_file_contents['installed_collections'])
             else:
@@ -300,6 +283,21 @@ class RunnerCallback:
                 self.delay_update(ansible_version=query_file_contents['ansible_version'])
             else:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
+
+            if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+                self.delay_update(event_queries_processed=False)
+                collections_info = collect_queries(query_file_contents)
+                for collection, data in collections_info.items():
+                    version = data['version']
+                    event_query = data['host_query']
+                    instance = EventQuery(fqcn=collection, collection_version=version, event_query=event_query)
+                    try:
+                        instance.validate_unique()
+                        instance.save()
+
+                        logger.info(f"event query for collection {collection}, version {version} created")
+                    except ValidationError as e:
+                        logger.info(e)
 
         self.artifacts_processed = True
 

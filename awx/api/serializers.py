@@ -1021,7 +1021,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 
 class UserSerializer(BaseSerializer):
-    password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
+    password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -5450,7 +5450,11 @@ class SchedulePreviewSerializer(BaseSerializer):
         for a_rule in match_multiple_rrule:
             if 'interval' not in a_rule.lower():
                 errors.append("{0}: {1}".format(_('INTERVAL required in rrule'), a_rule))
-            elif 'secondly' in a_rule.lower():
+            else:
+                match_interval = re.match(r".*?INTERVAL=([0-9]+)", a_rule)
+                if match_interval and int(match_interval.group(1)) < 1:
+                    errors.append("{0}: {1}".format(_("INTERVAL must be a positive integer"), a_rule))
+            if 'secondly' in a_rule.lower():
                 errors.append("{0}: {1}".format(_('SECONDLY is not supported'), a_rule))
             if re.match(by_day_with_numeric_prefix, a_rule):
                 errors.append("{0}: {1}".format(_("BYDAY with numeric prefix not supported"), a_rule))

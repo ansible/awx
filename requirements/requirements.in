@@ -50,7 +50,7 @@ pyasn1>=0.6.2  # CVE-2026-2349
 pygerduty
 PyGithub
 pyopenssl
-pyparsing==2.4.7 # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
+pyparsing>3.0 # Upgraded to v3 and changed import patterns
 python-daemon
 python-dsv-sdk>=1.0.4
 python-tss-sdk>=1.2.1

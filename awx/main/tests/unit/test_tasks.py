@@ -37,7 +37,7 @@ from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
 from awx.main.utils.licensing import Licenser
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 from receptorctl.socket_interface import ReceptorControl
 
@@ -372,12 +372,12 @@ class TestExtraVarSanitation(TestJobExecution):
             extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             for variable_name in ['_job_template_name', '_user_name', '_job_launch_type', '_project_revision', '_inventory_name']:
                 assert hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
         # ensure that non-strings are marked as safe
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             for variable_name in ['_job_template_id', '_job_id', '_user_id', '_inventory_id']:
                 assert not hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
@@ -524,7 +524,7 @@ class TestGenericRun:
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars, safe_dict = call_args
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
@@ -615,7 +615,7 @@ class TestAdhocRun(TestJobExecution):
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars = call_args
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
@@ -916,6 +916,81 @@ class TestJobCredentials(TestJobExecution):
         env = task.build_env(job, private_data_dir)
 
         assert env['FOO'] == 'BAR'
+
+
+class TestCallbacksEnabled(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
+    def test_callbacks_enabled_default(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count'
+
+    def test_callbacks_enabled_preserves_user_config(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.read_ansible_config', return_value={'callbacks_enabled': 'custom_callback,another_callback'}):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,custom_callback,another_callback'
+
+    def test_callbacks_enabled_uses_comma_delimiter(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.read_ansible_config', return_value={'callbacks_enabled': 'my_callback'}):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,my_callback'
+
+    def test_collect_host_queries_set_when_flag_on(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['AWX_COLLECT_HOST_QUERIES'] == '1'
+
+    def test_collect_host_queries_not_set_when_flag_off(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            env = task.build_env(job, private_data_dir)
+
+        assert 'AWX_COLLECT_HOST_QUERIES' not in env
 
 
 @pytest.mark.usefixtures("patch_Organization")

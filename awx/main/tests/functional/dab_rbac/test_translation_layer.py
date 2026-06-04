@@ -174,6 +174,22 @@ def test_creator_permission(rando, admin_user, inventory, setup_managed_roles):
 
 
 @pytest.mark.django_db
+def test_creator_permission_notification_template(rando, organization, setup_managed_roles):
+    """NotificationTemplate has no old-style roles, give_creator_permissions should not error"""
+    from awx.main.models import NotificationTemplate
+
+    nt = NotificationTemplate.objects.create(
+        name='test-nt',
+        organization=organization,
+        notification_type='slack',
+        notification_configuration={'token': 'x', 'channels': ['#test']},
+    )
+    give_creator_permissions(rando, nt)
+    assignment = RoleUserAssignment.objects.filter(user=rando, object_id=nt.pk).first()
+    assert assignment is not None
+
+
+@pytest.mark.django_db
 def test_implicit_parents_no_assignments(organization):
     """Through the normal course of creating models, we should not be changing DAB RBAC permissions"""
     with mock.patch('awx.main.models.rbac.give_or_remove_permission') as mck:
