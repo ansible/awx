@@ -23,7 +23,7 @@ def custom_cred_type(default_org):
                 }
             ]
         },
-        injectors={'file': {'template.custom_file': '{{ test_file_content }}'}, 'env': {'CUSTOM_FILE_PATH': '{{ tower.filename | quote }}'}},
+        injectors={'file': {'template.custom_file': '{{ test_file_content }}'}, 'env': {'CUSTOM_FILE_PATH': '{{ tower.filename.custom_file | quote }}'}},
     )
     cred_type.save()
     return cred_type
