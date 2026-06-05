@@ -5,6 +5,7 @@
 import copy
 import json
 import re
+import shlex
 import sys
 import urllib.parse
 
@@ -747,7 +748,9 @@ class CredentialTypeInjectorField(JSONSchemaField):
 
         def validate_template_string(type_, key, tmpl):
             try:
-                sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
+                sandbox_env = sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined)
+                sandbox_env.filters['quote'] = shlex.quote
+                sandbox_env.from_string(tmpl).render(valid_namespace)
             except UndefinedError as e:
                 raise django_exceptions.ValidationError(
                     _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
