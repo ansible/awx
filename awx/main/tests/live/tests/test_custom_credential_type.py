@@ -23,7 +23,7 @@ def custom_cred_type(default_org):
                 }
             ]
         },
-        injectors={'file': {'template.custom_file': '{{ test_file_content }}'}, 'env': {'CUSTOM_FILE_PATH': '{{ tower.filename.custom_file | quote }}'}},
+        injectors={'file': {'template.custom_file': '{{ test_file_content }}'}, 'env': {'CUSTOM_FILE_PATH': '{{ tower.filename.custom_file }}'}},
     )
     cred_type.save()
     return cred_type
@@ -58,7 +58,7 @@ def test_custom_credential_type_file_injection(
         test_name='custom_credential_type',
         playbook='test_cred.yml',
         scm_url=f'file://{live_tmp_folder}/custom_cred_project',
-        jt_params={'credentials': [custom_credential.id]},
+        credentials=[custom_credential],
     )
 
     job = result['job']
