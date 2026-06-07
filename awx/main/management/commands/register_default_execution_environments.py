@@ -118,7 +118,7 @@ class Command(BaseCommand):
                 defaults={
                     'image': ee["image"],
                     'credential': registry_cred,
-                    'pull': ee["pull"]
+                    'pull': ee.get("pull", "missing")
                 }
             )
             if ee_created:
@@ -130,6 +130,9 @@ class Command(BaseCommand):
                     changed = True
                 if _this_ee.credential != registry_cred:
                     _this_ee.credential = registry_cred
+                    changed = True
+                if _this_ee.pull != ee.get("pull", "missing"):
+                    _this_ee.pull = ee.get("pull", "missing")
                     changed = True
             if changed:
                 _this_ee.save()
