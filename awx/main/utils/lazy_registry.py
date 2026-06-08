@@ -58,3 +58,7 @@ class LazyLoadDict(dict):
     def copy(self):
         self._ensure_loaded()
         return super().copy()
+
+    def clear(self):
+        super().clear()
+        self._loaded = True
