@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Get CONFIG_FILE_PATH environment variable
+      set_fact:
+        config_file_path: "{{ lookup('env', 'CONFIG_FILE_PATH') }}"
+
+    - name: Assert CONFIG_FILE_PATH is set and not blank
+      assert:
+        that:
+          - config_file_path != ''
+        fail_msg: "FAIL: CONFIG_FILE_PATH environment variable is blank or not set"
+
+    - name: Read the config file
+      slurp:
+        src: "{{ config_file_path }}"
+      register: config_content
+
+    - name: Decode config file content
+      set_fact:
+        config_decoded: "{{ config_content['content'] | b64decode }}"
+
+    - name: Assert config file has expected content
+      assert:
+        that:
+          - "'localhost' in config_decoded"
+          - "'port=8080' in config_decoded"
+        fail_msg: |
+          FAIL: Config file does not contain expected content.
+          Expected to find 'localhost' and 'port=8080'
+          Actual content: {{ config_decoded }}

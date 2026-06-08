@@ -118,7 +118,7 @@ def test_custom_credential_type_single_file_injection(
     """
     result = run_job_from_playbook(
         test_name='simple_file_injection',
-        playbook='test_cred.yml',
+        playbook='test_single_file.yml',
         scm_url=f'file://{live_tmp_folder}/custom_cred_project',
         credentials=[simple_file_credential],
     )
@@ -143,7 +143,7 @@ def test_custom_credential_type_cross_file_references(
     """
     result = run_job_from_playbook(
         test_name='cross_ref_injection',
-        playbook='test_cred.yml',
+        playbook='test_multi_file.yml',
         scm_url=f'file://{live_tmp_folder}/custom_cred_project',
         credentials=[cross_ref_credential],
     )

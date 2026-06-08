@@ -41,18 +41,15 @@
         that:
           - extra_file_path != ''
         fail_msg: "FAIL: EXTRA_FILE_PATH environment variable is blank or not set"
-      when: "'template.extra' in ansible_facts.get('run_job_cred_injectors', '')"
 
     - name: Read the extra file
       slurp:
         src: "{{ extra_file_path }}"
       register: extra_content
-      when: extra_file_path != ''
 
     - name: Decode extra file content
       set_fact:
         extra_decoded: "{{ extra_content['content'] | b64decode }}"
-      when: extra_file_path != ''
 
     - name: Assert extra file has expected content
       assert:
@@ -63,4 +60,3 @@
           FAIL: Extra file does not contain expected content.
           Expected to find 'Additional settings' and 'Created by custom credential injection'
           Actual content: {{ extra_decoded }}
-      when: extra_file_path != ''
