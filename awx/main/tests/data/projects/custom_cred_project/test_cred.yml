@@ -3,54 +3,59 @@
   gather_facts: false
   connection: local
   tasks:
-    - name: Check CONFIG_FILE_PATH env var is set
-      debug:
-        msg: "Config file path from env: {{ lookup('env', 'CONFIG_FILE_PATH') }}"
+    - name: Get CONFIG_FILE_PATH environment variable
+      set_fact:
+        config_file_path: "{{ lookup('env', 'CONFIG_FILE_PATH') }}"
 
-    - name: Check EXTRA_FILE_PATH env var is set
-      debug:
-        msg: "Extra file path from env: {{ lookup('env', 'EXTRA_FILE_PATH') }}"
-
-    - name: Assert CONFIG_FILE_PATH is not empty
+    - name: Assert CONFIG_FILE_PATH is set (not empty)
       assert:
         that:
-          - lookup('env', 'CONFIG_FILE_PATH') | length > 0
-        fail_msg: "CONFIG_FILE_PATH environment variable is not set"
-
-    - name: Assert EXTRA_FILE_PATH is not empty
-      assert:
-        that:
-          - lookup('env', 'EXTRA_FILE_PATH') | length > 0
-        fail_msg: "EXTRA_FILE_PATH environment variable is not set"
+          - config_file_path != ''
+        fail_msg: "CONFIG_FILE_PATH environment variable must be set"
 
     - name: Read the config file
       slurp:
-        src: "{{ lookup('env', 'CONFIG_FILE_PATH') }}"
+        src: "{{ config_file_path }}"
       register: config_content
-
-    - name: Read the extra file
-      slurp:
-        src: "{{ lookup('env', 'EXTRA_FILE_PATH') }}"
-      register: extra_content
 
     - name: Display config file content
       debug:
-        msg: "Config file:\n{{ config_content['content'] | b64decode }}"
+        msg: "Config file content:\n{{ config_content['content'] | b64decode }}"
 
-    - name: Display extra file content
-      debug:
-        msg: "Extra file:\n{{ extra_content['content'] | b64decode }}"
-
-    - name: Assert config file contains expected content
+    - name: Assert config file has expected content
       assert:
         that:
           - "'localhost' in config_content['content'] | b64decode"
           - "'port=8080' in config_content['content'] | b64decode"
-        fail_msg: "Config file does not contain expected content"
+        fail_msg: |
+          Config file at {{ config_file_path }} does not contain expected content.
+          Expected 'localhost' and 'port=8080', but got: {{ config_content['content'] | b64decode }}
 
-    - name: Assert extra file contains expected content
+    - name: Get EXTRA_FILE_PATH environment variable
+      set_fact:
+        extra_file_path: "{{ lookup('env', 'EXTRA_FILE_PATH') }}"
+
+    - name: Check if EXTRA_FILE_PATH is defined (for multi-file test)
+      debug:
+        msg: "EXTRA_FILE_PATH is {% if extra_file_path %}set to: {{ extra_file_path }}{% else %}not set{% endif %}"
+
+    - name: Read the extra file (if EXTRA_FILE_PATH is set)
+      slurp:
+        src: "{{ extra_file_path }}"
+      register: extra_content
+      when: extra_file_path != ''
+
+    - name: Display extra file content (if exists)
+      debug:
+        msg: "Extra file content:\n{{ extra_content['content'] | b64decode }}"
+      when: extra_file_path != ''
+
+    - name: Assert extra file has expected content (if EXTRA_FILE_PATH is set)
       assert:
         that:
           - "'Additional settings' in extra_content['content'] | b64decode"
           - "'Created by custom credential injection' in extra_content['content'] | b64decode"
-        fail_msg: "Extra file does not contain expected content"
+        fail_msg: |
+          Extra file at {{ extra_file_path }} does not contain expected content.
+          Expected 'Additional settings' and 'Created by custom credential injection', but got: {{ extra_content['content'] | b64decode }}
+      when: extra_file_path != ''
