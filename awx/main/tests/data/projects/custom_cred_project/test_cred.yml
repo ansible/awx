@@ -7,55 +7,42 @@
       set_fact:
         config_file_path: "{{ lookup('env', 'CONFIG_FILE_PATH') }}"
 
-    - name: Assert CONFIG_FILE_PATH is set (not empty)
+    - name: Assert CONFIG_FILE_PATH is set and not blank
       assert:
         that:
           - config_file_path != ''
-        fail_msg: "CONFIG_FILE_PATH environment variable must be set"
+        fail_msg: "FAIL: CONFIG_FILE_PATH environment variable is blank or not set"
 
     - name: Read the config file
       slurp:
         src: "{{ config_file_path }}"
       register: config_content
 
-    - name: Display config file content
-      debug:
-        msg: "Config file content:\n{{ config_content['content'] | b64decode }}"
-
     - name: Assert config file has expected content
       assert:
         that:
           - "'localhost' in config_content['content'] | b64decode"
           - "'port=8080' in config_content['content'] | b64decode"
-        fail_msg: |
-          Config file at {{ config_file_path }} does not contain expected content.
-          Expected 'localhost' and 'port=8080', but got: {{ config_content['content'] | b64decode }}
+        fail_msg: "FAIL: Config file does not contain expected content (localhost, port=8080)"
 
     - name: Get EXTRA_FILE_PATH environment variable
       set_fact:
         extra_file_path: "{{ lookup('env', 'EXTRA_FILE_PATH') }}"
 
-    - name: Check if EXTRA_FILE_PATH is defined (for multi-file test)
-      debug:
-        msg: "EXTRA_FILE_PATH is {% if extra_file_path %}set to: {{ extra_file_path }}{% else %}not set{% endif %}"
+    - name: Assert EXTRA_FILE_PATH is set and not blank
+      assert:
+        that:
+          - extra_file_path != ''
+        fail_msg: "FAIL: EXTRA_FILE_PATH environment variable is blank or not set"
 
-    - name: Read the extra file (if EXTRA_FILE_PATH is set)
+    - name: Read the extra file
       slurp:
         src: "{{ extra_file_path }}"
       register: extra_content
-      when: extra_file_path != ''
 
-    - name: Display extra file content (if exists)
-      debug:
-        msg: "Extra file content:\n{{ extra_content['content'] | b64decode }}"
-      when: extra_file_path != ''
-
-    - name: Assert extra file has expected content (if EXTRA_FILE_PATH is set)
+    - name: Assert extra file has expected content
       assert:
         that:
           - "'Additional settings' in extra_content['content'] | b64decode"
           - "'Created by custom credential injection' in extra_content['content'] | b64decode"
-        fail_msg: |
-          Extra file at {{ extra_file_path }} does not contain expected content.
-          Expected 'Additional settings' and 'Created by custom credential injection', but got: {{ extra_content['content'] | b64decode }}
-      when: extra_file_path != ''
+        fail_msg: "FAIL: Extra file does not contain expected content (Additional settings, Created by custom credential injection)"
