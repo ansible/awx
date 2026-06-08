@@ -68,6 +68,7 @@ from awx.main.models import (
     UnifiedJob,
     convert_jsonfields,
 )
+from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
@@ -88,10 +89,8 @@ def _sync_credential_types_to_db():
     """Ensure CredentialType DB rows match the installed plugins.
 
     The in-memory registry is populated lazily on first access via LazyLoadDict.
-    This function only handles the DB upsert step.
+    This function only handles the DB sync step.
     """
-    from awx.main.models.credential import CredentialType
-
     if is_database_synchronized():
         CredentialType.setup_tower_managed_defaults()
 

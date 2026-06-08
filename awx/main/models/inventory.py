@@ -27,8 +27,10 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.utils.common import load_all_entry_points_for
 from awx.main.utils.lazy_registry import LazyLoadDict
 from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names, compute_cloud_inventory_sources
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
@@ -928,9 +930,6 @@ class HostMetricSummaryMonthly(models.Model):
 
 
 def _load_inventory_plugins():
-    from awx.main.utils.common import load_all_entry_points_for
-    from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
-
     is_awx = detect_server_product_name() == 'AWX'
     extra_entry_point_groups = () if is_awx else ('inventory.supported',)
     all_entry_points = load_all_entry_points_for(['inventory', *extra_entry_point_groups])
