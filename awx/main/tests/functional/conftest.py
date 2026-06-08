@@ -179,7 +179,7 @@ def run_computed_fields_right_away(request):
         i = Inventory.objects.get(id=inventory_id)
         i.update_computed_fields()
 
-    mocked = mock.patch('awx.main.tasks.system.update_inventory_computed_fields.delay', new=run_me)
+    mocked = mock.patch('awx.main.signals.update_inventory_computed_fields.delay', new=run_me)
     mocked.start()
 
     request.addfinalizer(mocked.stop)

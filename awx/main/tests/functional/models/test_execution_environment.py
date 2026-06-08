@@ -5,7 +5,7 @@ from awx.main.models.execution_environments import ExecutionEnvironment
 
 @pytest.fixture
 def cleanup_patch(mocker):
-    return mocker.patch('awx.main.tasks.system.handle_removed_image')
+    return mocker.patch('awx.main.signals.handle_removed_image')
 
 
 @pytest.mark.django_db
