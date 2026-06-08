@@ -51,12 +51,12 @@
       set_fact:
         extra_decoded: "{{ extra_content['content'] | b64decode }}"
 
-    - name: Assert extra file has expected content
+    - name: Verify config file path is referenced in extra file
       assert:
         that:
-          - "'Additional settings' in extra_decoded"
-          - "'Created by custom credential injection' in extra_decoded"
+          - "config_file_path.startswith('/')"
+          - "config_file_path in extra_decoded"
         fail_msg: |
-          FAIL: Extra file does not contain expected content.
-          Expected to find 'Additional settings' and 'Created by custom credential injection'
-          Actual content: {{ extra_decoded }}
+          FAIL: Extra file does not contain the path to the config file.
+          Config file path from CONFIG_FILE_PATH env var: {{ config_file_path }}
+          Extra file actual content: {{ extra_decoded }}
