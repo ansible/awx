@@ -5,9 +5,13 @@ from dispatcherd.config import setup as dispatcher_setup
 from django.apps import AppConfig
 from django.db import connection
 from django.utils.translation import gettext_lazy as _
+from django.core.management.base import CommandError
+from django.db.models.signals import pre_migrate
+
 from awx.main.utils.common import bypass_in_test, load_all_entry_points_for
 from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.named_url_graph import _customize_graph, generate_graph
+from awx.main.utils.db import db_requirement_violations
 from awx.conf import register, fields
 
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
@@ -16,6 +20,11 @@ from awx_plugins.interfaces._temporary_private_licensing_api import detect_serve
 class MainConfig(AppConfig):
     name = 'awx.main'
     verbose_name = _('Main')
+
+    def check_db_requirement(self, *args, **kwargs):
+        violations = db_requirement_violations()
+        if violations:
+            raise CommandError(violations)
 
     def load_named_url_feature(self):
         models = [m for m in self.get_models() if hasattr(m, 'get_absolute_url')]
@@ -110,3 +119,4 @@ class MainConfig(AppConfig):
             self.load_credential_types_feature()
         self.load_named_url_feature()
         self.load_inventory_plugins()
+        pre_migrate.connect(self.check_db_requirement, sender=self)
