@@ -663,6 +663,7 @@ def _is_oidc_namespace_disabled(ns):
 
 def load_credentials():
     ManagedCredentialType.registry._loaded = True
+    ManagedCredentialType.registry.clear()
 
     awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
     supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
