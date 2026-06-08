@@ -31,7 +31,7 @@
           - "lookup('env', 'OCI_USER_KEY_FILE') in config_content['content'] | b64decode"
         fail_msg: >-
           Config file does not contain the key file path.
-          The key_file= line is blank, meaning {{ tower.filename.ssh_keyfile }}
+          The key_file= line is blank, meaning tower.filename.ssh_keyfile
           was not available when the config file template was rendered.
 
     - name: Assert other OCI env vars are set
