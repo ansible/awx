@@ -2,9 +2,17 @@ import datetime
 from unittest import mock
 from django.utils.timezone import now as tz_now
 import pytest
+from django.test import override_settings
 
 from awx.main.models import Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
+from awx.main.dispatch.reaper import (
+    reset_orphaned_waiting_jobs,
+    reap_orphaned_jobs,
+    get_orphaned_running_jobs_query,
+    startup_reaping,
+    reap_job,
+)
 from awx.main.tasks import system
 from dispatcherd.publish import task
 
@@ -97,8 +105,6 @@ class TestJobReaper(object):
         system._heartbeat_handle_lost_instances([lost_inst], this_inst)
 
         # Simulate what the background task would do
-        from awx.main.dispatch.reaper import reset_orphaned_waiting_jobs
-
         reset_orphaned_waiting_jobs()
 
         job.refresh_from_db()
@@ -177,8 +183,6 @@ class TestJobReaper(object):
         job = Job.objects.create(status='waiting', controller_node='awx-task-dead', execution_node='')
 
         # Simulate what the background task would do
-        from awx.main.dispatch.reaper import reset_orphaned_waiting_jobs
-
         reset_orphaned_waiting_jobs()
 
         job.refresh_from_db()
@@ -194,10 +198,167 @@ class TestJobReaper(object):
         job = Job.objects.create(status='waiting', controller_node='awx-task-live', execution_node='')
 
         # Simulate what the background task would do
-        from awx.main.dispatch.reaper import reset_orphaned_waiting_jobs
-
         reset_orphaned_waiting_jobs()
 
         job.refresh_from_db()
         assert job.status == 'waiting'
         assert job.controller_node == 'awx-task-live'
+
+    def test_reap_orphaned_jobs_background_task(self):
+        """Test the reap_orphaned_jobs background task reaps running jobs on orphaned execution nodes."""
+        exec_inst = Instance(hostname='exec-live', node_type='execution')
+        exec_inst.save()
+
+        orphaned_job = Job.objects.create(
+            status='running',
+            execution_node='exec-orphaned',
+            controller_node='',
+            start_args='SENSITIVE',
+        )
+        valid_job = Job.objects.create(
+            status='running',
+            execution_node='exec-live',
+            controller_node='',
+        )
+
+        reap_orphaned_jobs()
+
+        orphaned_job.refresh_from_db()
+        valid_job.refresh_from_db()
+
+        assert orphaned_job.status == 'failed'
+        assert 'not a registered instance' in orphaned_job.job_explanation
+        assert orphaned_job.start_args == ''
+        assert valid_job.status == 'running'
+
+    def test_get_orphaned_running_jobs_query(self):
+        """Test that get_orphaned_running_jobs_query filters correctly."""
+        exec_inst = Instance(hostname='exec-live', node_type='execution')
+        exec_inst.save()
+
+        orphaned = Job.objects.create(status='running', execution_node='exec-orphaned', controller_node='')
+        valid = Job.objects.create(status='running', execution_node='exec-live', controller_node='')
+        not_running = Job.objects.create(status='pending', execution_node='exec-orphaned', controller_node='')
+        workflow = WorkflowJob.objects.create(status='running', execution_node='exec-orphaned', controller_node='')
+
+        valid_nodes = ['exec-live']
+        qs = get_orphaned_running_jobs_query(valid_nodes)
+
+        result_ids = set(qs.values_list('id', flat=True))
+        assert orphaned.id in result_ids
+        assert valid.id not in result_ids
+        assert not_running.id not in result_ids
+        assert workflow.id not in result_ids
+
+    def test_reset_orphaned_waiting_jobs_background_task(self):
+        """Test the reset_orphaned_waiting_jobs background task resets waiting jobs on orphaned controller nodes."""
+        ctrl_inst = Instance(hostname='ctrl-live', node_type='control')
+        ctrl_inst.save()
+
+        orphaned_job = Job.objects.create(
+            status='waiting',
+            controller_node='ctrl-orphaned',
+            execution_node='',
+        )
+        valid_job = Job.objects.create(
+            status='waiting',
+            controller_node='ctrl-live',
+            execution_node='',
+        )
+        pending_job = Job.objects.create(
+            status='pending',
+            controller_node='ctrl-orphaned',
+            execution_node='',
+        )
+
+        reset_orphaned_waiting_jobs()
+
+        orphaned_job.refresh_from_db()
+        valid_job.refresh_from_db()
+        pending_job.refresh_from_db()
+
+        assert orphaned_job.status == 'pending'
+        assert orphaned_job.controller_node == ''
+        assert orphaned_job.execution_node == ''
+        assert valid_job.status == 'waiting'
+        assert pending_job.status == 'pending'
+
+    def test_startup_reaping(self, mocker):
+        """Test startup_reaping reaps running jobs on the controller node at startup."""
+        inst = Instance(hostname='awx-controller')
+        inst.save()
+
+        mocker.patch('awx.main.models.Instance.objects.my_hostname', return_value='awx-controller')
+
+        job1 = Job.objects.create(status='running', controller_node='awx-controller', start_args='SENSITIVE')
+        job2 = Job.objects.create(status='running', controller_node='other', start_args='SENSITIVE')
+        job3 = Job.objects.create(status='failed', controller_node='awx-controller')
+
+        startup_reaping()
+
+        job1.refresh_from_db()
+        job2.refresh_from_db()
+        job3.refresh_from_db()
+
+        assert job1.status == 'failed'
+        assert 'at system start up' in job1.job_explanation
+        assert job1.start_args == ''
+        assert job2.status == 'running'
+        assert job3.status == 'failed'
+
+    def test_reap_job_updates_status(self):
+        """Test reap_job marks a running job as failed and clears sensitive data."""
+        job = Job.objects.create(
+            status='running',
+            start_args='SENSITIVE_DATA',
+            job_explanation='Some prior explanation.',
+        )
+
+        reap_job(job, 'failed', job_explanation='Task was lost')
+
+        job.refresh_from_db()
+        assert job.status == 'failed'
+        assert job.start_args == ''
+        assert 'Some prior explanation' in job.job_explanation
+        assert 'Task was lost' in job.job_explanation
+
+    def test_reap_job_does_not_reap_non_running(self):
+        """Test reap_job does not modify jobs that are not running or waiting."""
+        job = Job.objects.create(status='failed', start_args='SENSITIVE')
+        original_args = job.start_args
+
+        reap_job(job, 'failed', job_explanation='Should not apply')
+
+        job.refresh_from_db()
+        assert job.status == 'failed'
+        assert job.start_args == original_args
+
+    def test_heartbeat_handle_lost_instances_marks_offline(self, mocker):
+        """Test _heartbeat_handle_lost_instances marks lost control instances offline and triggers task manager."""
+        this_inst = Instance(hostname='awx-alive', node_type='control')
+        this_inst.save()
+        lost_inst = Instance(hostname='awx-lost', node_type='control', node_state=Instance.States.READY)
+        lost_inst.save()
+
+        schedule_mock = mocker.patch('awx.main.utils.ScheduleTaskManager')
+
+        system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+
+        lost_inst.refresh_from_db()
+        assert lost_inst.node_state == Instance.States.UNAVAILABLE
+        schedule_mock.return_value.schedule.assert_called_once()
+
+    @override_settings(AWX_AUTO_DEPROVISION_INSTANCES=True)
+    def test_heartbeat_handle_lost_instances_deprovisioned(self, mocker):
+        """Test _heartbeat_handle_lost_instances auto-deprovisions control nodes when enabled."""
+        this_inst = Instance(hostname='awx-alive', node_type='control')
+        this_inst.save()
+        lost_inst = Instance(hostname='awx-lost', node_type='control')
+        lost_inst.save()
+
+        schedule_mock = mocker.patch('awx.main.utils.ScheduleTaskManager')
+
+        system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+
+        assert not Instance.objects.filter(hostname='awx-lost').exists()
+        schedule_mock.return_value.schedule.assert_called_once()

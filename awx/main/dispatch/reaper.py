@@ -98,11 +98,11 @@ def reap_orphaned_jobs():
     execution nodes and reaps them. Runs independently to avoid passing
     large argument lists and to prevent saturating task manager cycle.
     """
-    valid_execution_nodes = set(Instance.objects.filter(node_type__in=('hybrid', 'execution')).values_list('hostname', flat=True))
+    valid_execution_nodes = {Instance.objects.filter(node_type__in=('hybrid', 'execution')).values_list('hostname', flat=True)}
 
     orphaned_running = get_orphaned_running_jobs_query(valid_execution_nodes)
 
-    logger.info(f'Reaping orphaned running jobs')
+    logger.info('Reaping orphaned running jobs')
     for job in orphaned_running:
         if not job.is_container_group_task:
             reap_job(job, 'failed', job_explanation='Task execution node is not a registered instance')
@@ -116,11 +116,11 @@ def reset_orphaned_waiting_jobs():
     controller nodes and resets them to pending. Runs independently to
     avoid passing large argument lists and to prevent saturating task manager.
     """
-    valid_controller_nodes = set(Instance.objects.filter(node_type__in=('hybrid', 'control')).values_list('hostname', flat=True))
+    valid_controller_nodes = {Instance.objects.filter(node_type__in=('hybrid', 'control')).values_list('hostname', flat=True)}
 
     orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=valid_controller_nodes)
 
-    logger.info(f'Resetting orphaned waiting jobs to pending')
+    logger.info('Resetting orphaned waiting jobs to pending')
     for job in orphaned_waiting:
         job.status = 'pending'
         job.controller_node = ''

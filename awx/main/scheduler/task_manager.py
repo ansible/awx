@@ -25,9 +25,8 @@ from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.lib.utils.db import advisory_lock
 
 # AWX
-from awx.main.dispatch.reaper import reap_job, get_orphaned_running_jobs_query, reap_orphaned_jobs, reset_orphaned_waiting_jobs
+from awx.main.dispatch.reaper import get_orphaned_running_jobs_query, reap_orphaned_jobs, reset_orphaned_waiting_jobs
 from awx.main.models import (
-    Instance,
     InventorySource,
     InventoryUpdate,
     Job,
