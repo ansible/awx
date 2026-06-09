@@ -687,13 +687,13 @@ class TaskManager(TaskBase):
         assert hasattr(self, 'all_tasks'), "queue_orphaned_job_reaping() called before get_tasks()"
 
         # Build sets of valid instance hostnames from in-memory data
-        valid_execution_nodes = set(
+        valid_execution_nodes = {
             hostname for hostname, inst in self.tm_models.instances.instances_by_hostname.items() if inst.node_type in ('hybrid', 'execution')
-        )
+        }
 
-        valid_controller_nodes = set(
+        valid_controller_nodes = {
             hostname for hostname, inst in self.tm_models.instances.instances_by_hostname.items() if inst.node_type in ('hybrid', 'control')
-        )
+        }
 
         # Check waiting jobs in memory (already loaded by get_tasks)
         orphaned_waiting_exists = any(

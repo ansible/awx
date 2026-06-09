@@ -98,7 +98,7 @@ def reap_orphaned_jobs():
     execution nodes and reaps them. Runs independently to avoid passing
     large argument lists and to prevent saturating task manager cycle.
     """
-    valid_execution_nodes = {inst for inst in Instance.objects.filter(node_type__in=('hybrid', 'execution')).values_list('hostname', flat=True)}
+    valid_execution_nodes = set(Instance.objects.filter(node_type__in=('hybrid', 'execution')).values_list('hostname', flat=True))
 
     orphaned_running = get_orphaned_running_jobs_query(valid_execution_nodes)
 
@@ -116,7 +116,7 @@ def reset_orphaned_waiting_jobs():
     controller nodes and resets them to pending. Runs independently to
     avoid passing large argument lists and to prevent saturating task manager.
     """
-    valid_controller_nodes = {inst for inst in Instance.objects.filter(node_type__in=('hybrid', 'control')).values_list('hostname', flat=True)}
+    valid_controller_nodes = set(Instance.objects.filter(node_type__in=('hybrid', 'control')).values_list('hostname', flat=True))
 
     orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=valid_controller_nodes)
 
