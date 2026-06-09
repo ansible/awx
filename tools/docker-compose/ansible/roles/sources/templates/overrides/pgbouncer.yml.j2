@@ -17,4 +17,5 @@ services:
       PGBOUNCER_AUTH_TYPE: trust
       PGBOUNCER_PORT: {{ pgbouncer_port }}
       PGBOUNCER_DEFAULT_POOL_SIZE: {{ pgbouncer_max_pool_size }}
+      # pg_notify will NOT work in transaction mode
       PGBOUNCER_POOL_MODE: session
