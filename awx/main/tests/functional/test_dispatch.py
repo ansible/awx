@@ -4,7 +4,7 @@ from django.utils.timezone import now as tz_now
 import pytest
 from django.test import override_settings
 
-from awx.main.models import Job, WorkflowJob, Instance
+from awx.main.models import InstanceGroup, Job, WorkflowJob, Instance
 from awx.main.dispatch import reaper
 from awx.main.dispatch.reaper import (
     reset_orphaned_waiting_jobs,
@@ -332,6 +332,38 @@ class TestJobReaper(object):
         job.refresh_from_db()
         assert job.status == 'failed'
         assert job.start_args == original_args
+
+    def test_reap_orphaned_jobs_skips_container_group_task(self):
+        """Container group tasks on orphaned nodes should not be reaped."""
+        exec_inst = Instance(hostname='exec-live', node_type='execution')
+        exec_inst.save()
+        cg = InstanceGroup.objects.create(name='container-group', is_container_group=True)
+
+        cg_job = Job.objects.create(
+            status='running',
+            execution_node='exec-orphaned',
+            controller_node='',
+            start_args='SENSITIVE',
+        )
+        cg_job.instance_group = cg
+        cg_job.save(update_fields=['instance_group'])
+
+        normal_job = Job.objects.create(
+            status='running',
+            execution_node='exec-orphaned',
+            controller_node='',
+            start_args='SENSITIVE',
+        )
+
+        reap_orphaned_jobs()
+
+        cg_job.refresh_from_db()
+        normal_job.refresh_from_db()
+
+        assert cg_job.status == 'running', 'Container group task should not be reaped'
+        assert cg_job.start_args != ''
+        assert normal_job.status == 'failed'
+        assert 'not a registered instance' in normal_job.job_explanation
 
     def test_heartbeat_handle_lost_instances_marks_offline(self, mocker):
         """Test _heartbeat_handle_lost_instances marks lost control instances offline and triggers task manager."""
