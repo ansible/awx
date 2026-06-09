@@ -69,10 +69,12 @@ from awx.main.models import (
     UnifiedJob,
     convert_jsonfields,
 )
+from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
 
 logger = logging.getLogger('awx.main.tasks.system')
@@ -82,6 +84,16 @@ It looks like you're trying to use a private key in OpenSSH format, which \
 isn't supported by the installed version of OpenSSH on this instance. \
 Try upgrading OpenSSH or providing your private key in an different format. \
 '''
+
+
+def _sync_credential_types_to_db():
+    """Ensure CredentialType DB rows match the installed plugins.
+
+    The in-memory registry is populated lazily on first access via LazyLoadDict.
+    This function only handles the DB sync step.
+    """
+    if is_database_synchronized():
+        CredentialType.setup_tower_managed_defaults()
 
 
 def _run_dispatch_startup_common():
@@ -98,6 +110,11 @@ def _run_dispatch_startup_common():
             write_receptor_config()
         except Exception:
             logger.exception("Failed to write receptor config, skipping.")
+
+    try:
+        _sync_credential_types_to_db()
+    except Exception:
+        logger.exception("Failed to sync credential types to DB, skipping.")
 
     try:
         convert_jsonfields()
