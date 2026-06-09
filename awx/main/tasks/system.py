@@ -19,6 +19,7 @@ from dispatcherd.publish import task
 # Runner
 import ansible_runner.cleanup
 import psycopg
+from ansible_base.lib.cache.tasks import clear_cache as dab_clear_cache
 from ansible_base.lib.utils.db import advisory_lock
 
 # django-ansible-base
@@ -331,22 +332,20 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_settings_change', timeout=600)
-def clear_setting_cache(setting_keys):
-    # log that cache is being cleared
-    logger.info(f"clear_setting_cache of keys {setting_keys}")
-    orig_len = len(setting_keys)
-    for i in range(orig_len):
-        for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
-            setting_keys.append(dependent_key)
-    cache_keys = set(setting_keys)
-    logger.debug('cache delete_many(%r)', cache_keys)
-    cache.delete_many(cache_keys)
+def _resolve_setting_dependents(key):
+    return settings_registry.get_dependent_settings(key)
 
-    if 'LOG_AGGREGATOR_LEVEL' in setting_keys:
+
+def _post_setting_invalidation(invalidated_keys):
+    if 'LOG_AGGREGATOR_LEVEL' in invalidated_keys:
         ctl = get_control_from_settings()
         ctl.queuename = get_task_queuename()
         ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
+
+
+@task(queue='tower_settings_change', timeout=600)
+def clear_setting_cache(setting_keys):
+    dab_clear_cache(setting_keys, _resolve_setting_dependents, _post_setting_invalidation)
 
 
 @task(queue='tower_broadcast_all', timeout=600)
