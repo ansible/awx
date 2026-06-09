@@ -526,6 +526,40 @@ MINIKUBE_CONTAINER_GROUP ?= false
 MINIKUBE_SETUP ?= false # if false, run minikube separately
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
 
+# Build the list of compose files from the base + optional overrides.
+# Uses = (not :=) so $(wildcard) is evaluated at use-time, after
+# docker-compose-sources has rendered the files.
+# Build the list of compose files from the base + optional overrides.
+# Static overrides live in tools/docker-compose/overrides/ (tracked in git).
+# Dynamic overrides are rendered by Ansible into _sources/overrides/.
+# Uses = (not :=) so $(wildcard) is evaluated at use-time, after
+# docker-compose-sources has rendered the dynamic files.
+COMPOSE_FILES = -f tools/docker-compose/_sources/docker-compose.yml
+ifeq ($(SPLUNK),true)
+  COMPOSE_FILES += -f tools/docker-compose/overrides/splunk.yml
+endif
+ifeq ($(PROMETHEUS),true)
+  COMPOSE_FILES += -f tools/docker-compose/overrides/prometheus.yml
+endif
+ifeq ($(GRAFANA),true)
+  COMPOSE_FILES += -f tools/docker-compose/overrides/grafana.yml
+endif
+ifeq ($(VAULT),true)
+  COMPOSE_FILES += -f tools/docker-compose/_sources/overrides/vault.yml
+endif
+ifeq ($(PGBOUNCER),true)
+  COMPOSE_FILES += -f tools/docker-compose/_sources/overrides/pgbouncer.yml
+endif
+ifeq ($(OTEL),true)
+  COMPOSE_FILES += -f tools/docker-compose/overrides/otel.yml
+endif
+ifeq ($(LOKI),true)
+  COMPOSE_FILES += -f tools/docker-compose/overrides/loki.yml
+endif
+COMPOSE_FILES += $(patsubst %,-f %,$(wildcard tools/docker-compose/_sources/overrides/execution-nodes.yml))
+COMPOSE_FILES += $(patsubst %,-f %,$(wildcard tools/docker-compose/_sources/overrides/editable-deps.yml))
+COMPOSE_FILES += $(patsubst %,-f %,$(wildcard tools/docker-compose/_sources/overrides/minikube.yml))
+
 ifneq ($(ADMIN_PASSWORD),)
 	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
 endif
@@ -562,23 +596,23 @@ docker-compose: awx/projects docker-compose-sources
 	$(MAKE) docker-compose-up
 
 docker-compose-up:
-	$(if $(GIT_IS_WORKTREE),SETUPTOOLS_SCM_PRETEND_VERSION="$(VERSION)") $(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
+	$(if $(GIT_IS_WORKTREE),SETUPTOOLS_SCM_PRETEND_VERSION="$(VERSION)") $(DOCKER_COMPOSE) $(COMPOSE_FILES) $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-down:
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) down --remove-orphans
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) $(COMPOSE_OPTS) down --remove-orphans
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx_1 --remove-orphans
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) -f tools/docker-compose/overrides/credential-plugins.yml up --no-recreate awx_1 --remove-orphans
 
 docker-compose-test: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /bin/bash
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) run --rm --service-ports awx_1 /bin/bash
 
 docker-compose-runtest: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /start_tests.sh
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) run --rm --service-ports awx_1 /start_tests.sh
 
 docker-compose-build-schema: awx/projects docker-compose-sources
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 make genschema
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) run --rm --service-ports --no-deps awx_1 make genschema
 
 awx-tui:
 	@if ! command -v awx-tui > /dev/null 2>&1; then \
@@ -607,7 +641,7 @@ validate-openapi-schema: genschema
 	@python3 -c "from openapi_spec_validator import validate; import json; spec = json.load(open('schema.json')); validate(spec); print('✓ Schema is valid')"
 
 docker-compose-clean: awx/projects
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml rm -sf
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) rm -sf
 
 docker-compose-container-group-clean:
 	@if [ -f "tools/docker-compose-minikube/_sources/minikube" ]; then \
@@ -658,6 +692,9 @@ docker-refresh: docker-clean docker-compose
 
 docker-compose-container-group:
 	MINIKUBE_CONTAINER_GROUP=true $(MAKE) docker-compose
+
+docker-compose-logstash: awx/projects docker-compose-sources
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES) -f tools/docker-compose/overrides/logstash.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 VERSION:
 	@echo "awx: $(VERSION)"

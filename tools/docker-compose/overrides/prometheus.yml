@@ -1,0 +1,17 @@
+---
+services:
+  prometheus:
+    image: mirror.gcr.io/prom/prometheus:v3.10.0
+    container_name: tools_prometheus_1
+    hostname: prometheus
+    networks:
+      - awx
+    ports:
+      - "9090:9090"
+    volumes:
+      - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus_storage:/prometheus:rw"
+
+volumes:
+  prometheus_storage:
+    name: tools_prometheus_storage
