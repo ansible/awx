@@ -6,7 +6,7 @@ from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
 from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
-from ansible.module_utils.six import raise_from
+from ansible.module_utils.six import raise_from, string_types
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
@@ -118,6 +118,7 @@ class ControllerModule(AnsibleModule):
         'request_timeout': 'request_timeout',
         'max_retries': 'max_retries',
         'retry_backoff_factor': 'retry_backoff_factor',
+        'oauth_token': 'aap_token',
     }
     host = '127.0.0.1'
     username = None
@@ -126,6 +127,7 @@ class ControllerModule(AnsibleModule):
     request_timeout = 10
     max_retries = 5
     retry_backoff_factor = 2
+    oauth_token = None
     authenticated = False
     config_name = 'tower_cli.cfg'
     version_checked = False
@@ -159,6 +161,20 @@ class ControllerModule(AnsibleModule):
             direct_value = self.params.get(long_param)
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
+
+        # Perform magic depending on whether aap_token is a string or a dict
+        if self.params.get('aap_token'):
+            token_param = self.params.get('aap_token')
+            if isinstance(token_param, dict):
+                if 'token' in token_param:
+                    self.oauth_token = token_param['token']
+                else:
+                    self.fail_json(msg="The provided dict in aap_token did not properly contain the token entry")
+            elif isinstance(token_param, string_types):
+                self.oauth_token = token_param
+            else:
+                error_msg = "The provided aap_token type was not valid ({0}). Valid options are str or dict.".format(type(token_param).__name__)
+                self.fail_json(msg=error_msg)
 
         # Perform some basic validation
         if not self.host.startswith(("https://", "http://")):  # NOSONAR
@@ -572,12 +588,13 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        # Authenticate to AWX (if not already done so)
-        if not self.authenticated:
-            # This method will set a cookie in the cookie jar for us
+        # Authenticate to AWX (if we don't have a token and if not already done so)
+        if not self.oauth_token and not self.authenticated:
+            # This method will set a cookie in the cookie jar for us and also an oauth_token
             self.authenticate(**kwargs)
-
-        headers['Authorization'] = self._get_basic_authorization_header()
+        if self.oauth_token:
+            # If we have an oauth token, we just use a bearer header
+            headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
