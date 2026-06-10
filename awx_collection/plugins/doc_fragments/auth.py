@@ -34,7 +34,8 @@ options:
     aliases: [ tower_password , aap_password ]
   aap_token:
     description:
-    - The OAuth token to use.
+    - The OAuth token to use, sent as a Bearer token in the Authorization header.
+    - When connecting through the AAP gateway, use a token issued by the gateway.
     - This value can be in one of two formats.
     - A string which is the token itself. (i.e. bqV5txm97wqJqtkxlMkhQz0pKhRMMX)
     - A dictionary structure as returned by the token module.

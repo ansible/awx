@@ -42,7 +42,8 @@ options:
         alternatives: 'TOWER_PASSWORD, AAP_PASSWORD'
   aap_token:
     description:
-    - The OAuth token to use.
+    - The OAuth token to use, sent as a Bearer token in the Authorization header.
+    - When connecting through the AAP gateway, use a token issued by the gateway.
     env:
     - name: AAP_TOKEN
       deprecated:
