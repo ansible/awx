@@ -40,15 +40,14 @@ options:
         version: '4.0.0'
         why: Collection name change
         alternatives: 'TOWER_PASSWORD, AAP_PASSWORD'
-  aap_token:
+  oauth_token:
     description:
     - The OAuth token to use.
+    - This value can be a string which is the token itself, or a dictionary as returned by the token module.
     env:
+    - name: CONTROLLER_OAUTH_TOKEN
     - name: AAP_TOKEN
-      deprecated:
-        collection_name: 'awx.awx'
-        version: '4.0.0'
-        why: Collection name change
+    aliases: [ aap_token ]
   verify_ssl:
     description:
     - Specify whether Ansible should verify the SSL certificate of the controller host.
