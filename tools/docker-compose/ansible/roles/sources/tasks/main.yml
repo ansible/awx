@@ -158,12 +158,18 @@
   loop_control:
     label: "{{ item.name }}"
   loop:
-    - { name: splunk, enabled: "{{ enable_splunk }}" }
-    - { name: prometheus, enabled: "{{ enable_prometheus }}" }
-    - { name: grafana, enabled: "{{ enable_grafana }}" }
-    - { name: otel, enabled: "{{ enable_otel }}" }
-    - { name: loki, enabled: "{{ enable_loki }}" }
-    - { name: minikube, enabled: "{{ minikube_container_group }}" }
+    - name: splunk
+      enabled: "{{ enable_splunk }}"
+    - name: prometheus
+      enabled: "{{ enable_prometheus }}"
+    - name: grafana
+      enabled: "{{ enable_grafana }}"
+    - name: otel
+      enabled: "{{ enable_otel }}"
+    - name: loki
+      enabled: "{{ enable_loki }}"
+    - name: minikube
+      enabled: "{{ minikube_container_group }}"
 
 - name: Render pgbouncer override
   template:
