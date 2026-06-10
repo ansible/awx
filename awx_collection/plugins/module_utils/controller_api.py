@@ -798,11 +798,63 @@ class ControllerAPIModule(ControllerModule):
                 },
             )
 
+    def _authenticate_create_token(self, app_key=None):
+        # Try to create a token via the appropriate endpoint.
+        # Does not raise on failure — returns silently so the caller can try other endpoints.
+        if self.username and self.password:
+            login_data = {
+                "description": "Automation Platform Controller Module Token",
+                "application": None,
+                "scope": "write",
+            }
+
+            api_token_url = self.build_url("tokens", app_key=app_key).geturl()
+            try:
+                response = self.session.open(
+                    'POST',
+                    api_token_url,
+                    validate_certs=self.verify_ssl,
+                    timeout=self.request_timeout,
+                    follow_redirects=True,
+                    data=dumps(login_data),
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": self._get_basic_authorization_header(),
+                    },
+                )
+
+            except Exception as exp:
+                self.warn("url: {0} - Failed to get token: {1}".format(api_token_url, exp))
+                return
+
+            token_response = None
+            try:
+                token_response = response.read()
+                response_json = loads(token_response)
+                self.oauth_token = response_json['token']
+            except Exception as exp:
+                self.warn(
+                    "url: {0} - Failed to extract token information from login response: {1}, response: {2}".format(
+                        api_token_url, exp, token_response,
+                    )
+                )
+
     def authenticate(self, **kwargs):
-        try:
-            self._authenticate_with_basic_auth()
-        except Exception as exp:
-            self.fail_json(msg='Failed to get user info: {0}'.format(exp))
+        # Try to get a token by using basic authentication from:
+        #   /api/gateway/v1/tokens/ when app_key is gateway
+        #   /api/v2/tokens/ when app_key is None and _COLLECTION_TYPE = "awx"
+        #   /api/controller/v2/tokens/ when app_key is None and _COLLECTION_TYPE != "awx"
+        for app_key in ["gateway", None]:
+            self._authenticate_create_token(app_key=app_key)
+            if self.oauth_token:
+                break
+
+        if not self.oauth_token:
+            # If we don't have a token, fall back to basic authentication
+            try:
+                self._authenticate_with_basic_auth()
+            except Exception as exp:
+                self.fail_json(msg='Failed to get user info: {0}'.format(exp))
 
         self.authenticated = True
 
