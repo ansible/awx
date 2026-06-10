@@ -50,6 +50,7 @@ options:
         collection_name: 'awx.awx'
         version: '4.0.0'
         why: Collection name change
+    aliases: [ controller_oauthtoken, tower_oauthtoken ]
   verify_ssl:
     description:
     - Specify whether Ansible should verify the SSL certificate of the controller host.

@@ -42,6 +42,7 @@ options:
     - If value not set, will try environment variable C(CONTROLLER_OAUTH_TOKEN) and then config files
     type: raw
     version_added: "3.7.0"
+    aliases: [ controller_oauthtoken, tower_oauthtoken ]
   validate_certs:
     description:
     - Whether to allow insecure connections to AWX.

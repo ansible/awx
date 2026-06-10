@@ -100,6 +100,7 @@ class ControllerModule(AnsibleModule):
         aap_token=dict(
             type='raw',
             no_log=True,
+            aliases=['controller_oauthtoken', 'tower_oauthtoken'],
             required=False,
             fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
         ),
