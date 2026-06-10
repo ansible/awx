@@ -163,13 +163,7 @@ class ControllerModule(AnsibleModule):
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
 
-        # aap_token can be the token string itself, or the dict that the
-        # ansible.platform.token module sets as the aap_token fact
-        if isinstance(self.aap_token, dict):
-            if 'token' in self.aap_token:
-                self.aap_token = self.aap_token['token']
-            else:
-                self.fail_json(msg="The provided dict in aap_token did not properly contain the token entry")
+        self._parse_aap_token()
 
         # Perform some basic validation
         if not self.host.startswith(("https://", "http://")):  # NOSONAR
@@ -196,6 +190,15 @@ class ControllerModule(AnsibleModule):
                     sockaddr[0]
         except Exception as e:
             self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
+
+    def _parse_aap_token(self):
+        # aap_token can be the token string itself, or the dict that the
+        # ansible.platform.token module sets as the aap_token fact
+        if isinstance(self.aap_token, dict):
+            if 'token' in self.aap_token:
+                self.aap_token = self.aap_token['token']
+            else:
+                self.fail_json(msg="The provided dict in aap_token did not properly contain the token entry")
 
     def build_url(self, endpoint, query_params=None, app_key=None):
         # Make sure we start with /api/vX
@@ -583,17 +586,7 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        if self.aap_token:
-            # A token (e.g. issued by the AAP gateway) is validated by the server on
-            # every request, so no login round-trip is needed
-            headers['Authorization'] = 'Bearer {0}'.format(self.aap_token)
-        else:
-            # Authenticate to AWX (if not already done so)
-            if not self.authenticated:
-                # This method will set a cookie in the cookie jar for us
-                self.authenticate(**kwargs)
-
-            headers['Authorization'] = self._get_basic_authorization_header()
+        headers['Authorization'] = self._get_authorization_header(**kwargs)
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -776,6 +769,19 @@ class ControllerAPIModule(ControllerModule):
             prefix = "{0}/".format(prefix)
 
         return prefix
+
+    def _get_authorization_header(self, **kwargs):
+        if self.aap_token:
+            # A token (e.g. issued by the AAP gateway) is validated by the server on
+            # every request, so no login round-trip is needed
+            return 'Bearer {0}'.format(self.aap_token)
+
+        # Authenticate to AWX (if not already done so)
+        if not self.authenticated:
+            # This method will set a cookie in the cookie jar for us
+            self.authenticate(**kwargs)
+
+        return self._get_basic_authorization_header()
 
     def _get_basic_authorization_header(self):
         basic_credentials = b64encode("{0}:{1}".format(self.username, self.password).encode()).decode()
