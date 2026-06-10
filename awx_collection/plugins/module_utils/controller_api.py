@@ -595,6 +595,8 @@ class ControllerAPIModule(ControllerModule):
         if self.oauth_token:
             # If we have an oauth token, we just use a bearer header
             headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
+        elif self.username and self.password:
+            headers['Authorization'] = self._get_basic_authorization_header()
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')

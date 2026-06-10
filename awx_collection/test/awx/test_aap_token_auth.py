@@ -7,7 +7,6 @@ import sys
 
 from unittest import mock
 
-import pytest
 from requests.models import Response
 
 
@@ -41,19 +40,33 @@ class TestAapTokenParsing:
 
     def test_dict_token_missing_token_key(self, collection_import):
         ControllerAPIModule = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
-        with pytest.raises(SystemExit):
-            ControllerAPIModule(
-                argument_spec={},
-                direct_params={'controller_host': 'https://localhost', 'aap_token': {'id': 1}},
-            )
+        error_messages = []
+
+        def error_callback(**kwargs):
+            error_messages.append(kwargs.get('msg', ''))
+
+        ControllerAPIModule(
+            argument_spec={},
+            direct_params={'controller_host': 'https://localhost', 'aap_token': {'id': 1}},
+            error_callback=error_callback,
+        )
+        assert len(error_messages) == 1
+        assert 'did not properly contain the token entry' in error_messages[0]
 
     def test_invalid_token_type(self, collection_import):
         ControllerAPIModule = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
-        with pytest.raises(SystemExit):
-            ControllerAPIModule(
-                argument_spec={},
-                direct_params={'controller_host': 'https://localhost', 'aap_token': 12345},
-            )
+        error_messages = []
+
+        def error_callback(**kwargs):
+            error_messages.append(kwargs.get('msg', ''))
+
+        ControllerAPIModule(
+            argument_spec={},
+            direct_params={'controller_host': 'https://localhost', 'aap_token': 12345},
+            error_callback=error_callback,
+        )
+        assert len(error_messages) == 1
+        assert 'not valid' in error_messages[0]
 
     def test_no_token(self, collection_import):
         ControllerAPIModule = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
