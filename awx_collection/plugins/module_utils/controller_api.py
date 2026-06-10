@@ -97,7 +97,7 @@ class ControllerModule(AnsibleModule):
             required=False,
             fallback=(env_fallback, ['AAP_RETRY_BACKOFF_FACTOR'])),
         aap_token=dict(
-            type='str',
+            type='raw',
             no_log=True,
             aliases=['controller_oauthtoken', 'tower_oauthtoken'],
             required=False,
@@ -162,6 +162,14 @@ class ControllerModule(AnsibleModule):
             direct_value = self.params.get(long_param)
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
+
+        # aap_token can be the token string itself, or the dict that the
+        # ansible.platform.token module sets as the aap_token fact
+        if isinstance(self.aap_token, dict):
+            if 'token' in self.aap_token:
+                self.aap_token = self.aap_token['token']
+            else:
+                self.fail_json(msg="The provided dict in aap_token did not properly contain the token entry")
 
         # Perform some basic validation
         if not self.host.startswith(("https://", "http://")):  # NOSONAR
