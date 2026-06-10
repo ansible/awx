@@ -6,36 +6,18 @@ MINIKUBE_CONTAINER_GROUP ?= false
 MINIKUBE_SETUP ?= false
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
 
-# Build the list of compose files from the base + optional overrides.
-# Static overrides live in tools/docker-compose/overrides/ (tracked in git).
-# Dynamic overrides are rendered by Ansible into _sources/overrides/.
+# Build the list of compose files from the base + active overrides.
+# `docker-compose-sources` activates every enabled override into
+# _sources/overrides/: static ones (splunk, prometheus, grafana, otel, loki,
+# minikube) are copied from tools/docker-compose/overrides/, dynamic ones
+# (vault, pgbouncer, execution-nodes, editable-deps) are rendered from J2
+# templates. The wildcard picks up whatever the last sources run activated,
+# so enabled-service state is remembered between make invocations — exactly
+# like the old monolithic rendered docker-compose.yml.
 # Uses = (not :=) so $(wildcard) is evaluated at use-time, after
-# docker-compose-sources has rendered the dynamic files.
+# docker-compose-sources has rendered the files.
 COMPOSE_FILES = -f tools/docker-compose/_sources/docker-compose.yml
-ifeq ($(SPLUNK),true)
-  COMPOSE_FILES += -f tools/docker-compose/overrides/splunk.yml
-endif
-ifeq ($(PROMETHEUS),true)
-  COMPOSE_FILES += -f tools/docker-compose/overrides/prometheus.yml
-endif
-ifeq ($(GRAFANA),true)
-  COMPOSE_FILES += -f tools/docker-compose/overrides/grafana.yml
-endif
-ifeq ($(VAULT),true)
-  COMPOSE_FILES += -f tools/docker-compose/_sources/overrides/vault.yml
-endif
-ifeq ($(PGBOUNCER),true)
-  COMPOSE_FILES += -f tools/docker-compose/_sources/overrides/pgbouncer.yml
-endif
-ifeq ($(OTEL),true)
-  COMPOSE_FILES += -f tools/docker-compose/overrides/otel.yml
-endif
-ifeq ($(LOKI),true)
-  COMPOSE_FILES += -f tools/docker-compose/overrides/loki.yml
-endif
-COMPOSE_FILES += $(patsubst %,-f %,$(wildcard tools/docker-compose/_sources/overrides/execution-nodes.yml))
-COMPOSE_FILES += $(patsubst %,-f %,$(wildcard tools/docker-compose/_sources/overrides/editable-deps.yml))
-COMPOSE_FILES += $(patsubst %,-f %,$(wildcard tools/docker-compose/_sources/overrides/minikube.yml))
+COMPOSE_FILES += $(patsubst %,-f %,$(sort $(wildcard tools/docker-compose/_sources/overrides/*.yml)))
 
 ifneq ($(ADMIN_PASSWORD),)
 	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
@@ -126,7 +108,7 @@ docker-compose-build: Dockerfile.dev
 docker-compose-buildx: Dockerfile.dev
 	- docker buildx create --name docker-compose-buildx
 	docker buildx use docker-compose-buildx
-	- docker buildx build \
+	docker buildx build \
 		--ssh default=$(SSH_AUTH_SOCK) \
 		--push \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \

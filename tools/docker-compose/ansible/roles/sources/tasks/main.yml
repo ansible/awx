@@ -132,20 +132,38 @@
     dest: "{{ sources_dest }}/{{ compose_name }}"
     mode: '0600'
 
-# --- Dynamic override files (rendered into _sources/overrides/) ---
-# Static overrides live in tools/docker-compose/overrides/ and are
-# referenced directly by the Makefile — no copying needed.
+# --- Override files (activated into _sources/overrides/) ---
+# The Makefile includes every file in _sources/overrides/ via $(wildcard),
+# so this directory is the single source of truth for which optional
+# services are enabled. Static overrides are copied from
+# tools/docker-compose/overrides/, dynamic ones are rendered from J2.
 
-- name: Clean stale dynamic override files
+- name: Clean stale override files
   file:
     path: "{{ sources_dest }}/overrides"
     state: absent
 
-- name: Recreate dynamic overrides directory
+- name: Recreate overrides directory
   file:
     path: "{{ sources_dest }}/overrides"
     state: directory
     mode: '0700'
+
+- name: Activate static overrides for enabled services
+  copy:
+    src: "{{ playbook_dir }}/../overrides/{{ item.name }}.yml"
+    dest: "{{ sources_dest }}/overrides/{{ item.name }}.yml"
+    mode: '0600'
+  when: item.enabled | bool
+  loop_control:
+    label: "{{ item.name }}"
+  loop:
+    - { name: splunk, enabled: "{{ enable_splunk }}" }
+    - { name: prometheus, enabled: "{{ enable_prometheus }}" }
+    - { name: grafana, enabled: "{{ enable_grafana }}" }
+    - { name: otel, enabled: "{{ enable_otel }}" }
+    - { name: loki, enabled: "{{ enable_loki }}" }
+    - { name: minikube, enabled: "{{ minikube_container_group }}" }
 
 - name: Render pgbouncer override
   template:
@@ -167,13 +185,6 @@
     dest: "{{ sources_dest }}/overrides/execution-nodes.yml"
     mode: '0600'
   when: execution_node_count | int > 0
-
-- name: Copy minikube override
-  copy:
-    src: "overrides/minikube.yml"
-    dest: "{{ sources_dest }}/overrides/minikube.yml"
-    mode: '0600'
-  when: minikube_container_group | bool
 
 - name: Render editable-deps override
   template:

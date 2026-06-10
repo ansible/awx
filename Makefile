@@ -519,6 +519,20 @@ sdist: dist/$(SDIST_TAR_FILE)
 awx/projects:
 	@mkdir -p $@
 
+awx-tui:
+	@if ! command -v awx-tui > /dev/null 2>&1; then \
+		$(PYTHON) -m pip install awx-tui; \
+	fi
+	@if [ -f "$(HOME)/.config/awx-tui/config.yaml" ]; then \
+		$(PYTHON) -m awx_tui.main; \
+	else \
+		AWX_HOST=$(AWX_HOST) \
+		AWX_USER=$(AWX_USER) \
+		AWX_PASSWORD=$(AWX_PASSWORD) \
+		AWX_VERIFY_SSL=$(AWX_VERIFY_SSL) \
+		$(PYTHON) -m awx_tui.main --host $(AWX_HOST); \
+	fi
+
 SCHEMA_DIFF_BASE_FOLDER ?= awx
 SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
