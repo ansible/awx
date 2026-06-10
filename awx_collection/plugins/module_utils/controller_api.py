@@ -7,7 +7,6 @@ from ansible.module_utils.urls import Request, SSLValidationError, ConnectionErr
 from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six import raise_from
-from ansible.module_utils.six import string_types
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
@@ -98,7 +97,7 @@ class ControllerModule(AnsibleModule):
             required=False,
             fallback=(env_fallback, ['AAP_RETRY_BACKOFF_FACTOR'])),
         aap_token=dict(
-            type='raw',
+            type='str',
             no_log=True,
             aliases=['controller_oauthtoken', 'tower_oauthtoken'],
             required=False,
@@ -126,7 +125,6 @@ class ControllerModule(AnsibleModule):
     username = None
     password = None
     aap_token = None
-    oauth_token = None
     verify_ssl = True
     request_timeout = 10
     max_retries = 5
@@ -164,20 +162,6 @@ class ControllerModule(AnsibleModule):
             direct_value = self.params.get(long_param)
             if direct_value is not None:
                 setattr(self, short_param, direct_value)
-
-        # aap_token (e.g. a token issued by the AAP gateway) can be either the token
-        # string itself or a dict as returned by a token module
-        if self.aap_token:
-            if isinstance(self.aap_token, dict):
-                if 'token' in self.aap_token:
-                    self.oauth_token = self.aap_token['token']
-                else:
-                    self.fail_json(msg="The provided dict in aap_token did not properly contain the token entry")
-            elif isinstance(self.aap_token, string_types):
-                self.oauth_token = self.aap_token
-            else:
-                error_msg = "The provided aap_token type was not valid ({0}). Valid options are str or dict.".format(type(self.aap_token).__name__)
-                self.fail_json(msg=error_msg)
 
         # Perform some basic validation
         if not self.host.startswith(("https://", "http://")):  # NOSONAR
@@ -591,10 +575,10 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        if self.oauth_token:
+        if self.aap_token:
             # A token (e.g. issued by the AAP gateway) is validated by the server on
             # every request, so no login round-trip is needed
-            headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
+            headers['Authorization'] = 'Bearer {0}'.format(self.aap_token)
         else:
             # Authenticate to AWX (if not already done so)
             if not self.authenticated:

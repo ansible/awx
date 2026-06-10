@@ -34,8 +34,8 @@ class ControllerAWXKitModule(ControllerModule):
 
     def authenticate(self):
         try:
-            if self.oauth_token:
-                self.connection.session.headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
+            if self.aap_token:
+                self.connection.session.headers['Authorization'] = 'Bearer {0}'.format(self.aap_token)
             else:
                 self.connection.login(username=self.username, password=self.password)
             self.authenticated = True

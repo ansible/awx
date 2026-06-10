@@ -36,11 +36,8 @@ options:
     description:
     - The OAuth token to use, sent as a Bearer token in the Authorization header.
     - When connecting through the AAP gateway, use a token issued by the gateway.
-    - This value can be in one of two formats.
-    - A string which is the token itself. (i.e. bqV5txm97wqJqtkxlMkhQz0pKhRMMX)
-    - A dictionary structure as returned by the token module.
     - If value not set, will try environment variable C(CONTROLLER_OAUTH_TOKEN) and then config files
-    type: raw
+    type: str
     version_added: "3.7.0"
     aliases: [ controller_oauthtoken, tower_oauthtoken ]
   validate_certs:
