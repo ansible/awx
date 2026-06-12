@@ -311,8 +311,8 @@ class ControllerModule(AnsibleModule):
         except Exception as e:
             raise_from(ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)), e)
 
-        # Backward compatibility: config files written for older collection versions
-        # (4.6.0 and earlier) used the oauth_token key; map it to aap_token.
+        # Backward compatibility: config files written for older collection
+        # releases used the oauth_token key; map it to aap_token.
         # If both keys are present, the new aap_token key wins.
         if 'oauth_token' in config_data and 'aap_token' not in config_data:
             config_data['aap_token'] = config_data['oauth_token']

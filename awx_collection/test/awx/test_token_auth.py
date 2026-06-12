@@ -81,7 +81,7 @@ def test_aap_token_legacy_aliases(collection_import, param):
 
 
 def test_lookup_oauth_token_option_maps_to_aap_token(collection_import):
-    # The 4.6.0-era lookup/inventory plugins pass options through as direct
+    # Older lookup/inventory plugin releases pass options through as direct
     # params keyed by the plugin option name; oauth_token must resolve to
     # aap_token via the argspec alias.
     module = make_module(collection_import, {'oauth_token': 'plugin-token'})
@@ -95,7 +95,7 @@ def test_lookup_oauth_token_option_maps_to_aap_token(collection_import):
 
 
 def test_config_file_legacy_oauth_token_key(collection_import, tmp_path):
-    # tower_cli.cfg-style config files from 4.6.0 used the oauth_token key
+    # tower_cli.cfg-style config files from older releases used the oauth_token key
     config_file = tmp_path / 'tower_cli.cfg'
     config_file.write_text('[general]\nhost = https://127.0.0.1\noauth_token = ini-legacy-token\n')
 
