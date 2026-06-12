@@ -58,7 +58,7 @@ options:
         why: Collection name change
         alternatives: 'AAP_TOKEN'
     - name: AAP_TOKEN
-    aliases: [ controller_oauthtoken, tower_oauthtoken ]
+    aliases: [ oauth_token, controller_oauthtoken, tower_oauthtoken ]
   verify_ssl:
     description:
     - Specify whether Ansible should verify the SSL certificate of the controller host.

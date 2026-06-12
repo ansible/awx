@@ -99,7 +99,7 @@ class ControllerModule(AnsibleModule):
         aap_token=dict(
             type='raw',
             no_log=True,
-            aliases=['controller_oauthtoken', 'tower_oauthtoken'],
+            aliases=['oauth_token', 'controller_oauthtoken', 'tower_oauthtoken'],
             required=False,
             fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN', 'AAP_TOKEN'])
         ),
@@ -298,7 +298,8 @@ class ControllerModule(AnsibleModule):
 
                     # If we made it here then we have values from reading the ini file, so let's pull them out into a dict
                     config_data = {}
-                    for honorred_setting in self.short_params:
+                    # 'oauth_token' is the legacy (pre-aap_token) config file key, kept for backward compatibility
+                    for honorred_setting in list(self.short_params) + ['oauth_token']:
                         try:
                             config_data[honorred_setting] = config.get('general', honorred_setting)
                         except NoOptionError:
@@ -309,6 +310,12 @@ class ControllerModule(AnsibleModule):
 
         except Exception as e:
             raise_from(ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)), e)
+
+        # Backward compatibility: config files written for older collection versions
+        # (4.6.0 and earlier) used the oauth_token key; map it to aap_token.
+        # If both keys are present, the new aap_token key wins.
+        if 'oauth_token' in config_data and 'aap_token' not in config_data:
+            config_data['aap_token'] = config_data['oauth_token']
 
         # If we made it here, we have a dict which has values in it from our config, any final settings logic can be performed here
         for honorred_setting in self.short_params:
