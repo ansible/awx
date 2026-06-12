@@ -91,6 +91,7 @@ class ApiVersionRootView(APIView):
         data['credential_types'] = reverse('api:credential_type_list', request=request)
         data['credential_input_sources'] = reverse('api:credential_input_source_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
+        data['candlepin_cert'] = reverse('api:candlepin_cert_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['constructed_inventory'] = reverse('api:constructed_inventory_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
