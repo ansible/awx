@@ -45,6 +45,10 @@ def make_module(collection_import, module_args, **kwargs):
     # patch the cached args directly: AnsibleModule caches sys.argv parsing in
     # basic._ANSIBLE_ARGS, so patching sys.argv would leak args between tests
     with mock.patch.object(basic, '_ANSIBLE_ARGS', to_bytes(json.dumps(cli_data))):
+        # ansible-core 2.21+ also requires a serialization profile alongside the args
+        if hasattr(basic, '_ANSIBLE_PROFILE'):
+            with mock.patch.object(basic, '_ANSIBLE_PROFILE', 'legacy'):
+                return ControllerAPIModule(argument_spec=dict(), **kwargs)
         return ControllerAPIModule(argument_spec=dict(), **kwargs)
 
 
@@ -70,10 +74,41 @@ def test_aap_token_sends_bearer_header(collection_import, token_value):
     assert module.authenticated is False
 
 
-@pytest.mark.parametrize('param', ['controller_oauthtoken', 'tower_oauthtoken'])
+@pytest.mark.parametrize('param', ['oauth_token', 'controller_oauthtoken', 'tower_oauthtoken'])
 def test_aap_token_legacy_aliases(collection_import, param):
     module = make_module(collection_import, {param: 'legacy-token'})
     assert module.aap_token == 'legacy-token'
+
+
+def test_lookup_oauth_token_option_maps_to_aap_token(collection_import):
+    # Older lookup/inventory plugin releases pass options through as direct
+    # params keyed by the plugin option name; oauth_token must resolve to
+    # aap_token via the argspec alias.
+    module = make_module(collection_import, {'oauth_token': 'plugin-token'})
+    assert module.aap_token == 'plugin-token'
+
+    opener, calls = make_recorder()
+    with mock.patch('ansible.module_utils.urls.Request.open', new=opener):
+        module.get_endpoint('ping')
+
+    assert calls[0]['headers']['Authorization'] == 'Bearer plugin-token'
+
+
+def test_config_file_legacy_oauth_token_key(collection_import, tmp_path):
+    # tower_cli.cfg-style config files from older releases used the oauth_token key
+    config_file = tmp_path / 'tower_cli.cfg'
+    config_file.write_text('[general]\nhost = https://127.0.0.1\noauth_token = ini-legacy-token\n')
+
+    module = make_module(collection_import, {'controller_config_file': str(config_file)})
+    assert module.aap_token == 'ini-legacy-token'
+
+
+def test_config_file_aap_token_wins_over_legacy_key(collection_import, tmp_path):
+    config_file = tmp_path / 'tower_cli.cfg'
+    config_file.write_text('[general]\nhost = https://127.0.0.1\noauth_token = ini-legacy-token\naap_token = ini-new-token\n')
+
+    module = make_module(collection_import, {'controller_config_file': str(config_file)})
+    assert module.aap_token == 'ini-new-token'
 
 
 def test_aap_token_dict_without_token_entry_fails(collection_import):
