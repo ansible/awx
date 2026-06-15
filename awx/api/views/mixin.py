@@ -4,7 +4,8 @@
 import dateutil
 import logging
 
-from django.db.models import Count
+from django.db.models import Count, IntegerField, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -15,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from awx.main.constants import ACTIVE_STATES
-from awx.main.models import Organization
+from awx.main.models import Organization, Role
 from awx.main.utils import get_object_or_400
 from awx.main.models.ha import Instance, InstanceGroup, schedule_policy_task
 from awx.main.models.organization import Team
@@ -178,9 +179,22 @@ class OrganizationCountsMixin(object):
         db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
         # Other members and admins of organization are always viewable
-        db_results['users'] = org_qs.annotate(users=Count('member_role__members', distinct=True), admins=Count('admin_role__members', distinct=True)).values(
-            'id', 'users', 'admins'
+        #
+        # Use independent subqueries instead of double-JOIN Count to avoid
+        # cartesian product.
+        RoleMember = Role.members.through
+        member_count = Subquery(
+            RoleMember.objects.filter(role_id=OuterRef('member_role_id')).values('role_id').annotate(cnt=Count('user_id', distinct=True)).values('cnt'),
+            output_field=IntegerField(),
         )
+        admin_count = Subquery(
+            RoleMember.objects.filter(role_id=OuterRef('admin_role_id')).values('role_id').annotate(cnt=Count('user_id', distinct=True)).values('cnt'),
+            output_field=IntegerField(),
+        )
+        db_results['users'] = org_qs.annotate(
+            users=Coalesce(member_count, 0),
+            admins=Coalesce(admin_count, 0),
+        ).values('id', 'users', 'admins')
 
         count_context = {}
         for org in org_id_list:

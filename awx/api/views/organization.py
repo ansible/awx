@@ -5,7 +5,8 @@
 import logging
 
 # Django
-from django.db.models import Count
+from django.db.models import Count, IntegerField, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -77,10 +78,19 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
 
         org_counts = {}
         access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
+        # Use independent subqueries instead of double-JOIN Count to avoid
+        # cartesian product.
+        RoleMember = Role.members.through
+        member_count = Subquery(
+            RoleMember.objects.filter(role_id=OuterRef('member_role_id')).values('role_id').annotate(cnt=Count('user_id', distinct=True)).values('cnt'),
+            output_field=IntegerField(),
+        )
+        admin_count = Subquery(
+            RoleMember.objects.filter(role_id=OuterRef('admin_role_id')).values('role_id').annotate(cnt=Count('user_id', distinct=True)).values('cnt'),
+            output_field=IntegerField(),
+        )
         direct_counts = (
-            Organization.objects.filter(id=org_id)
-            .annotate(users=Count('member_role__members', distinct=True), admins=Count('admin_role__members', distinct=True))
-            .values('users', 'admins')
+            Organization.objects.filter(id=org_id).annotate(users=Coalesce(member_count, 0), admins=Coalesce(admin_count, 0)).values('users', 'admins')
         )
 
         if not direct_counts:
