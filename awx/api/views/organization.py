@@ -80,13 +80,19 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
         # Use independent subqueries instead of double-JOIN Count to avoid
         # cartesian product.
-        RoleMember = Role.members.through
+        role_members_through = Role.members.through
         member_count = Subquery(
-            RoleMember.objects.filter(role_id=OuterRef('member_role_id')).values('role_id').annotate(cnt=Count('user_id', distinct=True)).values('cnt'),
+            role_members_through.objects.filter(role_id=OuterRef('member_role_id'))
+            .values('role_id')
+            .annotate(cnt=Count('user_id', distinct=True))
+            .values('cnt'),
             output_field=IntegerField(),
         )
         admin_count = Subquery(
-            RoleMember.objects.filter(role_id=OuterRef('admin_role_id')).values('role_id').annotate(cnt=Count('user_id', distinct=True)).values('cnt'),
+            role_members_through.objects.filter(role_id=OuterRef('admin_role_id'))
+            .values('role_id')
+            .annotate(cnt=Count('user_id', distinct=True))
+            .values('cnt'),
             output_field=IntegerField(),
         )
         direct_counts = (
