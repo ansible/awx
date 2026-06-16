@@ -147,3 +147,47 @@ class CandlepinRenewView(APIView):
 
         logger.info('Candlepin renewal completed via API (consumer_uuid=%s)', consumer_uuid)
         return Response(_cert_response_data(cert_pem, key_pem, consumer_uuid))
+
+
+class CandlepinLifecycleView(APIView):
+    """Single-call endpoint: register if no cert, then check in and renew if needed, return cert.
+
+    Designed for external service integrations (e.g. metrics-service) that need
+    a valid mTLS certificate without managing the register/renew steps separately.
+    Returns 201 on first registration, 200 on subsequent calls.
+    Returns 400 if no cert exists and registration fails (credentials not configured).
+    """
+
+    name = _('Candlepin Lifecycle')
+    permission_classes = (IsSystemAdmin,)
+    swagger_topic = 'System Configuration'
+    resource_purpose = 'candlepin lifecycle - register if needed, renew if needed, return cert'
+
+    def post(self, request, format=None):
+        newly_registered = False
+
+        cert_pem, key_pem, consumer_uuid = _fetch_candlepin_cert_from_db()
+
+        if not cert_pem or not key_pem:
+            cert_pem, key_pem, consumer_uuid = _register_candlepin_consumer()
+            if not cert_pem or not key_pem:
+                return Response(
+                    {
+                        'error': (
+                            'No Candlepin certificate found and registration failed. '
+                            'Ensure REDHAT_USERNAME and REDHAT_PASSWORD are configured in AWX settings.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            newly_registered = True
+            logger.info('Candlepin consumer registered via lifecycle endpoint (consumer_uuid=%s)', consumer_uuid)
+
+        if consumer_uuid:
+            cert_pem, key_pem = _run_candlepin_lifecycle(cert_pem, key_pem, consumer_uuid)
+
+        logger.info('Candlepin lifecycle completed via API (consumer_uuid=%s)', consumer_uuid)
+        return Response(
+            _cert_response_data(cert_pem, key_pem, consumer_uuid),
+            status=status.HTTP_201_CREATED if newly_registered else status.HTTP_200_OK,
+        )

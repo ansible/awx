@@ -34,7 +34,7 @@ from awx.api.views.bulk import (
     BulkJobLaunchView,
 )
 
-from awx.api.views.candlepin import CandlepinCertView, CandlepinRegisterView, CandlepinRenewView
+from awx.api.views.candlepin import CandlepinCertView, CandlepinRegisterView, CandlepinRenewView, CandlepinLifecycleView
 from awx.api.views.mesh_visualizer import MeshVisualizer
 
 from awx.api.views.metrics import MetricsView
@@ -97,6 +97,7 @@ v2_urls = [
     re_path(r'^candlepin/cert/$', CandlepinCertView.as_view(), name='candlepin_cert_view'),
     re_path(r'^candlepin/register/$', CandlepinRegisterView.as_view(), name='candlepin_register_view'),
     re_path(r'^candlepin/renew/$', CandlepinRenewView.as_view(), name='candlepin_renew_view'),
+    re_path(r'^candlepin/lifecycle/$', CandlepinLifecycleView.as_view(), name='candlepin_lifecycle_view'),
     re_path(r'^me/$', UserMeList.as_view(), name='user_me_list'),
     re_path(r'^dashboard/$', DashboardView.as_view(), name='dashboard_view'),
     re_path(r'^dashboard/graphs/jobs/$', DashboardJobsGraphView.as_view(), name='dashboard_jobs_graph_view'),

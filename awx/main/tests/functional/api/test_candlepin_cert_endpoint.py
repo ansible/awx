@@ -119,3 +119,41 @@ class TestCandlepinRenewView:
 
     def test_regular_user_is_forbidden(self, post, alice):
         post(self.url(), {}, alice, expect=403)
+
+
+@pytest.mark.django_db
+class TestCandlepinLifecycleView:
+    def url(self):
+        return reverse('api:candlepin_lifecycle_view')
+
+    def test_registers_and_returns_201_when_no_cert(self, post, admin):
+        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), \
+             mock.patch(MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
+             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
+            r = post(self.url(), {}, admin, expect=201)
+        assert r.data['registered'] is True
+        assert r.data['consumer_uuid'] == SAMPLE_UUID
+
+    def test_returns_200_when_cert_exists(self, post, admin):
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
+             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
+            r = post(self.url(), {}, admin, expect=200)
+        assert r.data['registered'] is True
+
+    def test_runs_lifecycle_when_cert_exists(self, post, admin):
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
+             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)) as mock_lc:
+            post(self.url(), {}, admin, expect=200)
+        mock_lc.assert_called_once_with(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)
+
+    def test_registration_failure_returns_400(self, post, admin):
+        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), \
+             mock.patch(MOCK_REGISTER, return_value=(None, None, None)):
+            r = post(self.url(), {}, admin, expect=400)
+        assert 'error' in r.data
+
+    def test_unauthenticated_is_rejected(self, post):
+        post(self.url(), {}, expect=401)
+
+    def test_regular_user_is_forbidden(self, post, alice):
+        post(self.url(), {}, alice, expect=403)
