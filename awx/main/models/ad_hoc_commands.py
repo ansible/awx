@@ -211,7 +211,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return AdHocCommand.objects.create(**data)
 
     def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
 
         def add_to_update_fields(name):
             if name not in update_fields:

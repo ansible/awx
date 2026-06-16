@@ -215,6 +215,9 @@ LOCAL_STDOUT_EXPIRE_TIME = 2592000
 # events into the database
 JOB_EVENT_WORKERS = 4
 
+# Minimum number of workers for the dispatcher (dispatcherd) process pool
+DISPATCHER_MIN_WORKERS = 4
+
 # The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
 JOB_EVENT_BUFFER_SECONDS = 1
@@ -445,7 +448,7 @@ DISPATCHER_SCHEDULE = {
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
-CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
+CACHES = {'default': {'BACKEND': 'ansible_base.lib.cache.redis_cache.DABRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
 
 ROLE_SINGLETON_USER_RELATIONSHIP = ''
 ROLE_SINGLETON_TEAM_RELATIONSHIP = ''

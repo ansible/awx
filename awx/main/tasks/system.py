@@ -19,6 +19,7 @@ from dispatcherd.publish import task
 # Runner
 import ansible_runner.cleanup
 import psycopg
+from ansible_base.lib.cache.tasks import clear_cache as dab_clear_cache
 from ansible_base.lib.utils.db import advisory_lock
 
 # django-ansible-base
@@ -68,10 +69,12 @@ from awx.main.models import (
     UnifiedJob,
     convert_jsonfields,
 )
+from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
 
 logger = logging.getLogger('awx.main.tasks.system')
@@ -81,6 +84,16 @@ It looks like you're trying to use a private key in OpenSSH format, which \
 isn't supported by the installed version of OpenSSH on this instance. \
 Try upgrading OpenSSH or providing your private key in an different format. \
 '''
+
+
+def _sync_credential_types_to_db():
+    """Ensure CredentialType DB rows match the installed plugins.
+
+    The in-memory registry is populated lazily on first access via LazyLoadDict.
+    This function only handles the DB sync step.
+    """
+    if is_database_synchronized():
+        CredentialType.setup_tower_managed_defaults()
 
 
 def _run_dispatch_startup_common():
@@ -97,6 +110,11 @@ def _run_dispatch_startup_common():
             write_receptor_config()
         except Exception:
             logger.exception("Failed to write receptor config, skipping.")
+
+    try:
+        _sync_credential_types_to_db()
+    except Exception:
+        logger.exception("Failed to sync credential types to DB, skipping.")
 
     try:
         convert_jsonfields()
@@ -240,12 +258,17 @@ def apply_cluster_membership_policies():
         # Process policy instance list first, these will represent manually managed memberships
         instance_hostnames_map = {inst.hostname: inst for inst in all_instances}
         for ig in all_groups:
+            # we don't want to allow execution nodes in the control plane
+            exclude_type = 'execution' if ig.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
             group_actual = Group(obj=ig, instances=[], prior_instances=[instance.pk for instance in ig.instances.all()])  # obtained in prefetch
             for hostname in ig.policy_instance_list:
                 if hostname not in instance_hostnames_map:
                     logger.info("Unknown instance {} in {} policy list".format(hostname, ig.name))
                     continue
                 inst = instance_hostnames_map[hostname]
+                if inst.node_type == exclude_type:
+                    logger.info("Instance {} is excluded in {} policy list".format(hostname, ig.name))
+                    continue
                 group_actual.instances.append(inst.id)
                 # NOTE: arguable behavior: policy-list-group is not added to
                 # instance's group count for consideration in minimum-policy rules
@@ -326,22 +349,20 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_settings_change', timeout=600)
-def clear_setting_cache(setting_keys):
-    # log that cache is being cleared
-    logger.info(f"clear_setting_cache of keys {setting_keys}")
-    orig_len = len(setting_keys)
-    for i in range(orig_len):
-        for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
-            setting_keys.append(dependent_key)
-    cache_keys = set(setting_keys)
-    logger.debug('cache delete_many(%r)', cache_keys)
-    cache.delete_many(cache_keys)
+def _resolve_setting_dependents(key):
+    return settings_registry.get_dependent_settings(key)
 
-    if 'LOG_AGGREGATOR_LEVEL' in setting_keys:
+
+def _post_setting_invalidation(invalidated_keys):
+    if 'LOG_AGGREGATOR_LEVEL' in invalidated_keys:
         ctl = get_control_from_settings()
         ctl.queuename = get_task_queuename()
         ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
+
+
+@task(queue='tower_settings_change', timeout=600)
+def clear_setting_cache(setting_keys):
+    dab_clear_cache(setting_keys, _resolve_setting_dependents, _post_setting_invalidation)
 
 
 @task(queue='tower_broadcast_all', timeout=600)

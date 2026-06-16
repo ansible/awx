@@ -326,6 +326,22 @@ register(
 )
 
 register(
+    'INCLUDE_DEPRECATED_AWX_VAR_PREFIX',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Include Deprecated AWX Variable Prefix'),
+    help_text=_(
+        'When enabled (default), auto-generated job variables are emitted '
+        'with both the tower_ prefix and the deprecated awx_ prefix for '
+        'backward compatibility. Disable to emit only tower_ prefixed '
+        'variables and eliminate duplicates. The awx_ prefix is deprecated '
+        'and this setting will default to False in a future release.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_ISOLATION_BASE_PATH',
     field_class=fields.CharField,
     label=_('Job execution path'),

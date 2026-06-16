@@ -120,7 +120,7 @@ from awx.main.utils.named_url_graph import reset_counters
 from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
-from awx.main.signals import update_inventory_computed_fields
+from awx.main.tasks.system import update_inventory_computed_fields
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -5450,7 +5450,11 @@ class SchedulePreviewSerializer(BaseSerializer):
         for a_rule in match_multiple_rrule:
             if 'interval' not in a_rule.lower():
                 errors.append("{0}: {1}".format(_('INTERVAL required in rrule'), a_rule))
-            elif 'secondly' in a_rule.lower():
+            else:
+                match_interval = re.match(r".*?INTERVAL=([0-9]+)", a_rule)
+                if match_interval and int(match_interval.group(1)) < 1:
+                    errors.append("{0}: {1}".format(_("INTERVAL must be a positive integer"), a_rule))
+            if 'secondly' in a_rule.lower():
                 errors.append("{0}: {1}".format(_('SECONDLY is not supported'), a_rule))
             if re.match(by_day_with_numeric_prefix, a_rule):
                 errors.append("{0}: {1}".format(_("BYDAY with numeric prefix not supported"), a_rule))
