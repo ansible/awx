@@ -96,7 +96,12 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
             output_field=IntegerField(),
         )
         direct_counts = (
-            Organization.objects.filter(id=org_id).annotate(users=Coalesce(member_count, 0), admins=Coalesce(admin_count, 0)).values('users', 'admins')
+            Organization.objects.filter(id=org_id)
+            .annotate(
+                users=Coalesce(member_count, 0),
+                admins=Coalesce(admin_count, 0),
+            )
+            .values('users', 'admins')
         )
 
         if not direct_counts:
