@@ -56,8 +56,7 @@ class TestCandlepinRegisterView:
         return reverse('api:candlepin_register_view')
 
     def test_register_success_returns_201(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), \
-             mock.patch(MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)):
+        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), mock.patch(MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)):
             r = post(self.url(), {}, admin, expect=201)
         assert r.data['registered'] is True
         assert r.data['consumer_uuid'] == SAMPLE_UUID
@@ -68,14 +67,14 @@ class TestCandlepinRegisterView:
         assert 'error' in r.data
 
     def test_force_overwrites_existing_registration(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
-             mock.patch(MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)):
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), mock.patch(
+            MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)
+        ):
             r = post(self.url(), {'force': True}, admin, expect=201)
         assert r.data['registered'] is True
 
     def test_registration_failure_returns_400(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), \
-             mock.patch(MOCK_REGISTER, return_value=(None, None, None)):
+        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), mock.patch(MOCK_REGISTER, return_value=(None, None, None)):
             r = post(self.url(), {}, admin, expect=400)
         assert 'error' in r.data
 
@@ -92,8 +91,7 @@ class TestCandlepinRenewView:
         return reverse('api:candlepin_renew_view')
 
     def test_renew_success_returns_200(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
-             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
             r = post(self.url(), {}, admin, expect=200)
         assert r.data['registered'] is True
 
@@ -105,10 +103,9 @@ class TestCandlepinRenewView:
     def test_force_renew_bypasses_threshold(self, post, admin):
         new_cert = SAMPLE_CERT.replace('DUMMY', 'RENEWED')
         # run_candlepin_lifecycle is imported locally inside post(), so mock the source module
-        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
-             mock.patch('awx.main.utils.candlepin.lifecycle.run_candlepin_lifecycle', return_value=(new_cert, SAMPLE_KEY)) as mock_lifecycle, \
-             mock.patch(MOCK_LIFECYCLE, return_value=(new_cert, SAMPLE_KEY)), \
-             mock.patch('awx.api.views.candlepin._save_candlepin_cert_to_db'):
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), mock.patch(
+            'awx.main.utils.candlepin.lifecycle.run_candlepin_lifecycle', return_value=(new_cert, SAMPLE_KEY)
+        ) as mock_lifecycle, mock.patch(MOCK_LIFECYCLE, return_value=(new_cert, SAMPLE_KEY)), mock.patch('awx.api.views.candlepin._save_candlepin_cert_to_db'):
             r = post(self.url(), {'force': True}, admin, expect=200)
         # renewal_days=0 was passed to force renewal regardless of days remaining
         call_kwargs = mock_lifecycle.call_args[1]
@@ -127,28 +124,27 @@ class TestCandlepinLifecycleView:
         return reverse('api:candlepin_lifecycle_view')
 
     def test_registers_and_returns_201_when_no_cert(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), \
-             mock.patch(MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
-             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
+        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), mock.patch(
+            MOCK_REGISTER, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)
+        ), mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
             r = post(self.url(), {}, admin, expect=201)
         assert r.data['registered'] is True
         assert r.data['consumer_uuid'] == SAMPLE_UUID
 
     def test_returns_200_when_cert_exists(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
-             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)):
             r = post(self.url(), {}, admin, expect=200)
         assert r.data['registered'] is True
 
     def test_runs_lifecycle_when_cert_exists(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), \
-             mock.patch(MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)) as mock_lc:
+        with mock.patch(MOCK_FETCH, return_value=(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)), mock.patch(
+            MOCK_LIFECYCLE, return_value=(SAMPLE_CERT, SAMPLE_KEY)
+        ) as mock_lc:
             post(self.url(), {}, admin, expect=200)
         mock_lc.assert_called_once_with(SAMPLE_CERT, SAMPLE_KEY, SAMPLE_UUID)
 
     def test_registration_failure_returns_400(self, post, admin):
-        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), \
-             mock.patch(MOCK_REGISTER, return_value=(None, None, None)):
+        with mock.patch(MOCK_FETCH, return_value=(None, None, None)), mock.patch(MOCK_REGISTER, return_value=(None, None, None)):
             r = post(self.url(), {}, admin, expect=400)
         assert 'error' in r.data
 
