@@ -36,7 +36,7 @@ maturin  # pydantic-core build dep
 msgpack
 msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
-kubernetes>=35.0.0
+kubernetes>=36.0.0  # fixes NO_PROXY silently being reset to None
 openshift
 opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
 opentelemetry-sdk~=1.37
