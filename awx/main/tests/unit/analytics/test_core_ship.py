@@ -285,9 +285,7 @@ class TestLogShippingResponse:
         response.json.return_value = {'request_id': 'req-abc', 'account_number': '99999', 'org_id': '11111'}
         with mock.patch('awx.main.analytics.core.logger') as mock_logger:
             _log_shipping_response(response, '/tmp/analytics.tar.gz')
-            mock_logger.info.assert_called_once_with(
-                "Analytics upload successful: file=analytics.tar.gz request_id=req-abc account_number=99999 org_id=11111"
-            )
+            mock_logger.info.assert_called_once_with("Analytics upload successful: file=analytics.tar.gz request_id=req-abc account_number=99999 org_id=11111")
 
     def test_logs_unknown_for_missing_fields(self):
         """Test fallback to 'unknown' when response fields are absent."""
@@ -306,6 +304,4 @@ class TestLogShippingResponse:
         response.status_code = 202
         with mock.patch('awx.main.analytics.core.logger') as mock_logger:
             _log_shipping_response(response, '/tmp/analytics.tar.gz')
-            mock_logger.info.assert_called_once_with(
-                "Analytics upload successful: file=analytics.tar.gz status=202"
-            )
+            mock_logger.info.assert_called_once_with("Analytics upload successful: file=analytics.tar.gz status=202")
