@@ -19,7 +19,6 @@ from django.core.exceptions import ValidationError
 from django.urls import resolve
 from django.utils.timezone import now
 from django.db.models import Q, Subquery, OuterRef
-from django.db.models.functions import Lower
 
 # REST Framework
 from rest_framework.exceptions import ParseError
@@ -524,9 +523,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         app_label = 'main'
         unique_together = (("name", "inventory"),)  # FIXME: Add ('instance_id', 'inventory') after migration.
         ordering = ('name',)
-        indexes = [
-            models.Index(Lower('name'), name='main_host_name_lower_idx'),
-        ]
 
     inventory = models.ForeignKey(
         'Inventory',
