@@ -117,6 +117,7 @@ jobs:
         working-directory: spec-repo
         env:
           GH_TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.OPENAPI_SPEC_SYNC_GPG_PRIVATE_KEY }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           SPEC_REPO: ansible-automation-platform/aap-openapi-specs
           REF_NAME: ${{ github.ref_name }}
@@ -124,8 +125,28 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
           IS_NEW_FILE: ${{ steps.compare.outputs.is_new_file }}
         run: |
+          # Import GPG key and configure git for signed commits
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import 2>/dev/null
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+          if [ -z "$GPG_KEY_ID" ]; then
+            echo "❌ Failed to import GPG key or extract key ID"
+            exit 1
+          fi
+          git config user.name "aap-api-bot"
+          git config user.email "aap-api-bot@redhat.com"
+          git config commit.gpgsign true
+          git config user.signingkey "$GPG_KEY_ID"
+
+          # Configure git to use the token for push
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${SPEC_REPO}.git"
+
           SHORT_SHA="${GITHUB_SHA_FULL:0:7}"
           BRANCH_NAME="update-Controller-${REF_NAME}-${SHORT_SHA}"
+
+          git checkout -b "$BRANCH_NAME"
+
+          # Add and commit changes
+          git add "controller.json"
 
           if [ "${IS_NEW_FILE}" == "true" ]; then
             COMMIT_MSG="Add Controller OpenAPI spec for ${REF_NAME}"
@@ -133,41 +154,15 @@ jobs:
             COMMIT_MSG="Update Controller OpenAPI spec for ${REF_NAME}"
           fi
 
-          COMMIT_MSG="${COMMIT_MSG}
+          git commit -m "${COMMIT_MSG}
 
           Synced from ${GITHUB_REPO}@${GITHUB_SHA_FULL}
-          Source branch: ${REF_NAME}"
+          Source branch: ${REF_NAME}
 
-          # Create branch via API
-          BASE_SHA=$(gh api "repos/${SPEC_REPO}/git/ref/heads/${REF_NAME}" --jq '.object.sha')
-          gh api "repos/${SPEC_REPO}/git/refs" \
-            -f "ref=refs/heads/${BRANCH_NAME}" \
-            -f "sha=${BASE_SHA}"
+          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
-          # Get the tree SHA from the base commit (base_tree requires a tree SHA, not a commit SHA)
-          BASE_TREE_SHA=$(gh api "repos/${SPEC_REPO}/git/commits/${BASE_SHA}" --jq '.tree.sha')
-
-          # Create blob and commit via API (commits created through the API are automatically signed by GitHub)
-          BLOB_SHA=$(gh api "repos/${SPEC_REPO}/git/blobs" \
-            -f "content=$(base64 -w 0 controller.json)" \
-            -f "encoding=base64" \
-            --jq '.sha')
-
-          TREE_SHA=$(gh api "repos/${SPEC_REPO}/git/trees" \
-            -f "base_tree=${BASE_TREE_SHA}" \
-            --input <(jq -n --arg blob "$BLOB_SHA" '{tree: [{path: "controller.json", mode: "100644", type: "blob", sha: $blob}]}') \
-            --jq '.sha')
-
-          NEW_COMMIT_SHA=$(gh api "repos/${SPEC_REPO}/git/commits" \
-            -f "message=${COMMIT_MSG}" \
-            -f "tree=${TREE_SHA}" \
-            -f "parents[]=${BASE_SHA}" \
-            --jq '.sha')
-
-          # Update branch ref to point to the new signed commit
-          gh api "repos/${SPEC_REPO}/git/refs/heads/${BRANCH_NAME}" \
-            -X PATCH \
-            -f "sha=${NEW_COMMIT_SHA}"
+          # Push branch
+          git push origin "$BRANCH_NAME"
 
           # Create PR
           PR_TITLE="[${REF_NAME}] Update Controller spec from merged commit"
