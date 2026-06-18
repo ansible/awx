@@ -4,8 +4,8 @@
 import dateutil
 import logging
 
-from django.db.models import Count, OuterRef, Subquery
-from django.db.models.functions import Coalesce
+from django.db.models import Count, OuterRef, Subquery, TextField
+from django.db.models.functions import Cast, Coalesce
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -188,7 +188,7 @@ class OrganizationCountsMixin(object):
                 return Coalesce(
                     Subquery(
                         RoleUserAssignment.objects.filter(
-                            object_id=OuterRef('pk'),
+                            object_id=Cast(OuterRef('pk'), output_field=TextField()),
                             role_definition=rd,
                         )
                         .values('role_definition')

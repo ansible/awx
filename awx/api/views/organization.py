@@ -5,8 +5,8 @@
 import logging
 
 # Django
-from django.db.models import Count, OuterRef, Subquery
-from django.db.models.functions import Coalesce
+from django.db.models import Count, OuterRef, Subquery, TextField
+from django.db.models.functions import Cast, Coalesce
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -88,7 +88,7 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
                 return Coalesce(
                     Subquery(
                         RoleUserAssignment.objects.filter(
-                            object_id=OuterRef('pk'),
+                            object_id=Cast(OuterRef('pk'), output_field=TextField()),
                             role_definition=rd,
                         )
                         .values('role_definition')
