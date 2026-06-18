@@ -5,12 +5,13 @@
 import logging
 
 # Django
-from django.db.models import Count, IntegerField, OuterRef, Subquery
+from django.db.models import Count, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 # AWX
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from awx.main.models import (
     ActivityStream,
     Inventory,
@@ -78,28 +79,28 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
 
         org_counts = {}
         access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
-        # Use independent subqueries instead of double-JOIN Count to avoid
-        # cartesian product.
-        role_members_through = Role.members.through
-        member_count = Subquery(
-            role_members_through.objects.filter(role_id=OuterRef('member_role_id'))
-            .values('role_id')
-            .annotate(cnt=Count('user_id', distinct=True))
-            .values('cnt'),
-            output_field=IntegerField(),
-        )
-        admin_count = Subquery(
-            role_members_through.objects.filter(role_id=OuterRef('admin_role_id'))
-            .values('role_id')
-            .annotate(cnt=Count('user_id', distinct=True))
-            .values('cnt'),
-            output_field=IntegerField(),
-        )
+        member_rd = RoleDefinition.objects.get(name='Organization Member')
+        admin_rd = RoleDefinition.objects.get(name='Organization Admin')
+
+        def assignment_count(rd):
+            return Coalesce(
+                Subquery(
+                    RoleUserAssignment.objects.filter(
+                        object_id=OuterRef('pk'),
+                        role_definition=rd,
+                    )
+                    .values('role_definition')
+                    .annotate(c=Count('pk'))
+                    .values('c')
+                ),
+                0,
+            )
+
         direct_counts = (
             Organization.objects.filter(id=org_id)
             .annotate(
-                users=Coalesce(member_count, 0),
-                admins=Coalesce(admin_count, 0),
+                users=assignment_count(member_rd),
+                admins=assignment_count(admin_rd),
             )
             .values('users', 'admins')
         )
