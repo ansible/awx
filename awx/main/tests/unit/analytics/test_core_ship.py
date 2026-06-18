@@ -286,11 +286,7 @@ class TestLogShippingResponse:
         with mock.patch('awx.main.analytics.core.logger') as mock_logger:
             _log_shipping_response(response, '/tmp/analytics.tar.gz')
             mock_logger.info.assert_called_once_with(
-                "Analytics upload successful: file=%s request_id=%s account_number=%s org_id=%s",
-                'analytics.tar.gz',
-                'req-abc',
-                '99999',
-                '11111',
+                "Analytics upload successful: file=analytics.tar.gz request_id=req-abc account_number=99999 org_id=11111"
             )
 
     def test_logs_unknown_for_missing_fields(self):
@@ -300,11 +296,7 @@ class TestLogShippingResponse:
         with mock.patch('awx.main.analytics.core.logger') as mock_logger:
             _log_shipping_response(response, '/tmp/analytics.tar.gz')
             mock_logger.info.assert_called_once_with(
-                "Analytics upload successful: file=%s request_id=%s account_number=%s org_id=%s",
-                'analytics.tar.gz',
-                'unknown',
-                'unknown',
-                'unknown',
+                "Analytics upload successful: file=analytics.tar.gz request_id=unknown account_number=unknown org_id=unknown"
             )
 
     def test_graceful_fallback_on_json_error(self):
@@ -315,7 +307,5 @@ class TestLogShippingResponse:
         with mock.patch('awx.main.analytics.core.logger') as mock_logger:
             _log_shipping_response(response, '/tmp/analytics.tar.gz')
             mock_logger.info.assert_called_once_with(
-                "Analytics upload successful: file=%s status=%s",
-                'analytics.tar.gz',
-                202,
+                "Analytics upload successful: file=analytics.tar.gz status=202"
             )

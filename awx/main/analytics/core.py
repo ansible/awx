@@ -421,17 +421,15 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
 
 
 def _log_shipping_response(response, path):
+    filename = os.path.basename(path)
     try:
         data = response.json()
-        logger.info(
-            "Analytics upload successful: file=%s request_id=%s account_number=%s org_id=%s",
-            os.path.basename(path),
-            data.get("request_id", "unknown"),
-            data.get("account_number", "unknown"),
-            data.get("org_id", "unknown"),
-        )
+        request_id = data.get('request_id', 'unknown')
+        account_number = data.get('account_number', 'unknown')
+        org_id = data.get('org_id', 'unknown')
+        logger.info(f"Analytics upload successful: file={filename} request_id={request_id} account_number={account_number} org_id={org_id}")
     except Exception:
-        logger.info("Analytics upload successful: file=%s status=%s", os.path.basename(path), response.status_code)
+        logger.info(f"Analytics upload successful: file={filename} status={response.status_code}")
 
 
 def ship(path):
