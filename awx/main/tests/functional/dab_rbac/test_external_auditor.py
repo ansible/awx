@@ -66,7 +66,7 @@ class TestExternalAuditorRoleAllModels:
         assert obj not in get_user_queryset(rando, model)
         assert obj in get_user_queryset(ext_auditor, model)
 
-    def test_global_list(self, obj_factory, model, ext_auditor, rando, get, setup_managed_roles):
+    def test_global_list(self, obj_factory, model, ext_auditor, rando, get):
         fixture_name = model._meta.verbose_name.replace(' ', '_')
         obj_factory(fixture_name)
 
@@ -85,7 +85,7 @@ class TestExternalAuditorRoleAllModels:
             r = get(url, user=ext_auditor, expect=200)
             assert r.data['count'] == initial_ct + 1
 
-    def test_detail_view(self, obj_factory, model, ext_auditor, rando, get, setup_managed_roles):
+    def test_detail_view(self, obj_factory, model, ext_auditor, rando, get):
         fixture_name = model._meta.verbose_name.replace(' ', '_')
         obj = obj_factory(fixture_name)
 
