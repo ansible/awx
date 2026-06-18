@@ -179,27 +179,29 @@ class OrganizationCountsMixin(object):
 
         db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        member_rd = RoleDefinition.objects.get(name='Organization Member')
-        admin_rd = RoleDefinition.objects.get(name='Organization Admin')
+        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
+        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
 
-        def assignment_count(rd):
-            return Coalesce(
-                Subquery(
-                    RoleUserAssignment.objects.filter(
-                        object_id=OuterRef('pk'),
-                        role_definition=rd,
-                    )
-                    .values('role_definition')
-                    .annotate(c=Count('pk'))
-                    .values('c')
-                ),
-                0,
-            )
+        if member_rd and admin_rd:
 
-        db_results['users'] = org_qs.annotate(
-            users=assignment_count(member_rd),
-            admins=assignment_count(admin_rd),
-        ).values('id', 'users', 'admins')
+            def assignment_count(rd):
+                return Coalesce(
+                    Subquery(
+                        RoleUserAssignment.objects.filter(
+                            object_id=OuterRef('pk'),
+                            role_definition=rd,
+                        )
+                        .values('role_definition')
+                        .annotate(c=Count('pk'))
+                        .values('c')
+                    ),
+                    0,
+                )
+
+            db_results['users'] = org_qs.annotate(
+                users=assignment_count(member_rd),
+                admins=assignment_count(admin_rd),
+            ).values('id', 'users', 'admins')
 
         count_context = {}
         for org in org_id_list:

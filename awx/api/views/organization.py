@@ -79,36 +79,41 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
 
         org_counts = {}
         access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
-        member_rd = RoleDefinition.objects.get(name='Organization Member')
-        admin_rd = RoleDefinition.objects.get(name='Organization Admin')
+        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
+        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
 
-        def assignment_count(rd):
-            return Coalesce(
-                Subquery(
-                    RoleUserAssignment.objects.filter(
-                        object_id=OuterRef('pk'),
-                        role_definition=rd,
-                    )
-                    .values('role_definition')
-                    .annotate(c=Count('pk'))
-                    .values('c')
-                ),
-                0,
+        if member_rd and admin_rd:
+
+            def assignment_count(rd):
+                return Coalesce(
+                    Subquery(
+                        RoleUserAssignment.objects.filter(
+                            object_id=OuterRef('pk'),
+                            role_definition=rd,
+                        )
+                        .values('role_definition')
+                        .annotate(c=Count('pk'))
+                        .values('c')
+                    ),
+                    0,
+                )
+
+            direct_counts = (
+                Organization.objects.filter(id=org_id)
+                .annotate(
+                    users=assignment_count(member_rd),
+                    admins=assignment_count(admin_rd),
+                )
+                .values('users', 'admins')
             )
 
-        direct_counts = (
-            Organization.objects.filter(id=org_id)
-            .annotate(
-                users=assignment_count(member_rd),
-                admins=assignment_count(admin_rd),
-            )
-            .values('users', 'admins')
-        )
+            if direct_counts:
+                org_counts = direct_counts[0]
+        else:
+            org_counts = {'users': 0, 'admins': 0}
 
-        if not direct_counts:
+        if not org_counts:
             return full_context
-
-        org_counts = direct_counts[0]
         org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
