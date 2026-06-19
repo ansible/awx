@@ -234,7 +234,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         dab_role_cts = permission_registry.content_type_model.objects.get_for_models(*role_subclasses).values()
 
         return (
-            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in dab_role_cts])
+            RoleEvaluation.objects.filter(
+                **RoleEvaluation._actor_role_filter(accessor),
+                codename__in=all_codenames,
+                content_type_id__in=[ct.id for ct in dab_role_cts],
+            )
             .values_list('object_id')
             .distinct()
         )
