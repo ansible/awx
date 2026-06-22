@@ -18,7 +18,7 @@ metadata:
     pipelines.appstudio.openshift.io/type: build
 spec:
   timeouts:
-    pipeline: "8h"
+    pipeline: "9h"
     tasks: "7h"
     finally: "1h"
   pipelineRef:
