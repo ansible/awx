@@ -420,6 +420,18 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         return tarfiles
 
 
+def _log_shipping_response(response, path):
+    filename = os.path.basename(path)
+    try:
+        data = response.json()
+        request_id = data.get('request_id', 'unknown')
+        account_number = data.get('account_number', 'unknown')
+        org_id = data.get('org_id', 'unknown')
+        logger.info(f"Analytics upload successful: file={filename} request_id={request_id} account_number={account_number} org_id={org_id}")
+    except Exception:
+        logger.info(f"Analytics upload successful: file={filename} status={response.status_code}")
+
+
 def ship(path):
     """
     Ship gathered metrics to the Insights API
@@ -468,6 +480,7 @@ def ship(path):
                             cert_url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
                         )
                         if response.status_code < 300:
+                            _log_shipping_response(response, path)
                             return True
                         else:
                             logger.warning(
@@ -484,6 +497,7 @@ def ship(path):
                 response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
 
                 if response.status_code < 300:
+                    _log_shipping_response(response, path)
                     return True
                 else:
                     logger.error(f'OIDC authentication failed with status {response.status_code}, {response.text}')
