@@ -1179,15 +1179,13 @@ class UnifiedJob(
 
                 tbl = self._meta.db_table + 'event'
                 where_parts = [
-                    sql.SQL('{} = %s').format(sql.Identifier(self.event_parent_key)),
+                    sql.SQL('{} = {}').format(sql.Identifier(self.event_parent_key), sql.Literal(self.id)),
                     sql.SQL("stdout != ''"),
                 ]
-                params = [self.id]
                 if self.has_unpartitioned_events:
                     tbl = '_unpartitioned_' + tbl
                 else:
-                    where_parts.insert(0, sql.SQL('job_created = %s'))
-                    params.insert(0, self.created)
+                    where_parts.insert(0, sql.SQL('job_created = {}').format(sql.Literal(self.created)))
 
                 copy_sql = sql.SQL('COPY (SELECT stdout FROM {} WHERE {} ORDER BY start_line) TO STDOUT').format(
                     sql.Identifier(tbl),
@@ -1196,7 +1194,7 @@ class UnifiedJob(
                 # psycopg3's copy writes bytes, but callers of this
                 # function assume a str-based fd will be returned; decode
                 # .write() calls on the fly to maintain this interface
-                with cursor.copy(copy_sql, params) as copy:
+                with cursor.copy(copy_sql) as copy:
                     while data := copy.read():
                         fd.write(smart_str(bytes(data)))
 
