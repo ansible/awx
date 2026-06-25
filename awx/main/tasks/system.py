@@ -633,7 +633,7 @@ def inspect_execution_and_hop_nodes(instance_list):
                 # check
                 logger.warning(f'Execution node attempting to rejoin as instance {hostname}.')
                 execution_node_health_check.apply_async([hostname])
-            elif instance.capacity == 0 and instance.enabled:
+            elif (instance.capacity == 0 or (instance.cpu == 0 and instance.memory == 0)) and instance.enabled:
                 # nodes with proven connection but need remediation run health checks are reduced frequency
                 if not instance.last_health_check or (nowtime - instance.last_health_check).total_seconds() >= settings.EXECUTION_NODE_REMEDIATION_CHECKS:
                     # Periodically re-run the health check of errored nodes, in case someone fixed it

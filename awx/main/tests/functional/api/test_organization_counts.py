@@ -1,20 +1,23 @@
 import pytest
 
+from ansible_base.rbac.models import RoleDefinition
 from awx.api.versioning import reverse
 
 from awx.main.models import Project, Host
 
 
 @pytest.fixture
-def organization_resource_creator(organization, user):
+def organization_resource_creator(organization, user, setup_managed_roles):
     def rf(users, admins, job_templates, projects, inventories, teams):
+        member_rd = RoleDefinition.objects.get(name='Organization Member')
+        admin_rd = RoleDefinition.objects.get(name='Organization Admin')
         # Associate one resource of every type with the organization
         for i in range(users):
             member_user = user('org-member %s' % i)
-            organization.member_role.members.add(member_user)
+            member_rd.give_permission(member_user, organization)
         for i in range(admins):
             admin_user = user('org-admin %s' % i)
-            organization.admin_role.members.add(admin_user)
+            admin_rd.give_permission(admin_user, organization)
         for i in range(teams):
             organization.teams.create(name='org-team %s' % i)
         for i in range(inventories):
