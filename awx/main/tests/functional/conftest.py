@@ -826,6 +826,28 @@ def get_db_prep_save(self, value, connection, **kwargs):
     return value
 
 
+def _render_sql_for_tests(sql):
+    from psycopg import sql as psql
+
+    if isinstance(sql, str):
+        return sql
+    if not isinstance(sql, psql.Composable):
+        return str(sql)
+
+    def render(obj):
+        if isinstance(obj, str):
+            return obj
+        if isinstance(obj, psql.SQL):
+            return obj._obj
+        if isinstance(obj, psql.Identifier):
+            return obj._ids[0]
+        if isinstance(obj, psql.Composed):
+            return ''.join(render(part) for part in obj)
+        return '%s'
+
+    return render(sql)
+
+
 class MockCopy:
     events = []
     index = -1
@@ -833,7 +855,7 @@ class MockCopy:
     def __init__(self, sql):
         self.events = []
         parts = sql.split(' ')
-        tablename = parts[parts.index('from') + 1]
+        tablename = parts[[p.lower() for p in parts].index('from') + 1]
         for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
             if cls._meta.db_table == tablename:
                 for event in cls.objects.order_by('start_line').all():
@@ -858,8 +880,8 @@ def sqlite_copy(request, mocker):
     # copy is postgres-specific, and SQLite doesn't support it; mock its
     # behavior to test that it writes a file that contains stdout from events
 
-    def write_stdout(self, sql):
-        mock_copy = MockCopy(sql)
+    def write_stdout(self, sql, params=None):
+        mock_copy = MockCopy(_render_sql_for_tests(sql))
         return mock_copy
 
     mocker.patch.object(SQLiteCursorWrapper, 'copy', write_stdout, create=True)
