@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Label PR
-        uses: actions/labeler@v3
+        uses: actions/labeler@26546f6c4d63b6c0623e8e39bde7869e3c2b1d7b # v3
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           configuration-path: .github/pr_labeler.yml
@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 20
     name: Label PR - Community
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
 
@@ -40,7 +40,7 @@ jobs:
       - name: Install python requests
         run: pip install requests
       - name: Check if user is a member of Ansible org
-        uses: jannekem/run-python-script-action@v1
+        uses: jannekem/run-python-script-action@9d8e2e0878d575fb6073277f38ce3f10ebf4f059 # v1
         id: check_user
         with:
           script: |
