@@ -4,7 +4,8 @@
 import dateutil
 import logging
 
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Subquery, TextField
+from django.db.models.functions import Cast, Coalesce
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -15,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from awx.main.constants import ACTIVE_STATES
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from awx.main.models import Organization
 from awx.main.utils import get_object_or_400
 from awx.main.models.ha import Instance, InstanceGroup, schedule_policy_task
@@ -177,10 +179,29 @@ class OrganizationCountsMixin(object):
 
         db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        # Other members and admins of organization are always viewable
-        db_results['users'] = org_qs.annotate(users=Count('member_role__members', distinct=True), admins=Count('admin_role__members', distinct=True)).values(
-            'id', 'users', 'admins'
-        )
+        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
+        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
+
+        if member_rd and admin_rd:
+
+            def assignment_count(rd):
+                return Coalesce(
+                    Subquery(
+                        RoleUserAssignment.objects.filter(
+                            object_id=Cast(OuterRef('pk'), output_field=TextField()),
+                            role_definition=rd,
+                        )
+                        .values('role_definition')
+                        .annotate(c=Count('pk'))
+                        .values('c')
+                    ),
+                    0,
+                )
+
+            db_results['users'] = org_qs.annotate(
+                users=assignment_count(member_rd),
+                admins=assignment_count(admin_rd),
+            ).values('id', 'users', 'admins')
 
         count_context = {}
         for org in org_id_list:
