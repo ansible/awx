@@ -2309,7 +2309,7 @@ class JobHostSummaryAccess(BaseAccess):
 
 class JobEventAccess(BaseAccess):
     """
-    I can see job event records whenever I can read both job and host.
+    I can see job event records whenever I can read the job or the host.
     """
 
     model = JobEvent
