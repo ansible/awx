@@ -2500,8 +2500,16 @@ class UnifiedJobAccess(BaseAccess):
         inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
         qs = self.model.objects.filter(
             Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-            | Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs)
-            | Q(adhoccommand__inventory__id__in=inv_pk_qs)
+            | Q(
+                pk__in=InventoryUpdate.objects.filter(
+                    inventory_source__inventory__id__in=inv_pk_qs,
+                ).values('pk')
+            )
+            | Q(
+                pk__in=AdHocCommand.objects.filter(
+                    inventory__id__in=inv_pk_qs,
+                ).values('pk')
+            )
             | Q(organization__in=Organization.accessible_pk_qs(self.user, 'auditor_role'))
         )
         return qs
