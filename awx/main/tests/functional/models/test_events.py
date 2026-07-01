@@ -71,7 +71,7 @@ class TestEvents:
             assert s.skipped == 0
 
         for host in Host.objects.all():
-            latest_summary = JobHostSummary.latest_for_host(host.id)
+            latest_summary = host.latest_summary
             assert latest_summary is not None
             assert latest_summary.job_id == self.job.id
             assert latest_summary.host == host
@@ -106,13 +106,12 @@ class TestEvents:
         # be related to the appropriate Host)
         assert JobHostSummary.objects.count() == 1
         for h in Host.objects.all():
-            latest_summary = JobHostSummary.latest_for_host(h.id)
+            latest_summary = h.latest_summary
             if h.name == 'Host 1':
                 assert latest_summary is not None
                 assert latest_summary.job_id == self.job.id
                 assert latest_summary.id == JobHostSummary.objects.first().id
             else:
-                # all other hosts in the inventory should have no summary
                 assert latest_summary is None
 
     def test_host_metrics_insert(self):
