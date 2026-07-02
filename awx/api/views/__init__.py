@@ -1926,7 +1926,8 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs.distinct().with_latest_summary_id()
+            qs = qs.distinct()
+        return qs.with_latest_summary_id()
 
     def list(self, *args, **kwargs):
         try:
