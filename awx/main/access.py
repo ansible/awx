@@ -2732,7 +2732,7 @@ class ActivityStreamAccess(BaseAccess):
         q |= Q(pk__in=AS.credential.through.objects.filter(credential__in=credential_set).values('activitystream_id'))
 
         auditing_orgs = (Organization.access_qs(self.user, 'change') | Organization.access_qs(self.user, 'audit')).distinct().values_list('id', flat=True)
-        if auditing_orgs:
+        if auditing_orgs.exists():
             q |= (
                 Q(pk__in=AS.user.through.objects.filter(user__in=auditing_orgs.values('member_role__members')).values('activitystream_id'))
                 | Q(pk__in=AS.organization.through.objects.filter(organization__in=auditing_orgs).values('activitystream_id'))
