@@ -2714,54 +2714,63 @@ class ActivityStreamAccess(BaseAccess):
         # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
         # 'inventory_source', 'workflow_job_template'
 
-        q = Q(user=self.user)
-        inventory_set = Inventory.accessible_pk_qs(self.user, 'read_role')
-        if inventory_set:
-            q |= (
-                Q(ad_hoc_command__inventory__in=inventory_set)
-                | Q(inventory__in=inventory_set)
-                | Q(host__inventory__in=inventory_set)
-                | Q(group__inventory__in=inventory_set)
-                | Q(inventory_source__inventory__in=inventory_set)
-                | Q(inventory_update__inventory_source__inventory__in=inventory_set)
-            )
+        AS = ActivityStream
 
-        credential_set = Credential.accessible_pk_qs(self.user, 'read_role')
-        if credential_set:
-            q |= Q(credential__in=credential_set)
+        q = Q(pk__in=AS.user.through.objects.filter(user=self.user).values('activitystream_id'))
+
+        inventory_set = Inventory.access_ids_qs(self.user, 'view')
+        q |= (
+            Q(pk__in=AS.ad_hoc_command.through.objects.filter(adhoccommand__inventory__in=inventory_set).values('activitystream_id'))
+            | Q(pk__in=AS.inventory.through.objects.filter(inventory__in=inventory_set).values('activitystream_id'))
+            | Q(pk__in=AS.host.through.objects.filter(host__inventory__in=inventory_set).values('activitystream_id'))
+            | Q(pk__in=AS.group.through.objects.filter(group__inventory__in=inventory_set).values('activitystream_id'))
+            | Q(pk__in=AS.inventory_source.through.objects.filter(inventorysource__inventory__in=inventory_set).values('activitystream_id'))
+            | Q(pk__in=AS.inventory_update.through.objects.filter(inventoryupdate__inventory_source__inventory__in=inventory_set).values('activitystream_id'))
+        )
+
+        credential_set = Credential.access_ids_qs(self.user, 'view')
+        q |= Q(pk__in=AS.credential.through.objects.filter(credential__in=credential_set).values('activitystream_id'))
 
         auditing_orgs = (Organization.access_qs(self.user, 'change') | Organization.access_qs(self.user, 'audit')).distinct().values_list('id', flat=True)
         if auditing_orgs:
             q |= (
-                Q(user__in=auditing_orgs.values('member_role__members'))
-                | Q(organization__in=auditing_orgs)
-                | Q(notification_template__organization__in=auditing_orgs)
-                | Q(notification__notification_template__organization__in=auditing_orgs)
-                | Q(label__organization__in=auditing_orgs)
-                | Q(role__in=Role.visible_roles(self.user) if auditing_orgs else [])
+                Q(pk__in=AS.user.through.objects.filter(user__in=auditing_orgs.values('member_role__members')).values('activitystream_id'))
+                | Q(pk__in=AS.organization.through.objects.filter(organization__in=auditing_orgs).values('activitystream_id'))
+                | Q(pk__in=AS.notification_template.through.objects.filter(notificationtemplate__organization__in=auditing_orgs).values('activitystream_id'))
+                | Q(
+                    pk__in=AS.notification.through.objects.filter(notification__notification_template__organization__in=auditing_orgs).values(
+                        'activitystream_id'
+                    )
+                )
+                | Q(pk__in=AS.label.through.objects.filter(label__organization__in=auditing_orgs).values('activitystream_id'))
+                | Q(pk__in=AS.role.through.objects.filter(role__in=Role.visible_roles(self.user)).values('activitystream_id'))
             )
 
-        project_set = Project.accessible_pk_qs(self.user, 'read_role')
-        if project_set:
-            q |= Q(project__in=project_set) | Q(project_update__project__in=project_set)
+        project_set = Project.access_ids_qs(self.user, 'view')
+        q |= Q(pk__in=AS.project.through.objects.filter(project__in=project_set).values('activitystream_id')) | Q(
+            pk__in=AS.project_update.through.objects.filter(projectupdate__project__in=project_set).values('activitystream_id')
+        )
 
-        jt_set = JobTemplate.accessible_pk_qs(self.user, 'read_role')
-        if jt_set:
-            q |= Q(job_template__in=jt_set) | Q(job__job_template__in=jt_set)
+        jt_set = JobTemplate.access_ids_qs(self.user, 'view')
+        q |= Q(pk__in=AS.job_template.through.objects.filter(jobtemplate__in=jt_set).values('activitystream_id')) | Q(
+            pk__in=AS.job.through.objects.filter(job__job_template__in=jt_set).values('activitystream_id')
+        )
 
-        wfjt_set = WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role')
-        if wfjt_set:
-            q |= (
-                Q(workflow_job_template__in=wfjt_set)
-                | Q(workflow_job_template_node__workflow_job_template__in=wfjt_set)
-                | Q(workflow_job__workflow_job_template__in=wfjt_set)
+        wfjt_set = WorkflowJobTemplate.access_ids_qs(self.user, 'view')
+        q |= (
+            Q(pk__in=AS.workflow_job_template.through.objects.filter(workflowjobtemplate__in=wfjt_set).values('activitystream_id'))
+            | Q(
+                pk__in=AS.workflow_job_template_node.through.objects.filter(workflowjobtemplatenode__workflow_job_template__in=wfjt_set).values(
+                    'activitystream_id'
+                )
             )
+            | Q(pk__in=AS.workflow_job.through.objects.filter(workflowjob__workflow_job_template__in=wfjt_set).values('activitystream_id'))
+        )
 
-        team_set = Team.accessible_pk_qs(self.user, 'read_role')
-        if team_set:
-            q |= Q(team__in=team_set)
+        team_set = Team.access_ids_qs(self.user, 'view')
+        q |= Q(pk__in=AS.team.through.objects.filter(team__in=team_set).values('activitystream_id'))
 
-        return qs.filter(q).distinct()
+        return qs.filter(q)
 
     def can_add(self, data):
         return False
