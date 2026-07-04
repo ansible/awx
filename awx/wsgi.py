@@ -14,6 +14,8 @@ from django.conf import settings  # NOQA
 from django.urls import resolve  # NOQA
 from django.core.wsgi import get_wsgi_application  # NOQA
 
+from ansible_base.observability import setup_observability
+
 """
 WSGI config for AWX project.
 
@@ -35,6 +37,8 @@ if MODE == 'production':
         logger.error("Missing or incorrect metadata for controller version.  Ensure controller was installed using the setup playbook.")
         raise Exception("Missing or incorrect metadata for controller version.  Ensure controller was installed using the setup playbook.") from e
 
+
+setup_observability(service_name="aap-controller-uwsgi")
 
 # Return the default Django WSGI application.
 application = get_wsgi_application()

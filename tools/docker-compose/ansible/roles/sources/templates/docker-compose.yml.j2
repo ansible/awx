@@ -49,6 +49,10 @@ services:
 {% if minikube_container_group|bool %}
       MINIKUBE_CONTAINER_GROUP: "true"
 {% endif %}
+{% if enable_otel|bool %}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel:4317
+      OTEL_SERVICE_NAME: aap-controller
+{% endif %}
     networks:
       - awx
       - service-mesh
@@ -162,18 +166,32 @@ services:
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
-    image: mirror.gcr.io/grafana/grafana-enterprise:12.3.4
+    image: docker.io/grafana/grafana:latest
     container_name: tools_grafana_1
     hostname: grafana
     networks:
       - awx
+      - service-mesh
     ports:
       - "3001:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     volumes:
       - "../../grafana:/etc/grafana/provisioning"
       - "grafana_storage:/var/lib/grafana:rw"
+{% if enable_prometheus|bool or enable_loki|bool or enable_tempo|bool %}
     depends_on:
+{% if enable_prometheus|bool %}
       - prometheus
+{% endif %}
+{% if enable_loki|bool %}
+      - loki
+{% endif %}
+{% if enable_tempo|bool %}
+      - tempo
+{% endif %}
+{% endif %}
 {% endif %}
   postgres:
     image: quay.io/sclorg/postgresql-15-c9s
@@ -224,33 +242,58 @@ services:
 {% endif %}
 {% if enable_otel|bool %}
   otel:
-    image: mirror.gcr.io/otel/opentelemetry-collector-contrib:0.88.0
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:latest
     container_name: tools_otel_1
     hostname: otel
-    command: ["--config=/etc/otel-collector-config.yaml", ""]
+    command: ["--config=/etc/otel/otel-collector-config.yaml"]
     networks:
       - awx
+      - service-mesh
     ports:
       - "4317:4317"   # OTLP gRPC receiver
       - "4318:4318"   # OTLP http receiver
-      - "55679:55679" # zpages http://localhost:55679/debug/servicez /tracez
+      - "8889:8889"   # Prometheus metrics
     volumes:
-      - "../../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml"
-      - "../../otel/awx-logs:/awx-logs/"
+      - "../../otel/otel-collector-config.yaml:/etc/otel/otel-collector-config.yaml:ro"
+{% if enable_loki|bool or enable_tempo|bool %}
+    depends_on:
+{% if enable_loki|bool %}
+      - loki
+{% endif %}
+{% if enable_tempo|bool %}
+      - tempo
+{% endif %}
+{% endif %}
 {% endif %}
 {% if enable_loki|bool %}
   loki:
-    image: mirror.gcr.io/grafana/loki:2.9.5
+    image: docker.io/grafana/loki:latest
     container_name: tools_loki_1
     hostname: loki
     ports:
       - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
+    command: ["-config.file=/etc/loki/local-config.yaml"]
     networks:
       - awx
+      - service-mesh
     volumes:
       - "loki_storage:/loki:rw"
-      - "../../loki/local-config.yaml:/etc/loki/local-config.yaml"
+      - "../../loki/local-config.yaml:/etc/loki/local-config.yaml:ro"
+{% endif %}
+{% if enable_tempo|bool %}
+  tempo:
+    image: docker.io/grafana/tempo:latest
+    container_name: tools_tempo_1
+    hostname: tempo
+    ports:
+      - "3200:3200"
+    command: ["-config.file=/etc/tempo/tempo-config.yaml"]
+    networks:
+      - awx
+      - service-mesh
+    volumes:
+      - "tempo_storage:/var/tempo:rw"
+      - "../../tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro"
 {% endif %}
 
 {% if execution_node_count|int > 0 %}
@@ -338,6 +381,10 @@ volumes:
 {% if enable_loki|bool %}
   loki_storage:
     name: tools_loki_storage
+{% endif %}
+{% if enable_tempo|bool %}
+  tempo_storage:
+    name: tools_tempo_storage
 {% endif %}
 
 networks:

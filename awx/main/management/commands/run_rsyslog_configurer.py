@@ -4,6 +4,8 @@ import json
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core.cache import cache
+
+from ansible_base.observability import setup_observability
 from awx.main.dispatch import pg_bus_conn
 from awx.main.dispatch.worker.task import run_callable
 from awx.main.utils.external_logging import reconfigure_rsyslog
@@ -21,6 +23,7 @@ class Command(BaseCommand):
     help = 'Launch the rsyslog_configurer daemon'
 
     def handle(self, *arg, **options):
+        setup_observability(service_name="aap-controller-rsyslog-configurer")
         try:
             with pg_bus_conn() as conn:
                 conn.listen("rsyslog_configurer")

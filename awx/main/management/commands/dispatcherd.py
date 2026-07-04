@@ -14,6 +14,7 @@ from django.db import connection
 
 from dispatcherd.config import setup as dispatcher_setup
 
+from ansible_base.observability import setup_observability
 from awx.main.dispatch.config import get_dispatcherd_config
 
 logger = logging.getLogger('awx.main.dispatch')
@@ -50,6 +51,7 @@ class Command(BaseCommand):
         return
 
     def handle(self, *arg, **options):
+        setup_observability(service_name="aap-controller-dispatcher")
         ensure_no_dispatcherd_env_config()
 
         self.configure_dispatcher_logging()

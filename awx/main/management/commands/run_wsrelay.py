@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
+from ansible_base.observability import setup_observability
 from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStatsManager,
     safe_name,
@@ -91,6 +92,7 @@ class Command(BaseCommand):
         return host_stats
 
     def handle(self, *arg, **options):
+        setup_observability(service_name="aap-controller-wsrelay")
         # it's necessary to delay this import in case
         # database migrations are still running
         from awx.main.models.ha import Instance

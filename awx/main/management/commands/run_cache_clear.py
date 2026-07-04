@@ -3,6 +3,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
+from ansible_base.observability import setup_observability
 from awx.main.dispatch import pg_bus_conn
 from awx.main.dispatch.worker.task import run_callable
 
@@ -18,6 +19,7 @@ class Command(BaseCommand):
     help = 'Launch the cache clear daemon'
 
     def handle(self, *arg, **options):
+        setup_observability(service_name="aap-controller-cache-clear")
         try:
             with pg_bus_conn() as conn:
                 conn.listen("tower_settings_change")

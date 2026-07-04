@@ -45,6 +45,11 @@ enable_grafana: false
 enable_prometheus: false
 scrape_interval: '5s'
 
+# Observability
+enable_otel: false
+enable_loki: false
+enable_tempo: false
+
 # pgbouncer
 enable_pgbouncer: false
 pgbouncer_port: 6432
