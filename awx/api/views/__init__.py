@@ -127,6 +127,7 @@ from awx.api.views.mixin import (
     RelatedJobsPreventDeleteMixin,
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
+    UnifiedJobExcludeMixin,
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
@@ -3851,7 +3852,7 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SystemJobTemplateNotific
     resource_purpose = 'notification templates triggered on system job success'
 
 
-class JobList(ListAPIView):
+class JobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.Job
     serializer_class = serializers.JobListSerializer
     resource_purpose = 'jobs'
@@ -4568,7 +4569,7 @@ class UnifiedJobTemplateList(ListAPIView):
     resource_purpose = 'unified job templates'
 
 
-class UnifiedJobList(ListAPIView):
+class UnifiedJobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     search_fields = ('description', 'name', 'job__playbook')
