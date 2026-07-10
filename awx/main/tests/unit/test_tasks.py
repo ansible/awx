@@ -1591,6 +1591,33 @@ def test_fcntl_ioerror():
         fcntl.lockf(99999, fcntl.LOCK_EX)
 
 
+def test_acquire_lock_handles_concurrent_projects_root_creation(tmp_path, mock_me):
+    projects_root = tmp_path / 'projects'
+    projects_root.mkdir()
+    lock_path = projects_root / 'project.lock'
+    real_exists = os.path.exists
+
+    def stale_projects_root_exists(path):
+        if path == str(projects_root):
+            return False
+        return real_exists(path)
+
+    instance = mock.Mock()
+    instance.get_lock_file.return_value = str(lock_path)
+
+    task = jobs.RunProjectUpdate()
+
+    with (
+        mock.patch.object(jobs.settings, 'PROJECTS_ROOT', str(projects_root)),
+        mock.patch('awx.main.tasks.jobs.os.path.exists', side_effect=stale_projects_root_exists),
+        mock.patch('os.open', return_value=3) as os_open,
+        mock.patch('fcntl.lockf'),
+    ):
+        task.acquire_lock(instance)
+
+    os_open.assert_called_once_with(str(lock_path), os.O_RDWR | os.O_CREAT)
+
+
 @mock.patch('os.open')
 @mock.patch('awx.main.tasks.jobs.logger')
 def test_acquire_lock_open_fail_logged(logger_mock, os_open, mock_me):
