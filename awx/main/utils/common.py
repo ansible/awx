@@ -89,6 +89,7 @@ __all__ = [
     'classproperty',
     'create_temporary_fifo',
     'truncate_stdout',
+    'truncate_event_data',
     'deepmerge',
     'get_event_partition_epoch',
     'cleanup_new_process',
@@ -1135,6 +1136,31 @@ def truncate_stdout(stdout, size):
             set_count += 1
 
     return stdout + '\u001b[0m' * (set_count - reset_count)
+
+
+def truncate_event_data(event_data, max_bytes):
+    """Truncate large string values inside event_data to prevent memory
+    exhaustion when serialising job event API responses.
+
+    Walks the structure recursively and truncates any string longer than
+    ``max_bytes``, appending a Unicode ellipsis (same convention used by
+    ``truncate_stdout``).  Non-string / non-container values are left
+    untouched.  Returns a shallow-copied structure so the original DB
+    cache is not mutated.
+    """
+    if max_bytes <= 0:
+        return event_data
+
+    def _truncate(obj):
+        if isinstance(obj, dict):
+            return {k: _truncate(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_truncate(v) for v in obj]
+        if isinstance(obj, str) and len(obj) > max_bytes:
+            return obj[: (max_bytes - 1)] + u'\u2026'
+        return obj
+
+    return _truncate(event_data)
 
 
 def deepmerge(a, b):
