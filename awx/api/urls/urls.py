@@ -36,7 +36,7 @@ from awx.api.views.bulk import (
 
 from awx.api.views.mesh_visualizer import MeshVisualizer
 
-from awx.api.views.metrics import MetricsView
+from ansible_base.prometheus.views import MetricsView
 from awx.api.views.analytics import AWX_ANALYTICS_API_PREFIX
 
 from .organization import urls as organization_urls

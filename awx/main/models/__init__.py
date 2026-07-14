@@ -220,6 +220,8 @@ def user_is_system_auditor(user, tf):
 
 
 User.add_to_class('is_system_auditor', user_is_system_auditor)
+# DAB cross-service convention: is_platform_auditor maps to AWX's system auditor role
+User.add_to_class('is_platform_auditor', property(lambda self: self.is_system_auditor))
 
 
 from awx.main.registrar import activity_stream_registrar  # noqa

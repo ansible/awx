@@ -215,4 +215,11 @@ def metrics():
     return generate_latest(registry=REGISTRY)
 
 
-__all__ = ['metrics']
+def metrics_for_dab(request):
+    """DAB extra-source adapter (fn(request) -> bytes). Skipped when ?subsystemonly=1."""
+    if request.query_params.get('subsystemonly', '0') == '1':
+        return b''
+    return metrics()
+
+
+__all__ = ['metrics', 'metrics_for_dab']

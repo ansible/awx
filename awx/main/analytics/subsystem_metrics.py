@@ -435,6 +435,13 @@ def metrics(request):
     return output_text
 
 
+def metrics_for_dab(request):
+    """DAB extra-source adapter (fn(request) -> bytes). Skipped when ?dbonly=1."""
+    if request.query_params.get('dbonly', '0') == '1':
+        return b''
+    return metrics(request).encode('utf-8')
+
+
 class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
     """
     Takes the metric data from redis -> our custom metric fields -> prometheus

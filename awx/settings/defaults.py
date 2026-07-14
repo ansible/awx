@@ -355,6 +355,7 @@ INSTALLED_APPS = [
     'ansible_base.rbac',
     'ansible_base.feature_flags',
     'ansible_base.api_documentation',
+    'ansible_base.prometheus',
     'flags',
 ]
 
@@ -399,6 +400,14 @@ LOGIN_REDIRECT_OVERRIDE = ''
 
 # Note: This setting may be overridden by database settings.
 ALLOW_METRICS_FOR_ANONYMOUS_USERS = False
+
+# DAB prometheus app settings. ALLOW_METRICS_FOR_ANONYMOUS_USERS is the
+# legacy name; ANSIBLE_PROMETHEUS_ALLOW_ANONYMOUS is the canonical one.
+ANSIBLE_PROMETHEUS_ALLOW_ANONYMOUS = False
+ANSIBLE_PROMETHEUS_EXTRA_SOURCES = [
+    'awx.main.analytics.metrics.metrics_for_dab',
+    'awx.main.analytics.subsystem_metrics.metrics_for_dab',
+]
 
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
@@ -895,6 +904,7 @@ MIDDLEWARE = [
     'awx.main.middleware.SettingsCacheMiddleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'ansible_base.prometheus.middleware.PrometheusMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
