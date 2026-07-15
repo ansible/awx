@@ -19,6 +19,7 @@ import json
 import logging
 import re
 import requests
+from urllib.parse import urlparse
 import time
 import zipfile
 
@@ -228,13 +229,9 @@ class Licenser(object):
         return host
 
     def validate_rh(self, user, pw, basic_auth):
-        # if basic auth is True, host is read from rhsm.conf (subscription.rhsm.redhat.com)
-        # if basic auth is False, host is settings.SUBSCRIPTIONS_RHSM_URL (console.redhat.com)
-        # if rhsm.conf is not found, host is settings.REDHAT_CANDLEPIN_HOST (satellite server)
         if basic_auth:
-            host = self.get_host_from_rhsm_config()
-            if not host:
-                host = getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)
+            if not (host := getattr(settings, 'REDHAT_CANDLEPIN_HOST', None)):
+                host = self.get_host_from_rhsm_config()
         else:
             host = settings.SUBSCRIPTIONS_RHSM_URL
 
@@ -314,7 +311,9 @@ class Licenser(object):
         except Exception as e:
             logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
             verify = True
-        if port:
+        # Append port from rhsm.conf only if the host URL doesn't already include one
+        # (REDHAT_CANDLEPIN_HOST may already contain a port)
+        if port and not urlparse(host).port:
             host = ':'.join([host, port])
         json = []
         try:
