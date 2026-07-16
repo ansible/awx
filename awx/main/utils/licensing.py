@@ -237,6 +237,8 @@ class Licenser(object):
 
         if not host:
             raise ValueError('Could not get host url for subscriptions')
+        if not host.startswith(('https://', 'http://')):
+            host = 'https://' + host
 
         if not user:
             raise ValueError('subscriptions_client_id or subscriptions_username is required')
@@ -315,6 +317,7 @@ class Licenser(object):
             port = str(self.config.get("server", "port"))
         except Exception:
             port = None
+        host = host.rstrip('/')
         # Append port from rhsm.conf only if the host URL doesn't already include one
         # (REDHAT_CANDLEPIN_HOST may already contain a port)
         if port and not urlparse(host).port:

@@ -117,6 +117,25 @@ def test_validate_rh_candlepin_host_prioritized_over_rhsm_config():
         mock_generate.assert_called_once_with([], is_candlepin=True)
 
 
+def test_validate_rh_prepends_scheme_when_missing():
+    """REDHAT_CANDLEPIN_HOST without a scheme gets https:// prepended"""
+    licenser = Licenser()
+
+    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(licenser, 'get_host_from_rhsm_config'), patch.object(
+        licenser, 'get_rhsm_subs'
+    ) as mock_get_rhsm, patch.object(licenser, 'get_satellite_subs', return_value=[]) as mock_get_satellite, patch.object(
+        licenser, 'get_crc_subs'
+    ), patch.object(
+        licenser, 'generate_license_options_from_entitlements'
+    ):
+
+        mock_settings.REDHAT_CANDLEPIN_HOST = 'satellite.example.com'
+        licenser.validate_rh('testuser', 'testpass', basic_auth=True)
+
+        mock_get_satellite.assert_called_once_with('https://satellite.example.com', 'testuser', 'testpass')
+        mock_get_rhsm.assert_not_called()
+
+
 def test_validate_rh_missing_user_raises_error():
     """Test validate_rh raises ValueError when user is missing"""
     licenser = Licenser()
@@ -141,39 +160,31 @@ def test_validate_rh_missing_password_raises_error():
             licenser.validate_rh('testuser', None, basic_auth=True)
 
 
-def test_get_satellite_subs_skips_port_when_host_already_has_one():
-    """Host URL with a port should not get rhsm.conf port appended"""
+@pytest.mark.parametrize(
+    'host_input, rhsm_port, expected_in_url, not_expected_in_url',
+    [
+        ('https://satellite.example.com:8443', '443', ':8443', ':8443:443'),
+        ('https://satellite.example.com', '8443', ':8443', None),
+        ('https://satellite.example.com/', '8443', ':8443', '/:'),
+    ],
+    ids=['skip-port-when-present', 'append-port-when-missing', 'strip-trailing-slash'],
+)
+def test_get_satellite_subs_port_handling(host_input, rhsm_port, expected_in_url, not_expected_in_url):
     licenser = Licenser()
     licenser.config = configparser.ConfigParser()
-    licenser.config.read_string("[server]\nhostname=satellite.example.com\nport=443\n[rhsm]\nrepo_ca_cert=/etc/rhsm/ca/redhat-uep.pem\n")
+    licenser.config.read_string(f"[server]\nhostname=satellite.example.com\nport={rhsm_port}\n[rhsm]\nrepo_ca_cert=/etc/rhsm/ca/redhat-uep.pem\n")
 
     with patch('awx.main.utils.licensing.settings') as mock_settings, patch('awx.main.utils.licensing.requests') as mock_requests:
         mock_settings.REDHAT_CANDLEPIN_VERIFY = None
         mock_orgs = mock_requests.get.return_value
         mock_orgs.json.return_value = {'results': []}
 
-        licenser.get_satellite_subs('https://satellite.example.com:8443', 'user', 'pw')
+        licenser.get_satellite_subs(host_input, 'user', 'pw')
 
         called_url = mock_requests.get.call_args[0][0]
-        assert ':8443' in called_url
-        assert ':8443:443' not in called_url
-
-
-def test_get_satellite_subs_appends_port_when_host_has_none():
-    """Host URL without a port should get rhsm.conf port appended"""
-    licenser = Licenser()
-    licenser.config = configparser.ConfigParser()
-    licenser.config.read_string("[server]\nhostname=satellite.example.com\nport=8443\n[rhsm]\nrepo_ca_cert=/etc/rhsm/ca/redhat-uep.pem\n")
-
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch('awx.main.utils.licensing.requests') as mock_requests:
-        mock_settings.REDHAT_CANDLEPIN_VERIFY = None
-        mock_orgs = mock_requests.get.return_value
-        mock_orgs.json.return_value = {'results': []}
-
-        licenser.get_satellite_subs('https://satellite.example.com', 'user', 'pw')
-
-        called_url = mock_requests.get.call_args[0][0]
-        assert ':8443' in called_url
+        assert expected_in_url in called_url
+        if not_expected_in_url:
+            assert not_expected_in_url not in called_url
 
 
 def test_get_satellite_subs_uses_candlepin_verify_setting():
