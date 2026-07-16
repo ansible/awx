@@ -305,12 +305,16 @@ class Licenser(object):
 
     def get_satellite_subs(self, host, user, pw):
         port = None
+        if (verify := getattr(settings, 'REDHAT_CANDLEPIN_VERIFY', None)) is None:
+            try:
+                verify = str(self.config.get("rhsm", "repo_ca_cert"))
+            except Exception as e:
+                logger.exception(f'Unable to read rhsm config to get ca_cert location. {e}')
+                verify = True
         try:
-            verify = str(self.config.get("rhsm", "repo_ca_cert"))
             port = str(self.config.get("server", "port"))
-        except Exception as e:
-            logger.exception('Unable to read rhsm config to get ca_cert location. {}'.format(str(e)))
-            verify = True
+        except Exception:
+            port = None
         # Append port from rhsm.conf only if the host URL doesn't already include one
         # (REDHAT_CANDLEPIN_HOST may already contain a port)
         if port and not urlparse(host).port:

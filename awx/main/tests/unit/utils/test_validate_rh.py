@@ -147,7 +147,8 @@ def test_get_satellite_subs_skips_port_when_host_already_has_one():
     licenser.config = configparser.ConfigParser()
     licenser.config.read_string("[server]\nhostname=satellite.example.com\nport=443\n[rhsm]\nrepo_ca_cert=/etc/rhsm/ca/redhat-uep.pem\n")
 
-    with patch('awx.main.utils.licensing.requests') as mock_requests:
+    with patch('awx.main.utils.licensing.settings') as mock_settings, patch('awx.main.utils.licensing.requests') as mock_requests:
+        mock_settings.REDHAT_CANDLEPIN_VERIFY = None
         mock_orgs = mock_requests.get.return_value
         mock_orgs.json.return_value = {'results': []}
 
@@ -164,7 +165,8 @@ def test_get_satellite_subs_appends_port_when_host_has_none():
     licenser.config = configparser.ConfigParser()
     licenser.config.read_string("[server]\nhostname=satellite.example.com\nport=8443\n[rhsm]\nrepo_ca_cert=/etc/rhsm/ca/redhat-uep.pem\n")
 
-    with patch('awx.main.utils.licensing.requests') as mock_requests:
+    with patch('awx.main.utils.licensing.settings') as mock_settings, patch('awx.main.utils.licensing.requests') as mock_requests:
+        mock_settings.REDHAT_CANDLEPIN_VERIFY = None
         mock_orgs = mock_requests.get.return_value
         mock_orgs.json.return_value = {'results': []}
 
@@ -172,6 +174,22 @@ def test_get_satellite_subs_appends_port_when_host_has_none():
 
         called_url = mock_requests.get.call_args[0][0]
         assert ':8443' in called_url
+
+
+def test_get_satellite_subs_uses_candlepin_verify_setting():
+    """REDHAT_CANDLEPIN_VERIFY should take priority over rhsm.conf ca_cert"""
+    licenser = Licenser()
+    licenser.config = configparser.ConfigParser()
+    licenser.config.read_string("[server]\nhostname=satellite.example.com\n[rhsm]\nrepo_ca_cert=/etc/rhsm/ca/redhat-uep.pem\n")
+
+    with patch('awx.main.utils.licensing.settings') as mock_settings, patch('awx.main.utils.licensing.requests') as mock_requests:
+        mock_settings.REDHAT_CANDLEPIN_VERIFY = False
+        mock_orgs = mock_requests.get.return_value
+        mock_orgs.json.return_value = {'results': []}
+
+        licenser.get_satellite_subs('https://satellite.example.com', 'user', 'pw')
+
+        assert mock_requests.get.call_args[1]['verify'] is False
 
 
 def test_validate_rh_no_host_raises_error():
