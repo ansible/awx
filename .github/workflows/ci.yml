@@ -200,7 +200,7 @@ jobs:
 
       - name: Install playbook dependencies
         run: |
-          python -m pip install 'docker>=7.0.0,<8.0.0'
+          python -m pip install 'docker==7.2.0'
 
       - name: Check Python version
         working-directory: awx
@@ -428,7 +428,7 @@ jobs:
           python -m pip uninstall -y ansible ansible-core || true
 
       - name: Upgrade ansible-core
-        run: python -m pip install --upgrade 'ansible-core>=2.17.0,<2.22.0'
+        run: python -m pip install --upgrade 'ansible-core==2.21.2'
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
