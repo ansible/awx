@@ -352,8 +352,8 @@ jobs:
 
       - name: Install dependencies for running tests
         run: |
-          python -m pip install -e ./awxkit/
           python -m pip install -r awx_collection/requirements.txt
+          python -m pip install -e ./awxkit/  # must come after requirements.txt to override PyPI awxkit with local source
           hash -r  # Rehash to pick up newly installed scripts
 
       - name: Run integration tests
