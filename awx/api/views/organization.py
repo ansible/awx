@@ -5,8 +5,6 @@
 import logging
 
 # Django
-from django.db.models import Count, OuterRef, Subquery, TextField
-from django.db.models.functions import Cast, Coalesce
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -83,32 +81,8 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
 
         if member_rd and admin_rd:
-
-            def assignment_count(rd):
-                return Coalesce(
-                    Subquery(
-                        RoleUserAssignment.objects.filter(
-                            object_id=Cast(OuterRef('pk'), output_field=TextField()),
-                            role_definition=rd,
-                        )
-                        .values('role_definition')
-                        .annotate(c=Count('pk'))
-                        .values('c')
-                    ),
-                    0,
-                )
-
-            direct_counts = (
-                Organization.objects.filter(id=org_id)
-                .annotate(
-                    users=assignment_count(member_rd),
-                    admins=assignment_count(admin_rd),
-                )
-                .values('users', 'admins')
-            )
-
-            if direct_counts:
-                org_counts = direct_counts[0]
+            org_counts['users'] = RoleUserAssignment.objects.filter(role_definition=member_rd, object_id=str(org_id)).count()
+            org_counts['admins'] = RoleUserAssignment.objects.filter(role_definition=admin_rd, object_id=str(org_id)).count()
         else:
             org_counts = {'users': 0, 'admins': 0}
 
