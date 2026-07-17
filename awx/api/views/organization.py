@@ -86,8 +86,6 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         else:
             org_counts = {'users': 0, 'admins': 0}
 
-        if not org_counts:
-            return full_context
         org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
