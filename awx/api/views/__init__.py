@@ -127,6 +127,7 @@ from awx.api.views.mixin import (
     RelatedJobsPreventDeleteMixin,
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
+    UnifiedJobExcludeMixin,
 )
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
@@ -1926,7 +1927,8 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs.distinct().with_latest_summary_id()
+            qs = qs.distinct()
+        return qs.with_latest_summary_id()
 
     def list(self, *args, **kwargs):
         try:
@@ -3850,7 +3852,7 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SystemJobTemplateNotific
     resource_purpose = 'notification templates triggered on system job success'
 
 
-class JobList(ListAPIView):
+class JobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.Job
     serializer_class = serializers.JobListSerializer
     resource_purpose = 'jobs'
@@ -4567,7 +4569,7 @@ class UnifiedJobTemplateList(ListAPIView):
     resource_purpose = 'unified job templates'
 
 
-class UnifiedJobList(ListAPIView):
+class UnifiedJobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     search_fields = ('description', 'name', 'job__playbook')

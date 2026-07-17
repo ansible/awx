@@ -1092,6 +1092,9 @@ class JobHostSummary(CreatedModifiedModel):
         unique_together = [('job', 'host_name')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
+        indexes = [
+            models.Index(fields=['host', '-id'], name='main_jobhostsumm_host_id_desc'),
+        ]
 
     job = models.ForeignKey(
         'Job',
