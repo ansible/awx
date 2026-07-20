@@ -149,6 +149,7 @@ def test_logging_aggregator_missing_settings(put, post, admin, key, value, error
         ['logstash', 'localhost', 8080, 'logger', 'mcstash'],
         ['loggly', 'http://logs-01.loggly.com/inputs/1fd38090-hash-h4a$h-8d80-t0k3n71/tag/http/', None, None, None],
         ['splunk', 'https://yoursplunk:8088/services/collector/event', None, None, None],
+        ['dynatrace', 'https://your-env.live.dynatrace.com/api/v2/logs/ingest', None, None, 'dt0c01.EXAMPLE-TOKEN'],
         ['other', '97.221.40.41', 9000, 'logger', 'mcstash'],
         ['sumologic', 'https://endpoint5.collection.us2.sumologic.com/receiver/v1/http/Zagnw_f9XGr_zZgd-_EPM0hb8_rUU7_RU8Q==', None, None, None],
     ],
