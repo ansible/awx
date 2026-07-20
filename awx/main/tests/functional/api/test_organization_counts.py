@@ -219,7 +219,7 @@ def test_JT_not_double_counted(resourced_organization, user, get):
 
 
 @pytest.mark.django_db
-def test_org_list_user_admin_query_count(organization_resource_creator, organizations, user, get, setup_managed_roles):
+def test_org_list_user_admin_query_count(organization_resource_creator, organizations, user, get):
     """User/admin counts use O(1) queries against roleuserassignment, not O(N) correlated subqueries."""
     admin_user = user('admin', True)
     extra_orgs = organizations(4)

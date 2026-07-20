@@ -5,6 +5,7 @@
 import logging
 
 # Django
+from django.db.models import Count, Q
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -81,10 +82,16 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
 
         if member_rd and admin_rd:
-            org_counts['users'] = RoleUserAssignment.objects.filter(role_definition=member_rd, object_id=str(org_id)).count()
-            org_counts['admins'] = RoleUserAssignment.objects.filter(role_definition=admin_rd, object_id=str(org_id)).count()
+            counts = RoleUserAssignment.objects.filter(
+                role_definition__in=[member_rd, admin_rd],
+                object_id=str(org_id),
+            ).aggregate(
+                users=Count('pk', filter=Q(role_definition=member_rd)),
+                admins=Count('pk', filter=Q(role_definition=admin_rd)),
+            )
+            org_counts.update(counts)
         else:
-            org_counts = {'users': 0, 'admins': 0}
+            org_counts.update({'users': 0, 'admins': 0})
 
         org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
