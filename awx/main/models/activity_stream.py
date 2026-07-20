@@ -98,9 +98,12 @@ class ActivityStream(models.Model):
     def get_absolute_url(self, request=None):
         return reverse('api:activity_stream_detail', kwargs={'pk': self.pk}, request=request)
 
-    def save(self, *args, **kwargs):
-        # Store denormalized actor metadata so that we retain it for accounting
-        # purposes when the User row is deleted.
+    def _prepare_denormalized_fields(self):
+        """Populate denormalized audit metadata (deleted_actor, action_node).
+
+        Called automatically by save() and should also be called before
+        bulk_create() since bulk_create bypasses save().
+        """
         if self.actor:
             self.deleted_actor = {
                 'id': self.actor_id,
@@ -108,10 +111,16 @@ class ActivityStream(models.Model):
                 'first_name': smart_str(self.actor.first_name),
                 'last_name': smart_str(self.actor.last_name),
             }
-            if 'update_fields' in kwargs and 'deleted_actor' not in kwargs['update_fields']:
-                kwargs['update_fields'].append('deleted_actor')
 
         hostname_char_limit = self._meta.get_field('action_node').max_length
         self.action_node = settings.CLUSTER_HOST_ID[:hostname_char_limit]
+
+    def save(self, *args, **kwargs):
+        # Store denormalized actor metadata so that we retain it for accounting
+        # purposes when the User row is deleted.
+        self._prepare_denormalized_fields()
+
+        if self.actor and 'update_fields' in kwargs and 'deleted_actor' not in kwargs['update_fields']:
+            kwargs['update_fields'].append('deleted_actor')
 
         super(ActivityStream, self).save(*args, **kwargs)

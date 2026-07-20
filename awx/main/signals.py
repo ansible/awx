@@ -306,6 +306,15 @@ class ActivityStreamEnabled(threading.local):
 activity_stream_enabled = ActivityStreamEnabled()
 
 
+class _DeferredAWXActivityStream(threading.local):
+    def __init__(self):
+        self.active = False
+        self.pending = []  # list of (ActivityStream_instance, on_commit_callback)
+
+
+_deferred_awx_activity_stream = _DeferredAWXActivityStream()
+
+
 @contextlib.contextmanager
 def disable_activity_stream():
     """
@@ -317,6 +326,39 @@ def disable_activity_stream():
         yield
     finally:
         activity_stream_enabled.enabled = previous_value
+
+
+@contextlib.contextmanager
+def deferred_activity_stream():
+    """Defer activity stream entries during bulk operations like cascade deletes.
+
+    Accumulates unsaved ActivityStream objects and bulk-creates them on
+    successful exit. On exception, accumulated entries are discarded.
+    Re-entrant: inner calls are no-ops (outermost caller owns the flush).
+    """
+    if _deferred_awx_activity_stream.active:
+        yield
+        return
+    _deferred_awx_activity_stream.active = True
+    try:
+        yield
+    except BaseException:
+        _deferred_awx_activity_stream.active = False
+        _deferred_awx_activity_stream.pending = []
+        raise
+    else:
+        pending = _deferred_awx_activity_stream.pending
+        _deferred_awx_activity_stream.active = False
+        _deferred_awx_activity_stream.pending = []
+
+        if pending:
+            entries = [entry for entry, _ in pending]
+            for entry in entries:
+                entry._prepare_denormalized_fields()
+            ActivityStream.objects.bulk_create(entries)
+            for _entry, on_commit_cb in pending:
+                if on_commit_cb:
+                    connection.on_commit(on_commit_cb)
 
 
 @contextlib.contextmanager
@@ -470,6 +512,9 @@ def activity_stream_delete(sender, instance, **kwargs):
     changes.update(model_to_dict(instance, model_serializer_mapping()))
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = get_activity_stream_class()(operation='delete', changes=json.dumps(changes), object1=object1, actor=get_current_user_or_none())
+    if _deferred_awx_activity_stream.active:
+        _deferred_awx_activity_stream.pending.append((activity_entry, lambda e=activity_entry: emit_activity_stream_change(e)))
+        return
     activity_entry.save()
     connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
 
