@@ -203,8 +203,7 @@ def test_job_accept_long_skip_tags(job_template_prompts, post, admin_user, mocke
     mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job)
     mocker.patch('awx.api.serializers.JobSerializer.to_representation')
     post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), {'skip_tags': long_skip_tags}, admin_user, expect=201)
-    assert JobTemplate.create_unified_job.called
-    assert JobTemplate.create_unified_job.call_args == ({'skip_tags': long_skip_tags},)
+    JobTemplate.create_unified_job.assert_called_once_with(skip_tags=long_skip_tags)
 
 
 @pytest.mark.django_db
