@@ -1636,6 +1636,22 @@ def test_acquire_lock_acquisition_fail_logged(fcntl_lockf, logger_mock, os_close
     )
 
 
+@mock.patch('awx.main.tasks.jobs.settings')
+def test_acquire_lock_projects_root_race_condition(settings_mock, mock_me):
+    """Regression test: acquire_lock must not fail when PROJECTS_ROOT already exists (TOCTOU race on multi-replica deployments)."""
+    settings_mock.PROJECTS_ROOT = '/some/projects'
+
+    instance = mock.Mock()
+    instance.get_lock_file.return_value = '/some/projects/my_project/.lock'
+    instance.cancel_flag = False
+
+    ProjectUpdate = jobs.RunProjectUpdate()
+
+    with mock.patch('os.makedirs') as makedirs_mock, mock.patch('os.open', return_value=3), mock.patch('fcntl.lockf'), mock.patch('os.close'):
+        ProjectUpdate.acquire_lock(instance)
+        makedirs_mock.assert_called_once_with('/some/projects', exist_ok=True)
+
+
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])
 def test_managed_injector_redaction(injector_cls):
     """See awx.main.models.inventory.PluginFileInjector._get_shared_env
