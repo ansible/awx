@@ -89,7 +89,7 @@ versions they are using.
 
 ### Dynatrace Instructions
 
-AWX sends logs to the Dynatrace [Log Ingest API v2](https://docs.dynatrace.com/docs/dynatrace-api/environment-api/log-monitoring/ingest-logs) endpoint.
+AWX sends logs to the Dynatrace [Log Ingest API v2](https://docs.dynatrace.com/docs/dynatrace-api/environment-api/log-monitoring-v2/post-ingest-logs) endpoint.
 
 Configure the following settings:
 
