@@ -20,6 +20,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
 from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac.policies import visible_users
 from ansible_base.rbac import permission_registry
 
 # AWX
@@ -643,6 +644,8 @@ class UserAccess(BaseAccess):
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             qs = User.objects.all()
+        elif settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            qs = visible_users(self.user)
         else:
             qs = (
                 User.objects.filter(pk__in=Organization.access_qs(self.user, 'view').values('member_role__members'))
@@ -706,12 +709,13 @@ class UserAccess(BaseAccess):
                 # in these cases only superusers can modify orphan users
                 return False
             if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-                # Permission granted if the user has all permissions that the target user has
                 target_perms = set(
-                    RoleEvaluation.objects.filter(role__in=obj.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(obj)).values_list('object_id', 'content_type_id', 'codename').distinct()
                 )
                 user_perms = set(
-                    RoleEvaluation.objects.filter(role__in=self.user.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(self.user))
+                    .values_list('object_id', 'content_type_id', 'codename')
+                    .distinct()
                 )
                 return not (target_perms - user_perms)
             return not obj.roles.all().exclude(ancestors__in=self.user.roles.all()).exists()
