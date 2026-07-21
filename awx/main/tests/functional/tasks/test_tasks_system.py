@@ -8,9 +8,18 @@ from unittest import mock
 
 import pytest
 
-from awx.main.tasks.system import CleanupImagesAndFiles, execution_node_health_check, inspect_established_receptor_connections, clear_setting_cache
+from awx.main.tasks.system import (
+    CleanupImagesAndFiles,
+    execution_node_health_check,
+    inspect_established_receptor_connections,
+    clear_setting_cache,
+    _batched_delete_inventory,
+)
 from awx.main.management.commands.dispatcherd import Command
-from awx.main.models import Instance, Job, ReceptorAddress, InstanceLink
+from django.db import DatabaseError
+
+from awx.main.models import Instance, Inventory, Job, Organization, ReceptorAddress, InstanceLink
+from awx.main.models.inventory import Group, Host
 
 
 @pytest.mark.django_db
@@ -103,6 +112,83 @@ def test_folder_cleanup_multiple_running_jobs(job_folder_factory, me_inst):
     CleanupImagesAndFiles.run(grace_period=0)
 
     assert [os.path.exists(d) for d in dirs] == [True for i in range(num_jobs)]
+
+
+@pytest.mark.django_db
+class TestBatchedDeleteInventory:
+    def _make_inventory_with_hosts(self, count):
+        from django.utils import timezone
+
+        now = timezone.now()
+        org = Organization.objects.create(name='test-org')
+        inv = Inventory.objects.create(name='test-inv', organization=org)
+        group = Group.objects.create(name='test-group', inventory=inv)
+        hosts = [Host(name=f'host-{i}', inventory=inv, created=now, modified=now) for i in range(count)]
+        Host.objects.bulk_create(hosts)
+        group.hosts.set(Host.objects.filter(inventory=inv))
+        return inv
+
+    def test_deletes_all_hosts_and_inventory(self):
+        inv = self._make_inventory_with_hosts(10)
+        inv_id = inv.id
+        _batched_delete_inventory(inv, batch_size=3)
+        assert not Host.objects.filter(inventory_id=inv_id).exists()
+        assert not Group.objects.filter(inventory_id=inv_id).exists()
+        assert not Inventory.objects.filter(id=inv_id).exists()
+
+    def test_no_hosts(self):
+        inv = self._make_inventory_with_hosts(0)
+        inv_id = inv.id
+        _batched_delete_inventory(inv)
+        assert not Inventory.objects.filter(id=inv_id).exists()
+
+    def test_exactly_one_batch(self):
+        inv = self._make_inventory_with_hosts(5)
+        inv_id = inv.id
+        _batched_delete_inventory(inv, batch_size=5)
+        assert not Host.objects.filter(inventory_id=inv_id).exists()
+        assert not Inventory.objects.filter(id=inv_id).exists()
+
+    def test_idempotent_after_partial_delete(self):
+        """Simulate a crash mid-way: delete some hosts manually, then run
+        _batched_delete_inventory — it should finish the job cleanly."""
+        inv = self._make_inventory_with_hosts(10)
+        inv_id = inv.id
+
+        # Simulate a partial deletion (as if the task crashed after 4 hosts)
+        partial_pks = list(Host.objects.filter(inventory=inv).values_list('pk', flat=True)[:4])
+        Host.objects.filter(pk__in=partial_pks).delete()
+        assert Host.objects.filter(inventory_id=inv_id).count() == 6
+
+        # Re-running should delete the remaining hosts and the inventory
+        inv.refresh_from_db()
+        _batched_delete_inventory(inv, batch_size=3)
+        assert not Host.objects.filter(inventory_id=inv_id).exists()
+        assert not Inventory.objects.filter(id=inv_id).exists()
+
+    def test_delete_inventory_retries_on_database_error(self):
+        """DatabaseError during deletion triggers a retry."""
+        from awx.main.tasks.system import delete_inventory
+
+        inv = self._make_inventory_with_hosts(3)
+        inv_id = inv.id
+
+        call_count = {'n': 0}
+        original = _batched_delete_inventory.__wrapped__ if hasattr(_batched_delete_inventory, '__wrapped__') else _batched_delete_inventory
+
+        def flaky_delete(inventory, batch_size=500):
+            call_count['n'] += 1
+            if call_count['n'] == 1:
+                raise DatabaseError('connection reset')
+            return original(inventory, batch_size=batch_size)
+
+        with mock.patch('awx.main.tasks.system._batched_delete_inventory', side_effect=flaky_delete):
+            with mock.patch('awx.main.tasks.system.emit_channel_notification'):
+                with mock.patch('awx.main.tasks.system.time.sleep'):
+                    delete_inventory(inv_id, None, retries=2)
+
+        assert call_count['n'] == 2
+        assert not Inventory.objects.filter(id=inv_id).exists()
 
 
 @pytest.mark.django_db
