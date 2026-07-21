@@ -177,10 +177,21 @@ class TestSelectBestInstanceForTask(object):
         'task,instances,instance_fit_index,reason',
         [
             (Job(task_impact=100), Is([100]), 0, "Only one, pick it"),
-            (Job(task_impact=100), Is([100, 100]), 0, "Two equally good fits, pick the first"),
+            (Job(task_impact=100), Is([100, 100]), 0, "Two equally good fits and equal jobs_running, pick the first"),
             (Job(task_impact=100), Is([50, 100]), 1, "First instance not as good as second instance"),
             (Job(task_impact=100), Is([50, 0, 20, 100, 100, 100, 30, 20]), 3, "Pick Instance [3] as it is the first that the task fits in."),
             (Job(task_impact=100), Is([50, 0, 20, 99, 11, 1, 5, 99]), None, "The task don't a fit, you must a quit!"),
+            # Tie-breaking: equal would_be_remaining but different jobs_running
+            # capacity=243 with 1 running (impact 43) → remaining 200 → would_be 100
+            # capacity=200 with 0 running → remaining 200 → would_be 100
+            (Job(task_impact=100), Is([(1, 243), (0, 200)]), 1, "Equal would_be_remaining, pick instance with fewer jobs running"),
+            # Three-way tie: capacities chosen so that remaining after consumption yields equal would_be
+            # (2 running, cap 286): remaining=286-86=200, would_be=100
+            # (0 running, cap 200): remaining=200, would_be=100
+            # (1 running, cap 243): remaining=243-43=200, would_be=100
+            (Job(task_impact=100), Is([(2, 286), (0, 200), (1, 243)]), 1, "Three-way tie, pick instance with fewest jobs running"),
+            (Job(task_impact=100), Is([(0, 200), (0, 300)]), 1, "Different capacity, pick higher capacity regardless of jobs"),
+            (Job(task_impact=100), Is([(5, 600), (0, 200)]), 0, "Higher remaining capacity wins even with more jobs running"),
         ],
     )
     def test_fit_task_to_most_remaining_capacity_instance(self, task, instances, instance_fit_index, reason):
@@ -197,6 +208,63 @@ class TestSelectBestInstanceForTask(object):
             assert instance_picked is None, reason
         else:
             assert instance_picked.hostname == instances[instance_fit_index].hostname, reason
+
+    def test_controller_node_tie_break_with_container_group_jobs(self):
+        """Verify that controller nodes managing container-group jobs track jobs_running
+        and tie-break correctly. Container-group jobs have controller_node set but no
+        execution_node, simulating the real burst workload scenario."""
+        ig = InstanceGroup(id=10, name='controlplane')
+        ctrl_a = Instance(hostname='ctrl-a', capacity=200, node_type='control')
+        ctrl_b = Instance(hostname='ctrl-b', capacity=200, node_type='control')
+        ctrl_c = Instance(hostname='ctrl-c', capacity=200, node_type='control')
+        ig.instances.add(ctrl_a, ctrl_b, ctrl_c)
+
+        # Simulate container-group jobs: ctrl-a has 3, ctrl-b has 1, ctrl-c has 0
+        tasks = [
+            Job(controller_node='ctrl-a', execution_node='', instance_group=ig),
+            Job(controller_node='ctrl-a', execution_node='', instance_group=ig),
+            Job(controller_node='ctrl-a', execution_node='', instance_group=ig),
+            Job(controller_node='ctrl-b', execution_node='', instance_group=ig),
+        ]
+        tm_models = TaskManagerModels.init_with_consumed_capacity(tasks=tasks, instances=[ctrl_a, ctrl_b, ctrl_c], instance_groups=[ig])
+
+        # ctrl-a: consumed=3, jobs_running=3, remaining=197
+        # ctrl-b: consumed=1, jobs_running=1, remaining=199
+        # ctrl-c: consumed=0, jobs_running=0, remaining=200
+        # New task with impact=1 (control): ctrl-c has most remaining (200) → wins by capacity
+        task = Job(task_impact=1, capacity_type='control')
+        picked = tm_models.instance_groups.fit_task_to_most_remaining_capacity_instance(task, 'controlplane')
+        assert picked.hostname == 'ctrl-c', "Should pick the node with most remaining capacity"
+
+    def test_controller_node_tie_break_equal_capacity(self):
+        """When control nodes have exactly equal remaining capacity, prefer the one
+        with fewer jobs_running. This is the core burst-distribution scenario."""
+        ig = InstanceGroup(id=10, name='controlplane')
+        ctrl_a = Instance(hostname='ctrl-a', capacity=200, node_type='control')
+        ctrl_b = Instance(hostname='ctrl-b', capacity=200, node_type='control')
+        ig.instances.add(ctrl_a, ctrl_b)
+
+        # Both nodes have same consumed capacity (1 each) but ctrl-a has 1 job, ctrl-b has 1 job
+        # After this, both have remaining=199, jobs_running=1 → tie → first wins
+        tasks = [
+            Job(controller_node='ctrl-a', execution_node='', instance_group=ig),
+            Job(controller_node='ctrl-b', execution_node='', instance_group=ig),
+        ]
+        tm_models = TaskManagerModels.init_with_consumed_capacity(tasks=tasks, instances=[ctrl_a, ctrl_b], instance_groups=[ig])
+        task = Job(task_impact=1, capacity_type='control')
+        picked = tm_models.instance_groups.fit_task_to_most_remaining_capacity_instance(task, 'controlplane')
+        # Both tied on capacity (199) and jobs_running (1) → first in iteration wins
+        assert picked.hostname == 'ctrl-a', "Equal capacity and jobs: first in iteration wins"
+
+        # Now give ctrl-a one more job, making it 2 vs 1
+        tasks.append(Job(controller_node='ctrl-a', execution_node='', instance_group=ig))
+        tm_models = TaskManagerModels.init_with_consumed_capacity(tasks=tasks, instances=[ctrl_a, ctrl_b], instance_groups=[ig])
+        # ctrl-a: consumed=2, jobs_running=2, remaining=198
+        # ctrl-b: consumed=1, jobs_running=1, remaining=199
+        # ctrl-b wins by capacity (199 > 198)
+        task = Job(task_impact=1, capacity_type='control')
+        picked = tm_models.instance_groups.fit_task_to_most_remaining_capacity_instance(task, 'controlplane')
+        assert picked.hostname == 'ctrl-b', "Node with fewer jobs has more remaining capacity, wins"
 
     @pytest.mark.parametrize(
         'instances,instance_fit_index,reason',
