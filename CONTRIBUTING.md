@@ -103,6 +103,12 @@ When necessary, remove any AWX containers and images by running the following:
 
 ### Pre commit hooks
 
+Install the pre-commit hook before contributing:
+
+```
+make pre-commit
+```
+
 When you attempt to perform a `git commit` there will be a pre-commit hook that gets run before the commit is allowed to your local repository. For example, python's [black](https://pypi.org/project/black/) will be run to test the formatting of any python files.
 
 While you can use environment variables to skip the pre-commit hooks GitHub will run similar tests and prevent merging of PRs if the tests do not pass.

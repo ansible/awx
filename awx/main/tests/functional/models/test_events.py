@@ -71,8 +71,10 @@ class TestEvents:
             assert s.skipped == 0
 
         for host in Host.objects.all():
-            assert host.last_job_id == self.job.id
-            assert host.last_job_host_summary.host == host
+            latest_summary = JobHostSummary.latest_for_host(host.id)
+            assert latest_summary is not None
+            assert latest_summary.job_id == self.job.id
+            assert latest_summary.host == host
 
     def test_host_summary_generation_with_deleted_hosts(self):
         self._generate_hosts(10)
@@ -91,8 +93,7 @@ class TestEvents:
     def test_host_summary_generation_with_limit(self):
         # Make an inventory with 10 hosts, run a playbook with a --limit
         # pointed at *one* host,
-        # Verify that *only* that host has an associated JobHostSummary and that
-        # *only* that host has an updated value for .last_job.
+        # Verify that *only* that host has an associated JobHostSummary.
         self._generate_hosts(10)
 
         # by making the playbook_on_stats *only* include Host 1, we're emulating
@@ -105,13 +106,14 @@ class TestEvents:
         # be related to the appropriate Host)
         assert JobHostSummary.objects.count() == 1
         for h in Host.objects.all():
+            latest_summary = JobHostSummary.latest_for_host(h.id)
             if h.name == 'Host 1':
-                assert h.last_job_id == self.job.id
-                assert h.last_job_host_summary_id == JobHostSummary.objects.first().id
+                assert latest_summary is not None
+                assert latest_summary.job_id == self.job.id
+                assert latest_summary.id == JobHostSummary.objects.first().id
             else:
-                # all other hosts in the inventory should remain untouched
-                assert h.last_job_id is None
-                assert h.last_job_host_summary_id is None
+                # all other hosts in the inventory should have no summary
+                assert latest_summary is None
 
     def test_host_metrics_insert(self):
         self._generate_hosts(10)

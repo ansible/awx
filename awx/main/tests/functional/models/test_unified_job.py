@@ -1,5 +1,6 @@
 import itertools
 import pytest
+from uuid import uuid4
 
 # CRUM
 from crum import impersonate
@@ -7,7 +8,7 @@ from crum import impersonate
 # AWX
 from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule, Credential
 from awx.api.versioning import reverse
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 
 @pytest.mark.django_db
@@ -31,6 +32,64 @@ def test_soft_unique_together(post, project, admin_user):
         expect=400,
     )
     assert 'combination already exists' in str(r.data)
+
+
+@pytest.mark.django_db
+class TestJobCancel:
+    """
+    Coverage for UnifiedJob.cancel, focused on interaction with dispatcherd objects.
+    Using mocks for the dispatcherd objects, because tests by default use a no-op broker.
+    """
+
+    def test_cancel_sets_flag_and_clears_start_args(self, mocker):
+        job = Job.objects.create(status='running', name='foo-job', celery_task_id=str(uuid4()), controller_node='foo', start_args='{"secret": "value"}')
+        job.websocket_emit_status = mocker.MagicMock()
+
+        assert job.can_cancel is True
+        assert job.cancel_flag is False
+
+        job.cancel()
+        job.refresh_from_db()
+
+        assert job.cancel_flag is True
+        assert job.start_args == ''
+
+    def test_cancel_sets_job_explanation(self, mocker):
+        job = Job.objects.create(status='running', name='foo-job', celery_task_id=str(uuid4()), controller_node='foo')
+        job.websocket_emit_status = mocker.MagicMock()
+        job_explanation = 'giggity giggity'
+
+        job.cancel(job_explanation=job_explanation)
+        job.refresh_from_db()
+
+        assert job.job_explanation == job_explanation
+
+    def test_cancel_sends_control_message(self, mocker):
+        celery_task_id = str(uuid4())
+        job = Job.objects.create(status='running', name='foo-job', celery_task_id=celery_task_id, controller_node='foo')
+        job.websocket_emit_status = mocker.MagicMock()
+        control = mocker.MagicMock()
+        get_control = mocker.patch('awx.main.models.unified_jobs.get_control_from_settings', return_value=control)
+
+        job.cancel()
+
+        get_control.assert_called_once_with(default_publish_channel='foo')
+        control.control.assert_called_once_with('cancel', data={'uuid': celery_task_id})
+
+    def test_cancel_refreshes_task_id_before_sending_control(self, mocker):
+        job = Job.objects.create(status='pending', name='foo-job', celery_task_id='', controller_node='bar')
+        job.websocket_emit_status = mocker.MagicMock()
+        celery_task_id = str(uuid4())
+        Job.objects.filter(pk=job.pk).update(status='running', celery_task_id=celery_task_id)
+        control = mocker.MagicMock()
+        get_control = mocker.patch('awx.main.models.unified_jobs.get_control_from_settings', return_value=control)
+        refresh_spy = mocker.spy(job, 'refresh_from_db')
+
+        job.cancel()
+
+        refresh_spy.assert_called_once_with(fields=['celery_task_id', 'controller_node'])
+        get_control.assert_called_once_with(default_publish_channel='bar')
+        control.control.assert_called_once_with('cancel', data={'uuid': celery_task_id})
 
 
 @pytest.mark.django_db
@@ -101,7 +160,13 @@ class TestMetaVars:
         job = Job.objects.create(name='job', created_by=admin_user)
         job.save()
 
-        user_vars = ['_'.join(x) for x in itertools.product(['tower', 'awx'], ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name'])]
+        user_vars = [
+            '_'.join(x)
+            for x in itertools.product(
+                get_job_variable_prefixes(),
+                ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name'],
+            )
+        ]
 
         for key in user_vars:
             assert key in job.awx_meta_vars()
@@ -120,7 +185,7 @@ class TestMetaVars:
 
         workflow_job.workflow_nodes.create(job=job)
         data = job.awx_meta_vars()
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert data['{}_user_id'.format(name)] == admin_user.id
             assert data['{}_user_name'.format(name)] == admin_user.username
             assert data['{}_workflow_job_id'.format(name)] == workflow_job.pk
@@ -130,7 +195,7 @@ class TestMetaVars:
         schedule = Schedule.objects.create(name='job-schedule', rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY', unified_job_template=job_template)
         job = Job.objects.create(name='fake-job', launch_type='workflow', schedule=schedule, job_template=job_template)
         data = job.awx_meta_vars()
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert data['{}_schedule_id'.format(name)] == schedule.pk
             assert '{}_user_name'.format(name) not in data
 
@@ -142,7 +207,7 @@ class TestMetaVars:
         job = Job.objects.create(launch_type='workflow')
         workflow_job.workflow_nodes.create(job=job)
         result_hash = {}
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             result_hash['{}_job_id'.format(name)] = job.id
             result_hash['{}_job_launch_type'.format(name)] = 'workflow'
             result_hash['{}_workflow_job_name'.format(name)] = 'workflow-job'

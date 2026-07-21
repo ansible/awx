@@ -36,7 +36,6 @@ from awx.main.models import (
     Inventory,
     InventorySource,
     Job,
-    JobHostSummary,
     Organization,
     Project,
     Role,
@@ -251,45 +250,9 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                         pass
 
 
-# Update host pointers to last_job and last_job_host_summary when a job is deleted
-
-
-def _update_host_last_jhs(host):
-    jhs_qs = JobHostSummary.objects.filter(host__pk=host.pk)
-    try:
-        jhs = jhs_qs.order_by('-job__pk')[0]
-    except IndexError:
-        jhs = None
-    update_fields = []
-    try:
-        last_job = jhs.job if jhs else None
-    except Job.DoesNotExist:
-        # The job (and its summaries) have already been/are currently being
-        # deleted, so there's no need to update the host w/ a reference to it
-        return
-    if host.last_job != last_job:
-        host.last_job = last_job
-        update_fields.append('last_job')
-    if host.last_job_host_summary != jhs:
-        host.last_job_host_summary = jhs
-        update_fields.append('last_job_host_summary')
-    if update_fields:
-        host.save(update_fields=update_fields)
-
-
-@receiver(pre_delete, sender=Job)
-def save_host_pks_before_job_delete(sender, **kwargs):
-    instance = kwargs['instance']
-    hosts_qs = Host.objects.filter(last_job__pk=instance.pk)
-    instance._saved_hosts_pks = set(hosts_qs.values_list('pk', flat=True))
-
-
-@receiver(post_delete, sender=Job)
-def update_host_last_job_after_job_deleted(sender, **kwargs):
-    instance = kwargs['instance']
-    hosts_pks = getattr(instance, '_saved_hosts_pks', [])
-    for host in Host.objects.filter(pk__in=hosts_pks):
-        _update_host_last_jhs(host)
+# Host.last_job and Host.last_job_host_summary are now derived from
+# JobHostSummary.latest_for_host / latest_job_for_host.
+# No signal handlers needed to maintain these denormalized FKs.
 
 
 # Set via ActivityStreamRegistrar to record activity stream events

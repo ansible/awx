@@ -111,7 +111,7 @@ class UnifiedJobEventPagination(Pagination):
     def __init__(self, *args, **kwargs):
         self.use_limit_paginator = False
         self.limit_pagination = LimitPagination()
-        return super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def paginate_queryset(self, queryset, request, view=None):
         if 'limit' in request.query_params:

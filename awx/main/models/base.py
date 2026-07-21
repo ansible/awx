@@ -177,7 +177,7 @@ class CreatedModifiedModel(BaseModel):
     )
 
     def save(self, *args, **kwargs):
-        update_fields = list(kwargs.get('update_fields', []))
+        update_fields = list(kwargs.get('update_fields') or [])
         # Manually perform auto_now_add and auto_now logic.
         if not self.pk and not self.created:
             self.created = now()
@@ -207,7 +207,7 @@ class PasswordFieldsModel(BaseModel):
         new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         # When first saving to the database, don't store any password field
         # values, but instead save them until after the instance is created.
         # Otherwise, store encrypted values to the database.
@@ -315,15 +315,14 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
     )
 
     def __init__(self, *args, **kwargs):
-        r = super(PrimordialModel, self).__init__(*args, **kwargs)
+        super(PrimordialModel, self).__init__(*args, **kwargs)
         if self.pk:
             self._prior_values_store = self._get_fields_snapshot()
         else:
             self._prior_values_store = {}
-        return r
 
     def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         user = get_current_user()
         if user and not user.id:
             user = None

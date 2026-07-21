@@ -18,13 +18,14 @@ from awx.main.tests.functional.conftest import *  # noqa
 from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
 from awx.main.tests import data
 
-from awx.main.models import Project, JobTemplate, Organization, Inventory
+from awx.main.models import Project, JobTemplate, Organization, Inventory, WorkflowJob, UnifiedJob
 from awx.main.tasks.system import clear_setting_cache
 
 logger = logging.getLogger(__name__)
 
 
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
+COLL_DATA = os.path.join(os.path.dirname(data.__file__), 'collections')
 
 
 def _copy_folders(source_path, dest_path, clear=False):
@@ -56,6 +57,7 @@ def live_tmp_folder():
         shutil.rmtree(path)
     os.mkdir(path)
     _copy_folders(PROJ_DATA, path)
+    _copy_folders(COLL_DATA, path)
     for dirname in os.listdir(path):
         source_dir = os.path.join(path, dirname)
         subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)
@@ -69,7 +71,7 @@ def live_tmp_folder():
         settings._awx_conf_memoizedcache.clear()
         # cache is cleared in test environment, but need to clear in test environment
         clear_setting_cache.delay(['AWX_ISOLATION_SHOW_PATHS'])
-        time.sleep(0.2)  # allow task to finish, we have no real metric to know
+        time.sleep(5.0)  # for _awx_conf_memoizedcache to expire on all workers
     else:
         logger.info(f'Believed that {path} is already in settings.AWX_ISOLATION_SHOW_PATHS: {settings.AWX_ISOLATION_SHOW_PATHS}')
     return path
@@ -100,6 +102,21 @@ def wait_for_events(uj, timeout=2):
 
 
 def unified_job_stdout(uj):
+    if type(uj) is UnifiedJob:
+        uj = uj.get_real_instance()
+    if isinstance(uj, WorkflowJob):
+        outputs = []
+        for node in uj.workflow_job_nodes.all().select_related('job').order_by('id'):
+            if node.job is None:
+                continue
+            outputs.append(
+                'workflow node {node_id} job {job_id} output:\n{output}'.format(
+                    node_id=node.id,
+                    job_id=node.job.id,
+                    output=unified_job_stdout(node.job),
+                )
+            )
+        return '\n'.join(outputs)
     wait_for_events(uj)
     return '\n'.join([event.stdout for event in uj.get_event_queryset().order_by('created')])
 

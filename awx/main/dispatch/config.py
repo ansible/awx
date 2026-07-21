@@ -25,8 +25,13 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
         "version": 2,
         "service": {
             "pool_kwargs": {
-                "min_workers": settings.JOB_EVENT_WORKERS,
+                "min_workers": settings.DISPATCHER_MIN_WORKERS,
                 "max_workers": max_workers,
+                # This must be less than max_workers to make sense, which is usually 4
+                # With reserve of 1, after a burst of tasks, load needs to down to 4-1=3
+                # before we return to min_workers
+                "scaledown_reserve": 1,
+                "worker_max_lifetime_seconds": settings.WORKER_MAX_LIFETIME_SECONDS,
             },
             "main_kwargs": {"node_id": settings.CLUSTER_HOST_ID},
             "process_manager_cls": "ForkServerManager",
@@ -38,8 +43,8 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
     }
 
     if mock_publish:
-        config["brokers"]["noop"] = {}
-        config["publish"]["default_broker"] = "noop"
+        config["brokers"]["dispatcherd.testing.brokers.noop"] = {}
+        config["publish"]["default_broker"] = "dispatcherd.testing.brokers.noop"
     else:
         config["brokers"]["pg_notify"] = {
             "config": get_pg_notify_params(),
@@ -56,5 +61,11 @@ def get_dispatcherd_config(for_service: bool = False, mock_publish: bool = False
         }
 
         config["brokers"]["pg_notify"]["channels"] = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]
+        metrics_cfg = settings.METRICS_SUBSYSTEM_CONFIG.get('server', {}).get(settings.METRICS_SERVICE_DISPATCHER)
+        if metrics_cfg:
+            config["service"]["metrics_kwargs"] = {
+                "host": metrics_cfg.get("host", "localhost"),
+                "port": metrics_cfg.get("port", 8015),
+            }
 
     return config

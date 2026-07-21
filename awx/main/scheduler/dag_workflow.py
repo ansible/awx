@@ -122,8 +122,11 @@ class WorkflowDAG(SimpleDAG):
             if not job:
                 continue
             elif job.can_cancel:
-                cancel_finished = False
                 job.cancel()
+                # If the job is not yet in a terminal state after .cancel(),
+                # the TaskManager still needs to process it.
+                if job.status not in ('successful', 'failed', 'canceled', 'error'):
+                    cancel_finished = False
         return cancel_finished
 
     def is_workflow_done(self):

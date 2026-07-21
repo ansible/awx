@@ -31,7 +31,23 @@ class User(HasCreate, base.Base):
         payload = self.create_payload(username=username, password=password, **kwargs)
         self.password = payload.password
 
-        self.update_identity(Users(self.connection).post(payload))
+        ctrl_users_api = Users(self.connection)
+        # Check if API base path is set to controller, then use gateway endpoint
+        if config.get("api_base_path") == "/api/controller/":
+            # Use gateway endpoint for user creation
+            gw_users_api = Users(self.connection)
+            gw_users_api.endpoint = "/api/gateway/v1/users/"
+            # Cleanup controller attributes
+            payload["is_platform_auditor"] = payload.get("is_system_auditor")
+            payload.pop("is_system_auditor")
+            # Create gw user
+            gw_user = gw_users_api.post(payload)
+            user = ctrl_users_api.get(username=gw_user.username).results.pop()
+            user.json["password"] = payload.password
+            self.update_identity(user)
+        else:
+            # Use default endpoint
+            self.update_identity(ctrl_users_api.post(payload))
 
         if organization:
             organization.add_user(self)

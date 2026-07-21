@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.models import InventorySource, Inventory, ActivityStream, Organization
 from awx.main.utils.inventory_vars import update_group_variables
 
 
@@ -462,6 +462,26 @@ class TestInventorySourceCredential:
         )
         assert 'Cloud-based inventory sources (such as ec2)' in r.data['credential'][0]
         assert 'require credentials for the matching cloud service' in r.data['credential'][0]
+
+    def test_credential_dict_value_returns_400(self, inventory, admin_user, put):
+        """Passing a dict for the credential field should return 400, not 500.
+
+        Reproduces a bug where int() raises TypeError on non-scalar types
+        (dict, list) which was uncaught, resulting in a 500 Internal Server Error.
+        """
+        inv_src = InventorySource.objects.create(name='test-src', inventory=inventory, source='ec2')
+        r = put(
+            url=reverse('api:inventory_source_detail', kwargs={'pk': inv_src.pk}),
+            data={
+                'name': 'test-src',
+                'inventory': inventory.pk,
+                'source': 'ec2',
+                'credential': {'username': 'admin', 'password': 'secret'},
+            },
+            user=admin_user,
+            expect=400,
+        )
+        assert r.status_code == 400
 
     def test_vault_credential_not_allowed(self, project, inventory, vault_credential, admin_user, post):
         """Vault credentials cannot be associated via the deprecated field"""
@@ -943,3 +963,45 @@ class TestInventoryAllVariables:
         # Test step 6: Value of var x from source A reappears, because the
         # latest update from source B did not contain var x.
         self.update_and_verify(inv_src_c, {}, expect={"x": 1}, teststep=6)
+
+
+@pytest.mark.django_db
+def test_inventory_names_unique_per_organization(post, admin_user):
+    """Validate that two inventories can have the same name if they belong to different organizations."""
+    org1 = Organization.objects.create(name='org-inv-1')
+    org2 = Organization.objects.create(name='org-inv-2')
+    inv_name = 'SharedInventoryName'
+
+    # Create inventory with same name in org1
+    resp1 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org1.id},
+        admin_user,
+        expect=201,
+    )
+    inv1_id = resp1.data['id']
+
+    # Create inventory with same name in org2 - should succeed
+    resp2 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org2.id},
+        admin_user,
+        expect=201,
+    )
+    inv2_id = resp2.data['id']
+
+    assert inv1_id != inv2_id
+    inv1 = Inventory.objects.get(id=inv1_id)
+    inv2 = Inventory.objects.get(id=inv2_id)
+    assert inv1.name == inv2.name == inv_name
+    assert inv1.organization.id == org1.id
+    assert inv2.organization.id == org2.id
+
+    # Attempt to create another inventory with same name in org1 - should fail
+    resp3 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org1.id},
+        admin_user,
+        expect=400,
+    )
+    assert 'Inventory with this Name and Organization already exists' in json.dumps(resp3.data)

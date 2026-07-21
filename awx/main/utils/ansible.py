@@ -48,15 +48,16 @@ def could_be_playbook(project_path, dir_path, filename):
     # show up.
     matched = False
     try:
-        for n, line in enumerate(codecs.open(playbook_path, 'r', encoding='utf-8', errors='ignore')):
-            if valid_playbook_re.match(line):
-                matched = True
-                break
-            # Any YAML file can also be encrypted with vault;
-            # allow these to be used as the main playbook.
-            elif n == 0 and line.startswith('$ANSIBLE_VAULT;'):
-                matched = True
-                break
+        with codecs.open(playbook_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for n, line in enumerate(f):
+                if valid_playbook_re.match(line):
+                    matched = True
+                    break
+                # Any YAML file can also be encrypted with vault;
+                # allow these to be used as the main playbook.
+                elif n == 0 and line.startswith('$ANSIBLE_VAULT;'):
+                    matched = True
+                    break
     except IOError:
         return None
     if not matched:

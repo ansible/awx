@@ -11,6 +11,7 @@ __all__ = [
     'CAN_CANCEL',
     'ACTIVE_STATES',
     'STANDARD_INVENTORY_UPDATE_ENV',
+    'OIDC_CREDENTIAL_TYPE_NAMESPACES',
 ]
 
 PRIVILEGE_ESCALATION_METHODS = [
@@ -99,10 +100,6 @@ MAX_ISOLATED_PATH_COLON_DELIMITER = 2
 
 SURVEY_TYPE_MAPPING = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}
 
-JOB_VARIABLE_PREFIXES = [
-    'awx',
-    'tower',
-]
 
 # Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
 # Importing a library just for this message seemed like overkill
@@ -140,3 +137,6 @@ org_role_to_permission = {
     'execution_environment_admin_role': 'add_executionenvironment',
     'auditor_role': 'view_project',  # TODO: also doesnt really work
 }
+
+# OIDC credential type namespaces for feature flag filtering
+OIDC_CREDENTIAL_TYPE_NAMESPACES = ['hashivault-kv-oidc', 'hashivault-ssh-oidc']

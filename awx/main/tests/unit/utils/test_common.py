@@ -330,17 +330,13 @@ class TestHostnameRegexValidator:
 
     def test_bad_call(self, regex_expr, re_flags):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags)
-        try:
+        with pytest.raises(ValidationError, match=r"^\['illegal characters detected in hostname=@#\$%\)\$#\(TUFAS_DG. Please verify.'\]$"):
             h("@#$%)$#(TUFAS_DG")
-        except ValidationError as e:
-            assert e.message is not None
 
     def test_good_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
-        try:
+        with pytest.raises(ValidationError, match=r"^\['Enter a valid value.'\]$"):
             h("1.2.3.4")
-        except ValidationError as e:
-            assert e.message is not None
 
     def test_bad_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)

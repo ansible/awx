@@ -8,6 +8,7 @@ import pathlib
 import shutil
 import tarfile
 import tempfile
+from urllib.parse import urlparse, urlunparse
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -23,6 +24,8 @@ from awx.main.models import Job
 from awx.main.access import access_registry
 from awx.main.utils import get_awx_http_client_headers, set_environ, datetime_hook
 from awx.main.utils.analytics_proxy import OIDCClient
+from awx.main.utils.candlepin import get_or_generate_candlepin_certificate
+from awx.main.utils.candlepin.client import _temp_cert_files
 
 __all__ = ['register', 'gather', 'ship']
 
@@ -39,6 +42,76 @@ def _valid_license():
         logger.exception("A valid license was not found:")
         return False
     return True
+
+
+def _get_cert_upload_url(url):
+    """
+    Convert analytics URL to use 'cert.' subdomain for mTLS uploads.
+
+    Some analytics services use different hostnames for different auth methods:
+    - cert.example.com - for mTLS (certificate-based) uploads
+    - example.com - for OIDC (token-based) uploads
+
+    Args:
+        url: Original analytics URL
+
+    Returns:
+        URL with 'cert.' prepended to hostname if not already present
+    """
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname
+
+        # Only modify if hostname doesn't already start with 'cert.'
+        if hostname and not hostname.startswith('cert.'):
+            new_hostname = f'cert.{hostname}'
+            # Reconstruct URL with new hostname
+            netloc = new_hostname
+            if parsed.port:
+                netloc = f'{new_hostname}:{parsed.port}'
+
+            new_parsed = parsed._replace(netloc=netloc)
+            return urlunparse(new_parsed)
+
+        return url
+    except Exception as e:
+        logger.warning(f'Could not modify URL for cert upload: {e}, using original URL')
+        return url
+
+
+def _get_analytics_credentials():
+    """
+    Get Red Hat Insights credentials from settings.
+
+    Attempts to retrieve credentials in the following priority order:
+    1. REDHAT_USERNAME / REDHAT_PASSWORD
+    2. SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD
+    3. SUBSCRIPTIONS_CLIENT_ID / SUBSCRIPTIONS_CLIENT_SECRET
+
+    Returns:
+        tuple: (username, password) if credentials are found, (None, None) otherwise
+    """
+    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
+    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
+
+    if rh_id and rh_secret:
+        return rh_id, rh_secret
+
+    # Try SUBSCRIPTIONS_USERNAME / SUBSCRIPTIONS_PASSWORD
+    rh_id = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
+    rh_secret = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
+
+    if rh_id and rh_secret:
+        return rh_id, rh_secret
+
+    # Try SUBSCRIPTIONS_CLIENT_ID / SUBSCRIPTIONS_CLIENT_SECRET
+    rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
+    rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+
+    if rh_id and rh_secret:
+        return rh_id, rh_secret
+
+    return None, None
 
 
 def all_collectors():
@@ -184,10 +257,8 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             logger.log(log_level, "Automation Analytics not enabled. Use --dry-run to gather locally without sending.")
             return None
 
-        if not (
-            settings.AUTOMATION_ANALYTICS_URL
-            and ((settings.REDHAT_USERNAME and settings.REDHAT_PASSWORD) or (settings.SUBSCRIPTIONS_CLIENT_ID and settings.SUBSCRIPTIONS_CLIENT_SECRET))
-        ):
+        rh_id, rh_secret = _get_analytics_credentials()
+        if not (settings.AUTOMATION_ANALYTICS_URL and rh_id and rh_secret):
             logger.log(log_level, "Not gathering analytics, configuration is invalid. Use --dry-run to gather locally without sending.")
             return None
 
@@ -349,6 +420,18 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
         return tarfiles
 
 
+def _log_shipping_response(response, path):
+    filename = os.path.basename(path)
+    try:
+        data = response.json()
+        request_id = data.get('request_id', 'unknown')
+        account_number = data.get('account_number', 'unknown')
+        org_id = data.get('org_id', 'unknown')
+        logger.info(f"Analytics upload successful: file={filename} request_id={request_id} account_number={account_number} org_id={org_id}")
+    except Exception:
+        logger.info(f"Analytics upload successful: file={filename} status={response.status_code}")
+
+
 def ship(path):
     """
     Ship gathered metrics to the Insights API
@@ -368,19 +451,14 @@ def ship(path):
         logger.error('AUTOMATION_ANALYTICS_URL is not set')
         return False
 
-    rh_id = getattr(settings, 'REDHAT_USERNAME', None)
-    rh_secret = getattr(settings, 'REDHAT_PASSWORD', None)
-
-    if not (rh_id and rh_secret):
-        rh_id = getattr(settings, 'SUBSCRIPTIONS_CLIENT_ID', None)
-        rh_secret = getattr(settings, 'SUBSCRIPTIONS_CLIENT_SECRET', None)
+    rh_id, rh_secret = _get_analytics_credentials()
 
     if not rh_id:
-        logger.error('Neither REDHAT_USERNAME nor SUBSCRIPTIONS_CLIENT_ID are set')
+        logger.error('No valid username found. Tried: REDHAT_USERNAME, SUBSCRIPTIONS_USERNAME, SUBSCRIPTIONS_CLIENT_ID')
         return False
 
     if not rh_secret:
-        logger.error('Neither REDHAT_PASSWORD nor SUBSCRIPTIONS_CLIENT_SECRET are set')
+        logger.error('No valid password found. Tried: REDHAT_PASSWORD, SUBSCRIPTIONS_PASSWORD, SUBSCRIPTIONS_CLIENT_SECRET')
         return False
 
     with open(path, 'rb') as f:
@@ -388,17 +466,42 @@ def ship(path):
         s = requests.Session()
         s.headers = get_awx_http_client_headers()
         s.headers.pop('Content-Type')
+
         with set_environ(**settings.AWX_TASK_ENV):
+            # Try Certificate-based mTLS authentication (zero-touch)
+            cert_pem, key_pem = get_or_generate_candlepin_certificate()
+            if cert_pem and key_pem:
+                # Use cert. subdomain for mTLS uploads
+                cert_url = _get_cert_upload_url(url)
+                logger.debug("Attempting certificate-based authentication for analytics upload")
+                try:
+                    with _temp_cert_files(cert_pem, key_pem) as (cert_path, key_path):
+                        response = s.post(
+                            cert_url, files=files, cert=(cert_path, key_path), verify=settings.INSIGHTS_CERT_PATH, headers=s.headers, timeout=(31, 31)
+                        )
+                        if response.status_code < 300:
+                            _log_shipping_response(response, path)
+                            return True
+                        else:
+                            logger.warning(
+                                f'Certificate-based authentication failed with status {response.status_code}, {response.text}. Falling back to OIDC auth'
+                            )
+                except Exception as e:
+                    logger.warning(f"Certificate-based authentication failed: {e}, falling back to OIDC auth")
+
+            # Try OIDC authentication
+            logger.debug("Attempting OIDC authentication for analytics upload")
+            f.seek(0)  # requests POST may read from the handler, so seek to beginning of file for the next POST attempt
             try:
                 client = OIDCClient(rh_id, rh_secret)
                 response = client.make_request("POST", url, headers=s.headers, files=files, verify=settings.INSIGHTS_CERT_PATH, timeout=(31, 31))
-            except requests.RequestException:
-                logger.error("Automation Analytics API request failed, trying base auth method")
-                response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_id, rh_secret), headers=s.headers, timeout=(31, 31))
 
-        # Accept 2XX status_codes
-        if response.status_code >= 300:
-            logger.error('Upload failed with status {}, {}'.format(response.status_code, response.text))
-            return False
-
-        return True
+                if response.status_code < 300:
+                    _log_shipping_response(response, path)
+                    return True
+                else:
+                    logger.error(f'OIDC authentication failed with status {response.status_code}, {response.text}')
+                    return False
+            except requests.RequestException as e:
+                logger.error(f"OIDC authentication failed: {e}")
+                return False

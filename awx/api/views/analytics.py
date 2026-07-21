@@ -49,7 +49,6 @@ class GetNotAllowedMixin(object):
 class AnalyticsRootView(APIView):
     permission_classes = (AnalyticsPermission,)
     name = _('Automation Analytics')
-    swagger_topic = 'Automation Analytics'
     resource_purpose = 'automation analytics endpoints'
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to analytics"})
@@ -306,7 +305,6 @@ class AnalyticsAuthorizedView(AnalyticsGenericListView):
 
 class AnalyticsReportsList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("Reports")
-    swagger_topic = "Automation Analytics"
     resource_purpose = 'automation analytics reports'
 
 

@@ -98,5 +98,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_controller_role_definitions),
+        migrations.RunPython(convert_controller_role_definitions, migrations.RunPython.noop),
     ]

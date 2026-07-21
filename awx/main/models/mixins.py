@@ -188,6 +188,16 @@ class SurveyJobTemplateMixin(models.Model):
                             runtime_extra_vars.pop(variable_key)
 
                 if default is not None:
+                    # do not add variables that contain an empty string, are not required and are not present in extra_vars
+                    # password fields must be skipped, because default values have special behaviour
+                    if (
+                        default == ''
+                        and not survey_element.get('required')
+                        and survey_element.get('type') != 'password'
+                        and variable_key not in runtime_extra_vars
+                    ):
+                        continue
+
                     decrypted_default = default
                     if survey_element['type'] == "password" and isinstance(decrypted_default, str) and decrypted_default.startswith('$encrypted$'):
                         decrypted_default = decrypt_value(get_encryption_key('value', pk=None), decrypted_default)

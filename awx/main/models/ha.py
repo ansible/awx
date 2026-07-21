@@ -50,9 +50,8 @@ class HasPolicyEditsMixin(HasEditsMixin):
         abstract = True
 
     def __init__(self, *args, **kwargs):
-        r = super(BaseModel, self).__init__(*args, **kwargs)
+        super(BaseModel, self).__init__(*args, **kwargs)
         self._prior_values_store = self._get_fields_snapshot()
-        return r
 
     def save(self, *args, **kwargs):
         super(BaseModel, self).save(*args, **kwargs)
@@ -375,6 +374,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.memory = new_memory
             update_fields.append('memory')
 
+        # Do not mark nodes READY if cpu or memory is zero
+        if not errors and self.node_type != Instance.Types.HOP and (not new_cpu or not new_memory):
+            errors = _('Health check for {} reported invalid values: cpu={}, memory={}').format(self.hostname, new_cpu, new_memory)
+            logger.warning(errors)
+
         if not errors:
             self.refresh_capacity_fields()
             self.errors = ''
@@ -486,6 +490,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMi
 
     class Meta:
         app_label = 'main'
+        ordering = ('pk',)
         permissions = [('use_instancegroup', 'Can use instance group in a preference list of a resource')]
         # Since this has no direct organization field only superuser can add, so remove add permission
         default_permissions = ('change', 'delete', 'view')

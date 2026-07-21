@@ -11,6 +11,24 @@ class ResourceOptionsParser(ResourceOptionsParser):
         self.allowed_options = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
 
+class NoPostResourceOptionsParser(ResourceOptionsParser):
+    """Simulates a user with object-level PUT but no list-level POST."""
+
+    detail_put_actions = {}
+
+    def get_allowed_options(self):
+        self.allowed_options = ['GET', 'PUT', 'PATCH', 'DELETE']
+        # Simulate the logic from the real get_allowed_options that
+        # falls back to the detail endpoint's PUT schema when POST
+        # is not available on the list endpoint.
+        if 'POST' not in self.options and 'PUT' in self.allowed_options:
+            if self.detail_put_actions:
+                self.options['PUT'] = self.detail_put_actions
+
+    def handle_custom_actions(self):
+        pass
+
+
 class OptionsPage(Page):
     def options(self):
         return self
@@ -185,6 +203,30 @@ class TestOptions(unittest.TestCase):
             self.parser.choices[method].print_help(out)
             assert 'positional arguments:\n  id' in out.getvalue()
 
+    def test_modify_without_list_post(self):
+        """User with object-level PUT but no list-level POST can still modify."""
+        page = OptionsPage.from_json(
+            {
+                'actions': {
+                    'GET': {},
+                }
+            }
+        )
+        NoPostResourceOptionsParser.detail_put_actions = {
+            'scm_branch': {'type': 'string', 'help_text': 'SCM branch'},
+            'description': {'type': 'string', 'help_text': 'Description'},
+        }
+        options = NoPostResourceOptionsParser(None, page, 'projects', self.parser)
+
+        assert 'modify' in self.parser.choices
+        assert 'create' not in self.parser.choices
+
+        options.build_query_arguments('modify', 'PUT')
+        out = StringIO()
+        self.parser.choices['modify'].print_help(out)
+        assert '--scm_branch TEXT' in out.getvalue()
+        assert '--description TEXT' in out.getvalue()
+
 
 class TestSettingsOptions(unittest.TestCase):
     def setUp(self):
@@ -209,3 +251,24 @@ class TestSettingsOptions(unittest.TestCase):
         out = StringIO()
         self.parser.choices['modify'].print_help(out)
         assert 'modify [-h] key value' in out.getvalue()
+
+
+class TestHelpParameterChanges(unittest.TestCase):
+    """Test that add_help parameter changes work correctly"""
+
+    def test_add_help_parameter_handling(self):
+        """Test that add_help=True and add_help=False work as expected"""
+        # Test add_help=True (for action parsers like list, create)
+        parser = argparse.ArgumentParser()
+        subparsers = parser.add_subparsers(dest='action')
+
+        list_parser = subparsers.add_parser('list', help='', add_help=True)
+        out = StringIO()
+        list_parser.print_help(out)
+        help_text = out.getvalue()
+        assert 'show this help message and exit' in help_text
+
+        # Test add_help=False (for resource parsers like users, jobs)
+        resource_parser = subparsers.add_parser('users', help='', add_help=False)
+        help_actions = [action for action in resource_parser._actions if '--help' in action.option_strings]
+        assert len(help_actions) == 0  # Should be 0 because add_help=False

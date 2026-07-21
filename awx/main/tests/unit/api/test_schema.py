@@ -1,5 +1,7 @@
+import copy
+import json
 import warnings
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, mock_open, patch
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -8,6 +10,8 @@ from awx.api.schema import (
     AuthenticatedSpectacularAPIView,
     AuthenticatedSpectacularSwaggerView,
     AuthenticatedSpectacularRedocView,
+    filter_credential_type_schema,
+    inject_ai_descriptions,
 )
 
 
@@ -271,3 +275,277 @@ class TestAuthenticatedSchemaViews:
     def test_authenticated_spectacular_redoc_view_requires_authentication(self):
         """Test that AuthenticatedSpectacularRedocView requires authentication."""
         assert IsAuthenticated in AuthenticatedSpectacularRedocView.permission_classes
+
+
+class TestFilterCredentialTypeSchema:
+    """Unit tests for filter_credential_type_schema postprocessing hook."""
+
+    def test_filters_both_schemas_correctly(self):
+        """Test that both CredentialTypeRequest and PatchedCredentialTypeRequest schemas are filtered."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialTypeRequest': {
+                        'properties': {
+                            'kind': {
+                                'enum': [
+                                    'ssh',
+                                    'vault',
+                                    'net',
+                                    'scm',
+                                    'cloud',
+                                    'registry',
+                                    'token',
+                                    'insights',
+                                    'external',
+                                    'kubernetes',
+                                    'galaxy',
+                                    'cryptography',
+                                    None,
+                                ],
+                                'type': 'string',
+                            }
+                        }
+                    },
+                    'PatchedCredentialTypeRequest': {
+                        'properties': {
+                            'kind': {
+                                'enum': [
+                                    'ssh',
+                                    'vault',
+                                    'net',
+                                    'scm',
+                                    'cloud',
+                                    'registry',
+                                    'token',
+                                    'insights',
+                                    'external',
+                                    'kubernetes',
+                                    'galaxy',
+                                    'cryptography',
+                                    None,
+                                ],
+                                'type': 'string',
+                            }
+                        }
+                    },
+                }
+            }
+        }
+
+        returned = filter_credential_type_schema(result, None, None, None)
+
+        # POST/PUT schema: no None (required field)
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['description'] == "* `cloud` - Cloud\\n* `net` - Network"
+
+        # PATCH schema: includes None (optional field)
+        assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net', None]
+        assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['description'] == "* `cloud` - Cloud\\n* `net` - Network"
+
+        # Other properties should be preserved
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['type'] == 'string'
+
+        # Function should return the result
+        assert returned is result
+
+    def test_handles_empty_result(self):
+        """Test graceful handling when result dict is empty."""
+        result = {}
+        original = copy.deepcopy(result)
+
+        returned = filter_credential_type_schema(result, None, None, None)
+
+        assert result == original
+        assert returned is result
+
+    def test_handles_missing_enum(self):
+        """Test that schemas without enum key are not modified."""
+        result = {'components': {'schemas': {'CredentialTypeRequest': {'properties': {'kind': {'type': 'string', 'description': 'Some description'}}}}}}
+        original = copy.deepcopy(result)
+
+        filter_credential_type_schema(result, None, None, None)
+
+        assert result == original
+
+    def test_filters_only_target_schemas(self):
+        """Test that only CredentialTypeRequest schemas are modified, not others."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'cloud', 'net', None]}}},
+                    'OtherSchema': {'properties': {'kind': {'enum': ['option1', 'option2']}}},
+                }
+            }
+        }
+
+        other_schema_before = copy.deepcopy(result['components']['schemas']['OtherSchema'])
+
+        filter_credential_type_schema(result, None, None, None)
+
+        # CredentialTypeRequest should be filtered (no None for required field)
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+
+        # OtherSchema should be unchanged
+        assert result['components']['schemas']['OtherSchema'] == other_schema_before
+
+    def test_handles_only_one_schema_present(self):
+        """Test that function works when only one target schema is present."""
+        result = {'components': {'schemas': {'CredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'cloud', 'net', None]}}}}}}
+
+        filter_credential_type_schema(result, None, None, None)
+
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+
+    def test_handles_missing_properties(self):
+        """Test graceful handling when schema has no properties key."""
+        result = {'components': {'schemas': {'CredentialTypeRequest': {}}}}
+        original = copy.deepcopy(result)
+
+        filter_credential_type_schema(result, None, None, None)
+
+        assert result == original
+
+    def test_differentiates_required_vs_optional_fields(self):
+        """Test that CredentialTypeRequest excludes None but PatchedCredentialTypeRequest includes it."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'vault', 'net', 'scm', 'cloud', 'registry', None]}}},
+                    'PatchedCredentialTypeRequest': {'properties': {'kind': {'enum': ['ssh', 'vault', 'net', 'scm', 'cloud', 'registry', None]}}},
+                }
+            }
+        }
+
+        filter_credential_type_schema(result, None, None, None)
+
+        # POST/PUT schema: no None (required field)
+        assert result['components']['schemas']['CredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net']
+
+        # PATCH schema: includes None (optional field)
+        assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net', None]
+
+
+class TestInjectAiDescriptions:
+    """Unit tests for inject_ai_descriptions postprocessing hook."""
+
+    def _make_result(self, operations):
+        """Build a minimal OpenAPI result dict from a list of (path, method, operationId, existing_desc) tuples."""
+        paths = {}
+        for path, method, op_id, desc in operations:
+            paths.setdefault(path, {})[method] = {'operationId': op_id}
+            if desc:
+                paths[path][method]['x-ai-description'] = desc
+        return {'paths': paths}
+
+    def test_injects_missing_descriptions(self):
+        """Test that descriptions are injected for operations without x-ai-description."""
+        overlay = {'op_list': 'List items', 'op_create': 'Create an item'}
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+                ('/api/v2/items/', 'post', 'op_create', None),
+            ]
+        )
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert result['paths']['/api/v2/items/']['get']['x-ai-description'] == 'List items'
+        assert result['paths']['/api/v2/items/']['post']['x-ai-description'] == 'Create an item'
+        assert returned is result
+
+    def test_does_not_overwrite_existing_descriptions(self):
+        """Test that existing x-ai-description from decorators is preserved."""
+        overlay = {'op_list': 'Overlay description'}
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', 'Decorator description'),
+            ]
+        )
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert result['paths']['/api/v2/items/']['get']['x-ai-description'] == 'Decorator description'
+
+    def test_skips_operations_not_in_overlay(self):
+        """Test that operations without a matching operationId in the overlay are unchanged."""
+        overlay = {'op_other': 'Other description'}
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+            ]
+        )
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert 'x-ai-description' not in result['paths']['/api/v2/items/']['get']
+
+    def test_handles_missing_overlay_file(self):
+        """Test graceful handling when the overlay file doesn't exist."""
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+            ]
+        )
+        original = copy.deepcopy(result)
+
+        with patch('builtins.open', side_effect=FileNotFoundError):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert result == original
+        assert returned is result
+
+    def test_handles_invalid_json(self):
+        """Test graceful handling when the overlay file contains invalid JSON."""
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+            ]
+        )
+        original = copy.deepcopy(result)
+
+        with patch('builtins.open', mock_open(read_data='not valid json')):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert result == original
+        assert returned is result
+
+    def test_handles_empty_result(self):
+        """Test graceful handling when result has no paths."""
+        result = {}
+        overlay = {'op_list': 'List items'}
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert returned is result
+
+    def test_skips_non_dict_path_items(self):
+        """Test that non-dict values in path items (e.g. parameters list) are skipped."""
+        overlay = {'op_list': 'List items'}
+        result = {
+            'paths': {
+                '/api/v2/items/': {
+                    'parameters': [{'name': 'id', 'in': 'path'}],
+                    'get': {'operationId': 'op_list'},
+                }
+            }
+        }
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert result['paths']['/api/v2/items/']['get']['x-ai-description'] == 'List items'
+
+    def test_handles_operation_without_operation_id(self):
+        """Test that operations without operationId are skipped."""
+        overlay = {'op_list': 'List items'}
+        result = {'paths': {'/api/v2/items/': {'get': {'summary': 'List'}}}}
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert 'x-ai-description' not in result['paths']['/api/v2/items/']['get']
