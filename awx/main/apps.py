@@ -67,5 +67,22 @@ class MainConfig(AppConfig):
         super().ready()
 
         self.configure_dispatcherd()
+
+        from ansible_base.rbac.triggers import dab_post_migrate
+
+        dab_post_migrate.connect(self._sync_managed_role_definitions, dispatch_uid='awx-sync-managed-role-definitions')
+
         self.load_named_url_feature()
         pre_migrate.connect(self.check_db_requirement, sender=self)
+
+    @staticmethod
+    def _sync_managed_role_definitions(sender, **kwargs):
+        from django.apps import apps as global_apps
+
+        # NOTE: setup_managed_role_definitions lives in the migrations module because
+        # it is also called from migration 0192. Ideally this would be extracted to a
+        # shared non-migration module, but doing so requires updating the migration
+        # import, which is a broader refactor (see also models/rbac.py imports).
+        from awx.main.migrations._dab_rbac import setup_managed_role_definitions
+
+        setup_managed_role_definitions(global_apps, None)
