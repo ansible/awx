@@ -6,11 +6,14 @@ from collections import OrderedDict
 # Django REST Framework
 from django.conf import settings
 from django.core.paginator import Paginator as DjangoPaginator
+from django.utils.functional import cached_property
 from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param
 from rest_framework.settings import api_settings
 from django.utils.translation import gettext_lazy as _
+
+from awx.main.models import UnifiedJob
 
 
 class DisabledPaginator(DjangoPaginator):
@@ -21,6 +24,20 @@ class DisabledPaginator(DjangoPaginator):
     @property
     def count(self):
         return 200
+
+
+class UnifiedJobPaginator(DjangoPaginator):
+    """Use unfiltered table count for unified job pagination.
+
+    The RBAC-filtered COUNT query is catastrophically slow on large tables
+    when the queryset uses pk__in with UNION subqueries.  An unfiltered
+    count is acceptable for pagination UI -- an approximate over-count
+    is harmless.
+    """
+
+    @cached_property
+    def count(self):
+        return UnifiedJob.objects.count()
 
 
 class Pagination(pagination.PageNumberPagination):
@@ -68,6 +85,28 @@ class Pagination(pagination.PageNumberPagination):
         if self.count_disabled:
             return Response({'results': data})
         return super(Pagination, self).get_paginated_response(data)
+
+
+class UnifiedJobPagination(Pagination):
+    """Pagination for unified jobs that uses an unfiltered table count.
+
+    The RBAC-filtered queryset from UnifiedJobAccess.filtered_queryset()
+    produces a catastrophic COUNT(*) query on large tables when using
+    pk__in with UNION subqueries.  This pagination class substitutes a
+    fast unfiltered count for the pagination header while still returning
+    RBAC-filtered results.
+    """
+
+    django_paginator_class = UnifiedJobPaginator
+
+    def paginate_queryset(self, queryset, request, **kwargs):
+        self.count_disabled = 'count_disabled' in request.query_params
+        try:
+            if self.count_disabled:
+                self.django_paginator_class = DisabledPaginator
+            return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
+        finally:
+            self.django_paginator_class = UnifiedJobPaginator
 
 
 class LimitPagination(pagination.BasePagination):
