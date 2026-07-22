@@ -226,4 +226,5 @@ def test_dynatrace_auth():
     setattr(mock_settings, 'LOG_AGGREGATOR_PASSWORD', 'dt0c01.EXAMPLE-TOKEN')
 
     tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert 'httpcontenttype="text/plain; charset=utf-8"' in tmpl
     assert 'httpheaderkey="Authorization" httpheadervalue="Api-Token dt0c01.EXAMPLE-TOKEN"' in tmpl

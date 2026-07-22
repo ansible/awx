@@ -117,6 +117,8 @@ def construct_rsyslog_conf_template(settings=settings):
                 params.append('httpheaderkey="Authorization"')
                 params.append(f'httpheadervalue="Splunk {password}"')
         elif aggregator_type == 'dynatrace':
+            # Dynatrace Log Ingest API v2 requires plain text, not JSON
+            params.append('httpcontenttype="text/plain; charset=utf-8"')
             if password:
                 params.append('httpheaderkey="Authorization"')
                 params.append(f'httpheadervalue="Api-Token {password}"')
