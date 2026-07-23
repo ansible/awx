@@ -4,8 +4,10 @@ from django.apps import AppConfig
 from django.db import connection
 from django.utils.translation import gettext_lazy as _
 from django.core.management.base import CommandError
+from django.db.backends.signals import connection_created
 from django.db.models.signals import pre_migrate
 
+from awx.main.db.statement_timeout import set_statement_timeout
 from awx.main.utils.named_url_graph import _customize_graph, generate_graph
 from awx.main.utils.db import db_requirement_violations
 from awx.conf import register, fields
@@ -74,6 +76,8 @@ class MainConfig(AppConfig):
 
         self.load_named_url_feature()
         pre_migrate.connect(self.check_db_requirement, sender=self)
+
+        connection_created.connect(set_statement_timeout)
 
     @staticmethod
     def _sync_managed_role_definitions(sender, **kwargs):
