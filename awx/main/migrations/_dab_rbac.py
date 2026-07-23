@@ -148,6 +148,12 @@ def get_permissions_for_role(role_field, children_map, apps):
     if role_field.name == 'auditor_role':
         perm_list.append(Permission.objects.get(codename='view_notificationtemplate'))
 
+    # organization child admin roles need member_organization for create operations
+    if role_field.model._meta.model_name == 'organization' and role_field.name.endswith('_admin_role') and role_field.name != 'admin_role':
+        member_perm = Permission.objects.get(codename='member_organization')
+        if member_perm not in perm_list:
+            perm_list.append(member_perm)
+
     return perm_list
 
 
@@ -339,6 +345,7 @@ def setup_managed_role_definitions(apps, schema_editor):
         if 'org_children' in to_create and (cls_name not in ('organization', 'instancegroup', 'team')):
             org_child_perms = object_perms.copy()
             org_child_perms.add(Permission.objects.get(codename='view_organization'))
+            org_child_perms.add(Permission.objects.get(codename='member_organization'))
 
             managed_role_definitions.append(
                 get_or_create_managed(

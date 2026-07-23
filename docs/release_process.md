@@ -62,6 +62,12 @@ If the latest release of `AWX` is 19.5.0:
 
 With very few exceptions the new `AWX Operator` release will always be a Y-stream release.
 
+## Cutting a Stable Branch
+
+When cutting a new stable branch for a release, there are additional dependency verification and branch protection steps that must be completed. See the full checklist on Confluence:
+
+[Cutting a Stable Branch](https://redhat.atlassian.net/wiki/spaces/AAP/pages/417433803/Cutting+a+Stable+Branch)
+
 ## Stage the release
 
 To stage the release, maintainers of this repository can run the [Stage Release](https://github.com/ansible/awx/actions/workflows/stage.yml) workflow.

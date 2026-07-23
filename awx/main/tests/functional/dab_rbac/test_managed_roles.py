@@ -40,6 +40,16 @@ def test_org_child_add_permission(setup_managed_roles):
 
 
 @pytest.mark.django_db
+def test_org_child_admin_roles_include_member_organization(setup_managed_roles):
+    """All specialized Organization *Admin roles must include member_organization
+    so that users granted these roles can perform create operations (AAP-82221)."""
+    for model_name in ('Project', 'Credential', 'Inventory', 'NotificationTemplate', 'WorkflowJobTemplate', 'ExecutionEnvironment'):
+        rd = RoleDefinition.objects.get(name=f'Organization {model_name} Admin')
+        codenames = set(rd.permissions.values_list('codename', flat=True))
+        assert 'member_organization' in codenames, f'{rd.name} is missing member_organization permission'
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('resource_name', ['Team', 'Organization'])
 @pytest.mark.parametrize('action', ['Member', 'Admin'])
 def test_legacy_RBAC_uses_platform_roles(setup_managed_roles, resource_name, action, team, bob, organization):
