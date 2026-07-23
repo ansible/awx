@@ -31,7 +31,7 @@ class TestGetStatementTimeout:
         settings.DATABASE_STATEMENT_TIMEOUT = 90000
         fake_uwsgi = types.ModuleType('uwsgi')
         fake_uwsgi.opt = {b'harakiri': b'0'}
-        with mock.patch.dict('sys.modules', {'uwsgi': None}):
+        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
             assert _get_statement_timeout() == 90000
 
     def test_uwsgi_harakiri_very_low_clamps_to_one_second(self):
