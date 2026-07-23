@@ -34,6 +34,19 @@ class TestGetStatementTimeout:
         with mock.patch.dict('sys.modules', {'uwsgi': None}):
             assert _get_statement_timeout() == 90000
 
+    def test_uwsgi_harakiri_very_low_clamps_to_one_second(self):
+        fake_uwsgi = types.ModuleType('uwsgi')
+        fake_uwsgi.opt = {b'harakiri': b'1'}
+        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
+            assert _get_statement_timeout() == 1000
+
+    def test_uwsgi_harakiri_midrange_uses_proportional_margin(self):
+        fake_uwsgi = types.ModuleType('uwsgi')
+        fake_uwsgi.opt = {b'harakiri': b'30'}
+        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
+            # margin = min(5, max(1, int(30*0.1))) = 3 → timeout = 27s
+            assert _get_statement_timeout() == 27000
+
 
 class TestSetStatementTimeout:
     def test_executes_set_when_timeout_available(self):
