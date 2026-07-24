@@ -1,3 +1,5 @@
+import logging
+
 from dispatcherd.config import setup as dispatcher_setup
 
 from django.apps import AppConfig
@@ -9,6 +11,8 @@ from django.db.models.signals import pre_migrate
 from awx.main.utils.named_url_graph import _customize_graph, generate_graph
 from awx.main.utils.db import db_requirement_violations
 from awx.conf import register, fields
+
+logger = logging.getLogger('awx.main.apps')
 
 
 class MainConfig(AppConfig):
@@ -85,4 +89,11 @@ class MainConfig(AppConfig):
         # import, which is a broader refactor (see also models/rbac.py imports).
         from awx.main.migrations._dab_rbac import setup_managed_role_definitions
 
-        setup_managed_role_definitions(global_apps, None)
+        try:
+            setup_managed_role_definitions(global_apps, None)
+        except Exception as e:
+            # During initial install the gateway resource server may not have completed
+            # migrate_service_data yet and will reject sync requests with HTTP 423.
+            # This is safe to defer: setup_managed_role_definitions is idempotent and
+            # will succeed on the next awx-manage migrate once the gateway is ready.
+            logger.warning('Failed to sync managed role definitions to resource server, will retry on next migrate: %s', e)

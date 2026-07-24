@@ -96,6 +96,22 @@ def _sync_credential_types_to_db():
         CredentialType.setup_tower_managed_defaults()
 
 
+def _sync_managed_role_definitions_to_db():
+    """Ensure DAB managed role definitions are up-to-date at controller startup.
+
+    This mirrors setup_managed_role_definitions() which also runs via the
+    dab_post_migrate signal during awx-manage migrate.  Running it here
+    guarantees the sync completes even when the migrate-time attempt fails
+    because the gateway resource server is not yet ready (HTTP 423 during
+    initial installation).
+    """
+    from django.apps import apps as global_apps
+    from awx.main.migrations._dab_rbac import setup_managed_role_definitions
+
+    if is_database_synchronized():
+        setup_managed_role_definitions(global_apps, None)
+
+
 def _run_dispatch_startup_common():
     """
     Execute the common startup initialization steps.
@@ -115,6 +131,11 @@ def _run_dispatch_startup_common():
         _sync_credential_types_to_db()
     except Exception:
         logger.exception("Failed to sync credential types to DB, skipping.")
+
+    try:
+        _sync_managed_role_definitions_to_db()
+    except Exception:
+        logger.exception("Failed to sync managed role definitions to DB, skipping.")
 
     try:
         convert_jsonfields()
