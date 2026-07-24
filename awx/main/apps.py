@@ -79,10 +79,16 @@ class MainConfig(AppConfig):
     def _sync_managed_role_definitions(sender, **kwargs):
         from django.apps import apps as global_apps
 
+        from ansible_base.resource_registry.signals.handlers import no_reverse_sync
+
         # NOTE: setup_managed_role_definitions lives in the migrations module because
         # it is also called from migration 0192. Ideally this would be extracted to a
         # shared non-migration module, but doing so requires updating the migration
         # import, which is a broader refactor (see also models/rbac.py imports).
         from awx.main.migrations._dab_rbac import setup_managed_role_definitions
 
-        setup_managed_role_definitions(global_apps, None)
+        # During post-migrate the resource server (gateway) may not be ready
+        # (e.g. migrate_service_data still holds a 423 lock).  Disable reverse
+        # sync for this call — gateway reconciles via migrate_service_data.
+        with no_reverse_sync():
+            setup_managed_role_definitions(global_apps, None)
