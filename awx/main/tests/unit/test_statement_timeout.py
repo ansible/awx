@@ -1,66 +1,79 @@
 import types
 from unittest import mock
 
-from awx.main.db.statement_timeout import _get_statement_timeout, set_statement_timeout
+from awx.settings.functions import merge_statement_timeout
+
+PG_ENGINE = "django.db.backends.postgresql"
+SQLITE_ENGINE = "django.db.backends.sqlite3"
 
 
-class TestGetStatementTimeout:
+def _make_settings(engine=PG_ENGINE, timeout=None, existing_options=""):
+    """Build a dict that quacks like DYNACONF.get() for merge_statement_timeout."""
+    data = {"DATABASES__default__ENGINE": engine}
+    if timeout is not None:
+        data["DATABASE_STATEMENT_TIMEOUT"] = timeout
+    if existing_options:
+        data["DATABASES__default__OPTIONS__options"] = existing_options
+    return data
+
+
+def _fake_uwsgi(harakiri):
+    mod = types.ModuleType('uwsgi')
+    mod.opt = {b'harakiri': str(harakiri).encode()}
+    return mod
+
+
+class TestMergeStatementTimeout:
     def test_derives_from_uwsgi_harakiri(self):
-        fake_uwsgi = types.ModuleType('uwsgi')
-        fake_uwsgi.opt = {b'harakiri': b'115'}
-        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
-            assert _get_statement_timeout() == (115 - 5) * 1000
+        settings = _make_settings()
+        with mock.patch.dict('sys.modules', {'uwsgi': _fake_uwsgi(115)}):
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c statement_timeout=110000"}
 
-    def test_returns_none_without_uwsgi_or_setting(self):
+    def test_returns_empty_without_uwsgi_or_setting(self):
+        settings = _make_settings()
         with mock.patch.dict('sys.modules', {'uwsgi': None}):
-            assert _get_statement_timeout() is None
+            result = merge_statement_timeout(settings)
+        assert result == {}
 
-    def test_falls_back_to_setting(self, settings):
-        settings.DATABASE_STATEMENT_TIMEOUT = 60000
+    def test_falls_back_to_setting(self):
+        settings = _make_settings(timeout=60000)
         with mock.patch.dict('sys.modules', {'uwsgi': None}):
-            assert _get_statement_timeout() == 60000
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c statement_timeout=60000"}
 
-    def test_uwsgi_takes_precedence_over_setting(self, settings):
-        settings.DATABASE_STATEMENT_TIMEOUT = 60000
-        fake_uwsgi = types.ModuleType('uwsgi')
-        fake_uwsgi.opt = {b'harakiri': b'115'}
-        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
-            assert _get_statement_timeout() == 110000
+    def test_uwsgi_takes_precedence_over_setting(self):
+        settings = _make_settings(timeout=60000)
+        with mock.patch.dict('sys.modules', {'uwsgi': _fake_uwsgi(115)}):
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c statement_timeout=110000"}
 
-    def test_uwsgi_harakiri_zero_falls_back_to_setting(self, settings):
-        settings.DATABASE_STATEMENT_TIMEOUT = 90000
-        fake_uwsgi = types.ModuleType('uwsgi')
-        fake_uwsgi.opt = {b'harakiri': b'0'}
-        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
-            assert _get_statement_timeout() == 90000
+    def test_harakiri_zero_falls_back_to_setting(self):
+        settings = _make_settings(timeout=90000)
+        with mock.patch.dict('sys.modules', {'uwsgi': _fake_uwsgi(0)}):
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c statement_timeout=90000"}
 
-    def test_uwsgi_harakiri_very_low_clamps_to_one_second(self):
-        fake_uwsgi = types.ModuleType('uwsgi')
-        fake_uwsgi.opt = {b'harakiri': b'1'}
-        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
-            assert _get_statement_timeout() == 1000
+    def test_harakiri_very_low_clamps_to_one_second(self):
+        settings = _make_settings()
+        with mock.patch.dict('sys.modules', {'uwsgi': _fake_uwsgi(1)}):
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c statement_timeout=1000"}
 
-    def test_uwsgi_harakiri_midrange_uses_proportional_margin(self):
-        fake_uwsgi = types.ModuleType('uwsgi')
-        fake_uwsgi.opt = {b'harakiri': b'30'}
-        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
+    def test_harakiri_midrange_uses_proportional_margin(self):
+        settings = _make_settings()
+        with mock.patch.dict('sys.modules', {'uwsgi': _fake_uwsgi(30)}):
             # margin = min(5, max(1, int(30*0.1))) = 3 → timeout = 27s
-            assert _get_statement_timeout() == 27000
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c statement_timeout=27000"}
 
+    def test_skips_sqlite(self):
+        settings = _make_settings(engine=SQLITE_ENGINE, timeout=60000)
+        result = merge_statement_timeout(settings)
+        assert result == {}
 
-class TestSetStatementTimeout:
-    def test_executes_set_when_timeout_available(self):
-        fake_uwsgi = types.ModuleType('uwsgi')
-        fake_uwsgi.opt = {b'harakiri': b'115'}
-        mock_cursor = mock.MagicMock()
-        mock_connection = mock.MagicMock()
-        mock_connection.cursor.return_value = mock_cursor
-        with mock.patch.dict('sys.modules', {'uwsgi': fake_uwsgi}):
-            set_statement_timeout(sender=None, connection=mock_connection)
-        mock_cursor.execute.assert_called_once_with("SET statement_timeout = %s", [110000])
-
-    def test_does_nothing_when_no_timeout(self):
-        mock_connection = mock.MagicMock()
+    def test_appends_to_existing_options(self):
+        settings = _make_settings(timeout=60000, existing_options="-c lock_timeout=5000")
         with mock.patch.dict('sys.modules', {'uwsgi': None}):
-            set_statement_timeout(sender=None, connection=mock_connection)
-        mock_connection.cursor.assert_not_called()
+            result = merge_statement_timeout(settings)
+        assert result == {"DATABASES__default__OPTIONS__options": "-c lock_timeout=5000 -c statement_timeout=60000"}

@@ -12,6 +12,7 @@ from ansible_base.lib.dynamic_config import (
 from .functions import (
     assert_production_settings,
     merge_application_name,
+    merge_statement_timeout,
     add_backwards_compatibility,
     load_extra_development_files,
 )
@@ -76,6 +77,11 @@ if DYNACONF.get('RESOURCE_SERVER__URL', None):
 DYNACONF.update(
     merge_application_name(DYNACONF),
     loader_identifier="awx.settings:merge_application_name",
+    merge=True,
+)
+DYNACONF.update(
+    merge_statement_timeout(DYNACONF),
+    loader_identifier="awx.settings:merge_statement_timeout",
     merge=True,
 )
 
