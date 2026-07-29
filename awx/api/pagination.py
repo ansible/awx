@@ -74,12 +74,13 @@ class Pagination(pagination.PageNumberPagination):
 
     def paginate_queryset(self, queryset, request, **kwargs):
         self.count_disabled = 'count_disabled' in request.query_params
+        original_paginator = self.django_paginator_class
         try:
             if self.count_disabled:
                 self.django_paginator_class = DisabledPaginator
             return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
         finally:
-            self.django_paginator_class = DjangoPaginator
+            self.django_paginator_class = original_paginator
 
     def get_paginated_response(self, data):
         if self.count_disabled:
@@ -98,15 +99,6 @@ class UnifiedJobPagination(Pagination):
     """
 
     django_paginator_class = UnifiedJobPaginator
-
-    def paginate_queryset(self, queryset, request, **kwargs):
-        self.count_disabled = 'count_disabled' in request.query_params
-        try:
-            if self.count_disabled:
-                self.django_paginator_class = DisabledPaginator
-            return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
-        finally:
-            self.django_paginator_class = UnifiedJobPaginator
 
 
 class LimitPagination(pagination.BasePagination):

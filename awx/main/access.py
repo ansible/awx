@@ -2530,7 +2530,11 @@ class UnifiedJobAccess(BaseAccess):
         )
 
         by_org_auditor = (
-            self.model.objects.filter(organization__in=Organization.access_ids_qs(self.user, 'audit_organization')).order_by().values_list('pk', flat=True)
+            self.model.objects.filter(
+                organization__in=Organization.access_ids_qs(self.user, 'audit_organization'),
+            )
+            .order_by()
+            .values_list('pk', flat=True)
         )
 
         return self.model.objects.filter(pk__in=by_template.union(by_inventory_update, by_adhoc, by_org_auditor))
