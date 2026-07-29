@@ -73,12 +73,13 @@ class Pagination(pagination.PageNumberPagination):
 
     def paginate_queryset(self, queryset, request, **kwargs):
         self.count_disabled = 'count_disabled' in request.query_params
+        original_paginator = self.django_paginator_class
         try:
             if self.count_disabled:
                 self.django_paginator_class = DisabledPaginator
             return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
         finally:
-            self.django_paginator_class = DjangoPaginator
+            self.django_paginator_class = original_paginator
 
     def get_paginated_response(self, data):
         if self.count_disabled:
@@ -87,24 +88,7 @@ class Pagination(pagination.PageNumberPagination):
 
 
 class ActivityStreamPagination(Pagination):
-    """Pagination for activity stream that uses an unfiltered table count.
-
-    The RBAC-filtered queryset from ActivityStreamAccess.filtered_queryset()
-    produces a catastrophic COUNT(*) query (~36 min per call on 713K rows).
-    This pagination class substitutes a fast unfiltered count for the
-    pagination header while still returning RBAC-filtered results.
-    """
-
     django_paginator_class = ActivityStreamPaginator
-
-    def paginate_queryset(self, queryset, request, **kwargs):
-        self.count_disabled = 'count_disabled' in request.query_params
-        try:
-            if self.count_disabled:
-                self.django_paginator_class = DisabledPaginator
-            return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
-        finally:
-            self.django_paginator_class = ActivityStreamPaginator
 
 
 class LimitPagination(pagination.BasePagination):
