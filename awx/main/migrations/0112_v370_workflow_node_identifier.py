@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
             model_name='workflowjobnode',
             name='identifier',
             field=models.CharField(
-                blank=True, help_text='An identifier coresponding to the workflow job template node that this node was created from.', max_length=512
+                blank=True, help_text='An identifier corresponding to the workflow job template node that this node was created from.', max_length=512
             ),
         ),
         migrations.AddField(

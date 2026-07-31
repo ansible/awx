@@ -125,7 +125,7 @@ def job_with_survey():
 
 @pytest.mark.survey
 def test_job_survey_password_redaction(job_with_survey):
-    """Tests the Job model's funciton to redact passwords from
+    """Tests the Job model's function to redact passwords from
     extra_vars - used when displaying job information"""
     assert json.loads(job_with_survey.display_extra_vars()) == {'submitter_email': 'foobar@redhat.com', 'secret_key': '$encrypted$', 'SSN': '$encrypted$'}
 
@@ -184,7 +184,7 @@ def test_display_survey_spec_encrypts_default(survey_spec_factory):
         ("multiplechoice", "", 0, 0, False, False, 'N/A'),  # historical bug
         ("multiplechoice", "zeb", 0, 0, False, False, 'N/A'),  # zeb not in choices
         ("multiplechoice", "coffee", 0, 0, True, True, 'coffee'),
-        ("multiselect", None, 0, 0, False, False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be prefered
+        ("multiselect", None, 0, 0, False, False, 'N/A'),  # NOTE: Behavior is arguable, value of [] may be preferred
         ("multiselect", "", 0, 0, False, False, 'N/A'),
         ("multiselect", ["zeb"], 0, 0, False, False, 'N/A'),
         ("multiselect", ["milk"], 0, 0, True, True, ["milk"]),

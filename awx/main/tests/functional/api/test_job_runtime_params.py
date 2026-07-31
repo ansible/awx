@@ -326,7 +326,7 @@ def test_job_launch_works_without_access_to_ig_if_ig_in_template(job_template_pr
     job_template.save()
     job_template.execute_role.members.add(rando)
 
-    # Make sure we get a 201 instead of a 403 since we are providing an override of just a subset of the instance gorup that was already added
+    # Make sure we get a 201 instead of a 403 since we are providing an override of just a subset of the instance group that was already added
     post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(instance_groups=runtime_data['instance_groups']), rando, expect=201)
 
 
@@ -339,7 +339,7 @@ def test_job_launch_works_without_access_to_label_if_label_in_template(job_templ
     job_template.save()
     job_template.execute_role.members.add(rando)
 
-    # Make sure we get a 201 instead of a 403 since we are providing an override of just a subset of the instance gorup that was already added
+    # Make sure we get a 201 instead of a 403 since we are providing an override of just a subset of the instance group that was already added
     post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(labels=runtime_data['labels']), rando, expect=201)
 
 

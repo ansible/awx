@@ -28,7 +28,7 @@ def test_inventory_contradictions(job_template_factory):
 
 @pytest.mark.survey
 def test_job_template_survey_password_redaction(job_template_with_survey_passwords_unit):
-    """Tests the JobTemplate model's funciton to redact passwords from
+    """Tests the JobTemplate model's function to redact passwords from
     extra_vars - used when creating a new job"""
     assert job_template_with_survey_passwords_unit.survey_password_variables() == ['secret_key', 'SSN']
 

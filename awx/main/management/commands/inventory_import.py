@@ -940,7 +940,7 @@ class Command(BaseCommand):
         This saves the inventory data to the database, calling load_into_database
         but also wraps that method in a host of options processing
         """
-        # outside of normal options, these are needed as part of programatic interface
+        # outside of normal options, these are needed as part of programmatic interface
         self.inventory = inventory_update.inventory
         self.inventory_source = inventory_update.inventory_source
         self.inventory_update = inventory_update

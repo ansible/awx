@@ -178,7 +178,7 @@ def test_orphaned_user_allowed(org_admin, rando, organization, org_credential):
     """
     We still allow adoption of orphaned* users by assigning them to
     organization member role, but only in the situation where the
-    org admin already posesses indirect access to all of the user's roles
+    org admin already possesses indirect access to all of the user's roles
     *orphaned means user is not a member of any organization
     """
     # give a descendent role to rando, to trigger the conditional

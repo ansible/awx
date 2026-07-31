@@ -17,7 +17,7 @@ def migrate_event_data(apps, schema_editor):
             # This loop used to do roughly the following:
             #     Rename the table to _old_<tablename>
             #     Create a new table form the old table (it would have no rows)
-            #     Drop the old sequnce and create a new on tied to the new table and set the sequence to the last number from the old table
+            #     Drop the old sequence and create a new on tied to the new table and set the sequence to the last number from the old table
             # This used to work with postgres spitting out a NOTICE and DETAIL
             # With the django 4.2 upgrade that changed to an ERROR and HINT
             # By the time we hit the 4.2 upgrade, no one should be upgrading a database this old directly to this new schema

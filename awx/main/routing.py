@@ -31,7 +31,7 @@ class AWXProtocolTypeRouter(ProtocolTypeRouter):
 class MultipleURLRouterAdapter:
     """
     Django channels doesn't nicely support Auth_1(urls_1), Auth_2(urls_2), ..., Auth_n(urls_n)
-    This class allows assocating a websocket url with an auth
+    This class allows associating a websocket url with an auth
     Ordering matters. The first matching url will be used.
     """
 

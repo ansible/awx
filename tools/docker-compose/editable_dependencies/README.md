@@ -52,7 +52,7 @@ or
 ln -s ../django-ansible-base tools/docker-compose/editable_dependencies/
 ```
 
-## How to remove indivisual editable dependencies
+## How to remove individual editable dependencies
 
 Simply removing the symlink from  `tools/docker-compose/editable_dependencies` **will cause problem**!
 

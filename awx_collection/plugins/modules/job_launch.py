@@ -153,7 +153,7 @@ EXAMPLES = '''
     inventory: "My Inventory"
     credentials:
       - "My Credential"
-      - "suplementary cred"
+      - "supplementary cred"
   register: job
 - name: Wait for job max 120s
   job_wait:
@@ -184,7 +184,7 @@ def main():
         job_type=dict(choices=['run', 'check']),
         inventory=dict(),
         organization=dict(),
-        # Credentials will be a str instead of a list for backwards compatability
+        # Credentials will be a str instead of a list for backwards compatibility
         credentials=dict(type='list', aliases=['credential'], elements='str'),
         limit=dict(),
         tags=dict(type='list', elements='str'),

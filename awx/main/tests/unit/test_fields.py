@@ -121,7 +121,7 @@ def test_cred_type_input_schema_validity(input_, valid):
         ({'file': {'template.username': '{{username}}', 'template.password': '{{pass}}'}}, True),
         # Use of unnamed file mutually exclusive with use of named files
         ({'file': {'template': '{{username}}', 'template.password': '{{pass}}'}}, False),
-        # References non-existant named file
+        # References non-existent named file
         ({'env': {'FROM_FILE': "{{tower.filename.cert}}"}}, False),
         # References unnamed file, but a file was never defined
         ({'env': {'FROM_FILE': "{{tower.filename}}"}}, False),

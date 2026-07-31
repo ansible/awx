@@ -248,7 +248,7 @@ class Role(models.Model):
         Updates our `ancestors` map to accurately reflect all of the ancestors for a role
 
         You should never need to call this. Signal handlers should be calling
-        this method when the role hierachy changes automatically.
+        this method when the role hierarchy changes automatically.
         """
         # The ancestry table
         # =================================================
@@ -345,7 +345,7 @@ class Role(models.Model):
             'roles_table': Role._meta.db_table,
         }
 
-        # SQLlite has a 1M sql statement limit.. since the django sqllite
+        # sqlite has a 1M sql statement limit.. since the django sqlite
         # driver isn't letting us pass in the ids through the preferred
         # parameter binding system, this function exists to obey this.
         # est max 12 bytes per number, used up to 2 times in a query,

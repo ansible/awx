@@ -81,7 +81,7 @@ def wait_to_leave_status(job, status, timeout=30, sleep_time=0.1):
     """Wait until the job does NOT have the specified status with some timeout
 
     the default timeout is based on the task manager running a 20 second
-    schedule, and the API does not guarentee working jobs faster than this
+    schedule, and the API does not guarantee working jobs faster than this
     """
     start = time.time()
     while time.time() - start < timeout:

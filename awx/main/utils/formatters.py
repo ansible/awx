@@ -278,6 +278,6 @@ class LogstashFormatter(LogstashFormatterBase):
 
         if settings.LOG_AGGREGATOR_TYPE == 'splunk':
             # splunk messages must have a top level "event" key when using the /services/collector/event receiver.
-            # The event receiver wont scan an event for a timestamp field therefore a time field must also be supplied containing epoch timestamp
+            # The event receiver won't scan an event for a timestamp field therefore a time field must also be supplied containing epoch timestamp
             message = {'time': record.created, 'event': message}
         return self.serialize(message)

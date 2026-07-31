@@ -34,7 +34,7 @@
     that:
       - result.changed
 
-- name: Delete Role User Assigment
+- name: Delete Role User Assignment
   role_user_assignment:
     role_definition: test_view_jt
     user: testing_user

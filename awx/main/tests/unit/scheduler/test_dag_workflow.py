@@ -325,7 +325,7 @@ class TestAllWorkflowNodes:
         assert 0 == len(nodes_to_run), "Convergence node should NOT be chosen to run because it is DNR"
 
     def test_workflow_all_converge_runs(self, workflow_all_converge_dnr):
-        # Trick the scheduler again to make sure the convergence node acutally runs
+        # Trick the scheduler again to make sure the convergence node actually runs
         g, nodes = workflow_all_converge_dnr
         nodes[1].job.status = 'failed'
         dnr_nodes = g.mark_dnr_nodes()

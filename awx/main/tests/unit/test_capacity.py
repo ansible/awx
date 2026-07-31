@@ -147,7 +147,7 @@ def test_RBAC_reduced_filter(sample_cluster, create_ig_manager):
     tasks = [Job(status='waiting', execution_node='i1'), Job(status='waiting', execution_node='i2'), Job(status='waiting', execution_node='i3')]
     instance_groups_mgr = create_ig_manager([default], tasks)
     # Cross-links between groups not visible to current user,
-    # so a naieve accounting of capacities is returned instead
+    # so a naive accounting of capacities is returned instead
     assert instance_groups_mgr.get_consumed_capacity('default') == 43
 
 

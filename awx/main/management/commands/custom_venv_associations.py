@@ -21,7 +21,7 @@ class Command(BaseCommand):
         parser.add_argument('-q', action='store_true', help='run with -q to output only the results of the query.')
 
     def handle(self, *args, **options):
-        # look organiztions and unified job templates (which include JTs, workflows, and Inventory updates)
+        # look organizations and unified job templates (which include JTs, workflows, and Inventory updates)
         super(Command, self).__init__()
         results = {}
         path = options.get('path')

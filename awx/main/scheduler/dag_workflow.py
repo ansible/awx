@@ -67,7 +67,7 @@ class WorkflowDAG(SimpleDAG):
     def _all_parents_met_convergence_criteria(self, node):
         # This function takes any node and checks that all it's parents have met their criteria to run the child.
         # This returns a boolean and is really only useful if the node is an ALL convergence node and is
-        # intended to be used in conjuction with the node property `all_parents_must_converge`
+        # intended to be used in conjunction with the node property `all_parents_must_converge`
         obj = node['node_object']
         parent_nodes = [p['node_object'] for p in self.get_parents(obj)]
         for p in parent_nodes:

@@ -3,7 +3,7 @@
   organization:
     name: Default
 
-- name: HACK - delete orphaned projects from preload data where organization deletd
+- name: HACK - delete orphaned projects from preload data where organization deleted
   project:
     name: "{{ item['id'] }}"
     scm_type: git

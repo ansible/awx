@@ -1478,7 +1478,7 @@ class UnifiedJob(
             ScheduleDependencyManager().schedule()
 
         # Each type of unified job has a different Task class; get the
-        # appropirate one.
+        # appropriate one.
         # task_type = get_type_for_model(self)
 
         # Actually tell the task runner to run this task.

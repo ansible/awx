@@ -48,7 +48,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
     job_event_queries_fqcn = {}
     for query_k, query_v in job_event_queries.items():
         if len(parts := query_k.split('.')) != 3:
-            logger.info(f"Skiping malformed query '{query_k}'. Expected to be of the form 'a.b.c'")
+            logger.info(f"Skipping malformed query '{query_k}'. Expected to be of the form 'a.b.c'")
             continue
         if parts[2] != '*':
             continue
@@ -177,7 +177,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
 
     with transaction.atomic():
         """
-        Pre-emptively set the job marker to 'events processed'. This prevents other instances from running the
+        Preemptively set the job marker to 'events processed'. This prevents other instances from running the
         same task.
         """
         try:

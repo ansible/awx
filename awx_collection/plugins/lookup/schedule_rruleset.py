@@ -199,7 +199,7 @@ class LookupModule(LookupBase):
         if not isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
-            # If they have a list of strs we want to strip the str incase its space delineated
+            # If they have a list of strs we want to strip the str in case its space delineated
             if isinstance(value, str):
                 value = value.strip()
             # If value happens to be an int (from a list of ints) we need to coerce it into a str for the re.match

@@ -8,7 +8,7 @@ from awx.main.models import InstanceGroup, Instance
 
 
 @pytest.mark.filterwarnings(
-    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: Figure out where it is emitted and what causes it.
     # FIXME: The suppression should be made more specific or the cause fixed.
     # Ref: https://github.com/ansible/awx/pull/15620
     "ignore::RuntimeWarning",
@@ -28,7 +28,7 @@ def test_instance_group_create(run_module, admin_user):
     # Create a new instance in the DB
     new_instance = Instance.objects.create(hostname='foo.example.com')
 
-    # Set the new instance group only to the one instnace
+    # Set the new instance group only to the one instance
     result = run_module('instance_group', {'name': 'foo-group', 'instances': [new_instance.hostname], 'state': 'present'}, admin_user)
     assert not result.get('failed', False), result
     assert result['changed']
@@ -43,7 +43,7 @@ def test_instance_group_create(run_module, admin_user):
 
 
 @pytest.mark.filterwarnings(
-    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: Figure out where it is emitted and what causes it.
     # FIXME: The suppression should be made more specific or the cause fixed.
     # Ref: https://github.com/ansible/awx/pull/15620
     "ignore::RuntimeWarning",

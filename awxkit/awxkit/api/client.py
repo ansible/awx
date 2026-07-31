@@ -22,7 +22,7 @@ class Connection(object):
     def __init__(self, server, verify=False):
         self.server = server
         self.verify = verify
-        # Note: We use the old sessionid here incase someone is trying to connect to an older AWX version
+        # Note: We use the old sessionid here in case someone is trying to connect to an older AWX version
         # There is a check below so that if AWX returns an X-API-Session-Cookie-Name we will grab it and
         # connect with the new session cookie name.
         self.session_cookie_name = 'sessionid'

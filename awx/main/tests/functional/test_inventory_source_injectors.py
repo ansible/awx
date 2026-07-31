@@ -99,7 +99,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
     private_key_regex = re.compile(r'-----BEGIN ENCRYPTED PRIVATE KEY-----.*-----END ENCRYPTED PRIVATE KEY-----')
 
     # read directory content
-    # build a mapping of the file paths to aliases which will be constant accross runs
+    # build a mapping of the file paths to aliases which will be constant across runs
     dir_contents = {}
     referenced_paths = set()
     file_aliases = {}

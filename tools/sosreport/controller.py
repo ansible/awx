@@ -22,7 +22,7 @@ SOSREPORT_CONTROLLER_COMMANDS = [
     "ls -ll /var/lib/awx",  # check permissions
     "ls -ll /var/lib/awx/venv",  # list all venvs
     "ls -ll /etc/tower",
-    "ls -ll /var/run/awx-receptor",  # list contents of dirctory where receptor socket should be
+    "ls -ll /var/run/awx-receptor",  # list contents of directory where receptor socket should be
     "ls -ll /etc/receptor",
     "receptorctl --socket /var/run/awx-receptor/receptor.sock status",  # Get information about the status of the mesh
     "receptorctl --socket /var/run/awx-receptor/receptor.sock work list",  # Get list of receptor work units

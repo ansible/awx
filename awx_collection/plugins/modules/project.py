@@ -238,7 +238,7 @@ def wait_for_project_update(module, last_request):
             url=result['json']['url'], object_name=module.get_item_name(last_request), object_type='Project Update', timeout=timeout, interval=interval
         )
 
-        # Set Changed to correct value depending on if hash changed Also output refspec comparision
+        # Set Changed to correct value depending on if hash changed Also output refspec comparison
         module.json_output['changed'] = True
         if result_final['json']['scm_revision'] == scm_revision_original:
             module.json_output['changed'] = False

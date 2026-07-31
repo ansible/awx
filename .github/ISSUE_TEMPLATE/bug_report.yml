@@ -125,7 +125,7 @@ body:
     id: expected-results
     attributes:
       label: Expected results
-      description: What did you expect to happpen when running the steps above?
+      description: What did you expect to happen when running the steps above?
     validations:
       required: true
 

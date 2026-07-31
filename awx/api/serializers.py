@@ -1115,7 +1115,7 @@ class UserSerializer(BaseSerializer):
             the reason for failure.
         :return: None.
         """
-        # We must do this here instead of in `validate_password` bacause some
+        # We must do this here instead of in `validate_password` because some
         # django password validators need access to other model instance fields,
         # e.g. ``username`` for the ``UserAttributeSimilarityValidator``.
         password = attrs.get("password")

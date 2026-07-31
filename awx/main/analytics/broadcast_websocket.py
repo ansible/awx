@@ -101,7 +101,7 @@ class RelayWebsocketStatsManager:
     @classmethod
     def get_stats_sync(cls):
         """
-        Stringified verion of all the stats
+        Stringified version of all the stats
         """
         # Reuse cached Redis client to avoid creating new connection pools on every call
         if cls._redis_client is None:

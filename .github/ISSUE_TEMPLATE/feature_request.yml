@@ -74,7 +74,7 @@ body:
   - type: textarea
     id: sugested-results
     attributes:
-      label: Sugested feature result
+      label: Suggested feature result
       description: What is the result this new feature will bring?
     validations:
       required: true

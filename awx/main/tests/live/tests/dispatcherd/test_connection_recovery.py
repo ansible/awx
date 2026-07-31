@@ -40,7 +40,7 @@ def test_advisory_lock_error_clears():
 
     This is an "easier" test case than the next,
     because it passes just by fixing the DAB case,
-    and passing this does not generally guarentee that
+    and passing this does not generally guarantee that
     workers will not be left with a connection in a bad state.
     """
     min_workers = settings.service['pool_kwargs']['min_workers']

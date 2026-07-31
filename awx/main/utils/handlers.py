@@ -102,7 +102,7 @@ class SpecialInventoryHandler(logging.Handler):
 
         self.counter += 1
         msg = self.format(record)
-        n_lines = len(msg.strip().split('\n'))  # don't count line breaks at boundry of text
+        n_lines = len(msg.strip().split('\n'))  # don't count line breaks at boundary of text
         dispatch_data = dict(
             created=now().isoformat(), event='verbose', counter=self.counter, stdout=msg, start_line=self._current_line, end_line=self._current_line + n_lines
         )
@@ -151,7 +151,7 @@ class OTLPHandler(LoggingHandler):
             raise ValueError("endpoint required")
 
         if auth == 'basic' and (username is None or password is None):
-            raise ValueError("auth type basic requires username and passsword parameters")
+            raise ValueError("auth type basic requires username and password parameters")
 
         self.endpoint = endpoint
         self.service_name = service_name or (sys.argv[1] if len(sys.argv) > 1 else (sys.argv[0] or 'unknown_service'))

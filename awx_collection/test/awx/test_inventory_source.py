@@ -119,7 +119,7 @@ def test_falsy_value(run_module, admin_user, base_inventory):
 # update_on_launch	?	?	o	o	o	o		o	o		o		o	o	o
 # UoPL          	?	?	o	-	-	-		-	-		-		-	-	-
 # source_vars*		?	?	-	o	-	o		o	o		o		-	-	-
-# environmet vars*	?	?	o	-	-	-		-	-		-		-	-	o
+# environment vars*	?	?	o	-	-	-		-	-		-		-	-	o
 # source_script		?	?	-	-	-	-		-	-		-		-	-	r
 #
 # UoPL - update_on_project_launch

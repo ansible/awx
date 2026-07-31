@@ -180,7 +180,7 @@ def test_user_create_with_django_password_validation_ext(post, delete, admin, us
     with override_settings(AUTH_PASSWORD_VALIDATORS=validators):
         response = post(reverse('api:user_list'), user_attrs, admin, middleware=SessionMiddleware(mock.Mock()))
         assert response.status_code == expected_status_code
-        # Delete user if it was created succesfully.
+        # Delete user if it was created successfully.
         if response.status_code == 201:
             response = delete(reverse('api:user_detail', kwargs={'pk': response.data['id']}), admin, middleware=SessionMiddleware(mock.Mock()))
             assert response.status_code == 204

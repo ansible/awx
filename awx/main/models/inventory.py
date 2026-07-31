@@ -1071,7 +1071,7 @@ class InventorySourceOptions(BaseModel):
         elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
             return _('Credentials of type insights and vault are disallowed for scm inventory sources.')
         elif source == 'openshift_virtualization' and cred and cred.credential_type.kind != 'kubernetes':
-            return _('Credentials of type kubernetes is requred for openshift_virtualization inventory sources.')
+            return _('Credentials of type kubernetes is required for openshift_virtualization inventory sources.')
         return None
 
     def get_cloud_credential(self):

@@ -101,7 +101,7 @@ MAX_ISOLATED_PATH_COLON_DELIMITER = 2
 SURVEY_TYPE_MAPPING = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}
 
 
-# Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
+# Note, the \u001b[... are ansi color codes. We don't currently import any of the python modules which define the codes.
 # Importing a library just for this message seemed like overkill
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
     '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
@@ -133,9 +133,9 @@ org_role_to_permission = {
     'inventory_admin_role': 'add_inventory',
     'credential_admin_role': 'add_credential',
     'workflow_admin_role': 'add_workflowjobtemplate',
-    'job_template_admin_role': 'change_jobtemplate',  # TODO: this doesnt really work, solution not clear
+    'job_template_admin_role': 'change_jobtemplate',  # TODO: this doesn't really work, solution not clear
     'execution_environment_admin_role': 'add_executionenvironment',
-    'auditor_role': 'view_project',  # TODO: also doesnt really work
+    'auditor_role': 'view_project',  # TODO: also doesn't really work
 }
 
 # OIDC credential type namespaces for feature flag filtering

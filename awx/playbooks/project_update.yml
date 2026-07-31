@@ -204,7 +204,7 @@
       ANSIBLE_COLLECTIONS_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_collections"
       ANSIBLE_ROLES_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_roles"
       # Put the local tmp directory in same volume as collection destination
-      # otherwise, files cannot be moved accross volumes and will cause error
+      # otherwise, files cannot be moved across volumes and will cause error
       ANSIBLE_LOCAL_TEMP: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/tmp"
   tasks:
     - name: Check content sync settings

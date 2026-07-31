@@ -109,7 +109,7 @@ class Command(BaseCommand):
             "--retry_sleep",
             type=self.ge_1,
             default=30,
-            help="Number of seconds to sleep before consequtive retries when waiting. Default: 30",
+            help="Number of seconds to sleep before consecutive retries when waiting. Default: 30",
         )
 
     def handle(self, *args, **options):

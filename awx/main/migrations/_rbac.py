@@ -218,7 +218,7 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
                 '{} {} on jt {} for users {} via inventory.organization {}'.format('Removing' if backward else 'Setting', jt_role, jt.pk, user_ids, org.pk)
             )
             if not backward:
-                # in reverse, explit role becomes redundant
+                # in reverse, explicit role becomes redundant
                 role.members.add(*user_ids)
             else:
                 role.members.remove(*user_ids)

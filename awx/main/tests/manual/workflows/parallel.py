@@ -27,7 +27,7 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
     node_success.success_nodes.add(nodes_parallel[1])
     node_success.success_nodes.add(nodes_parallel[2])
 
-    # Add a failure node for each paralell node
+    # Add a failure node for each parallel node
     for i, n in enumerate(nodes_parallel):
         n.failure_nodes.add(nodes_never[i])
 

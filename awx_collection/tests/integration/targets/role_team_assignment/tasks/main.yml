@@ -34,7 +34,7 @@
     that:
       - result.changed
 
-- name: Delete Role Team Assigment
+- name: Delete Role Team Assignment
   role_team_assignment:
     role_definition: test_view_jt
     team: All Stars

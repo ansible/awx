@@ -365,7 +365,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
                         except DatabaseError:
                             logger.exception('Computed fields database error saving event {}'.format(self.pk))
 
-                    # find parent links and progagate changed=T and failed=T
+                    # find parent links and propagate changed=T and failed=T
                     changed = (
                         job.get_event_queryset()
                         .filter(changed=True)

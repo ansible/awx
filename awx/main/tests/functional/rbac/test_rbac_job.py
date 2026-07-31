@@ -82,7 +82,7 @@ def test_superuser_superauditor_sees_orphans(normal_job, superuser, admin_user, 
 @pytest.mark.django_db
 def test_org_member_does_not_see_orphans(normal_job, org_member, project):
     normal_job.job_template = None
-    # Check that privledged access to project still does not grant access
+    # Check that privileged access to project still does not grant access
     project.admin_role.members.add(org_member)
     access = JobAccess(org_member)
     assert not access.can_read(normal_job)

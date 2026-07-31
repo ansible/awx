@@ -127,7 +127,7 @@ def test_empty_schedule_rrule(collection_import, freq):
         ('month', dict(start_date='2020-4-16 03:45:07', month_day_number='32'), "month_day_number must be between 1 and 31"),
         # Test on_the as junk
         ('month', dict(start_date='2020-4-16 03:45:07', on_the='junk'), "on_the parameter must be two words separated by a space"),
-        # Test on_the with invalid occurance
+        # Test on_the with invalid occurrence
         ('month', dict(start_date='2020-4-16 03:45:07', on_the='junk wednesday'), "The first string of the on_the parameter is not valid"),
         # Test on_the with invalid weekday
         ('month', dict(start_date='2020-4-16 03:45:07', on_the='second junk'), "Weekday portion of on_the parameter is not valid"),

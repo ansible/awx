@@ -175,7 +175,7 @@
       awx.awx.role:
         user: "{{ username }}"
         role: execute
-        job_template: "non existant temp"
+        job_template: "non existent temp"
         state: present
       register: results
       ignore_errors: true

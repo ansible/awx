@@ -97,8 +97,8 @@ def generate_users(organization, teams, superuser, persisted, **kwargs):
     If a User object is encountered the User.username is used as a key for the lookup dict.
 
     A short hand for assigning a user to a team is available in the following format: "team_name:username".
-    If a string in that format is encounted an attempt to lookup the team by the key team_name from the teams
-    argumnent is made, a KeyError will be thrown if the team does not exist in the dict. The teams argument should
+    If a string in that format is encountered an attempt to lookup the team by the key team_name from the teams
+    argument is made, a KeyError will be thrown if the team does not exist in the dict. The teams argument should
     be a dict of {Team.name:Team}
     """
     users = {}
@@ -118,9 +118,9 @@ def generate_users(organization, teams, superuser, persisted, **kwargs):
 
 
 def generate_teams(organization, persisted, **kwargs):
-    """generate_teams evalutes a mixed list of Team objects and strings.
+    """generate_teams evaluates a mixed list of Team objects and strings.
     If a string is encountered a team with that string name is created and added to the lookup dict.
-    If a Team object is encounted the Team.name is used as a key for the lookup dict.
+    If a Team object is encountered the Team.name is used as a key for the lookup dict.
     """
     teams = {}
     if 'teams' in kwargs and kwargs.get('teams') is not None:

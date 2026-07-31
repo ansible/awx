@@ -103,7 +103,7 @@ class ExternalLoggerEnabled(Filter):
 class DynamicLevelFilter(Filter):
     def filter(self, record):
         """Filters out logs that have a level below the threshold defined
-        by the databse setting LOG_AGGREGATOR_LEVEL
+        by the database setting LOG_AGGREGATOR_LEVEL
         """
         if record_is_blocked(record):
             # Fine to write denied loggers to file, apply default filtering level
