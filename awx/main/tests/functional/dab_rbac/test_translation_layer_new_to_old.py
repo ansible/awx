@@ -1,7 +1,5 @@
 from unittest import mock
 
-from django.db import models
-
 from ansible_base.rbac.models import ObjectRole, RoleDefinition, RoleUserAssignment, RoleTeamAssignment
 from ansible_base.lib.utils.response import get_relative_url
 import pytest
