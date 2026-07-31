@@ -3,9 +3,12 @@ Tests that save_user_claims (which uses bulk_create, skipping signals)
 correctly syncs old Role.members when run through AwxJWTAuthentication.
 """
 
+from unittest import mock
+
 import pytest
 
 from ansible_base.jwt_consumer.awx.auth import AwxJWTAuthentication
+from ansible_base.jwt_consumer.common.auth import JWTAuthentication
 from ansible_base.rbac.claims import save_user_claims
 from ansible_base.rbac.models import RoleDefinition
 
@@ -47,6 +50,14 @@ class TestClaimsOldRbacSync:
 
         return {"objects": objects, "object_roles": object_roles, "global_roles": []}
 
+    def _call_process_permissions(self, auth, user, claims):
+        """Call process_permissions with claims pre-loaded, mocking the JWT layer."""
+        save_user_claims(user, **claims)
+        auth.common_auth.user = user
+        auth.common_auth._saved_claims = (claims["objects"], claims["object_roles"], claims["global_roles"])
+        with mock.patch.object(JWTAuthentication, 'process_permissions'):
+            auth.process_permissions()
+
     def test_bulk_claims_skips_old_rbac_signals(self, bob, organization, team, setup_managed_roles):
         """Verify that save_user_claims (bulk path) does NOT populate old Role.members via signals."""
         claims = self._build_claims([organization], [team])
@@ -63,40 +74,35 @@ class TestClaimsOldRbacSync:
         assert bob not in organization.admin_role.members.all()
         assert bob not in team.member_role.members.all()
 
-    def test_awx_sync_populates_old_rbac(self, bob, organization, team, setup_managed_roles):
-        """Verify that _sync_old_rbac populates old Role.members after bulk claims."""
+    def test_process_permissions_populates_old_rbac(self, bob, organization, team, setup_managed_roles):
+        """Verify that process_permissions populates old Role.members after bulk claims."""
         claims = self._build_claims([organization], [team])
 
-        save_user_claims(bob, **claims)
-
-        # Manually call the AWX sync (normally called via process_permissions)
         auth = AwxJWTAuthentication()
-        auth._sync_old_rbac(bob, claims["objects"], claims["object_roles"])
+        self._call_process_permissions(auth, bob, claims)
 
         assert bob in organization.admin_role.members.all()
         assert bob in team.member_role.members.all()
 
-    def test_awx_sync_removes_stale_old_rbac(self, bob, organization, team, setup_managed_roles):
-        """Verify that _sync_old_rbac removes old Role.members when claims shrink."""
+    def test_process_permissions_removes_stale_old_rbac(self, bob, organization, team, setup_managed_roles):
+        """Verify that process_permissions removes old Role.members when claims shrink."""
+        auth = AwxJWTAuthentication()
+
         # First: give bob both org admin and team member
         claims_full = self._build_claims([organization], [team])
-        save_user_claims(bob, **claims_full)
-
-        auth = AwxJWTAuthentication()
-        auth._sync_old_rbac(bob, claims_full["objects"], claims_full["object_roles"])
+        self._call_process_permissions(auth, bob, claims_full)
 
         assert bob in organization.admin_role.members.all()
         assert bob in team.member_role.members.all()
 
         # Second: claims shrink to just org admin (no team member)
         claims_reduced = self._build_claims([organization], [])
-        save_user_claims(bob, **claims_reduced)
-        auth._sync_old_rbac(bob, claims_reduced["objects"], claims_reduced["object_roles"])
+        self._call_process_permissions(auth, bob, claims_reduced)
 
         assert bob in organization.admin_role.members.all()
         assert bob not in team.member_role.members.all()
 
-    def test_awx_sync_multiple_orgs_and_teams(self, bob, setup_managed_roles):
+    def test_process_permissions_multiple_orgs_and_teams(self, bob, setup_managed_roles):
         """Test sync at small scale with multiple orgs and teams."""
         from awx.main.models import Organization, Team
 
@@ -106,10 +112,9 @@ class TestClaimsOldRbacSync:
             teams.append(Team.objects.create(name=f"sync-team-{org.name}", organization=org))
 
         claims = self._build_claims(orgs, teams)
-        save_user_claims(bob, **claims)
 
         auth = AwxJWTAuthentication()
-        auth._sync_old_rbac(bob, claims["objects"], claims["object_roles"])
+        self._call_process_permissions(auth, bob, claims)
 
         for org in orgs:
             org.refresh_from_db()
