@@ -13,7 +13,7 @@ from rest_framework.utils.urls import replace_query_param
 from rest_framework.settings import api_settings
 from django.utils.translation import gettext_lazy as _
 
-from awx.main.models import UnifiedJob
+from awx.main.models import ActivityStream, UnifiedJob
 
 
 class DisabledPaginator(DjangoPaginator):
@@ -26,14 +26,16 @@ class DisabledPaginator(DjangoPaginator):
         return 200
 
 
-class UnifiedJobPaginator(DjangoPaginator):
-    """Use unfiltered table count for unified job pagination.
+class ActivityStreamPaginator(DjangoPaginator):
+    """Use unfiltered table count for activity stream pagination (AAP-83773)."""
 
-    The RBAC-filtered COUNT query is catastrophically slow on large tables
-    when the queryset uses pk__in with UNION subqueries.  An unfiltered
-    count is acceptable for pagination UI -- an approximate over-count
-    is harmless.
-    """
+    @cached_property
+    def count(self):
+        return ActivityStream.objects.count()
+
+
+class UnifiedJobPaginator(DjangoPaginator):
+    """Use unfiltered table count for unified job pagination."""
 
     @cached_property
     def count(self):
@@ -88,16 +90,11 @@ class Pagination(pagination.PageNumberPagination):
         return super(Pagination, self).get_paginated_response(data)
 
 
+class ActivityStreamPagination(Pagination):
+    django_paginator_class = ActivityStreamPaginator
+
+
 class UnifiedJobPagination(Pagination):
-    """Pagination for unified jobs that uses an unfiltered table count.
-
-    The RBAC-filtered queryset from UnifiedJobAccess.filtered_queryset()
-    produces a catastrophic COUNT(*) query on large tables when using
-    pk__in with UNION subqueries.  This pagination class substitutes a
-    fast unfiltered count for the pagination header while still returning
-    RBAC-filtered results.
-    """
-
     django_paginator_class = UnifiedJobPaginator
 
 

@@ -140,6 +140,29 @@ def test_stream_queryset_hides_shows_items(
 
 
 @pytest.mark.django_db
+def test_activity_stream_pagination_uses_unfiltered_count(get, organization, project, user, settings):
+    """The pagination count should reflect total activity stream rows, not
+    the RBAC-filtered subset.  The RBAC-filtered COUNT is catastrophically
+    slow on large tables (AAP-83773); an approximate over-count from an
+    unfiltered SELECT COUNT(*) is acceptable for pagination UI."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+
+    no_access_user = user('no-access-user', False)
+
+    total_entries = ActivityStream.objects.count()
+    assert total_entries > 0
+
+    url = reverse('api:activity_stream_list')
+    response = get(url, no_access_user)
+
+    assert response.status_code == 200
+    visible_results = len(response.data['results'])
+    pagination_count = response.data['count']
+    assert pagination_count == total_entries
+    assert visible_results < pagination_count
+
+
+@pytest.mark.django_db
 def test_stream_user_direct_role_updates(get, post, organization_factory):
     objects = organization_factory('test_org', superusers=['admin'], users=['test'], inventories=['inv1'])
 
