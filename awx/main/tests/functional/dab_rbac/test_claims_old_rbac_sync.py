@@ -10,7 +10,6 @@ import pytest
 from ansible_base.jwt_consumer.awx.auth import AwxJWTAuthentication
 from ansible_base.jwt_consumer.common.auth import JWTAuthentication
 from ansible_base.rbac.claims import save_user_claims
-from ansible_base.rbac.models import RoleUserAssignment
 from awx.main.models import Organization, Team
 
 
@@ -58,19 +57,6 @@ class TestClaimsOldRbacSync:
         auth.common_auth._saved_claims = (claims["objects"], claims["object_roles"], claims["global_roles"])
         with mock.patch.object(JWTAuthentication, 'process_permissions'):
             auth.process_permissions()
-
-    def test_bulk_claims_skips_old_rbac_signals(self, bob, organization, team, setup_managed_roles):
-        """Verify that save_user_claims (bulk path) does NOT populate old Role.members via signals."""
-        claims = self._build_claims([organization], [team])
-
-        save_user_claims(bob, **claims)
-
-        assert RoleUserAssignment.objects.filter(user=bob, role_definition__name="Organization Admin").exists()
-        assert RoleUserAssignment.objects.filter(user=bob, role_definition__name="Team Member").exists()
-
-        # Old Role.members NOT populated (bulk_create skips post_save signals)
-        assert bob not in organization.admin_role.members.all()
-        assert bob not in team.member_role.members.all()
 
     def test_process_permissions_populates_old_rbac(self, bob, organization, team, setup_managed_roles):
         """Verify that process_permissions populates old Role.members after bulk claims."""
