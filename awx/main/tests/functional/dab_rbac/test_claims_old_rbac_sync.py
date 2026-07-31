@@ -10,7 +10,8 @@ import pytest
 from ansible_base.jwt_consumer.awx.auth import AwxJWTAuthentication
 from ansible_base.jwt_consumer.common.auth import JWTAuthentication
 from ansible_base.rbac.claims import save_user_claims
-from ansible_base.rbac.models import RoleDefinition
+from ansible_base.rbac.models import RoleUserAssignment
+from awx.main.models import Organization, Team
 
 
 @pytest.mark.django_db
@@ -64,9 +65,6 @@ class TestClaimsOldRbacSync:
 
         save_user_claims(bob, **claims)
 
-        # DAB assignment exists
-        from ansible_base.rbac.models import RoleUserAssignment
-
         assert RoleUserAssignment.objects.filter(user=bob, role_definition__name="Organization Admin").exists()
         assert RoleUserAssignment.objects.filter(user=bob, role_definition__name="Team Member").exists()
 
@@ -104,8 +102,6 @@ class TestClaimsOldRbacSync:
 
     def test_process_permissions_multiple_orgs_and_teams(self, bob, setup_managed_roles):
         """Test sync at small scale with multiple orgs and teams."""
-        from awx.main.models import Organization, Team
-
         orgs = [Organization.objects.create(name=f"sync-org-{i}") for i in range(3)]
         teams = []
         for org in orgs:
