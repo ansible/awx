@@ -885,7 +885,9 @@ class SourceControlMixin(BaseTask):
         # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
         # Galaxy requirements are not supported for manual projects
-        if project.scm_type and ((not has_cache) or branch_override):
+        # If a source update is scheduled, always include roles/collections because
+        # the new revision may have different requirements.
+        if project.scm_type and ((not has_cache) or branch_override or source_update_tag in sync_needs):
             sync_needs.extend(['install_roles', 'install_collections'])
 
         return sync_needs
