@@ -129,7 +129,7 @@ from awx.api.views.mixin import (
     NoTruncateMixin,
     UnifiedJobExcludeMixin,
 )
-from awx.api.pagination import UnifiedJobEventPagination
+from awx.api.pagination import ActivityStreamPagination, UnifiedJobEventPagination
 from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views')
@@ -4818,6 +4818,7 @@ class ActivityStreamList(SimpleListAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
     search_fields = ('changes',)
+    pagination_class = ActivityStreamPagination
     resource_purpose = 'audit trail entries for tracking system changes'
 
     @extend_schema_if_available(

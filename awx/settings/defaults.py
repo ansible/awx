@@ -43,6 +43,11 @@ LISTENER_DATABASES = {
     }
 }
 
+# Optional manual override for statement_timeout (ms) on web worker DB
+# connections.  When running under uwsgi, the timeout is auto-derived from
+# the harakiri value.  Set this for non-uwsgi deployments or to override.
+DATABASE_STATEMENT_TIMEOUT = None
+
 # Whether or not the deployment is a K8S-based deployment
 # In K8S-based deployments, instances have zero capacity - all playbook
 # automation is intended to flow through defined Container Groups that
@@ -1103,6 +1108,7 @@ ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
 
 # Currently features are enabled to keep compatibility with old system, except custom roles
 ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN = False
+ANSIBLE_BASE_ALLOW_TEAM_ORG_MEMBER = True
 # ANSIBLE_BASE_ALLOW_CUSTOM_ROLES = True
 ANSIBLE_BASE_ALLOW_TEAM_PARENTS = False
 ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES = False

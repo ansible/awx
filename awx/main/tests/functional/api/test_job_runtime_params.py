@@ -193,6 +193,21 @@ def test_job_accept_empty_tags(job_template_prompts, post, admin_user, mocker):
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
+def test_job_accept_long_skip_tags(job_template_prompts, post, admin_user, mocker):
+    job_template = job_template_prompts(True)
+    long_skip_tags = ','.join(f'tag{i}' for i in range(500))
+    assert len(long_skip_tags) > 1024
+
+    mock_job = mocker.MagicMock(spec=Job, id=968)
+
+    mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job)
+    mocker.patch('awx.api.serializers.JobSerializer.to_representation')
+    post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), {'skip_tags': long_skip_tags}, admin_user, expect=201)
+    JobTemplate.create_unified_job.assert_called_once_with(skip_tags=long_skip_tags)
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
 def test_slice_timeout_forks_need_int(job_template_prompts, post, admin_user, mocker):
     job_template = job_template_prompts(True)
 
