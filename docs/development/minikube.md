@@ -52,7 +52,7 @@ $ docker push ${IMAGE_TAG_BASE}:${VERSION}
 
 ## Deploy AWX into Minikube using the AWX Operator
 
-If have have not made any changes to the AWX Dockerfile, run the following
+If you have not made any changes to the AWX Dockerfile, run the following
 command. If you need to test out changes to the Dockerfile, see the
 "Custom AWX Development Image for Kubernetes" section below.
 

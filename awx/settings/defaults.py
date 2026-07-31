@@ -994,7 +994,7 @@ HOST_METRIC_SUMMARY_TASK_LAST_TS = None
 HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 
 
-# TODO: cmeyers, replace with with register pattern
+# TODO: cmeyers, replace with register pattern
 # The register pattern is particularly nice for this because we need
 # to know the process to start the thread that will be the server.
 # The registration location should be the same location as we would

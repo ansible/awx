@@ -37,7 +37,7 @@ DYNACONF.set(
 
 #############################################################################################
 # Settings loaded before this point will be allowed to be overridden by the database settings
-# Any settings loaded after this point will be marked as as a read_only database setting
+# Any settings loaded after this point will be marked as a read_only database setting
 #############################################################################################
 
 # Load extra settings files from the following directories

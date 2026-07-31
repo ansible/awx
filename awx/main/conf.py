@@ -208,7 +208,7 @@ register(
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
     label=_('Automation Analytics upload URL'),
-    help_text=_('This setting is used to to configure the upload URL for data collection for Automation Analytics.'),
+    help_text=_('This setting is used to configure the upload URL for data collection for Automation Analytics.'),
     category=_('System'),
     category_slug='system',
 )

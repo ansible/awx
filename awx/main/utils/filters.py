@@ -178,7 +178,7 @@ class SmartFilter(object):
         TODO: separate django filter requests from our custom json filter
               request so we don't process the key any. This could be
               accomplished using an allowed list or introspecting the
-              relationship refered to to see if it's a jsonb type.
+              relationship referred to, to see if it's a jsonb type.
         '''
 
         def _json_path_to_contains(self, k, v):

@@ -49,7 +49,7 @@ options:
       type: float
     timeout:
       description:
-        - Maximum time in seconds to wait for a workflow job to to reach approval node.
+        - Maximum time in seconds to wait for a workflow job to reach approval node.
       default: 10
       type: int
 extends_documentation_fragment: awx.awx.auth

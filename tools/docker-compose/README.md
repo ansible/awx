@@ -380,7 +380,7 @@ Once the containers are up we are ready to configure and plumb Splunk with AWX. 
 
 For routing traffic between AWX and Splunk we will use the internal docker compose network. The `Logging Aggregator` will be configured using the internal network machine name of `splunk`.
 
-Once you have have the collections installed (from above) you can run the playbook like:
+Once you have the collections installed (from above) you can run the playbook like:
 ```bash
 export CONTROLLER_USERNAME=<your username>
 export CONTROLLER_PASSWORD=<your password>
