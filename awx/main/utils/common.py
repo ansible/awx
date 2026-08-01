@@ -81,6 +81,7 @@ __all__ = [
     'RequireDebugTrueOrTest',
     'has_model_field_prefetched',
     'set_environ',
+    'is_blocked_task_env_key',
     'IllegalArgumentError',
     'get_custom_venv_choices',
     'ScheduleTaskManager',
@@ -960,6 +961,17 @@ def ignore_inventory_group_removal():
         _inventory_updates.is_removing = previous_value
 
 
+_BLOCKED_TASK_ENV_PREFIXES = ('LD_', 'DYLD_', '_DYLD_', 'PYTHON', 'NODE_', 'PERL', 'RUBY', 'OPENSSL_', 'SSL_')
+_BLOCKED_TASK_ENV_KEYS = frozenset(
+    {'SSLKEYLOGFILE', 'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'PATH', 'HOME', 'USER', 'SHELL', 'LOGNAME', 'TERM', '_', 'IFS', 'ENV', 'BASH_ENV', 'CDPATH'}
+)
+
+
+def is_blocked_task_env_key(key):
+    upper_key = key.upper()
+    return upper_key.startswith(_BLOCKED_TASK_ENV_PREFIXES) or upper_key in _BLOCKED_TASK_ENV_KEYS
+
+
 @contextlib.contextmanager
 def set_environ(**environ):
     """
@@ -970,7 +982,11 @@ def set_environ(**environ):
     """
     old_environ = os.environ.copy()
     try:
-        os.environ.update(environ)
+        blocked = {k for k in environ if is_blocked_task_env_key(k)}
+        if blocked:
+            logger.warning('Blocked security-sensitive environment variable keys in set_environ: %s', ', '.join(sorted(blocked)))
+        filtered = {k: v for k, v in environ.items() if k not in blocked}
+        os.environ.update(filtered)
         yield
     finally:
         os.environ.clear()

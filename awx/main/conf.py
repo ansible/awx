@@ -15,6 +15,7 @@ from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
 from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 from awx.main.tasks.policy import OPA_AUTH_TYPES
+from awx.main.utils.common import is_blocked_task_env_key
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -449,11 +450,14 @@ def _is_dangerous_task_env_key(key):
 def jobs_validate(serializer, attrs):
     errors = []
     for setting_name in ('AWX_TASK_ENV', 'GALAXY_TASK_ENV'):
-        if setting_name not in attrs:
+        task_env = attrs.get(setting_name)
+        if not task_env:
             continue
-        dangerous_keys = [key for key in attrs[setting_name] if _is_dangerous_task_env_key(key)]
-        if dangerous_keys:
-            errors.append('{} may not contain keys that manipulate dynamic linkers or interpreters: {}'.format(setting_name, ', '.join(dangerous_keys)))
+        blocked_keys = {key for key in task_env if _is_dangerous_task_env_key(key)}
+        if setting_name == 'AWX_TASK_ENV':
+            blocked_keys |= {key for key in task_env if is_blocked_task_env_key(key)}
+        if blocked_keys:
+            errors.append('{} contains prohibited environment variable keys: {}'.format(setting_name, ', '.join(sorted(blocked_keys))))
     if errors:
         raise serializers.ValidationError(_('\n'.join(errors)))
     return attrs
