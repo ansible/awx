@@ -548,8 +548,7 @@ class BaseTask(object):
         self.lock_fd = None
 
     def acquire_lock(self, project, unified_job_id=None):
-        if not os.path.exists(settings.PROJECTS_ROOT):
-            os.mkdir(settings.PROJECTS_ROOT)
+         os.makedirs(settings.PROJECTS_ROOT, exist_ok=True)
 
         lock_path = project.get_lock_file()
         if lock_path is None:
