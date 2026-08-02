@@ -1141,8 +1141,12 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         default=False,
     )
 
-    update_cache_timeout = models.PositiveIntegerField(
+    from django.core.validators import MinValueValidator
+
+    update_cache_timeout = models.IntegerField(
         default=0,
+        validators=[MinValueValidator(-1)],
+        help_text=_('Time in seconds to cache inventory sync. Set to -1 to force sync on every launch.'),
     )
 
     @classmethod
@@ -1241,6 +1245,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
     @property
     def cache_timeout_blocked(self):
+        if self.update_cache_timeout == -1:
+            return False
         if not self.last_job_run:
             return False
         if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) > now():
@@ -1250,6 +1256,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     @property
     def needs_update_on_launch(self):
         if self.source and self.update_on_launch:
+            if self.update_cache_timeout == -1:
+                return True
             if not self.last_job_run:
                 return True
             if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) <= now():
