@@ -348,9 +348,17 @@ run-ws-heartbeat:
 reports:
 	mkdir -p $@
 
-black: reports
-	@command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
-	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
+## awx_collection is excluded: ansible-test sanity runs its own linters which conflict with ruff
+format: reports
+	@command -v ruff >/dev/null 2>&1 || { echo "could not find ruff on your PATH, you may need to \`pip install ruff\`" && exit 1; }
+	@(set -o pipefail && ruff format $(RUFF_FORMAT_ARGS) awx awxkit | tee reports/format.report)
+
+lint: reports
+	@command -v ruff >/dev/null 2>&1 || { echo "could not find ruff on your PATH, you may need to \`pip install ruff\`" && exit 1; }
+	ruff check awx awxkit
+
+## Legacy alias
+black: format
 
 $(GIT_COMMON_DIR)/hooks/pre-commit:
 	ln -sf ../../pre-commit.sh $(GIT_COMMON_DIR)/hooks/pre-commit
@@ -369,11 +377,11 @@ genschema-yaml: awx-link reports
 	fi; \
 	$(MANAGEMENT_COMMAND) spectacular --format openapi --file schema.yaml
 
-check: black
+check: format
 
 api-lint:
-	BLACK_ARGS="--check" $(MAKE) black
-	flake8 awx
+	RUFF_FORMAT_ARGS="--check" $(MAKE) format
+	$(MAKE) lint
 	yamllint -s .
 
 ## Run egg_info_dev to generate awx.egg-info for development.
