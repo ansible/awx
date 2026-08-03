@@ -2508,21 +2508,38 @@ class UnifiedJobAccess(BaseAccess):
 
     def filtered_queryset(self):
         inv_pk_qs = Inventory.access_ids_qs(self.user, 'view')
-        qs = self.model.objects.filter(
-            Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-            | Q(
-                pk__in=InventoryUpdate.objects.filter(
-                    inventory_source__inventory__id__in=inv_pk_qs,
-                ).values('pk')
-            )
-            | Q(
-                pk__in=AdHocCommand.objects.filter(
-                    inventory__id__in=inv_pk_qs,
-                ).values('pk')
-            )
-            | Q(organization__in=Organization.access_ids_qs(self.user, 'audit_organization'))
+
+        by_template = (
+            self.model.objects.filter(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            .order_by()
+            .values_list('pk', flat=True)
         )
-        return qs
+
+        by_inventory_update = (
+            InventoryUpdate.objects.filter(
+                inventory_source__inventory__id__in=inv_pk_qs,
+            )
+            .order_by()
+            .values_list('pk', flat=True)
+        )
+
+        by_adhoc = (
+            AdHocCommand.objects.filter(
+                inventory__id__in=inv_pk_qs,
+            )
+            .order_by()
+            .values_list('pk', flat=True)
+        )
+
+        by_org_auditor = (
+            self.model.objects.filter(
+                organization__in=Organization.access_ids_qs(self.user, 'audit_organization'),
+            )
+            .order_by()
+            .values_list('pk', flat=True)
+        )
+
+        return self.model.objects.filter(pk__in=by_template.union(by_inventory_update, by_adhoc, by_org_auditor))
 
     def get_queryset(self):
         return super(UnifiedJobAccess, self).get_queryset().filter(workflowapproval__isnull=True)
