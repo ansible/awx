@@ -139,3 +139,17 @@ class TestNewToOld:
             organization.delete()
 
         mck.assert_not_called()
+
+    def test_cascade_team_assignment_from_non_rbac_model_skips_sync(self, organization, team, inventory, setup_managed_roles):
+        """When Organization is deleted, Team cascade-deletes via real FK,
+        which cascade-deletes RoleTeamAssignment.  Django's Collector sets
+        origin to the Organization instance (a Model with app_label != 'dab_rbac'),
+        so the sync handler must skip."""
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        rd.give_permission(team, inventory)
+        assert RoleTeamAssignment.objects.filter(team=team, role_definition=rd, object_id=inventory.pk).exists()
+
+        with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+            organization.delete()
+
+        mck.assert_not_called()
