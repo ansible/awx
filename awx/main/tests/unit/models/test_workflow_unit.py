@@ -244,3 +244,85 @@ def test_get_ask_mapping_integrity():
         'skip_tags',
         'extra_vars',
     ]
+
+def test_send_approval_notification_node_level_override(mocker):
+    """
+    Test that send_approval_notification prioritizes node-level notification 
+    templates over workflow job template default templates.
+    """
+    from awx.main.models import WorkflowApproval, WorkflowApprovalTemplate, NotificationTemplate
+
+    # Setup mocks for node-level notification templates
+    node_nt = mocker.MagicMock(spec=NotificationTemplate)
+    node_nt.generate_notification.return_value = mocker.MagicMock(id=101)
+
+    # Setup mocks for workflow-level notification templates
+    wf_nt = mocker.MagicMock(spec=NotificationTemplate)
+    wf_nt.generate_notification.return_value = mocker.MagicMock(id=202)
+
+    # Mock approval template with node-level notifications configured
+    approval_template = mocker.MagicMock(spec=WorkflowApprovalTemplate)
+    approval_template.notification_templates_approvals.exists.return_value = True
+    approval_template.notification_templates_approvals.all.return_value = [node_nt]
+
+    # Mock workflow job template with default approval notifications
+    workflow_job_template = mocker.MagicMock()
+    workflow_job_template.notification_templates = {'approvals': [wf_nt]}
+
+    # Instantiate WorkflowApproval object
+    approval = WorkflowApproval(id=1)
+    approval.workflow_approval_template = approval_template
+
+    mocker.patch.object(
+        WorkflowApproval,
+        'workflow_job_template',
+        new_callable=mocker.PropertyMock,
+        return_value=workflow_job_template,
+    )
+    mocker.patch.object(approval, 'build_approval_notification_message', return_value=('Subject', 'Body'))
+    mock_on_commit = mocker.patch('awx.main.models.workflow.connection.on_commit')
+
+    # Execute
+    approval.send_approval_notification('approved')
+
+    # Assert node_nt was used instead of wf_nt
+    assert mock_on_commit.call_count == 1
+    node_nt.generate_notification.assert_called_once_with('Subject', 'Body')
+    wf_nt.generate_notification.assert_not_called()
+
+
+def test_send_approval_notification_fallback(mocker):
+    """
+    Test that send_approval_notification falls back to workflow job template 
+    approval templates when no node-level templates are configured.
+    """
+    from awx.main.models import WorkflowApproval, WorkflowApprovalTemplate, NotificationTemplate
+
+    wf_nt = mocker.MagicMock(spec=NotificationTemplate)
+    wf_nt.generate_notification.return_value = mocker.MagicMock(id=202)
+
+    # Mock approval template with NO node-level notifications configured
+    approval_template = mocker.MagicMock(spec=WorkflowApprovalTemplate)
+    approval_template.notification_templates_approvals.exists.return_value = False
+
+    workflow_job_template = mocker.MagicMock()
+    workflow_job_template.notification_templates = {'approvals': [wf_nt]}
+
+    approval = WorkflowApproval(id=1)
+    approval.workflow_approval_template = approval_template
+
+    mocker.patch.object(
+        WorkflowApproval,
+        'workflow_job_template',
+        new_callable=mocker.PropertyMock,
+        return_value=workflow_job_template,
+    )
+    mocker.patch.object(approval, 'build_approval_notification_message', return_value=('Subject', 'Body'))
+    mock_on_commit = mocker.patch('awx.main.models.workflow.connection.on_commit')
+
+    # Execute
+    approval.send_approval_notification('approved')
+
+    # Assert fallback wf_nt was used
+    assert mock_on_commit.call_count == 1
+    wf_nt.generate_notification.assert_called_once_with('Subject', 'Body')
