@@ -129,7 +129,7 @@ from awx.api.views.mixin import (
     NoTruncateMixin,
     UnifiedJobExcludeMixin,
 )
-from awx.api.pagination import ActivityStreamPagination, UnifiedJobEventPagination
+from awx.api.pagination import ActivityStreamPagination, UnifiedJobEventPagination, UnifiedJobPagination
 from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views')
@@ -4573,6 +4573,7 @@ class UnifiedJobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     search_fields = ('description', 'name', 'job__playbook')
+    pagination_class = UnifiedJobPagination
     resource_purpose = 'unified jobs'
 
 

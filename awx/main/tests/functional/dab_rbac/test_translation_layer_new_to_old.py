@@ -1,4 +1,6 @@
-from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
+from unittest import mock
+
+from ansible_base.rbac.models import ObjectRole, RoleDefinition, RoleUserAssignment, RoleTeamAssignment
 from ansible_base.lib.utils.response import get_relative_url
 import pytest
 
@@ -78,3 +80,76 @@ class TestNewToOld:
         url = get_relative_url('roleteamassignment-detail', kwargs={'pk': team_assignment.id})
         delete(url, user=admin, expect=204)
         assert team.member_role not in inventory.admin_role.parents.all()
+
+    def test_flush_rbac_cleanup_skips_sync(self, inventory, bob, setup_managed_roles):
+        """Simulate what defer_rbac_computations._flush_rbac does on exit:
+        it bulk-deletes ObjectRoles for deleted objects.  Those ObjectRole
+        deletions cascade to RoleUserAssignment via the object_role FK.
+
+        Django sets origin to the *initiating* QuerySet, so the cascaded
+        assignment post_delete receives origin=<QuerySet of ObjectRole>.
+        origin.model (ObjectRole) differs from type(instance) (RoleUserAssignment),
+        identifying this as a cascade from a parent model.  The sync handler
+        must skip this — the parent objects are already gone and old Role
+        M2M entries cascade-deleted from the same parent."""
+        from django.db.models import QuerySet
+        from django.db.models.signals import post_delete
+
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        rd.give_permission(bob, inventory)
+        assert bob in inventory.admin_role.members.all()
+
+        # Capture the origin kwarg to verify its type empirically
+        captured_origins = []
+
+        def capture_origin(sender, instance, origin=None, **kwargs):
+            if sender is RoleUserAssignment:
+                captured_origins.append(origin)
+
+        post_delete.connect(capture_origin)
+        try:
+            with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+                # This is what cleanup_deleted_team_roles does:
+                ObjectRole.objects.filter(
+                    role_definition=rd,
+                    object_id=inventory.pk,
+                ).delete()
+        finally:
+            post_delete.disconnect(capture_origin)
+
+        # Verify origin is an ObjectRole QuerySet — a different model
+        # than the deleted RoleUserAssignment instance.
+        assert len(captured_origins) == 1
+        origin = captured_origins[0]
+        assert isinstance(origin, QuerySet)
+        assert origin.model is ObjectRole
+        assert origin.model is not RoleUserAssignment
+
+        # The handler should skip sync for cross-model QuerySet origins
+        mck.assert_not_called()
+
+    def test_cascade_from_non_rbac_model_skips_sync(self, organization, inventory, bob, setup_managed_roles):
+        """When a non-RBAC parent (Organization) is deleted, cascaded assignment
+        deletions should skip the old RBAC sync entirely."""
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        rd.give_permission(bob, inventory)
+        assert bob in inventory.admin_role.members.all()
+
+        with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+            organization.delete()
+
+        mck.assert_not_called()
+
+    def test_cascade_team_assignment_from_non_rbac_model_skips_sync(self, organization, team, inventory, setup_managed_roles):
+        """When Organization is deleted, Team cascade-deletes via real FK,
+        which cascade-deletes RoleTeamAssignment.  Django's Collector sets
+        origin to the Organization instance (a Model with app_label != 'dab_rbac'),
+        so the sync handler must skip."""
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        rd.give_permission(team, inventory)
+        assert RoleTeamAssignment.objects.filter(team=team, role_definition=rd, object_id=inventory.pk).exists()
+
+        with mock.patch('awx.main.models.rbac._sync_assignments_to_old_rbac') as mck:
+            organization.delete()
+
+        mck.assert_not_called()
