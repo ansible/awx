@@ -1,6 +1,12 @@
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
 
+"""URL routing configuration for workflow approval template API endpoints.
+
+This module defines the URL patterns for accessing details, related jobs,
+and attached notification templates for workflow approval nodes.
+"""
+
 from django.urls import re_path
 
 from awx.api.views.workflow_approval_template import (
@@ -18,5 +24,6 @@ urls = [
         name='workflow_approval_template_notification_templates_approvals_list',
     ),
 ]
+"""list[URLPattern]: URL patterns for workflow approval template sub-resources."""
 
 __all__ = ['urls']

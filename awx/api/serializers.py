@@ -128,7 +128,6 @@ from awx.api.versioning import reverse
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField, DeprecatedCredentialField
 
 from awx.main.models import WorkflowApprovalTemplate, NotificationTemplate
-from awx.api.serializers import NotificationTemplateSerializer
 from awx.api.generics import SubResourceListCreateAttachDetachView
 
 # AWX Utils
@@ -4047,11 +4046,21 @@ class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListS
 
 
 class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
+    """Serializer for Workflow Approval Templates, exposing node-level settings and relationships."""
+
     class Meta:
         model = WorkflowApprovalTemplate
         fields = ('*', 'timeout', 'name', 'notification_templates_approvals')
 
     def get_related(self, obj):
+        """Retrieve related sub-resource URLs for the approval template.
+
+        Args:
+            obj (WorkflowApprovalTemplate): The approval template instance.
+
+        Returns:
+            dict: A dictionary of related resource endpoints.
+        """
         res = super(WorkflowApprovalTemplateSerializer, self).get_related(obj)
         if 'last_job' in res:
             del res['last_job']
