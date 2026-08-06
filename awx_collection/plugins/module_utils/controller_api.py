@@ -9,7 +9,7 @@ from ansible.module_utils.six import PY2
 from ansible.module_utils.six import raise_from
 from ansible.module_utils.six.moves import StringIO
 from ansible.module_utils.six.moves.urllib.error import HTTPError
-from ansible.module_utils.six.moves.http_cookiejar import CookieJar
+from ansible.module_utils.six.moves.http_cookiejar import CookieJar, Cookie
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode, quote
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
 from base64 import b64encode
@@ -120,6 +120,7 @@ class ControllerModule(AnsibleModule):
         'max_retries': 'max_retries',
         'retry_backoff_factor': 'retry_backoff_factor',
         'aap_token': 'aap_token',
+        'aap_session_id': 'aap_session_id'
     }
     host = '127.0.0.1'
     username = None
@@ -365,13 +366,28 @@ class ControllerAPIModule(ControllerModule):
         'controller': 'Red Hat Ansible Automation Platform',
     }
     session = None
+    aap_session_id = None
+
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
     ENCRYPTED_STRING = "$encrypted$"
+    AUTH_ARGSPEC = dict(
+        aap_session_id=dict(
+            type='dict',
+            no_log=True,
+            aliases=['controller_session_id', 'gateway_session_id'],
+            required=False,
+            fallback=(env_fallback, ['CONTROLLER_SESSION_ID', 'AAP_SESSION_ID', 'GATEWAY_SESSION_ID'])
+        )
+    )
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
-        super().__init__(argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
+        full_argspec = {}
+        full_argspec.update(ControllerAPIModule.AUTH_ARGSPEC)
+        full_argspec.update(argument_spec)
+
+        super().__init__(argument_spec=full_argspec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
         self.session = Request(cookies=CookieJar(), timeout=self.request_timeout, validate_certs=self.verify_ssl)
 
         if 'update_secrets' in self.params:
@@ -596,7 +612,8 @@ class ControllerAPIModule(ControllerModule):
         # Extract the headers, this will be used in a couple of places
         headers = kwargs.get('headers', {})
 
-        headers['Authorization'] = self._get_authorization_header(**kwargs)
+        if not self.authenticated:
+            self.authenticate(**kwargs)
 
         if method in ['POST', 'PUT', 'PATCH']:
             headers.setdefault('Content-Type', 'application/json')
@@ -780,27 +797,11 @@ class ControllerAPIModule(ControllerModule):
 
         return prefix
 
-    def _get_authorization_header(self, **kwargs):
-        if self.aap_token:
-            # A token (e.g. issued by the AAP gateway) is validated by the server on
-            # every request, so no login round-trip is needed
-            return 'Bearer {0}'.format(self.aap_token)
-
-        # Authenticate to AWX (if not already done so)
-        if not self.authenticated:
-            # This method will set a cookie in the cookie jar for us
-            self.authenticate(**kwargs)
-
-        return self._get_basic_authorization_header()
-
-    def _get_basic_authorization_header(self):
-        basic_credentials = b64encode("{0}:{1}".format(self.username, self.password).encode()).decode()
-        return "Basic {0}".format(basic_credentials)
-
     def _authenticate_with_basic_auth(self):
         if self.username and self.password:
             # use api url /api/v2/me to get current user info as a testing request
             me_url = self.build_url("me").geturl()
+            self.session.headers["Authorization"] = "Basic {0}".format(b64encode("{0}:{1}".format(self.username, self.password).encode()).decode())
             self.session.open(
                 "GET",
                 me_url,
@@ -808,14 +809,64 @@ class ControllerAPIModule(ControllerModule):
                 timeout=self.request_timeout,
                 follow_redirects=True,
                 headers={
-                    "Content-Type": "application/json",
-                    "Authorization": self._get_basic_authorization_header(),
+                    "Content-Type": "application/json"
                 },
             )
 
+    def _authenticate_with_session_cookies(self):
+        if self.aap_session_id:
+            if 'csrftoken' not in self.aap_session_id and 'gateway_sessionid' not in self.aap_session_id:
+                self.fail_json(msg="aap_session_id must contain both 'csrftoken' and 'gateway_sessionid' keys.")
+            if 'csrftoken' not in self.aap_session_id:
+                self.fail_json(msg="aap_session_id is missing the required 'csrftoken' key.")
+            if 'gateway_sessionid' not in self.aap_session_id:
+                self.fail_json(msg="aap_session_id is missing the required 'gateway_sessionid' key.")
+            for k in ['csrftoken', 'gateway_sessionid']:
+                c = Cookie(
+                    version=0, name=k, value=self.aap_session_id[k], port=None, port_specified=False,
+                    domain=self.url.hostname, domain_specified=True, domain_initial_dot=False,
+                    path='/', path_specified=True, secure=False, expires=None,
+                    discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}
+                )
+                self.session.cookies.set_cookie(c)
+
+            self.session.headers.update({
+                "X-Csrftoken": self.aap_session_id["csrftoken"],
+                "Referer": self.host
+            })
+
+            me_url = self.build_url("me").geturl()
+
+            self.session.open(
+                "GET",
+                me_url,
+                validate_certs=self.verify_ssl,
+                timeout=self.request_timeout,
+                follow_redirects=True
+            )
+        else:
+            self.fail_json(msg="This is a bug. This control path should not be followed. " \
+                            "The function, _authenticate_with_session_cookies, should not be called " \
+                            "if self.aap_session_id is not declared.")
+
+    def _authenticate_with_aap_token(self):
+        if self.aap_token:
+            # A token (e.g. issued by the AAP gateway) is validated by the server on
+            # every request, so no login round-trip is needed
+            self.session.headers["Authorization"] = 'Bearer {0}'.format(self.aap_token)
+
     def authenticate(self, **kwargs):
         try:
-            self._authenticate_with_basic_auth()
+            if self.authenticated:
+                return
+            elif self.aap_token:
+                self._authenticate_with_aap_token()
+            elif self.username and self.password:
+                self._authenticate_with_basic_auth()
+            elif self.aap_session_id:
+                self._authenticate_with_session_cookies()
+            else:
+                raise Exception("No authentication information found.")
         except Exception as exp:
             self.fail_json(msg='Failed to get user info: {0}'.format(exp))
 

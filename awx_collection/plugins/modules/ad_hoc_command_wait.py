@@ -36,7 +36,7 @@ options:
       description:
         - Maximum time in seconds to wait for a ad hoc command to finish.
       type: int
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''
