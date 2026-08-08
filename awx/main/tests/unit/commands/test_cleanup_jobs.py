@@ -1,6 +1,9 @@
+import datetime
 from unittest import mock
 
-from awx.main.management.commands.cleanup_jobs import _pre_delete_job_host_summaries, JHS_CHUNK_SIZE
+from django.utils.timezone import now
+
+from awx.main.management.commands.cleanup_jobs import Command, _pre_delete_job_host_summaries, JHS_CHUNK_SIZE
 
 
 class TestPreDeleteJobHostSummaries:
@@ -115,3 +118,90 @@ class TestDeleteMetaPreDelete:
         dm.delete_jobs()
 
         mock_pre_delete.assert_not_called()
+
+
+class TestCleanupJobsCommand:
+    def _make_command(self, batch_size=10, dry_run=False):
+        cmd = Command()
+        cmd.batch_size = batch_size
+        cmd.dry_run = dry_run
+        cmd.cutoff = now() - datetime.timedelta(days=1)
+        cmd.logger = mock.MagicMock()
+        return cmd
+
+    def test_empty_gap_batches_no_keyerror(self):
+        """Batch windows over ID gaps return (0, {}) — must not raise KeyError."""
+        cmd = self._make_command(batch_size=10)
+
+        mock_batch = mock.MagicMock()
+        mock_batch.values_list.return_value = []
+        mock_batch.delete.return_value = (0, {})
+
+        mock_qs = mock.MagicMock()
+        mock_qs.aggregate.return_value = {'min': 2, 'max': 1000}
+        mock_qs.filter.return_value = mock_batch
+
+        mock_filter_qs = mock.MagicMock()
+        mock_combined = mock.MagicMock()
+        mock_combined.count.return_value = 5
+        mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
+
+        with mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob, mock.patch(
+            'awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'
+        ), mock.patch.object(cmd, '_delete_unpartitioned_events'):
+            MockJob.objects.filter.return_value = mock_filter_qs
+            MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
+            skipped, deleted = cmd.cleanup_jobs()
+
+        assert skipped == 5
+        assert deleted == 0
+
+    def test_mixed_batches_sum_correctly(self):
+        """Batches returning {} and {'main.Job': N} are summed correctly."""
+        cmd = self._make_command(batch_size=10)
+
+        # 3 batches for range(1, 31, 10): first empty, second has 2 jobs, third empty
+        mock_batch = mock.MagicMock()
+        mock_batch.values_list.return_value = []
+        mock_batch.delete.side_effect = [(0, {}), (2, {'main.Job': 2}), (0, {})]
+
+        mock_qs = mock.MagicMock()
+        mock_qs.aggregate.return_value = {'min': 1, 'max': 30}
+        mock_qs.filter.return_value = mock_batch
+
+        mock_filter_qs = mock.MagicMock()
+        mock_combined = mock.MagicMock()
+        mock_combined.count.return_value = 0
+        mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
+
+        with mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob, mock.patch(
+            'awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'
+        ), mock.patch.object(cmd, '_delete_unpartitioned_events'):
+            MockJob.objects.filter.return_value = mock_filter_qs
+            MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
+            skipped, deleted = cmd.cleanup_jobs()
+
+        assert deleted == 2
+
+    def test_no_eligible_jobs_skips_loop(self):
+        """When aggregate returns min=None the batch loop is skipped entirely."""
+        cmd = self._make_command()
+
+        mock_qs = mock.MagicMock()
+        mock_qs.aggregate.return_value = {'min': None, 'max': None}
+
+        mock_filter_qs = mock.MagicMock()
+        mock_combined = mock.MagicMock()
+        mock_combined.count.return_value = 10
+        mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
+
+        with mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob, mock.patch(
+            'awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'
+        ) as mock_pre, mock.patch.object(cmd, '_delete_unpartitioned_events'):
+            MockJob.objects.filter.return_value = mock_filter_qs
+            MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
+            skipped, deleted = cmd.cleanup_jobs()
+
+        assert skipped == 10
+        assert deleted == 0
+        mock_pre.assert_not_called()
