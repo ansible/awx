@@ -156,6 +156,15 @@ class TestCleanupJobsCommand:
         assert skipped == 5
         assert deleted == 0
 
+        agg = mock_qs.aggregate.return_value
+        expected_starts = list(range(agg['min'], agg['max'] + 1, cmd.batch_size))
+        # Guard against extra or missing filter calls beyond the expected windows
+        assert mock_qs.filter.call_count == len(expected_starts)
+        for i, start in enumerate(expected_starts):
+            kwargs = mock_qs.filter.call_args_list[i].kwargs
+            assert kwargs['id__gte'] == start, f"batch {i}: expected id__gte={start}, got {kwargs['id__gte']}"
+            assert kwargs['id__lt'] == start + cmd.batch_size, f"batch {i}: expected id__lt={start + cmd.batch_size}, got {kwargs['id__lt']}"
+
     def test_mixed_batches_sum_correctly(self):
         """Batches returning {} and {'main.Job': N} are summed correctly."""
         cmd = self._make_command(batch_size=10)
@@ -182,6 +191,12 @@ class TestCleanupJobsCommand:
             skipped, deleted = cmd.cleanup_jobs()
 
         assert deleted == 2
+
+        assert mock_qs.filter.call_args_list == [
+            mock.call(id__gte=1, id__lt=11),
+            mock.call(id__gte=11, id__lt=21),
+            mock.call(id__gte=21, id__lt=31),
+        ]
 
     def test_no_eligible_jobs_skips_loop(self):
         """When aggregate returns min=None the batch loop is skipped entirely."""
