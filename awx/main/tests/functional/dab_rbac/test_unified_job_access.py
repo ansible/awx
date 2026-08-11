@@ -18,8 +18,8 @@ from awx.main.models import (
 
 
 @pytest.mark.django_db
-def test_unified_job_list_uses_union(user, organization, inventory, setup_managed_roles, get):
-    """The unified job list RBAC query uses UNION instead of OR to allow per-branch query planning."""
+def test_unified_job_list_uses_or_not_union(user, organization, inventory, setup_managed_roles, get):
+    """The unified job list RBAC query uses OR-based filtering, not UNION."""
     org_admin = user('uj-org-admin')
     RoleDefinition.objects.get(name='Organization Admin').give_permission(org_admin, organization)
 
@@ -38,8 +38,9 @@ def test_unified_job_list_uses_union(user, organization, inventory, setup_manage
     assert response.status_code == 200
     assert response.data['count'] >= 3
 
-    uj_rbac_queries = [q['sql'] for q in ctx.captured_queries if 'UNION' in q['sql'] and 'main_unifiedjob' in q['sql']]
-    assert uj_rbac_queries, "Expected at least one query using UNION for unified job RBAC filtering"
+    uj_rbac_queries = [q['sql'] for q in ctx.captured_queries if 'main_unifiedjob' in q['sql'] and 'dab_rbac_roleevaluation' in q['sql']]
+    for sql in uj_rbac_queries:
+        assert 'UNION' not in sql, "RBAC query should use OR, not UNION"
 
 
 @pytest.mark.django_db
