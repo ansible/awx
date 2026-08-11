@@ -80,6 +80,40 @@ def test_unified_job_list_inventory_viewer_sees_inventory_updates(user, setup_ma
 
 
 @pytest.mark.django_db
+def test_unified_job_list_singleton_permissions(user, organization, inventory, setup_managed_roles, get):
+    """Users with global (singleton) view permissions see jobs via shortcut paths
+    that bypass RoleEvaluation queries entirely."""
+    singleton_user = user('uj-singleton')
+    RoleDefinition.objects.get(name='Organization Admin').give_permission(singleton_user, organization)
+
+    project = Project.objects.create(name='uj-singleton-project', organization=organization)
+    jt = JobTemplate.objects.create(name='uj-singleton-jt', project=project, inventory=inventory, organization=organization)
+    job = jt.create_unified_job()
+
+    inv_src = InventorySource.objects.create(name='uj-singleton-invsrc', inventory=inventory, source='ec2')
+    inv_update = InventoryUpdate.objects.create(inventory_source=inv_src, source=inv_src.source)
+
+    adhoc = AdHocCommand.objects.create(name='uj-singleton-adhoc', inventory=inventory)
+
+    # Inject singleton permissions to exercise the shortcut branches in
+    # filtered_queryset() without needing a global RoleDefinition.
+    singleton_user._singleton_permissions = {
+        'view_jobtemplate',
+        'view_project',
+        'view_workflowjobtemplate',
+        'view_inventory',
+        'audit_organization',
+    }
+
+    response = get(reverse('api:unified_job_list'), singleton_user)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids
+    assert inv_update.pk in result_ids
+    assert adhoc.pk in result_ids
+
+
+@pytest.mark.django_db
 def test_unified_job_list_rando_sees_nothing(rando, setup_managed_roles, get):
     """Unprivileged user sees no unified jobs."""
     org = Organization.objects.create(name='uj-rando-org')
