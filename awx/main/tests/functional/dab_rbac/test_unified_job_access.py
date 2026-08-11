@@ -39,6 +39,7 @@ def test_unified_job_list_uses_or_not_union(user, organization, inventory, setup
     assert response.data['count'] >= 3
 
     uj_rbac_queries = [q['sql'] for q in ctx.captured_queries if 'main_unifiedjob' in q['sql'] and 'dab_rbac_roleevaluation' in q['sql']]
+    assert uj_rbac_queries, "Expected a unified-job RBAC query"
     for sql in uj_rbac_queries:
         assert 'UNION' not in sql, "RBAC query should use OR, not UNION"
 
