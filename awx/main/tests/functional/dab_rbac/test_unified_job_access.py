@@ -13,13 +13,14 @@ from awx.main.models import (
     JobTemplate,
     Organization,
     Project,
+    Team,
     UnifiedJob,
 )
 
 
 @pytest.mark.django_db
-def test_unified_job_list_uses_union(user, organization, inventory, setup_managed_roles, get):
-    """The unified job list RBAC query uses UNION instead of OR to allow per-branch query planning."""
+def test_unified_job_list_uses_or_not_union(user, organization, inventory, setup_managed_roles, get):
+    """The unified job list RBAC query uses OR-based filtering, not UNION."""
     org_admin = user('uj-org-admin')
     RoleDefinition.objects.get(name='Organization Admin').give_permission(org_admin, organization)
 
@@ -38,8 +39,10 @@ def test_unified_job_list_uses_union(user, organization, inventory, setup_manage
     assert response.status_code == 200
     assert response.data['count'] >= 3
 
-    uj_rbac_queries = [q['sql'] for q in ctx.captured_queries if 'UNION' in q['sql'] and 'main_unifiedjob' in q['sql']]
-    assert uj_rbac_queries, "Expected at least one query using UNION for unified job RBAC filtering"
+    uj_rbac_queries = [q['sql'] for q in ctx.captured_queries if 'main_unifiedjob' in q['sql'] and 'dab_rbac_roleevaluation' in q['sql']]
+    assert uj_rbac_queries, "Expected a unified-job RBAC query"
+    for sql in uj_rbac_queries:
+        assert 'UNION' not in sql, "RBAC query should use OR, not UNION"
 
 
 @pytest.mark.django_db
@@ -75,6 +78,62 @@ def test_unified_job_list_inventory_viewer_sees_inventory_updates(user, setup_ma
     assert response.status_code == 200
     result_ids = [r['id'] for r in response.data['results']]
     assert inv_update.pk in result_ids
+
+
+@pytest.mark.django_db
+def test_unified_job_list_singleton_permissions(user, organization, inventory, setup_managed_roles, get):
+    """Users with global (singleton) view permissions see jobs via shortcut paths
+    that bypass RoleEvaluation queries entirely."""
+    singleton_user = user('uj-singleton')
+    RoleDefinition.objects.get(name='Organization Admin').give_permission(singleton_user, organization)
+
+    project = Project.objects.create(name='uj-singleton-project', organization=organization)
+    jt = JobTemplate.objects.create(name='uj-singleton-jt', project=project, inventory=inventory, organization=organization)
+    job = jt.create_unified_job()
+
+    inv_src = InventorySource.objects.create(name='uj-singleton-invsrc', inventory=inventory, source='ec2')
+    inv_update = InventoryUpdate.objects.create(inventory_source=inv_src, source=inv_src.source)
+
+    adhoc = AdHocCommand.objects.create(name='uj-singleton-adhoc', inventory=inventory)
+
+    # Inject singleton permissions to exercise the shortcut branches in
+    # filtered_queryset() without needing a global RoleDefinition.
+    singleton_user._singleton_permissions = {
+        'view_jobtemplate',
+        'view_project',
+        'view_workflowjobtemplate',
+        'view_inventory',
+        'audit_organization',
+    }
+
+    response = get(reverse('api:unified_job_list'), singleton_user)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids
+    assert inv_update.pk in result_ids
+    assert adhoc.pk in result_ids
+
+
+@pytest.mark.django_db
+def test_unified_job_list_team_member_sees_team_granted_jobs(user, setup_managed_roles, get):
+    """A user who can view a JT only through a team assignment must see
+    the corresponding unified jobs in the list."""
+    org = Organization.objects.create(name='uj-team-org')
+    team = Team.objects.create(name='uj-test-team', organization=org)
+    team_user = user('uj-team-member')
+
+    RoleDefinition.objects.get(name='Team Member').give_permission(team_user, team)
+
+    inventory = org.inventories.create(name='uj-team-inv')
+    project = Project.objects.create(name='uj-team-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-team-jt', project=project, inventory=inventory, organization=org)
+    RoleDefinition.objects.get(name='JobTemplate Execute').give_permission(team, jt)
+    job = jt.create_unified_job()
+
+    response = get(reverse('api:unified_job_list'), team_user)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids, f"Team member should see job {job.pk} via team-granted JT execute permission, " f"but got result IDs: {result_ids}"
 
 
 @pytest.mark.django_db
