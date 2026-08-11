@@ -13,6 +13,7 @@ from awx.main.models import (
     JobTemplate,
     Organization,
     Project,
+    Team,
     UnifiedJob,
 )
 
@@ -111,6 +112,28 @@ def test_unified_job_list_singleton_permissions(user, organization, inventory, s
     assert job.pk in result_ids
     assert inv_update.pk in result_ids
     assert adhoc.pk in result_ids
+
+
+@pytest.mark.django_db
+def test_unified_job_list_team_member_sees_team_granted_jobs(user, setup_managed_roles, get):
+    """A user who can view a JT only through a team assignment must see
+    the corresponding unified jobs in the list."""
+    org = Organization.objects.create(name='uj-team-org')
+    team = Team.objects.create(name='uj-test-team', organization=org)
+    team_user = user('uj-team-member')
+
+    RoleDefinition.objects.get(name='Team Member').give_permission(team_user, team)
+
+    inventory = org.inventories.create(name='uj-team-inv')
+    project = Project.objects.create(name='uj-team-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-team-jt', project=project, inventory=inventory, organization=org)
+    RoleDefinition.objects.get(name='JobTemplate Execute').give_permission(team, jt)
+    job = jt.create_unified_job()
+
+    response = get(reverse('api:unified_job_list'), team_user)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids, f"Team member should see job {job.pk} via team-granted JT execute permission, " f"but got result IDs: {result_ids}"
 
 
 @pytest.mark.django_db
