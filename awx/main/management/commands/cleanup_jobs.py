@@ -297,7 +297,10 @@ class Command(BaseCommand):
 
                 _pre_delete_job_host_summaries(pk_list, self.logger)
                 _, results = qs_batch.delete()
-                deleted += results['main.Job']
+                # a window can hold no deletable Job at all: Job shares the
+                # UnifiedJob id sequence with the other job types, and windows
+                # overlap on their boundary id. Django reports {} for those.
+                deleted += results.get('main.Job', 0)
                 # Avoid dropping the job event table in case we have interacted with it already
                 self._delete_unpartitioned_events(Job, pk_list)
 
