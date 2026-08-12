@@ -20,6 +20,9 @@ from dispatcherd.factories import get_control_from_settings
 # Django
 from django.conf import settings
 from django.db import models, connection, transaction
+
+# psycopg
+from psycopg import sql
 from django.db.models.constraints import UniqueConstraint
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
@@ -234,7 +237,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         dab_role_cts = permission_registry.content_type_model.objects.get_for_models(*role_subclasses).values()
 
         return (
-            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__in=all_codenames, content_type_id__in=[ct.id for ct in dab_role_cts])
+            RoleEvaluation.objects.filter(
+                **RoleEvaluation._actor_role_filter(accessor),
+                codename__in=all_codenames,
+                content_type_id__in=[ct.id for ct in dab_role_cts],
+            )
             .values_list('object_id')
             .distinct()
         )
@@ -1175,17 +1182,23 @@ class UnifiedJob(
                         raise StdoutMaxBytesExceeded(total, max_supported)
 
                 tbl = self._meta.db_table + 'event'
-                created_by_cond = ''
+                where_parts = [
+                    sql.SQL('{} = {}').format(sql.Identifier(self.event_parent_key), sql.Literal(self.id)),
+                    sql.SQL("stdout != ''"),
+                ]
                 if self.has_unpartitioned_events:
-                    tbl = f'_unpartitioned_{tbl}'
+                    tbl = '_unpartitioned_' + tbl
                 else:
-                    created_by_cond = f"job_created='{self.created.isoformat()}' AND "
+                    where_parts.insert(0, sql.SQL('job_created = {}').format(sql.Literal(self.created)))
 
-                sql = f"copy (select stdout from {tbl} where {created_by_cond}{self.event_parent_key}={self.id} and stdout != '' order by start_line) to stdout"  # nosql
+                copy_sql = sql.SQL('COPY (SELECT stdout FROM {} WHERE {} ORDER BY start_line) TO STDOUT').format(
+                    sql.Identifier(tbl),
+                    sql.SQL(' AND ').join(where_parts),
+                )
                 # psycopg3's copy writes bytes, but callers of this
                 # function assume a str-based fd will be returned; decode
                 # .write() calls on the fly to maintain this interface
-                with cursor.copy(sql) as copy:
+                with cursor.copy(copy_sql) as copy:
                     while data := copy.read():
                         fd.write(smart_str(bytes(data)))
 

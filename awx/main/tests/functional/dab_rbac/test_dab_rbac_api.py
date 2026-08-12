@@ -178,10 +178,13 @@ def test_adding_actor_to_platform_roles(setup_managed_roles, role_name, actor, o
     '''
     Allow user to be added to platform-level roles
     Exceptions:
-    - Team cannot be added to Organization Member or Admin role
+    - Team cannot be added to Organization Admin role (manages teams)
     - Team cannot be added to Team Admin or Team Member role
+    Note: Team CAN be added to Organization Member role because
+    ANSIBLE_BASE_ALLOW_TEAM_ORG_MEMBER is True (required for org child
+    admin roles like Project Admin to be assignable to teams).
     '''
-    if actor == 'team':
+    if actor == 'team' and role_name != 'Organization Member':
         expect = 400
     else:
         expect = 201
@@ -195,6 +198,6 @@ def test_adding_actor_to_platform_roles(setup_managed_roles, role_name, actor, o
     r = post(url, data=data, user=admin, expect=expect)
     if expect == 400:
         if 'Organization' in role_name:
-            assert 'Assigning organization member permission to teams is not allowed' in str(r.data)
+            assert 'Assigning organization permissions that manage other teams is not allowed' in str(r.data)
         if 'Team' in role_name:
             assert 'Assigning team permissions to other teams is not allowed' in str(r.data)

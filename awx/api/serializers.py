@@ -120,7 +120,7 @@ from awx.main.utils.named_url_graph import reset_counters
 from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
-from awx.main.signals import update_inventory_computed_fields
+from awx.main.tasks.system import update_inventory_computed_fields
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -961,14 +961,27 @@ class UnifiedJobSerializer(BaseSerializer):
 
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
+    OPTIONAL_EXCLUDE_FIELDS = frozenset({'artifacts', 'extra_vars'})
+
+    _ALWAYS_STRIPPED_FIELDS = frozenset({'job_args', 'job_cwd', 'job_env', 'result_traceback', 'event_processing_finished'})
+
     class Meta:
-        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-event_processing_finished', '-artifacts')
+        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-event_processing_finished')
+
+    def _requested_excludes(self):
+        request = self.context.get('request')
+        if request is None:
+            return frozenset()
+        raw = request.query_params.get('exclude', '')
+        requested = {name.strip() for name in raw.split(',') if name.strip()}
+        return frozenset(requested) & self.OPTIONAL_EXCLUDE_FIELDS
 
     def get_field_names(self, declared_fields, info):
         field_names = super(UnifiedJobListSerializer, self).get_field_names(declared_fields, info)
         # Meta multiple inheritance and -field_name options don't seem to be
         # taking effect above, so remove the undesired fields here.
-        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback', 'event_processing_finished', 'artifacts'))
+        strip = self._ALWAYS_STRIPPED_FIELDS | self._requested_excludes()
+        return tuple(x for x in field_names if x not in strip)
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:

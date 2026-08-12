@@ -2,14 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "enabledManagers": ["tekton"],
   "tekton": {
-    "schedule": ["0 * * * *"],
-    "packageRules": [
-      {
-        "description": "Update aap-ci tekton-catalog pipeline bundles",
-        "matchPackageNames": ["/^quay\\.io\\/aap-ci\\/tekton-catalog\\/pipeline\\/"],
-        "matchManagers": ["tekton"],
-        "automerge": true
-      }
-    ]
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["* */12 * * 1-5"]
   }
 }

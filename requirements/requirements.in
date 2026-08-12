@@ -1,4 +1,4 @@
-aiohttp>=3.12.14 # CVE-2024-30251
+aiohttp>=3.13.5 # CVE-2024-30251, kubernetes>=36.0.2 requires >=3.13.5
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
 asn1
@@ -11,7 +11,7 @@ channels
 channels-redis
 cryptography
 Cython
-daphne
+daphne>=4.2.2
 distro
 django>=5.2,<5.3  # Django 5.2 LTS, allow patch updates
 django-cors-headers
@@ -36,7 +36,7 @@ maturin  # pydantic-core build dep
 msgpack
 msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
-kubernetes>=36.0.0  # fixes NO_PROXY silently being reset to None
+kubernetes>=36.0.2  # fixes NO_PROXY silently being reset to None
 openshift
 opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
 opentelemetry-sdk~=1.37

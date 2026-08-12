@@ -259,7 +259,7 @@ def test_user_verify_attribute_created(admin, get):
 
 
 @pytest.mark.django_db
-def test_org_not_shown_in_admin_user_sublists(admin_user, get, organization):
+def test_org_not_shown_in_admin_user_sublists(admin_user, get, organization, setup_managed_roles):
     for view_name in ('user_admin_of_organizations_list', 'user_organizations_list'):
         url = reverse(f'api:{view_name}', kwargs={'pk': admin_user.pk})
         r = get(url, user=admin_user, expect=200)

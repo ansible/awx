@@ -5,11 +5,12 @@
 import logging
 
 # Django
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 # AWX
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from awx.main.models import (
     ActivityStream,
     Inventory,
@@ -77,16 +78,21 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
 
         org_counts = {}
         access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
-        direct_counts = (
-            Organization.objects.filter(id=org_id)
-            .annotate(users=Count('member_role__members', distinct=True), admins=Count('admin_role__members', distinct=True))
-            .values('users', 'admins')
-        )
+        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
+        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
 
-        if not direct_counts:
-            return full_context
+        if member_rd and admin_rd:
+            counts = RoleUserAssignment.objects.filter(
+                role_definition__in=[member_rd, admin_rd],
+                object_id=str(org_id),
+            ).aggregate(
+                users=Count('pk', filter=Q(role_definition=member_rd)),
+                admins=Count('pk', filter=Q(role_definition=admin_rd)),
+            )
+            org_counts.update(counts)
+        else:
+            org_counts.update({'users': 0, 'admins': 0})
 
-        org_counts = direct_counts[0]
         org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
         org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()

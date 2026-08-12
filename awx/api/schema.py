@@ -1,3 +1,5 @@
+import json
+import os
 import warnings
 
 from rest_framework.permissions import IsAuthenticated
@@ -49,6 +51,37 @@ def filter_credential_type_schema(
             # Filter to only cloud and net (None allowed - field can be omitted in PATCH)
             kind_prop['enum'] = ['cloud', 'net', None]
             kind_prop['description'] = "* `cloud` - Cloud\\n* `net` - Network"
+
+    return result
+
+
+def inject_ai_descriptions(
+    result,
+    generator,  # NOSONAR
+    request,  # NOSONAR
+    public,  # NOSONAR
+):
+    """
+    Inject x-ai-description into operations from the overlay file.
+
+    Many endpoints have human-readable AI descriptions that were added
+    downstream but not backported as @extend_schema_if_available decorators.
+    This hook merges them from a JSON file keyed by operationId.
+    """
+    overlay_path = os.path.join(os.path.dirname(__file__), 'openapi_ai_descriptions.json')
+    try:
+        with open(overlay_path) as f:
+            descriptions = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return result
+
+    for path_item in result.get('paths', {}).values():
+        for operation in path_item.values():
+            if not isinstance(operation, dict):
+                continue
+            op_id = operation.get('operationId')
+            if op_id and op_id in descriptions and 'x-ai-description' not in operation:
+                operation['x-ai-description'] = descriptions[op_id]
 
     return result
 

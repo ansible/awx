@@ -56,7 +56,7 @@ def test_organization_list_access_tests(options, head, get, admin, alice):
 
 
 @pytest.mark.django_db
-def test_organization_access_tests(organization, get, admin, alice, bob):
+def test_organization_access_tests(organization, get, admin, alice, bob, setup_managed_roles):
     organization.member_role.members.add(alice)
     get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200)
     get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200)
@@ -65,14 +65,14 @@ def test_organization_access_tests(organization, get, admin, alice, bob):
 
 
 @pytest.mark.django_db
-def test_organization_list_integrity(organization, get, admin, alice):
+def test_organization_list_integrity(organization, get, admin, alice, setup_managed_roles):
     res = get(reverse('api:organization_list'), user=admin)
     for field in ['id', 'url', 'name', 'description', 'created']:
         assert field in res.data['results'][0]
 
 
 @pytest.mark.django_db
-def test_organization_list_order_integrity(organizations, get, admin):
+def test_organization_list_order_integrity(organizations, get, admin, setup_managed_roles):
     # check that the order of the organization list retains integrity.
     orgs = organizations(4)
     org_ids = {}
@@ -83,7 +83,7 @@ def test_organization_list_order_integrity(organizations, get, admin):
 
 
 @pytest.mark.django_db
-def test_organization_list_visibility(organizations, get, admin, alice):
+def test_organization_list_visibility(organizations, get, admin, alice, setup_managed_roles):
     orgs = organizations(2)
 
     res = get(reverse('api:organization_list'), user=admin)
@@ -151,7 +151,7 @@ def test_organization_inventory_list_order_integrity(organization, admin, invent
 
 
 @pytest.mark.django_db
-def test_create_organization(post, admin, alice):
+def test_create_organization(post, admin, alice, setup_managed_roles):
     new_org = {'name': 'new org', 'description': 'my description'}
     res = post(reverse('api:organization_list'), new_org, user=admin, expect=201)
     assert res.data['name'] == new_org['name']
@@ -197,7 +197,7 @@ def test_add_admin_to_organization_xfail(post, organization, alice, bob):
 
 
 @pytest.mark.django_db
-def test_update_organization(get, put, organization, alice, bob):
+def test_update_organization(get, put, organization, alice, bob, setup_managed_roles):
     organization.admin_role.members.add(alice)
     data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200).data
     data['description'] = 'hi'
@@ -209,7 +209,7 @@ def test_update_organization(get, put, organization, alice, bob):
 
 
 @pytest.mark.django_db
-def test_update_organization_max_hosts(get, put, organization, admin, alice, bob):
+def test_update_organization_max_hosts(get, put, organization, admin, alice, bob, setup_managed_roles):
     # Admin users can get and update max_hosts
     data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200).data
     assert organization.max_hosts == 0
