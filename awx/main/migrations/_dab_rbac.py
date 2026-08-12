@@ -268,7 +268,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     if old_system_auditor:
         # if the system auditor role is not present, this is a new install and no users should exist
         ct = 0
-        for user in role.members.all():
+        for user in old_system_auditor.members.all():
             RoleUserAssignment.objects.create(user=user, role_definition=new_system_auditor)
             ct += 1
         if ct:
