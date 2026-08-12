@@ -3,6 +3,7 @@ from copy import copy, deepcopy
 import json
 import logging
 import os
+import urllib.parse
 
 import requests
 
@@ -580,6 +581,59 @@ class WebhookMixin(models.Model):
     )
     webhook_guid = models.CharField(blank=True, max_length=128, help_text=_('Unique identifier of the event that triggered this webhook'))
 
+    @staticmethod
+    def _get_scm_hostname(scm_url):
+        """Extract hostname from an SCM URL, handling both HTTP(S) and SCP-style (git@host:path) formats."""
+        if not scm_url:
+            return None
+        if '://' in scm_url:
+            return urllib.parse.urlparse(scm_url).hostname
+        # SCP-style: [user@]host:path
+        host_part = scm_url.split('@', 1)[-1] if '@' in scm_url else scm_url
+        # Bracketed IPv6: [fd00::1]:path
+        if host_part.startswith('[') and ']:' in host_part:
+            host = host_part.split(']:')[0][1:]
+            return host if host else None
+        if ':' in host_part:
+            host = host_part.split(':', 1)[0]
+            return host if host else None
+        # Bare hostname with path (e.g. github.com/org/repo.git)
+        if '/' in host_part:
+            host = host_part.split('/', 1)[0]
+            return host if host else None
+        return None
+
+    def _validate_webhook_status_url(self, status_api):
+        """Validate that the webhook status callback URL points to the same host as the project's SCM URL."""
+        parsed = urllib.parse.urlparse(status_api)
+        status_host = parsed.hostname
+        if not status_host:
+            return False
+
+        project = getattr(self, 'project', None)
+        if project is None:
+            logger.warning("Webhook job has no project, cannot validate status URL host. Skipping status callback.")
+            return False
+
+        scm_host = self._get_scm_hostname(project.scm_url)
+        if not scm_host:
+            logger.warning("Project has no parseable SCM URL, cannot validate status URL host. Skipping status callback.")
+            return False
+
+        allowed_hosts = {scm_host}
+        # github.com repos use api.github.com for the status API
+        if scm_host == 'github.com':
+            allowed_hosts.add('api.github.com')
+
+        if status_host not in allowed_hosts:
+            logger.error(
+                "Webhook status URL host '%s' does not match project SCM host '%s'. " "Refusing to send credentials to unrecognized host.",
+                status_host,
+                scm_host,
+            )
+            return False
+        return True
+
     def update_webhook_status(self, status):
         if not self.webhook_credential:
             return
@@ -587,6 +641,9 @@ class WebhookMixin(models.Model):
         status_api = self.extra_vars_dict.get('awx_webhook_status_api')
         if not status_api:
             logger.debug("Webhook event did not have a status API endpoint associated, skipping.")
+            return
+
+        if not self._validate_webhook_status_url(status_api):
             return
 
         service_header = {
