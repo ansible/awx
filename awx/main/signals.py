@@ -27,6 +27,9 @@ from django.utils import timezone
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
+# Ansible_base app
+from ansible_base.rbac.models import RoleUserAssignment, RoleTeamAssignment
+
 # AWX
 from awx.main.models import (
     ActivityStream,
@@ -178,6 +181,72 @@ def rbac_activity_stream(instance, sender, **kwargs):
             role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
 
         activity_stream_associate(sender, instance, role=role, **kwargs)
+
+
+def _record_role_assignment_activity_stream(instance, operation):
+    if not activity_stream_enabled:
+        return
+    # Avoid flooding the activity stream when assignments are cascade-deleted as part
+    # of setup_managed_role_definitions() pruning stale managed RoleDefinitions on migrate.
+    if 'migrate' in sys.argv:
+        return
+
+    if isinstance(instance, RoleUserAssignment):
+        object1 = 'user'
+        actor_obj = instance.user
+    else:
+        object1 = 'team'
+        actor_obj = instance.team
+
+    content_object = None
+    if instance.object_id:
+        content_object = instance.content_object
+        if content_object is None and operation == 'disassociate':
+            # The target object is unresolvable, e.g. cascade-deleted along with its
+            # parent object, or a federated/remote content type. Skip recording a
+            # contentless entry rather than guessing at what changed.
+            # Note: FederatedForeignKey swallows ObjectDoesNotExist and returns None
+            # rather than raising, so there's no exception to catch here.
+            return
+
+    changes = {'role_definition': instance.role_definition.name, object1: getattr(actor_obj, 'username', None) or str(actor_obj)}
+
+    object2 = ''
+    activity_stream_cls = get_activity_stream_class()
+    if content_object is not None:
+        object2 = camelcase_to_underscore(content_object.__class__.__name__)
+        changes['object_type'] = object2
+        changes['object_id'] = content_object.pk
+        changes['object_name'] = str(content_object)
+        if not hasattr(activity_stream_cls, object2):
+            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object2)
+            object2 = ''
+
+    activity_entry = activity_stream_cls(
+        operation=operation,
+        object1=object1,
+        object2=object2,
+        changes=json.dumps(changes),
+        actor=get_current_user_or_none(),
+    )
+    activity_entry.save()
+    getattr(activity_entry, object1).add(actor_obj.pk)
+    if object2:
+        getattr(activity_entry, object2).add(content_object.pk)
+    connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
+
+
+@receiver(post_save, sender=RoleUserAssignment)
+@receiver(post_save, sender=RoleTeamAssignment)
+def record_role_assignment_activity_stream(instance, created, **kwargs):
+    if created:
+        _record_role_assignment_activity_stream(instance, 'associate')
+
+
+@receiver(post_delete, sender=RoleUserAssignment)
+@receiver(post_delete, sender=RoleTeamAssignment)
+def record_role_unassignment_activity_stream(instance, **kwargs):
+    _record_role_assignment_activity_stream(instance, 'disassociate')
 
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):

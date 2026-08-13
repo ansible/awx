@@ -7,7 +7,7 @@ from crum import impersonate
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions, get_role_codenames, get_role_definition
-from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
+from awx.main.models import ActivityStream, User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
@@ -39,6 +39,22 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     assignment = RoleUserAssignment.objects.get(user=rando)
     old_role = get_role_from_object_role(assignment.object_role)
     assert old_role.id == getattr(organization, role_name).id
+
+
+@pytest.mark.django_db
+def test_bulk_member_addition_records_one_entry_per_user(organization, rando, alice, setup_managed_roles):
+    """
+    Adding multiple users to a legacy role in one m2m .add() call syncs each user to the
+    new RBAC system individually (sync_members_to_new_rbac). The legacy-side add already
+    records one ActivityStream entry per user via rbac_activity_stream; the new-side mirror
+    must stay suppressed so this doesn't turn into two entries per user.
+    """
+    organization.admin_role.members.add(rando, alice)
+
+    assert RoleUserAssignment.objects.filter(user=rando, role_definition__name='Organization Admin').exists()
+    assert RoleUserAssignment.objects.filter(user=alice, role_definition__name='Organization Admin').exists()
+    assert ActivityStream.objects.filter(operation='associate', user=rando).count() == 1
+    assert ActivityStream.objects.filter(operation='associate', user=alice).count() == 1
 
 
 @pytest.mark.django_db

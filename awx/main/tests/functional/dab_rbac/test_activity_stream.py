@@ -1,0 +1,94 @@
+import json
+
+import pytest
+
+from awx.api.versioning import reverse
+
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+from ansible_base.rbac import permission_registry
+
+from awx.main.models import ActivityStream, Inventory, Organization
+
+
+@pytest.mark.django_db
+class TestCreatorPermissionActivityStream:
+    '''
+    give_creator_permissions grants the new-side RoleUserAssignment and mirrors it into
+    the legacy Role.members m2m. Only the new-side grant should be recorded - the mirrored
+    write must not produce a second entry.
+    '''
+
+    def test_object_creation_records_single_entry(self, post, rando, organization, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(
+            name='inventory-add',
+            permissions=['add_inventory', 'view_organization'],
+            content_type=permission_registry.content_type_model.objects.get_for_model(Organization),
+        )
+        rd.give_permission(rando, organization)
+
+        url = reverse('api:inventory_list')
+        response = post(url=url, data={'name': 'rando-created-inventory', 'organization': organization.id}, user=rando, expect=201)
+        inventory = Inventory.objects.get(pk=response.data['id'])
+
+        assert rando in inventory.admin_role.members.all()
+        assert ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains='Inventory Admin').count() == 1
+
+
+@pytest.mark.django_db
+class TestRoleAssignmentActivityStream:
+    '''
+    Tests that assigning/removing a DAB RBAC role records an ActivityStream entry,
+    independent of whether the role has a legacy Role equivalent.
+    '''
+
+    def test_custom_role_assignment_recorded(self, rando, inventory, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(
+            name='inventory-custom-role',
+            permissions=['view_inventory', 'change_inventory'],
+            content_type=permission_registry.content_type_model.objects.get_for_model(Inventory),
+        )
+        rd.give_permission(rando, inventory)
+
+        entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        assert json.loads(entries.get().changes) == {
+            'role_definition': rd.name,
+            'user': rando.username,
+            'object_type': 'inventory',
+            'object_id': inventory.id,
+            'object_name': str(inventory),
+        }
+
+    def test_custom_role_removal_recorded(self, rando, inventory, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(
+            name='inventory-custom-role',
+            permissions=['view_inventory', 'change_inventory'],
+            content_type=permission_registry.content_type_model.objects.get_for_model(Inventory),
+        )
+        rd.give_permission(rando, inventory)
+        rd.remove_permission(rando, inventory)
+
+        assert ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name).count() == 1
+
+    def test_global_role_assignment_recorded(self, rando, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(name='global-view-role', content_type=None)
+        RoleUserAssignment.objects.create(user=rando, role_definition=rd)
+
+        entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        assert json.loads(entries.get().changes) == {'role_definition': rd.name, 'user': rando.username}
+
+    def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
+        '''
+        Deleting an object cascade-deletes its RoleUserAssignments. By the time the
+        post_delete handler runs, the object is already gone, so there is nothing
+        useful to record - it should be skipped rather than logged with no context.
+        '''
+        org = Organization.objects.create(name='cascade-delete-org')
+        rd = RoleDefinition.objects.get(name='Organization Admin')
+        rd.give_permission(rando, org)
+        assert ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name).count() == 1
+
+        org.delete()
+
+        assert ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name).count() == 0
