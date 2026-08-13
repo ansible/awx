@@ -192,10 +192,10 @@ def _record_role_assignment_activity_stream(instance, operation):
         return
 
     if isinstance(instance, RoleUserAssignment):
-        object1 = 'user'
+        actor_field = 'user'
         actor_obj = instance.user
     else:
-        object1 = 'team'
+        actor_field = 'team'
         actor_obj = instance.team
 
     content_object = None
@@ -209,30 +209,33 @@ def _record_role_assignment_activity_stream(instance, operation):
             # rather than raising, so there's no exception to catch here.
             return
 
-    changes = {'role_definition': instance.role_definition.name, object1: getattr(actor_obj, 'username', None) or str(actor_obj)}
+    changes = {'role_definition': instance.role_definition.name, actor_field: getattr(actor_obj, 'username', None) or str(actor_obj)}
 
-    object2 = ''
+    # object1 is the role's content object and object2 the associated user/team, matching
+    # the convention used for legacy Role.members association entries (rbac_activity_stream
+    # below), so this reads e.g. "disassociated organization X from user Y".
+    object1 = ''
     activity_stream_cls = get_activity_stream_class()
     if content_object is not None:
-        object2 = camelcase_to_underscore(content_object.__class__.__name__)
-        changes['object_type'] = object2
+        object1 = camelcase_to_underscore(content_object.__class__.__name__)
+        changes['object_type'] = object1
         changes['object_id'] = content_object.pk
         changes['object_name'] = str(content_object)
-        if not hasattr(activity_stream_cls, object2):
-            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object2)
-            object2 = ''
+        if not hasattr(activity_stream_cls, object1):
+            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object1)
+            object1 = ''
 
     activity_entry = activity_stream_cls(
         operation=operation,
         object1=object1,
-        object2=object2,
+        object2=actor_field,
         changes=json.dumps(changes),
         actor=get_current_user_or_none(),
     )
     activity_entry.save()
-    getattr(activity_entry, object1).add(actor_obj.pk)
-    if object2:
-        getattr(activity_entry, object2).add(content_object.pk)
+    getattr(activity_entry, actor_field).add(actor_obj.pk)
+    if object1:
+        getattr(activity_entry, object1).add(content_object.pk)
     connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
 
 

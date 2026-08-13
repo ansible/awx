@@ -31,7 +31,11 @@ class TestCreatorPermissionActivityStream:
         inventory = Inventory.objects.get(pk=response.data['id'])
 
         assert rando in inventory.admin_role.members.all()
-        assert ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains='Inventory Admin').count() == 1
+        entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains='Inventory Admin')
+        assert entries.count() == 1
+        entry = entries.get()
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
 
 
 @pytest.mark.django_db
@@ -51,13 +55,19 @@ class TestRoleAssignmentActivityStream:
 
         entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'user': rando.username,
             'object_type': 'inventory',
             'object_id': inventory.id,
             'object_name': str(inventory),
         }
+        # object1 is the role's content object and object2 the associated actor, matching
+        # the convention used for legacy Role.members association entries, so this reads
+        # "disassociated inventory X from user Y" rather than the other way around.
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
 
     def test_custom_role_removal_recorded(self, rando, inventory, setup_managed_roles):
         rd, _ = RoleDefinition.objects.get_or_create(
@@ -68,7 +78,47 @@ class TestRoleAssignmentActivityStream:
         rd.give_permission(rando, inventory)
         rd.remove_permission(rando, inventory)
 
-        assert ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name).count() == 1
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
+
+    def test_custom_role_team_assignment_recorded(self, team, inventory, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(
+            name='inventory-custom-role',
+            permissions=['view_inventory', 'change_inventory'],
+            content_type=permission_registry.content_type_model.objects.get_for_model(Inventory),
+        )
+        rd.give_permission(team, inventory)
+
+        entries = ActivityStream.objects.filter(operation='associate', team=team, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'team': str(team),
+            'object_type': 'inventory',
+            'object_id': inventory.id,
+            'object_name': str(inventory),
+        }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'team'
+
+    def test_custom_role_team_removal_recorded(self, team, inventory, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(
+            name='inventory-custom-role',
+            permissions=['view_inventory', 'change_inventory'],
+            content_type=permission_registry.content_type_model.objects.get_for_model(Inventory),
+        )
+        rd.give_permission(team, inventory)
+        rd.remove_permission(team, inventory)
+
+        entries = ActivityStream.objects.filter(operation='disassociate', team=team, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'team'
 
     def test_global_role_assignment_recorded(self, rando, setup_managed_roles):
         rd, _ = RoleDefinition.objects.get_or_create(name='global-view-role', content_type=None)
@@ -76,7 +126,11 @@ class TestRoleAssignmentActivityStream:
 
         entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {'role_definition': rd.name, 'user': rando.username}
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        # No content object for a global role assignment, so object1 is left blank.
+        assert entry.object1 == ''
+        assert entry.object2 == 'user'
 
     def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
         '''

@@ -27,13 +27,16 @@ class TestNewToOld:
         # the new-side assignment should be recorded exactly once, not double-recorded via the old-side mirror
         entries = ActivityStream.objects.filter(operation='associate', user=bob)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'user': bob.username,
             'object_type': 'inventory',
             'object_id': inventory.id,
             'object_name': str(inventory),
         }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_removal(self, admin, delete, inventory, bob, setup_managed_roles):
         '''
@@ -49,13 +52,16 @@ class TestNewToOld:
         assert bob not in inventory.admin_role.members.all()
         entries = ActivityStream.objects.filter(operation='disassociate', user=bob)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'user': bob.username,
             'object_type': 'inventory',
             'object_id': inventory.id,
             'object_name': str(inventory),
         }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_team_member_addition(self, admin, post, team, bob, setup_managed_roles):
         '''
@@ -68,13 +74,16 @@ class TestNewToOld:
         assert bob in team.member_role.members.all()
         entries = ActivityStream.objects.filter(operation='associate', user=bob)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'user': bob.username,
             'object_type': 'team',
             'object_id': team.id,
             'object_name': str(team),
         }
+        assert entry.object1 == 'team'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_team_member_removal(self, admin, delete, team, bob, setup_managed_roles):
         '''
@@ -90,13 +99,16 @@ class TestNewToOld:
         assert bob not in team.member_role.members.all()
         entries = ActivityStream.objects.filter(operation='disassociate', user=bob)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'user': bob.username,
             'object_type': 'team',
             'object_id': team.id,
             'object_name': str(team),
         }
+        assert entry.object1 == 'team'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_team_addition(self, admin, post, team, inventory, setup_managed_roles):
         '''
@@ -109,13 +121,16 @@ class TestNewToOld:
         assert team.member_role in inventory.admin_role.parents.all()
         entries = ActivityStream.objects.filter(operation='associate', team=team)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'team': str(team),
             'object_type': 'inventory',
             'object_id': inventory.id,
             'object_name': str(inventory),
         }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'team'
 
     def test_new_to_old_rbac_team_removal(self, admin, delete, team, inventory, setup_managed_roles):
         '''
@@ -131,13 +146,16 @@ class TestNewToOld:
         assert team.member_role not in inventory.admin_role.parents.all()
         entries = ActivityStream.objects.filter(operation='disassociate', team=team)
         assert entries.count() == 1
-        assert json.loads(entries.get().changes) == {
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
             'role_definition': rd.name,
             'team': str(team),
             'object_type': 'inventory',
             'object_id': inventory.id,
             'object_name': str(inventory),
         }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'team'
 
     def test_flush_rbac_cleanup_skips_sync(self, inventory, bob, setup_managed_roles):
         """Simulate what defer_rbac_computations._flush_rbac does on exit:
