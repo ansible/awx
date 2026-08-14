@@ -221,14 +221,18 @@ def _record_role_assignment_activity_stream(instance, operation):
         changes['object_type'] = object1
         changes['object_id'] = content_object.pk
         changes['object_name'] = str(content_object)
+        obj_rel = f'{content_object.__class__.__module__}.{content_object.__class__.__name__}.{instance.role_definition_id}'
         if not hasattr(activity_stream_cls, object1):
             logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object1)
             object1 = ''
+    else:
+        obj_rel = str(instance.role_definition_id)
 
     activity_entry = activity_stream_cls(
         operation=operation,
         object1=object1,
         object2=actor_field,
+        object_relationship_type=obj_rel,
         changes=json.dumps(changes),
         actor=get_current_user_or_none(),
     )

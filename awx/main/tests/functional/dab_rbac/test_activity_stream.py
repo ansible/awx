@@ -68,6 +68,7 @@ class TestRoleAssignmentActivityStream:
         # "disassociated inventory X from user Y" rather than the other way around.
         assert entry.object1 == 'inventory'
         assert entry.object2 == 'user'
+        assert entry.object_relationship_type == f'{Inventory.__module__}.Inventory.{rd.id}'
 
     def test_custom_role_removal_recorded(self, rando, inventory, setup_managed_roles):
         rd, _ = RoleDefinition.objects.get_or_create(
@@ -131,6 +132,7 @@ class TestRoleAssignmentActivityStream:
         # No content object for a global role assignment, so object1 is left blank.
         assert entry.object1 == ''
         assert entry.object2 == 'user'
+        assert entry.object_relationship_type == str(rd.id)
 
     def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
         '''
