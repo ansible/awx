@@ -9,7 +9,7 @@ import json
 import sys
 
 # Django
-from django.db import connection
+from django.db import connection, models
 from django.conf import settings
 from django.db.models.signals import (
     pre_save,
@@ -252,7 +252,15 @@ def record_role_assignment_activity_stream(instance, created, **kwargs):
 
 @receiver(post_delete, sender=RoleUserAssignment)
 @receiver(post_delete, sender=RoleTeamAssignment)
-def record_role_unassignment_activity_stream(instance, **kwargs):
+def record_role_unassignment_activity_stream(instance, origin=None, **kwargs):
+    # Skip cascade deletes from non-assignment origins, same reasoning as
+    # sync_assignments_to_old_rbac_delete: the actor or content object is itself
+    # being deleted in the same cascade, so linking a new activity stream entry
+    # to it would leave a dangling foreign key once the cascade completes.
+    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
+        return
+    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
+        return
     _record_role_assignment_activity_stream(instance, 'disassociate')
 
 

@@ -148,3 +148,18 @@ class TestRoleAssignmentActivityStream:
         org.delete()
 
         assert ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name).count() == 0
+
+    def test_cascade_delete_of_team_does_not_leave_dangling_link(self, team, inventory, setup_managed_roles):
+        '''
+        Deleting a team's organization cascades to delete the team, which cascades to
+        delete its RoleTeamAssignments. Recording a fresh ActivityStream entry linked to
+        the team in response to that cascade would leave a dangling foreign key once the
+        team row is actually removed later in the same cascade - it must be skipped.
+        '''
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        rd.give_permission(team, inventory)
+        assert ActivityStream.objects.filter(operation='associate', team=team, changes__icontains=rd.name).count() == 1
+
+        team.organization.delete()
+
+        assert ActivityStream.objects.filter(operation='disassociate', team=team, changes__icontains=rd.name).count() == 0
