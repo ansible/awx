@@ -6,11 +6,14 @@ from collections import OrderedDict
 # Django REST Framework
 from django.conf import settings
 from django.core.paginator import Paginator as DjangoPaginator
+from django.utils.functional import cached_property
 from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param
 from rest_framework.settings import api_settings
 from django.utils.translation import gettext_lazy as _
+
+from awx.main.models import ActivityStream, UnifiedJob
 
 
 class DisabledPaginator(DjangoPaginator):
@@ -21,6 +24,22 @@ class DisabledPaginator(DjangoPaginator):
     @property
     def count(self):
         return 200
+
+
+class ActivityStreamPaginator(DjangoPaginator):
+    """Use unfiltered table count for activity stream pagination (AAP-83773)."""
+
+    @cached_property
+    def count(self):
+        return ActivityStream.objects.count()
+
+
+class UnifiedJobPaginator(DjangoPaginator):
+    """Use unfiltered table count for unified job pagination."""
+
+    @cached_property
+    def count(self):
+        return UnifiedJob.objects.count()
 
 
 class Pagination(pagination.PageNumberPagination):
@@ -57,17 +76,26 @@ class Pagination(pagination.PageNumberPagination):
 
     def paginate_queryset(self, queryset, request, **kwargs):
         self.count_disabled = 'count_disabled' in request.query_params
+        original_paginator = self.django_paginator_class
         try:
             if self.count_disabled:
                 self.django_paginator_class = DisabledPaginator
             return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
         finally:
-            self.django_paginator_class = DjangoPaginator
+            self.django_paginator_class = original_paginator
 
     def get_paginated_response(self, data):
         if self.count_disabled:
             return Response({'results': data})
         return super(Pagination, self).get_paginated_response(data)
+
+
+class ActivityStreamPagination(Pagination):
+    django_paginator_class = ActivityStreamPaginator
+
+
+class UnifiedJobPagination(Pagination):
+    django_paginator_class = UnifiedJobPaginator
 
 
 class LimitPagination(pagination.BasePagination):

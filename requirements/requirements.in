@@ -11,7 +11,7 @@ channels
 channels-redis
 cryptography
 Cython
-daphne
+daphne>=4.2.2
 distro
 django>=5.2,<5.3  # Django 5.2 LTS, allow patch updates
 django-cors-headers

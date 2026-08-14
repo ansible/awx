@@ -323,7 +323,7 @@ class ApiV2ConfigView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     @extend_schema_if_available(
-        extensions={'x-ai-description': 'Return various configuration settings'},
+        extensions={'x-ai-description': 'Returns platform-level configuration and license info.'},
     )
     def get(self, request, format=None):
         '''Return various sitewide configuration settings'''

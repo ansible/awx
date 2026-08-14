@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 
 # Django REST Framework
@@ -19,7 +20,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 
 # django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
-from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac.models import RoleEvaluation, RoleUserAssignment
 from ansible_base.rbac.policies import visible_users
 from ansible_base.rbac import permission_registry
 
@@ -2507,22 +2508,75 @@ class UnifiedJobAccess(BaseAccess):
     # )
 
     def filtered_queryset(self):
-        inv_pk_qs = Inventory.access_ids_qs(self.user, 'view')
-        qs = self.model.objects.filter(
-            Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        # AAP-87084 / AAP-87087: Pre-compute role IDs once to avoid 4x redundant
+        # roleuserassignment scans, and use OR (not UNION) to allow single-pass
+        # filtering with early LIMIT exit.
+        user_role_ids = list(RoleUserAssignment.objects.filter(user_id=self.user.id).values_list('object_role_id', flat=True))
+        if not user_role_ids:
+            return self.model.objects.none()
+
+        user_singletons = self.user.singleton_permissions()
+
+        role_subclasses = UnifiedJobTemplate._submodels_with_roles()
+        ujt_codenames = [f'view_{cls._meta.model_name}' for cls in role_subclasses]
+        if not (set(ujt_codenames) - user_singletons):
+            ujt_accessible = UnifiedJobTemplate.objects.filter(polymorphic_ctype__in=ContentType.objects.get_for_models(*role_subclasses).values()).values_list(
+                'id', flat=True
+            )
+        else:
+            dab_role_cts = permission_registry.content_type_model.objects.get_for_models(*role_subclasses).values()
+            ujt_accessible = (
+                RoleEvaluation.objects.filter(
+                    role_id__in=user_role_ids,
+                    codename__in=ujt_codenames,
+                    content_type_id__in=[ct.id for ct in dab_role_cts],
+                )
+                .values_list('object_id')
+                .distinct()
+            )
+
+        if 'view_inventory' in user_singletons:
+            inv_accessible = Inventory.objects.values_list('id', flat=True)
+        else:
+            inv_ct_id = permission_registry.content_type_model.objects.get_for_model(Inventory).id
+            inv_accessible = (
+                RoleEvaluation.objects.filter(
+                    role_id__in=user_role_ids,
+                    codename='view_inventory',
+                    content_type_id=inv_ct_id,
+                )
+                .values_list('object_id')
+                .distinct()
+            )
+
+        if 'audit_organization' in user_singletons:
+            org_accessible = Organization.objects.values_list('id', flat=True)
+        else:
+            org_ct_id = permission_registry.content_type_model.objects.get_for_model(Organization).id
+            org_accessible = (
+                RoleEvaluation.objects.filter(
+                    role_id__in=user_role_ids,
+                    codename='audit_organization',
+                    content_type_id=org_ct_id,
+                )
+                .values_list('object_id')
+                .distinct()
+            )
+
+        return self.model.objects.filter(
+            Q(unified_job_template_id__in=ujt_accessible)
             | Q(
                 pk__in=InventoryUpdate.objects.filter(
-                    inventory_source__inventory__id__in=inv_pk_qs,
+                    inventory_source__inventory__id__in=inv_accessible,
                 ).values('pk')
             )
             | Q(
                 pk__in=AdHocCommand.objects.filter(
-                    inventory__id__in=inv_pk_qs,
+                    inventory__id__in=inv_accessible,
                 ).values('pk')
             )
-            | Q(organization__in=Organization.access_ids_qs(self.user, 'audit_organization'))
+            | Q(organization__in=org_accessible)
         )
-        return qs
 
     def get_queryset(self):
         return super(UnifiedJobAccess, self).get_queryset().filter(workflowapproval__isnull=True)
