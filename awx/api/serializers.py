@@ -751,11 +751,12 @@ class OpaQueryPathMixin(serializers.Serializer):
 class UnifiedJobTemplateSerializer(BaseSerializer, OpaQueryPathMixin):
     # As a base serializer, the capabilities prefetch is not used directly,
     # instead they are derived from the Workflow Job Template Serializer and the Job Template Serializer, respectively.
+    priority = serializers.IntegerField(required=False, min_value=0, max_value=32000)
     capabilities_prefetch = []
 
     class Meta:
         model = UnifiedJobTemplate
-        fields = ('*', 'last_job_run', 'last_job_failed', 'next_job_run', 'status', 'execution_environment')
+        fields = ('*', 'last_job_run', 'last_job_failed', 'next_job_run', 'status', 'priority', 'execution_environment')
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -3215,6 +3216,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             'scm_branch',
             'forks',
             'limit',
+            'priority',
             'verbosity',
             'extra_vars',
             'job_tags',
@@ -3337,6 +3339,7 @@ class JobTemplateMixin(object):
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
     capabilities_prefetch = ['admin', 'execute', {'copy': ['project.use', 'inventory.use']}]
+    priority = serializers.IntegerField(required=False, min_value=0, max_value=32000)
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
@@ -3344,6 +3347,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         model = JobTemplate
         fields = (
             '*',
+            'priority',
             'host_config_key',
             'ask_scm_branch_on_launch',
             'ask_diff_mode_on_launch',
@@ -3472,6 +3476,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'diff_mode',
             'job_slice_number',
             'job_slice_count',
+            'priority',
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
@@ -3922,6 +3927,7 @@ class WorkflowJobTemplateWithSpecSerializer(WorkflowJobTemplateSerializer):
 
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    priority = serializers.IntegerField(required=False, min_value=0, max_value=32000)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -3942,6 +3948,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             '-controller_node',
             'inventory',
             'limit',
+            'priority',
             'scm_branch',
             'webhook_service',
             'webhook_credential',
@@ -4059,6 +4066,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None, choices=NEW_JOB_TYPE_CHOICES)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    priority = serializers.IntegerField(required=False, min_value=0, max_value=32000)
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
@@ -4077,6 +4085,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             'job_tags',
             'skip_tags',
             'limit',
+            'priority',
             'skip_tags',
             'diff_mode',
             'verbosity',
@@ -4589,6 +4598,7 @@ class JobLaunchSerializer(BaseSerializer):
     job_type = serializers.ChoiceField(required=False, choices=NEW_JOB_TYPE_CHOICES, write_only=True)
     skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
     limit = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    priority = serializers.IntegerField(required=False, write_only=False, min_value=0, max_value=32000)
     verbosity = serializers.ChoiceField(required=False, choices=VERBOSITY_CHOICES, write_only=True)
     execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, write_only=True)
     labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
@@ -4606,6 +4616,7 @@ class JobLaunchSerializer(BaseSerializer):
             'inventory',
             'scm_branch',
             'limit',
+            'priority',
             'job_tags',
             'skip_tags',
             'job_type',
@@ -4791,6 +4802,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     extra_vars = VerbatimField(required=False, write_only=True)
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
     limit = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    priority = serializers.IntegerField(required=False, write_only=False, min_value=0, max_value=32000)
     scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True)
     workflow_job_template_data = serializers.SerializerMethodField()
 
@@ -4930,13 +4942,14 @@ class BulkJobLaunchSerializer(serializers.Serializer):
     )
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
     limit = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    # priority = serializers.IntegerField(write_only=True, required=False, min_value=0, max_value=32000)
     scm_branch = serializers.CharField(write_only=True, required=False, allow_blank=False)
     skip_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
     job_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
 
     class Meta:
         model = WorkflowJob
-        fields = ('name', 'jobs', 'description', 'extra_vars', 'organization', 'inventory', 'limit', 'scm_branch', 'skip_tags', 'job_tags')
+        fields = ('name', 'jobs', 'description', 'extra_vars', 'organization', 'inventory', 'limit', 'priority', 'scm_branch', 'skip_tags', 'job_tags')
         read_only_fields = ()
 
     def validate(self, attrs):

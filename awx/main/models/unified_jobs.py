@@ -128,6 +128,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         default=None,
         editable=False,
     )
+    priority = models.PositiveIntegerField(
+        null=False,
+        default=0,
+        editable=True,
+    )
     current_job = models.ForeignKey(
         'UnifiedJob',
         null=True,
@@ -602,6 +607,13 @@ class UnifiedJob(
         null=True,
         default=None,
         editable=False,
+    )
+    priority = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_(
+            "Relative priority to other jobs. The higher the number, the higher the priority. Jobs with equivalent prioirty are started based on available capacity and launch time."
+        ),
     )
     emitted_events = models.PositiveIntegerField(
         default=0,

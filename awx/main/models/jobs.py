@@ -295,6 +295,7 @@ class JobTemplate(
                 'organization',
                 'survey_passwords',
                 'labels',
+                'priority',
                 'credentials',
                 'job_slice_number',
                 'job_slice_count',
@@ -1205,7 +1206,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'organization', 'job_type', 'extra_vars']
+        return ['name', 'description', 'organization', 'priority', 'job_type', 'extra_vars']
 
     def get_absolute_url(self, request=None):
         return reverse('api:system_job_template_detail', kwargs={'pk': self.pk}, request=request)

@@ -99,7 +99,7 @@ class TaskBase:
             UnifiedJob.objects.filter(**filter_args)
             .exclude(launch_type='sync')
             .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
-            .order_by('created')
+            .order_by('-priority', 'created')
             .prefetch_related('dependent_jobs')
         )
         self.all_tasks = [t for t in qs]
@@ -296,7 +296,7 @@ class WorkflowManager(TaskBase):
 
     @timeit
     def get_tasks(self, filter_args):
-        self.all_tasks = [wf for wf in WorkflowJob.objects.filter(**filter_args)]
+        self.all_tasks = [wf for wf in WorkflowJob.objects.filter(**filter_args).order_by('-priority', 'created')]
 
     @timeit
     def _schedule(self):
@@ -346,12 +346,14 @@ class DependencyManager(TaskBase):
 
         return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
 
-    def get_or_create_project_update(self, project_id):
+    def get_or_create_project_update(self, task):
+        project_id = task.project_id
+        priority = task.priority
         project = self.all_projects.get(project_id, None)
         if project is not None:
             latest_project_update = project.project_updates.filter(job_type='check').order_by("-created").first()
             if self.should_update_again(latest_project_update, project.scm_update_cache_timeout):
-                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency'))
+                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency', priority=priority))
                 project_task.signal_start()
                 return [project_task]
             else:
@@ -359,7 +361,7 @@ class DependencyManager(TaskBase):
         return []
 
     def gen_dep_for_job(self, task):
-        dependencies = self.get_or_create_project_update(task.project_id)
+        dependencies = self.get_or_create_project_update(task)
 
         try:
             start_args = json.loads(decrypt_field(task, field_name="start_args"))
@@ -371,7 +373,7 @@ class DependencyManager(TaskBase):
                 continue
             latest_inventory_update = inventory_source.inventory_updates.order_by("-created").first()
             if self.should_update_again(latest_inventory_update, inventory_source.update_cache_timeout):
-                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency'))
+                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency', priority=task.priority))
                 inventory_task.signal_start()
                 dependencies.append(inventory_task)
             else:
