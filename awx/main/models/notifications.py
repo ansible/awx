@@ -390,7 +390,9 @@ class JobNotificationMixin(object):
                 },
                 'timeout': 0,
                 'type': 'job',
-                'url': '/api/v2/jobs/13/',
+                'url': '/api/{prefix}v2/jobs/13/'.format(
+                    prefix=f"{settings.OPTIONAL_API_URLPATTERN_PREFIX}/" if settings.OPTIONAL_API_URLPATTERN_PREFIX else ""
+                ),
                 'use_fact_cache': False,
                 'verbosity': 0,
             },
@@ -466,6 +468,9 @@ class JobNotificationMixin(object):
         from awx.api.serializers import UnifiedJobSerializer
 
         job_serialization = UnifiedJobSerializer(self).to_representation(self)
+        if job_serialization.get('url') and settings.OPTIONAL_API_URLPATTERN_PREFIX:
+            prefix = settings.OPTIONAL_API_URLPATTERN_PREFIX.strip('/')
+            job_serialization['url'] = job_serialization['url'].replace('/api/', f'/api/{prefix}/', 1)
         context = self.context(job_serialization)
 
         msg_template = body_template = None
