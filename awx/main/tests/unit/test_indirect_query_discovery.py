@@ -427,8 +427,7 @@ class TestListCollectionsFailureResilience:
     """
 
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
-    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
-    def test_ansible_data_still_written_when_list_collections_raises(self, mock_list_collections):
+    def test_ansible_data_still_written_when_list_collections_raises(self, mock_list_collections, tmp_path):
         from awx.playbooks.library.indirect_instance_count import CallbackModule
 
         mock_list_collections.side_effect = KeyError('ignore_certs')
@@ -445,8 +444,9 @@ class TestListCollectionsFailureResilience:
                 handle.write = lambda data: written.setdefault('data', data)
             return handle
 
-        with mock.patch('builtins.open', side_effect=fake_open):
-            callback.v2_playbook_on_stats(mock.Mock())
+        with mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': str(tmp_path)}):
+            with mock.patch('builtins.open', side_effect=fake_open):
+                callback.v2_playbook_on_stats(mock.Mock())
 
         callback._display.warning.assert_called_once()
         assert "ignore_certs" in callback._display.warning.call_args[0][0]
@@ -456,8 +456,7 @@ class TestListCollectionsFailureResilience:
         assert 'ansible_version' in payload
 
     @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
-    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
-    def test_no_warning_when_list_collections_succeeds(self, mock_list_collections):
+    def test_no_warning_when_list_collections_succeeds(self, mock_list_collections, tmp_path):
         from awx.playbooks.library.indirect_instance_count import CallbackModule
 
         mock_list_collections.return_value = [mock.Mock(namespace='demo', name='query', ver='1.0.0', fqcn='demo.query')]
@@ -466,9 +465,10 @@ class TestListCollectionsFailureResilience:
         callback._display = mock.Mock()
         callback.set_option('collect_host_queries', False)
 
-        with mock.patch('builtins.open', mock.mock_open()):
-            with mock.patch('json.dumps', return_value='{}'):
-                callback.v2_playbook_on_stats(mock.Mock())
+        with mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': str(tmp_path)}):
+            with mock.patch('builtins.open', mock.mock_open()):
+                with mock.patch('json.dumps', return_value='{}'):
+                    callback.v2_playbook_on_stats(mock.Mock())
 
         callback._display.warning.assert_not_called()
 
