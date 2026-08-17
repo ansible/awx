@@ -9,6 +9,8 @@ def fix_system_auditor_assignments(apps, schema_editor):
     """
     Corrective migration for a bug in 0192 (migrate_to_new_rbac) where a stale
     loop variable caused old system_auditor members to not receive Platform Auditor.
+    Only adds missing assignments — does not remove any, since we cannot safely
+    distinguish bug-granted assignments from legitimate ones (e.g. from 0202 or admin actions).
     """
     Role = apps.get_model('main', 'Role')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
