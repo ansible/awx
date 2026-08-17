@@ -104,6 +104,60 @@ for k, v in role_name_to_perm_mapping.items():
 tls = threading.local()  # thread local storage
 
 
+def _scoped_actor_role_filter(actor, target_content_type_ids):
+    """Pre-filtered version of RoleEvaluation._actor_role_filter for scoped queries.
+
+    Narrows the role-assignment subquery to only include roles whose assignment
+    targets match the given content types.  This reduces the set of role IDs
+    sent into the outer RoleEvaluation filter, which matters when a user has
+    many roles on unrelated model types (e.g. hundreds of credential permissions
+    that are irrelevant to a unified-job-template query).
+
+    Organization and Team content types are automatically included alongside
+    ``target_content_type_ids`` because:
+    - Org-level roles (e.g. Org Admin) have ``content_type_id = <Org CT>``
+      on the assignment, but cascade to child-object permissions (JT, Project,
+      etc.) via RoleEvaluation.
+    - Team-membership roles have ``content_type_id = <Team CT>`` on the
+      assignment, but cascade to whatever permissions the team holds.
+
+    Global (system-wide) role assignments have ``content_type_id = NULL``
+    and are always included since they can grant permissions on any model.
+
+    When the final set contains exactly one content type, the subquery uses
+    ``content_type_id = X`` instead of ``content_type_id__in = [X]``.
+
+    TEMPORARY: This function duplicates logic that should live in DAB's
+    ``RoleEvaluation._actor_role_filter()``.  Once DAB merges the upstream
+    ``content_type_ids`` parameter (planned), replace calls to this function
+    with ``RoleEvaluation._actor_role_filter(actor, content_type_ids=...)``
+    and delete this shim.
+    """
+    from django.db.models import Q
+
+    from ansible_base.rbac import permission_registry
+
+    # Lazy imports to avoid circular dependencies
+    from awx.main.models.organization import Organization, Team
+
+    org_ct_id = permission_registry.content_type_model.objects.get_for_model(Organization).id
+    team_ct_id = permission_registry.content_type_model.objects.get_for_model(Team).id
+    all_ct_ids = set(target_content_type_ids) | {org_ct_id, team_ct_id}
+
+    if actor._meta.model_name == permission_registry.user_model._meta.model_name:
+        qs = RoleUserAssignment.objects.filter(user_id=actor.id)
+    else:
+        qs = RoleTeamAssignment.objects.filter(team_id=actor.id)
+
+    if len(all_ct_ids) == 1:
+        ct_filter = Q(content_type_id=next(iter(all_ct_ids)))
+    else:
+        ct_filter = Q(content_type_id__in=all_ct_ids)
+    qs = qs.filter(ct_filter | Q(content_type_id__isnull=True))
+
+    return {'role_id__in': qs.values('object_role_id')}
+
+
 def check_singleton(func):
     """
     check_singleton is a decorator that checks if a user given
