@@ -12,7 +12,6 @@ from django.conf import settings
 from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 
 # Django REST Framework
@@ -20,7 +19,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 
 # django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
-from ansible_base.rbac.models import RoleEvaluation, RoleUserAssignment
+from ansible_base.rbac.models import RoleEvaluation
 from ansible_base.rbac.policies import visible_users
 from ansible_base.rbac import permission_registry
 
