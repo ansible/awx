@@ -239,7 +239,7 @@ class TestSystemAuditorMigration:
         Role = old_state.apps.get_model('main', 'Role')
 
         user = User.objects.create(username='sys-auditor-user')
-        system_auditor_role = Role.objects.get(singleton_name='system_auditor')
+        system_auditor_role, _ = Role.objects.get_or_create(singleton_name='system_auditor', defaults={'role_field': 'system_auditor'})
         system_auditor_role.members.add(user)
 
         new_state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
@@ -259,7 +259,7 @@ class TestSystemAuditorMigration:
         Role = state.apps.get_model('main', 'Role')
 
         user = User.objects.create(username='missed-auditor')
-        system_auditor_role = Role.objects.get(singleton_name='system_auditor')
+        system_auditor_role, _ = Role.objects.get_or_create(singleton_name='system_auditor', defaults={'role_field': 'system_auditor'})
         system_auditor_role.members.add(user)
 
         state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
@@ -290,7 +290,7 @@ class TestSystemAuditorMigration:
         Role = state.apps.get_model('main', 'Role')
 
         user = User.objects.create(username='already-auditor')
-        system_auditor_role = Role.objects.get(singleton_name='system_auditor')
+        system_auditor_role, _ = Role.objects.get_or_create(singleton_name='system_auditor', defaults={'role_field': 'system_auditor'})
         system_auditor_role.members.add(user)
 
         state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
