@@ -70,25 +70,28 @@ class MainConfig(AppConfig):
 
         from ansible_base.rbac.triggers import dab_post_migrate
 
-        dab_post_migrate.connect(self._sync_managed_role_definitions, dispatch_uid='awx-sync-managed-role-definitions')
+        dab_post_migrate.connect(self._add_member_org_to_child_admins, dispatch_uid='awx-add-member-org-perm')
 
         self.load_named_url_feature()
         pre_migrate.connect(self.check_db_requirement, sender=self)
 
     @staticmethod
-    def _sync_managed_role_definitions(sender, **kwargs):
-        from django.apps import apps as global_apps
+    def _add_member_org_to_child_admins(sender, **kwargs):
+        """Ensure Organization Child Admin roles include member_organization."""
+        from ansible_base.rbac.models import RoleDefinition
+        from ansible_base.lib.models import DABPermission
 
-        from ansible_base.resource_registry.signals.handlers import no_reverse_sync
+        member_perm = DABPermission.objects.filter(codename='member_organization').first()
+        if not member_perm:
+            return
 
-        # NOTE: setup_managed_role_definitions lives in the migrations module because
-        # it is also called from migration 0192. Ideally this would be extracted to a
-        # shared non-migration module, but doing so requires updating the migration
-        # import, which is a broader refactor (see also models/rbac.py imports).
-        from awx.main.migrations._dab_rbac import setup_managed_role_definitions
-
-        # During post-migrate the resource server (gateway) may not be ready
-        # (e.g. migrate_service_data still holds a 423 lock).  Disable reverse
-        # sync for this call — gateway reconciles via migrate_service_data.
-        with no_reverse_sync():
-            setup_managed_role_definitions(global_apps, None)
+        child_admin_roles = [
+            'Organization Project Admin',
+            'Organization Credential Admin',
+            'Organization Inventory Admin',
+            'Organization NotificationTemplate Admin',
+            'Organization WorkflowJobTemplate Admin',
+            'Organization ExecutionEnvironment Admin',
+        ]
+        for rd in RoleDefinition.objects.filter(name__in=child_admin_roles, managed=True):
+            rd.permissions.add(member_perm)
