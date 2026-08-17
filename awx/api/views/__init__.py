@@ -890,7 +890,7 @@ class ExecutionEnvironmentList(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment. Once associated with JT/org/etc"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment container image reference."})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -963,7 +963,9 @@ class ProjectList(ListCreateAPIView):
     serializer_class = serializers.ProjectSerializer
     resource_purpose = 'projects'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of projects."})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Returns a paginated list of all projects. Projects represent playbook collections sourced from version control."}
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1385,7 +1387,7 @@ class CredentialTypeList(ListCreateAPIView):
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential types'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of credential types"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns a paginated list of all credential types (machine, vault, cloud, etc.)."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -2071,11 +2073,11 @@ class GroupList(ListCreateAPIView):
     serializer_class = serializers.GroupSerializer
     resource_purpose = 'groups'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of groups."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns a paginated list of all host groups."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new group."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new host group within an inventory."})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -2281,7 +2283,7 @@ class HostVariableData(BaseVariableData):
     serializer_class = serializers.HostVariableDataSerializer
     resource_purpose = 'variable data for a host'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "The extra variable configuration for this host."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns the extra variables (YAML/JSON) configured for a specific host by ID."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -2575,7 +2577,9 @@ class InventorySourceUpdateView(RetrieveAPIView):
     serializer_class = serializers.InventorySourceUpdateSerializer
     resource_purpose = 'update an inventory source'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Sync the inventory source"})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Trigger a sync of an inventory source by ID. Pulls latest host data from the external source."}
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(instance=obj, data=request.data)
@@ -2635,7 +2639,11 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'job templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of job templates."})
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Returns a paginated list of all job templates. A job template defines the playbook, inventory, credentials, and settings for launching a job."
+        }
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -2724,7 +2732,9 @@ class JobTemplateLaunch(RetrieveAPIView):
 
         return modern_data
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Launch the job template"})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Launch a job from a job template by ID. Starts execution of the playbook defined in the template."}
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -2807,7 +2817,11 @@ class JobTemplateSurveySpec(GenericAPIView):
         obj = self.get_object()
         return Response(obj.display_survey_spec())
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Update job template survey specification"})
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Create or update the survey specification for a job template. Surveys prompt users for input variables at launch time."
+        }
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -3423,7 +3437,11 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'workflow job templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of workflow job templates."})
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Returns a paginated list of all workflow job templates. Workflow templates chain multiple node types—job templates, other workflows, project syncs, inventory syncs, management jobs, and approval gates—into a single automated workflow."
+        }
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -3590,7 +3608,9 @@ class WorkflowJobRelaunch(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return Response({})
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a workflow job"})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Relaunch a previously completed or failed workflow job using the same parameters as the original run."}
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.is_sliced_job:
@@ -3954,7 +3974,7 @@ class JobRelaunch(RetrieveAPIView):
                 self.permission_denied(request, message=messages['detail'])
         return super(JobRelaunch, self).check_object_permissions(request, obj)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a job"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a previously completed or failed job using the same parameters as the original run."})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         context = self.get_serializer_context()
@@ -4724,7 +4744,7 @@ class NotificationTemplateList(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new notification template."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new notification template (email, Slack, webhook, etc.)."})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 

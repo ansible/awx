@@ -429,7 +429,11 @@ def setup_managed_role_definitions(apps, schema_editor):
         )
     )
 
-    unexpected_role_definitions = RoleDefinition.objects.filter(managed=True).exclude(pk__in=[rd.pk for rd in managed_role_definitions])
+    unexpected_role_definitions = (
+        RoleDefinition.objects.filter(managed=True)
+        .exclude(pk__in=[rd.pk for rd in managed_role_definitions])
+        .exclude(name__in=settings.ANSIBLE_BASE_JWT_MANAGED_ROLES)
+    )
     for role_definition in unexpected_role_definitions:
         logger.info(f'Deleting old managed role definition {role_definition.name}, pk={role_definition.pk}')
         role_definition.delete()
