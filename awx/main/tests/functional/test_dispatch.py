@@ -101,6 +101,77 @@ class TestJobReaper(object):
         assert job.controller_node == ''
         assert job.execution_node == ''
 
+    def test_reap_delay_preserves_running_jobs(self, mocker):
+        """When EXECUTION_NODE_REAP_DELAY > 0 and the reap deadline has not passed,
+        running jobs on lost execution nodes should be preserved."""
+        mocker.patch('awx.main.tasks.system.settings.EXECUTION_NODE_REAP_DELAY', 300)
+        mocker.patch('awx.main.tasks.system.settings.CLUSTER_NODE_HEARTBEAT_PERIOD', 60)
+        mocker.patch('awx.main.tasks.system.settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE', 2)
+        mocker.patch('awx.main.tasks.system.settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD', 60)
+
+        this_inst = Instance(hostname='awx')
+        this_inst.save()
+        lost_inst = Instance(
+            hostname='lost-exec',
+            node_type=Instance.Types.EXECUTION,
+            node_state=Instance.States.READY,
+            last_seen=tz_now() - datetime.timedelta(seconds=200),
+        )
+        lost_inst.save()
+        job = Job.objects.create(status='running', execution_node=lost_inst.hostname)
+
+        system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+
+        job.refresh_from_db()
+        lost_inst.refresh_from_db()
+        assert job.status == 'running'
+        assert lost_inst.node_state == Instance.States.UNAVAILABLE
+
+    def test_reap_delay_reaps_after_deadline(self, mocker):
+        """When the reap deadline has passed, jobs should be reaped with a descriptive explanation."""
+        mocker.patch('awx.main.tasks.system.settings.EXECUTION_NODE_REAP_DELAY', 300)
+        mocker.patch('awx.main.tasks.system.settings.CLUSTER_NODE_HEARTBEAT_PERIOD', 60)
+        mocker.patch('awx.main.tasks.system.settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE', 2)
+        mocker.patch('awx.main.tasks.system.settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD', 60)
+
+        this_inst = Instance(hostname='awx')
+        this_inst.save()
+        lost_inst = Instance(
+            hostname='lost-exec',
+            node_type=Instance.Types.EXECUTION,
+            node_state=Instance.States.READY,
+            last_seen=tz_now() - datetime.timedelta(seconds=600),
+        )
+        lost_inst.save()
+        job = Job.objects.create(status='running', execution_node=lost_inst.hostname, controller_node='')
+
+        system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+
+        job.refresh_from_db()
+        assert job.status == 'failed'
+        assert 'EXECUTION_NODE_REAP_DELAY' in job.job_explanation
+
+    def test_reap_delay_zero_immediate_reap(self, mocker):
+        """When EXECUTION_NODE_REAP_DELAY is 0, jobs should be reaped immediately (legacy behavior)."""
+        mocker.patch('awx.main.tasks.system.settings.EXECUTION_NODE_REAP_DELAY', 0)
+
+        this_inst = Instance(hostname='awx')
+        this_inst.save()
+        lost_inst = Instance(
+            hostname='lost-exec',
+            node_type=Instance.Types.EXECUTION,
+            node_state=Instance.States.READY,
+            last_seen=tz_now() - datetime.timedelta(seconds=200),
+        )
+        lost_inst.save()
+        job = Job.objects.create(status='running', execution_node=lost_inst.hostname, controller_node='')
+
+        system._heartbeat_handle_lost_instances([lost_inst], this_inst)
+
+        job.refresh_from_db()
+        assert job.status == 'failed'
+        assert 'instance shutdown' in job.job_explanation
+
     @pytest.mark.parametrize(
         'excluded_uuids, fail, started',
         [

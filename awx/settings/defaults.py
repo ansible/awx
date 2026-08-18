@@ -420,6 +420,10 @@ CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
+# Seconds to delay reaping jobs on lost execution/hop nodes.
+# 0 = immediate reap (legacy behavior).
+# >0 = delay reap to allow transient disconnects to recover.
+EXECUTION_NODE_REAP_DELAY = 300
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 

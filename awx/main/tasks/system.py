@@ -781,11 +781,88 @@ def _heartbeat_check_versions(this_inst, instance_list):
 
 
 def _heartbeat_handle_lost_instances(lost_instances, this_inst):
-    """Handle lost instances by reaping their running jobs and marking them offline."""
+    """Handle lost instances by reaping their running jobs and marking them offline.
+
+    When EXECUTION_NODE_REAP_DELAY > 0, execution/hop node job reaping is
+    delayed to allow transient disconnects to recover. The node is marked
+    UNAVAILABLE immediately (zero capacity), but running jobs are preserved
+    until the reap deadline passes.
+    """
+    nowtime = now()
     for other_inst in lost_instances:
+        if (
+            settings.EXECUTION_NODE_REAP_DELAY > 0
+            and other_inst.node_type in ('execution', 'hop')
+            and other_inst.last_seen is not None
+        ):
+            grace_period = (
+                settings.CLUSTER_NODE_HEARTBEAT_PERIOD
+                * settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE
+            )
+            if other_inst.node_type in ('execution', 'hop'):
+                grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
+            unavailable_since = other_inst.last_seen + timedelta(seconds=grace_period)
+            reap_deadline = unavailable_since + timedelta(
+                seconds=settings.EXECUTION_NODE_REAP_DELAY
+            )
+            elapsed_since_lost = (nowtime - unavailable_since).total_seconds()
+            time_until_reap = (reap_deadline - nowtime).total_seconds()
+
+            if nowtime < reap_deadline:
+                if other_inst.node_state == Instance.States.READY:
+                    other_inst.mark_offline(
+                        errors=_(
+                            'Instance unreachable. Jobs preserved for %(delay)s seconds '
+                            'pending reconnection.'
+                        ) % {'delay': settings.EXECUTION_NODE_REAP_DELAY}
+                    )
+                    running_jobs = UnifiedJob.objects.filter(
+                        status='running', execution_node=other_inst.hostname
+                    ).count()
+                    logger.warning(
+                        'Instance %s unreachable (last_seen %s). '
+                        'Marked UNAVAILABLE, preserving %d running job(s). '
+                        'Will reap at %s (in %.0fs). [REAP_DELAY=%d]',
+                        other_inst.hostname, other_inst.last_seen,
+                        running_jobs,
+                        reap_deadline.strftime('%H:%M:%S UTC'),
+                        time_until_reap,
+                        settings.EXECUTION_NODE_REAP_DELAY,
+                    )
+                else:
+                    logger.info(
+                        'Instance %s still unreachable (%.0fs since lost, '
+                        'reap in %.0fs). Jobs preserved.',
+                        other_inst.hostname, elapsed_since_lost, time_until_reap,
+                    )
+                continue
+
+            running_jobs = UnifiedJob.objects.filter(
+                status='running', execution_node=other_inst.hostname
+            ).count()
+            logger.warning(
+                'Instance %s unreachable for %.0fs (REAP_DELAY=%d exceeded). '
+                'Reaping %d running job(s).',
+                other_inst.hostname, elapsed_since_lost,
+                settings.EXECUTION_NODE_REAP_DELAY, running_jobs,
+            )
+
         try:
-            # Any jobs marked as running will be marked as error
-            explanation = "Job reaped due to instance shutdown"
+            if (
+                settings.EXECUTION_NODE_REAP_DELAY > 0
+                and other_inst.node_type in ('execution', 'hop')
+            ):
+                explanation = (
+                    'Execution node unreachable for %d seconds '
+                    '(EXECUTION_NODE_REAP_DELAY=%d exceeded)'
+                    % (
+                        int((nowtime - other_inst.last_seen).total_seconds())
+                        if other_inst.last_seen else 0,
+                        settings.EXECUTION_NODE_REAP_DELAY,
+                    )
+                )
+            else:
+                explanation = "Job reaped due to instance shutdown"
             reaper.reap(other_inst, job_explanation=explanation)
             # Any jobs that were waiting to be processed by this node will be handed back to task manager
             UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
