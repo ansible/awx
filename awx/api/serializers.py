@@ -42,6 +42,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
+from ansible_base.lib.serializers.mixins import CleanTextMixin
 from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
@@ -2993,7 +2994,7 @@ class CredentialTypeSerializer(BaseSerializer):
         return fields
 
 
-class CredentialSerializer(BaseSerializer):
+class CredentialSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
     managed = serializers.ReadOnlyField()
