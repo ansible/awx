@@ -2995,6 +2995,19 @@ class CredentialTypeSerializer(BaseSerializer):
 
 
 class CredentialSerializer(CleanTextMixin, BaseSerializer):
+    excluded_json_keys = {'inputs': frozenset({
+        'ssh_key_data',
+        'ssh_key_unlock',
+        'password',
+        'become_password',
+        'authorize_password',
+        'vault_password',
+        'secret',
+        'secret_key',
+        'client_secret',
+        'token',
+        'oauth_token',
+    })}
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = ['admin', 'use']
     managed = serializers.ReadOnlyField()
