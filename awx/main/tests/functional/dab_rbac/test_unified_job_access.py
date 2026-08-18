@@ -8,6 +8,8 @@ from ansible_base.rbac.models import RoleDefinition
 from awx.api.versioning import reverse
 from awx.main.models import (
     AdHocCommand,
+    Credential,
+    CredentialType,
     InventorySource,
     InventoryUpdate,
     JobTemplate,
@@ -169,3 +171,130 @@ def test_unified_job_list_pagination_uses_unfiltered_count(rando, setup_managed_
     assert response.status_code == 200
     assert len(response.data['results']) == 0
     assert response.data['count'] == total_jobs
+
+
+@pytest.mark.django_db
+def test_direct_jt_permission_only_sees_jt_jobs(user, setup_managed_roles, get):
+    """A user with a direct JT permission (but no inventory or org permissions)
+    sees only jobs from that JT — inventory updates are not visible."""
+    org = Organization.objects.create(name='uj-direct-jt-org')
+    inventory = org.inventories.create(name='uj-direct-jt-inv')
+    project = Project.objects.create(name='uj-direct-jt-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-direct-jt', project=project, inventory=inventory, organization=org)
+    job = jt.create_unified_job()
+
+    inv_src = InventorySource.objects.create(name='uj-direct-jt-invsrc', inventory=inventory, source='ec2')
+    inv_update = InventoryUpdate.objects.create(inventory_source=inv_src, source=inv_src.source)
+
+    jt_viewer = user('uj-direct-jt-viewer')
+    RoleDefinition.objects.get(name='JobTemplate Execute').give_permission(jt_viewer, jt)
+
+    response = get(reverse('api:unified_job_list'), jt_viewer)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids, "JT permission holder should see JT jobs"
+    assert inv_update.pk not in result_ids, "JT permission holder should NOT see inventory updates"
+
+
+@pytest.mark.django_db
+def test_global_ujt_view_singleton_sees_all_template_jobs(user, setup_managed_roles, get):
+    """A custom global role granting view on all UJT subclasses triggers
+    the singleton shortcut and surfaces all template-based jobs."""
+    org = Organization.objects.create(name='uj-global-ujt-org')
+    inventory = org.inventories.create(name='uj-global-ujt-inv')
+    project = Project.objects.create(name='uj-global-ujt-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-global-ujt-jt', project=project, inventory=inventory, organization=org)
+    job = jt.create_unified_job()
+
+    global_viewer = user('uj-global-ujt-viewer')
+    rd = RoleDefinition.objects.create_from_permissions(
+        name='global-ujt-viewer-test',
+        permissions=['view_jobtemplate', 'view_project', 'view_workflowjobtemplate'],
+        content_type=None,
+        managed=True,
+    )
+    rd.give_global_permission(global_viewer)
+
+    response = get(reverse('api:unified_job_list'), global_viewer)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids, "Global UJT viewer should see JT jobs via singleton shortcut"
+
+
+@pytest.mark.django_db
+def test_global_view_inventory_sees_inventory_updates_and_adhoc(user, setup_managed_roles, get):
+    """A custom global role granting only view_inventory lets the user see
+    inventory updates and ad hoc commands but not JT-based jobs."""
+    org = Organization.objects.create(name='uj-global-inv-org')
+    inventory = org.inventories.create(name='uj-global-inv-test')
+    project = Project.objects.create(name='uj-global-inv-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-global-inv-jt', project=project, inventory=inventory, organization=org)
+    job = jt.create_unified_job()
+
+    inv_src = InventorySource.objects.create(name='uj-global-inv-src', inventory=inventory, source='ec2')
+    inv_update = InventoryUpdate.objects.create(inventory_source=inv_src, source=inv_src.source)
+    adhoc = AdHocCommand.objects.create(name='uj-global-inv-adhoc', inventory=inventory)
+
+    global_inv_viewer = user('uj-global-inv-viewer')
+    rd = RoleDefinition.objects.create_from_permissions(
+        name='global-inv-viewer-test',
+        permissions=['view_inventory'],
+        content_type=None,
+        managed=True,
+    )
+    rd.give_global_permission(global_inv_viewer)
+
+    response = get(reverse('api:unified_job_list'), global_inv_viewer)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert inv_update.pk in result_ids, "Global inventory viewer should see inventory updates"
+    assert adhoc.pk in result_ids, "Global inventory viewer should see ad hoc commands"
+    assert job.pk not in result_ids, "Global inventory viewer should NOT see JT jobs"
+
+
+@pytest.mark.django_db
+def test_unrelated_credential_role_sees_no_unified_jobs(user, setup_managed_roles, get):
+    """A user with only credential permissions should see nothing in the
+    unified job list — credential roles are unrelated to UJ visibility."""
+    org = Organization.objects.create(name='uj-cred-org')
+    inventory = org.inventories.create(name='uj-cred-inv')
+    project = Project.objects.create(name='uj-cred-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-cred-jt', project=project, inventory=inventory, organization=org)
+    jt.create_unified_job()
+
+    ct = CredentialType.defaults['ssh']()
+    ct.save()
+    cred = Credential.objects.create(name='uj-test-cred', credential_type=ct, organization=org)
+
+    cred_user = user('uj-cred-only')
+    RoleDefinition.objects.get(name='Credential Admin').give_permission(cred_user, cred)
+
+    response = get(reverse('api:unified_job_list'), cred_user)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 0, "User with only credential perms should see no unified jobs"
+
+
+@pytest.mark.django_db
+def test_jt_role_plus_credential_role_only_shows_jt_jobs(user, setup_managed_roles, get):
+    """A user with both a direct JT role and an unrelated credential role
+    should only see jobs from the JT — the credential role must not
+    pollute or interfere."""
+    org = Organization.objects.create(name='uj-mixed-org')
+    inventory = org.inventories.create(name='uj-mixed-inv')
+    project = Project.objects.create(name='uj-mixed-project', organization=org)
+    jt = JobTemplate.objects.create(name='uj-mixed-jt', project=project, inventory=inventory, organization=org)
+    job = jt.create_unified_job()
+
+    ct = CredentialType.defaults['ssh']()
+    ct.save()
+    cred = Credential.objects.create(name='uj-mixed-cred', credential_type=ct, organization=org)
+
+    mixed_user = user('uj-mixed-user')
+    RoleDefinition.objects.get(name='JobTemplate Execute').give_permission(mixed_user, jt)
+    RoleDefinition.objects.get(name='Credential Admin').give_permission(mixed_user, cred)
+
+    response = get(reverse('api:unified_job_list'), mixed_user)
+    assert response.status_code == 200
+    result_ids = [r['id'] for r in response.data['results']]
+    assert job.pk in result_ids, "User should see JT job via direct JT permission"
+    assert len(result_ids) == 1, f"User should only see the one JT job, got: {result_ids}"
