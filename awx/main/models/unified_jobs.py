@@ -40,8 +40,6 @@ from ansible_base.lib.utils.models import prevent_search, get_type_for_model
 from ansible_base.rbac import permission_registry
 from ansible_base.rbac.models import RoleEvaluation
 
-from awx.main.models.rbac import _scoped_actor_role_filter
-
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
 from awx.main.dispatch import get_task_queuename
@@ -240,7 +238,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return (
             RoleEvaluation.objects.filter(
-                **_scoped_actor_role_filter(accessor, [ct.id for ct in dab_role_cts]),
+                **RoleEvaluation._actor_role_filter(accessor),
                 codename__in=all_codenames,
                 content_type_id__in=[ct.id for ct in dab_role_cts],
             )
