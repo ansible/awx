@@ -1,4 +1,4 @@
-aiohttp>=3.13.5 # CVE-2024-30251, kubernetes>=36.0.2 requires >=3.13.5
+aiohttp>=3.14.3
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
 asn1
