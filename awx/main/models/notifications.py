@@ -391,7 +391,7 @@ class JobNotificationMixin(object):
                 'timeout': 0,
                 'type': 'job',
                 'url': '/api/{prefix}v2/jobs/13/'.format(
-                    prefix=f"{settings.OPTIONAL_API_URLPATTERN_PREFIX}/" if settings.OPTIONAL_API_URLPATTERN_PREFIX else ""
+                    prefix=f"{settings.OPTIONAL_API_URLPATTERN_PREFIX.strip('/')}/" if settings.OPTIONAL_API_URLPATTERN_PREFIX else ""
                 ),
                 'use_fact_cache': False,
                 'verbosity': 0,
