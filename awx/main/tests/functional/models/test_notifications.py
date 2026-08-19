@@ -142,6 +142,11 @@ class TestJobNotificationMixin(object):
         context = JobNotificationMixin.context_stub()
         assert context['job']['url'] == '/api/myprefix/v2/jobs/13/'
 
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='/myprefix/')
+    def test_context_stub_url_prefix_strips_slashes(self):
+        context = JobNotificationMixin.context_stub()
+        assert context['job']['url'] == '/api/myprefix/v2/jobs/13/'
+
     @pytest.mark.django_db
     @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='')
     def test_build_notification_message_url_no_prefix(self, notification_template):
@@ -149,8 +154,8 @@ class TestJobNotificationMixin(object):
         notification_template.save()
         job = Job.objects.create(name='test-job')
         msg, body = job.build_notification_message(notification_template, 'running')
-        assert '/api/v2/' in body
-        assert 'myprefix' not in body
+        assert msg == f'/api/v2/jobs/{job.pk}/'
+        assert body == f'/api/v2/jobs/{job.pk}/'
 
     @pytest.mark.django_db
     @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='myprefix')
@@ -159,7 +164,8 @@ class TestJobNotificationMixin(object):
         notification_template.save()
         job = Job.objects.create(name='test-job')
         msg, body = job.build_notification_message(notification_template, 'running')
-        assert '/api/myprefix/v2/' in body
+        assert msg == f'/api/myprefix/v2/jobs/{job.pk}/'
+        assert body == f'/api/myprefix/v2/jobs/{job.pk}/'
 
     @pytest.mark.django_db
     @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='/myprefix/')
@@ -168,8 +174,8 @@ class TestJobNotificationMixin(object):
         notification_template.save()
         job = Job.objects.create(name='test-job')
         msg, body = job.build_notification_message(notification_template, 'running')
-        assert '/api/myprefix/v2/' in body
-        assert '/api//myprefix//' not in body
+        assert msg == f'/api/myprefix/v2/jobs/{job.pk}/'
+        assert body == f'/api/myprefix/v2/jobs/{job.pk}/'
 
     def test_context_stub(self):
         """The context stub is a fake context used to validate custom notification messages. Ensure that
