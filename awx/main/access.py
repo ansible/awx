@@ -644,14 +644,8 @@ class UserAccess(BaseAccess):
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             qs = User.objects.all()
-        elif settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            qs = visible_users(self.user)
         else:
-            qs = (
-                User.objects.filter(pk__in=Organization.access_qs(self.user, 'view').values('member_role__members'))
-                | User.objects.filter(pk=self.user.id)
-                | User.objects.filter(is_superuser=True)
-            ).distinct()
+            qs = visible_users(self.user)
         return qs
 
     def can_add(self, data):
