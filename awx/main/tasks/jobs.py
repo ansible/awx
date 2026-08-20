@@ -547,7 +547,13 @@ class BaseTask(object):
         os.close(self.lock_fd)
         self.lock_fd = None
 
-    def acquire_lock(self, project, unified_job_id=None):
+    def acquire_lock(self, project, unified_job_id=None, exclusive=True):
+        """Acquire a file lock on the project's local source tree.
+
+        Uses LOCK_EX (exclusive) when the tree will be modified, or LOCK_SH (shared)
+        when only reading (e.g. copying). Polls until the lock is granted, checking
+        for cancellation on each iteration.
+        """
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
 
@@ -565,11 +571,12 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
-                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.lockf(self.lock_fd, lock_type | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
@@ -958,10 +965,35 @@ class SourceControlMixin(BaseTask):
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
     def sync_and_copy(self, project, private_data_dir, scm_branch=None):
-        self.acquire_lock(project, self.instance.id)
+        """Copy project content to private_data_dir, syncing from SCM only if needed.
+
+        Acquires a shared lock first so concurrent copy-only jobs (e.g. slice jobs) can
+        run in parallel. Upgrades to an exclusive lock only when the project tree needs
+        to be modified (fresh clone, revision mismatch, or missing cache). DB state is
+        refreshed after each lock acquisition to account for concurrent updates.
+        """
+        # Always start with a shared lock so concurrent copy-only jobs don't serialize.
+        # LOCK_SH waits for any in-flight LOCK_EX to drain, making the tree stable.
+        # Refresh DB state after acquiring so get_sync_needs sees the current revision,
+        # then upgrade to LOCK_EX only if a sync is actually required.
+        self.acquire_lock(project, self.instance.id, exclusive=False)
         is_commit = False
         try:
             original_branch = None
+            if project.pk:
+                project.refresh_from_db()
+            sync_needs = self.get_sync_needs(project, scm_branch=scm_branch)
+            if sync_needs:
+                # Tree needs modification — upgrade to exclusive.
+                # POSIX advisory locks cannot be upgraded atomically: LOCK_SH must be
+                # released before LOCK_EX can be granted, leaving a window where another
+                # process may sync the project. Refresh after re-acquiring so
+                # sync_and_copy_without_lock operates on current DB state.
+                self.release_lock(project)
+                self.acquire_lock(project, self.instance.id, exclusive=True)
+                if project.pk:
+                    project.refresh_from_db()
+
             failed_reason = project.get_reason_if_failed()
             if failed_reason:
                 self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
