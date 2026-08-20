@@ -25,7 +25,7 @@ djangorestframework-yaml
 drf-spectacular>=0.27.0
 dynaconf
 filelock
-GitPython>=3.1.37  # CVE-2023-41040
+GitPython>=3.1.49
 grpcio
 irc
 jinja2>=3.1.6  # CVE-2025-27516
