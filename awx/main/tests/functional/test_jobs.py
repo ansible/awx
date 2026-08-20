@@ -44,7 +44,12 @@ def job_template_with_credentials():
     """
 
     def _create_job_template(
-        *credentials, org_name='test-org', project_name='test-project', inventory_name='test-inventory', jt_name='test-jt', playbook='test.yml'
+        *credentials,
+        org_name="test-org",
+        project_name="test-project",
+        inventory_name="test-inventory",
+        jt_name="test-jt",
+        playbook="test.yml",
     ):
         """
         Create a job template with the given credentials.
@@ -63,7 +68,9 @@ def job_template_with_credentials():
         org = Organization.objects.create(name=org_name)
         proj = Project.objects.create(name=project_name, organization=org)
         inv = Inventory.objects.create(name=inventory_name, organization=org)
-        jt = JobTemplate.objects.create(name=jt_name, project=proj, inventory=inv, playbook=playbook)
+        jt = JobTemplate.objects.create(
+            name=jt_name, project=proj, inventory=inv, playbook=playbook
+        )
 
         if credentials:
             jt.credentials.add(*credentials)
@@ -75,44 +82,51 @@ def job_template_with_credentials():
 
 @pytest.mark.django_db
 def test_orphan_unified_job_creation(instance, inventory):
-    job = Job.objects.create(job_template=None, inventory=inventory, name='hi world')
+    job = Job.objects.create(job_template=None, inventory=inventory, name="hi world")
     job2 = job.copy_unified_job()
     assert job2.job_template is None
     assert job2.inventory == inventory
-    assert job2.name == 'hi world'
+    assert job2.name == "hi world"
     assert job.job_type == job2.job_type
-    assert job2.launch_type == 'relaunch'
+    assert job2.launch_type == "relaunch"
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes', lambda *args, **kwargs: None)
-@mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu, is_control_node: 8)
-@mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem, is_control_node: 62)
+@mock.patch(
+    "awx.main.tasks.system.inspect_execution_and_hop_nodes",
+    lambda *args, **kwargs: None,
+)
+@mock.patch(
+    "awx.main.models.ha.get_cpu_effective_capacity", lambda cpu, is_control_node: 8
+)
+@mock.patch(
+    "awx.main.models.ha.get_mem_effective_capacity", lambda mem, is_control_node: 62
+)
 def test_job_capacity_and_with_inactive_node():
-    i = Instance.objects.create(hostname='test-1')
-    i.save_health_data('18.0.1', 2, 8000)
+    i = Instance.objects.create(hostname="test-1")
+    i.save_health_data("18.0.1", 2, 8000)
     assert i.enabled is True
     assert i.capacity_adjustment == 1.0
     assert i.capacity == 62
     i.enabled = False
     i.save()
     with override_settings(CLUSTER_HOST_ID=i.hostname):
-        with mock.patch.object(redis.client.Redis, 'ping', lambda self: True):
+        with mock.patch.object(redis.client.Redis, "ping", lambda self: True):
             cluster_node_heartbeat(None)
         i = Instance.objects.get(id=i.id)
         assert i.capacity == 0
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu: 8)
-@mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem: 62)
+@mock.patch("awx.main.models.ha.get_cpu_effective_capacity", lambda cpu: 8)
+@mock.patch("awx.main.models.ha.get_mem_effective_capacity", lambda mem: 62)
 def test_job_capacity_with_redis_disabled():
-    i = Instance.objects.create(hostname='test-1')
+    i = Instance.objects.create(hostname="test-1")
 
     def _raise(self):
         raise redis.ConnectionError()
 
-    with mock.patch.object(redis.client.Redis, 'ping', _raise):
+    with mock.patch.object(redis.client.Redis, "ping", _raise):
         i.local_health_check()
     assert i.capacity == 0
 
@@ -120,23 +134,23 @@ def test_job_capacity_with_redis_disabled():
 @pytest.mark.django_db
 def test_job_type_name():
     job = Job.objects.create()
-    assert job.job_type_name == 'job'
+    assert job.job_type_name == "job"
 
     ahc = AdHocCommand.objects.create()
-    assert ahc.job_type_name == 'ad_hoc_command'
+    assert ahc.job_type_name == "ad_hoc_command"
 
-    source = InventorySource.objects.create(source='ec2')
+    source = InventorySource.objects.create(source="ec2")
     source.save()
-    iu = InventoryUpdate.objects.create(inventory_source=source, source='ec2')
-    assert iu.job_type_name == 'inventory_update'
+    iu = InventoryUpdate.objects.create(inventory_source=source, source="ec2")
+    assert iu.job_type_name == "inventory_update"
 
     proj = Project.objects.create()
     proj.save()
     pu = ProjectUpdate.objects.create(project=proj)
-    assert pu.job_type_name == 'project_update'
+    assert pu.job_type_name == "project_update"
 
     sjob = SystemJob.objects.create()
-    assert sjob.job_type_name == 'system_job'
+    assert sjob.job_type_name == "system_job"
 
 
 @pytest.mark.django_db
@@ -145,22 +159,47 @@ def test_job_notification_data(inventory, machine_credential, project):
     job = Job.objects.create(
         job_template=None,
         inventory=inventory,
-        name='hi world',
+        name="hi world",
         extra_vars=json.dumps({"SSN": "123-45-6789"}),
         survey_passwords={"SSN": encrypted_str},
         project=project,
     )
     job.credentials.set([machine_credential])
     notification_data = job.notification_data(block=0)
-    assert json.loads(notification_data['extra_vars'])['SSN'] == encrypted_str
+    assert json.loads(notification_data["extra_vars"])["SSN"] == encrypted_str
 
 
 @pytest.mark.django_db
-def test_job_notification_host_data(inventory, machine_credential, project, job_template, host):
-    job = Job.objects.create(job_template=job_template, inventory=inventory, name='hi world', project=project)
-    JobHostSummary.objects.create(job=job, host=host, changed=1, dark=2, failures=3, ok=4, processed=3, skipped=2, rescued=1, ignored=0)
-    assert job.notification_data()['hosts'] == {
-        'single-host': {'failed': True, 'changed': 1, 'dark': 2, 'failures': 3, 'ok': 4, 'processed': 3, 'skipped': 2, 'rescued': 1, 'ignored': 0}
+def test_job_notification_host_data(
+    inventory, machine_credential, project, job_template, host
+):
+    job = Job.objects.create(
+        job_template=job_template, inventory=inventory, name="hi world", project=project
+    )
+    JobHostSummary.objects.create(
+        job=job,
+        host=host,
+        changed=1,
+        dark=2,
+        failures=3,
+        ok=4,
+        processed=3,
+        skipped=2,
+        rescued=1,
+        ignored=0,
+    )
+    assert job.notification_data()["hosts"] == {
+        "single-host": {
+            "failed": True,
+            "changed": 1,
+            "dark": 2,
+            "failures": 3,
+            "ok": 4,
+            "processed": 3,
+            "skipped": 2,
+            "rescued": 1,
+            "ignored": 0,
+        }
     }
 
 
@@ -169,45 +208,50 @@ class TestAnsibleFactsSave:
     current_call = 0
 
     def test_update_hosts_deleted_host(self, inventory):
-        hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+        hosts = [
+            Host.objects.create(inventory=inventory, name=f"foo{i}") for i in range(3)
+        ]
         for host in hosts:
-            host.ansible_facts = {'foo': 'bar'}
+            host.ansible_facts = {"foo": "bar"}
         last_pk = hosts[-1].pk
         assert inventory.hosts.count() == 3
         Host.objects.get(pk=last_pk).delete()
         assert inventory.hosts.count() == 2
-        bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
+        bulk_update_sorted_by_id(Host, hosts, fields=["ansible_facts"])
         assert inventory.hosts.count() == 2
         for host in inventory.hosts.all():
             host.refresh_from_db()
-            assert host.ansible_facts == {'foo': 'bar'}
+            assert host.ansible_facts == {"foo": "bar"}
 
     def test_update_hosts_forever_deadlock(self, inventory, mocker):
-        hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+        hosts = [
+            Host.objects.create(inventory=inventory, name=f"foo{i}") for i in range(3)
+        ]
         for host in hosts:
-            host.ansible_facts = {'foo': 'bar'}
-        db_mock = mocker.patch('awx.main.tasks.facts.Host.objects.bulk_update')
-        db_mock.side_effect = OperationalError('deadlock detected')
+            host.ansible_facts = {"foo": "bar"}
+        db_mock = mocker.patch("awx.main.tasks.facts.Host.objects.bulk_update")
+        db_mock.side_effect = OperationalError("deadlock detected")
         with pytest.raises(OperationalError):
-            bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
+            bulk_update_sorted_by_id(Host, hosts, fields=["ansible_facts"])
 
     def fake_bulk_update(self, host_list):
         if self.current_call > 2:
-            return Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
+            return Host.objects.bulk_update(
+                host_list, ["ansible_facts", "ansible_facts_modified"]
+            )
         self.current_call += 1
-        raise OperationalError('deadlock detected')
+        raise OperationalError("deadlock detected")
 
 
 @pytest.mark.django_db
 def test_update_hosts_resolved_deadlock(inventory, mocker):
-
-    hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+    hosts = [Host.objects.create(inventory=inventory, name=f"foo{i}") for i in range(3)]
 
     # Set ansible_facts for each host
     for host in hosts:
-        host.ansible_facts = {'foo': 'bar'}
+        host.ansible_facts = {"foo": "bar"}
 
-    bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
+    bulk_update_sorted_by_id(Host, hosts, fields=["ansible_facts"])
 
     # Save changes and refresh from DB to ensure the updated facts are saved
     for host in hosts:
@@ -216,9 +260,9 @@ def test_update_hosts_resolved_deadlock(inventory, mocker):
 
     # Assert that the ansible_facts were updated correctly
     for host in inventory.hosts.all():
-        assert host.ansible_facts == {'foo': 'bar'}
+        assert host.ansible_facts == {"foo": "bar"}
 
-    bulk_update_sorted_by_id(Host, hosts, fields=['ansible_facts'])
+    bulk_update_sorted_by_id(Host, hosts, fields=["ansible_facts"])
 
 
 @pytest.mark.django_db
@@ -261,11 +305,15 @@ class TestLaunchConfig:
 
     def test_many_to_many_fields(self, job_template, organization):
         job = Job.objects.create(job_template=job_template)
-        ig1 = InstanceGroup.objects.create(name='bar')
-        ig2 = InstanceGroup.objects.create(name='foo')
+        ig1 = InstanceGroup.objects.create(name="bar")
+        ig2 = InstanceGroup.objects.create(name="foo")
         job_template.instance_groups.add(ig2)
-        label1 = Label.objects.create(name='foo', description='bar', organization=organization)
-        label2 = Label.objects.create(name='faz', description='baz', organization=organization)
+        label1 = Label.objects.create(
+            name="foo", description="bar", organization=organization
+        )
+        label2 = Label.objects.create(
+            name="faz", description="baz", organization=organization
+        )
         # Order should matter here which is why we do 2 and then 1
         data = {
             "credentials": [],
@@ -291,7 +339,9 @@ class TestLaunchConfig:
 
     def test_pk_field(self, job_template, organization):
         job = Job.objects.create(job_template=job_template)
-        ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/foo/bar')
+        ee = ExecutionEnvironment.objects.create(
+            name="test-ee", image="quay.io/foo/bar"
+        )
         # Order should matter here which is why we do 2 and then 1
         data = {
             "credentials": [],
@@ -313,38 +363,63 @@ class TestLaunchConfig:
 
 
 @pytest.mark.django_db
-@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
-def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_credentials, mocker):
+@override_settings(
+    RESOURCE_SERVER={
+        "URL": "https://gateway.example.com",
+        "SECRET_KEY": "test-secret-key",
+        "VALIDATE_HTTPS": False,
+    }
+)
+def test_populate_workload_identity_tokens_with_flag_enabled(
+    job_template_with_credentials, mocker
+):
     """Test populate_workload_identity_tokens sets context when flag is enabled."""
-    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+    with feature_flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
         task = jobs.RunJob()
 
         # Create credential types
-        ssh_type = CredentialType.defaults['ssh']()
+        ssh_type = CredentialType.defaults["ssh"]()
         ssh_type.save()
 
         # Create a workload identity credential type
         hashivault_type = CredentialType(
-            name='HashiCorp Vault Secret Lookup (OIDC)',
-            kind='cloud',
+            name="HashiCorp Vault Secret Lookup (OIDC)",
+            kind="cloud",
             managed=False,
             inputs={
-                'fields': [
-                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
-                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                "fields": [
+                    {"id": "url", "type": "string", "label": "Server URL"},
+                    {
+                        "id": "workload_identity_token",
+                        "type": "string",
+                        "label": "Workload Identity Token",
+                        "secret": True,
+                        "internal": True,
+                    },
                 ]
             },
         )
         hashivault_type.save()
 
         # Create credentials
-        ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
-        target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
+        ssh_cred = Credential.objects.create(credential_type=ssh_type, name="ssh-cred")
+        source_cred = Credential.objects.create(
+            credential_type=hashivault_type,
+            name="vault-source",
+            inputs={"url": "https://vault.example.com"},
+        )
+        target_cred = Credential.objects.create(
+            credential_type=ssh_type,
+            name="target-cred",
+            inputs={"username": "testuser"},
+        )
 
         # Create input source linking source credential to target credential
         input_source = CredentialInputSource.objects.create(
-            target_credential=target_cred, source_credential=source_cred, input_field_name='password', metadata={'path': 'secret/data/password'}
+            target_credential=target_cred,
+            source_credential=source_cred,
+            input_field_name="password",
+            metadata={"path": "secret/data/password"},
         )
 
         # Create a job using fixture
@@ -355,52 +430,82 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
 
         # Mock only the HTTP response from the Gateway workload identity endpoint
         mock_response = mocker.Mock(status_code=200)
-        mock_response.json.return_value = {'jwt': 'eyJ.test.jwt'}
+        mock_response.json.return_value = {"jwt": "eyJ.test.jwt"}
 
-        mock_request = mocker.patch('requests.request', return_value=mock_response, autospec=True)
+        mock_request = mocker.patch(
+            "requests.request", return_value=mock_response, autospec=True
+        )
 
         task.populate_workload_identity_tokens(prep)
 
         # Verify the HTTP call was made to the correct endpoint
         mock_request.assert_called_once()
         call_kwargs = mock_request.call_args.kwargs
-        assert call_kwargs['method'] == 'POST'
-        assert '/api/gateway/v1/workload_identity_tokens' in call_kwargs['url']
+        assert call_kwargs["method"] == "POST"
+        assert "/api/gateway/v1/workload_identity_tokens" in call_kwargs["url"]
 
         # Verify workload token was set on prep, keyed by input source PK
         assert input_source.pk in prep.workload_tokens
-        assert prep.workload_tokens[input_source.pk]['workload_identity_token'] == 'eyJ.test.jwt'
+        assert (
+            prep.workload_tokens[input_source.pk]["workload_identity_token"]
+            == "eyJ.test.jwt"
+        )
 
 
 @pytest.mark.django_db
-@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
-def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(job_template_with_credentials, mocker):
+@override_settings(
+    RESOURCE_SERVER={
+        "URL": "https://gateway.example.com",
+        "SECRET_KEY": "test-secret-key",
+        "VALIDATE_HTTPS": False,
+    }
+)
+def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(
+    job_template_with_credentials, mocker
+):
     """Test populate_workload_identity_tokens passes workload_ttl_seconds from get_instance_timeout to the client."""
-    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+    with feature_flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
         task = jobs.RunJob()
 
-        ssh_type = CredentialType.defaults['ssh']()
+        ssh_type = CredentialType.defaults["ssh"]()
         ssh_type.save()
 
         hashivault_type = CredentialType(
-            name='HashiCorp Vault Secret Lookup (OIDC)',
-            kind='cloud',
+            name="HashiCorp Vault Secret Lookup (OIDC)",
+            kind="cloud",
             managed=False,
             inputs={
-                'fields': [
-                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
-                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                "fields": [
+                    {"id": "url", "type": "string", "label": "Server URL"},
+                    {
+                        "id": "workload_identity_token",
+                        "type": "string",
+                        "label": "Workload Identity Token",
+                        "secret": True,
+                        "internal": True,
+                    },
                 ]
             },
         )
         hashivault_type.save()
 
-        ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
-        target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
+        ssh_cred = Credential.objects.create(credential_type=ssh_type, name="ssh-cred")
+        source_cred = Credential.objects.create(
+            credential_type=hashivault_type,
+            name="vault-source",
+            inputs={"url": "https://vault.example.com"},
+        )
+        target_cred = Credential.objects.create(
+            credential_type=ssh_type,
+            name="target-cred",
+            inputs={"username": "testuser"},
+        )
 
         CredentialInputSource.objects.create(
-            target_credential=target_cred, source_credential=source_cred, input_field_name='password', metadata={'path': 'secret/data/password'}
+            target_credential=target_cred,
+            source_credential=source_cred,
+            input_field_name="password",
+            metadata={"path": "secret/data/password"},
         )
 
         job = job_template_with_credentials(target_cred, ssh_cred)
@@ -410,49 +515,68 @@ def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(
         prep = TaskPrepData(job, [target_cred, ssh_cred], galaxy_credentials=[])
 
         mock_response = mocker.Mock(status_code=200)
-        mock_response.json.return_value = {'jwt': 'eyJ.test.jwt'}
-        mock_request = mocker.patch('requests.request', return_value=mock_response, autospec=True)
+        mock_response.json.return_value = {"jwt": "eyJ.test.jwt"}
+        mock_request = mocker.patch(
+            "requests.request", return_value=mock_response, autospec=True
+        )
 
         task.populate_workload_identity_tokens(prep)
 
         call_kwargs = mock_request.call_args.kwargs
-        assert call_kwargs['method'] == 'POST'
-        json_body = call_kwargs.get('json', {})
-        assert json_body.get('workload_ttl_seconds') == 3600
+        assert call_kwargs["method"] == "POST"
+        json_body = call_kwargs.get("json", {})
+        assert json_body.get("workload_ttl_seconds") == 3600
 
 
 @pytest.mark.django_db
-def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_credentials):
+def test_populate_workload_identity_tokens_with_flag_disabled(
+    job_template_with_credentials,
+):
     """Test populate_workload_identity_tokens sets error status when flag is disabled."""
-    with feature_flag_disabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+    with feature_flag_disabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
         task = jobs.RunJob()
 
         # Create credential types
-        ssh_type = CredentialType.defaults['ssh']()
+        ssh_type = CredentialType.defaults["ssh"]()
         ssh_type.save()
 
         # Create a workload identity credential type
         hashivault_type = CredentialType(
-            name='HashiCorp Vault Secret Lookup (OIDC)',
-            kind='cloud',
+            name="HashiCorp Vault Secret Lookup (OIDC)",
+            kind="cloud",
             managed=False,
             inputs={
-                'fields': [
-                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
-                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                "fields": [
+                    {"id": "url", "type": "string", "label": "Server URL"},
+                    {
+                        "id": "workload_identity_token",
+                        "type": "string",
+                        "label": "Workload Identity Token",
+                        "secret": True,
+                        "internal": True,
+                    },
                 ]
             },
         )
         hashivault_type.save()
 
         # Create credentials
-        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source')
-        target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
+        source_cred = Credential.objects.create(
+            credential_type=hashivault_type, name="vault-source"
+        )
+        target_cred = Credential.objects.create(
+            credential_type=ssh_type,
+            name="target-cred",
+            inputs={"username": "testuser"},
+        )
 
         # Create input source linking source credential to target credential
         # Note: Creates the relationship that will trigger the feature flag check
         CredentialInputSource.objects.create(
-            target_credential=target_cred, source_credential=source_cred, input_field_name='password', metadata={'path': 'secret/data/password'}
+            target_credential=target_cred,
+            source_credential=source_cred,
+            input_field_name="password",
+            metadata={"path": "secret/data/password"},
         )
 
         # Create a job using fixture
@@ -465,65 +589,101 @@ def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_
 
         # Verify job status was set to error
         job.refresh_from_db()
-        assert job.status == 'error'
-        assert 'FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED' in job.job_explanation
-        assert 'vault-source' in job.job_explanation
+        assert job.status == "error"
+        assert "FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED" in job.job_explanation
+        assert "vault-source" in job.job_explanation
 
 
 @pytest.mark.django_db
-@override_settings(RESOURCE_SERVER={'URL': 'https://gateway.example.com', 'SECRET_KEY': 'test-secret-key', 'VALIDATE_HTTPS': False})
-def test_populate_workload_identity_tokens_multiple_input_sources_per_credential(job_template_with_credentials, mocker):
+@override_settings(
+    RESOURCE_SERVER={
+        "URL": "https://gateway.example.com",
+        "SECRET_KEY": "test-secret-key",
+        "VALIDATE_HTTPS": False,
+    }
+)
+def test_populate_workload_identity_tokens_multiple_input_sources_per_credential(
+    job_template_with_credentials, mocker
+):
     """Test that a single credential with two input sources from different workload identity
     credential types gets a separate JWT token for each input source, keyed by input source PK."""
-    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+    with feature_flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
         task = jobs.RunJob()
 
         # Create credential types
-        ssh_type = CredentialType.defaults['ssh']()
+        ssh_type = CredentialType.defaults["ssh"]()
         ssh_type.save()
 
         # Create two different workload identity credential types
         hashivault_kv_type = CredentialType(
-            name='HashiCorp Vault Secret Lookup (OIDC)',
-            kind='cloud',
+            name="HashiCorp Vault Secret Lookup (OIDC)",
+            kind="cloud",
             managed=False,
             inputs={
-                'fields': [
-                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
-                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                "fields": [
+                    {"id": "url", "type": "string", "label": "Server URL"},
+                    {
+                        "id": "workload_identity_token",
+                        "type": "string",
+                        "label": "Workload Identity Token",
+                        "secret": True,
+                        "internal": True,
+                    },
                 ]
             },
         )
         hashivault_kv_type.save()
 
         hashivault_ssh_type = CredentialType(
-            name='HashiCorp Vault Signed SSH (OIDC)',
-            kind='cloud',
+            name="HashiCorp Vault Signed SSH (OIDC)",
+            kind="cloud",
             managed=False,
             inputs={
-                'fields': [
-                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
-                    {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
+                "fields": [
+                    {"id": "url", "type": "string", "label": "Server URL"},
+                    {
+                        "id": "workload_identity_token",
+                        "type": "string",
+                        "label": "Workload Identity Token",
+                        "secret": True,
+                        "internal": True,
+                    },
                 ]
             },
         )
         hashivault_ssh_type.save()
 
         # Create source credentials with different audiences
-        source_cred_kv = Credential.objects.create(credential_type=hashivault_kv_type, name='vault-kv-source', inputs={'url': 'https://vault-kv.example.com'})
+        source_cred_kv = Credential.objects.create(
+            credential_type=hashivault_kv_type,
+            name="vault-kv-source",
+            inputs={"url": "https://vault-kv.example.com"},
+        )
         source_cred_ssh = Credential.objects.create(
-            credential_type=hashivault_ssh_type, name='vault-ssh-source', inputs={'url': 'https://vault-ssh.example.com'}
+            credential_type=hashivault_ssh_type,
+            name="vault-ssh-source",
+            inputs={"url": "https://vault-ssh.example.com"},
         )
 
         # Create target credential that uses both sources for different fields
-        target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
+        target_cred = Credential.objects.create(
+            credential_type=ssh_type,
+            name="target-cred",
+            inputs={"username": "testuser"},
+        )
 
         # Create two input sources on the same target credential, each for a different field
         input_source_password = CredentialInputSource.objects.create(
-            target_credential=target_cred, source_credential=source_cred_kv, input_field_name='password', metadata={'path': 'secret/data/password'}
+            target_credential=target_cred,
+            source_credential=source_cred_kv,
+            input_field_name="password",
+            metadata={"path": "secret/data/password"},
         )
         input_source_ssh_key = CredentialInputSource.objects.create(
-            target_credential=target_cred, source_credential=source_cred_ssh, input_field_name='ssh_key_data', metadata={'path': 'secret/data/ssh_key'}
+            target_credential=target_cred,
+            source_credential=source_cred_ssh,
+            input_field_name="ssh_key_data",
+            metadata={"path": "secret/data/ssh_key"},
         )
 
         # Create a job using fixture
@@ -534,12 +694,14 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
 
         # Mock HTTP responses - return different JWTs for each call
         response_kv = mocker.Mock(status_code=200)
-        response_kv.json.return_value = {'jwt': 'eyJ.kv.jwt'}
+        response_kv.json.return_value = {"jwt": "eyJ.kv.jwt"}
 
         response_ssh = mocker.Mock(status_code=200)
-        response_ssh.json.return_value = {'jwt': 'eyJ.ssh.jwt'}
+        response_ssh.json.return_value = {"jwt": "eyJ.ssh.jwt"}
 
-        mock_request = mocker.patch('requests.request', side_effect=[response_kv, response_ssh], autospec=True)
+        mock_request = mocker.patch(
+            "requests.request", side_effect=[response_kv, response_ssh], autospec=True
+        )
 
         task.populate_workload_identity_tokens(prep)
 
@@ -547,31 +709,44 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
         assert mock_request.call_count == 2
 
         # Verify each call used the correct audience from its source credential
-        audiences_requested = {call.kwargs.get('json', {}).get('audience', '') for call in mock_request.call_args_list}
-        assert 'https://vault-kv.example.com' in audiences_requested
-        assert 'https://vault-ssh.example.com' in audiences_requested
+        audiences_requested = {
+            call.kwargs.get("json", {}).get("audience", "")
+            for call in mock_request.call_args_list
+        }
+        assert "https://vault-kv.example.com" in audiences_requested
+        assert "https://vault-ssh.example.com" in audiences_requested
 
         # Verify workload tokens on prep, keyed by input source PK
         assert input_source_password.pk in prep.workload_tokens
         assert input_source_ssh_key.pk in prep.workload_tokens
-        assert prep.workload_tokens[input_source_password.pk]['workload_identity_token'] == 'eyJ.kv.jwt'
-        assert prep.workload_tokens[input_source_ssh_key.pk]['workload_identity_token'] == 'eyJ.ssh.jwt'
+        assert (
+            prep.workload_tokens[input_source_password.pk]["workload_identity_token"]
+            == "eyJ.kv.jwt"
+        )
+        assert (
+            prep.workload_tokens[input_source_ssh_key.pk]["workload_identity_token"]
+            == "eyJ.ssh.jwt"
+        )
 
 
 @pytest.mark.django_db
-def test_populate_workload_identity_tokens_without_workload_identity_credentials(job_template_with_credentials, mocker):
+def test_populate_workload_identity_tokens_without_workload_identity_credentials(
+    job_template_with_credentials, mocker
+):
     """Test populate_workload_identity_tokens does nothing when no workload identity credentials."""
-    with feature_flag_enabled('FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED'):
+    with feature_flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
         task = jobs.RunJob()
 
         # Create only standard credentials (no workload identity)
-        ssh_type = CredentialType.defaults['ssh']()
+        ssh_type = CredentialType.defaults["ssh"]()
         ssh_type.save()
-        vault_type = CredentialType.defaults['vault']()
+        vault_type = CredentialType.defaults["vault"]()
         vault_type.save()
 
-        ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-        vault_cred = Credential.objects.create(credential_type=vault_type, name='vault-cred')
+        ssh_cred = Credential.objects.create(credential_type=ssh_type, name="ssh-cred")
+        vault_cred = Credential.objects.create(
+            credential_type=vault_type, name="vault-cred"
+        )
 
         # Create a job using fixture
         job = job_template_with_credentials(ssh_cred, vault_cred)
@@ -579,7 +754,11 @@ def test_populate_workload_identity_tokens_without_workload_identity_credentials
 
         prep = TaskPrepData(job, [ssh_cred, vault_cred], galaxy_credentials=[])
 
-        mocker.patch('awx.main.tasks.jobs.populate_claims_for_workload', return_value={'job_id': 123}, autospec=True)
+        mocker.patch(
+            "awx.main.tasks.jobs.populate_claims_for_workload",
+            return_value={"job_id": 123},
+            autospec=True,
+        )
 
         task.populate_workload_identity_tokens(prep)
 

@@ -57,15 +57,20 @@ class PreparedCredential:
         For all other fields, delegates to the Credential model's get_input
         which handles decryption, defaults, etc.
         """
-        if self._credential.credential_type.kind != 'external' and field_name in self._credential.dynamic_input_fields:
+        if (
+            self._credential.credential_type.kind != "external"
+            and field_name in self._credential.dynamic_input_fields
+        ):
             return self._get_dynamic_input(field_name)
         return self._credential.get_input(field_name, **kwargs)
 
     def _get_dynamic_input(self, field_name):
         for input_source in self._credential.input_sources.all():
             if input_source.input_field_name == field_name:
-                return input_source.get_input_value(context=self._prep_data.workload_tokens)
-        raise ValueError('{} is not a dynamic input field'.format(field_name))
+                return input_source.get_input_value(
+                    context=self._prep_data.workload_tokens
+                )
+        raise ValueError("{} is not a dynamic input field".format(field_name))
 
     def __getattr__(self, name):
         return getattr(self._credential, name)
@@ -79,10 +84,10 @@ class PreparedCredential:
         # Allow comparison with raw Credential objects.
         # Django's Model.__eq__ returns NotImplemented for non-Model types,
         # so Python falls through to this side.
-        return self._credential.pk == getattr(other, 'pk', None)
+        return self._credential.pk == getattr(other, "pk", None)
 
     def __repr__(self):
-        return f'PreparedCredential(pk={self._credential.pk}, kind={self.kind})'
+        return f"PreparedCredential(pk={self._credential.pk}, kind={self.kind})"
 
 
 class TaskPrepData:
@@ -103,26 +108,30 @@ class TaskPrepData:
     """
 
     _TASK_KIND_MAP = {
-        'job': 'job',
-        'jobtemplate': 'job',
-        'projectupdate': 'project',
-        'project': 'project',
-        'inventoryupdate': 'inventory',
-        'inventorysource': 'inventory',
-        'adhoccommand': 'adhoc',
-        'systemjob': 'system',
-        'systemjobtemplate': 'system',
+        "job": "job",
+        "jobtemplate": "job",
+        "projectupdate": "project",
+        "project": "project",
+        "inventoryupdate": "inventory",
+        "inventorysource": "inventory",
+        "adhoccommand": "adhoc",
+        "systemjob": "system",
+        "systemjobtemplate": "system",
     }
 
-    def __init__(self, instance: Model, credentials: list[Model], galaxy_credentials: list[Model]):
+    def __init__(
+        self, instance: Model, credentials: list[Model], galaxy_credentials: list[Model]
+    ):
         self._instance = instance
         self.workload_tokens = {}
         self.parent_workflow_job_id = None
         self.credentials = [PreparedCredential(c, self) for c in credentials]
-        self.galaxy_credentials = [PreparedCredential(c, self) for c in galaxy_credentials]
+        self.galaxy_credentials = [
+            PreparedCredential(c, self) for c in galaxy_credentials
+        ]
 
     @property
-    def task_kind(self) -> Literal['job', 'project', 'inventory', 'adhoc', 'system']:
+    def task_kind(self) -> Literal["job", "project", "inventory", "adhoc", "system"]:
         return self._TASK_KIND_MAP[self._instance._meta.model_name]
 
     @classmethod
@@ -139,17 +148,33 @@ class TaskPrepData:
             from awx.main.signals import disable_activity_stream
 
             with disable_activity_stream():
-                instance.execution_environment = instance.resolve_execution_environment()
-                instance.save(update_fields=['execution_environment'])
+                instance.execution_environment = (
+                    instance.resolve_execution_environment()
+                )
+                instance.save(update_fields=["execution_environment"])
 
-        if instance._meta.model_name in ('projectupdate', 'adhoccommand'):
-            creds = [instance.credential] if instance.__dict__.get('credential_id') else []
+        if instance._meta.model_name in ("projectupdate", "adhoccommand"):
+            creds = (
+                [instance.credential] if instance.__dict__.get("credential_id") else []
+            )
         else:
-            creds = list(instance.credentials.prefetch_related('input_sources__source_credential').all())
+            creds = list(
+                instance.credentials.prefetch_related(
+                    "input_sources__source_credential"
+                ).all()
+            )
 
         galaxy_creds = []
-        if hasattr(instance, 'project') and instance.project and instance.project.organization:
-            galaxy_creds = list(instance.project.organization.galaxy_credentials.prefetch_related('input_sources__source_credential').all())
+        if (
+            hasattr(instance, "project")
+            and instance.project
+            and instance.project.organization
+        ):
+            galaxy_creds = list(
+                instance.project.organization.galaxy_credentials.prefetch_related(
+                    "input_sources__source_credential"
+                ).all()
+            )
 
         prep = cls(instance, creds, galaxy_credentials=galaxy_creds)
 
@@ -180,7 +205,7 @@ class TaskPrepData:
         Returns from the owned credentials list, never hits the DB.
         Returns None for job types that don't have a source.
         """
-        injector_kind = getattr(self._instance, 'injector_credential_kind', None)
+        injector_kind = getattr(self._instance, "injector_credential_kind", None)
         if injector_kind is None:
             return None
         kind = injector_kind()
@@ -188,7 +213,7 @@ class TaskPrepData:
             # source exists but has no dedicated injector
             # fall back to first non-vault credential
             for cred in self.credentials:
-                if cred.credential_type.kind != 'vault':
+                if cred.credential_type.kind != "vault":
                     return cred
             return None
         for cred in self.credentials:
@@ -209,9 +234,9 @@ class TaskPrepData:
         - InventoryUpdate: the cloud credential matching injector_credential_kind
           is handled by the inventory source injector.
         """
-        if self.task_kind in ('adhoc', 'project'):
+        if self.task_kind in ("adhoc", "project"):
             return []
-        injector_kind = getattr(self._instance, 'injector_credential_kind', None)
+        injector_kind = getattr(self._instance, "injector_credential_kind", None)
         if injector_kind is None:
             return self.credentials
         kind = injector_kind()

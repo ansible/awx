@@ -29,8 +29,13 @@ from ansible_base.lib.utils.models import prevent_search
 from awx.api.versioning import reverse
 from awx.main.utils.common import load_all_entry_points_for
 from awx.main.utils.lazy_registry import LazyLoadDict
-from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names, compute_cloud_inventory_sources
-from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
+from awx.main.utils.plugins import (
+    discover_available_cloud_provider_plugin_names,
+    compute_cloud_inventory_sources,
+)
+from awx_plugins.interfaces._temporary_private_licensing_api import (
+    detect_server_product_name,
+)
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
@@ -38,8 +43,16 @@ from awx.main.fields import (
     OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
-from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, accepts_json
-from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
+from awx.main.models.base import (
+    BaseModel,
+    CommonModelNameNotUnique,
+    VarsDictProperty,
+    accepts_json,
+)
+from awx.main.models.events import (
+    InventoryUpdateEvent,
+    UnpartitionedInventoryUpdateEvent,
+)
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -54,16 +67,31 @@ from awx.main.models.notifications import (
 )
 from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
-from awx.main.utils.execution_environments import get_control_plane_execution_environment
+from awx.main.utils.execution_environments import (
+    get_control_plane_execution_environment,
+)
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
+__all__ = [
+    "Inventory",
+    "Host",
+    "Group",
+    "InventorySource",
+    "InventoryUpdate",
+    "SmartInventoryMembership",
+    "HostMetric",
+    "HostMetricSummaryMonthly",
+]
 
-logger = logging.getLogger('awx.main.models.inventory')
+logger = logging.getLogger("awx.main.models.inventory")
 
 
 class InventoryConstructedInventoryMembership(models.Model):
-    constructed_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='constructed_inventory_memberships')
-    input_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
+    constructed_inventory = models.ForeignKey(
+        "Inventory",
+        on_delete=models.CASCADE,
+        related_name="constructed_inventory_memberships",
+    )
+    input_inventory = models.ForeignKey("Inventory", on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
         null=True,
         default=None,
@@ -71,136 +99,162 @@ class InventoryConstructedInventoryMembership(models.Model):
     )
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin):
+class Inventory(
+    CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin
+):
     """
     an inventory source contains lists and hosts.
     """
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups', 'prevent_instance_group_fallback']
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        "hosts",
+        "groups",
+        "instance_groups",
+        "prevent_instance_group_fallback",
+    ]
     KIND_CHOICES = [
-        ('', _('Hosts have a direct link to this inventory.')),
-        ('smart', _('Hosts for inventory generated using the host_filter property.')),
-        ('constructed', _('Parse list of source inventories with the constructed inventory plugin.')),
+        ("", _("Hosts have a direct link to this inventory.")),
+        ("smart", _("Hosts for inventory generated using the host_filter property.")),
+        (
+            "constructed",
+            _(
+                "Parse list of source inventories with the constructed inventory plugin."
+            ),
+        ),
     ]
 
     class Meta:
-        app_label = 'main'
-        verbose_name_plural = _('inventories')
-        unique_together = [('name', 'organization')]
-        ordering = ('name',)
+        app_label = "main"
+        verbose_name_plural = _("inventories")
+        unique_together = [("name", "organization")]
+        ordering = ("name",)
         permissions = [
-            ('use_inventory', 'Can use inventory in a job template'),
-            ('adhoc_inventory', 'Can run ad hoc commands'),
-            ('update_inventory', 'Can update inventory sources in inventory'),
+            ("use_inventory", "Can use inventory in a job template"),
+            ("adhoc_inventory", "Can run ad hoc commands"),
+            ("update_inventory", "Can update inventory sources in inventory"),
         ]
 
     organization = models.ForeignKey(
-        'Organization',
-        related_name='inventories',
-        help_text=_('Organization containing this inventory.'),
+        "Organization",
+        related_name="inventories",
+        help_text=_("Organization containing this inventory."),
         on_delete=models.SET_NULL,
         null=True,
     )
     variables = accepts_json(
         models.TextField(
             blank=True,
-            default='',
-            help_text=_('Inventory variables in JSON or YAML format.'),
+            default="",
+            help_text=_("Inventory variables in JSON or YAML format."),
         )
     )
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. Flag indicating whether any hosts in this inventory have failed.'),
+        help_text=_(
+            "This field is deprecated and will be removed in a future release. Flag indicating whether any hosts in this inventory have failed."
+        ),
     )
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. Total number of hosts in this inventory.'),
+        help_text=_(
+            "This field is deprecated and will be removed in a future release. Total number of hosts in this inventory."
+        ),
     )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. Number of hosts in this inventory with active failures.'),
+        help_text=_(
+            "This field is deprecated and will be removed in a future release. Number of hosts in this inventory with active failures."
+        ),
     )
     total_groups = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. Total number of groups in this inventory.'),
+        help_text=_(
+            "This field is deprecated and will be removed in a future release. Total number of groups in this inventory."
+        ),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
         help_text=_(
-            'This field is deprecated and will be removed in a future release. Flag indicating whether this inventory has any external inventory sources.'
+            "This field is deprecated and will be removed in a future release. Flag indicating whether this inventory has any external inventory sources."
         ),
     )
     total_inventory_sources = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total number of external inventory sources configured within this inventory.'),
+        help_text=_(
+            "Total number of external inventory sources configured within this inventory."
+        ),
     )
     inventory_sources_with_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of external inventory sources in this inventory with failures.'),
+        help_text=_(
+            "Number of external inventory sources in this inventory with failures."
+        ),
     )
     kind = models.CharField(
         max_length=32,
         choices=KIND_CHOICES,
         blank=True,
-        default='',
-        help_text=_('Kind of inventory being represented.'),
+        default="",
+        help_text=_("Kind of inventory being represented."),
     )
     host_filter = SmartFilterField(
         blank=True,
         null=True,
         default=None,
-        help_text=_('Filter that will be applied to the hosts of this inventory.'),
+        help_text=_("Filter that will be applied to the hosts of this inventory."),
     )
     input_inventories = OrderedManyToManyField(
-        'Inventory',
+        "Inventory",
         blank=True,
-        through_fields=('constructed_inventory', 'input_inventory'),
-        related_name='destination_inventories',
-        help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
-        through='InventoryConstructedInventoryMembership',
+        through_fields=("constructed_inventory", "input_inventory"),
+        related_name="destination_inventories",
+        help_text=_(
+            "Only valid for constructed inventories, this links to the inventories that will be used."
+        ),
+        through="InventoryConstructedInventoryMembership",
     )
     instance_groups = OrderedManyToManyField(
-        'InstanceGroup',
+        "InstanceGroup",
         blank=True,
-        through='InventoryInstanceGroupMembership',
+        through="InventoryInstanceGroupMembership",
     )
     admin_role = ImplicitRoleField(
-        parent_role='organization.inventory_admin_role',
+        parent_role="organization.inventory_admin_role",
     )
     update_role = ImplicitRoleField(
-        parent_role='admin_role',
+        parent_role="admin_role",
     )
     adhoc_role = ImplicitRoleField(
-        parent_role='admin_role',
+        parent_role="admin_role",
     )
     use_role = ImplicitRoleField(
-        parent_role='adhoc_role',
+        parent_role="adhoc_role",
     )
     read_role = ImplicitRoleField(
         parent_role=[
-            'organization.auditor_role',
-            'update_role',
-            'use_role',
-            'admin_role',
+            "organization.auditor_role",
+            "update_role",
+            "use_role",
+            "admin_role",
         ]
     )
     pending_deletion = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('Flag indicating the inventory is being deleted.'),
+        help_text=_("Flag indicating the inventory is being deleted."),
     )
     labels = models.ManyToManyField(
         "Label",
         blank=True,
-        related_name='inventory_labels',
-        help_text=_('Labels associated with this inventory.'),
+        related_name="inventory_labels",
+        help_text=_("Labels associated with this inventory."),
     )
     prevent_instance_group_fallback = models.BooleanField(
         default=False,
@@ -220,11 +274,15 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
 
             route = resolve(request.path_info)
             if any(route.url_name == url.name for url in constructed_inventory_urls):
-                return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
+                return reverse(
+                    "api:constructed_inventory_detail",
+                    kwargs={"pk": self.pk},
+                    request=request,
+                )
 
-        return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse("api:inventory_detail", kwargs={"pk": self.pk}, request=request)
 
-    variables_dict = VarsDictProperty('variables')
+    variables_dict = VarsDictProperty("variables")
 
     def get_group_hosts_map(self):
         """
@@ -233,7 +291,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         # FIXME: Cache this mapping?
         group_hosts_kw = dict(group__inventory_id=self.pk, host__inventory_id=self.pk)
         group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
-        group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id')
+        group_hosts_qs = group_hosts_qs.values_list("group_id", "host_id")
         group_hosts_map = {}
         for group_id, host_id in group_hosts_qs:
             group_host_ids = group_hosts_map.setdefault(group_id, set())
@@ -245,9 +303,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         Return dictionary mapping group_id to set of parent group_id's.
         """
         # FIXME: Cache this mapping?
-        group_parents_kw = dict(from_group__inventory_id=self.pk, to_group__inventory_id=self.pk)
+        group_parents_kw = dict(
+            from_group__inventory_id=self.pk, to_group__inventory_id=self.pk
+        )
         group_parents_qs = Group.parents.through.objects.filter(**group_parents_kw)
-        group_parents_qs = group_parents_qs.values_list('from_group_id', 'to_group_id')
+        group_parents_qs = group_parents_qs.values_list("from_group_id", "to_group_id")
         group_parents_map = {}
         for from_group_id, to_group_id in group_parents_qs:
             group_parents = group_parents_map.setdefault(from_group_id, set())
@@ -259,9 +319,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         Return dictionary mapping group_id to set of child group_id's.
         """
         # FIXME: Cache this mapping?
-        group_parents_kw = dict(from_group__inventory_id=self.pk, to_group__inventory_id=self.pk)
+        group_parents_kw = dict(
+            from_group__inventory_id=self.pk, to_group__inventory_id=self.pk
+        )
         group_parents_qs = Group.parents.through.objects.filter(**group_parents_kw)
-        group_parents_qs = group_parents_qs.values_list('from_group_id', 'to_group_id')
+        group_parents_qs = group_parents_qs.values_list("from_group_id", "to_group_id")
         group_children_map = {}
         for from_group_id, to_group_id in group_parents_qs:
             group_children = group_children_map.setdefault(to_group_id, set())
@@ -272,13 +334,15 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
     def parse_slice_params(slice_str):
         m = re.match(r"slice(?P<number>\d+)of(?P<step>\d+)", slice_str)
         if not m:
-            raise ParseError(_('Could not parse subset as slice specification.'))
-        number = int(m.group('number'))
-        step = int(m.group('step'))
+            raise ParseError(_("Could not parse subset as slice specification."))
+        number = int(m.group("number"))
+        step = int(m.group("step"))
         if number > step:
-            raise ParseError(_('Slice number must be less than total number of slices.'))
+            raise ParseError(
+                _("Slice number must be less than total number of slices.")
+            )
         elif number < 1:
-            raise ParseError(_('Slice number must be 1 or higher.'))
+            raise ParseError(_("Slice number must be 1 or higher."))
         return (number, step)
 
     def get_sliced_hosts(self, host_queryset, slice_number, slice_count):
@@ -300,33 +364,42 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
             host_queryset = host_queryset[offset::slice_count]
         return host_queryset
 
-    def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
+    def get_script_data(
+        self,
+        hostvars=False,
+        towervars=False,
+        show_all=False,
+        slice_number=1,
+        slice_count=1,
+    ):
         hosts_kw = dict()
         if not show_all:
-            hosts_kw['enabled'] = True
-        fetch_fields = ['name', 'id', 'variables', 'inventory_id']
+            hosts_kw["enabled"] = True
+        fetch_fields = ["name", "id", "variables", "inventory_id"]
         if towervars:
-            fetch_fields.append('enabled')
-        host_queryset = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
+            fetch_fields.append("enabled")
+        host_queryset = (
+            self.hosts.filter(**hosts_kw).order_by("name").only(*fetch_fields)
+        )
         hosts = self.get_sliced_hosts(host_queryset, slice_number, slice_count)
 
         data = dict()
-        all_group = data.setdefault('all', dict())
+        all_group = data.setdefault("all", dict())
         all_hostnames = set(host.name for host in hosts)
 
         if self.variables_dict:
-            all_group['vars'] = self.variables_dict
+            all_group["vars"] = self.variables_dict
 
-        if self.kind == 'smart':
-            all_group['hosts'] = [host.name for host in hosts]
+        if self.kind == "smart":
+            all_group["hosts"] = [host.name for host in hosts]
         else:
             # Keep track of hosts that are members of a group
             grouped_hosts = set([])
 
             # Build in-memory mapping of groups and their hosts.
-            group_hosts_qs = Group.hosts.through.objects.filter(group__inventory_id=self.id, host__inventory_id=self.id).values_list(
-                'group_id', 'host_id', 'host__name'
-            )
+            group_hosts_qs = Group.hosts.through.objects.filter(
+                group__inventory_id=self.id, host__inventory_id=self.id
+            ).values_list("group_id", "host_id", "host__name")
             group_hosts_map = {}
             for group_id, host_id, host_name in group_hosts_qs:
                 if host_name not in all_hostnames:
@@ -339,46 +412,48 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
             group_parents_qs = Group.parents.through.objects.filter(
                 from_group__inventory_id=self.id,
                 to_group__inventory_id=self.id,
-            ).values_list('from_group_id', 'from_group__name', 'to_group_id')
+            ).values_list("from_group_id", "from_group__name", "to_group_id")
             group_children_map = {}
             for from_group_id, from_group_name, to_group_id in group_parents_qs:
                 group_children = group_children_map.setdefault(to_group_id, [])
                 group_children.append(from_group_name)
 
             # Add ungrouped hosts to all group
-            all_group['hosts'] = [host.name for host in hosts if host.name not in grouped_hosts]
+            all_group["hosts"] = [
+                host.name for host in hosts if host.name not in grouped_hosts
+            ]
 
             # Now use in-memory maps to build up group info.
             all_group_names = []
-            for group in self.groups.only('name', 'id', 'variables', 'inventory_id'):
+            for group in self.groups.only("name", "id", "variables", "inventory_id"):
                 group_info = dict()
                 if group.id in group_hosts_map:
-                    group_info['hosts'] = group_hosts_map[group.id]
+                    group_info["hosts"] = group_hosts_map[group.id]
                 if group.id in group_children_map:
-                    group_info['children'] = group_children_map[group.id]
+                    group_info["children"] = group_children_map[group.id]
                 group_vars = group.variables_dict
                 if group_vars:
-                    group_info['vars'] = group_vars
+                    group_info["vars"] = group_vars
                 if group_info:
                     data[group.name] = group_info
                 all_group_names.append(group.name)
 
             # add all groups as children of all group, includes empty groups
             if all_group_names:
-                all_group['children'] = all_group_names
+                all_group["children"] = all_group_names
 
         if hostvars:
-            data.setdefault('_meta', dict())
-            data['_meta'].setdefault('hostvars', dict())
+            data.setdefault("_meta", dict())
+            data["_meta"].setdefault("hostvars", dict())
             for host in hosts:
-                data['_meta']['hostvars'][host.name] = host.variables_dict
+                data["_meta"]["hostvars"][host.name] = host.variables_dict
                 if towervars:
-                    for prefix in ('host', 'tower'):
+                    for prefix in ("host", "tower"):
                         tower_dict = {
-                            f'remote_{prefix}_enabled': str(host.enabled).lower(),
-                            f'remote_{prefix}_id': host.id,
+                            f"remote_{prefix}_enabled": str(host.enabled).lower(),
+                            f"remote_{prefix}_id": host.id,
                         }
-                        data['_meta']['hostvars'][host.name].update(tower_dict)
+                        data["_meta"]["hostvars"][host.name].update(tower_dict)
 
         return data
 
@@ -386,32 +461,44 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         """
         Update model fields that are computed from database relationships.
         """
-        logger.debug("Going to update inventory computed fields, pk={0}".format(self.pk))
+        logger.debug(
+            "Going to update inventory computed fields, pk={0}".format(self.pk)
+        )
         start_time = time.time()
         active_hosts = self.hosts
-        from awx.main.models.jobs import JobHostSummary  # circular import: inventory.py loads before jobs.py
+        from awx.main.models.jobs import (
+            JobHostSummary,
+        )  # circular import: inventory.py loads before jobs.py
 
-        latest_summary_failed = Subquery(JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
-        failed_hosts = active_hosts.annotate(_latest_failed=latest_summary_failed).filter(_latest_failed=True)
+        latest_summary_failed = Subquery(
+            JobHostSummary.objects.filter(host_id=OuterRef("pk"))
+            .order_by("-id")
+            .values("failed")[:1]
+        )
+        failed_hosts = active_hosts.annotate(
+            _latest_failed=latest_summary_failed
+        ).filter(_latest_failed=True)
         active_groups = self.groups
-        if self.kind == 'smart':
+        if self.kind == "smart":
             active_groups = active_groups.none()
-        if self.kind == 'smart':
+        if self.kind == "smart":
             active_inventory_sources = self.inventory_sources.none()
         else:
-            active_inventory_sources = self.inventory_sources.filter(source__in=compute_cloud_inventory_sources())
+            active_inventory_sources = self.inventory_sources.filter(
+                source__in=compute_cloud_inventory_sources()
+            )
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         total_hosts = active_hosts.count()
         # if total_hosts has changed, set update_task_impact to True
         update_task_impact = total_hosts != self.total_hosts
         computed_fields = {
-            'has_active_failures': bool(failed_hosts.count()),
-            'total_hosts': total_hosts,
-            'hosts_with_active_failures': failed_hosts.count(),
-            'total_groups': active_groups.count(),
-            'has_inventory_sources': bool(active_inventory_sources.count()),
-            'total_inventory_sources': active_inventory_sources.count(),
-            'inventory_sources_with_failures': failed_inventory_sources.count(),
+            "has_active_failures": bool(failed_hosts.count()),
+            "total_hosts": total_hosts,
+            "hosts_with_active_failures": failed_hosts.count(),
+            "total_groups": active_groups.count(),
+            "has_inventory_sources": bool(active_inventory_sources.count()),
+            "total_inventory_sources": active_inventory_sources.count(),
+            "inventory_sources_with_failures": failed_inventory_sources.count(),
         }
         # CentOS python seems to have issues clobbering the inventory on poor timing during certain operations
         iobj = Inventory.objects.get(id=self.id)
@@ -431,17 +518,28 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
             tasks = self.jobs.filter(status="pending")
             for t in tasks:
                 t.task_impact = t._get_task_impact()
-            UnifiedJob.objects.bulk_update(tasks, ['task_impact'])
-        logger.debug("Finished updating inventory computed fields, pk={0}, in {1:.3f} seconds".format(self.pk, time.time() - start_time))
+            UnifiedJob.objects.bulk_update(tasks, ["task_impact"])
+        logger.debug(
+            "Finished updating inventory computed fields, pk={0}, in {1:.3f} seconds".format(
+                self.pk, time.time() - start_time
+            )
+        )
 
     def websocket_emit_status(self, status):
         connection.on_commit(
-            lambda: emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': self.id, 'status': status})
+            lambda: emit_channel_notification(
+                "inventories-status_changed",
+                {
+                    "group_name": "inventories",
+                    "inventory_id": self.id,
+                    "status": status,
+                },
+            )
         )
 
     @property
     def root_groups(self):
-        group_pks = self.groups.values_list('pk', flat=True)
+        group_pks = self.groups.values_list("pk", flat=True)
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
 
     @transaction.atomic
@@ -452,17 +550,19 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         if self.pending_deletion is True:
             raise RuntimeError("Inventory is already pending deletion.")
         self.pending_deletion = True
-        self.save(update_fields=['pending_deletion'])
+        self.save(update_fields=["pending_deletion"])
         self.jobtemplates.clear()
         activity_stream_delete(Inventory, self, inventory_delete_flag=True)
-        self.websocket_emit_status('pending_deletion')
+        self.websocket_emit_status("pending_deletion")
         delete_inventory.delay(self.pk, user_id)
 
     def _update_host_smart_inventory_memeberships(self):
-        if self.kind == 'smart' and settings.AWX_REBUILD_SMART_MEMBERSHIP:
+        if self.kind == "smart" and settings.AWX_REBUILD_SMART_MEMBERSHIP:
 
             def on_commit():
-                from awx.main.tasks.system import update_host_smart_inventory_memberships
+                from awx.main.tasks.system import (
+                    update_host_smart_inventory_memberships,
+                )
 
                 update_host_smart_inventory_memberships.delay()
 
@@ -473,16 +573,24 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         Constructed inventory should always have exactly 1 inventory source, constructed type
         this enforces that requirement
         """
-        if self.kind == 'constructed':
+        if self.kind == "constructed":
             if not self.inventory_sources.exists():
                 self.inventory_sources.create(
-                    source='constructed', name=f'Auto-created source for: {self.name}'[:512], overwrite=True, overwrite_vars=True, update_on_launch=True
+                    source="constructed",
+                    name=f"Auto-created source for: {self.name}"[:512],
+                    overwrite=True,
+                    overwrite_vars=True,
+                    update_on_launch=True,
                 )
 
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).save(*args, **kwargs)
-        if self.kind == 'smart' and 'host_filter' in kwargs.get('update_fields', ['host_filter']) and connection.vendor != 'sqlite':
+        if (
+            self.kind == "smart"
+            and "host_filter" in kwargs.get("update_fields", ["host_filter"])
+            and connection.vendor != "sqlite"
+        ):
             # Minimal update of host_count for smart inventory host filter changes
             self.update_computed_fields()
         self._enforce_constructed_source()
@@ -491,12 +599,16 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQu
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).delete(*args, **kwargs)
 
-    '''
+    """
     RelatedJobsMixin
-    '''
+    """
 
     def _get_related_jobs(self):
-        return UnifiedJob.objects.non_polymorphic().filter(Q(job__inventory=self) | Q(inventoryupdate__inventory=self) | Q(adhoccommand__inventory=self))
+        return UnifiedJob.objects.non_polymorphic().filter(
+            Q(job__inventory=self)
+            | Q(inventoryupdate__inventory=self)
+            | Q(adhoccommand__inventory=self)
+        )
 
 
 class SmartInventoryMembership(BaseModel):
@@ -505,11 +617,13 @@ class SmartInventoryMembership(BaseModel):
     """
 
     class Meta:
-        app_label = 'main'
-        unique_together = (('host', 'inventory'),)
+        app_label = "main"
+        unique_together = (("host", "inventory"),)
 
-    inventory = models.ForeignKey('Inventory', related_name='+', on_delete=models.CASCADE)
-    host = models.ForeignKey('Host', related_name='+', on_delete=models.CASCADE)
+    inventory = models.ForeignKey(
+        "Inventory", related_name="+", on_delete=models.CASCADE
+    )
+    host = models.ForeignKey("Host", related_name="+", on_delete=models.CASCADE)
 
 
 class Host(CommonModelNameNotUnique, RelatedJobsMixin):
@@ -517,51 +631,63 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     A managed node
     """
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['name', 'description', 'groups', 'inventory', 'enabled', 'instance_id', 'variables']
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        "name",
+        "description",
+        "groups",
+        "inventory",
+        "enabled",
+        "instance_id",
+        "variables",
+    ]
 
     class Meta:
-        app_label = 'main'
-        unique_together = (("name", "inventory"),)  # FIXME: Add ('instance_id', 'inventory') after migration.
-        ordering = ('name',)
+        app_label = "main"
+        unique_together = (
+            ("name", "inventory"),
+        )  # FIXME: Add ('instance_id', 'inventory') after migration.
+        ordering = ("name",)
 
     inventory = models.ForeignKey(
-        'Inventory',
-        related_name='hosts',
+        "Inventory",
+        related_name="hosts",
         on_delete=models.CASCADE,
     )
     smart_inventories = models.ManyToManyField(
-        'Inventory',
-        related_name='+',
-        through='SmartInventoryMembership',
+        "Inventory",
+        related_name="+",
+        through="SmartInventoryMembership",
     )
     enabled = models.BooleanField(
         default=True,
-        help_text=_('Is this host online and available for running jobs?'),
+        help_text=_("Is this host online and available for running jobs?"),
     )
     instance_id = models.CharField(
         max_length=1024,
         blank=True,
-        default='',
-        help_text=_('The value used by the remote inventory source to uniquely identify the host'),
+        default="",
+        help_text=_(
+            "The value used by the remote inventory source to uniquely identify the host"
+        ),
     )
     variables = accepts_json(
         models.TextField(
             blank=True,
-            default='',
-            help_text=_('Host variables in JSON or YAML format.'),
+            default="",
+            help_text=_("Host variables in JSON or YAML format."),
         )
     )
     last_job = models.ForeignKey(
-        'Job',
-        related_name='hosts_as_last_job+',
+        "Job",
+        related_name="hosts_as_last_job+",
         null=True,
         default=None,
         editable=False,
         on_delete=models.SET_NULL,
     )
     last_job_host_summary = models.ForeignKey(
-        'JobHostSummary',
-        related_name='hosts_as_last_job_summary+',
+        "JobHostSummary",
+        related_name="hosts_as_last_job_summary+",
         blank=True,
         null=True,
         default=None,
@@ -569,32 +695,37 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         on_delete=models.SET_NULL,
     )
     inventory_sources = models.ManyToManyField(
-        'InventorySource',
-        related_name='hosts',
+        "InventorySource",
+        related_name="hosts",
         editable=False,
-        help_text=_('Inventory source(s) that created or modified this host.'),
+        help_text=_("Inventory source(s) that created or modified this host."),
     )
     ansible_facts = models.JSONField(
         blank=True,
         default=dict,
-        help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
+        help_text=_("Arbitrary JSON structure of most recent ansible_facts, per-host."),
     )
     ansible_facts_modified = models.DateTimeField(
         default=None,
         editable=False,
         null=True,
-        help_text=_('The date and time ansible_facts was last modified.'),
+        help_text=_("The date and time ansible_facts was last modified."),
     )
 
     objects = HostManager()
 
     @property
     def latest_summary(self):
-        if hasattr(self, '_latest_summary_cache'):
+        if hasattr(self, "_latest_summary_cache"):
             return self._latest_summary_cache
         from awx.main.models.jobs import JobHostSummary
 
-        summary = JobHostSummary.objects.filter(host_id=self.pk).order_by('-id').select_related('job', 'job__job_template').first()
+        summary = (
+            JobHostSummary.objects.filter(host_id=self.pk)
+            .order_by("-id")
+            .select_related("job", "job__job_template")
+            .first()
+        )
         self._latest_summary_cache = summary
         return summary
 
@@ -606,9 +737,9 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         return summary.job
 
     def get_absolute_url(self, request=None):
-        return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse("api:host_detail", kwargs={"pk": self.pk}, request=request)
 
-    variables_dict = VarsDictProperty('variables')
+    variables_dict = VarsDictProperty("variables")
 
     @property
     def all_groups(self):
@@ -617,7 +748,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         recursion in the case of cyclical group relations.
         """
         group_parents_map = self.inventory.get_group_parents_map()
-        group_pks = set(self.groups.values_list('pk', flat=True))
+        group_pks = set(self.groups.values_list("pk", flat=True))
         child_pks_to_check = set()
         child_pks_to_check.update(group_pks)
         child_pks_checked = set()
@@ -639,17 +770,19 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         command run.
         """
         host_name = self.name
-        if 'ansible_ssh_host' in self.variables_dict:
-            host_name = self.variables_dict['ansible_ssh_host']
-        if 'ansible_host' in self.variables_dict:
-            host_name = self.variables_dict['ansible_host']
+        if "ansible_ssh_host" in self.variables_dict:
+            host_name = self.variables_dict["ansible_ssh_host"]
+        if "ansible_host" in self.variables_dict:
+            host_name = self.variables_dict["ansible_host"]
         return host_name
 
     def _update_host_smart_inventory_memeberships(self):
         if settings.AWX_REBUILD_SMART_MEMBERSHIP:
 
             def on_commit():
-                from awx.main.tasks.system import update_host_smart_inventory_memberships
+                from awx.main.tasks.system import (
+                    update_host_smart_inventory_memberships,
+                )
 
                 update_host_smart_inventory_memberships.delay()
 
@@ -670,9 +803,9 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         self._update_host_smart_inventory_memeberships()
         super(Host, self).delete(*args, **kwargs)
 
-    '''
+    """
     RelatedJobsMixin
-    '''
+    """
 
     def _get_related_jobs(self):
         return self.inventory._get_related_jobs()
@@ -684,47 +817,55 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     groups.
     """
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['name', 'description', 'inventory', 'children', 'parents', 'hosts', 'variables']
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        "name",
+        "description",
+        "inventory",
+        "children",
+        "parents",
+        "hosts",
+        "variables",
+    ]
 
     class Meta:
-        app_label = 'main'
+        app_label = "main"
         unique_together = (("name", "inventory"),)
-        ordering = ('name',)
+        ordering = ("name",)
 
     inventory = models.ForeignKey(
-        'Inventory',
-        related_name='groups',
+        "Inventory",
+        related_name="groups",
         on_delete=models.CASCADE,
     )
     # Can also be thought of as: parents == member_of, children == members
     parents = models.ManyToManyField(
-        'self',
+        "self",
         symmetrical=False,
-        related_name='children',
+        related_name="children",
         blank=True,
     )
     variables = accepts_json(
         models.TextField(
             blank=True,
-            default='',
-            help_text=_('Group variables in JSON or YAML format.'),
+            default="",
+            help_text=_("Group variables in JSON or YAML format."),
         )
     )
     hosts = models.ManyToManyField(
-        'Host',
-        related_name='groups',
+        "Host",
+        related_name="groups",
         blank=True,
-        help_text=_('Hosts associated directly with this group.'),
+        help_text=_("Hosts associated directly with this group."),
     )
     inventory_sources = models.ManyToManyField(
-        'InventorySource',
-        related_name='groups',
+        "InventorySource",
+        related_name="groups",
         editable=False,
-        help_text=_('Inventory source(s) that created or modified this group.'),
+        help_text=_("Inventory source(s) that created or modified this group."),
     )
 
     def get_absolute_url(self, request=None):
-        return reverse('api:group_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse("api:group_detail", kwargs={"pk": self.pk}, request=request)
 
     @transaction.atomic
     def delete_recursive(self):
@@ -733,21 +874,25 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         from awx.main.signals import disable_activity_stream, activity_stream_delete
 
         def mark_actual():
-            all_group_hosts = Group.hosts.through.objects.select_related("host", "group").filter(group__inventory=self.inventory)
-            group_hosts = {'groups': {}, 'hosts': {}}
-            all_group_parents = Group.parents.through.objects.select_related("from_group", "to_group").filter(from_group__inventory=self.inventory)
+            all_group_hosts = Group.hosts.through.objects.select_related(
+                "host", "group"
+            ).filter(group__inventory=self.inventory)
+            group_hosts = {"groups": {}, "hosts": {}}
+            all_group_parents = Group.parents.through.objects.select_related(
+                "from_group", "to_group"
+            ).filter(from_group__inventory=self.inventory)
             group_children = {}
             group_parents = {}
             marked_hosts = []
             marked_groups = [self.id]
 
             for pairing in all_group_hosts:
-                if pairing.group_id not in group_hosts['groups']:
-                    group_hosts['groups'][pairing.group_id] = []
-                if pairing.host_id not in group_hosts['hosts']:
-                    group_hosts['hosts'][pairing.host_id] = []
-                group_hosts['groups'][pairing.group_id].append(pairing.host_id)
-                group_hosts['hosts'][pairing.host_id].append(pairing.group_id)
+                if pairing.group_id not in group_hosts["groups"]:
+                    group_hosts["groups"][pairing.group_id] = []
+                if pairing.host_id not in group_hosts["hosts"]:
+                    group_hosts["hosts"][pairing.host_id] = []
+                group_hosts["groups"][pairing.group_id].append(pairing.host_id)
+                group_hosts["hosts"][pairing.host_id].append(pairing.group_id)
 
             for pairing in all_group_parents:
                 if pairing.to_group_id not in group_children:
@@ -757,13 +902,17 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 group_children[pairing.to_group_id].append(pairing.from_group_id)
                 group_parents[pairing.from_group_id].append(pairing.to_group_id)
 
-            linked_children = [(self.id, g) for g in group_children[self.id]] if self.id in group_children else []
+            linked_children = (
+                [(self.id, g) for g in group_children[self.id]]
+                if self.id in group_children
+                else []
+            )
 
-            if self.id in group_hosts['groups']:
-                for host in copy.copy(group_hosts['groups'][self.id]):
-                    group_hosts['hosts'][host].remove(self.id)
-                    group_hosts['groups'][self.id].remove(host)
-                    if len(group_hosts['hosts'][host]) < 1:
+            if self.id in group_hosts["groups"]:
+                for host in copy.copy(group_hosts["groups"][self.id]):
+                    group_hosts["hosts"][host].remove(self.id)
+                    group_hosts["groups"][self.id].remove(host)
+                    if len(group_hosts["hosts"][host]) < 1:
                         marked_hosts.append(host)
 
             for subgroup in linked_children:
@@ -772,10 +921,10 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 group_children[parent].remove(group)
                 if len(group_parents[group]) > 0:
                     continue
-                for host in copy.copy(group_hosts['groups'].get(group, [])):
-                    group_hosts['hosts'][host].remove(group)
-                    group_hosts['groups'][group].remove(host)
-                    if len(group_hosts['hosts'][host]) < 1:
+                for host in copy.copy(group_hosts["groups"].get(group, [])):
+                    group_hosts["hosts"][host].remove(group)
+                    group_hosts["groups"][group].remove(host)
+                    if len(group_hosts["hosts"][host]) < 1:
                         marked_hosts.append(host)
                 if group in group_children:
                     for direct_child in group_children[group]:
@@ -790,7 +939,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 mark_actual()
             activity_stream_delete(None, self)
 
-    variables_dict = VarsDictProperty('variables')
+    variables_dict = VarsDictProperty("variables")
 
     def get_all_parents(self, except_pks=None):
         """
@@ -877,43 +1026,66 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
 
         return AdHocCommand.objects.filter(hosts__in=self.all_hosts)
 
-    '''
+    """
     RelatedJobsMixin
-    '''
+    """
 
     def _get_related_jobs(self):
-        return UnifiedJob.objects.non_polymorphic().filter(Q(job__inventory=self.inventory) | Q(inventoryupdate__inventory_source__groups=self))
+        return UnifiedJob.objects.non_polymorphic().filter(
+            Q(job__inventory=self.inventory)
+            | Q(inventoryupdate__inventory_source__groups=self)
+        )
 
 
 class HostMetric(models.Model):
     hostname = models.CharField(unique=True, max_length=512)
-    first_automation = models.DateTimeField(auto_now_add=True, null=False, db_index=True, help_text=_('When the host was first automated against'))
-    last_automation = models.DateTimeField(db_index=True, help_text=_('When the host was last automated against'))
-    last_deleted = models.DateTimeField(null=True, db_index=True, help_text=_('When the host was last deleted'))
-    automated_counter = models.BigIntegerField(default=0, help_text=_('How many times was the host automated'))
-    deleted_counter = models.IntegerField(default=0, help_text=_('How many times was the host deleted'))
-    deleted = models.BooleanField(
-        default=False, help_text=_('Boolean flag saying whether the host is deleted and therefore not counted into the subscription consumption')
+    first_automation = models.DateTimeField(
+        auto_now_add=True,
+        null=False,
+        db_index=True,
+        help_text=_("When the host was first automated against"),
     )
-    used_in_inventories = models.IntegerField(null=True, help_text=_('How many inventories contain this host'))
+    last_automation = models.DateTimeField(
+        db_index=True, help_text=_("When the host was last automated against")
+    )
+    last_deleted = models.DateTimeField(
+        null=True, db_index=True, help_text=_("When the host was last deleted")
+    )
+    automated_counter = models.BigIntegerField(
+        default=0, help_text=_("How many times was the host automated")
+    )
+    deleted_counter = models.IntegerField(
+        default=0, help_text=_("How many times was the host deleted")
+    )
+    deleted = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Boolean flag saying whether the host is deleted and therefore not counted into the subscription consumption"
+        ),
+    )
+    used_in_inventories = models.IntegerField(
+        null=True, help_text=_("How many inventories contain this host")
+    )
 
     objects = models.Manager()
     active_objects = HostMetricActiveManager()
 
     def get_absolute_url(self, request=None):
-        return reverse('api:host_metric_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse(
+            "api:host_metric_detail", kwargs={"pk": self.pk}, request=request
+        )
 
     def soft_delete(self):
         if not self.deleted:
             self.deleted_counter = (self.deleted_counter or 0) + 1
             self.last_deleted = now()
             self.deleted = True
-            self.save(update_fields=['deleted', 'deleted_counter', 'last_deleted'])
+            self.save(update_fields=["deleted", "deleted_counter", "last_deleted"])
 
     def soft_restore(self):
         if self.deleted:
             self.deleted = False
-            self.save(update_fields=['deleted'])
+            self.save(update_fields=["deleted"])
 
 
 class HostMetricSummaryMonthly(models.Model):
@@ -922,17 +1094,38 @@ class HostMetricSummaryMonthly(models.Model):
     """
 
     date = models.DateField(unique=True)
-    license_consumed = models.BigIntegerField(default=0, help_text=_("How many unique hosts are consumed from the license"))
-    license_capacity = models.BigIntegerField(default=0, help_text=_("'License capacity as max. number of unique hosts"))
-    hosts_added = models.IntegerField(default=0, help_text=_("How many hosts were added in the associated month, consuming more license capacity"))
-    hosts_deleted = models.IntegerField(default=0, help_text=_("How many hosts were deleted in the associated month, freeing the license capacity"))
-    indirectly_managed_hosts = models.IntegerField(default=0, help_text=("Manually entered number indirectly managed hosts for a certain month"))
+    license_consumed = models.BigIntegerField(
+        default=0, help_text=_("How many unique hosts are consumed from the license")
+    )
+    license_capacity = models.BigIntegerField(
+        default=0, help_text=_("'License capacity as max. number of unique hosts")
+    )
+    hosts_added = models.IntegerField(
+        default=0,
+        help_text=_(
+            "How many hosts were added in the associated month, consuming more license capacity"
+        ),
+    )
+    hosts_deleted = models.IntegerField(
+        default=0,
+        help_text=_(
+            "How many hosts were deleted in the associated month, freeing the license capacity"
+        ),
+    )
+    indirectly_managed_hosts = models.IntegerField(
+        default=0,
+        help_text=(
+            "Manually entered number indirectly managed hosts for a certain month"
+        ),
+    )
 
 
 def _load_inventory_plugins():
-    is_awx = detect_server_product_name() == 'AWX'
-    extra_entry_point_groups = () if is_awx else ('inventory.supported',)
-    all_entry_points = load_all_entry_points_for(['inventory', *extra_entry_point_groups])
+    is_awx = detect_server_product_name() == "AWX"
+    extra_entry_point_groups = () if is_awx else ("inventory.supported",)
+    all_entry_points = load_all_entry_points_for(
+        ["inventory", *extra_entry_point_groups]
+    )
 
     for entry_point_name, entry_point in all_entry_points.items():
         cls = entry_point.load()
@@ -948,9 +1141,9 @@ class InventorySourceOptions(BaseModel):
 
     # From the options of the Django management base command
     INVENTORY_UPDATE_VERBOSITY_CHOICES = [
-        (0, '0 (WARNING)'),
-        (1, '1 (INFO)'),
-        (2, '2 (DEBUG)'),
+        (0, "0 (WARNING)"),
+        (1, "1 (INFO)"),
+        (2, "2 (DEBUG)"),
     ]
 
     class Meta:
@@ -964,68 +1157,74 @@ class InventorySourceOptions(BaseModel):
     source_path = models.CharField(
         max_length=1024,
         blank=True,
-        default='',
+        default="",
     )
     source_vars = models.TextField(
         blank=True,
-        default='',
-        help_text=_('Inventory source variables in YAML or JSON format.'),
+        default="",
+        help_text=_("Inventory source variables in YAML or JSON format."),
     )
     scm_branch = models.CharField(
         max_length=1024,
-        default='',
+        default="",
         blank=True,
-        help_text=_('Inventory source SCM branch. Project default used if blank. Only allowed if project allow_override field is set to true.'),
+        help_text=_(
+            "Inventory source SCM branch. Project default used if blank. Only allowed if project allow_override field is set to true."
+        ),
     )
     enabled_var = models.TextField(
         blank=True,
-        default='',
+        default="",
         help_text=_(
-            'Retrieve the enabled state from the given dict of host '
+            "Retrieve the enabled state from the given dict of host "
             'variables. The enabled variable may be specified as "foo.bar", '
-            'in which case the lookup will traverse into nested dicts, '
+            "in which case the lookup will traverse into nested dicts, "
             'equivalent to: from_dict.get("foo", {}).get("bar", default)'
         ),
     )
     enabled_value = models.TextField(
         blank=True,
-        default='',
+        default="",
         help_text=_(
-            'Only used when enabled_var is set. Value when the host is '
+            "Only used when enabled_var is set. Value when the host is "
             'considered enabled. For example if enabled_var="status.power_state"'
             'and enabled_value="powered_on" with host variables:'
-            '{'
+            "{"
             '   "status": {'
             '     "power_state": "powered_on",'
             '     "created": "2020-08-04T18:13:04+00:00",'
             '     "healthy": true'
-            '    },'
+            "    },"
             '    "name": "foobar",'
             '    "ip_address": "192.168.2.1"'
-            '}'
-            'The host would be marked enabled. If power_state where any '
-            'value other than powered_on then the host would be disabled '
-            'when imported. If the key is not found then the '
-            'host will be enabled'
+            "}"
+            "The host would be marked enabled. If power_state where any "
+            "value other than powered_on then the host would be disabled "
+            "when imported. If the key is not found then the "
+            "host will be enabled"
         ),
     )
     host_filter = models.TextField(
         blank=True,
-        default='',
-        help_text=_('This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.'),
+        default="",
+        help_text=_(
+            "This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported."
+        ),
     )
     overwrite = models.BooleanField(
         default=False,
-        help_text=_('Overwrite local groups and hosts from remote inventory source.'),
+        help_text=_("Overwrite local groups and hosts from remote inventory source."),
     )
     overwrite_vars = models.BooleanField(
         default=False,
-        help_text=_('Overwrite local variables from remote inventory source.'),
+        help_text=_("Overwrite local variables from remote inventory source."),
     )
     timeout = models.IntegerField(
         blank=True,
         default=0,
-        help_text=_("The amount of time (in seconds) to run before the task is canceled."),
+        help_text=_(
+            "The amount of time (in seconds) to run before the task is canceled."
+        ),
     )
     verbosity = models.PositiveIntegerField(
         choices=INVENTORY_UPDATE_VERBOSITY_CHOICES,
@@ -1034,7 +1233,7 @@ class InventorySourceOptions(BaseModel):
     )
     limit = models.TextField(
         blank=True,
-        default='',
+        default="",
         help_text=_("Enter host, group or pattern match"),
     )
 
@@ -1044,7 +1243,7 @@ class InventorySourceOptions(BaseModel):
         Jobs using the project can use the default_environment, but the project updates
         are not flexible enough to allow customizing the image they use.
         """
-        if self.inventory.kind == 'constructed':
+        if self.inventory.kind == "constructed":
             return get_control_plane_execution_environment()
         return super().resolve_execution_environment()
 
@@ -1052,26 +1251,60 @@ class InventorySourceOptions(BaseModel):
     def cloud_credential_validation(source, cred):
         if not source:
             return None
-        if cred and source not in ('custom', 'scm', 'openshift_virtualization'):
+        if cred and source not in ("custom", "scm", "openshift_virtualization"):
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
             # TODO: AAP-53978 check that this matches new awx-plugin content for ESXI
-            if source == 'vmware_esxi' and source.replace('vmware_esxi', 'vmware') != cred.kind:
-                return _('VMWARE inventory sources (such as %s) require credentials for the matching cloud service.') % source
-            if source == 'ec2' and source.replace('ec2', 'aws') != cred.kind:
-                return _('Cloud-based inventory sources (such as %s) require credentials for the matching cloud service.') % source
+            if (
+                source == "vmware_esxi"
+                and source.replace("vmware_esxi", "vmware") != cred.kind
+            ):
+                return (
+                    _(
+                        "VMWARE inventory sources (such as %s) require credentials for the matching cloud service."
+                    )
+                    % source
+                )
+            if source == "ec2" and source.replace("ec2", "aws") != cred.kind:
+                return (
+                    _(
+                        "Cloud-based inventory sources (such as %s) require credentials for the matching cloud service."
+                    )
+                    % source
+                )
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
-        elif source in discover_available_cloud_provider_plugin_names() and source not in ['ec2', 'openshift_virtualization']:
-            return _('Credential is required for a cloud source.')
-        elif source == 'custom' and cred and cred.credential_type.kind in ('scm', 'ssh', 'insights', 'vault'):
-            return _('Credentials of type machine, source control, insights and vault are disallowed for custom inventory sources.')
-        elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
-            return _('Credentials of type insights and vault are disallowed for scm inventory sources.')
-        elif source == 'openshift_virtualization' and cred and cred.credential_type.kind != 'kubernetes':
-            return _('Credentials of type kubernetes is requred for openshift_virtualization inventory sources.')
+        elif (
+            source in discover_available_cloud_provider_plugin_names()
+            and source not in ["ec2", "openshift_virtualization"]
+        ):
+            return _("Credential is required for a cloud source.")
+        elif (
+            source == "custom"
+            and cred
+            and cred.credential_type.kind in ("scm", "ssh", "insights", "vault")
+        ):
+            return _(
+                "Credentials of type machine, source control, insights and vault are disallowed for custom inventory sources."
+            )
+        elif (
+            source == "scm"
+            and cred
+            and cred.credential_type.kind in ("insights", "vault")
+        ):
+            return _(
+                "Credentials of type insights and vault are disallowed for scm inventory sources."
+            )
+        elif (
+            source == "openshift_virtualization"
+            and cred
+            and cred.credential_type.kind != "kubernetes"
+        ):
+            return _(
+                "Credentials of type kubernetes is requred for openshift_virtualization inventory sources."
+            )
         return None
 
     def get_cloud_credential(self):
@@ -1083,7 +1316,7 @@ class InventorySourceOptions(BaseModel):
                     return cred
             else:
                 # these need to be returned in the API credential field
-                if cred.credential_type.kind != 'vault':
+                if cred.credential_type.kind != "vault":
                     return cred
         return None
 
@@ -1095,7 +1328,7 @@ class InventorySourceOptions(BaseModel):
         TaskPrepData to exclude this credential from the generic injection loop.
         """
         if self.source in discover_available_cloud_provider_plugin_names():
-            return self.source.replace('ec2', 'aws')
+            return self.source.replace("ec2", "aws")
         return None
 
     @property
@@ -1104,28 +1337,30 @@ class InventorySourceOptions(BaseModel):
         if cred is not None:
             return cred.pk
 
-    source_vars_dict = VarsDictProperty('source_vars')
+    source_vars_dict = VarsDictProperty("source_vars")
 
 
-class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualEnvMixin, RelatedJobsMixin):
-    SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'inventory')]
+class InventorySource(
+    UnifiedJobTemplate, InventorySourceOptions, CustomVirtualEnvMixin, RelatedJobsMixin
+):
+    SOFT_UNIQUE_TOGETHER = [("polymorphic_ctype", "name", "inventory")]
 
     class Meta:
-        app_label = 'main'
-        ordering = ('inventory', 'name')
+        app_label = "main"
+        ordering = ("inventory", "name")
 
     inventory = models.ForeignKey(
-        'Inventory',
-        related_name='inventory_sources',
+        "Inventory",
+        related_name="inventory_sources",
         null=True,
         default=None,
         on_delete=models.CASCADE,
     )
 
     source_project = models.ForeignKey(
-        'Project',
-        related_name='scm_inventory_sources',
-        help_text=_('Project containing inventory file used as source.'),
+        "Project",
+        related_name="scm_inventory_sources",
+        help_text=_("Project containing inventory file used as source."),
         on_delete=models.CASCADE,
         blank=True,
         default=None,
@@ -1146,35 +1381,49 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return set(f.name for f in InventorySourceOptions._meta.fields) | set(['name', 'description', 'organization', 'credentials', 'inventory'])
+        return set(f.name for f in InventorySourceOptions._meta.fields) | set(
+            ["name", "description", "organization", "credentials", "inventory"]
+        )
 
     def save(self, *args, **kwargs):
         # if this is a new object, inherit organization from its inventory
         if not self.pk:
-            self.org_unique = False  # needed to exclude from unique (name, organization) constraint
-            if self.inventory and self.inventory.organization_id and not self.organization_id:
+            self.org_unique = (
+                False  # needed to exclude from unique (name, organization) constraint
+            )
+            if (
+                self.inventory
+                and self.inventory.organization_id
+                and not self.organization_id
+            ):
                 self.organization_id = self.inventory.organization_id
 
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields') or []
+        update_fields = kwargs.get("update_fields") or []
         is_new_instance = not bool(self.pk)
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
-        replace_text = '__replace_%s__' % now()
-        old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
-        if not self.name or old_name_re.match(self.name) or '__replace_' in self.name:
-            group_name = getattr(self, 'v1_group_name', '')
+        replace_text = "__replace_%s__" % now()
+        old_name_re = re.compile(
+            r"^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$"
+        )
+        if not self.name or old_name_re.match(self.name) or "__replace_" in self.name:
+            group_name = getattr(self, "v1_group_name", "")
             if self.inventory and self.pk:
-                self.name = '%s (%s - %s)' % (group_name, self.inventory.name, self.pk)
+                self.name = "%s (%s - %s)" % (group_name, self.inventory.name, self.pk)
             elif self.inventory:
-                self.name = '%s (%s - %s)' % (group_name, self.inventory.name, replace_text)
+                self.name = "%s (%s - %s)" % (
+                    group_name,
+                    self.inventory.name,
+                    replace_text,
+                )
             elif not is_new_instance:
-                self.name = 'inventory source (%s)' % self.pk
+                self.name = "inventory source (%s)" % self.pk
             else:
-                self.name = 'inventory source (%s)' % replace_text
-            if 'name' not in update_fields:
-                update_fields.append('name')
+                self.name = "inventory source (%s)" % replace_text
+            if "name" not in update_fields:
+                update_fields.append("name")
 
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
@@ -1182,8 +1431,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         # Add the PK to the name.
         if replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
-            super(InventorySource, self).save(update_fields=['name'])
-        if not getattr(_inventory_updates, 'is_updating', False):
+            super(InventorySource, self).save(update_fields=["name"])
+        if not getattr(_inventory_updates, "is_updating", False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields()
 
@@ -1192,30 +1441,32 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             if self.current_job and self.current_job.status:
                 return self.current_job.status
             elif not self.last_job:
-                return 'never updated'
+                return "never updated"
             # inherit the child job status
             else:
                 return self.last_job.status
         else:
-            return 'none'
+            return "none"
 
     def get_absolute_url(self, request=None):
-        return reverse('api:inventory_source_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse(
+            "api:inventory_source_detail", kwargs={"pk": self.pk}, request=request
+        )
 
     def _can_update(self):
-        if self.source == 'custom':
+        if self.source == "custom":
             return bool(self.source_script)
-        elif self.source == 'scm':
+        elif self.source == "scm":
             return bool(self.source_project)
-        elif self.source == 'file':
+        elif self.source == "file":
             return False
-        elif self.source == 'ec2':
+        elif self.source == "ec2":
             # Permit credential-less ec2 updates to allow IAM roles
             return True
-        elif self.source == 'gce':
+        elif self.source == "gce":
             # These updates will hang if correct credential is not supplied
             credential = self.get_cloud_credential()
-            return bool(credential and credential.kind == 'gce')
+            return bool(credential and credential.kind == "gce")
         return True
 
     def create_inventory_update(self, **kwargs):
@@ -1224,21 +1475,23 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
     def create_unified_job(self, **kwargs):
         # Use special name, if name not already specified
         if self.inventory:
-            if '_eager_fields' not in kwargs:
-                kwargs['_eager_fields'] = {}
-            if 'name' not in kwargs['_eager_fields']:
-                name = '{} - {}'.format(self.inventory.name, self.name)
-                name_field = self._meta.get_field('name')
+            if "_eager_fields" not in kwargs:
+                kwargs["_eager_fields"] = {}
+            if "name" not in kwargs["_eager_fields"]:
+                name = "{} - {}".format(self.inventory.name, self.name)
+                name_field = self._meta.get_field("name")
                 if len(name) > name_field.max_length:
                     name = name[: name_field.max_length]
-                kwargs['_eager_fields']['name'] = name
+                kwargs["_eager_fields"]["name"] = name
         return super(InventorySource, self).create_unified_job(**kwargs)
 
     @property
     def cache_timeout_blocked(self):
         if not self.last_job_run:
             return False
-        if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) > now():
+        if (
+            self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)
+        ) > now():
             return True
         return False
 
@@ -1247,63 +1500,100 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         if self.source and self.update_on_launch:
             if not self.last_job_run:
                 return True
-            if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) <= now():
+            if (
+                self.last_job_run
+                + datetime.timedelta(seconds=self.update_cache_timeout)
+            ) <= now():
                 return True
         return False
 
     @property
     def notification_templates(self):
         base_notification_templates = NotificationTemplate.objects
-        error_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
-        started_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_started__in=[self]))
-        success_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        error_notification_templates = list(
+            base_notification_templates.filter(
+                unifiedjobtemplate_notification_templates_for_errors__in=[self]
+            )
+        )
+        started_notification_templates = list(
+            base_notification_templates.filter(
+                unifiedjobtemplate_notification_templates_for_started__in=[self]
+            )
+        )
+        success_notification_templates = list(
+            base_notification_templates.filter(
+                unifiedjobtemplate_notification_templates_for_success__in=[self]
+            )
+        )
         if self.inventory.organization is not None:
             error_notification_templates = set(
                 error_notification_templates
-                + list(base_notification_templates.filter(organization_notification_templates_for_errors=self.inventory.organization))
+                + list(
+                    base_notification_templates.filter(
+                        organization_notification_templates_for_errors=self.inventory.organization
+                    )
+                )
             )
             started_notification_templates = set(
                 started_notification_templates
-                + list(base_notification_templates.filter(organization_notification_templates_for_started=self.inventory.organization))
+                + list(
+                    base_notification_templates.filter(
+                        organization_notification_templates_for_started=self.inventory.organization
+                    )
+                )
             )
             success_notification_templates = set(
                 success_notification_templates
-                + list(base_notification_templates.filter(organization_notification_templates_for_success=self.inventory.organization))
+                + list(
+                    base_notification_templates.filter(
+                        organization_notification_templates_for_success=self.inventory.organization
+                    )
+                )
             )
-        return dict(error=list(error_notification_templates), started=list(started_notification_templates), success=list(success_notification_templates))
+        return dict(
+            error=list(error_notification_templates),
+            started=list(started_notification_templates),
+            success=list(success_notification_templates),
+        )
 
     def clean_source_path(self):
-        if self.source != 'scm' and self.source_path:
+        if self.source != "scm" and self.source_path:
             raise ValidationError(_("Cannot set source_path if not SCM type."))
         return self.source_path
 
-    '''
+    """
     RelatedJobsMixin
-    '''
+    """
 
     def _get_related_jobs(self):
         return InventoryUpdate.objects.filter(inventory_source=self)
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin, CustomVirtualEnvMixin):
+class InventoryUpdate(
+    UnifiedJob,
+    InventorySourceOptions,
+    JobNotificationMixin,
+    TaskManagerInventoryUpdateMixin,
+    CustomVirtualEnvMixin,
+):
     """
     Internal job for tracking inventory updates from external sources.
     """
 
     class Meta:
-        app_label = 'main'
-        ordering = ('inventory', 'name')
+        app_label = "main"
+        ordering = ("inventory", "name")
 
     inventory = models.ForeignKey(
-        'Inventory',
-        related_name='inventory_updates',
+        "Inventory",
+        related_name="inventory_updates",
         null=True,
         default=None,
         on_delete=models.DO_NOTHING,
     )
     inventory_source = models.ForeignKey(
-        'InventorySource',
-        related_name='inventory_updates',
+        "InventorySource",
+        related_name="inventory_updates",
         editable=False,
         on_delete=models.CASCADE,
     )
@@ -1316,9 +1606,11 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         editable=False,
     )
     source_project_update = models.ForeignKey(
-        'ProjectUpdate',
-        related_name='scm_inventory_updates',
-        help_text=_('Inventory files from this Project Update were used for the inventory update.'),
+        "ProjectUpdate",
+        related_name="scm_inventory_updates",
+        help_text=_(
+            "Inventory files from this Project Update were used for the inventory update."
+        ),
         on_delete=models.CASCADE,
         blank=True,
         default=None,
@@ -1327,10 +1619,12 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     scm_revision = models.CharField(
         max_length=1024,
         blank=True,
-        default='',
+        default="",
         editable=False,
-        verbose_name=_('SCM Revision'),
-        help_text=_('The SCM Revision from the Project used for this inventory update.  Only applicable to inventories source from scm'),
+        verbose_name=_("SCM Revision"),
+        help_text=_(
+            "The SCM Revision from the Project used for this inventory update.  Only applicable to inventories source from scm"
+        ),
     )
 
     @property
@@ -1338,7 +1632,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return bool(self.instance_group and self.instance_group.is_container_group)
 
     def _get_parent_field_name(self):
-        return 'inventory_source'
+        return "inventory_source"
 
     @classmethod
     def _get_task_class(cls):
@@ -1347,7 +1641,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return RunInventoryUpdate
 
     def _global_timeout_setting(self):
-        return 'DEFAULT_INVENTORY_UPDATE_TIMEOUT'
+        return "DEFAULT_INVENTORY_UPDATE_TIMEOUT"
 
     def websocket_emit_data(self):
         websocket_data = super(InventoryUpdate, self).websocket_emit_data()
@@ -1359,16 +1653,29 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return websocket_data
 
     def get_absolute_url(self, request=None):
-        return reverse('api:inventory_update_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse(
+            "api:inventory_update_detail", kwargs={"pk": self.pk}, request=request
+        )
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "{}/jobs/inventory/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
+        return urljoin(
+            settings.TOWER_URL_BASE,
+            "{}/jobs/inventory/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk),
+        )
 
     def get_actual_source_path(self):
-        '''Alias to source_path that combines with project path for for SCM file based sources'''
-        if self.inventory_source_id is None or self.inventory_source.source_project_id is None:
+        """Alias to source_path that combines with project path for for SCM file based sources"""
+        if (
+            self.inventory_source_id is None
+            or self.inventory_source.source_project_id is None
+        ):
             return self.source_path
-        return os.path.join(self.inventory_source.source_project.get_project_path(check_if_exists=False), self.source_path)
+        return os.path.join(
+            self.inventory_source.source_project.get_project_path(
+                check_if_exists=False
+            ),
+            self.source_path,
+        )
 
     @property
     def event_class(self):
@@ -1389,9 +1696,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
             return False
         return True
 
-    '''
+    """
     JobNotificationMixin
-    '''
+    """
 
     def get_notification_templates(self):
         return self.inventory_source.notification_templates
@@ -1408,10 +1715,16 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
                 selected_groups.append(instance_group)
             # If the inventory allows for fallback and we have an organization then also append the orgs IGs to the end of the list
             if (
-                not getattr(self.inventory_source.inventory, 'prevent_instance_group_fallback', False)
+                not getattr(
+                    self.inventory_source.inventory,
+                    "prevent_instance_group_fallback",
+                    False,
+                )
                 and self.inventory_source.inventory.organization is not None
             ):
-                for instance_group in self.inventory_source.inventory.organization.instance_groups.all():
+                for (
+                    instance_group
+                ) in self.inventory_source.inventory.organization.instance_groups.all():
                     selected_groups.append(instance_group)
 
         if not selected_groups:
@@ -1421,19 +1734,21 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
 class CustomInventoryScript(CommonModelNameNotUnique):
     class Meta:
-        app_label = 'main'
-        ordering = ('name',)
+        app_label = "main"
+        ordering = ("name",)
 
     script = prevent_search(
         models.TextField(
             blank=True,
-            default='',
-            help_text=_('Inventory script contents'),
+            default="",
+            help_text=_("Inventory script contents"),
         )
     )
 
     def get_absolute_url(self, request=None):
-        return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse(
+            "api:inventory_script_detail", kwargs={"pk": self.pk}, request=request
+        )
 
 
 class InventoryGroupVariablesWithHistory(models.Model):
@@ -1452,19 +1767,21 @@ class InventoryGroupVariablesWithHistory(models.Model):
             models.UniqueConstraint(
                 fields=["inventory", "group"],
                 name="unique_inventory_group",
-                violation_error_message=_("Inventory/Group combination must be unique."),
+                violation_error_message=_(
+                    "Inventory/Group combination must be unique."
+                ),
             ),
         ]
 
     inventory = models.ForeignKey(
-        'Inventory',
-        related_name='inventory_group_variables',
+        "Inventory",
+        related_name="inventory_group_variables",
         null=True,
         on_delete=models.CASCADE,
     )
     group = models.ForeignKey(  # `None` denotes the 'all'-group.
-        'Group',
-        related_name='inventory_group_variables',
+        "Group",
+        related_name="inventory_group_variables",
         null=True,
         on_delete=models.CASCADE,
     )
