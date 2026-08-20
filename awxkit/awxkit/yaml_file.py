@@ -14,9 +14,11 @@ file_path_cache = {}
 
 class Loader(yaml.SafeLoader):
     def __init__(self, stream):
-        raw_root = os.path.split(stream.name)[0]
-        # Keep '' for stdin so extractFile() rejects !include with no base dir
-        self._root = os.path.realpath(raw_root) if raw_root else ''
+        if stream.name == '<stdin>':
+            # !include is unsupported when reading from stdin; there's no base directory to resolve relative paths against
+            self._root = ''
+        else:
+            self._root = os.path.dirname(os.path.realpath(stream.name))
         super(Loader, self).__init__(stream)
         Loader.add_constructor('!include', Loader.include)
         Loader.add_constructor('!import', Loader.include)

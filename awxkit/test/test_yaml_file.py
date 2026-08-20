@@ -74,6 +74,15 @@ class TestIncludeLegitimate:
         result = load_file(str(main_yaml))
         assert result["imported"]["included_key"] == "included_value"
 
+    def test_relative_filename_with_no_directory_component(self, yaml_tree, monkeypatch):
+        # A stream.name with no directory component (e.g. `open("main.yaml")` from cwd)
+        # must still resolve _root to cwd, not be mistaken for stdin.
+        monkeypatch.chdir(yaml_tree)
+        stream = io.StringIO("data: !include sub/included.yaml")
+        stream.name = "main.yaml"
+        result = yaml.load(stream, Loader=Loader)
+        assert result["data"]["included_key"] == "included_value"
+
 
 class TestIncludePathTraversal:
     def test_relative_traversal(self, yaml_tree):
