@@ -40,19 +40,13 @@ class Command(BaseCommand):
                             continue
                         if "guid" in body:
                             set_guid(body["guid"])
-                        logger.info(
-                            "Change in logging settings found. Restarting rsyslogd"
-                        )
+                        logger.info("Change in logging settings found. Restarting rsyslogd")
                         # clear the cache of relevant settings then restart
-                        setting_keys = [
-                            k for k in dir(settings) if k.startswith("LOG_AGGREGATOR")
-                        ]
+                        setting_keys = [k for k in dir(settings) if k.startswith("LOG_AGGREGATOR")]
                         cache.delete_many(setting_keys)
                         settings._awx_conf_memoizedcache.clear()
                         reconfigure_rsyslog()
         except Exception:
             # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
-            logger.exception(
-                "Encountered unhandled error in rsyslog_configurer main loop"
-            )
+            logger.exception("Encountered unhandled error in rsyslog_configurer main loop")
             raise
