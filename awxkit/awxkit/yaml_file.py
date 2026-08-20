@@ -3,6 +3,8 @@ import yaml
 import glob
 import logging
 
+from awxkit.exceptions import PathTraversalError
+
 log = logging.getLogger(__name__)
 
 
@@ -12,7 +14,9 @@ file_path_cache = {}
 
 class Loader(yaml.SafeLoader):
     def __init__(self, stream):
-        self._root = os.path.split(stream.name)[0]
+        raw_root = os.path.split(stream.name)[0]
+        # Keep '' for stdin so extractFile() rejects !include with no base dir
+        self._root = os.path.realpath(raw_root) if raw_root else ''
         super(Loader, self).__init__(stream)
         Loader.add_constructor('!include', Loader.include)
         Loader.add_constructor('!import', Loader.include)
@@ -37,8 +41,25 @@ class Loader(yaml.SafeLoader):
             log.error("unrecognised node type in !include statement")
             raise yaml.constructor.ConstructorError
 
+    def _validate_path(self, filename, resolved_path):
+        real_path = os.path.realpath(resolved_path)
+        root_prefix = self._root + os.sep
+        if not (real_path.startswith(root_prefix) or real_path == self._root):
+            raise PathTraversalError("YAML !include path '{}' is not allowed".format(filename))
+
     def extractFile(self, filename):
+        if not self._root:
+            raise PathTraversalError("YAML !include directive is not supported when reading from stdin")
+
+        if os.path.isabs(filename):
+            raise PathTraversalError("YAML !include path '{}' is not allowed".format(filename))
+
         file_pattern = os.path.join(self._root, filename)
+
+        normalized = os.path.normpath(file_pattern)
+        root_prefix = self._root + os.sep
+        if not (normalized.startswith(root_prefix) or normalized == self._root):
+            raise PathTraversalError("YAML !include path '{}' is not allowed".format(filename))
         log.debug('Will attempt to extract schema from: {0}'.format(file_pattern))
         if file_pattern in file_pattern_cache:
             log.debug('File pattern cache hit: {0}'.format(file_pattern))
@@ -47,6 +68,7 @@ class Loader(yaml.SafeLoader):
         data = dict()
         for file_path in glob.glob(file_pattern):
             file_path = os.path.abspath(file_path)
+            self._validate_path(filename, file_path)
             if file_path in file_path_cache:
                 log.debug('Schema cache hit: {0}'.format(file_path))
                 path_data = file_path_cache[file_path]
