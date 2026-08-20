@@ -1076,32 +1076,27 @@ class InventorySourceOptions(BaseModel):
 
     def get_cloud_credential(self):
         """Return the credential which is directly tied to the inventory source type."""
-        credential = None
+        injector_kind = self.injector_credential_kind()
         for cred in self.credentials.all():
-            if self.source in discover_available_cloud_provider_plugin_names():
-                if cred.kind == self.source.replace('ec2', 'aws'):
-                    credential = cred
-                    break
+            if injector_kind:
+                if cred.kind == injector_kind:
+                    return cred
             else:
                 # these need to be returned in the API credential field
                 if cred.credential_type.kind != 'vault':
-                    credential = cred
-                    break
-        return credential
+                    return cred
+        return None
 
-    def get_extra_credentials(self):
-        """Return all credentials that are not used by the inventory source injector.
-        These are all credentials that should run their own inject_credential logic.
+    def injector_credential_kind(self):
+        """Return the credential kind handled by this source's inventory injector.
+
+        Returns the kind string if this source has a dedicated injector that
+        handles its own credential injection, or None otherwise. Used by
+        TaskPrepData to exclude this credential from the generic injection loop.
         """
-        special_cred = None
         if self.source in discover_available_cloud_provider_plugin_names():
-            # these have special injection logic associated with them
-            special_cred = self.get_cloud_credential()
-        extra_creds = []
-        for cred in self.credentials.all():
-            if special_cred is None or cred.pk != special_cred.pk:
-                extra_creds.append(cred)
-        return extra_creds
+            return self.source.replace('ec2', 'aws')
+        return None
 
     @property
     def credential(self):

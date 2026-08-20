@@ -200,29 +200,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append('vault_password')
         return needed
 
-    @functools.cached_property
-    def context(self):
-        """
-        Property for storing runtime context during credential resolution.
-
-        The context is a dict keyed by CredentialInputSource PK, where each value
-        is a dict of runtime fields for that input source. Example::
-
-            {
-                <input_source_pk>: {
-                    "workload_identity_token": "<jwt_token>"
-                },
-                <another_input_source_pk>: {
-                    "workload_identity_token": "<different_jwt_token>"
-                },
-            }
-
-        This structure allows each input source to have its own set of runtime
-        values, avoiding conflicts when a credential has multiple input sources
-        with different configurations (e.g., different JWT audiences).
-        """
-        return {}
-
     @cached_property
     def dynamic_input_fields(self):
         # if the credential is not yet saved we can't access the input_sources
@@ -348,7 +325,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def _get_dynamic_input(self, field_name):
         for input_source in self.input_sources.all():
             if input_source.input_field_name == field_name:
-                return input_source.get_input_value(context=self.context)
+                return input_source.get_input_value()
         else:
             raise ValueError('{} is not a dynamic input field'.format(field_name))
 

@@ -53,35 +53,60 @@ def test__get_credential_type_class_invalid_params():
     assert str(e.value) == 'Expected only apps or app_config to be defined, not both'
 
 
-def test_credential_context_property():
-    """Test that credential context property initializes empty dict and persists across accesses."""
+def test_workload_tokens_owned_by_prep_data():
+    """Test that workload tokens live on TaskPrepData, not individual credentials."""
+    from awx.main.tasks.prep import TaskPrepData
+
     ct = CredentialType(name='Test Cred', kind='vault')
     cred = Credential(id=1, name='Test Credential', credential_type=ct, inputs={})
+    prep = TaskPrepData.for_testing(None, [cred], workload_tokens={42: {'workload_identity_token': 'eyJ.test'}})
 
-    # First access should return empty dict
-    context = cred.context
-    assert context == {}
-
-    # Modify the context
-    context['test_key'] = 'test_value'
-
-    # Second access should return the same dict with modifications
-    assert cred.context == {'test_key': 'test_value'}
-    assert cred.context is context  # Same object reference
+    assert prep.workload_tokens == {42: {'workload_identity_token': 'eyJ.test'}}
+    # All credentials in the prep share the same workload_tokens
+    assert prep.credentials[0]._prep_data is prep
 
 
-def test_credential_context_property_independent_instances():
-    """Test that context property is independent between credential instances."""
+def test_workload_tokens_independent_between_prep_instances():
+    """Test that workload tokens are independent between TaskPrepData instances."""
+    from awx.main.tasks.prep import TaskPrepData
+
     ct = CredentialType(name='Test Cred', kind='vault')
     cred1 = Credential(id=1, name='Cred 1', credential_type=ct, inputs={})
     cred2 = Credential(id=2, name='Cred 2', credential_type=ct, inputs={})
+    prep1 = TaskPrepData.for_testing(None, [cred1], workload_tokens={1: {'token': 'a'}})
+    prep2 = TaskPrepData.for_testing(None, [cred2], workload_tokens={2: {'token': 'b'}})
 
-    cred1.context['key1'] = 'value1'
-    cred2.context['key2'] = 'value2'
+    assert prep1.workload_tokens == {1: {'token': 'a'}}
+    assert prep2.workload_tokens == {2: {'token': 'b'}}
+    assert prep1.workload_tokens is not prep2.workload_tokens
 
-    assert cred1.context == {'key1': 'value1'}
-    assert cred2.context == {'key2': 'value2'}
-    assert cred1.context is not cred2.context
+
+def test_credentials_of_kind():
+    """Test TaskPrepData.credentials_of_kind filters by credential type kind."""
+    from awx.main.tasks.prep import TaskPrepData
+
+    ssh_type = CredentialType(name='SSH', kind='ssh')
+    vault_type = CredentialType(name='Vault', kind='vault')
+    cloud_type = CredentialType(name='AWS', kind='cloud')
+
+    ssh_cred = Credential(id=1, name='ssh', credential_type=ssh_type, inputs={})
+    vault_cred1 = Credential(id=2, name='vault-1', credential_type=vault_type, inputs={})
+    vault_cred2 = Credential(id=3, name='vault-2', credential_type=vault_type, inputs={})
+    cloud_cred = Credential(id=4, name='aws', credential_type=cloud_type, inputs={})
+
+    prep = TaskPrepData(None, [ssh_cred, vault_cred1, cloud_cred, vault_cred2], galaxy_credentials=[])
+
+    vault_creds = prep.credentials_of_kind('vault')
+    assert len(vault_creds) == 2
+    assert vault_creds[0].pk == 2
+    assert vault_creds[1].pk == 3
+
+    ssh_creds = prep.credentials_of_kind('ssh')
+    assert len(ssh_creds) == 1
+    assert ssh_creds[0].pk == 1
+
+    net_creds = prep.credentials_of_kind('net')
+    assert net_creds == []
 
 
 def test_load_plugin_passes_description():
