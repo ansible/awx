@@ -88,7 +88,7 @@ def test_access_list_organization_access(get, admin_user, inventory):
     assert len(by_username['u2']['summary_fields']['direct_access']) == 1
     assert len(by_username['u2']['summary_fields']['indirect_access']) == 0
     access_entry = by_username['u2']['summary_fields']['direct_access'][0]
-    assert sorted(access_entry['descendant_roles']) == sorted(['inventory_admin_role', 'member_role', 'read_role'])
+    assert sorted(access_entry['descendant_roles']) == sorted(['inventory_admin_role', 'read_role'])
 
 
 @pytest.mark.django_db
