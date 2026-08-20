@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: inventory_source
 author: "Adrien Fleury (@fleu42)"
@@ -141,9 +145,9 @@ options:
         - Name of the inventory source's inventory's organization.
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add an inventory source
   awx.awx.inventory_source:
     name: "source-inventory"
@@ -155,7 +159,7 @@ EXAMPLES = '''
     organization: Default
     source_vars:
       private: false
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 from json import dumps
@@ -188,7 +192,7 @@ def main():
             ]
         ),
         source_path=dict(),
-        source_vars=dict(type='dict'),
+        source_vars=dict(type="dict"),
         enabled_var=dict(),
         enabled_value=dict(),
         host_filter=dict(),
@@ -197,115 +201,137 @@ def main():
         execution_environment=dict(),
         custom_virtualenv=dict(),
         organization=dict(),
-        overwrite=dict(type='bool'),
-        overwrite_vars=dict(type='bool'),
-        timeout=dict(type='int'),
-        verbosity=dict(type='int', choices=[0, 1, 2]),
-        update_on_launch=dict(type='bool'),
-        update_cache_timeout=dict(type='int'),
+        overwrite=dict(type="bool"),
+        overwrite_vars=dict(type="bool"),
+        timeout=dict(type="int"),
+        verbosity=dict(type="int", choices=[0, 1, 2]),
+        update_on_launch=dict(type="bool"),
+        update_cache_timeout=dict(type="int"),
         source_project=dict(),
-        scm_branch=dict(type='str'),
-        notification_templates_started=dict(type="list", elements='str'),
-        notification_templates_success=dict(type="list", elements='str'),
-        notification_templates_error=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        scm_branch=dict(type="str"),
+        notification_templates_started=dict(type="list", elements="str"),
+        notification_templates_success=dict(type="list", elements="str"),
+        notification_templates_error=dict(type="list", elements="str"),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
-    new_name = module.params.get('new_name')
-    inventory = module.params.get('inventory')
-    organization = module.params.get('organization')
-    credential = module.params.get('credential')
-    ee = module.params.get('execution_environment')
-    source_project = module.params.get('source_project')
-    state = module.params.get('state')
+    name = module.params.get("name")
+    new_name = module.params.get("new_name")
+    inventory = module.params.get("inventory")
+    organization = module.params.get("organization")
+    credential = module.params.get("credential")
+    ee = module.params.get("execution_environment")
+    source_project = module.params.get("source_project")
+    state = module.params.get("state")
 
     lookup_data = {}
     if organization:
-        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    inventory_object = module.get_one('inventories', name_or_id=inventory, data=lookup_data)
+        lookup_data["organization"] = module.resolve_name_to_id(
+            "organizations", organization
+        )
+    inventory_object = module.get_one(
+        "inventories", name_or_id=inventory, data=lookup_data
+    )
 
     if not inventory_object:
         # if the inventory does not exist, then it can't have sources.
-        if state == 'absent':
+        if state == "absent":
             module.exit_json(**module.json_output)
         else:
-            module.fail_json(msg='The specified inventory, {0}, was not found.'.format(lookup_data))
+            module.fail_json(
+                msg="The specified inventory, {0}, was not found.".format(lookup_data)
+            )
 
     inventory_source_object = module.get_one(
-        'inventory_sources',
+        "inventory_sources",
         name_or_id=name,
-        check_exists=(state == 'exists'),
+        check_exists=(state == "exists"),
         **{
-            'data': {
-                'inventory': inventory_object['id'],
+            "data": {
+                "inventory": inventory_object["id"],
             }
-        }
+        },
     )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(inventory_source_object)
 
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 
-    notifications_start = module.params.get('notification_templates_started')
+    notifications_start = module.params.get("notification_templates_started")
     if notifications_start is not None:
-        association_fields['notification_templates_started'] = []
+        association_fields["notification_templates_started"] = []
         for item in notifications_start:
-            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_started"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    notifications_success = module.params.get('notification_templates_success')
+    notifications_success = module.params.get("notification_templates_success")
     if notifications_success is not None:
-        association_fields['notification_templates_success'] = []
+        association_fields["notification_templates_success"] = []
         for item in notifications_success:
-            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_success"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    notifications_error = module.params.get('notification_templates_error')
+    notifications_error = module.params.get("notification_templates_error")
     if notifications_error is not None:
-        association_fields['notification_templates_error'] = []
+        association_fields["notification_templates_error"] = []
         for item in notifications_error:
-            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_error"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
     # Create the data that gets sent for create and update
     inventory_source_fields = {
-        'name': new_name if new_name else name,
-        'inventory': inventory_object['id'],
+        "name": new_name if new_name else name,
+        "inventory": inventory_object["id"],
     }
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if credential is not None:
-        inventory_source_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+        inventory_source_fields["credential"] = module.resolve_name_to_id(
+            "credentials", credential
+        )
     if ee is not None:
-        inventory_source_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
+        inventory_source_fields["execution_environment"] = module.resolve_name_to_id(
+            "execution_environments", ee
+        )
     if source_project is not None:
-        source_project_object = module.get_one('projects', name_or_id=source_project, data=lookup_data)
+        source_project_object = module.get_one(
+            "projects", name_or_id=source_project, data=lookup_data
+        )
         if not source_project_object:
-            module.fail_json(msg='The specified source project, {0}, was not found.'.format(lookup_data))
-        inventory_source_fields['source_project'] = source_project_object['id']
+            module.fail_json(
+                msg="The specified source project, {0}, was not found.".format(
+                    lookup_data
+                )
+            )
+        inventory_source_fields["source_project"] = source_project_object["id"]
 
     OPTIONAL_VARS = (
-        'description',
-        'source',
-        'source_path',
-        'source_vars',
-        'overwrite',
-        'overwrite_vars',
-        'custom_virtualenv',
-        'timeout',
-        'verbosity',
-        'update_on_launch',
-        'update_cache_timeout',
-        'enabled_var',
-        'enabled_value',
-        'host_filter',
-        'scm_branch',
-        'limit',
+        "description",
+        "source",
+        "source_path",
+        "source_vars",
+        "overwrite",
+        "overwrite_vars",
+        "custom_virtualenv",
+        "timeout",
+        "verbosity",
+        "update_on_launch",
+        "update_cache_timeout",
+        "enabled_var",
+        "enabled_value",
+        "host_filter",
+        "scm_branch",
+        "limit",
     )
 
     # Layer in all remaining optional information
@@ -315,18 +341,30 @@ def main():
             inventory_source_fields[field_name] = field_val
 
     # Attempt to JSON encode source vars
-    if inventory_source_fields.get('source_vars', None):
-        inventory_source_fields['source_vars'] = dumps(inventory_source_fields['source_vars'])
+    if inventory_source_fields.get("source_vars", None):
+        inventory_source_fields["source_vars"] = dumps(
+            inventory_source_fields["source_vars"]
+        )
 
     # Sanity check on arguments
-    if state == 'present' and not inventory_source_object and not inventory_source_fields['source']:
-        module.fail_json(msg="If creating a new inventory source, the source param must be present")
+    if (
+        state == "present"
+        and not inventory_source_object
+        and not inventory_source_fields["source"]
+    ):
+        module.fail_json(
+            msg="If creating a new inventory source, the source param must be present"
+        )
 
     # If the state was present we can let the module build or update the existing inventory_source_object, this will return on its own
     module.create_or_update_if_needed(
-        inventory_source_object, inventory_source_fields, endpoint='inventory_sources', item_type='inventory source', associations=association_fields
+        inventory_source_object,
+        inventory_source_fields,
+        endpoint="inventory_sources",
+        item_type="inventory source",
+        associations=association_fields,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

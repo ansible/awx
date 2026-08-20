@@ -100,7 +100,7 @@ def main():
             "data": {
                 "job__name": name,
             }
-        }
+        },
     )
 
     # Attempt to look up jobs based on the status

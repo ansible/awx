@@ -9,9 +9,8 @@ __metaclass__ = type
 
 
 class ModuleDocFragment(object):
-
     # Automation Platform Controller documentation fragment
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
 options:
   host:
     description: The network address of your Automation Platform Controller host.
@@ -118,4 +117,4 @@ notes:
     host=hostname
     username=username
     password=password
-'''
+"""

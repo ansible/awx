@@ -119,9 +119,11 @@ def main():
             "data": {
                 "job__name": name,
             }
-        }
+        },
     )
-    response = module.post_endpoint("{0}{1}".format(approval_job["related"]["job"], action))
+    response = module.post_endpoint(
+        "{0}{1}".format(approval_job["related"]["job"], action)
+    )
     if response["status_code"] == 204:
         module.json_output["changed"] = True
 

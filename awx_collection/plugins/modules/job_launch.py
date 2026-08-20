@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: job_launch
 author: "Wayne Witzel III (@wwitzel3)"
@@ -130,9 +134,9 @@ options:
           amount of seconds. This happens on the module side.
       type: int
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Launch a job
   awx.awx.job_launch:
     job_template: "My Job Template"
@@ -159,9 +163,9 @@ EXAMPLES = '''
   awx.awx.job_wait:
     job_id: "{{ job.id }}"
     timeout: 120
-'''
+"""
 
-RETURN = '''
+RETURN = """
 id:
     description: job id of the newly launched job
     returned: success
@@ -172,7 +176,7 @@ status:
     returned: success
     type: str
     sample: pending
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -180,29 +184,29 @@ from ..module_utils.controller_api import ControllerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True, aliases=['job_template']),
-        job_type=dict(choices=['run', 'check']),
+        name=dict(required=True, aliases=["job_template"]),
+        job_type=dict(choices=["run", "check"]),
         inventory=dict(),
         organization=dict(),
         # Credentials will be a str instead of a list for backwards compatability
-        credentials=dict(type='list', aliases=['credential'], elements='str'),
+        credentials=dict(type="list", aliases=["credential"], elements="str"),
         limit=dict(),
-        tags=dict(type='list', elements='str'),
-        extra_vars=dict(type='dict'),
+        tags=dict(type="list", elements="str"),
+        extra_vars=dict(type="dict"),
         scm_branch=dict(),
-        skip_tags=dict(type='list', elements='str'),
-        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
-        diff_mode=dict(type='bool'),
-        credential_passwords=dict(type='dict', no_log=False),
+        skip_tags=dict(type="list", elements="str"),
+        verbosity=dict(type="int", choices=[0, 1, 2, 3, 4, 5]),
+        diff_mode=dict(type="bool"),
+        credential_passwords=dict(type="dict", no_log=False),
         execution_environment=dict(),
-        forks=dict(type='int'),
-        instance_groups=dict(type='list', elements='str'),
-        job_slice_count=dict(type='int'),
-        labels=dict(type='list', elements='str'),
-        job_timeout=dict(type='int'),
-        wait=dict(default=False, type='bool'),
-        interval=dict(default=2.0, type='float'),
-        timeout=dict(type='int'),
+        forks=dict(type="int"),
+        instance_groups=dict(type="list", elements="str"),
+        job_slice_count=dict(type="int"),
+        labels=dict(type="list", elements="str"),
+        job_timeout=dict(type="int"),
+        wait=dict(default=False, type="bool"),
+        interval=dict(default=2.0, type="float"),
+        timeout=dict(type="int"),
     )
 
     # Create a module for ourselves
@@ -210,45 +214,45 @@ def main():
 
     optional_args = {}
     # Extract our parameters
-    name = module.params.get('name')
-    inventory = module.params.get('inventory')
-    organization = module.params.get('organization')
-    credentials = module.params.get('credentials')
-    execution_environment = module.params.get('execution_environment')
-    instance_groups = module.params.get('instance_groups')
-    labels = module.params.get('labels')
-    wait = module.params.get('wait')
-    interval = module.params.get('interval')
-    timeout = module.params.get('timeout')
+    name = module.params.get("name")
+    inventory = module.params.get("inventory")
+    organization = module.params.get("organization")
+    credentials = module.params.get("credentials")
+    execution_environment = module.params.get("execution_environment")
+    instance_groups = module.params.get("instance_groups")
+    labels = module.params.get("labels")
+    wait = module.params.get("wait")
+    interval = module.params.get("interval")
+    timeout = module.params.get("timeout")
 
     for field_name in (
-        'job_type',
-        'limit',
-        'extra_vars',
-        'scm_branch',
-        'verbosity',
-        'diff_mode',
-        'credential_passwords',
-        'forks',
-        'job_slice_count',
-        'job_timeout',
+        "job_type",
+        "limit",
+        "extra_vars",
+        "scm_branch",
+        "verbosity",
+        "diff_mode",
+        "credential_passwords",
+        "forks",
+        "job_slice_count",
+        "job_timeout",
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
             optional_args[field_name] = field_val
 
         # Special treatment of tags parameters
-        job_tags = module.params.get('tags')
+        job_tags = module.params.get("tags")
         if job_tags is not None:
-            optional_args['job_tags'] = ",".join(job_tags)
-        skip_tags = module.params.get('skip_tags')
+            optional_args["job_tags"] = ",".join(job_tags)
+        skip_tags = module.params.get("skip_tags")
         if skip_tags is not None:
-            optional_args['skip_tags'] = ",".join(skip_tags)
+            optional_args["skip_tags"] = ",".join(skip_tags)
 
     # job_timeout is special because its actually timeout but we already had a timeout variable
-    job_timeout = module.params.get('job_timeout')
+    job_timeout = module.params.get("job_timeout")
     if job_timeout is not None:
-        optional_args['timeout'] = job_timeout
+        optional_args["timeout"] = job_timeout
 
     # Create a datastructure to pass into our job launch
     post_data = {}
@@ -258,28 +262,36 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if inventory:
-        post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
+        post_data["inventory"] = module.resolve_name_to_id("inventories", inventory)
     if execution_environment:
-        post_data['execution_environment'] = module.resolve_name_to_id('execution_environments', execution_environment)
+        post_data["execution_environment"] = module.resolve_name_to_id(
+            "execution_environments", execution_environment
+        )
 
     if credentials:
-        post_data['credentials'] = []
+        post_data["credentials"] = []
         for credential in credentials:
-            post_data['credentials'].append(module.resolve_name_to_id('credentials', credential))
+            post_data["credentials"].append(
+                module.resolve_name_to_id("credentials", credential)
+            )
     if labels:
-        post_data['labels'] = []
+        post_data["labels"] = []
         for label in labels:
-            post_data['labels'].append(module.resolve_name_to_id('labels', label))
+            post_data["labels"].append(module.resolve_name_to_id("labels", label))
     if instance_groups:
-        post_data['instance_groups'] = []
+        post_data["instance_groups"] = []
         for instance_group in instance_groups:
-            post_data['instance_groups'].append(module.resolve_name_to_id('instance_groups', instance_group))
+            post_data["instance_groups"].append(
+                module.resolve_name_to_id("instance_groups", instance_group)
+            )
 
     # Attempt to look up job_template based on the provided name
     lookup_data = {}
     if organization:
-        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    job_template = module.get_one('job_templates', name_or_id=name, data=lookup_data)
+        lookup_data["organization"] = module.resolve_name_to_id(
+            "organizations", organization
+        )
+    job_template = module.get_one("job_templates", name_or_id=name, data=lookup_data)
 
     if job_template is None:
         module.fail_json(msg="Unable to find job template by name {0}".format(name))
@@ -287,53 +299,75 @@ def main():
     # The API will allow you to submit values to a jb launch that are not prompt on launch.
     # Therefore, we will test to see if anything is set which is not prompt on launch and fail.
     check_vars_to_prompts = {
-        'scm_branch': 'ask_scm_branch_on_launch',
-        'diff_mode': 'ask_diff_mode_on_launch',
-        'limit': 'ask_limit_on_launch',
-        'tags': 'ask_tags_on_launch',
-        'skip_tags': 'ask_skip_tags_on_launch',
-        'job_type': 'ask_job_type_on_launch',
-        'verbosity': 'ask_verbosity_on_launch',
-        'inventory': 'ask_inventory_on_launch',
-        'credentials': 'ask_credential_on_launch',
+        "scm_branch": "ask_scm_branch_on_launch",
+        "diff_mode": "ask_diff_mode_on_launch",
+        "limit": "ask_limit_on_launch",
+        "tags": "ask_tags_on_launch",
+        "skip_tags": "ask_skip_tags_on_launch",
+        "job_type": "ask_job_type_on_launch",
+        "verbosity": "ask_verbosity_on_launch",
+        "inventory": "ask_inventory_on_launch",
+        "credentials": "ask_credential_on_launch",
     }
 
     param_errors = []
     for variable_name, prompt in check_vars_to_prompts.items():
         if module.params.get(variable_name) and not job_template[prompt]:
-            param_errors.append("The field {0} was specified but the job template does not allow for it to be overridden".format(variable_name))
+            param_errors.append(
+                "The field {0} was specified but the job template does not allow for it to be overridden".format(
+                    variable_name
+                )
+            )
     # Check if Either ask_variables_on_launch, or survey_enabled is enabled for use of extra vars.
-    if module.params.get('extra_vars') and not (job_template['ask_variables_on_launch'] or job_template['survey_enabled']):
-        param_errors.append("The field extra_vars was specified but the job template does not allow for it to be overridden")
+    if module.params.get("extra_vars") and not (
+        job_template["ask_variables_on_launch"] or job_template["survey_enabled"]
+    ):
+        param_errors.append(
+            "The field extra_vars was specified but the job template does not allow for it to be overridden"
+        )
     if len(param_errors) > 0:
-        module.fail_json(msg="Parameters specified which can not be passed into job template, see errors for details", **{'errors': param_errors})
+        module.fail_json(
+            msg="Parameters specified which can not be passed into job template, see errors for details",
+            **{"errors": param_errors},
+        )
 
     # Launch the job
-    results = module.post_endpoint(job_template['related']['launch'], **{'data': post_data})
+    results = module.post_endpoint(
+        job_template["related"]["launch"], **{"data": post_data}
+    )
 
-    if results['status_code'] != 201:
-        module.fail_json(msg="Failed to launch job, see response for details", **{'response': results})
+    if results["status_code"] != 201:
+        module.fail_json(
+            msg="Failed to launch job, see response for details",
+            **{"response": results},
+        )
 
     if not wait:
         module.exit_json(
             **{
-                'changed': True,
-                'id': results['json']['id'],
-                'status': results['json']['status'],
+                "changed": True,
+                "id": results["json"]["id"],
+                "status": results["json"]["status"],
             }
         )
 
     # Invoke wait function
-    results = module.wait_on_url(url=results['json']['url'], object_name=name, object_type='Job', timeout=timeout, interval=interval)
+    results = module.wait_on_url(
+        url=results["json"]["url"],
+        object_name=name,
+        object_type="Job",
+        timeout=timeout,
+        interval=interval,
+    )
 
     module.exit_json(
         **{
-            'changed': True,
-            'id': results['json']['id'],
-            'status': results['json']['status'],
+            "changed": True,
+            "id": results["json"]["id"],
+            "status": results["json"]["status"],
         }
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

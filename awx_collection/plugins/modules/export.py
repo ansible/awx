@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: export
 author: "John Westcott IV (@john-westcott-iv)"
@@ -96,9 +100,9 @@ requirements:
 notes:
   - Specifying a name of "all" for any asset type will export all items of that asset type.
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Export all assets
   awx.awx.export:
     all: true
@@ -115,7 +119,7 @@ EXAMPLES = '''
 - name: Export a list of inventories
   awx.awx.export:
     inventory: ['My Inventory 1', 'My Inventory 2']
-'''
+"""
 
 import logging
 from ansible.module_utils.six.moves import StringIO
@@ -131,13 +135,13 @@ except ImportError:
 
 def main():
     argument_spec = dict(
-        all=dict(type='bool', default=False),
+        all=dict(type="bool", default=False),
     )
 
     # We are not going to raise an error here because the __init__ method of ControllerAWXKitModule will do that for us
     if HAS_EXPORTABLE_RESOURCES:
         for resource in EXPORTABLE_RESOURCES:
-            argument_spec[resource] = dict(type='list', elements='str')
+            argument_spec[resource] = dict(type="list", elements="str")
 
     module = ControllerAWXKitModule(argument_spec=argument_spec)
 
@@ -145,7 +149,7 @@ def main():
         module.fail_json(msg="Your version of awxkit does not have import/export")
 
     # The export process will never change the AWX system
-    module.json_output['changed'] = False
+    module.json_output["changed"] = False
 
     # The exporter code currently works like the following:
     #   Empty string == all assets of that type
@@ -154,9 +158,9 @@ def main():
     # Here we are going to setup a dict of values to export
     export_args = {}
     for resource in EXPORTABLE_RESOURCES:
-        if module.params.get('all') or module.params.get(resource) == ['all']:
+        if module.params.get("all") or module.params.get(resource) == ["all"]:
             # If we are exporting everything or we got the keyword "all" we pass in an empty string for this asset type
-            export_args[resource] = ''
+            export_args[resource] = ""
         else:
             # Otherwise we take either the string or None (if the parameter was not passed) to get one or no items
             export_args[resource] = module.params.get(resource)
@@ -166,17 +170,19 @@ def main():
     # Set up a log gobbler to get error messages from export_assets
     log_capture_string = StringIO()
     ch = logging.StreamHandler(log_capture_string)
-    for logger_name in ['awxkit.api.pages.api', 'awxkit.api.pages.page']:
+    for logger_name in ["awxkit.api.pages.api", "awxkit.api.pages.page"]:
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.ERROR)
         ch.setLevel(logging.ERROR)
 
     logger.addHandler(ch)
-    log_contents = ''
+    log_contents = ""
 
     # Run the export process
     try:
-        module.json_output['assets'] = module.get_api_v2_object().export_assets(**export_args)
+        module.json_output["assets"] = module.get_api_v2_object().export_assets(
+            **export_args
+        )
         module.exit_json(**module.json_output)
     except Exception as e:
         module.fail_json(msg="Failed to export assets {0}".format(e))
@@ -184,9 +190,9 @@ def main():
         # Finally, consume the logs in case there were any errors and die if there were
         log_contents = log_capture_string.getvalue()
         log_capture_string.close()
-        if log_contents != '':
+        if log_contents != "":
             module.fail_json(msg=log_contents)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

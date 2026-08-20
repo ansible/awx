@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: user
 author: "John Westcott IV (@john-westcott-iv)"
@@ -73,10 +77,10 @@ options:
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add user
   awx.awx.user:
     username: jdoe
@@ -119,7 +123,7 @@ EXAMPLES = '''
     email: jdoe@example.org
     state: absent
     controller_config_file: "~/tower_cli.cfg"
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -132,63 +136,76 @@ def main():
         first_name=dict(),
         last_name=dict(),
         email=dict(),
-        is_superuser=dict(type='bool', aliases=['superuser']),
-        is_system_auditor=dict(type='bool', aliases=['auditor']),
+        is_superuser=dict(type="bool", aliases=["superuser"]),
+        is_system_auditor=dict(type="bool", aliases=["auditor"]),
         password=dict(no_log=True),
-        update_secrets=dict(type='bool', default=True, no_log=False),
+        update_secrets=dict(type="bool", default=True, no_log=False),
         organization=dict(),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    username = module.params.get('username')
+    username = module.params.get("username")
     new_username = module.params.get("new_username")
-    first_name = module.params.get('first_name')
-    last_name = module.params.get('last_name')
-    email = module.params.get('email')
-    is_superuser = module.params.get('is_superuser')
-    is_system_auditor = module.params.get('is_system_auditor')
-    password = module.params.get('password')
-    organization = module.params.get('organization')
-    state = module.params.get('state')
+    first_name = module.params.get("first_name")
+    last_name = module.params.get("last_name")
+    email = module.params.get("email")
+    is_superuser = module.params.get("is_superuser")
+    is_system_auditor = module.params.get("is_system_auditor")
+    password = module.params.get("password")
+    organization = module.params.get("organization")
+    state = module.params.get("state")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('users', name_or_id=username, check_exists=(state == 'exists'))
+    existing_item = module.get_one(
+        "users", name_or_id=username, check_exists=(state == "exists")
+    )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
     # Create the data that gets sent for create and update
     new_fields = {}
     if username is not None:
-        new_fields['username'] = new_username if new_username else (module.get_item_name(existing_item) if existing_item else username)
+        new_fields["username"] = (
+            new_username
+            if new_username
+            else (module.get_item_name(existing_item) if existing_item else username)
+        )
     if first_name is not None:
-        new_fields['first_name'] = first_name
+        new_fields["first_name"] = first_name
     if last_name is not None:
-        new_fields['last_name'] = last_name
+        new_fields["last_name"] = last_name
     if email is not None:
-        new_fields['email'] = email
+        new_fields["email"] = email
     if is_superuser is not None:
-        new_fields['is_superuser'] = is_superuser
+        new_fields["is_superuser"] = is_superuser
     if is_system_auditor is not None:
-        new_fields['is_system_auditor'] = is_system_auditor
+        new_fields["is_system_auditor"] = is_system_auditor
     if password is not None:
-        new_fields['password'] = password
+        new_fields["password"] = password
 
     if organization:
-        org_id = module.resolve_name_to_id('organizations', organization)
+        org_id = module.resolve_name_to_id("organizations", organization)
         # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(existing_item, new_fields, endpoint='organizations/{0}/users'.format(org_id), item_type='user')
+        module.create_or_update_if_needed(
+            existing_item,
+            new_fields,
+            endpoint="organizations/{0}/users".format(org_id),
+            item_type="user",
+        )
     else:
         # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
+        module.create_or_update_if_needed(
+            existing_item, new_fields, endpoint="users", item_type="user"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

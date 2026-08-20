@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: ad_hoc_command_wait
 author: "John Westcott IV (@john-westcott-iv)"
@@ -37,9 +41,9 @@ options:
         - Maximum time in seconds to wait for a ad hoc command to finish.
       type: int
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Launch an ad hoc command
   awx.awx.ad_hoc_command:
     inventory: "Demo Inventory"
@@ -51,9 +55,9 @@ EXAMPLES = '''
   awx.awx.ad_hoc_command_wait:
     command_id: "{{ command.id }}"
     timeout: 120
-'''
+"""
 
-RETURN = '''
+RETURN = """
 id:
     description: Ad hoc command id that is being waited on
     returned: success
@@ -79,7 +83,7 @@ status:
     returned: success
     type: str
     sample: successful
-'''
+"""
 
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -88,37 +92,47 @@ from ..module_utils.controller_api import ControllerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        command_id=dict(type='int', required=True),
-        timeout=dict(type='int'),
-        interval=dict(type='float', default=2),
+        command_id=dict(type="int", required=True),
+        timeout=dict(type="int"),
+        interval=dict(type="float", default=2),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    command_id = module.params.get('command_id')
-    timeout = module.params.get('timeout')
-    interval = module.params.get('interval')
+    command_id = module.params.get("command_id")
+    timeout = module.params.get("timeout")
+    interval = module.params.get("interval")
 
     # Attempt to look up command based on the provided id
     command = module.get_one(
-        'ad_hoc_commands',
+        "ad_hoc_commands",
         **{
-            'data': {
-                'id': command_id,
+            "data": {
+                "id": command_id,
             }
-        }
+        },
     )
 
     if command is None:
-        module.fail_json(msg='Unable to wait on ad hoc command {0}; that ID does not exist.'.format(command_id))
+        module.fail_json(
+            msg="Unable to wait on ad hoc command {0}; that ID does not exist.".format(
+                command_id
+            )
+        )
 
     # Invoke wait function
-    module.wait_on_url(url=command['url'], object_name=command_id, object_type='ad hoc command', timeout=timeout, interval=interval)
+    module.wait_on_url(
+        url=command["url"],
+        object_name=command_id,
+        object_type="ad hoc command",
+        timeout=timeout,
+        interval=interval,
+    )
 
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

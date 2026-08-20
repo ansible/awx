@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: credential_input_source
 author: "Tom Page (@Tompage1994)"
@@ -53,10 +57,10 @@ options:
       type: str
 
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Use CyberArk Lookup credential as password source
   awx.awx.credential_input_source:
     input_field_name: password
@@ -66,7 +70,7 @@ EXAMPLES = '''
       object_query: "Safe=MY_SAFE;Object=awxuser"
       object_query_format: "Exact"
     state: present
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -79,57 +83,68 @@ def main():
         target_credential=dict(required=True),
         source_credential=dict(),
         metadata=dict(type="dict"),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    description = module.params.get('description')
-    input_field_name = module.params.get('input_field_name')
-    target_credential = module.params.get('target_credential')
-    source_credential = module.params.get('source_credential')
-    metadata = module.params.get('metadata')
-    state = module.params.get('state')
+    description = module.params.get("description")
+    input_field_name = module.params.get("input_field_name")
+    target_credential = module.params.get("target_credential")
+    source_credential = module.params.get("source_credential")
+    metadata = module.params.get("metadata")
+    state = module.params.get("state")
 
     # The target credential lookup should not fail if the target credential is absent and the
     # state on the credential input source is also absent. If the credential input source has a
     # state of present, then this should fail as the target credential cannot be nonexistent.
-    target_credential_lookup = module.get_one('credentials', name_or_id=target_credential, allow_none=(state == 'absent'))
+    target_credential_lookup = module.get_one(
+        "credentials", name_or_id=target_credential, allow_none=(state == "absent")
+    )
 
     if target_credential_lookup is None:
-        module.exit_json(**{'changed': False})
+        module.exit_json(**{"changed": False})
     else:
-        target_credential_id = target_credential_lookup['id']
+        target_credential_id = target_credential_lookup["id"]
 
     # Attempt to look up the object based on the target credential and input field
     lookup_data = {
-        'target_credential': target_credential_id,
-        'input_field_name': input_field_name,
+        "target_credential": target_credential_id,
+        "input_field_name": input_field_name,
     }
-    credential_input_source = module.get_one('credential_input_sources', check_exists=(state == 'exists'), **{'data': lookup_data})
+    credential_input_source = module.get_one(
+        "credential_input_sources",
+        check_exists=(state == "exists"),
+        **{"data": lookup_data},
+    )
 
-    if state == 'absent':
+    if state == "absent":
         module.delete_if_needed(credential_input_source)
 
     # Create the data that gets sent for create and update
     credential_input_source_fields = {
-        'target_credential': target_credential_id,
-        'input_field_name': input_field_name,
+        "target_credential": target_credential_id,
+        "input_field_name": input_field_name,
     }
     if source_credential:
-        credential_input_source_fields['source_credential'] = module.resolve_name_to_id('credentials', source_credential)
+        credential_input_source_fields["source_credential"] = module.resolve_name_to_id(
+            "credentials", source_credential
+        )
     if metadata:
-        credential_input_source_fields['metadata'] = metadata
+        credential_input_source_fields["metadata"] = metadata
     if description:
-        credential_input_source_fields['description'] = description
+        credential_input_source_fields["description"] = description
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
     module.create_or_update_if_needed(
-        credential_input_source, credential_input_source_fields, endpoint='credential_input_sources', item_type='credential_input_source'
+        credential_input_source,
+        credential_input_source_fields,
+        endpoint="credential_input_sources",
+        item_type="credential_input_source",
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -8,10 +8,14 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: license
 author: "John Westcott IV (@john-westcott-iv)"
@@ -43,11 +47,11 @@ options:
       choices: ["present", "absent"]
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Set the license using a file
   awx.awx.license:
     manifest: "/tmp/my_manifest.zip"
@@ -64,7 +68,7 @@ EXAMPLES = '''
 - name: Remove license
   awx.awx.license:
     state: absent
-'''
+"""
 
 import base64
 
@@ -72,69 +76,79 @@ from ..module_utils.controller_api import ControllerAPIModule
 
 
 def main():
-
     module = ControllerAPIModule(
         argument_spec=dict(
-            manifest=dict(type='str', required=False),
-            subscription_id=dict(type='str', required=False),
-            force=dict(type='bool', default=False),
-            state=dict(choices=['present', 'absent'], default='present'),
+            manifest=dict(type="str", required=False),
+            subscription_id=dict(type="str", required=False),
+            force=dict(type="bool", default=False),
+            state=dict(choices=["present", "absent"], default="present"),
         ),
         required_if=[
-            ['state', 'present', ['manifest', 'subscription_id'], True],
+            ["state", "present", ["manifest", "subscription_id"], True],
         ],
         mutually_exclusive=[("manifest", "subscription_id")],
     )
 
-    json_output = {'changed': False}
+    json_output = {"changed": False}
 
     # If the state was absent we can delete the endpoint and exit.
-    state = module.params.get('state')
-    if state == 'absent':
-        module.delete_endpoint('config')
+    state = module.params.get("state")
+    if state == "absent":
+        module.delete_endpoint("config")
         module.exit_json(**json_output)
 
-    if module.params.get('manifest', None):
+    if module.params.get("manifest", None):
         try:
-            with open(module.params.get('manifest'), 'rb') as fid:
+            with open(module.params.get("manifest"), "rb") as fid:
                 manifest = base64.b64encode(fid.read())
         except OSError as e:
             module.fail_json(msg=str(e))
 
     # Check if Tower is already licensed
-    config = module.get_endpoint('config')['json']
+    config = module.get_endpoint("config")["json"]
     already_licensed = (
-        'license_info' in config
-        and 'instance_count' in config['license_info']
-        and config['license_info']['instance_count'] > 0
-        and 'trial' in config['license_info']
-        and not config['license_info']['trial']
+        "license_info" in config
+        and "instance_count" in config["license_info"]
+        and config["license_info"]["instance_count"] > 0
+        and "trial" in config["license_info"]
+        and not config["license_info"]["trial"]
     )
 
     # Determine if we will install the license
-    perform_install = bool((not already_licensed) or module.params.get('force'))
+    perform_install = bool((not already_licensed) or module.params.get("force"))
 
     # Handle check mode
     if module.check_mode:
-        json_output['changed'] = perform_install
+        json_output["changed"] = perform_install
         module.exit_json(**json_output)
 
     # Do the actual install, if we need to
     if perform_install:
-        if module.params.get('manifest', None):
-            response = module.post_endpoint('config', data={'manifest': manifest.decode()})
+        if module.params.get("manifest", None):
+            response = module.post_endpoint(
+                "config", data={"manifest": manifest.decode()}
+            )
         else:
-            response = module.post_endpoint('config/attach', data={'subscription_id': module.params.get('subscription_id')})
+            response = module.post_endpoint(
+                "config/attach",
+                data={"subscription_id": module.params.get("subscription_id")},
+            )
 
         # Check API response for errors (AAP-44277 fix)
-        if response and response.get('status_code') and response.get('status_code') != 200:
-            error_msg = response.get('json', {}).get('error', 'License operation failed')
+        if (
+            response
+            and response.get("status_code")
+            and response.get("status_code") != 200
+        ):
+            error_msg = response.get("json", {}).get(
+                "error", "License operation failed"
+            )
             module.fail_json(msg=error_msg)
 
-        json_output['changed'] = True
+        json_output["changed"] = True
 
     module.exit_json(**json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -7,9 +7,13 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.0', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.0",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: project_update
 author: "Sean Sullivan (@sean-m-sullivan)"
@@ -49,9 +53,9 @@ options:
           amount of seconds
       type: int
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-RETURN = '''
+RETURN = """
 id:
     description: project id of the updated project
     returned: success
@@ -62,10 +66,10 @@ status:
     returned: success
     type: str
     sample: pending
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Launch a project with a timeout of 10 seconds
   awx.awx.project_update:
     project: "Networking Project"
@@ -75,7 +79,7 @@ EXAMPLES = '''
   awx.awx.project_update:
     project: "Networking Project"
     wait: false
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -83,61 +87,72 @@ from ..module_utils.controller_api import ControllerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        name=dict(required=True, aliases=['project']),
+        name=dict(required=True, aliases=["project"]),
         organization=dict(),
-        wait=dict(default=True, type='bool'),
-        interval=dict(default=2.0, type='float'),
-        timeout=dict(type='int'),
+        wait=dict(default=True, type="bool"),
+        interval=dict(default=2.0, type="float"),
+        timeout=dict(type="int"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
-    organization = module.params.get('organization')
-    wait = module.params.get('wait')
-    interval = module.params.get('interval')
-    timeout = module.params.get('timeout')
+    name = module.params.get("name")
+    organization = module.params.get("organization")
+    wait = module.params.get("wait")
+    interval = module.params.get("interval")
+    timeout = module.params.get("timeout")
 
     # Attempt to look up project based on the provided name or id
     lookup_data = {}
     if organization:
-        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
-    project = module.get_one('projects', name_or_id=name, data=lookup_data)
+        lookup_data["organization"] = module.resolve_name_to_id(
+            "organizations", organization
+        )
+    project = module.get_one("projects", name_or_id=name, data=lookup_data)
     if project is None:
         module.fail_json(msg="Unable to find project")
 
     if wait:
-        scm_revision_original = project['scm_revision']
+        scm_revision_original = project["scm_revision"]
 
     # Update the project
-    result = module.post_endpoint(project['related']['update'])
+    result = module.post_endpoint(project["related"]["update"])
 
-    if result['status_code'] == 405:
+    if result["status_code"] == 405:
         module.fail_json(
-            msg="Unable to trigger a project update because the project scm_type ({0}) does not support it.".format(project['scm_type']), response=result
+            msg="Unable to trigger a project update because the project scm_type ({0}) does not support it.".format(
+                project["scm_type"]
+            ),
+            response=result,
         )
-    elif result['status_code'] != 202:
-        module.fail_json(msg="Failed to update project, see response for details", response=result)
+    elif result["status_code"] != 202:
+        module.fail_json(
+            msg="Failed to update project, see response for details", response=result
+        )
 
-    module.json_output['changed'] = True
-    module.json_output['id'] = result['json']['id']
-    module.json_output['status'] = result['json']['status']
+    module.json_output["changed"] = True
+    module.json_output["id"] = result["json"]["id"]
+    module.json_output["status"] = result["json"]["status"]
 
     if not wait:
         module.exit_json(**module.json_output)
 
     # Invoke wait function
     result = module.wait_on_url(
-        url=result['json']['url'], object_name=module.get_item_name(project), object_type='Project Update', timeout=timeout, interval=interval
+        url=result["json"]["url"],
+        object_name=module.get_item_name(project),
+        object_type="Project Update",
+        timeout=timeout,
+        interval=interval,
     )
-    scm_revision_new = result['json']['scm_revision']
+    scm_revision_new = result["json"]["scm_revision"]
     if scm_revision_new == scm_revision_original:
-        module.json_output['changed'] = False
+        module.json_output["changed"] = False
 
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

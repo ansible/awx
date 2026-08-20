@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: execution_environment
 author: "Shane McDonald (@shanemcd)"
@@ -59,15 +63,15 @@ options:
       default: 'missing'
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add EE to the controller instance
   awx.awx.execution_environment:
     name: "My EE"
     image: quay.io/ansible/awx-ee
-'''
+"""
 
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -82,48 +86,59 @@ def main():
         description=dict(),
         organization=dict(),
         credential=dict(),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
         # NOTE: Default for pull differs from API (which is blank by default)
-        pull=dict(choices=['always', 'missing', 'never'], default='missing'),
+        pull=dict(choices=["always", "missing", "never"], default="missing"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
+    name = module.params.get("name")
     new_name = module.params.get("new_name")
-    image = module.params.get('image')
-    description = module.params.get('description')
-    state = module.params.get('state')
-    pull = module.params.get('pull')
+    image = module.params.get("image")
+    description = module.params.get("description")
+    state = module.params.get("state")
+    pull = module.params.get("pull")
 
-    existing_item = module.get_one('execution_environments', name_or_id=name, check_exists=(state == 'exists'))
+    existing_item = module.get_one(
+        "execution_environments", name_or_id=name, check_exists=(state == "exists")
+    )
 
-    if state == 'absent':
+    if state == "absent":
         module.delete_if_needed(existing_item)
 
     new_fields = {
-        'name': new_name if new_name else (module.get_item_name(existing_item) if existing_item else name),
-        'image': image,
+        "name": new_name
+        if new_name
+        else (module.get_item_name(existing_item) if existing_item else name),
+        "image": image,
     }
     if description:
-        new_fields['description'] = description
+        new_fields["description"] = description
 
     if pull:
-        new_fields['pull'] = pull
+        new_fields["pull"] = pull
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    organization = module.params.get('organization')
+    organization = module.params.get("organization")
     if organization:
-        new_fields['organization'] = module.resolve_name_to_id('organizations', organization)
+        new_fields["organization"] = module.resolve_name_to_id(
+            "organizations", organization
+        )
 
-    credential = module.params.get('credential')
+    credential = module.params.get("credential")
     if credential:
-        new_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+        new_fields["credential"] = module.resolve_name_to_id("credentials", credential)
 
-    module.create_or_update_if_needed(existing_item, new_fields, endpoint='execution_environments', item_type='execution_environment')
+    module.create_or_update_if_needed(
+        existing_item,
+        new_fields,
+        endpoint="execution_environments",
+        item_type="execution_environment",
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

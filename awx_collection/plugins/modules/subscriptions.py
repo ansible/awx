@@ -8,10 +8,14 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: subscriptions
 author: "John Westcott IV (@john-westcott-iv)"
@@ -50,16 +54,16 @@ options:
       type: dict
       default: {}
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-RETURN = '''
+RETURN = """
 subscriptions:
     description: dictionary containing information about the subscriptions
     returned: If login succeeded
     type: dict
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Get subscriptions
   awx.awx.subscriptions:
     client_id: "00000000-0000-0000-0000-000000000000"
@@ -77,62 +81,58 @@ EXAMPLES = '''
     filters:
       product_name: "Red Hat Ansible Automation Platform"
       support_level: "Self-Support"
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
 
 def main():
-
     module = ControllerAPIModule(
         argument_spec=dict(
-            username=dict(type='str', required=False),
-            password=dict(type='str', no_log=True, required=False),
-            client_id=dict(type='str', required=False),
-            client_secret=dict(type='str', no_log=True, required=False),
-            filters=dict(type='dict', required=False, default={}),
+            username=dict(type="str", required=False),
+            password=dict(type="str", no_log=True, required=False),
+            client_id=dict(type="str", required=False),
+            client_secret=dict(type="str", no_log=True, required=False),
+            filters=dict(type="dict", required=False, default={}),
         ),
-        mutually_exclusive=[
-            ['username', 'client_id']
-        ],
-        required_together=[
-            ['username', 'password'],
-            ['client_id', 'client_secret']
-        ],
-        required_one_of=[
-            ['username', 'client_id']
-        ],
+        mutually_exclusive=[["username", "client_id"]],
+        required_together=[["username", "password"], ["client_id", "client_secret"]],
+        required_one_of=[["username", "client_id"]],
     )
 
-    json_output = {'changed': False}
-    username = module.params.get('username')
-    password = module.params.get('password')
-    client_id = module.params.get('client_id')
-    client_secret = module.params.get('client_secret')
+    json_output = {"changed": False}
+    username = module.params.get("username")
+    password = module.params.get("password")
+    client_id = module.params.get("client_id")
+    client_secret = module.params.get("client_secret")
 
     if username and password:
         post_data = {
-            'subscriptions_username': username,
-            'subscriptions_password': password,
+            "subscriptions_username": username,
+            "subscriptions_password": password,
         }
     else:
         post_data = {
-            'subscriptions_client_id': client_id,
-            'subscriptions_client_secret': client_secret,
+            "subscriptions_client_id": client_id,
+            "subscriptions_client_secret": client_secret,
         }
 
-    all_subscriptions = module.post_endpoint('config/subscriptions', data=post_data)['json']
-    json_output['subscriptions'] = []
+    all_subscriptions = module.post_endpoint("config/subscriptions", data=post_data)[
+        "json"
+    ]
+    json_output["subscriptions"] = []
     for subscription in all_subscriptions:
         add = True
-        for key in module.params.get('filters').keys():
-            if subscription.get(key, None) and module.params.get('filters')[key] not in subscription.get(key):
+        for key in module.params.get("filters").keys():
+            if subscription.get(key, None) and module.params.get("filters")[
+                key
+            ] not in subscription.get(key):
                 add = False
         if add:
-            json_output['subscriptions'].append(subscription)
+            json_output["subscriptions"].append(subscription)
 
     module.exit_json(**json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

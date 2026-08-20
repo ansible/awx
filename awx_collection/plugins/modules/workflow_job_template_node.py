@@ -10,9 +10,13 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: workflow_job_template_node
 author: "John Westcott IV (@john-westcott-iv)"
@@ -183,9 +187,9 @@ options:
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Create a node, follows workflow_job_template example
   awx.awx.workflow_job_template_node:
     identifier: my-first-node
@@ -251,7 +255,7 @@ EXAMPLES = '''
         organization: Default
         success_nodes:
           - my-third-node
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -260,38 +264,49 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         identifier=dict(required=True),
-        workflow_job_template=dict(required=True, aliases=['workflow']),
+        workflow_job_template=dict(required=True, aliases=["workflow"]),
         organization=dict(),
-        extra_data=dict(type='dict'),
+        extra_data=dict(type="dict"),
         inventory=dict(),
         scm_branch=dict(),
-        job_type=dict(choices=['run', 'check']),
+        job_type=dict(choices=["run", "check"]),
         job_tags=dict(),
         skip_tags=dict(),
         limit=dict(),
-        diff_mode=dict(type='bool'),
-        verbosity=dict(choices=['0', '1', '2', '3', '4', '5']),
+        diff_mode=dict(type="bool"),
+        verbosity=dict(choices=["0", "1", "2", "3", "4", "5"]),
         unified_job_template=dict(),
         lookup_organization=dict(),
-        approval_node=dict(type='dict'),
-        all_parents_must_converge=dict(type='bool'),
-        success_nodes=dict(type='list', elements='str'),
-        always_nodes=dict(type='list', elements='str'),
-        failure_nodes=dict(type='list', elements='str'),
-        credentials=dict(type='list', elements='str'),
-        execution_environment=dict(type='str'),
-        forks=dict(type='int'),
-        instance_groups=dict(type='list', elements='str'),
-        job_slice_count=dict(type='int'),
-        labels=dict(type='list', elements='str'),
-        timeout=dict(type='int'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        approval_node=dict(type="dict"),
+        all_parents_must_converge=dict(type="bool"),
+        success_nodes=dict(type="list", elements="str"),
+        always_nodes=dict(type="list", elements="str"),
+        failure_nodes=dict(type="list", elements="str"),
+        credentials=dict(type="list", elements="str"),
+        execution_environment=dict(type="str"),
+        forks=dict(type="int"),
+        instance_groups=dict(type="list", elements="str"),
+        job_slice_count=dict(type="int"),
+        labels=dict(type="list", elements="str"),
+        timeout=dict(type="int"),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
     mutually_exclusive = [("unified_job_template", "approval_node")]
     required_if = [
-        ['state', 'absent', ['identifier']],
-        ['state', 'present', ['identifier']],
-        ['state', 'present', ['unified_job_template', 'approval_node', 'success_nodes', 'always_nodes', 'failure_nodes'], True],
+        ["state", "absent", ["identifier"]],
+        ["state", "present", ["identifier"]],
+        [
+            "state",
+            "present",
+            [
+                "unified_job_template",
+                "approval_node",
+                "success_nodes",
+                "always_nodes",
+                "failure_nodes",
+            ],
+            True,
+        ],
     ]
 
     # Create a module for ourselves
@@ -302,116 +317,153 @@ def main():
     )
 
     # Extract our parameters
-    identifier = module.params.get('identifier')
-    state = module.params.get('state')
-    approval_node = module.params.get('approval_node')
+    identifier = module.params.get("identifier")
+    state = module.params.get("state")
+    approval_node = module.params.get("approval_node")
     new_fields = {}
-    lookup_organization = module.params.get('lookup_organization')
-    search_fields = {'identifier': identifier}
+    lookup_organization = module.params.get("lookup_organization")
+    search_fields = {"identifier": identifier}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    workflow_job_template = module.params.get('workflow_job_template')
+    workflow_job_template = module.params.get("workflow_job_template")
     workflow_job_template_id = None
     if workflow_job_template:
         wfjt_search_fields = {}
-        organization = module.params.get('organization')
+        organization = module.params.get("organization")
         if organization:
-            organization_id = module.resolve_name_to_id('organizations', organization)
-            wfjt_search_fields['organization'] = organization_id
-        wfjt_data = module.get_one('workflow_job_templates', name_or_id=workflow_job_template, **{'data': wfjt_search_fields})
+            organization_id = module.resolve_name_to_id("organizations", organization)
+            wfjt_search_fields["organization"] = organization_id
+        wfjt_data = module.get_one(
+            "workflow_job_templates",
+            name_or_id=workflow_job_template,
+            **{"data": wfjt_search_fields},
+        )
         if wfjt_data is None:
-            if state == 'absent':
+            if state == "absent":
                 # if the workflow doesn't exist, it can't have workflow nodes.
                 module.exit_json(**module.json_output)
             else:
                 module.fail_json(
-                    msg="The workflow {0} in organization {1} was not found on the controller instance server".format(workflow_job_template, organization)
+                    msg="The workflow {0} in organization {1} was not found on the controller instance server".format(
+                        workflow_job_template, organization
+                    )
                 )
-        workflow_job_template_id = wfjt_data['id']
-        search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
+        workflow_job_template_id = wfjt_data["id"]
+        search_fields["workflow_job_template"] = new_fields["workflow_job_template"] = (
+            workflow_job_template_id
+        )
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', check_exists=(state == 'exists'), **{'data': search_fields})
+    existing_item = module.get_one(
+        "workflow_job_template_nodes",
+        check_exists=(state == "exists"),
+        **{"data": search_fields},
+    )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
     # Set lookup data to use
     search_fields = {}
     if lookup_organization:
-        search_fields['organization'] = module.resolve_name_to_id('organizations', lookup_organization)
+        search_fields["organization"] = module.resolve_name_to_id(
+            "organizations", lookup_organization
+        )
 
-    unified_job_template = module.params.get('unified_job_template')
+    unified_job_template = module.params.get("unified_job_template")
     if unified_job_template:
-        ujt = module.get_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})
-        if ujt is None or 'id' not in ujt:
-            module.fail_json(msg=f'Could not get unified_job_template name_or_id={unified_job_template} search_fields={search_fields}, got {ujt}')
-        new_fields['unified_job_template'] = ujt['id']
-    inventory = module.params.get('inventory')
+        ujt = module.get_one(
+            "unified_job_templates",
+            name_or_id=unified_job_template,
+            **{"data": search_fields},
+        )
+        if ujt is None or "id" not in ujt:
+            module.fail_json(
+                msg=f"Could not get unified_job_template name_or_id={unified_job_template} search_fields={search_fields}, got {ujt}"
+            )
+        new_fields["unified_job_template"] = ujt["id"]
+    inventory = module.params.get("inventory")
     if inventory:
-        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
+        new_fields["inventory"] = module.resolve_name_to_id("inventories", inventory)
 
     # Create the data that gets sent for create and update
     for field_name in (
-        'identifier',
-        'extra_data',
-        'scm_branch',
-        'job_type',
-        'job_tags',
-        'skip_tags',
-        'limit',
-        'diff_mode',
-        'verbosity',
-        'all_parents_must_converge',
-        'forks',
-        'job_slice_count',
-        'timeout',
+        "identifier",
+        "extra_data",
+        "scm_branch",
+        "job_type",
+        "job_tags",
+        "skip_tags",
+        "limit",
+        "diff_mode",
+        "verbosity",
+        "all_parents_must_converge",
+        "forks",
+        "job_slice_count",
+        "timeout",
     ):
         field_val = module.params.get(field_name)
         if field_val:
             new_fields[field_name] = field_val
 
     association_fields = {}
-    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials', 'instance_groups', 'labels'):
+    for association in (
+        "always_nodes",
+        "success_nodes",
+        "failure_nodes",
+        "credentials",
+        "instance_groups",
+        "labels",
+    ):
         name_list = module.params.get(association)
         if name_list is None:
             continue
         id_list = []
         for sub_name in name_list:
-            if association in ['credentials', 'instance_groups', 'labels']:
+            if association in ["credentials", "instance_groups", "labels"]:
                 sub_obj = module.get_one(association, name_or_id=sub_name)
             else:
-                endpoint = 'workflow_job_template_nodes'
-                lookup_data = {'identifier': sub_name}
+                endpoint = "workflow_job_template_nodes"
+                lookup_data = {"identifier": sub_name}
                 if workflow_job_template_id:
-                    lookup_data['workflow_job_template'] = workflow_job_template_id
-                sub_obj = module.get_one(endpoint, **{'data': lookup_data})
+                    lookup_data["workflow_job_template"] = workflow_job_template_id
+                sub_obj = module.get_one(endpoint, **{"data": lookup_data})
             if sub_obj is None:
-                module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
-            id_list.append(sub_obj['id'])
+                module.fail_json(
+                    msg="Could not find {0} entry with name {1}".format(
+                        association, sub_name
+                    )
+                )
+            id_list.append(sub_obj["id"])
         association_fields[association] = id_list
 
-    execution_environment = module.params.get('execution_environment')
+    execution_environment = module.params.get("execution_environment")
     if execution_environment is not None:
-        if execution_environment == '':
-            new_fields['execution_environment'] = ''
+        if execution_environment == "":
+            new_fields["execution_environment"] = ""
         else:
-            ee = module.get_one('execution_environments', name_or_id=execution_environment)
+            ee = module.get_one(
+                "execution_environments", name_or_id=execution_environment
+            )
             if ee is None:
-                module.fail_json(msg='could not find execution_environment entry with name {0}'.format(execution_environment))
+                module.fail_json(
+                    msg="could not find execution_environment entry with name {0}".format(
+                        execution_environment
+                    )
+                )
             else:
-                new_fields['execution_environment'] = ee['id']
+                new_fields["execution_environment"] = ee["id"]
 
     # In the case of a new object, the utils need to know it is a node
-    new_fields['type'] = 'workflow_job_template_node'
+    new_fields["type"] = "workflow_job_template_node"
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
         existing_item,
         new_fields,
-        endpoint='workflow_job_template_nodes',
-        item_type='workflow_job_template_node',
+        endpoint="workflow_job_template_nodes",
+        item_type="workflow_job_template_node",
         auto_exit=not approval_node,
         associations=association_fields,
     )
@@ -422,31 +474,48 @@ def main():
         new_fields = {}
 
         # Extract Parameters
-        if approval_node.get('name') is None:
-            module.fail_json(msg="Approval node name is required to create approval node.")
-        if approval_node.get('name') is not None:
-            new_fields['name'] = approval_node['name']
-        if approval_node.get('description') is not None:
-            new_fields['description'] = approval_node['description']
-        if approval_node.get('timeout') is not None:
-            new_fields['timeout'] = approval_node['timeout']
+        if approval_node.get("name") is None:
+            module.fail_json(
+                msg="Approval node name is required to create approval node."
+            )
+        if approval_node.get("name") is not None:
+            new_fields["name"] = approval_node["name"]
+        if approval_node.get("description") is not None:
+            new_fields["description"] = approval_node["description"]
+        if approval_node.get("timeout") is not None:
+            new_fields["timeout"] = approval_node["timeout"]
 
         # Find created workflow node ID
-        search_fields = {'identifier': identifier}
-        search_fields['workflow_job_template'] = workflow_job_template_id
-        workflow_job_template_node = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
-        workflow_job_template_node_id = workflow_job_template_node['id']
-        module.json_output['workflow_node_id'] = workflow_job_template_node_id
+        search_fields = {"identifier": identifier}
+        search_fields["workflow_job_template"] = workflow_job_template_id
+        workflow_job_template_node = module.get_one(
+            "workflow_job_template_nodes", **{"data": search_fields}
+        )
+        workflow_job_template_node_id = workflow_job_template_node["id"]
+        module.json_output["workflow_node_id"] = workflow_job_template_node_id
         existing_item = None
         # Due to not able to lookup workflow_approval_templates, find the existing item in another place
-        if workflow_job_template_node['related'].get('unified_job_template') is not None:
-            existing_item = module.get_endpoint(workflow_job_template_node['related']['unified_job_template'])['json']
-        approval_endpoint = 'workflow_job_template_nodes/{0}/create_approval_template/'.format(workflow_job_template_node_id)
+        if (
+            workflow_job_template_node["related"].get("unified_job_template")
+            is not None
+        ):
+            existing_item = module.get_endpoint(
+                workflow_job_template_node["related"]["unified_job_template"]
+            )["json"]
+        approval_endpoint = (
+            "workflow_job_template_nodes/{0}/create_approval_template/".format(
+                workflow_job_template_node_id
+            )
+        )
         module.create_or_update_if_needed(
-            existing_item, new_fields, endpoint=approval_endpoint, item_type='workflow_job_template_approval_node', associations=association_fields
+            existing_item,
+            new_fields,
+            endpoint=approval_endpoint,
+            item_type="workflow_job_template_approval_node",
+            associations=association_fields,
         )
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: settings
 author: "Nikhil Jain (@jainnikhil30)"
@@ -38,9 +42,9 @@ options:
 requirements:
   - pyyaml
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Set the value of AWX_ISOLATION_BASE_PATH
   awx.awx.settings:
     name: AWX_ISOLATION_BASE_PATH
@@ -52,7 +56,7 @@ EXAMPLES = '''
     name: "AWX_ISOLATION_SHOW_PATHS"
     value: "'/var/lib/awx/projects/', '/tmp'"
   register: testing_settings
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -69,13 +73,16 @@ def coerce_type(module, value):
     if value is None:
         return value
 
-    yaml_ish = bool((value.startswith('{') and value.endswith('}')) or (value.startswith('[') and value.endswith(']')))
+    yaml_ish = bool(
+        (value.startswith("{") and value.endswith("}"))
+        or (value.startswith("[") and value.endswith("]"))
+    )
     if yaml_ish:
         if not HAS_YAML:
             module.fail_json(msg="yaml is not installed, try 'pip install pyyaml'")
         return yaml.safe_load(value)
-    elif value.lower() in ('true', 'false', 't', 'f'):
-        return {'t': True, 'f': False}[value[0].lower()]
+    elif value.lower() in ("true", "false", "t", "f"):
+        return {"t": True, "f": False}[value[0].lower()]
     try:
         return int(value)
     except ValueError:
@@ -88,21 +95,21 @@ def main():
     argument_spec = dict(
         name=dict(),
         value=dict(),
-        settings=dict(type='dict'),
+        settings=dict(type="dict"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(
         argument_spec=argument_spec,
-        required_one_of=[['name', 'settings']],
-        mutually_exclusive=[['name', 'settings']],
-        required_if=[['name', 'present', ['value']]],
+        required_one_of=[["name", "settings"]],
+        mutually_exclusive=[["name", "settings"]],
+        required_if=[["name", "present", ["value"]]],
     )
 
     # Extract our parameters
-    name = module.params.get('name')
-    value = module.params.get('value')
-    new_settings = module.params.get('settings')
+    name = module.params.get("name")
+    value = module.params.get("value")
+    new_settings = module.params.get("settings")
 
     # If we were given a name/value pair we will just make settings out of that and proceed normally
     if new_settings is None:
@@ -111,55 +118,63 @@ def main():
         new_settings = {name: new_value}
 
     # Load the existing settings
-    existing_settings = module.get_endpoint('settings/all')['json']
+    existing_settings = module.get_endpoint("settings/all")["json"]
 
     # Begin a json response
-    json_output = {'changed': False, 'old_values': {}, 'new_values': {}}
+    json_output = {"changed": False, "old_values": {}, "new_values": {}}
 
     # Check any of the settings to see if anything needs to be updated
     needs_update = False
     for a_setting in new_settings:
-        if a_setting not in existing_settings or existing_settings[a_setting] != new_settings[a_setting]:
+        if (
+            a_setting not in existing_settings
+            or existing_settings[a_setting] != new_settings[a_setting]
+        ):
             # At least one thing is different so we need to patch
             needs_update = True
-            json_output['old_values'][a_setting] = existing_settings[a_setting]
-            json_output['new_values'][a_setting] = new_settings[a_setting]
+            json_output["old_values"][a_setting] = existing_settings[a_setting]
+            json_output["new_values"][a_setting] = new_settings[a_setting]
 
     if module._diff:
-        json_output['diff'] = {'before': json_output['old_values'], 'after': json_output['new_values']}
+        json_output["diff"] = {
+            "before": json_output["old_values"],
+            "after": json_output["new_values"],
+        }
 
     # If nothing needs an update we can simply exit with the response (as not changed)
     if not needs_update:
         module.exit_json(**json_output)
 
     if module.check_mode and module._diff:
-        json_output['changed'] = True
+        json_output["changed"] = True
         module.exit_json(**json_output)
 
     # Make the call to update the settings
-    response = module.patch_endpoint('settings/all', **{'data': new_settings})
+    response = module.patch_endpoint("settings/all", **{"data": new_settings})
 
-    if response['status_code'] == 200:
+    if response["status_code"] == 200:
         # Set the changed response to True
-        json_output['changed'] = True
+        json_output["changed"] = True
 
         # To deal with the old style values we need to return 'value' in the response
         new_values = {}
         for a_setting in new_settings:
-            new_values[a_setting] = response['json'][a_setting]
+            new_values[a_setting] = response["json"][a_setting]
 
         # If we were using a name we will just add a value of a string, otherwise we will return an array in values
         if name is not None:
-            json_output['value'] = new_values[name]
+            json_output["value"] = new_values[name]
         else:
-            json_output['values'] = new_values
+            json_output["values"] = new_values
 
         module.exit_json(**json_output)
-    elif 'json' in response and '__all__' in response['json']:
-        module.fail_json(msg=response['json']['__all__'])
+    elif "json" in response and "__all__" in response["json"]:
+        module.fail_json(msg=response["json"]["__all__"])
     else:
-        module.fail_json(**{'msg': "Unable to update settings, see response", 'response': response})
+        module.fail_json(
+            **{"msg": "Unable to update settings, see response", "response": response}
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
