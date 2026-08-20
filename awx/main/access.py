@@ -1232,9 +1232,11 @@ class TeamAccess(BaseAccess):
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             return self.model.objects.all()
-        return self.model.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')) | Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role'))
+        org_member_teams = (
+            self.model.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')).order_by().values_list('pk', flat=True)
         )
+        direct_read_teams = self.model.objects.filter(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')).order_by().values_list('pk', flat=True)
+        return self.model.objects.filter(pk__in=org_member_teams.union(direct_read_teams))
 
     @check_superuser
     def can_add(self, data):
@@ -2506,7 +2508,7 @@ class UnifiedJobAccess(BaseAccess):
 
     def filtered_queryset(self):
         inv_pk_qs = Inventory.access_ids_qs(self.user, 'view')
-        qs = self.model.objects.filter(
+        return self.model.objects.filter(
             Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
             | Q(
                 pk__in=InventoryUpdate.objects.filter(
@@ -2520,7 +2522,6 @@ class UnifiedJobAccess(BaseAccess):
             )
             | Q(organization__in=Organization.access_ids_qs(self.user, 'audit_organization'))
         )
-        return qs
 
     def get_queryset(self):
         return super(UnifiedJobAccess, self).get_queryset().filter(workflowapproval__isnull=True)
