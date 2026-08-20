@@ -1,5 +1,8 @@
 import pytest
 
+from django.test.utils import CaptureQueriesContext
+from django.db import connection
+
 from ansible_base.rbac.models import RoleDefinition
 from awx.api.versioning import reverse
 
@@ -213,3 +216,24 @@ def test_JT_not_double_counted(resourced_organization, user, get):
     assert 'hosts' in counts
     counts.pop('hosts')
     assert counts == counts_dict
+
+
+@pytest.mark.django_db
+def test_org_list_user_admin_query_count(organization_resource_creator, organizations, user, get):
+    """User/admin counts use O(1) queries against roleuserassignment, not O(N) correlated subqueries."""
+    admin_user = user('admin', True)
+    extra_orgs = organizations(4)
+    member_rd = RoleDefinition.objects.get(name='Organization Member')
+    admin_rd = RoleDefinition.objects.get(name='Organization Admin')
+    for org in extra_orgs:
+        for i in range(3):
+            member_rd.give_permission(user(f'member-{org.pk}-{i}'), org)
+        admin_rd.give_permission(user(f'admin-{org.pk}'), org)
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = get(reverse('api:organization_list'), admin_user)
+
+    assert response.status_code == 200
+
+    rua_queries = [q for q in ctx.captured_queries if 'dab_rbac_roleuserassignment' in q['sql']]
+    assert len(rua_queries) <= 2, f"Expected at most 2 roleuserassignment queries, got {len(rua_queries)}"

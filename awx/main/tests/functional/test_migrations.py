@@ -224,3 +224,84 @@ class TestGithubAppBug:
         assert CredentialType.objects.filter(
             namespace='github_app_lookup', name='Legacy GitHub App Credential'
         ).exists(), "CredentialType should be updated to 'github_app_lookup' and retain its name."
+
+
+@pytest.mark.django_db
+class TestSystemAuditorMigration:
+    def test_system_auditor_migrated_to_platform_auditor(self, migrator):
+        """
+        The bug in 0192 used a stale loop variable `role` instead of
+        `old_system_auditor`, so system_auditor members were not granted
+        Platform Auditor. With the fix applied, they should be.
+        """
+        old_state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
+        User = old_state.apps.get_model('auth', 'User')
+        Role = old_state.apps.get_model('main', 'Role')
+
+        user = User.objects.create(username='sys-auditor-user')
+        system_auditor_role, _ = Role.objects.get_or_create(singleton_name='system_auditor', defaults={'role_field': 'system_auditor'})
+        system_auditor_role.members.add(user)
+
+        new_state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
+        RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
+
+        assert RoleUserAssignment.objects.filter(
+            user=user.id, role_definition__name='Platform Auditor'
+        ).exists(), "system_auditor member should have been granted Platform Auditor"
+
+    def test_fix_system_auditor_migration_backfills_missing(self, migrator):
+        """
+        Migration 0208 should backfill Platform Auditor for any
+        system_auditor members who were missed by the original migration.
+        """
+        state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
+        User = state.apps.get_model('auth', 'User')
+        Role = state.apps.get_model('main', 'Role')
+
+        user = User.objects.create(username='missed-auditor')
+        system_auditor_role, _ = Role.objects.get_or_create(singleton_name='system_auditor', defaults={'role_field': 'system_auditor'})
+        system_auditor_role.members.add(user)
+
+        state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
+        RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
+        RoleDefinition = state.apps.get_model('dab_rbac', 'RoleDefinition')
+
+        # Simulate the pre-fix state: remove the Platform Auditor assignment
+        platform_auditor = RoleDefinition.objects.get(name='Platform Auditor')
+        RoleUserAssignment.objects.filter(user=user.id, role_definition=platform_auditor).delete()
+        assert not RoleUserAssignment.objects.filter(
+            user=user.id, role_definition=platform_auditor
+        ).exists(), "Setup: user should not have Platform Auditor before corrective migration"
+
+        state = migrator.apply_tested_migration(('main', '0208_fix_system_auditor_migration'))
+        RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
+
+        assert RoleUserAssignment.objects.filter(
+            user=user.id, role_definition__name='Platform Auditor'
+        ).exists(), "Corrective migration should have backfilled Platform Auditor"
+
+    def test_fix_system_auditor_migration_no_duplicates(self, migrator):
+        """
+        Migration 0208 must be idempotent — users who already have
+        Platform Auditor should not receive a duplicate assignment.
+        """
+        state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
+        User = state.apps.get_model('auth', 'User')
+        Role = state.apps.get_model('main', 'Role')
+
+        user = User.objects.create(username='already-auditor')
+        system_auditor_role, _ = Role.objects.get_or_create(singleton_name='system_auditor', defaults={'role_field': 'system_auditor'})
+        system_auditor_role.members.add(user)
+
+        state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
+        RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
+
+        # Confirm the user already has the assignment (from the fixed 0192)
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').exists()
+
+        state = migrator.apply_tested_migration(('main', '0208_fix_system_auditor_migration'))
+        RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
+
+        assert (
+            RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').count() == 1
+        ), "Should have exactly one Platform Auditor assignment, not duplicates"

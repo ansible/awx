@@ -4,8 +4,8 @@
 import dateutil
 import logging
 
-from django.db.models import Count, OuterRef, Subquery, TextField
-from django.db.models.functions import Cast, Coalesce
+from django.db.models import Count, Q, TextField
+from django.db.models.functions import Cast
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -179,48 +179,37 @@ class OrganizationCountsMixin(object):
 
         db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
-        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
-
-        if member_rd and admin_rd:
-
-            def assignment_count(rd):
-                return Coalesce(
-                    Subquery(
-                        RoleUserAssignment.objects.filter(
-                            object_id=Cast(OuterRef('pk'), output_field=TextField()),
-                            role_definition=rd,
-                        )
-                        .values('role_definition')
-                        .annotate(c=Count('pk'))
-                        .values('c')
-                    ),
-                    0,
-                )
-
-            db_results['users'] = org_qs.annotate(
-                users=assignment_count(member_rd),
-                admins=assignment_count(admin_rd),
-            ).values('id', 'users', 'admins')
-
         count_context = {}
         for org in org_id_list:
             org_id = org['id']
             count_context[org_id] = {'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0, 'admins': 0, 'projects': 0}
 
         for res, count_qs in db_results.items():
-            if res == 'users':
-                org_reference = 'id'
-            else:
-                org_reference = 'organization'
             for entry in count_qs:
-                org_id = entry[org_reference]
+                org_id = entry['organization']
                 if org_id in count_context:
-                    if res == 'users':
-                        count_context[org_id]['admins'] = entry['admins']
-                        count_context[org_id]['users'] = entry['users']
-                        continue
-                    count_context[org_id][res] = entry['%s__count' % org_reference]
+                    count_context[org_id][res] = entry['organization__count']
+
+        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
+        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
+
+        if member_rd and admin_rd:
+            user_admin_counts = (
+                RoleUserAssignment.objects.filter(
+                    role_definition__in=[member_rd, admin_rd],
+                    object_id__in=org_qs.annotate(text_pk=Cast('pk', TextField())).values('text_pk'),
+                )
+                .values('object_id')
+                .annotate(
+                    users=Count('pk', filter=Q(role_definition=member_rd)),
+                    admins=Count('pk', filter=Q(role_definition=admin_rd)),
+                )
+            )
+            for entry in user_admin_counts:
+                org_id = int(entry['object_id'])
+                if org_id in count_context:
+                    count_context[org_id]['users'] = entry['users']
+                    count_context[org_id]['admins'] = entry['admins']
 
         full_context['related_field_counts'] = count_context
 
