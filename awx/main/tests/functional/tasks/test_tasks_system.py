@@ -10,6 +10,7 @@ import pytest
 
 from awx.main.tasks.system import (
     CleanupImagesAndFiles,
+    awx_periodic_scheduler,
     execution_node_health_check,
     inspect_established_receptor_connections,
     clear_setting_cache,
@@ -18,7 +19,7 @@ from awx.main.tasks.system import (
 from awx.main.management.commands.dispatcherd import Command
 from django.db import DatabaseError
 
-from awx.main.models import Instance, Inventory, Job, Organization, ReceptorAddress, InstanceLink
+from awx.main.models import Instance, Inventory, Job, JobTemplate, Organization, ReceptorAddress, InstanceLink, Schedule, TowerScheduleState
 from awx.main.models.inventory import Group, Host
 
 
@@ -250,3 +251,69 @@ def test_configure_dispatcher_logging_updates_level(settings):
 
     assert logging.getLogger('dispatcherd').level == logging.WARNING
     settings.LOGGING = original_logging_settings
+
+
+@pytest.mark.django_db
+def test_periodic_scheduler_survives_invalid_schedule(inventory, project):
+    """A schedule whose update_computed_fields raises should not prevent the
+    periodic scheduler from processing other healthy schedules.
+
+    Simulates the scenario where a corrupt rrule causes update_computed_fields
+    to raise ValueError (the exact error from the BYHOUR/DST bug). Verifies
+    the scheduler completes, creates a job for the healthy schedule, and skips
+    the broken one.
+    """
+    from datetime import datetime, timedelta, timezone as dt_tz
+
+    jt = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory)
+
+    run_now = datetime(2026, 7, 1, 14, 0, 0, tzinfo=dt_tz.utc)
+    last_run = run_now - timedelta(seconds=30)
+
+    healthy_schedule = Schedule.objects.create(
+        name='healthy-schedule',
+        rrule='DTSTART:20260101T120000Z RRULE:FREQ=DAILY;INTERVAL=1',
+        unified_job_template=jt,
+    )
+    Schedule.objects.filter(pk=healthy_schedule.pk).update(next_run=last_run + timedelta(seconds=10))
+
+    bad_schedule = Schedule.objects.create(
+        name='bad-schedule',
+        rrule='DTSTART:20260101T120000Z RRULE:FREQ=DAILY;INTERVAL=1',
+        unified_job_template=jt,
+    )
+    bad_schedule_id = bad_schedule.pk
+    Schedule.objects.filter(pk=bad_schedule_id).update(next_run=last_run + timedelta(seconds=10))
+
+    state = TowerScheduleState.get_solo()
+    state.schedule_last_run = last_run
+    state.save()
+
+    # Make update_computed_fields raise for the bad schedule, simulating the
+    # ValueError that occurs when _fast_forward_rrule hits a corrupt rrule.
+    original_ucf = Schedule.update_computed_fields
+    bad_schedule_raised = False
+
+    def update_or_raise(self):
+        nonlocal bad_schedule_raised
+        if self.pk == bad_schedule_id:
+            bad_schedule_raised = True
+            raise ValueError("Invalid rrule byxxx generates an empty set.")
+        return original_ucf(self)
+
+    with (
+        mock.patch('awx.main.tasks.system.now', return_value=run_now),
+        mock.patch('awx.main.models.schedules.now', return_value=run_now),
+        mock.patch('awx.main.models.schedules.emit_channel_notification'),
+        mock.patch('awx.main.tasks.system.emit_channel_notification'),
+        mock.patch.object(Schedule, 'update_computed_fields', update_or_raise),
+    ):
+        awx_periodic_scheduler()
+
+    assert bad_schedule_raised, "The bad schedule's update_computed_fields should have been called and raised"
+
+    healthy_jobs = Job.objects.filter(schedule=healthy_schedule)
+    assert healthy_jobs.count() == 1, "Healthy schedule should have created exactly one job"
+
+    bad_jobs = Job.objects.filter(schedule=bad_schedule)
+    assert bad_jobs.count() == 0, "Bad schedule should not have created a job"

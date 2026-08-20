@@ -91,7 +91,17 @@ def _fast_forward_rrule(rrule, ref_dt=None):
 
     interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
     new_start = rrule._dtstart + interval_aligned_offset
-    new_rrule = rrule.replace(dtstart=new_start)
+    try:
+        new_rrule = rrule.replace(dtstart=new_start)
+    except ValueError:
+        logger.warning(
+            "Fast-forward of rrule failed due to invalid byxxx constraint "
+            "with new dtstart=%s (original dtstart=%s). "
+            "Returning original rrule without fast-forward.",
+            new_start,
+            rrule._dtstart,
+        )
+        return rrule
     return new_rrule
 
 
@@ -168,7 +178,11 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     def timezone(self):
         utc = tzutc()
         # All rules in a ruleset will have the same dtstart so we can just take the first rule
-        tzinfo = Schedule.rrulestr(self.rrule)._rrule[0]._dtstart.tzinfo
+        try:
+            tzinfo = Schedule.rrulestr(self.rrule)._rrule[0]._dtstart.tzinfo
+        except ValueError as e:
+            logger.warning("Schedule id=%s has an invalid rrule, cannot determine timezone: %s", self.id, e)
+            return ''
         if tzinfo is utc:
             return 'UTC'
         all_zones = Schedule.get_zoneinfo()
@@ -186,7 +200,12 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     def until(self):
         # The UNTIL= datestamp (if any) coerced from UTC to the local naive time
         # of the DTSTART
-        for r in Schedule.rrulestr(self.rrule)._rrule:
+        try:
+            rrules = Schedule.rrulestr(self.rrule)._rrule
+        except ValueError as e:
+            logger.warning("Schedule id=%s has an invalid rrule, cannot determine until: %s", self.id, e)
+            return ''
+        for r in rrules:
             if r._until:
                 local_until = r._until.astimezone(r._dtstart.tzinfo)
                 naive_until = local_until.replace(tzinfo=None)
@@ -311,7 +330,16 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         for field_name in affects_fields:
             starting_values[field_name] = getattr(self, field_name)
 
-        future_rs = Schedule.rrulestr(self.rrule)
+        try:
+            future_rs = Schedule.rrulestr(self.rrule)
+        except ValueError as e:
+            logger.error(
+                "Schedule id=%s has an invalid rrule that cannot be parsed: %s. Error: %s",
+                self.id,
+                self.rrule,
+                e,
+            )
+            raise
 
         if self.enabled:
             next_run_actual = future_rs.after(now())
