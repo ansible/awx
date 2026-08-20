@@ -1,13 +1,13 @@
 import collections
 import os
 import sqlite3
-import sys
 import unittest
 
 import pytest
 
 import awx
 from awx.main.db.profiled_pg.base import RecordedQueryLog
+from awx.main.utils.db import db_requirement_violations
 
 QUERY = {'sql': 'SELECT * FROM main_job', 'time': '.01'}
 EXPLAIN = 'Seq Scan on public.main_job  (cost=0.00..1.18 rows=18 width=86)'
@@ -124,7 +124,7 @@ def test_sql_above_threshold(tmpdir):
         args, kw = _call
         assert args == ('EXPLAIN VERBOSE {}'.format(QUERY['sql']),)
 
-    path = os.path.join(tmpdir, '{}.sqlite'.format(os.path.basename(sys.argv[0])))
+    path = os.path.join(tmpdir, 'unknown.sqlite')
     assert os.path.exists(path)
 
     # verify the results
@@ -145,3 +145,71 @@ def test_sql_above_threshold(tmpdir):
         assert q['sql'] == QUERY['sql']
         assert EXPLAIN in q['explain']
         assert 'test_sql_above_threshold' in q['bt']
+
+
+def test_db_requirement_violations_skip_env_var(mocker):
+    mocker.patch.dict(os.environ, {'SKIP_PG_VERSION_CHECK': 'true'})
+    result = db_requirement_violations()
+    assert result is None
+
+
+def test_db_requirement_violations_postgresql_sufficient_version(mocker):
+    mock_connection = mocker.MagicMock()
+    mock_connection.vendor = 'postgresql'
+    mock_connection.pg_version = 120000  # Version 12.0
+    mocker.patch('awx.main.utils.db.connection', mock_connection)
+    mocker.patch.dict(os.environ, {}, clear=True)
+
+    result = db_requirement_violations()
+
+    assert result is None
+
+
+def test_db_requirement_violations_postgresql_insufficient_version(mocker):
+    mock_connection = mocker.MagicMock()
+    mock_connection.vendor = 'postgresql'
+    mock_connection.pg_version = 110000  # Version 11.0
+    mocker.patch('awx.main.utils.db.connection', mock_connection)
+    mocker.patch.dict(os.environ, {}, clear=True)
+
+    result = db_requirement_violations()
+
+    assert result is not None
+    assert "At a minimum, postgres version 12 is required, found 11" in result
+
+
+def test_db_requirement_violations_non_postgresql_production(mocker):
+    mock_connection = mocker.MagicMock()
+    mock_connection.vendor = 'sqlite'
+    mocker.patch('awx.main.utils.db.connection', mock_connection)
+    mocker.patch('awx.main.utils.db.MODE', 'production')
+    mocker.patch.dict(os.environ, {}, clear=True)
+
+    result = db_requirement_violations()
+
+    assert result is not None
+    assert "Running server with 'sqlite' type database is not supported" in result
+
+
+def test_db_requirement_violations_non_postgresql_development(mocker):
+    mock_connection = mocker.MagicMock()
+    mock_connection.vendor = 'sqlite'
+    mocker.patch('awx.main.utils.db.connection', mock_connection)
+    mocker.patch('awx.main.utils.db.MODE', 'development')
+    mocker.patch.dict(os.environ, {}, clear=True)
+
+    result = db_requirement_violations()
+
+    assert result is None
+
+
+def test_db_requirement_violations_postgresql_edge_case_version(mocker):
+    mock_connection = mocker.MagicMock()
+    mock_connection.vendor = 'postgresql'
+    mock_connection.pg_version = 129999  # Version 12.9999
+    mocker.patch('awx.main.utils.db.connection', mock_connection)
+    mocker.patch.dict(os.environ, {}, clear=True)
+
+    result = db_requirement_violations()
+
+    assert result is None

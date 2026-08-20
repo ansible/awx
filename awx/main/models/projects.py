@@ -367,7 +367,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         pre_save_vals = getattr(self, '_prior_values_store', {})
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         self._skip_update = bool(kwargs.pop('skip_update', False))
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
@@ -450,13 +450,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     @property
     def cache_id(self):
-        """This gives the folder name where collections and roles will be saved to so it does not re-download
+        # Prefer scm_revision as the cache key if available. This guarantees that project changes are tracked correctly
+        # even over multiple nodes. The scm_revision is a hex string and thus safe to be used as a directory name.
+        if self.scm_revision:
+            return self.scm_revision
 
-        Normally we want this to track with the last update, because every update should pull new content.
-        This does not count sync jobs, but sync jobs do not update last_job or current_job anyway.
-        If cleanup_jobs deletes the last jobs, then we can fallback to using any given heuristic related
-        to the last job ran.
-        """
+        # If no scm_revision is available (e.g. non-scm projects), use these. current_job_id and last_job_id are global
+        # IDs in the database. This means that when a project sync runs on one node, all other nodes become outdated,
+        # resulting in unnecessary re-syncs.
         if self.current_job_id:
             return str(self.current_job_id)
         elif self.last_job_id:
@@ -638,7 +639,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def cache_id(self):
-        if self.branch_override or self.job_type == 'check' or (not self.project):
+        if self.branch_override or (not self.project):
             return str(self.id)  # causes it to not use the cache, basically
         return self.project.cache_id
 

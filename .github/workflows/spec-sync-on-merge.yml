@@ -20,12 +20,11 @@ on:
       - 'stable-2.[1-9][0-9]'
   workflow_dispatch: # Allow manual triggering for testing
 jobs:
-  check-ownership:
-    uses: ./.github/workflows/_repo-owns-branch.yml
-
   sync-openapi-spec:
-    needs: check-ownership
-    if: needs.check-ownership.outputs.should_run == 'true'
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.repository == 'ansible/awx' && (github.ref_name == 'devel' || startsWith(github.ref_name, 'feature_'))) ||
+      (github.repository == 'ansible/tower' && (startsWith(github.ref_name, 'stable-') || startsWith(github.ref_name, 'release_')))
     name: Sync OpenAPI spec to central repo
     runs-on: ubuntu-latest
     permissions:
@@ -44,9 +43,12 @@ jobs:
           private-github-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Generate API Schema
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-          COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
+          COMPOSE_TAG=${BASE_REF:-${REF_NAME}} \
           docker run -u $(id -u) --rm -v ${{ github.workspace }}:/awx_devel/:Z \
             --workdir=/awx_devel `make print-DEVEL_IMAGE_NAME` /start_tests.sh genschema
 
@@ -73,9 +75,11 @@ jobs:
 
       - name: Fail if branch doesn't exist
         if: steps.checkout_spec_repo.outcome == 'failure'
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          echo "##[error]❌ Branch '${{ github.ref_name }}' does not exist in the central spec repository."
-          echo "##[error]Expected branch: ${{ github.ref_name }}"
+          echo "##[error]❌ Branch '${REF_NAME}' does not exist in the central spec repository."
+          echo "##[error]Expected branch: ${REF_NAME}"
           echo "##[error]This branch must be created in the spec repo before specs can be synced."
           exit 1
 
@@ -113,31 +117,47 @@ jobs:
         working-directory: spec-repo
         env:
           GH_TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.OPENAPI_SPEC_SYNC_GPG_PRIVATE_KEY }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          SPEC_REPO: ansible-automation-platform/aap-openapi-specs
+          REF_NAME: ${{ github.ref_name }}
+          GITHUB_SHA_FULL: ${{ github.sha }}
+          GITHUB_REPO: ${{ github.repository }}
+          IS_NEW_FILE: ${{ steps.compare.outputs.is_new_file }}
         run: |
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Import GPG key and configure git for signed commits
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import 2>/dev/null
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+          if [ -z "$GPG_KEY_ID" ]; then
+            echo "❌ Failed to import GPG key or extract key ID"
+            exit 1
+          fi
+          git config user.name "aap-api-bot"
+          git config user.email "aap-api-bot@redhat.com"
+          git config commit.gpgsign true
+          git config user.signingkey "$GPG_KEY_ID"
 
-          # Create branch for PR
-          SHORT_SHA="${{ github.sha }}"
-          SHORT_SHA="${SHORT_SHA:0:7}"
-          BRANCH_NAME="update-Controller-${{ github.ref_name }}-${SHORT_SHA}"
+          # Configure git to use the token for push
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${SPEC_REPO}.git"
+
+          SHORT_SHA="${GITHUB_SHA_FULL:0:7}"
+          BRANCH_NAME="update-Controller-${REF_NAME}-${SHORT_SHA}"
+
           git checkout -b "$BRANCH_NAME"
 
           # Add and commit changes
           git add "controller.json"
 
-          if [ "${{ steps.compare.outputs.is_new_file }}" == "true" ]; then
-            COMMIT_MSG="Add Controller OpenAPI spec for ${{ github.ref_name }}"
+          if [ "${IS_NEW_FILE}" == "true" ]; then
+            COMMIT_MSG="Add Controller OpenAPI spec for ${REF_NAME}"
           else
-            COMMIT_MSG="Update Controller OpenAPI spec for ${{ github.ref_name }}"
+            COMMIT_MSG="Update Controller OpenAPI spec for ${REF_NAME}"
           fi
 
-          git commit -m "$COMMIT_MSG
+          git commit -m "${COMMIT_MSG}
 
-          Synced from ${{ github.repository }}@${{ github.sha }}
-          Source branch: ${{ github.ref_name }}
+          Synced from ${GITHUB_REPO}@${GITHUB_SHA_FULL}
+          Source branch: ${REF_NAME}
 
           Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
@@ -145,17 +165,17 @@ jobs:
           git push origin "$BRANCH_NAME"
 
           # Create PR
-          PR_TITLE="[${{ github.ref_name }}] Update Controller spec from merged commit"
+          PR_TITLE="[${REF_NAME}] Update Controller spec from merged commit"
           PR_BODY="## Summary
           Automated OpenAPI spec sync from component repository merge.
 
-          **Source:** ${{ github.repository }}@${{ github.sha }}
-          **Branch:** \`${{ github.ref_name }}\`
+          **Source:** ${GITHUB_REPO}@${GITHUB_SHA_FULL}
+          **Branch:** \`${REF_NAME}\`
           **Component:** \`Controller\`
           **Spec File:** \`controller.json\`
 
           ## Changes
-          $(if [ "${{ steps.compare.outputs.is_new_file }}" == "true" ]; then echo "- 🆕 New spec file created"; else echo "- 📝 Spec file updated with latest changes"; fi)
+          $(if [ "${IS_NEW_FILE}" == "true" ]; then echo "- 🆕 New spec file created"; else echo "- 📝 Spec file updated with latest changes"; fi)
 
           ## Source Commit
           \`\`\`
@@ -166,17 +186,20 @@ jobs:
           🤖 This PR was automatically generated by the OpenAPI spec sync workflow."
 
           gh pr create \
+            --repo "${SPEC_REPO}" \
             --title "$PR_TITLE" \
             --body "$PR_BODY" \
-            --base "${{ github.ref_name }}" \
+            --base "${REF_NAME}" \
             --head "$BRANCH_NAME"
 
           echo "✅ Created PR in spec repo"
 
       - name: Report results
         if: always()
+        env:
+          HAS_DIFF: ${{ steps.compare.outputs.has_diff }}
         run: |
-          if [ "${{ steps.compare.outputs.has_diff }}" == "true" ]; then
+          if [ "${HAS_DIFF}" == "true" ]; then
             echo "📝 Spec sync completed - PR created in spec repo"
           else
             echo "✅ Spec sync completed - no changes needed"

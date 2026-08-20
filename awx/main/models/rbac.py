@@ -613,7 +613,7 @@ def get_role_from_object_role(object_role):
         model_name, role_name = rd.name.split()
         role_name = role_name.lower()
         role_name += '_role'
-    return getattr(object_role.content_object, role_name)
+    return getattr(object_role.content_object, role_name, None)
 
 
 def give_or_remove_permission(role, actor, giving=True, rd=None):
@@ -649,6 +649,8 @@ def give_creator_permissions(user, obj):
     if assignment:
         with disable_rbac_sync():
             old_role = get_role_from_object_role(assignment.object_role)
+            if old_role is None:
+                return
             old_role.members.add(user)
 
 
@@ -802,7 +804,17 @@ def _sync_assignments_to_old_rbac(instance, delete=True):
 
 @receiver(post_delete, sender=RoleUserAssignment)
 @receiver(post_delete, sender=RoleTeamAssignment)
-def sync_assignments_to_old_rbac_delete(instance, **kwargs):
+def sync_assignments_to_old_rbac_delete(instance, origin=None, **kwargs):
+    # Skip cascade deletes from non-assignment origins — sync is redundant:
+    #  - Model origin with app_label != dab_rbac: a parent object (e.g.
+    #    Organization) is being deleted and old Role M2M tables cascade from
+    #    the same parent.
+    #  - QuerySet of a different model (e.g. ObjectRole): bulk RBAC cleanup
+    #    such as defer_rbac_computations flush — parent objects already gone.
+    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
+        return
+    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
+        return
     _sync_assignments_to_old_rbac(instance, delete=True)
 
 

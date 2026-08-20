@@ -4,7 +4,8 @@
 import dateutil
 import logging
 
-from django.db.models import Count
+from django.db.models import Count, Q, TextField
+from django.db.models.functions import Cast
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -15,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from awx.main.constants import ACTIVE_STATES
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from awx.main.models import Organization
 from awx.main.utils import get_object_or_400
 from awx.main.models.ha import Instance, InstanceGroup, schedule_policy_task
@@ -177,29 +179,37 @@ class OrganizationCountsMixin(object):
 
         db_results['projects'] = project_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        # Other members and admins of organization are always viewable
-        db_results['users'] = org_qs.annotate(users=Count('member_role__members', distinct=True), admins=Count('admin_role__members', distinct=True)).values(
-            'id', 'users', 'admins'
-        )
-
         count_context = {}
         for org in org_id_list:
             org_id = org['id']
             count_context[org_id] = {'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0, 'admins': 0, 'projects': 0}
 
         for res, count_qs in db_results.items():
-            if res == 'users':
-                org_reference = 'id'
-            else:
-                org_reference = 'organization'
             for entry in count_qs:
-                org_id = entry[org_reference]
+                org_id = entry['organization']
                 if org_id in count_context:
-                    if res == 'users':
-                        count_context[org_id]['admins'] = entry['admins']
-                        count_context[org_id]['users'] = entry['users']
-                        continue
-                    count_context[org_id][res] = entry['%s__count' % org_reference]
+                    count_context[org_id][res] = entry['organization__count']
+
+        member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
+        admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
+
+        if member_rd and admin_rd:
+            user_admin_counts = (
+                RoleUserAssignment.objects.filter(
+                    role_definition__in=[member_rd, admin_rd],
+                    object_id__in=org_qs.annotate(text_pk=Cast('pk', TextField())).values('text_pk'),
+                )
+                .values('object_id')
+                .annotate(
+                    users=Count('pk', filter=Q(role_definition=member_rd)),
+                    admins=Count('pk', filter=Q(role_definition=admin_rd)),
+                )
+            )
+            for entry in user_admin_counts:
+                org_id = int(entry['object_id'])
+                if org_id in count_context:
+                    count_context[org_id]['users'] = entry['users']
+                    count_context[org_id]['admins'] = entry['admins']
 
         full_context['related_field_counts'] = count_context
 
@@ -212,3 +222,9 @@ class NoTruncateMixin(object):
         if self.request.query_params.get('no_truncate'):
             context.update(no_truncate=True)
         return context
+
+
+class UnifiedJobExcludeMixin(object):
+    # Reserve the name 'exclude' so we can use it as a query param. Otherwise, the rest-filters backend
+    # would treat it as a model field lookup.
+    rest_filters_reserved_names = ('exclude',)

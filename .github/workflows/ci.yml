@@ -12,7 +12,7 @@ on:
     branches:
       - devel  # needed to publish code coverage post-merge
   schedule:
-    - cron: '0 12,18 * * 1-5'
+    - cron: '0 11,17 * * 1-5'
   workflow_dispatch: {}
 jobs:
   trigger-release-branches:
@@ -36,12 +36,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
+      - name: Trigger CI on stable-2.7
+        id: dispatch_stable_27
+        continue-on-error: true
+        run: gh workflow run ci.yml --ref stable-2.7
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
       - name: Check dispatch results
-        if: steps.dispatch_release_46.outcome == 'failure' || steps.dispatch_stable_26.outcome == 'failure'
+        if: steps.dispatch_release_46.outcome == 'failure' || steps.dispatch_stable_26.outcome == 'failure' || steps.dispatch_stable_27.outcome == 'failure'
         run: |
           echo "One or more dispatches failed:"
           echo "  release_4.6: ${{ steps.dispatch_release_46.outcome }}"
           echo "  stable-2.6: ${{ steps.dispatch_stable_26.outcome }}"
+          echo "  stable-2.7: ${{ steps.dispatch_stable_27.outcome }}"
           exit 1
 
   common-tests:
@@ -252,7 +260,7 @@ jobs:
         continue-on-error: true
         run: |
           set +e
-          timeout 15m bash -elc '
+          timeout 20m bash -elc '
             python -m pip install -r molecule/requirements.txt
             python -m pip install PyYAML # for awx/tools/scripts/rewrite-awx-operator-requirements.py
             $(realpath ../awx/tools/scripts/rewrite-awx-operator-requirements.py) molecule/requirements.yml $(realpath ../awx)

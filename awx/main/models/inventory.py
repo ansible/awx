@@ -27,7 +27,10 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.utils.common import load_all_entry_points_for
+from awx.main.utils.lazy_registry import LazyLoadDict
 from awx.main.utils.plugins import discover_available_cloud_provider_plugin_names, compute_cloud_inventory_sources
+from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
@@ -926,12 +929,22 @@ class HostMetricSummaryMonthly(models.Model):
     indirectly_managed_hosts = models.IntegerField(default=0, help_text=("Manually entered number indirectly managed hosts for a certain month"))
 
 
+def _load_inventory_plugins():
+    is_awx = detect_server_product_name() == 'AWX'
+    extra_entry_point_groups = () if is_awx else ('inventory.supported',)
+    all_entry_points = load_all_entry_points_for(['inventory', *extra_entry_point_groups])
+
+    for entry_point_name, entry_point in all_entry_points.items():
+        cls = entry_point.load()
+        InventorySourceOptions.injectors[entry_point_name] = cls
+
+
 class InventorySourceOptions(BaseModel):
     """
     Common fields for InventorySource and InventoryUpdate.
     """
 
-    injectors = dict()
+    injectors = LazyLoadDict(_load_inventory_plugins)
 
     # From the options of the Django management base command
     INVENTORY_UPDATE_VERBOSITY_CHOICES = [
@@ -1149,7 +1162,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
 
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         is_new_instance = not bool(self.pk)
 
         # Set name automatically. Include PK (or placeholder) to make sure the names are always unique.
