@@ -43,6 +43,11 @@ LISTENER_DATABASES = {
     }
 }
 
+# Optional manual override for statement_timeout (ms) on web worker DB
+# connections.  When running under uwsgi, the timeout is auto-derived from
+# the harakiri value.  Set this for non-uwsgi deployments or to override.
+DATABASE_STATEMENT_TIMEOUT = None
+
 # Whether or not the deployment is a K8S-based deployment
 # In K8S-based deployments, instances have zero capacity - all playbook
 # automation is intended to flow through defined Container Groups that
@@ -1038,8 +1043,11 @@ SPECTACULAR_SETTINGS = {
     # Use our custom schema class that handles swagger_topic and deprecated views
     'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
     'COMPONENT_SPLIT_REQUEST': True,
-    # Postprocessing hook to filter CredentialType enum values
-    'POSTPROCESSING_HOOKS': ['awx.api.schema.filter_credential_type_schema'],
+    # Postprocessing hooks for OpenAPI schema generation
+    'POSTPROCESSING_HOOKS': [
+        'awx.api.schema.filter_credential_type_schema',
+        'awx.api.schema.inject_ai_descriptions',
+    ],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,

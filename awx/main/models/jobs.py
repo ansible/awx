@@ -132,8 +132,7 @@ class JobOptions(BaseModel):
         blank=True,
         default=False,
     )
-    skip_tags = models.CharField(
-        max_length=1024,
+    skip_tags = models.TextField(
         blank=True,
         default='',
     )
@@ -1092,6 +1091,9 @@ class JobHostSummary(CreatedModifiedModel):
         unique_together = [('job', 'host_name')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
+        indexes = [
+            models.Index(fields=['host', '-id'], name='main_jobhostsumm_host_id_desc'),
+        ]
 
     job = models.ForeignKey(
         'Job',
