@@ -135,7 +135,7 @@ def test_unified_job_list_team_member_sees_team_granted_jobs(user, setup_managed
     response = get(reverse('api:unified_job_list'), team_user)
     assert response.status_code == 200
     result_ids = [r['id'] for r in response.data['results']]
-    assert job.pk in result_ids, f"Team member should see job {job.pk} via team-granted JT execute permission, " f"but got result IDs: {result_ids}"
+    assert job.pk in result_ids, f"Team member should see job {job.pk} via team-granted JT execute permission, but got result IDs: {result_ids}"
 
 
 @pytest.mark.django_db

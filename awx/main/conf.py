@@ -488,7 +488,7 @@ register(
     min_value=0,
     label=_('Job Event Standard Output Maximum Display Size'),
     help_text=_(
-        u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
+        'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
     ),
     category=_('Jobs'),
     category_slug='jobs',
@@ -722,9 +722,7 @@ register(
     default='https',
     label=_('Logging Aggregator Protocol'),
     help_text=_(
-        'Protocol used to communicate with log aggregator.  '
-        'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
-        'the Logging Aggregator hostname.'
+        'Protocol used to communicate with log aggregator.  HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in the Logging Aggregator hostname.'
     ),
     category=_('Logging'),
     category_slug='logging',

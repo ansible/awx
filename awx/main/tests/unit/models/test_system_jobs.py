@@ -39,7 +39,7 @@ def test_valid__clean_extra_data_system_jobs(extra_data):
 )
 def test_invalid__extra_data_system_jobs(extra_data):
     accepted, rejected, errors = SystemJobTemplate(job_type='cleanup_jobs').accept_or_ignore_variables(extra_data)
-    assert str(errors['extra_vars'][0]) == u'days must be a positive integer.'
+    assert str(errors['extra_vars'][0]) == 'days must be a positive integer.'
 
 
 def test_unallowed_system_job_data():

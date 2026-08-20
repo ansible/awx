@@ -118,11 +118,11 @@ class DynamicLevelFilter(Filter):
 
 
 def string_to_type(t):
-    if t == u'null':
+    if t == 'null':
         return None
-    if t == u'true':
+    if t == 'true':
         return True
-    elif t == u'false':
+    elif t == 'false':
         return False
 
     if re.search(r'^[-+]?[0-9]+$', t):
@@ -151,7 +151,7 @@ class SmartFilter(object):
             search_kwargs = self._expand_search(k, v)
             if search_kwargs:
                 kwargs.update(search_kwargs)
-                q = reduce(lambda x, y: x | y, [models.Q(**{u'%s__icontains' % _k: _v}) for _k, _v in kwargs.items()])
+                q = reduce(lambda x, y: x | y, [models.Q(**{'%s__icontains' % _k: _v}) for _k, _v in kwargs.items()])
                 self.result = Host.objects.filter(q)
             else:
                 # detect loops and restrict access to sensitive fields
@@ -168,7 +168,7 @@ class SmartFilter(object):
             return v
 
         def strip_quotes_json_logic(self, v):
-            if type(v) is str and v.startswith('"') and v.endswith('"') and v != u'"null"':
+            if type(v) is str and v.startswith('"') and v.endswith('"') and v != '"null"':
                 return v[1:-1]
             return v
 
@@ -203,9 +203,9 @@ class SmartFilter(object):
                 strip_len = len(SmartFilter.SEARCHABLE_RELATIONSHIP)
             k = k[strip_len:]
 
-            pieces = k.split(u'__')
+            pieces = k.split('__')
 
-            assembled_k = u'%s__contains' % (SmartFilter.SEARCHABLE_RELATIONSHIP)
+            assembled_k = '%s__contains' % (SmartFilter.SEARCHABLE_RELATIONSHIP)
             assembled_v = None
 
             last_v = None
@@ -213,7 +213,7 @@ class SmartFilter(object):
 
             for i, piece in enumerate(pieces):
                 new_kv = dict()
-                if piece.endswith(u'[]'):
+                if piece.endswith('[]'):
                     new_v = []
                     new_kv[piece[0:-2]] = new_v
                 else:
@@ -241,7 +241,7 @@ class SmartFilter(object):
 
         def _extract_key_value(self, t):
             k = t[0]
-            v = t[1] if len(t) > 1 else u""
+            v = t[1] if len(t) > 1 else ""
 
             # Strip quotes from key
             if isinstance(k, str) and k.startswith('"') and k.endswith('"'):
@@ -333,7 +333,7 @@ class SmartFilter(object):
         try:
             res = bool_expr.parse_string(filter_string, parse_all=True)
         except (pp.ParseException, FieldDoesNotExist):
-            raise RuntimeError(u"Invalid query %s" % filter_string_raw)
+            raise RuntimeError("Invalid query %s" % filter_string_raw)
 
         if len(res) > 0:
             return res[0].result

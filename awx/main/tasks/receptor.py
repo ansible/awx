@@ -180,7 +180,7 @@ def find_node_in_mesh(node_name, receptor_ctl):
             if node.get('NodeID') == node_name:
                 return node
         else:
-            logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts-attempt} attempts left.")
+            logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts - attempt} attempts left.")
             time.sleep(backoff)
             backoff += 1
     else:
@@ -848,7 +848,7 @@ def reload_receptor():
             receptor_ctl.simple_command("reload")
             break
         except ValueError:
-            logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
+            logger.warning(f"Unable to reload Receptor configuration. {attempts - backoff} attempts left.")
             time.sleep(backoff)
     else:
         raise RuntimeError("Receptor reload failed")

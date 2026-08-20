@@ -15,7 +15,6 @@ from awx.main.models import Organization, Team
 
 @pytest.mark.django_db
 class TestClaimsOldRbacSync:
-
     def _build_claims(self, orgs, teams):
         """Build a claims dict from org/team model instances."""
         objects = {"organization": [], "team": []}

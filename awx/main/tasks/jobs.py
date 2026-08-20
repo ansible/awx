@@ -563,7 +563,7 @@ class BaseTask(object):
             project.save()
             lock_path = project.get_lock_file()
             if lock_path is None:
-                raise RuntimeError(u'Invalid lock file path')
+                raise RuntimeError('Invalid lock file path')
 
         try:
             self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)

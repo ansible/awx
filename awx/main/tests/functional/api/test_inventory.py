@@ -285,12 +285,12 @@ def test_urlencode_host_filter(post, admin_user, organization):
 def test_host_filter_unicode(post, admin_user, organization):
     post(
         reverse('api:inventory_list'),
-        data={'name': 'smart inventory', 'kind': 'smart', 'organization': organization.pk, 'host_filter': u'ansible_facts__ansible_distribution=レッドハット'},
+        data={'name': 'smart inventory', 'kind': 'smart', 'organization': organization.pk, 'host_filter': 'ansible_facts__ansible_distribution=レッドハット'},
         user=admin_user,
         expect=201,
     )
     si = Inventory.objects.get(name='smart inventory')
-    assert si.host_filter == u'ansible_facts__ansible_distribution=レッドハット'
+    assert si.host_filter == 'ansible_facts__ansible_distribution=レッドハット'
 
 
 @pytest.mark.django_db
@@ -302,7 +302,7 @@ def test_host_filter_invalid_ansible_facts_lookup(post, admin_user, organization
             'name': 'smart inventory',
             'kind': 'smart',
             'organization': organization.pk,
-            'host_filter': u'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
+            'host_filter': 'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
         },
         user=admin_user,
         expect=400,
@@ -417,7 +417,7 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
         mock_settings.INV_ENV_VARIABLE_BLOCKED = ('FOOBAR',)
         r = post(
             reverse('api:inventory_source_list'),
-            {'name': 'new inv src', 'source_vars': '{\"FOOBAR\": \"val\"}', 'inventory': inventory.pk},
+            {'name': 'new inv src', 'source_vars': '{"FOOBAR": "val"}', 'inventory': inventory.pk},
             admin_user,
             expect=400,
         )
@@ -729,7 +729,6 @@ class TestConstructedInventory:
 
 @pytest.mark.django_db
 class TestInventoryAllVariables:
-
     @staticmethod
     def simulate_update_from_source(inv_src, variables_dict, overwrite_vars=True):
         """
