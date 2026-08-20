@@ -10,6 +10,7 @@ from awx.main.tasks.host_indirect import (
     build_indirect_host_data,
     fetch_job_event_query,
     save_indirect_host_entries,
+    save_indirect_host_entries_of_job,
     cleanup_and_save_indirect_host_entries_fallback,
 )
 from awx.main.models.event_query import EventQuery
@@ -364,3 +365,56 @@ def test_cleanup_old_audit_records(old_audit_record, new_audit_record):
     cleanup_and_save_indirect_host_entries_fallback()
     count_after_cleanup = IndirectManagedNodeAudit.objects.count()
     assert count_after_cleanup == 1
+
+
+@mock.patch('awx.main.tasks.host_indirect.logger.warning')
+@pytest.mark.django_db
+def test_null_name_event_skipped_with_warning(mock_logger_warning, bare_job, event_query):
+    """Event with name=None should be skipped and a warning logged once."""
+    bare_job.job_events.create(
+        event_data={
+            'resolved_action': 'demo.query.example',
+            'res': {'direct_host_name': 'foo_host', 'name': None},
+        }
+    )
+    query = Query('demo.query.example', TEST_JQ)
+    records = build_indirect_host_data(bare_job, query)
+    assert records == []
+    mock_logger_warning.assert_called_once()
+    assert 'missing name' in mock_logger_warning.call_args[0][0]
+
+
+@pytest.mark.django_db
+def test_mixed_valid_and_null_name_events(bare_job, event_query):
+    """Job with one valid and one null-name event: valid record persists, null-name is skipped."""
+    bare_job.job_events.create(
+        event_data={
+            'resolved_action': 'demo.query.example',
+            'res': {'direct_host_name': 'foo_host', 'name': 'vm-foo'},
+        }
+    )
+    bare_job.job_events.create(
+        event_data={
+            'resolved_action': 'demo.query.example',
+            'res': {'direct_host_name': 'bar_host', 'name': None},
+        }
+    )
+    save_indirect_host_entries(bare_job.id, wait_for_events=False)
+    bare_job.refresh_from_db()
+
+    assert bare_job.event_queries_processed is True
+    assert IndirectManagedNodeAudit.objects.filter(job=bare_job).count() == 1
+    audit = IndirectManagedNodeAudit.objects.get(job=bare_job)
+    assert audit.name == 'vm-foo'
+
+
+@pytest.mark.django_db
+def test_save_failure_leaves_flag_false(bare_job, event_query):
+    """If bulk_create raises, event_queries_processed must remain False for fallback retry."""
+    create_registered_event(bare_job)
+
+    with mock.patch.object(IndirectManagedNodeAudit.objects, 'bulk_create', side_effect=RuntimeError('db error')):
+        save_indirect_host_entries(bare_job.id, wait_for_events=False)
+
+    bare_job.refresh_from_db()
+    assert bare_job.event_queries_processed is False
