@@ -24,20 +24,24 @@ from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
 
-logger = logging.getLogger('awx.main.models.schedule')
+logger = logging.getLogger("awx.main.models.schedule")
 
-__all__ = ['Schedule']
+__all__ = ["Schedule"]
 
 
 UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
 
 
 def _assert_timezone_id_is_valid(rrules) -> None:
-    broken_rrules = [str(rrule) for rrule in rrules if rrule._dtstart and rrule._dtstart.tzinfo is None]
+    broken_rrules = [
+        str(rrule)
+        for rrule in rrules
+        if rrule._dtstart and rrule._dtstart.tzinfo is None
+    ]
     if not broken_rrules:
         return
     raise ValueError(
-        f'A valid TZID must be provided (e.g., America/New_York). Invalid: {broken_rrules}',
+        f"A valid TZID must be provided (e.g., America/New_York). Invalid: {broken_rrules}",
     ) from None
 
 
@@ -48,7 +52,7 @@ def _fast_forward_rrules(rrules, ref_dt=None):
 
 
 def _fast_forward_rrule(rrule, ref_dt=None):
-    '''
+    """
     Utility to fast forward an rrule, maintaining consistency in the resulting
     occurrences.
 
@@ -61,7 +65,7 @@ def _fast_forward_rrule(rrule, ref_dt=None):
     then back to the original timezone at the end.
 
     Returns a new rrule with a new dtstart
-    '''
+    """
 
     if rrule._freq not in {dateutil.rrule.HOURLY, dateutil.rrule.MINUTELY}:
         return rrule
@@ -89,7 +93,9 @@ def _fast_forward_rrule(rrule, ref_dt=None):
 
     seconds_since_dtstart = (ref_dt - rrule._dtstart).total_seconds()
 
-    interval_aligned_offset = datetime.timedelta(seconds=(seconds_since_dtstart // interval) * interval)
+    interval_aligned_offset = datetime.timedelta(
+        seconds=(seconds_since_dtstart // interval) * interval
+    )
     new_start = rrule._dtstart + interval_aligned_offset
     try:
         new_rrule = rrule.replace(dtstart=new_start)
@@ -132,33 +138,54 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
 
 class Schedule(PrimordialModel, LaunchTimeConfig):
     class Meta:
-        app_label = 'main'
-        ordering = [models.F('next_run').desc(nulls_last=True), 'id']
-        unique_together = ('unified_job_template', 'name')
+        app_label = "main"
+        ordering = [models.F("next_run").desc(nulls_last=True), "id"]
+        unique_together = ("unified_job_template", "name")
 
     objects = ScheduleManager()
 
     unified_job_template = models.ForeignKey(
-        'UnifiedJobTemplate',
-        related_name='schedules',
+        "UnifiedJobTemplate",
+        related_name="schedules",
         on_delete=models.CASCADE,
     )
     name = models.CharField(
         max_length=512,
     )
-    enabled = models.BooleanField(default=True, help_text=_("Enables processing of this schedule."))
-    dtstart = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The first occurrence of the schedule occurs on or after this time."))
-    dtend = models.DateTimeField(
-        null=True, default=None, editable=False, help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires.")
+    enabled = models.BooleanField(
+        default=True, help_text=_("Enables processing of this schedule.")
     )
-    rrule = models.TextField(help_text=_("A value representing the schedules iCal recurrence rule."))
-    next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
+    dtstart = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_(
+            "The first occurrence of the schedule occurs on or after this time."
+        ),
+    )
+    dtend = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_(
+            "The last occurrence of the schedule occurs before this time, aftewards the schedule expires."
+        ),
+    )
+    rrule = models.TextField(
+        help_text=_("A value representing the schedules iCal recurrence rule.")
+    )
+    next_run = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_("The next time that the scheduled action will run."),
+    )
     instance_groups = OrderedManyToManyField(
-        'InstanceGroup',
-        related_name='schedule_instance_groups',
+        "InstanceGroup",
+        related_name="schedule_instance_groups",
         blank=True,
         editable=False,
-        through='ScheduleInstanceGroupMembership',
+        through="ScheduleInstanceGroupMembership",
     )
 
     @classmethod
@@ -181,19 +208,23 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         try:
             tzinfo = Schedule.rrulestr(self.rrule)._rrule[0]._dtstart.tzinfo
         except ValueError as e:
-            logger.warning("Schedule id=%s has an invalid rrule, cannot determine timezone: %s", self.id, e)
-            return ''
+            logger.warning(
+                "Schedule id=%s has an invalid rrule, cannot determine timezone: %s",
+                self.id,
+                e,
+            )
+            return ""
         if tzinfo is utc:
-            return 'UTC'
+            return "UTC"
         all_zones = Schedule.get_zoneinfo()
         all_zones.sort(key=lambda x: -len(x))
-        fname = getattr(tzinfo, '_filename', None)
+        fname = getattr(tzinfo, "_filename", None)
         if fname:
             for zone in all_zones:
                 if fname.endswith(zone):
                     return zone
-        logger.warning('Could not detect valid zoneinfo for {}'.format(self.rrule))
-        return ''
+        logger.warning("Could not detect valid zoneinfo for {}".format(self.rrule))
+        return ""
 
     @property
     # TODO: How would we handle multiple until parameters? The UI is currently using this on the edit screen of a schedule
@@ -203,14 +234,18 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         try:
             rrules = Schedule.rrulestr(self.rrule)._rrule
         except ValueError as e:
-            logger.warning("Schedule id=%s has an invalid rrule, cannot determine until: %s", self.id, e)
-            return ''
+            logger.warning(
+                "Schedule id=%s has an invalid rrule, cannot determine until: %s",
+                self.id,
+                e,
+            )
+            return ""
         for r in rrules:
             if r._until:
                 local_until = r._until.astimezone(r._dtstart.tzinfo)
                 naive_until = local_until.replace(tzinfo=None)
                 return naive_until.isoformat()
-        return ''
+        return ""
 
     @classmethod
     def coerce_naive_until(cls, rrule):
@@ -231,41 +266,61 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         #
 
         # Find the DTSTART rule or raise an error, its usually the first rule but that is not strictly enforced
-        start_date_rule = re.sub(r'^.*(DTSTART[^\s]+)\s.*$', r'\1', rrule)
+        start_date_rule = re.sub(r"^.*(DTSTART[^\s]+)\s.*$", r"\1", rrule)
         if not start_date_rule:
-            raise ValueError('A DTSTART field needs to be in the rrule')
+            raise ValueError("A DTSTART field needs to be in the rrule")
 
-        rules = re.split(r'\s+', rrule)
+        rules = re.split(r"\s+", rrule)
         for index in range(0, len(rules)):
             rule = rules[index]
-            if 'until=' in rule.lower():
+            if "until=" in rule.lower():
                 # if DTSTART;TZID= is used, coerce "naive" UNTIL values
                 # to the proper UTC date
-                match_until = re.match(r".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rule)
-                if not len(match_until.group('utcflag')):
+                match_until = re.match(
+                    r".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rule
+                )
+                if not len(match_until.group("utcflag")):
                     # rule = DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
 
                     # Find the UNTIL=N part of the string
                     # naive_until = UNTIL=20200601T170000
-                    naive_until = match_until.group('until')
+                    naive_until = match_until.group("until")
 
                     # What is the DTSTART timezone for:
                     # DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000Z
                     # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
                     # We are going to construct a 'dummy' rule for parsing which will include the DTSTART and the rest of the rule
-                    temp_rule = "{} {}".format(start_date_rule, rule.replace(naive_until, naive_until + 'Z'))
+                    temp_rule = "{} {}".format(
+                        start_date_rule, rule.replace(naive_until, naive_until + "Z")
+                    )
                     # If the rule is an EX rule we have to add an RRULE to it because an EX rule alone will not manifest into a ruleset
-                    if rule.lower().startswith('ex'):
-                        temp_rule = "{} {}".format(temp_rule, 'RRULE:FREQ=MINUTELY;INTERVAL=1;UNTIL=20380601T170000Z')
-                    local_tz = dateutil.rrule.rrulestr(temp_rule, tzinfos=UTC_TIMEZONES, **{'forceset': True})._rrule[0]._dtstart.tzinfo
+                    if rule.lower().startswith("ex"):
+                        temp_rule = "{} {}".format(
+                            temp_rule,
+                            "RRULE:FREQ=MINUTELY;INTERVAL=1;UNTIL=20380601T170000Z",
+                        )
+                    local_tz = (
+                        dateutil.rrule.rrulestr(
+                            temp_rule, tzinfos=UTC_TIMEZONES, **{"forceset": True}
+                        )
+                        ._rrule[0]
+                        ._dtstart.tzinfo
+                    )
 
                     # Make a datetime object with tzinfo=<the DTSTART timezone>
                     # localized_until = datetime.datetime(2020, 6, 1, 17, 0, tzinfo=tzfile('/usr/share/zoneinfo/America/New_York'))
-                    localized_until = make_aware(datetime.datetime.strptime(re.sub('^UNTIL=', '', naive_until), "%Y%m%dT%H%M%S"), local_tz)
+                    localized_until = make_aware(
+                        datetime.datetime.strptime(
+                            re.sub("^UNTIL=", "", naive_until), "%Y%m%dT%H%M%S"
+                        ),
+                        local_tz,
+                    )
 
                     # Coerce the datetime to UTC and format it as a string w/ Zulu format
                     # utc_until = UNTIL=20200601T220000Z
-                    utc_until = 'UNTIL=' + localized_until.astimezone(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+                    utc_until = "UNTIL=" + localized_until.astimezone(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%SZ")
 
                     # rule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
                     # rule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
@@ -278,7 +333,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         Apply our own custom rrule parsing requirements
         """
         rrule = Schedule.coerce_naive_until(rrule)
-        kwargs['forceset'] = True
+        kwargs["forceset"] = True
         rruleset = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
 
         _assert_timezone_id_is_valid(rruleset._rrule)
@@ -295,17 +350,24 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         return rruleset
 
     def __str__(self):
-        return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
+        return "%s_t%s_%s_%s" % (
+            self.name,
+            self.unified_job_template.id,
+            self.id,
+            self.next_run,
+        )
 
     def get_absolute_url(self, request=None):
-        return reverse('api:schedule_detail', kwargs={'pk': self.pk}, request=request)
+        return reverse("api:schedule_detail", kwargs={"pk": self.pk}, request=request)
 
     def get_job_kwargs(self):
         config_data = self.prompts_dict()
-        job_kwargs, rejected, errors = self.unified_job_template._accept_or_ignore_job_kwargs(**config_data)
+        job_kwargs, rejected, errors = (
+            self.unified_job_template._accept_or_ignore_job_kwargs(**config_data)
+        )
         if errors:
-            logger.info('Errors creating scheduled job: {}'.format(errors))
-        job_kwargs['_eager_fields'] = {'launch_type': 'scheduled', 'schedule': self}
+            logger.info("Errors creating scheduled job: {}".format(errors))
+        job_kwargs["_eager_fields"] = {"launch_type": "scheduled", "schedule": self}
         return job_kwargs
 
     def get_end_date(ruleset):
@@ -325,7 +387,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
             return None
 
     def update_computed_fields_no_save(self):
-        affects_fields = ['next_run', 'dtstart', 'dtend']
+        affects_fields = ["next_run", "dtstart", "dtend"]
         starting_values = {}
         for field_name in affects_fields:
             starting_values[field_name] = getattr(self, field_name)
@@ -359,28 +421,35 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
                 self.dtstart = None
         self.dtend = Schedule.get_end_date(future_rs)
 
-        changed = any(getattr(self, field_name) != starting_values[field_name] for field_name in affects_fields)
+        changed = any(
+            getattr(self, field_name) != starting_values[field_name]
+            for field_name in affects_fields
+        )
         return changed
 
     def update_computed_fields(self):
         changed = self.update_computed_fields_no_save()
         if not changed:
             return
-        emit_channel_notification('schedules-changed', dict(id=self.id, group_name='schedules'))
+        emit_channel_notification(
+            "schedules-changed", dict(id=self.id, group_name="schedules")
+        )
         # Must save self here before calling unified_job_template computed fields
         # in order for that method to be correct
         # by adding modified to update fields, we avoid updating modified time
-        super(Schedule, self).save(update_fields=['next_run', 'dtstart', 'dtend', 'modified'])
+        super(Schedule, self).save(
+            update_fields=["next_run", "dtstart", "dtend", "modified"]
+        )
         with ignore_inventory_computed_fields():
             self.unified_job_template.update_computed_fields()
 
     def save(self, *args, **kwargs):
         self.rrule = Schedule.coerce_naive_until(self.rrule)
         changed = self.update_computed_fields_no_save()
-        if changed and 'update_fields' in kwargs:
-            for field_name in ['next_run', 'dtstart', 'dtend']:
-                if field_name not in kwargs['update_fields']:
-                    kwargs['update_fields'].append(field_name)
+        if changed and "update_fields" in kwargs:
+            for field_name in ["next_run", "dtstart", "dtend"]:
+                if field_name not in kwargs["update_fields"]:
+                    kwargs["update_fields"].append(field_name)
         super(Schedule, self).save(*args, **kwargs)
         if changed:
             with ignore_inventory_computed_fields():
