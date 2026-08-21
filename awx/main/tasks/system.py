@@ -73,7 +73,6 @@ from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
-    RECEPTOR_CONF,
     administrative_workunit_reaper,
     get_receptor_ctl,
     read_receptor_config,
@@ -733,7 +732,7 @@ def _heartbeat_instance_management():
     try:
         config_data = read_receptor_config()
     except FileNotFoundError:
-        logger.error(f'Receptor config {RECEPTOR_CONF} not found, marking instance offline.')
+        logger.error('Receptor config not found, marking instance offline.')
         if this_inst:
             this_inst.local_health_check()
             this_inst.mark_offline(errors='Receptor config missing')

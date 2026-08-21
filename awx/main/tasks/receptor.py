@@ -43,7 +43,6 @@ from filelock import FileLock
 
 logger = logging.getLogger('awx.main.tasks.receptor')
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
-RECEPTOR_CONF = __RECEPTOR_CONF
 __RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
