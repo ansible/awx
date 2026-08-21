@@ -590,16 +590,11 @@ def inspect_established_receptor_connections(mesh_status):
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
 
-def inspect_execution_and_hop_nodes(instance_list, config_data=None):
+def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
         try:
-            ctl = get_receptor_ctl(config_data=config_data)
-        except FileNotFoundError:
-            logger.error('Receptor daemon not running, skipping execution node check')
-            return
-        try:
-            mesh_status = ctl.simple_command('status')
+            mesh_status = receptor_ctl.simple_command('status')
         except ValueError as exc:
             logger.error(f'Error running receptorctl status command, error: {str(exc)}')
             return
@@ -744,7 +739,14 @@ def _heartbeat_instance_management():
             this_inst.mark_offline(errors='Receptor config missing')
         return None, None, None
 
-    inspect_execution_and_hop_nodes(instance_list, config_data)
+    try:
+        ctl = get_receptor_ctl(config_data=config_data)
+    except FileNotFoundError:
+        logger.error('Receptor daemon not running, skipping execution node check')
+        ctl = None
+
+    if ctl is not None:
+        inspect_execution_and_hop_nodes(instance_list, ctl)
 
     for inst in list(instance_list):
         if inst == this_inst:
