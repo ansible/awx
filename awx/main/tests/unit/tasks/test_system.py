@@ -64,9 +64,9 @@ def test_update_inventory_computed_fields_database_error_nosqlstate(mock_logger,
             mock_inventory.update_computed_fields.assert_called_once()
 
 
-@patch('awx.main.tasks.system.read_receptor_config', side_effect=FileNotFoundError)
+@patch('awx.main.tasks.system.get_receptor_ctl', side_effect=FileNotFoundError)
 @patch('awx.main.tasks.system.Instance.objects.filter')
-def test_heartbeat_marks_offline_when_receptor_config_missing(mock_filter, mock_read_config):
+def test_heartbeat_marks_offline_when_receptor_unavailable(mock_filter, mock_get_ctl):
     this_inst = MagicMock(spec=Instance)
     this_inst.hostname = 'test-host'
     mock_filter.return_value = [this_inst]
@@ -77,4 +77,4 @@ def test_heartbeat_marks_offline_when_receptor_config_missing(mock_filter, mock_
 
     assert result == (None, None, None)
     this_inst.local_health_check.assert_called_once()
-    this_inst.mark_offline.assert_called_once_with(errors='Receptor config missing')
+    this_inst.mark_offline.assert_called_once_with(errors='Receptor not available')

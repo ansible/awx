@@ -75,7 +75,6 @@ from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
     administrative_workunit_reaper,
     get_receptor_ctl,
-    read_receptor_config,
     worker_cleanup,
     worker_info,
     write_receptor_config,
@@ -730,22 +729,15 @@ def _heartbeat_instance_management():
             break
 
     try:
-        config_data = read_receptor_config()
+        ctl = get_receptor_ctl()
     except FileNotFoundError:
-        logger.error('Receptor config not found, marking instance offline.')
+        logger.error('Receptor not available, marking instance offline.')
         if this_inst:
             this_inst.local_health_check()
-            this_inst.mark_offline(errors='Receptor config missing')
+            this_inst.mark_offline(errors='Receptor not available')
         return None, None, None
 
-    try:
-        ctl = get_receptor_ctl(config_data=config_data)
-    except FileNotFoundError:
-        logger.error('Receptor daemon not running, skipping execution node check')
-        ctl = None
-
-    if ctl is not None:
-        inspect_execution_and_hop_nodes(instance_list, ctl)
+    inspect_execution_and_hop_nodes(instance_list, ctl)
 
     for inst in list(instance_list):
         if inst == this_inst:
