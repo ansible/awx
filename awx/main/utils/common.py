@@ -592,18 +592,18 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         4: {'edit': True, 'start': True},
         6: {'edit': False, 'start': False}
     }
-    Each capability is produced for all items in the page in a single query
+    Each capability is produced for all items in the page in a single query.
 
-    Examples of prefetch language:
-    prefetch_list = ['admin', 'execute']
-      --> prefetch the admin (edit) and execute (start) permissions for
+    Examples of prefetch language (permission-based):
+    prefetch_list = [{'edit': 'change'}, {'start': 'execute'}]
+      --> prefetch change (edit) and execute (start) permissions for
           items in list for current user
-    prefetch_list = ['inventory.admin']
-      --> prefetch the related inventory FK permissions for current user,
+    prefetch_list = [{'edit': 'inventory.change'}]
+      --> prefetch related inventory FK change permissions for current user,
           and put it into the object's cache
-    prefetch_list = [{'copy': ['inventory.admin', 'project.admin']}]
-      --> prefetch logical combination of admin permission to inventory AND
-          project, put into cache dictionary as "copy"
+    prefetch_list = [{'copy': ['inventory.use', 'project.use']}]
+      --> prefetch logical combination of use permission to inventory AND
+          project, put into cache dictionary as 'copy'
     """
     page_ids = [obj.id for obj in page]
     mapping = {}
@@ -621,29 +621,28 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         if type(paths) is not list:
             paths = [paths]
 
-        # Build the query for accessible_objects according the user & role(s)
+        # Build the query for access_qs according the user & permission(s)
         filter_args = []
-        for role_path in paths:
-            if '.' in role_path:
-                res_path = '__'.join(role_path.split('.')[:-1])
-                role_type = role_path.split('.')[-1]
+        for perm_path in paths:
+            if '.' in perm_path:
+                res_path = '__'.join(perm_path.split('.')[:-1])
+                action = perm_path.split('.')[-1]
                 parent_model = model
-                for subpath in role_path.split('.')[:-1]:
+                for subpath in perm_path.split('.')[:-1]:
                     parent_model = parent_model._meta.get_field(subpath).related_model
-                filter_args.append(
-                    Q(Q(**{'%s__pk__in' % res_path: parent_model.accessible_pk_qs(user, '%s_role' % role_type)}) | Q(**{'%s__isnull' % res_path: True}))
-                )
+                access_qs = parent_model.access_qs(user, action)
+                filter_args.append(Q(Q(**{'%s__in' % res_path: access_qs}) | Q(**{'%s__isnull' % res_path: True})))
             else:
-                role_type = role_path
-                filter_args.append(Q(**{'pk__in': model.accessible_pk_qs(user, '%s_role' % role_type)}))
+                action = perm_path
+                if hasattr(model, 'access_qs'):
+                    filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
+                else:
+                    # UnifiedJobTemplate is not registered with the permission registry,
+                    # so it only has access_ids_qs (not access_qs)
+                    filter_args.append(Q(**{'pk__in': model.access_ids_qs(user, action)}))
 
         if display_method is None:
-            # Role name translation to UI names for methods
-            display_method = role_type
-            if role_type == 'admin':
-                display_method = 'edit'
-            elif role_type in ['execute', 'update']:
-                display_method = 'start'
+            display_method = action
 
         # Union that query with the list of items on page
         filter_args.append(Q(pk__in=page_ids))

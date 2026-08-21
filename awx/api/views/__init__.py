@@ -835,8 +835,8 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        my_qs = self.model.accessible_objects(self.request.user, 'read_role')
-        team_qs = models.Project.accessible_objects(team, 'read_role')
+        my_qs = self.model.access_qs(self.request.user, 'view')
+        team_qs = models.Project.access_qs(team, 'view')
         return my_qs & team_qs
 
 
@@ -1009,7 +1009,7 @@ class ProjectTeamsList(ListAPIView):
         team_member_parent_roles = models.Role.objects.filter(children__in=roles_on_project, role_field='member_role', content_type=team_ct).distinct()
 
         team_ids = team_member_parent_roles.values_list('object_id', flat=True)
-        my_qs = self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=team_ids)
+        my_qs = self.model.access_qs(self.request.user, 'view').filter(pk__in=team_ids)
         return my_qs
 
 
@@ -1239,7 +1239,7 @@ class UserTeamsList(SubListAPIView):
         u = get_object_or_404(models.User, pk=self.kwargs['pk'])
         if not self.request.user.can_access(models.User, 'read', u):
             raise PermissionDenied()
-        return models.Team.accessible_objects(self.request.user, 'read_role').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
+        return models.Team.access_qs(self.request.user, 'view').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
 
 class UserRolesList(SubListAttachDetachAPIView):
@@ -1290,8 +1290,8 @@ class UserProjectsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = models.Project.accessible_objects(self.request.user, 'read_role')
-        user_qs = models.Project.accessible_objects(parent, 'read_role')
+        my_qs = models.Project.access_qs(self.request.user, 'view')
+        user_qs = models.Project.access_qs(parent, 'view')
         return my_qs & user_qs
 
 
@@ -1304,7 +1304,7 @@ class UserOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = models.Organization.accessible_objects(self.request.user, 'read_role')
+        my_qs = models.Organization.access_qs(self.request.user, 'view')
         user_qs = models.Organization.objects.filter(member_role__members=parent)
         return my_qs & user_qs
 
@@ -1318,7 +1318,7 @@ class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = models.Organization.accessible_objects(self.request.user, 'read_role')
+        my_qs = models.Organization.access_qs(self.request.user, 'view')
         user_qs = models.Organization.objects.filter(admin_role__members=parent)
         return my_qs & user_qs
 
@@ -1495,8 +1495,8 @@ class UserCredentialsList(SubListCreateAPIView):
         user = self.get_parent_object()
         self.check_parent_access(user)
 
-        visible_creds = models.Credential.accessible_objects(self.request.user, 'read_role')
-        user_creds = models.Credential.accessible_objects(user, 'read_role')
+        visible_creds = models.Credential.access_qs(self.request.user, 'view')
+        user_creds = models.Credential.access_qs(user, 'view')
         return user_creds & visible_creds
 
 
@@ -1511,7 +1511,7 @@ class TeamCredentialsList(SubListCreateAPIView):
         team = self.get_parent_object()
         self.check_parent_access(team)
 
-        visible_creds = models.Credential.accessible_objects(self.request.user, 'read_role')
+        visible_creds = models.Credential.access_qs(self.request.user, 'view')
         team_creds = models.Credential.objects.filter(Q(use_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
         return (team_creds & visible_creds).distinct()
 
@@ -1527,7 +1527,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         organization = self.get_parent_object()
         self.check_parent_access(organization)
 
-        user_visible = models.Credential.accessible_objects(self.request.user, 'read_role').all()
+        user_visible = models.Credential.access_qs(self.request.user, 'view').all()
         org_set = models.Credential.objects.filter(organization=organization)
 
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
