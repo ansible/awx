@@ -75,6 +75,7 @@ from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
     administrative_workunit_reaper,
     get_receptor_ctl,
+    receptor_config_exists,
     worker_cleanup,
     worker_info,
     write_receptor_config,
@@ -112,6 +113,14 @@ def _run_dispatch_startup_common():
 
     # TODO: Enable this on VM installs
     if settings.IS_K8S:
+        for attempt in range(60):
+            if receptor_config_exists():
+                break
+            startup_logger.info("Waiting for receptor config to be created by EE sidecar...")
+            time.sleep(2)
+        else:
+            startup_logger.error("Receptor config not created after 120s, instance will be marked offline by heartbeat.")
+
         try:
             write_receptor_config()
         except Exception:

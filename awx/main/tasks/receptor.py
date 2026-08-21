@@ -117,6 +117,10 @@ class FuzzyError:
         return UnknownError(msg, node=node, state_name=state_name)
 
 
+def receptor_config_exists():
+    return os.path.exists(__RECEPTOR_CONF)
+
+
 def read_receptor_config():
     # for K8S deployments, getting a lock is necessary as another process
     # may be re-writing the config at this time
