@@ -590,10 +590,14 @@ def inspect_established_receptor_connections(mesh_status):
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
 
-def inspect_execution_and_hop_nodes(instance_list, config_data):
+def inspect_execution_and_hop_nodes(instance_list, config_data=None):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        ctl = get_receptor_ctl(config_data=config_data)
+        try:
+            ctl = get_receptor_ctl(config_data=config_data)
+        except FileNotFoundError:
+            logger.error('Receptor daemon not running, skipping execution node check')
+            return
         try:
             mesh_status = ctl.simple_command('status')
         except ValueError as exc:
