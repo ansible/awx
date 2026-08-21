@@ -14,16 +14,14 @@ def test_validate_rh_basic_auth_rhsm():
     """
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(
-        licenser, 'get_host_from_rhsm_config', return_value='https://subscription.rhsm.redhat.com'
-    ) as mock_get_host, patch.object(licenser, 'get_rhsm_subs', return_value=[]) as mock_get_rhsm, patch.object(
-        licenser, 'get_satellite_subs'
-    ) as mock_get_satellite, patch.object(
-        licenser, 'get_crc_subs'
-    ) as mock_get_crc, patch.object(
-        licenser, 'generate_license_options_from_entitlements'
-    ) as mock_generate:
-
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config', return_value='https://subscription.rhsm.redhat.com') as mock_get_host,
+        patch.object(licenser, 'get_rhsm_subs', return_value=[]) as mock_get_rhsm,
+        patch.object(licenser, 'get_satellite_subs') as mock_get_satellite,
+        patch.object(licenser, 'get_crc_subs') as mock_get_crc,
+        patch.object(licenser, 'generate_license_options_from_entitlements') as mock_generate,
+    ):
         mock_settings.REDHAT_CANDLEPIN_HOST = None
 
         licenser.validate_rh('testuser', 'testpass', basic_auth=True)
@@ -44,16 +42,14 @@ def test_validate_rh_basic_auth_satellite():
     """
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(
-        licenser, 'get_host_from_rhsm_config', return_value='https://satellite.example.com'
-    ) as mock_get_host, patch.object(licenser, 'get_rhsm_subs') as mock_get_rhsm, patch.object(
-        licenser, 'get_satellite_subs', return_value=[]
-    ) as mock_get_satellite, patch.object(
-        licenser, 'get_crc_subs'
-    ) as mock_get_crc, patch.object(
-        licenser, 'generate_license_options_from_entitlements'
-    ) as mock_generate:
-
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config', return_value='https://satellite.example.com') as mock_get_host,
+        patch.object(licenser, 'get_rhsm_subs') as mock_get_rhsm,
+        patch.object(licenser, 'get_satellite_subs', return_value=[]) as mock_get_satellite,
+        patch.object(licenser, 'get_crc_subs') as mock_get_crc,
+        patch.object(licenser, 'generate_license_options_from_entitlements') as mock_generate,
+    ):
         mock_settings.REDHAT_CANDLEPIN_HOST = None
 
         licenser.validate_rh('testuser', 'testpass', basic_auth=True)
@@ -72,14 +68,14 @@ def test_validate_rh_service_account_crc():
     """
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(licenser, 'get_host_from_rhsm_config') as mock_get_host, patch.object(
-        licenser, 'get_rhsm_subs'
-    ) as mock_get_rhsm, patch.object(licenser, 'get_satellite_subs') as mock_get_satellite, patch.object(
-        licenser, 'get_crc_subs', return_value=[]
-    ) as mock_get_crc, patch.object(
-        licenser, 'generate_license_options_from_entitlements'
-    ) as mock_generate:
-
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config') as mock_get_host,
+        patch.object(licenser, 'get_rhsm_subs') as mock_get_rhsm,
+        patch.object(licenser, 'get_satellite_subs') as mock_get_satellite,
+        patch.object(licenser, 'get_crc_subs', return_value=[]) as mock_get_crc,
+        patch.object(licenser, 'generate_license_options_from_entitlements') as mock_generate,
+    ):
         mock_settings.SUBSCRIPTIONS_RHSM_URL = 'https://console.redhat.com/api/rhsm/v1/subscriptions'
 
         licenser.validate_rh('client_id', 'client_secret', basic_auth=False)
@@ -99,14 +95,14 @@ def test_validate_rh_candlepin_host_prioritized_over_rhsm_config():
     """
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(licenser, 'get_host_from_rhsm_config') as mock_get_host, patch.object(
-        licenser, 'get_rhsm_subs'
-    ) as mock_get_rhsm, patch.object(licenser, 'get_satellite_subs', return_value=[]) as mock_get_satellite, patch.object(
-        licenser, 'get_crc_subs'
-    ) as mock_get_crc, patch.object(
-        licenser, 'generate_license_options_from_entitlements'
-    ) as mock_generate:
-
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config') as mock_get_host,
+        patch.object(licenser, 'get_rhsm_subs') as mock_get_rhsm,
+        patch.object(licenser, 'get_satellite_subs', return_value=[]) as mock_get_satellite,
+        patch.object(licenser, 'get_crc_subs') as mock_get_crc,
+        patch.object(licenser, 'generate_license_options_from_entitlements') as mock_generate,
+    ):
         mock_settings.REDHAT_CANDLEPIN_HOST = 'https://satellite.example.com'
         licenser.validate_rh('testuser', 'testpass', basic_auth=True)
 
@@ -121,14 +117,14 @@ def test_validate_rh_prepends_scheme_when_missing():
     """REDHAT_CANDLEPIN_HOST without a scheme gets https:// prepended"""
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(licenser, 'get_host_from_rhsm_config'), patch.object(
-        licenser, 'get_rhsm_subs'
-    ) as mock_get_rhsm, patch.object(licenser, 'get_satellite_subs', return_value=[]) as mock_get_satellite, patch.object(
-        licenser, 'get_crc_subs'
-    ), patch.object(
-        licenser, 'generate_license_options_from_entitlements'
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config'),
+        patch.object(licenser, 'get_rhsm_subs') as mock_get_rhsm,
+        patch.object(licenser, 'get_satellite_subs', return_value=[]) as mock_get_satellite,
+        patch.object(licenser, 'get_crc_subs'),
+        patch.object(licenser, 'generate_license_options_from_entitlements'),
     ):
-
         mock_settings.REDHAT_CANDLEPIN_HOST = 'satellite.example.com'
         licenser.validate_rh('testuser', 'testpass', basic_auth=True)
 
@@ -140,8 +136,9 @@ def test_validate_rh_missing_user_raises_error():
     """Test validate_rh raises ValueError when user is missing"""
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(
-        licenser, 'get_host_from_rhsm_config', return_value='https://subscription.rhsm.redhat.com'
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config', return_value='https://subscription.rhsm.redhat.com'),
     ):
         mock_settings.REDHAT_CANDLEPIN_HOST = None
         with pytest.raises(ValueError, match='subscriptions_client_id or subscriptions_username is required'):
@@ -152,8 +149,9 @@ def test_validate_rh_missing_password_raises_error():
     """Test validate_rh raises ValueError when password is missing"""
     licenser = Licenser()
 
-    with patch('awx.main.utils.licensing.settings') as mock_settings, patch.object(
-        licenser, 'get_host_from_rhsm_config', return_value='https://subscription.rhsm.redhat.com'
+    with (
+        patch('awx.main.utils.licensing.settings') as mock_settings,
+        patch.object(licenser, 'get_host_from_rhsm_config', return_value='https://subscription.rhsm.redhat.com'),
     ):
         mock_settings.REDHAT_CANDLEPIN_HOST = None
         with pytest.raises(ValueError, match='subscriptions_client_secret or subscriptions_password is required'):

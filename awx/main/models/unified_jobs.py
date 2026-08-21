@@ -836,7 +836,7 @@ class UnifiedJob(
         return True
 
     def __str__(self):
-        return u'%s-%s-%s' % (self.created, self.id, self.status)
+        return '%s-%s-%s' % (self.created, self.id, self.status)
 
     @property
     def log_format(self):
@@ -1416,14 +1416,14 @@ class UnifiedJob(
 
         if not all(opts.values()):
             missing_fields = ', '.join([k for k, v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
+            self.job_explanation = 'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
 
         return opts
 
     def pre_start(self):
         if not self.can_start:
-            self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
+            self.job_explanation = '%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
             return (False, None)
 

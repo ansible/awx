@@ -164,15 +164,15 @@ class TestMigrationSmoke:
 
         CredentialType = new_state.apps.get_model('main', 'CredentialType')
         for expected_name in validate_exists:
-            assert CredentialType.objects.filter(
-                name=expected_name
-            ).exists(), f'Could not find {expected_name} credential type name, all names: {list(CredentialType.objects.values_list("name", flat=True))}'
+            assert CredentialType.objects.filter(name=expected_name).exists(), (
+                f'Could not find {expected_name} credential type name, all names: {list(CredentialType.objects.values_list("name", flat=True))}'
+            )
 
         # Verify the system_administrator role exists
         Role = new_state.apps.get_model('main', 'Role')
-        assert Role.objects.filter(
-            singleton_name='system_administrator', role_field='system_administrator'
-        ).exists(), "expected to find a system_administrator singleton role"
+        assert Role.objects.filter(singleton_name='system_administrator', role_field='system_administrator').exists(), (
+            "expected to find a system_administrator singleton role"
+        )
 
 
 @pytest.mark.django_db
@@ -215,15 +215,15 @@ class TestGithubAppBug:
         CredentialType = new_state.apps.get_model('main', 'CredentialType')  # Get CredentialType model from the new state
 
         # Assertion 1: The CredentialType with the old 'github_app' kind should no longer exist.
-        assert not CredentialType.objects.filter(
-            namespace='github_app'
-        ).exists(), "CredentialType with old 'github_app' kind should no longer exist after migration."
+        assert not CredentialType.objects.filter(namespace='github_app').exists(), (
+            "CredentialType with old 'github_app' kind should no longer exist after migration."
+        )
 
         # Assertion 2: The CredentialType should now exist with the new 'github_app_lookup' kind
         # and retain its original name.
-        assert CredentialType.objects.filter(
-            namespace='github_app_lookup', name='Legacy GitHub App Credential'
-        ).exists(), "CredentialType should be updated to 'github_app_lookup' and retain its name."
+        assert CredentialType.objects.filter(namespace='github_app_lookup', name='Legacy GitHub App Credential').exists(), (
+            "CredentialType should be updated to 'github_app_lookup' and retain its name."
+        )
 
 
 @pytest.mark.django_db
@@ -245,9 +245,9 @@ class TestSystemAuditorMigration:
         new_state = migrator.apply_tested_migration(('main', '0192_custom_roles'))
         RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
 
-        assert RoleUserAssignment.objects.filter(
-            user=user.id, role_definition__name='Platform Auditor'
-        ).exists(), "system_auditor member should have been granted Platform Auditor"
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').exists(), (
+            "system_auditor member should have been granted Platform Auditor"
+        )
 
     def test_fix_system_auditor_migration_backfills_missing(self, migrator):
         """
@@ -269,16 +269,16 @@ class TestSystemAuditorMigration:
         # Simulate the pre-fix state: remove the Platform Auditor assignment
         platform_auditor = RoleDefinition.objects.get(name='Platform Auditor')
         RoleUserAssignment.objects.filter(user=user.id, role_definition=platform_auditor).delete()
-        assert not RoleUserAssignment.objects.filter(
-            user=user.id, role_definition=platform_auditor
-        ).exists(), "Setup: user should not have Platform Auditor before corrective migration"
+        assert not RoleUserAssignment.objects.filter(user=user.id, role_definition=platform_auditor).exists(), (
+            "Setup: user should not have Platform Auditor before corrective migration"
+        )
 
         state = migrator.apply_tested_migration(('main', '0208_fix_system_auditor_migration'))
         RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
 
-        assert RoleUserAssignment.objects.filter(
-            user=user.id, role_definition__name='Platform Auditor'
-        ).exists(), "Corrective migration should have backfilled Platform Auditor"
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').exists(), (
+            "Corrective migration should have backfilled Platform Auditor"
+        )
 
     def test_fix_system_auditor_migration_no_duplicates(self, migrator):
         """
@@ -302,6 +302,6 @@ class TestSystemAuditorMigration:
         state = migrator.apply_tested_migration(('main', '0208_fix_system_auditor_migration'))
         RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
 
-        assert (
-            RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').count() == 1
-        ), "Should have exactly one Platform Auditor assignment, not duplicates"
+        assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').count() == 1, (
+            "Should have exactly one Platform Auditor assignment, not duplicates"
+        )

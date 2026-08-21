@@ -174,7 +174,7 @@ class ProjectCreate(CustomAction):
     resource = 'projects'
 
     def add_arguments(self, parser, resource_options_parser):
-        parser.choices[self.action].add_argument('--monitor', action='store_true', help=('If set, prints stdout of the project update until ' 'it finishes.'))
+        parser.choices[self.action].add_argument('--monitor', action='store_true', help=('If set, prints stdout of the project update until it finishes.'))
         parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the new project has updated.')
 
     def post(self, kwargs):

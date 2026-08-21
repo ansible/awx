@@ -99,9 +99,9 @@ class CustomAutoSchema(AutoSchema):
         except Exception:
             serializer = None
             warnings.warn(
-                '{}.get_serializer() raised an exception during '
-                'schema generation. Serializer fields will not be '
-                'generated for this view.'.format(self.view.__class__.__name__)
+                '{}.get_serializer() raised an exception during schema generation. Serializer fields will not be generated for this view.'.format(
+                    self.view.__class__.__name__
+                )
             )
 
         if hasattr(self.view, 'swagger_topic'):

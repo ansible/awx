@@ -20,7 +20,7 @@ class Command(BaseCommand):
         """
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT pg_index.indisvalid " "FROM pg_class JOIN pg_index ON pg_class.oid = pg_index.indexrelid " "WHERE pg_class.relname = %s",
+                "SELECT pg_index.indisvalid FROM pg_class JOIN pg_index ON pg_class.oid = pg_index.indexrelid WHERE pg_class.relname = %s",
                 [self.INDEX_NAME],
             )
             row = cursor.fetchone()
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 # have set ALTER ROLE ... SET statement_timeout which would kill
                 # the index build on large tables.
                 cursor.execute("SET statement_timeout = 0")
-                cursor.execute(f"CREATE INDEX CONCURRENTLY {self.INDEX_NAME} " f"ON {self.TABLE_NAME} (host_id, id DESC)")
+                cursor.execute(f"CREATE INDEX CONCURRENTLY {self.INDEX_NAME} ON {self.TABLE_NAME} (host_id, id DESC)")
         finally:
             connection.connection.autocommit = old_autocommit
 

@@ -256,8 +256,7 @@ class WorkflowManager(TaskBase):
                             )
                             display_list = [spawn_node.unified_job_template] + workflow_ancestors
                             job.job_explanation = gettext_noop(
-                                "Workflow Job spawned from workflow could not start because it "
-                                "would result in recursion (spawn order, most recent first: {})"
+                                "Workflow Job spawned from workflow could not start because it would result in recursion (spawn order, most recent first: {})"
                             ).format(', '.join('<{}>'.format(tmp) for tmp in display_list))
                         else:
                             logger.debug(
@@ -344,7 +343,7 @@ class DependencyManager(TaskBase):
         if update.status in ['waiting', 'pending', 'running']:
             return False
 
-        return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
+        return bool((update.finished + timedelta(seconds=cache_timeout)) < tz_now())
 
     def get_or_create_project_update(self, project_id):
         project = self.all_projects.get(project_id, None)
