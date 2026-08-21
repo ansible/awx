@@ -78,9 +78,9 @@ def test_role_migration_matches(request, model, setup_managed_roles):
                 rd_data = {}
                 for rd in model_rds:
                     rd_data[rd.name] = list(rd.permissions.values_list('codename', flat=True))
-            assert (
-                'Compat' not in rd.name
-            ), f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+            assert 'Compat' not in rd.name, (
+                f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+            )
             assert new_codenames == set(old_codenames)
 
     # In the old system these models did not have object-level roles, all others expect some model roles

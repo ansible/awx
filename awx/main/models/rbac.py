@@ -180,9 +180,9 @@ class Role(models.Model):
 
     def __str__(self):
         if 'role_field' in self.__dict__:
-            return u'%s-%s' % (self.name, self.pk)
+            return '%s-%s' % (self.name, self.pk)
         else:
-            return u'%s-%s' % (self._meta.verbose_name, self.pk)
+            return '%s-%s' % (self._meta.verbose_name, self.pk)
 
     def save(self, *args, **kwargs):
         super(Role, self).save(*args, **kwargs)
@@ -365,7 +365,8 @@ class Role(models.Model):
                 if len(removals) > 0:
                     for ids in split_ids_for_sqlite(removals):
                         sql_params['ids'] = ','.join(str(x) for x in ids)
-                        cursor.execute('''
+                        cursor.execute(
+                            '''
                             DELETE FROM %(ancestors_table)s
                             WHERE descendent_id IN (%(ids)s)
                                   AND descendent_id != ancestor_id
@@ -377,7 +378,9 @@ class Role(models.Model):
                                        WHERE parents.from_role_id = %(ancestors_table)s.descendent_id
                                              AND %(ancestors_table)s.ancestor_id = inner_ancestors.ancestor_id
                                   )
-                        ''' % sql_params)
+                        '''
+                            % sql_params
+                        )
 
                         delete_ct += cursor.rowcount
 
@@ -385,7 +388,8 @@ class Role(models.Model):
                 if len(additions) > 0:
                     for ids in split_ids_for_sqlite(additions):
                         sql_params['ids'] = ','.join(str(x) for x in ids)
-                        cursor.execute('''
+                        cursor.execute(
+                            '''
                             INSERT INTO %(ancestors_table)s (descendent_id, ancestor_id, role_field, content_type_id, object_id)
                             SELECT from_id, to_id, new_ancestry_list.role_field, new_ancestry_list.content_type_id, new_ancestry_list.object_id FROM  (
                                   SELECT roles.id from_id,
@@ -415,7 +419,9 @@ class Role(models.Model):
                                        AND %(ancestors_table)s.ancestor_id = new_ancestry_list.to_id
                              )
 
-                        ''' % sql_params)
+                        '''
+                            % sql_params
+                        )
                         insert_ct += cursor.rowcount
 
                 if insert_ct == 0 and delete_ct == 0:

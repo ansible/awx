@@ -89,3 +89,7 @@ class IsMigrating(Common):
 
 class ImportExportError(Exception):
     pass
+
+
+class PathTraversalError(Exception):
+    pass

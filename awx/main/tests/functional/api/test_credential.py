@@ -930,7 +930,7 @@ def test_field_removal(put, organization, admin, credentialtype_ssh):
         },
     }
     cred = Credential(
-        credential_type=credentialtype_ssh, name='Best credential ever', organization=organization, inputs={'username': u'jim', 'password': u'secret'}
+        credential_type=credentialtype_ssh, name='Best credential ever', organization=organization, inputs={'username': 'jim', 'password': 'secret'}
     )
     cred.save()
 
@@ -957,7 +957,7 @@ def test_field_removal(put, organization, admin, credentialtype_ssh):
 )
 def test_credential_type_mutability(patch, organization, admin, credentialtype_ssh, credentialtype_aws, relation, related_obj):
     cred = Credential(
-        credential_type=credentialtype_ssh, name='Best credential ever', organization=organization, inputs={'username': u'jim', 'password': u'pass'}
+        credential_type=credentialtype_ssh, name='Best credential ever', organization=organization, inputs={'username': 'jim', 'password': 'pass'}
     )
     cred.save()
 
@@ -967,7 +967,7 @@ def test_credential_type_mutability(patch, organization, admin, credentialtype_s
     def _change_credential_type():
         return patch(
             reverse('api:credential_detail', kwargs={'pk': cred.pk}),
-            {'credential_type': credentialtype_aws.pk, 'inputs': {'username': u'jim', 'password': u'pass'}},
+            {'credential_type': credentialtype_aws.pk, 'inputs': {'username': 'jim', 'password': 'pass'}},
             admin,
         )
 
@@ -992,7 +992,7 @@ def test_vault_credential_type_mutability(patch, organization, admin, credential
         name='Best credential ever',
         organization=organization,
         inputs={
-            'vault_password': u'some-vault',
+            'vault_password': 'some-vault',
         },
     )
     cred.save()
@@ -1004,7 +1004,7 @@ def test_vault_credential_type_mutability(patch, organization, admin, credential
     def _change_credential_type():
         return patch(
             reverse('api:credential_detail', kwargs={'pk': cred.pk}),
-            {'credential_type': credentialtype_ssh.pk, 'inputs': {'username': u'jim', 'password': u'pass'}},
+            {'credential_type': credentialtype_ssh.pk, 'inputs': {'username': 'jim', 'password': 'pass'}},
             admin,
         )
 
@@ -1025,7 +1025,7 @@ def test_vault_credential_type_mutability(patch, organization, admin, credential
 @pytest.mark.django_db
 def test_cloud_credential_type_mutability(patch, organization, admin, credentialtype_ssh, credentialtype_aws):
     cred = Credential(
-        credential_type=credentialtype_aws, name='Best credential ever', organization=organization, inputs={'username': u'jim', 'password': u'pass'}
+        credential_type=credentialtype_aws, name='Best credential ever', organization=organization, inputs={'username': 'jim', 'password': 'pass'}
     )
     cred.save()
 
@@ -1036,7 +1036,7 @@ def test_cloud_credential_type_mutability(patch, organization, admin, credential
     def _change_credential_type():
         return patch(
             reverse('api:credential_detail', kwargs={'pk': cred.pk}),
-            {'credential_type': credentialtype_ssh.pk, 'inputs': {'username': u'jim', 'password': u'pass'}},
+            {'credential_type': credentialtype_ssh.pk, 'inputs': {'username': 'jim', 'password': 'pass'}},
             admin,
         )
 
@@ -1084,7 +1084,7 @@ def test_ssh_unlock_needed(put, organization, admin, credentialtype_ssh):
         credential_type=credentialtype_ssh,
         name='Best credential ever',
         organization=organization,
-        inputs={'username': u'joe', 'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'ssh_key_unlock': 'unlock'},
+        inputs={'username': 'joe', 'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'ssh_key_unlock': 'unlock'},
     )
     cred.save()
 
@@ -1110,7 +1110,7 @@ def test_ssh_unlock_not_needed(put, organization, admin, credentialtype_ssh):
         name='Best credential ever',
         organization=organization,
         inputs={
-            'username': u'joe',
+            'username': 'joe',
             'ssh_key_data': EXAMPLE_PRIVATE_KEY,
         },
     )
@@ -1137,7 +1137,7 @@ def test_ssh_unlock_with_prior_value(put, organization, admin, credentialtype_ss
         credential_type=credentialtype_ssh,
         name='Best credential ever',
         organization=organization,
-        inputs={'username': u'joe', 'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'ssh_key_unlock': 'old-unlock'},
+        inputs={'username': 'joe', 'ssh_key_data': EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'ssh_key_unlock': 'old-unlock'},
     )
     cred.save()
 
@@ -1165,7 +1165,7 @@ def test_ssh_bad_key_unlock_not_checked(put, organization, admin, credentialtype
         name='Best credential ever',
         organization=organization,
         inputs={
-            'username': u'oscar',
+            'username': 'oscar',
             'ssh_key_data': 'invalid-key',
             'ssh_key_unlock': 'unchecked-unlock',
         },
@@ -1251,7 +1251,7 @@ def test_secret_encryption_previous_value(patch, organization, admin, credential
         }
     }
     cred = Credential(
-        credential_type=credentialtype_ssh, name='Best credential ever', organization=organization, inputs={'username': u'jim', 'password': u'secret'}
+        credential_type=credentialtype_ssh, name='Best credential ever', organization=organization, inputs={'username': 'jim', 'password': 'secret'}
     )
     cred.save()
 
