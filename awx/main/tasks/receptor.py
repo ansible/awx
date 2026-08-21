@@ -117,6 +117,10 @@ class FuzzyError:
         return UnknownError(msg, node=node, state_name=state_name)
 
 
+def receptor_config_exists():
+    return os.path.exists(__RECEPTOR_CONF)
+
+
 def read_receptor_config():
     # for K8S deployments, getting a lock is necessary as another process
     # may be re-writing the config at this time
@@ -801,7 +805,11 @@ def should_update_config(new_config):
     tcp-peers in the config
     '''
 
-    current_config = read_receptor_config()  # this gets receptor conf lock
+    try:
+        current_config = read_receptor_config()  # this gets receptor conf lock
+    except FileNotFoundError:
+        logger.warning("Receptor config file not found, config needs to be written.")
+        return True
     for config_entry in current_config:
         if config_entry not in new_config:
             logger.warning(f"{config_entry} should not be in receptor config. Updating.")
