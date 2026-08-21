@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from awx.main.tasks.system import update_inventory_computed_fields
-from awx.main.models import Inventory
+from awx.main.tasks.system import _heartbeat_instance_management, update_inventory_computed_fields
+from awx.main.models import Instance, Inventory
 from django.db import DatabaseError
 
 
@@ -62,3 +62,19 @@ def test_update_inventory_computed_fields_database_error_nosqlstate(mock_logger,
             mock_filter.assert_called_once_with(id=1)
             mock_update_computed_fields.assert_called_once()
             mock_inventory.update_computed_fields.assert_called_once()
+
+
+@patch('awx.main.tasks.system.read_receptor_config', side_effect=FileNotFoundError)
+@patch('awx.main.tasks.system.Instance.objects.filter')
+def test_heartbeat_marks_offline_when_receptor_config_missing(mock_filter, mock_read_config):
+    this_inst = MagicMock(spec=Instance)
+    this_inst.hostname = 'test-host'
+    mock_filter.return_value = [this_inst]
+
+    with patch('awx.main.tasks.system.settings') as mock_settings:
+        mock_settings.CLUSTER_HOST_ID = 'test-host'
+        result = _heartbeat_instance_management()
+
+    assert result == (None, None, None)
+    this_inst.local_health_check.assert_called_once()
+    this_inst.mark_offline.assert_called_once_with(errors='Receptor config missing')

@@ -72,7 +72,15 @@ from awx.main.models import (
 from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
-from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
+from awx.main.tasks.receptor import (
+    RECEPTOR_CONF,
+    administrative_workunit_reaper,
+    get_receptor_ctl,
+    read_receptor_config,
+    worker_cleanup,
+    worker_info,
+    write_receptor_config,
+)
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
@@ -582,14 +590,10 @@ def inspect_established_receptor_connections(mesh_status):
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
 
-def inspect_execution_and_hop_nodes(instance_list):
+def inspect_execution_and_hop_nodes(instance_list, config_data):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        try:
-            ctl = get_receptor_ctl()
-        except FileNotFoundError:
-            logger.error('Receptor daemon not running, skipping execution node check')
-            return
+        ctl = get_receptor_ctl(config_data=config_data)
         try:
             mesh_status = ctl.simple_command('status')
         except ValueError as exc:
@@ -727,7 +731,16 @@ def _heartbeat_instance_management():
             this_inst = inst
             break
 
-    inspect_execution_and_hop_nodes(instance_list)
+    try:
+        config_data = read_receptor_config()
+    except FileNotFoundError:
+        logger.error(f'Receptor config {RECEPTOR_CONF} not found, marking instance offline.')
+        if this_inst:
+            this_inst.local_health_check()
+            this_inst.mark_offline(errors='Receptor config missing')
+        return None, None, None
+
+    inspect_execution_and_hop_nodes(instance_list, config_data)
 
     for inst in list(instance_list):
         if inst == this_inst:

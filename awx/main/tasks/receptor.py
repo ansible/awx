@@ -43,6 +43,7 @@ from filelock import FileLock
 
 logger = logging.getLogger('awx.main.tasks.receptor')
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
+RECEPTOR_CONF = __RECEPTOR_CONF
 __RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
@@ -801,7 +802,11 @@ def should_update_config(new_config):
     tcp-peers in the config
     '''
 
-    current_config = read_receptor_config()  # this gets receptor conf lock
+    try:
+        current_config = read_receptor_config()  # this gets receptor conf lock
+    except FileNotFoundError:
+        logger.warning("Receptor config file not found, config needs to be written.")
+        return True
     for config_entry in current_config:
         if config_entry not in new_config:
             logger.warning(f"{config_entry} should not be in receptor config. Updating.")
