@@ -280,8 +280,9 @@ jobs:
           AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
 
-      - name: Collect awx-operator logs
-        if: always()
+      - name: Collect awx-operator logs on timeout
+        # Only run on timeout; normal failures should use molecule's built-in log collection.
+        if: steps.awx_operator_test.outputs.timed_out == 'true'
         run: |
           mkdir -p "$DEBUG_OUTPUT_DIR"
           if command -v kind >/dev/null 2>&1; then
