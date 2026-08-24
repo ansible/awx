@@ -4,7 +4,10 @@ from unittest import mock
 
 import pytest
 
+from django.db import transaction
 from django.utils.timezone import now, timedelta
+
+from awx.main.models import Job
 
 from awx.main.tasks.host_indirect import (
     build_indirect_host_data,
@@ -417,3 +420,17 @@ def test_save_failure_leaves_flag_false(bare_job, event_query):
 
     bare_job.refresh_from_db()
     assert bare_job.event_queries_processed is False
+
+
+@pytest.mark.django_db
+def test_job_deleted_between_fetch_and_lock(bare_job):
+    """Race: job exists at initial fetch but is gone by SELECT FOR UPDATE."""
+    job_id = bare_job.id
+    original_atomic = transaction.atomic
+
+    def delete_then_atomic(*args, **kwargs):
+        Job.objects.filter(id=job_id).delete()
+        return original_atomic(*args, **kwargs)
+
+    with mock.patch('awx.main.tasks.host_indirect.transaction.atomic', side_effect=delete_then_atomic):
+        save_indirect_host_entries(job_id, wait_for_events=False)
