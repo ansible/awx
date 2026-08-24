@@ -1303,10 +1303,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             if credential:
                 credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
-        env["VMWARE_USER"] == "bob",
-        env["VMWARE_PASSWORD"] == "secret",
-        env["VMWARE_HOST"] == "https://example.org",
-        env["VMWARE_VALIDATE_CERTS"] == "False",
+        (env["VMWARE_USER"] == "bob",)
+        (env["VMWARE_PASSWORD"] == "secret",)
+        (env["VMWARE_HOST"] == "https://example.org",)
+        (env["VMWARE_VALIDATE_CERTS"] == "False",)
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker, mock_me):
         task = jobs.RunInventoryUpdate()

@@ -1292,9 +1292,9 @@ class ProjectOptionsSerializer(BaseSerializer):
         # Don't allow assigning a local_path when scm_type is set.
         valid_local_paths = Project.get_local_path_choices()
         if self.instance:
-            scm_type = attrs.get('scm_type', self.instance.scm_type) or u''
+            scm_type = attrs.get('scm_type', self.instance.scm_type) or ''
         else:
-            scm_type = attrs.get('scm_type', u'') or u''
+            scm_type = attrs.get('scm_type', '') or ''
         if self.instance and not scm_type:
             valid_local_paths.append(self.instance.local_path)
         if self.instance and scm_type and "local_path" in attrs and self.instance.local_path != attrs['local_path']:
@@ -1914,7 +1914,7 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_str(port))
+                raise serializers.ValidationError(_('Invalid port specification: %s') % force_str(port))
         return name, port
 
     def validate_name(self, value):
@@ -3595,7 +3595,7 @@ class JobRelaunchSerializer(BaseSerializer):
         res = super(JobRelaunchSerializer, self).to_representation(obj)
         view = self.context.get('view', None)
         if hasattr(view, '_raw_data_form_marker'):
-            password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
+            password_keys = dict([(p, '') for p in self.get_passwords_needed_to_start(obj)])
             res.update(password_keys)
         return res
 
@@ -3765,7 +3765,7 @@ class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
 
     def to_representation(self, obj):
         if obj:
-            return dict([(p, u'') for p in obj.passwords_needed_to_start])
+            return dict([(p, '') for p in obj.passwords_needed_to_start])
         else:
             return {}
 

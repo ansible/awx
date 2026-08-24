@@ -265,9 +265,7 @@ class Licenser(object):
         except requests.exceptions.ConnectionError as error:
             raise error
         except OSError as error:
-            raise OSError(
-                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
-            ) from error  # noqa
+            raise OSError('Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)) from error  # noqa
         subs.raise_for_status()
 
         for sub in subs.json():
@@ -328,9 +326,7 @@ class Licenser(object):
         except requests.exceptions.ConnectionError as error:
             raise error
         except OSError as error:
-            raise OSError(
-                'Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)
-            ) from error  # noqa
+            raise OSError('Unable to open certificate bundle {}. Check that the service is running on Red Hat Enterprise Linux.'.format(verify)) from error  # noqa
         orgs.raise_for_status()
 
         for org in orgs.json()['results']:

@@ -1768,11 +1768,15 @@ class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
     obj_permission_type = 'use'
     resource_purpose = 'test external credential'
 
-    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential.
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": """Test update the input values and metadata of an external credential.
         This endpoint supports testing credentials that connect to external secret management systems
         such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault,
         Centrify Vault, Thycotic DevOps Secrets Vault, and GitHub App Installation Access Token Lookup.
-        It does not support standard credential types such as Machine, SCM, and Cloud."""})
+        It does not support standard credential types such as Machine, SCM, and Cloud."""
+        }
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.credential_type.kind != 'external':
@@ -2692,11 +2696,11 @@ class JobTemplateLaunch(RetrieveAPIView):
             if needed_passwords:
                 data['credential_passwords'] = {}
                 for p in needed_passwords:
-                    data['credential_passwords'][p] = u''
+                    data['credential_passwords'][p] = ''
             else:
                 data.pop('credential_passwords')
             for v in obj.variables_needed_to_start:
-                extra_vars.setdefault(v, u'')
+                extra_vars.setdefault(v, '')
             if extra_vars:
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.JobTemplate.get_ask_mapping()
@@ -3347,7 +3351,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         '''
         relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
         relationships.remove(self.relationship)
-        qs = functools.reduce(lambda x, y: (x | y), (Q(**{'{}__in'.format(r): [sub.id]}) for r in relationships))
+        qs = functools.reduce(lambda x, y: x | y, (Q(**{'{}__in'.format(r): [sub.id]}) for r in relationships))
 
         if models.WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
             return {"Error": _("Relationship not allowed.")}
@@ -3548,7 +3552,7 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
         extra_vars = data.pop('extra_vars', None) or {}
         if obj:
             for v in obj.variables_needed_to_start:
-                extra_vars.setdefault(v, u'')
+                extra_vars.setdefault(v, '')
             if extra_vars:
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
@@ -3958,7 +3962,7 @@ class JobRelaunch(RetrieveAPIView):
             if needed_passwords:
                 data['credential_passwords'] = {}
                 for p in needed_passwords:
-                    data['credential_passwords'][p] = u''
+                    data['credential_passwords'][p] = ''
             else:
                 data.pop('credential_passwords', None)
         return data

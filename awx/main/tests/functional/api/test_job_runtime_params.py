@@ -278,9 +278,9 @@ def test_job_reject_invalid_prompted_vars(runtime_data, job_template_prompts, po
         expect=400,
     )
 
-    assert response.data['job_type'] == [u'"foobicate" is not a valid choice.']
-    assert response.data['inventory'] == [u'Invalid pk "87865" - object does not exist.']
-    assert response.data['credentials'] == [u'Invalid pk "48474" - object does not exist.']
+    assert response.data['job_type'] == ['"foobicate" is not a valid choice.']
+    assert response.data['inventory'] == ['Invalid pk "87865" - object does not exist.']
+    assert response.data['credentials'] == ['Invalid pk "48474" - object does not exist.']
 
 
 @pytest.mark.django_db
@@ -314,7 +314,7 @@ def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime
     # Assure that giving an inventory without access to the inventory blocks the launch
     response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(inventory=runtime_data['inventory']), rando, expect=403)
 
-    assert response.data['detail'] == u'You do not have permission to perform this action.'
+    assert response.data['detail'] == 'You do not have permission to perform this action.'
 
 
 @pytest.mark.django_db
@@ -540,15 +540,15 @@ def test_job_launch_fails_with_missing_multivault_password(machine_credential, v
     assert {
         'credential_type': vault_cred_first.credential_type_id,
         'passwords_needed': ['vault_password.abc'],
-        'vault_id': u'abc',
-        'name': u'Vault #1',
+        'vault_id': 'abc',
+        'name': 'Vault #1',
         'id': vault_cred_first.id,
     } in resp.data['defaults']['credentials']
     assert {
         'credential_type': vault_cred_second.credential_type_id,
         'passwords_needed': ['vault_password.xyz'],
-        'vault_id': u'xyz',
-        'name': u'Vault #2',
+        'vault_id': 'xyz',
+        'name': 'Vault #2',
         'id': vault_cred_second.id,
     } in resp.data['defaults']['credentials']
 

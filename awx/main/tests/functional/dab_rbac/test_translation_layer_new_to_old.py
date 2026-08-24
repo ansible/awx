@@ -1,8 +1,11 @@
+import json
 from unittest import mock
 
 from ansible_base.rbac.models import ObjectRole, RoleDefinition, RoleUserAssignment, RoleTeamAssignment
 from ansible_base.lib.utils.response import get_relative_url
 import pytest
+
+from awx.main.models import ActivityStream
 
 
 @pytest.mark.django_db
@@ -21,6 +24,19 @@ class TestNewToOld:
         url = get_relative_url('roleuserassignment-list')
         post(url, user=admin, data={'role_definition': rd.id, 'user': bob.id, 'object_id': inventory.id}, expect=201)
         assert bob in inventory.admin_role.members.all()
+        # the new-side assignment should be recorded exactly once, not double-recorded via the old-side mirror
+        entries = ActivityStream.objects.filter(operation='associate', user=bob)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'user': bob.username,
+            'object_type': 'inventory',
+            'object_id': inventory.id,
+            'object_name': str(inventory),
+        }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_removal(self, admin, delete, inventory, bob, setup_managed_roles):
         '''
@@ -34,6 +50,18 @@ class TestNewToOld:
         url = get_relative_url('roleuserassignment-detail', kwargs={'pk': user_assignment.id})
         delete(url, user=admin, expect=204)
         assert bob not in inventory.admin_role.members.all()
+        entries = ActivityStream.objects.filter(operation='disassociate', user=bob)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'user': bob.username,
+            'object_type': 'inventory',
+            'object_id': inventory.id,
+            'object_name': str(inventory),
+        }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_team_member_addition(self, admin, post, team, bob, setup_managed_roles):
         '''
@@ -44,6 +72,18 @@ class TestNewToOld:
         url = get_relative_url('roleuserassignment-list')
         post(url, user=admin, data={'role_definition': rd.id, 'user': bob.id, 'object_id': team.id}, expect=201)
         assert bob in team.member_role.members.all()
+        entries = ActivityStream.objects.filter(operation='associate', user=bob)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'user': bob.username,
+            'object_type': 'team',
+            'object_id': team.id,
+            'object_name': str(team),
+        }
+        assert entry.object1 == 'team'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_team_member_removal(self, admin, delete, team, bob, setup_managed_roles):
         '''
@@ -57,6 +97,18 @@ class TestNewToOld:
         url = get_relative_url('roleuserassignment-detail', kwargs={'pk': user_assignment.id})
         delete(url, user=admin, expect=204)
         assert bob not in team.member_role.members.all()
+        entries = ActivityStream.objects.filter(operation='disassociate', user=bob)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'user': bob.username,
+            'object_type': 'team',
+            'object_id': team.id,
+            'object_name': str(team),
+        }
+        assert entry.object1 == 'team'
+        assert entry.object2 == 'user'
 
     def test_new_to_old_rbac_team_addition(self, admin, post, team, inventory, setup_managed_roles):
         '''
@@ -67,6 +119,18 @@ class TestNewToOld:
         url = get_relative_url('roleteamassignment-list')
         post(url, user=admin, data={'role_definition': rd.id, 'team': team.id, 'object_id': inventory.id}, expect=201)
         assert team.member_role in inventory.admin_role.parents.all()
+        entries = ActivityStream.objects.filter(operation='associate', team=team)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'team': str(team),
+            'object_type': 'inventory',
+            'object_id': inventory.id,
+            'object_name': str(inventory),
+        }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'team'
 
     def test_new_to_old_rbac_team_removal(self, admin, delete, team, inventory, setup_managed_roles):
         '''
@@ -80,6 +144,18 @@ class TestNewToOld:
         url = get_relative_url('roleteamassignment-detail', kwargs={'pk': team_assignment.id})
         delete(url, user=admin, expect=204)
         assert team.member_role not in inventory.admin_role.parents.all()
+        entries = ActivityStream.objects.filter(operation='disassociate', team=team)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {
+            'role_definition': rd.name,
+            'team': str(team),
+            'object_type': 'inventory',
+            'object_id': inventory.id,
+            'object_name': str(inventory),
+        }
+        assert entry.object1 == 'inventory'
+        assert entry.object2 == 'team'
 
     def test_flush_rbac_cleanup_skips_sync(self, inventory, bob, setup_managed_roles):
         """Simulate what defer_rbac_computations._flush_rbac does on exit:

@@ -333,16 +333,16 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
-        netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
+        netloc = ':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
-        netloc = u''
+        netloc = ''
     # urllib.parse strips brackets from IPv6 addresses, so we need to add them back in
     hostname = parts.hostname
     if hostname and ':' in hostname and '[' in url and ']' in url:
         hostname = f'[{hostname}]'
-    netloc = u'@'.join(filter(None, [netloc, hostname]))
+    netloc = '@'.join(filter(None, [netloc, hostname]))
     if parts.port:
-        netloc = u':'.join([netloc, str(parts.port)])
+        netloc = ':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':
         new_url = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
@@ -378,7 +378,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     if field_name in password_fields or (isinstance(field_val, str) and field_val.startswith('$encrypted$')):
-        return u'hidden'
+        return 'hidden'
     if hasattr(obj, 'display_%s' % field_name):
         field_val = getattr(obj, 'display_%s' % field_name)()
     if isinstance(field_val, (list, dict)):
@@ -1126,15 +1126,15 @@ def truncate_stdout(stdout, size):
     if size <= 0 or len(stdout) <= size:
         return stdout
 
-    stdout = stdout[: (size - 1)] + u'\u2026'
+    stdout = stdout[: (size - 1)] + '\u2026'
     set_count, reset_count = 0, 0
     for m in ANSI_SGR_PATTERN.finditer(stdout):
-        if m.group() == u'\u001b[0m':
+        if m.group() == '\u001b[0m':
             reset_count += 1
         else:
             set_count += 1
 
-    return stdout + u'\u001b[0m' * (set_count - reset_count)
+    return stdout + '\u001b[0m' * (set_count - reset_count)
 
 
 def deepmerge(a, b):
