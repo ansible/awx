@@ -651,16 +651,24 @@ def disable_rbac_sync():
 
 
 def give_creator_permissions(user, obj):
+    from awx.main.signals import disable_activity_stream
+
     assignment = RoleDefinition.objects.give_creator_permissions(user, obj)
     if assignment:
         with disable_rbac_sync():
             old_role = get_role_from_object_role(assignment.object_role)
             if old_role is None:
                 return
-            old_role.members.add(user)
+            # The new-side assignment above is already recorded by
+            # record_role_assignment_activity_stream. Suppress activity stream for this
+            # mirrored write so it isn't recorded a second time.
+            with disable_activity_stream():
+                old_role.members.add(user)
 
 
 def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
+    from awx.main.signals import disable_activity_stream
+
     if action.startswith('pre_'):
         return
     if not rbac_sync_enabled.enabled:
@@ -684,7 +692,11 @@ def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
         else:
             user = get_user_model().objects.get(pk=user_or_role_id)
         rd = get_role_definition(role)
-        assignment = give_or_remove_permission(role, user, giving=is_giving, rd=rd)
+        # This mirrors an already-recorded legacy Role.members change into the new RBAC
+        # system. Suppress activity stream here so the mirrored RoleUserAssignment/
+        # RoleTeamAssignment write isn't recorded a second time (see record_role_assignment_activity_stream).
+        with disable_activity_stream():
+            assignment = give_or_remove_permission(role, user, giving=is_giving, rd=rd)
 
         # sync to resource server
         if rbac_sync_enabled.enabled:
@@ -695,6 +707,8 @@ def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 
 
 def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
+    from awx.main.signals import disable_activity_stream
+
     if action.startswith('pre_'):
         return
 
@@ -735,7 +749,10 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 
             team = Team.objects.get(pk=parent_role.object_id)
             rd = get_role_definition(child_role)
-            assignment = give_or_remove_permission(child_role, team, giving=is_giving, rd=rd)
+            # See comment in sync_members_to_new_rbac: suppress activity stream for this
+            # mirrored write to avoid double-recording an already-recorded legacy change.
+            with disable_activity_stream():
+                assignment = give_or_remove_permission(child_role, team, giving=is_giving, rd=rd)
 
             # sync to resource server
             if rbac_sync_enabled.enabled:
