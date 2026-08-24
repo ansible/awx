@@ -1036,6 +1036,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
+    password_reset_required = serializers.BooleanField(
+        default=False, help_text=_('Force the user to reset their password at next login.')
+    )
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -1050,6 +1053,7 @@ class UserSerializer(BaseSerializer):
             'email',
             'is_superuser',
             'is_system_auditor',
+            'password_reset_required',
             'password',
             'last_login',
         )
@@ -1135,7 +1139,13 @@ class UserSerializer(BaseSerializer):
     def _update_password(self, obj, new_password):
         if new_password and new_password != '$encrypted$':
             obj.set_password(new_password)
-            obj.save(update_fields=['password'])
+            update_fields = ['password']
+            # Clear force-reset after a successful password change on an existing user.
+            # (On create, admins may set a temp password and password_reset_required together.)
+            if self.instance is not None and getattr(obj, 'password_reset_required', False):
+                obj.password_reset_required = False
+                update_fields.append('password_reset_required')
+            obj.save(update_fields=update_fields)
 
             # Cycle the session key, but if the requesting user is the same
             # as the modified user then inject a session key derived from
@@ -1151,19 +1161,29 @@ class UserSerializer(BaseSerializer):
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
         is_system_auditor = validated_data.pop('is_system_auditor', None)
+        password_reset_required = validated_data.pop('password_reset_required', None)
         obj = super(UserSerializer, self).create(validated_data)
         self._update_password(obj, new_password)
         if is_system_auditor is not None:
             obj.is_system_auditor = is_system_auditor
+        if password_reset_required is not None:
+            obj.password_reset_required = password_reset_required
+            obj.save(update_fields=['password_reset_required'])
         return obj
 
     def update(self, obj, validated_data):
         new_password = validated_data.pop('password', None)
         is_system_auditor = validated_data.pop('is_system_auditor', None)
+        password_reset_required = validated_data.pop('password_reset_required', None)
         obj = super(UserSerializer, self).update(obj, validated_data)
         self._update_password(obj, new_password)
         if is_system_auditor is not None:
             obj.is_system_auditor = is_system_auditor
+        # Apply after _update_password so an admin can set a new temp password
+        # and re-assert password_reset_required=True in the same request.
+        if password_reset_required is not None:
+            obj.password_reset_required = password_reset_required
+            obj.save(update_fields=['password_reset_required'])
         return obj
 
     def get_related(self, obj):

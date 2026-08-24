@@ -60,6 +60,11 @@ options:
       description:
         - Write-only field used to change the password.
       type: str
+    password_reset_required:
+      description:
+        - Designates that this user must reset their password on next login.
+        - Useful when provisioning users with a temporary shared password.
+      type: bool
     update_secrets:
       description:
         - C(true) will always change password if user specifies password, even if API gives $encrypted$ for password.
@@ -105,6 +110,14 @@ EXAMPLES = '''
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
+- name: Add user who must reset password at first login
+  user:
+    username: jdoe
+    password: temporary-shared-password
+    email: jdoe@example.org
+    password_reset_required: true
+    state: present
+
 - name: Add user as a member of an organization (permissions on the organization are required)
   user:
     username: jdoe
@@ -135,6 +148,7 @@ def main():
         is_superuser=dict(type='bool', aliases=['superuser']),
         is_system_auditor=dict(type='bool', aliases=['auditor']),
         password=dict(no_log=True),
+        password_reset_required=dict(type='bool'),
         update_secrets=dict(type='bool', default=True, no_log=False),
         organization=dict(),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
@@ -152,6 +166,7 @@ def main():
     is_superuser = module.params.get('is_superuser')
     is_system_auditor = module.params.get('is_system_auditor')
     password = module.params.get('password')
+    password_reset_required = module.params.get('password_reset_required')
     organization = module.params.get('organization')
     state = module.params.get('state')
 
@@ -180,6 +195,8 @@ def main():
         new_fields['is_system_auditor'] = is_system_auditor
     if password is not None:
         new_fields['password'] = password
+    if password_reset_required is not None:
+        new_fields['password_reset_required'] = password_reset_required
 
     if organization:
         org_id = module.resolve_name_to_id('organizations', organization)
