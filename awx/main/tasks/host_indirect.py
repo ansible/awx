@@ -44,7 +44,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
     compiled_jq_expressions = {}  # Cache for compiled jq expressions
     facts_missing_logged = False
     unhashable_facts_logged = False
-    name_missing_logged = False
+    name_missing_logged = set()
 
     job_event_queries_fqcn = {}
     for query_k, query_v in job_event_queries.items():
@@ -104,10 +104,10 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
             # Obtain the record based on the hashable canonical_facts now determined
             facts = data.get('facts')
             name = data.get('name')
-            if not name:
-                if not name_missing_logged:
+            if name is None:
+                if resolved_action not in name_missing_logged:
                     logger.warning(f'jq output missing name for module {resolved_action} on event {event.id} using jq:{jq_str_for_event}')
-                    name_missing_logged = True
+                    name_missing_logged.add(resolved_action)
                 continue
 
             if hashable_facts in results:

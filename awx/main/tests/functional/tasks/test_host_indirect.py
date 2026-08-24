@@ -10,7 +10,6 @@ from awx.main.tasks.host_indirect import (
     build_indirect_host_data,
     fetch_job_event_query,
     save_indirect_host_entries,
-    save_indirect_host_entries_of_job,
     cleanup_and_save_indirect_host_entries_fallback,
 )
 from awx.main.models.event_query import EventQuery
