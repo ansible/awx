@@ -253,6 +253,12 @@ jobs:
           DEV_DOCKER_TAG_BASE: local
           HEADLESS: yes
 
+      - name: Free disk space after Docker build
+        run: |
+          docker builder prune -af
+          docker image prune -f
+          df -h /
+
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         id: awx_operator_test
