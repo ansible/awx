@@ -90,6 +90,7 @@ def test_inventory_update_ee_resolution(set_up_defaults, organization, source, e
         source=source,
     )
     inv_update = InventoryUpdate.objects.create(
+        inventory=inv,
         inventory_source=inv_source,
         source=source,
     )
