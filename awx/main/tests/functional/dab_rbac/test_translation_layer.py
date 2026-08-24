@@ -73,11 +73,11 @@ def test_role_migration_matches(request, model, setup_managed_roles):
             rd = get_role_definition(old_role)
             new_codenames = set(rd.permissions.values_list('codename', flat=True))
             # all the old roles should map to a non-Compat role definition
+            rd_data = {}
             if 'Compat' not in rd.name:
                 model_rds = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get_for_model(obj))
-                rd_data = {}
-                for rd in model_rds:
-                    rd_data[rd.name] = list(rd.permissions.values_list('codename', flat=True))
+                for other_rd in model_rds:
+                    rd_data[other_rd.name] = list(other_rd.permissions.values_list('codename', flat=True))
             assert 'Compat' not in rd.name, (
                 f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
             )
