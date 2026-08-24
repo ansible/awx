@@ -353,7 +353,7 @@ class TestTruncateEventData:
         data = {'res': {'msg': 'x' * 2000}}
         result = common.truncate_event_data(data, 1024)
         assert len(result['res']['msg']) == 1024
-        assert result['res']['msg'].endswith(u'\u2026')
+        assert result['res']['msg'].endswith('\u2026')
 
     def test_preserves_short_siblings(self):
         data = {'res': {'msg': 'x' * 2000, 'rc': 0, 'cmd': 'echo hello'}}

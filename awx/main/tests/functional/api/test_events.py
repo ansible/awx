@@ -79,7 +79,7 @@ def test_job_events_event_data_truncation(get, organization_factory, job_templat
     result_msg = response.data['results'][0]['event_data']['res']['msg']
     assert (len(result_msg) == 2000) == expected
     if truncate:
-        assert result_msg.endswith(u'\u2026')
+        assert result_msg.endswith('\u2026')
     assert response.data['results'][0]['event_data']['res']['rc'] == 0
 
 

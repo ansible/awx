@@ -1157,7 +1157,7 @@ def truncate_event_data(event_data, max_bytes):
         if isinstance(obj, list):
             return [_truncate(v) for v in obj]
         if isinstance(obj, str) and len(obj) > max_bytes:
-            return obj[: (max_bytes - 1)] + u'\u2026'
+            return obj[: (max_bytes - 1)] + '\u2026'
         return obj
 
     return _truncate(event_data)
