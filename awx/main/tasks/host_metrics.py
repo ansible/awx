@@ -3,7 +3,7 @@ from dateutil.relativedelta import relativedelta
 import logging
 
 from django.conf import settings
-from django.db.models import Count, F, OuterRef, Subquery, Value
+from django.db.models import Count, F, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce, TruncMonth
 from django.utils.timezone import now
 from dispatcherd.publish import task
@@ -306,30 +306,18 @@ class HostMetricInventoryCountTask:
 
     @staticmethod
     def update_counts():
-        counts = dict(
-            Host.objects.values('name')
+        """Update inventory membership counts for all host metric rows."""
+        inventory_count_subquery = (
+            Host.objects.filter(name=OuterRef('hostname'))
+            .values('name')
             .annotate(cnt=Count('inventory_id', distinct=True))
-            .values_list('name', 'cnt')
+            .values('cnt')
         )
+        expected_count = Coalesce(Subquery(inventory_count_subquery), Value(0))
 
-        rows = 0
-
-        # Set hosts with inventory membership to their actual count (only where changed)
-        if counts:
-            inventory_count_subquery = (
-                Host.objects.filter(name=OuterRef('hostname'))
-                .values('name')
-                .annotate(cnt=Count('inventory_id', distinct=True))
-                .values('cnt')
-            )
-            rows += HostMetric.objects.filter(hostname__in=counts.keys()).exclude(
-                used_in_inventories=Subquery(inventory_count_subquery)
-            ).update(used_in_inventories=Subquery(inventory_count_subquery))
-
-        # Set hosts without any inventory membership to 0 (only where not already 0)
-        rows += HostMetric.objects.exclude(hostname__in=counts.keys()).exclude(
-            used_in_inventories=0
-        ).update(used_in_inventories=0)
+        rows = HostMetric.objects.filter(Q(used_in_inventories__isnull=True) | ~Q(used_in_inventories=expected_count)).update(
+            used_in_inventories=expected_count
+        )
 
         settings.HOST_METRIC_INVENTORY_COUNTS_LAST_TS = now()
         logger.info(f"update_host_metric_inventory_counts: updated {rows} HostMetric records")
