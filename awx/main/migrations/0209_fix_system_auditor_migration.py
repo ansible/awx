@@ -37,7 +37,7 @@ def fix_system_auditor_assignments(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0207_alter_skip_tags_to_textfield'),
+        ('main', '0208_alter_skip_tags_to_textfield'),
     ]
 
     operations = [

@@ -251,7 +251,7 @@ class TestSystemAuditorMigration:
 
     def test_fix_system_auditor_migration_backfills_missing(self, migrator):
         """
-        Migration 0208 should backfill Platform Auditor for any
+        Migration 0209 should backfill Platform Auditor for any
         system_auditor members who were missed by the original migration.
         """
         state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
@@ -273,7 +273,7 @@ class TestSystemAuditorMigration:
             "Setup: user should not have Platform Auditor before corrective migration"
         )
 
-        state = migrator.apply_tested_migration(('main', '0208_fix_system_auditor_migration'))
+        state = migrator.apply_tested_migration(('main', '0209_fix_system_auditor_migration'))
         RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
 
         assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').exists(), (
@@ -282,7 +282,7 @@ class TestSystemAuditorMigration:
 
     def test_fix_system_auditor_migration_no_duplicates(self, migrator):
         """
-        Migration 0208 must be idempotent — users who already have
+        Migration 0209 must be idempotent — users who already have
         Platform Auditor should not receive a duplicate assignment.
         """
         state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
@@ -299,7 +299,7 @@ class TestSystemAuditorMigration:
         # Confirm the user already has the assignment (from the fixed 0192)
         assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').exists()
 
-        state = migrator.apply_tested_migration(('main', '0208_fix_system_auditor_migration'))
+        state = migrator.apply_tested_migration(('main', '0209_fix_system_auditor_migration'))
         RoleUserAssignment = state.apps.get_model('dab_rbac', 'RoleUserAssignment')
 
         assert RoleUserAssignment.objects.filter(user=user.id, role_definition__name='Platform Auditor').count() == 1, (
