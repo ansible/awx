@@ -656,3 +656,91 @@ def test_job_scm_branch_not_propagated_when_override_not_allowed(controlplane_in
     # unaffected by the job's launch-time override - falls back to the project's own branch
     assert project_update.scm_branch == 'main'
     assert inventory_update.scm_branch == ''
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_creates_new_dependency_when_cached_update_has_different_branch(
+    controlplane_instance_group, job_template_factory, inventory_source_factory
+):
+    """If a dependency project update already exists (e.g. still in-flight from a
+    concurrently-launched job) but was created for a different scm_branch, a job
+    needing a different branch must get its own fresh update rather than silently
+    reusing the wrong-branch one."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-b')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    project_update_a = p.project_updates.filter(scm_branch='branch-a').first()
+    project_update_b = p.project_updates.filter(scm_branch='branch-b').first()
+    assert project_update_a is not None
+    assert project_update_b is not None
+    assert project_update_a.id != project_update_b.id
+    # job_a's dependency project update is still in-flight (TaskManager.start_task is mocked,
+    # so it never actually runs) - this is what would have made the reuse-by-staleness path
+    # incorrectly hand it to job_b too, without the branch check.
+    assert project_update_a.status == 'pending'
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_inventory_update_creates_new_dependency_when_cached_update_has_different_branch(
+    controlplane_instance_group, job_template_factory, inventory_source_factory
+):
+    """Same as the project-update case above, but for the SCM inventory source
+    dependency: a job needing a different branch must not be handed another job's
+    still-in-flight (or recently-completed) InventoryUpdate for a different branch."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-b')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    inventory_update_a = ii.inventory_updates.filter(scm_branch='branch-a').first()
+    inventory_update_b = ii.inventory_updates.filter(scm_branch='branch-b').first()
+    assert inventory_update_a is not None
+    assert inventory_update_b is not None
+    assert inventory_update_a.id != inventory_update_b.id
+    # job_a's dependency inventory update is still in-flight - this is what would have made the
+    # reuse-by-staleness path incorrectly hand it to job_b too, without the branch check.
+    assert inventory_update_a.status == 'pending'
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_reuses_older_matching_dependency_after_other_branch_is_more_recent(
+    controlplane_instance_group, job_template_factory, inventory_source_factory
+):
+    """A job requesting a branch should reuse an existing in-flight update for that branch
+    even if a *different* branch's update was created more recently in between - the lookup
+    must match on branch, not just take whichever update happens to be newest."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-b')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    # still only one update each for branch-a and branch-b - the third job's request for
+    # branch-a reused the first job's still-in-flight update instead of creating a duplicate.
+    assert p.project_updates.filter(scm_branch='branch-a').count() == 1
+    assert p.project_updates.filter(scm_branch='branch-b').count() == 1
+    assert ii.inventory_updates.filter(scm_branch='branch-a').count() == 1
+    assert ii.inventory_updates.filter(scm_branch='branch-b').count() == 1

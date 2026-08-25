@@ -349,12 +349,18 @@ class DependencyManager(TaskBase):
     def get_or_create_project_update(self, project_id, scm_branch=None):
         project = self.all_projects.get(project_id, None)
         if project is not None:
-            latest_project_update = project.project_updates.filter(job_type='check').order_by("-created").first()
+            effective_branch = project.scm_branch
+            if scm_branch and scm_branch != project.scm_branch and project.allow_override:
+                effective_branch = scm_branch
+            project_updates = project.project_updates.filter(job_type='check')
+            # Match on branch when one was requested, so revisiting an earlier branch reuses its
+            # own update instead of comparing against whatever branch synced most recently.
+            if scm_branch:
+                latest_project_update = project_updates.filter(scm_branch=effective_branch).order_by("-created").first()
+            else:
+                latest_project_update = project_updates.order_by("-created").first()
             if self.should_update_again(latest_project_update, project.scm_update_cache_timeout):
-                fields = dict(launch_type='dependency')
-                if scm_branch and scm_branch != project.scm_branch and project.allow_override:
-                    fields['scm_branch'] = scm_branch
-                project_task = project.create_project_update(_eager_fields=fields)
+                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency', scm_branch=effective_branch))
                 project_task.signal_start()
                 return [project_task]
             else:
@@ -372,16 +378,21 @@ class DependencyManager(TaskBase):
         for inventory_source in self.all_inventory_sources.get(task.inventory_id, []):
             if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
                 continue
-            latest_inventory_update = inventory_source.inventory_updates.order_by("-created").first()
+            # Only let the job's branch override take effect if the inventory source itself
+            # isn't already pinned to an explicit branch - an explicit pin is intentional
+            # and should not be silently defeated by whatever branch a job happens to run on.
+            source_project = inventory_source.source_project
+            effective_branch = inventory_source.scm_branch
+            if not effective_branch and task.scm_branch and source_project and source_project.allow_override:
+                effective_branch = task.scm_branch
+            inventory_updates = inventory_source.inventory_updates
+            # Same reasoning as get_or_create_project_update: match on branch when one was requested.
+            if task.scm_branch:
+                latest_inventory_update = inventory_updates.filter(scm_branch=effective_branch).order_by("-created").first()
+            else:
+                latest_inventory_update = inventory_updates.order_by("-created").first()
             if self.should_update_again(latest_inventory_update, inventory_source.update_cache_timeout):
-                fields = dict(launch_type='dependency')
-                # Only let the job's branch override take effect if the inventory source itself
-                # isn't already pinned to an explicit branch - an explicit pin is intentional
-                # and should not be silently defeated by whatever branch a job happens to run on.
-                source_project = inventory_source.source_project
-                if task.scm_branch and not inventory_source.scm_branch and source_project and source_project.allow_override:
-                    fields['scm_branch'] = task.scm_branch
-                inventory_task = inventory_source.create_inventory_update(_eager_fields=fields)
+                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency', scm_branch=effective_branch))
                 inventory_task.signal_start()
                 dependencies.append(inventory_task)
             else:
