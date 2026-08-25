@@ -327,7 +327,7 @@ class DependencyManager(TaskBase):
         for proj in Project.objects.filter(id__in=project_ids, scm_update_on_launch=True):
             self.all_projects[proj.id] = proj
 
-        for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids, update_on_launch=True):
+        for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids, update_on_launch=True).select_related('source_project'):
             self.all_inventory_sources.setdefault(invsrc.inventory_id, [])
             self.all_inventory_sources[invsrc.inventory_id].append(invsrc)
 
@@ -346,12 +346,15 @@ class DependencyManager(TaskBase):
 
         return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
 
-    def get_or_create_project_update(self, project_id):
+    def get_or_create_project_update(self, project_id, scm_branch=None):
         project = self.all_projects.get(project_id, None)
         if project is not None:
             latest_project_update = project.project_updates.filter(job_type='check').order_by("-created").first()
             if self.should_update_again(latest_project_update, project.scm_update_cache_timeout):
-                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency'))
+                fields = dict(launch_type='dependency')
+                if scm_branch and scm_branch != project.scm_branch and project.allow_override:
+                    fields['scm_branch'] = scm_branch
+                project_task = project.create_project_update(_eager_fields=fields)
                 project_task.signal_start()
                 return [project_task]
             else:
@@ -359,7 +362,7 @@ class DependencyManager(TaskBase):
         return []
 
     def gen_dep_for_job(self, task):
-        dependencies = self.get_or_create_project_update(task.project_id)
+        dependencies = self.get_or_create_project_update(task.project_id, task.scm_branch)
 
         try:
             start_args = json.loads(decrypt_field(task, field_name="start_args"))
@@ -371,7 +374,14 @@ class DependencyManager(TaskBase):
                 continue
             latest_inventory_update = inventory_source.inventory_updates.order_by("-created").first()
             if self.should_update_again(latest_inventory_update, inventory_source.update_cache_timeout):
-                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency'))
+                fields = dict(launch_type='dependency')
+                # Only let the job's branch override take effect if the inventory source itself
+                # isn't already pinned to an explicit branch - an explicit pin is intentional
+                # and should not be silently defeated by whatever branch a job happens to run on.
+                source_project = inventory_source.source_project
+                if task.scm_branch and not inventory_source.scm_branch and source_project and source_project.allow_override:
+                    fields['scm_branch'] = task.scm_branch
+                inventory_task = inventory_source.create_inventory_update(_eager_fields=fields)
                 inventory_task.signal_start()
                 dependencies.append(inventory_task)
             else:
