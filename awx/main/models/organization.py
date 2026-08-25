@@ -22,12 +22,12 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.unified_jobs import UnifiedJob
-from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, OpaQueryPathMixin
+from awx.main.models.mixins import CustomVirtualEnvMixin, RelatedJobsMixin, OpaQueryPathMixin
 
 __all__ = ['Organization', 'Team', 'UserSessionMembership']
 
 
-class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, OpaQueryPathMixin):
+class Organization(CommonModel, NotificationFieldsModel, CustomVirtualEnvMixin, RelatedJobsMixin, OpaQueryPathMixin):
     """
     An organization is the basic unit of multi-tenancy divisions
     """
@@ -134,7 +134,7 @@ class OrganizationGalaxyCredentialMembership(models.Model):
     )
 
 
-class Team(CommonModelNameNotUnique, ResourceMixin):
+class Team(CommonModelNameNotUnique):
     """
     A team is a group of users that work on common projects.
     """

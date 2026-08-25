@@ -74,7 +74,7 @@ from awx.main.models import (
     WorkflowApproval,
     WorkflowApprovalTemplate,
 )
-from awx.main.models.mixins import ResourceMixin
+
 
 __all__ = [
     'get_user_queryset',
@@ -692,7 +692,7 @@ class UserAccess(BaseAccess):
         returns True if `u` is member of any organization that is
         not also an organization that `self.user` admins
         """
-        return not self.user_organizations(u).exclude(pk__in=Organization.accessible_pk_qs(self.user, 'admin_role')).exists()
+        return not self.user_organizations(u).exclude(pk__in=Organization.access_ids_qs(self.user, 'change')).exists()
 
     def user_is_orphaned(self, u):
         return not self.user_organizations(u).exists()
@@ -905,7 +905,7 @@ class HostAccess(BaseAccess):
     prefetch_related = ('groups', 'inventory_sources')
 
     def filtered_queryset(self):
-        return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(inventory__in=Inventory.access_ids_qs(self.user, 'view'))
 
     def can_add(self, data):
         if not data:  # So the browseable API will work
@@ -967,7 +967,7 @@ class GroupAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
+        return Group.objects.filter(inventory__in=Inventory.access_ids_qs(self.user, 'view'))
 
     def can_add(self, data):
         if not data:  # So the browseable API will work
@@ -1009,7 +1009,7 @@ class InventorySourceAccess(NotificationAttachMixin, UnifiedCredentialsMixin, Ba
     prefetch_related = ('credentials__credential_type', 'last_job', 'source_project')
 
     def filtered_queryset(self):
-        return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(inventory__in=Inventory.access_ids_qs(self.user, 'view'))
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
@@ -1059,7 +1059,7 @@ class InventoryUpdateAccess(BaseAccess):
     prefetch_related = ('unified_job_template', 'instance_group', 'credentials__credential_type', 'inventory')
 
     def filtered_queryset(self):
-        return self.model.objects.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(inventory_source__inventory__in=Inventory.access_ids_qs(self.user, 'view'))
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
@@ -1187,7 +1187,7 @@ class CredentialInputSourceAccess(BaseAccess):
     select_related = ('target_credential', 'source_credential')
 
     def filtered_queryset(self):
-        return CredentialInputSource.objects.filter(target_credential__in=Credential.accessible_pk_qs(self.user, 'read_role'))
+        return CredentialInputSource.objects.filter(target_credential__in=Credential.access_ids_qs(self.user, 'view'))
 
     @check_superuser
     def can_add(self, data):
@@ -1232,10 +1232,8 @@ class TeamAccess(BaseAccess):
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             return self.model.objects.all()
-        org_member_teams = (
-            self.model.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')).order_by().values_list('pk', flat=True)
-        )
-        direct_read_teams = self.model.objects.filter(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')).order_by().values_list('pk', flat=True)
+        org_member_teams = self.model.objects.filter(organization__in=Organization.access_ids_qs(self.user, 'member')).order_by().values_list('pk', flat=True)
+        direct_read_teams = self.model.objects.filter(pk__in=self.model.access_ids_qs(self.user, 'view')).order_by().values_list('pk', flat=True)
         return self.model.objects.filter(pk__in=org_member_teams.union(direct_read_teams))
 
     @check_superuser
@@ -1268,7 +1266,7 @@ class TeamAccess(BaseAccess):
             if sub_obj.content_object is None:
                 raise PermissionDenied(_("The {} role cannot be assigned to a team").format(sub_obj.name))
 
-            if isinstance(sub_obj.content_object, ResourceMixin):
+            if permission_registry.is_registered(sub_obj.content_object):
                 role_access = RoleAccess(self.user)
                 return role_access.can_attach(sub_obj, obj, 'member_role.parents', *args, **kwargs)
         if self.user.is_superuser:
@@ -1284,7 +1282,10 @@ class TeamAccess(BaseAccess):
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         # MANAGE_ORGANIZATION_AUTH setting checked in RoleAccess
         if isinstance(sub_obj, Role):
-            if isinstance(sub_obj.content_object, ResourceMixin):
+            if sub_obj.content_object is None:
+                raise PermissionDenied(_("The {} role cannot be unassigned from a team").format(sub_obj.name))
+
+            if permission_registry.is_registered(sub_obj.content_object):
                 role_access = RoleAccess(self.user)
                 return role_access.can_unattach(sub_obj, obj, 'member_role.parents', *args, **kwargs)
 
@@ -1423,7 +1424,7 @@ class ProjectUpdateAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return self.model.objects.filter(project__in=Project.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(project__in=Project.access_ids_qs(self.user, 'view'))
 
     @check_superuser
     def can_cancel(self, obj):
@@ -1817,7 +1818,8 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
         if cls is Label:
             return LabelAccess(self.user).filtered_queryset()
         else:
-            return cls._accessible_pk_qs(cls, self.user, 'use_role')
+            action = f'use_{cls._meta.model_name}'
+            return cls.access_qs(self.user, action)
 
     def has_obj_m2m_access(self, obj):
         for relationship, cls in self.M2M_CHECKS.items():
@@ -1961,7 +1963,7 @@ class WorkflowJobNodeAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.access_ids_qs(self.user, 'view'))
             | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)))
         )
 
@@ -2105,8 +2107,7 @@ class WorkflowJobAccess(BaseAccess):
 
     def filtered_queryset(self):
         return WorkflowJob.objects.filter(
-            Q(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-            | Q(organization__in=Organization.accessible_pk_qs(self.user, 'auditor_role'))
+            Q(unified_job_template__in=UnifiedJobTemplate.access_ids_qs(self.user, 'view')) | Q(organization__in=Organization.access_ids_qs(self.user, 'audit'))
         )
 
     def can_read(self, obj):
@@ -2211,7 +2212,7 @@ class AdHocCommandAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(inventory__in=Inventory.access_ids_qs(self.user, 'view'))
 
     def can_add(self, data, validate_license=True):
         if not data:  # So the browseable API will work
@@ -2352,7 +2353,7 @@ class ProjectUpdateEventAccess(BaseAccess):
     model = ProjectUpdateEvent
 
     def filtered_queryset(self):
-        return self.model.objects.filter(Q(project_update__project__in=Project.accessible_pk_qs(self.user, 'read_role')))
+        return self.model.objects.filter(Q(project_update__project__in=Project.access_ids_qs(self.user, 'view')))
 
     def can_add(self, data):
         return False
@@ -2372,7 +2373,7 @@ class InventoryUpdateEventAccess(BaseAccess):
     model = InventoryUpdateEvent
 
     def filtered_queryset(self):
-        return self.model.objects.filter(Q(inventory_update__inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role')))
+        return self.model.objects.filter(Q(inventory_update__inventory_source__inventory__in=Inventory.access_ids_qs(self.user, 'view')))
 
     def can_add(self, data):
         return False
@@ -2392,7 +2393,8 @@ class ReceptorAddressAccess(BaseAccess):
     model = ReceptorAddress
 
     def filtered_queryset(self):
-        return self.model.objects.filter(Q(instance__in=Instance.accessible_pk_qs(self.user, 'read_role')))
+        instance_qs = InstanceAccess(self.user).filtered_queryset()
+        return self.model.objects.filter(Q(instance__in=instance_qs))
 
     @check_superuser
     def can_add(self, data):
@@ -2456,7 +2458,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role'))
+            Q(pk__in=self.model.access_ids_qs(self.user, 'view'))
             | Q(
                 pk__in=InventorySource.objects.filter(
                     inventory__id__in=Inventory.access_ids_qs(self.user, 'view'),
@@ -2509,7 +2511,7 @@ class UnifiedJobAccess(BaseAccess):
     def filtered_queryset(self):
         inv_pk_qs = Inventory.access_ids_qs(self.user, 'view')
         return self.model.objects.filter(
-            Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            Q(unified_job_template_id__in=UnifiedJobTemplate.access_ids_qs(self.user, 'view'))
             | Q(
                 pk__in=InventoryUpdate.objects.filter(
                     inventory_source__inventory__id__in=inv_pk_qs,
@@ -2520,7 +2522,7 @@ class UnifiedJobAccess(BaseAccess):
                     inventory__id__in=inv_pk_qs,
                 ).values('pk')
             )
-            | Q(organization__in=Organization.access_ids_qs(self.user, 'audit_organization'))
+            | Q(organization__in=Organization.access_ids_qs(self.user, 'audit'))
         )
 
     def get_queryset(self):
@@ -2642,7 +2644,7 @@ class LabelAccess(BaseAccess):
             Q(organization__in=Organization.access_ids_qs(self.user, 'view'))
             | Q(
                 pk__in=UnifiedJobTemplate.labels.through.objects.filter(
-                    unifiedjobtemplate_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'),
+                    unifiedjobtemplate_id__in=UnifiedJobTemplate.access_ids_qs(self.user, 'view'),
                 ).values('label_id')
             )
         )
@@ -2851,7 +2853,7 @@ class RoleAccess(BaseAccess):
             if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
                 return False
 
-        if isinstance(obj.content_object, ResourceMixin) and self.user in obj.content_object.admin_role:
+        if obj.content_object is not None and permission_registry.is_registered(obj.content_object) and self.user in obj.content_object.admin_role:
             return True
         return False
 
@@ -2888,7 +2890,7 @@ class WorkflowApprovalAccess(BaseAccess):
         return True
 
     def filtered_queryset(self):
-        return self.model.objects.filter(unified_job_node__workflow_job__unified_job_template__in=WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(unified_job_node__workflow_job__unified_job_template__in=WorkflowJobTemplate.access_ids_qs(self.user, 'view'))
 
     def can_approve_or_deny(self, obj):
         if (obj.workflow_job_template and self.user in obj.workflow_job_template.approval_role) or self.user.is_superuser:
@@ -2934,7 +2936,7 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
         return self.user in obj.workflow_job_template.execute_role
 
     def filtered_queryset(self):
-        return self.model.objects.filter(workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.access_ids_qs(self.user, 'view'))
 
 
 for cls in BaseAccess.__subclasses__():

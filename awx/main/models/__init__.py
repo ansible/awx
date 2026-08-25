@@ -75,7 +75,6 @@ from awx.main.models.rbac import (  # noqa
 from awx.main.models.mixins import (  # noqa
     CustomVirtualEnvMixin,
     ExecutionEnvironmentMixin,
-    ResourceMixin,
     SurveyJobMixin,
     SurveyJobTemplateMixin,
     TaskManagerInventoryUpdateMixin,

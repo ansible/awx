@@ -369,7 +369,7 @@ class ApiV2ConfigView(APIView):
             )
         else:
             # Only check JobTemplate access if org check failed
-            if JobTemplate.accessible_objects(request.user, 'admin_role').exists():
+            if JobTemplate.access_qs(request.user, 'change').exists():
                 data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)

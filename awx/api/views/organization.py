@@ -77,7 +77,6 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         org_id = int(self.kwargs['pk'])
 
         org_counts = {}
-        access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
         member_rd = RoleDefinition.objects.filter(name='Organization Member').first()
         admin_rd = RoleDefinition.objects.filter(name='Organization Admin').first()
 
@@ -93,10 +92,10 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
         else:
             org_counts.update({'users': 0, 'admins': 0})
 
-        org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
-        org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
-        org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
-        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(organization__id=org_id).count()
+        org_counts['inventories'] = Inventory.access_qs(self.request.user, 'view').filter(organization__id=org_id).count()
+        org_counts['teams'] = Team.access_qs(self.request.user, 'view').filter(organization__id=org_id).count()
+        org_counts['projects'] = Project.access_qs(self.request.user, 'view').filter(organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.access_qs(self.request.user, 'view').filter(organization__id=org_id).count()
         org_counts['hosts'] = Host.objects.org_active_count(org_id)
 
         full_context['related_field_counts'] = {}

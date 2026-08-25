@@ -8,6 +8,7 @@ from crum import impersonate
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions, get_role_codenames, get_role_definition
 from awx.main.models import ActivityStream, User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
+from awx.main.constants import org_role_to_permission
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
@@ -147,11 +148,11 @@ def test_organization_level_permissions(organization, inventory, setup_managed_r
     assert u1 not in organization.workflow_admin_role
     assert not (set(u1.has_roles.all()) & set(u2.has_roles.all()))  # user have no roles in common
 
-    # Old style
-    assert set(Organization.accessible_objects(u1, 'inventory_admin_role')) == set([organization])
-    assert set(Organization.accessible_objects(u2, 'inventory_admin_role')) == set()
-    assert set(Organization.accessible_objects(u1, 'workflow_admin_role')) == set()
-    assert set(Organization.accessible_objects(u2, 'workflow_admin_role')) == set([organization])
+    # Old style (converted to new style)
+    assert set(Organization.access_qs(u1, org_role_to_permission['inventory_admin_role'])) == set([organization])
+    assert set(Organization.access_qs(u2, org_role_to_permission['inventory_admin_role'])) == set()
+    assert set(Organization.access_qs(u1, org_role_to_permission['workflow_admin_role'])) == set()
+    assert set(Organization.access_qs(u2, org_role_to_permission['workflow_admin_role'])) == set([organization])
 
     # New style
     assert set(Organization.access_qs(u1, 'add_inventory')) == set([organization])
@@ -165,7 +166,7 @@ def test_organization_level_permissions(organization, inventory, setup_managed_r
 def test_organization_execute_role(organization, rando, setup_managed_roles):
     organization.execute_role.members.add(rando)
     assert rando in organization.execute_role
-    assert set(Organization.accessible_objects(rando, 'execute_role')) == set([organization])
+    assert set(Organization.access_qs(rando, org_role_to_permission['execute_role'])) == set([organization])
 
 
 @pytest.mark.django_db

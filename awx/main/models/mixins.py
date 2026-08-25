@@ -9,7 +9,7 @@ import requests
 # Django
 from django.apps import apps
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
@@ -20,19 +20,17 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 
-from awx.main.models.rbac import Role, RoleAncestorEntry, to_permissions
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import AskForField
-from awx.main.constants import ACTIVE_STATES, org_role_to_permission
+from awx.main.constants import ACTIVE_STATES
 
 logger = logging.getLogger('awx.main.models.mixins')
 
 
 __all__ = [
-    'ResourceMixin',
     'SurveyJobTemplateMixin',
     'SurveyJobMixin',
     'TaskManagerUnifiedJobMixin',
@@ -43,57 +41,6 @@ __all__ = [
     'CustomVirtualEnvMixin',
     'OpaQueryPathMixin',
 ]
-
-
-class ResourceMixin(models.Model):
-    class Meta:
-        abstract = True
-
-    @classmethod
-    def accessible_objects(cls, accessor, role_field):
-        """
-        Use instead of `MyModel.objects` when you want to only consider
-        resources that a user has specific permissions for. For example:
-        MyModel.accessible_objects(user, 'read_role').filter(name__istartswith='bar');
-        NOTE: This should only be used for list type things.
-        """
-        return ResourceMixin._accessible_objects(cls, accessor, role_field)
-
-    @classmethod
-    def accessible_pk_qs(cls, accessor, role_field):
-        return ResourceMixin._accessible_pk_qs(cls, accessor, role_field)
-
-    @staticmethod
-    def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
-        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            if cls._meta.model_name == 'organization' and role_field in org_role_to_permission:
-                # Organization roles can not use the DAB RBAC shortcuts
-                # like Organization.access_qs(user, 'change_jobtemplate') is needed
-                # not just Organization.access_qs(user, 'change') is needed
-                if accessor.is_superuser:
-                    return cls.objects.values_list('id')
-
-                codename = org_role_to_permission[role_field]
-
-                return cls.access_ids_qs(accessor, codename, content_types=content_types)
-            return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
-        if accessor._meta.model_name == 'user':
-            ancestor_roles = accessor.roles.all()
-        elif type(accessor) == Role:
-            ancestor_roles = [accessor]
-        else:
-            raise RuntimeError(f'Role filters only valid for users and ancestor role, received {accessor}')
-
-        if content_types is None:
-            ct_kwarg = dict(content_type=ContentType.objects.get_for_model(cls))
-        else:
-            ct_kwarg = dict(content_type_id__in=content_types)
-
-        return RoleAncestorEntry.objects.filter(ancestor__in=ancestor_roles, role_field=role_field, **ct_kwarg).values_list('object_id').distinct()
-
-    @staticmethod
-    def _accessible_objects(cls, accessor, role_field):
-        return cls.objects.filter(pk__in=ResourceMixin._accessible_pk_qs(cls, accessor, role_field))
 
 
 class SurveyJobTemplateMixin(models.Model):
