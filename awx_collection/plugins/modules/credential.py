@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: credential
 author: "Wayne Witzel III (@wwitzel3)"
@@ -116,12 +120,12 @@ extends_documentation_fragment: awx.awx.auth
 notes:
   - Values `inputs` and the other deprecated fields (such as `tenant`) are replacements of existing values.
     See the last 4 examples for details.
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add machine credential
-  credential:
+  awx.awx.credential:
     name: Team Name
     description: Team Description
     organization: test-org
@@ -130,7 +134,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Create a valid SCM credential from a private_key file
-  credential:
+  awx.awx.credential:
     name: SCM Credential
     organization: Default
     state: present
@@ -147,7 +151,7 @@ EXAMPLES = '''
   register: aws_ssh_key
 
 - name: Add Credential
-  credential:
+  awx.awx.credential:
     name: Workshop Credential
     credential_type: Machine
     organization: Default
@@ -157,7 +161,7 @@ EXAMPLES = '''
   delegate_to: localhost
 
 - name: Add Credential with Custom Credential Type
-  credential:
+  awx.awx.credential:
     name: Workshop Credential
     credential_type: MyCloudCredential
     organization: Default
@@ -166,7 +170,7 @@ EXAMPLES = '''
     controller_host: https://localhost
 
 - name: Create a Vault credential (example for notes)
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -175,7 +179,7 @@ EXAMPLES = '''
       vault_id: 'My ID'
 
 - name: Bad password update (will replace vault_id)
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -183,14 +187,14 @@ EXAMPLES = '''
       vault_password: 'new_password'
 
 - name: Another bad password update (will replace vault_id)
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
     vault_password: 'new_password'
 
 - name: A safe way to update a password and keep vault_id
-  credential:
+  awx.awx.credential:
     name: Example password
     credential_type: Vault
     organization: Default
@@ -199,12 +203,12 @@ EXAMPLES = '''
       vault_id: 'My ID'
 
 - name: Copy Credential
-  credential:
+  awx.awx.credential:
     name: Copy password
     copy_from: Example password
     credential_type: Vault
     organization: Foo
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -218,49 +222,53 @@ def main():
         description=dict(),
         organization=dict(),
         credential_type=dict(required=True),
-        inputs=dict(type='dict', no_log=True),
-        update_secrets=dict(type='bool', default=True, no_log=False),
+        inputs=dict(type="dict", no_log=True),
+        update_secrets=dict(type="bool", default=True, no_log=False),
         user=dict(),
         team=dict(),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     mutually_exclusive = [("organization", "user", "team")]
 
     # Create a module for ourselves
     module = ControllerAPIModule(
-        argument_spec=argument_spec,
-        mutually_exclusive=mutually_exclusive
+        argument_spec=argument_spec, mutually_exclusive=mutually_exclusive
     )
 
     # Extract our parameters
-    name = module.params.get('name')
-    new_name = module.params.get('new_name')
-    copy_from = module.params.get('copy_from')
-    description = module.params.get('description')
-    organization = module.params.get('organization')
-    credential_type = module.params.get('credential_type')
-    inputs = module.params.get('inputs')
-    user = module.params.get('user')
-    team = module.params.get('team')
-    state = module.params.get('state')
+    name = module.params.get("name")
+    new_name = module.params.get("new_name")
+    copy_from = module.params.get("copy_from")
+    description = module.params.get("description")
+    organization = module.params.get("organization")
+    credential_type = module.params.get("credential_type")
+    inputs = module.params.get("inputs")
+    user = module.params.get("user")
+    team = module.params.get("team")
+    state = module.params.get("state")
 
-    cred_type_id = module.resolve_name_to_id('credential_types', credential_type)
+    cred_type_id = module.resolve_name_to_id("credential_types", credential_type)
     if organization:
-        org_id = module.resolve_name_to_id('organizations', organization)
+        org_id = module.resolve_name_to_id("organizations", organization)
 
     # Attempt to look up the object based on the provided name, credential type and optional organization
     lookup_data = {
-        'credential_type': cred_type_id,
+        "credential_type": cred_type_id,
     }
     # Create a copy of lookup data for copying without org.
     copy_lookup_data = lookup_data
     if organization:
-        lookup_data['organization'] = org_id
+        lookup_data["organization"] = org_id
     if user:
-        lookup_data['organization'] = None
+        lookup_data["organization"] = None
 
-    credential = module.get_one('credentials', name_or_id=name, check_exists=(state == 'exists'), **{'data': lookup_data})
+    credential = module.get_one(
+        "credentials",
+        name_or_id=name,
+        check_exists=(state == "exists"),
+        **{"data": lookup_data},
+    )
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -269,49 +277,53 @@ def main():
             credential,
             copy_from,
             name,
-            endpoint='credentials',
-            item_type='credential',
+            endpoint="credentials",
+            item_type="credential",
             copy_lookup_data=copy_lookup_data,
         )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if user:
-        user_id = module.resolve_name_to_id('users', user)
+        user_id = module.resolve_name_to_id("users", user)
     if team:
-        team_id = module.resolve_name_to_id('teams', team)
+        team_id = module.resolve_name_to_id("teams", team)
 
     # Create the data that gets sent for create and update
     credential_fields = {
-        'name': new_name if new_name else (module.get_item_name(credential) if credential else name),
-        'credential_type': cred_type_id,
+        "name": new_name
+        if new_name
+        else (module.get_item_name(credential) if credential else name),
+        "credential_type": cred_type_id,
     }
 
     if inputs:
-        credential_fields['inputs'] = inputs
+        credential_fields["inputs"] = inputs
     if description is not None:
-        if description == '':
-            credential_fields['description'] = ''
+        if description == "":
+            credential_fields["description"] = ""
         else:
-            credential_fields['description'] = description
+            credential_fields["description"] = description
     if organization:
-        credential_fields['organization'] = org_id
+        credential_fields["organization"] = org_id
 
     # If we don't already have a credential (and we are creating one) we can add user/team
     # The API does not appear to do anything with these after creation anyway
     # NOTE: We can't just add these on a modification because they are never returned from a GET so it would always cause a changed=True
     if not credential:
         if user:
-            credential_fields['user'] = user_id
+            credential_fields["user"] = user_id
         if team:
-            credential_fields['team'] = team_id
+            credential_fields["team"] = team_id
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
-    module.create_or_update_if_needed(credential, credential_fields, endpoint='credentials', item_type='credential')
+    module.create_or_update_if_needed(
+        credential, credential_fields, endpoint="credentials", item_type="credential"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

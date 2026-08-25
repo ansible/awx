@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: inventory
 author: "Wayne Witzel III (@wwitzel3)"
@@ -81,12 +85,12 @@ options:
       choices: ["present", "absent", "exists"]
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add inventory
-  inventory:
+  awx.awx.inventory:
     name: "Foo Inventory"
     description: "Our Foo Cloud Servers"
     organization: "Bar Org"
@@ -94,7 +98,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Copy inventory
-  inventory:
+  awx.awx.inventory:
     name: Copy Foo Inventory
     copy_from: Default Inventory
     description: "Our Foo Cloud Servers"
@@ -105,7 +109,7 @@ EXAMPLES = '''
 # of kind "constructed" and then editing the automatically generated inventory
 # source for that inventory.
 - name: Add constructed inventory with two existing input inventories
-  inventory:
+  awx.awx.inventory:
     name: My Constructed Inventory
     organization: Default
     kind: constructed
@@ -114,7 +118,7 @@ EXAMPLES = '''
       - "East Datacenter"
 
 - name: Edit the constructed inventory source
-  inventory_source:
+  awx.awx.inventory_source:
     # The constructed inventory source will always be in the format:
     # "Auto-created source for: <constructed inventory name>"
     name: "Auto-created source for: My Constructed Inventory"
@@ -129,7 +133,7 @@ EXAMPLES = '''
         shutdown_in_product_dev: resolved_state == "shutdown" and account_alias == "product_dev"
       compose:
         resolved_state: state | default("running")
-'''
+"""
 
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -144,35 +148,42 @@ def main():
         copy_from=dict(),
         description=dict(),
         organization=dict(required=True),
-        variables=dict(type='dict'),
-        kind=dict(choices=['', 'smart', 'constructed']),
+        variables=dict(type="dict"),
+        kind=dict(choices=["", "smart", "constructed"]),
         host_filter=dict(),
-        instance_groups=dict(type="list", elements='str'),
-        prevent_instance_group_fallback=dict(type='bool'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
-        input_inventories=dict(type='list', elements='str'),
+        instance_groups=dict(type="list", elements="str"),
+        prevent_instance_group_fallback=dict(type="bool"),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
+        input_inventories=dict(type="list", elements="str"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
+    name = module.params.get("name")
     new_name = module.params.get("new_name")
-    copy_from = module.params.get('copy_from')
-    description = module.params.get('description')
-    organization = module.params.get('organization')
-    variables = module.params.get('variables')
-    state = module.params.get('state')
-    kind = module.params.get('kind')
-    host_filter = module.params.get('host_filter')
-    prevent_instance_group_fallback = module.params.get('prevent_instance_group_fallback')
+    copy_from = module.params.get("copy_from")
+    description = module.params.get("description")
+    organization = module.params.get("organization")
+    variables = module.params.get("variables")
+    state = module.params.get("state")
+    kind = module.params.get("kind")
+    host_filter = module.params.get("host_filter")
+    prevent_instance_group_fallback = module.params.get(
+        "prevent_instance_group_fallback"
+    )
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    org_id = module.resolve_name_to_id('organizations', organization)
+    org_id = module.resolve_name_to_id("organizations", organization)
 
     # Attempt to look up inventory based on the provided name and org ID
-    inventory = module.get_one('inventories', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
+    inventory = module.get_one(
+        "inventories",
+        name_or_id=name,
+        check_exists=(state == "exists"),
+        **{"data": {"organization": org_id}},
+    )
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -181,57 +192,67 @@ def main():
             inventory,
             copy_from,
             name,
-            endpoint='inventories',
-            item_type='inventory',
+            endpoint="inventories",
+            item_type="inventory",
             copy_lookup_data={},
         )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(inventory)
 
     # Create the data that gets sent for create and update
     inventory_fields = {
-        'name': new_name if new_name else (module.get_item_name(inventory) if inventory else name),
-        'organization': org_id,
-        'kind': kind,
-        'host_filter': host_filter,
+        "name": new_name
+        if new_name
+        else (module.get_item_name(inventory) if inventory else name),
+        "organization": org_id,
+        "kind": kind,
+        "host_filter": host_filter,
     }
     if prevent_instance_group_fallback is not None:
-        inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
+        inventory_fields["prevent_instance_group_fallback"] = (
+            prevent_instance_group_fallback
+        )
     if description is not None:
-        inventory_fields['description'] = description
+        inventory_fields["description"] = description
     if variables is not None:
-        inventory_fields['variables'] = json.dumps(variables)
+        inventory_fields["variables"] = json.dumps(variables)
 
     association_fields = {}
 
-    instance_group_names = module.params.get('instance_groups')
+    instance_group_names = module.params.get("instance_groups")
     if instance_group_names is not None:
-        association_fields['instance_groups'] = []
+        association_fields["instance_groups"] = []
         for item in instance_group_names:
-            association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+            association_fields["instance_groups"].append(
+                module.resolve_name_to_id("instance_groups", item)
+            )
 
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
-    if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
-        module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
+    if inventory and inventory["kind"] == "" and inventory_fields["kind"] == "smart":
+        module.fail_json(
+            msg='You cannot turn a regular inventory into a "smart" inventory.'
+        )
 
-    if kind == 'constructed':
-        input_inventory_names = module.params.get('input_inventories')
+    if kind == "constructed":
+        input_inventory_names = module.params.get("input_inventories")
         if input_inventory_names is not None:
-            association_fields['input_inventories'] = []
+            association_fields["input_inventories"] = []
             for item in input_inventory_names:
-                association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item))
+                association_fields["input_inventories"].append(
+                    module.resolve_name_to_id("inventories", item)
+                )
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
     module.create_or_update_if_needed(
         inventory,
         inventory_fields,
-        endpoint='inventories',
-        item_type='inventory',
+        endpoint="inventories",
+        item_type="inventory",
         associations=association_fields,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

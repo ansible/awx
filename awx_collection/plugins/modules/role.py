@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: role
 author: "Wayne Witzel III (@wwitzel3)"
@@ -147,19 +151,19 @@ options:
       type: str
 
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add jdoe to the member role of My Team
-  role:
+  awx.awx.role:
     user: jdoe
     target_team: "My Team"
     role: member
     state: present
 
 - name: Add Joe to multiple job templates and a workflow
-  role:
+  awx.awx.role:
     user: joe
     role: execute
     workflows:
@@ -168,18 +172,17 @@ EXAMPLES = '''
       - jt1
       - jt2
     state: present
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
 
 def main():
-
     argument_spec = dict(
         user=dict(),
-        users=dict(type='list', elements='str'),
+        users=dict(type="list", elements="str"),
         team=dict(),
-        teams=dict(type='list', elements='str'),
+        teams=dict(type="list", elements="str"),
         role=dict(
             choices=[
                 "admin",
@@ -202,65 +205,69 @@ def main():
             required=True,
         ),
         target_team=dict(),
-        target_teams=dict(type='list', elements='str'),
+        target_teams=dict(type="list", elements="str"),
         inventory=dict(),
-        inventories=dict(type='list', elements='str'),
+        inventories=dict(type="list", elements="str"),
         job_template=dict(),
-        job_templates=dict(type='list', elements='str'),
+        job_templates=dict(type="list", elements="str"),
         workflow=dict(),
-        workflows=dict(type='list', elements='str'),
+        workflows=dict(type="list", elements="str"),
         credential=dict(),
-        credentials=dict(type='list', elements='str'),
+        credentials=dict(type="list", elements="str"),
         organization=dict(),
-        organizations=dict(type='list', elements='str'),
+        organizations=dict(type="list", elements="str"),
         lookup_organization=dict(),
         project=dict(),
-        projects=dict(type='list', elements='str'),
-        instance_groups=dict(type='list', elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        projects=dict(type="list", elements="str"),
+        instance_groups=dict(type="list", elements="str"),
+        state=dict(choices=["present", "absent"], default="present"),
     )
 
     module = ControllerAPIModule(argument_spec=argument_spec)
 
-    role_type = module.params.pop('role')
-    role_field = role_type + '_role'
-    state = module.params.pop('state')
+    role_type = module.params.pop("role")
+    role_field = role_type + "_role"
+    state = module.params.pop("state")
 
-    module.json_output['role'] = role_type
+    module.json_output["role"] = role_type
 
     # Deal with legacy parameters
     resource_list_param_keys = {
-        'credentials': 'credential',
-        'inventories': 'inventory',
-        'job_templates': 'job_template',
-        'organizations': 'organization',
-        'projects': 'project',
-        'target_teams': 'target_team',
-        'workflows': 'workflow',
-        'users': 'user',
-        'teams': 'team',
-        'instance_groups': 'instance_group',
+        "credentials": "credential",
+        "inventories": "inventory",
+        "job_templates": "job_template",
+        "organizations": "organization",
+        "projects": "project",
+        "target_teams": "target_team",
+        "workflows": "workflow",
+        "users": "user",
+        "teams": "team",
+        "instance_groups": "instance_group",
     }
 
     resources = {}
     for resource_group, old_name in resource_list_param_keys.items():
         if module.params.get(resource_group) is not None:
-            resources.setdefault(resource_group, []).extend(module.params.get(resource_group))
+            resources.setdefault(resource_group, []).extend(
+                module.params.get(resource_group)
+            )
         if module.params.get(old_name) is not None:
             resources.setdefault(resource_group, []).append(module.params.get(old_name))
-    if module.params.get('lookup_organization') is not None:
-        resources['lookup_organization'] = module.params.get('lookup_organization')
-    if module.params.get('instance_groups') is not None:
-        resources['instance_groups'] = module.params.get('instance_groups')
+    if module.params.get("lookup_organization") is not None:
+        resources["lookup_organization"] = module.params.get("lookup_organization")
+    if module.params.get("instance_groups") is not None:
+        resources["instance_groups"] = module.params.get("instance_groups")
     # Change workflows to its endpoint name.
-    if 'workflows' in resources:
-        resources['workflow_job_templates'] = resources.pop('workflows')
+    if "workflows" in resources:
+        resources["workflow_job_templates"] = resources.pop("workflows")
 
     # Set lookup data to use
     lookup_data = {}
-    if 'lookup_organization' in resources:
-        lookup_data['organization'] = module.resolve_name_to_id('organizations', resources['lookup_organization'])
-        resources.pop('lookup_organization')
+    if "lookup_organization" in resources:
+        lookup_data["organization"] = module.resolve_name_to_id(
+            "organizations", resources["lookup_organization"]
+        )
+        resources.pop("lookup_organization")
 
     # Lookup actor data
     # separate actors from resources
@@ -272,25 +279,30 @@ def main():
         for resource in value:
             # Attempt to look up project based on the provided name, ID, or named URL and lookup data
             lookup_key = key
-            if key == 'organizations' or key == 'users' or key == 'teams':
+            if key == "organizations" or key == "users" or key == "teams":
                 lookup_data_populated = {}
             else:
                 lookup_data_populated = lookup_data
-            if key == 'target_teams':
-                lookup_key = 'teams'
-            data = module.get_one(lookup_key, name_or_id=resource, data=lookup_data_populated)
+            if key == "target_teams":
+                lookup_key = "teams"
+            data = module.get_one(
+                lookup_key, name_or_id=resource, data=lookup_data_populated
+            )
             if data is None:
                 missing_items.append(resource)
             else:
-                if key == 'users' or key == 'teams':
+                if key == "users" or key == "teams":
                     actor_data.setdefault(key, []).append(data)
-                elif key == 'target_teams':
-                    resource_data.setdefault('teams', []).append(data)
+                elif key == "target_teams":
+                    resource_data.setdefault("teams", []).append(data)
                 else:
                     resource_data.setdefault(key, []).append(data)
     if len(missing_items) > 0:
         module.fail_json(
-            msg='There were {0} missing items, missing items: {1}'.format(len(missing_items), missing_items), changed=False
+            msg="There were {0} missing items, missing items: {1}".format(
+                len(missing_items), missing_items
+            ),
+            changed=False,
         )
 
     # build association agenda
@@ -298,40 +310,62 @@ def main():
     for actor_type, actors in actor_data.items():
         for key, value in resource_data.items():
             for resource in value:
-                resource_roles = resource['summary_fields']['object_roles']
+                resource_roles = resource["summary_fields"]["object_roles"]
                 if role_field not in resource_roles:
-                    available_roles = ', '.join(list(resource_roles.keys()))
+                    available_roles = ", ".join(list(resource_roles.keys()))
                     module.fail_json(
-                        msg='Resource {0} has no role {1}, available roles: {2}'.format(resource['url'], role_field, available_roles), changed=False
+                        msg="Resource {0} has no role {1}, available roles: {2}".format(
+                            resource["url"], role_field, available_roles
+                        ),
+                        changed=False,
                     )
                 role_data = resource_roles[role_field]
-                endpoint = '/roles/{0}/{1}/'.format(role_data['id'], actor_type)
+                endpoint = "/roles/{0}/{1}/".format(role_data["id"], actor_type)
                 associations.setdefault(endpoint, [])
                 for actor in actors:
-                    associations[endpoint].append(actor['id'])
+                    associations[endpoint].append(actor["id"])
 
     # perform associations
     for association_endpoint, new_association_list in associations.items():
         response = module.get_all_endpoint(association_endpoint)
-        existing_associated_ids = [association['id'] for association in response['json']['results']]
+        existing_associated_ids = [
+            association["id"] for association in response["json"]["results"]
+        ]
 
-        if state == 'present':
+        if state == "present":
             for an_id in list(set(new_association_list) - set(existing_associated_ids)):
-                response = module.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
-                if response['status_code'] == 204:
-                    module.json_output['changed'] = True
+                response = module.post_endpoint(
+                    association_endpoint, **{"data": {"id": int(an_id)}}
+                )
+                if response["status_code"] == 204:
+                    module.json_output["changed"] = True
                 else:
-                    module.fail_json(msg="Failed to grant role. {0}".format(response['json'].get('detail', response['json'].get('msg', 'unknown'))))
+                    module.fail_json(
+                        msg="Failed to grant role. {0}".format(
+                            response["json"].get(
+                                "detail", response["json"].get("msg", "unknown")
+                            )
+                        )
+                    )
         else:
             for an_id in list(set(existing_associated_ids) & set(new_association_list)):
-                response = module.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
-                if response['status_code'] == 204:
-                    module.json_output['changed'] = True
+                response = module.post_endpoint(
+                    association_endpoint,
+                    **{"data": {"id": int(an_id), "disassociate": True}},
+                )
+                if response["status_code"] == 204:
+                    module.json_output["changed"] = True
                 else:
-                    module.fail_json(msg="Failed to revoke role. {0}".format(response['json'].get('detail', response['json'].get('msg', 'unknown'))))
+                    module.fail_json(
+                        msg="Failed to revoke role. {0}".format(
+                            response["json"].get(
+                                "detail", response["json"].get("msg", "unknown")
+                            )
+                        )
+                    )
 
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,14 +1,3 @@
-# (********************************************************)
-# (*                                                      *)
-# (*             WARNING                                  *)
-# (*                                                      *)
-# (*  This file is managed by Ansible and not to be       *)
-# (*  edited directly! Instead modify:                    *)
-# (*  tools/roles/template_galaxy/templates/galaxy.yml.j2 *)
-# (*                                                      *)
-# (*  Changes to the base galaxy.yml file are refreshed   *)
-# (*  upon build of the collection                        *)
-# (********************************************************)
 ---
 authors:
   - AWX Project Contributors <awx-project@googlegroups.com>
@@ -33,6 +22,4 @@ version: 0.0.1-devel
 build_ignore:
   - tools
   - setup.cfg
-  - galaxy.yml.j2
-  - template_galaxy.yml
   - '*.tar.gz'

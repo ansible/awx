@@ -30,11 +30,10 @@ PARALLEL_TESTS ?= -n auto
 COLLECTION_TEST_TARGET ?=
 # Python version for ansible-test (must be 3.11, 3.12, or 3.13)
 ANSIBLE_TEST_PYTHON_VERSION ?= 3.13
-# args for collection install
-COLLECTION_PACKAGE ?= awx
-COLLECTION_NAMESPACE ?= awx
-COLLECTION_INSTALL = $(HOME)/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
-COLLECTION_TEMPLATE_VERSION ?= false
+# args for collection install - read namespace and name from galaxy.yml
+COLLECTION_NAMESPACE ?= $(shell grep '^namespace:' awx_collection/galaxy.yml | awk '{print $$2}')
+COLLECTION_PACKAGE ?= $(shell grep '^name:' awx_collection/galaxy.yml | awk '{print $$2}')
+COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -450,10 +449,7 @@ symlink_collection:
 
 awx_collection_build: $(shell find awx_collection -type f)
 	$(ANSIBLE_PLAYBOOK) -i localhost, awx_collection/tools/template_galaxy.yml \
-	  -e collection_package=$(COLLECTION_PACKAGE) \
-	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
-	  -e collection_version=$(COLLECTION_VERSION) \
-	  -e '{"awx_template_version": $(COLLECTION_TEMPLATE_VERSION)}'
+	  -e collection_version=$(COLLECTION_VERSION)
 	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
 
 build_collection: awx_collection_build

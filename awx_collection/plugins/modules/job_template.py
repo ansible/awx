@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: job_template
 author: "Wayne Witzel III (@wwitzel3)"
@@ -323,12 +327,12 @@ notes:
   - JSON for survey_spec can be found in the API Documentation. See
     U(https://docs.ansible.com/automation-controller/latest/html/towerapi)
     for job template survey creation and POST operation payload example.
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Create Ping job template
-  job_template:
+  awx.awx.job_template:
     name: "Ping"
     job_type: "run"
     organization: "Default"
@@ -344,20 +348,20 @@ EXAMPLES = '''
     survey_spec: "{{ lookup('file', 'my_survey.json') }}"
 
 - name: Add start notification to Job Template
-  job_template:
+  awx.awx.job_template:
     name: "Ping"
     notification_templates_started:
       - Notification1
       - Notification2
 
 - name: Remove Notification1 start notification from Job Template
-  job_template:
+  awx.awx.job_template:
     name: "Ping"
     notification_templates_started:
       - Notification2
 
 - name: Copy Job Template
-  job_template:
+  awx.awx.job_template:
     name: copy job template
     copy_from: test job template
     job_type: "run"
@@ -365,23 +369,29 @@ EXAMPLES = '''
     project: test
     playbook: hello_world.yml
     state: "present"
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 import json
 
 
 def update_survey(module, last_request):
-    spec_endpoint = last_request.get('related', {}).get('survey_spec')
-    if module.params.get('survey_spec') == {}:
+    spec_endpoint = last_request.get("related", {}).get("survey_spec")
+    if module.params.get("survey_spec") == {}:
         response = module.delete_endpoint(spec_endpoint)
-        if response['status_code'] != 200:
+        if response["status_code"] != 200:
             # Not sure how to make this actually return a non 200 to test what to dump in the respinse
-            module.fail_json(msg="Failed to delete survey: {0}".format(response['json']))
+            module.fail_json(
+                msg="Failed to delete survey: {0}".format(response["json"])
+            )
     else:
-        response = module.post_endpoint(spec_endpoint, **{'data': module.params.get('survey_spec')})
-        if response['status_code'] != 200:
-            module.fail_json(msg="Failed to update survey: {0}".format(response['json']['error']))
+        response = module.post_endpoint(
+            spec_endpoint, **{"data": module.params.get("survey_spec")}
+        )
+        if response["status_code"] != 200:
+            module.fail_json(
+                msg="Failed to update survey: {0}".format(response["json"]["error"])
+            )
     module.exit_json(**module.json_output)
 
 
@@ -393,73 +403,79 @@ def main():
         copy_from=dict(),
         description=dict(),
         organization=dict(),
-        job_type=dict(choices=['run', 'check']),
+        job_type=dict(choices=["run", "check"]),
         inventory=dict(),
         project=dict(),
         playbook=dict(),
         credential=dict(),
         vault_credential=dict(),
-        credentials=dict(type='list', elements='str'),
+        credentials=dict(type="list", elements="str"),
         execution_environment=dict(),
         custom_virtualenv=dict(),
-        instance_groups=dict(type="list", elements='str'),
-        forks=dict(type='int'),
+        instance_groups=dict(type="list", elements="str"),
+        forks=dict(type="int"),
         limit=dict(),
-        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
-        extra_vars=dict(type='dict'),
+        verbosity=dict(type="int", choices=[0, 1, 2, 3, 4, 5]),
+        extra_vars=dict(type="dict"),
         job_tags=dict(),
-        force_handlers=dict(type='bool', aliases=['force_handlers_enabled']),
+        force_handlers=dict(type="bool", aliases=["force_handlers_enabled"]),
         skip_tags=dict(),
         start_at_task=dict(),
-        timeout=dict(type='int'),
-        use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
+        timeout=dict(type="int"),
+        use_fact_cache=dict(type="bool", aliases=["fact_caching_enabled"]),
         host_config_key=dict(no_log=False),
-        ask_diff_mode_on_launch=dict(type='bool', aliases=['ask_diff_mode']),
-        ask_variables_on_launch=dict(type='bool', aliases=['ask_extra_vars']),
-        ask_limit_on_launch=dict(type='bool', aliases=['ask_limit']),
-        ask_tags_on_launch=dict(type='bool', aliases=['ask_tags']),
-        ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
-        ask_job_type_on_launch=dict(type='bool', aliases=['ask_job_type']),
-        ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity']),
-        ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory']),
-        ask_credential_on_launch=dict(type='bool', aliases=['ask_credential']),
-        ask_execution_environment_on_launch=dict(type='bool', aliases=['ask_execution_environment']),
-        ask_forks_on_launch=dict(type='bool', aliases=['ask_forks']),
-        ask_instance_groups_on_launch=dict(type='bool', aliases=['ask_instance_groups']),
-        ask_job_slice_count_on_launch=dict(type='bool', aliases=['ask_job_slice_count']),
-        ask_labels_on_launch=dict(type='bool', aliases=['ask_labels']),
-        ask_timeout_on_launch=dict(type='bool', aliases=['ask_timeout']),
-        survey_enabled=dict(type='bool'),
+        ask_diff_mode_on_launch=dict(type="bool", aliases=["ask_diff_mode"]),
+        ask_variables_on_launch=dict(type="bool", aliases=["ask_extra_vars"]),
+        ask_limit_on_launch=dict(type="bool", aliases=["ask_limit"]),
+        ask_tags_on_launch=dict(type="bool", aliases=["ask_tags"]),
+        ask_skip_tags_on_launch=dict(type="bool", aliases=["ask_skip_tags"]),
+        ask_job_type_on_launch=dict(type="bool", aliases=["ask_job_type"]),
+        ask_verbosity_on_launch=dict(type="bool", aliases=["ask_verbosity"]),
+        ask_inventory_on_launch=dict(type="bool", aliases=["ask_inventory"]),
+        ask_credential_on_launch=dict(type="bool", aliases=["ask_credential"]),
+        ask_execution_environment_on_launch=dict(
+            type="bool", aliases=["ask_execution_environment"]
+        ),
+        ask_forks_on_launch=dict(type="bool", aliases=["ask_forks"]),
+        ask_instance_groups_on_launch=dict(
+            type="bool", aliases=["ask_instance_groups"]
+        ),
+        ask_job_slice_count_on_launch=dict(
+            type="bool", aliases=["ask_job_slice_count"]
+        ),
+        ask_labels_on_launch=dict(type="bool", aliases=["ask_labels"]),
+        ask_timeout_on_launch=dict(type="bool", aliases=["ask_timeout"]),
+        survey_enabled=dict(type="bool"),
         survey_spec=dict(type="dict"),
-        become_enabled=dict(type='bool'),
-        diff_mode=dict(type='bool', aliases=['diff_mode_enabled']),
-        allow_simultaneous=dict(type='bool', aliases=['concurrent_jobs_enabled']),
+        become_enabled=dict(type="bool"),
+        diff_mode=dict(type="bool", aliases=["diff_mode_enabled"]),
+        allow_simultaneous=dict(type="bool", aliases=["concurrent_jobs_enabled"]),
         scm_branch=dict(),
-        ask_scm_branch_on_launch=dict(type='bool'),
-        job_slice_count=dict(type='int'),
-        webhook_service=dict(choices=['github', 'gitlab', 'bitbucket_dc', '']),
+        ask_scm_branch_on_launch=dict(type="bool"),
+        job_slice_count=dict(type="int"),
+        webhook_service=dict(choices=["github", "gitlab", "bitbucket_dc", ""]),
         webhook_credential=dict(),
-        labels=dict(type="list", elements='str'),
-        notification_templates_started=dict(type="list", elements='str'),
-        notification_templates_success=dict(type="list", elements='str'),
-        notification_templates_error=dict(type="list", elements='str'),
+        labels=dict(type="list", elements="str"),
+        notification_templates_started=dict(type="list", elements="str"),
+        notification_templates_success=dict(type="list", elements="str"),
+        notification_templates_error=dict(type="list", elements="str"),
         prevent_instance_group_fallback=dict(type="bool"),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
+    name = module.params.get("name")
     new_name = module.params.get("new_name")
-    copy_from = module.params.get('copy_from')
-    state = module.params.get('state')
+    copy_from = module.params.get("copy_from")
+    state = module.params.get("state")
 
     # Deal with legacy credential and vault_credential
-    credential = module.params.get('credential')
-    vault_credential = module.params.get('vault_credential')
-    credentials = module.params.get('credentials')
+    credential = module.params.get("credential")
+    vault_credential = module.params.get("vault_credential")
+    credentials = module.params.get("credentials")
     if vault_credential:
         if credentials is None:
             credentials = []
@@ -474,17 +490,24 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
-    organization = module.params.get('organization')
+    organization = module.params.get("organization")
     if organization:
-        organization_id = module.resolve_name_to_id('organizations', organization)
-        search_fields['organization'] = new_fields['organization'] = organization_id
+        organization_id = module.resolve_name_to_id("organizations", organization)
+        search_fields["organization"] = new_fields["organization"] = organization_id
 
-    ee = module.params.get('execution_environment')
+    ee = module.params.get("execution_environment")
     if ee:
-        new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
+        new_fields["execution_environment"] = module.resolve_name_to_id(
+            "execution_environments", ee
+        )
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('job_templates', name_or_id=name, check_exists=(state == 'exists'), **{'data': search_fields})
+    existing_item = module.get_one(
+        "job_templates",
+        name_or_id=name,
+        check_exists=(state == "exists"),
+        **{"data": search_fields},
+    )
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -493,157 +516,183 @@ def main():
             existing_item,
             copy_from,
             name,
-            endpoint='job_templates',
-            item_type='job_template',
+            endpoint="job_templates",
+            item_type="job_template",
             copy_lookup_data={},
         )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
     # Create the data that gets sent for create and update
-    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
+    new_fields["name"] = (
+        new_name
+        if new_name
+        else (module.get_item_name(existing_item) if existing_item else name)
+    )
     for field_name in (
-        'description',
-        'job_type',
-        'playbook',
-        'scm_branch',
-        'forks',
-        'limit',
-        'verbosity',
-        'job_tags',
-        'force_handlers',
-        'skip_tags',
-        'start_at_task',
-        'timeout',
-        'use_fact_cache',
-        'host_config_key',
-        'ask_scm_branch_on_launch',
-        'ask_diff_mode_on_launch',
-        'ask_variables_on_launch',
-        'ask_limit_on_launch',
-        'ask_tags_on_launch',
-        'ask_skip_tags_on_launch',
-        'ask_job_type_on_launch',
-        'ask_verbosity_on_launch',
-        'ask_inventory_on_launch',
-        'ask_credential_on_launch',
-        'ask_execution_environment_on_launch',
-        'ask_forks_on_launch',
-        'ask_instance_groups_on_launch',
-        'ask_job_slice_count_on_launch',
-        'ask_labels_on_launch',
-        'ask_timeout_on_launch',
-        'survey_enabled',
-        'become_enabled',
-        'diff_mode',
-        'allow_simultaneous',
-        'custom_virtualenv',
-        'job_slice_count',
-        'webhook_service',
-        'prevent_instance_group_fallback',
+        "description",
+        "job_type",
+        "playbook",
+        "scm_branch",
+        "forks",
+        "limit",
+        "verbosity",
+        "job_tags",
+        "force_handlers",
+        "skip_tags",
+        "start_at_task",
+        "timeout",
+        "use_fact_cache",
+        "host_config_key",
+        "ask_scm_branch_on_launch",
+        "ask_diff_mode_on_launch",
+        "ask_variables_on_launch",
+        "ask_limit_on_launch",
+        "ask_tags_on_launch",
+        "ask_skip_tags_on_launch",
+        "ask_job_type_on_launch",
+        "ask_verbosity_on_launch",
+        "ask_inventory_on_launch",
+        "ask_credential_on_launch",
+        "ask_execution_environment_on_launch",
+        "ask_forks_on_launch",
+        "ask_instance_groups_on_launch",
+        "ask_job_slice_count_on_launch",
+        "ask_labels_on_launch",
+        "ask_timeout_on_launch",
+        "survey_enabled",
+        "become_enabled",
+        "diff_mode",
+        "allow_simultaneous",
+        "custom_virtualenv",
+        "job_slice_count",
+        "webhook_service",
+        "prevent_instance_group_fallback",
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
             new_fields[field_name] = field_val
 
     # Special treatment of extra_vars parameter
-    extra_vars = module.params.get('extra_vars')
+    extra_vars = module.params.get("extra_vars")
     if extra_vars is not None:
-        new_fields['extra_vars'] = json.dumps(extra_vars)
+        new_fields["extra_vars"] = json.dumps(extra_vars)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    inventory = module.params.get('inventory')
-    project = module.params.get('project')
-    webhook_credential = module.params.get('webhook_credential')
+    inventory = module.params.get("inventory")
+    project = module.params.get("project")
+    webhook_credential = module.params.get("webhook_credential")
 
     if inventory is not None:
-        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
+        new_fields["inventory"] = module.resolve_name_to_id("inventories", inventory)
     if project is not None:
         if organization_id is not None:
             project_data = module.get_one(
-                'projects',
+                "projects",
                 name_or_id=project,
                 **{
-                    'data': {
-                        'organization': organization_id,
+                    "data": {
+                        "organization": organization_id,
                     }
-                }
+                },
             )
             if project_data is None:
-                module.fail_json(msg="The project {0} in organization {1} was not found on the controller instance server".format(project, organization))
-            new_fields['project'] = project_data['id']
+                module.fail_json(
+                    msg="The project {0} in organization {1} was not found on the controller instance server".format(
+                        project, organization
+                    )
+                )
+            new_fields["project"] = project_data["id"]
         else:
-            new_fields['project'] = module.resolve_name_to_id('projects', project)
+            new_fields["project"] = module.resolve_name_to_id("projects", project)
     if webhook_credential is not None:
-        new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
+        new_fields["webhook_credential"] = module.resolve_name_to_id(
+            "credentials", webhook_credential
+        )
 
     association_fields = {}
 
     if credentials is not None:
-        association_fields['credentials'] = []
+        association_fields["credentials"] = []
         for item in credentials:
-            association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
+            association_fields["credentials"].append(
+                module.resolve_name_to_id("credentials", item)
+            )
 
-    labels = module.params.get('labels')
+    labels = module.params.get("labels")
     if labels is not None:
-        association_fields['labels'] = []
+        association_fields["labels"] = []
         for item in labels:
-            label_id = module.get_one('labels', name_or_id=item, **{'data': search_fields})
+            label_id = module.get_one(
+                "labels", name_or_id=item, **{"data": search_fields}
+            )
             if label_id is None:
-                module.fail_json(msg='Could not find label entry with name {0}'.format(item))
+                module.fail_json(
+                    msg="Could not find label entry with name {0}".format(item)
+                )
             else:
-                association_fields['labels'].append(label_id['id'])
+                association_fields["labels"].append(label_id["id"])
 
-    notifications_start = module.params.get('notification_templates_started')
+    notifications_start = module.params.get("notification_templates_started")
     if notifications_start is not None:
-        association_fields['notification_templates_started'] = []
+        association_fields["notification_templates_started"] = []
         for item in notifications_start:
-            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_started"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    notifications_success = module.params.get('notification_templates_success')
+    notifications_success = module.params.get("notification_templates_success")
     if notifications_success is not None:
-        association_fields['notification_templates_success'] = []
+        association_fields["notification_templates_success"] = []
         for item in notifications_success:
-            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_success"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    notifications_error = module.params.get('notification_templates_error')
+    notifications_error = module.params.get("notification_templates_error")
     if notifications_error is not None:
-        association_fields['notification_templates_error'] = []
+        association_fields["notification_templates_error"] = []
         for item in notifications_error:
-            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_error"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    instance_group_names = module.params.get('instance_groups')
+    instance_group_names = module.params.get("instance_groups")
     if instance_group_names is not None:
-        association_fields['instance_groups'] = []
+        association_fields["instance_groups"] = []
         for item in instance_group_names:
-            association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+            association_fields["instance_groups"].append(
+                module.resolve_name_to_id("instance_groups", item)
+            )
 
     on_change = None
-    new_spec = module.params.get('survey_spec')
+    new_spec = module.params.get("survey_spec")
     if new_spec is not None:
         existing_spec = None
         if existing_item:
-            spec_endpoint = existing_item.get('related', {}).get('survey_spec')
-            existing_spec = module.get_endpoint(spec_endpoint)['json']
+            spec_endpoint = existing_item.get("related", {}).get("survey_spec")
+            existing_spec = module.get_endpoint(spec_endpoint)["json"]
         if new_spec != existing_spec:
-            module.json_output['changed'] = True
+            module.json_output["changed"] = True
             if existing_item and module.has_encrypted_values(existing_spec):
-                module._encrypted_changed_warning('survey_spec', existing_item, warning=True)
+                module._encrypted_changed_warning(
+                    "survey_spec", existing_item, warning=True
+                )
             on_change = update_survey
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
     module.create_or_update_if_needed(
         existing_item,
         new_fields,
-        endpoint='job_templates',
-        item_type='job_template',
+        endpoint="job_templates",
+        item_type="job_template",
         associations=association_fields,
         on_create=on_change,
         on_update=on_change,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

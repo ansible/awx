@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: project
 author: "Wayne Witzel III (@wwitzel3)"
@@ -167,12 +171,12 @@ options:
       type: str
 
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add project
-  project:
+  awx.awx.project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
@@ -180,7 +184,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add Project with cache timeout
-  project:
+  awx.awx.project:
     name: "Foo"
     description: "Foo bar project"
     organization: "test"
@@ -190,13 +194,13 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Copy project
-  project:
+  awx.awx.project:
     name: copy
     copy_from: test
     description: Foo copy project
     organization: Foo
     state: present
-'''
+"""
 
 import time
 
@@ -207,41 +211,52 @@ def wait_for_project_update(module, last_request):
     # The current running job for the update is in last_request['summary_fields']['current_update']['id']
 
     # Get parameters that were not passed in
-    update_project = module.params.get('update_project')
-    wait = module.params.get('wait')
-    timeout = module.params.get('timeout')
-    interval = module.params.get('interval')
-    scm_revision_original = last_request['scm_revision']
+    update_project = module.params.get("update_project")
+    wait = module.params.get("wait")
+    timeout = module.params.get("timeout")
+    interval = module.params.get("interval")
+    scm_revision_original = last_request["scm_revision"]
 
-    if 'current_update' in last_request['summary_fields']:
+    if "current_update" in last_request["summary_fields"]:
         running = True
         while running:
-            result = module.get_endpoint('/project_updates/{0}/'.format(last_request['summary_fields']['current_update']['id']))['json']
+            result = module.get_endpoint(
+                "/project_updates/{0}/".format(
+                    last_request["summary_fields"]["current_update"]["id"]
+                )
+            )["json"]
 
-            if module.is_job_done(result['status']):
+            if module.is_job_done(result["status"]):
                 time.sleep(1)
                 running = False
 
-        if result['status'] != 'successful':
+        if result["status"] != "successful":
             module.fail_json(msg="Project update failed")
     elif update_project:
-        result = module.post_endpoint(last_request['related']['update'])
+        result = module.post_endpoint(last_request["related"]["update"])
 
-        if result['status_code'] != 202:
-            module.fail_json(msg="Failed to update project, see response for details", response=result)
+        if result["status_code"] != 202:
+            module.fail_json(
+                msg="Failed to update project, see response for details",
+                response=result,
+            )
 
         if not wait:
             module.exit_json(**module.json_output)
 
         # Invoke wait function
         result_final = module.wait_on_url(
-            url=result['json']['url'], object_name=module.get_item_name(last_request), object_type='Project Update', timeout=timeout, interval=interval
+            url=result["json"]["url"],
+            object_name=module.get_item_name(last_request),
+            object_type="Project Update",
+            timeout=timeout,
+            interval=interval,
         )
 
         # Set Changed to correct value depending on if hash changed Also output refspec comparision
-        module.json_output['changed'] = True
-        if result_final['json']['scm_revision'] == scm_revision_original:
-            module.json_output['changed'] = False
+        module.json_output["changed"] = True
+        if result_final["json"]["scm_revision"] == scm_revision_original:
+            module.json_output["changed"] = False
 
     module.exit_json(**module.json_output)
 
@@ -253,30 +268,30 @@ def main():
         new_name=dict(),
         copy_from=dict(),
         description=dict(),
-        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive']),
+        scm_type=dict(choices=["manual", "git", "svn", "insights", "archive"]),
         scm_url=dict(),
         local_path=dict(),
         scm_branch=dict(),
         scm_refspec=dict(),
-        credential=dict(aliases=['scm_credential']),
-        scm_clean=dict(type='bool'),
-        scm_delete_on_update=dict(type='bool'),
-        scm_track_submodules=dict(type='bool'),
-        scm_update_on_launch=dict(type='bool'),
-        scm_update_cache_timeout=dict(type='int'),
-        allow_override=dict(type='bool', aliases=['scm_allow_override']),
-        timeout=dict(type='int', aliases=['job_timeout']),
+        credential=dict(aliases=["scm_credential"]),
+        scm_clean=dict(type="bool"),
+        scm_delete_on_update=dict(type="bool"),
+        scm_track_submodules=dict(type="bool"),
+        scm_update_on_launch=dict(type="bool"),
+        scm_update_cache_timeout=dict(type="int"),
+        allow_override=dict(type="bool", aliases=["scm_allow_override"]),
+        timeout=dict(type="int", aliases=["job_timeout"]),
         default_environment=dict(),
         custom_virtualenv=dict(),
         organization=dict(),
-        notification_templates_started=dict(type="list", elements='str'),
-        notification_templates_success=dict(type="list", elements='str'),
-        notification_templates_error=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
-        wait=dict(type='bool', default=True),
-        update_project=dict(default=False, type='bool'),
-        interval=dict(default=2.0, type='float'),
-        signature_validation_credential=dict(type='str'),
+        notification_templates_started=dict(type="list", elements="str"),
+        notification_templates_success=dict(type="list", elements="str"),
+        notification_templates_error=dict(type="list", elements="str"),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
+        wait=dict(type="bool", default=True),
+        update_project=dict(default=False, type="bool"),
+        interval=dict(default=2.0, type="float"),
+        signature_validation_credential=dict(type="str"),
     )
 
     # Create a module for ourselves
@@ -285,35 +300,39 @@ def main():
     )
 
     # Alias for manual projects
-    if module.params.get('scm_type') == "manual":
-        module.params['scm_type'] = ''
+    if module.params.get("scm_type") == "manual":
+        module.params["scm_type"] = ""
 
     # Extract our parameters
-    name = module.params.get('name')
+    name = module.params.get("name")
     new_name = module.params.get("new_name")
-    copy_from = module.params.get('copy_from')
-    scm_type = module.params.get('scm_type')
-    local_path = module.params.get('local_path')
-    credential = module.params.get('credential')
-    scm_update_on_launch = module.params.get('scm_update_on_launch')
-    scm_update_cache_timeout = module.params.get('scm_update_cache_timeout')
-    default_ee = module.params.get('default_environment')
-    organization = module.params.get('organization')
-    state = module.params.get('state')
-    wait = module.params.get('wait')
-    update_project = module.params.get('update_project')
+    copy_from = module.params.get("copy_from")
+    scm_type = module.params.get("scm_type")
+    local_path = module.params.get("local_path")
+    credential = module.params.get("credential")
+    scm_update_on_launch = module.params.get("scm_update_on_launch")
+    scm_update_cache_timeout = module.params.get("scm_update_cache_timeout")
+    default_ee = module.params.get("default_environment")
+    organization = module.params.get("organization")
+    state = module.params.get("state")
+    wait = module.params.get("wait")
+    update_project = module.params.get("update_project")
 
-    signature_validation_credential = module.params.get('signature_validation_credential')
+    signature_validation_credential = module.params.get(
+        "signature_validation_credential"
+    )
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     lookup_data = {}
     org_id = None
     if organization:
-        org_id = module.resolve_name_to_id('organizations', organization)
-        lookup_data['organization'] = org_id
+        org_id = module.resolve_name_to_id("organizations", organization)
+        lookup_data["organization"] = org_id
 
     # Attempt to look up project based on the provided name and org ID
-    project = module.get_one('projects', name_or_id=name, check_exists=(state == 'exists'), data=lookup_data)
+    project = module.get_one(
+        "projects", name_or_id=name, check_exists=(state == "exists"), data=lookup_data
+    )
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -322,92 +341,106 @@ def main():
             project,
             copy_from,
             name,
-            endpoint='projects',
-            item_type='project',
+            endpoint="projects",
+            item_type="project",
             copy_lookup_data={},
         )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(project)
 
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 
-    notifications_start = module.params.get('notification_templates_started')
+    notifications_start = module.params.get("notification_templates_started")
     if notifications_start is not None:
-        association_fields['notification_templates_started'] = []
+        association_fields["notification_templates_started"] = []
         for item in notifications_start:
-            association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_started"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    notifications_success = module.params.get('notification_templates_success')
+    notifications_success = module.params.get("notification_templates_success")
     if notifications_success is not None:
-        association_fields['notification_templates_success'] = []
+        association_fields["notification_templates_success"] = []
         for item in notifications_success:
-            association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_success"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
-    notifications_error = module.params.get('notification_templates_error')
+    notifications_error = module.params.get("notification_templates_error")
     if notifications_error is not None:
-        association_fields['notification_templates_error'] = []
+        association_fields["notification_templates_error"] = []
         for item in notifications_error:
-            association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+            association_fields["notification_templates_error"].append(
+                module.resolve_name_to_id("notification_templates", item)
+            )
 
     # Create the data that gets sent for create and update
     project_fields = {
-        'name': new_name if new_name else (module.get_item_name(project) if project else name),
+        "name": new_name
+        if new_name
+        else (module.get_item_name(project) if project else name),
     }
 
     for field_name in (
-        'scm_type',
-        'scm_url',
-        'scm_branch',
-        'scm_refspec',
-        'scm_clean',
-        'scm_delete_on_update',
-        'scm_track_submodules',
-        'scm_update_on_launch',
-        'scm_update_cache_timeout',
-        'timeout',
-        'scm_update_cache_timeout',
-        'custom_virtualenv',
-        'description',
-        'allow_override',
+        "scm_type",
+        "scm_url",
+        "scm_branch",
+        "scm_refspec",
+        "scm_clean",
+        "scm_delete_on_update",
+        "scm_track_submodules",
+        "scm_update_on_launch",
+        "scm_update_cache_timeout",
+        "timeout",
+        "scm_update_cache_timeout",
+        "custom_virtualenv",
+        "description",
+        "allow_override",
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
             project_fields[field_name] = field_val
 
     for variable, field, endpoint in (
-        (default_ee, 'default_environment', 'execution_environments'),
-        (credential, 'credential', 'credentials'),
-        (signature_validation_credential, 'signature_validation_credential', 'credentials'),
+        (default_ee, "default_environment", "execution_environments"),
+        (credential, "credential", "credentials"),
+        (
+            signature_validation_credential,
+            "signature_validation_credential",
+            "credentials",
+        ),
     ):
         if variable is not None:
             project_fields[field] = module.resolve_name_to_id(endpoint, variable)
 
     if org_id is not None:
         # this is resolved earlier, so save an API call and don't do it again in the loop above
-        project_fields['organization'] = org_id
+        project_fields["organization"] = org_id
 
     # Respect local_path if scm_type is manual type or not specified
-    if scm_type in ('', None) and local_path is not None:
-        project_fields['local_path'] = local_path
+    if scm_type in ("", None) and local_path is not None:
+        project_fields["local_path"] = local_path
 
     if scm_update_cache_timeout not in (0, None) and scm_update_on_launch is not True:
-        module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
+        module.warn(
+            "scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true"
+        )
 
     # If we are doing a not manual project, register our on_change method
     # An on_change function, if registered, will fire after an post_endpoint or update_if_needed completes successfully
     on_change = None
-    if wait and scm_type != '' or update_project and scm_type != '':
+    if wait and scm_type != "" or update_project and scm_type != "":
         on_change = wait_for_project_update
 
     # If the state was present and we can let the module build or update the existing project, this will return on its own
     response = module.create_or_update_if_needed(
         project,
         project_fields,
-        endpoint='projects',
-        item_type='project',
+        endpoint="projects",
+        item_type="project",
         associations=association_fields,
         on_create=on_change,
         on_update=on_change,
@@ -419,5 +452,5 @@ def main():
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

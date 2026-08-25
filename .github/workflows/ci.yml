@@ -6,6 +6,8 @@ env:
   DEV_DOCKER_OWNER: ${{ github.repository_owner }}
   COMPOSE_TAG: ${{ github.base_ref || github.ref_name || 'devel' }}
   UPSTREAM_REPOSITORY_ID: 91594105
+  COLLECTION_NAMESPACE: ${{ github.repository == 'ansible/tower' && 'ansible' || 'awx' }}
+  COLLECTION_PACKAGE: ${{ github.repository == 'ansible/tower' && 'controller' || 'awx' }}
 on:
   pull_request:
   push:
@@ -253,6 +255,13 @@ jobs:
           DEV_DOCKER_TAG_BASE: local
           HEADLESS: yes
 
+      - name: Convert awx-operator playbooks to ansible.controller FQCN
+        if: github.repository == 'ansible/tower'
+        working-directory: awx-operator
+        run: |
+          find molecule/ -type f \( -name '*.yml' -o -name '*.yaml' \) \
+            -exec sed -i 's/awx\.awx/ansible.controller/g' {} +
+
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
         id: awx_operator_test
@@ -279,6 +288,7 @@ jobs:
           AWX_TEST_VERSION: ci
           AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
+          CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX: /api/
 
       - name: Collect awx-operator logs on timeout
         # Only run on timeout; normal failures should use molecule's built-in log collection.
@@ -319,20 +329,28 @@ jobs:
           - stable-2.17
           # - devel
     steps:
+      - name: Verify FQCN conversion was applied
+        if: github.repository == 'ansible/tower'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Check for unconverted references
+        if: github.repository == 'ansible/tower'
+        run: |
+          if grep -rq 'awx\.awx' awx_collection/; then
+            echo "::error::Found unconverted awx.awx references. Run: ./awx_collection/tools/replace_fqcn.sh"
+            grep -rn 'awx\.awx' awx_collection/
+            exit 1
+          fi
+
       - name: Perform sanity testing
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
           ansible-core-version: ${{ matrix.ansible }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
           collection-root: awx_collection
-          pre-test-cmd: >-
-            ansible-playbook
-            -i localhost,
-            tools/template_galaxy.yml
-            -e collection_package=awx
-            -e collection_namespace=awx
-            -e collection_version=1.0.0
-            -e '{"awx_template_version": false}'
           testing-type: sanity
 
       - name: Upload awx jUnit test reports to the unified dashboard
@@ -402,11 +420,13 @@ jobs:
           echo 'username = admin' >> ~/.tower_cli.cfg
           echo 'password = password' >> ~/.tower_cli.cfg
           echo 'verify_ssl = false' >> ~/.tower_cli.cfg
+          echo 'api_prefix = /api/' >> ~/.tower_cli.cfg
           TARGETS="$(ls awx_collection/tests/integration/targets | grep '${{ matrix.target-regex.regex }}' | tr '\n' ' ')"
           export PYTHONPATH="$(python -c 'import site; print(":".join(site.getsitepackages()))')${PYTHONPATH:+:$PYTHONPATH}"
-          make COLLECTION_VERSION=100.100.100-git COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
+          make COLLECTION_VERSION=100.100.100 COLLECTION_TEST_TARGET="--requirements $TARGETS" test_collection_integration
         env:
           ANSIBLE_TEST_PREFER_PODMAN: 1
+          CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX: /api/
 
       - name: Upload test coverage to Codecov
         if: >-
@@ -434,7 +454,7 @@ jobs:
         if: always()
         with:
           name: coverage-${{ matrix.target-regex.name }}
-          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
+          path: ~/.ansible/collections/ansible_collections/${{ env.COLLECTION_NAMESPACE }}/${{ env.COLLECTION_PACKAGE }}/tests/output/coverage/
           retention-days: 1
 
       - uses: ./.github/actions/upload_awx_devel_logs
@@ -476,10 +496,10 @@ jobs:
 
       - name: Combine coverage
         run: |
-          make COLLECTION_VERSION=100.100.100-git install_collection
-          mkdir -p ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage
-          cp -rv coverage/* ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
-          cd ~/.ansible/collections/ansible_collections/awx/awx
+          make COLLECTION_VERSION=100.100.100 install_collection
+          mkdir -p ~/.ansible/collections/ansible_collections/${{ env.COLLECTION_NAMESPACE }}/${{ env.COLLECTION_PACKAGE }}/tests/output/coverage
+          cp -rv coverage/* ~/.ansible/collections/ansible_collections/${{ env.COLLECTION_NAMESPACE }}/${{ env.COLLECTION_PACKAGE }}/tests/output/coverage/
+          cd ~/.ansible/collections/ansible_collections/${{ env.COLLECTION_NAMESPACE }}/${{ env.COLLECTION_PACKAGE }}
           hash -r  # Rehash to pick up newly installed scripts
           PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage combine --requirements
           PATH="$(python -c 'import sys; import os; print(os.path.dirname(sys.executable))'):$PATH" ansible-test coverage html
@@ -495,4 +515,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: awx-collection-integration-coverage-html
-          path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/reports/coverage
+          path: ~/.ansible/collections/ansible_collections/${{ env.COLLECTION_NAMESPACE }}/${{ env.COLLECTION_PACKAGE }}/tests/output/reports/coverage

@@ -10,9 +10,13 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: ad_hoc_command
 author: "John Westcott IV (@john-westcott-iv)"
@@ -92,19 +96,19 @@ options:
           amount of seconds
       type: int
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Launch an Ad Hoc Command waiting for it to finish
-  ad_hoc_command:
+  awx.awx.ad_hoc_command:
     inventory: Demo Inventory
     credential: Demo Credential
     module_name: command
     module_args: echo I <3 Ansible
     wait: true
-'''
+"""
 
-RETURN = '''
+RETURN = """
 id:
     description: id of the newly launched command
     returned: success
@@ -115,7 +119,7 @@ status:
     returned: success
     type: str
     sample: pending
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 import json
@@ -124,20 +128,20 @@ import json
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        job_type=dict(choices=['run', 'check']),
+        job_type=dict(choices=["run", "check"]),
         inventory=dict(required=True),
         limit=dict(),
         credential=dict(required=True),
         module_name=dict(required=True),
         module_args=dict(),
-        forks=dict(type='int'),
-        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
-        extra_vars=dict(type='dict'),
-        become_enabled=dict(type='bool'),
-        diff_mode=dict(type='bool'),
-        wait=dict(default=False, type='bool'),
-        interval=dict(default=2.0, type='float'),
-        timeout=dict(type='int'),
+        forks=dict(type="int"),
+        verbosity=dict(type="int", choices=[0, 1, 2, 3, 4, 5]),
+        extra_vars=dict(type="dict"),
+        become_enabled=dict(type="bool"),
+        diff_mode=dict(type="bool"),
+        wait=dict(default=False, type="bool"),
+        interval=dict(default=2.0, type="float"),
+        timeout=dict(type="int"),
         execution_environment=dict(),
     )
 
@@ -145,61 +149,80 @@ def main():
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    inventory = module.params.get('inventory')
-    credential = module.params.get('credential')
-    module_name = module.params.get('module_name')
-    module_args = module.params.get('module_args')
+    inventory = module.params.get("inventory")
+    credential = module.params.get("credential")
+    module_name = module.params.get("module_name")
+    module_args = module.params.get("module_args")
 
-    wait = module.params.get('wait')
-    interval = module.params.get('interval')
-    timeout = module.params.get('timeout')
-    execution_environment = module.params.get('execution_environment')
+    wait = module.params.get("wait")
+    interval = module.params.get("interval")
+    timeout = module.params.get("timeout")
+    execution_environment = module.params.get("execution_environment")
 
     # Create a datastructure to pass into our command launch
     post_data = {
-        'module_name': module_name,
-        'module_args': module_args,
+        "module_name": module_name,
+        "module_args": module_args,
     }
-    for arg in ['job_type', 'limit', 'forks', 'verbosity', 'extra_vars', 'become_enabled', 'diff_mode']:
+    for arg in [
+        "job_type",
+        "limit",
+        "forks",
+        "verbosity",
+        "extra_vars",
+        "become_enabled",
+        "diff_mode",
+    ]:
         if module.params.get(arg):
             # extra_var can receive a dict or a string, if a dict covert it to a string
-            if arg == 'extra_vars' and not isinstance(module.params.get(arg), str):
+            if arg == "extra_vars" and not isinstance(module.params.get(arg), str):
                 post_data[arg] = json.dumps(module.params.get(arg))
             else:
                 post_data[arg] = module.params.get(arg)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
-    post_data['credential'] = module.resolve_name_to_id('credentials', credential)
+    post_data["inventory"] = module.resolve_name_to_id("inventories", inventory)
+    post_data["credential"] = module.resolve_name_to_id("credentials", credential)
     if execution_environment:
-        post_data['execution_environment'] = module.resolve_name_to_id('execution_environments', execution_environment)
+        post_data["execution_environment"] = module.resolve_name_to_id(
+            "execution_environments", execution_environment
+        )
 
     # Launch the ad hoc command
-    results = module.post_endpoint('ad_hoc_commands', **{'data': post_data})
+    results = module.post_endpoint("ad_hoc_commands", **{"data": post_data})
 
-    if results['status_code'] != 201:
-        module.fail_json(msg="Failed to launch command, see response for details", **{'response': results})
+    if results["status_code"] != 201:
+        module.fail_json(
+            msg="Failed to launch command, see response for details",
+            **{"response": results},
+        )
 
     if not wait:
         module.exit_json(
             **{
-                'changed': True,
-                'id': results['json']['id'],
-                'status': results['json']['status'],
+                "changed": True,
+                "id": results["json"]["id"],
+                "status": results["json"]["status"],
             }
         )
 
     # Invoke wait function
-    results = module.wait_on_url(url=results['json']['url'], object_name=module_name, object_type='Ad Hoc Command', timeout=timeout, interval=interval)
+    results = module.wait_on_url(
+        url=results["json"]["url"],
+        object_name=module_name,
+        object_type="Ad Hoc Command",
+        timeout=timeout,
+        interval=interval,
+    )
 
     module.exit_json(
         **{
-            'changed': True,
-            'id': results['json']['id'],
-            'status': results['json']['status'],
+            "changed": True,
+            "id": results["json"]["id"],
+            "status": results["json"]["status"],
         }
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

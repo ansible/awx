@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: host
 author: "Wayne Witzel III (@wwitzel3)"
@@ -54,12 +58,12 @@ options:
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add host
-  host:
+  awx.awx.host:
     name: localhost
     description: "Local Host Group"
     inventory: "Local Inventory"
@@ -67,7 +71,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
     variables:
       example_var: 123
-'''
+"""
 
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -81,47 +85,56 @@ def main():
         new_name=dict(),
         description=dict(),
         inventory=dict(required=True),
-        enabled=dict(type='bool'),
-        variables=dict(type='dict'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        enabled=dict(type="bool"),
+        variables=dict(type="dict"),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
-    new_name = module.params.get('new_name')
-    description = module.params.get('description')
-    inventory = module.params.get('inventory')
-    enabled = module.params.get('enabled')
-    state = module.params.get('state')
-    variables = module.params.get('variables')
+    name = module.params.get("name")
+    new_name = module.params.get("new_name")
+    description = module.params.get("description")
+    inventory = module.params.get("inventory")
+    enabled = module.params.get("enabled")
+    state = module.params.get("state")
+    variables = module.params.get("variables")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    inventory_id = module.resolve_name_to_id('inventories', inventory)
+    inventory_id = module.resolve_name_to_id("inventories", inventory)
 
     # Attempt to look up host based on the provided name and inventory ID
-    host = module.get_one('hosts', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'inventory': inventory_id}})
+    host = module.get_one(
+        "hosts",
+        name_or_id=name,
+        check_exists=(state == "exists"),
+        **{"data": {"inventory": inventory_id}},
+    )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(host)
 
     # Create the data that gets sent for create and update
     host_fields = {
-        'name': new_name if new_name else (module.get_item_name(host) if host else name),
-        'inventory': inventory_id,
-        'enabled': enabled,
+        "name": new_name
+        if new_name
+        else (module.get_item_name(host) if host else name),
+        "inventory": inventory_id,
+        "enabled": enabled,
     }
     if description is not None:
-        host_fields['description'] = description
+        host_fields["description"] = description
     if variables is not None:
-        host_fields['variables'] = json.dumps(variables)
+        host_fields["variables"] = json.dumps(variables)
 
     # If the state was present and we can let the module build or update the existing host, this will return on its own
-    module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
+    module.create_or_update_if_needed(
+        host, host_fields, endpoint="hosts", item_type="host"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

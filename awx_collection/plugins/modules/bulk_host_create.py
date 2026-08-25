@@ -7,9 +7,13 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: bulk_host_create
 author: "Seth Foster (@fosterseth)"
@@ -52,16 +56,16 @@ options:
       required: True
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Bulk host create
-  bulk_host_create:
+  awx.awx.bulk_host_create:
     inventory: 1
     hosts:
       - name: foobar.org
       - name: 127.0.0.1
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 import json
@@ -70,33 +74,37 @@ import json
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        hosts=dict(required=True, type='list', elements='dict'),
-        inventory=dict(required=True, type='str'),
+        hosts=dict(required=True, type="list", elements="dict"),
+        inventory=dict(required=True, type="str"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    inv_name = module.params.get('inventory')
-    hosts = module.params.get('hosts')
+    inv_name = module.params.get("inventory")
+    hosts = module.params.get("hosts")
 
     for h in hosts:
-        if 'variables' in h:
-            h['variables'] = json.dumps(h['variables'])
+        if "variables" in h:
+            h["variables"] = json.dumps(h["variables"])
 
-    inv_id = module.resolve_name_to_id('inventories', inv_name)
+    inv_id = module.resolve_name_to_id("inventories", inv_name)
 
     # Launch the jobs
-    result = module.post_endpoint("bulk/host_create", data={"inventory": inv_id, "hosts": hosts})
+    result = module.post_endpoint(
+        "bulk/host_create", data={"inventory": inv_id, "hosts": hosts}
+    )
 
-    if result['status_code'] != 201:
-        module.fail_json(msg="Failed to create hosts, see response for details", response=result)
+    if result["status_code"] != 201:
+        module.fail_json(
+            msg="Failed to create hosts, see response for details", response=result
+        )
 
-    module.json_output['changed'] = True
+    module.json_output["changed"] = True
 
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

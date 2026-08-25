@@ -10,9 +10,13 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: label
 author: "Wayne Witzel III (@wwitzel3)"
@@ -44,14 +48,14 @@ options:
       choices: ["present", "exists"]
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add label to organization
-  label:
+  awx.awx.label:
     name: Custom Label
     organization: My Organization
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -62,43 +66,49 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         organization=dict(required=True),
-        state=dict(choices=['present', 'exists'], default='present'),
+        state=dict(choices=["present", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
+    name = module.params.get("name")
     new_name = module.params.get("new_name")
-    organization = module.params.get('organization')
+    organization = module.params.get("organization")
     state = module.params.get("state")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
     if organization:
-        organization_id = module.resolve_name_to_id('organizations', organization)
+        organization_id = module.resolve_name_to_id("organizations", organization)
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one(
-        'labels',
+        "labels",
         name_or_id=name,
-        check_exists=(state == 'exists'),
+        check_exists=(state == "exists"),
         **{
-            'data': {
-                'organization': organization_id,
+            "data": {
+                "organization": organization_id,
             }
-        }
+        },
     )
 
     # Create the data that gets sent for create and update
     new_fields = {}
-    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
+    new_fields["name"] = (
+        new_name
+        if new_name
+        else (module.get_item_name(existing_item) if existing_item else name)
+    )
     if organization:
-        new_fields['organization'] = organization_id
+        new_fields["organization"] = organization_id
 
-    module.create_or_update_if_needed(existing_item, new_fields, endpoint='labels', item_type='label', associations={})
+    module.create_or_update_if_needed(
+        existing_item, new_fields, endpoint="labels", item_type="label", associations={}
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

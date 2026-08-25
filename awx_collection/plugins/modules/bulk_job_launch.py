@@ -7,9 +7,13 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: bulk_job_launch
 author: "Seth Foster (@fosterseth)"
@@ -164,18 +168,18 @@ options:
       default: 2
       type: float
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-RETURN = '''
+RETURN = """
 job_info:
     description: dictionary containing information about the bulk job executed
     returned: If bulk job launched
     type: dict
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Launch bulk jobs
-  bulk_job_launch:
+  awx.awx.bulk_job_launch:
     name: My Bulk Job Launch
     jobs:
       - unified_job_template: 7
@@ -196,13 +200,13 @@ EXAMPLES = '''
     inventory: Demo Inventory
 
 - name: Launch bulk jobs with lookup plugin
-  bulk_job_launch:
+  awx.awx.bulk_job_launch:
     name: My Bulk Job Launch
     jobs:
       - unified_job_template: 7
       - unified_job_template: "{{ lookup('awx.awx.controller_api', 'job_templates', query_params={'name': 'Demo Job Template'},
         return_ids=True, expect_one=True) }}"
-'''
+"""
 
 from ..module_utils.controller_api import ControllerAPIModule
 
@@ -210,32 +214,32 @@ from ..module_utils.controller_api import ControllerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        jobs=dict(required=True, type='list', elements='dict'),
+        jobs=dict(required=True, type="list", elements="dict"),
         name=dict(),
         description=dict(),
-        organization=dict(type='str'),
-        inventory=dict(type='str'),
+        organization=dict(type="str"),
+        inventory=dict(type="str"),
         limit=dict(),
         scm_branch=dict(),
-        extra_vars=dict(type='dict'),
+        extra_vars=dict(type="dict"),
         job_tags=dict(),
         skip_tags=dict(),
-        wait=dict(required=False, default=True, type='bool'),
-        interval=dict(required=False, default=2.0, type='float'),
+        wait=dict(required=False, default=True, type="bool"),
+        interval=dict(required=False, default=2.0, type="float"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     post_data_names = (
-        'jobs',
-        'name',
-        'description',
-        'limit',
-        'scm_branch',
-        'extra_vars',
-        'job_tags',
-        'skip_tags',
+        "jobs",
+        "name",
+        "description",
+        "limit",
+        "scm_branch",
+        "extra_vars",
+        "job_tags",
+        "skip_tags",
     )
     post_data = {}
     for p in post_data_names:
@@ -245,40 +249,48 @@ def main():
 
     # Resolve name to ID for related resources
     # Do not resolve name for "jobs" suboptions, for optimization
-    org_name = module.params.get('organization')
+    org_name = module.params.get("organization")
     if org_name:
-        post_data['organization'] = module.resolve_name_to_id('organizations', org_name)
+        post_data["organization"] = module.resolve_name_to_id("organizations", org_name)
 
-    inv_name = module.params.get('inventory')
+    inv_name = module.params.get("inventory")
     if inv_name:
-        post_data['inventory'] = module.resolve_name_to_id('inventories', inv_name)
+        post_data["inventory"] = module.resolve_name_to_id("inventories", inv_name)
 
     # Extract our parameters
-    wait = module.params.get('wait')
-    timeout = module.params.get('timeout')
-    interval = module.params.get('interval')
-    name = module.params.get('name')
+    wait = module.params.get("wait")
+    timeout = module.params.get("timeout")
+    interval = module.params.get("interval")
+    name = module.params.get("name")
 
     # Launch the jobs
     result = module.post_endpoint("bulk/job_launch", data=post_data)
 
-    if result['status_code'] != 201:
-        module.fail_json(msg="Failed to launch bulk jobs, see response for details", response=result)
+    if result["status_code"] != 201:
+        module.fail_json(
+            msg="Failed to launch bulk jobs, see response for details", response=result
+        )
 
-    module.json_output['changed'] = True
-    module.json_output['id'] = result['json']['id']
-    module.json_output['status'] = result['json']['status']
+    module.json_output["changed"] = True
+    module.json_output["id"] = result["json"]["id"]
+    module.json_output["status"] = result["json"]["status"]
     # This is for backwards compatability
-    module.json_output['job_info'] = result['json']
+    module.json_output["job_info"] = result["json"]
 
     if not wait:
         module.exit_json(**module.json_output)
 
     # Invoke wait function
-    module.wait_on_url(url=result['json']['url'], object_name=name, object_type='Bulk Job Launch', timeout=timeout, interval=interval)
+    module.wait_on_url(
+        url=result["json"]["url"],
+        object_name=name,
+        object_type="Bulk Job Launch",
+        timeout=timeout,
+        interval=interval,
+    )
 
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

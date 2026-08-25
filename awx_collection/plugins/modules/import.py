@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: import
 author: "John Westcott (@john-westcott-iv)"
@@ -31,22 +35,22 @@ options:
 requirements:
   - "awxkit >= 9.3.0"
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Export all assets
-  export:
+  awx.awx.export:
     all: true
   register: export_output
 
 - name: Import all assets from our export
-  import:
+  awx.awx.import:
     assets: "{{ export_output.assets }}"
 
 - name: Load data from a json file created by a command like awx export --organization Default
-  import:
+  awx.awx.import:
     assets: "{{ lookup('file', 'org.json') | from_json() }}"
-'''
+"""
 
 from ..module_utils.awxkit import ControllerAWXKitModule
 
@@ -64,19 +68,23 @@ except ImportError:
 
 
 def main():
-    argument_spec = dict(assets=dict(type='dict', required=True))
+    argument_spec = dict(assets=dict(type="dict", required=True))
 
-    module = ControllerAWXKitModule(argument_spec=argument_spec, supports_check_mode=False)
+    module = ControllerAWXKitModule(
+        argument_spec=argument_spec, supports_check_mode=False
+    )
 
-    assets = module.params.get('assets')
+    assets = module.params.get("assets")
 
     if not HAS_EXPORTABLE_RESOURCES:
-        module.fail_json(msg="Your version of awxkit does not appear to have import/export")
+        module.fail_json(
+            msg="Your version of awxkit does not appear to have import/export"
+        )
 
     # Currently the import process does not return anything on error
     # It simply just logs to Python's logger
     # Set up a log gobbler to get error messages from import_assets
-    logger = logging.getLogger('awxkit.api.pages.api')
+    logger = logging.getLogger("awxkit.api.pages.api")
     logger.setLevel(logging.ERROR)
 
     log_capture_string = StringIO()
@@ -84,22 +92,22 @@ def main():
     ch.setLevel(logging.ERROR)
 
     logger.addHandler(ch)
-    log_contents = ''
+    log_contents = ""
 
     # Run the import process
     try:
-        module.json_output['changed'] = module.get_api_v2_object().import_assets(assets)
+        module.json_output["changed"] = module.get_api_v2_object().import_assets(assets)
     except Exception as e:
         module.fail_json(msg="Failed to import assets {0}".format(e))
     finally:
         # Finally, consume the logs in case there were any errors and die if there were
         log_contents = log_capture_string.getvalue()
         log_capture_string.close()
-        if log_contents != '':
+        if log_contents != "":
             module.fail_json(msg=log_contents)
 
     module.exit_json(**module.json_output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

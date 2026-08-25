@@ -58,7 +58,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = """
 - name: Create a workflow approval node
-  workflow_job_template_node:
+  awx.awx.workflow_job_template_node:
     identifier: approval_test
     approval_node:
       name: approval_jt_name
@@ -66,13 +66,13 @@ EXAMPLES = """
     workflow: "Test Workflow"
 
 - name: Launch the workflow with a timeout of 10 seconds
-  workflow_launch:
+  awx.awx.workflow_launch:
     workflow_template: "Test Workflow"
     wait: false
   register: workflow
 
 - name: Wait for approval node to activate and approve
-  workflow_approval:
+  awx.awx.workflow_approval:
     workflow_job_id: "{{ workflow.id }}"
     name: approval_jt_name
     interval: 10
@@ -119,9 +119,11 @@ def main():
             "data": {
                 "job__name": name,
             }
-        }
+        },
     )
-    response = module.post_endpoint("{0}{1}".format(approval_job["related"]["job"], action))
+    response = module.post_endpoint(
+        "{0}{1}".format(approval_job["related"]["job"], action)
+    )
     if response["status_code"] == 204:
         module.json_output["changed"] = True
 

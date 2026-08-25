@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: ad_hoc_command_cancel
 author: "John Westcott IV (@john-westcott-iv)"
@@ -44,21 +48,21 @@ options:
       type: int
       default: 0
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Cancel command
-  ad_hoc_command_cancel:
+  awx.awx.ad_hoc_command_cancel:
     command_id: command.id
-'''
+"""
 
-RETURN = '''
+RETURN = """
 id:
     description: command id requesting to cancel
     returned: success
     type: int
     sample: 94
-'''
+"""
 
 
 import time
@@ -69,65 +73,73 @@ from ..module_utils.controller_api import ControllerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        command_id=dict(type='int', required=True),
-        fail_if_not_running=dict(type='bool', default=False),
-        interval=dict(type='float', default=1.0),
-        timeout=dict(type='int', default=0),
+        command_id=dict(type="int", required=True),
+        fail_if_not_running=dict(type="bool", default=False),
+        interval=dict(type="float", default=1.0),
+        timeout=dict(type="int", default=0),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    command_id = module.params.get('command_id')
-    fail_if_not_running = module.params.get('fail_if_not_running')
-    interval = module.params.get('interval')
-    timeout = module.params.get('timeout')
+    command_id = module.params.get("command_id")
+    fail_if_not_running = module.params.get("fail_if_not_running")
+    interval = module.params.get("interval")
+    timeout = module.params.get("timeout")
 
     # Attempt to look up the command based on the provided name
     command = module.get_one(
-        'ad_hoc_commands',
+        "ad_hoc_commands",
         **{
-            'data': {
-                'id': command_id,
+            "data": {
+                "id": command_id,
             }
-        }
+        },
     )
 
     if command is None:
         module.fail_json(msg="Unable to find command with id {0}".format(command_id))
 
-    cancel_page = module.get_endpoint(command['related']['cancel'])
-    if 'json' not in cancel_page or 'can_cancel' not in cancel_page['json']:
-        module.fail_json(msg="Failed to cancel command, got unexpected response", **{'response': cancel_page})
+    cancel_page = module.get_endpoint(command["related"]["cancel"])
+    if "json" not in cancel_page or "can_cancel" not in cancel_page["json"]:
+        module.fail_json(
+            msg="Failed to cancel command, got unexpected response",
+            **{"response": cancel_page},
+        )
 
-    if not cancel_page['json']['can_cancel']:
+    if not cancel_page["json"]["can_cancel"]:
         if fail_if_not_running:
             module.fail_json(msg="Ad Hoc Command is not running")
         else:
-            module.exit_json(**{'changed': False})
+            module.exit_json(**{"changed": False})
 
-    results = module.post_endpoint(command['related']['cancel'], **{'data': {}})
+    results = module.post_endpoint(command["related"]["cancel"], **{"data": {}})
 
-    if results['status_code'] != 202:
-        module.fail_json(msg="Failed to cancel command, see response for details", **{'response': results})
+    if results["status_code"] != 202:
+        module.fail_json(
+            msg="Failed to cancel command, see response for details",
+            **{"response": results},
+        )
 
-    result = module.get_endpoint(command['related']['cancel'])
+    result = module.get_endpoint(command["related"]["cancel"])
     start = time.time()
-    while result['json']['can_cancel']:
+    while result["json"]["can_cancel"]:
         # If we are past our time out fail with a message
         if timeout and timeout < time.time() - start:
             # Account for Legacy messages
-            module.json_output['msg'] = 'Monitoring of ad hoc command aborted due to timeout'
+            module.json_output["msg"] = (
+                "Monitoring of ad hoc command aborted due to timeout"
+            )
             module.fail_json(**module.json_output)
 
         # Put the process to sleep for our interval
         time.sleep(interval)
 
-        result = module.get_endpoint(command['related']['cancel'])
+        result = module.get_endpoint(command["related"]["cancel"])
 
-    module.exit_json(**{'changed': True})
+    module.exit_json(**{"changed": True})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

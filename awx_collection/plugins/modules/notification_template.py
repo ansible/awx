@@ -9,10 +9,14 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: notification_template
 author: "Samuel Carpentier (@samcarpentier)"
@@ -101,12 +105,12 @@ options:
       choices: ["present", "absent", "exists"]
       type: str
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Add Slack notification with custom messages
-  notification_template:
+  awx.awx.notification_template:
     name: slack notification
     organization: Default
     notification_type: slack
@@ -125,7 +129,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add webhook notification
-  notification_template:
+  awx.awx.notification_template:
     name: webhook notification
     notification_type: webhook
     notification_configuration:
@@ -136,7 +140,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add email notification
-  notification_template:
+  awx.awx.notification_template:
     name: email notification
     notification_type: email
     notification_configuration:
@@ -153,7 +157,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add twilio notification
-  notification_template:
+  awx.awx.notification_template:
     name: twilio notification
     notification_type: twilio
     notification_configuration:
@@ -166,7 +170,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add PagerDuty notification
-  notification_template:
+  awx.awx.notification_template:
     name: pagerduty notification
     notification_type: pagerduty
     notification_configuration:
@@ -178,7 +182,7 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Add IRC notification
-  notification_template:
+  awx.awx.notification_template:
     name: irc notification
     notification_type: irc
     notification_configuration:
@@ -193,20 +197,20 @@ EXAMPLES = '''
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Delete notification
-  notification_template:
+  awx.awx.notification_template:
     name: old notification
     state: absent
     controller_config_file: "~/tower_cli.cfg"
 
 - name: Copy webhook notification
-  notification_template:
+  awx.awx.notification_template:
     name: foo notification
     copy_from: email notification
     organization: Foo
-'''
+"""
 
 
-RETURN = ''' # '''
+RETURN = """ # """
 
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -220,41 +224,54 @@ def main():
         copy_from=dict(),
         description=dict(),
         organization=dict(),
-        notification_type=dict(choices=['awssns', 'email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
-        notification_configuration=dict(type='dict'),
-        messages=dict(type='dict'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        notification_type=dict(
+            choices=[
+                "awssns",
+                "email",
+                "grafana",
+                "irc",
+                "mattermost",
+                "pagerduty",
+                "rocketchat",
+                "slack",
+                "twilio",
+                "webhook",
+            ]
+        ),
+        notification_configuration=dict(type="dict"),
+        messages=dict(type="dict"),
+        state=dict(choices=["present", "absent", "exists"], default="present"),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    name = module.params.get('name')
-    new_name = module.params.get('new_name')
-    copy_from = module.params.get('copy_from')
-    description = module.params.get('description')
-    organization = module.params.get('organization')
-    notification_type = module.params.get('notification_type')
-    notification_configuration = module.params.get('notification_configuration')
-    messages = module.params.get('messages')
-    state = module.params.get('state')
+    name = module.params.get("name")
+    new_name = module.params.get("new_name")
+    copy_from = module.params.get("copy_from")
+    description = module.params.get("description")
+    organization = module.params.get("organization")
+    notification_type = module.params.get("notification_type")
+    notification_configuration = module.params.get("notification_configuration")
+    messages = module.params.get("messages")
+    state = module.params.get("state")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
     if organization:
-        organization_id = module.resolve_name_to_id('organizations', organization)
+        organization_id = module.resolve_name_to_id("organizations", organization)
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one(
-        'notification_templates',
+        "notification_templates",
         name_or_id=name,
-        check_exists=(state == 'exists'),
+        check_exists=(state == "exists"),
         **{
-            'data': {
-                'organization': organization_id,
+            "data": {
+                "organization": organization_id,
             }
-        }
+        },
     )
 
     # Attempt to look up credential to copy based on the provided name
@@ -264,12 +281,12 @@ def main():
             existing_item,
             copy_from,
             name,
-            endpoint='notification_templates',
-            item_type='notification_template',
+            endpoint="notification_templates",
+            item_type="notification_template",
             copy_lookup_data={},
         )
 
-    if state == 'absent':
+    if state == "absent":
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
 
@@ -280,20 +297,30 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {}
     if final_notification_configuration:
-        new_fields['notification_configuration'] = final_notification_configuration
-    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
+        new_fields["notification_configuration"] = final_notification_configuration
+    new_fields["name"] = (
+        new_name
+        if new_name
+        else (module.get_item_name(existing_item) if existing_item else name)
+    )
     if description is not None:
-        new_fields['description'] = description
+        new_fields["description"] = description
     if organization is not None:
-        new_fields['organization'] = organization_id
+        new_fields["organization"] = organization_id
     if notification_type is not None:
-        new_fields['notification_type'] = notification_type
+        new_fields["notification_type"] = notification_type
     if messages is not None:
-        new_fields['messages'] = messages
+        new_fields["messages"] = messages
 
     # If the state was present and we can let the module build or update the existing item, this will return on its own
-    module.create_or_update_if_needed(existing_item, new_fields, endpoint='notification_templates', item_type='notification_template', associations={})
+    module.create_or_update_if_needed(
+        existing_item,
+        new_fields,
+        endpoint="notification_templates",
+        item_type="notification_template",
+        associations={},
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

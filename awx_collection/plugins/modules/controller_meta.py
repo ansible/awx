@@ -9,9 +9,13 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: controller_meta
 author: "Alan Rominger (@alancoding)"
@@ -21,10 +25,10 @@ description:
     - This takes common module parameters, but does nothing with them.
 options: {}
 extends_documentation_fragment: awx.awx.auth
-'''
+"""
 
 
-RETURN = '''
+RETURN = """
 prefix:
     description: Collection namespace and name in the namespace.name format
     returned: success
@@ -45,11 +49,11 @@ version:
     returned: success
     sample: 0.0.1-devel
     type: str
-'''
+"""
 
 
-EXAMPLES = '''
-- controller_meta:
+EXAMPLES = """
+- awx.awx.controller_meta:
   register: result
 
 - name: Show details about the collection
@@ -58,7 +62,7 @@ EXAMPLES = '''
 - name: Load the UI setting without hard-coding the collection name
   debug:
     msg: "{{ lookup(result.prefix + '.controller_api', 'settings/ui') }}"
-'''
+"""
 
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -66,10 +70,12 @@ from ..module_utils.controller_api import ControllerAPIModule
 
 def main():
     module = ControllerAPIModule(argument_spec={})
-    namespace = {'awx': 'awx', 'controller': 'ansible'}.get(module._COLLECTION_TYPE, 'unknown')
-    namespace_name = '{0}.{1}'.format(namespace, module._COLLECTION_TYPE)
-    module.exit_json(prefix=namespace_name, name=module._COLLECTION_TYPE, namespace=namespace, version=module._COLLECTION_VERSION)
+    fqcn = module._COLLECTION_FQCN
+    namespace, name = fqcn.split(".")
+    module.exit_json(
+        prefix=fqcn, name=name, namespace=namespace, version=module._COLLECTION_VERSION
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
