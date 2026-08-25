@@ -276,7 +276,7 @@ class DashboardJobsGraphView(APIView):
     swagger_topic = 'Jobs'
     resource_purpose = 'dashboard jobs graph data'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Get dasboard data for jobs"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Get dashboard data for jobs"})
     def get(self, request, format=None):
         period = request.query_params.get('period', 'month')
         job_type = request.query_params.get('job_type', 'all')

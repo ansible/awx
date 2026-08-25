@@ -231,7 +231,7 @@ class LookupModule(LookupBase):
                 raise AnsibleError('Timezone parameter is not valid')
             timezone = kwargs['timezone']
 
-        # rrule puts a \n in the rule instad of a space and can't handle timezones
+        # rrule puts a \n in the rule instead of a space and can't handle timezones
         return_rrule = str(my_rule).replace('\n', ' ').replace('DTSTART:', 'DTSTART;TZID={0}:'.format(timezone))
         # AWX requires an interval. rrule will not add interval if it's set to 1
         if kwargs.get('every', 1) == 1:

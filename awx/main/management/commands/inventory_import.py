@@ -43,7 +43,7 @@ LICENSE_EXPIRED_MESSAGE = '''\
 Subscription expired.
 Contact us (https://www.redhat.com/contact) for subscription extension information.'''
 
-LICENSE_NON_EXISTANT_MESSAGE = '''\
+LICENSE_NON_EXISTENT_MESSAGE = '''\
 No subscription.
 Contact us (https://www.redhat.com/contact) for subscription information.'''
 
@@ -801,7 +801,7 @@ class Command(BaseCommand):
         license_info = get_licenser().validate()
         local_license_type = license_info.get('license_type', 'UNLICENSED')
         if local_license_type == 'UNLICENSED':
-            logger.error(LICENSE_NON_EXISTANT_MESSAGE)
+            logger.error(LICENSE_NON_EXISTENT_MESSAGE)
             raise PermissionDenied('No license found!')
         elif local_license_type == 'open':
             return
@@ -940,7 +940,7 @@ class Command(BaseCommand):
         This saves the inventory data to the database, calling load_into_database
         but also wraps that method in a host of options processing
         """
-        # outside of normal options, these are needed as part of programatic interface
+        # outside of normal options, these are needed as part of programmatic interface
         self.inventory = inventory_update.inventory
         self.inventory_source = inventory_update.inventory_source
         self.inventory_update = inventory_update

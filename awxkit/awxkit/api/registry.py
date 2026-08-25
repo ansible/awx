@@ -38,7 +38,7 @@ class URLRegistry(object):
 
     def register(self, *args):
         """Registers a single resource (generic python type or object) to either
-        1. a single url string (internally coverted via URLRegistry.url_pattern) and optional method or method iterable
+        1. a single url string (internally converted via URLRegistry.url_pattern) and optional method or method iterable
         2. a list or tuple of url string and optional method or method iterables
         for retrieval via get().
 

@@ -20,7 +20,7 @@ jobs:
           repo: django-ansible-base
           excludes: prerelease, draft
 
-      - name: Check out respository code
+      - name: Check out repository code
         uses: actions/checkout@v4
 
       - id: dab-pinned

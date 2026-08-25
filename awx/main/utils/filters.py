@@ -103,7 +103,7 @@ class ExternalLoggerEnabled(Filter):
 class DynamicLevelFilter(Filter):
     def filter(self, record):
         """Filters out logs that have a level below the threshold defined
-        by the databse setting LOG_AGGREGATOR_LEVEL
+        by the database setting LOG_AGGREGATOR_LEVEL
         """
         if record_is_blocked(record):
             # Fine to write denied loggers to file, apply default filtering level
@@ -178,7 +178,7 @@ class SmartFilter(object):
         TODO: separate django filter requests from our custom json filter
               request so we don't process the key any. This could be
               accomplished using an allowed list or introspecting the
-              relationship refered to to see if it's a jsonb type.
+              relationship referred to, to see if it's a jsonb type.
         '''
 
         def _json_path_to_contains(self, k, v):

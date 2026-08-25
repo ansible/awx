@@ -43,7 +43,7 @@ __all__ = ['__version__']
 
 
 # Check for the presence/absence of "devonly" module to determine if running
-# from a source code checkout or release packaage.
+# from a source code checkout or release package.
 try:
     import awx.devonly  # noqa
 

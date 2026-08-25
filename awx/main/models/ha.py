@@ -390,7 +390,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             update_fields.extend(fields_to_update)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
-        # disabling activity stream will avoid extra queries, which is important for heatbeat actions
+        # disabling activity stream will avoid extra queries, which is important for heartbeat actions
         from awx.main.signals import disable_activity_stream
 
         with disable_activity_stream():

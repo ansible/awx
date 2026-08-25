@@ -42,7 +42,7 @@ def resolve_parent_role(f, role_path):
     Given a field and a path declared in parent_role from the field definition, like
         execute_role = ImplicitRoleField(parent_role='admin_role')
     This expects to be passed in (execute_role object, "admin_role")
-    It hould return the admin_role from that object
+    It should return the admin_role from that object
     """
     if role_path == 'singleton:system_administrator':
         return system_admin
@@ -176,7 +176,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     if Permission.objects.count() == 0:
         raise RuntimeError('Running migrate_to_new_rbac requires DABPermission objects created first')
 
-    # remove add premissions that are not valid for migrations from old versions
+    # remove add permissions that are not valid for migrations from old versions
     for perm_str in ('add_organization', 'add_jobtemplate'):
         perm = Permission.objects.filter(codename=perm_str).first()
         if perm:

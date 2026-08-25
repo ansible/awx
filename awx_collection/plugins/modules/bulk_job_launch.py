@@ -188,7 +188,7 @@ EXAMPLES = '''
     limit: bar
     credentials:
       - "My Credential"
-      - "suplementary cred"
+      - "supplementary cred"
     extra_vars: # these override / extend extra_data at the job level
       food: grape
       animal: owl
@@ -268,7 +268,7 @@ def main():
     module.json_output['changed'] = True
     module.json_output['id'] = result['json']['id']
     module.json_output['status'] = result['json']['status']
-    # This is for backwards compatability
+    # This is for backwards compatibility
     module.json_output['job_info'] = result['json']
 
     if not wait:

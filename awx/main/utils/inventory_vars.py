@@ -134,7 +134,7 @@ class InventoryGroupVariables(dict):
         """
         Copy the current values of all variables into the internal dict.
 
-        Call this everytime the `_vars` structure has been modified.
+        Call this every time the `_vars` structure has been modified.
         """
         for name, inv_var in self._vars.items():
             self[name] = inv_var.value

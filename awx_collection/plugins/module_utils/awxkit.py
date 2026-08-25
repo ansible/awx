@@ -29,7 +29,7 @@ class ControllerAWXKitModule(ControllerModule):
         if not HAS_AWX_KIT:
             self.fail_json(msg=missing_required_lib('awxkit'))
 
-        # Establish our conneciton object
+        # Establish our connection object
         self.connection = Connection(self.host, verify=self.verify_ssl)
 
     def authenticate(self):

@@ -313,4 +313,4 @@ When a user creates a notification template in `/api/v2/notification_templates`,
 
 Notifications assigned at certain levels will inherit traits defined on parent objects in different ways.  For example, ad hoc commands will use notifications defined on the Organization that the inventory is associated with.
 
-For more details on notifications, visit the [Notifications chapter](hhttps://ansible.readthedocs.io/projects/awx/en/latest/userguide/notifications.html) of the _Automating with AWX_ guide.
+For more details on notifications, visit the [Notifications chapter](https://ansible.readthedocs.io/projects/awx/en/latest/userguide/notifications.html) of the _Automating with AWX_ guide.

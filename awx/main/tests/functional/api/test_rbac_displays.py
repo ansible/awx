@@ -80,7 +80,7 @@ class TestJobTemplateCopyEdit:
     def test_validation_bad_data_copy_edit(self, admin_user, project):
         """
         If a required resource (inventory here) was deleted, copying not allowed
-        because doing so would caues a validation error
+        because doing so would cause a validation error
         """
 
         jt_res = JobTemplate.objects.create(
@@ -112,7 +112,7 @@ class TestJobTemplateCopyEdit:
 
     def test_jt_admin_copy_edit(self, jt_copy_edit, rando):
         """
-        JT admins wihout access to associated resources SHOULD NOT be able to copy
+        JT admins without access to associated resources SHOULD NOT be able to copy
         SHOULD be able to make nonsensitive changes"""
 
         # random user given JT admin access only
@@ -224,7 +224,7 @@ def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_metho
 def test_team_roles_unattach_functional(team, team_member, inventory, get):
     team.member_role.children.add(inventory.admin_role)
     response = get(reverse('api:team_roles_list', kwargs={'pk': team.id}), team_member)
-    # Team member should be able to remove access to inventory, becauase
+    # Team member should be able to remove access to inventory, because
     # the inventory admin_role grants that ability
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
 

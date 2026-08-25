@@ -274,7 +274,7 @@ class WorkflowJobNode(WorkflowNodeBase):
     identifier = models.CharField(
         max_length=512,
         blank=True,  # blank denotes pre-migration job nodes
-        help_text=_('An identifier coresponding to the workflow job template node that this node was created from.'),
+        help_text=_('An identifier corresponding to the workflow job template node that this node was created from.'),
     )
     instance_groups = OrderedManyToManyField(
         'InstanceGroup', related_name='workflow_job_node_instance_groups', blank=True, editable=False, through='WorkflowJobNodeBaseInstanceGroupMembership'
@@ -331,7 +331,7 @@ class WorkflowJobNode(WorkflowNodeBase):
                 wj_prompts_data['credentials'] = [cred for cred in node_pivoted_creds.values()]
 
             # NOTE: no special rules for instance_groups, because they do not merge
-            # or labels, because they do not propogate WFJT-->node at all
+            # or labels, because they do not propagate WFJT-->node at all
 
             # Combine WFJT prompts with node here, WFJT at higher level
             node_prompts_data.update(wj_prompts_data)
@@ -786,7 +786,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         else:
             r = super().prompts_dict(*args, **kwargs)
             # Workflow labels and job labels are treated separately
-            # that means that they do not propogate from WFJT / workflow job to jobs in workflow
+            # that means that they do not propagate from WFJT / workflow job to jobs in workflow
             r.pop('labels', None)
 
         return r

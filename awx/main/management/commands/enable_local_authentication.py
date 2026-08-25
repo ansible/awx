@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def _enable_disable_auth(self, enable, disable):
         """
-        this method allows the disabling or enabling of local authenication based on the argument passed into the parser
+        this method allows the disabling or enabling of local authentication based on the argument passed into the parser
         if no arguments throw a command error, if --enable set the DISABLE_LOCAL_AUTH to False
         if --disable it's set to True. Realizing that the flag is counterintuitive to what is expected.
         """

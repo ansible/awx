@@ -31,7 +31,7 @@ Thank you once again for this and your interest in AWX!
 ### No Progress Issue
 - Hi! \
 \
-Thank you very much for for this issue. It means a lot to us that you have taken time to contribute by opening this report. \
+Thank you very much for this issue. It means a lot to us that you have taken time to contribute by opening this report. \
 \
 On this issue, there were comments added but it has been some time since then without response. At this time we are closing this issue. If you get time to address the comments we can reopen the issue if you can contact us by using any of the communication methods listed in the page below: \
 \

@@ -478,10 +478,10 @@ class AWXReceptorJob:
             # when we start the job in receptor and when we associate the job <-> work_unit_id.
             # In that case, there will be work running in receptor and Controller will not know
             # which Job it is associated with.
-            # We do not programatically handle this case. Ideally, we would handle this with a reaper case.
+            # We do not programmatically handle this case. Ideally, we would handle this with a reaper case.
             # The two distinct job lifecycle log events below allow for us to at least detect when this
             # edge case occurs. If the lifecycle event work_unit_id_received occurs without the
-            # work_unit_id_assigned event then this case may have occured.
+            # work_unit_id_assigned event then this case may have occurred.
             self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
             self.task.instance.log_lifecycle("work_unit_id_received")
             self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
@@ -524,7 +524,7 @@ class AWXReceptorJob:
                 signal_state.raise_exception = False
 
             if res.status == 'error':
-                # If ansible-runner ran, but an error occured at runtime, the traceback information
+                # If ansible-runner ran, but an error occurred at runtime, the traceback information
                 # is saved via the status_handler passed in to the processor.
                 if 'result_traceback' in self.task.runner_callback.extra_update_fields:
                     return res

@@ -12,7 +12,7 @@ def get_headers():
         access_token = os.environ[access_token_env_var]
         return {"Authorization": f"token {access_token}"}
     else:
-        print(f"{access_token_env_var} not present, performing unathenticated calls that might hit rate limits.")
+        print(f"{access_token_env_var} not present, performing unauthenticated calls that might hit rate limits.")
         return None
 
 

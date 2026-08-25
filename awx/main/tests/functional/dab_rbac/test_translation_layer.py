@@ -33,7 +33,7 @@ from ansible_base.rbac import permission_registry
 def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
     """
     Make an assignment with the old-style role,
-    get the equivelent new role
+    get the equivalent new role
     get the old role again
     """
     getattr(organization, role_name).members.add(rando)

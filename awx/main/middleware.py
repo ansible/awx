@@ -203,14 +203,14 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
 class OptionalURLPrefixPath(MiddlewareMixin):
     @functools.lru_cache
     def _url_optional(self, prefix):
-        # Relavant Django code path https://github.com/django/django/blob/stable/4.2.x/django/core/handlers/base.py#L300
+        # Relevant Django code path https://github.com/django/django/blob/stable/4.2.x/django/core/handlers/base.py#L300
         #
         # resolve_request(request)
         #   get_resolver(request.urlconf)
         #     _get_cached_resolver(request.urlconf) <-- cached via @functools.cache
         #
         # Django will attempt to cache the value(s) of request.urlconf
-        # Being hashable is a prerequisit for being cachable.
+        # Being hashable is a prerequisite for being cacheable.
         # tuple() is hashable list() is not.
         # Hence the tuple(list()) wrap.
         return tuple(get_urlpatterns(prefix=prefix))

@@ -155,7 +155,7 @@ class TestJobReaper(object):
         # creating job at current time
         job = Job.objects.create(status='running', controller_node=i.hostname)
         reaper.reap(i, ref_time=ref_time)
-        # explictly refreshing from db to ensure up to date cache
+        # explicitly refreshing from db to ensure up to date cache
         job.refresh_from_db()
         assert job.started > ref_time
         assert job.status == 'running'

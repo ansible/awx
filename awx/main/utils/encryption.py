@@ -15,7 +15,7 @@ logger = logging.getLogger('awx.main.utils.encryption')
 
 
 class Fernet256(Fernet):
-    """Not techincally Fernet, but uses the base of the Fernet spec and uses AES-256-CBC
+    """Not technically Fernet, but uses the base of the Fernet spec and uses AES-256-CBC
     instead of AES-128-CBC. All other functionality remain identical.
     """
 

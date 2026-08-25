@@ -399,7 +399,7 @@ AUTHENTICATION_BACKENDS = ('awx.main.backends.AWXModelBackend',)
 AUTH_BASIC_ENABLED = True
 
 # If set, specifies a URL that unauthenticated users will be redirected to
-# when trying to access a UI page that requries authentication.
+# when trying to access a UI page that requires authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
 # Note: This setting may be overridden by database settings.
@@ -994,7 +994,7 @@ HOST_METRIC_SUMMARY_TASK_LAST_TS = None
 HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 
 
-# TODO: cmeyers, replace with with register pattern
+# TODO: cmeyers, replace with register pattern
 # The register pattern is particularly nice for this because we need
 # to know the process to start the thread that will be the server.
 # The registration location should be the same location as we would
@@ -1120,7 +1120,7 @@ SYSTEM_USERNAME = None
 
 # For indirect host query processing
 # if a job is not immediently confirmed to have all events processed
-# it will be eligable for processing after this number of minutes
+# it will be eligible for processing after this number of minutes
 INDIRECT_HOST_QUERY_FALLBACK_MINUTES = 60
 
 # If an error happens in event collection, give up after this time

@@ -203,7 +203,7 @@ def test_build_indirect_host_data_malformed_module_name(mock_logger_debug, bare_
 )
 def test_build_indirect_host_data_malformed_query(mock_logger_info, job_with_counted_event, query: str):
     assert build_indirect_host_data(job_with_counted_event, {query: {'query': TEST_JQ}}) == []
-    mock_logger_info.assert_called_once_with(f"Skiping malformed query '{query}'. Expected to be of the form 'a.b.c'")
+    mock_logger_info.assert_called_once_with(f"Skipping malformed query '{query}'. Expected to be of the form 'a.b.c'")
 
 
 @pytest.mark.django_db

@@ -9,7 +9,7 @@ from django.test.utils import override_settings
 
 
 @pytest.mark.filterwarnings(
-    # FIXME: Figure out where it is emited and what causes it.
+    # FIXME: Figure out where it is emitted and what causes it.
     # FIXME: The suppression should be made more specific or the cause fixed.
     # Ref: https://github.com/ansible/awx/pull/15620
     "ignore::RuntimeWarning",

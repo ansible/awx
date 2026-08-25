@@ -50,7 +50,7 @@ def creation_order(graph):
 
 
 def separate_async_optionals(creation_order):
-    """In cases where creation group items share dependencies but as asymetric optionals,
+    """In cases where creation group items share dependencies but as asymmetric optionals,
     those that create them as actual dependencies to be later sourced as optionals
     need to be listed first
     """

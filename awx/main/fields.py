@@ -449,7 +449,7 @@ class CredentialInputField(JSONSchemaField):
         if not isinstance(value, dict):
             return super(CredentialInputField, self).validate(value, model_instance)
 
-        # Backwards compatability: in prior versions, if you submit `null` for
+        # Backwards compatibility: in prior versions, if you submit `null` for
         # a credential field value, it just considers the value an empty string
         for unset in [key for key, v in model_instance.inputs.items() if not v]:
             default_value = model_instance.credential_type.default_for_field(unset)

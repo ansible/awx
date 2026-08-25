@@ -118,7 +118,7 @@ def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwarg
 
 
 def sync_superuser_status_to_rbac(instance, **kwargs):
-    'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
+    'When the is_superuser flag is changed on a user, reflect that in the membership of the System Administrator role'
     if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
         return
     update_fields = kwargs.get('update_fields', None)
@@ -469,7 +469,7 @@ def activity_stream_delete(sender, instance, **kwargs):
         return
     # Inventory delete happens in the task system rather than request-response-cycle.
     # If we trigger this handler there we may fall into db-integrity-related race conditions.
-    # So we add flag verification to prevent normal signal handling. This funciton will be
+    # So we add flag verification to prevent normal signal handling. This function will be
     # explicitly called with flag on in Inventory.schedule_deletion.
     changes = {}
     if isinstance(instance, Inventory):

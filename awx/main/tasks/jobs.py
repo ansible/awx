@@ -344,7 +344,7 @@ class BaseTask(object):
                 if this_path.count(':') == MAX_ISOLATED_PATH_COLON_DELIMITER:
                     src, dest, mount_option = this_path.split(':')
 
-                    # mount_option validation via performed via API, but since this can be overriden via settings.py
+                    # mount_option validation via performed via API, but since this can be overridden via settings.py
                     if mount_option not in CONTAINER_VOLUMES_MOUNT_TYPES:
                         mount_option = 'z'
                         logger.warning(f'The path {this_path} has volume mount type {mount_option} which is not supported. Using "z" instead.')
@@ -915,7 +915,7 @@ class SourceControlMixin(BaseTask):
         )
         if scm_branch and scm_branch != project.scm_branch:
             sync_metafields['scm_branch'] = scm_branch
-            sync_metafields['scm_clean'] = True  # to accomidate force pushes
+            sync_metafields['scm_clean'] = True  # to accommodate force pushes
         if 'update_' not in sync_metafields['job_tags']:
             sync_metafields['scm_revision'] = project.scm_revision
         local_project_sync = project.create_project_update(_eager_fields=sync_metafields)
@@ -1999,7 +1999,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise
         except Exception:
             logger.exception('Exception saving {} content, rolling back changes.'.format(inventory_update.log_format))
-            raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
+            raise PostRunError('Error occurred while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
 @task(queue=get_task_queuename)

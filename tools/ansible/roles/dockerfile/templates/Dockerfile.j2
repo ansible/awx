@@ -5,7 +5,7 @@
 ###
 
 {% if not headless|bool %}
-# UI_next build contaienr
+# UI_next build container
 FROM quay.io/centos/centos:stream9 AS ui-builder
 USER root
 RUN dnf -y update && dnf module -y enable nodejs:18 && dnf module -y install nodejs:18/common && dnf install -y make git

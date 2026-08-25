@@ -1070,7 +1070,7 @@ class InventorySourceOptions(BaseModel):
         elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
             return _('Credentials of type insights and vault are disallowed for scm inventory sources.')
         elif source == 'openshift_virtualization' and cred and cred.credential_type.kind != 'kubernetes':
-            return _('Credentials of type kubernetes is requred for openshift_virtualization inventory sources.')
+            return _('Credentials of type kubernetes is required for openshift_virtualization inventory sources.')
         return None
 
     def get_cloud_credential(self):
@@ -1369,7 +1369,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return urljoin(settings.TOWER_URL_BASE, "{}/jobs/inventory/{}".format(settings.OPTIONAL_UI_URL_PREFIX, self.pk))
 
     def get_actual_source_path(self):
-        '''Alias to source_path that combines with project path for for SCM file based sources'''
+        '''Alias to source_path that combines with project path for SCM file based sources'''
         if self.inventory_source_id is None or self.inventory_source.source_project_id is None:
             return self.source_path
         return os.path.join(self.inventory_source.source_project.get_project_path(check_if_exists=False), self.source_path)

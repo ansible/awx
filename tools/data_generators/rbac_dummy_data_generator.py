@@ -181,7 +181,7 @@ class Rollback(Exception):
 
 # Normally the modified_by field is populated by the crum library automatically,
 # but since this is ran outside the request-response cycle that won't work.
-# It is disaled here.
+# It is disabled here.
 def mock_save(self, *args, **kwargs):
     return super(PrimordialModel, self).save(*args, **kwargs)
 
@@ -292,7 +292,7 @@ def make_the_data():
             for org in organizations:
                 org_teams = [t for t in org.teams.all()]
                 org_users = [u for u in org.member_role.members.all()]
-                print('  Spreading %d users accross %d teams for %s' % (len(org_users), len(org_teams), org.name))
+                print('  Spreading %d users across %d teams for %s' % (len(org_users), len(org_teams), org.name))
                 # Our normal spread for most users
                 cur_user_idx = 0
                 cur_team_idx = 0

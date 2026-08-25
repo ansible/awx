@@ -531,7 +531,7 @@ class NotificationAttachMixin(BaseAccess):
     - I have notification_admin_role to organization of the NT
     - I can read the object I am attaching it to
 
-    I can unattach when those same critiera are met
+    I can unattach when those same criteria are met
     """
 
     notification_attach_roles = None
@@ -893,7 +893,7 @@ class InventoryAccess(BaseAccess):
 class HostAccess(BaseAccess):
     """
     I can see hosts whenever I can see their inventory.
-    I can change or delete hosts whenver I can change their inventory.
+    I can change or delete hosts whenever I can change their inventory.
     """
 
     model = Host

@@ -34,8 +34,8 @@ class UriCleaner(object):
                     password = o.password
 
                 # Given a python MatchObject, with respect to redactedtext, find and
-                # replace the first occurance of username and the first and second
-                # occurance of password
+                # replace the first occurrence of username and the first and second
+                # occurrence of password
 
                 uri_str = redactedtext[match.start() : match.end()]
                 if username:

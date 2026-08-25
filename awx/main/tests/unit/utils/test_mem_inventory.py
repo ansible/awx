@@ -19,7 +19,7 @@ def memory_inventory():
 
 @pytest.fixture
 def JSON_of_inv():
-    # Implemented as fixture becuase it may be change inside of tests
+    # Implemented as fixture because it may be change inside of tests
     return {
         "_meta": {"hostvars": {"group_host": {}, "my_host": {"foo": "bar"}}},
         "all": {"children": ["my_group", "ungrouped"]},

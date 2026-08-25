@@ -14,7 +14,7 @@ GIT_IS_WORKTREE := $(shell test -f .git && echo yes)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
 
-# ansible-test requires semver compatable version, so we allow overrides to hack it
+# ansible-test requires semver compatible version, so we allow overrides to hack it
 COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
 # args for the ansible-test sanity command
 COLLECTION_SANITY_ARGS ?= --docker

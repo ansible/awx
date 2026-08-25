@@ -208,7 +208,7 @@ register(
     schemes=('http', 'https'),
     allow_plain_hostname=True,  # Allow hostname only without TLD.
     label=_('Automation Analytics upload URL'),
-    help_text=_('This setting is used to to configure the upload URL for data collection for Automation Analytics.'),
+    help_text=_('This setting is used to configure the upload URL for data collection for Automation Analytics.'),
     category=_('System'),
     category_slug='system',
 )
@@ -761,7 +761,7 @@ register(
         'Level threshold used by log handler. Severities from lowest to highest'
         ' are DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe '
         'than the threshold will be ignored by log handler. (messages under category '
-        'awx.anlytics ignore this setting)'
+        'awx.analytics ignore this setting)'
     ),
     category=_('Logging'),
     category_slug='logging',

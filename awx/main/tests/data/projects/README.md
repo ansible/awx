@@ -4,7 +4,7 @@ Each folder in this directory is usable as source for a project or role or colle
 which is used in tests, particularly the "awx/main/tests/live" tests.
 
 Although these are not git repositories, test fixtures will make copies,
-and in the coppied folders, run `git init` type commands, turning them into
+and in the copied folders, run `git init` type commands, turning them into
 git repos. This is done in the locations
 
  - `/var/lib/awx/projects`

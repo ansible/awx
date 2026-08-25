@@ -224,7 +224,7 @@ class CallbackBrokerWorker:
                     # If the database is flaking, let ensure_connection throw a general exception
                     # will be caught by the outer loop, which goes into a proper sleep and retry loop
                     django_connection.ensure_connection()
-                    logger.warning(f'Error in events bulk_create, will try indiviually, error: {str(exc)}')
+                    logger.warning(f'Error in events bulk_create, will try individually, error: {str(exc)}')
                     # if an exception occurs, we should re-attempt to save the
                     # events one-by-one, because something in the list is
                     # broken/stale

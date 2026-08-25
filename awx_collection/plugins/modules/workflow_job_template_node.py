@@ -50,7 +50,7 @@ options:
       type: str
     skip_tags:
       description:
-        - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
+        - Tags to skip, applied as a prompt, if job template prompts for job tags
       type: str
     limit:
       description:

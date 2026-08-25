@@ -339,7 +339,7 @@ class PageList(object):
     @property
     def __item_class__(self):
         """Returns the class representing a single 'Page' item
-        With an inheritence of OrgListSubClass -> OrgList -> PageList -> Org -> Base -> Page, the following
+        With an inheritance of OrgListSubClass -> OrgList -> PageList -> Org -> Base -> Page, the following
         will return the parent class of the current object (e.g. 'Org').
 
         Obtaining a page type by registered endpoint is highly recommended over using this method.

@@ -196,7 +196,7 @@ def main():
     module.json_output['changed'] = True
     module.json_output['id'] = result['json']['id']
     module.json_output['status'] = result['json']['status']
-    # This is for backwards compatability
+    # This is for backwards compatibility
     module.json_output['job_info'] = {'id': result['json']['id']}
 
     if not wait:

@@ -42,7 +42,7 @@ class MemGroup(MemObject):
         self.variables = {}
         self.parents = []
         # Used on the "all" group in place of previous global variables.
-        # maps host and group names to hosts to prevent redudant additions
+        # maps host and group names to hosts to prevent redundant additions
         self.all_hosts = {}
         self.all_groups = {}
         self.variables = {}

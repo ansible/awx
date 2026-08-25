@@ -741,7 +741,7 @@ class Migration(migrations.Migration):
             name='dtend',
             field=models.DateTimeField(
                 default=None,
-                help_text='The last occurrence of the schedule occurs before this time, aftewards the schedule expires.',
+                help_text='The last occurrence of the schedule occurs before this time, afterwards the schedule expires.',
                 null=True,
                 editable=False,
             ),

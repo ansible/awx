@@ -50,7 +50,7 @@ EXAMPLES = '''
 
 from ..module_utils.awxkit import ControllerAWXKitModule
 
-# These two lines are not needed if awxkit changes to do programatic notifications on issues
+# These two lines are not needed if awxkit changes to do programmatic notifications on issues
 from ansible.module_utils.six.moves import StringIO
 import logging
 

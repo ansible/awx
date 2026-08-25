@@ -306,10 +306,10 @@ class ControllerModule(AnsibleModule):
                             pass
 
                 except Exception as e:
-                    raise_from(ConfigFileException("An unknown exception occured trying to ini load config file: {0}".format(e)), e)
+                    raise_from(ConfigFileException("An unknown exception occurred trying to ini load config file: {0}".format(e)), e)
 
         except Exception as e:
-            raise_from(ConfigFileException("An unknown exception occured trying to load config file: {0}".format(e)), e)
+            raise_from(ConfigFileException("An unknown exception occurred trying to load config file: {0}".format(e)), e)
 
         # Backward compatibility: config files written for older collection
         # releases used the oauth_token key; map it to aap_token.
@@ -824,10 +824,10 @@ class ControllerAPIModule(ControllerModule):
     def delete_if_needed(self, existing_item, item_type=None, on_delete=None, auto_exit=True):
         # This will exit from the module on its own.
         # If the method successfully deletes an item and on_delete param is defined,
-        #   the on_delete parameter will be called as a method pasing in this object and the json from the response
+        #   the on_delete parameter will be called as a method passing in this object and the json from the response
         # This will return one of two things:
         #   1. None if the existing_item is not defined (so no delete needs to happen)
-        #   2. The response from AWX from calling the delete on the endpont. It's up to you to process the response and exit from the module
+        #   2. The response from AWX from calling the delete on the endpoint. It's up to you to process the response and exit from the module
         # Note: common error codes from the AWX API can cause the module to fail
         if existing_item:
             # If we have an item, we can try to delete it
@@ -919,7 +919,7 @@ class ControllerAPIModule(ControllerModule):
         if copy_from_lookup is None:
             self.fail_json(msg="A {0} with the name {1} was not able to be found.".format(item_type, copy_from_name_or_id))
 
-        # Do checks for copy permisions if warrented
+        # Do checks for copy permissions if warrented
         if item_type == 'workflow_job_template':
             copy_get_check = self.get_endpoint(copy_from_lookup['related']['copy'])
             if copy_get_check['status_code'] in [200]:
@@ -957,10 +957,10 @@ class ControllerAPIModule(ControllerModule):
 
         # This will exit from the module on its own
         # If the method successfully creates an item and on_create param is defined,
-        #    the on_create parameter will be called as a method pasing in this object and the json from the response
+        #    the on_create parameter will be called as a method passing in this object and the json from the response
         # This will return one of two things:
         #    1. None if the existing_item is already defined (so no create needs to happen)
-        #    2. The response from AWX from calling the patch on the endpont. It's up to you to process the response and exit from the module
+        #    2. The response from AWX from calling the patch on the endpoint. It's up to you to process the response and exit from the module
         # Note: common error codes from the AWX API can cause the module to fail
         response = None
         if not endpoint:
@@ -1080,7 +1080,7 @@ class ControllerAPIModule(ControllerModule):
     def update_if_needed(self, existing_item, new_item, item_type=None, on_update=None, auto_exit=True, associations=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
-        #   the on_update parameter will be called as a method pasing in this object and the json from the response
+        #   the on_update parameter will be called as a method passing in this object and the json from the response
         # This will return one of two things:
         #    1. None if the existing_item does not need to be updated
         #    2. The response from AWX from patching to the endpoint. It's up to you to process the response and exit from the module.

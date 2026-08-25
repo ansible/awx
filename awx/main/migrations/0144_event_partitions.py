@@ -15,7 +15,7 @@ def migrate_event_data(apps, schema_editor):
     # denormalized column, job_created, this is used as a
     # basis for partitioning job event rows
     #
-    # The initial partion will be a unique case. After
+    # The initial partition will be a unique case. After
     # the migration is completed, awx should create
     # new partitions on an hourly basis, as needed.
     # All events for a given job should be placed in
@@ -34,7 +34,7 @@ def migrate_event_data(apps, schema_editor):
             # to suffer a serious performance degradation
             cursor.execute(f'CREATE TABLE tmp_{tblname} (LIKE _unpartitioned_{tblname} INCLUDING ALL)')
 
-            # drop primary key constraint; in a partioned table
+            # drop primary key constraint; in a partitioned table
             # constraints must include the partition key itself
             # TODO: do more generic search for pkey constraints
             # instead of hardcoding this one that applies to main_jobevent
@@ -52,7 +52,7 @@ def migrate_event_data(apps, schema_editor):
 
     with connection.cursor() as cursor:
         """
-        Big int migration introduced the brin index main_jobevent_job_id_brin_idx index. For upgardes, we drop the index, new installs do nothing.
+        Big int migration introduced the brin index main_jobevent_job_id_brin_idx index. For upgrades, we drop the index, new installs do nothing.
         I have seen the second index in my dev environment. I can not find where in the code it was created. Drop it just in case
         """
         cursor.execute('DROP INDEX IF EXISTS main_jobevent_job_id_brin_idx')

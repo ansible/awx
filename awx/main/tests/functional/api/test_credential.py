@@ -130,7 +130,7 @@ def test_create_team_credential(post, get, team, organization, org_admin, team_m
     assert response.status_code == 200
     assert response.data['count'] == 1
 
-    # Assure that credential's organization is implictly set to team's org
+    # Assure that credential's organization is implicitly set to team's org
     assert response.data['results'][0]['summary_fields']['organization']['id'] == team.organization.id
 
 
