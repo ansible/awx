@@ -64,7 +64,7 @@ be the same as `serializer_class` of corresponding resource detail view; for exa
 Third, for the underlying model of the resource, add two macros, `FIELDS_TO_PRESERVE_AT_COPY` and
 `FIELDS_TO_DISCARD_AT_COPY`, as needed. Here is an example:
 ```python
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.

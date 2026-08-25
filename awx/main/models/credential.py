@@ -40,7 +40,6 @@ from awx.main.fields import (
 from awx.main.utils import decrypt_field, classproperty, set_environ
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
-from awx.main.models.mixins import ResourceMixin
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -77,7 +76,7 @@ def build_safe_env(env):
     return safe_env
 
 
-class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
+class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     """
     A credential contains information about how to talk to a remote resource
     Usually this is a SSH key location, and possibly an unlock password.
