@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 from awx.main.tasks.system import _heartbeat_instance_management, update_inventory_computed_fields, inspect_execution_and_hop_nodes
 from awx.main.models import Instance, Inventory
 from django.db import DatabaseError
