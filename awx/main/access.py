@@ -702,9 +702,11 @@ class UserAccess(BaseAccess):
             if not allow_orphans:
                 # in these cases only superusers can modify orphan users
                 return False
-            target_perms = set(RoleEvaluation.objects.filter(role__in=obj.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct())
+            target_perms = set(
+                RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(obj)).values_list('object_id', 'content_type_id', 'codename').distinct()
+            )
             user_perms = set(
-                RoleEvaluation.objects.filter(role__in=self.user.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(self.user)).values_list('object_id', 'content_type_id', 'codename').distinct()
             )
             return not (target_perms - user_perms)
         else:
