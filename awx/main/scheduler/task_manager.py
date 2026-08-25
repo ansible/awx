@@ -360,7 +360,7 @@ class DependencyManager(TaskBase):
             else:
                 latest_project_update = project_updates.order_by("-created").first()
             if self.should_update_again(latest_project_update, project.scm_update_cache_timeout):
-                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency', scm_branch=effective_branch))
+                project_task = project.create_project_update(_eager_fields={'launch_type': 'dependency', 'scm_branch': effective_branch})
                 project_task.signal_start()
                 return [project_task]
             else:
@@ -392,7 +392,7 @@ class DependencyManager(TaskBase):
             else:
                 latest_inventory_update = inventory_updates.order_by("-created").first()
             if self.should_update_again(latest_inventory_update, inventory_source.update_cache_timeout):
-                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency', scm_branch=effective_branch))
+                inventory_task = inventory_source.create_inventory_update(_eager_fields={'launch_type': 'dependency', 'scm_branch': effective_branch})
                 inventory_task.signal_start()
                 dependencies.append(inventory_task)
             else:
