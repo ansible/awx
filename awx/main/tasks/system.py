@@ -589,7 +589,11 @@ def inspect_established_receptor_connections(mesh_status):
 
 
 def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
-    with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
+    with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False) as acquired:
+        if not acquired:
+            logger.debug("Not running inspect_execution_and_hop_nodes, another instance holds lock")
+            return
+        start = time.monotonic()
         node_lookup = {inst.hostname: inst for inst in instance_list}
         try:
             mesh_status = receptor_ctl.simple_command('status')
@@ -601,6 +605,7 @@ def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
 
         nowtime = now()
         workers = mesh_status['Advertisements']
+        updated_count = 0
 
         for ad in workers:
             hostname = ad['NodeID']
@@ -620,6 +625,7 @@ def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
                 continue
             instance.last_seen = last_seen
             instance.save(update_fields=['last_seen'])
+            updated_count += 1
 
             # Only execution nodes should be dealt with by execution_node_health_check
             if instance.node_type == Instance.Types.HOP:
@@ -641,6 +647,12 @@ def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
                     # TODO: perhaps decrease the frequency of these checks
                     logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
                     execution_node_health_check.apply_async([hostname])
+
+        elapsed = time.monotonic() - start
+        if elapsed > 2.0:
+            logger.warning(f"inspect_execution_and_hop_nodes completed in {elapsed:.1f}s, updated {updated_count} node(s)")
+        else:
+            logger.debug(f"inspect_execution_and_hop_nodes completed in {elapsed:.3f}s, updated {updated_count} node(s)")
 
 
 @task(queue=get_task_queuename, bind=True)
