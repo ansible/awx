@@ -1,4 +1,4 @@
-aiohttp>=3.13.5 # CVE-2024-30251, kubernetes>=36.0.2 requires >=3.13.5
+aiohttp>=3.14.3
 ansi2html  # Used to format the stdout from jobs into html for display
 jq  # used for indirect host counting feature
 asn1
@@ -11,7 +11,7 @@ channels
 channels-redis
 cryptography
 Cython
-daphne
+daphne>=4.2.2
 distro
 django>=5.2,<5.3  # Django 5.2 LTS, allow patch updates
 django-cors-headers
@@ -25,7 +25,7 @@ djangorestframework-yaml
 drf-spectacular>=0.27.0
 dynaconf
 filelock
-GitPython>=3.1.37  # CVE-2023-41040
+GitPython>=3.1.49
 grpcio
 irc
 jinja2>=3.1.6  # CVE-2025-27516

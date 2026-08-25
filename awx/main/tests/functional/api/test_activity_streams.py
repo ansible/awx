@@ -64,8 +64,8 @@ def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_adm
     settings.ACTIVITY_STREAM_ENABLED = True
     assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
-    assert activity_stream_entry.role.first() == organization.admin_role
-    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+    assert activity_stream_entry.object1 == 'organization'
+    assert activity_stream_entry.object2 == 'user'
 
 
 @pytest.mark.django_db
@@ -73,8 +73,8 @@ def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, 
     settings.ACTIVITY_STREAM_ENABLED = True
     assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
-    assert activity_stream_entry.role.first() == organization.admin_role
-    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+    assert activity_stream_entry.object1 == 'organization'
+    assert activity_stream_entry.object2 == 'user'
 
 
 @pytest.mark.django_db
@@ -169,11 +169,9 @@ def test_stream_user_direct_role_updates(get, post, organization_factory):
     url = reverse('api:user_roles_list', kwargs={'pk': objects.users.test.pk})
     post(url, dict(id=objects.inventories.inv1.read_role.pk), objects.superusers.admin)
 
-    activity_stream = ActivityStream.objects.filter(
-        inventory__pk=objects.inventories.inv1.pk, user__pk=objects.users.test.pk, role__pk=objects.inventories.inv1.read_role.pk
-    ).first()
+    activity_stream = ActivityStream.objects.filter(inventory__pk=objects.inventories.inv1.pk, user__pk=objects.users.test.pk, operation='associate').first()
     url = reverse('api:activity_stream_detail', kwargs={'pk': activity_stream.pk})
     response = get(url, objects.users.test)
 
-    assert response.data['object1'] == 'user'
-    assert response.data['object2'] == 'inventory'
+    assert response.data['object1'] == 'inventory'
+    assert response.data['object2'] == 'user'

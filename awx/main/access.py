@@ -2508,7 +2508,7 @@ class UnifiedJobAccess(BaseAccess):
 
     def filtered_queryset(self):
         inv_pk_qs = Inventory.access_ids_qs(self.user, 'view')
-        qs = self.model.objects.filter(
+        return self.model.objects.filter(
             Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
             | Q(
                 pk__in=InventoryUpdate.objects.filter(
@@ -2522,7 +2522,6 @@ class UnifiedJobAccess(BaseAccess):
             )
             | Q(organization__in=Organization.access_ids_qs(self.user, 'audit_organization'))
         )
-        return qs
 
     def get_queryset(self):
         return super(UnifiedJobAccess, self).get_queryset().filter(workflowapproval__isnull=True)

@@ -33,7 +33,6 @@ def org_ee_rd():
 def test_old_ee_role_maps_to_correct_permissions(organization):
     assert set(get_role_codenames(organization.execution_environment_admin_role)) == {
         'view_organization',
-        'member_organization',
         'add_executionenvironment',
         'change_executionenvironment',
         'delete_executionenvironment',

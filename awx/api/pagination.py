@@ -13,7 +13,7 @@ from rest_framework.utils.urls import replace_query_param
 from rest_framework.settings import api_settings
 from django.utils.translation import gettext_lazy as _
 
-from awx.main.models import ActivityStream
+from awx.main.models import ActivityStream, UnifiedJob
 
 
 class DisabledPaginator(DjangoPaginator):
@@ -27,16 +27,19 @@ class DisabledPaginator(DjangoPaginator):
 
 
 class ActivityStreamPaginator(DjangoPaginator):
-    """Use unfiltered table count for activity stream pagination (AAP-83773).
-
-    The RBAC-filtered COUNT query takes ~36 min on large tables due to the
-    pk__in subquery shape from AAP-81860.  An unfiltered count is acceptable
-    for pagination UI -- an approximate over-count is harmless.
-    """
+    """Use unfiltered table count for activity stream pagination (AAP-83773)."""
 
     @cached_property
     def count(self):
         return ActivityStream.objects.count()
+
+
+class UnifiedJobPaginator(DjangoPaginator):
+    """Use unfiltered table count for unified job pagination."""
+
+    @cached_property
+    def count(self):
+        return UnifiedJob.objects.count()
 
 
 class Pagination(pagination.PageNumberPagination):
@@ -89,6 +92,10 @@ class Pagination(pagination.PageNumberPagination):
 
 class ActivityStreamPagination(Pagination):
     django_paginator_class = ActivityStreamPaginator
+
+
+class UnifiedJobPagination(Pagination):
+    django_paginator_class = UnifiedJobPaginator
 
 
 class LimitPagination(pagination.BasePagination):

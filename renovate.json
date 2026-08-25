@@ -4,6 +4,9 @@
   "tekton": {
     "enabled": true,
     "automerge": true,
-    "schedule": ["* */12 * * 1-5"]
+    "schedule": ["* */12 * * 1-5"],
+    "postUpgradeTasks": {
+      "commands": []
+    }
   }
 }
