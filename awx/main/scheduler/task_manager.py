@@ -196,6 +196,10 @@ class WorkflowManager(TaskBase):
                     workflow_job.start_args = ''  # blank field to remove encrypted passwords
                     workflow_job.save(update_fields=['status', 'start_args'])
                     status_changed = True
+                else:
+                    # Speed-up: schedule the task manager so it can process the
+                    # canceled pending jobs without waiting for the next cycle.
+                    ScheduleTaskManager().schedule()
             else:
                 dnr_nodes = dag.mark_dnr_nodes()
                 WorkflowJobNode.objects.bulk_update(dnr_nodes, ['do_not_run'])
@@ -237,6 +241,8 @@ class WorkflowManager(TaskBase):
                     job = spawn_node.unified_job_template.create_unified_job(**kv)
                     spawn_node.job = job
                     spawn_node.save()
+                    if spawn_node.ancestor_artifacts and isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
+                        job.seed_root_ancestor_artifacts(spawn_node.ancestor_artifacts)
                     logger.debug('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
                     can_start = True
                     if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
@@ -250,8 +256,7 @@ class WorkflowManager(TaskBase):
                             )
                             display_list = [spawn_node.unified_job_template] + workflow_ancestors
                             job.job_explanation = gettext_noop(
-                                "Workflow Job spawned from workflow could not start because it "
-                                "would result in recursion (spawn order, most recent first: {})"
+                                "Workflow Job spawned from workflow could not start because it would result in recursion (spawn order, most recent first: {})"
                             ).format(', '.join('<{}>'.format(tmp) for tmp in display_list))
                         else:
                             logger.debug(
@@ -338,7 +343,7 @@ class DependencyManager(TaskBase):
         if update.status in ['waiting', 'pending', 'running']:
             return False
 
-        return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
+        return bool((update.finished + timedelta(seconds=cache_timeout)) < tz_now())
 
     def get_or_create_project_update(self, project_id):
         project = self.all_projects.get(project_id, None)
@@ -443,17 +448,29 @@ class TaskManager(TaskBase):
         self.controlplane_ig = self.tm_models.instance_groups.controlplane_ig
 
     def process_job_dep_failures(self, task):
-        """If job depends on a job that has failed, mark as failed and handle misc stuff."""
+        """If job depends on a job that has failed or been canceled, mark as failed.
+
+        Returns True if a dep failure was found, False otherwise.
+        """
         for dep in task.dependent_jobs.all():
-            # if we detect a failed or error dependency, go ahead and fail this task.
-            if dep.status in ("error", "failed"):
+            # if we detect a failed, error, or canceled dependency, go ahead and fail this task.
+            if dep.status in ("error", "failed", "canceled"):
                 task.status = 'failed'
-                logger.warning(f'Previous task failed task: {task.id} dep: {dep.id} task manager')
-                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(dep)),
-                    dep.name,
-                    dep.id,
-                )
+                if dep.status == 'canceled':
+                    logger.warning(f'Previous task canceled, failing task: {task.id} dep: {dep.id} task manager')
+                    task.job_explanation = 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                        get_type_for_model(type(dep)),
+                        dep.name,
+                        dep.id,
+                    )
+                    ScheduleWorkflowManager().schedule()  # speedup for dependency chains in workflow, on workflow cancel
+                else:
+                    logger.warning(f'Previous task failed, failing task: {task.id} dep: {dep.id} task manager')
+                    task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                        get_type_for_model(type(dep)),
+                        dep.name,
+                        dep.id,
+                    )
                 task.save(update_fields=['status', 'job_explanation'])
                 task.websocket_emit_status('failed')
                 self.pre_start_failed.append(task.id)
@@ -545,8 +562,17 @@ class TaskManager(TaskBase):
                 logger.warning("Task manager has reached time out while processing pending jobs, exiting loop early")
                 break
 
-            has_failed = self.process_job_dep_failures(task)
-            if has_failed:
+            if task.cancel_flag:
+                logger.debug(f"Canceling pending task {task.log_format} because cancel_flag is set")
+                task.status = 'canceled'
+                task.job_explanation = gettext_noop("This job was canceled before it started.")
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status('canceled')
+                self.pre_start_failed.append(task.id)
+                ScheduleWorkflowManager().schedule()
+                continue
+
+            if self.process_job_dep_failures(task):
                 continue
 
             blocked_by = self.job_blocked_by(task)
@@ -660,6 +686,17 @@ class TaskManager(TaskBase):
             if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
+
+        # Reset waiting jobs whose controller_node was deprovisioned (e.g. K8s pod replaced).
+        # These jobs will never be picked up because no live node is listening for them.
+        registered_control_nodes = Instance.objects.filter(node_type__in=('control', 'hybrid')).values_list('hostname', flat=True)
+        orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=registered_control_nodes)
+        for j in orphaned_waiting:
+            logger.warning(f'{j.controller_node} is not a registered instance; resetting {j.log_format} to pending')
+            j.status = 'pending'
+            j.controller_node = ''
+            j.execution_node = ''
+            j.save(update_fields=['status', 'controller_node', 'execution_node'])
 
     def process_tasks(self):
         # maintain a list of jobs that went to an early failure state,

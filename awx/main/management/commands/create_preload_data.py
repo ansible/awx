@@ -52,7 +52,11 @@ class Command(BaseCommand):
 
                     ssh_type = CredentialType.objects.filter(namespace='ssh').first()
                     c, _ = Credential.objects.get_or_create(
-                        credential_type=ssh_type, name='Demo Credential', inputs={'username': getattr(superuser, 'username', 'null')}, created_by=superuser
+                        credential_type=ssh_type,
+                        name='Demo Credential',
+                        inputs={'username': getattr(superuser, 'username', 'null')},
+                        created_by=superuser,
+                        organization=o,
                     )
 
                     if superuser:

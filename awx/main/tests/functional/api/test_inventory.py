@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream
+from awx.main.models import InventorySource, Inventory, ActivityStream, Organization
 from awx.main.utils.inventory_vars import update_group_variables
 
 
@@ -285,12 +285,12 @@ def test_urlencode_host_filter(post, admin_user, organization):
 def test_host_filter_unicode(post, admin_user, organization):
     post(
         reverse('api:inventory_list'),
-        data={'name': 'smart inventory', 'kind': 'smart', 'organization': organization.pk, 'host_filter': u'ansible_facts__ansible_distribution=レッドハット'},
+        data={'name': 'smart inventory', 'kind': 'smart', 'organization': organization.pk, 'host_filter': 'ansible_facts__ansible_distribution=レッドハット'},
         user=admin_user,
         expect=201,
     )
     si = Inventory.objects.get(name='smart inventory')
-    assert si.host_filter == u'ansible_facts__ansible_distribution=レッドハット'
+    assert si.host_filter == 'ansible_facts__ansible_distribution=レッドハット'
 
 
 @pytest.mark.django_db
@@ -302,7 +302,7 @@ def test_host_filter_invalid_ansible_facts_lookup(post, admin_user, organization
             'name': 'smart inventory',
             'kind': 'smart',
             'organization': organization.pk,
-            'host_filter': u'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
+            'host_filter': 'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
         },
         user=admin_user,
         expect=400,
@@ -417,7 +417,7 @@ def test_inventory_source_vars_prohibition(post, inventory, admin_user):
         mock_settings.INV_ENV_VARIABLE_BLOCKED = ('FOOBAR',)
         r = post(
             reverse('api:inventory_source_list'),
-            {'name': 'new inv src', 'source_vars': '{\"FOOBAR\": \"val\"}', 'inventory': inventory.pk},
+            {'name': 'new inv src', 'source_vars': '{"FOOBAR": "val"}', 'inventory': inventory.pk},
             admin_user,
             expect=400,
         )
@@ -729,7 +729,6 @@ class TestConstructedInventory:
 
 @pytest.mark.django_db
 class TestInventoryAllVariables:
-
     @staticmethod
     def simulate_update_from_source(inv_src, variables_dict, overwrite_vars=True):
         """
@@ -963,3 +962,45 @@ class TestInventoryAllVariables:
         # Test step 6: Value of var x from source A reappears, because the
         # latest update from source B did not contain var x.
         self.update_and_verify(inv_src_c, {}, expect={"x": 1}, teststep=6)
+
+
+@pytest.mark.django_db
+def test_inventory_names_unique_per_organization(post, admin_user):
+    """Validate that two inventories can have the same name if they belong to different organizations."""
+    org1 = Organization.objects.create(name='org-inv-1')
+    org2 = Organization.objects.create(name='org-inv-2')
+    inv_name = 'SharedInventoryName'
+
+    # Create inventory with same name in org1
+    resp1 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org1.id},
+        admin_user,
+        expect=201,
+    )
+    inv1_id = resp1.data['id']
+
+    # Create inventory with same name in org2 - should succeed
+    resp2 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org2.id},
+        admin_user,
+        expect=201,
+    )
+    inv2_id = resp2.data['id']
+
+    assert inv1_id != inv2_id
+    inv1 = Inventory.objects.get(id=inv1_id)
+    inv2 = Inventory.objects.get(id=inv2_id)
+    assert inv1.name == inv2.name == inv_name
+    assert inv1.organization.id == org1.id
+    assert inv2.organization.id == org2.id
+
+    # Attempt to create another inventory with same name in org1 - should fail
+    resp3 = post(
+        reverse('api:inventory_list'),
+        {'name': inv_name, 'organization': org1.id},
+        admin_user,
+        expect=400,
+    )
+    assert 'Inventory with this Name and Organization already exists' in json.dumps(resp3.data)

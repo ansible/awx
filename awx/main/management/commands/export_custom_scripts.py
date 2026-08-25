@@ -22,8 +22,8 @@ class Command(BaseCommand):
             with tarfile.open(tar_filename, "w") as tar:
                 for cis in CustomInventoryScript.objects.all():
                     # naming convention similar to project paths
-                    slug_name = slugify(str(cis.name)).replace(u'-', u'_')
-                    script_filename = u'_%d__%s' % (int(cis.pk), slug_name)
+                    slug_name = slugify(str(cis.name)).replace('-', '_')
+                    script_filename = '_%d__%s' % (int(cis.pk), slug_name)
                     script_path = os.path.join(tmpdirname, script_filename)
 
                     with open(script_path, 'w') as f:

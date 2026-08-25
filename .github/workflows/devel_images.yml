@@ -13,6 +13,10 @@ on:
       - stable-*
 jobs:
   push-development-images:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.repository == 'ansible/awx' && (github.ref_name == 'devel' || startsWith(github.ref_name, 'feature_'))) ||
+      (github.repository == 'ansible/tower' && (startsWith(github.ref_name, 'stable-') || startsWith(github.ref_name, 'release_')))
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -29,12 +33,6 @@ jobs:
           - image-name: awx
             make-target: awx-kube-buildx
     steps:
-
-      - name: Skipping build of awx image for non-awx repository
-        run: |
-          echo "Skipping build of awx image for non-awx repository"
-          exit 0
-        if: matrix.build-targets.image-name == 'awx' && !endsWith(github.repository, '/awx')
 
       - uses: actions/checkout@v4
         with:

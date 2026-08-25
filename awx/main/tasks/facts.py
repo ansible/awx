@@ -25,7 +25,8 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     log_data = log_data or {}
     log_data['inventory_id'] = inventory_id
     log_data['written_ct'] = 0
-    hosts_cached = []
+    # Dict mapping host name -> bool (True if a fact file was written)
+    hosts_cached = {}
 
     # Create the fact_cache directory inside artifacts_dir
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
@@ -37,13 +38,14 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
     last_write_time = None
 
     for host in hosts:
-        hosts_cached.append(host.name)
         if not host.ansible_facts_modified or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
+            hosts_cached[host.name] = False
             continue  # facts are expired - do not write them
 
         filepath = os.path.join(fact_cache_dir, host.name)
         if not os.path.realpath(filepath).startswith(fact_cache_dir):
             logger.error(f'facts for host {smart_str(host.name)} could not be cached')
+            hosts_cached[host.name] = False
             continue
 
         try:
@@ -59,8 +61,10 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
             backdated = mtime - 2
             os.utime(filepath, (backdated, backdated))
             last_write_time = backdated
+            hosts_cached[host.name] = True
         except IOError:
             logger.error(f'facts for host {smart_str(host.name)} could not be cached')
+            hosts_cached[host.name] = False
             continue
 
     # Write summary file directly to the artifacts_dir
@@ -69,7 +73,6 @@ def start_fact_cache(hosts, artifacts_dir, timeout=None, inventory_id=None, log_
         summary_data = {
             'last_write_time': last_write_time,
             'hosts_cached': hosts_cached,
-            'written_ct': log_data['written_ct'],
         }
         with open(summary_file, 'w', encoding='utf-8') as f:
             json.dump(summary_data, f, indent=2)
@@ -96,55 +99,99 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
     try:
         with open(summary_path, 'r', encoding='utf-8') as f:
             summary = json.load(f)
-        facts_write_time = os.path.getmtime(summary_path)  # After successful read
+        facts_write_time = os.path.getmtime(summary_path)
     except (json.JSONDecodeError, OSError) as e:
         logger.error(f'Error reading summary file at {summary_path}: {e}')
         return
 
-    host_names = summary.get('hosts_cached', [])
-    hosts_cached = host_qs.filter(name__in=host_names).order_by('id').iterator()
-    # Path where individual fact files were written
+    hosts_cached_map = summary.get('hosts_cached', {})
     fact_cache_dir = os.path.join(artifacts_dir, 'fact_cache')
-    hosts_to_update = []
 
-    for host in hosts_cached:
-        filepath = os.path.join(fact_cache_dir, host.name)
-        if not os.path.realpath(filepath).startswith(fact_cache_dir):
-            logger.error(f'Invalid path for facts file: {filepath}')
-            continue
+    # Phase 1: Scan files on disk to discover which hosts have updated or missing facts
+    hosts_with_updates = set()  # hostnames whose fact file was modified by Ansible
+    hosts_to_clear = []  # hostnames where Ansible removed the fact file
+    seen_in_dir = set()  # hostnames we found as files on disk
 
-        if os.path.exists(filepath):
-            # If the file changed since we wrote the last facts file, pre-playbook run...
-            modified = os.path.getmtime(filepath)
-            if not facts_write_time or modified >= facts_write_time:
-                try:
-                    with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                        ansible_facts = json.load(f)
-                except ValueError:
-                    continue
+    if os.path.isdir(fact_cache_dir):
+        for filename in os.listdir(fact_cache_dir):
+            if filename not in hosts_cached_map:
+                continue  # not an expected host for this job
 
-                if ansible_facts != host.ansible_facts:
-                    host.ansible_facts = ansible_facts
-                    host.ansible_facts_modified = now()
-                    hosts_to_update.append(host)
-                    logger.info(
-                        f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
-                        extra=dict(
-                            inventory_id=host.inventory.id,
-                            host_name=host.name,
-                            ansible_facts=host.ansible_facts,
-                            ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                            job_id=job_id,
-                        ),
-                    )
-                    log_data['updated_ct'] += 1
-                else:
-                    log_data['unmodified_ct'] += 1
+            filepath = os.path.join(fact_cache_dir, filename)
+            if os.path.islink(filepath):
+                logger.error(f'Invalid path for facts file: {filepath}')
+                continue
+            if not os.path.isfile(filepath):
+                continue
+
+            seen_in_dir.add(filename)
+            try:
+                modified = os.path.getmtime(filepath)
+            except OSError as e:
+                logger.warning(f'Could not stat facts file {filepath}: {e}')
+                continue
+            if modified >= facts_write_time:
+                hosts_with_updates.add(filename)
             else:
                 log_data['unmodified_ct'] += 1
+
+    # Check for files we wrote pre-job that are now missing (Ansible cleared facts)
+    for hostname, was_written in hosts_cached_map.items():
+        if hostname in seen_in_dir:
+            continue  # already handled above
+        if was_written:
+            hosts_to_clear.append(hostname)
         else:
-            # if the file goes missing, ansible removed it (likely via clear_facts)
-            # if the file goes missing, but the host has not started facts, then we should not clear the facts
+            log_data['unmodified_ct'] += 1
+
+    # Phase 2: Stream updated facts to database in batches
+    if hosts_with_updates:
+        hosts_to_save = []
+        total_rows_updated = 0
+        for host in host_qs.filter(name__in=list(hosts_with_updates)).select_related('inventory').iterator():
+            filepath = os.path.join(fact_cache_dir, host.name)
+            try:
+                with codecs.open(filepath, 'r', encoding='utf-8') as f:
+                    new_facts = json.load(f)
+            except (ValueError, OSError):
+                continue
+
+            if new_facts != host.ansible_facts:
+                host.ansible_facts = new_facts
+                host.ansible_facts_modified = now()
+                hosts_to_save.append(host)
+                logger.info(
+                    f'New fact for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}',
+                    extra=dict(
+                        inventory_id=host.inventory.id,
+                        host_name=host.name,
+                        ansible_facts=host.ansible_facts,
+                        ansible_facts_modified=host.ansible_facts_modified.isoformat(),
+                        job_id=job_id,
+                    ),
+                )
+                log_data['updated_ct'] += 1
+            else:
+                log_data['unmodified_ct'] += 1
+
+            if len(hosts_to_save) >= 100:
+                total_rows_updated += bulk_update_sorted_by_id(Host, hosts_to_save, fields=['ansible_facts', 'ansible_facts_modified'])
+                hosts_to_save = []
+
+        if hosts_to_save:
+            total_rows_updated += bulk_update_sorted_by_id(Host, hosts_to_save, fields=['ansible_facts', 'ansible_facts_modified'])
+
+        # Mismatch means a concurrent process changed or deleted hosts between our read and bulk update
+        if total_rows_updated != log_data['updated_ct']:
+            logger.warning(
+                f'Fact update for inventory {inventory_id} job {job_id}: expected to update {log_data["updated_ct"]} hosts but {total_rows_updated} rows were changed'
+            )
+
+    # Phase 3: Clear facts for hosts whose files were removed by Ansible
+    if hosts_to_clear:
+        hosts = list(host_qs.filter(name__in=hosts_to_clear).select_related('inventory'))
+        clear_hosts = []
+        for host in hosts:
             if job_created and host.ansible_facts_modified and host.ansible_facts_modified > job_created:
                 logger.warning(
                     f'Skipping fact clear for host {smart_str(host.name)} in job {job_id} '
@@ -157,13 +204,13 @@ def finish_fact_cache(host_qs, artifacts_dir, job_id=None, inventory_id=None, jo
             else:
                 host.ansible_facts = {}
                 host.ansible_facts_modified = now()
-                hosts_to_update.append(host)
+                clear_hosts.append(host)
                 logger.info(f'Facts cleared for inventory {smart_str(host.inventory.name)} host {smart_str(host.name)}')
                 log_data['cleared_ct'] += 1
 
-        if len(hosts_to_update) >= 100:
-            bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
-            hosts_to_update = []
+        if clear_hosts:
+            rows = bulk_update_sorted_by_id(Host, clear_hosts, fields=['ansible_facts', 'ansible_facts_modified'])
+            if rows != len(clear_hosts):
+                logger.warning(f'Fact clear for inventory {inventory_id} job {job_id}: expected to clear {len(clear_hosts)} hosts but {rows} rows were changed')
 
-    bulk_update_sorted_by_id(Host, hosts_to_update, fields=['ansible_facts', 'ansible_facts_modified'])
     logger.debug(f'Updated {log_data["updated_ct"]} host facts for inventory {inventory_id} in job {job_id}')

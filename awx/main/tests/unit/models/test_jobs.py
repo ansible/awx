@@ -29,7 +29,7 @@ def hosts(ref_time):
         Host(name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
         Host(name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
         Host(name='host3', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
-        Host(name=u'Iñtërnâtiônàlizætiøn', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name='Iñtërnâtiônàlizætiøn', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
     ]
 
 
@@ -112,7 +112,9 @@ def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
     os.remove(os.path.join(fact_cache_dir, hosts[1].name))
 
     hosts_qs = mock.MagicMock()
-    hosts_qs.filter.return_value.order_by.return_value.iterator.return_value = iter(hosts)
+    # The new code calls host_qs.filter(name__in=...).select_related('inventory')
+    # Only hosts[1] needs clearing (its file was removed), so return just that host
+    hosts_qs.filter.return_value.select_related.return_value = [hosts[1]]
 
     finish_fact_cache(hosts_qs, artifacts_dir=artifacts_dir, inventory_id=inventory_id)
 
@@ -145,10 +147,8 @@ def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
             os.utime(filepath, (new_modification_time, new_modification_time))
 
     hosts_qs = mock.MagicMock()
-    hosts_qs.filter.return_value.order_by.return_value.iterator.return_value = iter(hosts)
 
     finish_fact_cache(hosts_qs, artifacts_dir=artifacts_dir, inventory_id=inventory_id)
 
-    # Invalid JSON should be skipped — no hosts updated
-    updated_hosts = bulk_update.call_args[0][1]
-    assert updated_hosts == []
+    # Invalid JSON should be skipped — no hosts updated, bulk_update never called
+    bulk_update.assert_not_called()

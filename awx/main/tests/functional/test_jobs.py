@@ -486,7 +486,7 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -495,7 +495,7 @@ def test_populate_workload_identity_tokens_with_flag_enabled(job_template_with_c
 
         # Create credentials
         ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'jwt_aud': 'https://vault.example.com'})
+        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
         target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
 
         # Create input source linking source credential to target credential
@@ -545,7 +545,7 @@ def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -553,7 +553,7 @@ def test_populate_workload_identity_tokens_passes_workload_ttl_from_job_timeout(
         hashivault_type.save()
 
         ssh_cred = Credential.objects.create(credential_type=ssh_type, name='ssh-cred')
-        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'jwt_aud': 'https://vault.example.com'})
+        source_cred = Credential.objects.create(credential_type=hashivault_type, name='vault-source', inputs={'url': 'https://vault.example.com'})
         target_cred = Credential.objects.create(credential_type=ssh_type, name='target-cred', inputs={'username': 'testuser'})
 
         CredentialInputSource.objects.create(
@@ -595,7 +595,7 @@ def test_populate_workload_identity_tokens_with_flag_disabled(job_template_with_
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -647,7 +647,7 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -660,7 +660,7 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
             managed=False,
             inputs={
                 'fields': [
-                    {'id': 'jwt_aud', 'type': 'string', 'label': 'JWT Audience'},
+                    {'id': 'url', 'type': 'string', 'label': 'Server URL'},
                     {'id': 'workload_identity_token', 'type': 'string', 'label': 'Workload Identity Token', 'secret': True, 'internal': True},
                 ]
             },
@@ -668,11 +668,9 @@ def test_populate_workload_identity_tokens_multiple_input_sources_per_credential
         hashivault_ssh_type.save()
 
         # Create source credentials with different audiences
-        source_cred_kv = Credential.objects.create(
-            credential_type=hashivault_kv_type, name='vault-kv-source', inputs={'jwt_aud': 'https://vault-kv.example.com'}
-        )
+        source_cred_kv = Credential.objects.create(credential_type=hashivault_kv_type, name='vault-kv-source', inputs={'url': 'https://vault-kv.example.com'})
         source_cred_ssh = Credential.objects.create(
-            credential_type=hashivault_ssh_type, name='vault-ssh-source', inputs={'jwt_aud': 'https://vault-ssh.example.com'}
+            credential_type=hashivault_ssh_type, name='vault-ssh-source', inputs={'url': 'https://vault-ssh.example.com'}
         )
 
         # Create target credential that uses both sources for different fields

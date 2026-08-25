@@ -93,7 +93,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 url_next_log_safe = base64.b64encode(url_next.encode('UTF-8')) if url_next else b'None'
 
                 # we've hit a redirect. extract the redirect URL out of the first response header and try again
-                logger.warning(f"Received a {resp.status_code} from {url_log_safe}, trying to reach redirect url {url_next_log_safe}; attempt #{retries+1}")
+                logger.warning(f"Received a {resp.status_code} from {url_log_safe}, trying to reach redirect url {url_next_log_safe}; attempt #{retries + 1}")
 
                 # take the first redirect URL in the response header and try that
                 url = url_next

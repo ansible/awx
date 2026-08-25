@@ -1,13 +1,22 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2,<10"]
 build-backend = "setuptools.build_meta"
 
 # Do not uncomment the line below. We need to be able to override the version via a file, and this
 # causes the "version" key in setup.cfg to be ignored.
 # [tool.setuptools_scm]
 
-[tool.black]
+[tool.ruff]
 line-length = 160
-fast = true
-skip-string-normalization = true
-extend-exclude = "awx_collection"
+extend-exclude = ["awx_collection"]
+
+[tool.ruff.format]
+quote-style = "preserve"
+
+[tool.ruff.lint]
+select = [
+    "E722",
+    "F401", "F402", "F405", "F523", "F541",
+    "F811", "F821", "F822", "F841",
+    "W291", "W605",
+]

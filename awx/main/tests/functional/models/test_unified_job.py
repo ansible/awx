@@ -8,7 +8,7 @@ from crum import impersonate
 # AWX
 from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule, Credential
 from awx.api.versioning import reverse
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 
 @pytest.mark.django_db
@@ -160,7 +160,13 @@ class TestMetaVars:
         job = Job.objects.create(name='job', created_by=admin_user)
         job.save()
 
-        user_vars = ['_'.join(x) for x in itertools.product(['tower', 'awx'], ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name'])]
+        user_vars = [
+            '_'.join(x)
+            for x in itertools.product(
+                get_job_variable_prefixes(),
+                ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name'],
+            )
+        ]
 
         for key in user_vars:
             assert key in job.awx_meta_vars()
@@ -179,7 +185,7 @@ class TestMetaVars:
 
         workflow_job.workflow_nodes.create(job=job)
         data = job.awx_meta_vars()
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert data['{}_user_id'.format(name)] == admin_user.id
             assert data['{}_user_name'.format(name)] == admin_user.username
             assert data['{}_workflow_job_id'.format(name)] == workflow_job.pk
@@ -189,7 +195,7 @@ class TestMetaVars:
         schedule = Schedule.objects.create(name='job-schedule', rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY', unified_job_template=job_template)
         job = Job.objects.create(name='fake-job', launch_type='workflow', schedule=schedule, job_template=job_template)
         data = job.awx_meta_vars()
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert data['{}_schedule_id'.format(name)] == schedule.pk
             assert '{}_user_name'.format(name) not in data
 
@@ -201,7 +207,7 @@ class TestMetaVars:
         job = Job.objects.create(launch_type='workflow')
         workflow_job.workflow_nodes.create(job=job)
         result_hash = {}
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             result_hash['{}_job_id'.format(name)] = job.id
             result_hash['{}_job_launch_type'.format(name)] = 'workflow'
             result_hash['{}_workflow_job_name'.format(name)] = 'workflow-job'

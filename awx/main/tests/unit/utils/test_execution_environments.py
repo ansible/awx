@@ -1,6 +1,4 @@
-import shutil
 import os
-from uuid import uuid4
 
 import pytest
 
@@ -24,17 +22,11 @@ def test_switch_paths(container_path, host_path):
     assert get_incontainer_path(host_path, private_data_dir) == container_path
 
 
-def test_symlink_isolation_dir(request):
-    rand_str = str(uuid4())[:8]
-    dst_path = f'/tmp/ee_{rand_str}_symlink_dst'
-    src_path = f'/tmp/ee_{rand_str}_symlink_src'
+def test_symlink_isolation_dir(tmp_path):
+    src_path = tmp_path / 'symlink_src'
+    dst_path = tmp_path / 'symlink_dst'
 
-    def remove_folders():
-        os.unlink(dst_path)
-        shutil.rmtree(src_path)
-
-    request.addfinalizer(remove_folders)
-    os.mkdir(src_path)
+    src_path.mkdir()
     os.symlink(src_path, dst_path)
 
     pdd = f'{dst_path}/awx_xxx'

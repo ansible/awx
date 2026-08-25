@@ -7,7 +7,7 @@ from crum import impersonate
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions, get_role_codenames, get_role_definition
-from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
+from awx.main.models import ActivityStream, User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
@@ -42,6 +42,22 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
 
 
 @pytest.mark.django_db
+def test_bulk_member_addition_records_one_entry_per_user(organization, rando, alice, setup_managed_roles):
+    """
+    Adding multiple users to a legacy role in one m2m .add() call syncs each user to the
+    new RBAC system individually (sync_members_to_new_rbac). The legacy-side add already
+    records one ActivityStream entry per user via rbac_activity_stream; the new-side mirror
+    must stay suppressed so this doesn't turn into two entries per user.
+    """
+    organization.admin_role.members.add(rando, alice)
+
+    assert RoleUserAssignment.objects.filter(user=rando, role_definition__name='Organization Admin').exists()
+    assert RoleUserAssignment.objects.filter(user=alice, role_definition__name='Organization Admin').exists()
+    assert ActivityStream.objects.filter(operation='associate', user=rando).count() == 1
+    assert ActivityStream.objects.filter(operation='associate', user=alice).count() == 1
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('model', sorted(permission_registry.all_registered_models, key=lambda cls: cls._meta.model_name))
 def test_role_migration_matches(request, model, setup_managed_roles):
     fixture_name = model._meta.verbose_name.replace(' ', '_')
@@ -57,14 +73,14 @@ def test_role_migration_matches(request, model, setup_managed_roles):
             rd = get_role_definition(old_role)
             new_codenames = set(rd.permissions.values_list('codename', flat=True))
             # all the old roles should map to a non-Compat role definition
+            rd_data = {}
             if 'Compat' not in rd.name:
                 model_rds = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get_for_model(obj))
-                rd_data = {}
-                for rd in model_rds:
-                    rd_data[rd.name] = list(rd.permissions.values_list('codename', flat=True))
-            assert (
-                'Compat' not in rd.name
-            ), f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+                for other_rd in model_rds:
+                    rd_data[other_rd.name] = list(other_rd.permissions.values_list('codename', flat=True))
+            assert 'Compat' not in rd.name, (
+                f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+            )
             assert new_codenames == set(old_codenames)
 
     # In the old system these models did not have object-level roles, all others expect some model roles
@@ -171,6 +187,22 @@ def test_creator_permission(rando, admin_user, inventory, setup_managed_roles):
     give_creator_permissions(rando, inventory)
     assert rando in inventory.admin_role
     assert rando in inventory.admin_role.members.all()
+
+
+@pytest.mark.django_db
+def test_creator_permission_notification_template(rando, organization, setup_managed_roles):
+    """NotificationTemplate has no old-style roles, give_creator_permissions should not error"""
+    from awx.main.models import NotificationTemplate
+
+    nt = NotificationTemplate.objects.create(
+        name='test-nt',
+        organization=organization,
+        notification_type='slack',
+        notification_configuration={'token': 'x', 'channels': ['#test']},
+    )
+    give_creator_permissions(rando, nt)
+    assignment = RoleUserAssignment.objects.filter(user=rando, object_id=nt.pk).first()
+    assert assignment is not None
 
 
 @pytest.mark.django_db

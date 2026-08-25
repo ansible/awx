@@ -120,8 +120,7 @@ from awx.main.utils.named_url_graph import reset_counters
 from awx.main.utils.inventory_vars import update_group_variables
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
-from awx.main.signals import update_inventory_computed_fields
-
+from awx.main.tasks.system import update_inventory_computed_fields
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -175,8 +174,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
-    'last_job': DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error', 'canceled_on'),
-    'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
+    # last_job and last_job_host_summary are derived from JobHostSummary in HostSerializer,
+    # not from the stale FK fields on Host.
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -962,14 +961,27 @@ class UnifiedJobSerializer(BaseSerializer):
 
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
+    OPTIONAL_EXCLUDE_FIELDS = frozenset({'artifacts', 'extra_vars'})
+
+    _ALWAYS_STRIPPED_FIELDS = frozenset({'job_args', 'job_cwd', 'job_env', 'result_traceback', 'event_processing_finished'})
+
     class Meta:
-        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-event_processing_finished', '-artifacts')
+        fields = ('*', '-job_args', '-job_cwd', '-job_env', '-result_traceback', '-event_processing_finished')
+
+    def _requested_excludes(self):
+        request = self.context.get('request')
+        if request is None:
+            return frozenset()
+        raw = request.query_params.get('exclude', '')
+        requested = {name.strip() for name in raw.split(',') if name.strip()}
+        return frozenset(requested) & self.OPTIONAL_EXCLUDE_FIELDS
 
     def get_field_names(self, declared_fields, info):
         field_names = super(UnifiedJobListSerializer, self).get_field_names(declared_fields, info)
         # Meta multiple inheritance and -field_name options don't seem to be
         # taking effect above, so remove the undesired fields here.
-        return tuple(x for x in field_names if x not in ('job_args', 'job_cwd', 'job_env', 'result_traceback', 'event_processing_finished', 'artifacts'))
+        strip = self._ALWAYS_STRIPPED_FIELDS | self._requested_excludes()
+        return tuple(x for x in field_names if x not in strip)
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
@@ -1022,7 +1034,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 
 class UserSerializer(BaseSerializer):
-    password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
+    password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -1280,9 +1292,9 @@ class ProjectOptionsSerializer(BaseSerializer):
         # Don't allow assigning a local_path when scm_type is set.
         valid_local_paths = Project.get_local_path_choices()
         if self.instance:
-            scm_type = attrs.get('scm_type', self.instance.scm_type) or u''
+            scm_type = attrs.get('scm_type', self.instance.scm_type) or ''
         else:
-            scm_type = attrs.get('scm_type', u'') or u''
+            scm_type = attrs.get('scm_type', '') or ''
         if self.instance and not scm_type:
             valid_local_paths.append(self.instance.local_path)
         if self.instance and scm_type and "local_path" in attrs and self.instance.local_path != attrs['local_path']:
@@ -1838,19 +1850,35 @@ class HostSerializer(BaseSerializerWithVariables):
             res['ansible_facts'] = self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.instance_id})
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.last_job:
-            res['last_job'] = self.reverse('api:job_detail', kwargs={'pk': obj.last_job.pk})
-        if obj.last_job_host_summary:
-            res['last_job_host_summary'] = self.reverse('api:job_host_summary_detail', kwargs={'pk': obj.last_job_host_summary.pk})
+        last_summary = obj.latest_summary
+        if last_summary:
+            res['last_job_host_summary'] = self.reverse('api:job_host_summary_detail', kwargs={'pk': last_summary.pk})
+            if last_summary.job_id:
+                res['last_job'] = self.reverse('api:job_detail', kwargs={'pk': last_summary.job_id})
         return res
 
     def get_summary_fields(self, obj):
         d = super(HostSerializer, self).get_summary_fields(obj)
-        try:
-            d['last_job']['job_template_id'] = obj.last_job.job_template.id
-            d['last_job']['job_template_name'] = obj.last_job.job_template.name
-        except (KeyError, AttributeError):
-            pass
+        last_summary = obj.latest_summary
+        if last_summary:
+            d['last_job_host_summary'] = OrderedDict()
+            d['last_job_host_summary']['id'] = last_summary.id
+            d['last_job_host_summary']['failed'] = last_summary.failed
+            try:
+                last_job = last_summary.job
+                d['last_job'] = OrderedDict()
+                for field in DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'canceled_on'):
+                    fval = getattr(last_job, field, None)
+                    if fval is not None:
+                        d['last_job'][field] = fval
+                if last_job.job_template:
+                    d['last_job']['job_template_id'] = last_job.job_template.id
+                    d['last_job']['job_template_name'] = last_job.job_template.name
+            except ObjectDoesNotExist:
+                pass
+        else:
+            d.pop('last_job', None)
+            d.pop('last_job_host_summary', None)
         if has_model_field_prefetched(obj, 'groups'):
             group_list = sorted([{'id': g.id, 'name': g.name} for g in obj.groups.all()], key=lambda x: x['id'])[:5]
         else:
@@ -1886,7 +1914,7 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_str(port))
+                raise serializers.ValidationError(_('Invalid port specification: %s') % force_str(port))
         return name, port
 
     def validate_name(self, value):
@@ -1925,14 +1953,16 @@ class HostSerializer(BaseSerializerWithVariables):
             return ret
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        if 'last_job' in ret and not obj.last_job:
-            ret['last_job'] = None
-        if 'last_job_host_summary' in ret and not obj.last_job_host_summary:
-            ret['last_job_host_summary'] = None
+        last_summary = obj.latest_summary
+        if 'last_job' in ret:
+            ret['last_job'] = last_summary.job_id if last_summary else None
+        if 'last_job_host_summary' in ret:
+            ret['last_job_host_summary'] = last_summary.pk if last_summary else None
         return ret
 
     def get_has_active_failures(self, obj):
-        return bool(obj.last_job_host_summary and obj.last_job_host_summary.failed)
+        last_summary = obj.latest_summary
+        return bool(last_summary and last_summary.failed)
 
     def get_has_inventory_sources(self, obj):
         return obj.inventory_sources.exists()
@@ -2079,9 +2109,17 @@ class BulkHostCreateSerializer(serializers.Serializer):
         if request and not request.user.is_superuser:
             if request.user not in inv.admin_role:
                 raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
-        current_hostnames = set(inv.hosts.values_list('name', flat=True))
+
+        # Performance optimization (AAP-67978): Instead of loading ALL host names from
+        # the inventory, only check if the specific new names already exist in the database.
         new_names = [host['name'] for host in attrs['hosts']]
-        duplicate_new_names = [n for n in new_names if n in current_hostnames or new_names.count(n) > 1]
+
+        new_name_counts = Counter(new_names)
+        duplicates_in_new = [name for name, count in new_name_counts.items() if count > 1]
+        unique_new_names = list(new_name_counts.keys())
+        existing_duplicates = list(Host.objects.filter(inventory=inv, name__in=unique_new_names).values_list('name', flat=True))
+        duplicate_new_names = list(set(duplicates_in_new + existing_duplicates))
+
         if duplicate_new_names:
             raise serializers.ValidationError(_(f'Hostnames must be unique in an inventory. Duplicates found: {duplicate_new_names}'))
 
@@ -2932,6 +2970,19 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
+
+        # Deep copy inputs to avoid modifying the original model data
+        inputs = value.get('inputs')
+        if not isinstance(inputs, dict):
+            inputs = {}
+        value['inputs'] = copy.deepcopy(inputs)
+        fields = value['inputs'].get('fields', [])
+        if not isinstance(fields, list):
+            fields = []
+
+        # Normalize fields and filter out internal fields
+        value['inputs']['fields'] = [f for f in fields if not f.get('internal')]
+
         return value
 
     def filter_field_metadata(self, fields, method):
@@ -3544,7 +3595,7 @@ class JobRelaunchSerializer(BaseSerializer):
         res = super(JobRelaunchSerializer, self).to_representation(obj)
         view = self.context.get('view', None)
         if hasattr(view, '_raw_data_form_marker'):
-            password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
+            password_keys = dict([(p, '') for p in self.get_passwords_needed_to_start(obj)])
             res.update(password_keys)
         return res
 
@@ -3714,7 +3765,7 @@ class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
 
     def to_representation(self, obj):
         if obj:
-            return dict([(p, u'') for p in obj.passwords_needed_to_start])
+            return dict([(p, '') for p in obj.passwords_needed_to_start])
         else:
             return {}
 
@@ -4122,9 +4173,28 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                             attrs['extra_data'][key] = db_extra_data[key]
 
         # Build unsaved version of this config, use it to detect prompts errors
+        # Capture keys before _build_mock_obj pops pseudo-fields from attrs
+        incoming_attr_keys = set(attrs.keys())
         mock_obj = self._build_mock_obj(attrs)
-        if set(list(ujt.get_ask_mapping().keys()) + ['extra_data']) & set(attrs.keys()):
-            accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(_exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+        ask_mapping_keys = set(ujt.get_ask_mapping().keys())
+        requested_prompt_fields = incoming_attr_keys & ask_mapping_keys
+        if 'extra_data' in incoming_attr_keys:
+            requested_prompt_fields.add('extra_vars')
+            requested_prompt_fields.add('survey_passwords')
+
+        # prompts_dict() pulls persisted M2M state (labels, credentials,
+        # instance_groups) via the instance pk.  Only re-validate the full prompt
+        # state when the caller is switching the underlying template; otherwise
+        # restrict validation to the fields the request explicitly provided.
+        if 'unified_job_template' in attrs:
+            prompts_to_validate = mock_obj.prompts_dict()
+        elif requested_prompt_fields:
+            prompts_to_validate = {k: v for k, v in mock_obj.prompts_dict().items() if k in requested_prompt_fields}
+        else:
+            prompts_to_validate = None
+
+        if prompts_to_validate is not None:
+            accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(_exclude_errors=self.exclude_errors, **prompts_to_validate)
         else:
             # Only perform validation of prompts if prompts fields are provided
             errors = {}
@@ -5393,7 +5463,11 @@ class SchedulePreviewSerializer(BaseSerializer):
         for a_rule in match_multiple_rrule:
             if 'interval' not in a_rule.lower():
                 errors.append("{0}: {1}".format(_('INTERVAL required in rrule'), a_rule))
-            elif 'secondly' in a_rule.lower():
+            else:
+                match_interval = re.match(r".*?INTERVAL=([0-9]+)", a_rule)
+                if match_interval and int(match_interval.group(1)) < 1:
+                    errors.append("{0}: {1}".format(_("INTERVAL must be a positive integer"), a_rule))
+            if 'secondly' in a_rule.lower():
                 errors.append("{0}: {1}".format(_('SECONDLY is not supported'), a_rule))
             if re.match(by_day_with_numeric_prefix, a_rule):
                 errors.append("{0}: {1}".format(_("BYDAY with numeric prefix not supported"), a_rule))

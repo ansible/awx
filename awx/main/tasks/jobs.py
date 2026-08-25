@@ -94,7 +94,7 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-from ansible_base.resource_registry.workload_identity_client import get_workload_identity_client
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -168,14 +168,12 @@ def retrieve_workload_identity_jwt(
     Raises:
         RuntimeError: if the workload identity client is not configured.
     """
-    client = get_workload_identity_client()
-    if client is None:
-        raise RuntimeError("Workload identity client is not configured")
-    claims = populate_claims_for_workload(unified_job)
-    kwargs = {"claims": claims, "scope": scope, "audience": audience}
-    if workload_ttl_seconds:
-        kwargs["workload_ttl_seconds"] = workload_ttl_seconds
-    return client.request_workload_jwt(**kwargs).jwt
+    return retrieve_workload_identity_jwt_with_claims(
+        populate_claims_for_workload(unified_job),
+        audience,
+        scope,
+        workload_ttl_seconds,
+    )
 
 
 def with_path_cleanup(f):
@@ -230,16 +228,19 @@ class BaseTask(object):
         # Convert to list to prevent re-evaluation of QuerySet
         return list(credentials_list)
 
-    def populate_workload_identity_tokens(self):
+    def populate_workload_identity_tokens(self, additional_credentials=None):
         """
         Populate credentials with workload identity tokens.
 
         Sets the context on Credential objects that have input sources
         using compatible external credential types.
         """
+        credentials = list(self._credentials)
+        if additional_credentials:
+            credentials.extend(additional_credentials)
         credential_input_sources = (
             (credential.context, src)
-            for credential in self._credentials
+            for credential in credentials
             for src in credential.input_sources.all()
             if any(
                 field.get('id') == 'workload_identity_token' and field.get('internal')
@@ -253,7 +254,7 @@ class BaseTask(object):
                 try:
                     jwt = retrieve_workload_identity_jwt(
                         self.instance,
-                        audience=input_src.source_credential.get_input('jwt_aud'),
+                        audience=input_src.source_credential.get_input('url'),
                         scope=AutomationControllerJobScope.name,
                         workload_ttl_seconds=workload_ttl,
                     )
@@ -546,7 +547,13 @@ class BaseTask(object):
         os.close(self.lock_fd)
         self.lock_fd = None
 
-    def acquire_lock(self, project, unified_job_id=None):
+    def acquire_lock(self, project, unified_job_id=None, exclusive=True):
+        """Acquire a file lock on the project's local source tree.
+
+        Uses LOCK_EX (exclusive) when the tree will be modified, or LOCK_SH (shared)
+        when only reading (e.g. copying). Polls until the lock is granted, checking
+        for cancellation on each iteration.
+        """
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
 
@@ -556,7 +563,7 @@ class BaseTask(object):
             project.save()
             lock_path = project.get_lock_file()
             if lock_path is None:
-                raise RuntimeError(u'Invalid lock file path')
+                raise RuntimeError('Invalid lock file path')
 
         try:
             self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
@@ -564,11 +571,12 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
-                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.lockf(self.lock_fd, lock_type | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
@@ -884,7 +892,9 @@ class SourceControlMixin(BaseTask):
         # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
         # Galaxy requirements are not supported for manual projects
-        if project.scm_type and ((not has_cache) or branch_override):
+        # If a source update is scheduled, always include roles/collections because
+        # the new revision may have different requirements.
+        if project.scm_type and ((not has_cache) or branch_override or source_update_tag in sync_needs):
             sync_needs.extend(['install_roles', 'install_collections'])
 
         return sync_needs
@@ -955,10 +965,35 @@ class SourceControlMixin(BaseTask):
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
     def sync_and_copy(self, project, private_data_dir, scm_branch=None):
-        self.acquire_lock(project, self.instance.id)
+        """Copy project content to private_data_dir, syncing from SCM only if needed.
+
+        Acquires a shared lock first so concurrent copy-only jobs (e.g. slice jobs) can
+        run in parallel. Upgrades to an exclusive lock only when the project tree needs
+        to be modified (fresh clone, revision mismatch, or missing cache). DB state is
+        refreshed after each lock acquisition to account for concurrent updates.
+        """
+        # Always start with a shared lock so concurrent copy-only jobs don't serialize.
+        # LOCK_SH waits for any in-flight LOCK_EX to drain, making the tree stable.
+        # Refresh DB state after acquiring so get_sync_needs sees the current revision,
+        # then upgrade to LOCK_EX only if a sync is actually required.
+        self.acquire_lock(project, self.instance.id, exclusive=False)
         is_commit = False
         try:
             original_branch = None
+            if project.pk:
+                project.refresh_from_db()
+            sync_needs = self.get_sync_needs(project, scm_branch=scm_branch)
+            if sync_needs:
+                # Tree needs modification — upgrade to exclusive.
+                # POSIX advisory locks cannot be upgraded atomically: LOCK_SH must be
+                # released before LOCK_EX can be granted, leaving a window where another
+                # process may sync the project. Refresh after re-acquiring so
+                # sync_and_copy_without_lock operates on current DB state.
+                self.release_lock(project)
+                self.acquire_lock(project, self.instance.id, exclusive=True)
+                if project.pk:
+                    project.refresh_from_db()
+
             failed_reason = project.get_reason_if_failed()
             if failed_reason:
                 self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
@@ -1137,12 +1172,11 @@ class RunJob(SourceControlMixin, BaseTask):
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
         ]
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            path_vars.append(
-                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
-            )
+        path_vars.append(
+            ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+        )
 
-        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
+        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)) + ['callbacks_enabled'])
 
         for env_key, config_setting, folder, default in path_vars:
             paths = default.split(':')
@@ -1157,11 +1191,12 @@ class RunJob(SourceControlMixin, BaseTask):
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
-            if 'callbacks_enabled' in config_values:
-                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
+        env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+        if 'callbacks_enabled' in config_values:
+            env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
 
+        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            env['AWX_COLLECT_HOST_QUERIES'] = '1'
             # Add vendor collections path for external query file discovery
             vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
             env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
@@ -1330,6 +1365,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 hosts_qs = job.get_source_hosts_for_constructed_inventory()
             else:
                 hosts_qs = job.inventory.hosts
+            hosts_qs = hosts_qs.only(*HOST_FACTS_FIELDS)
             finish_fact_cache(
                 hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
@@ -1610,16 +1646,14 @@ class RunProjectUpdate(BaseTask):
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            # copy the special callback (not stdout type) plugin to get list of collections
-            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
-            if not os.path.exists(pdd_plugins_path):
-                os.mkdir(pdd_plugins_path)
-            from awx.playbooks import library
+        pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+        if not os.path.exists(pdd_plugins_path):
+            os.mkdir(pdd_plugins_path)
+        from awx.playbooks import library
 
-            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
-            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
-            shutil.copyfile(plugin_file_source, plugin_file_dest)
+        plugin_file_source = os.path.join(library.__path__[0], 'indirect_instance_count.py')
+        plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+        shutil.copyfile(plugin_file_source, plugin_file_dest)
 
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)
@@ -1682,7 +1716,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
     def build_credentials_list(self, project_update):
-        if project_update.scm_type == 'insights' and project_update.credential:
+        if project_update.credential:
             return [project_update.credential]
         return []
 
@@ -1864,6 +1898,24 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     def build_credentials_list(self, inventory_update):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """Also generate OIDC tokens for the cloud credential.
+
+        The cloud credential is not in _credentials (it is handled by the
+        inventory source injector), but it may still need a workload identity
+        token generated for it.
+        """
+        cloud_cred = self.instance.get_cloud_credential()
+        creds = list(additional_credentials or [])
+        if cloud_cred:
+            creds.append(cloud_cred)
+        super().populate_workload_identity_tokens(additional_credentials=creds or None)
+        # Override get_cloud_credential on this instance so the injector
+        # uses the credential with OIDC context instead of doing a fresh
+        # DB fetch that would lose it.
+        if cloud_cred and cloud_cred.context:
+            self.instance.get_cloud_credential = lambda: cloud_cred
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None

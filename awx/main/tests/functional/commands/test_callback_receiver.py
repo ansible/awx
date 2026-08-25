@@ -48,7 +48,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         worker = CallbackBrokerWorker()
         events = [InventoryUpdateEvent(uuid=str(uuid4()), **self.event_create_kwargs())]
         worker.buff = {InventoryUpdateEvent: events}
-        worker.flush()
+        worker.flush(force=True)
         assert worker.buff.get(InventoryUpdateEvent, []) == []
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 1
 
@@ -61,7 +61,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
             InventoryUpdateEvent(uuid=str(uuid4()), stdout='good2', **kwargs),
         ]
         worker.buff = {InventoryUpdateEvent: events.copy()}
-        worker.flush()
+        worker.flush(force=True)
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 1
         assert InventoryUpdateEvent.objects.filter(uuid=events[1].uuid).count() == 0
         assert InventoryUpdateEvent.objects.filter(uuid=events[2].uuid).count() == 1
@@ -71,7 +71,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         worker = CallbackBrokerWorker()
         events = [InventoryUpdateEvent(uuid=str(uuid4()), **self.event_create_kwargs())]
         worker.buff = {InventoryUpdateEvent: events.copy()}
-        worker.flush()
+        worker.flush(force=True)
 
         # put current saved event in buffer (error case)
         worker.buff = {InventoryUpdateEvent: [InventoryUpdateEvent.objects.get(uuid=events[0].uuid)]}
@@ -113,7 +113,7 @@ class TestCallbackBrokerWorker(TransactionTestCase):
 
         with mock.patch.object(InventoryUpdateEvent.objects, 'bulk_create', side_effect=ValueError):
             with mock.patch.object(events[0], 'save', side_effect=ValueError):
-                worker.flush()
+                worker.flush(force=True)
 
             assert "\x00" not in events[0].stdout
 

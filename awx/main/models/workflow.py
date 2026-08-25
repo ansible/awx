@@ -345,7 +345,11 @@ class WorkflowJobNode(WorkflowNodeBase):
                 )
             data.update(accepted_fields)  # missing fields are handled in the scheduler
         # build ancestor artifacts, save them to node model for later
-        aa_dict = {}
+        # initialize from pre-seeded ancestor_artifacts (set on root nodes of
+        # child workflows via seed_root_ancestor_artifacts to carry artifacts
+        # from the parent workflow); exclude job_slice which is internal
+        # metadata handled separately below
+        aa_dict = {k: v for k, v in self.ancestor_artifacts.items() if k != 'job_slice'} if self.ancestor_artifacts else {}
         is_root_node = True
         for parent_node in self.get_parent_nodes():
             is_root_node = False
@@ -366,11 +370,13 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['survey_passwords'] = password_dict
         # process extra_vars
         extra_vars = data.get('extra_vars', {})
-        if ujt_obj and isinstance(ujt_obj, (JobTemplate, WorkflowJobTemplate)):
+        if ujt_obj and isinstance(ujt_obj, JobTemplate):
             if aa_dict:
                 functional_aa_dict = copy(aa_dict)
                 functional_aa_dict.pop('_ansible_no_log', None)
                 extra_vars.update(functional_aa_dict)
+        elif ujt_obj and isinstance(ujt_obj, WorkflowJobTemplate):
+            pass  # artifacts are applied via seed_root_ancestor_artifacts in the task manager
 
         # Workflow Job extra_vars higher precedence than ancestor artifacts
         extra_vars.update(wj_special_vars)
@@ -734,6 +740,18 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             wj = wj.get_workflow_job()
         return ancestors
 
+    def seed_root_ancestor_artifacts(self, artifacts):
+        """Apply parent workflow artifacts to root nodes so they propagate
+        through the normal ancestor_artifacts channel instead of being
+        baked into this workflow's extra_vars."""
+        self.workflow_job_nodes.exclude(
+            workflowjobnodes_success__isnull=False,
+        ).exclude(
+            workflowjobnodes_failure__isnull=False,
+        ).exclude(
+            workflowjobnodes_always__isnull=False,
+        ).update(ancestor_artifacts=artifacts)
+
     def get_effective_artifacts(self, **kwargs):
         """
         For downstream jobs of a workflow nested inside of a workflow,
@@ -882,7 +900,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return 'workflow_approval_template'
 
     def save(self, *args, **kwargs):
-        update_fields = list(kwargs.get('update_fields', []))
+        update_fields = list(kwargs.get('update_fields') or [])
         if self.timeout != 0 and ((not self.pk) or (not update_fields) or ('timeout' in update_fields)):
             if not self.created:  # on creation, created will be set by parent class, so we fudge it here
                 created = now()
@@ -917,6 +935,17 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.websocket_emit_status(self.status)
         ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
+
+    def cancel(self, job_explanation=None, is_chain=False):
+        # WorkflowApprovals have no dispatcher process (they wait for human
+        # input) and are excluded from TaskManager processing, so the base
+        # cancel() would only set cancel_flag without ever transitioning the
+        # status.  We call super() for the flag, then transition directly.
+        has_already_canceled = bool(self.status == 'canceled')
+        super().cancel(job_explanation=job_explanation, is_chain=is_chain)
+        if self.status != 'canceled' and not has_already_canceled:
+            self.status = 'canceled'
+            self.save(update_fields=['status'])
 
     def signal_start(self, **kwargs):
         can_start = super(WorkflowApproval, self).signal_start(**kwargs)

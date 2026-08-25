@@ -126,7 +126,7 @@ class TestKeyRegeneration:
             name='Example Template',
             survey_spec=survey_spec_factory([{'variable': 'secret_key', 'default': encrypt_value('donttell', pk=None), 'type': 'password'}]),
             survey_enabled=True,
-            **params
+            **params,
         )
         job = jt.create_unified_job()
         assert jt.survey_spec['spec'][0]['default'].startswith(PREFIX)

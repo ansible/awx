@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-import tempfile
-import shutil
-
 import pytest
 from unittest import mock
 
@@ -32,13 +28,12 @@ from ansible_base.lib.workload_identity.controller import AutomationControllerJo
 
 
 @pytest.fixture
-def private_data_dir():
-    private_data = tempfile.mkdtemp(prefix='awx_')
+def private_data_dir(tmp_path):
+    private_data = tmp_path / 'awx_pdd'
+    private_data.mkdir()
     for subfolder in ('inventory', 'env'):
-        runner_subfolder = os.path.join(private_data, subfolder)
-        os.makedirs(runner_subfolder, exist_ok=True)
-    yield private_data
-    shutil.rmtree(private_data, True)
+        (private_data / subfolder).mkdir()
+    return str(private_data)
 
 
 @pytest.fixture
@@ -88,11 +83,15 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
     host1 = mock.MagicMock(spec=Host, id=1, name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
     host2 = mock.MagicMock(spec=Host, id=2, name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=now(), inventory=inventory)
 
-    # Mock hosts queryset
+    # Mock hosts queryset — must support .only().filter().order_by().iterator() chain
     hosts = [host1, host2]
     qs_hosts = mock.MagicMock(spec=QuerySet)
     qs_hosts._result_cache = hosts
-    qs_hosts.only.return_value = hosts
+    qs_hosts.__iter__ = lambda self: iter(self._result_cache)
+    qs_hosts.only.return_value = qs_hosts
+    qs_hosts.filter.return_value = qs_hosts
+    qs_hosts.order_by.return_value = qs_hosts
+    qs_hosts.iterator.side_effect = lambda: iter(qs_hosts._result_cache)
     qs_hosts.count.side_effect = lambda: len(qs_hosts._result_cache)
     inventory.hosts = qs_hosts
 
@@ -101,6 +100,8 @@ def test_pre_post_run_hook_facts(mock_create_partition, mock_facts_settings, pri
     proj = mock.MagicMock(spec=Project, pk=1, organization=org)
     job = mock.MagicMock(
         spec=Job,
+        pk=1,
+        id=1,
         use_fact_cache=True,
         project=proj,
         organization=org,
@@ -157,9 +158,12 @@ def test_pre_post_run_hook_facts_deleted_sliced(
         host.inventory = mock_inventory
         hosts.append(host)
 
-    # Mock inventory.hosts behavior
+    # Mock inventory.hosts behavior — must support .only().filter().order_by().iterator() chain
     mock_qs_hosts = mock.MagicMock()
-    mock_qs_hosts.only.return_value = hosts
+    mock_qs_hosts.only.return_value = mock_qs_hosts
+    mock_qs_hosts.filter.return_value = mock_qs_hosts
+    mock_qs_hosts.order_by.return_value = mock_qs_hosts
+    mock_qs_hosts.iterator.side_effect = lambda: iter(hosts)
     mock_qs_hosts.count.return_value = 999
     mock_inventory.hosts = mock_qs_hosts
 
@@ -170,6 +174,8 @@ def test_pre_post_run_hook_facts_deleted_sliced(
 
     # Mock job object
     job = mock.MagicMock(spec=Job)
+    job.pk = 2
+    job.id = 2
     job.use_fact_cache = True
     job.project = proj
     job.organization = org
@@ -474,7 +480,7 @@ def test_populate_claims_for_adhoc_command(workload_attrs, expected_claims):
     assert claims == expected_claims
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_returns_jwt_from_client(mock_get_client):
     """retrieve_workload_identity_jwt returns the JWT string from the client."""
     mock_client = mock.MagicMock()
@@ -503,7 +509,7 @@ def test_retrieve_workload_identity_jwt_returns_jwt_from_client(mock_get_client)
     assert call_kwargs['claims'][AutomationControllerJobScope.CLAIM_JOB_NAME] == 'Test Job'
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_client):
     """retrieve_workload_identity_jwt passes audience and scope to the client."""
     mock_client = mock.MagicMock()
@@ -519,7 +525,7 @@ def test_retrieve_workload_identity_jwt_passes_audience_and_scope(mock_get_clien
     mock_client.request_workload_jwt.assert_called_once_with(claims={'job_id': 1}, scope=scope, audience=audience)
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_passes_workload_ttl(mock_get_client):
     """retrieve_workload_identity_jwt passes workload_ttl_seconds when provided."""
     mock_client = mock.Mock()
@@ -543,7 +549,7 @@ def test_retrieve_workload_identity_jwt_passes_workload_ttl(mock_get_client):
     )
 
 
-@mock.patch('awx.main.tasks.jobs.get_workload_identity_client')
+@mock.patch('awx.main.utils.workload_identity.get_workload_identity_client')
 def test_retrieve_workload_identity_jwt_raises_when_client_not_configured(mock_get_client):
     """retrieve_workload_identity_jwt raises RuntimeError when client is None."""
     mock_get_client.return_value = None
@@ -591,3 +597,67 @@ def test_populate_workload_identity_tokens_passes_get_instance_timeout_to_client
         scope=AutomationControllerJobScope.name,
         workload_ttl_seconds=expected_ttl,
     )
+
+
+class TestRunInventoryUpdatePopulateWorkloadIdentityTokens:
+    """Tests for RunInventoryUpdate.populate_workload_identity_tokens."""
+
+    def test_cloud_credential_passed_as_additional_credential(self):
+        """The cloud credential is forwarded to super().populate_workload_identity_tokens via additional_credentials."""
+        cloud_cred = mock.MagicMock(name='cloud_cred')
+        cloud_cred.context = {}
+
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = cloud_cred
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens()
+
+        mock_super.assert_called_once_with(additional_credentials=[cloud_cred])
+
+    def test_no_cloud_credential_calls_super_with_none(self):
+        """When there is no cloud credential, super() is called with additional_credentials=None."""
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = None
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens()
+
+        mock_super.assert_called_once_with(additional_credentials=None)
+
+    def test_additional_credentials_combined_with_cloud_credential(self):
+        """Caller-supplied additional_credentials are combined with the cloud credential."""
+        cloud_cred = mock.MagicMock(name='cloud_cred')
+        cloud_cred.context = {}
+        extra_cred = mock.MagicMock(name='extra_cred')
+
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = cloud_cred
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens(additional_credentials=[extra_cred])
+
+        mock_super.assert_called_once_with(additional_credentials=[extra_cred, cloud_cred])
+
+    def test_cloud_credential_override_after_context_set(self):
+        """After OIDC processing, get_cloud_credential is overridden on the instance when context is populated."""
+        cloud_cred = mock.MagicMock(name='cloud_cred')
+        # Simulate that super().populate_workload_identity_tokens populates context
+        cloud_cred.context = {'workload_identity_token': 'eyJ.test.jwt'}
+
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = cloud_cred
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens'):
+            task.populate_workload_identity_tokens()
+
+        # The instance's get_cloud_credential should now return the same object with context
+        assert task.instance.get_cloud_credential() is cloud_cred

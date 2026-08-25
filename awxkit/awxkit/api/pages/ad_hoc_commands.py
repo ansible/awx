@@ -39,7 +39,7 @@ class AdHocCommand(HasCreate, UnifiedJob):
             verbosity=verbosity,
             inventory=self.ds.inventory,
             credential=self.ds.credential,
-            **kwargs
+            **kwargs,
         )
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
@@ -53,7 +53,7 @@ class AdHocCommand(HasCreate, UnifiedJob):
             verbosity=verbosity,
             inventory=inventory,
             credential=credential,
-            **kwargs
+            **kwargs,
         )
         return self.update_identity(AdHocCommands(self.connection).post(payload))
 

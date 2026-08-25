@@ -20,6 +20,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
 from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac.policies import visible_users
 from ansible_base.rbac import permission_registry
 
 # AWX
@@ -643,6 +644,8 @@ class UserAccess(BaseAccess):
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             qs = User.objects.all()
+        elif settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            qs = visible_users(self.user)
         else:
             qs = (
                 User.objects.filter(pk__in=Organization.access_qs(self.user, 'view').values('member_role__members'))
@@ -706,12 +709,13 @@ class UserAccess(BaseAccess):
                 # in these cases only superusers can modify orphan users
                 return False
             if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-                # Permission granted if the user has all permissions that the target user has
                 target_perms = set(
-                    RoleEvaluation.objects.filter(role__in=obj.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(obj)).values_list('object_id', 'content_type_id', 'codename').distinct()
                 )
                 user_perms = set(
-                    RoleEvaluation.objects.filter(role__in=self.user.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(self.user))
+                    .values_list('object_id', 'content_type_id', 'codename')
+                    .distinct()
                 )
                 return not (target_perms - user_perms)
             return not obj.roles.all().exclude(ancestors__in=self.user.roles.all()).exists()
@@ -897,8 +901,6 @@ class HostAccess(BaseAccess):
         'created_by',
         'modified_by',
         'inventory',
-        'last_job__job_template',
-        'last_job_host_summary__job',
     )
     prefetch_related = ('groups', 'inventory_sources')
 
@@ -1230,9 +1232,11 @@ class TeamAccess(BaseAccess):
             Organization.access_qs(self.user, 'change').exists() or Organization.access_qs(self.user, 'audit').exists()
         ):
             return self.model.objects.all()
-        return self.model.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')) | Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role'))
+        org_member_teams = (
+            self.model.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'member_role')).order_by().values_list('pk', flat=True)
         )
+        direct_read_teams = self.model.objects.filter(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')).order_by().values_list('pk', flat=True)
+        return self.model.objects.filter(pk__in=org_member_teams.union(direct_read_teams))
 
     @check_superuser
     def can_add(self, data):
@@ -1667,11 +1671,11 @@ class JobAccess(BaseAccess):
     def filtered_queryset(self):
         qs = self.model.objects
 
-        qs_jt = qs.filter(job_template__in=JobTemplate.access_qs(self.user, 'view'))
-
-        org_access_qs = Organization.objects.filter(Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
+        org_access_qs = Organization.objects.filter(
+            Q(pk__in=Organization.access_ids_qs(self.user, 'change')) | Q(pk__in=Organization.access_ids_qs(self.user, 'audit_organization'))
+        )
         if not org_access_qs.exists():
-            return qs_jt
+            return qs.filter(job_template__in=JobTemplate.access_qs(self.user, 'view'))
 
         return qs.filter(Q(job_template__in=JobTemplate.access_qs(self.user, 'view')) | Q(organization__in=org_access_qs)).distinct()
 
@@ -2311,7 +2315,7 @@ class JobHostSummaryAccess(BaseAccess):
 
 class JobEventAccess(BaseAccess):
     """
-    I can see job event records whenever I can read both job and host.
+    I can see job event records whenever I can read the job or the host.
     """
 
     model = JobEvent
@@ -2322,8 +2326,8 @@ class JobEventAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(host__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
-            | Q(job__job_template__in=JobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            Q(host_id__in=Host.objects.filter(inventory__in=Inventory.access_ids_qs(self.user, 'view')).values('pk'))
+            | Q(job_id__in=Job.objects.filter(job_template__in=JobTemplate.access_ids_qs(self.user, 'view')).values('pk'))
         )
 
     def can_add(self, data):
@@ -2453,7 +2457,11 @@ class UnifiedJobTemplateAccess(BaseAccess):
     def filtered_queryset(self):
         return self.model.objects.filter(
             Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role'))
-            | Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(Inventory, self.user, 'read_role'))
+            | Q(
+                pk__in=InventorySource.objects.filter(
+                    inventory__id__in=Inventory.access_ids_qs(self.user, 'view'),
+                ).values('unifiedjobtemplate_ptr_id')
+            )
         )
 
     def can_start(self, obj, validate_license=True):
@@ -2499,14 +2507,21 @@ class UnifiedJobAccess(BaseAccess):
     # )
 
     def filtered_queryset(self):
-        inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
-        qs = self.model.objects.filter(
+        inv_pk_qs = Inventory.access_ids_qs(self.user, 'view')
+        return self.model.objects.filter(
             Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-            | Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs)
-            | Q(adhoccommand__inventory__id__in=inv_pk_qs)
-            | Q(organization__in=Organization.accessible_pk_qs(self.user, 'auditor_role'))
+            | Q(
+                pk__in=InventoryUpdate.objects.filter(
+                    inventory_source__inventory__id__in=inv_pk_qs,
+                ).values('pk')
+            )
+            | Q(
+                pk__in=AdHocCommand.objects.filter(
+                    inventory__id__in=inv_pk_qs,
+                ).values('pk')
+            )
+            | Q(organization__in=Organization.access_ids_qs(self.user, 'audit_organization'))
         )
-        return qs
 
     def get_queryset(self):
         return super(UnifiedJobAccess, self).get_queryset().filter(workflowapproval__isnull=True)
@@ -2624,9 +2639,13 @@ class LabelAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(organization__in=Organization.accessible_pk_qs(self.user, 'read_role'))
-            | Q(unifiedjobtemplate_labels__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-        ).distinct()
+            Q(organization__in=Organization.access_ids_qs(self.user, 'view'))
+            | Q(
+                pk__in=UnifiedJobTemplate.labels.through.objects.filter(
+                    unifiedjobtemplate_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'),
+                ).values('label_id')
+            )
+        )
 
     @check_superuser
     def can_add(self, data):
@@ -2700,54 +2719,73 @@ class ActivityStreamAccess(BaseAccess):
         # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
         # 'inventory_source', 'workflow_job_template'
 
-        q = Q(user=self.user)
-        inventory_set = Inventory.accessible_pk_qs(self.user, 'read_role')
-        if inventory_set:
+        AS = ActivityStream
+
+        q = Q(pk__in=AS.user.through.objects.filter(user=self.user).values('activitystream_id'))
+
+        inventory_set = Inventory.access_ids_qs(self.user, 'view')
+        if inventory_set.exists():
             q |= (
-                Q(ad_hoc_command__inventory__in=inventory_set)
-                | Q(inventory__in=inventory_set)
-                | Q(host__inventory__in=inventory_set)
-                | Q(group__inventory__in=inventory_set)
-                | Q(inventory_source__inventory__in=inventory_set)
-                | Q(inventory_update__inventory_source__inventory__in=inventory_set)
+                Q(pk__in=AS.ad_hoc_command.through.objects.filter(adhoccommand__inventory__in=inventory_set).values('activitystream_id'))
+                | Q(pk__in=AS.inventory.through.objects.filter(inventory__in=inventory_set).values('activitystream_id'))
+                | Q(pk__in=AS.host.through.objects.filter(host__inventory__in=inventory_set).values('activitystream_id'))
+                | Q(pk__in=AS.group.through.objects.filter(group__inventory__in=inventory_set).values('activitystream_id'))
+                | Q(pk__in=AS.inventory_source.through.objects.filter(inventorysource__inventory__in=inventory_set).values('activitystream_id'))
+                | Q(
+                    pk__in=AS.inventory_update.through.objects.filter(inventoryupdate__inventory_source__inventory__in=inventory_set).values(
+                        'activitystream_id'
+                    )
+                )
             )
 
-        credential_set = Credential.accessible_pk_qs(self.user, 'read_role')
-        if credential_set:
-            q |= Q(credential__in=credential_set)
+        credential_set = Credential.access_ids_qs(self.user, 'view')
+        if credential_set.exists():
+            q |= Q(pk__in=AS.credential.through.objects.filter(credential__in=credential_set).values('activitystream_id'))
 
         auditing_orgs = (Organization.access_qs(self.user, 'change') | Organization.access_qs(self.user, 'audit')).distinct().values_list('id', flat=True)
-        if auditing_orgs:
+        if auditing_orgs.exists():
             q |= (
-                Q(user__in=auditing_orgs.values('member_role__members'))
-                | Q(organization__in=auditing_orgs)
-                | Q(notification_template__organization__in=auditing_orgs)
-                | Q(notification__notification_template__organization__in=auditing_orgs)
-                | Q(label__organization__in=auditing_orgs)
-                | Q(role__in=Role.visible_roles(self.user) if auditing_orgs else [])
+                Q(pk__in=AS.user.through.objects.filter(user__in=auditing_orgs.values('member_role__members')).values('activitystream_id'))
+                | Q(pk__in=AS.organization.through.objects.filter(organization__in=auditing_orgs).values('activitystream_id'))
+                | Q(pk__in=AS.notification_template.through.objects.filter(notificationtemplate__organization__in=auditing_orgs).values('activitystream_id'))
+                | Q(
+                    pk__in=AS.notification.through.objects.filter(notification__notification_template__organization__in=auditing_orgs).values(
+                        'activitystream_id'
+                    )
+                )
+                | Q(pk__in=AS.label.through.objects.filter(label__organization__in=auditing_orgs).values('activitystream_id'))
+                | Q(pk__in=AS.role.through.objects.filter(role__in=Role.visible_roles(self.user)).values('activitystream_id'))
             )
 
-        project_set = Project.accessible_pk_qs(self.user, 'read_role')
-        if project_set:
-            q |= Q(project__in=project_set) | Q(project_update__project__in=project_set)
-
-        jt_set = JobTemplate.accessible_pk_qs(self.user, 'read_role')
-        if jt_set:
-            q |= Q(job_template__in=jt_set) | Q(job__job_template__in=jt_set)
-
-        wfjt_set = WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role')
-        if wfjt_set:
-            q |= (
-                Q(workflow_job_template__in=wfjt_set)
-                | Q(workflow_job_template_node__workflow_job_template__in=wfjt_set)
-                | Q(workflow_job__workflow_job_template__in=wfjt_set)
+        project_set = Project.access_ids_qs(self.user, 'view')
+        if project_set.exists():
+            q |= Q(pk__in=AS.project.through.objects.filter(project__in=project_set).values('activitystream_id')) | Q(
+                pk__in=AS.project_update.through.objects.filter(projectupdate__project__in=project_set).values('activitystream_id')
             )
 
-        team_set = Team.accessible_pk_qs(self.user, 'read_role')
-        if team_set:
-            q |= Q(team__in=team_set)
+        jt_set = JobTemplate.access_ids_qs(self.user, 'view')
+        if jt_set.exists():
+            q |= Q(pk__in=AS.job_template.through.objects.filter(jobtemplate__in=jt_set).values('activitystream_id')) | Q(
+                pk__in=AS.job.through.objects.filter(job__job_template__in=jt_set).values('activitystream_id')
+            )
 
-        return qs.filter(q).distinct()
+        wfjt_set = WorkflowJobTemplate.access_ids_qs(self.user, 'view')
+        if wfjt_set.exists():
+            q |= (
+                Q(pk__in=AS.workflow_job_template.through.objects.filter(workflowjobtemplate__in=wfjt_set).values('activitystream_id'))
+                | Q(
+                    pk__in=AS.workflow_job_template_node.through.objects.filter(workflowjobtemplatenode__workflow_job_template__in=wfjt_set).values(
+                        'activitystream_id'
+                    )
+                )
+                | Q(pk__in=AS.workflow_job.through.objects.filter(workflowjob__workflow_job_template__in=wfjt_set).values('activitystream_id'))
+            )
+
+        team_set = Team.access_ids_qs(self.user, 'view')
+        if team_set.exists():
+            q |= Q(pk__in=AS.team.through.objects.filter(team__in=team_set).values('activitystream_id'))
+
+        return qs.filter(q)
 
     def can_add(self, data):
         return False

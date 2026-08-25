@@ -393,7 +393,7 @@ def test_remove_team_from_role(post, team, admin, role):
 
 
 @pytest.mark.django_db
-def test_ensure_rbac_fields_are_present(organization, get, admin):
+def test_ensure_rbac_fields_are_present(organization, get, admin, setup_managed_roles):
     url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     response = get(url, admin)
     assert response.status_code == 200
@@ -412,7 +412,7 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
 
 
 @pytest.mark.django_db
-def test_ensure_role_summary_is_present(organization, get, user):
+def test_ensure_role_summary_is_present(organization, get, user, setup_managed_roles):
     url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     response = get(url, user('admin', True))
     assert response.status_code == 200

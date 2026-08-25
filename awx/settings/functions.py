@@ -12,6 +12,41 @@ def merge_application_name(settings):
     return data
 
 
+def merge_statement_timeout(settings):
+    """Return a dynaconf merge dict to set statement_timeout for web worker DB connections.
+
+    Under uwsgi, derives timeout from harakiri with a safety margin so
+    PostgreSQL cancels the query before uwsgi kills the worker.  The margin
+    is 10% of harakiri, clamped to [1s, 5s].  Falls back to the
+    DATABASE_STATEMENT_TIMEOUT setting for non-uwsgi deployments.
+    """
+    if "sqlite3" in settings.get("DATABASES__default__ENGINE", ""):
+        return {}
+
+    timeout_ms = None
+    try:
+        import uwsgi
+
+        harakiri = int(uwsgi.opt.get(b'harakiri', 0))
+        if harakiri > 0:
+            margin = min(5, max(1, int(harakiri * 0.1)))
+            timeout_ms = max(1000, (harakiri - margin) * 1000)
+    except (ImportError, ValueError):
+        pass
+
+    if timeout_ms is None:
+        timeout_ms = settings.get("DATABASE_STATEMENT_TIMEOUT")
+
+    if timeout_ms is None:
+        return {}
+
+    existing = settings.get("DATABASES__default__OPTIONS__options", "")
+    new_opt = f"-c statement_timeout={timeout_ms}"
+    value = f"{existing} {new_opt}".strip() if existing else new_opt
+
+    return {"DATABASES__default__OPTIONS__options": value}
+
+
 def add_backwards_compatibility():
     """Add backwards compatibility for AWX_MODE.
 

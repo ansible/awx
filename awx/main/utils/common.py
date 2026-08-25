@@ -93,6 +93,7 @@ __all__ = [
     'get_event_partition_epoch',
     'cleanup_new_process',
     'unified_job_class_to_event_table_name',
+    'get_job_variable_prefixes',
 ]
 
 
@@ -148,14 +149,6 @@ def is_testing(argv=None):
     elif len(argv) >= 2 and argv[1] == 'test':
         return True
     return False
-
-
-def bypass_in_test(func):
-    def fn(*args, **kwargs):
-        if not is_testing():
-            return func(*args, **kwargs)
-
-    return fn
 
 
 class RequireDebugTrueOrTest(logging.Filter):
@@ -340,16 +333,16 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type not in ("insights", "archive"):
-        netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
+        netloc = ':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
-        netloc = u''
+        netloc = ''
     # urllib.parse strips brackets from IPv6 addresses, so we need to add them back in
     hostname = parts.hostname
     if hostname and ':' in hostname and '[' in url and ']' in url:
         hostname = f'[{hostname}]'
-    netloc = u'@'.join(filter(None, [netloc, hostname]))
+    netloc = '@'.join(filter(None, [netloc, hostname]))
     if parts.port:
-        netloc = u':'.join([netloc, str(parts.port)])
+        netloc = ':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':
         new_url = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
@@ -385,7 +378,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     if field_name in password_fields or (isinstance(field_val, str) and field_val.startswith('$encrypted$')):
-        return u'hidden'
+        return 'hidden'
     if hasattr(obj, 'display_%s' % field_name):
         field_val = getattr(obj, 'display_%s' % field_name)()
     if isinstance(field_val, (list, dict)):
@@ -773,6 +766,21 @@ def get_cpu_effective_capacity(cpu_count, is_control_node=False):
     return max(1, int(cpu_count * forkcpu))
 
 
+def get_job_variable_prefixes():
+    """Return the list of active job variable prefixes based on INCLUDE_DEPRECATED_AWX_VAR_PREFIX setting.
+
+    When True (default), returns both 'awx' and 'tower' prefixes for backward compatibility.
+    When False, returns only 'tower'. The 'awx' prefix is deprecated and this setting
+    will default to False in a future release.
+    """
+    from django.conf import settings
+
+    include_awx = getattr(settings, 'INCLUDE_DEPRECATED_AWX_VAR_PREFIX', True)
+    if include_awx:
+        return ['awx', 'tower']
+    return ['tower']
+
+
 def convert_mem_str_to_bytes(mem_str):
     """Convert string with suffix indicating units to memory in bytes (base 2)
 
@@ -1118,15 +1126,15 @@ def truncate_stdout(stdout, size):
     if size <= 0 or len(stdout) <= size:
         return stdout
 
-    stdout = stdout[: (size - 1)] + u'\u2026'
+    stdout = stdout[: (size - 1)] + '\u2026'
     set_count, reset_count = 0, 0
     for m in ANSI_SGR_PATTERN.finditer(stdout):
-        if m.group() == u'\u001b[0m':
+        if m.group() == '\u001b[0m':
             reset_count += 1
         else:
             set_count += 1
 
-    return stdout + u'\u001b[0m' * (set_count - reset_count)
+    return stdout + '\u001b[0m' * (set_count - reset_count)
 
 
 def deepmerge(a, b):

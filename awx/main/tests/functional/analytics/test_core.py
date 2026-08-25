@@ -74,9 +74,9 @@ def temp_analytic_tar():
 
 @pytest.fixture
 def mock_analytic_post():
-    # Patch the Session.post method to return a mock response with status_code 200
-    with mock.patch('awx.main.analytics.core.requests.Session.post', return_value=mock.Mock(status_code=200)) as mock_post:
-        yield mock_post
+    # Patch get_or_generate_candlepin_certificate to skip mTLS path
+    with mock.patch('awx.main.analytics.core.get_or_generate_candlepin_certificate', return_value=(None, None)):
+        yield
 
 
 @pytest.mark.parametrize(
@@ -141,15 +141,22 @@ def mock_analytic_post():
 )
 @pytest.mark.django_db
 def test_ship_credential(setting_map, expected_result, expected_auth, temp_analytic_tar, mock_analytic_post):
-    with override_settings(**setting_map):
-        result = ship(temp_analytic_tar)
+    with override_settings(**setting_map, AUTOMATION_ANALYTICS_URL='https://example.com/api'):
+        with mock.patch('awx.main.analytics.core.OIDCClient') as mock_oidc:
+            mock_oidc_instance = mock.Mock()
+            mock_oidc_instance.make_request.return_value = mock.Mock(status_code=200)
+            mock_oidc.return_value = mock_oidc_instance
 
-        assert result == expected_result
-        if expected_auth:
-            mock_analytic_post.assert_called_once()
-            assert mock_analytic_post.call_args[1]['auth'] == expected_auth
-        else:
-            mock_analytic_post.assert_not_called()
+            result = ship(temp_analytic_tar)
+
+            assert result == expected_result
+            if expected_auth:
+                # Verify OIDC client was instantiated with correct credentials
+                mock_oidc.assert_called_once_with(expected_auth[0], expected_auth[1])
+                mock_oidc_instance.make_request.assert_called_once()
+            else:
+                # When credentials are missing, OIDCClient should not be called
+                mock_oidc.assert_not_called()
 
 
 @pytest.mark.django_db
