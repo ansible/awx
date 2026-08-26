@@ -53,27 +53,18 @@ JHS_CHUNK_SIZE = 1000
 
 
 def _pre_delete_job_host_summaries(job_pks, logger=None):
-    """Pre-delete JobHostSummary rows and clear Host FK references in batches.
+    """Pre-delete JobHostSummary rows in batches.
 
-    Django's cascade collector materializes all JHS IDs into a single
-    UPDATE ... IN (...) to SET_NULL on Host.last_job_host_summary.
-    With many jobs x hosts this exceeds PostgreSQL's 1GB alloc limit.
-    Doing it in chunks with raw SQL avoids that.
+    Deleting via raw SQL in chunks avoids Django's cascade collector
+    materializing all JHS IDs into memory at once, which can exceed
+    PostgreSQL's 1GB alloc limit when many jobs x hosts are involved.
     """
     if not job_pks:
         return
 
-    # ANY(%s) is PostgreSQL-specific; AWX only supports PostgreSQL
     with connection.cursor() as cursor:
         for i in range(0, len(job_pks), JHS_CHUNK_SIZE):
             chunk = list(job_pks[i : i + JHS_CHUNK_SIZE])
-
-            cursor.execute(
-                "UPDATE main_host SET last_job_host_summary_id = NULL"
-                " WHERE last_job_host_summary_id IN"
-                " (SELECT id FROM main_jobhostsummary WHERE job_id = ANY(%s))",
-                [chunk],
-            )
 
             cursor.execute(
                 "DELETE FROM main_jobhostsummary WHERE job_id = ANY(%s)",

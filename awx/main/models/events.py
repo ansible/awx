@@ -589,9 +589,6 @@ class JobEvent(BasePlaybookEvent):
 
             JobHostSummary.objects.bulk_create(summaries.values())
 
-            # last_job and last_job_host_summary are now derived via
-            # JobHostSummary.latest_for_host / latest_job_for_host
-
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)
 

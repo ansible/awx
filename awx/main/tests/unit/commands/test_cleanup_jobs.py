@@ -18,13 +18,8 @@ class TestPreDeleteJobHostSummaries:
 
             _pre_delete_job_host_summaries(job_pks)
 
-            assert mock_cursor.execute.call_count == 2
-            update_call = mock_cursor.execute.call_args_list[0]
-            assert 'UPDATE main_host SET last_job_host_summary_id = NULL' in update_call[0][0]
-            assert 'ANY(%s)' in update_call[0][0]
-            assert update_call[0][1] == [[1, 2, 3]]
-
-            delete_call = mock_cursor.execute.call_args_list[1]
+            assert mock_cursor.execute.call_count == 1
+            delete_call = mock_cursor.execute.call_args_list[0]
             assert 'DELETE FROM main_jobhostsummary' in delete_call[0][0]
             assert 'ANY(%s)' in delete_call[0][0]
             assert delete_call[0][1] == [[1, 2, 3]]
@@ -38,16 +33,16 @@ class TestPreDeleteJobHostSummaries:
 
             _pre_delete_job_host_summaries(job_pks)
 
-            # 2 chunks x 2 SQL statements each = 4 execute calls
-            assert mock_cursor.execute.call_count == 4
+            # 2 chunks x 1 DELETE each = 2 execute calls
+            assert mock_cursor.execute.call_count == 2
 
             # First chunk should have JHS_CHUNK_SIZE items
-            first_update = mock_cursor.execute.call_args_list[0]
-            assert len(first_update[0][1][0]) == JHS_CHUNK_SIZE
+            first_delete = mock_cursor.execute.call_args_list[0]
+            assert len(first_delete[0][1][0]) == JHS_CHUNK_SIZE
 
             # Second chunk should have the remainder
-            second_update = mock_cursor.execute.call_args_list[2]
-            assert len(second_update[0][1][0]) == 499
+            second_delete = mock_cursor.execute.call_args_list[1]
+            assert len(second_delete[0][1][0]) == 499
 
     def test_sql_is_fully_static(self):
         """SQL strings contain no interpolated values — only ANY(%s) placeholders."""
@@ -76,21 +71,6 @@ class TestPreDeleteJobHostSummaries:
             _pre_delete_job_host_summaries(job_pks, logger=logger)
 
             logger.debug.assert_called_once()
-
-    def test_update_runs_before_delete(self):
-        """Host FK must be NULLed before JHS rows are deleted."""
-        job_pks = [1]
-        with mock.patch('awx.main.management.commands.cleanup_jobs.connection') as mock_conn:
-            mock_cursor = mock.MagicMock()
-            mock_conn.cursor.return_value.__enter__ = mock.Mock(return_value=mock_cursor)
-            mock_conn.cursor.return_value.__exit__ = mock.Mock(return_value=False)
-
-            _pre_delete_job_host_summaries(job_pks)
-
-            first_sql = mock_cursor.execute.call_args_list[0][0][0]
-            second_sql = mock_cursor.execute.call_args_list[1][0][0]
-            assert 'UPDATE' in first_sql
-            assert 'DELETE' in second_sql
 
 
 class TestDeleteMetaPreDelete:

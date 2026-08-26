@@ -550,23 +550,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
             help_text=_('Host variables in JSON or YAML format.'),
         )
     )
-    last_job = models.ForeignKey(
-        'Job',
-        related_name='hosts_as_last_job+',
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.SET_NULL,
-    )
-    last_job_host_summary = models.ForeignKey(
-        'JobHostSummary',
-        related_name='hosts_as_last_job_summary+',
-        blank=True,
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.SET_NULL,
-    )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
         related_name='hosts',
