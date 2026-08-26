@@ -635,7 +635,7 @@ register(
 register(
     'LOG_AGGREGATOR_TYPE',
     field_class=fields.ChoiceField,
-    choices=['logstash', 'splunk', 'loggly', 'sumologic', 'other'],
+    choices=['logstash', 'splunk', 'loggly', 'sumologic', 'dynatrace', 'other'],
     allow_null=True,
     default=None,
     label=_('Logging Aggregator Type'),

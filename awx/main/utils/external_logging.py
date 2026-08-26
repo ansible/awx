@@ -105,7 +105,8 @@ def construct_rsyslog_conf_template(settings=settings):
             params.append(f'restpath="{path}"')
         username = escape_quotes(getattr(settings, 'LOG_AGGREGATOR_USERNAME', ''))
         password = escape_quotes(getattr(settings, 'LOG_AGGREGATOR_PASSWORD', ''))
-        if getattr(settings, 'LOG_AGGREGATOR_TYPE', None) == 'splunk':
+        aggregator_type = getattr(settings, 'LOG_AGGREGATOR_TYPE', None)
+        if aggregator_type == 'splunk':
             # splunk has a weird authorization header <shrug>
             if password:
                 # from omhttp docs:
@@ -115,6 +116,12 @@ def construct_rsyslog_conf_template(settings=settings):
                 # > arbitrary header key/value lists.
                 params.append('httpheaderkey="Authorization"')
                 params.append(f'httpheadervalue="Splunk {password}"')
+        elif aggregator_type == 'dynatrace':
+            # Dynatrace Log Ingest API v2 requires plain text, not JSON
+            params.append('httpcontenttype="text/plain; charset=utf-8"')
+            if password:
+                params.append('httpheaderkey="Authorization"')
+                params.append(f'httpheadervalue="Api-Token {password}"')
         elif username:
             params.append(f'uid="{username}"')
             if password:
