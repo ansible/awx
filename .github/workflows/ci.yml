@@ -77,7 +77,7 @@ jobs:
             coverage-upload-name: "awx-collection"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
 
@@ -113,7 +113,7 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.cov-report-files != ''
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           fail_ci_if_error: >-
             ${{
@@ -132,7 +132,7 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.test-result-files != ''
-        uses: codecov/test-results-action@v1
+        uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3 # v1
         with:
           fail_ci_if_error: >-
             ${{
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.tests.name }}-artifacts
           path: |
@@ -184,7 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
 
@@ -214,7 +214,7 @@ jobs:
       DEBUG_OUTPUT_DIR: /tmp/awx_operator_molecule_test
     steps:
       - name: Checkout awx
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
           path: awx
@@ -224,7 +224,7 @@ jobs:
           ssh-private-key: ${{ secrets.PRIVATE_GITHUB_KEY }}
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false\
           repository: ansible/awx-operator
@@ -305,7 +305,7 @@ jobs:
 
       - name: Upload debug output
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: awx-operator-debug-output
           path: ${{ env.DEBUG_OUTPUT_DIR }}
@@ -374,7 +374,7 @@ jobs:
           - name: r-z0-9
             regex: ^[r-z0-9]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
 
@@ -418,7 +418,7 @@ jobs:
         if: >-
           !cancelled()
           && steps.make-run.outputs.cov-report-files != ''
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           fail_ci_if_error: >-
             ${{
@@ -436,7 +436,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       # Upload coverage report as artifact
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: coverage-${{ matrix.target-regex.name }}
@@ -457,7 +457,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
           show-progress: false
@@ -474,7 +474,7 @@ jobs:
         run: python -m pip install --upgrade ansible-core
 
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           merge-multiple: true
           path: coverage
@@ -498,7 +498,7 @@ jobs:
           echo 'Download the HTML artifacts to view the coverage report.' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload coverage report as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: awx-collection-integration-coverage-html
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/reports/coverage
