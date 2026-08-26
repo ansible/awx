@@ -218,7 +218,7 @@ def test_embedded_query_takes_precedence(live_tmp_folder, run_job_from_playbook,
     # Verify the embedded query was used (includes device_type in facts)
     host_audit = IndirectManagedNodeAudit.objects.filter(job=job).first()
     assert host_audit.facts == {'device_type': 'Fake Host'}, (
-        'Expected embedded query output (with device_type). ' 'If facts is {}, the external query was incorrectly used instead.'
+        'Expected embedded query output (with device_type). If facts is {}, the external query was incorrectly used instead.'
     )
 
 
@@ -288,7 +288,7 @@ def test_fallback_does_not_overcount(live_tmp_folder, run_job_from_playbook, ena
 
     # Critical safety check: fallback must never count MORE than exact
     assert fallback_count <= exact_count, (
-        f'Overcounting detected! Fallback produced {fallback_count} records ' f'but exact match produced only {exact_count} records.'
+        f'Overcounting detected! Fallback produced {fallback_count} records but exact match produced only {exact_count} records.'
     )
 
     # Both use the same jq expression and same module, so counts should be equal
@@ -343,5 +343,5 @@ def test_no_counting_without_compatible_fallback(live_tmp_folder, run_job_from_p
 
     # No audit records should exist for this job
     assert IndirectManagedNodeAudit.objects.filter(job=job).count() == 0, (
-        'IndirectManagedNodeAudit records were created despite no compatible ' 'fallback existing for demo.external v3.0.0 (only v1.x queries available).'
+        'IndirectManagedNodeAudit records were created despite no compatible fallback existing for demo.external v3.0.0 (only v1.x queries available).'
     )

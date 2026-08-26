@@ -29,7 +29,7 @@ class TestNotificationTemplateSerializer:
             },
             {'started': {'body': '{{ job_metadata }}'}},
             {'started': {'body': '{{ job.summary_fields.inventory.total_hosts }}'}},
-            {'started': {'body': u'Iñtërnâtiônàlizætiøn'}},
+            {'started': {'body': 'Iñtërnâtiônàlizætiøn'}},
         ],
     )
     def test_valid_messages(self, valid_messages):

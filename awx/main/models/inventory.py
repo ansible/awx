@@ -42,7 +42,6 @@ from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictPr
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
-    ResourceMixin,
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
     CustomVirtualEnvMixin,
@@ -71,7 +70,7 @@ class InventoryConstructedInventoryMembership(models.Model):
     )
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin):
+class Inventory(CommonModelNameNotUnique, RelatedJobsMixin, OpaQueryPathMixin):
     """
     an inventory source contains lists and hosts.
     """

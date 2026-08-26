@@ -75,7 +75,6 @@ from awx.main.models.rbac import (  # noqa
 from awx.main.models.mixins import (  # noqa
     CustomVirtualEnvMixin,
     ExecutionEnvironmentMixin,
-    ResourceMixin,
     SurveyJobMixin,
     SurveyJobTemplateMixin,
     TaskManagerInventoryUpdateMixin,
@@ -201,6 +200,8 @@ def user_is_system_auditor(user):
 
 @user_is_system_auditor.setter
 def user_is_system_auditor(user, tf):
+    from awx.main.signals import disable_activity_stream
+
     if not user.id:
         # If the user doesn't have a primary key yet (i.e., this is the *first*
         # time they've logged in, and we've just created the new User in this
@@ -210,10 +211,14 @@ def user_is_system_auditor(user, tf):
     assignment = RoleUserAssignment.objects.filter(user=user, role_definition=rd).first()
     prior_value = bool(assignment)
     if prior_value != bool(tf):
-        if assignment:
-            assignment.delete()
-        else:
-            rd.give_global_permission(user)
+        # The role assignment change below is already recorded by this function's own
+        # 'update' entry, which captures the prior/new boolean value. Suppress activity
+        # stream for the assignment create/delete so it isn't recorded a second time.
+        with disable_activity_stream():
+            if assignment:
+                assignment.delete()
+            else:
+                rd.give_global_permission(user)
         user._is_system_auditor = bool(tf)
         entry = ActivityStream.objects.create(changes=json.dumps({"is_system_auditor": [prior_value, bool(tf)]}), object1='user', operation='update')
         entry.user.add(user)

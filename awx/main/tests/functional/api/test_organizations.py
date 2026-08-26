@@ -272,7 +272,7 @@ def test_organization_delete_with_active_jobs(delete, admin, organization, organ
     resp_sorted = sorted(resp.data['active_jobs'], key=sort_keys)
     expect_sorted = sorted(expect_transformed, key=sort_keys)
 
-    assert resp.data['error'] == u"Resource is being used by running jobs."
+    assert resp.data['error'] == "Resource is being used by running jobs."
     assert resp_sorted == expect_sorted
 
 

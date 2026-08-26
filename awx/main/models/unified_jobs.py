@@ -45,7 +45,6 @@ from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, 
 from awx.main.dispatch import get_task_queuename
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
-from awx.main.models.rbac import to_permissions
 from awx.main.utils.common import (
     camelcase_to_underscore,
     get_model_for_type,
@@ -214,21 +213,18 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         return [c for c in cls.__subclasses__() if permission_registry.is_registered(c)]
 
     @classmethod
-    def accessible_pk_qs(cls, accessor, role_field):
+    def access_ids_qs(cls, accessor, action):
         """
-        A re-implementation of accessible pk queryset for the "normal" unified JTs.
-        Does not return inventory sources or system JTs, these should
-        be handled inside of get_queryset where it is utilized.
+        Returns a queryset of IDs for UnifiedJobTemplates accessible to the user.
+        Handles the polymorphic nature by checking permissions across all submodels.
         """
         # do not use this if in a subclass
         if cls != UnifiedJobTemplate:
-            return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
-
-        action = to_permissions[role_field]
+            return super(UnifiedJobTemplate, cls).access_ids_qs(accessor, action)
 
         # Special condition for super auditor
         role_subclasses = cls._submodels_with_roles()
-        all_codenames = {f'{action}_{cls._meta.model_name}' for cls in role_subclasses}
+        all_codenames = {f'{action}_{subcls._meta.model_name}' for subcls in role_subclasses}
         if not (all_codenames - accessor.singleton_permissions()):
             role_cts = ContentType.objects.get_for_models(*role_subclasses).values()
             qs = cls.objects.filter(polymorphic_ctype__in=role_cts)
@@ -836,7 +832,7 @@ class UnifiedJob(
         return True
 
     def __str__(self):
-        return u'%s-%s-%s' % (self.created, self.id, self.status)
+        return '%s-%s-%s' % (self.created, self.id, self.status)
 
     @property
     def log_format(self):
@@ -1416,14 +1412,14 @@ class UnifiedJob(
 
         if not all(opts.values()):
             missing_fields = ', '.join([k for k, v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
+            self.job_explanation = 'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
 
         return opts
 
     def pre_start(self):
         if not self.can_start:
-            self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
+            self.job_explanation = '%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
             return (False, None)
 

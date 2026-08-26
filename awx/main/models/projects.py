@@ -30,7 +30,7 @@ from awx.main.models.unified_jobs import (
     UnifiedJobTemplate,
 )
 from awx.main.models.jobs import Job
-from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin, RelatedJobsMixin
+from awx.main.models.mixins import TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
@@ -249,7 +249,7 @@ class ProjectOptions(models.Model):
         return proj_path + '.lock'
 
 
-class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
+class Project(UnifiedJobTemplate, ProjectOptions, CustomVirtualEnvMixin, RelatedJobsMixin):
     """
     A project represents a playbook git repo that can access a set of inventories
     """
@@ -371,8 +371,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         self._skip_update = bool(kwargs.pop('skip_update', False))
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
-            slug_name = slugify(str(self.name)).replace(u'-', u'_')
-            self.local_path = u'_%d__%s' % (int(self.pk), slug_name)
+            slug_name = slugify(str(self.name)).replace('-', '_')
+            self.local_path = '_%d__%s' % (int(self.pk), slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
         # Do the actual save.

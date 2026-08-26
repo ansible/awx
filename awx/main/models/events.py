@@ -525,7 +525,7 @@ class JobEvent(BasePlaybookEvent):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
 
     def __str__(self):
-        return u'%s @ %s' % (self.get_event_display2(), self.created.isoformat())
+        return '%s @ %s' % (self.get_event_display2(), self.created.isoformat())
 
     def _hostnames(self):
         hostnames = set()
@@ -717,7 +717,7 @@ class BaseCommandEvent(CreatedModifiedModel):
     )
 
     def __str__(self):
-        return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
+        return '%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
     @classmethod
     def create_from_data(cls, **kwargs):
