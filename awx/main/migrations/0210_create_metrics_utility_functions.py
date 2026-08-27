@@ -47,7 +47,7 @@ DROP_FUNCTIONS_SQL = """
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0205_add_ordering_to_instancegroup_and_workflow_nodes'),
+        ('main', '0209_fix_system_auditor_migration'),
     ]
 
     operations = [
