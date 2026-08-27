@@ -47,7 +47,7 @@ DROP_FUNCTIONS_SQL = """
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0209_fix_system_auditor_migration'),
+        ('main', '0210_remove_host_last_job_fields'),
     ]
 
     operations = [
