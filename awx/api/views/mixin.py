@@ -157,23 +157,21 @@ class OrganizationCountsMixin(object):
             return full_context
 
         db_results = {}
-        org_qs = self.model.accessible_objects(self.request.user, 'read_role')
+        org_qs = self.model.access_qs(self.request.user, 'view')
         org_id_list = org_qs.values('id')
         if len(org_id_list) == 0:
             if self.request.method == 'POST':
                 full_context['related_field_counts'] = {}
             return full_context
 
-        inv_qs = Inventory.accessible_objects(self.request.user, 'read_role')
-        project_qs = Project.accessible_objects(self.request.user, 'read_role')
-        jt_qs = JobTemplate.accessible_objects(self.request.user, 'read_role')
+        inv_qs = Inventory.access_qs(self.request.user, 'view')
+        project_qs = Project.access_qs(self.request.user, 'view')
+        jt_qs = JobTemplate.access_qs(self.request.user, 'view')
 
         # Produce counts of Foreign Key relationships
         db_results['inventories'] = inv_qs.values('organization').annotate(Count('organization')).order_by('organization')
 
-        db_results['teams'] = (
-            Team.accessible_objects(self.request.user, 'read_role').values('organization').annotate(Count('organization')).order_by('organization')
-        )
+        db_results['teams'] = Team.access_qs(self.request.user, 'view').values('organization').annotate(Count('organization')).order_by('organization')
 
         db_results['job_templates'] = jt_qs.values('organization').annotate(Count('organization')).order_by('organization')
 

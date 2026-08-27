@@ -242,7 +242,7 @@ def test_user_roles_unattach_functional(organization, alice, bob, get):
 def test_prefetch_jt_capabilities(job_template, rando):
     job_template.execute_role.members.add(rando)
     qs = JobTemplate.objects.all()
-    mapping = prefetch_page_capabilities(JobTemplate, qs, ['admin', 'execute'], rando)
+    mapping = prefetch_page_capabilities(JobTemplate, qs, [{'edit': 'change'}, {'start': 'execute'}], rando)
     assert mapping[job_template.id] == {'edit': False, 'start': True}
 
 
@@ -250,10 +250,10 @@ def test_prefetch_jt_capabilities(job_template, rando):
 def test_prefetch_ujt_job_template_capabilities(alice, bob, job_template):
     job_template.execute_role.members.add(alice)
     qs = UnifiedJobTemplate.objects.all()
-    mapping = prefetch_page_capabilities(UnifiedJobTemplate, qs, ['admin', 'execute'], alice)
+    mapping = prefetch_page_capabilities(UnifiedJobTemplate, qs, [{'edit': 'change'}, {'start': 'execute'}], alice)
     assert mapping[job_template.id] == {'edit': False, 'start': True}
     qs = UnifiedJobTemplate.objects.all()
-    mapping = prefetch_page_capabilities(UnifiedJobTemplate, qs, ['admin', 'execute'], bob)
+    mapping = prefetch_page_capabilities(UnifiedJobTemplate, qs, [{'edit': 'change'}, {'start': 'execute'}], bob)
     assert mapping[job_template.id] == {'edit': False, 'start': False}
 
 
@@ -282,7 +282,7 @@ def test_prefetch_ujt_project_capabilities(alice, project, job_template, mocker)
 def test_prefetch_group_capabilities(group, rando):
     group.inventory.adhoc_role.members.add(rando)
     qs = Group.objects.all()
-    mapping = prefetch_page_capabilities(Group, qs, ['inventory.admin', 'inventory.adhoc'], rando)
+    mapping = prefetch_page_capabilities(Group, qs, [{'edit': 'inventory.change'}, {'adhoc': 'inventory.adhoc'}], rando)
     assert mapping[group.id] == {'edit': False, 'adhoc': True}
 
 

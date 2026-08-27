@@ -34,7 +34,7 @@ from awx.main.models.rbac import (
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
 from awx.main.utils.redis import get_redis_client
-from awx.main.models.mixins import RelatedJobsMixin, ResourceMixin
+from awx.main.models.mixins import RelatedJobsMixin
 from awx.main.models.receptor_address import ReceptorAddress
 
 # ansible-runner
@@ -409,7 +409,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
 
-class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMixin):
+class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
 
     name = models.CharField(max_length=250, unique=True)

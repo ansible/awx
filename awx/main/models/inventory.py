@@ -42,7 +42,6 @@ from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictPr
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
-    ResourceMixin,
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
     CustomVirtualEnvMixin,
@@ -71,7 +70,7 @@ class InventoryConstructedInventoryMembership(models.Model):
     )
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin, OpaQueryPathMixin):
+class Inventory(CommonModelNameNotUnique, RelatedJobsMixin, OpaQueryPathMixin):
     """
     an inventory source contains lists and hosts.
     """
@@ -550,23 +549,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
             default='',
             help_text=_('Host variables in JSON or YAML format.'),
         )
-    )
-    last_job = models.ForeignKey(
-        'Job',
-        related_name='hosts_as_last_job+',
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.SET_NULL,
-    )
-    last_job_host_summary = models.ForeignKey(
-        'JobHostSummary',
-        related_name='hosts_as_last_job_summary+',
-        blank=True,
-        null=True,
-        default=None,
-        editable=False,
-        on_delete=models.SET_NULL,
     )
     inventory_sources = models.ManyToManyField(
         'InventorySource',

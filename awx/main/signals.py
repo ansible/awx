@@ -302,11 +302,6 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                         pass
 
 
-# Host.last_job and Host.last_job_host_summary are now derived from
-# JobHostSummary.latest_for_host / latest_job_for_host.
-# No signal handlers needed to maintain these denormalized FKs.
-
-
 # Set via ActivityStreamRegistrar to record activity stream events
 
 

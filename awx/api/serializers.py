@@ -174,8 +174,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'workflow_approval': DEFAULT_SUMMARY_FIELDS + ('timeout',),
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
-    # last_job and last_job_host_summary are derived from JobHostSummary in HostSerializer,
-    # not from the stale FK fields on Host.
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -1356,7 +1354,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete', 'copy']
-    capabilities_prefetch = ['admin', 'update', {'copy': 'organization.project_admin'}]
+    capabilities_prefetch = [{'edit': 'change'}, {'start': 'update'}, {'copy': 'organization.add_project'}]
 
     class Meta:
         model = Project
@@ -1555,7 +1553,7 @@ class LabelsListMixin(object):
 
 class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
-    capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
+    capabilities_prefetch = [{'edit': 'change'}, {'adhoc': 'adhoc'}, {'copy': 'organization.add_inventory'}]
 
     class Meta:
         model = Inventory
@@ -1799,10 +1797,12 @@ class InventoryScriptSerializer(InventorySerializer):
 
 class HostSerializer(BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete']
-    capabilities_prefetch = ['inventory.admin']
+    capabilities_prefetch = [{'edit': 'inventory.change'}]
 
     has_active_failures = serializers.SerializerMethodField()
     has_inventory_sources = serializers.SerializerMethodField()
+    last_job = serializers.SerializerMethodField()
+    last_job_host_summary = serializers.SerializerMethodField()
 
     class Meta:
         model = Host
@@ -1818,7 +1818,7 @@ class HostSerializer(BaseSerializerWithVariables):
             'last_job_host_summary',
             'ansible_facts_modified',
         )
-        read_only_fields = ('last_job', 'last_job_host_summary', 'ansible_facts_modified')
+        read_only_fields = ('ansible_facts_modified',)
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(HostSerializer, self).build_relational_field(field_name, relation_info)
@@ -1953,12 +1953,15 @@ class HostSerializer(BaseSerializerWithVariables):
             return ret
         if 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
-        last_summary = obj.latest_summary
-        if 'last_job' in ret:
-            ret['last_job'] = last_summary.job_id if last_summary else None
-        if 'last_job_host_summary' in ret:
-            ret['last_job_host_summary'] = last_summary.pk if last_summary else None
         return ret
+
+    def get_last_job(self, obj):
+        last_summary = obj.latest_summary
+        return last_summary.job_id if last_summary else None
+
+    def get_last_job_host_summary(self, obj):
+        last_summary = obj.latest_summary
+        return last_summary.pk if last_summary else None
 
     def get_has_active_failures(self, obj):
         last_summary = obj.latest_summary
@@ -1978,7 +1981,7 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 class GroupSerializer(BaseSerializerWithVariables):
     show_capabilities = ['copy', 'edit', 'delete']
-    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
+    capabilities_prefetch = [{'edit': 'inventory.change'}, {'adhoc': 'inventory.adhoc'}]
 
     class Meta:
         model = Group
@@ -2376,7 +2379,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete']
-    capabilities_prefetch = [{'admin': 'inventory.admin'}, {'start': 'inventory.update'}]
+    capabilities_prefetch = [{'edit': 'inventory.change'}, {'start': 'inventory.update'}]
 
     class Meta:
         model = InventorySource
@@ -2995,7 +2998,7 @@ class CredentialTypeSerializer(BaseSerializer):
 
 class CredentialSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
-    capabilities_prefetch = ['admin', 'use']
+    capabilities_prefetch = [{'edit': 'change'}, {'use': 'use'}]
     managed = serializers.ReadOnlyField()
 
     class Meta:
@@ -3336,7 +3339,7 @@ class JobTemplateMixin(object):
 
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
-    capabilities_prefetch = ['admin', 'execute', {'copy': ['project.use', 'inventory.use']}]
+    capabilities_prefetch = [{'edit': 'change'}, {'start': 'execute'}, {'copy': ['project.use', 'inventory.use']}]
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
@@ -3825,7 +3828,7 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
 class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'schedule', 'edit', 'copy', 'delete']
-    capabilities_prefetch = ['admin', 'execute', {'copy': 'organization.workflow_admin'}]
+    capabilities_prefetch = [{'edit': 'change'}, {'start': 'execute'}, {'copy': 'organization.add_workflowjobtemplate'}]
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
@@ -4987,17 +4990,17 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             raise serializers.ValidationError(_("Template types {type_names} not allowed in bulk jobs").format(type_names=type_names))
 
         for model, obj_list in ujts.items():
-            role_field = 'execute_role' if issubclass(model, (JobTemplate, WorkflowJobTemplate)) else 'update_role'
-            self.check_list_permission(model, set([obj.id for obj in obj_list]), role_field)
+            action = 'execute' if issubclass(model, (JobTemplate, WorkflowJobTemplate)) else 'update'
+            self.check_list_permission(model, set([obj.id for obj in obj_list]), action)
 
         self.check_organization_permission(attrs, request)
 
         if 'inventory' in attrs:
             requested_use_inventories.add(attrs['inventory'].id)
 
-        self.check_list_permission(Inventory, requested_use_inventories, 'use_role')
+        self.check_list_permission(Inventory, requested_use_inventories, 'use')
 
-        self.check_list_permission(Credential, requested_use_credentials, 'use_role')
+        self.check_list_permission(Credential, requested_use_credentials, 'use')
         self.check_list_permission(Label, requested_use_labels)
         self.check_list_permission(InstanceGroup, requested_use_instance_groups)  # TODO: change to use_role for conflict
         self.check_list_permission(ExecutionEnvironment, requested_use_execution_environments)  # TODO: change if roles introduced
@@ -5011,14 +5014,14 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         attrs = super().validate(attrs)
         return attrs
 
-    def check_list_permission(self, model, id_list, role_field=None):
+    def check_list_permission(self, model, id_list, action=None):
         if not id_list:
             return
         user = self.context['request'].user
-        if role_field is None:  # implies "read" level permission is required
+        if action is None:  # implies "read" level permission is required
             access_qs = user.get_queryset(model)
         else:
-            access_qs = model.accessible_objects(user, role_field)
+            access_qs = model.access_qs(user, action)
 
         not_allowed = set(id_list) - set(access_qs.filter(id__in=id_list).values_list('id', flat=True))
         if not_allowed:
@@ -5115,7 +5118,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         # - If the orgs is not set, set it to the org of the launching user
         # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
         if not request.user.is_superuser:
-            read_org_qs = Organization.accessible_objects(request.user, 'member_role')
+            read_org_qs = Organization.access_qs(request.user, 'member')
             if 'organization' not in attrs or attrs['organization'] == None or attrs['organization'] == '':
                 read_org_ct = read_org_qs.count()
                 if read_org_ct == 1:
@@ -5149,7 +5152,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
 
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
-    capabilities_prefetch = [{'copy': 'organization.admin'}]
+    capabilities_prefetch = [{'copy': 'organization.add_notificationtemplate'}]
 
     class Meta:
         model = NotificationTemplate

@@ -42,7 +42,6 @@ from awx.main.models.notifications import (
 from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
 from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
-    ResourceMixin,
     SurveyJobTemplateMixin,
     SurveyJobMixin,
     TaskManagerJobMixin,
@@ -190,9 +189,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(
-    UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin
-):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin):
     """
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -1142,22 +1139,6 @@ class JobHostSummary(CreatedModifiedModel):
             self.rescued,
             self.skipped,
         )
-
-    @classmethod
-    def latest_for_host(cls, host_id):
-        """Return the most recent JobHostSummary for a given host, or None."""
-        return cls.objects.filter(host_id=host_id).order_by('-id').first()
-
-    @classmethod
-    def latest_job_for_host(cls, host_id):
-        """Return the Job from the most recent JobHostSummary for a host, or None."""
-        summary = cls.latest_for_host(host_id)
-        if summary:
-            try:
-                return summary.job
-            except cls.job.field.related_model.DoesNotExist:
-                return None
-        return None
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_host_summary_detail', kwargs={'pk': self.pk}, request=request)
