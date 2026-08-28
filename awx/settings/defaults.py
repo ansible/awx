@@ -262,10 +262,6 @@ TASK_MANAGER_TIMEOUT = 300
 TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
 TASK_MANAGER_LOCK_TIMEOUT = TASK_MANAGER_TIMEOUT + TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
-# Number of seconds _in addition to_ the task manager timeout a job can stay
-# in waiting without being reaped
-JOB_WAITING_GRACE_PERIOD = 60
-
 # Number of seconds after a container group job finished time to wait
 # before the awx_k8s_reaper task will tear down the pods
 K8S_POD_REAPER_GRACE_PERIOD = 60
