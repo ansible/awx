@@ -727,6 +727,42 @@ def _get_active_task_ids_from_dispatcherd(binder):
         return None
 
 
+def _mesh_all_ready_nodes_visible(instance_list):
+    """Return True if all READY execution/hop nodes appear in both
+    KnownConnectionCosts (routing) and Advertisements (service ads).
+
+    Fails open on any receptor error so existing error paths are not bypassed.
+    Called only when lost_instances is non-empty — short-circuits otherwise.
+
+    Catches two re-establishment windows after a controller restart:
+      Window A (<10s): routing not yet propagated — EEs absent from KnownConnectionCosts
+      Window B (10-60s): routing restored but EEs not yet re-advertised via Advertisements
+    """
+    expected = {
+        inst.hostname for inst in instance_list if inst.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and inst.node_state == Instance.States.READY
+    }
+    if not expected:
+        return True
+    try:
+        mesh_status = get_receptor_ctl().simple_command('status')
+    except (FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
+        logger.warning(f'Mesh stability gate: receptor unavailable, skipping gate: {exc}')
+        return True
+    # Window A (routing) must be checked before Window B (advertisements); dict order preserves that.
+    # Use `or {}` / `or []` guards: receptor is a Go service and marshals nil maps/slices as JSON null,
+    # which becomes Python None — not caught by the .get() default.
+    present_by_table = {
+        'KnownConnectionCosts': set(mesh_status.get('KnownConnectionCosts') or {}),
+        'Advertisements': {ad['NodeID'] for ad in (mesh_status.get('Advertisements') or [])},
+    }
+    for table, present in present_by_table.items():
+        missing = expected - present
+        if missing:
+            logger.info(f'Mesh stability gate: {len(missing)} node(s) absent from {table}, skipping peer-judgment this cycle: {missing}')
+            return False
+    return True
+
+
 def _heartbeat_instance_management():
     """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
@@ -778,6 +814,9 @@ def _heartbeat_instance_management():
         else:
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
             return None, None, None
+
+    if lost_instances and not _mesh_all_ready_nodes_visible(instance_list + lost_instances):
+        return this_inst, instance_list, []
 
     return this_inst, instance_list, lost_instances
 

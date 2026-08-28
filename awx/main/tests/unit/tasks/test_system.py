@@ -1,8 +1,209 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from awx.main.tasks.system import _heartbeat_instance_management, update_inventory_computed_fields, inspect_execution_and_hop_nodes
+from awx.main.tasks.system import _heartbeat_instance_management, update_inventory_computed_fields, inspect_execution_and_hop_nodes, _mesh_all_ready_nodes_visible
 from awx.main.models import Instance, Inventory
 from django.db import DatabaseError
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+
+def _instance(hostname, node_type='execution', node_state='ready'):
+    inst = MagicMock()
+    inst.hostname = hostname
+    inst.node_type = node_type
+    inst.node_state = node_state
+    return inst
+
+
+_UNSET = object()  # sentinel so callers can explicitly pass None (JSON null from receptor)
+
+
+def _mesh_status(known_costs=_UNSET, advertisements=_UNSET):
+    return {
+        'KnownConnectionCosts': {} if known_costs is _UNSET else known_costs,
+        'Advertisements': [] if advertisements is _UNSET else [{'NodeID': n} for n in (advertisements or [])],
+    }
+
+
+def _mock_ctl(status):
+    ctl = MagicMock()
+    ctl.simple_command.return_value = status
+    return ctl
+
+
+# ── Tests: _mesh_all_ready_nodes_visible ──────────────────────────────────────
+
+
+class TestMeshAllReadyNodesVisible:
+    def test_passes_when_all_nodes_visible(self):
+        """Gate passes when all READY EE/hop nodes appear in both tables."""
+        nodes = [
+            _instance('ee-0', 'execution', 'ready'),
+            _instance('ee-1', 'execution', 'ready'),
+            _instance('hop-0', 'hop', 'ready'),
+            _instance('ctrl-0', 'control', 'ready'),  # controls never checked
+        ]
+        status = _mesh_status(
+            known_costs={'ee-0': {}, 'ee-1': {}, 'hop-0': {}},
+            advertisements=['ee-0', 'ee-1', 'hop-0'],
+        )
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+
+    def test_blocks_window_a_ee_absent_from_routing(self):
+        """Gate blocks (Window A) when EEs absent from KnownConnectionCosts.
+
+        Scenario: fresh receptor after controller restart — routing table not yet propagated.
+        """
+        nodes = [_instance('ee-0'), _instance('ee-1')]
+        status = _mesh_status(
+            known_costs={'ctrl-0': {}},  # EEs not in routing table yet
+            advertisements=['ee-0', 'ee-1'],
+        )
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            assert _mesh_all_ready_nodes_visible(nodes) is False
+
+    def test_blocks_window_b_ee_absent_from_advertisements(self):
+        """Gate blocks (Window B) when EEs are routable but not yet advertising.
+
+        Scenario: t=3-60s after restart — routing propagated but EEs haven't
+        re-advertised yet (advertisement period = 60s, fresh receptor has no cache).
+        """
+        nodes = [_instance('ee-0'), _instance('ee-1')]
+        status = _mesh_status(
+            known_costs={'ee-0': {}, 'ee-1': {}},  # routing restored
+            advertisements=['ctrl-0'],  # but no EE advertisements yet
+        )
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            assert _mesh_all_ready_nodes_visible(nodes) is False
+
+    def test_fails_open_when_receptor_socket_missing(self):
+        """Gate fails open on FileNotFoundError (receptor not yet started)."""
+        nodes = [_instance('ee-0')]
+        with patch('awx.main.tasks.system.get_receptor_ctl', side_effect=FileNotFoundError):
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+
+    def test_fails_open_when_receptor_status_fails(self):
+        """Gate fails open when receptorctl status raises ValueError."""
+        nodes = [_instance('ee-0')]
+        ctl = MagicMock()
+        ctl.simple_command.side_effect = ValueError('connection reset')
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+
+    def test_fails_open_on_oserror(self):
+        """Gate fails open on OSError (stale socket — exists but daemon not accepting).
+
+        A present-but-unresponsive socket raises OSError/ConnectionRefusedError, not
+        FileNotFoundError. This is the exact scenario during a controller restart window.
+        """
+        nodes = [_instance('ee-0')]
+        with patch('awx.main.tasks.system.get_receptor_ctl', side_effect=OSError('Connection refused')):
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+
+    def test_fails_open_on_runtime_error(self):
+        """Gate fails open on RuntimeError (receptor handshake or protocol error)."""
+        nodes = [_instance('ee-0')]
+        ctl = MagicMock()
+        ctl.simple_command.side_effect = RuntimeError('Failed to connect to Receptor socket')
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+
+    def test_fails_open_when_receptor_returns_null_known_costs(self):
+        """Gate fails open when KnownConnectionCosts is JSON null (Go nil map → Python None).
+
+        Receptor is a Go service; a nil map marshals to JSON null, which Python's json
+        decoder represents as None. This is most likely during Window A (fresh startup
+        with no established connections yet). set(None) would raise TypeError without
+        the `or {}` guard.
+        """
+        nodes = [_instance('ee-0')]
+        status = _mesh_status(known_costs=None, advertisements=['ee-0'])
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            # None KnownConnectionCosts → ee-0 absent from routing → gate blocks (Window A)
+            assert _mesh_all_ready_nodes_visible(nodes) is False
+
+    def test_fails_open_when_receptor_returns_null_advertisements(self):
+        """Gate blocks when Advertisements is JSON null (Go nil slice → Python None).
+
+        This is Window B: routing is established but no service advertisements yet.
+        `for ad in None` would raise TypeError without the `or []` guard.
+        """
+        nodes = [_instance('ee-0')]
+        status = _mesh_status(known_costs={'ee-0': {}}, advertisements=None)
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            # None Advertisements → ee-0 absent from ads → gate blocks (Window B)
+            assert _mesh_all_ready_nodes_visible(nodes) is False
+
+    def test_passes_trivially_with_no_ee_or_hop_nodes(self):
+        """Gate passes immediately when instance_list has only control nodes.
+
+        No receptor call is made — nothing to check.
+        """
+        nodes = [_instance('ctrl-0', 'control', 'ready')]
+        with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl:
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+        mock_ctl.assert_not_called()
+
+    def test_receptor_not_called_when_expected_set_is_empty(self):
+        """Gate returns True without calling receptor when no READY EE/hop nodes exist.
+
+        If `expected` is empty (e.g. control-only cluster, or all EEs are UNAVAILABLE),
+        the gate short-circuits before making a receptor call. This also validates that
+        control nodes are never included in the expected set.
+        """
+        nodes = [
+            _instance('ctrl-0', 'control', 'ready'),
+            _instance('ee-down', 'execution', 'unavailable'),
+        ]
+        with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl:
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+        mock_ctl.assert_not_called()
+
+    def test_ignores_unavailable_ee_nodes(self):
+        """Gate only checks READY nodes — already-UNAVAILABLE EEs are excluded.
+
+        An EE that is already UNAVAILABLE should not be in expected; the gate
+        should not fail if that EE is missing from the mesh tables.
+        """
+        nodes = [
+            _instance('ee-down', 'execution', 'unavailable'),
+            _instance('ee-up', 'execution', 'ready'),
+        ]
+        status = _mesh_status(
+            known_costs={'ee-up': {}},  # only the READY EE present
+            advertisements=['ee-up'],
+        )
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            assert _mesh_all_ready_nodes_visible(nodes) is True
+
+    def test_instance_list_plus_lost_covers_removed_ees(self):
+        """Caller must pass instance_list + lost_instances, not just instance_list.
+
+        The peer-judgment loop removes lost EEs from instance_list before the gate
+        runs. If only instance_list is passed, expected is empty and the gate always
+        returns True. This test proves the gate correctly catches Window B when given
+        the combined list.
+        """
+        ee0 = _instance('ee-0')
+        ee1 = _instance('ee-1')
+
+        # Simulate the state after peer-judgment loop:
+        # instance_list had EEs removed; lost_instances holds them.
+        instance_list_after_loop = []  # EEs already removed
+        lost_instances = [ee0, ee1]  # peer-judgment put them here
+
+        status = _mesh_status(
+            known_costs={'ee-0': {}, 'ee-1': {}},
+            advertisements=['ctrl-0'],  # no EE ads → Window B
+        )
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
+            # Wrong: passing only instance_list (empty) → gate returns True (bug)
+            assert _mesh_all_ready_nodes_visible(instance_list_after_loop) is True
+
+            # Correct: passing combined list → gate catches Window B (returns False)
+            assert _mesh_all_ready_nodes_visible(instance_list_after_loop + lost_instances) is False
 
 
 @pytest.fixture
