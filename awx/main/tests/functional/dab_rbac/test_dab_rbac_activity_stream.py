@@ -4,7 +4,7 @@ import pytest
 
 from awx.api.versioning import reverse
 
-from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+from ansible_base.rbac.models import RoleDefinition
 from ansible_base.rbac import permission_registry
 
 from awx.main.models import ActivityStream, Inventory, Organization
@@ -122,14 +122,31 @@ class TestRoleAssignmentActivityStream:
         assert entry.object2 == 'team'
 
     def test_global_role_assignment_recorded(self, rando, setup_managed_roles):
+        # Global (singleton) roles have no content object, so they cannot go through the
+        # object-scoped bulk pipeline. give_global_permission is the supported entry point;
+        # it routes through the pipeline and fires dab_rbac_assignments_created. A raw
+        # RoleUserAssignment.objects.create() would NOT record an entry (see triggers.py).
         rd, _ = RoleDefinition.objects.get_or_create(name='global-view-role', content_type=None)
-        RoleUserAssignment.objects.create(user=rando, role_definition=rd)
+        rd.give_global_permission(rando)
 
         entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
         assert entries.count() == 1
         entry = entries.get()
         assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
         # No content object for a global role assignment, so object1 is left blank.
+        assert entry.object1 == ''
+        assert entry.object2 == 'user'
+        assert entry.object_relationship_type == str(rd.id)
+
+    def test_global_role_removal_recorded(self, rando, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(name='global-view-role', content_type=None)
+        rd.give_global_permission(rando)
+        rd.remove_global_permission(rando)
+
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
         assert entry.object1 == ''
         assert entry.object2 == 'user'
         assert entry.object_relationship_type == str(rd.id)

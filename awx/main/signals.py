@@ -9,7 +9,7 @@ import json
 import sys
 
 # Django
-from django.db import connection, models
+from django.db import connection
 from django.conf import settings
 from django.db.models.signals import (
     pre_save,
@@ -28,7 +28,7 @@ from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
 # Ansible_base app
-from ansible_base.rbac.models import RoleUserAssignment, RoleTeamAssignment
+from ansible_base.rbac.models import RoleUserAssignment
 
 # AWX
 from awx.main.models import (
@@ -213,25 +213,11 @@ def _record_role_assignment_activity_stream(instance, operation):
     connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
 
 
-@receiver(post_save, sender=RoleUserAssignment)
-@receiver(post_save, sender=RoleTeamAssignment)
-def record_role_assignment_activity_stream(instance, created, **kwargs):
-    if created:
-        _record_role_assignment_activity_stream(instance, 'associate')
-
-
-@receiver(post_delete, sender=RoleUserAssignment)
-@receiver(post_delete, sender=RoleTeamAssignment)
-def record_role_unassignment_activity_stream(instance, origin=None, **kwargs):
-    # Skip cascade deletes from non-assignment origins, same reasoning as
-    # sync_assignments_to_old_rbac_delete: the actor or content object is itself
-    # being deleted in the same cascade, so linking a new activity stream entry
-    # to it would leave a dangling foreign key once the cascade completes.
-    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
-        return
-    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
-        return
-    _record_role_assignment_activity_stream(instance, 'disassociate')
+# Activity-stream recording for role assignments is driven by the DAB bulk signals
+# (dab_rbac_assignments_created / dab_rbac_assignments_pre_delete), handled together with
+# the old-RBAC Role.members mirror in awx.main.models.rbac. _record_role_assignment_activity_stream
+# above is the shared implementation those handlers call; it is no longer connected to per-row
+# post_save / post_delete, which the bulk assignment pipeline does not emit.
 
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):

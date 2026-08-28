@@ -15,8 +15,7 @@ from crum import impersonate
 
 # Django
 from django.db import models, transaction, connection
-from django.db.models.signals import m2m_changed, post_save, post_delete
-from django.dispatch import receiver
+from django.db.models.signals import m2m_changed
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -26,8 +25,9 @@ from django.apps import apps
 from django.conf import settings
 
 # Ansible_base app
-from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
+from ansible_base.rbac.models import RoleDefinition
 from ansible_base.rbac.sync import maybe_reverse_sync_assignment, maybe_reverse_sync_unassignment, maybe_reverse_sync_role_definition
+from ansible_base.rbac.triggers import dab_rbac_assignments_created, dab_rbac_assignments_pre_delete
 from ansible_base.rbac import permission_registry
 from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 from ansible_base.lib.utils.models import get_type_for_model
@@ -703,6 +703,13 @@ def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
     if action.startswith('pre_'):
         return
+    # Mirror the guard in sync_members_to_new_rbac: when _sync_assignments_to_old_rbac
+    # mirrors a team assignment it edits member_role.children inside disable_rbac_sync(),
+    # which fires this m2m handler. Without this guard the reverse (old->new) sync would
+    # call remove_permission again and, because the bulk pre_delete signal now fires
+    # before the assignment row is deleted, re-find the still-present assignment and recurse.
+    if not rbac_sync_enabled.enabled:
+        return
 
     if action == 'post_add':
         is_giving = True
@@ -814,27 +821,54 @@ def _sync_assignments_to_old_rbac(instance, delete=True):
                     instance.team.member_role.children.add(role)
 
 
-@receiver(post_delete, sender=RoleUserAssignment)
-@receiver(post_delete, sender=RoleTeamAssignment)
-def sync_assignments_to_old_rbac_delete(instance, origin=None, **kwargs):
-    # Skip cascade deletes from non-assignment origins — sync is redundant:
-    #  - Model origin with app_label != dab_rbac: a parent object (e.g.
-    #    Organization) is being deleted and old Role M2M tables cascade from
-    #    the same parent.
-    #  - QuerySet of a different model (e.g. ObjectRole): bulk RBAC cleanup
-    #    such as defer_rbac_computations flush — parent objects already gone.
-    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
-        return
-    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
-        return
-    _sync_assignments_to_old_rbac(instance, delete=True)
+def handle_dab_assignments_created(sender, assignments, content_objects=None, **kwargs):
+    """Handle a batch of newly-created role assignments from the DAB bulk pipeline.
+
+    Fires once per bulk_give_permissions / give_assignments operation (and for the
+    interim-restored JWT/SSO claims path), only for rows that were actually created.
+    A single handler performs both jobs — the old-RBAC Role.members mirror and the
+    new-side activity-stream recording — so ordering stays deterministic: the old-RBAC
+    write happens inside disable_activity_stream()/disable_rbac_sync() (within
+    _sync_assignments_to_old_rbac), then the activity-stream entry is recorded once.
+
+    Replaces the former per-row post_save receivers sync_user_assignments_to_old_rbac_create
+    and record_role_assignment_activity_stream, which do not fire for bulk_create.
+    """
+    from awx.main.signals import _record_role_assignment_activity_stream
+
+    for instance in assignments:
+        _sync_assignments_to_old_rbac(instance, delete=False)
+        _record_role_assignment_activity_stream(instance, 'associate')
 
 
-@receiver(post_save, sender=RoleUserAssignment)
-@receiver(post_save, sender=RoleTeamAssignment)
-def sync_user_assignments_to_old_rbac_create(instance, **kwargs):
-    _sync_assignments_to_old_rbac(instance, delete=False)
+def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None, **kwargs):
+    """Handle a batch of role assignments about to be removed by the DAB bulk pipeline.
+
+    Fires once per bulk_remove_permissions / remove_assignments operation, BEFORE the
+    rows are deleted, so every FK on each assignment (object_role, role_definition,
+    actor, content_object) is still readable. It fires ONLY on explicit assignment
+    removal, never on FK cascade (e.g. deleting an Organization), so the origin-filter
+    logic the old post_delete receivers needed to skip cascades is no longer required —
+    cascade cleanup of the old Role.members happens through the parent's own cascade.
+
+    Replaces the former per-row post_delete receivers sync_assignments_to_old_rbac_delete
+    and record_role_unassignment_activity_stream, which do not fire for queryset .delete().
+    """
+    from awx.main.signals import _record_role_assignment_activity_stream
+
+    for instance in assignments:
+        # Record the activity stream entry BEFORE deletion, while the FKs are still valid.
+        _record_role_assignment_activity_stream(instance, 'disassociate')
+        _sync_assignments_to_old_rbac(instance, delete=True)
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)
 m2m_changed.connect(sync_parents_to_new_rbac, Role.parents.through)
+
+# The DAB bulk assignment pipeline (bulk_give_permissions / bulk_remove_permissions and the
+# lower-level give_assignments / remove_assignments) creates and deletes rows with bulk_create
+# and queryset .delete(), which do not emit per-row post_save / post_delete. These two bulk
+# signals fire once per operation with the whole batch instead. Exactly one handler is connected
+# to each so a single pass does both the old-RBAC mirror and the activity-stream recording.
+dab_rbac_assignments_created.connect(handle_dab_assignments_created, dispatch_uid='awx_dab_assignments_created')
+dab_rbac_assignments_pre_delete.connect(handle_dab_assignments_pre_delete, dispatch_uid='awx_dab_assignments_pre_delete')
