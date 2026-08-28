@@ -153,7 +153,55 @@ def sync_rbac_to_superuser_status(instance, sender, **kwargs):
                 user.save(update_fields=['is_superuser'])
 
 
-def _record_role_assignment_activity_stream(instance, operation):
+def _prefetch_assignment_content_objects(assignments, content_objects=None):
+    """Build a {(content_type_id, object_id): instance} lookup for a batch of assignments.
+
+    The DAB bulk signal supplies ``content_objects`` when the grant/removal went through
+    bulk_give_permissions / bulk_remove_permissions, but it can be empty when a caller
+    used give_assignments / remove_assignments directly. For any object-scoped assignment
+    not already covered, this fetches the referenced objects in bulk grouped by content
+    type — one query per type — instead of dereferencing ``instance.content_object`` one
+    row at a time, which was the per-row cost this migration set out to remove (AAP-85842).
+
+    Content types that don't resolve to a local model (remote / federated) are left out;
+    _record_role_assignment_activity_stream falls back to a per-row fetch for those.
+    """
+    from ansible_base.rbac import permission_registry
+    from ansible_base.rbac.remote import get_remote_base_class
+
+    lookup = dict(content_objects or {})
+    # content_type_id -> set(object_id) still needing resolution. Group by id only so we
+    # never touch instance.content_type per row (that would be the per-row query again).
+    missing = {}
+    for instance in assignments:
+        if not instance.object_id:
+            continue  # global (singleton) assignment: no content object
+        key = (instance.content_type_id, instance.object_id)
+        if key in lookup:
+            continue
+        missing.setdefault(instance.content_type_id, set()).add(instance.object_id)
+
+    if not missing:
+        return lookup
+
+    content_types = permission_registry.content_type_model.objects.in_bulk(missing.keys())
+    remote_base = get_remote_base_class()
+    for ct_id, object_ids in missing.items():
+        ct = content_types.get(ct_id)
+        if ct is None:
+            continue  # content type row is gone; leave to per-row fallback
+        try:
+            model = ct.model_class()
+        except LookupError:
+            continue  # unknown content type; leave to per-row fallback
+        if issubclass(model, remote_base):
+            continue  # remote/federated object; can't bulk-fetch locally
+        for obj in model._base_manager.in_bulk(object_ids).values():
+            lookup[(ct_id, str(obj.pk))] = obj
+    return lookup
+
+
+def _record_role_assignment_activity_stream(instance, operation, content_objects=None):
     if not activity_stream_enabled:
         return
     # Avoid flooding the activity stream when assignments are cascade-deleted as part
@@ -170,7 +218,11 @@ def _record_role_assignment_activity_stream(instance, operation):
 
     content_object = None
     if instance.object_id:
-        content_object = instance.content_object
+        # Prefer the batch lookup (populated once per bulk signal, same-type prefetched);
+        # fall back to a per-row fetch only for keys it doesn't cover.
+        content_object = (content_objects or {}).get((instance.content_type_id, instance.object_id))
+        if content_object is None:
+            content_object = instance.content_object
         if content_object is None and operation == 'disassociate':
             # The target object is unresolvable, e.g. cascade-deleted along with its
             # parent object, or a federated/remote content type. Skip recording a

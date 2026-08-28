@@ -151,6 +151,34 @@ class TestRoleAssignmentActivityStream:
         assert entry.object2 == 'user'
         assert entry.object_relationship_type == str(rd.id)
 
+    def test_content_object_lookup_batches_by_type(self, rando, organization, django_assert_max_num_queries, setup_managed_roles):
+        # The whole point of the bulk-signal migration is to stop resolving each assignment's
+        # content object with its own query. _prefetch_assignment_content_objects must fetch
+        # all objects of a type in one query regardless of how many assignments there are.
+        from ansible_base.rbac.models import RoleUserAssignment
+
+        from awx.main.models import Inventory
+        from awx.main.signals import _prefetch_assignment_content_objects
+
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        inventories = [Inventory.objects.create(name=f'batch-inv-{i}', organization=organization) for i in range(5)]
+        for inv in inventories:
+            rd.give_permission(rando, inv)
+
+        # Re-fetch so content_object is not already cached on the instances.
+        assignments = list(RoleUserAssignment.objects.filter(role_definition=rd, user=rando))
+        assert len(assignments) == 5
+
+        # No content_objects supplied (the give_assignments-direct / empty-dict case): the
+        # helper must batch — one query for the content types, one in_bulk for the objects —
+        # not one query per assignment. Assert a small constant that does not grow with the
+        # number of assignments.
+        with django_assert_max_num_queries(3):
+            lookup = _prefetch_assignment_content_objects(assignments, {})
+
+        for a in assignments:
+            assert lookup[(a.content_type_id, a.object_id)].pk == int(a.object_id)
+
     def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
         '''
         Deleting an object cascade-deletes its RoleUserAssignments. By the time the

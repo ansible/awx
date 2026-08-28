@@ -834,11 +834,16 @@ def handle_dab_assignments_created(sender, assignments, content_objects=None, **
     Replaces the former per-row post_save receivers sync_user_assignments_to_old_rbac_create
     and record_role_assignment_activity_stream, which do not fire for bulk_create.
     """
-    from awx.main.signals import _record_role_assignment_activity_stream
+    from awx.main.signals import _prefetch_assignment_content_objects, _record_role_assignment_activity_stream
+
+    # Resolve every assignment's content object once, using the dict the signal provides and
+    # falling back to a single bulk fetch per content type, so activity-stream recording does
+    # not incur a per-row query.
+    content_objects = _prefetch_assignment_content_objects(assignments, content_objects)
 
     for instance in assignments:
         _sync_assignments_to_old_rbac(instance, delete=False)
-        _record_role_assignment_activity_stream(instance, 'associate')
+        _record_role_assignment_activity_stream(instance, 'associate', content_objects)
 
 
 def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None, **kwargs):
@@ -854,11 +859,15 @@ def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None,
     Replaces the former per-row post_delete receivers sync_assignments_to_old_rbac_delete
     and record_role_unassignment_activity_stream, which do not fire for queryset .delete().
     """
-    from awx.main.signals import _record_role_assignment_activity_stream
+    from awx.main.signals import _prefetch_assignment_content_objects, _record_role_assignment_activity_stream
+
+    # Same prefetch as the create side: the rows still exist (pre_delete), so their content
+    # objects can be bulk-fetched per content type instead of one query per assignment.
+    content_objects = _prefetch_assignment_content_objects(assignments, content_objects)
 
     for instance in assignments:
         # Record the activity stream entry BEFORE deletion, while the FKs are still valid.
-        _record_role_assignment_activity_stream(instance, 'disassociate')
+        _record_role_assignment_activity_stream(instance, 'disassociate', content_objects)
         _sync_assignments_to_old_rbac(instance, delete=True)
 
 
