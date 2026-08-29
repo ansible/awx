@@ -69,6 +69,45 @@ def test_org_credential_access_admin(role_name, alice, org_credential):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("role_name", ["admin_role", "credential_admin_role"])
+def test_org_credential_copy_capability(role_name, alice, org_credential):
+    """Org credential admins must be able to copy credentials (AAP-64683)."""
+    role = getattr(org_credential.organization, role_name)
+    role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert access.can_copy(org_credential)
+
+
+@pytest.mark.django_db
+def test_org_credential_copy_denied_for_plain_member(alice, org_credential):
+    """Plain org members (non-admin) must NOT be able to copy credentials."""
+    org_credential.organization.member_role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert not access.can_copy(org_credential)
+
+
+@pytest.mark.django_db
+def test_credential_without_org_not_copyable_by_non_superuser(alice, credential):
+    """Credentials with no organization must not be copyable by non-superusers.
+    Verifies that the can_copy fallback path does not regress.
+    The `credential` fixture has no organization set (organization_id is None)."""
+    access = CredentialAccess(alice)
+    assert not access.can_copy(credential)
+
+
+@pytest.mark.django_db
+def test_org_credential_copy_denied_for_direct_admin(alice, org_credential):
+    """A direct credential admin (admin_role on the credential itself, no org role)
+    cannot copy an org credential even though can_change passes for them.
+    Copying routes through can_add which requires org-level creation rights;
+    being in obj.admin_role alone is not sufficient."""
+    org_credential.admin_role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert access.can_change(org_credential, {'description': 'updated'})
+    assert not access.can_copy(org_credential)
+
+
+@pytest.mark.django_db
 def test_org_and_user_credential_access(alice, organization):
     """Address specific bug where any user could make an org credential
     in another org without any permissions to that org
