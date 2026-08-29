@@ -256,6 +256,29 @@ def test_credential_copy(post, get, machine_credential, credentialtype_ssh, admi
 
 
 @pytest.mark.django_db
+def test_org_credential_copy_rbac(post, get, org_credential, alice):
+    """Org member alone is denied copy; org credential_admin_role grants it.
+    Both the copy endpoint (can_copy) and the detail API (user_capabilities.copy)
+    must reflect the same RBAC decision (AAP-64683)."""
+    # auditor_role is in Credential.read_role (via organization.auditor_role), so GETs return 200;
+    # it does not flow into admin_role or credential_admin_role, so copy is correctly denied.
+    org_credential.organization.auditor_role.members.add(alice)
+    assert get(reverse('api:credential_copy', kwargs={'pk': org_credential.pk}), alice, expect=200).data['can_copy'] is False
+    detail = get(reverse('api:credential_detail', kwargs={'pk': org_credential.pk}), alice, expect=200).data
+    assert detail['summary_fields']['user_capabilities']['copy'] is False
+
+    org_credential.organization.credential_admin_role.members.add(alice)
+    assert get(reverse('api:credential_copy', kwargs={'pk': org_credential.pk}), alice, expect=200).data['can_copy'] is True
+    detail = get(reverse('api:credential_detail', kwargs={'pk': org_credential.pk}), alice, expect=200).data
+    # Regression: unfixed code returns can_copy=True but user_capabilities.copy=False here.
+    assert detail['summary_fields']['user_capabilities']['copy'] is True
+    copy_id = post(reverse('api:credential_copy', kwargs={'pk': org_credential.pk}), {'name': 'copied-by-alice'}, alice, expect=201).data['id']
+    credential_copy = type(org_credential).objects.get(pk=copy_id)
+    assert credential_copy.organization == org_credential.organization
+    assert credential_copy.credential_type == org_credential.credential_type
+
+
+@pytest.mark.django_db
 def test_notification_template_copy(post, get, notification_template_with_encrypt, organization, alice):
     notification_template_with_encrypt.organization.auditor_role.members.add(alice)
     assert get(reverse('api:notification_template_copy', kwargs={'pk': notification_template_with_encrypt.pk}), alice, expect=200).data['can_copy'] is False
