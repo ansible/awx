@@ -25,7 +25,7 @@ from django.apps import apps
 from django.conf import settings
 
 # Ansible_base app
-from ansible_base.rbac.models import RoleDefinition
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from ansible_base.rbac.sync import maybe_reverse_sync_assignment, maybe_reverse_sync_unassignment, maybe_reverse_sync_role_definition
 from ansible_base.rbac.triggers import dab_rbac_assignments_created, dab_rbac_assignments_pre_delete
 from ansible_base.rbac import permission_registry
@@ -792,33 +792,61 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
 }
 
 
-def _sync_assignments_to_old_rbac(instance, delete=True):
+_UNSET = object()
+
+
+def _sync_assignments_to_old_rbac(instance, delete=True, content_object=_UNSET, field_name=_UNSET):
+    """Mirror a single new-RBAC assignment into the legacy Role.members / children m2m.
+
+    ``content_object`` and ``field_name`` may be supplied pre-resolved by the bulk handlers
+    (see _field_names_for_old_rbac and the shared content-object prefetch) so a batch does
+    not re-dereference instance.role_definition and instance.object_role.content_object once
+    per row. When omitted they are resolved from the instance, preserving the original
+    single-row behavior for any other caller.
+    """
     from awx.main.signals import disable_activity_stream
 
     with disable_activity_stream():
         with disable_rbac_sync():
-            field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
+            if field_name is _UNSET:
+                field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
             if not field_name:
                 return
-            try:
-                role = getattr(instance.object_role.content_object, field_name)
-            # in the case RoleUserAssignment is being cascade deleted, then
-            # object_role might not exist. In which case the object is about to be removed
-            # anyways so just return
-            except ObjectDoesNotExist:
+            if content_object is _UNSET:
+                try:
+                    content_object = instance.object_role.content_object
+                # in the case RoleUserAssignment is being cascade deleted, then
+                # object_role might not exist. In which case the object is about to be removed
+                # anyways so just return
+                except ObjectDoesNotExist:
+                    return
+            if content_object is None:
+                # Object no longer resolvable (e.g. already deleted) — nothing to mirror.
                 return
-            if isinstance(instance.actor, get_user_model()):
-                # user
+            role = getattr(content_object, field_name)
+            if isinstance(instance, RoleUserAssignment):
+                # user — add/remove by pk to avoid fetching the user object
                 if delete:
-                    role.members.remove(instance.actor)
+                    role.members.remove(instance.user_id)
                 else:
-                    role.members.add(instance.actor)
+                    role.members.add(instance.user_id)
             else:
                 # team
                 if delete:
                     instance.team.member_role.children.remove(role)
                 else:
                     instance.team.member_role.children.add(role)
+
+
+def _field_names_for_old_rbac(assignments):
+    """Map role_definition_id -> legacy Role field name for a whole batch in one query.
+
+    Resolves the role-definition names once (instead of dereferencing
+    instance.role_definition per row) so _sync_assignments_to_old_rbac can look the field
+    up by id. Role definitions with no legacy equivalent map to None and are skipped.
+    """
+    rd_ids = {instance.role_definition_id for instance in assignments}
+    return {pk: ROLE_DEFINITION_TO_ROLE_FIELD.get(name) for pk, name in RoleDefinition.objects.filter(pk__in=rd_ids).values_list('pk', 'name')}
 
 
 def handle_dab_assignments_created(sender, assignments, content_objects=None, **kwargs):
@@ -836,13 +864,14 @@ def handle_dab_assignments_created(sender, assignments, content_objects=None, **
     """
     from awx.main.signals import _prefetch_assignment_content_objects, _record_role_assignment_activity_stream
 
-    # Resolve every assignment's content object once, using the dict the signal provides and
-    # falling back to a single bulk fetch per content type, so activity-stream recording does
-    # not incur a per-row query.
+    # Resolve every assignment's content object and legacy field name once per batch, so
+    # neither the old-RBAC mirror nor activity-stream recording incurs a per-row query.
     content_objects = _prefetch_assignment_content_objects(assignments, content_objects)
+    field_names = _field_names_for_old_rbac(assignments)
 
     for instance in assignments:
-        _sync_assignments_to_old_rbac(instance, delete=False)
+        content_object = content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
+        _sync_assignments_to_old_rbac(instance, delete=False, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
         _record_role_assignment_activity_stream(instance, 'associate', content_objects)
 
 
@@ -861,14 +890,17 @@ def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None,
     """
     from awx.main.signals import _prefetch_assignment_content_objects, _record_role_assignment_activity_stream
 
-    # Same prefetch as the create side: the rows still exist (pre_delete), so their content
-    # objects can be bulk-fetched per content type instead of one query per assignment.
+    # Same batch resolution as the create side: the rows still exist (pre_delete), so their
+    # content objects can be bulk-fetched per content type and field names resolved in one
+    # query, instead of one query per assignment.
     content_objects = _prefetch_assignment_content_objects(assignments, content_objects)
+    field_names = _field_names_for_old_rbac(assignments)
 
     for instance in assignments:
         # Record the activity stream entry BEFORE deletion, while the FKs are still valid.
         _record_role_assignment_activity_stream(instance, 'disassociate', content_objects)
-        _sync_assignments_to_old_rbac(instance, delete=True)
+        content_object = content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
+        _sync_assignments_to_old_rbac(instance, delete=True, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)

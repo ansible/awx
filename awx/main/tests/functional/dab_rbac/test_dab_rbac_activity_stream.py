@@ -179,6 +179,32 @@ class TestRoleAssignmentActivityStream:
         for a in assignments:
             assert lookup[(a.content_type_id, a.object_id)].pk == int(a.object_id)
 
+    def test_old_rbac_field_names_resolved_in_one_query(self, django_assert_num_queries, setup_managed_roles):
+        # The old-RBAC mirror needs each assignment's role-definition name to find the legacy
+        # Role field. _field_names_for_old_rbac must resolve the whole batch in a single query
+        # rather than dereferencing instance.role_definition once per assignment.
+        from awx.main.models.rbac import _field_names_for_old_rbac
+
+        rds = [
+            RoleDefinition.objects.get(name='Inventory Admin'),
+            RoleDefinition.objects.get(name='Organization Admin'),
+            RoleDefinition.objects.get(name='Project Admin'),
+        ]
+
+        # Stand-in assignment objects carrying only the role_definition_id the helper reads,
+        # duplicated so the batch is larger than the number of distinct role definitions.
+        class _Stub:
+            def __init__(self, rd_id):
+                self.role_definition_id = rd_id
+
+        assignments = [_Stub(rd.id) for rd in rds] * 4
+
+        with django_assert_num_queries(1):
+            field_names = _field_names_for_old_rbac(assignments)
+
+        assert field_names[rds[0].id] == 'admin_role'
+        assert field_names[rds[1].id] == 'admin_role'
+
     def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
         '''
         Deleting an object cascade-deletes its RoleUserAssignments. By the time the
