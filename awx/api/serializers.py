@@ -5499,7 +5499,11 @@ class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
         password_fields_to_forward = []
         error_list = []
         if 'notification_configuration' not in attrs:
-            return attrs
+            # Still chain into CleanTextMixin.validate() (AAP-78694) so a
+            # PATCH that omits notification_configuration (e.g. name/
+            # description only) doesn't skip Tier 1/2 validation entirely --
+            # only the config-schema checks below are skipped.
+            return super(NotificationTemplateSerializer, self).validate(attrs)
         if self.context['view'].kwargs and isinstance(self.context['view'], NotificationTemplateDetail):
             object_actual = self.context['view'].get_object()
         else:
