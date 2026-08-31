@@ -1,6 +1,7 @@
 import pytest
+from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
-from awx.main.tasks.system import _heartbeat_instance_management, update_inventory_computed_fields, inspect_execution_and_hop_nodes, _mesh_all_ready_nodes_visible
+from awx.main.tasks.system import _heartbeat_instance_management, update_inventory_computed_fields, inspect_execution_and_hop_nodes, _mesh_all_ready_nodes_visible, _heartbeat_handle_lost_instances
 from awx.main.models import Instance, Inventory
 from django.db import DatabaseError
 
@@ -204,6 +205,97 @@ class TestMeshAllReadyNodesVisible:
 
             # Correct: passing combined list → gate catches Window B (returns False)
             assert _mesh_all_ready_nodes_visible(instance_list_after_loop + lost_instances) is False
+
+
+# ── Tests: _heartbeat_handle_lost_instances (task manager lock) ───────────────
+
+
+def _make_lock(acquired):
+    """Return a context manager factory that always yields the given acquired bool."""
+
+    @contextmanager
+    def _lock(name, wait=True, **kwargs):
+        yield acquired
+
+    return _lock
+
+
+def _make_lock_sequence(sequence):
+    """Return a context manager factory that yields values from sequence in order."""
+    it = iter(sequence)
+
+    @contextmanager
+    def _lock(name, wait=True, **kwargs):
+        yield next(it)
+
+    return _lock
+
+
+def _lost_instance(hostname='ctrl-1'):
+    inst = MagicMock()
+    inst.hostname = hostname
+    inst.node_type = 'control'
+    inst.node_state = 'ready'
+    return inst
+
+
+class TestHeartbeatHandleLostInstancesLock:
+    def _run(self, lost, this_inst=None):
+        if this_inst is None:
+            this_inst = MagicMock()
+        with (
+            patch('awx.main.tasks.system.reaper') as mock_reaper,
+            patch('awx.main.tasks.system.UnifiedJob') as mock_uj,
+            patch('awx.main.tasks.system.settings') as mock_settings,
+        ):
+            mock_settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+            _heartbeat_handle_lost_instances(lost, this_inst)
+            return mock_reaper, mock_uj
+
+    def test_processes_instance_when_lock_acquired(self):
+        """When the lock is acquired, reap and mark_offline are both called."""
+        inst = _lost_instance()
+        with patch('awx.main.tasks.system.advisory_lock', _make_lock(True)):
+            mock_reaper, _ = self._run([inst])
+        mock_reaper.reap.assert_called_once_with(inst, job_explanation='Job reaped due to instance shutdown')
+        inst.mark_offline.assert_called_once()
+
+    def test_skips_instance_when_lock_unavailable(self):
+        """When the lock is unavailable, reap and mark_offline are not called."""
+        inst = _lost_instance()
+        with patch('awx.main.tasks.system.advisory_lock', _make_lock(False)):
+            mock_reaper, _ = self._run([inst])
+        mock_reaper.reap.assert_not_called()
+        inst.mark_offline.assert_not_called()
+
+    def test_logs_when_instance_deferred(self):
+        """When the lock is unavailable, a log message is emitted with the hostname."""
+        inst = _lost_instance('ctrl-1')
+        with patch('awx.main.tasks.system.advisory_lock', _make_lock(False)), patch('awx.main.tasks.system.logger') as mock_log:
+            self._run([inst])
+        assert mock_log.info.called
+        logged = mock_log.info.call_args[0][0]
+        assert 'ctrl-1' in logged
+
+    def test_per_instance_lock_first_skipped_second_processed(self):
+        """Lock alternates False/True: first instance skipped, second processed."""
+        inst1 = _lost_instance('ctrl-1')
+        inst2 = _lost_instance('ctrl-2')
+        with patch('awx.main.tasks.system.advisory_lock', _make_lock_sequence([False, True])):
+            mock_reaper, _ = self._run([inst1, inst2])
+        mock_reaper.reap.assert_called_once_with(inst2, job_explanation='Job reaped due to instance shutdown')
+        inst1.mark_offline.assert_not_called()
+        inst2.mark_offline.assert_called_once()
+
+    def test_all_instances_processed_when_lock_always_acquired(self):
+        """When lock is always acquired, all instances are fully processed."""
+        inst1 = _lost_instance('ctrl-1')
+        inst2 = _lost_instance('ctrl-2')
+        with patch('awx.main.tasks.system.advisory_lock', _make_lock(True)):
+            mock_reaper, _ = self._run([inst1, inst2])
+        assert mock_reaper.reap.call_count == 2
+        inst1.mark_offline.assert_called_once()
+        inst2.mark_offline.assert_called_once()
 
 
 @pytest.fixture

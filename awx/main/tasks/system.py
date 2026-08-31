@@ -840,39 +840,50 @@ def _heartbeat_check_versions(this_inst, instance_list):
             raise RuntimeError("Shutting down.")
 
 
+def _reap_and_mark_lost_instance(other_inst):
+    """Reap a lost instance's running jobs and mark it offline (or deprovision it)."""
+    try:
+        # Any jobs marked as running will be marked as error
+        explanation = "Job reaped due to instance shutdown"
+        reaper.reap(other_inst, job_explanation=explanation)
+        # Any jobs that were waiting to be processed by this node will be handed back to task manager
+        UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
+    except Exception:
+        logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
+    try:
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
+            deprovision_hostname = other_inst.hostname
+            other_inst.delete()  # FIXME: what about associated inbound links?
+            logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
+        elif other_inst.node_state == Instance.States.READY:
+            other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
+            logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
+
+    except DatabaseError as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            logger.debug('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+
+            if sqlstate == psycopg.errors.NoData:
+                logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
+            else:
+                logger.exception("Error marking {} as lost.".format(other_inst.hostname))
+        else:
+            logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+
+
 def _heartbeat_handle_lost_instances(lost_instances, this_inst):
     """Handle lost instances by reaping their running jobs and marking them offline."""
     for other_inst in lost_instances:
-        try:
-            # Any jobs marked as running will be marked as error
-            explanation = "Job reaped due to instance shutdown"
-            reaper.reap(other_inst, job_explanation=explanation)
-            # Any jobs that were waiting to be processed by this node will be handed back to task manager
-            UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
-        except Exception:
-            logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
-        try:
-            if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
-                deprovision_hostname = other_inst.hostname
-                other_inst.delete()  # FIXME: what about associated inbound links?
-                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
-            elif other_inst.node_state == Instance.States.READY:
-                other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
-
-        except DatabaseError as e:
-            cause = e.__cause__
-            if cause and hasattr(cause, 'sqlstate'):
-                sqlstate = cause.sqlstate
-                sqlstate_str = psycopg.errors.lookup(sqlstate)
-                logger.debug('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
-
-                if sqlstate == psycopg.errors.NoData:
-                    logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
-                else:
-                    logger.exception("Error marking {} as lost.".format(other_inst.hostname))
-            else:
-                logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+        # Serialize offline handling against the task manager so we never reap jobs
+        # mid-schedule; if the lock is held, retry this instance on the next heartbeat.
+        with advisory_lock('task_manager_lock', wait=False) as acquired:
+            if not acquired:
+                logger.info(f'task_manager_lock held, deferring offline handling for {other_inst.hostname} to next heartbeat cycle')
+                continue
+            _reap_and_mark_lost_instance(other_inst)
 
 
 @task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
