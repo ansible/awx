@@ -44,6 +44,7 @@ from polymorphic.models import PolymorphicModel
 # django-ansible-base
 from ansible_base.lib.serializers.mixins import CleanTextMixin
 from ansible_base.lib.utils.models import get_type_for_model
+from ansible_base.lib.utils.settings import get_setting
 from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
@@ -212,8 +213,44 @@ def reverse_gfk(content_object, request):
     return {camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url(request=request)}
 
 
-class CopySerializer(serializers.Serializer):
+class PlainSerializerCleanTextMixin(CleanTextMixin):
+    """CleanTextMixin for plain `serializers.Serializer` subclasses with no
+    backing Django model (AAP-78694). Overrides ONLY field discovery -- treats
+    the serializer's own declared CharFields as the text fields to validate.
+    Everything else (Tier 1/2 dispatch, exclusions, audit logging, the
+    enforcement gate) is reused unchanged from CleanTextMixin.
+
+    Known limitation: unlike the model-field path, this can't replicate the
+    get_internal_type() exclusion of SlugField/IPAddressField-style fields
+    (DRF fields have no equivalent signal) -- not an issue for any serializer
+    using this mixin today, since none declare such fields.
+    """
+
+    def _classify_fields(self, model):
+        text_fields = [name for name, field in self.fields.items() if isinstance(field, serializers.CharField)]
+        return text_fields, []
+
+
+class _CopySerializerFakeModel:
+    """Stand-in for Meta.model on CopySerializer, a plain serializers.Serializer
+    with no backing model of its own (it's reused across many resource types via
+    CopyAPIView subclasses). Only satisfies the `_meta.app_label`/`object_name`
+    attributes CleanTextMixin's audit-log message reads (AAP-78694) -- never
+    introspected for real fields, since PlainSerializerCleanTextMixin overrides
+    field discovery."""
+
+    _meta = type('Meta', (), {'app_label': 'main', 'object_name': 'CopySerializer'})
+
+
+class CopySerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
+    # The submitted name becomes the new object's name (see
+    # CopyAPIView.post -> copy_model_obj in awx/api/generics.py), so it needs
+    # the same Tier 1 protection as the 'name' field on the resource being
+    # copied (AAP-78694) -- without this, Copy bypassed validation entirely.
     name = serializers.CharField()
+
+    class Meta:
+        model = _CopySerializerFakeModel
 
     def validate(self, attrs):
         name = attrs.get('name')
@@ -221,7 +258,7 @@ class CopySerializer(serializers.Serializer):
         obj = view.get_object()
         if name == obj.name:
             raise serializers.ValidationError(_('The original object is already named {}, a copy from it cannot have the same name.'.format(name)))
-        return attrs
+        return super().validate(attrs)
 
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
@@ -751,6 +788,28 @@ class PromptFieldCleanTextMixin(CleanTextMixin):
         text_fields, json_fields = super()._classify_fields(model)
         extra = [f for f in self.prompt_pseudo_fields if f in self.fields and f not in text_fields]
         return list(text_fields) + extra, json_fields
+
+    def _run_clean_text_validation(self, attrs):
+        """Run Tier 1/2 validation and raise on failure, without chaining into
+        the next class in the MRO's validate(). Needed by BulkJobNodeSerializer,
+        whose own validate() intentionally skips LaunchConfigurationBaseSerializer.validate()
+        (that method assumes unified_job_template/inventory/execution_environment
+        are model instances, but BulkJobNodeSerializer declares them as raw PKs
+        to avoid a DB lookup per node) via `super(LaunchConfigurationBaseSerializer, self)`.
+        A plain `self.validate(attrs)` call there would still run this mixin's
+        own `super().validate(attrs)` chain straight into the skipped class, since
+        Python's zero-arg super() resolves against the instance's full MRO
+        regardless of how the method was invoked -- so the Tier 1/2 checks are
+        exposed here as a standalone step instead.
+        """
+        model = self.Meta.model
+        text_fields, json_fields = self._classify_fields(model)
+        errors = {}
+        self._validate_text_fields(text_fields, attrs, errors)
+        self._validate_json_fields(json_fields, attrs, errors)
+        if errors and get_setting('ENHANCED_INPUT_VALIDATION_ENABLED', False):
+            raise serializers.ValidationError(errors)
+        return attrs
 
 
 class EmptySerializer(serializers.Serializer):
@@ -3526,7 +3585,13 @@ class JobTemplateWithSpecSerializer(JobTemplateSerializer):
         fields = ('*', 'survey_spec')
 
 
-class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
+class JobSerializer(CleanTextMixin, UnifiedJobSerializer, JobOptionsSerializer):
+    # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
+    # ("{{ var }}"), same conflict class as JobTemplateSerializer.extra_vars
+    # (AAP-78694). JobDetail allows PUT/PATCH while status is "new" (see
+    # JobDetail.update), which is the real write path this protects.
+    excluded_fields = frozenset({'extra_vars'})
+
     passwords_needed_to_start = serializers.ReadOnlyField()
     artifacts = serializers.SerializerMethodField()
 
@@ -4355,7 +4420,7 @@ class WorkflowJobTemplateNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigu
         return summary_fields
 
 
-class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
+class WorkflowJobNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -4993,6 +5058,10 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
         fields = ('*', 'credentials', 'labels', 'instance_groups')  # m2m fields are not canonical for WJ nodes
 
     def validate(self, attrs):
+        # Deliberately skips LaunchConfigurationBaseSerializer.validate() (see
+        # its comment above) -- run Tier 1/2 validation explicitly first
+        # since that skip would otherwise bypass it too (AAP-78694).
+        attrs = self._run_clean_text_validation(attrs)
         return super(LaunchConfigurationBaseSerializer, self).validate(attrs)
 
     def get_validation_exclusions(self, obj=None):
@@ -5001,7 +5070,15 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
         return ret
 
 
-class BulkJobLaunchSerializer(serializers.Serializer):
+class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer):
+    # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
+    # ("{{ var }}"); by the time this mixin's validate() runs it has already
+    # been converted from a dict to a JSON string by validate() below
+    # (unlike JobLaunchSerializer/WorkflowJobLaunchSerializer's extra_vars,
+    # which stay parsed), so this exclusion is load-bearing here, not
+    # defensive (AAP-78694).
+    excluded_fields = frozenset({'extra_vars'})
+
     name = serializers.CharField(default='Bulk Job Launch', max_length=512, write_only=True, required=False, allow_blank=True)  # limited by max name of jobs
     jobs = BulkJobNodeSerializer(
         many=True,
