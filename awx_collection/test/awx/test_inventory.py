@@ -9,6 +9,7 @@ from awx.main.models import Inventory, Organization
 
 @pytest.mark.django_db
 def test_inventory_create(run_module, admin_user, organization):
+    """Creating a basic inventory sets its variables and organization correctly."""
     # Create an insights credential
 
     result = run_module(
@@ -35,6 +36,7 @@ def test_inventory_create(run_module, admin_user, organization):
 
 @pytest.mark.django_db
 def test_invalid_smart_inventory_create(run_module, admin_user, organization):
+    """An invalid host_filter query on a smart inventory fails the module."""
     result = run_module(
         'inventory',
         {'name': 'foo-inventory', 'organization': organization.name, 'kind': 'smart', 'host_filter': 'ansible', 'state': 'present'},
@@ -47,6 +49,7 @@ def test_invalid_smart_inventory_create(run_module, admin_user, organization):
 
 @pytest.mark.django_db
 def test_valid_smart_inventory_create(run_module, admin_user, organization):
+    """A valid host_filter query creates a smart inventory with that filter."""
     result = run_module(
         'inventory',
         {'name': 'foo-inventory', 'organization': organization.name, 'kind': 'smart', 'host_filter': 'name=my_host', 'state': 'present'},
