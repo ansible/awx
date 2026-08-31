@@ -154,6 +154,25 @@ def test_unified_job_list_rando_sees_nothing(rando, setup_managed_roles, get):
 
 
 @pytest.mark.django_db
+def test_unified_job_list_filtered_count_matches_results(admin, organization, inventory, setup_managed_roles, get):
+    """When a filter narrows the result set, the pagination count must
+    match the actual number of matching results, not the unfiltered
+    table total."""
+    project = Project.objects.create(name='uj-filtered-count-project', organization=organization)
+    jt = JobTemplate.objects.create(name='uj-filtered-count-jt', project=project, inventory=inventory, organization=organization)
+
+    canceled_job = jt.create_unified_job(_eager_fields={'status': 'canceled'})
+    jt.create_unified_job(_eager_fields={'status': 'successful'})
+
+    response = get(reverse('api:unified_job_list') + '?status=canceled', admin)
+    assert response.status_code == 200
+    assert {'count': response.data['count'], 'result_ids': [r['id'] for r in response.data['results']]} == {
+        'count': 1,
+        'result_ids': [canceled_job.pk],
+    }
+
+
+@pytest.mark.django_db
 def test_unified_job_list_pagination_uses_unfiltered_count(rando, setup_managed_roles, get):
     """The pagination count should reflect total unified job rows, not
     the RBAC-filtered subset.  The RBAC-filtered COUNT is catastrophically
