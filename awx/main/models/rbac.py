@@ -797,23 +797,22 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
 _UNSET = object()
 
 
-def _sync_assignment_to_old_role(instance, delete=True, content_object=_UNSET, field_name=_UNSET):
+def _sync_assignment_to_old_role(instance, field_name, delete=True, content_object=_UNSET):
     """Mirror a single new-RBAC assignment into the legacy Role.members / children m2m.
 
-    ``content_object`` and ``field_name`` may be supplied pre-resolved by the bulk handlers
-    (see _field_names_for_old_rbac and the shared content-object prefetch) so a batch does
-    not re-dereference instance.role_definition and instance.object_role.content_object once
-    per row. When omitted they are resolved from the instance, preserving the original
-    single-row behavior for any other caller.
+    ``field_name`` is the legacy Role field for the assignment's role definition, resolved
+    once for the whole batch by the bulk handlers (see _field_names_for_old_rbac); a role
+    definition with no legacy equivalent passes None and is skipped. ``content_object`` is
+    taken from DAB's content_objects when available; on the narrow path where DAB did not
+    supply it, pass _UNSET and it is dereferenced from the instance here.
     """
     from awx.main.signals import disable_activity_stream
 
+    if not field_name:
+        return
+
     with disable_activity_stream():
         with disable_rbac_sync():
-            if field_name is _UNSET:
-                field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
-            if not field_name:
-                return
             if content_object is _UNSET:
                 try:
                     content_object = instance.object_role.content_object
@@ -935,7 +934,7 @@ def handle_dab_assignments_created(sender, assignments, content_objects=None, **
 
     for instance in assignments:
         content_object = dab_content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
-        _sync_assignment_to_old_role(instance, delete=False, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
+        _sync_assignment_to_old_role(instance, field_names.get(instance.role_definition_id), delete=False, content_object=content_object)
         _record_role_assignment_activity_stream(instance, 'associate', dab_content_objects)
 
 
@@ -961,7 +960,7 @@ def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None,
         # Record the activity stream entry BEFORE deletion, while the FKs are still valid.
         _record_role_assignment_activity_stream(instance, 'disassociate', dab_content_objects)
         content_object = dab_content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
-        _sync_assignment_to_old_role(instance, delete=True, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
+        _sync_assignment_to_old_role(instance, field_names.get(instance.role_definition_id), delete=True, content_object=content_object)
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)
