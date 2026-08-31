@@ -10,6 +10,7 @@ import yaml
 import urllib.parse
 from collections import Counter, OrderedDict
 from datetime import timedelta
+from types import MappingProxyType
 from uuid import uuid4
 
 # Jinja
@@ -5324,13 +5325,24 @@ class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
     capabilities_prefetch = [{'copy': 'organization.add_notificationtemplate'}]
 
-    # notification_configuration holds a dynamic, notification-type-dependent
-    # schema that includes password-type secret fields (Slack/webhook/SMTP
-    # tokens) -- same secrets concern as Credential.inputs. messages is
-    # user-authored Jinja2 template text ("{{ job.id }}" etc.), already
-    # validated by its own sandboxed Jinja renderer in validate_messages()
-    # below -- a stronger, purpose-built check that Tier 2 would conflict with.
-    excluded_fields = frozenset({'notification_configuration', 'messages'})
+    # messages is user-authored Jinja2 template text ("{{ job.id }}" etc.),
+    # already validated by its own sandboxed Jinja renderer in
+    # validate_messages() below -- a stronger, purpose-built check that
+    # Tier 2 would conflict with.
+    excluded_fields = frozenset({'messages'})
+
+    # notification_configuration's schema is notification_type-dependent, but
+    # unlike Credential.inputs (admin-definable custom types with arbitrary
+    # secret fields), notification_type is a fixed models.CharField(choices=...)
+    # -- every possible backend class ships in awx/main/notifications/ and is
+    # known at code-authoring time. This is the exhaustive union, across all
+    # backends, of every init_parameters key with type "password" (verified:
+    # none of these names are used for a non-secret value in any backend):
+    # email/irc/webhook password, slack/pagerduty token, twilio account_token,
+    # grafana grafana_key, awssns aws_secret_access_key/aws_session_token.
+    excluded_json_keys = MappingProxyType(
+        {'notification_configuration': frozenset({'password', 'token', 'account_token', 'grafana_key', 'aws_secret_access_key', 'aws_session_token'})}
+    )
 
     class Meta:
         model = NotificationTemplate
