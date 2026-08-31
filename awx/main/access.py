@@ -24,6 +24,7 @@ from ansible_base.rbac.policies import visible_users
 from ansible_base.rbac import permission_registry
 
 # AWX
+from awx.main.fields import AskForField
 from awx.main.utils import (
     get_object_or_400,
     get_pk_from_dict,
@@ -1592,12 +1593,6 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
             'job_tags',
             'force_handlers',
             'skip_tags',
-            'ask_variables_on_launch',
-            'ask_tags_on_launch',
-            'ask_job_type_on_launch',
-            'ask_skip_tags_on_launch',
-            'ask_inventory_on_launch',
-            'ask_credential_on_launch',
             'survey_enabled',
             'custom_virtualenv',
             'diff_mode',
@@ -1608,18 +1603,25 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
             'created',
             'modified',
         ]
+        # ask_*_on_launch fields only toggle whether a field can be prompted for at launch
+        # time; they don't grant access to a new resource, so they are always non-sensitive
+        # regardless of which model defines them
+        ask_field_names = {f.name for f in obj._meta.get_fields() if isinstance(f, AskForField)}
 
-        for k, v in data.items():
-            if k not in [x.name for x in obj._meta.concrete_fields]:
+        for field_name, new_value in data.items():
+            if field_name not in [x.name for x in obj._meta.concrete_fields]:
                 continue
-            if hasattr(obj, k) and getattr(obj, k) != v:
-                if (
-                    k not in allowed_fields
-                    and v != getattr(obj, '%s_id' % k, None)
-                    and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == '')
-                ):  # Equate '' to None in the case of foreign keys
+            if hasattr(obj, field_name) and getattr(obj, field_name) != new_value:
+                if field_name not in allowed_fields and field_name not in ask_field_names and not self._fk_value_unchanged(obj, field_name, new_value):
                     return False
         return True
+
+    def _fk_value_unchanged(self, obj, field_name, new_value):
+        """True if new_value is just a different representation of the current FK value (id, or '' equated to None)."""
+        fk_id_attr = '%s_id' % field_name
+        if new_value == getattr(obj, fk_id_attr, None):
+            return True
+        return hasattr(obj, fk_id_attr) and getattr(obj, fk_id_attr) is None and new_value == ''
 
     def can_delete(self, obj):
         return self.user.is_superuser or self.user in obj.admin_role
