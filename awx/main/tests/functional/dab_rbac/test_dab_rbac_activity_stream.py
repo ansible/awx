@@ -151,33 +151,77 @@ class TestRoleAssignmentActivityStream:
         assert entry.object2 == 'user'
         assert entry.object_relationship_type == str(rd.id)
 
-    def test_content_object_lookup_batches_by_type(self, rando, organization, django_assert_max_num_queries, setup_managed_roles):
-        # The whole point of the bulk-signal migration is to stop resolving each assignment's
-        # content object with its own query. _prefetch_assignment_content_objects must fetch
-        # all objects of a type in one query regardless of how many assignments there are.
+    def test_platform_auditor_global_role_recorded(self, rando, setup_managed_roles):
+        # Platform Auditor is the one real managed singleton role (content_type=None); it is
+        # created by a data migration, not by setup_managed_role_definitions, so the fixture
+        # does not provide it and the test materializes it the same way the migration does.
+        rd, _ = RoleDefinition.objects.get_or_create(name='Platform Auditor', defaults={'managed': True})
+        rd.give_global_permission(rando)
+
+        entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.object2 == 'user'
+        assert entry.object_relationship_type == str(rd.id)
+
+        rd.remove_global_permission(rando)
+        removals = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert removals.count() == 1
+        assert removals.get().object1 == ''
+
+    def test_object_not_supplied_by_dab_records_bare_entry_without_link(self, rando, setup_managed_roles):
+        # When DAB does not hand us the resolved object (the narrow direct-give_assignments
+        # path, or an object row that is already gone), we deliberately do NOT fetch it — that
+        # per-row fetch is the regression this migration removes (AAP-85842). The entry is
+        # still recorded with the role and actor, but with no object metadata and no m2m link,
+        # so it can never reference a row that does not exist. The call must not raise.
         from ansible_base.rbac.models import RoleUserAssignment
 
-        from awx.main.models import Inventory
-        from awx.main.models.rbac import _prefetch_assignment_content_objects
+        from awx.main.models.rbac import _record_role_assignment_activity_stream
 
+        ct = permission_registry.content_type_model.objects.get_for_model(Inventory)
         rd = RoleDefinition.objects.get(name='Inventory Admin')
-        inventories = [Inventory.objects.create(name=f'batch-inv-{i}', organization=organization) for i in range(5)]
-        for inv in inventories:
-            rd.give_permission(rando, inv)
+        missing_id = 99999999
+        assert not Inventory.objects.filter(pk=missing_id).exists()
+        # Force-create an assignment pointing at a non-existent object; object_role is None.
+        assignment = RoleUserAssignment.objects.create(role_definition=rd, user=rando, content_type=ct, object_id=str(missing_id))
 
-        # Re-fetch so content_object is not already cached on the instances.
-        assignments = list(RoleUserAssignment.objects.filter(role_definition=rd, user=rando))
-        assert len(assignments) == 5
+        # No content_objects passed: the recorder relies solely on DAB's dict.
+        _record_role_assignment_activity_stream(assignment, 'disassociate')
 
-        # No content_objects supplied (the give_assignments-direct / empty-dict case): the
-        # helper must batch — one query for the content types, one in_bulk for the objects —
-        # not one query per assignment. Assert a small constant that does not grow with the
-        # number of assignments.
-        with django_assert_max_num_queries(3):
-            lookup = _prefetch_assignment_content_objects(assignments, {})
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        # Only the role and actor are captured; no object type/id/name and no link.
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.inventory.count() == 0
 
-        for a in assignments:
-            assert lookup[(a.content_type_id, a.object_id)].pk == int(a.object_id)
+    def test_non_integer_object_id_records_bare_entry_without_link(self, rando, setup_managed_roles):
+        # A degenerate assignment (e.g. a row another service wrote into our database) can
+        # carry a non-integer object_id. DAB would never resolve such a key into
+        # content_objects, so it falls into the same "object not supplied" path: the bare
+        # assignment is recorded (role + actor) and no bogus object link is attempted. Because
+        # we never cast object_id ourselves, the degenerate value cannot raise.
+        from ansible_base.rbac.models import RoleUserAssignment
+
+        from awx.main.models.rbac import _record_role_assignment_activity_stream
+
+        ct = permission_registry.content_type_model.objects.get_for_model(Inventory)
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        # Materialize an assignment with a degenerate generic foreign key.
+        assignment = RoleUserAssignment.objects.create(role_definition=rd, user=rando, content_type=ct, object_id='not-an-int')
+
+        _record_role_assignment_activity_stream(assignment, 'disassociate')
+
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.inventory.count() == 0
 
     def test_old_rbac_field_names_resolved_in_one_query(self, django_assert_num_queries, setup_managed_roles):
         # The old-RBAC mirror needs each assignment's role-definition name to find the legacy
