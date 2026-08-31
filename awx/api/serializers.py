@@ -3297,7 +3297,7 @@ class CredentialSerializerCreate(CredentialSerializer):
         return credential
 
 
-class CredentialInputSourceSerializer(BaseSerializer):
+class CredentialInputSourceSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['delete']
 
     class Meta:
@@ -4185,7 +4185,7 @@ class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListS
         fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out')
 
 
-class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
+class WorkflowApprovalTemplateSerializer(CleanTextMixin, UnifiedJobTemplateSerializer):
     class Meta:
         model = WorkflowApprovalTemplate
         fields = ('*', 'timeout', 'name')
@@ -5594,7 +5594,7 @@ class NotificationSerializer(BaseSerializer):
         return ret
 
 
-class LabelSerializer(BaseSerializer):
+class LabelSerializer(CleanTextMixin, BaseSerializer):
     class Meta:
         model = Label
         fields = ('*', '-description', 'organization')
