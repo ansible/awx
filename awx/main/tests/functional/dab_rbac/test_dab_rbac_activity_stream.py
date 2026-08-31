@@ -223,31 +223,42 @@ class TestRoleAssignmentActivityStream:
         assert entry.object1 == ''
         assert entry.inventory.count() == 0
 
-    def test_old_rbac_field_names_resolved_in_one_query(self, django_assert_num_queries, setup_managed_roles):
-        # The old-RBAC mirror needs each assignment's role-definition name to find the legacy
-        # Role field. _field_names_for_old_rbac must resolve the whole batch in a single query
-        # rather than dereferencing instance.role_definition once per assignment.
-        from awx.main.models.rbac import _field_names_for_old_rbac
+    def test_role_definition_materialized_on_signal_instances(self, rando, inventory, django_assert_num_queries, setup_managed_roles):
+        # The old-RBAC mirror resolves the legacy Role field from instance.role_definition.name
+        # per row instead of a batch query, which is only free because DAB materializes
+        # role_definition on the assignments it hands to both bulk signals. Guard that: reading
+        # .role_definition.name on the delivered instances must issue no query. If it regresses,
+        # the mirror (and the activity-stream recorder) would do a per-row SELECT again.
+        from ansible_base.rbac.triggers import dab_rbac_assignments_created, dab_rbac_assignments_pre_delete
 
-        rds = [
-            RoleDefinition.objects.get(name='Inventory Admin'),
-            RoleDefinition.objects.get(name='Organization Admin'),
-            RoleDefinition.objects.get(name='Project Admin'),
-        ]
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        captured = []
 
-        # Stand-in assignment objects carrying only the role_definition_id the helper reads,
-        # duplicated so the batch is larger than the number of distinct role definitions.
-        class _Stub:
-            def __init__(self, rd_id):
-                self.role_definition_id = rd_id
+        def probe(sender, assignments, **kwargs):
+            captured.extend(assignments)
 
-        assignments = [_Stub(rd.id) for rd in rds] * 4
+        dab_rbac_assignments_created.connect(probe)
+        try:
+            rd.give_permission(rando, inventory)
+        finally:
+            dab_rbac_assignments_created.disconnect(probe)
 
-        with django_assert_num_queries(1):
-            field_names = _field_names_for_old_rbac(assignments)
+        assert captured
+        with django_assert_num_queries(0):
+            for assignment in captured:
+                assert assignment.role_definition.name == rd.name
 
-        assert field_names[rds[0].id] == 'admin_role'
-        assert field_names[rds[1].id] == 'admin_role'
+        captured.clear()
+        dab_rbac_assignments_pre_delete.connect(probe)
+        try:
+            rd.remove_permission(rando, inventory)
+        finally:
+            dab_rbac_assignments_pre_delete.disconnect(probe)
+
+        assert captured
+        with django_assert_num_queries(0):
+            for assignment in captured:
+                assert assignment.role_definition.name == rd.name
 
     def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
         '''
