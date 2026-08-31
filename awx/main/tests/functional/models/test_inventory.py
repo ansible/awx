@@ -342,6 +342,33 @@ def test_inventory_update_excessively_long_name(inventory, inventory_source):
 
 
 @pytest.mark.django_db
+class TestConstructedInventory:
+    def test_constructed_inventory_aggregates_hosts_from_inputs(self, organization):
+        """Create 2 regular inventories with asymmetric host counts, create a constructed
+        inventory with those as inputs, verify both inventories are linked and hosts
+        from each are distinguishable"""
+        inv1 = Inventory.objects.create(name='source-inv-1', organization=organization)
+        inv1.hosts.create(name='host-a')
+        inv1.hosts.create(name='host-b')
+        inv1.hosts.create(name='host-c')
+
+        inv2 = Inventory.objects.create(name='source-inv-2', organization=organization)
+        inv2.hosts.create(name='host-d')
+
+        constructed = Inventory.objects.create(name='my-constructed', kind='constructed', organization=organization)
+        constructed.input_inventories.add(inv1)
+        constructed.input_inventories.add(inv2)
+
+        input_ids = set(constructed.input_inventories.values_list('id', flat=True))
+        assert input_ids == {inv1.id, inv2.id}
+
+        all_host_names = set()
+        for inv in constructed.input_inventories.all():
+            all_host_names.update(inv.hosts.values_list('name', flat=True))
+        assert all_host_names == {'host-a', 'host-b', 'host-c', 'host-d'}
+
+
+@pytest.mark.django_db
 class TestHostManager:
     def test_host_filter_not_smart(self, setup_ec2_gce, organization):
         smart_inventory = Inventory(name='smart', organization=organization, host_filter='inventory_sources__source=ec2')
