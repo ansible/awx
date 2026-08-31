@@ -139,6 +139,13 @@ import json
 
 
 def main():
+    """Entry point for the awx.awx.inventory module.
+
+    Resolves the target organization and inventory, optionally copies an
+    existing inventory, and creates/updates/deletes the inventory along
+    with its instance_groups and (for constructed inventories)
+    input_inventories associations.
+    """
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
