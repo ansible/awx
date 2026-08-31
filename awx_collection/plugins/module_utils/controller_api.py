@@ -538,6 +538,21 @@ class ControllerAPIModule(ControllerModule):
         return self.get_one(endpoint, name_or_id=name_or_id, allow_none=False, **kwargs)
 
     def resolve_name_to_id(self, endpoint, name_or_id, data=None):
+        """Resolve a name or ID to the numeric ID of exactly one matching object.
+
+        Args:
+            endpoint: API endpoint to search, for instance 'organizations' or 'inventories'.
+            name_or_id: Name or numeric ID of the object to resolve.
+            data: Optional dict of extra query filters (e.g. {'organization': org_id}) to
+                scope the search, the same way get_one()/get_exactly_one() already support.
+                Defaults to no extra scoping, matching the previous behavior of this method.
+
+        Returns:
+            int: The numeric ID of the single matching object.
+
+        Raises:
+            Fails the module (via fail_json) if zero or more than one object matches.
+        """
         return self.get_exactly_one(endpoint, name_or_id, data=data or {})['id']
 
     def is_retryable(self, status_code, method, endpoint):
