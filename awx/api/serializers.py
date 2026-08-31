@@ -1901,9 +1901,13 @@ class HostSerializer(CleanTextMixin, BaseSerializerWithVariables):
 
     # variables is raw YAML/JSON that legitimately contains Jinja2 syntax.
     excluded_fields = frozenset({'variables'})
-    # name supports an existing "hostname:port" syntax (see validate_name /
-    # _get_host_port_from_name below); Tier 1's allowlist has no colon, so
-    # demote to Tier 2 to avoid rejecting that already-supported syntax.
+    # NOT for the single "host:port" syntax (see _get_host_port_from_name
+    # below) -- that colon is stripped from attrs['name'] in validate()
+    # before it ever reaches Tier 1. This demotion is for names
+    # _get_host_port_from_name passes through untouched: any colon count
+    # other than exactly 1, most notably IPv6 addresses, which its own
+    # comment says it explicitly does not parse ("except IPv6 for now").
+    # Tier 1's allowlist has no colon, so those would otherwise be rejected.
     name_fields = DEFAULT_NAME_FIELDS - {'name'}
 
     has_active_failures = serializers.SerializerMethodField()
