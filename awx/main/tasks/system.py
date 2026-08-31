@@ -685,7 +685,7 @@ def cluster_node_heartbeat(binder):
     # Run local reaper using tasks from dispatcherd
     ref_time = now()  # No dispatch_time in dispatcherd version
     logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
-    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time, undispatched_only=True)
     # If waiting jobs are hanging out, resubmit them
     if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
         from awx.main.tasks.jobs import dispatch_waiting_jobs
@@ -728,7 +728,7 @@ def _get_active_task_ids_from_dispatcherd(binder):
 
 
 def _mesh_all_ready_nodes_visible(instance_list):
-    """Return True if all READY execution/hop nodes appear in both
+    """Return True if all recently-seen READY execution/hop nodes appear in both
     KnownConnectionCosts (routing) and Advertisements (service ads).
 
     Fails open on any receptor error so existing error paths are not bypassed.
@@ -737,9 +737,23 @@ def _mesh_all_ready_nodes_visible(instance_list):
     Catches two re-establishment windows after a controller restart:
       Window A (<10s): routing not yet propagated — EEs absent from KnownConnectionCosts
       Window B (10-60s): routing restored but EEs not yet re-advertised via Advertisements
+
+    Nodes with last_seen older than 1.5 × HEARTBEAT_PERIOD are excluded from expected:
+    they are genuinely offline rather than transiently absent during re-establishment.
+    This prevents indefinite deferral when a dead node stays in READY state while it
+    awaits lost-instance handling.
     """
+    # Nodes last seen within this window could be transiently absent during re-establishment.
+    # Dead nodes (last_seen >= is_lost threshold of 2 × HEARTBEAT_PERIOD) are excluded so
+    # their mesh absence doesn't block peer judgment on every subsequent heartbeat cycle.
+    recency_cutoff = now() - timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 1.5)
     expected = {
-        inst.hostname for inst in instance_list if inst.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and inst.node_state == Instance.States.READY
+        inst.hostname
+        for inst in instance_list
+        if inst.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP)
+        and inst.node_state == Instance.States.READY
+        and inst.last_seen is not None
+        and inst.last_seen > recency_cutoff
     }
     if not expected:
         return True
@@ -843,9 +857,9 @@ def _heartbeat_check_versions(this_inst, instance_list):
 def _reap_and_mark_lost_instance(other_inst):
     """Reap a lost instance's running jobs and mark it offline (or deprovision it)."""
     try:
-        # Any jobs marked as running will be marked as error
+        # Only reap jobs never dispatched to receptor; dispatched jobs are left for adoption (AAP-89602)
         explanation = "Job reaped due to instance shutdown"
-        reaper.reap(other_inst, job_explanation=explanation)
+        reaper.reap(other_inst, job_explanation=explanation, undispatched_only=True)
         # Any jobs that were waiting to be processed by this node will be handed back to task manager
         UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
     except Exception:

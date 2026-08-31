@@ -1154,3 +1154,7 @@ FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED = False
 # based on age. Note workers will finish their last task before retiring if
 # they are busy when they reach retirement age.
 WORKER_MAX_LIFETIME_SECONDS = 14400  # seconds
+
+# Maximum time (seconds) a dispatched job may remain without an active controller
+# before it is failed. Used by the adoption loop (AAP-89602) as a hard deadline.
+HADR_JOB_ADOPTION_TIMEOUT = 3600
