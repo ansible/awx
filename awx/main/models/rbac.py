@@ -2,7 +2,9 @@
 # All Rights Reserved.
 
 # Python
+import json
 import logging
+import sys
 import threading
 import contextlib
 import re
@@ -15,19 +17,18 @@ from crum import impersonate
 
 # Django
 from django.db import models, transaction, connection
-from django.db.models.signals import m2m_changed, post_save, post_delete
-from django.dispatch import receiver
+from django.db.models.signals import m2m_changed
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 from django.apps import apps
 from django.conf import settings
 
 # Ansible_base app
-from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment, RoleTeamAssignment
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from ansible_base.rbac.sync import maybe_reverse_sync_assignment, maybe_reverse_sync_unassignment, maybe_reverse_sync_role_definition
+from ansible_base.rbac.triggers import dab_rbac_assignments_created, dab_rbac_assignments_pre_delete
 from ansible_base.rbac import permission_registry
 from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 from ansible_base.lib.utils.models import get_type_for_model
@@ -703,6 +704,13 @@ def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
     if action.startswith('pre_'):
         return
+    # Mirror the guard in sync_members_to_new_rbac: when _sync_assignment_to_old_role
+    # mirrors a team assignment it edits member_role.children inside disable_rbac_sync(),
+    # which fires this m2m handler. Without this guard the reverse (old->new) sync would
+    # call remove_permission again and, because the bulk pre_delete signal now fires
+    # before the assignment row is deleted, re-find the still-present assignment and recurse.
+    if not rbac_sync_enabled.enabled:
+        return
 
     if action == 'post_add':
         is_giving = True
@@ -785,27 +793,41 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
 }
 
 
-def _sync_assignments_to_old_rbac(instance, delete=True):
+_UNSET = object()
+
+
+def _sync_assignment_to_old_role(instance, delete=True, content_object=_UNSET):
+    """Mirror a single new-RBAC assignment into the legacy Role.members / children m2m.
+
+    The legacy Role field is resolved from instance.role_definition.name, which DAB now
+    materializes on both the created and pre_delete signal instances, so this costs no query;
+    a role definition with no legacy equivalent has no field and is skipped. ``content_object``
+    is taken from DAB's content_objects when available; on the narrow path where DAB did not
+    supply it, pass _UNSET and it is dereferenced from the instance here.
+    """
     from awx.main.signals import disable_activity_stream
+
+    field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
+    if not field_name:
+        return
 
     with disable_activity_stream():
         with disable_rbac_sync():
-            field_name = ROLE_DEFINITION_TO_ROLE_FIELD.get(instance.role_definition.name)
-            if not field_name:
+            if content_object is _UNSET:
+                # Resolve straight off the assignment's own content_type/object_id (both cached
+                # on the row) rather than hopping through object_role - one lookup, not two. A
+                # missing object (e.g. mid cascade-delete) resolves to None, handled below.
+                content_object = instance.content_object
+            if content_object is None:
+                # Object no longer resolvable (e.g. already deleted) — nothing to mirror.
                 return
-            try:
-                role = getattr(instance.object_role.content_object, field_name)
-            # in the case RoleUserAssignment is being cascade deleted, then
-            # object_role might not exist. In which case the object is about to be removed
-            # anyways so just return
-            except ObjectDoesNotExist:
-                return
-            if isinstance(instance.actor, get_user_model()):
-                # user
+            role = getattr(content_object, field_name)
+            if isinstance(instance, RoleUserAssignment):
+                # user — add/remove by pk to avoid fetching the user object
                 if delete:
-                    role.members.remove(instance.actor)
+                    role.members.remove(instance.user_id)
                 else:
-                    role.members.add(instance.actor)
+                    role.members.add(instance.user_id)
             else:
                 # team
                 if delete:
@@ -814,27 +836,123 @@ def _sync_assignments_to_old_rbac(instance, delete=True):
                     instance.team.member_role.children.add(role)
 
 
-@receiver(post_delete, sender=RoleUserAssignment)
-@receiver(post_delete, sender=RoleTeamAssignment)
-def sync_assignments_to_old_rbac_delete(instance, origin=None, **kwargs):
-    # Skip cascade deletes from non-assignment origins — sync is redundant:
-    #  - Model origin with app_label != dab_rbac: a parent object (e.g.
-    #    Organization) is being deleted and old Role M2M tables cascade from
-    #    the same parent.
-    #  - QuerySet of a different model (e.g. ObjectRole): bulk RBAC cleanup
-    #    such as defer_rbac_computations flush — parent objects already gone.
-    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
+def _record_role_assignment_activity_stream(instance, operation, content_objects=None):
+    from awx.main.signals import activity_stream_enabled, emit_activity_stream_change, get_activity_stream_class, get_current_user_or_none
+    from awx.main.utils import camelcase_to_underscore
+
+    if not activity_stream_enabled:
         return
-    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
+    # Avoid flooding the activity stream when assignments are cascade-deleted as part
+    # of setup_managed_role_definitions() pruning stale managed RoleDefinitions on migrate.
+    if 'migrate' in sys.argv:
         return
-    _sync_assignments_to_old_rbac(instance, delete=True)
+
+    if isinstance(instance, RoleUserAssignment):
+        actor_field = 'user'
+        actor_obj = instance.user
+    else:
+        actor_field = 'team'
+        actor_obj = instance.team
+
+    changes = {'role_definition': instance.role_definition.name, actor_field: getattr(actor_obj, 'username', None) or str(actor_obj)}
+
+    # object1 names the ActivityStream relation we link the entry to (object2 is the actor),
+    # matching the convention used for legacy Role.members association entries so this reads
+    # e.g. "disassociated organization X from user Y". Defaults describe a global (singleton)
+    # role assignment with no content object; object-scoped assignments fill these in below.
+    activity_stream_cls = get_activity_stream_class()
+    object1 = ''
+    obj_rel = str(instance.role_definition_id)
+
+    # The object is linked only when DAB resolved it for us in content_objects. We never
+    # fetch it ourselves: that per-row fetch is exactly the regression this migration set out
+    # to remove (AAP-85842). On the narrow path where DAB does not supply it (a direct
+    # give_assignments / remove_assignments, or a global role) the entry is recorded with just
+    # the role and actor, without an object link. Because we only ever link an object DAB
+    # actually resolved, the m2m link can never reference a row that does not exist.
+    content_object = (content_objects or {}).get((instance.content_type_id, instance.object_id)) if instance.object_id else None
+    if content_object is not None:
+        object_type = camelcase_to_underscore(content_object.__class__.__name__)
+        obj_rel = f'{content_object.__class__.__module__}.{content_object.__class__.__name__}.{instance.role_definition_id}'
+        changes['object_type'] = object_type
+        changes['object_id'] = content_object.pk
+        changes['object_name'] = str(content_object)
+        if hasattr(activity_stream_cls, object_type):
+            object1 = object_type
+        else:
+            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object_type)
+
+    activity_entry = activity_stream_cls(
+        operation=operation,
+        object1=object1,
+        object2=actor_field,
+        object_relationship_type=obj_rel,
+        changes=json.dumps(changes),
+        actor=get_current_user_or_none(),
+    )
+    activity_entry.save()
+    getattr(activity_entry, actor_field).add(actor_obj.pk)
+    if object1:
+        getattr(activity_entry, object1).add(content_object.pk)
+    connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
 
 
-@receiver(post_save, sender=RoleUserAssignment)
-@receiver(post_save, sender=RoleTeamAssignment)
-def sync_user_assignments_to_old_rbac_create(instance, **kwargs):
-    _sync_assignments_to_old_rbac(instance, delete=False)
+def handle_dab_assignments_created(sender, assignments, content_objects=None, **kwargs):
+    """Handle a batch of newly-created role assignments from the DAB bulk pipeline.
+
+    Fires once per bulk_give_permissions / give_assignments operation (and for the
+    interim-restored JWT/SSO claims path), only for rows that were actually created.
+    A single handler performs both jobs — the old-RBAC Role.members mirror and the
+    new-side activity-stream recording — so ordering stays deterministic: the old-RBAC
+    write happens inside disable_activity_stream()/disable_rbac_sync() (within
+    _sync_assignment_to_old_role), then the activity-stream entry is recorded once.
+
+    Replaces the former per-row post_save receivers sync_user_assignments_to_old_rbac_create
+    and record_role_assignment_activity_stream, which do not fire for bulk_create.
+    """
+    # Take the content objects straight from the DAB dict — we never fetch them ourselves
+    # (AAP-85842). The old-RBAC mirror falls back to a per-row lookup only on the narrow path
+    # where DAB did not supply the object (a direct give_assignments); the activity-stream
+    # recorder simply omits the object link there.
+    dab_content_objects = content_objects or {}
+
+    for instance in assignments:
+        content_object = dab_content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
+        _sync_assignment_to_old_role(instance, delete=False, content_object=content_object)
+        _record_role_assignment_activity_stream(instance, 'associate', dab_content_objects)
+
+
+def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None, **kwargs):
+    """Handle a batch of role assignments about to be removed by the DAB bulk pipeline.
+
+    Fires once per bulk_remove_permissions / remove_assignments operation, BEFORE the
+    rows are deleted, so every FK on each assignment (object_role, role_definition,
+    actor, content_object) is still readable. It fires ONLY on explicit assignment
+    removal, never on FK cascade (e.g. deleting an Organization), so the origin-filter
+    logic the old post_delete receivers needed to skip cascades is no longer required —
+    cascade cleanup of the old Role.members happens through the parent's own cascade.
+
+    Replaces the former per-row post_delete receivers sync_assignments_to_old_rbac_delete
+    and record_role_unassignment_activity_stream, which do not fire for queryset .delete().
+    """
+    # Same as the create side: content objects taken straight from the DAB dict rather than
+    # fetched here (AAP-85842).
+    dab_content_objects = content_objects or {}
+
+    for instance in assignments:
+        # Record the activity stream entry BEFORE deletion, while the FKs are still valid.
+        _record_role_assignment_activity_stream(instance, 'disassociate', dab_content_objects)
+        content_object = dab_content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
+        _sync_assignment_to_old_role(instance, delete=True, content_object=content_object)
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)
 m2m_changed.connect(sync_parents_to_new_rbac, Role.parents.through)
+
+# The DAB bulk assignment pipeline (bulk_give_permissions / bulk_remove_permissions and the
+# lower-level give_assignments / remove_assignments) creates and deletes rows with bulk_create
+# and queryset .delete(), which do not emit per-row post_save / post_delete. These two bulk
+# signals fire once per operation with the whole batch instead. Exactly one handler is connected
+# to each so a single pass does both the old-RBAC mirror and the activity-stream recording.
+dab_rbac_assignments_created.connect(handle_dab_assignments_created, dispatch_uid='awx_dab_assignments_created')
+dab_rbac_assignments_pre_delete.connect(handle_dab_assignments_pre_delete, dispatch_uid='awx_dab_assignments_pre_delete')
