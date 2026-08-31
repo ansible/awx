@@ -27,9 +27,6 @@ from django.utils import timezone
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
-# Ansible_base app
-from ansible_base.rbac.models import RoleUserAssignment
-
 # AWX
 from awx.main.models import (
     ActivityStream,
@@ -153,122 +150,9 @@ def sync_rbac_to_superuser_status(instance, sender, **kwargs):
                 user.save(update_fields=['is_superuser'])
 
 
-def _prefetch_assignment_content_objects(assignments, content_objects=None):
-    """Build a {(content_type_id, object_id): instance} lookup for a batch of assignments.
-
-    The DAB bulk signal supplies ``content_objects`` when the grant/removal went through
-    bulk_give_permissions / bulk_remove_permissions, but it can be empty when a caller
-    used give_assignments / remove_assignments directly. For any object-scoped assignment
-    not already covered, this fetches the referenced objects in bulk grouped by content
-    type — one query per type — instead of dereferencing ``instance.content_object`` one
-    row at a time, which was the per-row cost this migration set out to remove (AAP-85842).
-
-    Content types that don't resolve to a local model (remote / federated) are left out;
-    _record_role_assignment_activity_stream falls back to a per-row fetch for those.
-    """
-    from ansible_base.rbac import permission_registry
-    from ansible_base.rbac.remote import get_remote_base_class
-
-    lookup = dict(content_objects or {})
-    # content_type_id -> set(object_id) still needing resolution. Group by id only so we
-    # never touch instance.content_type per row (that would be the per-row query again).
-    missing = {}
-    for instance in assignments:
-        if not instance.object_id:
-            continue  # global (singleton) assignment: no content object
-        key = (instance.content_type_id, instance.object_id)
-        if key in lookup:
-            continue
-        missing.setdefault(instance.content_type_id, set()).add(instance.object_id)
-
-    if not missing:
-        return lookup
-
-    content_types = permission_registry.content_type_model.objects.in_bulk(missing.keys())
-    remote_base = get_remote_base_class()
-    for ct_id, object_ids in missing.items():
-        ct = content_types.get(ct_id)
-        if ct is None:
-            continue  # content type row is gone; leave to per-row fallback
-        try:
-            model = ct.model_class()
-        except LookupError:
-            continue  # unknown content type; leave to per-row fallback
-        if issubclass(model, remote_base):
-            continue  # remote/federated object; can't bulk-fetch locally
-        for obj in model._base_manager.in_bulk(object_ids).values():
-            lookup[(ct_id, str(obj.pk))] = obj
-    return lookup
-
-
-def _record_role_assignment_activity_stream(instance, operation, content_objects=None):
-    if not activity_stream_enabled:
-        return
-    # Avoid flooding the activity stream when assignments are cascade-deleted as part
-    # of setup_managed_role_definitions() pruning stale managed RoleDefinitions on migrate.
-    if 'migrate' in sys.argv:
-        return
-
-    if isinstance(instance, RoleUserAssignment):
-        actor_field = 'user'
-        actor_obj = instance.user
-    else:
-        actor_field = 'team'
-        actor_obj = instance.team
-
-    content_object = None
-    if instance.object_id:
-        # Prefer the batch lookup (populated once per bulk signal, same-type prefetched);
-        # fall back to a per-row fetch only for keys it doesn't cover.
-        content_object = (content_objects or {}).get((instance.content_type_id, instance.object_id))
-        if content_object is None:
-            content_object = instance.content_object
-        if content_object is None and operation == 'disassociate':
-            # The target object is unresolvable, e.g. cascade-deleted along with its
-            # parent object, or a federated/remote content type. Skip recording a
-            # contentless entry rather than guessing at what changed.
-            # Note: FederatedForeignKey swallows ObjectDoesNotExist and returns None
-            # rather than raising, so there's no exception to catch here.
-            return
-
-    changes = {'role_definition': instance.role_definition.name, actor_field: getattr(actor_obj, 'username', None) or str(actor_obj)}
-
-    # object1 is the role's content object and object2 the associated user/team, matching
-    # the convention used for legacy Role.members association entries (rbac_activity_stream
-    # below), so this reads e.g. "disassociated organization X from user Y".
-    object1 = ''
-    activity_stream_cls = get_activity_stream_class()
-    if content_object is not None:
-        object1 = camelcase_to_underscore(content_object.__class__.__name__)
-        changes['object_type'] = object1
-        changes['object_id'] = content_object.pk
-        changes['object_name'] = str(content_object)
-        obj_rel = f'{content_object.__class__.__module__}.{content_object.__class__.__name__}.{instance.role_definition_id}'
-        if not hasattr(activity_stream_cls, object1):
-            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object1)
-            object1 = ''
-    else:
-        obj_rel = str(instance.role_definition_id)
-
-    activity_entry = activity_stream_cls(
-        operation=operation,
-        object1=object1,
-        object2=actor_field,
-        object_relationship_type=obj_rel,
-        changes=json.dumps(changes),
-        actor=get_current_user_or_none(),
-    )
-    activity_entry.save()
-    getattr(activity_entry, actor_field).add(actor_obj.pk)
-    if object1:
-        getattr(activity_entry, object1).add(content_object.pk)
-    connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
-
-
-# Activity-stream recording for role assignments is driven by the DAB bulk signals
-# (dab_rbac_assignments_created / dab_rbac_assignments_pre_delete), handled together with
-# the old-RBAC Role.members mirror in awx.main.models.rbac. _record_role_assignment_activity_stream
-# above is the shared implementation those handlers call; it is no longer connected to per-row
+# Activity-stream recording for role assignments lives in awx.main.models.rbac, driven by
+# the DAB bulk signals (dab_rbac_assignments_created / dab_rbac_assignments_pre_delete) and
+# handled together with the old-RBAC Role.members mirror. It is no longer connected to per-row
 # post_save / post_delete, which the bulk assignment pipeline does not emit.
 
 

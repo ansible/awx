@@ -158,7 +158,7 @@ class TestRoleAssignmentActivityStream:
         from ansible_base.rbac.models import RoleUserAssignment
 
         from awx.main.models import Inventory
-        from awx.main.signals import _prefetch_assignment_content_objects
+        from awx.main.models.rbac import _prefetch_assignment_content_objects
 
         rd = RoleDefinition.objects.get(name='Inventory Admin')
         inventories = [Inventory.objects.create(name=f'batch-inv-{i}', organization=organization) for i in range(5)]
