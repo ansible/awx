@@ -62,13 +62,14 @@ def test_valid_smart_inventory_create(run_module, admin_user, organization):
 
 @pytest.mark.django_db
 def test_constructed_inventory_input_inventories_scoped_to_organization(run_module, admin_user, organization):
-    # Regression test for https://github.com/ansible/awx/issues/16393
-    #
-    # Two organizations each have an inventory with the *same* name. A
-    # constructed inventory in org-a should be able to reference org-a's
-    # "shared-name" inventory as an input inventory without the lookup
-    # becoming ambiguous because org-b also has an inventory called
-    # "shared-name".
+    """Regression test for https://github.com/ansible/awx/issues/16393.
+
+    Two organizations each have an inventory with the *same* name. A
+    constructed inventory in org-a should be able to reference org-a's
+    "shared-name" inventory as an input inventory without the lookup
+    becoming ambiguous because org-b also has an inventory called
+    "shared-name".
+    """
     other_organization = Organization.objects.create(name='other-organization')
 
     Inventory.objects.create(name='shared-name', organization=organization)
