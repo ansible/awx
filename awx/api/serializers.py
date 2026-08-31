@@ -1731,9 +1731,11 @@ class ConstructedInventorySerializer(InventorySerializer):
     update_cache_timeout = ConstructedIntegerField(
         required=False,
         allow_null=True,
-        min_value=0,
+        min_value=-1,
         default=None,
-        help_text=_('The cache timeout for the related auto-created inventory source, special to constructed inventory'),
+        help_text=_(
+            'The cache timeout for the related auto-created inventory source, special to constructed inventory. Set to -1 to force update on every launch.'
+        ),
     )
     limit = ConstructedCharField(
         required=False,
