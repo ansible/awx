@@ -705,7 +705,7 @@ def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
     if action.startswith('pre_'):
         return
-    # Mirror the guard in sync_members_to_new_rbac: when _sync_assignment_to_old_roles
+    # Mirror the guard in sync_members_to_new_rbac: when _sync_assignment_to_old_role
     # mirrors a team assignment it edits member_role.children inside disable_rbac_sync(),
     # which fires this m2m handler. Without this guard the reverse (old->new) sync would
     # call remove_permission again and, because the bulk pre_delete signal now fires
@@ -797,7 +797,7 @@ ROLE_DEFINITION_TO_ROLE_FIELD = {
 _UNSET = object()
 
 
-def _sync_assignment_to_old_roles(instance, delete=True, content_object=_UNSET, field_name=_UNSET):
+def _sync_assignment_to_old_role(instance, delete=True, content_object=_UNSET, field_name=_UNSET):
     """Mirror a single new-RBAC assignment into the legacy Role.members / children m2m.
 
     ``content_object`` and ``field_name`` may be supplied pre-resolved by the bulk handlers
@@ -844,7 +844,7 @@ def _field_names_for_old_rbac(assignments):
     """Map role_definition_id -> legacy Role field name for a whole batch in one query.
 
     Resolves the role-definition names once (instead of dereferencing
-    instance.role_definition per row) so _sync_assignment_to_old_roles can look the field
+    instance.role_definition per row) so _sync_assignment_to_old_role can look the field
     up by id. Role definitions with no legacy equivalent map to None and are skipped.
     """
     rd_ids = {instance.role_definition_id for instance in assignments}
@@ -920,7 +920,7 @@ def handle_dab_assignments_created(sender, assignments, content_objects=None, **
     A single handler performs both jobs — the old-RBAC Role.members mirror and the
     new-side activity-stream recording — so ordering stays deterministic: the old-RBAC
     write happens inside disable_activity_stream()/disable_rbac_sync() (within
-    _sync_assignment_to_old_roles), then the activity-stream entry is recorded once.
+    _sync_assignment_to_old_role), then the activity-stream entry is recorded once.
 
     Replaces the former per-row post_save receivers sync_user_assignments_to_old_rbac_create
     and record_role_assignment_activity_stream, which do not fire for bulk_create.
@@ -935,7 +935,7 @@ def handle_dab_assignments_created(sender, assignments, content_objects=None, **
 
     for instance in assignments:
         content_object = dab_content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
-        _sync_assignment_to_old_roles(instance, delete=False, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
+        _sync_assignment_to_old_role(instance, delete=False, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
         _record_role_assignment_activity_stream(instance, 'associate', dab_content_objects)
 
 
@@ -961,7 +961,7 @@ def handle_dab_assignments_pre_delete(sender, assignments, content_objects=None,
         # Record the activity stream entry BEFORE deletion, while the FKs are still valid.
         _record_role_assignment_activity_stream(instance, 'disassociate', dab_content_objects)
         content_object = dab_content_objects.get((instance.content_type_id, instance.object_id), _UNSET)
-        _sync_assignment_to_old_roles(instance, delete=True, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
+        _sync_assignment_to_old_role(instance, delete=True, content_object=content_object, field_name=field_names.get(instance.role_definition_id))
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)
