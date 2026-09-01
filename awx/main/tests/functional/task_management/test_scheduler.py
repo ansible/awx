@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 from awx.main.utils import encrypt_field
-from awx.main.models import WorkflowJobTemplate, JobTemplate, Job, Project, InventorySource, Inventory
+from awx.main.models import WorkflowJobTemplate, WorkflowJob, JobTemplate, Job, Project, InventorySource, Inventory
 from awx.main.models.ha import Instance
 from . import create_job
 from django.conf import settings
@@ -449,6 +449,67 @@ def test_job_dependency_with_already_updated(controlplane_instance_group, job_te
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
+
+
+@pytest.mark.django_db
+def test_undecryptable_start_args_does_not_freeze_scheduler(controlplane_instance_group, job_template_factory):
+    """
+    A single pending job whose start_args cannot be decrypted with the
+    current SECRET_KEY (e.g. restored from a different environment) must not
+    crash DependencyManager and must not prevent every other pending job in
+    the same batch from being marked dependencies_processed.
+    """
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+
+    bad_job = create_job(objects.job_template, dependencies_processed=False)
+    # Simulate a job restored from a different environment: start_args is
+    # ciphertext produced under a *different* SECRET_KEY than this instance's.
+    # We must bypass PasswordFieldsModel.save() (it re-encrypts PASSWORD_FIELDS
+    # under the *current* SECRET_KEY on every save unless the value already
+    # starts with `$encrypted$`), so we write directly via .update().
+    bad_job.start_args = json.dumps(dict(inventory_sources_already_updated=[]))  # in-memory only, not saved
+    corrupt_ciphertext = encrypt_field(bad_job, field_name="start_args", secret_key="a-different-environments-secret-key")
+    Job.objects.filter(pk=bad_job.pk).update(start_args=corrupt_ciphertext)
+
+    good_job = create_job(objects.job_template, dependencies_processed=False)
+
+    dm = DependencyManager()
+    dm.schedule()  # must not raise cryptography.fernet.InvalidToken
+
+    bad_job.refresh_from_db()
+    good_job.refresh_from_db()
+    assert bad_job.dependencies_processed is True
+    assert good_job.dependencies_processed is True
+
+
+@pytest.mark.django_db
+def test_workflow_job_undecryptable_start_args_does_not_block_spawn(inventory, project, controlplane_instance_group):
+    """
+    A running workflow job whose start_args cannot be decrypted with the
+    current SECRET_KEY must not crash WorkflowManager and must not prevent
+    its ready-to-run node from being spawned.
+    """
+    jt = JobTemplate.objects.create(inventory=inventory, project=project, playbook='helloworld.yml')
+    wfjt = WorkflowJobTemplate.objects.create(name='wfjt-aap-90155')
+    wfjt.workflow_nodes.create(unified_job_template=jt)
+
+    wj = wfjt.create_unified_job()
+    wj.signal_start()
+    TaskManager().schedule()  # transitions wj from pending to running
+    wj.refresh_from_db()
+    assert wj.status == 'running'
+
+    # Same corruption technique as test_undecryptable_start_args_does_not_freeze_scheduler:
+    # encrypt_field() no-ops if the value already starts with `$encrypted$`, so we
+    # must set a fresh in-memory plaintext value first, then bypass
+    # PasswordFieldsModel.save()'s re-encrypt-on-save guard via .update().
+    wj.start_args = json.dumps({})  # in-memory only, not saved
+    corrupt_ciphertext = encrypt_field(wj, field_name="start_args", secret_key="a-different-environments-secret-key")
+    WorkflowJob.objects.filter(pk=wj.pk).update(start_args=corrupt_ciphertext)
+
+    WorkflowManager().schedule()  # must not raise cryptography.fernet.InvalidToken
+
+    assert jt.jobs.count() == 1  # node's job was still spawned
 
 
 @pytest.mark.django_db
