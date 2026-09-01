@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from awx.main.tasks.system import clear_setting_cache
 
@@ -13,12 +13,7 @@ class Command(BaseCommand):
         group.add_argument('--disable', action='store_true', help='Disable indirect node counting.')
 
     def handle(self, **options):
-        if options['enable']:
-            enabled = True
-        elif options['disable']:
-            enabled = False
-        else:
-            raise CommandError('Pass either --enable or --disable.')
+        enabled = options['enable']
 
         settings.INDIRECT_NODE_COUNTING_ENABLED = enabled
         clear_setting_cache.delay(['INDIRECT_NODE_COUNTING_ENABLED'])
