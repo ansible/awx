@@ -1,0 +1,34 @@
+#jinja2: lstrip_blocks: True
+---
+services:
+  init_awx:
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    container_name: tools_init_awx
+    command: /awx_devel/tools/docker-compose/editable_dependencies/install.sh
+    user: root
+    working_dir: "/"
+    environment:
+      RUN_MIGRATIONS: 1
+    volumes:
+      - "../../../:/awx_devel"
+{% for editable_dependency in editable_dependencies %}
+      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
+{% endfor %}
+      - "var_lib_awx:/var/lib/awx"
+
+{% for i in range(control_plane_node_count|int) %}
+  {% set container_postfix = loop.index %}
+  awx_{{ container_postfix }}:
+    volumes:
+      - "var_lib_awx:/var/lib/awx"
+{% for editable_dependency in editable_dependencies %}
+      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
+{% endfor %}
+    depends_on:
+      init_awx:
+        condition: service_completed_successfully
+{% endfor %}
+
+volumes:
+  var_lib_awx:
+    name: tools_var_lib_awx

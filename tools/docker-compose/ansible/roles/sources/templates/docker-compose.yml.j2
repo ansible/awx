@@ -2,22 +2,6 @@
 ---
 version: '2.1'
 services:
-{% if editable_dependencies | length > 0 %}
-  init_awx:
-    image: "{{ awx_image }}:{{ awx_image_tag }}"
-    container_name: tools_init_awx
-    command: /awx_devel/tools/docker-compose/editable_dependencies/install.sh
-    user: root
-    working_dir: "/"
-    environment:
-      RUN_MIGRATIONS: 1
-    volumes:
-      - "../../../:/awx_devel"
-{% for editable_dependency in editable_dependencies %}
-      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
-{% endfor %}
-      - "var_lib_awx:/var/lib/awx"
-{% endif %}
 {% for i in range(control_plane_node_count|int) %}
   {% set container_postfix = loop.index %}
   {% set awx_sdb_port_start = 7899 + (loop.index0*1000) | int %}
@@ -54,12 +38,6 @@ services:
       - service-mesh
     working_dir: "/awx_devel"
     volumes:
-{% if editable_dependencies | length > 0 %}
-      - "var_lib_awx:/var/lib/awx"
-{% for editable_dependency in editable_dependencies %}
-      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
-{% endfor %}
-{% endif %}
       - "../../../:/awx_devel"
       - "../../docker-compose/supervisor.conf:/etc/supervisord.conf"
       - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
@@ -84,10 +62,6 @@ services:
         condition: service_started
       redis_{{ container_postfix }}:
         condition: service_started
-{% if editable_dependencies | length > 0 %}
-      init_awx:
-        condition: service_completed_successfully
-{% endif %}
     tty: true
     ports:
       - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
@@ -131,50 +105,6 @@ services:
     - "awx_{{ container_postfix }}"
   {% endfor %}
 {% endif %}
-{% if enable_splunk|bool %}
-  splunk:
-    # NOTE: upgrading to 10.x requires adding SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
-    image: mirror.gcr.io/splunk/splunk:9.4.2
-    container_name: tools_splunk_1
-    hostname: splunk
-    networks:
-      - awx
-    ports:
-      - "8000:8000"
-      - "8089:8089"
-      - "9199:9199"
-    environment:
-      SPLUNK_START_ARGS: --accept-license
-      SPLUNK_PASSWORD: splunk_admin
-{% endif %}
-{% if enable_prometheus|bool %}
-  prometheus:
-    image: mirror.gcr.io/prom/prometheus:v3.10.0
-    container_name: tools_prometheus_1
-    hostname: prometheus
-    networks:
-      - awx
-    ports:
-      - "9090:9090"
-    volumes:
-      - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "prometheus_storage:/prometheus:rw"
-{% endif %}
-{% if enable_grafana|bool %}
-  grafana:
-    image: mirror.gcr.io/grafana/grafana-enterprise:12.3.4
-    container_name: tools_grafana_1
-    hostname: grafana
-    networks:
-      - awx
-    ports:
-      - "3001:3000"
-    volumes:
-      - "../../grafana:/etc/grafana/provisioning"
-      - "grafana_storage:/var/lib/grafana:rw"
-    depends_on:
-      - prometheus
-{% endif %}
   postgres:
     image: quay.io/sclorg/postgresql-15-c9s
     container_name: tools_postgres_1
@@ -201,121 +131,8 @@ services:
       - awx
     ports:
        - "${AWX_PG_PORT:-5441}:5432"
-{% if enable_pgbouncer|bool %}
-  pgbouncer:
-    image: mirror.gcr.io/bitnami/pgbouncer:1.24.0
-    container_name: tools_pgbouncer_1
-    hostname: pgbouncer
-    networks:
-      - awx
-    environment:
-      POSTGRESQL_USERNAME: {{ pg_username }}
-      POSTGRESQL_DATABASE: {{ pg_database }}
-      PGBOUNCER_DATABASE: {{ pg_database }}
-      POSTGRESQL_PASSWORD: {{ pg_password }}
-      POSTGRESQL_HOST: {{ pg_hostname | default('postgres') }}
-      POSTGRESQL_PORT: {{ pg_port }}
-      PGBOUNCER_AUTH_TYPE: trust
-      PGBOUNCER_PORT: {{ pgbouncer_port }}
-      PGBOUNCER_DEFAULT_POOL_SIZE: {{ pgbouncer_max_pool_size }}
-      # This is the default, but we're being explicit here because it's important:
-      # pg_notify will NOT work in transaction mode.
-      PGBOUNCER_POOL_MODE: session
-{% endif %}
-{% if enable_otel|bool %}
-  otel:
-    image: mirror.gcr.io/otel/opentelemetry-collector-contrib:0.88.0
-    container_name: tools_otel_1
-    hostname: otel
-    command: ["--config=/etc/otel-collector-config.yaml", ""]
-    networks:
-      - awx
-    ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP http receiver
-      - "55679:55679" # zpages http://localhost:55679/debug/servicez /tracez
-    volumes:
-      - "../../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml"
-      - "../../otel/awx-logs:/awx-logs/"
-{% endif %}
-{% if enable_loki|bool %}
-  loki:
-    image: mirror.gcr.io/grafana/loki:2.9.5
-    container_name: tools_loki_1
-    hostname: loki
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - awx
-    volumes:
-      - "loki_storage:/loki:rw"
-      - "../../loki/local-config.yaml:/etc/loki/local-config.yaml"
-{% endif %}
-
-{% if execution_node_count|int > 0 %}
-  receptor-hop:
-    image: {{ receptor_image }}
-    user: root
-    container_name: tools_receptor_hop
-    hostname: receptor-hop
-    command: 'receptor --config /etc/receptor/receptor.conf'
-    networks:
-      - awx
-    ports:
-      - "5555:5555"
-    volumes:
-      - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
-  {% for i in range(execution_node_count|int) %}
-  receptor-{{ loop.index }}:
-    image: "{{ awx_image }}:{{ awx_image_tag }}"
-    user: "{{ ansible_user_uid }}"
-    container_name: tools_receptor_{{ loop.index }}
-    hostname: receptor-{{ loop.index }}
-    command: 'receptor --config /etc/receptor/receptor.conf'
-    environment:
-      RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
-    networks:
-      - awx
-    volumes:
-      - "../../../:/awx_devel"  # not used, but mounted so that any in-place installs can be used for whole cluster
-      - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
-      - "/sys/fs/cgroup:/sys/fs/cgroup"
-      - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
-    privileged: true
-  {% endfor %}
-{% endif %}
-{% if enable_vault | bool %}
-  vault:
-    image: hashicorp/vault:1.14
-    container_name: tools_vault_1
-    command: server
-    hostname: vault
-    networks:
-      - awx
-    ports:
-      - "1234:1234"
-    environment:
-{% if vault_tls | bool %}
-      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": false, "tls_cert_file": "/vault/tls/server.crt", "tls_key_file": "/vault/tls/server.key"}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
-{% else %}
-      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
-{% endif %}
-    cap_add:
-      - IPC_LOCK
-    volumes:
-{% if vault_tls | bool %}
-      - '../../docker-compose/_sources/vault_certs:/vault/tls'
-{% endif %}
-      - 'hashicorp_vault_data:/vault/file'
-{% endif %}
 
 volumes:
-{% if editable_dependencies | length > 0 %}
-  var_lib_awx:
-    name: tools_var_lib_awx
-{% endif %}
-{# For the postgres 15 db upgrade we changed the mount name because 15 can't load a 12 DB #}
   awx_db_15:
     name: tools_awx_db_15
 {% for i in range(control_plane_node_count|int) -%}
@@ -323,30 +140,9 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
-{% if enable_vault|bool %}
-  hashicorp_vault_data:
-    name: tools_vault_1
-{% endif %}
-{% if enable_prometheus|bool %}
-  prometheus_storage:
-    name: tools_prometheus_storage
-{% endif %}
-{% if enable_grafana|bool %}
-  grafana_storage:
-    name: tools_grafana_storage
-{% endif %}
-{% if enable_loki|bool %}
-  loki_storage:
-    name: tools_loki_storage
-{% endif %}
 
 networks:
   awx:
     name: awx
   service-mesh:
     name: service-mesh
-{% if minikube_container_group|bool %}
-  default:
-    external:
-      name: minikube
-{% endif %}
