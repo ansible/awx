@@ -52,8 +52,9 @@ def test_reverse_gfk_uses_absolute_url():
 
 
 def test_opa_query_path_rejects_unencoded_url():
+    serializer = OpaQueryPathMixin()
     with pytest.raises(ValidationError):
-        OpaQueryPathMixin().validate_opa_query_path('not a valid path')
+        serializer.validate_opa_query_path('not a valid path')
 
 
 def test_unified_job_stdout_types():

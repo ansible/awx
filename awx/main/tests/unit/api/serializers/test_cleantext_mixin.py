@@ -88,8 +88,9 @@ class TestBulkJobNodeCleanText:
 class TestExecutionEnvironmentSerializerValidate:
     def test_rejects_non_registry_credentials(self):
         serializer = ExecutionEnvironmentSerializer()
+        credential = mock.Mock(kind='ssh')
         with pytest.raises(ValidationError):
-            serializer.validate_credential(mock.Mock(kind='ssh'))
+            serializer.validate_credential(credential)
 
     def test_accepts_registry_credentials(self):
         credential = mock.Mock(kind='registry')
@@ -98,9 +99,10 @@ class TestExecutionEnvironmentSerializerValidate:
     def test_rejects_organization_change(self):
         serializer = ExecutionEnvironmentSerializer()
         serializer.instance = mock.Mock(organization_id=1)
+        organization = mock.Mock(pk=2)
 
         with pytest.raises(ValidationError) as exc:
-            serializer.validate({'organization': mock.Mock(pk=2)})
+            serializer.validate({'organization': organization})
 
         assert 'organization' in exc.value.detail
 
