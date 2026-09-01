@@ -4373,6 +4373,21 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
 
 class WorkflowJobTemplateNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer):
+    # extra_data plays the same role as extra_vars elsewhere (arbitrary
+    # launch-time variables) and is submitted in the same two formats: a
+    # dict, or a raw YAML/JSON string (see parse_yaml_or_json). Its model
+    # field is JSONBlob, whose get_internal_type() reports "TextField" for
+    # legacy DB-migration reasons (awx/main/fields.py); since CleanTextMixin
+    # classifies fields via get_internal_type(), a dict payload is silently
+    # skipped (not a str) while a string payload hits Tier 2's
+    # template-injection blocklist and incorrectly rejects legitimate Jinja
+    # variable references -- same conflict class as extra_vars (AAP-78694).
+    # NOTE: this must be set directly on this class, not on
+    # LaunchConfigurationBaseSerializer -- CleanTextMixin's own
+    # excluded_fields default sits earlier in the MRO than that shared base,
+    # so a base-class override there is silently shadowed and never applies.
+    excluded_fields = frozenset({'extra_data'})
+
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -4426,6 +4441,11 @@ class WorkflowJobTemplateNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigu
 
 
 class WorkflowJobNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer):
+    # See WorkflowJobTemplateNodeSerializer.excluded_fields above -- same
+    # reasoning, and same requirement that this live directly on this class
+    # rather than on the shared LaunchConfigurationBaseSerializer base.
+    excluded_fields = frozenset({'extra_data'})
+
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -5691,6 +5711,11 @@ class SchedulePreviewSerializer(BaseSerializer):
 
 
 class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
+    # See WorkflowJobTemplateNodeSerializer.excluded_fields above -- same
+    # reasoning, and same requirement that this live directly on this class
+    # rather than on the shared LaunchConfigurationBaseSerializer base.
+    excluded_fields = frozenset({'extra_data'})
+
     show_capabilities = ['edit', 'delete']
 
     timezone = serializers.SerializerMethodField(
