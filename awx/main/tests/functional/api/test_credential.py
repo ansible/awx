@@ -1358,3 +1358,96 @@ def test_external_credential_rbac_test_endpoint(post, alice, external_credential
 
     external_credential.use_role.members.add(alice)
     assert post(url, data, alice).status_code == 202
+
+
+#
+# CleanTextMixin on Credential.inputs (AAP-78694)
+#
+# Nested JSON strings always go through Tier 2. These tests only assert which
+# keys are skipped: credential_type.secret_fields are excluded per-request via
+# instance excluded_json_keys; everything else is still validated.
+#
+
+UNSAFE_INPUT = '<script>x</script>'
+
+
+@pytest.fixture
+def enforce_clean_text():
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        yield
+
+
+@pytest.mark.django_db
+def test_credential_inputs_rejects_unsafe_non_secret_key(post, admin, credentialtype_ssh, enforce_clean_text):
+    assert 'username' not in credentialtype_ssh.secret_fields
+    response = post(
+        reverse('api:credential_list'),
+        {
+            'name': 'ssh-cleantext-username',
+            'credential_type': credentialtype_ssh.id,
+            'user': admin.id,
+            'inputs': {'username': UNSAFE_INPUT, 'password': UNSAFE_INPUT},
+        },
+        admin,
+    )
+    assert response.status_code == 400
+    assert 'username' in response.data['inputs']
+    assert 'password' not in response.data['inputs']
+
+
+@pytest.mark.django_db
+def test_credential_inputs_skips_secret_keys(post, admin, credentialtype_ssh, enforce_clean_text):
+    assert 'password' in credentialtype_ssh.secret_fields
+    response = post(
+        reverse('api:credential_list'),
+        {
+            'name': 'ssh-cleantext-password',
+            'credential_type': credentialtype_ssh.id,
+            'user': admin.id,
+            'inputs': {'username': 'ok-user', 'password': UNSAFE_INPUT},
+        },
+        admin,
+    )
+    assert response.status_code == 201
+
+
+@pytest.mark.django_db
+def test_credential_inputs_secret_fields_follow_custom_type_schema(post, admin, organization, enforce_clean_text):
+    credential_type = CredentialType(
+        kind='cloud',
+        name='CustomCleanTextType',
+        inputs={
+            'fields': [
+                {'id': 'endpoint', 'label': 'Endpoint', 'type': 'string'},
+                {'id': 'token', 'label': 'Token', 'type': 'string', 'secret': True},
+            ]
+        },
+    )
+    credential_type.save()
+    assert credential_type.secret_fields == ['token']
+
+    rejected = post(
+        reverse('api:credential_list'),
+        {
+            'name': 'custom-cleantext-endpoint',
+            'organization': organization.pk,
+            'credential_type': credential_type.pk,
+            'inputs': {'endpoint': UNSAFE_INPUT, 'token': 'ok-token'},
+        },
+        admin,
+    )
+    assert rejected.status_code == 400
+    assert 'endpoint' in rejected.data['inputs']
+    assert 'token' not in rejected.data['inputs']
+
+    accepted = post(
+        reverse('api:credential_list'),
+        {
+            'name': 'custom-cleantext-token',
+            'organization': organization.pk,
+            'credential_type': credential_type.pk,
+            'inputs': {'endpoint': 'https://example.invalid', 'token': UNSAFE_INPUT},
+        },
+        admin,
+    )
+    assert accepted.status_code == 201

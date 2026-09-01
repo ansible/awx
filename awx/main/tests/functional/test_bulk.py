@@ -1,6 +1,7 @@
 import pytest
 
 from uuid import uuid4
+from unittest import mock
 
 from awx.api.versioning import reverse
 
@@ -629,3 +630,22 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
 
     assert len(response.data['hosts']) == 10
     assert Host.objects.filter(inventory=inventory).count() == 10010
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_rejects_unsafe_limit(organization, inventory, project, post, user):
+    """PromptFieldCleanTextMixin._run_clean_text_validation must raise when
+    enforcement is on -- BulkJobNodeSerializer skips the normal validate()
+    chain that would otherwise do this (AAP-78694)."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('awx.api.serializers.get_setting', return_value=True):
+        response = post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id, 'limit': '<script>x</script>'}]},
+            normal_user,
+            expect=400,
+        )
+    assert 'limit' in str(response.data)

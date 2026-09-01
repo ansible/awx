@@ -271,3 +271,14 @@ def test_notification_template_copy(post, get, notification_template_with_encryp
     assert decrypt_field(notification_template_with_encrypt, 'notification_configuration', 'token') == decrypt_field(
         notification_template_copy, 'notification_configuration', 'token'
     )
+
+
+@pytest.mark.django_db
+def test_job_template_copy_rejects_same_name(post, job_template, admin):
+    response = post(
+        reverse('api:job_template_copy', kwargs={'pk': job_template.pk}),
+        {'name': job_template.name},
+        admin,
+        expect=400,
+    )
+    assert 'already named' in str(response.data)

@@ -65,6 +65,29 @@ def test_inventory_host_name_unique(scm_inventory, post, admin_user):
 
 
 @pytest.mark.django_db
+def test_inventory_host_inline_port(scm_inventory, post, admin_user):
+    resp = post(
+        reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+        {'name': 'web.example.com:2222'},
+        admin_user,
+        expect=201,
+    )
+    assert resp.data['name'] == 'web.example.com'
+    assert '2222' in resp.data['variables']
+
+
+@pytest.mark.django_db
+def test_inventory_host_invalid_inline_port(scm_inventory, post, admin_user):
+    resp = post(
+        reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+        {'name': 'web.example.com:99999'},
+        admin_user,
+        expect=400,
+    )
+    assert 'Invalid port' in json.dumps(resp.data)
+
+
+@pytest.mark.django_db
 def test_inventory_host_list_ordering(scm_inventory, get, admin_user):
     # create 3 hosts, hit the inventory host list view 3 times and get the order visible there each time and compare
     inv_src = scm_inventory.inventory_sources.first()
