@@ -24,6 +24,7 @@ ASSETS = set([
     "workflow_job_templates",
     "execution_environments",
     "schedules",
+    "credential_input_sources",
 ])
 
 
