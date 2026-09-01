@@ -802,24 +802,20 @@ def _heartbeat_check_versions(this_inst, instance_list):
 
 
 def _heartbeat_handle_lost_instances(lost_instances, this_inst):
-    """Handle lost instances by reaping their running jobs and marking them offline."""
+    """Handle lost instances by marking them offline, then trigger task manager to detect orphaned jobs."""
+    instances_marked_down = []
+
     for other_inst in lost_instances:
-        try:
-            # Any jobs marked as running will be marked as error
-            explanation = "Job reaped due to instance shutdown"
-            reaper.reap(other_inst, job_explanation=explanation)
-            # Any jobs that were waiting to be processed by this node will be handed back to task manager
-            UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
-        except Exception:
-            logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
         try:
             if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
                 deprovision_hostname = other_inst.hostname
-                other_inst.delete()  # FIXME: what about associated inbound links?
+                other_inst.delete()
                 logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
+                instances_marked_down.append(deprovision_hostname)
             elif other_inst.node_state == Instance.States.READY:
                 other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
                 logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
+                instances_marked_down.append(other_inst.hostname)
 
         except DatabaseError as e:
             cause = e.__cause__
@@ -834,6 +830,12 @@ def _heartbeat_handle_lost_instances(lost_instances, this_inst):
                     logger.exception("Error marking {} as lost.".format(other_inst.hostname))
             else:
                 logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+
+    if instances_marked_down:
+        logger.info(f"Triggering task manager to handle jobs from lost instances: {instances_marked_down}")
+        from awx.main.utils import ScheduleTaskManager
+
+        ScheduleTaskManager().schedule()
 
 
 @task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')

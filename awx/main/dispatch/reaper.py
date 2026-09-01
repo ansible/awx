@@ -2,8 +2,11 @@ import logging
 
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
+from dispatcherd.publish import task as dispatcher_task
 
+from awx.main.dispatch import get_task_queuename
 from awx.main.models import Instance, UnifiedJob, WorkflowJob
+from awx.main.utils import ScheduleTaskManager
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -47,6 +50,26 @@ def reap_job(j, status, job_explanation=None):
     logger.error(f'{j.log_format} is no longer {status_before}; reaping')
 
 
+def get_orphaned_running_jobs_query(valid_execution_node_hostnames):
+    """Get queryset for running jobs on orphaned execution nodes.
+
+    Args:
+        valid_execution_node_hostnames: Iterable of valid execution node hostnames
+
+    Returns:
+        QuerySet of running jobs on invalid execution nodes, excluding workflows
+    """
+    workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+    return (
+        UnifiedJob.objects.filter(
+            status='running',
+            execution_node__isnull=False,
+        )
+        .exclude(execution_node__in=valid_execution_node_hostnames)
+        .exclude(polymorphic_ctype_id=workflow_ctype_id)
+    )
+
+
 def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None, ref_time=None):
     """
     Reap all jobs in running for this instance.
@@ -65,3 +88,44 @@ def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=No
         jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:
         reap_job(j, status, job_explanation=job_explanation)
+
+
+@dispatcher_task(queue=get_task_queuename, timeout=600, on_duplicate='queue_one')
+def reap_orphaned_jobs():
+    """Background task to reap running jobs on orphaned instances.
+
+    Queries for running jobs referencing non-existent or unregistered
+    execution nodes and reaps them. Runs independently to avoid passing
+    large argument lists and to prevent saturating task manager cycle.
+    """
+    valid_execution_nodes = set(Instance.objects.filter(node_type__in=('hybrid', 'execution')).values_list('hostname', flat=True))
+
+    orphaned_running = get_orphaned_running_jobs_query(valid_execution_nodes)
+
+    logger.info('Reaping orphaned running jobs')
+    for job in orphaned_running:
+        if not job.is_container_group_task:
+            reap_job(job, 'failed', job_explanation='Task execution node is not a registered instance')
+
+
+@dispatcher_task(queue=get_task_queuename, timeout=600, on_duplicate='queue_one')
+def reset_orphaned_waiting_jobs():
+    """Background task to reset waiting jobs on orphaned controller instances.
+
+    Queries for waiting jobs referencing non-existent or unregistered
+    controller nodes and resets them to pending. Runs independently to
+    avoid passing large argument lists and to prevent saturating task manager.
+    """
+    valid_controller_nodes = set(Instance.objects.filter(node_type__in=('hybrid', 'control')).values_list('hostname', flat=True))
+
+    orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=valid_controller_nodes)
+
+    logger.info('Resetting orphaned waiting jobs to pending')
+    for job in orphaned_waiting:
+        job.status = 'pending'
+        job.controller_node = ''
+        job.execution_node = ''
+        job.save(update_fields=['status', 'controller_node', 'execution_node'])
+
+    # Trigger task manager to re-process these now-pending jobs
+    ScheduleTaskManager().schedule()
