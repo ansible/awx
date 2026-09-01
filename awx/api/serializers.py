@@ -3124,10 +3124,13 @@ class CredentialSerializer(CleanTextMixin, BaseSerializer):
     capabilities_prefetch = [{'edit': 'change'}, {'use': 'use'}]
     managed = serializers.ReadOnlyField()
 
-    # inputs holds actual secret material (SSH keys, passwords, tokens, certs).
-    # Excluded entirely rather than pattern-validated: false-positive risk on
-    # secret content, and secrets shouldn't be run through a generic sanitizer.
-    excluded_fields = frozenset({'inputs'})
+    # inputs is a JSONField whose schema is credential-type-dependent, including
+    # admin-defined custom types. Secret keys cannot be listed at class level
+    # (unlike NotificationTemplateSerializer.notification_configuration).
+    # validate() below sets instance excluded_json_keys from
+    # credential_type.secret_fields (the schema's "secret": true flags) so
+    # non-secret strings (username, host, ...) still get Tier 2. If the type
+    # cannot be resolved, the whole blob is skipped (fail closed).
 
     class Meta:
         model = Credential
@@ -3200,6 +3203,16 @@ class CredentialSerializer(CleanTextMixin, BaseSerializer):
     def validate(self, attrs):
         if self.instance and self.instance.managed:
             raise PermissionDenied(detail=_("Modifications not allowed for managed credentials"))
+
+        # Shadow the class-level MappingProxyType on this instance only -- DRF
+        # constructs a new serializer per request, so this does not leak.
+        # Must run before super().validate() so CleanTextMixin sees it.
+        cred_type = attrs.get('credential_type') or getattr(self.instance, 'credential_type', None)
+        if cred_type is not None:
+            self.excluded_json_keys = MappingProxyType({'inputs': frozenset(cred_type.secret_fields)})
+        else:
+            self.excluded_fields = frozenset(self.excluded_fields) | {'inputs'}
+
         return super(CredentialSerializer, self).validate(attrs)
 
     def get_validation_exclusions(self, obj=None):
