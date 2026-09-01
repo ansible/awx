@@ -25,6 +25,19 @@ from awx.main.constants import ACTIVE_STATES
 from awx.main.models import JobLaunchConfig, WorkflowApproval, WorkflowJobTemplate
 
 
+def _mock(**kwargs):
+    """Build a Mock with a real `.name` attribute.
+
+    unittest.mock.Mock(name=...) only sets the mock's repr name, so
+    getattr(obj, 'name') would return another Mock instead of the string.
+    """
+    name = kwargs.pop('name', None)
+    obj = mock.Mock(**kwargs)
+    if name is not None:
+        obj.name = name
+    return obj
+
+
 def test_reverse_gfk_empty_when_object_missing():
     assert reverse_gfk(None, None) == {}
     assert reverse_gfk(object(), None) == {}
@@ -165,16 +178,16 @@ class TestJobCreateScheduleSerializerPaths:
         assert JobCreateScheduleSerializer().get_can_schedule(obj) is True
 
     def test_summarize_copies_fk_fields(self):
-        obj = mock.Mock(id=3, name='inv', description='d')
+        obj = _mock(id=3, name='inv', description='d')
         summary = JobCreateScheduleSerializer._summarize('host', obj)
         assert summary['id'] == 3
         assert summary['name'] == 'inv'
 
     def test_get_prompts_summarizes_related_objects(self):
-        inventory = mock.Mock(id=1, name='inv', description='', has_active_failures=False)
-        ee = mock.Mock(id=2, name='ee', description='', image='img')
-        cred = mock.Mock(id=3, name='cred', description='', kind='ssh', cloud=False, kubernetes=False, credential_type_id=1)
-        ig = mock.Mock(id=4, name='ig', is_container_group=False)
+        inventory = _mock(id=1, name='inv', description='', has_active_failures=False)
+        ee = _mock(id=2, name='ee', description='', image='img')
+        cred = _mock(id=3, name='cred', description='', kind='ssh', cloud=False, kubernetes=False, credential_type_id=1)
+        ig = _mock(id=4, name='ig', is_container_group=False)
         config = mock.Mock()
         config.prompts_dict.return_value = {
             'inventory': inventory,
@@ -256,7 +269,7 @@ class TestWorkflowJobLaunchSerializerPaths:
         assert serializer.get_survey_enabled(obj) is True
 
     def test_workflow_job_template_data(self):
-        obj = mock.Mock(name='wf', id=5, description='d')
+        obj = _mock(name='wf', id=5, description='d')
         assert WorkflowJobLaunchSerializer().get_workflow_job_template_data(obj) == {'name': 'wf', 'id': 5, 'description': 'd'}
 
     def test_defaults_inventory_and_labels(self):
@@ -265,7 +278,7 @@ class TestWorkflowJobLaunchSerializerPaths:
         obj.inventory.name = 'inv'
         obj.inventory.pk = 8
         obj.limit = 'webservers'
-        label = mock.Mock(id=1, name='prod')
+        label = _mock(id=1, name='prod')
         obj.labels.all.return_value = [label]
         with mock.patch.object(WorkflowJobTemplate, 'get_ask_mapping', return_value=mapping):
             defaults = WorkflowJobLaunchSerializer().get_defaults(obj)
@@ -316,7 +329,7 @@ class TestProjectUpdateEventSanitization:
 class TestUnifiedJobSummaryFields:
     def test_spawned_by_workflow_copies_job_summary(self):
         serializer = UnifiedJobSerializer()
-        workflow_job = mock.Mock(id=10, name='wf', description='', status='successful', failed=False, elapsed=1.5, type='workflow_job', canceled_on=None)
+        workflow_job = _mock(id=10, name='wf', description='', status='successful', failed=False, elapsed=1.5, type='workflow_job', canceled_on=None)
         obj = mock.Mock(spawned_by_workflow=True, ancestor_job=None)
         obj.unified_job_node.workflow_job = workflow_job
         with mock.patch('awx.api.serializers.BaseSerializer.get_summary_fields', return_value={}):
