@@ -1,0 +1,7 @@
+---
+# This inventory is designed to be processed by an inventory plugin
+plugin: custom_inventory_plugin
+parameters:
+  - first
+  - second
+  - third
