@@ -356,6 +356,7 @@ class TestWorkflowJobTemplatePrompts:
             ask_limit_on_launch=True,
             ask_scm_branch_on_launch=True,
             ask_skip_tags_on_launch=True,
+            ask_nodes_job_type_on_launch=True,
         )
 
     @pytest.fixture
@@ -367,6 +368,7 @@ class TestWorkflowJobTemplatePrompts:
             scm_branch='release-3.3',
             job_tags='foo',
             skip_tags='bar',
+            nodes_job_type='check',
         )
 
     def test_apply_workflow_job_prompts(self, workflow_job_template, wfjt_prompts, prompts_data, inventory):
@@ -378,6 +380,7 @@ class TestWorkflowJobTemplatePrompts:
         assert workflow_job.job_tags is None
         assert workflow_job.skip_tags is None
         assert len(workflow_job.labels.all()) == 0
+        assert workflow_job.nodes_job_type == 'run'
 
         # fields from prompts used
         workflow_job = workflow_job_template.create_unified_job(**prompts_data)
@@ -387,6 +390,7 @@ class TestWorkflowJobTemplatePrompts:
         assert workflow_job.scm_branch == 'release-3.3'
         assert workflow_job.job_tags == 'foo'
         assert workflow_job.skip_tags == 'bar'
+        assert workflow_job.nodes_job_type == 'check'
 
         # non-null fields from WFJT used
         workflow_job_template.inventory = inventory
@@ -472,6 +476,7 @@ class TestWorkflowJobTemplatePrompts:
         assert wfjt.ask_skip_tags_on_launch is False
         assert wfjt.ask_tags_on_launch is False
         assert wfjt.ask_variables_on_launch is False
+        assert wfjt.ask_nodes_job_type_on_launch is False
 
     @pytest.mark.django_db
     def test_set_all_ask_for_prompts_true_from_post(self, post, organization, inventory, org_admin):
@@ -493,6 +498,7 @@ class TestWorkflowJobTemplatePrompts:
                 ask_skip_tags_on_launch=True,
                 ask_tags_on_launch=True,
                 ask_variables_on_launch=True,
+                ask_nodes_job_type_on_launch=True,
             ),
             user=org_admin,
             expect=201,
@@ -506,6 +512,40 @@ class TestWorkflowJobTemplatePrompts:
         assert wfjt.ask_skip_tags_on_launch is True
         assert wfjt.ask_tags_on_launch is True
         assert wfjt.ask_variables_on_launch is True
+        assert wfjt.ask_nodes_job_type_on_launch is True
+
+    @pytest.mark.django_db
+    def test_nodes_inherit_job_type_prompt_on_launch(self, post, organization, inventory, job_template, org_admin):
+        """
+        If ask_nodes_job_type_on_launch is set, all nodes in the launched workflow
+        should inherit job_type=nodes_job_type via char_prompts.
+        """
+        r = post(
+            url=reverse('api:workflow_job_template_list'),
+            data=dict(
+                name='My workflow',
+                organization=organization.id,
+                inventory=inventory.id,
+                ask_nodes_job_type_on_launch=True,
+            ),
+            user=org_admin,
+            expect=201,
+        )
+        wfjt = WorkflowJobTemplate.objects.get(id=r.data['id'])
+
+        # Add two nodes to the workflow
+        wfjt.workflow_job_template_nodes.create(unified_job_template=job_template)
+        wfjt.workflow_job_template_nodes.create(unified_job_template=job_template)
+
+        launch_url = r.data['related']['launch']
+        with mock.patch('awx.main.queue.CallbackQueueDispatcher.dispatch', lambda self, obj: None):
+            r = post(url=launch_url, data=dict(nodes_job_type='check'), user=org_admin, expect=201)
+
+        wf_job = WorkflowJob.objects.get(id=r.data['id'])
+
+        for node in wf_job.workflow_job_nodes.all():
+            assert node.char_prompts.get('job_type') == 'check'
+            assert node.job_type == 'check'
 
 
 @pytest.mark.django_db

@@ -110,6 +110,13 @@ options:
       description:
         - Comma separated list of the tags to skip for the job template.
       type: str
+    ask_nodes_job_type_on_launch:
+      description:
+        - Prompt user for a job type for each workflow node.
+        - This prevents the creation of identical workflows with only different job types.
+      type: bool
+      aliases:
+        - ask_nodes_job_type
     webhook_service:
       description:
         - Service that webhook requests will be accepted from
@@ -823,6 +830,7 @@ def main():
         ask_labels_on_launch=dict(type='bool', aliases=['ask_labels']),
         ask_tags_on_launch=dict(type='bool', aliases=['ask_tags']),
         ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
+        ask_nodes_job_type_on_launch=dict(type='bool', aliases=['ask_nodes_job_type']),
         inventory=dict(),
         limit=dict(),
         scm_branch=dict(),
@@ -908,6 +916,7 @@ def main():
         'ask_labels_on_launch',
         'ask_tags_on_launch',
         'ask_skip_tags_on_launch',
+        'ask_nodes_job_type_on_launch',
         'webhook_service',
         'job_tags',
         'skip_tags',

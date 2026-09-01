@@ -54,6 +54,14 @@ options:
         - A specific branch of the SCM project to run the template on.
         - This is only applicable if your project allows for branch override.
       type: str
+    nodes_job_type:
+      description:
+        - The job type that will override every workflow node.
+        - This option is only applied if 'ask_nodes_job_type_on_launch' is set to 'True' during workflow creation.
+      type: str
+      choices:
+        - 'run'
+        - 'check'
     extra_vars:
       description:
         - Any extra vars required to launch the job.
@@ -117,6 +125,7 @@ def main():
         wait=dict(required=False, default=True, type='bool'),
         interval=dict(required=False, default=2.0, type='float'),
         timeout=dict(required=False, type='int'),
+        nodes_job_type=dict(type='str', default='run'),
     )
 
     # Create a module for ourselves
@@ -130,6 +139,7 @@ def main():
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
+    nodes_job_type = module.params.get('nodes_job_type')
 
     for field_name in (
         'limit',
@@ -166,6 +176,9 @@ def main():
 
     if workflow_job_template is None:
         module.fail_json(msg="Unable to find workflow job template")
+
+    if workflow_job_template.get('ask_nodes_job_type_on_launch', False):
+        post_data['nodes_job_type'] = nodes_job_type
 
     # The API will allow you to submit values to a jb launch that are not prompt on launch.
     # Therefore, we will test to see if anything is set which is not prompt on launch and fail.
