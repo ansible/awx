@@ -316,9 +316,7 @@ class TestProjectUpdateEventSanitization:
 class TestUnifiedJobSummaryFields:
     def test_spawned_by_workflow_copies_job_summary(self):
         serializer = UnifiedJobSerializer()
-        workflow_job = mock.Mock(
-            id=10, name='wf', description='', status='successful', failed=False, elapsed=1.5, type='workflow_job', canceled_on=None
-        )
+        workflow_job = mock.Mock(id=10, name='wf', description='', status='successful', failed=False, elapsed=1.5, type='workflow_job', canceled_on=None)
         obj = mock.Mock(spawned_by_workflow=True, ancestor_job=None)
         obj.unified_job_node.workflow_job = workflow_job
         with mock.patch('awx.api.serializers.BaseSerializer.get_summary_fields', return_value={}):
