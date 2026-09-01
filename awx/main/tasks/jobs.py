@@ -1001,12 +1001,16 @@ class SourceControlMixin(BaseTask):
             project_path = project.get_project_path(check_if_exists=False)
             if project.scm_type == 'git' and (scm_branch and scm_branch != project.scm_branch):
                 if os.path.exists(project_path):
-                    git_repo = git.Repo(project_path)
-                    if git_repo.head.is_detached:
-                        is_commit = True
-                        original_branch = git_repo.head.commit
-                    else:
-                        original_branch = git_repo.active_branch
+                    try:
+                        git_repo = git.Repo(project_path)
+                        if git_repo.head.is_detached:
+                            is_commit = True
+                            original_branch = git_repo.head.commit
+                        else:
+                            original_branch = git_repo.active_branch
+                    except git.exc.InvalidGitRepositoryError:
+                        logger.error(f"Invalid git repository at {project_path}. Removing directory and continuing.")
+                        shutil.rmtree(project_path)
 
             return self.sync_and_copy_without_lock(project, private_data_dir, scm_branch=scm_branch)
         finally:
