@@ -965,7 +965,7 @@ class TestCallbacksEnabled(TestJobExecution):
 
         assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,my_callback'
 
-    def test_collect_host_queries_set_when_flag_on(self, patch_Job, private_data_dir, execution_environment, mock_me):
+    def test_collect_host_queries_set_when_indirect_node_counting_enabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
@@ -974,12 +974,12 @@ class TestCallbacksEnabled(TestJobExecution):
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
-            with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True):
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True):
                 env = task.build_env(job, private_data_dir)
 
         assert env['AWX_COLLECT_HOST_QUERIES'] == '1'
 
-    def test_collect_host_queries_not_set_when_flag_off(self, patch_Job, private_data_dir, execution_environment, mock_me):
+    def test_collect_host_queries_not_set_when_indirect_node_counting_disabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
@@ -988,7 +988,8 @@ class TestCallbacksEnabled(TestJobExecution):
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
-            env = task.build_env(job, private_data_dir)
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
+                env = task.build_env(job, private_data_dir)
 
         assert 'AWX_COLLECT_HOST_QUERIES' not in env
 
