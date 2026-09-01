@@ -547,6 +547,12 @@ class AWXReceptorJob:
                     self.task.update_model(self.task.instance.pk, status='pending')
                     return
 
+                if 'ImagePullBackOff' in detail:
+                    logger.warning(detail)
+                    log_name = self.task.instance.log_format
+                    logger.warning(f"Could not launch pod for {log_name}. ImagePullBackOff.")
+                    self.task.runner_callback.delay_update(job_explanation=f'{detail}')
+
                 try:
                     receptor_output = ''
                     if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
