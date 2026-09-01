@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 from awx.main.utils import encrypt_field
-from awx.main.models import WorkflowJobTemplate, WorkflowJob, JobTemplate, Job, Project, InventorySource, Inventory
+from awx.main.models import WorkflowJobTemplate, JobTemplate, Job, Project, InventorySource, Inventory
 from awx.main.models.ha import Instance
 from . import create_job
 from django.conf import settings
@@ -462,14 +462,9 @@ def test_undecryptable_start_args_does_not_freeze_scheduler(controlplane_instanc
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
 
     bad_job = create_job(objects.job_template, dependencies_processed=False)
-    # Simulate a job restored from a different environment: start_args is
-    # ciphertext produced under a *different* SECRET_KEY than this instance's.
-    # We must bypass PasswordFieldsModel.save() (it re-encrypts PASSWORD_FIELDS
-    # under the *current* SECRET_KEY on every save unless the value already
-    # starts with `$encrypted$`), so we write directly via .update().
-    bad_job.start_args = json.dumps(dict(inventory_sources_already_updated=[]))  # in-memory only, not saved
-    corrupt_ciphertext = encrypt_field(bad_job, field_name="start_args", secret_key="a-different-environments-secret-key")
-    Job.objects.filter(pk=bad_job.pk).update(start_args=corrupt_ciphertext)
+    bad_job.start_args = json.dumps({'inventory_sources_already_updated': []})
+    bad_job.start_args = encrypt_field(bad_job, field_name='start_args', secret_key='a-different-environments-secret-key')
+    bad_job.save(update_fields=['start_args'])
 
     good_job = create_job(objects.job_template, dependencies_processed=False)
 
@@ -499,13 +494,9 @@ def test_workflow_job_undecryptable_start_args_does_not_block_spawn(inventory, p
     wj.refresh_from_db()
     assert wj.status == 'running'
 
-    # Same corruption technique as test_undecryptable_start_args_does_not_freeze_scheduler:
-    # encrypt_field() no-ops if the value already starts with `$encrypted$`, so we
-    # must set a fresh in-memory plaintext value first, then bypass
-    # PasswordFieldsModel.save()'s re-encrypt-on-save guard via .update().
-    wj.start_args = json.dumps({})  # in-memory only, not saved
-    corrupt_ciphertext = encrypt_field(wj, field_name="start_args", secret_key="a-different-environments-secret-key")
-    WorkflowJob.objects.filter(pk=wj.pk).update(start_args=corrupt_ciphertext)
+    wj.start_args = json.dumps({})
+    wj.start_args = encrypt_field(wj, field_name='start_args', secret_key='a-different-environments-secret-key')
+    wj.save(update_fields=['start_args'])
 
     WorkflowManager().schedule()  # must not raise cryptography.fernet.InvalidToken
 
