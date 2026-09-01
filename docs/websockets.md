@@ -101,7 +101,7 @@ which have active clients on them. This prevents us from sending lots of
 messages to web pods which immediately discard them due to having no clients
 that care about them.
 
-### The Heartbeet
+### The Heartbeat
 
 There is also a "ws_heartbeat" system, that goes along with
 the above. Remember that `wsrelay` lives in each task pod, and there could be an
