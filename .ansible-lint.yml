@@ -1,0 +1,34 @@
+exclude_paths:
+  - .github
+  - .tox
+
+# Failed: 1348 failure(s), 97 warning(s) on 4230 files.
+skip_list:
+  - 'command-instead-of-module'
+  - 'command-instead-of-shell'
+  - 'deprecated-local-action'
+  - 'key-order[task]'
+  - 'jinja[invalid]'
+  - 'jinja[spacing]'
+  - 'schema[tasks]'
+  - 'name[missing]'
+  - 'name[play]'
+  - 'var-naming[no-reserved]'
+  - 'var-naming[pattern]'
+  - 'yaml[document-start]'
+  - 'yaml[empty-lines]'
+  - 'name[template]'
+  - 'name[casing]'
+  - 'risky-file-permissions'
+  - 'risky-shell-pipe'
+  - 'galaxy[no-changelog]'
+  - 'galaxy[version-incorrect]'
+  - 'ignore-errors'
+  - 'no-changed-when'
+  - 'no-handler'
+  - 'sanity[cannot-ignore]'
+  - 'fqcn[action-core]'
+  - 'fqcn[action]'
+  - 'fqcn[canonical]'
+  - 'fqcn[keyword]'
+  - 'args[module]'

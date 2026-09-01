@@ -1,0 +1,50 @@
+name: Run ansible-lint
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 */8 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get remove ansible -y
+        python3 -m pip uninstall ansible ansible-base ansible-core -y
+        python3 -m pip install --upgrade ansible
+        python3 -m pip install --upgrade --ignore-installed PyYAML
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade virtualenv
+        python3 -m pip install --upgrade setuptools
+        python3 -m pip install --upgrade shyaml
+
+    - name: Build the AWX collection and resolve dependencies
+      run: |
+        cd awx_collection
+        rm -rf awx_collection/releases
+        mkdir -p awx_collection/releases
+
+        # Build and install the collection
+        rm -rf ~/.ansible/collections/ansible_collections/awx/awx
+        ansible-galaxy collection build -vvvvv --force --output-path releases/
+        ansible-galaxy collection install -vvvvv --force --force-with-deps releases/awx-awx-`cat galaxy.yml | shyaml get-value version`.tar.gz
+
+        ansible-galaxy collection install -vvv --force --force-with-deps community.docker:*
+        ansible-galaxy collection install -vvv --force --force-with-deps community.kubernetes:*
+        ansible-galaxy collection install -vvv --force --force-with-deps splunk.es:*
+
+    - name: Set collection paths env
+      run: echo "ANSIBLE_COLLECTIONS_PATHS=$ANSIBLE_COLLECTIONS_PATHS:/home/runner/.ansible/collections/ansible_collections" >> $GITHUB_ENV
+
+    - name: Lint Ansible Playbook
+      uses: ansible/ansible-lint@main
+      with:
+        targets: |
+          playbooks
+          roles
+        args: "-v -c .ansible-lint.yml"

@@ -1,2 +1,2 @@
 ---
-- ansible.builtin.import_playbook: foo
+- ansible.builtin.import_playbook: hello_world.yml
