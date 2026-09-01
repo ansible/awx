@@ -1922,6 +1922,9 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'hosts'
+    rest_filters_reserved_names = [
+        'host_filter',
+    ]
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of hosts."})
     def get(self, request, *args, **kwargs):
