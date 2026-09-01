@@ -588,23 +588,21 @@ def inspect_established_receptor_connections(mesh_status):
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
 
-def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
+def inspect_execution_and_hop_nodes(instance_list, mesh_status):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False) as acquired:
         if not acquired:
             logger.debug("Not running inspect_execution_and_hop_nodes, another instance holds lock")
             return
+        if mesh_status is None:
+            logger.debug("Not running inspect_execution_and_hop_nodes, mesh status unavailable")
+            return
         start = time.monotonic()
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        try:
-            mesh_status = receptor_ctl.simple_command('status')
-        except ValueError as exc:
-            logger.error(f'Error running receptorctl status command, error: {str(exc)}')
-            return
 
         inspect_established_receptor_connections(mesh_status)
 
         nowtime = now()
-        workers = mesh_status['Advertisements']
+        workers = mesh_status.get('Advertisements') or []
         updated_count = 0
 
         for ad in workers:
@@ -685,7 +683,7 @@ def cluster_node_heartbeat(binder):
     # Run local reaper using tasks from dispatcherd
     ref_time = now()  # No dispatch_time in dispatcherd version
     logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
-    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time, undispatched_only=True)
+    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
     # If waiting jobs are hanging out, resubmit them
     if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
         from awx.main.tasks.jobs import dispatch_waiting_jobs
@@ -727,53 +725,24 @@ def _get_active_task_ids_from_dispatcherd(binder):
         return None
 
 
-def _mesh_all_ready_nodes_visible(instance_list):
-    """Return True if all recently-seen READY execution/hop nodes appear in both
-    KnownConnectionCosts (routing) and Advertisements (service ads).
+def _mesh_all_ready_nodes_visible(mesh_status):
+    """Return False if the receptor mesh is still re-establishing after a controller restart.
 
-    Fails open on any receptor error so existing error paths are not bypassed.
-    Called only when lost_instances is non-empty — short-circuits otherwise.
+    Uses KnownConnectionCosts as the stability signal: receptor's routing protocol
+    populates this table as connections establish via gossip. An empty table means no
+    routing has propagated yet (Window A — typically the first ~10s after restart).
 
-    Catches two re-establishment windows after a controller restart:
-      Window A (<10s): routing not yet propagated — EEs absent from KnownConnectionCosts
-      Window B (10-60s): routing restored but EEs not yet re-advertised via Advertisements
+    No DB state is consulted. KnownConnectionCosts is maintained entirely by the receptor
+    Go process, making it a reliable mesh-state signal free of stale DB records.
 
-    Nodes with last_seen older than 1.5 × HEARTBEAT_PERIOD are excluded from expected:
-    they are genuinely offline rather than transiently absent during re-establishment.
-    This prevents indefinite deferral when a dead node stays in READY state while it
-    awaits lost-instance handling.
+    Fails open (returns True) when mesh_status is None so existing error paths are
+    not bypassed.
     """
-    # Nodes last seen within this window could be transiently absent during re-establishment.
-    # Dead nodes (last_seen >= is_lost threshold of 2 × HEARTBEAT_PERIOD) are excluded so
-    # their mesh absence doesn't block peer judgment on every subsequent heartbeat cycle.
-    recency_cutoff = now() - timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 1.5)
-    expected = {
-        inst.hostname
-        for inst in instance_list
-        if inst.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP)
-        and inst.node_state == Instance.States.READY
-        and inst.last_seen is not None
-        and inst.last_seen > recency_cutoff
-    }
-    if not expected:
-        return True
-    try:
-        mesh_status = get_receptor_ctl().simple_command('status')
-    except (FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
-        logger.warning(f'Mesh stability gate: receptor unavailable, skipping gate: {exc}')
-        return True
-    # Window A (routing) must be checked before Window B (advertisements); dict order preserves that.
-    # Use `or {}` / `or []` guards: receptor is a Go service and marshals nil maps/slices as JSON null,
-    # which becomes Python None — not caught by the .get() default.
-    present_by_table = {
-        'KnownConnectionCosts': set(mesh_status.get('KnownConnectionCosts') or {}),
-        'Advertisements': {ad['NodeID'] for ad in (mesh_status.get('Advertisements') or [])},
-    }
-    for table, present in present_by_table.items():
-        missing = expected - present
-        if missing:
-            logger.info(f'Mesh stability gate: {len(missing)} node(s) absent from {table}, skipping peer-judgment this cycle: {missing}')
-            return False
+    if mesh_status is None:
+        return True  # fail open: status unavailable, let normal peer-judgment proceed
+    if not (mesh_status.get('KnownConnectionCosts') or {}):
+        logger.info('Mesh stability gate: routing table empty, deferring peer-judgment (receptor re-establishing)')
+        return False
     return True
 
 
@@ -799,7 +768,13 @@ def _heartbeat_instance_management():
             this_inst.mark_offline(errors='Receptor not available')
         return None, None, None
 
-    inspect_execution_and_hop_nodes(instance_list, ctl)
+    try:
+        mesh_status = ctl.simple_command('status')
+    except (OSError, RuntimeError, ValueError) as exc:
+        logger.warning(f'Receptor status unavailable: {exc}')
+        mesh_status = None
+
+    inspect_execution_and_hop_nodes(instance_list, mesh_status)
 
     for inst in list(instance_list):
         if inst == this_inst:
@@ -829,7 +804,7 @@ def _heartbeat_instance_management():
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
             return None, None, None
 
-    if lost_instances and not _mesh_all_ready_nodes_visible(instance_list + lost_instances):
+    if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
         return this_inst, instance_list, []
 
     return this_inst, instance_list, lost_instances
@@ -859,7 +834,7 @@ def _reap_and_mark_lost_instance(other_inst):
     try:
         # Only reap jobs never dispatched to receptor; dispatched jobs are left for adoption (AAP-89602)
         explanation = "Job reaped due to instance shutdown"
-        reaper.reap(other_inst, job_explanation=explanation, undispatched_only=True)
+        reaper.reap(other_inst, job_explanation=explanation)
         # Any jobs that were waiting to be processed by this node will be handed back to task manager
         UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
     except Exception:

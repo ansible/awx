@@ -13,7 +13,7 @@ def startup_reaping():
     If this particular instance is starting, then we know that any running jobs are invalid
     so we will reap those jobs as a special action here
     """
-    jobs = UnifiedJob.objects.filter(status='running', controller_node=Instance.objects.my_hostname(), work_unit_id='')
+    jobs = UnifiedJob.objects.filter(status='running', controller_node=Instance.objects.my_hostname())
     job_ids = []
     for j in jobs:
         job_ids.append(j.id)
@@ -47,12 +47,9 @@ def reap_job(j, status, job_explanation=None):
     logger.error(f'{j.log_format} is no longer {status_before}; reaping')
 
 
-def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None, ref_time=None, undispatched_only=False):
+def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None, ref_time=None):
     """
     Reap all jobs in running for this instance.
-
-    undispatched_only: when True, only reap jobs that were never dispatched to receptor
-    (work_unit_id=''). Jobs with a work_unit_id are left for adoption by a surviving controller.
     """
     if instance is None:
         hostname = Instance.objects.my_hostname()
@@ -60,8 +57,6 @@ def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=No
         hostname = instance.hostname
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     base_Q = Q(status='running') & (Q(execution_node=hostname) | Q(controller_node=hostname)) & ~Q(polymorphic_ctype_id=workflow_ctype_id)
-    if undispatched_only:
-        base_Q &= Q(work_unit_id='')
     if ref_time:
         jobs = UnifiedJob.objects.filter(base_Q & Q(started__lte=ref_time))
     else:

@@ -9,9 +9,7 @@ from awx.main.tasks.system import (
     _heartbeat_handle_lost_instances,
     _reap_and_mark_lost_instance,
 )
-from awx.main.dispatch.reaper import startup_reaping, reap
 from awx.main.models import Instance, Inventory
-from django.conf import settings
 from django.db import DatabaseError
 from django.utils.timezone import now, timedelta
 
@@ -49,192 +47,60 @@ def _mock_ctl(status):
 
 
 class TestMeshAllReadyNodesVisible:
-    def test_passes_when_all_nodes_visible(self):
-        """Gate passes when all READY EE/hop nodes appear in both tables."""
-        nodes = [
-            _instance('ee-0', 'execution', 'ready'),
-            _instance('ee-1', 'execution', 'ready'),
-            _instance('hop-0', 'hop', 'ready'),
-            _instance('ctrl-0', 'control', 'ready'),  # controls never checked
-        ]
-        status = _mesh_status(
-            known_costs={'ee-0': {}, 'ee-1': {}, 'hop-0': {}},
-            advertisements=['ee-0', 'ee-1', 'hop-0'],
-        )
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            assert _mesh_all_ready_nodes_visible(nodes) is True
+    """Gate uses KnownConnectionCosts (receptor routing table) as the stability signal.
 
-    def test_blocks_window_a_ee_absent_from_routing(self):
-        """Gate blocks (Window A) when EEs absent from KnownConnectionCosts.
+    No DB state is consulted — KnownConnectionCosts is maintained entirely by
+    receptor's routing protocol. Empty table = routing not yet established (Window A).
+    """
 
-        Scenario: fresh receptor after controller restart — routing table not yet propagated.
+    def test_defers_when_routing_table_empty(self):
+        """Gate defers when KnownConnectionCosts is empty.
+
+        Window A scenario: fresh receptor after controller restart — routing gossip
+        has not yet propagated. Empty dict means no connections are established.
         """
-        nodes = [_instance('ee-0'), _instance('ee-1')]
-        status = _mesh_status(
-            known_costs={'ctrl-0': {}},  # EEs not in routing table yet
-            advertisements=['ee-0', 'ee-1'],
-        )
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            assert _mesh_all_ready_nodes_visible(nodes) is False
+        status = _mesh_status(known_costs={}, advertisements=['ee-0', 'ee-1'])
+        assert _mesh_all_ready_nodes_visible(status) is False
 
-    def test_blocks_window_b_ee_absent_from_advertisements(self):
-        """Gate blocks (Window B) when EEs are routable but not yet advertising.
-
-        Scenario: t=3-60s after restart — routing propagated but EEs haven't
-        re-advertised yet (advertisement period = 60s, fresh receptor has no cache).
-        """
-        nodes = [_instance('ee-0'), _instance('ee-1')]
-        status = _mesh_status(
-            known_costs={'ee-0': {}, 'ee-1': {}},  # routing restored
-            advertisements=['ctrl-0'],  # but no EE advertisements yet
-        )
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            assert _mesh_all_ready_nodes_visible(nodes) is False
-
-    def test_fails_open_when_receptor_socket_missing(self):
-        """Gate fails open on FileNotFoundError (receptor not yet started)."""
-        nodes = [_instance('ee-0')]
-        with patch('awx.main.tasks.system.get_receptor_ctl', side_effect=FileNotFoundError):
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-
-    def test_fails_open_when_receptor_status_fails(self):
-        """Gate fails open when receptorctl status raises ValueError."""
-        nodes = [_instance('ee-0')]
-        ctl = MagicMock()
-        ctl.simple_command.side_effect = ValueError('connection reset')
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-
-    def test_fails_open_on_oserror(self):
-        """Gate fails open on OSError (stale socket — exists but daemon not accepting).
-
-        A present-but-unresponsive socket raises OSError/ConnectionRefusedError, not
-        FileNotFoundError. This is the exact scenario during a controller restart window.
-        """
-        nodes = [_instance('ee-0')]
-        with patch('awx.main.tasks.system.get_receptor_ctl', side_effect=OSError('Connection refused')):
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-
-    def test_fails_open_on_runtime_error(self):
-        """Gate fails open on RuntimeError (receptor handshake or protocol error)."""
-        nodes = [_instance('ee-0')]
-        ctl = MagicMock()
-        ctl.simple_command.side_effect = RuntimeError('Failed to connect to Receptor socket')
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-
-    def test_fails_open_when_receptor_returns_null_known_costs(self):
-        """Gate fails open when KnownConnectionCosts is JSON null (Go nil map → Python None).
+    def test_defers_when_routing_table_null(self):
+        """Gate defers when KnownConnectionCosts is JSON null (Go nil map → Python None).
 
         Receptor is a Go service; a nil map marshals to JSON null, which Python's json
-        decoder represents as None. This is most likely during Window A (fresh startup
-        with no established connections yet). set(None) would raise TypeError without
-        the `or {}` guard.
+        decoder represents as None. Treated the same as an empty routing table.
         """
-        nodes = [_instance('ee-0')]
         status = _mesh_status(known_costs=None, advertisements=['ee-0'])
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            # None KnownConnectionCosts → ee-0 absent from routing → gate blocks (Window A)
-            assert _mesh_all_ready_nodes_visible(nodes) is False
+        assert _mesh_all_ready_nodes_visible(status) is False
 
-    def test_fails_open_when_receptor_returns_null_advertisements(self):
-        """Gate blocks when Advertisements is JSON null (Go nil slice → Python None).
+    def test_passes_when_routing_established(self):
+        """Gate passes when KnownConnectionCosts is populated.
 
-        This is Window B: routing is established but no service advertisements yet.
-        `for ad in None` would raise TypeError without the `or []` guard.
+        Any non-empty routing table means receptor's gossip has propagated and
+        the mesh is stable enough to trust peer-judgment decisions.
         """
-        nodes = [_instance('ee-0')]
-        status = _mesh_status(known_costs={'ee-0': {}}, advertisements=None)
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            # None Advertisements → ee-0 absent from ads → gate blocks (Window B)
-            assert _mesh_all_ready_nodes_visible(nodes) is False
+        status = _mesh_status(known_costs={'ctrl-0': {'ee-0': 1}}, advertisements=['ee-0'])
+        assert _mesh_all_ready_nodes_visible(status) is True
 
-    def test_passes_trivially_with_no_ee_or_hop_nodes(self):
-        """Gate passes immediately when instance_list has only control nodes.
+    def test_passes_when_routing_established_dead_ee_not_in_routing(self):
+        """Gate passes even when a dead EE is absent from routing.
 
-        No receptor call is made — nothing to check.
+        A genuinely dead EE won't appear in KnownConnectionCosts (no active
+        connections to gossip it). The gate correctly ignores its absence because
+        it only checks whether routing is established at all, not which nodes appear.
+        The dead EE will be caught by normal lost-instance handling.
         """
-        nodes = [_instance('ctrl-0', 'control', 'ready')]
-        with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl:
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-        mock_ctl.assert_not_called()
-
-    def test_receptor_not_called_when_expected_set_is_empty(self):
-        """Gate returns True without calling receptor when no READY EE/hop nodes exist.
-
-        If `expected` is empty (e.g. control-only cluster, or all EEs are UNAVAILABLE),
-        the gate short-circuits before making a receptor call. This also validates that
-        control nodes are never included in the expected set.
-        """
-        nodes = [
-            _instance('ctrl-0', 'control', 'ready'),
-            _instance('ee-down', 'execution', 'unavailable'),
-        ]
-        with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl:
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-        mock_ctl.assert_not_called()
-
-    def test_ignores_unavailable_ee_nodes(self):
-        """Gate only checks READY nodes — already-UNAVAILABLE EEs are excluded.
-
-        An EE that is already UNAVAILABLE should not be in expected; the gate
-        should not fail if that EE is missing from the mesh tables.
-        """
-        nodes = [
-            _instance('ee-down', 'execution', 'unavailable'),
-            _instance('ee-up', 'execution', 'ready'),
-        ]
         status = _mesh_status(
-            known_costs={'ee-up': {}},  # only the READY EE present
-            advertisements=['ee-up'],
-        )
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            assert _mesh_all_ready_nodes_visible(nodes) is True
-
-    def test_excludes_genuinely_dead_node_from_expected(self):
-        """Gate does not block indefinitely on a genuinely dead node.
-
-        A dead node stays in READY state until lost-instance handling runs.
-        Its last_seen is >= is_lost threshold (2 × HEARTBEAT_PERIOD = 120s), which
-        is past the 1.5 × HEARTBEAT_PERIOD recency cutoff (90s). The gate must
-        exclude it from expected so its mesh absence does not defer peer judgment
-        on every subsequent heartbeat cycle.
-        """
-        dead_node = _instance('dead-ee', last_seen_secs_ago=settings.CLUSTER_NODE_HEARTBEAT_PERIOD * 3)
-        live_node = _instance('live-ee')
-        status = _mesh_status(
-            known_costs={'live-ee': {}},  # dead-ee absent (genuinely offline)
+            known_costs={'ctrl-0': {'live-ee': 1}},  # dead-ee absent — but routing is up
             advertisements=['live-ee'],
         )
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            assert _mesh_all_ready_nodes_visible([dead_node, live_node]) is True
+        assert _mesh_all_ready_nodes_visible(status) is True
 
-    def test_instance_list_plus_lost_covers_removed_ees(self):
-        """Caller must pass instance_list + lost_instances, not just instance_list.
+    def test_fails_open_when_mesh_status_none(self):
+        """Gate fails open when mesh_status is None (receptor status fetch failed).
 
-        The peer-judgment loop removes lost EEs from instance_list before the gate
-        runs. If only instance_list is passed, expected is empty and the gate always
-        returns True. This test proves the gate correctly catches Window B when given
-        the combined list (nodes must have recent last_seen to be included).
+        If the caller couldn't fetch status, we can't assess mesh stability.
+        Fail open so existing peer-judgment error paths are not bypassed.
         """
-        ee0 = _instance('ee-0')
-        ee1 = _instance('ee-1')
-
-        # Simulate the state after peer-judgment loop:
-        # instance_list had EEs removed; lost_instances holds them.
-        instance_list_after_loop = []  # EEs already removed
-        lost_instances = [ee0, ee1]  # peer-judgment put them here
-
-        status = _mesh_status(
-            known_costs={'ee-0': {}, 'ee-1': {}},
-            advertisements=['ctrl-0'],  # no EE ads → Window B
-        )
-        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=_mock_ctl(status)):
-            # Wrong: passing only instance_list (empty) → gate returns True (bug)
-            assert _mesh_all_ready_nodes_visible(instance_list_after_loop) is True
-
-            # Correct: passing combined list → gate catches Window B (returns False)
-            assert _mesh_all_ready_nodes_visible(instance_list_after_loop + lost_instances) is False
+        assert _mesh_all_ready_nodes_visible(None) is True
 
 
 # ── Tests: _heartbeat_handle_lost_instances (task manager lock) ───────────────
@@ -287,7 +153,7 @@ class TestHeartbeatHandleLostInstancesLock:
         inst = _lost_instance()
         with patch('awx.main.tasks.system.advisory_lock', _make_lock(True)):
             mock_reaper, _ = self._run([inst])
-        mock_reaper.reap.assert_called_once_with(inst, job_explanation='Job reaped due to instance shutdown', undispatched_only=True)
+        mock_reaper.reap.assert_called_once_with(inst, job_explanation='Job reaped due to instance shutdown')
         inst.mark_offline.assert_called_once()
 
     def test_skips_instance_when_lock_unavailable(self):
@@ -313,7 +179,7 @@ class TestHeartbeatHandleLostInstancesLock:
         inst2 = _lost_instance('ctrl-2')
         with patch('awx.main.tasks.system.advisory_lock', _make_lock_sequence([False, True])):
             mock_reaper, _ = self._run([inst1, inst2])
-        mock_reaper.reap.assert_called_once_with(inst2, job_explanation='Job reaped due to instance shutdown', undispatched_only=True)
+        mock_reaper.reap.assert_called_once_with(inst2, job_explanation='Job reaped due to instance shutdown')
         inst1.mark_offline.assert_not_called()
         inst2.mark_offline.assert_called_once()
 
@@ -420,74 +286,6 @@ class TestReapAndMarkLostInstance:
         assert any('marked' in m for m in debug_messages)
 
 
-# ── Tests: work_unit_id filter (AAP-89598) ───────────────────────────────────
-
-
-class TestWorkUnitIdFilter:
-    def test_startup_reaping_excludes_dispatched_jobs(self):
-        """startup_reaping filters on work_unit_id='' so dispatched EE jobs are never reaped on restart."""
-        with (
-            patch('awx.main.dispatch.reaper.UnifiedJob.objects.filter') as mock_filter,
-            patch('awx.main.dispatch.reaper.Instance.objects.my_hostname', return_value='ctrl-1'),
-        ):
-            mock_filter.return_value = []
-            startup_reaping()
-        mock_filter.assert_called_once_with(status='running', controller_node='ctrl-1', work_unit_id='')
-
-    def test_reap_undispatched_only_excludes_dispatched_jobs(self):
-        """reap(undispatched_only=True) adds work_unit_id='' to the queryset filter."""
-        with (
-            patch('awx.main.dispatch.reaper.UnifiedJob.objects.filter') as mock_filter,
-            patch('awx.main.dispatch.reaper.Instance.objects.my_hostname', return_value='ctrl-1'),
-            patch('awx.main.dispatch.reaper.ContentType.objects.get_for_model') as mock_ct,
-        ):
-            mock_ct.return_value.id = 99
-            mock_filter.return_value = []
-            reap(undispatched_only=True)
-        q_obj = mock_filter.call_args[0][0]
-        # The Q tree must contain the work_unit_id='' leaf
-        assert _q_contains(q_obj, 'work_unit_id', '')
-
-    def test_reap_default_includes_dispatched_jobs(self):
-        """reap() without undispatched_only does not add work_unit_id filter (existing behaviour)."""
-        with (
-            patch('awx.main.dispatch.reaper.UnifiedJob.objects.filter') as mock_filter,
-            patch('awx.main.dispatch.reaper.Instance.objects.my_hostname', return_value='ctrl-1'),
-            patch('awx.main.dispatch.reaper.ContentType.objects.get_for_model') as mock_ct,
-        ):
-            mock_ct.return_value.id = 99
-            mock_filter.return_value = []
-            reap()
-        q_obj = mock_filter.call_args[0][0]
-        assert not _q_contains(q_obj, 'work_unit_id', '')
-
-    def test_peer_reaper_passes_undispatched_only(self):
-        """_reap_and_mark_lost_instance calls reaper.reap with undispatched_only=True.
-
-        Dispatched jobs on a dead peer are left untouched so AAP-89602 adoption can pick them up.
-        """
-        inst = _lost_instance('ctrl-1')
-        with (
-            patch('awx.main.tasks.system.advisory_lock', _make_lock(True)),
-            patch('awx.main.tasks.system.reaper') as mock_reaper,
-            patch('awx.main.tasks.system.UnifiedJob'),
-            patch('awx.main.tasks.system.settings') as mock_settings,
-        ):
-            mock_settings.AWX_AUTO_DEPROVISION_INSTANCES = False
-            _heartbeat_handle_lost_instances([inst], MagicMock())
-        mock_reaper.reap.assert_called_once_with(inst, job_explanation='Job reaped due to instance shutdown', undispatched_only=True)
-
-
-def _q_contains(q, key, value):
-    """Recursively check whether a Q object tree contains a (key, value) leaf."""
-    for child in q.children:
-        if isinstance(child, tuple) and child == (key, value):
-            return True
-        if hasattr(child, 'children') and _q_contains(child, key, value):
-            return True
-    return False
-
-
 @pytest.fixture
 def mock_logger():
     with patch("awx.main.tasks.system.logger") as logger:
@@ -570,6 +368,7 @@ def test_heartbeat_defers_lost_instances_when_mesh_gate_blocks(mock_filter, mock
         _, _, lost_result = _heartbeat_instance_management()
 
     assert lost_result == []
+    # Gate is called with mesh_status (not instance_list) — just verify it was called
     mock_gate.assert_called_once()
 
 
@@ -590,18 +389,27 @@ def test_heartbeat_marks_offline_when_receptor_unavailable(mock_filter, mock_get
 
 
 class TestInspectExecutionAndHopNodes:
-    """Tests for the advisory_lock guard in inspect_execution_and_hop_nodes."""
+    """Tests for inspect_execution_and_hop_nodes, which now accepts pre-fetched mesh_status."""
 
     @patch('awx.main.tasks.system.inspect_established_receptor_connections')
     @patch('awx.main.tasks.system.advisory_lock')
     def test_skips_when_lock_not_acquired(self, mock_lock, mock_inspect_conns):
         mock_lock.return_value.__enter__ = MagicMock(return_value=False)
         mock_lock.return_value.__exit__ = MagicMock(return_value=False)
-        receptor_ctl = MagicMock()
 
-        inspect_execution_and_hop_nodes([], receptor_ctl)
+        inspect_execution_and_hop_nodes([], _mesh_status())
 
-        receptor_ctl.simple_command.assert_not_called()
+        mock_inspect_conns.assert_not_called()
+
+    @patch('awx.main.tasks.system.inspect_established_receptor_connections')
+    @patch('awx.main.tasks.system.advisory_lock')
+    def test_skips_when_mesh_status_none(self, mock_lock, mock_inspect_conns):
+        """When mesh_status is None (status fetch failed), skip all inspection."""
+        mock_lock.return_value.__enter__ = MagicMock(return_value=True)
+        mock_lock.return_value.__exit__ = MagicMock(return_value=False)
+
+        inspect_execution_and_hop_nodes([], None)
+
         mock_inspect_conns.assert_not_called()
 
     @patch('awx.main.tasks.system.inspect_established_receptor_connections')
@@ -609,12 +417,9 @@ class TestInspectExecutionAndHopNodes:
     def test_runs_when_lock_acquired(self, mock_lock, mock_inspect_conns):
         mock_lock.return_value.__enter__ = MagicMock(return_value=True)
         mock_lock.return_value.__exit__ = MagicMock(return_value=False)
-        receptor_ctl = MagicMock()
-        receptor_ctl.simple_command.return_value = {'Advertisements': [], 'KnownConnectionCosts': {}}
 
-        inspect_execution_and_hop_nodes([], receptor_ctl)
+        inspect_execution_and_hop_nodes([], _mesh_status())
 
-        receptor_ctl.simple_command.assert_called_once_with('status')
         mock_inspect_conns.assert_called_once()
 
     @patch('awx.main.tasks.system.inspect_established_receptor_connections')
@@ -637,16 +442,17 @@ class TestInspectExecutionAndHopNodes:
         control_node.hostname = 'control-1'
         control_node.node_type = 'control'
 
-        receptor_ctl = MagicMock()
-        receptor_ctl.simple_command.return_value = {
-            'Advertisements': [
-                {'NodeID': 'exec-1', 'Time': '2026-01-01T00:00:00+00:00'},
-                {'NodeID': 'control-1', 'Time': '2026-01-01T00:00:00+00:00'},
-            ],
-            'KnownConnectionCosts': {},
-        }
+        status = _mesh_status(
+            known_costs={},
+            advertisements=['exec-1', 'control-1'],
+        )
+        # Override Advertisements to include Time field required by the function
+        status['Advertisements'] = [
+            {'NodeID': 'exec-1', 'Time': '2026-01-01T00:00:00+00:00'},
+            {'NodeID': 'control-1', 'Time': '2026-01-01T00:00:00+00:00'},
+        ]
 
-        inspect_execution_and_hop_nodes([exec_node, control_node], receptor_ctl)
+        inspect_execution_and_hop_nodes([exec_node, control_node], status)
 
         exec_node.save.assert_called_once_with(update_fields=['last_seen'])
         control_node.save.assert_not_called()
