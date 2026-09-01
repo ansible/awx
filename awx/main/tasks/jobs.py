@@ -1179,6 +1179,10 @@ class RunJob(SourceControlMixin, BaseTask):
         config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)) + ['callbacks_enabled'])
 
         for env_key, config_setting, folder, default in path_vars:
+            local_folder = os.path.join(private_data_dir, folder)
+            if (not os.path.exists(local_folder)) or (os.listdir(local_folder) == []):
+                # If there is no content populated in the additional content folder, do not set the env var
+                continue
             paths = default.split(':')
             if env_key in env:
                 for path in env[env_key].split(':'):
