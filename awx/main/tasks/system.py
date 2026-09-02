@@ -36,7 +36,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 from django.db import DatabaseError, IntegrityError, connection, transaction
+from django.db.models import Max, Q
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
@@ -65,6 +67,7 @@ from awx.main.models import (
     SmartInventoryMembership,
     TowerScheduleState,
     UnifiedJob,
+    WorkflowJob,
     convert_jsonfields,
 )
 from awx.main.models.credential import CredentialType
@@ -149,7 +152,10 @@ def _run_dispatch_startup_common():
     #
     apply_cluster_membership_policies()
     cluster_node_heartbeat(None)
-    reaper.startup_reaping()
+    # Safety net: reap undispatched startup jobs even if cluster_node_heartbeat returned early
+    # (receptor unavailable, rejoining cluster). _process_startup_jobs handles adoption; this
+    # handles the reap-only case. reap_job() is idempotent — already-reaped jobs are skipped.
+    _startup_reap_undispatched(settings.CLUSTER_HOST_ID)
     m = DispatcherMetrics()
     m.reset_values()
 
@@ -661,8 +667,9 @@ def cluster_node_heartbeat(binder):
     Uses Control API to get running tasks.
     """
 
-    # Run common instance management logic
-    this_inst, instance_list, lost_instances = _heartbeat_instance_management()
+    # Run common instance management logic — ctl is the same receptor connection used for
+    # mesh status; we reuse it for the job processing loop to avoid a second socket open.
+    this_inst, instance_list, lost_instances, ctl = _heartbeat_instance_management()
     if this_inst is None:
         return  # Early return case from instance management
 
@@ -672,19 +679,24 @@ def cluster_node_heartbeat(binder):
     # Handle lost instances
     _heartbeat_handle_lost_instances(lost_instances, this_inst)
 
-    # Get running tasks using dispatcherd API
     if binder is None:
+        # Startup: one loop over all running jobs on this instance.
+        # Dispatched jobs are re-adopted; undispatched jobs are reaped.
+        _process_startup_jobs(this_inst, ctl)
         logger.debug("Heartbeat finished in startup.")
         return
+
+    # Periodic heartbeat: get running tasks from dispatcherd, then process orphaned jobs.
     active_task_ids = _get_active_task_ids_from_dispatcherd(binder)
     if active_task_ids is None:
         logger.warning("No active task IDs retrieved from dispatcherd, skipping reaper")
         return  # Failed to get task IDs, don't attempt reaping
 
-    # Run local reaper using tasks from dispatcherd
-    ref_time = now()  # No dispatch_time in dispatcherd version
-    logger.debug(f"Running reaper with {len(active_task_ids)} excluded UUIDs")
-    reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=ref_time)
+    # One loop over all orphaned running jobs — adopt dispatched, reap undispatched.
+    ref_time = now()
+    logger.debug(f"Running job processing loop with {len(active_task_ids)} excluded UUIDs")
+    _process_running_jobs(this_inst, ctl, active_task_ids, ref_time)
+
     # If waiting jobs are hanging out, resubmit them
     if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
         from awx.main.tasks.jobs import dispatch_waiting_jobs
@@ -767,7 +779,7 @@ def _heartbeat_instance_management():
         if this_inst:
             this_inst.local_health_check()
             this_inst.mark_offline(errors='Receptor not available')
-        return None, None, None
+        return None, None, None, None
 
     try:
         mesh_status = ctl.simple_command('status')
@@ -790,7 +802,7 @@ def _heartbeat_instance_management():
         this_inst.local_health_check()
         if startup_event and this_inst.capacity != 0:
             logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
-            return None, None, None  # Early return case
+            return None, None, None, None  # Early return case
         elif not last_last_seen:
             logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
         elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
@@ -803,12 +815,12 @@ def _heartbeat_instance_management():
             this_inst.local_health_check()
         else:
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
-            return None, None, None
+            return None, None, None, None
 
     if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
-        return this_inst, instance_list, []
+        return this_inst, instance_list, [], ctl
 
-    return this_inst, instance_list, lost_instances
+    return this_inst, instance_list, lost_instances, ctl
 
 
 def _heartbeat_check_versions(this_inst, instance_list):
@@ -833,9 +845,17 @@ def _heartbeat_check_versions(this_inst, instance_list):
 def _reap_and_mark_lost_instance(other_inst):
     """Reap a lost instance's running jobs and mark it offline (or deprovision it)."""
     try:
-        # Only reap jobs never dispatched to receptor; dispatched jobs are left for adoption (AAP-89602)
-        explanation = "Job reaped due to instance shutdown"
-        reaper.reap(other_inst, job_explanation=explanation)
+        workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+        running_jobs = list(
+            UnifiedJob.objects.filter(
+                Q(execution_node=other_inst.hostname) | Q(controller_node=other_inst.hostname),
+                status='running',
+            ).exclude(polymorphic_ctype_id=workflow_ctype_id)
+        )
+        for j in running_jobs:
+            # AAP-89602: cross-controller adoption for dispatched jobs will be added here
+            # once ansible/receptor#1564 merges. Both paths reap identically for now.
+            reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
         # Any jobs that were waiting to be processed by this node will be handed back to task manager
         UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
     except Exception:
@@ -874,6 +894,126 @@ def _heartbeat_handle_lost_instances(lost_instances, this_inst):
                 logger.info(f'task_manager_lock held, deferring offline handling for {other_inst.hostname} to next heartbeat cycle')
                 continue
             _reap_and_mark_lost_instance(other_inst)
+
+
+def _try_adopt_job(job, ctl, adoption_timeout, timeout_cutoff):
+    """Attempt adoption for a single dispatched job."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    # Measure orphan duration from when events stopped arriving, not from job start.
+    # job.started counts total runtime — a job running 55 min before a 5-min controller
+    # outage would wrongly hit the 1-hour limit. The last event's created timestamp is
+    # the closest proxy for when the controller last streamed successfully from receptor.
+    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
+    orphaned_since = last_event_time or job.started
+    if orphaned_since and orphaned_since < timeout_cutoff:
+        logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
+        reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
+        return
+    try:
+        reattach_to_work_unit(job, ctl)
+    except Exception:
+        logger.exception(f'Adoption failed for job {job.id} (unit={job.work_unit_id})')
+
+
+def _startup_reap_undispatched(hostname):
+    """Reap undispatched running jobs at startup using only the hostname — no receptor needed.
+
+    Called unconditionally from _run_dispatch_startup_common so undispatched jobs are always
+    reaped, even when cluster_node_heartbeat() returns early (receptor unavailable, rejoining
+    cluster). reap_job() is idempotent: jobs already handled by _process_startup_jobs are
+    skipped via the running-status check.
+    """
+    workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+    jobs = list(
+        UnifiedJob.objects.filter(
+            status='running',
+            controller_node=hostname,
+        )
+        .filter(Q(work_unit_id='') | Q(work_unit_id=None))
+        .exclude(polymorphic_ctype_id=workflow_ctype_id)
+    )
+    job_ids = [j.id for j in jobs]
+    for j in jobs:
+        reaper.reap_job(
+            j,
+            'failed',
+            job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
+        )
+    if job_ids:
+        logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
+
+
+def _process_startup_jobs(this_inst, ctl):
+    """On controller restart, process all running jobs owned by this instance in one loop.
+
+    Dispatched jobs (work_unit_id set) are re-adopted via reattach_to_work_unit.
+    Undispatched jobs (work_unit_id absent) are marked as failed — the controller died
+    before finishing dispatch and there is no EE work unit to reconnect to.
+
+    Same-controller only. Cross-controller adoption (jobs from a dead peer controller) is
+    deferred to AAP-89602 and requires ansible/receptor#1564.
+    """
+    adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
+    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
+
+    workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+    jobs = list(UnifiedJob.objects.filter(status='running', controller_node=this_inst.hostname).exclude(polymorphic_ctype_id=workflow_ctype_id))
+    if not jobs:
+        return
+
+    reaped_ids = []
+    for j in jobs:
+        try:
+            if j.work_unit_id:
+                if ctl is not None:
+                    _try_adopt_job(j, ctl, adoption_timeout, timeout_cutoff)
+            else:
+                reaped_ids.append(j.id)
+                reaper.reap_job(
+                    j,
+                    'failed',
+                    job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
+                )
+        except Exception:
+            logger.exception(f'Failed processing job {j.id} in startup job loop')
+    if reaped_ids:
+        logger.error(f'Unified jobs {reaped_ids} were reaped on dispatch startup')
+
+
+def _process_running_jobs(this_inst, ctl, active_task_ids, ref_time):
+    """On each heartbeat, process running jobs that dispatcherd is no longer tracking.
+
+    Jobs still in active_task_ids are legitimately running — leave them alone.
+    For orphaned jobs (not in active_task_ids):
+    - Dispatched (work_unit_id set, controller_node=this_inst) → try adoption.
+    - Undispatched or not owned by this controller → reap.
+
+    Cross-controller adoption (jobs from a dead peer controller) is deferred to AAP-89602.
+    """
+    workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+    base_q = Q(status='running') & (Q(execution_node=this_inst.hostname) | Q(controller_node=this_inst.hostname))
+    base_q &= ~Q(polymorphic_ctype_id=workflow_ctype_id)
+    if active_task_ids:
+        base_q &= ~Q(celery_task_id__in=active_task_ids)
+    if ref_time:
+        base_q &= Q(started__lte=ref_time)
+    jobs = list(UnifiedJob.objects.filter(base_q))
+    if not jobs:
+        return
+
+    adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
+    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
+
+    for j in jobs:
+        try:
+            if j.work_unit_id and j.controller_node == this_inst.hostname:
+                if ctl is not None:
+                    _try_adopt_job(j, ctl, adoption_timeout, timeout_cutoff)
+            else:
+                reaper.reap_job(j, 'failed')
+        except Exception:
+            logger.exception(f'Failed processing job {j.id} in heartbeat job loop')
 
 
 @task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
