@@ -6,6 +6,7 @@ import tempfile
 import shutil
 from contextlib import contextmanager
 from unittest import mock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -20,12 +21,17 @@ from awx.main.tasks.system import (
     _reap_and_mark_lost_instance,
     inspect_execution_and_hop_nodes,
     _heartbeat_instance_management,
+    _process_startup_jobs,
+    _process_running_jobs,
+    _startup_reap_undispatched,
+    _try_adopt_job,
 )
+from awx.main.dispatch.reaper import reap
 from awx.main.management.commands.dispatcherd import Command
 from django.db import DatabaseError
 from django.utils.timezone import now, timedelta
 
-from awx.main.models import Instance, Inventory, Job, Organization, ReceptorAddress, InstanceLink
+from awx.main.models import Instance, Inventory, Job, Organization, ReceptorAddress, InstanceLink, WorkflowJob
 from awx.main.models.inventory import Group, Host
 
 
@@ -395,8 +401,9 @@ class TestReapAndMarkLostInstance:
     def test_reap_exception_does_not_prevent_mark_offline(self, settings):
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
         inst = self._inst()
+        Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id=None)
         with mock.patch('awx.main.tasks.system.reaper') as mock_reaper:
-            mock_reaper.reap.side_effect = Exception('receptor timeout')
+            mock_reaper.reap_job.side_effect = Exception('receptor timeout')
             _reap_and_mark_lost_instance(inst)
         inst.refresh_from_db()
         assert inst.node_state == Instance.States.UNAVAILABLE
@@ -543,14 +550,14 @@ def test_heartbeat_defers_lost_instances_when_mesh_gate_blocks(settings):
         mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
         mock.patch.object(Instance, 'local_health_check'),
     ):
-        _, _, lost_result = _heartbeat_instance_management()
+        _, _, lost_result, _ = _heartbeat_instance_management()
 
     assert lost_result == []
 
 
 @pytest.mark.django_db
 def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
-    """FileNotFoundError from get_receptor_ctl → this_inst marked offline, returns (None, None, None)."""
+    """FileNotFoundError from get_receptor_ctl → this_inst marked offline, returns (None, None, None, None)."""
     settings.CLUSTER_HOST_ID = 'ctrl-0'
     settings.AWX_AUTO_DEPROVISION_INSTANCES = False
 
@@ -564,6 +571,444 @@ def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
     ):
         result = _heartbeat_instance_management()
 
-    assert result == (None, None, None)
+    assert result == (None, None, None, None)
     this_inst.refresh_from_db()
     assert this_inst.node_state == Instance.States.UNAVAILABLE
+
+
+# ── AAP-89607: unified startup job processing ─────────────────────────────────
+
+
+@pytest.mark.django_db
+def test_process_startup_jobs_skips_dispatched_job(me_inst, settings):
+    """_process_startup_jobs() must not reap jobs that have a work_unit_id (dispatched to receptor).
+
+    Dispatched jobs may still be running on the EE; the adoption path will reconnect to them.
+    """
+    dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='abc12345')
+    ctl = MagicMock()
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit', return_value=False):
+        _process_startup_jobs(me_inst, ctl)
+    dispatched.refresh_from_db()
+    assert dispatched.status == 'running', 'dispatched job was wrongly reaped by _process_startup_jobs()'
+
+
+@pytest.mark.django_db
+def test_process_startup_jobs_reaps_undispatched_job(me_inst, settings):
+    """_process_startup_jobs() reaps jobs with no work_unit_id (never dispatched to receptor)."""
+    undispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None)
+    ctl = MagicMock()
+    _process_startup_jobs(me_inst, ctl)
+    undispatched.refresh_from_db()
+    assert undispatched.status == 'failed', 'undispatched job should have been reaped'
+
+
+@pytest.mark.django_db
+def test_reap_reaps_dispatched_jobs(me_inst):
+    """reap() reaps dispatched jobs (no undispatched_only filter)."""
+    dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-xyz')
+    reap(instance=me_inst)
+    dispatched.refresh_from_db()
+    assert dispatched.status == 'failed', 'reap() should reap dispatched jobs'
+
+
+# ── AAP-89607: adoption loop ──────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+def test_startup_no_op_when_no_jobs(me_inst):
+    """_process_startup_jobs() is a no-op when there are no running jobs."""
+    ctl = MagicMock()
+    _process_startup_jobs(me_inst, ctl)
+    ctl.simple_command.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_adoption_skips_still_running_work_unit(me_inst):
+    """Startup adoption defers a job whose receptor work unit is still running."""
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='running-unit')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Running', 'ExitCode': None}
+
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit', wraps=lambda j, c: False):
+        _process_startup_jobs(me_inst, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'running', 'job should still be running — adoption deferred'
+
+
+@pytest.mark.django_db
+def test_adoption_timeout_fails_job(me_inst, settings):
+    """Jobs orphaned longer than HADR_JOB_ADOPTION_TIMEOUT are failed.
+
+    Timeout is measured from the last event received (orphaned_since), not from job.started.
+    With no events in DB the fallback is job.started — that's what this test exercises.
+    """
+    from django.utils.timezone import now, timedelta
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='old-unit',
+        started=now() - timedelta(seconds=7200),  # started 2h ago, no events in DB → orphaned 2h
+    )
+    ctl = MagicMock()
+    _process_startup_jobs(me_inst, ctl)
+    job.refresh_from_db()
+    assert job.status == 'failed', 'timed-out job should be reaped by startup job processing'
+    assert 'HADR_JOB_ADOPTION_TIMEOUT' in job.job_explanation
+
+
+@pytest.mark.django_db
+def test_adoption_timeout_spares_long_running_job_with_recent_events(me_inst, settings):
+    """Long-running jobs are NOT killed if events arrived recently.
+
+    A job started 2 hours ago but with events arriving 5 minutes ago (controller just
+    restarted briefly) should NOT be failed — the outage was short, not the job runtime.
+    This is the fix for the job.started bug: we measure from last_event.created, not
+    from job.started.
+    """
+    from django.utils.timezone import now, timedelta
+    from awx.main.models import JobEvent
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='long-running-unit',
+        started=now() - timedelta(seconds=7200),  # started 2h ago → old job.started
+    )
+    # Simulate events arriving 5 minutes ago (brief controller outage)
+    JobEvent.objects.create(
+        job=job,
+        counter=10,
+        event='runner_on_ok',
+        job_created=job.created,
+    )
+    # Manually set created to 5 min ago (default is now())
+    JobEvent.objects.filter(job=job).update(created=now() - timedelta(seconds=300))
+
+    ctl = MagicMock()
+    _process_startup_jobs(me_inst, ctl)
+    job.refresh_from_db()
+    assert job.status == 'running', 'Long-running job with recent events must not be failed — measure timeout from last event, not job.started'
+
+
+@pytest.mark.django_db
+def test_adoption_finalizes_successful_job(me_inst):
+    """reattach_to_work_unit finalizes a job as successful when ExitCode=0."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='done-unit')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_instance = MagicMock()
+        mock_instance._process_phase.return_value = MagicMock()
+        mock_job_cls.return_value = mock_instance
+
+        reattach_to_work_unit(job, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'successful'
+
+
+@pytest.mark.django_db
+def test_adoption_finalizes_failed_job(me_inst):
+    """reattach_to_work_unit finalizes a job as failed when ExitCode=1."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='failed-unit')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Failed', 'ExitCode': 1}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_instance = MagicMock()
+        mock_instance._process_phase.return_value = MagicMock(status='failed', rc=1)
+        mock_job_cls.return_value = mock_instance
+
+        reattach_to_work_unit(job, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'failed'
+
+
+@pytest.mark.django_db
+def test_process_running_jobs_adopts_dispatched_skips_active(me_inst):
+    """_process_running_jobs() adopts dispatched orphaned jobs and leaves active ones alone."""
+    active_job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='active-unit', celery_task_id='active-uuid')
+    orphaned_dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='orphaned-unit', celery_task_id='orphan-uuid')
+    ctl = MagicMock()
+
+    adopted = []
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit', side_effect=lambda j, c: adopted.append(j.id)):
+        _process_running_jobs(me_inst, ctl, active_task_ids={'active-uuid'}, ref_time=None)
+
+    assert orphaned_dispatched.id in adopted, 'orphaned dispatched job should be adopted'
+    assert active_job.id not in adopted, 'active job should not be touched'
+
+
+@pytest.mark.django_db
+def test_process_running_jobs_reaps_undispatched(me_inst):
+    """_process_running_jobs() reaps undispatched orphaned jobs."""
+    undispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None, celery_task_id='orphan-undispatched')
+    ctl = MagicMock()
+    _process_running_jobs(me_inst, ctl, active_task_ids=set(), ref_time=None)
+    undispatched.refresh_from_db()
+    assert undispatched.status == 'failed', 'undispatched orphaned job should be reaped'
+
+
+@pytest.mark.django_db
+def test_startup_reap_undispatched_reaps_undispatched_leaves_dispatched(me_inst):
+    """_startup_reap_undispatched() reaps jobs with no work_unit_id, leaves dispatched jobs alone.
+
+    This is the unconditional safety net called from _run_dispatch_startup_common for cases
+    where cluster_node_heartbeat returns early (receptor unavailable, rejoining cluster).
+    """
+    undispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None)
+    dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='abc-unit')
+    _startup_reap_undispatched(me_inst.hostname)
+    undispatched.refresh_from_db()
+    dispatched.refresh_from_db()
+    assert undispatched.status == 'failed', 'undispatched job should be reaped by safety net'
+    assert dispatched.status == 'running', 'dispatched job must not be reaped (adoption loop handles it)'
+
+
+@pytest.mark.django_db
+def test_startup_reap_undispatched_no_op_when_no_jobs(me_inst):
+    """_startup_reap_undispatched() is a no-op when no undispatched running jobs exist."""
+    _startup_reap_undispatched(me_inst.hostname)  # should not raise
+
+
+@pytest.mark.django_db
+def test_startup_reap_undispatched_skips_workflow_jobs(me_inst):
+    """_startup_reap_undispatched() must not reap WorkflowJobs.
+
+    WorkflowJob has work_unit_id=None (it never owns a receptor work unit) but must not
+    be reaped on controller restart — it coordinates via its node jobs, not receptor directly.
+    """
+    wfj = WorkflowJob.objects.create(status='running', controller_node=me_inst.hostname)
+    _startup_reap_undispatched(me_inst.hostname)
+    wfj.refresh_from_db()
+    assert wfj.status == 'running', 'WorkflowJob must not be reaped by startup safety net'
+
+
+@pytest.mark.django_db
+def test_process_startup_jobs_skips_workflow_jobs(me_inst, settings):
+    """_process_startup_jobs() must not reap WorkflowJobs on controller restart.
+
+    WorkflowJob has work_unit_id=None but is not a receptor-dispatched job; reaping it
+    on startup would immediately fail running workflows.
+    """
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    wfj = WorkflowJob.objects.create(status='running', controller_node=me_inst.hostname)
+    ctl = MagicMock()
+    _process_startup_jobs(me_inst, ctl)
+    wfj.refresh_from_db()
+    assert wfj.status == 'running', 'WorkflowJob must not be reaped by startup job loop'
+
+
+@pytest.mark.django_db
+def test_try_adopt_job_timeout_reaps(me_inst):
+    """_try_adopt_job reaps a job orphaned longer than HADR_JOB_ADOPTION_TIMEOUT."""
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='stale-unit',
+        started=now() - timedelta(seconds=7200),
+    )
+    ctl = MagicMock()
+    timeout_cutoff = now() - timedelta(seconds=3600)
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        _try_adopt_job(job, ctl, 3600, timeout_cutoff)
+    mock_reattach.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'failed', 'timed-out orphaned job should be reaped'
+
+
+@pytest.mark.django_db
+def test_try_adopt_job_exception_is_swallowed(me_inst):
+    """_try_adopt_job swallows exceptions from reattach_to_work_unit and does not re-raise."""
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
+    ctl = MagicMock()
+    timeout_cutoff = now() - timedelta(seconds=3600)
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit', side_effect=RuntimeError('network failure')):
+        _try_adopt_job(job, ctl, 3600, timeout_cutoff)  # must not raise
+
+
+@pytest.mark.django_db
+def test_adoption_counter_skip_dedup():
+    """RunnerCallback.event_handler skips events whose counter is in persisted_counters.
+
+    Uses a set rather than a max threshold so out-of-order worker persistence doesn't
+    cause gaps: a higher-counter event committed while a lower-counter event is still
+    buffered would erroneously skip the lower event with a max-based approach.
+    """
+    from awx.main.tasks.callback import RunnerCallback
+
+    cb = RunnerCallback()
+    cb.persisted_counters = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+    dispatched = []
+    cb.dispatcher = MagicMock()
+    cb.dispatcher.dispatch.side_effect = dispatched.append
+
+    # mock the minimum needed for event_handler to run
+    from collections import deque
+
+    cb.instance = MagicMock()
+    cb.instance.event_class.WRAPUP_EVENT = 'playbook_on_stats'
+    cb.event_data_key = 'job_id'
+    cb.job_created = None
+    cb.parent_workflow_job_id = None
+    cb.host_map = {}
+    cb.recent_event_timings = deque(maxlen=100)
+
+    # event whose counter is in the persisted set — should be skipped
+    cb.event_handler({'event': 'runner_on_ok', 'counter': 5, 'job_id': 1})
+    assert len(dispatched) == 0, 'event with counter in persisted_counters should be skipped'
+
+    # event at the top of the set — also skipped
+    cb.event_handler({'event': 'runner_on_ok', 'counter': 10, 'job_id': 1})
+    assert len(dispatched) == 0, 'event at max persisted counter should be skipped'
+
+    # None sentinel disables skip entirely (default RunnerCallback behavior)
+    cb.persisted_counters = None
+    cb.event_handler({'event': 'runner_on_ok', 'counter': 1, 'job_id': 1})
+    # no assertion — just verify no exception; dispatched may or may not be called
+    # depending on deeper event_handler logic
+
+
+# ── reattach_to_work_unit branch coverage ────────────────────────────────────
+
+
+@pytest.mark.django_db
+def test_reattach_receptor_command_fails(me_inst):
+    """receptor_ctl.simple_command raising returns False without touching the job."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
+    ctl = MagicMock()
+    ctl.simple_command.side_effect = Exception('connection refused')
+
+    result = reattach_to_work_unit(job, ctl)
+
+    assert result is False
+    job.refresh_from_db()
+    assert job.status == 'running'
+
+
+@pytest.mark.django_db
+def test_reattach_exit_code_from_detail(me_inst):
+    """Exit code is parsed from the Detail string when ExitCode is absent."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-detail')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Failed', 'Detail': 'exit status 2'}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_job_cls.return_value = MagicMock()
+        reattach_to_work_unit(job, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'failed'
+
+
+@pytest.mark.django_db
+def test_reattach_exit_code_fallback_succeeded(me_inst):
+    """Unparseable Detail with Succeeded state → exit_code=0 → successful."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-fb-ok')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'Detail': 'not-a-number'}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_job_cls.return_value = MagicMock()
+        reattach_to_work_unit(job, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'successful'
+
+
+@pytest.mark.django_db
+def test_reattach_exit_code_fallback_failed(me_inst):
+    """Unparseable Detail with Failed state → exit_code=1 → failed."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-fb-fail')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Failed', 'Detail': ''}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_job_cls.return_value = MagicMock()
+        reattach_to_work_unit(job, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'failed'
+
+
+@pytest.mark.django_db
+def test_reattach_process_phase_raises(me_inst):
+    """When _process_phase raises, the job is still finalized via the pre-fetched exit_code."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-raise')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_instance = MagicMock()
+        mock_instance._process_phase.side_effect = RuntimeError('boom')
+        mock_job_cls.return_value = mock_instance
+        result = reattach_to_work_unit(job, ctl)
+
+    assert result is True
+    job.refresh_from_db()
+    assert job.status == 'successful'
+
+
+@pytest.mark.django_db
+def test_reattach_job_already_finalized(me_inst):
+    """finished_callback finalizing the job during process phase is not overwritten."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-already')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+
+    def _finalize_in_db(*args, **kwargs):
+        Job.objects.filter(pk=job.pk).update(status='successful')
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_instance = MagicMock()
+        mock_instance._process_phase.side_effect = _finalize_in_db
+        mock_job_cls.return_value = mock_instance
+        reattach_to_work_unit(job, ctl)
+
+    job.refresh_from_db()
+    assert job.status == 'successful'
