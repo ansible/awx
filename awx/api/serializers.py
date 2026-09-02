@@ -127,6 +127,9 @@ from awx.main.validators import vars_validate_or_raise
 from awx.api.versioning import reverse
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField, DeprecatedCredentialField
 
+from awx.main.models import WorkflowApprovalTemplate, NotificationTemplate
+from awx.api.generics import SubResourceListCreateAttachDetachView
+
 # AWX Utils
 from awx.api.validators import HostnameRegexValidator
 
@@ -1731,9 +1734,11 @@ class ConstructedInventorySerializer(InventorySerializer):
     update_cache_timeout = ConstructedIntegerField(
         required=False,
         allow_null=True,
-        min_value=0,
+        min_value=-1,
         default=None,
-        help_text=_('The cache timeout for the related auto-created inventory source, special to constructed inventory'),
+        help_text=_(
+            'The cache timeout for the related auto-created inventory source, special to constructed inventory. Set to -1 to force update on every launch.'
+        ),
     )
     limit = ConstructedCharField(
         required=False,
@@ -4044,17 +4049,39 @@ class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListS
 
 
 class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
+    """Serializer for Workflow Approval Templates, exposing node-level settings and relationships."""
+
     class Meta:
         model = WorkflowApprovalTemplate
-        fields = ('*', 'timeout', 'name')
+        fields = ('*', 'timeout', 'name', 'notification_templates_approvals')
 
     def get_related(self, obj):
+        """Retrieve related sub-resource URLs for the approval template.
+
+        Args:
+            obj (WorkflowApprovalTemplate): The approval template instance.
+
+        Returns:
+            dict: A dictionary of related resource endpoints.
+        """
         res = super(WorkflowApprovalTemplateSerializer, self).get_related(obj)
         if 'last_job' in res:
             del res['last_job']
 
-        res.update(jobs=self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}))
+        res.update(
+            jobs=self.reverse('api:workflow_approval_template_jobs_list', kwargs={'pk': obj.pk}),
+            notification_templates_approvals=self.reverse(
+                'api:workflow_approval_template_notification_templates_approvals_list', 
+                kwargs={'pk': obj.pk}
+            ),
+        )
         return res
+    
+class WorkflowApprovalTemplateNotificationTemplatesApprovalsList(SubResourceListCreateAttachDetachView):
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = WorkflowApprovalTemplate
+    relationship = 'notification_templates_approvals'
 
 
 class LaunchConfigurationBaseSerializer(BaseSerializer):
