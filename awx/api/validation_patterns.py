@@ -23,9 +23,7 @@ except ImportError:  # pragma: no cover - DAB without AAP-85987
     build_tier2_frontend_pattern = None
 
 # Keep in sync with ansible_base.lib.metadata.inject_clean_text_patterns (Tier 2).
-TIER2_PATTERN_DESCRIPTION = (
-    "This field can't include HTML tags, script markup, unsafe URI schemes, shell or template syntax, or control characters."
-)
+TIER2_PATTERN_DESCRIPTION = "This field can't include HTML tags, script markup, unsafe URI schemes, shell or template syntax, or control characters."
 
 _STRING_TYPES = frozenset({'string', 'str'})
 
