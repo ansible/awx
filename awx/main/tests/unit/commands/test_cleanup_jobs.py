@@ -146,9 +146,11 @@ class TestCleanupJobsCommand:
         mock_combined.count.return_value = 5
         mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
 
-        with mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob, mock.patch(
-            'awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'
-        ), mock.patch.object(cmd, '_delete_unpartitioned_events'):
+        with (
+            mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob,
+            mock.patch('awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'),
+            mock.patch.object(cmd, '_delete_unpartitioned_events'),
+        ):
             MockJob.objects.filter.return_value = mock_filter_qs
             MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
             skipped, deleted = cmd.cleanup_jobs()
@@ -183,9 +185,11 @@ class TestCleanupJobsCommand:
         mock_combined.count.return_value = 0
         mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
 
-        with mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob, mock.patch(
-            'awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'
-        ), mock.patch.object(cmd, '_delete_unpartitioned_events'):
+        with (
+            mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob,
+            mock.patch('awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'),
+            mock.patch.object(cmd, '_delete_unpartitioned_events'),
+        ):
             MockJob.objects.filter.return_value = mock_filter_qs
             MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
             skipped, deleted = cmd.cleanup_jobs()
@@ -210,9 +214,11 @@ class TestCleanupJobsCommand:
         mock_combined.count.return_value = 10
         mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
 
-        with mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob, mock.patch(
-            'awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'
-        ) as mock_pre, mock.patch.object(cmd, '_delete_unpartitioned_events'):
+        with (
+            mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob,
+            mock.patch('awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries') as mock_pre,
+            mock.patch.object(cmd, '_delete_unpartitioned_events'),
+        ):
             MockJob.objects.filter.return_value = mock_filter_qs
             MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
             skipped, deleted = cmd.cleanup_jobs()
