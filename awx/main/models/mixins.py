@@ -178,20 +178,18 @@ class SurveyJobTemplateMixin(models.Model):
                 errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
+                display_value = '$encrypted$' if survey_element['type'] == 'password' else data[survey_element['variable']]
                 if not isinstance(data[survey_element['variable']], str):
-                    errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']], survey_element['variable']))
+                    errors.append("Value %s for '%s' expected to be a string." % (display_value, survey_element['variable']))
                     return errors
 
                 if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
                     errors.append(
                         "'%s' value %s is too small (length is %s must be at least %s)."
-                        % (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min'])
+                        % (survey_element['variable'], display_value, len(data[survey_element['variable']]), survey_element['min'])
                     )
                 if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
-                    errors.append(
-                        "'%s' value %s is too large (must be no more than %s)."
-                        % (survey_element['variable'], data[survey_element['variable']], survey_element['max'])
-                    )
+                    errors.append("'%s' value %s is too large (must be no more than %s)." % (survey_element['variable'], display_value, survey_element['max']))
 
         elif survey_element['type'] == 'integer':
             if survey_element['variable'] in data:
