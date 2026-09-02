@@ -89,6 +89,7 @@ class RunnerCallback:
         self.wrapup_event_dispatched = False
         self.artifacts_processed = False
         self.extra_update_fields = {}
+        self.persisted_counters = None  # set to the set of counters in DB by reattach_to_work_unit for adoption dedup
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -144,6 +145,10 @@ class RunnerCallback:
         # logger
         if event_data.get('event') == 'keepalive':
             return
+        if self.persisted_counters is not None:
+            counter = event_data.get('counter')
+            if counter is not None and counter in self.persisted_counters:
+                return  # already persisted — skip (adoption counter-skip dedup)
 
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':
