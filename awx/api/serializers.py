@@ -3657,6 +3657,14 @@ class JobTemplateSerializer(CleanTextMixin, JobTemplateMixin, UnifiedJobTemplate
             res['webhook_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.webhook_credential_id})
         return res
 
+    def to_representation(self, obj):
+        ret = super(JobTemplateSerializer, self).to_representation(obj)
+        request = self.context.get('request')
+        user = request.user if request else None
+        if not (user and user.is_authenticated and (user.is_superuser or user in obj.admin_role)):
+            ret['host_config_key'] = '$encrypted$'
+        return ret
+
     def validate(self, attrs):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)

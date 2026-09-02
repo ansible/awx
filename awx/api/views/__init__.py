@@ -3165,6 +3165,8 @@ class JobTemplateCallback(GenericAPIView):
         job_template = self.get_object()
         matching_hosts = self.find_matching_hosts()
         data = dict(host_config_key=job_template.host_config_key, matching_hosts=[x.name for x in matching_hosts])
+        if not (request.user and request.user.is_authenticated and (request.user.is_superuser or request.user in job_template.admin_role)):
+            data['host_config_key'] = '$encrypted$'
         if settings.DEBUG:
             d = dict([(k, v) for k, v in request.META.items() if k.startswith('HTTP_') or k.startswith('REMOTE_')])
             data['request_meta'] = d

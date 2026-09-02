@@ -485,3 +485,64 @@ class TestJobTemplateCallbackProxyIntegration:
                     expect=400,
                     **headers,
                 )
+
+
+@pytest.mark.django_db
+class TestHostConfigKeyRedaction:
+
+    @pytest.fixture
+    def jt_with_callback(self, project, inventory):
+        return JobTemplate.objects.create(
+            name='test-redaction-jt',
+            inventory=inventory,
+            project=project,
+            playbook='helloworld.yml',
+            host_config_key='supersecretkey123',
+        )
+
+    def test_detail_redacts_for_non_admin(self, get, jt_with_callback, alice):
+        jt_with_callback.execute_role.members.add(alice)
+        r = get(reverse('api:job_template_detail', kwargs={'pk': jt_with_callback.pk}), user=alice, expect=200)
+        assert r.data['host_config_key'] == '$encrypted$'
+
+    def test_detail_visible_for_superuser(self, get, jt_with_callback, admin_user):
+        r = get(reverse('api:job_template_detail', kwargs={'pk': jt_with_callback.pk}), user=admin_user, expect=200)
+        assert r.data['host_config_key'] == 'supersecretkey123'
+
+    def test_detail_visible_for_jt_admin(self, get, jt_with_callback, alice):
+        jt_with_callback.admin_role.members.add(alice)
+        r = get(reverse('api:job_template_detail', kwargs={'pk': jt_with_callback.pk}), user=alice, expect=200)
+        assert r.data['host_config_key'] == 'supersecretkey123'
+
+    def test_callback_get_redacts_for_non_admin(self, get, jt_with_callback, alice):
+        jt_with_callback.execute_role.members.add(alice)
+        r = get(reverse('api:job_template_callback', kwargs={'pk': jt_with_callback.pk}), user=alice, expect=200)
+        assert r.data['host_config_key'] == '$encrypted$'
+
+    def test_callback_get_visible_for_superuser(self, get, jt_with_callback, admin_user):
+        r = get(reverse('api:job_template_callback', kwargs={'pk': jt_with_callback.pk}), user=admin_user, expect=200)
+        assert r.data['host_config_key'] == 'supersecretkey123'
+
+    def test_callback_get_visible_for_jt_admin(self, get, jt_with_callback, alice):
+        jt_with_callback.admin_role.members.add(alice)
+        r = get(reverse('api:job_template_callback', kwargs={'pk': jt_with_callback.pk}), user=alice, expect=200)
+        assert r.data['host_config_key'] == 'supersecretkey123'
+
+    def test_host_config_key_in_password_fields(self):
+        assert 'host_config_key' in JobTemplate.PASSWORD_FIELDS
+
+    def test_callback_post_rejects_wrong_key(self, post, jt_with_callback, admin_user):
+        post(
+            url=reverse('api:job_template_callback', kwargs={'pk': jt_with_callback.pk}),
+            data={'host_config_key': 'wrongkey'},
+            user=admin_user,
+            expect=403,
+        )
+
+    def test_callback_post_accepts_correct_key(self, post, jt_with_callback, admin_user):
+        r = post(
+            url=reverse('api:job_template_callback', kwargs={'pk': jt_with_callback.pk}),
+            data={'host_config_key': 'supersecretkey123'},
+            user=admin_user,
+        )
+        assert r.status_code != 403
