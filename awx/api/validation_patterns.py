@@ -71,12 +71,11 @@ def inject_free_text_pattern(field_schema, *, secret=False, field_type=None):
 
 
 def inject_patterns_into_field_list(fields):
-    """Inject patterns into a credential-type ``fields`` or ``metadata`` list."""
+    """Inject patterns into a credential-type ``fields`` or ``metadata`` list in place."""
     if not isinstance(fields, list):
-        return fields
+        return
     for field in fields:
         inject_free_text_pattern(field)
-    return fields
 
 
 def inject_patterns_into_init_parameters(init_parameters):
