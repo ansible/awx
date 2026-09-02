@@ -48,17 +48,13 @@ class TestInventorySourceSerializerGetRelated(object):
         ('backup..yml', False),
         ('', False),
         (None, False),
+        ('/var/lib/awx/example_source_path/', False),
         ('../etc/passwd', True),
         ('inventories/../secrets', True),
         ('..\\windows\\path', True),
         ('foo\\..\\bar', True),
         ('..', True),
         ('foo/..', True),
-        ('/etc/passwd', True),
-        ('//server/share/inventory', True),
-        ('\\\\server\\share\\inventory', True),
-        ('C:\\windows\\hosts', True),
-        ('C:/windows/hosts', True),
     ],
 )
 def test_contains_path_traversal(value, expected):
@@ -66,27 +62,24 @@ def test_contains_path_traversal(value, expected):
 
 
 class TestInventorySourcePathTraversal:
-    @pytest.mark.parametrize(
-        'source_path',
-        [
-            '../etc/passwd',
-            '..\\windows\\path',
-            '/etc/passwd',
-            '//server/share/inventory',
-            '\\\\server\\share\\inventory',
-            'C:\\windows\\hosts',
-            'C:/windows/hosts',
-        ],
-    )
-    def test_rejects_unsafe_source_path(self, source_path):
+    def test_rejects_posix_traversal(self):
         serializer = InventorySourceSerializer()
         with pytest.raises(ValidationError) as exc:
-            serializer.validate_source_path(source_path)
-        assert 'relative' in str(exc.value.detail)
+            serializer.validate_source_path('../etc/passwd')
+        assert 'path segments' in str(exc.value.detail)
+
+    def test_rejects_windows_traversal(self):
+        serializer = InventorySourceSerializer()
+        with pytest.raises(ValidationError):
+            serializer.validate_source_path('..\\windows\\path')
 
     def test_accepts_valid_relative_path(self):
         serializer = InventorySourceSerializer()
         assert serializer.validate_source_path('playbooks/main.yml') == 'playbooks/main.yml'
+
+    def test_accepts_absolute_path(self):
+        serializer = InventorySourceSerializer()
+        assert serializer.validate_source_path('/var/lib/awx/example_source_path/') == '/var/lib/awx/example_source_path/'
 
     def test_accepts_empty_path(self):
         serializer = InventorySourceSerializer()

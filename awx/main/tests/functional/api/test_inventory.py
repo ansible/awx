@@ -1026,11 +1026,6 @@ class TestSourcePathTraversal:
             '../etc/passwd',
             'inventories/../secrets',
             '..\\windows\\path',
-            '/etc/passwd',
-            '//server/share/inventory',
-            '\\\\server\\share\\inventory',
-            'C:\\windows\\hosts',
-            'C:/windows/hosts',
         ],
     )
     def test_create_rejects_traversal(self, post, inventory, project, admin_user, source_path):

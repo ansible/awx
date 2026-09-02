@@ -2356,7 +2356,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         if self.instance is not None and getattr(self.instance, 'source_path', None) == value:
             return value
         if contains_path_traversal(value):
-            raise serializers.ValidationError(_("Enter a path relative to the project directory."))
+            raise serializers.ValidationError(_("Enter a path that does not include '..' path segments."))
         return value
 
     def validate_source_vars(self, value):

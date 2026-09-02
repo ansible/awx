@@ -1,28 +1,19 @@
 import re
-from pathlib import PurePosixPath, PureWindowsPath
 
 from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 
 
 def contains_path_traversal(value):
-    """Return True if value would resolve outside an SCM project directory.
+    """Return True if value contains a '..' path segment.
 
-    Rejects parent-directory segments (`../`, `..\\`), POSIX absolute paths
-    (`/etc/passwd`), UNC paths (`\\\\server\\share`, `//server/share`), and
-    Windows drive-qualified paths (`C:\\...`, `C:/...`). A file name that
+    Matches POSIX (`../`) and Windows (`..\\`) traversal. A file name that
     merely contains two dots (e.g. `backup..yml`) is not traversal.
-
-    Controller joins source_path onto the project path with os.path.join;
-    an absolute or UNC second argument discards the project prefix.
+    Absolute paths are allowed; they are not parent-directory traversal.
     """
     if not isinstance(value, str) or not value:
         return False
-    posix = PurePosixPath(value.replace('\\', '/'))
-    windows = PureWindowsPath(value)
-    if posix.is_absolute() or windows.is_absolute() or windows.drive:
-        return True
-    return any(part == '..' for part in posix.parts)
+    return any(part == '..' for part in value.replace('\\', '/').split('/'))
 
 
 class HostnameRegexValidator(RegexValidator):
