@@ -13,6 +13,9 @@ from rest_framework.utils.urls import replace_query_param
 from rest_framework.settings import api_settings
 from django.utils.translation import gettext_lazy as _
 
+from ansible_base.rest_filters.rest_framework.field_lookup_backend import (
+    FieldLookupBackend,
+)
 from awx.main.models import ActivityStream, UnifiedJob
 
 
@@ -43,23 +46,45 @@ class UnifiedJobPaginator(DjangoPaginator):
 
 
 class Pagination(pagination.PageNumberPagination):
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = settings.MAX_PAGE_SIZE
     count_disabled = False
+
+    # FieldLookupBackend reserves these too, but they still filter via a different backend.
+    RESERVED_NAMES_THAT_STILL_FILTER = frozenset(
+        (
+            "search",
+            "type",
+            "host_filter",
+            "user_ansible_id",
+            "team_ansible_id",
+            "object_ansible_id",
+            "assignment",
+        )
+    )
+
+    def has_filter_params(self, request, view=None):
+        non_filtering = set(FieldLookupBackend().reserved_names(view)) - self.RESERVED_NAMES_THAT_STILL_FILTER
+        return bool(set(request.query_params) - non_filtering)
+
+    def get_filtered_paginator_class(self):
+        # Override when django_paginator_class trades count accuracy for speed --
+        # that tradeoff is only safe when there's no filter to make the count wrong.
+        return self.django_paginator_class
 
     def get_next_link(self):
         if not self.page.has_next():
             return None
-        url = self.request and self.request.get_full_path() or ''
-        url = url.encode('utf-8')
+        url = self.request and self.request.get_full_path() or ""
+        url = url.encode("utf-8")
         page_number = self.page.next_page_number()
         return replace_query_param(self.cap_page_size(url), self.page_query_param, page_number)
 
     def get_previous_link(self):
         if not self.page.has_previous():
             return None
-        url = self.request and self.request.get_full_path() or ''
-        url = url.encode('utf-8')
+        url = self.request and self.request.get_full_path() or ""
+        url = url.encode("utf-8")
         page_number = self.page.previous_page_number()
         return replace_query_param(self.cap_page_size(url), self.page_query_param, page_number)
 
@@ -70,38 +95,50 @@ class Pagination(pagination.PageNumberPagination):
 
     def get_html_context(self):
         context = super().get_html_context()
-        context['page_links'] = [pl._replace(url=self.cap_page_size(pl.url)) for pl in context['page_links']]
+        context["page_links"] = [pl._replace(url=self.cap_page_size(pl.url)) for pl in context["page_links"]]
 
         return context
 
     def paginate_queryset(self, queryset, request, **kwargs):
-        self.count_disabled = 'count_disabled' in request.query_params
+        self.count_disabled = "count_disabled" in request.query_params
         original_paginator = self.django_paginator_class
         try:
             if self.count_disabled:
                 self.django_paginator_class = DisabledPaginator
+            else:
+                filtered_paginator_class = self.get_filtered_paginator_class()
+                # Skip the has_filter_params check entirely for classes that don't override
+                # get_filtered_paginator_class -- it would be a no-op anyway.
+                if filtered_paginator_class is not self.django_paginator_class and self.has_filter_params(request, kwargs.get("view")):
+                    self.django_paginator_class = filtered_paginator_class
             return super(Pagination, self).paginate_queryset(queryset, request, **kwargs)
         finally:
             self.django_paginator_class = original_paginator
 
     def get_paginated_response(self, data):
         if self.count_disabled:
-            return Response({'results': data})
+            return Response({"results": data})
         return super(Pagination, self).get_paginated_response(data)
 
 
 class ActivityStreamPagination(Pagination):
     django_paginator_class = ActivityStreamPaginator
 
+    def get_filtered_paginator_class(self):
+        return DjangoPaginator
+
 
 class UnifiedJobPagination(Pagination):
     django_paginator_class = UnifiedJobPaginator
 
+    def get_filtered_paginator_class(self):
+        return DjangoPaginator
+
 
 class LimitPagination(pagination.BasePagination):
     default_limit = api_settings.PAGE_SIZE
-    limit_query_param = 'limit'
-    limit_query_description = _('Number of results to return per page.')
+    limit_query_param = "limit"
+    limit_query_description = _("Number of results to return per page.")
     max_page_size = settings.MAX_PAGE_SIZE
 
     def paginate_queryset(self, queryset, request, view=None):
@@ -111,13 +148,13 @@ class LimitPagination(pagination.BasePagination):
         return list(queryset[0 : self.limit])
 
     def get_paginated_response(self, data):
-        return Response(OrderedDict([('results', data)]))
+        return Response(OrderedDict([("results", data)]))
 
     def get_paginated_response_schema(self, schema):
         return {
-            'type': 'object',
-            'properties': {
-                'results': schema,
+            "type": "object",
+            "properties": {
+                "results": schema,
             },
         }
 
@@ -142,7 +179,7 @@ class UnifiedJobEventPagination(Pagination):
         super().__init__(*args, **kwargs)
 
     def paginate_queryset(self, queryset, request, view=None):
-        if 'limit' in request.query_params:
+        if "limit" in request.query_params:
             self.use_limit_paginator = True
 
         if self.use_limit_paginator:
