@@ -282,3 +282,19 @@ def test_job_template_copy_rejects_same_name(post, job_template, admin):
         expect=400,
     )
     assert 'already named' in str(response.data)
+
+
+@pytest.mark.django_db
+def test_job_template_copy_rejects_unsafe_name(post, job_template, admin):
+    """CopySerializer.super().validate() must run CleanTextMixin — the same-name
+    check above never reaches it (AAP-78694)."""
+    unsafe_name = '<script>x</script>'
+    assert job_template.name != unsafe_name
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        response = post(
+            reverse('api:job_template_copy', kwargs={'pk': job_template.pk}),
+            {'name': unsafe_name},
+            admin,
+            expect=400,
+        )
+    assert 'name' in response.data

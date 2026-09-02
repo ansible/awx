@@ -649,3 +649,25 @@ def test_bulk_job_launch_rejects_unsafe_limit(organization, inventory, project, 
             expect=400,
         )
     assert 'limit' in str(response.data)
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_allows_jinja_extra_vars(organization, inventory, project, post, user):
+    """BulkJobLaunchSerializer stringifies extra_vars before CleanTextMixin
+    runs; excluded_fields must keep legitimate Jinja from being rejected
+    (AAP-78694)."""
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        post(
+            reverse('api:bulk_job_launch'),
+            {
+                'name': 'Bulk Job Launch',
+                'jobs': [{'unified_job_template': jt.id}],
+                'extra_vars': {'foo': '{{ bar }}'},
+            },
+            normal_user,
+            expect=201,
+        )

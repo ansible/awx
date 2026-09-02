@@ -66,14 +66,29 @@ def test_inventory_host_name_unique(scm_inventory, post, admin_user):
 
 @pytest.mark.django_db
 def test_inventory_host_inline_port(scm_inventory, post, admin_user):
-    resp = post(
-        reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
-        {'name': 'web.example.com:2222'},
-        admin_user,
-        expect=201,
-    )
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        resp = post(
+            reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+            {'name': 'web.example.com:2222'},
+            admin_user,
+            expect=201,
+        )
     assert resp.data['name'] == 'web.example.com'
     assert '2222' in resp.data['variables']
+
+
+@pytest.mark.django_db
+def test_inventory_host_ipv6_name(scm_inventory, post, admin_user):
+    """HostSerializer demotes name from Tier 1 so IPv6 (multiple colons)
+    is not rejected once enforcement is on (AAP-78694)."""
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        resp = post(
+            reverse('api:inventory_hosts_list', kwargs={'pk': scm_inventory.id}),
+            {'name': '2001:db8::1'},
+            admin_user,
+            expect=201,
+        )
+    assert resp.data['name'] == '2001:db8::1'
 
 
 @pytest.mark.django_db
