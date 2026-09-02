@@ -166,7 +166,7 @@ def test_unified_job_list_filtered_count_matches_results(admin, organization, in
 
     response = get(reverse('api:unified_job_list') + '?status=canceled', admin)
     assert response.status_code == 200
-    assert response.data['count'] == len(response.data['results'])
+    assert response.data['count'] == len(response.data['results']) == 1
 
 
 @pytest.mark.django_db
