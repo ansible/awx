@@ -23,6 +23,7 @@ from rest_framework.request import clone_request
 
 # AWX
 from awx.api.fields import ChoiceNullField
+from awx.api.validation_patterns import inject_patterns_into_init_parameters
 from awx.main.fields import ImplicitRoleField
 from awx.main.models import NotificationTemplate
 from awx.main.utils.execution_environments import get_default_pod_spec
@@ -131,7 +132,9 @@ class Metadata(metadata.SimpleMetadata):
         # are conditional on the type selected.
         if field.field_name == 'notification_configuration':
             for notification_type_name, notification_tr_name, notification_type_class in NotificationTemplate.NOTIFICATION_TYPES:
-                field_info[notification_type_name] = notification_type_class.init_parameters
+                # Copy before injecting patterns so class-level init_parameters
+                # dicts are never mutated (AAP-87586).
+                field_info[notification_type_name] = inject_patterns_into_init_parameters(notification_type_class.init_parameters)
 
         # Special handling of notification messages where the required properties
         # are conditional on the type selected.
