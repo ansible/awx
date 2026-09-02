@@ -566,3 +566,181 @@ def test_generate_dependencies_only_once(job_template_factory):
         dm.generate_dependencies = mock.MagicMock(return_value=[])
         dm.schedule()
         dm.generate_dependencies.assert_not_called()
+
+
+def _setup_scm_project_and_source(objects, inventory_source_factory, source_scm_branch='', allow_override=True):
+    """Sets up an SCM project (with an initial project update cleared out of the way)
+    and a linked SCM inventory source, ready for a dependency-generation test."""
+    p = objects.project
+    p.scm_type = 'git'
+    p.scm_url = 'http://github.com/ansible/test-playbooks'
+    p.scm_branch = 'main'
+    p.allow_override = allow_override
+    p.scm_update_on_launch = True
+    p.save()
+
+    # clear out the project update automatically triggered by creating a new SCM project,
+    # so the dependency manager will spawn a fresh one for the job below
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        TaskManager().schedule()
+        initial_pu = p.project_updates.first()
+        initial_pu.status = 'failed'
+        initial_pu.finished = initial_pu.created + timedelta(seconds=1)
+        initial_pu.save()
+
+    ii = inventory_source_factory('scm', inventory=objects.inventory)
+    ii.source = 'scm'
+    ii.source_project = p
+    ii.scm_branch = source_scm_branch
+    ii.update_on_launch = True
+    ii.update_cache_timeout = 0
+    ii.save()
+
+    return p, ii
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_propagates_to_unpinned_dependencies(controlplane_instance_group, job_template_factory, inventory_source_factory):
+    """A job launched with an scm_branch override should propagate that branch to both
+    its dependency project update and its dependency SCM inventory update, when the
+    inventory source itself is not pinned to an explicit branch."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='feature-x')
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    project_update = p.project_updates.order_by('created').last()
+    inventory_update = ii.inventory_updates.first()
+    assert p.project_updates.count() == 2
+    assert inventory_update is not None
+    assert project_update.scm_branch == 'feature-x'
+    assert inventory_update.scm_branch == 'feature-x'
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_not_propagated_when_inventory_source_pinned(controlplane_instance_group, job_template_factory, inventory_source_factory):
+    """An inventory source with an explicit scm_branch pin should not have that pin
+    overridden by a job's launch-time scm_branch, even though the job's own project
+    dependency update still honors the override."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory, source_scm_branch='pinned-branch')
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='feature-x')
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    project_update = p.project_updates.order_by('created').last()
+    inventory_update = ii.inventory_updates.first()
+    assert project_update.scm_branch == 'feature-x'
+    assert inventory_update.scm_branch == 'pinned-branch'
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_not_propagated_when_override_not_allowed(controlplane_instance_group, job_template_factory, inventory_source_factory):
+    """If the project does not allow branch overrides, a job's scm_branch should not
+    propagate to either the project or the SCM inventory source dependency updates."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory, allow_override=False)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='feature-x')
+
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    project_update = p.project_updates.order_by('created').last()
+    inventory_update = ii.inventory_updates.first()
+    # unaffected by the job's launch-time override - falls back to the project's own branch
+    assert project_update.scm_branch == 'main'
+    assert inventory_update.scm_branch == ''
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_creates_new_dependency_when_cached_update_has_different_branch(
+    controlplane_instance_group, job_template_factory, inventory_source_factory
+):
+    """If a dependency project update already exists (e.g. still in-flight from a
+    concurrently-launched job) but was created for a different scm_branch, a job
+    needing a different branch must get its own fresh update rather than silently
+    reusing the wrong-branch one."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-b')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    project_update_a = p.project_updates.filter(scm_branch='branch-a').first()
+    project_update_b = p.project_updates.filter(scm_branch='branch-b').first()
+    assert project_update_a is not None
+    assert project_update_b is not None
+    assert project_update_a.id != project_update_b.id
+    # job_a's dependency project update is still in-flight (TaskManager.start_task is mocked,
+    # so it never actually runs) - this is what would have made the reuse-by-staleness path
+    # incorrectly hand it to job_b too, without the branch check.
+    assert project_update_a.status == 'pending'
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_inventory_update_creates_new_dependency_when_cached_update_has_different_branch(
+    controlplane_instance_group, job_template_factory, inventory_source_factory
+):
+    """Same as the project-update case above, but for the SCM inventory source
+    dependency: a job needing a different branch must not be handed another job's
+    still-in-flight (or recently-completed) InventoryUpdate for a different branch."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-b')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    inventory_update_a = ii.inventory_updates.filter(scm_branch='branch-a').first()
+    inventory_update_b = ii.inventory_updates.filter(scm_branch='branch-b').first()
+    assert inventory_update_a is not None
+    assert inventory_update_b is not None
+    assert inventory_update_a.id != inventory_update_b.id
+    # job_a's dependency inventory update is still in-flight - this is what would have made the
+    # reuse-by-staleness path incorrectly hand it to job_b too, without the branch check.
+    assert inventory_update_a.status == 'pending'
+
+
+@pytest.mark.django_db
+def test_job_scm_branch_reuses_older_matching_dependency_after_other_branch_is_more_recent(
+    controlplane_instance_group, job_template_factory, inventory_source_factory
+):
+    """A job requesting a branch should reuse an existing in-flight update for that branch
+    even if a *different* branch's update was created more recently in between - the lookup
+    must match on branch, not just take whichever update happens to be newest."""
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
+    p, ii = _setup_scm_project_and_source(objects, inventory_source_factory)
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-b')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    create_job(objects.job_template, dependencies_processed=False, scm_branch='branch-a')
+    with mock.patch("awx.main.scheduler.TaskManager.start_task"):
+        DependencyManager().schedule()
+
+    # still only one update each for branch-a and branch-b - the third job's request for
+    # branch-a reused the first job's still-in-flight update instead of creating a duplicate.
+    assert p.project_updates.filter(scm_branch='branch-a').count() == 1
+    assert p.project_updates.filter(scm_branch='branch-b').count() == 1
+    assert ii.inventory_updates.filter(scm_branch='branch-a').count() == 1
+    assert ii.inventory_updates.filter(scm_branch='branch-b').count() == 1
