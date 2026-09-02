@@ -254,6 +254,8 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
         raise ValueError(_('Unsupported SCM type "%s"') % str(scm_type))
     if not url.strip():
         return ''
+    if url.strip().startswith('-'):
+        raise ValueError(_('Invalid %s URL') % scm_type)
     parts = urllib.parse.urlsplit(url)
     try:
         parts.port

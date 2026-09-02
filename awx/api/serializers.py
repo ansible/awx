@@ -1490,6 +1490,10 @@ class ProjectOptionsSerializer(BaseSerializer):
         if attrs.get('scm_track_submodules') and scm_type != 'git':
             errors['scm_track_submodules'] = _('SCM track_submodules can only be used with git projects.')
 
+        scm_url = attrs.get('scm_url', None)
+        if scm_url is not None and scm_url.strip().startswith('-'):
+            errors['scm_url'] = _('SCM URL cannot begin with a dash.')
+
         if errors:
             raise serializers.ValidationError(errors)
 

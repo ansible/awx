@@ -295,6 +295,28 @@ def test_update_scm_url(scm_type, url, username, password, check_special_cases, 
         assert common.update_scm_url(scm_type, url, username, password, check_special_cases, scp_format) == expected
 
 
+@pytest.mark.parametrize(
+    'scm_type, url, expected',
+    [
+        # Dash-prefixed URLs must be rejected (argument injection guard)
+        ('git', '--upload-pack=id>&2;echo:x', ValueError('Invalid git URL')),
+        ('git', '-malicious', ValueError('Invalid git URL')),
+        ('git', '  --upload-pack=id>&2;echo:x', ValueError('Invalid git URL')),
+        ('svn', '-option', ValueError('Invalid svn URL')),
+        # Normal URLs must still be accepted through the guard
+        ('git', 'https://example.com/repo.git', 'https://example.com/repo.git'),
+        ('git', '', ''),
+    ],
+)
+def test_update_scm_url_rejects_dash_urls(scm_type, url, expected):
+    if isinstance(expected, Exception):
+        with pytest.raises(type(expected)) as excinfo:
+            common.update_scm_url(scm_type, url)
+        assert str(excinfo.value) == str(expected)
+    else:
+        assert common.update_scm_url(scm_type, url) == expected
+
+
 class TestHostnameRegexValidator:
     @pytest.fixture
     def regex_expr(self):
