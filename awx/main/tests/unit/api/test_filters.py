@@ -11,6 +11,7 @@ from awx.main.models import (
     AdHocCommand,
     Job,
     JobTemplate,
+    Notification,
     SystemJob,
     UnifiedJob,
     User,
@@ -44,3 +45,32 @@ def test_filter_sensitive_fields_and_relations(model, query):
     with pytest.raises(PermissionDenied) as excinfo:
         field, new_lookup = field_lookup.get_field_from_lookup(model, query)
     assert 'not allowed' in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    'query',
+    [
+        'error__icontains',
+        'recipients__icontains',
+        'subject__icontains',
+        'body__icontains',
+    ],
+)
+def test_notification_prevent_search_fields(query):
+    field_lookup = FieldLookupBackend()
+    with pytest.raises(PermissionDenied) as excinfo:
+        field_lookup.get_field_from_lookup(Notification, query)
+    assert 'not allowed' in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    'query',
+    [
+        'status__exact',
+        'notification_type__exact',
+    ],
+)
+def test_notification_non_sensitive_fields_still_filterable(query):
+    field_lookup = FieldLookupBackend()
+    field, new_lookup = field_lookup.get_field_from_lookup(Notification, query)
+    assert field is not None

@@ -216,10 +216,12 @@ class Notification(CreatedModifiedModel):
         default='pending',
         editable=False,
     )
-    error = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    error = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            editable=False,
+        )
     )
     notifications_sent = models.IntegerField(
         default=0,
@@ -229,17 +231,21 @@ class Notification(CreatedModifiedModel):
         max_length=32,
         choices=NotificationTemplate.NOTIFICATION_TYPE_CHOICES,
     )
-    recipients = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    recipients = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            editable=False,
+        )
     )
-    subject = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    subject = prevent_search(
+        models.TextField(
+            blank=True,
+            default='',
+            editable=False,
+        )
     )
-    body = models.JSONField(default=dict, blank=True)
+    body = prevent_search(models.JSONField(default=dict, blank=True))
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)
