@@ -422,13 +422,13 @@ class TestPrivateDataDirIntegration:
     @mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True)
     @mock.patch('awx.main.tasks.jobs.shutil.copytree')
     @mock.patch('awx.main.tasks.jobs.os.path.exists')
-    def test_vendor_collections_copied(self, mock_exists, mock_copytree):
-        """AC7.10: build_private_data_files() copies vendor collections to private_data_dir."""
-        from awx.main.tasks.jobs import BaseTask
+    def test_vendor_collections_copied(self, mock_exists, mock_copytree, mock_flag):
+        """AC7.10: RunJob.build_private_data_files() copies vendor collections to private_data_dir."""
+        from awx.main.tasks.jobs import RunJob
 
         mock_exists.return_value = True
 
-        task = BaseTask()
+        task = RunJob()
         task.instance = mock.Mock()
         task.cleanup_paths = []
         task.build_private_data = mock.Mock(return_value=None)
@@ -444,11 +444,11 @@ class TestPrivateDataDirIntegration:
     @mock.patch('awx.main.tasks.jobs.os.path.exists')
     def test_missing_source_handled_gracefully(self, mock_exists, mock_copytree, mock_logger):
         """AC7.11: Collection copy handles missing source directory gracefully."""
-        from awx.main.tasks.jobs import BaseTask
+        from awx.main.tasks.jobs import RunJob
 
         mock_exists.return_value = False
 
-        task = BaseTask()
+        task = RunJob()
         task.instance = mock.Mock()
         task.cleanup_paths = []
         task.build_private_data = mock.Mock(return_value=None)
@@ -459,4 +459,29 @@ class TestPrivateDataDirIntegration:
         # copytree should not be called when source doesn't exist
         mock_copytree.assert_not_called()
         # Function should complete without raising an exception
+        assert result is not None
+
+    @mock.patch('awx.main.tasks.jobs.flag_enabled')
+    @mock.patch('awx.main.tasks.jobs.logger')
+    @mock.patch('awx.main.tasks.jobs.shutil.copytree')
+    @mock.patch('awx.main.tasks.jobs.os.path.exists')
+    def test_copy_failure_logged(self, mock_exists, mock_copytree, mock_logger, mock_flag):
+        """A failed vendor-collection copy is caught and logged as a warning, not raised."""
+        from awx.main.tasks.jobs import RunJob
+
+        mock_flag.return_value = True
+        mock_exists.return_value = True
+        mock_copytree.side_effect = OSError('disk full')
+
+        task = RunJob()
+        task.instance = mock.Mock()
+        task.cleanup_paths = []
+        task.build_private_data = mock.Mock(return_value=None)
+
+        private_data_dir = '/tmp/awx_123_abc'
+        result = task.build_private_data_files(task.instance, private_data_dir)
+
+        mock_copytree.assert_called_once()
+        mock_logger.warning.assert_called_once()
+        # failure is swallowed; the method still returns normally
         assert result is not None

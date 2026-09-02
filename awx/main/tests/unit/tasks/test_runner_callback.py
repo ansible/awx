@@ -128,8 +128,10 @@ class TestArtifactsHandler:
         assert rc.extra_update_fields['installed_collections'] == SAMPLE_ANSIBLE_DATA['installed_collections']
         assert rc.extra_update_fields['ansible_version'] == '2.16.0'
         assert rc.extra_update_fields['event_queries_processed'] is False
-        mock_event_query.assert_called_once()
+        mock_event_query.objects.get_or_create.assert_called_once()
+        assert rc.artifacts_processed is True
 
+    @mock.patch('awx.main.tasks.callback.logger')
     @mock.patch('awx.main.tasks.callback.EventQuery')
     def test_no_event_queries_when_indirect_node_counting_disabled(self, mock_event_query, mock_me):
         rc = RunnerCallback()
@@ -141,7 +143,11 @@ class TestArtifactsHandler:
             with mock.patch('awx.main.tasks.callback.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
                 rc.artifacts_handler(tmpdir)
 
-        mock_event_query.assert_not_called()
+        mock_event_query.objects.get_or_create.assert_called_once()
+        # nothing was created, so no "created" line is logged
+        mock_logger.info.assert_not_called()
+        assert rc.extra_update_fields['event_queries_processed'] is False
+        assert rc.artifacts_processed is True
 
     def test_handles_missing_artifact_file(self, mock_me):
         rc = RunnerCallback()

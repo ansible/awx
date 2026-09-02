@@ -1086,6 +1086,22 @@ class RunJob(SourceControlMixin, BaseTask):
 
         return private_data
 
+    def build_private_data_files(self, job, private_data_dir):
+        private_data_files, ssh_key_data = super(RunJob, self).build_private_data_files(job, private_data_dir)
+
+        # Copy vendor collections to private_data_dir for indirect node counting
+        # This makes external query files available to the callback plugin in EEs
+        vendor_src = '/var/lib/awx/vendor_collections'
+        vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
+        if os.path.exists(vendor_src):
+            try:
+                shutil.copytree(vendor_src, vendor_dest)
+                logger.debug(f"Copied vendor collections from {vendor_src} to {vendor_dest}")
+            except Exception as e:
+                logger.warning(f"Failed to copy vendor collections: {e}")
+
+        return private_data_files, ssh_key_data
+
     def build_passwords(self, job, runtime_passwords):
         """
         Build a dictionary of passwords for SSH private key, SSH user, sudo/su

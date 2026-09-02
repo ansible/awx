@@ -9,7 +9,6 @@ from awx.main.models.event_query import EventQuery
 
 # Django
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django_guid import get_guid
 from django.utils.functional import cached_property
 from django.db import connections
@@ -270,6 +269,7 @@ class RunnerCallback:
                     self.delay_update(**{field_name: field_value})
 
     def artifacts_handler(self, artifact_dir):
+        """Persist collection/ansible_version metadata and host-query records from a completed run's artifacts."""
         success, query_file_contents = try_load_query_file(artifact_dir)
         if success:
             if 'installed_collections' in query_file_contents:

@@ -991,7 +991,7 @@ class TestCallbacksEnabled(TestJobExecution):
             with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
                 env = task.build_env(job, private_data_dir)
 
-        assert 'AWX_COLLECT_HOST_QUERIES' not in env
+        assert env['AWX_COLLECT_HOST_QUERIES'] == '1'
 
 
 @pytest.mark.usefixtures("patch_Organization")
