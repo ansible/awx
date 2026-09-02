@@ -85,9 +85,9 @@ class TestInjectPatternsIntoFieldList:
         assert 'pattern' not in fields[1]
         assert 'pattern' not in fields[2]
 
-    def test_returns_non_list_unchanged(self, fake_tier2_pattern):
+    def test_ignores_non_list(self, fake_tier2_pattern):
         with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
-            assert validation_patterns.inject_patterns_into_field_list('not-a-list') == 'not-a-list'
+            assert validation_patterns.inject_patterns_into_field_list('not-a-list') is None
 
 
 class TestInjectPatternsIntoInitParameters:
