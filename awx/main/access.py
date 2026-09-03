@@ -890,10 +890,16 @@ class InventoryAccess(BaseAccess):
             if self.user in sub_obj.use_role and self.user in obj.admin_role:
                 return True
             return False
+        if relationship == "input_inventories":
+            if self.user in sub_obj.use_role and self.user in obj.admin_role:
+                return True
+            return False
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
+            return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        if relationship == "input_inventories":
             return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
