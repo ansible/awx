@@ -1336,7 +1336,9 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.access_qs(self.user, 'add_executionenvironment').exists()
-        return self.check_related('organization', Organization, data, mandatory=True, role_field='execution_environment_admin_role')
+        return self.check_related('organization', Organization, data, mandatory=True, role_field='execution_environment_admin_role') and self.check_related(
+            'credential', Credential, data, role_field='use_role'
+        )
 
     @check_superuser
     def can_change(self, obj, data):
@@ -1349,6 +1351,8 @@ class ExecutionEnvironmentAccess(BaseAccess):
             if self.user not in obj.organization.execution_environment_admin_role:
                 raise PermissionDenied
         if not self.check_related('organization', Organization, data, obj=obj, role_field='execution_environment_admin_role'):
+            return False
+        if not self.check_related('credential', Credential, data, obj=obj, role_field='use_role'):
             return False
         # Special case that check_related does not catch, org users can not remove the organization from the EE
         if data and ('organization' in data or 'organization_id' in data):
