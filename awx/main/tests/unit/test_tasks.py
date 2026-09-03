@@ -783,6 +783,42 @@ class TestAdhocRun(TestJobExecution):
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
 
+class TestAdHocBuildArgsLimitHandling(object):
+    """The limit value must be passed as the value of -l (not a bare
+    positional arg) and 'all' must always be appended."""
+
+    def test_limit_passed_as_flag_value(self):
+        adhoc = AdHocCommand(pk=1, id=1, inventory=Inventory())
+        adhoc.limit = 'webservers'
+        task = jobs.RunAdHocCommand()
+        args = task.build_args(adhoc, '/tmp/pdd', {})
+        idx = args.index('-l')
+        assert args[idx + 1] == 'webservers'
+        assert 'all' in args
+
+    def test_no_limit_still_appends_all(self):
+        adhoc = AdHocCommand(pk=1, id=1, inventory=Inventory())
+        adhoc.limit = ''
+        task = jobs.RunAdHocCommand()
+        args = task.build_args(adhoc, '/tmp/pdd', {})
+        assert '-l' not in args
+        assert 'all' in args
+
+    def test_limit_not_bare_positional(self):
+        adhoc = AdHocCommand(pk=1, id=1, inventory=Inventory())
+        adhoc.limit = '--version'
+        task = jobs.RunAdHocCommand()
+        args = task.build_args(adhoc, '/tmp/pdd', {})
+        # --version must appear only as the value of -l, not standalone
+        idx = args.index('-l')
+        assert args[idx + 1] == '--version'
+        # It must not appear anywhere else in args as a standalone element
+        for i, arg in enumerate(args):
+            if arg == '--version' and i != idx + 1:
+                raise AssertionError('--version appears as standalone arg')
+        assert 'all' in args
+
+
 class TestJobCredentials(TestJobExecution):
     @pytest.fixture(autouse=True)
     def mock_flag_enabled(self):

@@ -2252,9 +2252,8 @@ class RunAdHocCommand(BaseTask):
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
         if ad_hoc_command.limit:
-            args.append(ad_hoc_command.limit)
-        else:
-            args.append('all')
+            args.extend(['-l', ad_hoc_command.limit])
+        args.append('all')
 
         return args
 

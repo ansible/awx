@@ -4015,6 +4015,9 @@ class AdHocCommandSerializer(CleanTextMixin, UnifiedJobSerializer):
 
     def validate(self, attrs):
         ret = super(AdHocCommandSerializer, self).validate(attrs)
+        limit = ret.get('limit', '')
+        if limit.startswith('-'):
+            raise serializers.ValidationError({'limit': _('Limit must not start with a dash.')})
         return ret
 
     def validate_extra_vars(self, value):
