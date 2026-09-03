@@ -1383,8 +1383,10 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
             if not self.user.can_access(ExecutionEnvironment, 'read', ee):
                 return False
 
-        return self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True) and self.check_related(
-            'credential', Credential, data, role_field='use_role'
+        return (
+            self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True)
+            and self.check_related('credential', Credential, data, role_field='use_role')
+            and self.check_related('signature_validation_credential', Credential, data, role_field='use_role')
         )
 
     @check_superuser
@@ -1398,6 +1400,7 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
             self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role')
             and self.user in obj.admin_role
             and self.check_related('credential', Credential, data, obj=obj, role_field='use_role')
+            and self.check_related('signature_validation_credential', Credential, data, obj=obj, role_field='use_role')
         )
 
     @check_superuser
