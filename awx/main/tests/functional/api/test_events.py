@@ -49,6 +49,41 @@ def test_ad_hoc_events_sublist_truncation(get, organization_factory, job_templat
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    'truncate, expected',
+    [
+        (True, False),
+        (False, True),
+    ],
+)
+def test_job_events_event_data_truncation(get, organization_factory, job_template_factory, truncate, expected):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization, inventory='test_inv', project='test_proj').job_template
+    job = jt.create_unified_job()
+    large_msg = 'a' * 2000
+    event_data = {'res': {'msg': large_msg, 'rc': 0}}
+    JobEvent.create_from_data(
+        job_id=job.pk,
+        uuid='abc456',
+        event='runner_on_ok',
+        stdout='ok',
+        event_data=event_data,
+        job_created=job.created,
+    ).save()
+
+    url = reverse('api:job_job_events_list', kwargs={'pk': job.pk})
+    if not truncate:
+        url += '?no_truncate=1'
+
+    response = get(url, user=objs.superusers.admin, expect=200)
+    result_msg = response.data['results'][0]['event_data']['res']['msg']
+    assert (len(result_msg) == 2000) == expected
+    if truncate:
+        assert result_msg.endswith('\u2026')
+    assert response.data['results'][0]['event_data']['res']['rc'] == 0
+
+
+@pytest.mark.django_db
 def test_job_job_events_children_summary(get, organization_factory, job_template_factory):
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization, inventory='test_inv', project='test_proj').job_template
