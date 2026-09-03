@@ -434,16 +434,15 @@ def events_processed_hook(unified_job):
     Either one of these events could happen before the other, or there may be no events"""
     unified_job.send_notification_templates('succeeded' if unified_job.status == 'successful' else 'failed')
     if isinstance(unified_job, Job):
+        if not settings.INDIRECT_NODE_COUNTING_ENABLED:
+            Job.objects.filter(id=unified_job.id, event_queries_processed=False).update(event_queries_processed=True)
+            return
         if unified_job.event_queries_processed is True:
             # If this is called from callback receiver, it likely does not have updated model data
             # a refresh now is formally robust
             unified_job.refresh_from_db(fields=['event_queries_processed'])
         if unified_job.event_queries_processed is False:
-            if settings.INDIRECT_NODE_COUNTING_ENABLED:
-                save_indirect_host_entries.delay(unified_job.id)
-            else:
-                unified_job.event_queries_processed = True
-                unified_job.save(update_fields=['event_queries_processed'])
+            save_indirect_host_entries.delay(unified_job.id)
 
 
 @task(queue=get_task_queuename, timeout=3600 * 5, on_duplicate='discard')

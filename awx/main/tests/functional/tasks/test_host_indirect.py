@@ -107,12 +107,13 @@ def test_save_indirect_host_entries_skips_when_disabled(bare_job, event_query, s
 def test_events_processed_hook_discards_pending_counting_when_disabled(bare_job, settings, mocker):
     settings.INDIRECT_NODE_COUNTING_ENABLED = False
     mock_delay = mocker.patch('awx.main.tasks.system.save_indirect_host_entries.delay')
+    mock_refresh = mocker.patch.object(bare_job, 'refresh_from_db')
     mocker.patch('awx.main.models.notifications.JobNotificationMixin.send_notification_templates')
 
     events_processed_hook(bare_job)
 
-    bare_job.refresh_from_db()
-    assert bare_job.event_queries_processed is True
+    assert Job.objects.get(id=bare_job.id).event_queries_processed is True
+    mock_refresh.assert_not_called()
     mock_delay.assert_not_called()
 
 
