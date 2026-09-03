@@ -4283,6 +4283,8 @@ class JobJobEventsChildrenSummary(APIView):
     def get(self, request, **kwargs):
         resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False, is_tree=True)
         job = get_object_or_404(models.Job, pk=kwargs['pk'])
+        if not request.user.can_access(models.Job, 'read', job):
+            raise PermissionDenied()
         if not job.event_processing_finished:
             return Response(resp)
         else:

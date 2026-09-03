@@ -277,3 +277,30 @@ class TestControllerNode:
 
         r = get(reverse('api:system_job_detail', kwargs={'pk': system_job.pk}), admin_user, expect=200)
         assert 'controller_node' not in r.data
+
+
+@pytest.mark.django_db
+def test_job_events_children_summary_rbac(get, inventory, project, admin_user, rando):
+    """An unprivileged user must not access another job's children_summary.
+
+    Regression test: before the fix, JobJobEventsChildrenSummary.get had no
+    RBAC check, so any authenticated user could read the children summary of
+    any job.  The fix gates on request.user.can_access(Job, 'read', job).
+    """
+    jt = JobTemplate.objects.create(
+        name='testjt-children-summary',
+        inventory=inventory,
+        project=project,
+    )
+    job = jt.create_unified_job()
+    url = reverse(
+        'api:job_job_events_children_summary',
+        kwargs={'pk': job.pk},
+    )
+
+    # An admin (who can read the job) must be permitted — 200
+    r = get(url, admin_user, expect=200)
+    assert 'children_summary' in r.data
+
+    # An unprivileged user who cannot read the job must be denied — 403
+    get(url, rando, expect=403)
