@@ -43,6 +43,33 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('custom_name', ('Test Custom 1', 'Test Custom Admin', 'This Is A Custom Admin', 'Organization Widget Admin'))
+def test_custom_role_with_unrecognized_name_has_no_legacy_role(organization, rando, setup_managed_roles, custom_name):
+    managed_rd = RoleDefinition.objects.get(name='Organization Project Admin')
+    custom_rd = RoleDefinition.objects.create_from_permissions(
+        name=custom_name,
+        permissions=managed_rd.permissions.values_list('codename', flat=True),
+        content_type=managed_rd.content_type,
+    )
+    assignment = custom_rd.give_permission(rando, organization)
+
+    assert get_role_from_object_role(assignment.object_role) is None
+
+
+@pytest.mark.django_db
+def test_custom_role_with_legacy_compatible_name_still_maps(project, rando, setup_managed_roles):
+    managed_rd = RoleDefinition.objects.get(name='Project Admin')
+    custom_rd = RoleDefinition.objects.create_from_permissions(
+        name='Custom Admin',
+        permissions=managed_rd.permissions.values_list('codename', flat=True),
+        content_type=managed_rd.content_type,
+    )
+    assignment = custom_rd.give_permission(rando, project)
+
+    assert get_role_from_object_role(assignment.object_role) == project.admin_role
+
+
+@pytest.mark.django_db
 def test_bulk_member_addition_records_one_entry_per_user(organization, rando, alice, setup_managed_roles):
     """
     Adding multiple users to a legacy role in one m2m .add() call syncs each user to the
