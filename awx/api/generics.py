@@ -245,7 +245,7 @@ class APIView(views.APIView):
             ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
             msg_data = {
                 'status_code': response.status_code,
-                'user_name': request.user,
+                'user_name': str(request.user),
                 'url_path': request.path,
                 'remote_addr': ip,
             }
