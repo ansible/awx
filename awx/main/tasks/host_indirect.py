@@ -9,9 +9,6 @@ from django.utils.timezone import now, timedelta
 from django.conf import settings
 from django.db import transaction
 
-# Django flags
-from flags.state import flag_enabled
-
 from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
@@ -166,6 +163,10 @@ def cleanup_old_indirect_host_entries() -> None:
 
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> None:
+    if not settings.INDIRECT_NODE_COUNTING_ENABLED:
+        Job.objects.filter(id=job_id, event_queries_processed=False).update(event_queries_processed=True)
+        return
+
     try:
         job = Job.objects.get(id=job_id)
     except Job.DoesNotExist:
@@ -203,7 +204,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
 
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def cleanup_and_save_indirect_host_entries_fallback() -> None:
-    if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+    if not settings.INDIRECT_NODE_COUNTING_ENABLED:
         return
 
     try:

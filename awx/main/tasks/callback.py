@@ -20,8 +20,6 @@ from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSA
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
 
-from flags.state import flag_enabled
-
 logger = logging.getLogger('awx.main.tasks.callback')
 
 
@@ -284,7 +282,7 @@ class RunnerCallback:
             else:
                 logger.warning(f'The file {COLLECTION_FILENAME} unexpectedly did not contain ansible_version')
 
-            if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+            if settings.INDIRECT_NODE_COUNTING_ENABLED:
                 self.delay_update(event_queries_processed=False)
                 collections_info = collect_queries(query_file_contents)
                 for collection, data in collections_info.items():
