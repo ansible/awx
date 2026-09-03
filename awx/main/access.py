@@ -802,6 +802,11 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
             if self.user in obj.admin_role and self.user in sub_obj.use_role:
                 return True
             return False
+
+        if relationship == "galaxy_credentials":
+            if self.user in obj.admin_role and self.user in sub_obj.use_role:
+                return True
+            return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
