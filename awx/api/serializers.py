@@ -5194,6 +5194,8 @@ class WorkflowJobLaunchSerializer(PromptFieldCleanTextMixin, BaseSerializer):
 
 
 class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
+    job = serializers.PrimaryKeyRelatedField(read_only=True)
+    workflow_job = serializers.PrimaryKeyRelatedField(read_only=True)
     # We don't do a PrimaryKeyRelatedField for unified_job_template and others, because that increases the number
     # of database queries, rather we take them as integer and later convert them to objects in get_objectified_jobs
     unified_job_template = serializers.IntegerField(

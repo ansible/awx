@@ -333,6 +333,74 @@ def test_bulk_job_set_all_prompt(job_template, organization, inventory, project,
 
 
 @pytest.mark.django_db
+def test_bulk_job_launch_ignores_injected_job_fk(organization, inventory, project, post, user):
+    """BulkJobNodeSerializer must treat job and workflow_job as read-only.
+
+    A client-supplied 'job' or 'workflow_job' FK in the bulk job launch
+    payload must be silently ignored so that created WorkflowJobNodes
+    never reference an arbitrary foreign job (FK injection).
+    """
+    from awx.api.serializers import BulkJobNodeSerializer
+
+    # --- REJECT: the serializer fields must be read-only ---
+    ser = BulkJobNodeSerializer()
+    assert ser.fields['job'].read_only is True
+    assert ser.fields['workflow_job'].read_only is True
+
+    # --- Setup ---
+    normal_user = user('normal_user', False)
+    jt = JobTemplate.objects.create(
+        name='my-jt',
+        inventory=inventory,
+        project=project,
+        playbook='helloworld.yml',
+    )
+    organization.member_role.members.add(normal_user)
+    jt.execute_role.members.add(normal_user)
+
+    # --- PERMIT: normal launch without injected FKs still works ---
+    resp = post(
+        reverse('api:bulk_job_launch'),
+        {
+            'name': 'Bulk Job Launch',
+            'jobs': [{'unified_job_template': jt.id}],
+        },
+        normal_user,
+        expect=201,
+    ).data
+    bulk_job_id = resp['id']
+    node = WorkflowJob.objects.get(id=bulk_job_id).workflow_job_nodes.first()
+    assert node is not None
+    assert node.unified_job_template_id == jt.id
+    assert node.job_id is None
+
+    # --- REJECT end-to-end: injecting fake job/workflow_job FKs ---
+    # With the fix these are read-only and silently ignored (201).
+    # Without the fix the auto-generated PrimaryKeyRelatedField would
+    # attempt to resolve the PK, fail, and return 400.
+    resp2 = post(
+        reverse('api:bulk_job_launch'),
+        {
+            'name': 'Bulk Job Launch 2',
+            'jobs': [
+                {
+                    'unified_job_template': jt.id,
+                    'job': 999999,
+                    'workflow_job': 999999,
+                }
+            ],
+        },
+        normal_user,
+        expect=201,
+    ).data
+    bulk_job_id2 = resp2['id']
+    node2 = WorkflowJob.objects.get(id=bulk_job_id2).workflow_job_nodes.first()
+    assert node2 is not None
+    assert node2.job_id is None
+    assert node2.workflow_job_id == bulk_job_id2
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('num_hosts, num_queries', [(1, 70), (10, 150), (25, 250)])
 def test_bulk_host_delete_num_queries(organization, inventory, post, get, user, num_hosts, num_queries, django_assert_max_num_queries):
     '''
