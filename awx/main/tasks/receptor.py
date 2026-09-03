@@ -7,12 +7,14 @@ import logging
 import os
 import shutil
 import socket
+import tempfile
 import time
 import yaml
 
 # Django
 from django.conf import settings
 from django.db import connections
+from django.utils.timezone import now
 
 # Runner
 import ansible_runner
@@ -31,7 +33,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
+from awx.main.constants import JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
@@ -442,6 +444,26 @@ class AWXReceptorJob:
             logger.debug(f"RECEPTOR_KEEP_WORK_ON_ERROR is True and status is 'error', not releasing work unit {self.unit_id}.")
             return
 
+        # Guard against a race where the work unit is released before the final job status
+        # is committed to DB.  BaseTask.run() commits the status AFTER AWXReceptorJob.run()
+        # returns — so the finally block here fires before the DB write.  If the controller
+        # is killed in that window, the unit is gone but the job stays 'running', making
+        # adoption impossible.  By checking the DB first and deferring when the status is
+        # not yet finalized, we keep the unit available for the adoption loop on restart.
+        # awx_receptor_workunit_reaper will release it once the job is properly finalized.
+        if self.task and getattr(self.task, 'instance', None) is not None:
+            try:
+                db_status = type(self.task.instance).objects.filter(pk=self.task.instance.pk).values_list('status', flat=True).first()
+                if db_status in ('running', 'waiting'):
+                    logger.info(
+                        f'Deferring release of work unit {self.unit_id}: '
+                        f'job {self.task.instance.pk} not yet finalized in DB '
+                        f'(status={db_status!r}). awx_receptor_workunit_reaper will release later.'
+                    )
+                    return
+            except Exception:
+                logger.debug(f'Could not check DB status before releasing unit {self.unit_id}, proceeding')
+
         try:
             logger.debug(f"Released work unit {self.unit_id}.")
             receptor_ctl.simple_command(f"work release {self.unit_id}")
@@ -449,6 +471,21 @@ class AWXReceptorJob:
             logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     def _run_internal(self, receptor_ctl):
+        self._transmit_phase(receptor_ctl)
+        return self._process_phase(receptor_ctl)
+
+    def _transmit_phase(self, receptor_ctl):
+        """Submit work to receptor and wait for the transmit thread to finish.
+
+        Creates the receptor work unit, streams the job payload (private_data_dir + kwargs)
+        to the EE via a socketpair, and saves the resulting unit_id to the DB.
+
+        After this returns, artifacts/ is deleted from private_data_dir. Fact-cache and
+        other input artifacts are transmitted to the EE during this phase; by the time
+        _process_phase() reads artifacts output, the dir is empty so there is no stale
+        input state. This means _process_phase() always receives a clean private_data_dir
+        whether called from _run_internal() or from reattach_to_work_unit().
+        """
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
         # reading.
@@ -497,6 +534,13 @@ class AWXReceptorJob:
         if self.work_type != 'local' and os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
+    def _process_phase(self, receptor_ctl):
+        """Stream events from the receptor work unit via the ansible-runner process streamer.
+
+        Extracted from _run_internal() so it can be called standalone for job adoption
+        after a same-controller restart (reattach_to_work_unit). The transmit phase
+        (submit_work + transmit) is not repeated — the EE is already running.
+        """
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
 
         connections.close_all()
@@ -524,48 +568,55 @@ class AWXReceptorJob:
                 signal_state.raise_exception = False
 
             if res.status == 'error':
-                # If ansible-runner ran, but an error occured at runtime, the traceback information
-                # is saved via the status_handler passed in to the processor.
-                if 'result_traceback' in self.task.runner_callback.extra_update_fields:
-                    return res
+                return self._handle_work_error(receptor_ctl, res)
 
-                try:
-                    unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
-                    detail = unit_status.get('Detail', None)
-                    state_name = unit_status.get('StateName', None)
-                    stdout_size = unit_status.get('StdoutSize', 0)
-                except Exception:
-                    detail = ''
-                    state_name = ''
-                    stdout_size = 0
-                    logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
+        return res
 
-                if 'exceeded quota' in detail:
-                    logger.warning(detail)
-                    log_name = self.task.instance.log_format
-                    logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
-                    self.task.update_model(self.task.instance.pk, status='pending')
-                    return
+    def _handle_work_error(self, receptor_ctl, res):
+        """Handle the error path from _process_phase when the work unit status is 'error'."""
+        # If ansible-runner ran, but an error occured at runtime, the traceback information
+        # is saved via the status_handler passed in to the processor.
+        if 'result_traceback' in self.task.runner_callback.extra_update_fields:
+            return res
 
-                try:
-                    receptor_output = ''
-                    if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
-                        # if receptor work unit failed and no events were emitted, work results may
-                        # contain useful information about why the job failed. In case stdout is
-                        # massive, only ask for last 1000 bytes
-                        startpos = max(stdout_size - 1000, 0)
-                        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
-                        lines = resultfile.readlines()
-                        receptor_output = b"".join(lines).decode()
-                    if receptor_output:
-                        self.task.runner_callback.delay_update(result_traceback=f'Worker output:\n{receptor_output}')
-                    elif detail:
-                        self.task.runner_callback.delay_update(result_traceback=f'Receptor detail:\n{detail}')
-                    else:
-                        logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
-                except Exception:
-                    logger.exception(f'Work results error from job id={self.task.instance.id} work_unit={self.task.instance.work_unit_id}')
-                    raise RuntimeError(detail)
+        try:
+            unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
+            detail = unit_status.get('Detail') or ''
+            state_name = unit_status.get('StateName', None)
+            stdout_size = unit_status.get('StdoutSize', 0)
+        except Exception:
+            detail = ''
+            state_name = ''
+            stdout_size = 0
+            logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
+
+        if 'exceeded quota' in detail:
+            logger.warning(detail)
+            log_name = self.task.instance.log_format
+            logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
+            self.task.update_model(self.task.instance.pk, status='pending')
+            return None
+
+        try:
+            receptor_output = ''
+            if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
+                # if receptor work unit failed and no events were emitted, work results may
+                # contain useful information about why the job failed. In case stdout is
+                # massive, only ask for last 1000 bytes
+                startpos = max(stdout_size - 1000, 0)
+                _resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
+                lines = resultfile.readlines()
+                receptor_output = b"".join(lines).decode()
+                _resultsock.shutdown(socket.SHUT_RDWR)
+            if receptor_output:
+                self.task.runner_callback.delay_update(result_traceback=f'Worker output:\n{receptor_output}')
+            elif detail:
+                self.task.runner_callback.delay_update(result_traceback=f'Receptor detail:\n{detail}')
+            else:
+                logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
+        except Exception:
+            logger.exception(f'Work results error from job id={self.task.instance.id} work_unit={self.task.instance.work_unit_id}')
+            raise RuntimeError(detail)
 
         return res
 
@@ -797,6 +848,218 @@ RECEPTOR_CONFIG_STARTER = (
         }
     },
 )
+
+
+class _AdoptionTask:
+    """Minimal task stub passed to AWXReceptorJob when called from reattach_to_work_unit.
+
+    Stands in for BaseTask without re-executing task-manager logic. update_model is a
+    no-op since adoption doesn't touch scheduling fields (those are handled by the
+    reaper/heartbeat path that triggered the adoption).
+    """
+
+    def __init__(self, instance, runner_callback):
+        self.instance = instance
+        self.runner_callback = runner_callback
+
+    def build_execution_environment_params(self, _instance, _private_data_dir):
+        return {}
+
+    def update_model(self, pk, **kwargs):
+        # Intentionally a no-op: adoption reuses _process_phase without task-manager field updates.
+        # Heartbeat/reaper handles scheduling state; no fields need updating here.
+        pass
+
+
+def _get_adoption_exit_code(unit_status, state_name):
+    """Extract exit code from a finished receptor work unit status dict."""
+    if 'ExitCode' in unit_status:
+        return unit_status['ExitCode']
+    detail = unit_status.get('Detail', '')
+    try:
+        return int(detail.split()[-1])
+    except (ValueError, IndexError):
+        return 0 if state_name == 'Succeeded' else 1
+
+
+def _configure_runner_callback(callback, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
+    """Configure a RunnerCallback with the fields required for event processing.
+
+    This is the single source of truth for RunnerCallback initialization, shared
+    between the normal job path (BaseTask.run) and adoption (reattach_to_work_unit).
+    Having both paths call this function means any missing field is caught by the
+    normal test suite rather than only by adoption-specific tests.
+
+    Args:
+        callback: an already-instantiated RunnerCallback (or subclass)
+        instance: the UnifiedJob model instance being run
+        safe_env: masked environment dict for log output. None → {} (adoption path,
+            where credentials are not available at reconnect time)
+        dedup_threshold: highest counter where all lower counters are in DB (contiguous
+            prefix). event_handler skips counter <= threshold with an O(1) check. None
+            disables dedup (normal jobs, zero overhead).
+        persisted_counters: small set of counters above dedup_threshold that are already
+            in DB (the collision zone from parallel callback worker races). Bounded by
+            worker concurrency, not job size. None when dedup is disabled.
+    """
+    callback.instance = instance
+    callback.job_created = str(instance.created)  # stamped on every event (callback.py:160)
+    callback.safe_env = safe_env if safe_env is not None else {}
+    if getattr(instance, 'spawned_by_workflow', False):
+        try:
+            callback.parent_workflow_job_id = instance.get_workflow_job().id
+        except Exception:
+            pass
+    callback.dedup_threshold = dedup_threshold
+    callback.persisted_counters = persisted_counters
+    # Rebuild host_map from inventory so that replayed post-kill events get host_id set.
+    # For normal jobs this is populated by write_inventory_file(); for adoption we
+    # reconstruct it from the already-saved inventory hosts.
+    if hasattr(instance, 'inventory') and instance.inventory_id:
+        try:
+            for host in instance.inventory.hosts.only('name', 'id'):
+                callback.host_map[host.name] = host.id
+        except Exception:
+            pass  # host_map stays {}; host_id won't be set on replayed events
+
+
+def _build_adoption_callback(job, dedup_threshold, collision_zone):
+    """Construct a RunnerCallback for event replay during adoption."""
+    from awx.main.tasks.callback import RunnerCallback
+
+    callback = RunnerCallback(model=type(job))
+    _configure_runner_callback(callback, job, dedup_threshold=dedup_threshold, persisted_counters=collision_zone)
+    return callback
+
+
+def _get_or_create_private_data_dir(job):
+    """Return a writable private_data_dir for the adoption process streamer.
+
+    On same-controller restart the original tempdir may be gone (e.g. on OCP where /tmp
+    is wiped on pod restart). ansible-runner's process streamer only needs a writable root
+    directory — it creates artifacts/job_events/ itself.
+
+    Uses AWX_ISOLATION_BASE_PATH (the same root as all other job working dirs) so that
+    sysadmin-configured isolation paths (e.g. persistent volumes on OCP) are respected.
+    """
+    return tempfile.mkdtemp(
+        prefix=JOB_FOLDER_PREFIX % job.pk + 'adoption_',
+        dir=settings.AWX_ISOLATION_BASE_PATH,
+    )
+
+
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed):
+    """Write terminal status, timestamps, and delayed callback fields to DB.
+
+    Only runs when the job is still 'running' in the DB after _process_phase
+    returns — meaning the async callback receiver hasn't committed status yet.
+    Uses get_delayed_update_fields() to mirror what BaseTask.run() writes via
+    update_model(**get_delayed_update_fields()).
+    """
+    job.refresh_from_db(fields=['status'])
+    if job.status != 'running':
+        return
+
+    final_status = 'successful' if exit_code == 0 else 'failed'
+    finished_at = now()
+
+    delayed = {k: v for k, v in callback.get_delayed_update_fields().items() if k != 'status'}
+    update_kwargs = {'status': final_status, 'finished': finished_at, **delayed}
+    if job.started:
+        update_kwargs['elapsed'] = (finished_at - job.started).total_seconds()
+    for field, value in update_kwargs.items():
+        setattr(job, field, value)
+    job.save(update_fields=list(update_kwargs.keys()))
+
+    if hasattr(job, 'send_notification_templates'):
+        job.send_notification_templates('succeeded' if final_status == 'successful' else 'failed')
+    job.websocket_emit_status(final_status)
+
+    label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
+    logger.info(f'Job {job.id} finalized via {label}: {final_status}')
+
+
+def _compute_adoption_dedup(job):
+    """Return (safe_threshold, collision_zone) for counter-skip dedup during adoption.
+
+    Hybrid approach — memory is O(1) + O(worker_count), never O(total events):
+
+    safe_threshold: highest counter where all lower counters are also in DB (contiguous
+        prefix). Events <= this are skipped with a single integer comparison.
+
+    collision_zone: small set of counters above safe_threshold that ARE in DB. These
+        exist because parallel callback workers can commit a higher-counter event before
+        a lower-counter one. Bounded by JOB_EVENT_WORKERS × batch size, typically < 20
+        regardless of total job event count.
+    """
+    from django.db.models import Exists, OuterRef
+
+    next_ctr = job.get_event_queryset().filter(counter=OuterRef('counter') + 1)
+    gap_event = job.get_event_queryset().annotate(has_next=Exists(next_ctr)).filter(has_next=False).order_by('counter').first()
+    safe_threshold = gap_event.counter if gap_event else 0
+
+    collision_zone = set(job.get_event_queryset().filter(counter__gt=safe_threshold).values_list('counter', flat=True))
+    return safe_threshold, collision_zone
+
+
+def reattach_to_work_unit(job, receptor_ctl):
+    """Reconnect to a completed receptor work unit after a same-controller restart.
+
+    Reconstructs the minimal process-phase context from the DB job record, replays events
+    from startpos=0 with counter-skip dedup (skipping events already in DB), then finalizes
+    the job status from the receptor work unit exit code.
+
+    Non-blocking: returns False if the work unit is still running so the adoption loop can
+    retry on the next heartbeat.
+
+    Cross-controller path (node=execution_node) is deferred to AAP-89602.
+    It requires ansible/receptor#1564 which is not yet merged.
+    """
+    unit_id = job.work_unit_id
+
+    # Check receptor work unit state — skip if still running (retry next heartbeat)
+    try:
+        unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
+    except Exception:
+        logger.warning(f'Cannot get receptor status for work unit {unit_id} (job {job.id}), deferring adoption')
+        return False
+
+    state_name = unit_status.get('StateName', '')
+    if state_name not in ('Succeeded', 'Failed'):
+        logger.debug(f'Job {job.id} unit {unit_id} still in state {state_name!r}, deferring adoption to next heartbeat')
+        return False
+
+    exit_code = _get_adoption_exit_code(unit_status, state_name)
+    logger.info(f'Adopting job {job.id}: receptor_state={state_name} exit_code={exit_code}')
+
+    safe_threshold, collision_zone = _compute_adoption_dedup(job)
+    max_counter = max(collision_zone) if collision_zone else safe_threshold
+    logger.info(
+        f'Job {job.id}: safe_threshold={safe_threshold} collision_zone_size={len(collision_zone)} '
+        f'(max counter={max_counter}), replaying from startpos=0 with counter-skip'
+    )
+
+    callback = _build_adoption_callback(job, safe_threshold, collision_zone)
+
+    private_data_dir = _get_or_create_private_data_dir(job)
+    receptor_job = AWXReceptorJob(_AdoptionTask(job, callback), {'private_data_dir': private_data_dir})
+    receptor_job.unit_id = unit_id
+
+    process_phase_failed = False
+    res = None
+    try:
+        res = receptor_job._process_phase(receptor_ctl)
+    except Exception:
+        logger.exception(f'Adoption process phase failed for job {job.id} (unit={unit_id})')
+        process_phase_failed = True
+    finally:
+        receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
+        shutil.rmtree(private_data_dir, ignore_errors=True)
+
+    # Finalize via exit_code if the async callback receiver hasn't committed DB status yet.
+    _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+
+    return True
 
 
 def should_update_config(new_config):
