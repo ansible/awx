@@ -1935,11 +1935,15 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
+        if relationship == 'instance_groups':
+            return self.can_change(obj, None) and (self.user in sub_obj.use_role)
         return super().can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         if relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.wfjt_admin(obj)
+        if relationship == 'instance_groups':
+            return self.can_change(obj, None) and (self.user in sub_obj.use_role)
         return super().can_unattach(obj, sub_obj, relationship, data=None)
 
 
@@ -2575,6 +2579,17 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, {})
+
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if relationship == 'instance_groups':
+            return self.can_change(obj, None) and (self.user in sub_obj.use_role)
+        return super().can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    def can_unattach(self, obj, sub_obj, relationship, data=None):
+        if relationship == 'instance_groups':
+            return self.can_attach(obj, sub_obj, relationship, data)
+        return super().can_unattach(obj, sub_obj, relationship, data=data)
 
 
 class NotificationTemplateAccess(BaseAccess):
