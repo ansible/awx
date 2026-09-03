@@ -6469,6 +6469,24 @@ class InstanceGroupSerializer(CleanTextMixin, BaseSerializer):
         if automount_service_account_token:
             raise serializers.ValidationError(_('automountServiceAccountToken is not allowed for security reasons'))
 
+        blocked_volume_names = set()
+        for volume in spec.get('volumes', []):
+            if 'secret' in volume:
+                blocked_volume_names.add(volume.get('name'))
+                raise serializers.ValidationError(_('Mounting Kubernetes secrets via pod_spec_override is not allowed for security reasons'))
+            if 'projected' in volume:
+                sources = volume.get('projected', {}).get('sources', [])
+                if any('serviceAccountToken' in source for source in sources):
+                    blocked_volume_names.add(volume.get('name'))
+                    raise serializers.ValidationError(_('Projected serviceAccountToken volumes are not allowed for security reasons'))
+
+        if blocked_volume_names:
+            for container_key in ('containers', 'initContainers', 'ephemeralContainers'):
+                for container in spec.get(container_key, []):
+                    for volume_mount in container.get('volumeMounts', []):
+                        if volume_mount.get('name') in blocked_volume_names:
+                            raise serializers.ValidationError(_('Volume mount references a blocked volume'))
+
         return value
 
     def validate(self, attrs):
