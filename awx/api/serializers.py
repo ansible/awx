@@ -128,7 +128,7 @@ from awx.api.versioning import reverse
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField, DeprecatedCredentialField
 
 # AWX Utils
-from awx.api.validators import HostnameRegexValidator
+from awx.api.validators import HostnameRegexValidator, contains_path_traversal
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -2349,6 +2349,15 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         if obj.credential:  # TODO: remove when 'credential' field is removed
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential})
         return res
+
+    def validate_source_path(self, value):
+        # Unchanged values on update are grandfathered so pre-existing traversal
+        # paths are not rejected until they are edited (AAP-78700).
+        if self.instance is not None and getattr(self.instance, 'source_path', None) == value:
+            return value
+        if contains_path_traversal(value):
+            raise serializers.ValidationError(_("Enter a path that does not include '..' path segments."))
+        return value
 
     def validate_source_vars(self, value):
         ret = vars_validate_or_raise(value)
