@@ -1489,6 +1489,10 @@ class ProjectOptionsSerializer(BaseSerializer):
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
         if attrs.get('scm_track_submodules') and scm_type != 'git':
             errors['scm_track_submodules'] = _('SCM track_submodules can only be used with git projects.')
+        if attrs.get('scm_branch', '').lstrip().startswith('-'):
+            errors['scm_branch'] = _('Branch names beginning with "-" are not allowed.')
+        if attrs.get('scm_refspec', '').lstrip().startswith('-'):
+            errors['scm_refspec'] = _('Refspec values beginning with "-" are not allowed.')
 
         scm_url = attrs.get('scm_url', None)
         if scm_url is not None and scm_url.strip().startswith('-'):

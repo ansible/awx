@@ -1555,6 +1555,9 @@ class RunProjectUpdate(BaseTask):
         elif not scm_branch:
             scm_branch = 'HEAD'
 
+        if scm_branch.lstrip().startswith('-'):
+            raise RuntimeError('Rejected scm_branch value starting with "-": potential argument injection')
+
         galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
         if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
             logger.warning(f'Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
@@ -1582,6 +1585,9 @@ class RunProjectUpdate(BaseTask):
         elif project_update.project.allow_override:
             # If branch is override-able, do extra fetch for all branches
             extra_vars['scm_refspec'] = '+refs/heads/*:refs/remotes/origin/*'
+
+        if extra_vars.get('scm_refspec', '').lstrip().startswith('-'):
+            raise RuntimeError('Rejected scm_refspec value starting with "-": potential argument injection')
 
         if project_update.scm_type == 'archive':
             # for raw archive, prevent error moving files between volumes
