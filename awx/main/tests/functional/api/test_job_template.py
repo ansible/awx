@@ -436,7 +436,7 @@ class TestJobTemplateCallbackProxyIntegration:
         )
 
     @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=[])
-    def test_no_proxy_trust_all_headers(self, job_template, admin_user, post):
+    def test_no_proxy_strips_http_headers(self, job_template, admin_user, post):
         job_template.inventory.hosts.create(name='foobar')
 
         headers = {
@@ -444,7 +444,7 @@ class TestJobTemplateCallbackProxyIntegration:
             'REMOTE_ADDR': 'bar',
             'REMOTE_HOST': 'baz',
         }
-        post(url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}), data={'host_config_key': 'abcd'}, user=admin_user, expect=201, **headers)
+        post(url=reverse('api:job_template_callback', kwargs={'pk': job_template.pk}), data={'host_config_key': 'abcd'}, user=admin_user, expect=400, **headers)
 
     @override_settings(REMOTE_HOST_HEADERS=['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST'], PROXY_IP_ALLOWED_LIST=['my.proxy.example.org'])
     def test_trusted_proxy(self, job_template, admin_user, post, rsa_keypair):  # noqa: F811

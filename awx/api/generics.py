@@ -182,6 +182,7 @@ class APIView(views.APIView):
         normal Django request, store time the request started.
         """
         remote_headers = ['REMOTE_ADDR', 'REMOTE_HOST']
+        trusted_proxy = False
 
         self.time_started = time.time()
         if getattr(settings, 'SQL_DEBUG', False):
@@ -190,6 +191,7 @@ class APIView(views.APIView):
         if 'HTTP_X_TRUSTED_PROXY' in request.environ:
             if validate_x_trusted_proxy_header(request.environ['HTTP_X_TRUSTED_PROXY']):
                 remote_headers = settings.REMOTE_HOST_HEADERS
+                trusted_proxy = True
             else:
                 logger.warning("Request appeared to be a trusted upstream proxy but failed to provide a matching shared secret.")
 
@@ -198,6 +200,8 @@ class APIView(views.APIView):
         if settings.PROXY_IP_ALLOWED_LIST:
             if not is_proxy_in_headers(self.request, settings.PROXY_IP_ALLOWED_LIST, remote_headers):
                 delete_headers_starting_with_http(request, settings.REMOTE_HOST_HEADERS)
+        elif not trusted_proxy:
+            delete_headers_starting_with_http(request, settings.REMOTE_HOST_HEADERS)
 
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
