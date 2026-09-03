@@ -10,6 +10,7 @@ import yaml
 import urllib.parse
 from collections import Counter, OrderedDict
 from datetime import timedelta
+from types import MappingProxyType
 from uuid import uuid4
 
 # Jinja
@@ -42,7 +43,10 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
+from ansible_base.lib.serializers.mixins import CleanTextMixin
 from ansible_base.lib.utils.models import get_type_for_model
+from ansible_base.lib.utils.settings import get_setting
+from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
 
@@ -210,8 +214,44 @@ def reverse_gfk(content_object, request):
     return {camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url(request=request)}
 
 
-class CopySerializer(serializers.Serializer):
+class PlainSerializerCleanTextMixin(CleanTextMixin):
+    """CleanTextMixin for plain `serializers.Serializer` subclasses with no
+    backing Django model (AAP-78694). Overrides ONLY field discovery -- treats
+    the serializer's own declared CharFields as the text fields to validate.
+    Everything else (Tier 1/2 dispatch, exclusions, audit logging, the
+    enforcement gate) is reused unchanged from CleanTextMixin.
+
+    Known limitation: unlike the model-field path, this can't replicate the
+    get_internal_type() exclusion of SlugField/IPAddressField-style fields
+    (DRF fields have no equivalent signal) -- not an issue for any serializer
+    using this mixin today, since none declare such fields.
+    """
+
+    def _classify_fields(self, model):
+        text_fields = [name for name, field in self.fields.items() if isinstance(field, serializers.CharField)]
+        return text_fields, []
+
+
+class _CopySerializerFakeModel:
+    """Stand-in for Meta.model on CopySerializer, a plain serializers.Serializer
+    with no backing model of its own (it's reused across many resource types via
+    CopyAPIView subclasses). Only satisfies the `_meta.app_label`/`object_name`
+    attributes CleanTextMixin's audit-log message reads (AAP-78694) -- never
+    introspected for real fields, since PlainSerializerCleanTextMixin overrides
+    field discovery."""
+
+    _meta = type('Meta', (), {'app_label': 'main', 'object_name': 'CopySerializer'})
+
+
+class CopySerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
+    # The submitted name becomes the new object's name (see
+    # CopyAPIView.post -> copy_model_obj in awx/api/generics.py), so it needs
+    # the same Tier 1 protection as the 'name' field on the resource being
+    # copied (AAP-78694) -- without this, Copy bypassed validation entirely.
     name = serializers.CharField()
+
+    class Meta:
+        model = _CopySerializerFakeModel
 
     def validate(self, attrs):
         name = attrs.get('name')
@@ -219,7 +259,7 @@ class CopySerializer(serializers.Serializer):
         obj = view.get_object()
         if name == obj.name:
             raise serializers.ValidationError(_('The original object is already named {}, a copy from it cannot have the same name.'.format(name)))
-        return attrs
+        return super().validate(attrs)
 
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
@@ -727,6 +767,52 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         return False
 
 
+class PromptFieldCleanTextMixin(CleanTextMixin):
+    """
+    CleanTextMixin for serializers whose Meta.model derives from
+    LaunchTimeConfigBase (WorkflowJobTemplate, WorkflowJobTemplateNode,
+    WorkflowJobNode, Schedule). Those models store scm_branch/limit/job_tags/
+    skip_tags as NullablePromptPseudoField descriptors backed by the
+    char_prompts JSONField, not real django.db.models.Field instances, so
+    CleanTextMixin's model._meta.get_fields() auto-discovery can never see
+    them (AAP-78694). This adds them back in explicitly as Tier 2 free-text
+    fields. They are always declared as plain serializer CharFields (see
+    LaunchConfigurationBaseSerializer below), so self.fields has them
+    whenever applicable, and grandfathering still works because the
+    pseudo-field descriptor's __get__ correctly returns the stored
+    char_prompts value via getattr(self.instance, name).
+    """
+
+    prompt_pseudo_fields = frozenset({'scm_branch', 'limit', 'job_tags', 'skip_tags'})
+
+    def _classify_fields(self, model):
+        text_fields, json_fields = super()._classify_fields(model)
+        extra = [f for f in self.prompt_pseudo_fields if f in self.fields and f not in text_fields]
+        return list(text_fields) + extra, json_fields
+
+    def _run_clean_text_validation(self, attrs):
+        """Run Tier 1/2 validation and raise on failure, without chaining into
+        the next class in the MRO's validate(). Needed by BulkJobNodeSerializer,
+        whose own validate() intentionally skips LaunchConfigurationBaseSerializer.validate()
+        (that method assumes unified_job_template/inventory/execution_environment
+        are model instances, but BulkJobNodeSerializer declares them as raw PKs
+        to avoid a DB lookup per node) via `super(LaunchConfigurationBaseSerializer, self)`.
+        A plain `self.validate(attrs)` call there would still run this mixin's
+        own `super().validate(attrs)` chain straight into the skipped class, since
+        Python's zero-arg super() resolves against the instance's full MRO
+        regardless of how the method was invoked -- so the Tier 1/2 checks are
+        exposed here as a standalone step instead.
+        """
+        model = self.Meta.model
+        text_fields, json_fields = self._classify_fields(model)
+        errors = {}
+        self._validate_text_fields(text_fields, attrs, errors)
+        self._validate_json_fields(json_fields, attrs, errors)
+        if errors and get_setting('ENHANCED_INPUT_VALIDATION_ENABLED', False):
+            raise serializers.ValidationError(errors)
+        return attrs
+
+
 class EmptySerializer(serializers.Serializer):
     pass
 
@@ -1031,7 +1117,18 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
             return super(UnifiedJobStdoutSerializer, self).get_types()
 
 
-class UserSerializer(BaseSerializer):
+class UserSerializer(CleanTextMixin, BaseSerializer):
+    # password is excluded because it is a raw secret at validation time (pre-hash);
+    # running the Tier 2 blocklist against it would both leak nothing useful and
+    # reject otherwise-valid passwords containing blocklisted characters.
+    excluded_fields = frozenset({'password'})
+
+    # username is deliberately left in Tier 1 (default name_fields) even though
+    # Django's stock UnicodeUsernameValidator (^[\w.@+-]+$) allows '+', which
+    # Tier 1's allowlist does not. This is an intentional hardening decision
+    # (ANSTRAT-1756): new/changed usernames containing '+' will be rejected once
+    # enforcement is enabled. Existing '+' usernames are grandfathered until edited.
+
     password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
@@ -1192,7 +1289,7 @@ class UserActivityStreamSerializer(UserSerializer):
         fields = ('*', '-is_system_auditor')
 
 
-class OrganizationSerializer(BaseSerializer, OpaQueryPathMixin):
+class OrganizationSerializer(CleanTextMixin, BaseSerializer, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -1314,7 +1411,7 @@ class ProjectOptionsSerializer(BaseSerializer):
         return super(ProjectOptionsSerializer, self).validate(attrs)
 
 
-class ExecutionEnvironmentSerializer(BaseSerializer):
+class ExecutionEnvironmentSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
     managed = serializers.ReadOnlyField()
 
@@ -1349,7 +1446,7 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
         return super(ExecutionEnvironmentSerializer, self).validate(attrs)
 
 
-class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
+class ProjectSerializer(CleanTextMixin, UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
@@ -1551,9 +1648,13 @@ class LabelsListMixin(object):
         return res
 
 
-class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
+class InventorySerializer(CleanTextMixin, LabelsListMixin, BaseSerializerWithVariables, OpaQueryPathMixin):
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = [{'edit': 'change'}, {'adhoc': 'adhoc'}, {'copy': 'organization.add_inventory'}]
+
+    # variables is raw YAML/JSON that legitimately contains Jinja2 syntax,
+    # same conflict class as extra_vars.
+    excluded_fields = frozenset({'variables'})
 
     class Meta:
         model = Inventory
@@ -1795,9 +1896,20 @@ class InventoryScriptSerializer(InventorySerializer):
         fields = ()
 
 
-class HostSerializer(BaseSerializerWithVariables):
+class HostSerializer(CleanTextMixin, BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete']
     capabilities_prefetch = [{'edit': 'inventory.change'}]
+
+    # variables is raw YAML/JSON that legitimately contains Jinja2 syntax.
+    excluded_fields = frozenset({'variables'})
+    # NOT for the single "host:port" syntax (see _get_host_port_from_name
+    # below) -- that colon is stripped from attrs['name'] in validate()
+    # before it ever reaches Tier 1. This demotion is for names
+    # _get_host_port_from_name passes through untouched: any colon count
+    # other than exactly 1, most notably IPv6 addresses, which its own
+    # comment says it explicitly does not parse ("except IPv6 for now").
+    # Tier 1's allowlist has no colon, so those would otherwise be rejected.
+    name_fields = DEFAULT_NAME_FIELDS - {'name'}
 
     has_active_failures = serializers.SerializerMethodField()
     has_inventory_sources = serializers.SerializerMethodField()
@@ -1979,9 +2091,12 @@ class AnsibleFactsSerializer(BaseSerializer):
         return obj.ansible_facts
 
 
-class GroupSerializer(BaseSerializerWithVariables):
+class GroupSerializer(CleanTextMixin, BaseSerializerWithVariables):
     show_capabilities = ['copy', 'edit', 'delete']
     capabilities_prefetch = [{'edit': 'inventory.change'}, {'adhoc': 'inventory.adhoc'}]
+
+    # variables is raw YAML/JSON that legitimately contains Jinja2 syntax.
+    excluded_fields = frozenset({'variables'})
 
     class Meta:
         model = Group
@@ -2374,12 +2489,15 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         return summary_fields
 
 
-class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
+class InventorySourceSerializer(CleanTextMixin, UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
     status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete']
     capabilities_prefetch = [{'edit': 'inventory.change'}, {'start': 'inventory.update'}]
+
+    # source_vars is raw YAML/JSON that legitimately contains Jinja2 syntax.
+    excluded_fields = frozenset({'source_vars'})
 
     class Meta:
         model = InventorySource
@@ -2642,7 +2760,7 @@ class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
         fields = ('can_cancel',)
 
 
-class TeamSerializer(BaseSerializer):
+class TeamSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -2925,9 +3043,14 @@ class ResourceAccessListElementSerializer(UserSerializer):
         return ret
 
 
-class CredentialTypeSerializer(BaseSerializer):
+class CredentialTypeSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete']
     managed = serializers.ReadOnlyField()
+
+    # injectors is Jinja2-templated by design (e.g. "{{ api_token }}" in env/file
+    # injection definitions) -- Tier 2's injection blocklist would break every
+    # custom credential type that defines injectors.
+    excluded_fields = frozenset({'injectors'})
 
     class Meta:
         model = CredentialType
@@ -2996,10 +3119,18 @@ class CredentialTypeSerializer(BaseSerializer):
         return fields
 
 
-class CredentialSerializer(BaseSerializer):
+class CredentialSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = [{'edit': 'change'}, {'use': 'use'}]
     managed = serializers.ReadOnlyField()
+
+    # inputs is a JSONField whose schema is credential-type-dependent, including
+    # admin-defined custom types. Secret keys cannot be listed at class level
+    # (unlike NotificationTemplateSerializer.notification_configuration).
+    # validate() below sets instance excluded_json_keys from
+    # credential_type.secret_fields (the schema's "secret": true flags) so
+    # non-secret strings (username, host, ...) still get Tier 2. If the type
+    # cannot be resolved, the whole blob is skipped (fail closed).
 
     class Meta:
         model = Credential
@@ -3072,6 +3203,16 @@ class CredentialSerializer(BaseSerializer):
     def validate(self, attrs):
         if self.instance and self.instance.managed:
             raise PermissionDenied(detail=_("Modifications not allowed for managed credentials"))
+
+        # Shadow the class-level MappingProxyType on this instance only -- DRF
+        # constructs a new serializer per request, so this does not leak.
+        # Must run before super().validate() so CleanTextMixin sees it.
+        cred_type = attrs.get('credential_type') or getattr(self.instance, 'credential_type', None)
+        if cred_type is not None:
+            self.excluded_json_keys = MappingProxyType({'inputs': frozenset(cred_type.secret_fields)})
+        else:
+            self.excluded_fields = frozenset(self.excluded_fields) | {'inputs'}
+
         return super(CredentialSerializer, self).validate(attrs)
 
     def get_validation_exclusions(self, obj=None):
@@ -3174,7 +3315,7 @@ class CredentialSerializerCreate(CredentialSerializer):
         return credential
 
 
-class CredentialInputSourceSerializer(BaseSerializer):
+class CredentialInputSourceSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['delete']
 
     class Meta:
@@ -3337,9 +3478,13 @@ class JobTemplateMixin(object):
         return super().validate(attrs)
 
 
-class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
+class JobTemplateSerializer(CleanTextMixin, JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
     capabilities_prefetch = [{'edit': 'change'}, {'start': 'execute'}, {'copy': ['project.use', 'inventory.use']}]
+
+    # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
+    # ("{{ var }}"), which Tier 2's injection blocklist would reject.
+    excluded_fields = frozenset({'extra_vars'})
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
@@ -3458,7 +3603,13 @@ class JobTemplateWithSpecSerializer(JobTemplateSerializer):
         fields = ('*', 'survey_spec')
 
 
-class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
+class JobSerializer(CleanTextMixin, UnifiedJobSerializer, JobOptionsSerializer):
+    # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
+    # ("{{ var }}"), same conflict class as JobTemplateSerializer.extra_vars
+    # (AAP-78694). JobDetail allows PUT/PATCH while status is "new" (see
+    # JobDetail.update), which is the real write path this protects.
+    excluded_fields = frozenset({'extra_vars'})
+
     passwords_needed_to_start = serializers.ReadOnlyField()
     artifacts = serializers.SerializerMethodField()
 
@@ -3668,7 +3819,12 @@ class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
             return {'all': _('Unknown, job may have been run before launch configurations were saved.')}
 
 
-class AdHocCommandSerializer(UnifiedJobSerializer):
+class AdHocCommandSerializer(CleanTextMixin, UnifiedJobSerializer):
+    # extra_vars/module_args are raw YAML/JSON or ad hoc arguments that
+    # legitimately contain Jinja2 syntax ("{{ var }}"), which Tier 2's
+    # injection blocklist would reject.
+    excluded_fields = frozenset({'extra_vars', 'module_args'})
+
     class Meta:
         model = AdHocCommand
         fields = (
@@ -3826,9 +3982,13 @@ class SystemJobCancelSerializer(SystemJobSerializer):
         fields = ('can_cancel',)
 
 
-class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
+class WorkflowJobTemplateSerializer(PromptFieldCleanTextMixin, JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'schedule', 'edit', 'copy', 'delete']
     capabilities_prefetch = [{'edit': 'change'}, {'start': 'execute'}, {'copy': 'organization.add_workflowjobtemplate'}]
+
+    # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax.
+    excluded_fields = frozenset({'extra_vars'})
+
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
@@ -4043,7 +4203,7 @@ class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListS
         fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out')
 
 
-class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
+class WorkflowApprovalTemplateSerializer(CleanTextMixin, UnifiedJobTemplateSerializer):
     class Meta:
         model = WorkflowApprovalTemplate
         fields = ('*', 'timeout', 'name')
@@ -4225,7 +4385,22 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         return attrs
 
 
-class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
+class WorkflowJobTemplateNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer):
+    # extra_data plays the same role as extra_vars elsewhere (arbitrary
+    # launch-time variables) and is submitted in the same two formats: a
+    # dict, or a raw YAML/JSON string (see parse_yaml_or_json). Its model
+    # field is JSONBlob, whose get_internal_type() reports "TextField" for
+    # legacy DB-migration reasons (awx/main/fields.py); since CleanTextMixin
+    # classifies fields via get_internal_type(), a dict payload is silently
+    # skipped (not a str) while a string payload hits Tier 2's
+    # template-injection blocklist and incorrectly rejects legitimate Jinja
+    # variable references -- same conflict class as extra_vars (AAP-78694).
+    # NOTE: this must be set directly on this class, not on
+    # LaunchConfigurationBaseSerializer -- CleanTextMixin's own
+    # excluded_fields default sits earlier in the MRO than that shared base,
+    # so a base-class override there is silently shadowed and never applies.
+    excluded_fields = frozenset({'extra_data'})
+
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -4278,7 +4453,12 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
         return summary_fields
 
 
-class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
+class WorkflowJobNodeSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer):
+    # See WorkflowJobTemplateNodeSerializer.excluded_fields above -- same
+    # reasoning, and same requirement that this live directly on this class
+    # rather than on the shared LaunchConfigurationBaseSerializer base.
+    excluded_fields = frozenset({'extra_data'})
+
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -4348,7 +4528,7 @@ class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer)
         return field_class, field_kwargs
 
 
-class WorkflowJobTemplateNodeCreateApprovalSerializer(BaseSerializer):
+class WorkflowJobTemplateNodeCreateApprovalSerializer(CleanTextMixin, BaseSerializer):
     class Meta:
         model = WorkflowApprovalTemplate
         fields = ('timeout', 'name', 'description')
@@ -4570,7 +4750,13 @@ class SystemJobEventSerializer(AdHocCommandEventSerializer):
         return res
 
 
-class JobLaunchSerializer(BaseSerializer):
+class JobLaunchSerializer(CleanTextMixin, BaseSerializer):
+    # extra_vars is declared as a JSONField below, so it's already a parsed
+    # dict/list (not a str) by the time CleanTextMixin.validate() runs, which
+    # makes this a no-op today -- excluded anyway for clarity/future-proofing,
+    # consistent with JobTemplateSerializer's extra_vars exclusion.
+    excluded_fields = frozenset({'extra_vars'})
+
     # Representational fields
     passwords_needed_to_start = serializers.ReadOnlyField()
     can_start_without_user_input = serializers.BooleanField(read_only=True)
@@ -4786,7 +4972,13 @@ class JobLaunchSerializer(BaseSerializer):
         return accepted
 
 
-class WorkflowJobLaunchSerializer(BaseSerializer):
+class WorkflowJobLaunchSerializer(PromptFieldCleanTextMixin, BaseSerializer):
+    # extra_vars is declared as a VerbatimField below, so it's already a
+    # parsed dict/list (not a str) by the time CleanTextMixin.validate() runs,
+    # which makes this a no-op today -- excluded anyway for clarity/future-
+    # proofing, consistent with WorkflowJobTemplateSerializer's exclusion.
+    excluded_fields = frozenset({'extra_vars'})
+
     can_start_without_user_input = serializers.BooleanField(read_only=True)
     defaults = serializers.SerializerMethodField()
     variables_needed_to_start = serializers.ReadOnlyField()
@@ -4904,6 +5096,10 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
         fields = ('*', 'credentials', 'labels', 'instance_groups')  # m2m fields are not canonical for WJ nodes
 
     def validate(self, attrs):
+        # Deliberately skips LaunchConfigurationBaseSerializer.validate() (see
+        # its comment above) -- run Tier 1/2 validation explicitly first
+        # since that skip would otherwise bypass it too (AAP-78694).
+        attrs = self._run_clean_text_validation(attrs)
         return super(LaunchConfigurationBaseSerializer, self).validate(attrs)
 
     def get_validation_exclusions(self, obj=None):
@@ -4912,7 +5108,15 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
         return ret
 
 
-class BulkJobLaunchSerializer(serializers.Serializer):
+class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer):
+    # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
+    # ("{{ var }}"); by the time this mixin's validate() runs it has already
+    # been converted from a dict to a JSON string by validate() below
+    # (unlike JobLaunchSerializer/WorkflowJobLaunchSerializer's extra_vars,
+    # which stay parsed), so this exclusion is load-bearing here, not
+    # defensive (AAP-78694).
+    excluded_fields = frozenset({'extra_vars'})
+
     name = serializers.CharField(default='Bulk Job Launch', max_length=512, write_only=True, required=False, allow_blank=True)  # limited by max name of jobs
     jobs = BulkJobNodeSerializer(
         many=True,
@@ -5150,9 +5354,28 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         return objectified_jobs
 
 
-class NotificationTemplateSerializer(BaseSerializer):
+class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
     capabilities_prefetch = [{'copy': 'organization.add_notificationtemplate'}]
+
+    # messages is user-authored Jinja2 template text ("{{ job.id }}" etc.),
+    # already validated by its own sandboxed Jinja renderer in
+    # validate_messages() below -- a stronger, purpose-built check that
+    # Tier 2 would conflict with.
+    excluded_fields = frozenset({'messages'})
+
+    # notification_configuration's schema is notification_type-dependent, but
+    # unlike Credential.inputs (admin-definable custom types with arbitrary
+    # secret fields), notification_type is a fixed models.CharField(choices=...)
+    # -- every possible backend class ships in awx/main/notifications/ and is
+    # known at code-authoring time. This is the exhaustive union, across all
+    # backends, of every init_parameters key with type "password" (verified:
+    # none of these names are used for a non-secret value in any backend):
+    # email/irc/webhook password, slack/pagerduty token, twilio account_token,
+    # grafana grafana_key, awssns aws_secret_access_key/aws_session_token.
+    excluded_json_keys = MappingProxyType(
+        {'notification_configuration': frozenset({'password', 'token', 'account_token', 'grafana_key', 'aws_secret_access_key', 'aws_session_token'})}
+    )
 
     class Meta:
         model = NotificationTemplate
@@ -5325,7 +5548,11 @@ class NotificationTemplateSerializer(BaseSerializer):
         password_fields_to_forward = []
         error_list = []
         if 'notification_configuration' not in attrs:
-            return attrs
+            # Still chain into CleanTextMixin.validate() (AAP-78694) so a
+            # PATCH that omits notification_configuration (e.g. name/
+            # description only) doesn't skip Tier 1/2 validation entirely --
+            # only the config-schema checks below are skipped.
+            return super(NotificationTemplateSerializer, self).validate(attrs)
         if self.context['view'].kwargs and isinstance(self.context['view'], NotificationTemplateDetail):
             object_actual = self.context['view'].get_object()
         else:
@@ -5416,7 +5643,7 @@ class NotificationSerializer(BaseSerializer):
         return ret
 
 
-class LabelSerializer(BaseSerializer):
+class LabelSerializer(CleanTextMixin, BaseSerializer):
     class Meta:
         model = Label
         fields = ('*', '-description', 'organization')
@@ -5496,7 +5723,12 @@ class SchedulePreviewSerializer(BaseSerializer):
         return value
 
 
-class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
+class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
+    # See WorkflowJobTemplateNodeSerializer.excluded_fields above -- same
+    # reasoning, and same requirement that this live directly on this class
+    # rather than on the shared LaunchConfigurationBaseSerializer base.
+    excluded_fields = frozenset({'extra_data'})
+
     show_capabilities = ['edit', 'delete']
 
     timezone = serializers.SerializerMethodField(
@@ -5625,8 +5857,14 @@ class ReceptorAddressSerializer(BaseSerializer):
         return obj.get_full_address()
 
 
-class InstanceSerializer(BaseSerializer):
+class InstanceSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit']
+
+    # hostname's existing HostnameRegexValidator (see extra_kwargs below)
+    # explicitly accepts IPv6 addresses, which contain colons that Tier 1's
+    # allowlist rejects. Demote to Tier 2 so IPv6 execution-node hostnames
+    # keep working; the existing validator remains the real charset gate.
+    name_fields = DEFAULT_NAME_FIELDS - {'hostname'}
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
@@ -5926,7 +6164,7 @@ class HostMetricSummaryMonthlySerializer(BaseSerializer):
         fields = read_only_fields
 
 
-class InstanceGroupSerializer(BaseSerializer):
+class InstanceGroupSerializer(CleanTextMixin, BaseSerializer):
     show_capabilities = ['edit', 'delete']
     capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
