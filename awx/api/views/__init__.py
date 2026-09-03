@@ -3568,6 +3568,19 @@ class WorkflowJobTemplateCopy(CopyAPIView):
                         if not user.can_access(cred.__class__, 'use', cred):
                             logger.debug('Deep copy: removing {} from relationship due to permissions'.format(cred))
                             item.remove(cred.pk)
+                elif field_name in ['instance_groups']:
+                    for ig in item.all():
+                        if not user.can_access(ig.__class__, 'use', ig):
+                            logger.debug('Deep copy: removing {} from relationship due to permissions'.format(ig))
+                            item.remove(ig.pk)
+                elif field_name in ['execution_environment']:
+                    if not user.can_access(item.__class__, 'read', item):
+                        setattr(obj, field_name, None)
+                elif field_name in ['labels']:
+                    for label in item.all():
+                        if not user.can_access(label.__class__, 'read', label):
+                            logger.debug('Deep copy: removing {} from relationship due to permissions'.format(label))
+                            item.remove(label.pk)
             obj.save()
 
 
