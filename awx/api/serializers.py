@@ -2837,6 +2837,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     continue
                 new_roles_seen.add(new_role.id)
                 old_role = get_role_from_object_role(new_role)
+                if old_role is None:
+                    continue
                 all_permissive_role_ids.add(old_role.id)
 
                 if int(new_role.object_id) == obj.id and new_role.content_type_id == content_type.id:
@@ -2857,6 +2859,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     continue
                 new_roles_seen.add(new_role.id)
                 old_role = get_role_from_object_role(new_role)
+                if old_role is None:
+                    continue
                 all_permissive_role_ids.add(old_role.id)
 
             # In DAB RBAC, superuser is strictly a user flag, and global roles are not in the RoleEvaluation table
