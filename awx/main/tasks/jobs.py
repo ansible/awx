@@ -703,16 +703,11 @@ class BaseTask(object):
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
-            self.runner_callback.safe_env = build_safe_env(env)
+            # Initialize common callback fields via the shared factory so that the
+            # normal job path exercises the same configuration code as adoption.
+            from awx.main.tasks.receptor import _configure_runner_callback
 
-            self.runner_callback.instance = self.instance
-
-            # store a reference to the parent workflow job (if any) so we can include
-            # it in event data JSON
-            if self.instance.spawned_by_workflow:
-                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
-
-            self.runner_callback.job_created = str(self.instance.created)
+            _configure_runner_callback(self.runner_callback, self.instance, safe_env=build_safe_env(env))
 
             credentials = self._credentials
 

@@ -17,6 +17,7 @@ import pytest
 from awx.main.tasks.receptor import (
     AWXReceptorJob,
     _AdoptionTask,
+    _configure_runner_callback,
     _get_adoption_exit_code,
     _get_or_create_private_data_dir,
     receptor_config_exists,
@@ -439,6 +440,68 @@ def test_adoption_task_build_ee_params_returns_empty_dict():
 def test_adoption_task_update_model_is_noop():
     task = _AdoptionTask(Mock(), Mock())
     task.update_model(1, status='successful', result_traceback='boom')  # must not raise
+
+
+# ---------------------------------------------------------------------------
+# _configure_runner_callback — shared initialization for normal + adoption paths
+# ---------------------------------------------------------------------------
+
+
+def test_configure_runner_callback_sets_common_fields():
+    from awx.main.tasks.callback import RunnerCallback
+
+    cb = RunnerCallback(model=None)
+    instance = Mock()
+    instance.created = '2026-01-01T00:00:00Z'
+    instance.spawned_by_workflow = False
+
+    _configure_runner_callback(cb, instance, safe_env={'KEY': 'val'}, persisted_counters={1, 2})
+
+    assert cb.instance is instance
+    assert cb.job_created == str(instance.created)
+    assert cb.safe_env == {'KEY': 'val'}
+    assert cb.persisted_counters == {1, 2}
+
+
+def test_configure_runner_callback_safe_env_defaults_to_empty_dict():
+    from awx.main.tasks.callback import RunnerCallback
+
+    cb = RunnerCallback(model=None)
+    instance = Mock()
+    instance.created = '2026-01-01'
+    instance.spawned_by_workflow = False
+
+    _configure_runner_callback(cb, instance)
+
+    assert cb.safe_env == {}
+    assert cb.persisted_counters is None
+
+
+def test_configure_runner_callback_sets_parent_workflow_job_id():
+    from awx.main.tasks.callback import RunnerCallback
+
+    cb = RunnerCallback(model=None)
+    instance = Mock()
+    instance.created = '2026-01-01'
+    instance.spawned_by_workflow = True
+    instance.get_workflow_job.return_value.id = 42
+
+    _configure_runner_callback(cb, instance)
+
+    assert cb.parent_workflow_job_id == 42
+
+
+def test_configure_runner_callback_swallows_workflow_lookup_error():
+    from awx.main.tasks.callback import RunnerCallback
+
+    cb = RunnerCallback(model=None)
+    instance = Mock()
+    instance.created = '2026-01-01'
+    instance.spawned_by_workflow = True
+    instance.get_workflow_job.side_effect = Exception('lookup failed')
+
+    _configure_runner_callback(cb, instance)  # must not raise
+    assert cb.parent_workflow_job_id is None
 
 
 # ---------------------------------------------------------------------------
