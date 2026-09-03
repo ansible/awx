@@ -1,6 +1,9 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+import ipaddress
+import socket
+
 from django.core.mail.backends.smtp import EmailBackend
 
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
@@ -51,3 +54,25 @@ class CustomEmailBackend(EmailBackend, CustomNotificationBase):
     def format_body(self, body):
         # leave body unchanged (expect a string)
         return body
+
+    @staticmethod
+    def _validate_host_not_internal(host):
+        if not host:
+            return
+        if host.startswith('[') and host.endswith(']'):
+            host = host[1:-1]
+        try:
+            addrinfo = socket.getaddrinfo(host, None)
+        except socket.gaierror:
+            return
+        for family, type_, proto, canonname, sockaddr in addrinfo:
+            try:
+                ip = ipaddress.ip_address(sockaddr[0])
+            except ValueError:
+                continue
+            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+                raise ValueError('SMTP host is not allowed: the host resolves to a private or reserved network address.')
+
+    def open(self):
+        self._validate_host_not_internal(self.host)
+        return super().open()
