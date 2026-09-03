@@ -882,7 +882,7 @@ def _get_adoption_exit_code(unit_status, state_name):
         return 0 if state_name == 'Succeeded' else 1
 
 
-def _configure_runner_callback(callback, instance, safe_env=None, persisted_counters=None):
+def _configure_runner_callback(callback, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
     """Configure a RunnerCallback with the fields required for event processing.
 
     This is the single source of truth for RunnerCallback initialization, shared
@@ -895,9 +895,12 @@ def _configure_runner_callback(callback, instance, safe_env=None, persisted_coun
         instance: the UnifiedJob model instance being run
         safe_env: masked environment dict for log output. None → {} (adoption path,
             where credentials are not available at reconnect time)
-        persisted_counters: set of event counters already in DB. None disables the
-            counter-skip check (normal jobs, zero overhead). Set by adoption to avoid
-            re-dispatching events that are already persisted.
+        dedup_threshold: highest counter where all lower counters are in DB (contiguous
+            prefix). event_handler skips counter <= threshold with an O(1) check. None
+            disables dedup (normal jobs, zero overhead).
+        persisted_counters: small set of counters above dedup_threshold that are already
+            in DB (the collision zone from parallel callback worker races). Bounded by
+            worker concurrency, not job size. None when dedup is disabled.
     """
     callback.instance = instance
     callback.job_created = str(instance.created)  # stamped on every event (callback.py:160)
@@ -907,15 +910,25 @@ def _configure_runner_callback(callback, instance, safe_env=None, persisted_coun
             callback.parent_workflow_job_id = instance.get_workflow_job().id
         except Exception:
             pass
+    callback.dedup_threshold = dedup_threshold
     callback.persisted_counters = persisted_counters
+    # Rebuild host_map from inventory so that replayed post-kill events get host_id set.
+    # For normal jobs this is populated by write_inventory_file(); for adoption we
+    # reconstruct it from the already-saved inventory hosts.
+    if hasattr(instance, 'inventory') and instance.inventory_id:
+        try:
+            for host in instance.inventory.hosts.only('name', 'id'):
+                callback.host_map[host.name] = host.id
+        except Exception:
+            pass  # host_map stays {}; host_id won't be set on replayed events
 
 
-def _build_adoption_callback(job, persisted_counters):
+def _build_adoption_callback(job, dedup_threshold, collision_zone):
     """Construct a RunnerCallback for event replay during adoption."""
     from awx.main.tasks.callback import RunnerCallback
 
     callback = RunnerCallback(model=type(job))
-    _configure_runner_callback(callback, job, persisted_counters=persisted_counters)
+    _configure_runner_callback(callback, job, dedup_threshold=dedup_threshold, persisted_counters=collision_zone)
     return callback
 
 
@@ -933,6 +946,60 @@ def _get_or_create_private_data_dir(job):
         prefix=JOB_FOLDER_PREFIX % job.pk + 'adoption_',
         dir=settings.AWX_ISOLATION_BASE_PATH,
     )
+
+
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed):
+    """Write terminal status, timestamps, and delayed callback fields to DB.
+
+    Only runs when the job is still 'running' in the DB after _process_phase
+    returns — meaning the async callback receiver hasn't committed status yet.
+    Uses get_delayed_update_fields() to mirror what BaseTask.run() writes via
+    update_model(**get_delayed_update_fields()).
+    """
+    job.refresh_from_db(fields=['status'])
+    if job.status != 'running':
+        return
+
+    final_status = 'successful' if exit_code == 0 else 'failed'
+    finished_at = now()
+
+    delayed = {k: v for k, v in callback.get_delayed_update_fields().items() if k != 'status'}
+    update_kwargs = {'status': final_status, 'finished': finished_at, **delayed}
+    if job.started:
+        update_kwargs['elapsed'] = (finished_at - job.started).total_seconds()
+    for field, value in update_kwargs.items():
+        setattr(job, field, value)
+    job.save(update_fields=list(update_kwargs.keys()))
+
+    if hasattr(job, 'send_notification_templates'):
+        job.send_notification_templates('succeeded' if final_status == 'successful' else 'failed')
+    job.websocket_emit_status(final_status)
+
+    label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
+    logger.info(f'Job {job.id} finalized via {label}: {final_status}')
+
+
+def _compute_adoption_dedup(job):
+    """Return (safe_threshold, collision_zone) for counter-skip dedup during adoption.
+
+    Hybrid approach — memory is O(1) + O(worker_count), never O(total events):
+
+    safe_threshold: highest counter where all lower counters are also in DB (contiguous
+        prefix). Events <= this are skipped with a single integer comparison.
+
+    collision_zone: small set of counters above safe_threshold that ARE in DB. These
+        exist because parallel callback workers can commit a higher-counter event before
+        a lower-counter one. Bounded by JOB_EVENT_WORKERS × batch size, typically < 20
+        regardless of total job event count.
+    """
+    from django.db.models import Exists, OuterRef
+
+    next_ctr = job.get_event_queryset().filter(counter=OuterRef('counter') + 1)
+    gap_event = job.get_event_queryset().annotate(has_next=Exists(next_ctr)).filter(has_next=False).order_by('counter').first()
+    safe_threshold = gap_event.counter if gap_event else 0
+
+    collision_zone = set(job.get_event_queryset().filter(counter__gt=safe_threshold).values_list('counter', flat=True))
+    return safe_threshold, collision_zone
 
 
 def reattach_to_work_unit(job, receptor_ctl):
@@ -965,15 +1032,14 @@ def reattach_to_work_unit(job, receptor_ctl):
     exit_code = _get_adoption_exit_code(unit_status, state_name)
     logger.info(f'Adopting job {job.id}: receptor_state={state_name} exit_code={exit_code}')
 
-    # Counter-skip dedup: collect all counters already written to DB so the event_handler
-    # can skip them on replay. Using a set (not Max) avoids a gap when parallel callback
-    # workers commit a higher-counter event before a lower-counter one — Max would then
-    # incorrectly skip the un-persisted lower event permanently.
-    persisted_counters = set(job.get_event_queryset().values_list('counter', flat=True))
-    max_counter = max(persisted_counters) if persisted_counters else 0
-    logger.info(f'Job {job.id}: {len(persisted_counters)} events in DB (max counter={max_counter}), replaying from startpos=0 with counter-skip')
+    safe_threshold, collision_zone = _compute_adoption_dedup(job)
+    max_counter = max(collision_zone) if collision_zone else safe_threshold
+    logger.info(
+        f'Job {job.id}: safe_threshold={safe_threshold} collision_zone_size={len(collision_zone)} '
+        f'(max counter={max_counter}), replaying from startpos=0 with counter-skip'
+    )
 
-    callback = _build_adoption_callback(job, persisted_counters)
+    callback = _build_adoption_callback(job, safe_threshold, collision_zone)
 
     private_data_dir = _get_or_create_private_data_dir(job)
     receptor_job = AWXReceptorJob(_AdoptionTask(job, callback), {'private_data_dir': private_data_dir})
@@ -990,35 +1056,8 @@ def reattach_to_work_unit(job, receptor_ctl):
         receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
         shutil.rmtree(private_data_dir, ignore_errors=True)
 
-    # Finalize status from receptor exit code.
-    # finished_callback may have already set the status via the process phase; only touch
-    # the job if it is still marked running.
-    # Also covers the case where _process_phase raised: we already know the terminal exit_code
-    # from `work status` above, so we finalize rather than leaving the job stuck in 'running'.
-    job.refresh_from_db(fields=['status'])
-    if job.status == 'running':
-        final_status = 'successful' if exit_code == 0 else 'failed'
-        finished_at = now()
-
-        # Collect delayed fields set by callbacks during _process_phase
-        # (result_traceback, job_explanation, emitted_events, etc.), mirroring
-        # what BaseTask.run() writes via update_model(**get_delayed_update_fields()).
-        # status is excluded — we derive it from exit_code, not from callbacks.
-        delayed = {k: v for k, v in callback.get_delayed_update_fields().items() if k != 'status'}
-
-        update_kwargs = {'status': final_status, 'finished': finished_at, **delayed}
-        if job.started:
-            update_kwargs['elapsed'] = (finished_at - job.started).total_seconds()
-        for field, value in update_kwargs.items():
-            setattr(job, field, value)
-        job.save(update_fields=list(update_kwargs.keys()))
-        if hasattr(job, 'send_notification_templates'):
-            job.send_notification_templates('succeeded' if final_status == 'successful' else 'failed')
-        job.websocket_emit_status(final_status)
-        if process_phase_failed:
-            logger.info(f'Job {job.id} finalized via adoption exit_code (process phase raised): {final_status}')
-        else:
-            logger.info(f'Job {job.id} finalized via adoption: {final_status}')
+    # Finalize via exit_code if the async callback receiver hasn't committed DB status yet.
+    _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
 
     return True
 

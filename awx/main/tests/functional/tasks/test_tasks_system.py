@@ -767,6 +767,78 @@ def test_process_running_jobs_reaps_undispatched(me_inst):
 
 
 @pytest.mark.django_db
+def test_process_running_jobs_noop_when_no_orphaned_jobs(me_inst):
+    """_process_running_jobs() is a no-op (early return) when all running jobs are active."""
+    active_job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='u1', celery_task_id='active-uuid')
+    ctl = MagicMock()
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        _process_running_jobs(me_inst, ctl, active_task_ids={'active-uuid'}, ref_time=None)
+    mock_reattach.assert_not_called()
+    active_job.refresh_from_db()
+    assert active_job.status == 'running'
+
+
+@pytest.mark.django_db
+def test_process_running_jobs_ref_time_filter(me_inst):
+    """_process_running_jobs() excludes jobs started after ref_time."""
+    future_job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id=None,
+        celery_task_id='future-uuid',
+        started=now() + timedelta(seconds=60),
+    )
+    ref_time = now()
+    ctl = MagicMock()
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        _process_running_jobs(me_inst, ctl, active_task_ids=set(), ref_time=ref_time)
+    mock_reattach.assert_not_called()
+    future_job.refresh_from_db()
+    assert future_job.status == 'running', 'job started after ref_time should not be touched'
+
+
+@pytest.mark.django_db
+def test_process_running_jobs_exception_does_not_abort_loop(me_inst):
+    """Exception in _process_running_jobs job loop is caught — remaining jobs still processed."""
+    job1 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-a', celery_task_id='uuid-a')
+    job2 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-b', celery_task_id='uuid-b')
+
+    processed = []
+
+    def side_effect(j, ctl, timeout, cutoff):
+        if j.id == job1.id:
+            raise RuntimeError('simulated failure')
+        processed.append(j.id)
+
+    with patch('awx.main.tasks.system._try_adopt_job', side_effect=side_effect):
+        _process_running_jobs(me_inst, ctl=MagicMock(), active_task_ids=set(), ref_time=None)
+
+    assert job2.id in processed, 'second job must be processed even though first raised'
+
+
+@pytest.mark.django_db
+def test_process_startup_jobs_exception_does_not_abort_loop(me_inst, settings):
+    """Exception in _process_startup_jobs job loop is caught — remaining jobs still processed."""
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job1 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
+    job2 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None)
+    ctl = MagicMock()
+
+    processed = []
+
+    def side_effect(j, c, timeout, cutoff):
+        if j.id == job1.id:
+            raise RuntimeError('simulated failure')
+        processed.append(j.id)
+
+    with patch('awx.main.tasks.system._try_adopt_job', side_effect=side_effect):
+        _process_startup_jobs(me_inst, ctl)
+
+    job2.refresh_from_db()
+    assert job2.status == 'failed', 'undispatched job2 must still be reaped after job1 exception'
+
+
+@pytest.mark.django_db
 def test_startup_reap_undispatched_reaps_undispatched_leaves_dispatched(me_inst):
     """_startup_reap_undispatched() reaps jobs with no work_unit_id, leaves dispatched jobs alone.
 
@@ -817,6 +889,91 @@ def test_process_startup_jobs_skips_workflow_jobs(me_inst, settings):
 
 
 @pytest.mark.django_db
+def test_configure_runner_callback_populates_host_map(me_inst):
+    """_configure_runner_callback populates host_map from inventory hosts for adoption."""
+    from awx.main.tasks.receptor import _configure_runner_callback
+    from awx.main.tasks.callback import RunnerCallback
+    from awx.main.models import Organization, Inventory, Host
+
+    org = Organization.objects.first()
+    inv = Inventory.objects.create(name='cb-hostmap-inv', organization=org)
+    host = Host.objects.create(name='myhost', inventory=inv)
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv)
+
+    cb = RunnerCallback(model=Job)
+    _configure_runner_callback(cb, job)
+
+    assert cb.host_map.get('myhost') == host.id
+
+
+@pytest.mark.django_db
+def test_receptor_release_work_defers_when_db_status_running(me_inst, settings):
+    """DB-status guard in _receptor_release_work defers release when job is still running."""
+    from awx.main.tasks.receptor import AWXReceptorJob
+
+    settings.RECEPTOR_RELEASE_WORK = True
+    settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-guard')
+
+    rj = AWXReceptorJob.__new__(AWXReceptorJob)
+    rj.unit_id = 'unit-guard'
+    rj.runner_params = {}
+
+    task_mock = MagicMock()
+    task_mock.instance = job
+    rj.task = task_mock
+
+    ctl = MagicMock()
+    rj._receptor_release_work(ctl, 'successful')
+
+    # Guard triggered — job still 'running' in DB → work release NOT called
+    ctl.simple_command.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_compute_adoption_dedup_no_events(me_inst):
+    """_compute_adoption_dedup returns (0, set()) when job has no events in DB."""
+    from awx.main.tasks.receptor import _compute_adoption_dedup
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
+    threshold, collision_zone = _compute_adoption_dedup(job)
+    assert threshold == 0
+    assert collision_zone == set()
+
+
+@pytest.mark.django_db
+def test_compute_adoption_dedup_contiguous_events(me_inst):
+    """_compute_adoption_dedup returns (max_counter, empty set) for contiguous events."""
+    from awx.main.tasks.receptor import _compute_adoption_dedup
+    from awx.main.models import JobEvent
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
+    for ctr in [1, 2, 3, 4, 5]:
+        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok')
+
+    threshold, collision_zone = _compute_adoption_dedup(job)
+    assert threshold == 5
+    assert collision_zone == set()
+
+
+@pytest.mark.django_db
+def test_compute_adoption_dedup_gap_produces_collision_zone(me_inst):
+    """_compute_adoption_dedup finds gap and puts above-gap events in collision_zone."""
+    from awx.main.tasks.receptor import _compute_adoption_dedup
+    from awx.main.models import JobEvent
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
+    # Events 1-3 contiguous, then gap at 4, then 5 and 6 committed out of order
+    for ctr in [1, 2, 3, 5, 6]:
+        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok')
+
+    threshold, collision_zone = _compute_adoption_dedup(job)
+    assert threshold == 3
+    assert collision_zone == {5, 6}
+
+
+@pytest.mark.django_db
 def test_try_adopt_job_timeout_reaps(me_inst):
     """_try_adopt_job reaps a job orphaned longer than HADR_JOB_ADOPTION_TIMEOUT."""
     job = Job.objects.create(
@@ -846,22 +1003,24 @@ def test_try_adopt_job_exception_is_swallowed(me_inst):
 
 @pytest.mark.django_db
 def test_adoption_counter_skip_dedup():
-    """RunnerCallback.event_handler skips events whose counter is in persisted_counters.
+    """RunnerCallback.event_handler hybrid dedup: O(1) threshold + small collision-zone set.
 
-    Uses a set rather than a max threshold so out-of-order worker persistence doesn't
-    cause gaps: a higher-counter event committed while a lower-counter event is still
-    buffered would erroneously skip the lower event with a max-based approach.
+    safe_threshold skips the contiguous prefix with a single integer comparison.
+    persisted_counters (collision_zone) handles out-of-order committed events above
+    the threshold — bounded by worker concurrency, not total event count.
     """
     from awx.main.tasks.callback import RunnerCallback
 
     cb = RunnerCallback()
-    cb.persisted_counters = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+    # Simulate: events 1-8 committed contiguously (threshold=8),
+    # events 9,10 committed out-of-order (collision zone)
+    cb.dedup_threshold = 8
+    cb.persisted_counters = {9, 10}
 
     dispatched = []
     cb.dispatcher = MagicMock()
     cb.dispatcher.dispatch.side_effect = dispatched.append
 
-    # mock the minimum needed for event_handler to run
     from collections import deque
 
     cb.instance = MagicMock()
@@ -872,19 +1031,23 @@ def test_adoption_counter_skip_dedup():
     cb.host_map = {}
     cb.recent_event_timings = deque(maxlen=100)
 
-    # event whose counter is in the persisted set — should be skipped
+    # below threshold — skipped by O(1) integer check
     cb.event_handler({'event': 'runner_on_ok', 'counter': 5, 'job_id': 1})
-    assert len(dispatched) == 0, 'event with counter in persisted_counters should be skipped'
+    assert len(dispatched) == 0, 'counter <= threshold should be skipped'
 
-    # event at the top of the set — also skipped
-    cb.event_handler({'event': 'runner_on_ok', 'counter': 10, 'job_id': 1})
-    assert len(dispatched) == 0, 'event at max persisted counter should be skipped'
+    # at threshold — also skipped
+    cb.event_handler({'event': 'runner_on_ok', 'counter': 8, 'job_id': 1})
+    assert len(dispatched) == 0, 'counter == threshold should be skipped'
 
-    # None sentinel disables skip entirely (default RunnerCallback behavior)
+    # in collision zone — skipped by set membership
+    cb.event_handler({'event': 'runner_on_ok', 'counter': 9, 'job_id': 1})
+    assert len(dispatched) == 0, 'counter in collision_zone should be skipped'
+
+    # None threshold disables dedup entirely (normal job path, zero overhead)
+    cb.dedup_threshold = None
     cb.persisted_counters = None
     cb.event_handler({'event': 'runner_on_ok', 'counter': 1, 'job_id': 1})
-    # no assertion — just verify no exception; dispatched may or may not be called
-    # depending on deeper event_handler logic
+    # no assertion — just verify no exception
 
 
 # ── reattach_to_work_unit branch coverage ────────────────────────────────────
