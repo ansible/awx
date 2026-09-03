@@ -7,6 +7,7 @@ from awx.api.versioning import reverse
 
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Organization, Inventory, WorkflowJob, ExecutionEnvironment, Host
+from awx.main.models.ha import InstanceGroup
 from awx.main.scheduler import TaskManager
 
 from django.test import override_settings
@@ -688,3 +689,77 @@ def test_bulk_job_launch_allows_jinja_extra_vars(organization, inventory, projec
             normal_user,
             expect=201,
         )
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_instance_group_read_role_rejected(organization, inventory, project, post, user):
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+
+    jt = JobTemplate.objects.create(
+        name='my-jt',
+        ask_instance_groups_on_launch=True,
+        project=project,
+        inventory=inventory,
+        playbook='helloworld.yml',
+    )
+    jt.execute_role.members.add(normal_user)
+    inventory.use_role.members.add(normal_user)
+
+    ig = InstanceGroup.objects.create(name='test-ig')
+    ig.read_role.members.add(normal_user)
+
+    response = post(
+        reverse('api:bulk_job_launch'),
+        {
+            'name': 'Bulk Job Launch',
+            'jobs': [
+                {
+                    'unified_job_template': jt.id,
+                    'instance_groups': [ig.id],
+                }
+            ],
+        },
+        normal_user,
+        expect=400,
+    )
+    assert 'Instance Groups' in str(response.data)
+
+
+@pytest.mark.django_db
+def test_bulk_job_launch_instance_group_use_role_permitted(organization, inventory, project, post, user, mocker):
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+
+    jt = JobTemplate.objects.create(
+        name='my-jt',
+        ask_instance_groups_on_launch=True,
+        project=project,
+        inventory=inventory,
+        playbook='helloworld.yml',
+    )
+    jt.execute_role.members.add(normal_user)
+    inventory.use_role.members.add(normal_user)
+
+    ig = InstanceGroup.objects.create(name='test-ig')
+    ig.use_role.members.add(normal_user)
+
+    mocker.patch(
+        'awx.api.serializers.BulkJobLaunchSerializer.create',
+        return_value={'id': 1, 'url': '/api/v2/workflow_jobs/1/'},
+    )
+
+    post(
+        reverse('api:bulk_job_launch'),
+        {
+            'name': 'Bulk Job Launch',
+            'jobs': [
+                {
+                    'unified_job_template': jt.id,
+                    'instance_groups': [ig.id],
+                }
+            ],
+        },
+        normal_user,
+        expect=201,
+    )
