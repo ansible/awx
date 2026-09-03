@@ -340,6 +340,35 @@ class ApiV2ConfigView(APIView):
         if not license_data.get('valid_key', False):
             license_data = {}
 
+        # Check superuser/auditor first
+        if request.user.is_superuser or request.user.is_system_auditor:
+            is_privileged = True
+        else:
+            # Single query checking all three organization role types at once
+            is_privileged = (
+                (
+                    Organization.access_qs(request.user, 'change')
+                    | Organization.access_qs(request.user, 'audit')
+                    | Organization.access_qs(request.user, 'add_project')
+                )
+                .distinct()
+                .exists()
+            )
+
+        if not is_privileged:
+            allowed_license_keys = {
+                'license_type',
+                'valid_key',
+                'compliant',
+                'date_warning',
+                'date_expired',
+                'trial',
+                'product_name',
+                'time_remaining',
+                'grace_period_remaining',
+            }
+            license_data = {k: v for k, v in license_data.items() if k in allowed_license_keys}
+
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
         data = dict(
@@ -352,22 +381,7 @@ class ApiV2ConfigView(APIView):
             become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 
-        # Check superuser/auditor first
-        if request.user.is_superuser or request.user.is_system_auditor:
-            has_org_access = True
-        else:
-            # Single query checking all three organization role types at once
-            has_org_access = (
-                (
-                    Organization.access_qs(request.user, 'change')
-                    | Organization.access_qs(request.user, 'audit')
-                    | Organization.access_qs(request.user, 'add_project')
-                )
-                .distinct()
-                .exists()
-            )
-
-        if has_org_access:
+        if is_privileged:
             data.update(
                 dict(
                     project_base_dir=settings.PROJECTS_ROOT,
