@@ -882,24 +882,40 @@ def _get_adoption_exit_code(unit_status, state_name):
         return 0 if state_name == 'Succeeded' else 1
 
 
-def _build_adoption_callback(job, persisted_counters):
-    """Construct a RunnerCallback for event replay during adoption.
+def _configure_runner_callback(callback, instance, safe_env=None, persisted_counters=None):
+    """Configure a RunnerCallback with the fields required for event processing.
 
-    Mirrors the initialization that BaseTask.run() performs in jobs.py so that
-    replayed events are stored with correct metadata.
+    This is the single source of truth for RunnerCallback initialization, shared
+    between the normal job path (BaseTask.run) and adoption (reattach_to_work_unit).
+    Having both paths call this function means any missing field is caught by the
+    normal test suite rather than only by adoption-specific tests.
+
+    Args:
+        callback: an already-instantiated RunnerCallback (or subclass)
+        instance: the UnifiedJob model instance being run
+        safe_env: masked environment dict for log output. None → {} (adoption path,
+            where credentials are not available at reconnect time)
+        persisted_counters: set of event counters already in DB. None disables the
+            counter-skip check (normal jobs, zero overhead). Set by adoption to avoid
+            re-dispatching events that are already persisted.
     """
-    from awx.main.tasks.callback import RunnerCallback
-
-    callback = RunnerCallback(model=type(job))
-    callback.instance = job
-    callback.job_created = str(job.created)  # stamped on every event (callback.py:160)
-    callback.safe_env = {}  # no credentials to mask at reconnect time; prevents AttributeError
-    if getattr(job, 'spawned_by_workflow', False):
+    callback.instance = instance
+    callback.job_created = str(instance.created)  # stamped on every event (callback.py:160)
+    callback.safe_env = safe_env if safe_env is not None else {}
+    if getattr(instance, 'spawned_by_workflow', False):
         try:
-            callback.parent_workflow_job_id = job.get_workflow_job().id
+            callback.parent_workflow_job_id = instance.get_workflow_job().id
         except Exception:
             pass
     callback.persisted_counters = persisted_counters
+
+
+def _build_adoption_callback(job, persisted_counters):
+    """Construct a RunnerCallback for event replay during adoption."""
+    from awx.main.tasks.callback import RunnerCallback
+
+    callback = RunnerCallback(model=type(job))
+    _configure_runner_callback(callback, job, persisted_counters=persisted_counters)
     return callback
 
 
@@ -983,11 +999,19 @@ def reattach_to_work_unit(job, receptor_ctl):
     if job.status == 'running':
         final_status = 'successful' if exit_code == 0 else 'failed'
         finished_at = now()
-        job.status = final_status
-        job.finished = finished_at
+
+        # Collect delayed fields set by callbacks during _process_phase
+        # (result_traceback, job_explanation, emitted_events, etc.), mirroring
+        # what BaseTask.run() writes via update_model(**get_delayed_update_fields()).
+        # status is excluded — we derive it from exit_code, not from callbacks.
+        delayed = {k: v for k, v in callback.get_delayed_update_fields().items() if k != 'status'}
+
+        update_kwargs = {'status': final_status, 'finished': finished_at, **delayed}
         if job.started:
-            job.elapsed = (finished_at - job.started).total_seconds()
-        job.save(update_fields=['status', 'finished', 'elapsed'])
+            update_kwargs['elapsed'] = (finished_at - job.started).total_seconds()
+        for field, value in update_kwargs.items():
+            setattr(job, field, value)
+        job.save(update_fields=list(update_kwargs.keys()))
         if hasattr(job, 'send_notification_templates'):
             job.send_notification_templates('succeeded' if final_status == 'successful' else 'failed')
         job.websocket_emit_status(final_status)
