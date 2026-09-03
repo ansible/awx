@@ -154,3 +154,40 @@ class TestArtifactsHandler:
         assert 'installed_collections' not in rc.extra_update_fields
         assert 'ansible_version' not in rc.extra_update_fields
         assert rc.artifacts_processed is True
+
+
+def test_event_clocks_skip_keepalive_and_keep_first_event(mock_me):
+    rc = RunnerCallback()
+    rc.instance = mock.Mock(id=1)
+    rc.dispatcher = mock.MagicMock()
+    rc.event_data_key = 'job_id'
+    rc.wrapup_event_type = 'playbook_on_stats'
+
+    rc.event_handler({'event': 'keepalive'})
+    assert rc.first_event_at is None
+
+    rc.event_handler({'event': 'playbook_on_start', 'event_data': {}})
+    first = rc.first_event_at
+    assert first is not None
+
+    rc.event_handler({'event': 'runner_on_ok', 'event_data': {}})
+    assert rc.first_event_at == first
+    assert rc.wrapup_event_at is None
+
+    rc.event_handler({'event': 'playbook_on_stats', 'event_data': {}})
+    assert rc.wrapup_event_at is not None
+    assert rc.wrapup_event_at >= first
+
+
+def test_status_handler_records_runner_starting(mock_me):
+    rc = RunnerCallback()
+    rc.instance = mock.Mock(pk=1)
+    rc.safe_env = {}
+    rc.update_model = mock.Mock(return_value=rc.instance)
+    runner_config = mock.Mock(command=['podman', 'run'], cwd='/runner', env={})
+
+    rc.status_handler({'status': 'starting'}, runner_config)
+
+    assert rc.runner_starting_at is not None
+    rc.instance.log_lifecycle.assert_called_with('runner_starting')
+

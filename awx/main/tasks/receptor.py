@@ -47,6 +47,27 @@ __RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
 
+def compute_execution_timing(work_type, marks, runner_starting_at=None, first_event_at=None, wrapup_event_at=None):
+    """Build Receptor / runner / EE duration fields from monotonic timestamps.
+
+    marks keys: transmit_start, transmit_end, processor_end
+    """
+
+    def delta(start, end):
+        if start is None or end is None:
+            return None
+        return round(end - start, 3)
+
+    return {
+        'work_type': work_type,
+        'receptor_transmit_s': delta(marks.get('transmit_start'), marks.get('transmit_end')),
+        'runner_setup_s': delta(marks.get('transmit_end'), runner_starting_at),
+        'ee_start_s': delta(runner_starting_at, first_event_at),
+        'playbook_s': delta(first_event_at, wrapup_event_at),
+        'result_stream_s': delta(wrapup_event_at, marks.get('processor_end')),
+    }
+
+
 class ReceptorConnectionType(Enum):
     DATAGRAM = 0
     STREAM = 1
@@ -391,6 +412,7 @@ class AWXReceptorJob:
         self.task = task
         self.runner_params = runner_params
         self.unit_id = None
+        self.timing = {}
 
         if self.task and not self.task.instance.is_container_group_task:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
@@ -444,6 +466,25 @@ class AWXReceptorJob:
         except Exception:
             logger.exception(f"Error releasing work unit {self.unit_id}.")
 
+    def _mark(self, key):
+        self.timing[key] = time.monotonic()
+
+    def _log_execution_timing(self):
+        try:
+            callback = getattr(self.task, 'runner_callback', None)
+            timing = compute_execution_timing(
+                self.work_type,
+                self.timing,
+                runner_starting_at=getattr(callback, 'runner_starting_at', None),
+                first_event_at=getattr(callback, 'first_event_at', None),
+                wrapup_event_at=getattr(callback, 'wrapup_event_at', None),
+            )
+            if self.task and self.task.instance:
+                self.task.instance.log_lifecycle("execution_timing", timing=timing)
+            logger.info('%s execution timing: %s', getattr(self.task.instance, 'log_format', 'job'), timing)
+        except Exception:
+            logger.exception('Failed to record execution timing')
+
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
@@ -457,11 +498,15 @@ class AWXReceptorJob:
             use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
             work_submit_kw['tlsclient'] = get_tls_client(self.config_data, use_stream_tls)
 
+        self._mark('transmit_start')
+        self.task.instance.log_lifecycle("receptor_transmit_start", work_type=self.work_type)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             transmitter_future = executor.submit(self.transmit, sockin)
 
             # submit our work, passing in the right side of our socketpair for reading.
             result = receptor_ctl.submit_work(payload=sockout.makefile('rb'), **work_submit_kw)
+            self._mark('submit_work')
 
             sockin.close()
             sockout.close()
@@ -486,6 +531,8 @@ class AWXReceptorJob:
         # Throws an exception if the transmit failed.
         # Will be caught by the try/except in BaseTask#run.
         transmitter_future.result()
+        self._mark('transmit_end')
+        self.task.instance.log_lifecycle("receptor_transmit_end")
 
         # Artifacts are an output, but sometimes they are an input as well
         # this is the case with fact cache, where clearing facts deletes a file, and this must be captured
@@ -518,6 +565,8 @@ class AWXReceptorJob:
                 res = result('canceled', 1)
             finally:
                 signal_state.raise_exception = False
+                self._mark('processor_end')
+                self._log_execution_timing()
 
             if res.status == 'error':
                 # If ansible-runner ran, but an error occured at runtime, the traceback information

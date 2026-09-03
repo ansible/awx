@@ -41,6 +41,16 @@ def test_log_representation():
     assert uj.log_format == 'unified_job 4 (running)'
 
 
+def test_log_lifecycle_accepts_timing_extra_fields():
+    job = Job(status='running', id=4, name='example')
+    with mock.patch('awx.main.models.unified_jobs.logger_job_lifecycle') as log:
+        job.log_lifecycle('execution_timing', timing={'playbook_s': 1.25, 'ee_start_s': None})
+    extra = log.info.call_args.kwargs['extra']['lifecycle_data']
+    assert extra['state'] == 'execution_timing'
+    assert extra['task_id'] == 4
+    assert extra['timing'] == {'playbook_s': 1.25, 'ee_start_s': None}
+
+
 class TestMetaVars:
     """
     Corresponding functional test exists for cases with indirect relationships

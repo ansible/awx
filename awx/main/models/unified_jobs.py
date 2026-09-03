@@ -1617,13 +1617,16 @@ class UnifiedJob(
     def is_container_group_task(self):
         return False
 
-    def log_lifecycle(self, state, blocked_by=None):
-        extra = {
-            'type': self._meta.model_name,
-            'task_id': self.id,
-            'state': state,
-            'work_unit_id': self.work_unit_id,
-        }
+    def log_lifecycle(self, state, blocked_by=None, **extra_fields):
+        extra = dict(extra_fields)
+        extra.update(
+            {
+                'type': self._meta.model_name,
+                'task_id': self.id,
+                'state': state,
+                'work_unit_id': self.work_unit_id,
+            }
+        )
         if self.name:
             extra["task_name"] = self.name
         if state == "blocked" and blocked_by:

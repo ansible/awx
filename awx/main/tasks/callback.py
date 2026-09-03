@@ -91,6 +91,10 @@ class RunnerCallback:
         self.wrapup_event_dispatched = False
         self.artifacts_processed = False
         self.extra_update_fields = {}
+        # Monotonic clocks for Receptor / runner / EE timing (see AWXReceptorJob).
+        self.runner_starting_at = None
+        self.first_event_at = None
+        self.wrapup_event_at = None
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -146,6 +150,10 @@ class RunnerCallback:
         # logger
         if event_data.get('event') == 'keepalive':
             return
+
+        now = time.monotonic()
+        if self.first_event_at is None:
+            self.first_event_at = now
 
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':
@@ -219,6 +227,7 @@ class RunnerCallback:
             self.recent_event_timings.append(time.time())
 
         if event_data.get('event', '') == self.wrapup_event_type:
+            self.wrapup_event_at = now
             self.wrapup_event_dispatched = True
 
         event_data.setdefault(self.event_data_key, self.instance.id)
@@ -245,6 +254,7 @@ class RunnerCallback:
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)
         if self.wrapup_event_type == 'EOF':
+            self.wrapup_event_at = time.monotonic()
             self.wrapup_event_dispatched = True
 
     def status_handler(self, status_data, runner_config):
@@ -252,6 +262,9 @@ class RunnerCallback:
         Ansible runner callback triggered on status transition
         """
         if status_data['status'] == 'starting':
+            self.runner_starting_at = time.monotonic()
+            if self.instance:
+                self.instance.log_lifecycle("runner_starting")
             job_env = dict(runner_config.env)
             '''
             Take the safe environment variables and overwrite

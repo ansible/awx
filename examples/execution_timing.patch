@@ -1,0 +1,192 @@
+# Job execution timing — production files only (no tests).
+#
+# Apply on every control-plane TASK instance. Do not apply on execution, hop,
+# ee, web, postgres, or redis. After patching, restart awx-dispatcher.
+#
+#   python3 -c 'import awx,os; print(os.path.dirname(awx.__file__))'
+#   # cd to the parent of that awx/ directory, then:
+#   patch -p1 < execution_timing.patch
+#   supervisorctl restart awx-dispatcher
+#
+# Repeat on every control-plane replica. Grep job_lifecycle for "execution_timing".
+
+diff --git a/awx/main/models/unified_jobs.py b/awx/main/models/unified_jobs.py
+index bca6b2c4d6..3d34badb0c 100644
+--- a/awx/main/models/unified_jobs.py
++++ b/awx/main/models/unified_jobs.py
+@@ -1617,13 +1617,16 @@ class UnifiedJob(
+     def is_container_group_task(self):
+         return False
+ 
+-    def log_lifecycle(self, state, blocked_by=None):
+-        extra = {
+-            'type': self._meta.model_name,
+-            'task_id': self.id,
+-            'state': state,
+-            'work_unit_id': self.work_unit_id,
+-        }
++    def log_lifecycle(self, state, blocked_by=None, **extra_fields):
++        extra = dict(extra_fields)
++        extra.update(
++            {
++                'type': self._meta.model_name,
++                'task_id': self.id,
++                'state': state,
++                'work_unit_id': self.work_unit_id,
++            }
++        )
+         if self.name:
+             extra["task_name"] = self.name
+         if state == "blocked" and blocked_by:
+diff --git a/awx/main/tasks/callback.py b/awx/main/tasks/callback.py
+index 266fd22015..bf65912b1e 100644
+--- a/awx/main/tasks/callback.py
++++ b/awx/main/tasks/callback.py
+@@ -91,6 +91,10 @@ class RunnerCallback:
+         self.wrapup_event_dispatched = False
+         self.artifacts_processed = False
+         self.extra_update_fields = {}
++        # Monotonic clocks for Receptor / runner / EE timing (see AWXReceptorJob).
++        self.runner_starting_at = None
++        self.first_event_at = None
++        self.wrapup_event_at = None
+ 
+     def update_model(self, pk, _attempt=0, **updates):
+         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
+@@ -147,6 +151,10 @@ class RunnerCallback:
+         if event_data.get('event') == 'keepalive':
+             return
+ 
++        now = time.monotonic()
++        if self.first_event_at is None:
++            self.first_event_at = now
++
+         if event_data.get(self.event_data_key, None):
+             if self.event_data_key != 'job_id':
+                 event_data.pop('parent_uuid', None)
+@@ -219,6 +227,7 @@ class RunnerCallback:
+             self.recent_event_timings.append(time.time())
+ 
+         if event_data.get('event', '') == self.wrapup_event_type:
++            self.wrapup_event_at = now
+             self.wrapup_event_dispatched = True
+ 
+         event_data.setdefault(self.event_data_key, self.instance.id)
+@@ -245,6 +254,7 @@ class RunnerCallback:
+         event_data.setdefault(self.event_data_key, self.instance.id)
+         self.dispatcher.dispatch(event_data)
+         if self.wrapup_event_type == 'EOF':
++            self.wrapup_event_at = time.monotonic()
+             self.wrapup_event_dispatched = True
+ 
+     def status_handler(self, status_data, runner_config):
+@@ -252,6 +262,9 @@ class RunnerCallback:
+         Ansible runner callback triggered on status transition
+         """
+         if status_data['status'] == 'starting':
++            self.runner_starting_at = time.monotonic()
++            if self.instance:
++                self.instance.log_lifecycle("runner_starting")
+             job_env = dict(runner_config.env)
+             '''
+             Take the safe environment variables and overwrite
+diff --git a/awx/main/tasks/receptor.py b/awx/main/tasks/receptor.py
+index e1ccf4d7c4..9aaab399a8 100644
+--- a/awx/main/tasks/receptor.py
++++ b/awx/main/tasks/receptor.py
+@@ -47,6 +47,27 @@ __RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
+ RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
+ 
+ 
++def compute_execution_timing(work_type, marks, runner_starting_at=None, first_event_at=None, wrapup_event_at=None):
++    """Build Receptor / runner / EE duration fields from monotonic timestamps.
++
++    marks keys: transmit_start, transmit_end, processor_end
++    """
++
++    def delta(start, end):
++        if start is None or end is None:
++            return None
++        return round(end - start, 3)
++
++    return {
++        'work_type': work_type,
++        'receptor_transmit_s': delta(marks.get('transmit_start'), marks.get('transmit_end')),
++        'runner_setup_s': delta(marks.get('transmit_end'), runner_starting_at),
++        'ee_start_s': delta(runner_starting_at, first_event_at),
++        'playbook_s': delta(first_event_at, wrapup_event_at),
++        'result_stream_s': delta(wrapup_event_at, marks.get('processor_end')),
++    }
++
++
+ class ReceptorConnectionType(Enum):
+     DATAGRAM = 0
+     STREAM = 1
+@@ -391,6 +412,7 @@ class AWXReceptorJob:
+         self.task = task
+         self.runner_params = runner_params
+         self.unit_id = None
++        self.timing = {}
+ 
+         if self.task and not self.task.instance.is_container_group_task:
+             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
+@@ -444,6 +466,25 @@ class AWXReceptorJob:
+         except Exception:
+             logger.exception(f"Error releasing work unit {self.unit_id}.")
+ 
++    def _mark(self, key):
++        self.timing[key] = time.monotonic()
++
++    def _log_execution_timing(self):
++        try:
++            callback = getattr(self.task, 'runner_callback', None)
++            timing = compute_execution_timing(
++                self.work_type,
++                self.timing,
++                runner_starting_at=getattr(callback, 'runner_starting_at', None),
++                first_event_at=getattr(callback, 'first_event_at', None),
++                wrapup_event_at=getattr(callback, 'wrapup_event_at', None),
++            )
++            if self.task and self.task.instance:
++                self.task.instance.log_lifecycle("execution_timing", timing=timing)
++            logger.info('%s execution timing: %s', getattr(self.task.instance, 'log_format', 'job'), timing)
++        except Exception:
++            logger.exception('Failed to record execution timing')
++
+     def _run_internal(self, receptor_ctl):
+         # Create a socketpair. Where the left side will be used for writing our payload
+         # (private data dir, kwargs). The right side will be passed to Receptor for
+@@ -457,11 +498,15 @@ class AWXReceptorJob:
+             use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
+             work_submit_kw['tlsclient'] = get_tls_client(self.config_data, use_stream_tls)
+ 
++        self._mark('transmit_start')
++        self.task.instance.log_lifecycle("receptor_transmit_start", work_type=self.work_type)
++
+         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+             transmitter_future = executor.submit(self.transmit, sockin)
+ 
+             # submit our work, passing in the right side of our socketpair for reading.
+             result = receptor_ctl.submit_work(payload=sockout.makefile('rb'), **work_submit_kw)
++            self._mark('submit_work')
+ 
+             sockin.close()
+             sockout.close()
+@@ -486,6 +531,8 @@ class AWXReceptorJob:
+         # Throws an exception if the transmit failed.
+         # Will be caught by the try/except in BaseTask#run.
+         transmitter_future.result()
++        self._mark('transmit_end')
++        self.task.instance.log_lifecycle("receptor_transmit_end")
+ 
+         # Artifacts are an output, but sometimes they are an input as well
+         # this is the case with fact cache, where clearing facts deletes a file, and this must be captured
+@@ -518,6 +565,8 @@ class AWXReceptorJob:
+                 res = result('canceled', 1)
+             finally:
+                 signal_state.raise_exception = False
++                self._mark('processor_end')
++                self._log_execution_timing()
+ 
+             if res.status == 'error':
+                 # If ansible-runner ran, but an error occured at runtime, the traceback information
