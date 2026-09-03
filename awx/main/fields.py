@@ -8,7 +8,7 @@ import re
 import sys
 import urllib.parse
 
-from jinja2 import sandbox, StrictUndefined
+from jinja2 import nodes, sandbox, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError, SecurityError
 
 # Django
@@ -764,8 +764,26 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
         def validate_template_string(type_, key, tmpl):
+            env = sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined)
             try:
-                sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
+                ast = env.parse(tmpl)
+            except TemplateSyntaxError as e:
+                raise django_exceptions.ValidationError(
+                    _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+
+            BLOCKED_NODES = (nodes.For, nodes.Extends, nodes.Include, nodes.Import, nodes.FromImport, nodes.Macro, nodes.CallBlock, nodes.FilterBlock)
+            if list(ast.find_all(BLOCKED_NODES)):
+                raise django_exceptions.ValidationError(
+                    _('{sub_key} contains a disallowed Jinja2 construct').format(sub_key=key),
+                    code='invalid',
+                    params={'value': value},
+                )
+
+            try:
+                env.from_string(tmpl).render(valid_namespace)
             except UndefinedError as e:
                 raise django_exceptions.ValidationError(
                     _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
@@ -777,6 +795,12 @@ class CredentialTypeInjectorField(JSONSchemaField):
             except TemplateSyntaxError as e:
                 raise django_exceptions.ValidationError(
                     _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+            except Exception as e:
+                raise django_exceptions.ValidationError(
+                    _('Error validating template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=str(e)),
                     code='invalid',
                     params={'value': value},
                 )
