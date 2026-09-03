@@ -30,7 +30,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -159,6 +159,11 @@ def api_exception_handler(exc, context):
         exc = ParseError(exc.args[0])
     if isinstance(context['view'], UnifiedJobStdout):
         context['view'].renderer_classes = [renderers.BrowsableAPIRenderer, JSONRenderer]
+    if isinstance(exc, Http404):
+        req = context['request']._request
+        if 'awx.named_url_rewritten' in req.environ:
+            req.path = req.environ['awx.named_url_rewritten']
+            exc = NotFound(detail=_('Not found.'))
     if isinstance(exc, APIException):
         req = context['request']._request
         if 'awx.named_url_rewritten' in req.environ and not str(getattr(exc, 'status_code', 0)).startswith('2'):
