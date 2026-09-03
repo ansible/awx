@@ -4716,6 +4716,7 @@ class UnifiedJobStdout(RetrieveAPIView):
 
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
+                content = re.sub(r'\x1b\].*?(?:\x07|\x1b\\)', '', content, flags=re.DOTALL)
 
                 conv = Ansi2HTMLConverter()
                 body = conv.convert(html.escape(content))
