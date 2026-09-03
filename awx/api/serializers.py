@@ -5658,6 +5658,16 @@ class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
             raise serializers.ValidationError(_('Missing required fields for Notification Configuration: notification_type'))
 
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[notification_type]
+
+        # When notification_type changes, ensure stale config is cleaned
+        if self.instance and notification_type != self.instance.notification_type:
+            if 'notification_configuration' not in attrs:
+                attrs['notification_configuration'] = self.instance.notification_configuration.copy()
+            valid_keys = set(notification_class.init_parameters.keys())
+            stale_keys = [k for k in attrs['notification_configuration'] if k not in valid_keys]
+            for k in stale_keys:
+                del attrs['notification_configuration'][k]
+
         missing_fields = []
         incorrect_type_fields = []
         password_fields_to_forward = []
@@ -5690,6 +5700,8 @@ class NotificationTemplateSerializer(CleanTextMixin, BaseSerializer):
                 continue
             if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
                 password_fields_to_forward.append(field)
+            if field_type == "password" and isinstance(field_val, str) and field_val.startswith('$encrypted$') and field_val != '$encrypted$':
+                error_list.append(_('Raw encrypted values are not allowed for field \'{}\'.').format(field))
             if field == "http_method" and field_val.lower() not in ['put', 'post']:
                 error_list.append(_("HTTP method must be either 'POST' or 'PUT'."))
         if missing_fields:

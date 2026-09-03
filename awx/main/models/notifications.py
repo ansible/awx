@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.db import connection
 from django.utils.translation import gettext_lazy as _
-from django.utils.encoding import smart_str, force_str
+from django.utils.encoding import smart_str
 from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
@@ -135,6 +135,16 @@ class NotificationTemplate(CommonModelNameNotUnique):
                         merge_messages(old_messages, new_messages, event)
                     new_messages.setdefault(event, None)
 
+        stale_keys = [
+            k
+            for k in list(self.notification_configuration.keys())
+            if k not in self.notification_class.init_parameters
+            and isinstance(self.notification_configuration.get(k), str)
+            and self.notification_configuration[k].startswith('$encrypted$')
+        ]
+        for k in stale_keys:
+            del self.notification_configuration[k]
+
         for field in filter(lambda x: self.notification_class.init_parameters[x]['type'] == "password", self.notification_class.init_parameters):
             if self.notification_configuration[field].startswith("$encrypted$"):
                 continue
@@ -188,9 +198,9 @@ class NotificationTemplate(CommonModelNameNotUnique):
 
     def display_notification_configuration(self):
         field_val = self.notification_configuration.copy()
-        for field in self.notification_class.init_parameters:
-            if field in field_val and force_str(field_val[field]).startswith('$encrypted$'):
-                field_val[field] = '$encrypted$'
+        for key in field_val:
+            if isinstance(field_val[key], str) and field_val[key].startswith('$encrypted$'):
+                field_val[key] = '$encrypted$'
         return field_val
 
 
