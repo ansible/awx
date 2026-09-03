@@ -3890,7 +3890,12 @@ class SystemJobTemplateLaunch(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
+        extra_vars = request.data.get('extra_vars', {})
+        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(extra_vars=extra_vars)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        new_job = obj.create_unified_job(**accepted)
         new_job.signal_start()
         data = OrderedDict()
         data['system_job'] = new_job.id

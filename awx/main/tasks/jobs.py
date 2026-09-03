@@ -2312,9 +2312,9 @@ class RunSystemJob(BaseTask):
                 json_vars = json.loads(system_job.extra_vars)
             if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
                 if 'days' in json_vars:
-                    args.extend(['--days', str(json_vars.get('days', 60))])
+                    args.extend(['--days', str(int(json_vars.get('days', 60)))])
                 if 'batch_size' in json_vars:
-                    args.extend(['--batch-size', str(json_vars['batch_size'])])
+                    args.extend(['--batch-size', str(int(json_vars['batch_size']))])
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
@@ -2326,7 +2326,7 @@ class RunSystemJob(BaseTask):
         return args
 
     def write_args_file(self, private_data_dir, args):
-        return self.write_private_data_file(private_data_dir, 'args', ' '.join(args))
+        return self.write_private_data_file(private_data_dir, 'args', ansible_runner.utils.args2cmdline(*args))
 
     def build_env(self, instance, private_data_dir, private_data_files=None):
         base_env = super(RunSystemJob, self).build_env(instance, private_data_dir, private_data_files=private_data_files)
