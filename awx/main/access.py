@@ -1928,8 +1928,6 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
             return self.user in obj.workflow_job_template.admin_role
 
     def ujt_execute(self, obj, data=None):
-        if not obj.unified_job_template:
-            return True
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role', mandatory=True)
 
     def can_change(self, obj, data):
