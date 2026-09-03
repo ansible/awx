@@ -322,6 +322,7 @@ class JobNotificationMixin(object):
         """Returns a stub context that can be used for validating notification messages.
         Context has the same structure as the context that will actually be used to render
         a notification message."""
+        _prefix = settings.OPTIONAL_API_URLPATTERN_PREFIX.strip('/')
         context = {
             'job': {
                 'allow_simultaneous': False,
@@ -390,7 +391,7 @@ class JobNotificationMixin(object):
                 },
                 'timeout': 0,
                 'type': 'job',
-                'url': '/api/v2/jobs/13/',
+                'url': '/api/{prefix}v2/jobs/13/'.format(prefix=f"{_prefix}/" if _prefix else ""),
                 'use_fact_cache': False,
                 'verbosity': 0,
             },
@@ -466,6 +467,9 @@ class JobNotificationMixin(object):
         from awx.api.serializers import UnifiedJobSerializer
 
         job_serialization = UnifiedJobSerializer(self).to_representation(self)
+        prefix = settings.OPTIONAL_API_URLPATTERN_PREFIX.strip('/')
+        if job_serialization.get('url') and prefix:
+            job_serialization['url'] = job_serialization['url'].replace('/api/', f'/api/{prefix}/', 1)
         context = self.context(job_serialization)
 
         msg_template = body_template = None
