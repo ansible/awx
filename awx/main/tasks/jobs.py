@@ -36,6 +36,7 @@ from dispatcherd.publish import task
 from dispatcherd.utils import serialize_task
 
 # AWX
+from awx.main.conf import _is_dangerous_task_env_key
 from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
@@ -520,7 +521,8 @@ class BaseTask(object):
                 env[attr] = str(getattr(settings, attr))
         # Also set environment variables configured in AWX_TASK_ENV setting.
         for key, value in settings.AWX_TASK_ENV.items():
-            env[key] = str(value)
+            if not _is_dangerous_task_env_key(key):
+                env[key] = str(value)
 
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
@@ -1571,7 +1573,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
-                'galaxy_task_env': settings.GALAXY_TASK_ENV,
+                'galaxy_task_env': {k: v for k, v in settings.GALAXY_TASK_ENV.items() if not _is_dangerous_task_env_key(k)},
             }
         )
         # apply custom refspec from user for PR refs and the like

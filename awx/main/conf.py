@@ -430,6 +430,27 @@ register(
     placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
 )
 
+
+def _is_dangerous_task_env_key(key):
+    key = key.upper()
+    return key.startswith('LD_') or key.startswith('DYLD_') or key.startswith('PYTHON') or key == 'PERL5OPT'
+
+
+def jobs_validate(serializer, attrs):
+    errors = []
+    for setting_name in ('AWX_TASK_ENV', 'GALAXY_TASK_ENV'):
+        if setting_name not in attrs:
+            continue
+        dangerous_keys = [key for key in attrs[setting_name] if _is_dangerous_task_env_key(key)]
+        if dangerous_keys:
+            errors.append('{} may not contain keys that manipulate dynamic linkers or interpreters: {}'.format(setting_name, ', '.join(dangerous_keys)))
+    if errors:
+        raise serializers.ValidationError(_('\n'.join(errors)))
+    return attrs
+
+
+register_validate('jobs', jobs_validate)
+
 register(
     'INSIGHTS_TRACKING_STATE',
     field_class=fields.BooleanField,
