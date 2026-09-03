@@ -4,7 +4,6 @@
 import base64
 import json
 import logging
-import operator
 from collections import OrderedDict
 
 from django.conf import settings
@@ -35,7 +34,7 @@ from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
 from awx.api.versioning import URLPathVersioning, reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
-from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
+from awx.main.models import Project, Organization, JobTemplate
 from awx.main.utils import set_environ
 from awx.main.utils.analytics_proxy import TokenError
 from awx.main.utils.licensing import get_licenser
@@ -153,27 +152,7 @@ class ApiV2PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        response = {'ha': is_ha_environment(), 'version': get_awx_version(), 'active_node': settings.CLUSTER_HOST_ID, 'install_uuid': settings.INSTALL_UUID}
-
-        response['instances'] = []
-        for instance in Instance.objects.exclude(node_type='hop'):
-            response['instances'].append(
-                dict(
-                    node=instance.hostname,
-                    node_type=instance.node_type,
-                    uuid=instance.uuid,
-                    heartbeat=instance.last_seen,
-                    capacity=instance.capacity,
-                    version=instance.version,
-                )
-            )
-            response['instances'] = sorted(response['instances'], key=operator.itemgetter('node'))
-        response['instance_groups'] = []
-        for instance_group in InstanceGroup.objects.prefetch_related('instances'):
-            response['instance_groups'].append(
-                dict(name=instance_group.name, capacity=instance_group.capacity, instances=[x.hostname for x in instance_group.instances.all()])
-            )
-            response['instance_groups'] = sorted(response['instance_groups'], key=lambda x: x['name'].lower())
+        response = {'ha': is_ha_environment(), 'version': get_awx_version()}
         return Response(response)
 
 
