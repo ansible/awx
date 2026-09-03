@@ -6076,7 +6076,7 @@ class InstanceSerializer(CleanTextMixin, BaseSerializer):
             'hostname': {
                 'validators': [
                     MaxLengthValidator(limit_value=250),
-                    validators.UniqueValidator(queryset=Instance.objects.all()),
+                    validators.UniqueValidator(queryset=Instance.objects.all(), lookup='iexact'),
                     RegexValidator(
                         regex=r'^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
                         flags=re.IGNORECASE,
@@ -6217,6 +6217,8 @@ class InstanceSerializer(CleanTextMixin, BaseSerializer):
         """
         if self.instance and self.instance.hostname != value:
             raise serializers.ValidationError(_("Cannot change hostname."))
+
+        value = value.lower()
 
         return value
 
