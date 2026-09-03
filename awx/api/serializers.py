@@ -4352,6 +4352,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     timeout = serializers.IntegerField(required=False, allow_null=True, default=None)
     exclude_errors = ()
 
+    def validate_scm_branch(self, value):
+        if value and value.lstrip().startswith('-'):
+            raise serializers.ValidationError(_('SCM branch/revision cannot begin with "-".'))
+        return value
+
     class Meta:
         fields = (
             '*',
