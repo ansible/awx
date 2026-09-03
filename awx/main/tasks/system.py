@@ -589,23 +589,21 @@ def inspect_established_receptor_connections(mesh_status):
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
 
-def inspect_execution_and_hop_nodes(instance_list, receptor_ctl):
+def inspect_execution_and_hop_nodes(instance_list, mesh_status):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False) as acquired:
         if not acquired:
             logger.debug("Not running inspect_execution_and_hop_nodes, another instance holds lock")
             return
+        if mesh_status is None:
+            logger.debug("Not running inspect_execution_and_hop_nodes, mesh status unavailable")
+            return
         start = time.monotonic()
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        try:
-            mesh_status = receptor_ctl.simple_command('status')
-        except ValueError as exc:
-            logger.error(f'Error running receptorctl status command, error: {str(exc)}')
-            return
 
         inspect_established_receptor_connections(mesh_status)
 
         nowtime = now()
-        workers = mesh_status['Advertisements']
+        workers = mesh_status.get('Advertisements') or []
         updated_count = 0
 
         for ad in workers:
@@ -728,6 +726,27 @@ def _get_active_task_ids_from_dispatcherd(binder):
         return None
 
 
+def _mesh_all_ready_nodes_visible(mesh_status):
+    """Return False if the receptor mesh is still re-establishing after a controller restart.
+
+    Uses KnownConnectionCosts as the stability signal: receptor's routing protocol
+    populates this table as connections establish via gossip. An empty table means no
+    routing has propagated yet (Window A — typically the first ~10s after restart).
+
+    No DB state is consulted. KnownConnectionCosts is maintained entirely by the receptor
+    Go process, making it a reliable mesh-state signal free of stale DB records.
+
+    Fails open (returns True) when mesh_status is None so existing error paths are
+    not bypassed.
+    """
+    if mesh_status is None:
+        return True  # fail open: status unavailable, let normal peer-judgment proceed
+    if not (mesh_status.get('KnownConnectionCosts') or {}):
+        logger.info('Mesh stability gate: routing table empty, deferring peer-judgment (receptor re-establishing)')
+        return False
+    return True
+
+
 def _heartbeat_instance_management():
     """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
@@ -750,7 +769,13 @@ def _heartbeat_instance_management():
             this_inst.mark_offline(errors='Receptor not available')
         return None, None, None
 
-    inspect_execution_and_hop_nodes(instance_list, ctl)
+    try:
+        mesh_status = ctl.simple_command('status')
+    except (OSError, RuntimeError, ValueError) as exc:
+        logger.warning(f'Receptor status unavailable: {exc}')
+        mesh_status = None
+
+    inspect_execution_and_hop_nodes(instance_list, mesh_status)
 
     for inst in list(instance_list):
         if inst == this_inst:
@@ -780,6 +805,9 @@ def _heartbeat_instance_management():
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
             return None, None, None
 
+    if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
+        return this_inst, instance_list, []
+
     return this_inst, instance_list, lost_instances
 
 
@@ -802,39 +830,50 @@ def _heartbeat_check_versions(this_inst, instance_list):
             raise RuntimeError("Shutting down.")
 
 
+def _reap_and_mark_lost_instance(other_inst):
+    """Reap a lost instance's running jobs and mark it offline (or deprovision it)."""
+    try:
+        # Only reap jobs never dispatched to receptor; dispatched jobs are left for adoption (AAP-89602)
+        explanation = "Job reaped due to instance shutdown"
+        reaper.reap(other_inst, job_explanation=explanation)
+        # Any jobs that were waiting to be processed by this node will be handed back to task manager
+        UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
+    except Exception:
+        logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
+    try:
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
+            deprovision_hostname = other_inst.hostname
+            other_inst.delete()  # FIXME: what about associated inbound links?
+            logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
+        elif other_inst.node_state == Instance.States.READY:
+            other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
+            logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
+
+    except DatabaseError as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            logger.debug('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+
+            if sqlstate == psycopg.errors.NoData:
+                logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
+            else:
+                logger.exception("Error marking {} as lost.".format(other_inst.hostname))
+        else:
+            logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+
+
 def _heartbeat_handle_lost_instances(lost_instances, this_inst):
     """Handle lost instances by reaping their running jobs and marking them offline."""
     for other_inst in lost_instances:
-        try:
-            # Any jobs marked as running will be marked as error
-            explanation = "Job reaped due to instance shutdown"
-            reaper.reap(other_inst, job_explanation=explanation)
-            # Any jobs that were waiting to be processed by this node will be handed back to task manager
-            UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
-        except Exception:
-            logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
-        try:
-            if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
-                deprovision_hostname = other_inst.hostname
-                other_inst.delete()  # FIXME: what about associated inbound links?
-                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
-            elif other_inst.node_state == Instance.States.READY:
-                other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
-
-        except DatabaseError as e:
-            cause = e.__cause__
-            if cause and hasattr(cause, 'sqlstate'):
-                sqlstate = cause.sqlstate
-                sqlstate_str = psycopg.errors.lookup(sqlstate)
-                logger.debug('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
-
-                if sqlstate == psycopg.errors.NoData:
-                    logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
-                else:
-                    logger.exception("Error marking {} as lost.".format(other_inst.hostname))
-            else:
-                logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+        # Serialize offline handling against the task manager so we never reap jobs
+        # mid-schedule; if the lock is held, retry this instance on the next heartbeat.
+        with advisory_lock('task_manager_lock', wait=False) as acquired:
+            if not acquired:
+                logger.info(f'task_manager_lock held, deferring offline handling for {other_inst.hostname} to next heartbeat cycle')
+                continue
+            _reap_and_mark_lost_instance(other_inst)
 
 
 @task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
