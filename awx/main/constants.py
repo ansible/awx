@@ -139,4 +139,9 @@ org_role_to_permission = {
 }
 
 # OIDC credential type namespaces for feature flag filtering
-OIDC_CREDENTIAL_TYPE_NAMESPACES = ['hashivault-kv-oidc', 'hashivault-ssh-oidc']
+OIDC_CREDENTIAL_TYPE_NAMESPACES = [
+    'hashivault-kv-oidc',
+    'hashivault-ssh-oidc',
+    'akeyless-oidc',
+    'akeyless-ssh-oidc',
+]
