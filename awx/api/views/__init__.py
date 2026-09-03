@@ -1785,9 +1785,10 @@ class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
         backend_kwargs = {}
         for field_name, value in obj.inputs.items():
             backend_kwargs[field_name] = obj.get_input(field_name)
-        for field_name, value in request.data.get('inputs', {}).items():
-            if value != '$encrypted$':
-                backend_kwargs[field_name] = value
+        if request.user.can_access(models.Credential, 'change', obj, None):
+            for field_name, value in request.data.get('inputs', {}).items():
+                if value != '$encrypted$':
+                    backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
 
         # Handle OIDC workload identity token generation if enabled
