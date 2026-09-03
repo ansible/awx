@@ -10,6 +10,8 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: 'true'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/on-target-branch: "[devel]"
     pipelinesascode.tekton.dev/on-comment: "^/run-atf-tests$"
     pipelinesascode.tekton.dev/target-namespace: ansible-ci-tenant
   labels:
