@@ -1976,8 +1976,11 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     def list(self, *args, **kwargs):
         try:
             return super(HostList, self).list(*args, **kwargs)
-        except Exception as e:
+        except RuntimeError as e:
             return Response(dict(error=_(str(e))), status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.exception('Unexpected error in HostList')
+            return Response(dict(error=_('Invalid host filter.')), status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
