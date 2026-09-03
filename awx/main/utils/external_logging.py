@@ -9,6 +9,17 @@ from dispatcherd.publish import task
 from awx.main.utils.reload import supervisor_service_command
 
 
+def escape_quotes(x):
+    if x is None:
+        return ''
+    s = str(x)
+    s = s.replace('\\', '\\\\')
+    s = s.replace('"', '\\"')
+    s = s.replace('\n', '')
+    s = s.replace('\r', '')
+    return s
+
+
 def construct_rsyslog_conf_template(settings=settings):
     tmpl = ''
     parts = []
@@ -23,7 +34,7 @@ def construct_rsyslog_conf_template(settings=settings):
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
 
     queue_options = [
-        f'queue.spoolDirectory="{spool_directory}"',
+        f'queue.spoolDirectory="{escape_quotes(spool_directory)}"',
         'queue.filename="awx-external-logger-action-queue"',
         f'queue.maxDiskSpace="{max_disk_space_action_queue}g"',  # overall disk space for all queue files
         'queue.maxFileSize="100m"',  # individual file size
@@ -53,11 +64,6 @@ def construct_rsyslog_conf_template(settings=settings):
             'template(name="awx" type="string" string="%rawmsg-after-pri%")',
         ]
     )
-
-    def escape_quotes(x):
-        if x is None:
-            return ''
-        return x.replace('"', '\\"')
 
     if not enabled:
         parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
@@ -97,7 +103,7 @@ def construct_rsyslog_conf_template(settings=settings):
             f'action.resumeInterval="{timeout}"',
         ] + queue_options
         if error_log_file:
-            params.append(f'errorfile="{error_log_file}"')
+            params.append(f'errorfile="{escape_quotes(error_log_file)}"')
         if parsed.path:
             path = urlparse.quote(parsed.path[1:], safe='/=')
             if parsed.query:
@@ -125,7 +131,7 @@ def construct_rsyslog_conf_template(settings=settings):
     elif protocol and host and port:
         params = [
             'type="omfwd"',
-            f'target="{host}"',
+            f'target="{escape_quotes(host)}"',
             f'port="{port}"',
             f'protocol="{protocol}"',
             'action.resumeRetryCount="-1"',

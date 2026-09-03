@@ -18,6 +18,16 @@ from awx.main.tasks.policy import OPA_AUTH_TYPES
 
 logger = logging.getLogger('awx.main.conf')
 
+_RSYSLOG_UNSAFE_RE = re.compile(r'["\\\(\)\x00-\x1f]')
+
+
+def validate_rsyslog_safe(value):
+    if value and _RSYSLOG_UNSAFE_RE.search(str(value)):
+        raise serializers.ValidationError(
+            'Value contains characters not allowed in rsyslog configuration ' '(quotes, backslashes, parentheses, or control characters).'
+        )
+
+
 register(
     'ACTIVITY_STREAM_ENABLED',
     field_class=fields.BooleanField,
@@ -671,6 +681,7 @@ register(
     field_class=fields.CharField,
     allow_null=True,
     default=None,
+    validators=[validate_rsyslog_safe],
     label=_('Logging Aggregator'),
     help_text=_('Hostname/IP where external logs will be sent to.'),
     category=_('Logging'),
@@ -702,6 +713,7 @@ register(
     field_class=fields.CharField,
     allow_blank=True,
     default='',
+    validators=[validate_rsyslog_safe],
     label=_('Logging Aggregator Username'),
     help_text=_('Username for external log aggregator (if required; HTTP/s only).'),
     category=_('Logging'),
@@ -856,6 +868,7 @@ register(
     'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH',
     field_class=fields.CharField,
     default='/var/lib/awx',
+    validators=[validate_rsyslog_safe],
     label=_('File system location for rsyslogd disk persistence'),
     help_text=_(
         'Location to persist logs that should be retried after an outage '
