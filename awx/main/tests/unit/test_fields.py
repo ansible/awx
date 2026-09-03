@@ -269,6 +269,63 @@ def test_credential_input_field_accepts_non_internal_fields_only():
     field.validate(cred.inputs, cred)
 
 
+@pytest.mark.parametrize(
+    'env_var, valid',
+    [
+        # --- New prefix-based rejection: LD_ (dynamic linker hijacking) ---
+        ('LD_PRELOAD', False),
+        ('LD_LIBRARY_PATH', False),
+        # --- New prefix-based rejection: BASH_ (shell behaviour) ---
+        ('BASH_ENV', False),
+        ('BASH_FUNC_x', False),
+        # --- New prefix-based rejection: PYTHON (runtime hijacking) ---
+        ('PYTHONHOME', False),
+        ('PYTHONSTARTUP', False),
+        # --- New explicit blocklist entries ---
+        ('ENV', False),
+        ('IFS', False),
+        ('CDPATH', False),
+        ('PROMPT_COMMAND', False),
+        ('SHELLOPTS', False),
+        ('BASHOPTS', False),
+        ('GLOBIGNORE', False),
+        ('PERL5OPT', False),
+        ('PERL5LIB', False),
+        ('RUBYOPT', False),
+        ('RUBYLIB', False),
+        ('NODE_OPTIONS', False),
+        ('GIT_SSH_COMMAND', False),
+        ('GIT_EXEC_PATH', False),
+        ('GIT_TEMPLATE_DIR', False),
+        # --- Permitted: safe custom env vars that pass all checks ---
+        ('MY_CUSTOM_VAR', True),
+        ('AWS_ACCESS_KEY_ID', True),
+    ],
+)
+def test_env_var_blocklist_rejects_dangerous_injectors(env_var, valid):
+    """Regression: credential-type injectors must reject env vars that can
+    hijack the execution environment (LD_*, BASH_*, PYTHON*, and specific
+    blocklist entries added for process-hijacking prevention), while still
+    permitting safe custom env vars."""
+    type_ = CredentialType(
+        kind='cloud',
+        name='SomeCloud',
+        managed=True,
+        inputs={
+            'fields': [
+                {'id': 'secret', 'type': 'string', 'label': '_'},
+            ]
+        },
+        injectors={'env': {env_var: '{{secret}}'}},
+    )
+    field = CredentialType._meta.get_field('injectors')
+    if valid is False:
+        with pytest.raises(ValidationError):
+            field.clean({'env': {env_var: '{{secret}}'}}, type_)
+    else:
+        field.clean({'env': {env_var: '{{secret}}'}}, type_)
+
+
 def test_implicit_role_field_parents():
     """This assures that every ImplicitRoleField only references parents
     which are relationships that actually exist

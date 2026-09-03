@@ -693,6 +693,24 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 code='invalid',
                 params={'value': env_var},
             )
+        if env_var.startswith('LD_'):
+            raise django_exceptions.ValidationError(
+                _('Environment variable {} may affect dynamic linker behavior so its use is not allowed in credentials.').format(env_var),
+                code='invalid',
+                params={'value': env_var},
+            )
+        if env_var.startswith('BASH_'):
+            raise django_exceptions.ValidationError(
+                _('Environment variable {} may affect shell behavior so its use is not allowed in credentials.').format(env_var),
+                code='invalid',
+                params={'value': env_var},
+            )
+        if env_var.startswith('PYTHON'):
+            raise django_exceptions.ValidationError(
+                _('Environment variable {} may affect Python runtime behavior so its use is not allowed in credentials.').format(env_var),
+                code='invalid',
+                params={'value': env_var},
+            )
         if env_var in ENV_BLOCKLIST:
             raise django_exceptions.ValidationError(
                 _('Environment variable {} is not allowed to be used in credentials.').format(env_var),
