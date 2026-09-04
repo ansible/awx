@@ -3,12 +3,12 @@ from dateutil.relativedelta import relativedelta
 import logging
 
 from django.conf import settings
-from django.db.models import Count, F
-from django.db.models.functions import TruncMonth
+from django.db.models import Count, F, OuterRef, Q, Subquery, Value
+from django.db.models.functions import Coalesce, TruncMonth
 from django.utils.timezone import now
 from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename
-from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
+from awx.main.models.inventory import Host, HostMetric, HostMetricSummaryMonthly
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
 from ansible_base.lib.utils.db import advisory_lock
@@ -35,6 +35,25 @@ def host_metric_summary_monthly():
         logger.info(f"Executing host_metric_summary_monthly, last ran at {getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', '---')}")
         HostMetricSummaryMonthlyTask().execute()
         logger.info("Finished host_metric_summary_monthly")
+
+
+@task(queue=get_task_queuename)
+def update_host_metric_inventory_counts():
+    """Populate HostMetric.used_in_inventories with the count of inventories each host belongs to."""
+    with advisory_lock('host_metric_inventory_counts', lock_session_timeout_milliseconds=300000, wait=False) as acquired:
+        if not acquired:
+            logger.info("Another instance of update_host_metric_inventory_counts is already running. Exiting.")
+            return
+        if is_run_threshold_reached(
+            getattr(settings, 'HOST_METRIC_INVENTORY_COUNTS_LAST_TS', None),
+            getattr(settings, 'HOST_METRIC_INVENTORY_COUNTS_INTERVAL', 1) * 86400,
+        ):
+            logger.info(
+                f"Executing update_host_metric_inventory_counts, last ran at "
+                f"{getattr(settings, 'HOST_METRIC_INVENTORY_COUNTS_LAST_TS', '---')}"
+            )
+            rows = HostMetricInventoryCountTask.update_counts()
+            logger.info(f"Finished update_host_metric_inventory_counts, updated {rows} records")
 
 
 class HostMetricTask:
@@ -276,3 +295,30 @@ class HostMetricSummaryMonthlyTask:
         """Returns first month after host metrics hard delete threshold"""
         threshold = getattr(settings, 'CLEANUP_HOST_METRICS_HARD_THRESHOLD', 36)
         return datetime.date.today().replace(day=1) - relativedelta(months=int(threshold) - 1)
+
+
+class HostMetricInventoryCountTask:
+    """
+    Populates HostMetric.used_in_inventories with the number of distinct
+    inventories each hostname appears in (matching Host.name to HostMetric.hostname).
+    Only updates rows whose count actually changed to avoid unnecessary WAL churn.
+    """
+
+    @staticmethod
+    def update_counts():
+        """Update inventory membership counts for all host metric rows."""
+        inventory_count_subquery = (
+            Host.objects.filter(name=OuterRef('hostname'))
+            .values('name')
+            .annotate(cnt=Count('inventory_id', distinct=True))
+            .values('cnt')
+        )
+        expected_count = Coalesce(Subquery(inventory_count_subquery), Value(0))
+
+        rows = HostMetric.objects.filter(Q(used_in_inventories__isnull=True) | ~Q(used_in_inventories=expected_count)).update(
+            used_in_inventories=expected_count
+        )
+
+        settings.HOST_METRIC_INVENTORY_COUNTS_LAST_TS = now()
+        logger.info(f"update_host_metric_inventory_counts: updated {rows} HostMetric records")
+        return rows
