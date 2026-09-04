@@ -1035,6 +1035,7 @@ class UserSerializer(BaseSerializer):
     password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
+    password_reset_required = serializers.BooleanField(default=False, help_text=_('Force the user to reset their password on next login.'))
 
     class Meta:
         model = User
@@ -1049,6 +1050,7 @@ class UserSerializer(BaseSerializer):
             'is_superuser',
             'is_system_auditor',
             'password',
+            'password_reset_required',
             'last_login',
         )
         extra_kwargs = {'last_login': {'read_only': True}}
@@ -1149,6 +1151,7 @@ class UserSerializer(BaseSerializer):
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
         is_system_auditor = validated_data.pop('is_system_auditor', None)
+        password_reset_required = validated_data.pop('password_reset_required', False)
         obj = super(UserSerializer, self).create(validated_data)
         self._update_password(obj, new_password)
         if is_system_auditor is not None:
@@ -1158,6 +1161,7 @@ class UserSerializer(BaseSerializer):
     def update(self, obj, validated_data):
         new_password = validated_data.pop('password', None)
         is_system_auditor = validated_data.pop('is_system_auditor', None)
+        password_reset_required = validated_data.pop('password_reset_required', False)
         obj = super(UserSerializer, self).update(obj, validated_data)
         self._update_password(obj, new_password)
         if is_system_auditor is not None:

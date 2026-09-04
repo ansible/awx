@@ -7,6 +7,7 @@ import json
 from django.conf import settings  # noqa
 from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
+from django.db import models # for pass
 
 # django-ansible-base
 from ansible_base.resource_registry.fields import AnsibleResourceField
@@ -185,6 +186,7 @@ def get_system_auditor_role():
         rd.permissions.add(*list(permission_registry.permission_qs.filter(codename__startswith='view')))
     return rd
 
+User.add_to_class('password_reset_required', models.BooleanField(default=False))
 
 @property
 def user_is_system_auditor(user):

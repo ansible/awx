@@ -1343,6 +1343,19 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.UserSerializer
     resource_purpose = 'user detail'
 
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        
+        # If the admin set the 'password_reset_required' flag to True
+        if getattr(obj, 'password_reset_required', False):
+            # We return a 403 Forbidden with a specific detail message
+            return Response({
+                "detail": _("Password reset is required before you can continue."),
+                "password_reset_required": True
+            }, status=status.HTTP_403_FORBIDDEN)
+            
+        return super(UserDetail, self).get(request, *args, **kwargs)
+
     def update_filter(self, request, *args, **kwargs):
         '''make sure non-read-only fields that can only be edited by admins, are only edited by admins'''
         obj = self.get_object()
