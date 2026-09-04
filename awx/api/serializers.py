@@ -5709,7 +5709,7 @@ class InstanceSerializer(BaseSerializer):
         if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP] and not obj.managed:
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
-            if obj.node_type == 'execution':
+            if obj.node_type != 'hop':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
