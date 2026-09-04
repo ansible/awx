@@ -37,6 +37,13 @@ Notable files:
 - [Ansible](https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html) will need to be installed as we use it to template files needed for the docker-compose.
 - OpenSSL.
 
+### AWX Logos
+AWX uses branding assets provided by the 'awx-logos' repository.
+Clone the repo before starting development environment:
+
+'''bash
+git clone https://github.com/ansible/awx-logos.git
+
 ### Tested Operating Systems
 
 The docker-compose development environment is regularly used and should work on x86_64 systems running:
