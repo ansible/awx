@@ -672,6 +672,26 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def get_notification_friendly_name(self):
         return "Project Update"
 
+    @property
+    def preferred_instance_groups(self):
+        """Return instance groups for this project update."""
+        if self.project and self.project.instance_groups.exists():
+            return list(self.project.instance_groups.all())
+        # No instance groups - use control plane (current behavior)
+        return self.control_plane_instance_group
+
+    @property
+    def capacity_type(self):
+        """Return capacity type - 'execution' if project has instance groups."""
+        if self.project and self.project.instance_groups.exists():
+            return 'execution'
+        return 'control'
+
+    @property
+    def is_remote_update(self):
+        """Returns True if running on a remote mesh node."""
+        return bool(self.execution_node and self.controller_node and self.execution_node != self.controller_node)
+
     def save(self, *args, **kwargs):
         added_update_fields = []
         if not self.job_tags:

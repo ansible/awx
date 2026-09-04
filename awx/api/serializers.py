@@ -1392,6 +1392,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                 access_list=self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
                 object_roles=self.reverse('api:project_object_roles_list', kwargs={'pk': obj.pk}),
                 copy=self.reverse('api:project_copy', kwargs={'pk': obj.pk}),
+                instance_groups=self.reverse('api:project_instance_groups_list', kwargs={'pk': obj.pk}),
             )
         )
         if obj.organization:

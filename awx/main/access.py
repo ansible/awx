@@ -1405,6 +1405,20 @@ class ProjectAccess(NotificationAttachMixin, BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if relationship == "instance_groups":
+            if not obj.organization:
+                return False
+            return self.user in sub_obj.use_role and self.user in obj.admin_role
+        return super(ProjectAccess, self).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    @check_superuser
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == "instance_groups":
+            return self.can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(ProjectAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+
 
 class ProjectUpdateAccess(BaseAccess):
     """

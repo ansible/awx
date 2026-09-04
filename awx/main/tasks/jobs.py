@@ -195,6 +195,30 @@ def with_path_cleanup(f):
     return _wrapped
 
 
+def select_execution_node_by_capacity(instances):
+    """
+    Helper function for spawn_project_sync jobs since they need to work outside task manager context.
+    """
+    best_instance = None
+    best_remaining = -1
+
+    for instance in instances:
+        if instance.capacity <= 0:
+            continue
+        remaining = instance.remaining_capacity
+        if remaining >= 0 and remaining > best_remaining:
+            best_instance = instance
+            best_remaining = remaining
+
+    # Fallback: return least-loaded node even if all are over capacity
+    if best_instance is None:
+        valid = [i for i in instances if i.capacity > 0]
+        if valid:
+            best_instance = max(valid, key=lambda i: i.remaining_capacity)
+
+    return best_instance
+
+
 @task(on_duplicate='queue_one', bind=True, queue=get_task_queuename)
 def dispatch_waiting_jobs(binder):
     for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
@@ -900,8 +924,20 @@ class SourceControlMixin(BaseTask):
         return sync_needs
 
     def spawn_project_sync(self, project, sync_needs, scm_branch=None):
+        cn = Instance.objects.my_hostname()
+
         pu_ig = self.instance.instance_group
-        pu_en = Instance.objects.my_hostname()
+        pu_en = cn
+
+        if project.instance_groups.exists():
+            for project_ig in project.instance_groups.all():
+                candidate_instances = project_ig.instances.filter(enabled=True, node_type__in=['execution', 'hybrid'])
+                execution_instance = select_execution_node_by_capacity(candidate_instances)
+
+                if execution_instance and execution_instance.hostname != cn:
+                    pu_ig = project_ig
+                    pu_en = execution_instance.hostname
+                    break
 
         sync_metafields = dict(
             launch_type="sync",
@@ -910,7 +946,7 @@ class SourceControlMixin(BaseTask):
             status='running',
             instance_group=pu_ig,
             execution_node=pu_en,
-            controller_node=pu_en,
+            controller_node=cn,
             celery_task_id=self.instance.celery_task_id,
         )
         if scm_branch and scm_branch != project.scm_branch:
@@ -1512,8 +1548,15 @@ class RunProjectUpdate(BaseTask):
         args = []
         if getattr(settings, 'PROJECT_UPDATE_VVV', False):
             args.append('-vvv')
-        if project_update.job_tags:
-            args.extend(['-t', project_update.job_tags])
+
+        job_tags = project_update.job_tags
+
+        # Add remote_update tag for automation mesh execution. (value set in pre_run_hook)
+        if getattr(self, '_is_remote_update', False):
+            job_tags = f"{job_tags},remote_update" if job_tags else "remote_update"
+
+        if job_tags:
+            args.extend(['-t', job_tags])
         return args
 
     def build_extra_vars_file(self, project_update, private_data_dir):
@@ -1586,6 +1629,9 @@ class RunProjectUpdate(BaseTask):
     def pre_run_hook(self, instance, private_data_dir):
         super(RunProjectUpdate, self).pre_run_hook(instance, private_data_dir)
         # re-create root project folder if a natural disaster has destroyed it
+        # Store remote update decision for use in build_args and post_run_hook
+        self.private_data_dir = private_data_dir
+        self._is_remote_update = instance.is_remote_update
         project_path = instance.project.get_project_path(check_if_exists=False)
 
         if instance.launch_type != 'sync':
@@ -1663,6 +1709,11 @@ class RunProjectUpdate(BaseTask):
                 instance.scm_revision = self.runner_callback.playbook_new_revision
                 instance.save(update_fields=['scm_revision'])
 
+            # Handle remote execution - copy project from artifacts
+            if getattr(self, '_is_remote_update', False) and status == 'successful':
+                self._copy_project_from_artifacts(instance)
+                self._copy_requirements_from_artifacts(instance)
+
             # Roles and collection folders copy to durable cache
             base_path = instance.get_cache_path()
             stage_path = os.path.join(base_path, 'stage')
@@ -1698,6 +1749,62 @@ class RunProjectUpdate(BaseTask):
             p.playbook_files = p.playbooks
             p.inventory_files = p.inventories
             p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
+
+    def _copy_project_from_artifacts(self, instance):
+        """Copy project files from artifacts to projects_root after remote execution."""
+        artifacts_project_path = self.runner_callback.project_artifact_path
+
+        if artifacts_project_path is None or not os.path.exists(artifacts_project_path):
+            raise PostRunError(
+                f'{instance.log_format} project artifacts not found after remote update: {artifacts_project_path}',
+                status='error',
+            )
+
+        project_path = instance.get_project_path(check_if_exists=False)
+
+        try:
+            if os.path.exists(project_path):
+                shutil.rmtree(project_path)
+
+            shutil.copytree(artifacts_project_path, project_path, symlinks=True)
+        except Exception:
+            raise PostRunError(
+                f'{instance.log_format} failed to copy project artifacts to {project_path}',
+                status='error',
+                tb=traceback.format_exc(),
+            )
+
+        logger.info(f'Copied project from remote execution for {instance.log_format}')
+
+    def _copy_requirements_from_artifacts(self, instance):
+        """Copy roles and collections from artifacts to cache stage directory after remote execution."""
+        base_path = instance.get_cache_path()
+        stage_path = os.path.join(base_path, 'stage')
+
+        # Mapping: artifact path attribute -> destination subdirectory
+        artifact_mappings = [
+            ('roles_artifact_path', 'requirements_roles'),
+            ('collections_artifact_path', 'requirements_collections'),
+        ]
+
+        for attr, dest_subdir in artifact_mappings:
+            artifact_path = getattr(self.runner_callback, attr, None)
+
+            if artifact_path is None or not os.path.exists(artifact_path):
+                logger.debug(f'{instance.log_format} {attr} path does not exist: {artifact_path}')
+                continue
+
+            dest_path = os.path.join(stage_path, dest_subdir)
+            try:
+                shutil.copytree(artifact_path, dest_path, symlinks=True, dirs_exist_ok=True)
+            except Exception:
+                raise PostRunError(
+                    f'{instance.log_format} failed to copy {dest_subdir} from remote execution artifacts',
+                    status='error',
+                    tb=traceback.format_exc(),
+                )
+
+            logger.info(f'{instance.log_format} copied {dest_subdir} from remote execution artifacts')
 
     def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
