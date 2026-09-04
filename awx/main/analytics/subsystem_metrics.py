@@ -346,7 +346,9 @@ class Metrics(MetricsNamespace):
         instance_names = [self.instance_name]
         for m in self.conn.scan_iter(root_key + '-' + self._namespace + '_instance_*'):
             instance_names.append(m.decode('UTF-8').split('_instance_')[1])
-        instance_names.sort()
+        # Fix for issue #AAP-47144 - Hostname changes in redis metrics data payload
+        # Remove duplicated instance names
+        instance_names = sorted(set(instance_names))
         # load data, including data from the this local instance
         instance_data = {}
         for instance in instance_names:
@@ -355,6 +357,10 @@ class Metrics(MetricsNamespace):
                 # data from other instances may not be available. That is OK.
                 if instance_data_from_redis:
                     instance_data[instance] = json.loads(instance_data_from_redis.decode('UTF-8'))
+            # Fix for issue #AAP-47144 - Hostname changes in redis metrics data payload
+            # Fallback for the local instance
+            elif instance == self.instance_name:
+                instance_data[instance] = {}
         return instance_data
 
     def generate_metrics(self, request):
@@ -455,13 +461,15 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
         my_hostname = settings.CLUSTER_HOST_ID
 
         instance_data = self._metrics.load_other_metrics(Request(HttpRequest()))
+        # Fix for issue #AAP-47144 - Hostname changes in redis metrics data payload
+        # Use empty return to graceefully exit the generator instead of returning NONE which will cause an error in the prometheus client.
         if not instance_data:
             logger.debug(f"No metric data not found in redis for metric namespace '{self._metrics._namespace}'")
-            return None
-
+            return 
+        # Use an emptty return as well for missing hostname
         if not (host_metrics := instance_data.get(my_hostname)):
             logger.debug(f"Metric data for this node '{my_hostname}' not found in redis for metric namespace '{self._metrics._namespace}'")
-            return None
+            return 
 
         for _, metric in self._metrics.METRICS.items():
             entry = host_metrics.get(metric.field)
