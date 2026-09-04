@@ -75,6 +75,7 @@ from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields, events_processed_hook
 from awx.main.exceptions import AwxTaskError, PolicyEvaluationError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
+from awx.main.utils.encryption import decrypt_field
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.common import (
     update_scm_url,
@@ -1459,6 +1460,11 @@ class RunProjectUpdate(BaseTask):
         if galaxy_server_list:
             env['ANSIBLE_GALAXY_SERVER_LIST'] = ','.join(galaxy_server_list)
 
+        if project_update.proxy:
+            proxy_value = decrypt_field(project_update, 'proxy')
+            for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+                env[var] = proxy_value
+
         return env
 
     def _build_scm_url_extra_vars(self, project_update):
@@ -1801,6 +1807,11 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             paths = ['~/.ansible/collections', '/usr/share/ansible/collections']
         paths.append('/usr/share/automation-controller/collections')
         env['ANSIBLE_COLLECTIONS_PATH'] = os.pathsep.join(paths)
+
+        if inventory_update.proxy:
+            proxy_value = decrypt_field(inventory_update, 'proxy')
+            for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+                env[var] = proxy_value
 
         return env
 

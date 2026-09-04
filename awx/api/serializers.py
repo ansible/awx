@@ -114,6 +114,7 @@ from awx.main.utils import (
     get_licenser,
 )
 
+from awx.main.utils.encryption import decrypt_field
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
@@ -1275,6 +1276,7 @@ class ProjectOptionsSerializer(BaseSerializer):
             'credential',
             'timeout',
             'scm_revision',
+            'proxy',
         )
 
     def get_related(self, obj):
@@ -1312,6 +1314,25 @@ class ProjectOptionsSerializer(BaseSerializer):
             raise serializers.ValidationError(errors)
 
         return super(ProjectOptionsSerializer, self).validate(attrs)
+
+    def validate_proxy(self, value):
+        if not value:
+            return value
+        if REPLACE_STR in value:
+            if self.instance:
+                db_proxy = decrypt_field(self.instance, 'proxy')
+                if _mask_proxy_password(db_proxy) == value:
+                    return db_proxy
+            raise serializers.ValidationError(_('Proxy password must be provided in plain text, not as $encrypted$.'))
+        _validate_proxy_url(value)
+        return value
+
+    def to_representation(self, obj):
+        ret = super().to_representation(obj)
+        if ret.get('proxy'):
+            decrypted = decrypt_field(obj, 'proxy')
+            ret['proxy'] = _mask_proxy_password(decrypted)
+        return ret
 
 
 class ExecutionEnvironmentSerializer(BaseSerializer):
@@ -2312,6 +2333,44 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
         model = Group
 
 
+_VALID_PROXY_SCHEMES = ('http', 'https', 'socks', 'socks4', 'socks4a', 'socks5', 'socks5h')
+
+
+def _validate_proxy_url(value):
+    """Validate that *value* is a well-formed proxy URL (scheme + hostname)."""
+    try:
+        parsed = urllib.parse.urlsplit(value)
+    except ValueError:
+        raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.')) from None
+    if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES or parsed.hostname is None:
+        raise serializers.ValidationError(_('Proxy must be an HTTP, HTTPS, or SOCKS URL.'))
+    try:
+        _port = parsed.port  # noqa: F841 – access triggers ValueError for invalid ports
+    except ValueError:
+        raise serializers.ValidationError(_('Proxy URL has an invalid port.')) from None
+
+
+def _mask_proxy_password(proxy_url):
+    """Mask credentials embedded in a proxy URL for safe API display."""
+    if not proxy_url:
+        return ''
+    parsed = urllib.parse.urlsplit(proxy_url)
+    if parsed.scheme.lower() not in _VALID_PROXY_SCHEMES:
+        return proxy_url
+    if '@' not in parsed.netloc:
+        return proxy_url
+    userinfo, host = parsed.netloc.rsplit('@', 1)
+    if not userinfo:
+        return proxy_url
+    if ':' in userinfo:
+        username = userinfo.split(':', 1)[0]
+        masked_userinfo = '{}:{}'.format(username, REPLACE_STR) if username else ':{}'.format(REPLACE_STR)
+    else:
+        masked_userinfo = REPLACE_STR
+    masked_netloc = '{}@{}'.format(masked_userinfo, host)
+    return urllib.parse.urlunsplit((parsed.scheme, masked_netloc, parsed.path, parsed.query, parsed.fragment))
+
+
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
     source = serializers.ChoiceField(choices=[])
@@ -2333,6 +2392,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'timeout',
             'verbosity',
             'limit',
+            'proxy',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 
@@ -2355,6 +2415,25 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         for env_k in parse_yaml_or_json(value):
             if env_k in settings.INV_ENV_VARIABLE_BLOCKED:
                 raise serializers.ValidationError(_("`{}` is a prohibited environment variable".format(env_k)))
+        return ret
+
+    def validate_proxy(self, value):
+        if not value:
+            return value
+        if REPLACE_STR in value:
+            if self.instance:
+                db_proxy = decrypt_field(self.instance, 'proxy')
+                if _mask_proxy_password(db_proxy) == value:
+                    return db_proxy
+            raise serializers.ValidationError(_('Proxy password must be provided in plain text, not as $encrypted$.'))
+        _validate_proxy_url(value)
+        return value
+
+    def to_representation(self, obj):
+        ret = super().to_representation(obj)
+        if ret.get('proxy'):
+            decrypted = decrypt_field(obj, 'proxy')
+            ret['proxy'] = _mask_proxy_password(decrypted)
         return ret
 
     # TODO: remove when old 'credential' fields are removed
