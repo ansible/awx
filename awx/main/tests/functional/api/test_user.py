@@ -1,11 +1,14 @@
 from unittest import mock
+import json
 
 import pytest
 
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.test import RequestFactory
 from django.test.utils import override_settings
 
 from awx.main.models import User
+from awx.main.middleware import ForcePasswordChangeMiddleware
 from awx.api.versioning import reverse
 
 #
@@ -272,3 +275,114 @@ def test_admin_user_not_shown_in_org_users(admin_user, get, organization):
         url = reverse(f'api:{view_name}', kwargs={'pk': organization.pk})
         r = get(url, user=admin_user, expect=200)
         assert admin_user.pk not in [u['id'] for u in r.data['results']]
+
+
+@pytest.mark.django_db
+def test_create_user_with_password_reset_required(post, get, admin):
+    """Admins can create users that must reset password on next login."""
+    data = dict(EXAMPLE_USER_DATA, password_reset_required=True)
+    response = post(reverse('api:user_list'), data, admin, middleware=SessionMiddleware(mock.Mock()))
+    assert response.status_code == 201
+    assert response.data['password_reset_required'] is True
+    user = User.objects.get(pk=response.data['id'])
+    assert user.password_reset_required is True
+
+    # Flag is persisted and visible on detail/me-style reads.
+    detail = get(reverse('api:user_detail', kwargs={'pk': user.pk}), admin)
+    assert detail.status_code == 200
+    assert detail.data['password_reset_required'] is True
+
+
+@pytest.mark.django_db
+def test_update_password_reset_required_flag(post, patch, admin):
+    response = post(reverse('api:user_list'), EXAMPLE_USER_DATA, admin, middleware=SessionMiddleware(mock.Mock()))
+    assert response.status_code == 201
+    user_id = response.data['id']
+    assert response.data['password_reset_required'] is False
+
+    response = patch(
+        reverse('api:user_detail', kwargs={'pk': user_id}),
+        {'password_reset_required': True},
+        admin,
+        middleware=SessionMiddleware(mock.Mock()),
+    )
+    assert response.status_code == 200
+    assert response.data['password_reset_required'] is True
+    assert User.objects.get(pk=user_id).password_reset_required is True
+
+
+@pytest.mark.django_db
+def test_password_change_clears_password_reset_required(post, patch, admin):
+    """Changing password on an existing user clears the force-reset flag."""
+    data = dict(EXAMPLE_USER_DATA, password_reset_required=True)
+    response = post(reverse('api:user_list'), data, admin, middleware=SessionMiddleware(mock.Mock()))
+    assert response.status_code == 201
+    user_id = response.data['id']
+    assert User.objects.get(pk=user_id).password_reset_required is True
+
+    response = patch(
+        reverse('api:user_detail', kwargs={'pk': user_id}),
+        {'password': 'nEwP@ssw0rd!xyz'},
+        admin,
+        middleware=SessionMiddleware(mock.Mock()),
+    )
+    assert response.status_code == 200
+    user = User.objects.get(pk=user_id)
+    assert user.password_reset_required is False
+    assert user.check_password('nEwP@ssw0rd!xyz')
+
+
+@pytest.mark.django_db
+def test_create_with_temp_password_keeps_reset_flag(post, admin):
+    """Create may set a temporary password and still require reset."""
+    data = dict(EXAMPLE_USER_DATA, password_reset_required=True, password='T3mpP@ssw0rd!')
+    response = post(reverse('api:user_list'), data, admin, middleware=SessionMiddleware(mock.Mock()))
+    assert response.status_code == 201
+    user = User.objects.get(pk=response.data['id'])
+    assert user.password_reset_required is True
+    assert user.check_password('T3mpP@ssw0rd!')
+
+
+@pytest.mark.django_db
+def test_force_password_change_middleware_blocks_other_api(alice):
+    alice.password_reset_required = True
+    alice.save(update_fields=['password_reset_required'])
+
+    request = RequestFactory().get('/api/v2/organizations/')
+    request.user = alice
+    response = ForcePasswordChangeMiddleware(lambda r: None).process_request(request)
+    assert response is not None
+    assert response.status_code == 403
+    body = json.loads(response.content.decode('utf-8'))
+    assert body['password_reset_required'] is True
+
+
+@pytest.mark.django_db
+def test_force_password_change_middleware_allows_own_user_and_me(alice):
+    alice.password_reset_required = True
+    alice.save(update_fields=['password_reset_required'])
+    mw = ForcePasswordChangeMiddleware(lambda r: None)
+
+    for path in (
+        reverse('api:user_me_list'),
+        reverse('api:user_detail', kwargs={'pk': alice.pk}),
+        '/api/login/',
+        '/api/logout/',
+        '/static/foo.js',
+    ):
+        request = RequestFactory().get(path)
+        request.user = alice
+        assert mw.process_request(request) is None, path
+
+    # Password update on own user is allowed.
+    request = RequestFactory().patch(reverse('api:user_detail', kwargs={'pk': alice.pk}))
+    request.user = alice
+    assert mw.process_request(request) is None
+
+
+@pytest.mark.django_db
+def test_force_password_change_middleware_noop_without_flag(alice):
+    assert alice.password_reset_required is False
+    request = RequestFactory().get('/api/v2/organizations/')
+    request.user = alice
+    assert ForcePasswordChangeMiddleware(lambda r: None).process_request(request) is None
