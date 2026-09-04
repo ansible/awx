@@ -155,6 +155,33 @@ def test_post_org_approval_notification(get, post, admin, notification_template,
     assert len(response.data['results']) == 1
 
 
+@pytest.fixture
+def workflow_approval_template(workflow_job_template):
+    from awx.main.models.workflow import WorkflowApprovalTemplate, WorkflowJobTemplateNode
+
+    wat = WorkflowApprovalTemplate.objects.create(name='test-approval', timeout=0)
+    WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template, unified_job_template=wat)
+    return wat
+
+
+@pytest.mark.django_db
+def test_get_approval_template_approval_notification(get, admin, workflow_approval_template):
+    url = reverse('api:workflow_approval_template_notification_templates_approvals_list', kwargs={'pk': workflow_approval_template.pk})
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 0
+
+
+@pytest.mark.django_db
+def test_post_approval_template_approval_notification(get, post, admin, notification_template, workflow_approval_template):
+    url = reverse('api:workflow_approval_template_notification_templates_approvals_list', kwargs={'pk': workflow_approval_template.pk})
+    response = post(url, dict(id=notification_template.id, associate=True), admin)
+    assert response.status_code == 204
+    response = get(url, admin)
+    assert response.status_code == 200
+    assert len(response.data['results']) == 1
+
+
 @pytest.mark.django_db
 def test_post_wfj_notification(get, post, admin, workflow_job, notification):
     workflow_job.notifications.add(notification)

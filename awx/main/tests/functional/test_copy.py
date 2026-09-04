@@ -6,7 +6,7 @@ from awx.main.utils import decrypt_field
 from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowApprovalTemplate
 from awx.main.models.jobs import JobTemplate
 from awx.main.tasks.system import deep_copy_model_obj
-from awx.main.models import Label, ExecutionEnvironment, InstanceGroup
+from awx.main.models import Label, ExecutionEnvironment, InstanceGroup, NotificationTemplate
 
 
 @pytest.mark.django_db
@@ -241,6 +241,34 @@ def test_workflow_approval_node_copy(workflow_job_template, post, get, admin, or
     # if you remove the " copy" suffix from the copied template names, they
     # should match the original templates
     assert set([x.name for x in original_templates]) == set([x.name.replace(' copy', '') for x in copied_templates])
+
+
+@pytest.mark.django_db
+def test_workflow_approval_node_copy_preserves_notification_templates(workflow_job_template, post, get, admin, organization):
+    workflow_job_template.organization = organization
+    workflow_job_template.save()
+
+    nt = NotificationTemplate.objects.create(
+        name='approval-nt',
+        organization=organization,
+        notification_type='webhook',
+        notification_configuration=dict(url='http://localhost', username='', password='', headers={}),
+    )
+    wat = WorkflowApprovalTemplate.objects.create(name='test-approval-nt', timeout=0)
+    wat.notification_templates_approvals.add(nt)
+    WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template, unified_job_template=wat)
+
+    with mock.patch('awx.api.generics.trigger_delayed_deep_copy') as deep_copy_mock:
+        wfjt_copy_id = post(
+            reverse('api:workflow_job_template_copy', kwargs={'pk': workflow_job_template.pk}), {'name': 'copy-nt-wfjt'}, admin, expect=201
+        ).data['id']
+        wfjt_copy = WorkflowJobTemplate.objects.get(pk=wfjt_copy_id)
+        args, kwargs = deep_copy_mock.call_args
+        deep_copy_model_obj(*args, **kwargs)
+
+    copied_wat = wfjt_copy.workflow_job_template_nodes.first().unified_job_template
+    assert copied_wat.pk != wat.pk
+    assert list(copied_wat.notification_templates_approvals.values_list('pk', flat=True)) == [nt.pk]
 
 
 @pytest.mark.django_db
