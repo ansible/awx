@@ -42,6 +42,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
+from ansible_base.lib.serializers.mixins import CleanTextMixin
 from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
@@ -2996,7 +2997,20 @@ class CredentialTypeSerializer(BaseSerializer):
         return fields
 
 
-class CredentialSerializer(BaseSerializer):
+class CredentialSerializer(CleanTextMixin, BaseSerializer):
+    excluded_json_keys = {'inputs': frozenset({
+        'ssh_key_data',
+        'ssh_key_unlock',
+        'password',
+        'become_password',
+        'authorize_password',
+        'vault_password',
+        'secret',
+        'secret_key',
+        'client_secret',
+        'token',
+        'oauth_token',
+    })}
     show_capabilities = ['edit', 'delete', 'copy', 'use']
     capabilities_prefetch = [{'edit': 'change'}, {'use': 'use'}]
     managed = serializers.ReadOnlyField()
