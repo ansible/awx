@@ -2,13 +2,13 @@ import pytest
 
 from uuid import uuid4
 
+from django.test import override_settings
+
 from awx.api.versioning import reverse
 
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Organization, Inventory, WorkflowJob, ExecutionEnvironment, Host
 from awx.main.scheduler import TaskManager
-
-from django.test import override_settings
 
 
 @pytest.mark.django_db
@@ -100,10 +100,10 @@ def test_bulk_job_launch_queries(job_template, organization, inventory, project,
     inventory.save()
     jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(num_jobs)]
 
-    # This is not working, we need to figure that out if we want to include tests for more jobs
-    # with mock.patch('awx.api.serializers.settings.BULK_JOB_MAX_LAUNCH', num_jobs + 1):
-    with django_assert_max_num_queries(num_queries):
-        bulk_job_launch_response = post(reverse('api:bulk_job_launch'), {'name': 'Bulk Job Launch', 'jobs': jobs}, normal_user, expect=201).data
+    # Assure settings allow given number of jobs
+    with override_settings(BULK_JOB_MAX_LAUNCH=num_jobs + 1):
+        with django_assert_max_num_queries(num_queries):
+            bulk_job_launch_response = post(reverse('api:bulk_job_launch'), {'name': 'Bulk Job Launch', 'jobs': jobs}, normal_user, expect=201).data
 
     # Run task manager so the workflow job nodes actually spawn
     TaskManager().schedule()
