@@ -67,27 +67,25 @@ SAMPLE_ANSIBLE_DATA = {
 
 
 class TestTryLoadQueryFile:
-    def test_loads_file_without_feature_flag(self):
+    def test_loads_file_when_indirect_node_counting_disabled(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, 'ansible_data.json')
             with open(path, 'w') as f:
                 json.dump(SAMPLE_ANSIBLE_DATA, f)
 
-            with mock.patch('awx.main.tasks.callback.flag_enabled', return_value=False):
-                success, data = try_load_query_file(tmpdir)
+            success, data = try_load_query_file(tmpdir)
 
             assert success is True
             assert data['ansible_version'] == '2.16.0'
             assert 'ansible.builtin' in data['installed_collections']
 
-    def test_loads_file_with_feature_flag(self):
+    def test_loads_file_when_indirect_node_counting_enabled(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, 'ansible_data.json')
             with open(path, 'w') as f:
                 json.dump(SAMPLE_ANSIBLE_DATA, f)
 
-            with mock.patch('awx.main.tasks.callback.flag_enabled', return_value=True):
-                success, data = try_load_query_file(tmpdir)
+            success, data = try_load_query_file(tmpdir)
 
             assert success is True
             assert data == SAMPLE_ANSIBLE_DATA
@@ -101,14 +99,14 @@ class TestTryLoadQueryFile:
 
 
 class TestArtifactsHandler:
-    def test_always_persists_metadata_when_flag_off(self, mock_me):
+    def test_always_persists_metadata_when_indirect_node_counting_disabled(self, mock_me):
         rc = RunnerCallback()
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, 'ansible_data.json')
             with open(path, 'w') as f:
                 json.dump(SAMPLE_ANSIBLE_DATA, f)
 
-            with mock.patch('awx.main.tasks.callback.flag_enabled', return_value=False):
+            with mock.patch('awx.main.tasks.callback.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
                 rc.artifacts_handler(tmpdir)
 
         assert rc.extra_update_fields['installed_collections'] == SAMPLE_ANSIBLE_DATA['installed_collections']
@@ -117,14 +115,14 @@ class TestArtifactsHandler:
         assert rc.artifacts_processed is True
 
     @mock.patch('awx.main.tasks.callback.EventQuery')
-    def test_creates_event_queries_when_flag_on(self, mock_event_query, mock_me):
+    def test_creates_event_queries_when_indirect_node_counting_enabled(self, mock_event_query, mock_me):
         rc = RunnerCallback()
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, 'ansible_data.json')
             with open(path, 'w') as f:
                 json.dump(SAMPLE_ANSIBLE_DATA, f)
 
-            with mock.patch('awx.main.tasks.callback.flag_enabled', return_value=True):
+            with mock.patch('awx.main.tasks.callback.settings.INDIRECT_NODE_COUNTING_ENABLED', True):
                 rc.artifacts_handler(tmpdir)
 
         assert rc.extra_update_fields['installed_collections'] == SAMPLE_ANSIBLE_DATA['installed_collections']
@@ -133,14 +131,14 @@ class TestArtifactsHandler:
         mock_event_query.assert_called_once()
 
     @mock.patch('awx.main.tasks.callback.EventQuery')
-    def test_no_event_queries_when_flag_off(self, mock_event_query, mock_me):
+    def test_no_event_queries_when_indirect_node_counting_disabled(self, mock_event_query, mock_me):
         rc = RunnerCallback()
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, 'ansible_data.json')
             with open(path, 'w') as f:
                 json.dump(SAMPLE_ANSIBLE_DATA, f)
 
-            with mock.patch('awx.main.tasks.callback.flag_enabled', return_value=False):
+            with mock.patch('awx.main.tasks.callback.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
                 rc.artifacts_handler(tmpdir)
 
         mock_event_query.assert_not_called()
@@ -148,8 +146,7 @@ class TestArtifactsHandler:
     def test_handles_missing_artifact_file(self, mock_me):
         rc = RunnerCallback()
         with tempfile.TemporaryDirectory() as tmpdir:
-            with mock.patch('awx.main.tasks.callback.flag_enabled', return_value=False):
-                rc.artifacts_handler(tmpdir)
+            rc.artifacts_handler(tmpdir)
 
         assert 'installed_collections' not in rc.extra_update_fields
         assert 'ansible_version' not in rc.extra_update_fields

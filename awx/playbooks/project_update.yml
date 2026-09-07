@@ -156,8 +156,8 @@
           ansible.builtin.file:
             path: "{{ item.path }}"
             state: absent
-          loop: "{{ previous_archive.files }}"
-          when: previous_archive.files | default([])
+          loop: "{{ previous_archive.files | default([]) }}"
+          when: previous_archive.files | default([]) | length > 0
 
         - name: Set scm_version to archive sha1 checksum
           ansible.builtin.set_fact:
@@ -253,7 +253,6 @@
               skip: True
           changed_when: "'Nothing to do.' not in galaxy_collection_result.stdout"
           when:
-            - "ansible_version.full is version_compare('2.9', '>=')"
             - collections_enabled | bool
             - req_file | length > 0
           tags:
@@ -273,7 +272,6 @@
               skip: True
           changed_when: "'Nothing to do.' not in galaxy_combined_result.stdout"
           when:
-            - "ansible_version.full is version_compare('2.10', '>=')"
             - collections_enabled | bool
             - roles_enabled | bool
             - req_file | length > 0
