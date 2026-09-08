@@ -223,6 +223,9 @@ JOB_EVENT_WORKERS = 4
 # Minimum number of workers for the dispatcher (dispatcherd) process pool
 DISPATCHER_MIN_WORKERS = 4
 
+# Maximum number of events buffered per callback worker before flushing via bulk_create()
+JOB_EVENT_CALLBACK_BUFFER_SIZE = 1000
+
 # The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
 JOB_EVENT_BUFFER_SECONDS = 1

@@ -14,6 +14,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import connections
+from django.db.models import Exists, OuterRef
 from django.utils.timezone import now
 
 # Runner
@@ -992,32 +993,32 @@ def _compute_adoption_dedup(job):
         a lower-counter one. Bounded by JOB_EVENT_WORKERS × batch size, typically < 20
         regardless of total job event count.
     """
-    from django.db.models import Exists, OuterRef
-
     next_ctr = job.get_event_queryset().filter(counter=OuterRef('counter') + 1)
     gap_event = job.get_event_queryset().annotate(has_next=Exists(next_ctr)).filter(has_next=False).order_by('counter').first()
     safe_threshold = gap_event.counter if gap_event else 0
 
-    collision_zone = set(job.get_event_queryset().filter(counter__gt=safe_threshold).values_list('counter', flat=True))
+    collision_zone = set(
+        job.get_event_queryset()
+        .filter(counter__gt=safe_threshold)
+        .values_list('counter', flat=True)[: settings.JOB_EVENT_WORKERS * settings.JOB_EVENT_CALLBACK_BUFFER_SIZE]
+    )
     return safe_threshold, collision_zone
 
 
 def reattach_to_work_unit(job, receptor_ctl):
-    """Reconnect to a completed receptor work unit after a same-controller restart.
+    """Reconnect to a receptor work unit and stream events in real-time until it completes.
 
-    Reconstructs the minimal process-phase context from the DB job record, replays events
-    from startpos=0 with counter-skip dedup (skipping events already in DB), then finalizes
-    the job status from the receptor work unit exit code.
+    Reconstructs the minimal process-phase context from the DB job record, then calls
+    _process_phase which blocks until the work unit finishes — streaming events live as
+    the EE generates them. Dedup (safe_threshold + collision_zone) skips events already
+    in DB so replay from startpos=0 is safe.
 
-    Non-blocking: returns False if the work unit is still running so the adoption loop can
-    retry on the next heartbeat.
-
-    Cross-controller path (node=execution_node) is deferred to AAP-89602.
-    It requires ansible/receptor#1564 which is not yet merged.
+    Intended to be called from adopt_job_async (a background task) so the caller is not
+    blocked. Cross-controller path (node=execution_node) is deferred to AAP-89602.
     """
     unit_id = job.work_unit_id
 
-    # Check receptor work unit state — skip if still running (retry next heartbeat)
+    # Check state for logging — no longer a gate. We stream regardless.
     try:
         unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
     except Exception:
@@ -1025,12 +1026,7 @@ def reattach_to_work_unit(job, receptor_ctl):
         return False
 
     state_name = unit_status.get('StateName', '')
-    if state_name not in ('Succeeded', 'Failed'):
-        logger.debug(f'Job {job.id} unit {unit_id} still in state {state_name!r}, deferring adoption to next heartbeat')
-        return False
-
-    exit_code = _get_adoption_exit_code(unit_status, state_name)
-    logger.info(f'Adopting job {job.id}: receptor_state={state_name} exit_code={exit_code}')
+    logger.info(f'Adopting job {job.id}: unit {unit_id} in state {state_name!r}, starting real-time streaming')
 
     safe_threshold, collision_zone = _compute_adoption_dedup(job)
     max_counter = max(collision_zone) if collision_zone else safe_threshold
@@ -1048,13 +1044,27 @@ def reattach_to_work_unit(job, receptor_ctl):
     process_phase_failed = False
     res = None
     try:
-        res = receptor_job._process_phase(receptor_ctl)
+        res = receptor_job._process_phase(receptor_ctl)  # blocks until unit completes
     except Exception:
         logger.exception(f'Adoption process phase failed for job {job.id} (unit={unit_id})')
         process_phase_failed = True
     finally:
         receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
         shutil.rmtree(private_data_dir, ignore_errors=True)
+
+    # Use _process_phase result for exit code — the work unit may be released by now.
+    # For jobs that were still "Running" at adoption start, the initial unit_status has
+    # state_name='Running' which would give exit_code=1; res.status is authoritative.
+    if res is not None:
+        exit_code = 0 if getattr(res, 'status', '') == 'successful' else 1
+    else:
+        # _process_phase raised — fall back to work status (unit may still be there)
+        try:
+            unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
+            state_name = unit_status.get('StateName', '')
+        except Exception:
+            logger.debug(f'Could not get final status for {unit_id} after process phase failure')
+        exit_code = _get_adoption_exit_code(unit_status, state_name)
 
     # Finalize via exit_code if the async callback receiver hasn't committed DB status yet.
     _finalize_adopted_job(job, callback, exit_code, process_phase_failed)

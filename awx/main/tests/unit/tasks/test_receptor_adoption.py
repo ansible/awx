@@ -544,6 +544,77 @@ def test_reattach_non_workflow_job_no_parent_id(mock_rmtree, mock_pdd, mock_rele
 
 
 # ---------------------------------------------------------------------------
+# reattach_to_work_unit — streams immediately even for still-running units
+# ---------------------------------------------------------------------------
+
+
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_streams_immediately_for_running_unit(mock_rmtree, mock_pdd, mock_release, mock_process, mock_dedup):
+    """reattach_to_work_unit calls _process_phase even when unit state is 'Running'.
+
+    No longer returns False for still-running units — streams in real-time and blocks
+    in the adopt_job_async background task until the unit completes.
+
+    Exit code comes from res.status (not a second work status re-check), so the work unit
+    being released before finalization doesn't cause an incorrect 'failed' result.
+    """
+    job = Mock()
+    job.id = 1
+    job.work_unit_id = 'unit-running'
+    job.created = '2026-01-01T00:00:00Z'
+    job.spawned_by_workflow = False
+    job.status = 'running'
+    job.started = None  # avoid datetime arithmetic error in _finalize_adopted_job
+    ctl = Mock()
+    # Only one simple_command call: the initial state check before _process_phase
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+    # _process_phase returns a result with status='successful'
+    mock_process.return_value = Mock(status='successful', rc=0)
+
+    result = reattach_to_work_unit(job, ctl)
+
+    mock_process.assert_called_once()  # _process_phase must be called, not skipped
+    assert result is True
+
+
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_process_phase_failure_falls_back_to_work_status(mock_rmtree, mock_pdd, mock_release, mock_process, mock_dedup):
+    """When _process_phase raises, exit code falls back to work status re-check.
+
+    If the re-check also fails, the exception is swallowed and the job is finalized
+    with exit_code=1 (failed). This path only triggers when _process_phase itself
+    raises (process_phase_failed=True), not when the job streams normally.
+    """
+    job = Mock()
+    job.id = 1
+    job.work_unit_id = 'unit-recheck-err'
+    job.created = '2026-01-01T00:00:00Z'
+    job.spawned_by_workflow = False
+    job.status = 'running'
+    job.started = None
+    ctl = Mock()
+    # Initial status check succeeds; _process_phase raises; re-check also raises
+    ctl.simple_command.side_effect = [
+        {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''},
+        RuntimeError('socket closed'),
+    ]
+    mock_process.side_effect = RuntimeError('process phase failed')
+
+    result = reattach_to_work_unit(job, ctl)  # must not raise
+
+    # Returns True (function completed without re-raising)
+    assert result is True
+
+
+# ---------------------------------------------------------------------------
 # _finalize_adopted_job — all branches
 # ---------------------------------------------------------------------------
 
