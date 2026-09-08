@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Ansible, Inc.
 # All Rights Reserved.
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from rest_framework import serializers
 
