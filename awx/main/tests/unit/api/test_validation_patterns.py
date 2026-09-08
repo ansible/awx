@@ -72,6 +72,51 @@ class TestInjectFreeTextPattern:
             assert validation_patterns.inject_free_text_pattern('not-a-dict') == 'not-a-dict'
 
 
+class TestFreeTextPatternMetadata:
+    def test_returns_pattern_dict_when_helper_available(self, fake_tier2_pattern):
+        result = validation_patterns.free_text_pattern_metadata()
+        assert result is not None
+        assert result['pattern'] == FAKE_PATTERN
+        assert result['pattern_description'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
+        assert result['flags'] == 'i'
+
+    def test_returns_none_when_helper_missing(self, monkeypatch):
+        monkeypatch.setattr(validation_patterns, 'build_tier2_frontend_pattern', None)
+        assert validation_patterns.free_text_pattern_metadata() is None
+
+
+class TestIsStringSchema:
+    def test_string_type_in_schema(self):
+        assert validation_patterns._is_string_schema({'type': 'string'}) is True
+
+    def test_str_type_in_schema(self):
+        assert validation_patterns._is_string_schema({'type': 'str'}) is True
+
+    def test_non_string_type_in_schema(self):
+        assert validation_patterns._is_string_schema({'type': 'boolean'}) is False
+
+    def test_missing_type_defaults_to_string(self):
+        assert validation_patterns._is_string_schema({}) is True
+
+    def test_explicit_field_type_overrides_schema(self):
+        assert validation_patterns._is_string_schema({'type': 'boolean'}, field_type='string') is True
+        assert validation_patterns._is_string_schema({'type': 'string'}, field_type='int') is False
+
+
+class TestInjectFreeTextPatternSecretKwarg:
+    def test_skips_when_secret_kwarg_true(self, fake_tier2_pattern):
+        schema = {'id': 'token', 'type': 'string'}
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            validation_patterns.inject_free_text_pattern(schema, secret=True)
+        assert 'pattern' not in schema
+
+    def test_injects_when_secret_kwarg_false(self, fake_tier2_pattern):
+        schema = {'id': 'host', 'type': 'string'}
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            validation_patterns.inject_free_text_pattern(schema, secret=False)
+        assert schema['pattern'] == FAKE_PATTERN
+
+
 class TestInjectPatternsIntoFieldList:
     def test_injects_only_non_secret_strings(self, fake_tier2_pattern):
         fields = [
@@ -88,6 +133,16 @@ class TestInjectPatternsIntoFieldList:
     def test_ignores_non_list(self, fake_tier2_pattern):
         with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
             assert validation_patterns.inject_patterns_into_field_list('not-a-list') is None
+
+    def test_handles_none_input(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            assert validation_patterns.inject_patterns_into_field_list(None) is None
+
+    def test_handles_empty_list(self, fake_tier2_pattern):
+        fields = []
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            validation_patterns.inject_patterns_into_field_list(fields)
+        assert fields == []
 
 
 class TestInjectPatternsIntoInitParameters:
@@ -117,6 +172,43 @@ class TestInjectPatternsIntoInitParameters:
         assert 'pattern' not in injected['host']
         assert injected['host'] == CustomEmailBackend.init_parameters['host']
         assert injected is not CustomEmailBackend.init_parameters
+
+    def test_non_dict_input_returns_empty_dict(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_patterns_into_init_parameters('not-a-dict')
+        assert result == {}
+
+    def test_none_input_returns_empty_dict(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_patterns_into_init_parameters(None)
+        assert result == {}
+
+    def test_list_input_returns_empty_dict(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_patterns_into_init_parameters([1, 2, 3])
+        assert result == {}
+
+    def test_skips_non_dict_values(self, fake_tier2_pattern):
+        params = {
+            'host': {'label': 'Host', 'type': 'string'},
+            'extra_info': 'just-a-string',
+            'count': 42,
+        }
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_patterns_into_init_parameters(params)
+        assert 'pattern' in result['host']
+        assert result['extra_info'] == 'just-a-string'
+        assert result['count'] == 42
+
+    def test_non_dict_input_toggle_off_returns_empty_dict(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+            result = validation_patterns.inject_patterns_into_init_parameters(None)
+        assert result == {}
+
+    def test_empty_dict_returns_empty_dict(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_patterns_into_init_parameters({})
+        assert result == {}
 
 
 class TestInjectTopLevelCleanTextPatterns:
