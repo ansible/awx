@@ -117,3 +117,28 @@ class TestInjectPatternsIntoInitParameters:
         assert 'pattern' not in injected['host']
         assert injected['host'] == CustomEmailBackend.init_parameters['host']
         assert injected is not CustomEmailBackend.init_parameters
+
+
+class TestInjectTopLevelCleanTextPatterns:
+    def test_no_op_when_dab_helper_missing(self, monkeypatch):
+        monkeypatch.setattr(validation_patterns, '_dab_inject_clean_text_patterns', None)
+        field_info = {'type': 'string'}
+        result = validation_patterns.inject_top_level_clean_text_patterns(object(), field_info)
+        assert result == {'type': 'string'}
+
+    def test_delegates_to_dab_helper(self, monkeypatch):
+        calls = []
+
+        def fake_dab_inject(field, field_info):
+            calls.append((field, field_info))
+            field_info['pattern'] = 'FAKE'
+            return field_info
+
+        monkeypatch.setattr(validation_patterns, '_dab_inject_clean_text_patterns', fake_dab_inject)
+        sentinel_field = object()
+        field_info = {'type': 'string'}
+
+        result = validation_patterns.inject_top_level_clean_text_patterns(sentinel_field, field_info)
+
+        assert result['pattern'] == 'FAKE'
+        assert calls == [(sentinel_field, field_info)]

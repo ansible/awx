@@ -1,16 +1,19 @@
 # Copyright (c) 2026 Ansible, Inc.
 # All Rights Reserved.
 
-"""Inject DAB CleanTextMixin frontend patterns into JSON sub-key schemas.
+"""Inject DAB CleanTextMixin frontend patterns into API OPTIONS metadata.
 
-Top-level CharField OPTIONS metadata is handled by DAB's CleanTextMetadata
-(AAP-85987). JSON sub-keys (credential inputs, notification config, credential
-input source metadata) are domain-owned schemas, so pattern injection lives
-here rather than in DAB.
+Controller defines its own ``DEFAULT_METADATA_CLASS`` (``awx.api.metadata.Metadata``)
+rather than using DAB's ``CleanTextMetadata``, so top-level CharField OPTIONS
+metadata is not handled automatically by DAB -- ``inject_top_level_clean_text_patterns``
+below is called directly from ``awx.api.metadata.Metadata.get_field_info`` to cover it.
+JSON sub-keys (credential inputs, notification config, credential input source
+metadata) are domain-owned schemas that DAB has no visibility into at all, so
+pattern injection for those lives here unconditionally.
 
 Depends on django-ansible-base PR #1119 (AAP-85987) for
-``build_tier2_frontend_pattern``. Until that lands on DAB devel, injection is
-a no-op so Controller can still import and run.
+``build_tier2_frontend_pattern`` and ``inject_clean_text_patterns``. Until that
+lands on DAB devel, injection is a no-op so Controller can still import and run.
 """
 
 import copy
@@ -21,6 +24,11 @@ try:
     from ansible_base.lib.metadata import build_tier2_frontend_pattern
 except ImportError:  # pragma: no cover - DAB without AAP-85987
     build_tier2_frontend_pattern = None
+
+try:
+    from ansible_base.lib.metadata import inject_clean_text_patterns as _dab_inject_clean_text_patterns
+except ImportError:  # pragma: no cover - DAB without AAP-85987
+    _dab_inject_clean_text_patterns = None
 
 # Keep in sync with ansible_base.lib.metadata.inject_clean_text_patterns (Tier 2).
 TIER2_PATTERN_DESCRIPTION = "This field can't include HTML tags, script markup, unsafe URI schemes, shell or template syntax, or control characters."
@@ -92,3 +100,15 @@ def inject_patterns_into_init_parameters(init_parameters):
             continue
         inject_free_text_pattern(field_schema, secret=field_schema.get('type') == 'password')
     return params
+
+
+def inject_top_level_clean_text_patterns(field, field_info):
+    """Advertise DAB CleanTextMixin Tier 1/Tier 2 patterns on a top-level serializer field.
+
+    Delegates entirely to DAB's ``inject_clean_text_patterns``, which no-ops unless
+    ``ENHANCED_INPUT_VALIDATION_ENABLED`` is on and the field's serializer mixes in
+    ``CleanTextMixin``. No-op when the DAB helper is missing.
+    """
+    if _dab_inject_clean_text_patterns is None:
+        return field_info
+    return _dab_inject_clean_text_patterns(field, field_info)

@@ -23,7 +23,7 @@ from rest_framework.request import clone_request
 
 # AWX
 from awx.api.fields import ChoiceNullField
-from awx.api.validation_patterns import inject_patterns_into_init_parameters
+from awx.api.validation_patterns import inject_patterns_into_init_parameters, inject_top_level_clean_text_patterns
 from awx.main.fields import ImplicitRoleField
 from awx.main.models import NotificationTemplate
 from awx.main.utils.execution_environments import get_default_pod_spec
@@ -180,6 +180,10 @@ class Metadata(metadata.SimpleMetadata):
             field_info['type'] = 'list_of_ids'
         elif isinstance(model_field, BooleanField):
             field_info['type'] = 'boolean'
+
+        # Advertise CleanTextMixin Tier 1/Tier 2 patterns on top-level CharFields (AAP-87586).
+        # No-op unless ENHANCED_INPUT_VALIDATION_ENABLED is on and the serializer mixes in CleanTextMixin.
+        field_info = inject_top_level_clean_text_patterns(field, field_info)
 
         return field_info
 
