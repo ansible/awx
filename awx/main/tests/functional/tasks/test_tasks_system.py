@@ -24,7 +24,6 @@ from awx.main.tasks.system import (
     _process_startup_jobs,
     _process_running_jobs,
     _startup_reap_undispatched,
-    _try_adopt_job,
 )
 from awx.main.dispatch.reaper import reap
 from awx.main.management.commands.dispatcherd import Command
@@ -583,22 +582,22 @@ def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
 def test_process_startup_jobs_skips_dispatched_job(me_inst, settings):
     """_process_startup_jobs() must not reap jobs that have a work_unit_id (dispatched to receptor).
 
-    Dispatched jobs may still be running on the EE; the adoption path will reconnect to them.
+    Dispatched jobs are handed to adopt_job_async for background streaming adoption.
     """
     dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='abc12345')
-    ctl = MagicMock()
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit', return_value=False):
-        _process_startup_jobs(me_inst, ctl)
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock()
+        _process_startup_jobs(me_inst)
     dispatched.refresh_from_db()
     assert dispatched.status == 'running', 'dispatched job was wrongly reaped by _process_startup_jobs()'
+    mock_adopt.apply_async.assert_called_once()
 
 
 @pytest.mark.django_db
 def test_process_startup_jobs_reaps_undispatched_job(me_inst, settings):
     """_process_startup_jobs() reaps jobs with no work_unit_id (never dispatched to receptor)."""
     undispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None)
-    ctl = MagicMock()
-    _process_startup_jobs(me_inst, ctl)
+    _process_startup_jobs(me_inst)
     undispatched.refresh_from_db()
     assert undispatched.status == 'failed', 'undispatched job should have been reaped'
 
@@ -618,45 +617,46 @@ def test_reap_reaps_dispatched_jobs(me_inst):
 @pytest.mark.django_db
 def test_startup_no_op_when_no_jobs(me_inst):
     """_process_startup_jobs() is a no-op when there are no running jobs."""
-    ctl = MagicMock()
-    _process_startup_jobs(me_inst, ctl)
-    ctl.simple_command.assert_not_called()
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock()
+        _process_startup_jobs(me_inst)
+    mock_adopt.apply_async.assert_not_called()
 
 
 @pytest.mark.django_db
 def test_adoption_skips_still_running_work_unit(me_inst):
-    """Startup adoption defers a job whose receptor work unit is still running."""
+    """Startup dispatches adopt_job_async for a still-running job — no inline blocking."""
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='running-unit')
-    ctl = MagicMock()
-    ctl.simple_command.return_value = {'StateName': 'Running', 'ExitCode': None}
 
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit', wraps=lambda j, c: False):
-        _process_startup_jobs(me_inst, ctl)
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock()
+        _process_startup_jobs(me_inst)
 
+    mock_adopt.apply_async.assert_called_once_with(args=[job.id], queue=mock_adopt.apply_async.call_args[1]['queue'])
     job.refresh_from_db()
-    assert job.status == 'running', 'job should still be running — adoption deferred'
+    assert job.status == 'running', 'job must not be reaped — adoption deferred to background task'
 
 
 @pytest.mark.django_db
 def test_adoption_timeout_fails_job(me_inst, settings):
-    """Jobs orphaned longer than HADR_JOB_ADOPTION_TIMEOUT are failed.
+    """Jobs orphaned longer than HADR_JOB_ADOPTION_TIMEOUT are reaped by adopt_job_async.
 
-    Timeout is measured from the last event received (orphaned_since), not from job.started.
-    With no events in DB the fallback is job.started — that's what this test exercises.
+    Timeout is measured from the last event received, not from job.started.
     """
-    from django.utils.timezone import now, timedelta
-
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    from awx.main.tasks.system import adopt_job_async
+
     job = Job.objects.create(
         controller_node=me_inst.hostname,
         status='running',
         work_unit_id='old-unit',
-        started=now() - timedelta(seconds=7200),  # started 2h ago, no events in DB → orphaned 2h
+        started=now() - timedelta(seconds=7200),
     )
-    ctl = MagicMock()
-    _process_startup_jobs(me_inst, ctl)
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id)
+    mock_reattach.assert_not_called()
     job.refresh_from_db()
-    assert job.status == 'failed', 'timed-out job should be reaped by startup job processing'
+    assert job.status == 'failed', 'timed-out job should be reaped by adopt_job_async'
     assert 'HADR_JOB_ADOPTION_TIMEOUT' in job.job_explanation
 
 
@@ -664,35 +664,27 @@ def test_adoption_timeout_fails_job(me_inst, settings):
 def test_adoption_timeout_spares_long_running_job_with_recent_events(me_inst, settings):
     """Long-running jobs are NOT killed if events arrived recently.
 
-    A job started 2 hours ago but with events arriving 5 minutes ago (controller just
-    restarted briefly) should NOT be failed — the outage was short, not the job runtime.
-    This is the fix for the job.started bug: we measure from last_event.created, not
-    from job.started.
+    A job started 2 hours ago but with events 5 minutes ago (brief outage) must not be failed.
+    Timeout is measured from last_event.created, not job.started.
     """
-    from django.utils.timezone import now, timedelta
     from awx.main.models import JobEvent
+    from awx.main.tasks.system import adopt_job_async
 
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(
         controller_node=me_inst.hostname,
         status='running',
         work_unit_id='long-running-unit',
-        started=now() - timedelta(seconds=7200),  # started 2h ago → old job.started
+        started=now() - timedelta(seconds=7200),
     )
-    # Simulate events arriving 5 minutes ago (brief controller outage)
-    JobEvent.objects.create(
-        job=job,
-        counter=10,
-        event='runner_on_ok',
-        job_created=job.created,
-    )
-    # Manually set created to 5 min ago (default is now())
+    JobEvent.objects.create(job=job, counter=10, event='runner_on_ok', job_created=job.created)
     JobEvent.objects.filter(job=job).update(created=now() - timedelta(seconds=300))
 
-    ctl = MagicMock()
-    _process_startup_jobs(me_inst, ctl)
+    with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id)
+    mock_reattach.assert_called_once()
     job.refresh_from_db()
-    assert job.status == 'running', 'Long-running job with recent events must not be failed — measure timeout from last event, not job.started'
+    assert job.status == 'running', 'Long-running job with recent events must not be failed'
 
 
 @pytest.mark.django_db
@@ -709,7 +701,7 @@ def test_adoption_finalizes_successful_job(me_inst):
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
         mock_instance = MagicMock()
-        mock_instance._process_phase.return_value = MagicMock()
+        mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
         mock_job_cls.return_value = mock_instance
 
         reattach_to_work_unit(job, ctl)
@@ -743,25 +735,24 @@ def test_adoption_finalizes_failed_job(me_inst):
 
 @pytest.mark.django_db
 def test_process_running_jobs_adopts_dispatched_skips_active(me_inst):
-    """_process_running_jobs() adopts dispatched orphaned jobs and leaves active ones alone."""
+    """_process_running_jobs() dispatches adopt_job_async for orphaned jobs, skips active ones."""
     active_job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='active-unit', celery_task_id='active-uuid')
     orphaned_dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='orphaned-unit', celery_task_id='orphan-uuid')
-    ctl = MagicMock()
 
-    adopted = []
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit', side_effect=lambda j, c: adopted.append(j.id)):
-        _process_running_jobs(me_inst, ctl, active_task_ids={'active-uuid'}, ref_time=None)
+    dispatched_ids = []
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock(side_effect=lambda args, **kw: dispatched_ids.append(args[0]))
+        _process_running_jobs(me_inst, active_task_ids={'active-uuid'}, ref_time=None)
 
-    assert orphaned_dispatched.id in adopted, 'orphaned dispatched job should be adopted'
-    assert active_job.id not in adopted, 'active job should not be touched'
+    assert orphaned_dispatched.id in dispatched_ids, 'orphaned dispatched job should be queued for adoption'
+    assert active_job.id not in dispatched_ids, 'active job should not be touched'
 
 
 @pytest.mark.django_db
 def test_process_running_jobs_reaps_undispatched(me_inst):
     """_process_running_jobs() reaps undispatched orphaned jobs."""
     undispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None, celery_task_id='orphan-undispatched')
-    ctl = MagicMock()
-    _process_running_jobs(me_inst, ctl, active_task_ids=set(), ref_time=None)
+    _process_running_jobs(me_inst, active_task_ids=set(), ref_time=None)
     undispatched.refresh_from_db()
     assert undispatched.status == 'failed', 'undispatched orphaned job should be reaped'
 
@@ -770,10 +761,10 @@ def test_process_running_jobs_reaps_undispatched(me_inst):
 def test_process_running_jobs_noop_when_no_orphaned_jobs(me_inst):
     """_process_running_jobs() is a no-op (early return) when all running jobs are active."""
     active_job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='u1', celery_task_id='active-uuid')
-    ctl = MagicMock()
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
-        _process_running_jobs(me_inst, ctl, active_task_ids={'active-uuid'}, ref_time=None)
-    mock_reattach.assert_not_called()
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock()
+        _process_running_jobs(me_inst, active_task_ids={'active-uuid'}, ref_time=None)
+    mock_adopt.apply_async.assert_not_called()
     active_job.refresh_from_db()
     assert active_job.status == 'running'
 
@@ -789,10 +780,10 @@ def test_process_running_jobs_ref_time_filter(me_inst):
         started=now() + timedelta(seconds=60),
     )
     ref_time = now()
-    ctl = MagicMock()
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
-        _process_running_jobs(me_inst, ctl, active_task_ids=set(), ref_time=ref_time)
-    mock_reattach.assert_not_called()
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock()
+        _process_running_jobs(me_inst, active_task_ids=set(), ref_time=ref_time)
+    mock_adopt.apply_async.assert_not_called()
     future_job.refresh_from_db()
     assert future_job.status == 'running', 'job started after ref_time should not be touched'
 
@@ -803,17 +794,18 @@ def test_process_running_jobs_exception_does_not_abort_loop(me_inst):
     job1 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-a', celery_task_id='uuid-a')
     job2 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-b', celery_task_id='uuid-b')
 
-    processed = []
+    dispatched = []
 
-    def side_effect(j, ctl, timeout, cutoff):
-        if j.id == job1.id:
+    def side_effect(args, **kw):
+        if args[0] == job1.id:
             raise RuntimeError('simulated failure')
-        processed.append(j.id)
+        dispatched.append(args[0])
 
-    with patch('awx.main.tasks.system._try_adopt_job', side_effect=side_effect):
-        _process_running_jobs(me_inst, ctl=MagicMock(), active_task_ids=set(), ref_time=None)
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock(side_effect=side_effect)
+        _process_running_jobs(me_inst, active_task_ids=set(), ref_time=None)
 
-    assert job2.id in processed, 'second job must be processed even though first raised'
+    assert job2.id in dispatched, 'second job must be processed even though first raised'
 
 
 @pytest.mark.django_db
@@ -822,17 +814,14 @@ def test_process_startup_jobs_exception_does_not_abort_loop(me_inst, settings):
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job1 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
     job2 = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=None)
-    ctl = MagicMock()
 
-    processed = []
-
-    def side_effect(j, c, timeout, cutoff):
-        if j.id == job1.id:
+    def side_effect(args, **kw):
+        if args[0] == job1.id:
             raise RuntimeError('simulated failure')
-        processed.append(j.id)
 
-    with patch('awx.main.tasks.system._try_adopt_job', side_effect=side_effect):
-        _process_startup_jobs(me_inst, ctl)
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock(side_effect=side_effect)
+        _process_startup_jobs(me_inst)
 
     job2.refresh_from_db()
     assert job2.status == 'failed', 'undispatched job2 must still be reaped after job1 exception'
@@ -882,8 +871,7 @@ def test_process_startup_jobs_skips_workflow_jobs(me_inst, settings):
     """
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     wfj = WorkflowJob.objects.create(status='running', controller_node=me_inst.hostname)
-    ctl = MagicMock()
-    _process_startup_jobs(me_inst, ctl)
+    _process_startup_jobs(me_inst)
     wfj.refresh_from_db()
     assert wfj.status == 'running', 'WorkflowJob must not be reaped by startup job loop'
 
@@ -974,31 +962,14 @@ def test_compute_adoption_dedup_gap_produces_collision_zone(me_inst):
 
 
 @pytest.mark.django_db
-def test_try_adopt_job_timeout_reaps(me_inst):
-    """_try_adopt_job reaps a job orphaned longer than HADR_JOB_ADOPTION_TIMEOUT."""
-    job = Job.objects.create(
-        controller_node=me_inst.hostname,
-        status='running',
-        work_unit_id='stale-unit',
-        started=now() - timedelta(seconds=7200),
-    )
-    ctl = MagicMock()
-    timeout_cutoff = now() - timedelta(seconds=3600)
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
-        _try_adopt_job(job, ctl, 3600, timeout_cutoff)
-    mock_reattach.assert_not_called()
-    job.refresh_from_db()
-    assert job.status == 'failed', 'timed-out orphaned job should be reaped'
+def test_adopt_job_async_exception_is_swallowed(me_inst, settings):
+    """adopt_job_async swallows exceptions from reattach_to_work_unit and does not re-raise."""
+    from awx.main.tasks.system import adopt_job_async
 
-
-@pytest.mark.django_db
-def test_try_adopt_job_exception_is_swallowed(me_inst):
-    """_try_adopt_job swallows exceptions from reattach_to_work_unit and does not re-raise."""
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
-    ctl = MagicMock()
-    timeout_cutoff = now() - timedelta(seconds=3600)
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit', side_effect=RuntimeError('network failure')):
-        _try_adopt_job(job, ctl, 3600, timeout_cutoff)  # must not raise
+    with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.receptor.reattach_to_work_unit', side_effect=RuntimeError('network failure')):
+        adopt_job_async(job.id)  # must not raise
 
 
 @pytest.mark.django_db
@@ -1091,7 +1062,7 @@ def test_reattach_exit_code_from_detail(me_inst):
 
 @pytest.mark.django_db
 def test_reattach_exit_code_fallback_succeeded(me_inst):
-    """Unparseable Detail with Succeeded state → exit_code=0 → successful."""
+    """_process_phase returning status='successful' → job finalized as successful."""
     from awx.main.tasks.receptor import reattach_to_work_unit
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-fb-ok')
@@ -1102,7 +1073,9 @@ def test_reattach_exit_code_fallback_succeeded(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_job_cls.return_value = MagicMock()
+        mock_instance = MagicMock()
+        mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
+        mock_job_cls.return_value = mock_instance
         reattach_to_work_unit(job, ctl)
 
     job.refresh_from_db()
@@ -1175,3 +1148,68 @@ def test_reattach_job_already_finalized(me_inst):
 
     job.refresh_from_db()
     assert job.status == 'successful'
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_calls_reattach(me_inst, settings):
+    """adopt_job_async creates its own receptor_ctl and calls reattach_to_work_unit."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-async')
+
+    with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl_factory, patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id)
+
+    mock_ctl_factory.assert_called_once()
+    mock_reattach.assert_called_once_with(job, mock_ctl_factory.return_value)
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_skips_already_finalized(me_inst, settings):
+    """adopt_job_async is a no-op if the job is no longer running."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(controller_node=me_inst.hostname, status='successful', work_unit_id='unit-done')
+
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id)
+
+    mock_reattach.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_reaps_on_timeout(me_inst, settings):
+    """adopt_job_async reaps a job orphaned longer than HADR_JOB_ADOPTION_TIMEOUT."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='unit-old',
+        started=now() - timedelta(seconds=7200),
+    )
+
+    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id)
+
+    mock_reattach.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'failed'
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_ctl_close_exception_is_swallowed(me_inst, settings):
+    """adopt_job_async does not propagate exceptions from receptor_ctl.close()."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-close-err')
+
+    mock_ctl = MagicMock()
+    mock_ctl.close.side_effect = RuntimeError('socket already closed')
+
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.receptor.reattach_to_work_unit'):
+        adopt_job_async(job.id)  # must not raise

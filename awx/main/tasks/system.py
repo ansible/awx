@@ -669,7 +669,7 @@ def cluster_node_heartbeat(binder):
 
     # Run common instance management logic — ctl is the same receptor connection used for
     # mesh status; we reuse it for the job processing loop to avoid a second socket open.
-    this_inst, instance_list, lost_instances, ctl = _heartbeat_instance_management()
+    this_inst, instance_list, lost_instances, _ctl = _heartbeat_instance_management()
     if this_inst is None:
         return  # Early return case from instance management
 
@@ -681,8 +681,8 @@ def cluster_node_heartbeat(binder):
 
     if binder is None:
         # Startup: one loop over all running jobs on this instance.
-        # Dispatched jobs are re-adopted; undispatched jobs are reaped.
-        _process_startup_jobs(this_inst, ctl)
+        # Dispatched jobs are handed to adopt_job_async; undispatched jobs are reaped.
+        _process_startup_jobs(this_inst)
         logger.debug("Heartbeat finished in startup.")
         return
 
@@ -695,7 +695,7 @@ def cluster_node_heartbeat(binder):
     # One loop over all orphaned running jobs — adopt dispatched, reap undispatched.
     ref_time = now()
     logger.debug(f"Running job processing loop with {len(active_task_ids)} excluded UUIDs")
-    _process_running_jobs(this_inst, ctl, active_task_ids, ref_time)
+    _process_running_jobs(this_inst, active_task_ids, ref_time)
 
     # If waiting jobs are hanging out, resubmit them
     if UnifiedJob.objects.filter(controller_node=settings.CLUSTER_HOST_ID, status='waiting').exists():
@@ -896,26 +896,6 @@ def _heartbeat_handle_lost_instances(lost_instances, this_inst):
             _reap_and_mark_lost_instance(other_inst)
 
 
-def _try_adopt_job(job, ctl, adoption_timeout, timeout_cutoff):
-    """Attempt adoption for a single dispatched job."""
-    from awx.main.tasks.receptor import reattach_to_work_unit
-
-    # Measure orphan duration from when events stopped arriving, not from job start.
-    # job.started counts total runtime — a job running 55 min before a 5-min controller
-    # outage would wrongly hit the 1-hour limit. The last event's created timestamp is
-    # the closest proxy for when the controller last streamed successfully from receptor.
-    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    orphaned_since = last_event_time or job.started
-    if orphaned_since and orphaned_since < timeout_cutoff:
-        logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
-        reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
-        return
-    try:
-        reattach_to_work_unit(job, ctl)
-    except Exception:
-        logger.exception(f'Adoption failed for job {job.id} (unit={job.work_unit_id})')
-
-
 def _startup_reap_undispatched(hostname):
     """Reap undispatched running jobs at startup using only the hostname — no receptor needed.
 
@@ -944,19 +924,15 @@ def _startup_reap_undispatched(hostname):
         logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
 
 
-def _process_startup_jobs(this_inst, ctl):
+def _process_startup_jobs(this_inst):
     """On controller restart, process all running jobs owned by this instance in one loop.
 
-    Dispatched jobs (work_unit_id set) are re-adopted via reattach_to_work_unit.
-    Undispatched jobs (work_unit_id absent) are marked as failed — the controller died
-    before finishing dispatch and there is no EE work unit to reconnect to.
+    Dispatched jobs (work_unit_id set) are handed off to adopt_job_async, which streams
+    events in real-time in a background task. Undispatched jobs are reaped immediately.
 
     Same-controller only. Cross-controller adoption (jobs from a dead peer controller) is
     deferred to AAP-89602 and requires ansible/receptor#1564.
     """
-    adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
-    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
-
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = list(UnifiedJob.objects.filter(status='running', controller_node=this_inst.hostname).exclude(polymorphic_ctype_id=workflow_ctype_id))
     if not jobs:
@@ -966,8 +942,7 @@ def _process_startup_jobs(this_inst, ctl):
     for j in jobs:
         try:
             if j.work_unit_id:
-                if ctl is not None:
-                    _try_adopt_job(j, ctl, adoption_timeout, timeout_cutoff)
+                adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
             else:
                 reaped_ids.append(j.id)
                 reaper.reap_job(
@@ -981,12 +956,12 @@ def _process_startup_jobs(this_inst, ctl):
         logger.error(f'Unified jobs {reaped_ids} were reaped on dispatch startup')
 
 
-def _process_running_jobs(this_inst, ctl, active_task_ids, ref_time):
+def _process_running_jobs(this_inst, active_task_ids, ref_time):
     """On each heartbeat, process running jobs that dispatcherd is no longer tracking.
 
     Jobs still in active_task_ids are legitimately running — leave them alone.
     For orphaned jobs (not in active_task_ids):
-    - Dispatched (work_unit_id set, controller_node=this_inst) → try adoption.
+    - Dispatched (work_unit_id set, controller_node=this_inst) → adopt_job_async (real-time streaming).
     - Undispatched or not owned by this controller → reap.
 
     Cross-controller adoption (jobs from a dead peer controller) is deferred to AAP-89602.
@@ -1002,18 +977,51 @@ def _process_running_jobs(this_inst, ctl, active_task_ids, ref_time):
     if not jobs:
         return
 
-    adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
-    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
-
     for j in jobs:
         try:
             if j.work_unit_id and j.controller_node == this_inst.hostname:
-                if ctl is not None:
-                    _try_adopt_job(j, ctl, adoption_timeout, timeout_cutoff)
+                adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
             else:
                 reaper.reap_job(j, 'failed')
         except Exception:
             logger.exception(f'Failed processing job {j.id} in heartbeat job loop')
+
+
+@task(queue=get_task_queuename, timeout=3600 * 2, on_duplicate='discard')
+def adopt_job_async(job_id):
+    """Adopt a single orphaned job in a background task, streaming events in real-time.
+
+    Called from _process_startup_jobs and _process_running_jobs via apply_async so the
+    heartbeat returns immediately. on_duplicate='discard' ensures only one adoption runs
+    per job across heartbeat cycles.
+    """
+    from awx.main.models import UnifiedJob
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = UnifiedJob.objects.filter(id=job_id, status='running').first()
+    if not job:
+        logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
+        return
+
+    adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
+    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
+    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
+    orphaned_since = last_event_time or job.started
+    if orphaned_since and orphaned_since < timeout_cutoff:
+        logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
+        reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
+        return
+
+    receptor_ctl = get_receptor_ctl()
+    try:
+        reattach_to_work_unit(job, receptor_ctl)
+    except Exception:
+        logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
+    finally:
+        try:
+            receptor_ctl.close()
+        except Exception:
+            pass
 
 
 @task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
