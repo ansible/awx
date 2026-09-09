@@ -2,10 +2,11 @@
 # All Rights Reserved.
 
 import pytest
+from unittest.mock import PropertyMock, patch
 from django.core.exceptions import ValidationError
 
 from awx.main.utils import decrypt_field
-from awx.main.models import Credential, CredentialType
+from awx.main.models import Credential, CredentialType, CredentialInputSource
 
 from rest_framework import serializers
 
@@ -380,3 +381,131 @@ def test_idempotent_credential_type_setup():
 
     CredentialType.setup_tower_managed_defaults()
     assert CredentialType.objects.count() == total
+
+
+@pytest.mark.django_db
+def test_get_input_prefers_direct_value_over_dynamic_source(organization_factory):
+    """
+    When a credential has an input_source (e.g. HashiCorp Vault) attached to
+    a field AND a direct value is provided in inputs (e.g. via PATCH), the
+    direct value should be returned without calling the external backend.
+    Regression test for AAP-89036.
+    """
+    organization = organization_factory('test').organization
+
+    external_type = CredentialType(
+        kind='external',
+        name='HashiCorp Vault Secret Lookup',
+        inputs={'fields': [{'id': 'url', 'type': 'string'}, {'id': 'token', 'type': 'string', 'secret': True}]},
+    )
+    external_type.save()
+
+    ssh_type = CredentialType(
+        kind='ssh',
+        name='Machine',
+        managed=True,
+        inputs={
+            'fields': [
+                {'id': 'username', 'type': 'string'},
+                {'id': 'ssh_key_data', 'type': 'string', 'secret': True, 'multiline': True},
+            ]
+        },
+    )
+    ssh_type.save()
+
+    source_cred = Credential(
+        organization=organization,
+        credential_type=external_type,
+        name='Vault Lookup',
+        inputs={'url': 'https://vault.example.com', 'token': 'fake-token'},
+    )
+    source_cred.save()
+
+    target_cred = Credential(
+        organization=organization,
+        credential_type=ssh_type,
+        name='My Machine Cred',
+        inputs={'username': 'myuser'},
+    )
+    target_cred.save()
+
+    CredentialInputSource.objects.create(
+        target_credential=target_cred,
+        source_credential=source_cred,
+        input_field_name='ssh_key_data',
+        metadata={'secret_path': 'secret/data/ssh-keys', 'secret_key': 'private_key'},
+    )
+
+    # Clear cached_property so dynamic_input_fields picks up the new source
+    if 'dynamic_input_fields' in target_cred.__dict__:
+        del target_cred.__dict__['dynamic_input_fields']
+
+    assert 'ssh_key_data' in target_cred.dynamic_input_fields
+
+    # Simulate a PATCH that sets a new direct value for ssh_key_data
+    target_cred.inputs['ssh_key_data'] = 'direct-new-key-value'
+
+    # get_input should return the direct value WITHOUT calling _get_dynamic_input
+    with patch.object(Credential, '_get_dynamic_input', side_effect=RuntimeError('Should not be called')) as mock_dynamic:
+        result = target_cred.get_input('ssh_key_data')
+
+    assert result == 'direct-new-key-value'
+    mock_dynamic.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_get_input_falls_back_to_dynamic_when_no_direct_value(organization_factory):
+    """
+    When a credential has an input_source and the direct value is empty or
+    absent, get_input() should still delegate to the dynamic input path.
+    """
+    organization = organization_factory('test').organization
+
+    external_type = CredentialType(
+        kind='external',
+        name='External Lookup',
+        inputs={'fields': [{'id': 'url', 'type': 'string'}]},
+    )
+    external_type.save()
+
+    custom_type = CredentialType(
+        kind='cloud',
+        name='Custom Cloud',
+        inputs={'fields': [{'id': 'api_key', 'type': 'string'}]},
+    )
+    custom_type.save()
+
+    source_cred = Credential(
+        organization=organization,
+        credential_type=external_type,
+        name='External Source',
+        inputs={'url': 'https://external.example.com'},
+    )
+    source_cred.save()
+
+    target_cred = Credential(
+        organization=organization,
+        credential_type=custom_type,
+        name='Cloud Cred',
+        inputs={},
+    )
+    target_cred.save()
+
+    CredentialInputSource.objects.create(
+        target_credential=target_cred,
+        source_credential=source_cred,
+        input_field_name='api_key',
+        metadata={},
+    )
+
+    if 'dynamic_input_fields' in target_cred.__dict__:
+        del target_cred.__dict__['dynamic_input_fields']
+
+    assert 'api_key' in target_cred.dynamic_input_fields
+
+    # No direct value in inputs -- should call _get_dynamic_input
+    with patch.object(Credential, '_get_dynamic_input', return_value='dynamic-value') as mock_dynamic:
+        result = target_cred.get_input('api_key')
+
+    assert result == 'dynamic-value'
+    mock_dynamic.assert_called_once_with('api_key')
