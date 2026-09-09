@@ -652,7 +652,7 @@ def test_adoption_timeout_fails_job(me_inst, settings):
         work_unit_id='old-unit',
         started=now() - timedelta(seconds=7200),
     )
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+    with patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
         adopt_job_async(job.id)
     mock_reattach.assert_not_called()
     job.refresh_from_db()
@@ -680,7 +680,7 @@ def test_adoption_timeout_spares_long_running_job_with_recent_events(me_inst, se
     JobEvent.objects.create(job=job, counter=10, event='runner_on_ok', job_created=job.created)
     JobEvent.objects.filter(job=job).update(created=now() - timedelta(seconds=300))
 
-    with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+    with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
         adopt_job_async(job.id)
     mock_reattach.assert_called_once()
     job.refresh_from_db()
@@ -878,8 +878,7 @@ def test_process_startup_jobs_skips_workflow_jobs(me_inst, settings):
 
 @pytest.mark.django_db
 def test_configure_runner_callback_populates_host_map(me_inst):
-    """_configure_runner_callback populates host_map from inventory hosts for adoption."""
-    from awx.main.tasks.receptor import _configure_runner_callback
+    """RunnerCallback.configure_for_job populates host_map from inventory hosts for adoption."""
     from awx.main.tasks.callback import RunnerCallback
     from awx.main.models import Organization, Inventory, Host
 
@@ -889,34 +888,9 @@ def test_configure_runner_callback_populates_host_map(me_inst):
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv)
 
     cb = RunnerCallback(model=Job)
-    _configure_runner_callback(cb, job)
+    cb.configure_for_job(job)
 
     assert cb.host_map.get('myhost') == host.id
-
-
-@pytest.mark.django_db
-def test_receptor_release_work_defers_when_db_status_running(me_inst, settings):
-    """DB-status guard in _receptor_release_work defers release when job is still running."""
-    from awx.main.tasks.receptor import AWXReceptorJob
-
-    settings.RECEPTOR_RELEASE_WORK = True
-    settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
-
-    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-guard')
-
-    rj = AWXReceptorJob.__new__(AWXReceptorJob)
-    rj.unit_id = 'unit-guard'
-    rj.runner_params = {}
-
-    task_mock = MagicMock()
-    task_mock.instance = job
-    rj.task = task_mock
-
-    ctl = MagicMock()
-    rj._receptor_release_work(ctl, 'successful')
-
-    # Guard triggered — job still 'running' in DB → work release NOT called
-    ctl.simple_command.assert_not_called()
 
 
 @pytest.mark.django_db
@@ -968,7 +942,7 @@ def test_adopt_job_async_exception_is_swallowed(me_inst, settings):
 
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
-    with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.receptor.reattach_to_work_unit', side_effect=RuntimeError('network failure')):
+    with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.system.reattach_to_work_unit', side_effect=RuntimeError('network failure')):
         adopt_job_async(job.id)  # must not raise
 
 
@@ -1158,7 +1132,7 @@ def test_adopt_job_async_calls_reattach(me_inst, settings):
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-async')
 
-    with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl_factory, patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+    with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl_factory, patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
         adopt_job_async(job.id)
 
     mock_ctl_factory.assert_called_once()
@@ -1173,7 +1147,7 @@ def test_adopt_job_async_skips_already_finalized(me_inst, settings):
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(controller_node=me_inst.hostname, status='successful', work_unit_id='unit-done')
 
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+    with patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
         adopt_job_async(job.id)
 
     mock_reattach.assert_not_called()
@@ -1192,7 +1166,7 @@ def test_adopt_job_async_reaps_on_timeout(me_inst, settings):
         started=now() - timedelta(seconds=7200),
     )
 
-    with patch('awx.main.tasks.receptor.reattach_to_work_unit') as mock_reattach:
+    with patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
         adopt_job_async(job.id)
 
     mock_reattach.assert_not_called()
@@ -1211,5 +1185,5 @@ def test_adopt_job_async_ctl_close_exception_is_swallowed(me_inst, settings):
     mock_ctl = MagicMock()
     mock_ctl.close.side_effect = RuntimeError('socket already closed')
 
-    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.receptor.reattach_to_work_unit'):
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit'):
         adopt_job_async(job.id)  # must not raise

@@ -76,6 +76,7 @@ from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
     administrative_workunit_reaper,
     get_receptor_ctl,
+    reattach_to_work_unit,
     worker_cleanup,
     worker_info,
     write_receptor_config,
@@ -942,7 +943,8 @@ def _process_startup_jobs(this_inst):
     for j in jobs:
         try:
             if j.work_unit_id:
-                adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
             else:
                 reaped_ids.append(j.id)
                 reaper.reap_job(
@@ -980,7 +982,10 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
     for j in jobs:
         try:
             if j.work_unit_id and j.controller_node == this_inst.hostname:
-                adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                # Record the adoption task UUID so subsequent heartbeats see this job
+                # as active and skip it — preventing redundant re-adoption dispatches.
+                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
             else:
                 reaper.reap_job(j, 'failed')
         except Exception:
@@ -995,9 +1000,6 @@ def adopt_job_async(job_id):
     heartbeat returns immediately. on_duplicate='discard' ensures only one adoption runs
     per job across heartbeat cycles.
     """
-    from awx.main.models import UnifiedJob
-    from awx.main.tasks.receptor import reattach_to_work_unit
-
     job = UnifiedJob.objects.filter(id=job_id, status='running').first()
     if not job:
         logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
