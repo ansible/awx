@@ -207,7 +207,7 @@ def project_factory(post, default_org, admin):
 
 @pytest.fixture
 def run_job_from_playbook(demo_inv, post, admin, project_factory):
-    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None, proj=None, wait=True):
+    def _rf(test_name, playbook, local_path=None, scm_url=None, jt_params=None, proj=None, wait=True, credentials=None):
         jt_name = f'{test_name} JT: {playbook}'
 
         if not proj:
@@ -235,6 +235,8 @@ def run_job_from_playbook(demo_inv, post, admin, project_factory):
             expect=201,
         )
         jt = JobTemplate.objects.get(id=result.data['id'])
+        if credentials:
+            jt.credentials.add(*credentials)
         job = jt.create_unified_job()
         job.signal_start()
 
