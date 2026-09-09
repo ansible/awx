@@ -811,6 +811,7 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
     FIELDS_TO_PRESERVE_AT_COPY = [
         'description',
         'timeout',
+        'notification_templates_approvals'
     ]
 
     class Meta:
@@ -820,6 +821,13 @@ class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
         blank=True,
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
+    )
+    
+    notification_templates_approvals = models.ManyToManyField(
+        'main.NotificationTemplate',
+        blank=True,
+        related_name='workflow_approval_templates',
+        help_text=_("Notification templates to fire for this approval node."),
     )
 
     @classmethod
@@ -966,7 +974,15 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
         if self.workflow_job_template is None:
             return
-        for nt in self.workflow_job_template.notification_templates["approvals"]:
+
+        # 1. Fallback to default Workflow Job Template / Org level approval notifications
+        notification_templates = list(self.workflow_job_template.notification_templates.get("approvals", []))
+
+        # 2. Check for node-level approval notification templates (takes precedence if configured)
+        if self.workflow_approval_template and self.workflow_approval_template.notification_templates_approvals.exists():
+            notification_templates = list(self.workflow_approval_template.notification_templates_approvals.all())
+
+        for nt in notification_templates:
             try:
                 notification_subject, notification_body = self.build_approval_notification_message(nt, approval_status)
             except Exception:
