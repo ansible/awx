@@ -895,31 +895,6 @@ def test_configure_runner_callback_populates_host_map(me_inst):
 
 
 @pytest.mark.django_db
-def test_receptor_release_work_defers_when_db_status_running(me_inst, settings):
-    """DB-status guard in _receptor_release_work defers release when job is still running."""
-    from awx.main.tasks.receptor import AWXReceptorJob
-
-    settings.RECEPTOR_RELEASE_WORK = True
-    settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
-
-    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-guard')
-
-    rj = AWXReceptorJob.__new__(AWXReceptorJob)
-    rj.unit_id = 'unit-guard'
-    rj.runner_params = {}
-
-    task_mock = MagicMock()
-    task_mock.instance = job
-    rj.task = task_mock
-
-    ctl = MagicMock()
-    rj._receptor_release_work(ctl, 'successful')
-
-    # Guard triggered — job still 'running' in DB → work release NOT called
-    ctl.simple_command.assert_not_called()
-
-
-@pytest.mark.django_db
 def test_compute_adoption_dedup_no_events(me_inst):
     """_compute_adoption_dedup returns (0, set()) when job has no events in DB."""
     from awx.main.tasks.receptor import _compute_adoption_dedup

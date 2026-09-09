@@ -942,7 +942,8 @@ def _process_startup_jobs(this_inst):
     for j in jobs:
         try:
             if j.work_unit_id:
-                adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
             else:
                 reaped_ids.append(j.id)
                 reaper.reap_job(
@@ -980,7 +981,10 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
     for j in jobs:
         try:
             if j.work_unit_id and j.controller_node == this_inst.hostname:
-                adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
+                # Record the adoption task UUID so subsequent heartbeats see this job
+                # as active and skip it — preventing redundant re-adoption dispatches.
+                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
             else:
                 reaper.reap_job(j, 'failed')
         except Exception:

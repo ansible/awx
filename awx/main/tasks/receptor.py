@@ -178,6 +178,34 @@ def get_receptor_ctl(config_data=None):
         return ReceptorControl(receptor_sockfile)
 
 
+def adopt_remote_work(receptor_ctl, node, unit_id, config_data=None):
+    """Adopt a running work unit from a remote node, passing TLS/signwork when configured.
+
+    PR#1564 adds adopt_work() to receptorctl. If not available (older client), falls back
+    to the JSON control-socket protocol directly — compatible with any PR#1564 receptor server.
+    """
+    import json as _json
+
+    if config_data is None:
+        config_data = read_receptor_config()
+    tls_client = get_tls_client(config_data, True)
+    sign = work_signing_enabled(config_data)
+
+    if hasattr(receptor_ctl, 'adopt_work'):
+        return receptor_ctl.adopt_work(node, unit_id, tlsclient=tls_client or None, signwork=sign)
+
+    # Older receptorctl: send JSON directly so the server's InitFromJSON path handles TLS/signwork.
+    # The text-protocol InitFromString path does NOT support tlsclient/signwork.
+    command = {"command": "work", "subcommand": "adopt", "node": node, "unitid": unit_id}
+    if tls_client:
+        command["tlsclient"] = tls_client
+    if sign:
+        command["signwork"] = True
+    receptor_ctl.connect()
+    receptor_ctl.writestr(_json.dumps(command) + "\n")
+    return receptor_ctl.read_and_parse_json()
+
+
 def find_node_in_mesh(node_name, receptor_ctl):
     attempts = 10
     backoff = 1
@@ -409,65 +437,22 @@ class AWXReceptorJob:
     def run(self):
         # We establish a connection to the Receptor socket
         self.config_data = read_receptor_config()
-        receptor_ctl = get_receptor_ctl(self.config_data)
-
-        res = None
-        try:
-            res = self._run_internal(receptor_ctl)
-            return res
-        finally:
-            status = getattr(res, 'status', 'error')
-            self._receptor_release_work(receptor_ctl, status)
+        self.receptor_ctl = get_receptor_ctl(self.config_data)
+        return self._run_internal(self.receptor_ctl)
 
     def _receptor_release_work(self, receptor_ctl: ReceptorControl, status: str) -> None:
-        """
-        Releases the work unit from Receptor if certain conditions are met.
-        This method checks several conditions before attempting to release the work unit:
-        - If `self.unit_id` is `None`, the method returns immediately.
-        - If the `RECEPTOR_RELEASE_WORK` setting is `False`, the method returns immediately.
-        - If the `RECEPTOR_KEEP_WORK_ON_ERROR` setting is `True` and the status is 'error', the method returns immediately.
-        If none of the above conditions are met, the method attempts to release the work unit using the Receptor control command.
-        If an exception occurs during the release process, it logs an error message.
-        Args:
-            receptor_ctl (ReceptorControl): The Receptor control object used to issue commands.
-            status (str): The status of the work unit, which may affect whether it is released.
-        """
-
         if self.unit_id is None:
-            logger.debug("No work unit ID to release.")
             return
 
         if settings.RECEPTOR_RELEASE_WORK is False:
-            logger.debug(f"RECEPTOR_RELEASE_WORK is False, not releasing work unit {self.unit_id}.")
             return
 
         if settings.RECEPTOR_KEEP_WORK_ON_ERROR and status == 'error':
-            logger.debug(f"RECEPTOR_KEEP_WORK_ON_ERROR is True and status is 'error', not releasing work unit {self.unit_id}.")
             return
 
-        # Guard against a race where the work unit is released before the final job status
-        # is committed to DB.  BaseTask.run() commits the status AFTER AWXReceptorJob.run()
-        # returns — so the finally block here fires before the DB write.  If the controller
-        # is killed in that window, the unit is gone but the job stays 'running', making
-        # adoption impossible.  By checking the DB first and deferring when the status is
-        # not yet finalized, we keep the unit available for the adoption loop on restart.
-        # awx_receptor_workunit_reaper will release it once the job is properly finalized.
-        if self.task and getattr(self.task, 'instance', None) is not None:
-            try:
-                db_status = type(self.task.instance).objects.filter(pk=self.task.instance.pk).values_list('status', flat=True).first()
-                if db_status in ('running', 'waiting'):
-                    logger.info(
-                        f'Deferring release of work unit {self.unit_id}: '
-                        f'job {self.task.instance.pk} not yet finalized in DB '
-                        f'(status={db_status!r}). awx_receptor_workunit_reaper will release later.'
-                    )
-                    return
-            except Exception:
-                logger.debug(f'Could not check DB status before releasing unit {self.unit_id}, proceeding')
-
         try:
-            logger.debug(f"Released work unit {self.unit_id}.")
             receptor_ctl.simple_command(f"work release {self.unit_id}")
+            logger.debug(f"Released work unit {self.unit_id}.")
         except Exception:
             logger.exception(f"Error releasing work unit {self.unit_id}.")
 
@@ -542,7 +527,13 @@ class AWXReceptorJob:
         after a same-controller restart (reattach_to_work_unit). The transmit phase
         (submit_work + transmit) is not repeated — the EE is already running.
         """
-        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
+        resultsock = None
+        resultfile = None
+        try:
+            resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
+        except Exception:
+            logger.exception(f'Failed to get work results for unit {self.unit_id}')
+            raise
 
         connections.close_all()
 
@@ -561,8 +552,13 @@ class AWXReceptorJob:
                 res = processor_future.result()
             except SignalExit:
                 receptor_ctl.simple_command(f"work cancel {self.unit_id}")
-                resultsock.shutdown(socket.SHUT_RDWR)
-                resultfile.close()
+                if resultsock:
+                    try:
+                        resultsock.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
+                if resultfile:
+                    resultfile.close()
                 result = namedtuple('result', ['status', 'rc'])
                 res = result('canceled', 1)
             finally:
@@ -950,31 +946,25 @@ def _get_or_create_private_data_dir(job):
 
 
 def _finalize_adopted_job(job, callback, exit_code, process_phase_failed):
-    """Write terminal status, timestamps, and delayed callback fields to DB.
+    """Commit terminal status for an adopted job via the shared _finalize_job_run path.
 
-    Only runs when the job is still 'running' in the DB after _process_phase
-    returns — meaning the async callback receiver hasn't committed status yet.
-    Uses get_delayed_update_fields() to mirror what BaseTask.run() writes via
-    update_model(**get_delayed_update_fields()).
+    Guards before calling: if awx_receptor_workunit_reaper already committed the final
+    status, there is nothing left to do. final_run_hook is skipped — it belongs to the
+    original BaseTask invocation that no longer exists on this controller.
     """
+    from awx.main.tasks.jobs import _finalize_job_run
+
     job.refresh_from_db(fields=['status'])
     if job.status != 'running':
         return
 
     final_status = 'successful' if exit_code == 0 else 'failed'
     finished_at = now()
-
-    delayed = {k: v for k, v in callback.get_delayed_update_fields().items() if k != 'status'}
-    update_kwargs = {'status': final_status, 'finished': finished_at, **delayed}
+    extra = {'finished': finished_at}
     if job.started:
-        update_kwargs['elapsed'] = (finished_at - job.started).total_seconds()
-    for field, value in update_kwargs.items():
-        setattr(job, field, value)
-    job.save(update_fields=list(update_kwargs.keys()))
+        extra['elapsed'] = (finished_at - job.started).total_seconds()
 
-    if hasattr(job, 'send_notification_templates'):
-        job.send_notification_templates('succeeded' if final_status == 'successful' else 'failed')
-    job.websocket_emit_status(final_status)
+    _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra)
 
     label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
     logger.info(f'Job {job.id} finalized via {label}: {final_status}')
@@ -997,11 +987,17 @@ def _compute_adoption_dedup(job):
     gap_event = job.get_event_queryset().annotate(has_next=Exists(next_ctr)).filter(has_next=False).order_by('counter').first()
     safe_threshold = gap_event.counter if gap_event else 0
 
-    collision_zone = set(
-        job.get_event_queryset()
-        .filter(counter__gt=safe_threshold)
-        .values_list('counter', flat=True)[: settings.JOB_EVENT_WORKERS * settings.JOB_EVENT_CALLBACK_BUFFER_SIZE]
-    )
+    cap = settings.JOB_EVENT_WORKERS * settings.JOB_EVENT_CALLBACK_BUFFER_SIZE
+    collision_zone_list = list(job.get_event_queryset().filter(counter__gt=safe_threshold).values_list('counter', flat=True))
+
+    if len(collision_zone_list) > cap:
+        logger.warning(
+            f'Job {job.id}: collision_zone has {len(collision_zone_list)} events above safe_threshold, '
+            f'exceeds dedup cap of {cap}. Events beyond cap may be re-processed if replayed. '
+            f'Consider increasing JOB_EVENT_CALLBACK_BUFFER_SIZE or reducing parallel callback workers.'
+        )
+
+    collision_zone = set(collision_zone_list[:cap])
     return safe_threshold, collision_zone
 
 
@@ -1028,6 +1024,11 @@ def reattach_to_work_unit(job, receptor_ctl):
     state_name = unit_status.get('StateName', '')
     logger.info(f'Adopting job {job.id}: unit {unit_id} in state {state_name!r}, starting real-time streaming')
 
+    # Pending/Running — EE not yet finished; defer to next heartbeat.
+    if state_name in ('Pending', 'Running'):
+        logger.info(f'Job {job.id}: unit {unit_id} in state {state_name!r}, deferring to next heartbeat')
+        return False
+
     safe_threshold, collision_zone = _compute_adoption_dedup(job)
     max_counter = max(collision_zone) if collision_zone else safe_threshold
     logger.info(
@@ -1049,25 +1050,32 @@ def reattach_to_work_unit(job, receptor_ctl):
         logger.exception(f'Adoption process phase failed for job {job.id} (unit={unit_id})')
         process_phase_failed = True
     finally:
-        receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
         shutil.rmtree(private_data_dir, ignore_errors=True)
 
-    # Use _process_phase result for exit code — the work unit may be released by now.
-    # For jobs that were still "Running" at adoption start, the initial unit_status has
-    # state_name='Running' which would give exit_code=1; res.status is authoritative.
-    if res is not None:
-        exit_code = 0 if getattr(res, 'status', '') == 'successful' else 1
-    else:
-        # _process_phase raised — fall back to work status (unit may still be there)
-        try:
-            unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
-            state_name = unit_status.get('StateName', '')
-        except Exception:
-            logger.debug(f'Could not get final status for {unit_id} after process phase failure')
-        exit_code = _get_adoption_exit_code(unit_status, state_name)
-
-    # Finalize via exit_code if the async callback receiver hasn't committed DB status yet.
-    _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+    # Finalize status to DB first, then release the work unit — matching the ordering
+    # in BaseTask.run() where release follows _finalize_job_run.
+    #
+    # _process_phase -> _handle_work_error may return None for 'exceeded quota' where
+    # the job is already set to 'pending' — don't finalize, let the next dispatch handle it.
+    try:
+        if res is not None:
+            exit_code = 0 if getattr(res, 'status', '') == 'successful' else 1
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+        elif not process_phase_failed:
+            logger.info(f'Job {job.id}: adoption deferred (handled in _handle_work_error)')
+        else:
+            # _process_phase raised — fall back to work status for exit code
+            try:
+                unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
+                state_name = unit_status.get('StateName', '')
+            except Exception:
+                logger.debug(f'Could not get final status for {unit_id} after process phase failure')
+                unit_status = {}
+                state_name = ''
+            exit_code = _get_adoption_exit_code(unit_status, state_name)
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+    finally:
+        receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
 
     return True
 
