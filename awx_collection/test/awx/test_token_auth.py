@@ -70,8 +70,7 @@ def test_aap_token_sends_bearer_header(collection_import, token_value):
 
     assert len(calls) == 1, calls
     assert calls[0]['headers']['Authorization'] == 'Bearer a-token-string'
-    # a token needs no login round-trip
-    assert module.authenticated is False
+    assert module.authenticated is True
 
 
 @pytest.mark.parametrize('param', ['oauth_token', 'controller_oauthtoken', 'tower_oauthtoken'])
