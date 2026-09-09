@@ -91,6 +91,24 @@ options:
         - schedule names, IDs, or named URLs to export
       type: list
       elements: str
+    exclude_inventory_children:
+      description:
+        - Names or IDs of inventories whose hosts and groups will be left out of the export.
+        - The inventories themselves are still exported.
+        - Inventory sources are a separate asset type, so select I(inventory_sources) as well if the omitted
+          hosts and groups are meant to be recreated by a source synchronization after an import.
+        - Note that manually added hosts and groups are omitted as well, and no source will restore them.
+      type: list
+      elements: str
+    exclude_dynamic_inventory_children:
+      description:
+        - Leave the hosts and groups of every inventory that has at least one inventory source out of the export.
+        - Inventory sources are a separate asset type, so select I(inventory_sources) as well, otherwise the
+          export carries neither the children nor the sources that would recreate them.
+        - Given that, the omitted hosts and groups are recreated when the sources are synchronized after an import.
+        - Note that manually added hosts and groups of such an inventory are omitted as well, and no source will restore them.
+      type: bool
+      default: false
 requirements:
   - "awxkit >= 9.3.0"
 notes:
@@ -115,6 +133,20 @@ EXAMPLES = '''
 - name: Export a list of inventories
   export:
     inventory: ['My Inventory 1', 'My Inventory 2']
+
+- name: Export all inventories without the hosts and groups of the dynamic ones
+  export:
+    inventory: 'all'
+    # the sources are what recreate the omitted hosts and groups on the next sync
+    inventory_sources: 'all'
+    exclude_dynamic_inventory_children: true
+
+- name: Export all assets, skipping the children of two known dynamic inventories
+  export:
+    all: true
+    exclude_inventory_children:
+      - 'My Cloud Inventory'
+      - 'My Other Cloud Inventory'
 '''
 
 import logging
@@ -128,10 +160,19 @@ try:
 except ImportError:
     HAS_EXPORTABLE_RESOURCES = False
 
+try:
+    from awxkit.api.pages.api import INVENTORY_CHILDREN  # noqa: F401
+
+    HAS_EXCLUDABLE_INVENTORY_CHILDREN = True
+except ImportError:
+    HAS_EXCLUDABLE_INVENTORY_CHILDREN = False
+
 
 def main():
     argument_spec = dict(
         all=dict(type='bool', default=False),
+        exclude_inventory_children=dict(type='list', elements='str'),
+        exclude_dynamic_inventory_children=dict(type='bool', default=False),
     )
 
     # We are not going to raise an error here because the __init__ method of ControllerAWXKitModule will do that for us
@@ -160,6 +201,16 @@ def main():
         else:
             # Otherwise we take either the string or None (if the parameter was not passed) to get one or no items
             export_args[resource] = module.params.get(resource)
+
+    # Only pass the exclusions on when they were asked for, so that an older awxkit,
+    # which would reject the unknown keywords, keeps working for everyone else
+    exclude_inventory_children = module.params.get('exclude_inventory_children')
+    exclude_dynamic_inventory_children = module.params.get('exclude_dynamic_inventory_children')
+    if exclude_inventory_children or exclude_dynamic_inventory_children:
+        if not HAS_EXCLUDABLE_INVENTORY_CHILDREN:
+            module.fail_json(msg="Your version of awxkit does not support excluding the children of an inventory from an export")
+        export_args['exclude_inventory_children'] = exclude_inventory_children
+        export_args['exclude_dynamic_inventory_children'] = exclude_dynamic_inventory_children
 
     # Currently the export process does not return anything on error
     # It simply just logs to Python's logger

@@ -64,6 +64,12 @@ DEPENDENT_NONEXPORT = [
 ]
 
 
+# Related views of an Inventory that hold its child objects.  These may be
+# omitted from an export, which is useful for inventories that are populated
+# from an inventory source and can be repopulated on import.
+INVENTORY_CHILDREN = ['hosts', 'groups']
+
+
 class Api(base.Base):
     pass
 
@@ -135,6 +141,10 @@ class ApiV2(base.Base):
         for key, rel_endpoint in _page.related.items():
             # skip if no endpoint for this related object
             if not rel_endpoint:
+                continue
+
+            # skip the hosts and groups of an inventory the caller asked to omit them for
+            if key in INVENTORY_CHILDREN and self._skip_inventory_children(_page):
                 continue
 
             rel = rel_endpoint._create()
@@ -213,6 +223,28 @@ class ApiV2(base.Base):
         assets = (self._export(asset, post_fields) for asset in endpoint.results)
         return [asset for asset in assets if asset is not None]
 
+    def _skip_inventory_children(self, _page):
+        """Determine whether the hosts and groups of an inventory should be left out of the export.
+
+        Children are omitted when the inventory was named in ``exclude_inventory_children``,
+        or when ``exclude_dynamic_inventory_children`` is set and the inventory has at least
+        one inventory source.
+        """
+        if _page.__item_class__.__name__ != 'Inventory':
+            return False
+
+        if getattr(self, '_exclude_dynamic_inventory_children', False) and _page.json.get('has_inventory_sources'):
+            return True
+
+        for identifier in getattr(self, '_exclude_inventory_children', None) or []:
+            if self._check_for_int(identifier):
+                if int(identifier) == _page.json.get('id'):
+                    return True
+            elif identifier == _page.json.get('name'):
+                return True
+
+        return False
+
     def _check_for_int(self, value):
         return isinstance(value, int) or (isinstance(value, str) and value.isdecimal())
 
@@ -234,6 +266,8 @@ class ApiV2(base.Base):
 
     def export_assets(self, **kwargs):
         self._cache = page.PageCache(self.connection)
+        self._exclude_dynamic_inventory_children = bool(kwargs.pop('exclude_dynamic_inventory_children', False))
+        self._exclude_inventory_children = kwargs.pop('exclude_inventory_children', None) or []
 
         # If no resource kwargs are explicitly used, export everything.
         all_resources = all(kwargs.get(resource) is None for resource in EXPORTABLE_RESOURCES)
