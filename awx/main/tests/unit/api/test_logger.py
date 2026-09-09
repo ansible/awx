@@ -214,3 +214,17 @@ def test_splunk_auth():
 
     tmpl = construct_rsyslog_conf_template(mock_settings)
     assert 'httpheaderkey="Authorization" httpheadervalue="Splunk SECRET-TOKEN"' in tmpl
+
+
+def test_dynatrace_auth():
+    mock_settings, _ = _mock_logging_defaults()
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'dynatrace')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'https://your-env.live.dynatrace.com/api/v2/logs/ingest')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PASSWORD', 'dt0c01.EXAMPLE-TOKEN')
+
+    tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert 'httpcontenttype="text/plain; charset=utf-8"' in tmpl
+    assert 'httpheaderkey="Authorization" httpheadervalue="Api-Token dt0c01.EXAMPLE-TOKEN"' in tmpl
