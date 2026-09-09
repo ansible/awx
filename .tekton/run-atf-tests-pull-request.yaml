@@ -10,7 +10,10 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: 'true'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/on-target-branch: "[devel]"
     pipelinesascode.tekton.dev/on-comment: "^/run-atf-tests$"
+    pipelinesascode.tekton.dev/on-path-change: "[awx/**, requirements/**, .tekton/**]"
     pipelinesascode.tekton.dev/target-namespace: ansible-ci-tenant
   labels:
     appstudio.openshift.io/application: '{{repo_owner}}'
@@ -27,7 +30,7 @@ spec:
       - name: name
         value: aap-api-tests
       - name: bundle
-        value: quay.io/aap-ci/tekton-catalog/pipeline/test/aap-api-tests:0.1@sha256:dd9512fe69efeb4392c99ea311ea84f12d2f01ddd44251fc584d619441e32b49
+        value: quay.io/aap-ci/tekton-catalog/pipeline/test/aap-api-tests:0.1@sha256:3e0da91fe167180db139690585c4d3ce0a38d641af77b887d205193f532cd4e9
       - name: kind
         value: pipeline
       - name: secret
@@ -51,8 +54,10 @@ spec:
       value: "{{pull_request_number}}"
     - name: aap-dev-component-source-name
       value: "controller"
+    - name: pytest-expression
+      value: "not Gateway"
     - name: pytest-number-of-parallel-processes
-      value: "6"
+      value: "3"
 
   workspaces:
     - name: workspace
