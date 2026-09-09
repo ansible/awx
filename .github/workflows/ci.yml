@@ -244,6 +244,22 @@ jobs:
         run: |
           make print-PYTHON
       
+      - name: Free up runner disk space before the image build
+        # This job builds the AWX and operator images, loads a SECOND copy of
+        # each into the kind node, then pulls awx-ee, postgres, redis and
+        # ingress-nginx on top - about 10G at peak, most of it under
+        # /var/lib/docker. The runner image itself already occupies ~60G
+        # before any of that, and none of these toolchains are used here.
+        #
+        # /opt/hostedtoolcache is deliberately NOT removed - setup-python
+        # installs into it.
+        run: |
+          echo "before:"; df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android \
+                      /usr/local/.ghcup /usr/local/share/boost \
+                      /usr/share/swift /opt/hostedtoolcache/CodeQL
+          echo "after:"; df -h /
+
       - name: Build AWX image
         working-directory: awx
         run: |
@@ -286,11 +302,24 @@ jobs:
           AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
 
-      - name: Collect awx-operator logs on timeout
-        # Only run on timeout; normal failures should use molecule's built-in log collection.
-        if: steps.awx_operator_test.outputs.timed_out == 'true'
+      - name: Collect awx-operator logs on failure
+        # Any failure, not just a timeout. A run that dies because the disk
+        # filled up is not a timeout, so it would otherwise leave no molecule
+        # log and no artifact at all, which reads like a hang.
+        if: steps.awx_operator_test.outcome != 'success'
         run: |
+          # Reclaim space FIRST, before creating or writing anything. When
+          # this step matters most the filesystem is genuinely at 0 bytes,
+          # and mkdir/the redirects below can fail before a later cleanup
+          # ever runs — CodeRabbit caught this on the first review.
+          if [ "$(df -P / | awk 'NR==2 {print $4}')" -lt 1048576 ]; then
+            echo "under 1G free - reclaiming space so the bundle can be written"
+            docker image prune -af >/dev/null 2>&1 || true
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android >/dev/null 2>&1 || true
+          fi
           mkdir -p "$DEBUG_OUTPUT_DIR"
+          df -h / > "$DEBUG_OUTPUT_DIR/df.txt" 2>&1 || true
+          docker system df -v > "$DEBUG_OUTPUT_DIR/docker-df.txt" 2>&1 || true
           if command -v kind >/dev/null 2>&1; then
             for cluster in $(kind get clusters 2>/dev/null); do
               kind export logs "$DEBUG_OUTPUT_DIR/$cluster" --name "$cluster" || true
