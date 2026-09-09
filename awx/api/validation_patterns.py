@@ -30,8 +30,10 @@ try:
 except ImportError:  # pragma: no cover - DAB without AAP-85987
     _dab_inject_clean_text_patterns = None
 
-# Keep in sync with ansible_base.lib.metadata.inject_clean_text_patterns (Tier 2).
-TIER2_PATTERN_DESCRIPTION = "This field can't include HTML tags, script markup, unsafe URI schemes, shell or template syntax, or control characters."
+try:
+    from ansible_base.lib.metadata import TIER2_PATTERN_DESCRIPTION
+except ImportError:  # pragma: no cover - DAB without AAP-85987
+    TIER2_PATTERN_DESCRIPTION = "This field can't include HTML tags, script markup, unsafe URI schemes, shell or template syntax, or control characters."
 
 _STRING_TYPES = frozenset({'string', 'str'})
 
@@ -80,6 +82,8 @@ def inject_free_text_pattern(field_schema, *, secret=False, field_type=None):
 
 def inject_patterns_into_field_list(fields):
     """Inject patterns into a credential-type ``fields`` or ``metadata`` list in place."""
+    if not enhanced_input_validation_enabled():
+        return
     if not isinstance(fields, list):
         return
     for field in fields:
