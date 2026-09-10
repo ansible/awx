@@ -68,6 +68,8 @@ options:
     input_inventories:
       description:
         - List of Inventory names, IDs, or named URLs to use as input for Constructed Inventory.
+        - Name lookups are scoped to the inventory's organization, so an input inventory name
+          that also exists in another organization will not cause an ambiguous match.
       type: list
       elements: str
     prevent_instance_group_fallback:
@@ -137,6 +139,9 @@ import json
 
 
 def main():
+    # Resolves org/inventory, optionally copies an existing inventory, then
+    # creates/updates/deletes it along with instance_groups and (for
+    # constructed inventories) input_inventories associations.
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
@@ -221,7 +226,10 @@ def main():
         if input_inventory_names is not None:
             association_fields['input_inventories'] = []
             for item in input_inventory_names:
-                association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item))
+                # Scope the lookup to this inventory's organization so that an input
+                # inventory name that also exists in another organization does not
+                # cause an ambiguous "returned N items, expected 1" failure.
+                association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item, data={'organization': org_id}))
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
     module.create_or_update_if_needed(
