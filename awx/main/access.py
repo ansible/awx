@@ -2899,7 +2899,7 @@ class WorkflowApprovalAccess(BaseAccess):
             return True
 
 
-class WorkflowApprovalTemplateAccess(BaseAccess):
+class WorkflowApprovalTemplateAccess(NotificationAttachMixin, BaseAccess):
     """
     A user can create a workflow approval if they are a superuser, an org admin
     of the org connected to the workflow, or if they are assigned as admins to

@@ -1,7 +1,7 @@
 import pytest
 
 from awx.main.models import Organization, Project
-from awx.main.access import NotificationTemplateAccess, NotificationAccess, JobTemplateAccess
+from awx.main.access import NotificationTemplateAccess, NotificationAccess, JobTemplateAccess, WorkflowApprovalTemplateAccess
 
 
 @pytest.mark.django_db
@@ -222,3 +222,33 @@ def test_notification_access_org_auditor(notification, org_auditor):
     access = NotificationAccess(org_auditor)
     assert access.can_read(notification)
     assert not access.can_delete(notification)
+
+
+@pytest.mark.django_db
+def test_approval_template_NT_attach_nt_admin(rando, notification_template, workflow_job_template):
+    from awx.main.models.workflow import WorkflowApprovalTemplate, WorkflowJobTemplateNode
+
+    wat = WorkflowApprovalTemplate.objects.create(name='test-approval', timeout=0)
+    WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template, unified_job_template=wat)
+
+    notification_template.organization.notification_admin_role.members.add(rando)
+    access = WorkflowApprovalTemplateAccess(rando)
+    # NT admin alone is insufficient without target access
+    assert not access.can_attach(wat, notification_template, 'notification_templates_approvals', {'id': notification_template.id})
+
+    # Granting WFJT admin (which gates WAT can_read) allows the attach
+    workflow_job_template.admin_role.members.add(rando)
+    assert access.can_attach(wat, notification_template, 'notification_templates_approvals', {'id': notification_template.id})
+
+
+@pytest.mark.django_db
+def test_approval_template_NT_attach_denied_without_nt_admin(rando, notification_template, workflow_job_template):
+    from awx.main.models.workflow import WorkflowApprovalTemplate, WorkflowJobTemplateNode
+
+    wat = WorkflowApprovalTemplate.objects.create(name='test-approval', timeout=0)
+    WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template, unified_job_template=wat)
+
+    # Target access without NT admin is insufficient
+    workflow_job_template.admin_role.members.add(rando)
+    access = WorkflowApprovalTemplateAccess(rando)
+    assert not access.can_attach(wat, notification_template, 'notification_templates_approvals', {'id': notification_template.id})

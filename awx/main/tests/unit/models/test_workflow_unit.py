@@ -244,3 +244,73 @@ def test_get_ask_mapping_integrity():
         'skip_tags',
         'extra_vars',
     ]
+
+
+class TestApprovalNodeNotificationOverride:
+    """Verify that send_approval_notification prefers node-level templates
+    when they are configured, and falls back to the WFJT-level templates
+    when they are not."""
+
+    def _build_approval(self, mocker, node_templates=None, wfjt_templates=None):
+        from awx.main.models.workflow import WorkflowApproval, WorkflowApprovalTemplate
+
+        nt_node = node_templates or []
+        nt_wfjt = wfjt_templates or []
+
+        wat = mocker.MagicMock(spec=WorkflowApprovalTemplate)
+        wat.notification_templates_approvals.all.return_value = nt_node
+
+        wfjt = mocker.MagicMock()
+        wfjt.notification_templates = {"approvals": nt_wfjt}
+
+        approval = WorkflowApproval()
+        mocker.patch.object(type(approval), 'workflow_approval_template', new_callable=mocker.PropertyMock, return_value=wat)
+        mocker.patch.object(type(approval), 'workflow_job_template', new_callable=mocker.PropertyMock, return_value=wfjt)
+        mocker.patch.object(approval, 'build_approval_notification_message', return_value=('subject', 'body'))
+        mocker.patch('awx.main.tasks.system.send_notifications.delay')
+        mock_conn = mocker.patch('awx.main.models.workflow.connection')
+        mock_conn.on_commit.side_effect = lambda callback: callback()
+        return approval
+
+    def test_uses_node_templates_when_set(self, mocker):
+        from awx.main.tasks.system import send_notifications
+
+        node_nt = mocker.MagicMock()
+        node_nt.generate_notification.return_value.id = 1
+        wfjt_nt = mocker.MagicMock()
+        wfjt_nt.generate_notification.return_value.id = 2
+
+        approval = self._build_approval(mocker, node_templates=[node_nt], wfjt_templates=[wfjt_nt])
+        approval.send_approval_notification('running')
+
+        node_nt.generate_notification.assert_called_once()
+        wfjt_nt.generate_notification.assert_not_called()
+        send_notifications.delay.assert_called_once()
+
+    def test_falls_back_to_wfjt_templates(self, mocker):
+        from awx.main.tasks.system import send_notifications
+
+        wfjt_nt = mocker.MagicMock()
+        wfjt_nt.generate_notification.return_value.id = 1
+
+        approval = self._build_approval(mocker, node_templates=[], wfjt_templates=[wfjt_nt])
+        approval.send_approval_notification('approved')
+
+        wfjt_nt.generate_notification.assert_called_once()
+        send_notifications.delay.assert_called_once()
+
+    def test_no_templates_no_error(self, mocker):
+        approval = self._build_approval(mocker, node_templates=[], wfjt_templates=[])
+        approval.send_approval_notification('denied')
+        from awx.main.tasks.system import send_notifications
+
+        send_notifications.delay.assert_not_called()
+
+    def test_no_wfjt_returns_early(self, mocker):
+        from awx.main.models.workflow import WorkflowApproval
+
+        approval = WorkflowApproval()
+        mocker.patch.object(type(approval), 'workflow_job_template', new_callable=mocker.PropertyMock, return_value=None)
+        send_delay = mocker.patch('awx.main.tasks.system.send_notifications.delay')
+        approval.send_approval_notification('running')
+        send_delay.assert_not_called()
