@@ -59,7 +59,7 @@ class WebsocketSecretAuthHelper:
 
         secret_serialized = hmac.new(force_bytes(settings.BROADCAST_WEBSOCKET_SECRET), msg=force_bytes(payload_serialized), digestmod='sha256').hexdigest()
 
-        if secret_serialized != secret_parsed:
+        if not hmac.compare_digest(secret_serialized, secret_parsed):
             raise ValueError("Invalid secret")
 
         # Avoid timing attack and check the nonce after all the heavy lifting
