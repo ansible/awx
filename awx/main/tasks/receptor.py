@@ -7,12 +7,15 @@ import logging
 import os
 import shutil
 import socket
+import tempfile
 import time
 import yaml
 
 # Django
 from django.conf import settings
 from django.db import connections
+from django.db.models import Exists, OuterRef
+from django.utils.timezone import now
 
 # Runner
 import ansible_runner
@@ -31,7 +34,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     cleanup_new_process,
 )
-from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
+from awx.main.constants import JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
@@ -173,6 +176,34 @@ def get_receptor_ctl(config_data=None):
         return ReceptorControl(receptor_sockfile, config=__RECEPTOR_CONF, tlsclient=get_tls_client(config_data, True))
     except RuntimeError:
         return ReceptorControl(receptor_sockfile)
+
+
+def adopt_remote_work(receptor_ctl, node, unit_id, config_data=None):
+    """Adopt a running work unit from a remote node, passing TLS/signwork when configured.
+
+    PR#1564 adds adopt_work() to receptorctl. If not available (older client), falls back
+    to the JSON control-socket protocol directly — compatible with any PR#1564 receptor server.
+    """
+    import json as _json
+
+    if config_data is None:
+        config_data = read_receptor_config()
+    tls_client = get_tls_client(config_data, True)
+    sign = work_signing_enabled(config_data)
+
+    if hasattr(receptor_ctl, 'adopt_work'):
+        return receptor_ctl.adopt_work(node, unit_id, tlsclient=tls_client or None, signwork=sign)
+
+    # Older receptorctl: send JSON directly so the server's InitFromJSON path handles TLS/signwork.
+    # The text-protocol InitFromString path does NOT support tlsclient/signwork.
+    command = {"command": "work", "subcommand": "adopt", "node": node, "unitid": unit_id}
+    if tls_client:
+        command["tlsclient"] = tls_client
+    if sign:
+        command["signwork"] = True
+    receptor_ctl.connect()
+    receptor_ctl.writestr(_json.dumps(command) + "\n")
+    return receptor_ctl.read_and_parse_json()
 
 
 def find_node_in_mesh(node_name, receptor_ctl):
@@ -406,49 +437,41 @@ class AWXReceptorJob:
     def run(self):
         # We establish a connection to the Receptor socket
         self.config_data = read_receptor_config()
-        receptor_ctl = get_receptor_ctl(self.config_data)
-
-        res = None
-        try:
-            res = self._run_internal(receptor_ctl)
-            return res
-        finally:
-            status = getattr(res, 'status', 'error')
-            self._receptor_release_work(receptor_ctl, status)
+        self.receptor_ctl = get_receptor_ctl(self.config_data)
+        return self._run_internal(self.receptor_ctl)
 
     def _receptor_release_work(self, receptor_ctl: ReceptorControl, status: str) -> None:
-        """
-        Releases the work unit from Receptor if certain conditions are met.
-        This method checks several conditions before attempting to release the work unit:
-        - If `self.unit_id` is `None`, the method returns immediately.
-        - If the `RECEPTOR_RELEASE_WORK` setting is `False`, the method returns immediately.
-        - If the `RECEPTOR_KEEP_WORK_ON_ERROR` setting is `True` and the status is 'error', the method returns immediately.
-        If none of the above conditions are met, the method attempts to release the work unit using the Receptor control command.
-        If an exception occurs during the release process, it logs an error message.
-        Args:
-            receptor_ctl (ReceptorControl): The Receptor control object used to issue commands.
-            status (str): The status of the work unit, which may affect whether it is released.
-        """
-
         if self.unit_id is None:
-            logger.debug("No work unit ID to release.")
             return
 
         if settings.RECEPTOR_RELEASE_WORK is False:
-            logger.debug(f"RECEPTOR_RELEASE_WORK is False, not releasing work unit {self.unit_id}.")
             return
 
         if settings.RECEPTOR_KEEP_WORK_ON_ERROR and status == 'error':
-            logger.debug(f"RECEPTOR_KEEP_WORK_ON_ERROR is True and status is 'error', not releasing work unit {self.unit_id}.")
             return
 
         try:
-            logger.debug(f"Released work unit {self.unit_id}.")
             receptor_ctl.simple_command(f"work release {self.unit_id}")
+            logger.debug(f"Released work unit {self.unit_id}.")
         except Exception:
             logger.exception(f"Error releasing work unit {self.unit_id}.")
 
     def _run_internal(self, receptor_ctl):
+        self._transmit_phase(receptor_ctl)
+        return self._process_phase(receptor_ctl)
+
+    def _transmit_phase(self, receptor_ctl):
+        """Submit work to receptor and wait for the transmit thread to finish.
+
+        Creates the receptor work unit, streams the job payload (private_data_dir + kwargs)
+        to the EE via a socketpair, and saves the resulting unit_id to the DB.
+
+        After this returns, artifacts/ is deleted from private_data_dir. Fact-cache and
+        other input artifacts are transmitted to the EE during this phase; by the time
+        _process_phase() reads artifacts output, the dir is empty so there is no stale
+        input state. This means _process_phase() always receives a clean private_data_dir
+        whether called from _run_internal() or from reattach_to_work_unit().
+        """
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
         # reading.
@@ -497,7 +520,20 @@ class AWXReceptorJob:
         if self.work_type != 'local' and os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
-        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
+    def _process_phase(self, receptor_ctl):
+        """Stream events from the receptor work unit via the ansible-runner process streamer.
+
+        Extracted from _run_internal() so it can be called standalone for job adoption
+        after a same-controller restart (reattach_to_work_unit). The transmit phase
+        (submit_work + transmit) is not repeated — the EE is already running.
+        """
+        resultsock = None
+        resultfile = None
+        try:
+            resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
+        except Exception:
+            logger.exception(f'Failed to get work results for unit {self.unit_id}')
+            raise
 
         connections.close_all()
 
@@ -516,56 +552,68 @@ class AWXReceptorJob:
                 res = processor_future.result()
             except SignalExit:
                 receptor_ctl.simple_command(f"work cancel {self.unit_id}")
-                resultsock.shutdown(socket.SHUT_RDWR)
-                resultfile.close()
+                if resultsock:
+                    try:
+                        resultsock.shutdown(socket.SHUT_RDWR)
+                    except Exception:
+                        pass
+                if resultfile:
+                    resultfile.close()
                 result = namedtuple('result', ['status', 'rc'])
                 res = result('canceled', 1)
             finally:
                 signal_state.raise_exception = False
 
             if res.status == 'error':
-                # If ansible-runner ran, but an error occured at runtime, the traceback information
-                # is saved via the status_handler passed in to the processor.
-                if 'result_traceback' in self.task.runner_callback.extra_update_fields:
-                    return res
+                return self._handle_work_error(receptor_ctl, res)
 
-                try:
-                    unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
-                    detail = unit_status.get('Detail', None)
-                    state_name = unit_status.get('StateName', None)
-                    stdout_size = unit_status.get('StdoutSize', 0)
-                except Exception:
-                    detail = ''
-                    state_name = ''
-                    stdout_size = 0
-                    logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
+        return res
 
-                if 'exceeded quota' in detail:
-                    logger.warning(detail)
-                    log_name = self.task.instance.log_format
-                    logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
-                    self.task.update_model(self.task.instance.pk, status='pending')
-                    return
+    def _handle_work_error(self, receptor_ctl, res):
+        """Handle the error path from _process_phase when the work unit status is 'error'."""
+        # If ansible-runner ran, but an error occured at runtime, the traceback information
+        # is saved via the status_handler passed in to the processor.
+        if 'result_traceback' in self.task.runner_callback.extra_update_fields:
+            return res
 
-                try:
-                    receptor_output = ''
-                    if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
-                        # if receptor work unit failed and no events were emitted, work results may
-                        # contain useful information about why the job failed. In case stdout is
-                        # massive, only ask for last 1000 bytes
-                        startpos = max(stdout_size - 1000, 0)
-                        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
-                        lines = resultfile.readlines()
-                        receptor_output = b"".join(lines).decode()
-                    if receptor_output:
-                        self.task.runner_callback.delay_update(result_traceback=f'Worker output:\n{receptor_output}')
-                    elif detail:
-                        self.task.runner_callback.delay_update(result_traceback=f'Receptor detail:\n{detail}')
-                    else:
-                        logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
-                except Exception:
-                    logger.exception(f'Work results error from job id={self.task.instance.id} work_unit={self.task.instance.work_unit_id}')
-                    raise RuntimeError(detail)
+        try:
+            unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
+            detail = unit_status.get('Detail') or ''
+            state_name = unit_status.get('StateName', None)
+            stdout_size = unit_status.get('StdoutSize', 0)
+        except Exception:
+            detail = ''
+            state_name = ''
+            stdout_size = 0
+            logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
+
+        if 'exceeded quota' in detail:
+            logger.warning(detail)
+            log_name = self.task.instance.log_format
+            logger.warning(f"Could not launch pod for {log_name}. Exceeded quota.")
+            self.task.update_model(self.task.instance.pk, status='pending')
+            return None
+
+        try:
+            receptor_output = ''
+            if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
+                # if receptor work unit failed and no events were emitted, work results may
+                # contain useful information about why the job failed. In case stdout is
+                # massive, only ask for last 1000 bytes
+                startpos = max(stdout_size - 1000, 0)
+                _resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
+                lines = resultfile.readlines()
+                receptor_output = b"".join(lines).decode()
+                _resultsock.shutdown(socket.SHUT_RDWR)
+            if receptor_output:
+                self.task.runner_callback.delay_update(result_traceback=f'Worker output:\n{receptor_output}')
+            elif detail:
+                self.task.runner_callback.delay_update(result_traceback=f'Receptor detail:\n{detail}')
+            else:
+                logger.warning(f'No result details or output from {self.task.instance.log_format}, status:\n{state_name}')
+        except Exception:
+            logger.exception(f'Work results error from job id={self.task.instance.id} work_unit={self.task.instance.work_unit_id}')
+            raise RuntimeError(detail)
 
         return res
 
@@ -797,6 +845,239 @@ RECEPTOR_CONFIG_STARTER = (
         }
     },
 )
+
+
+class _AdoptionTask:
+    """Minimal task stub passed to AWXReceptorJob when called from reattach_to_work_unit.
+
+    Stands in for BaseTask without re-executing task-manager logic. update_model is a
+    no-op since adoption doesn't touch scheduling fields (those are handled by the
+    reaper/heartbeat path that triggered the adoption).
+    """
+
+    def __init__(self, instance, runner_callback):
+        self.instance = instance
+        self.runner_callback = runner_callback
+
+    def build_execution_environment_params(self, _instance, _private_data_dir):
+        return {}
+
+    def update_model(self, pk, **kwargs):
+        # Intentionally a no-op: adoption reuses _process_phase without task-manager field updates.
+        # Heartbeat/reaper handles scheduling state; no fields need updating here.
+        pass
+
+
+def _get_adoption_exit_code(unit_status, state_name):
+    """Extract exit code from a finished receptor work unit status dict."""
+    if 'ExitCode' in unit_status:
+        return unit_status['ExitCode']
+    detail = unit_status.get('Detail', '')
+    try:
+        return int(detail.split()[-1])
+    except (ValueError, IndexError):
+        return 0 if state_name == 'Succeeded' else 1
+
+
+def _configure_runner_callback(callback, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
+    """Configure a RunnerCallback with the fields required for event processing.
+
+    This is the single source of truth for RunnerCallback initialization, shared
+    between the normal job path (BaseTask.run) and adoption (reattach_to_work_unit).
+    Having both paths call this function means any missing field is caught by the
+    normal test suite rather than only by adoption-specific tests.
+
+    Args:
+        callback: an already-instantiated RunnerCallback (or subclass)
+        instance: the UnifiedJob model instance being run
+        safe_env: masked environment dict for log output. None → {} (adoption path,
+            where credentials are not available at reconnect time)
+        dedup_threshold: highest counter where all lower counters are in DB (contiguous
+            prefix). event_handler skips counter <= threshold with an O(1) check. None
+            disables dedup (normal jobs, zero overhead).
+        persisted_counters: small set of counters above dedup_threshold that are already
+            in DB (the collision zone from parallel callback worker races). Bounded by
+            worker concurrency, not job size. None when dedup is disabled.
+    """
+    callback.instance = instance
+    callback.job_created = str(instance.created)  # stamped on every event (callback.py:160)
+    callback.safe_env = safe_env if safe_env is not None else {}
+    if getattr(instance, 'spawned_by_workflow', False):
+        try:
+            callback.parent_workflow_job_id = instance.get_workflow_job().id
+        except Exception:
+            pass
+    callback.dedup_threshold = dedup_threshold
+    callback.persisted_counters = persisted_counters
+    # Rebuild host_map from inventory so that replayed post-kill events get host_id set.
+    # For normal jobs this is populated by write_inventory_file(); for adoption we
+    # reconstruct it from the already-saved inventory hosts.
+    if hasattr(instance, 'inventory') and instance.inventory_id:
+        try:
+            for host in instance.inventory.hosts.only('name', 'id'):
+                callback.host_map[host.name] = host.id
+        except Exception:
+            pass  # host_map stays {}; host_id won't be set on replayed events
+
+
+def _build_adoption_callback(job, dedup_threshold, collision_zone):
+    """Construct a RunnerCallback for event replay during adoption."""
+    from awx.main.tasks.callback import RunnerCallback
+
+    callback = RunnerCallback(model=type(job))
+    _configure_runner_callback(callback, job, dedup_threshold=dedup_threshold, persisted_counters=collision_zone)
+    return callback
+
+
+def _get_or_create_private_data_dir(job):
+    """Return a writable private_data_dir for the adoption process streamer.
+
+    On same-controller restart the original tempdir may be gone (e.g. on OCP where /tmp
+    is wiped on pod restart). ansible-runner's process streamer only needs a writable root
+    directory — it creates artifacts/job_events/ itself.
+
+    Uses AWX_ISOLATION_BASE_PATH (the same root as all other job working dirs) so that
+    sysadmin-configured isolation paths (e.g. persistent volumes on OCP) are respected.
+    """
+    return tempfile.mkdtemp(
+        prefix=JOB_FOLDER_PREFIX % job.pk + 'adoption_',
+        dir=settings.AWX_ISOLATION_BASE_PATH,
+    )
+
+
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed):
+    """Commit terminal status for an adopted job via the shared _finalize_job_run path.
+
+    Guards before calling: if awx_receptor_workunit_reaper already committed the final
+    status, there is nothing left to do. final_run_hook is skipped — it belongs to the
+    original BaseTask invocation that no longer exists on this controller.
+    """
+    from awx.main.tasks.jobs import _finalize_job_run
+
+    job.refresh_from_db(fields=['status'])
+    if job.status != 'running':
+        return
+
+    final_status = 'successful' if exit_code == 0 else 'failed'
+    finished_at = now()
+    extra = {'finished': finished_at}
+    if job.started:
+        extra['elapsed'] = (finished_at - job.started).total_seconds()
+
+    _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra)
+
+    label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
+    logger.info(f'Job {job.id} finalized via {label}: {final_status}')
+
+
+def _compute_adoption_dedup(job):
+    """Return (safe_threshold, collision_zone) for counter-skip dedup during adoption.
+
+    Hybrid approach — memory is O(1) + O(worker_count), never O(total events):
+
+    safe_threshold: highest counter where all lower counters are also in DB (contiguous
+        prefix). Events <= this are skipped with a single integer comparison.
+
+    collision_zone: small set of counters above safe_threshold that ARE in DB. These
+        exist because parallel callback workers can commit a higher-counter event before
+        a lower-counter one. Bounded by JOB_EVENT_WORKERS × batch size, typically < 20
+        regardless of total job event count.
+    """
+    next_ctr = job.get_event_queryset().filter(counter=OuterRef('counter') + 1)
+    gap_event = job.get_event_queryset().annotate(has_next=Exists(next_ctr)).filter(has_next=False).order_by('counter').first()
+    safe_threshold = gap_event.counter if gap_event else 0
+
+    cap = settings.JOB_EVENT_WORKERS * settings.JOB_EVENT_CALLBACK_BUFFER_SIZE
+    collision_zone_list = list(job.get_event_queryset().filter(counter__gt=safe_threshold).values_list('counter', flat=True))
+
+    if len(collision_zone_list) > cap:
+        logger.warning(
+            f'Job {job.id}: collision_zone has {len(collision_zone_list)} events above safe_threshold, '
+            f'exceeds dedup cap of {cap}. Events beyond cap may be re-processed if replayed. '
+            f'Consider increasing JOB_EVENT_CALLBACK_BUFFER_SIZE or reducing parallel callback workers.'
+        )
+
+    collision_zone = set(collision_zone_list[:cap])
+    return safe_threshold, collision_zone
+
+
+def reattach_to_work_unit(job, receptor_ctl):
+    """Reconnect to a receptor work unit and stream events in real-time until it completes.
+
+    Reconstructs the minimal process-phase context from the DB job record, then calls
+    _process_phase which blocks until the work unit finishes — streaming events live as
+    the EE generates them. Dedup (safe_threshold + collision_zone) skips events already
+    in DB so replay from startpos=0 is safe.
+
+    Intended to be called from adopt_job_async (a background task) so the caller is not
+    blocked. Cross-controller path (node=execution_node) is deferred to AAP-89602.
+    """
+    unit_id = job.work_unit_id
+
+    # Check state for logging — no longer a gate. We stream regardless.
+    try:
+        unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
+    except Exception:
+        logger.warning(f'Cannot get receptor status for work unit {unit_id} (job {job.id}), deferring adoption')
+        return False
+
+    state_name = unit_status.get('StateName', '')
+    logger.info(f'Adopting job {job.id}: unit {unit_id} in state {state_name!r}, starting real-time streaming')
+
+    # Pending/Running — EE not yet finished; defer to next heartbeat.
+    if state_name in ('Pending', 'Running'):
+        logger.info(f'Job {job.id}: unit {unit_id} in state {state_name!r}, deferring to next heartbeat')
+        return False
+
+    safe_threshold, collision_zone = _compute_adoption_dedup(job)
+    max_counter = max(collision_zone) if collision_zone else safe_threshold
+    logger.info(
+        f'Job {job.id}: safe_threshold={safe_threshold} collision_zone_size={len(collision_zone)} '
+        f'(max counter={max_counter}), replaying from startpos=0 with counter-skip'
+    )
+
+    callback = _build_adoption_callback(job, safe_threshold, collision_zone)
+
+    private_data_dir = _get_or_create_private_data_dir(job)
+    receptor_job = AWXReceptorJob(_AdoptionTask(job, callback), {'private_data_dir': private_data_dir})
+    receptor_job.unit_id = unit_id
+
+    process_phase_failed = False
+    res = None
+    try:
+        res = receptor_job._process_phase(receptor_ctl)  # blocks until unit completes
+    except Exception:
+        logger.exception(f'Adoption process phase failed for job {job.id} (unit={unit_id})')
+        process_phase_failed = True
+    finally:
+        shutil.rmtree(private_data_dir, ignore_errors=True)
+
+    # Finalize status to DB first, then release the work unit — matching the ordering
+    # in BaseTask.run() where release follows _finalize_job_run.
+    #
+    # _process_phase -> _handle_work_error may return None for 'exceeded quota' where
+    # the job is already set to 'pending' — don't finalize, let the next dispatch handle it.
+    try:
+        if res is not None:
+            exit_code = 0 if getattr(res, 'status', '') == 'successful' else 1
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+        elif not process_phase_failed:
+            logger.info(f'Job {job.id}: adoption deferred (handled in _handle_work_error)')
+        else:
+            # _process_phase raised — fall back to work status for exit code
+            try:
+                unit_status = receptor_ctl.simple_command(f'work status {unit_id}')
+                state_name = unit_status.get('StateName', '')
+            except Exception:
+                logger.debug(f'Could not get final status for {unit_id} after process phase failure')
+                unit_status = {}
+                state_name = ''
+            exit_code = _get_adoption_exit_code(unit_status, state_name)
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+    finally:
+        receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
+
+    return True
 
 
 def should_update_config(new_config):

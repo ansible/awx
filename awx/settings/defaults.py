@@ -223,6 +223,9 @@ JOB_EVENT_WORKERS = 4
 # Minimum number of workers for the dispatcher (dispatcherd) process pool
 DISPATCHER_MIN_WORKERS = 4
 
+# Maximum number of events buffered per callback worker before flushing via bulk_create()
+JOB_EVENT_CALLBACK_BUFFER_SIZE = 1000
+
 # The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
 JOB_EVENT_BUFFER_SECONDS = 1
@@ -418,6 +421,12 @@ CLUSTER_NODE_HEARTBEAT_PERIOD = 60
 CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
 
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
+
+# Seconds after a controller restart before an orphaned dispatched job is failed.
+# Jobs with work_unit_id set are skipped by the reaper and handled by the adoption loop
+# (_attempt_adoption_for_dispatched_jobs). This timeout is the maximum time we wait for
+# the EE to finish before giving up and failing the job.
+HADR_JOB_ADOPTION_TIMEOUT = 3600
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
