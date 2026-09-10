@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Tuple, Union
 
 import yaml
@@ -14,6 +15,7 @@ from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 from awx.main.models.event_query import EventQuery
 from awx.main.models import Job
+from awx.main.analytics.subsystem_metrics import IndirectCountingMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -36,93 +38,114 @@ def get_hashable_form(input_data: Union[dict, list, Tuple, int, float, str, bool
     raise UnhashableFacts(f'Cannonical facts contains a {type(input_data)} type which can not be hashed.')
 
 
-def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, str]]) -> list[IndirectManagedNodeAudit]:
-    results = {}
-    compiled_jq_expressions = {}  # Cache for compiled jq expressions
-    facts_missing_logged = False
-    unhashable_facts_logged = False
-    name_missing_logged = set()
+def _execute_jq_query(compiled_jq, event_data_res, resolved_action, event_id, s_metrics):
+    """Execute a compiled jq expression against event data, recording metrics."""
+    jq_start = time.perf_counter()
+    try:
+        return compiled_jq.input(event_data_res).all()
+    except Exception as e:
+        s_metrics.inc('indirect_node_jq_query_errors', 1)
+        logger.warning(f'jq error for module {resolved_action} on event {event_id}: {e}')
+        return None
+    finally:
+        s_metrics.inc('indirect_node_query_execution_seconds', time.perf_counter() - jq_start)
 
-    job_event_queries_fqcn = {}
+
+def _build_wildcard_queries(job_event_queries: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
+    """Build a lookup of wildcard (a.b.*) queries keyed by fqcn (a.b)."""
+    fqcn_queries = {}
     for query_k, query_v in job_event_queries.items():
         if len(parts := query_k.split('.')) != 3:
             logger.info(f"Skiping malformed query '{query_k}'. Expected to be of the form 'a.b.c'")
             continue
-        if parts[2] != '*':
-            continue
-        job_event_queries_fqcn['.'.join(parts[0:2])] = query_v
+        if parts[2] == '*':
+            fqcn_queries['.'.join(parts[0:2])] = query_v
+    return fqcn_queries
+
+
+def _resolve_event_query(event, job_event_queries, job_event_queries_fqcn):
+    """Match an event to its jq query string. Returns (resolved_action, jq_str) or (None, None)."""
+    if 'res' not in event.event_data:
+        return None, None
+
+    resolved_action = event.event_data.get('resolved_action', None)
+    if not resolved_action:
+        return None, None
+
+    if len(resolved_action_parts := resolved_action.split('.')) != 3:
+        logger.debug(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
+        return None, None
+
+    resolved_action_fqcn = '.'.join(resolved_action_parts[0:2])
+    jq_str = job_event_queries.get(resolved_action, job_event_queries_fqcn.get(resolved_action_fqcn, {})).get('query')
+    if not jq_str:
+        return None, None
+
+    return resolved_action, jq_str
+
+
+def _process_jq_result(data, resolved_action, event, jq_str, job, results, log_state):
+    """Process a single jq result into an audit record. Returns True if a record was created/updated."""
+    if not data.get('canonical_facts'):
+        if not log_state['facts_missing']:
+            logger.error(f'jq output missing canonical_facts for module {resolved_action} on event {event.id} using jq:{jq_str}')
+            log_state['facts_missing'] = True
+        return
+
+    canonical_facts = data['canonical_facts']
+    try:
+        hashable_facts = get_hashable_form(canonical_facts)
+    except UnhashableFacts:
+        if not log_state['unhashable']:
+            logger.info(f'Could not hash canonical_facts {canonical_facts}, skipping')
+            log_state['unhashable'] = True
+        return
+
+    name = data.get('name')
+    if name is None:
+        if resolved_action not in log_state['name_missing']:
+            logger.warning(f'jq output missing name for module {resolved_action} on event {event.id} using jq:{jq_str}')
+            log_state['name_missing'].add(resolved_action)
+        return
+
+    if hashable_facts in results:
+        audit_record = results[hashable_facts]
+    else:
+        audit_record = IndirectManagedNodeAudit(
+            canonical_facts=canonical_facts,
+            facts=data.get('facts'),
+            job=job,
+            organization=job.organization,
+            name=name,
+        )
+        results[hashable_facts] = audit_record
+
+    if resolved_action not in audit_record.events:
+        audit_record.events.append(resolved_action)
+    audit_record.count += 1
+
+
+def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, str]], s_metrics: IndirectCountingMetrics) -> list[IndirectManagedNodeAudit]:
+    results = {}
+    compiled_jq_expressions = {}
+    job_event_queries_fqcn = _build_wildcard_queries(job_event_queries)
+    log_state = {'facts_missing': False, 'unhashable': False, 'name_missing': set()}
 
     for event in job.job_events.filter(event_data__isnull=False).iterator():
-        if 'res' not in event.event_data:
+        resolved_action, jq_str = _resolve_event_query(event, job_event_queries, job_event_queries_fqcn)
+        if not resolved_action:
             continue
 
-        if not (resolved_action := event.event_data.get('resolved_action', None)):
-            continue
-
-        if len(resolved_action_parts := resolved_action.split('.')) != 3:
-            logger.debug(f"Malformed invocation module name '{resolved_action}'. Expected to be of the form 'a.b.c'")
-            continue
-
-        resolved_action_fqcn = '.'.join(resolved_action_parts[0:2])
-
-        # Match module invocation to collection queries
-        # First match against fully qualified query names i.e. a.b.c
-        # Then try and match against wildcard queries i.e. a.b.*
-        if not (jq_str_for_event := job_event_queries.get(resolved_action, job_event_queries_fqcn.get(resolved_action_fqcn, {})).get('query')):
-            continue
-
-        # Recall from cache, or process the jq expression, and loop over the jq results
-        if jq_str_for_event not in compiled_jq_expressions:
-            compiled_jq_expressions[resolved_action] = jq.compile(jq_str_for_event)
+        if jq_str not in compiled_jq_expressions:
+            compiled_jq_expressions[resolved_action] = jq.compile(jq_str)
         compiled_jq = compiled_jq_expressions[resolved_action]
 
-        try:
-            data_source = compiled_jq.input(event.event_data['res']).all()
-        except Exception as e:
-            logger.warning(f'error for module {resolved_action} and data {event.event_data["res"]}: {e}')
+        data_source = _execute_jq_query(compiled_jq, event.event_data['res'], resolved_action, event.id, s_metrics)
+        if data_source is None:
             continue
 
         for data in data_source:
-            # From this jq result (specific to a single Ansible module), get index information about this host record
-            if not data.get('canonical_facts'):
-                if not facts_missing_logged:
-                    logger.error(f'jq output missing canonical_facts for module {resolved_action} on event {event.id} using jq:{jq_str_for_event}')
-                    facts_missing_logged = True
-                continue
-            canonical_facts = data['canonical_facts']
-            try:
-                hashable_facts = get_hashable_form(canonical_facts)
-            except UnhashableFacts:
-                if not unhashable_facts_logged:
-                    logger.info(f'Could not hash canonical_facts {canonical_facts}, skipping')
-                    unhashable_facts_logged = True
-                continue
-
-            # Obtain the record based on the hashable canonical_facts now determined
-            facts = data.get('facts')
-            name = data.get('name')
-            if name is None:
-                if resolved_action not in name_missing_logged:
-                    logger.warning(f'jq output missing name for module {resolved_action} on event {event.id} using jq:{jq_str_for_event}')
-                    name_missing_logged.add(resolved_action)
-                continue
-
-            if hashable_facts in results:
-                audit_record = results[hashable_facts]
-            else:
-                audit_record = IndirectManagedNodeAudit(
-                    canonical_facts=canonical_facts,
-                    facts=facts,
-                    job=job,
-                    organization=job.organization,
-                    name=name,
-                )
-                results[hashable_facts] = audit_record
-
-            # Increment rolling count fields
-            if resolved_action not in audit_record.events:
-                audit_record.events.append(resolved_action)
-            audit_record.count += 1
+            _process_jq_result(data, resolved_action, event, jq_str, job, results, log_state)
 
     return list(results.values())
 
@@ -145,11 +168,13 @@ def fetch_job_event_query(job: Job) -> dict[str, dict[str, str]]:
     return net_job_data
 
 
-def save_indirect_host_entries_of_job(job: Job) -> None:
+def save_indirect_host_entries_of_job(job: Job, s_metrics: IndirectCountingMetrics) -> None:
     "Once we have a job and we know that we want to do indirect host processing, this is called"
     job_event_queries = fetch_job_event_query(job)
-    records = build_indirect_host_data(job, job_event_queries)
+    records = build_indirect_host_data(job, job_event_queries, s_metrics)
     IndirectManagedNodeAudit.objects.bulk_create(records)
+    record_count = len(records)
+    transaction.on_commit(lambda: s_metrics.inc('indirect_node_audit_records_created', record_count))
 
 
 def cleanup_old_indirect_host_entries() -> None:
@@ -181,6 +206,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
             return
         job.log_lifecycle(f'finished processing {current_events} events, running save_indirect_host_entries')
 
+    s_metrics = IndirectCountingMetrics()
     try:
         with transaction.atomic():
             try:
@@ -195,17 +221,25 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
                 # 2. the artifacts_handler has not yet been called for this job
                 return
 
-            save_indirect_host_entries_of_job(job)
+            save_indirect_host_entries_of_job(job, s_metrics)
             job.event_queries_processed = True
             job.save(update_fields=['event_queries_processed'])
     except Exception:
         logger.exception(f'Error processing indirect host data for job_id={job_id}')
+    finally:
+        try:
+            s_metrics.pipe_execute()
+        except Exception:
+            logger.warning("Failed to flush indirect counting metrics")
 
 
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def cleanup_and_save_indirect_host_entries_fallback() -> None:
     if not settings.INDIRECT_NODE_COUNTING_ENABLED:
         return
+
+    s_metrics = IndirectCountingMetrics()
+    fallback_start = time.perf_counter()
 
     try:
         cleanup_old_indirect_host_entries()
@@ -221,3 +255,9 @@ def cleanup_and_save_indirect_host_entries_fallback() -> None:
         job_ct += 1
     if job_ct:
         logger.info(f'Restarted event processing for {job_ct} jobs')
+
+    s_metrics.set('indirect_node_fallback_cleanup_seconds', time.perf_counter() - fallback_start)
+    try:
+        s_metrics.pipe_execute()
+    except Exception:
+        logger.warning("Failed to flush indirect counting metrics")

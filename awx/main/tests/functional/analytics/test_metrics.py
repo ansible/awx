@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from django.test import RequestFactory
@@ -5,6 +7,8 @@ from prometheus_client.parser import text_string_to_metric_families
 from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
+from awx.main.analytics.analytics_tasks import send_subsystem_metrics
+from awx.main.analytics.subsystem_metrics import IndirectCountingMetrics
 from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
 
@@ -132,3 +136,24 @@ def test_dispatcherd_metrics_metric_filter_excludes_unrelated(mocker):
     request = Request(RequestFactory().get('/api/v2/metrics/', {'metric': 'awx_system_info'}))
 
     assert get_dispatcherd_metrics(request) == ''
+
+
+@mock.patch('awx.main.analytics.analytics_tasks.IndirectCountingMetrics')
+@mock.patch('awx.main.analytics.analytics_tasks.CallbackReceiverMetrics')
+@mock.patch('awx.main.analytics.analytics_tasks.DispatcherMetrics')
+def test_send_subsystem_metrics(mock_dispatcher, mock_callback, mock_indirect):
+    """send_subsystem_metrics calls send_metrics on all subsystem metric classes."""
+    send_subsystem_metrics()
+    mock_dispatcher.return_value.send_metrics.assert_called_once()
+    mock_callback.return_value.send_metrics.assert_called_once()
+    mock_indirect.return_value.send_metrics.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_indirect_counting_metrics_init():
+    """IndirectCountingMetrics can be instantiated and has expected metric fields."""
+    m = IndirectCountingMetrics(metrics_have_changed=False)
+    assert 'indirect_node_audit_records_created' in m.METRICS
+    assert 'indirect_node_query_execution_seconds' in m.METRICS
+    assert 'indirect_node_jq_query_errors' in m.METRICS
+    assert 'indirect_node_fallback_cleanup_seconds' in m.METRICS
