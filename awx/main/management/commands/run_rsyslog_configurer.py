@@ -1,14 +1,15 @@
-import logging
 import json
+import logging
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core.cache import cache
+from django_guid import set_guid
 from awx.main.dispatch import pg_bus_conn
-from awx.main.dispatch.worker.task import run_callable
 from awx.main.utils.external_logging import reconfigure_rsyslog
 
-logger = logging.getLogger('awx.main.rsyslog_configurer')
+logger = logging.getLogger("awx.main.rsyslog_configurer")
+EXPECTED_TASK = "awx.main.utils.external_logging.reconfigure_rsyslog"
 
 
 class Command(BaseCommand):
@@ -18,7 +19,7 @@ class Command(BaseCommand):
     for pg_notify then calls reconfigure_rsyslog
     """
 
-    help = 'Launch the rsyslog_configurer daemon'
+    help = "Launch the rsyslog_configurer daemon"
 
     def handle(self, *arg, **options):
         try:
@@ -28,14 +29,24 @@ class Command(BaseCommand):
                 reconfigure_rsyslog()
                 for e in conn.events():
                     if e is not None:
+                        body = json.loads(e.payload)
+                        task = body.get("task")
+                        if task != EXPECTED_TASK:
+                            logger.critical(
+                                "Refusing unexpected task %s; expected %s",
+                                task,
+                                EXPECTED_TASK,
+                            )
+                            continue
+                        if "guid" in body:
+                            set_guid(body["guid"])
                         logger.info("Change in logging settings found. Restarting rsyslogd")
                         # clear the cache of relevant settings then restart
-                        setting_keys = [k for k in dir(settings) if k.startswith('LOG_AGGREGATOR')]
+                        setting_keys = [k for k in dir(settings) if k.startswith("LOG_AGGREGATOR")]
                         cache.delete_many(setting_keys)
                         settings._awx_conf_memoizedcache.clear()
-                        body = json.loads(e.payload)
-                        run_callable(body)
+                        reconfigure_rsyslog()
         except Exception:
             # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
-            logger.exception('Encountered unhandled error in rsyslog_configurer main loop')
+            logger.exception("Encountered unhandled error in rsyslog_configurer main loop")
             raise
