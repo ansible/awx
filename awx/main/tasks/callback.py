@@ -305,6 +305,28 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
         super(RunnerCallbackForProjectUpdate, self).__init__(*args, **kwargs)
         self.playbook_new_revision = None
         self.host_map = {}
+        self.project_artifact_path = None
+        self.roles_artifact_path = None
+        self.collections_artifact_path = None
+
+    def artifacts_handler(self, artifact_dir):
+        """Process artifacts including project files for remote updates."""
+        super().artifacts_handler(artifact_dir)
+
+        project_update_path = os.path.join(artifact_dir, 'project_update')
+        if os.path.exists(project_update_path):
+            self.project_artifact_path = project_update_path
+            logger.debug(f'Found project artifacts at {project_update_path}')
+
+        project_roles_path = os.path.join(artifact_dir, 'project_roles')
+        if os.path.exists(project_roles_path):
+            self.roles_artifact_path = project_roles_path
+            logger.debug(f'Found roles artifacts at {project_roles_path}')
+
+        project_collections_path = os.path.join(artifact_dir, 'project_collections')
+        if os.path.exists(project_collections_path):
+            self.collections_artifact_path = project_collections_path
+            logger.debug(f'Found collections artifacts at {project_collections_path}')
 
     def event_handler(self, event_data):
         super_return_value = super(RunnerCallbackForProjectUpdate, self).event_handler(event_data)

@@ -19,6 +19,7 @@ from awx.api.views import (
     ProjectNotificationTemplatesSuccessList,
     ProjectObjectRolesList,
     ProjectAccessList,
+    ProjectInstanceGroupsList,
     ProjectCopy,
 )
 
@@ -48,6 +49,7 @@ urls = [
     ),
     re_path(r'^(?P<pk>[0-9]+)/object_roles/$', ProjectObjectRolesList.as_view(), name='project_object_roles_list'),
     re_path(r'^(?P<pk>[0-9]+)/access_list/$', ProjectAccessList.as_view(), name='project_access_list'),
+    re_path(r'^(?P<pk>[0-9]+)/instance_groups/$', ProjectInstanceGroupsList.as_view(), name='project_instance_groups_list'),
     re_path(r'^(?P<pk>[0-9]+)/copy/$', ProjectCopy.as_view(), name='project_copy'),
 ]
 

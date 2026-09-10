@@ -1210,6 +1210,15 @@ class ProjectCopy(CopyAPIView):
     resource_purpose = 'copy of a project'
 
 
+class ProjectInstanceGroupsList(SubListAttachDetachAPIView):
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.Project
+    relationship = 'instance_groups'
+    filter_read_permission = False
+    resource_purpose = 'instance groups of a project'
+
+
 class UserList(ListCreateAPIView):
     model = models.User
     serializer_class = serializers.UserSerializer
