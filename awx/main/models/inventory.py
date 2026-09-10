@@ -52,6 +52,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import _inventory_updates
+from awx.main.utils.encryption import decrypt_field, encrypt_field
 from awx.main.utils.safe_yaml import sanitize_jinja
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
 
@@ -953,6 +954,16 @@ class InventorySourceOptions(BaseModel):
         default='',
         help_text=_('Inventory source variables in YAML or JSON format.'),
     )
+    proxy = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_(
+            'Proxy URL to use when running inventory updates '
+            '(sets http_proxy/https_proxy/HTTP_PROXY/HTTPS_PROXY). '
+            'Overrides the global proxy set in Extra Environment Variables.'
+        ),
+    )
     scm_branch = models.CharField(
         max_length=1024,
         default='',
@@ -1163,8 +1174,24 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             if 'name' not in update_fields:
                 update_fields.append('name')
 
+        # Defer proxy encryption for new instances (pk is None, which
+        # would produce a different encryption key than decrypt expects).
+        pending_proxy = None
+        if is_new_instance and self.proxy:
+            pending_proxy = self.proxy
+            self.proxy = ''
+        elif self.proxy:
+            self.proxy = encrypt_field(self, 'proxy')
+            if 'proxy' not in update_fields and update_fields:
+                update_fields.append('proxy')
+
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
+
+        if pending_proxy:
+            self.proxy = pending_proxy
+            self.proxy = encrypt_field(self, 'proxy')
+            super(InventorySource, self).save(update_fields=['proxy'])
 
         # Add the PK to the name.
         if replace_text in self.name:
@@ -1209,6 +1236,12 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         return self.create_unified_job(**kwargs)
 
     def create_unified_job(self, **kwargs):
+        # Proxy is stored encrypted under the source's pk; pass the
+        # plaintext so PasswordFieldsModel.save() re-encrypts it with
+        # the update's own pk.
+        if self.proxy and 'proxy' not in kwargs:
+            kwargs['proxy'] = decrypt_field(self, 'proxy')
+
         # Use special name, if name not already specified
         if self.inventory:
             if '_eager_fields' not in kwargs:
@@ -1276,6 +1309,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     """
     Internal job for tracking inventory updates from external sources.
     """
+
+    PASSWORD_FIELDS = ('start_args', 'proxy')
 
     class Meta:
         app_label = 'main'
