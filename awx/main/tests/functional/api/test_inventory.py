@@ -1004,3 +1004,80 @@ def test_inventory_names_unique_per_organization(post, admin_user):
         expect=400,
     )
     assert 'Inventory with this Name and Organization already exists' in json.dumps(resp3.data)
+
+
+@pytest.mark.django_db
+class TestSourcePathTraversal:
+    """Serializer-level path traversal prevention on InventorySource.source_path (AAP-78700)."""
+
+    def _create_payload(self, inventory, project, source_path, name='scm-src'):
+        return {
+            'inventory': inventory.pk,
+            'name': name,
+            'source': 'scm',
+            'source_project': project.pk,
+            'source_path': source_path,
+            'source_vars': 'plugin: a.b.c',
+        }
+
+    @pytest.mark.parametrize(
+        'source_path',
+        [
+            '../etc/passwd',
+            'inventories/../secrets',
+            '..\\windows\\path',
+        ],
+    )
+    def test_create_rejects_traversal(self, post, inventory, project, admin_user, source_path):
+        response = post(
+            reverse('api:inventory_source_list'),
+            self._create_payload(inventory, project, source_path),
+            admin_user,
+            expect=400,
+        )
+        assert 'source_path' in response.data
+
+    def test_create_accepts_valid_path(self, post, inventory, project, admin_user):
+        response = post(
+            reverse('api:inventory_source_list'),
+            self._create_payload(inventory, project, 'playbooks/main.yml'),
+            admin_user,
+            expect=201,
+        )
+        assert response.data['source_path'] == 'playbooks/main.yml'
+
+    def test_update_rejects_changed_traversal_path(self, patch, inventory, project, admin_user):
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            inv_src = InventorySource.objects.create(
+                inventory=inventory,
+                name='scm-src',
+                source='scm',
+                source_project=project,
+                source_path='playbooks/main.yml',
+            )
+        response = patch(
+            inv_src.get_absolute_url(),
+            {'source_path': '../etc/passwd'},
+            admin_user,
+            expect=400,
+        )
+        assert 'source_path' in response.data
+
+    def test_update_grandfathers_unchanged_traversal_path(self, patch, inventory, project, admin_user):
+        legacy_path = '../legacy/hosts'
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+            inv_src = InventorySource.objects.create(
+                inventory=inventory,
+                name='legacy-src',
+                source='scm',
+                source_project=project,
+                source_path=legacy_path,
+            )
+        response = patch(
+            inv_src.get_absolute_url(),
+            {'source_path': legacy_path, 'name': 'legacy-src-renamed'},
+            admin_user,
+            expect=200,
+        )
+        assert response.data['source_path'] == legacy_path
+        assert response.data['name'] == 'legacy-src-renamed'
