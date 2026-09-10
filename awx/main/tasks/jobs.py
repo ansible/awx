@@ -197,12 +197,24 @@ def with_path_cleanup(f):
 
 @task(on_duplicate='queue_one', bind=True, queue=get_task_queuename)
 def dispatch_waiting_jobs(binder):
-    for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id'):
+    start_time = time.monotonic()
+    job_id_list = []
+    for uj in UnifiedJob.objects.filter(status='waiting', controller_node=settings.CLUSTER_HOST_ID).only('id', 'status', 'polymorphic_ctype', 'celery_task_id')[
+        :25
+    ]:
         kwargs = uj.get_start_kwargs()
         if not kwargs:
             kwargs = {}
+        job_id_list.append(uj.pk)
         binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
         UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
+    if job_id_list:
+        logger.info(f'Dispatching off waiting jobs {job_id_list}, in time {time.monotonic() - start_time}')
+        # If this is a burst, the task manager may still be producing more jobs so reschedule
+        if len(job_id_list) > 1:
+            binder.control('run', data={'task': serialize_task(dispatch_waiting_jobs), 'args': [], 'kwargs': {}})
+    else:
+        logger.debug('No more waiting jobs to dispatch on this node')
 
 
 class BaseTask(object):
