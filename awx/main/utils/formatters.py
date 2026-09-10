@@ -252,8 +252,9 @@ class LogstashFormatter(LogstashFormatterBase):
             log_kind = record.name[len('awx.analytics.') :]
             fields = self.reformat_data_for_log(fields, kind=log_kind)
         # General AWX metadata
-        fields['cluster_host_id'] = self.cluster_host_id
-        fields['tower_uuid'] = self.tower_uuid
+        fields['cluster_host_id'] = settings.CLUSTER_HOST_ID
+        tower_uuid = getattr(settings, 'LOG_AGGREGATOR_TOWER_UUID', None) or getattr(settings, 'INSTALL_UUID', None)
+        fields['tower_uuid'] = tower_uuid
         return fields
 
     def format(self, record):
