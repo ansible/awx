@@ -1673,4 +1673,8 @@ class UnifiedJob(
 
     @property
     def ancestor_job(self):
-        return self.get_workflow_job().ancestor_job if self.spawned_by_workflow else self
+        if self.spawned_by_workflow:
+            wj = self.get_workflow_job()
+            if wj is not None:
+                return wj.ancestor_job
+        return self
