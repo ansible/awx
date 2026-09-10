@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
 from awx.main.analytics.analytics_tasks import send_subsystem_metrics
+from awx.main.analytics.subsystem_metrics import IndirectCountingMetrics
 from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
 
@@ -146,3 +147,13 @@ def test_send_subsystem_metrics(mock_dispatcher, mock_callback, mock_indirect):
     mock_dispatcher.return_value.send_metrics.assert_called_once()
     mock_callback.return_value.send_metrics.assert_called_once()
     mock_indirect.return_value.send_metrics.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_indirect_counting_metrics_init():
+    """IndirectCountingMetrics can be instantiated and has expected metric fields."""
+    m = IndirectCountingMetrics(metrics_have_changed=False)
+    assert 'indirect_node_audit_records_created' in m.METRICS
+    assert 'indirect_node_query_execution_seconds' in m.METRICS
+    assert 'indirect_node_jq_query_errors' in m.METRICS
+    assert 'indirect_node_fallback_cleanup_seconds' in m.METRICS
