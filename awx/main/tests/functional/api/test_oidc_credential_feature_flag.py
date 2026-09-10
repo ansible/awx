@@ -92,7 +92,7 @@ def test_oidc_types_in_registry_when_flag_enabled(isolated_registry):
     """Test that OIDC credential types are added to the registry when flag is enabled."""
     mock_eps = _mock_entry_points_factory(
         managed_names=['ssh', 'vault'],
-        supported_names=['hashivault-kv-oidc', 'hashivault-ssh-oidc'],
+        supported_names=list(OIDC_CREDENTIAL_TYPE_NAMESPACES),
     )
     with override_settings(FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED=True):
         with mock.patch('awx.main.models.credential.detect_server_product_name', return_value='NOT_AWX'):
@@ -109,7 +109,7 @@ def test_oidc_types_not_in_registry_when_flag_disabled(isolated_registry):
     """Test that OIDC credential types are excluded from the registry when flag is disabled."""
     mock_eps = _mock_entry_points_factory(
         managed_names=['ssh', 'vault'],
-        supported_names=['hashivault-kv-oidc', 'hashivault-ssh-oidc'],
+        supported_names=list(OIDC_CREDENTIAL_TYPE_NAMESPACES),
     )
     with override_settings(FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED=False):
         with mock.patch('awx.main.models.credential.detect_server_product_name', return_value='NOT_AWX'):
@@ -127,7 +127,9 @@ def test_oidc_namespaces_constant():
     """Test that OIDC_CREDENTIAL_TYPE_NAMESPACES contains the expected namespaces."""
     assert 'hashivault-kv-oidc' in OIDC_CREDENTIAL_TYPE_NAMESPACES
     assert 'hashivault-ssh-oidc' in OIDC_CREDENTIAL_TYPE_NAMESPACES
-    assert len(OIDC_CREDENTIAL_TYPE_NAMESPACES) == 2
+    assert 'akeyless-oidc' in OIDC_CREDENTIAL_TYPE_NAMESPACES
+    assert 'akeyless-ssh-oidc' in OIDC_CREDENTIAL_TYPE_NAMESPACES
+    assert len(OIDC_CREDENTIAL_TYPE_NAMESPACES) == 4
 
 
 # --- Functional API tests ---
