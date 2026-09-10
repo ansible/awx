@@ -1,5 +1,6 @@
 import yaml
 import time
+from unittest import mock
 
 from django.core.management import call_command
 
@@ -20,7 +21,7 @@ def test_indirect_host_counting(live_tmp_folder, run_job_from_playbook):
     event_query = {'demo.query.example': {'query': module_jq_str}}
 
     # Run the task logic directly with local data
-    results = build_indirect_host_data(job, event_query)
+    results = build_indirect_host_data(job, event_query, mock.MagicMock())
     assert len(results) == 1
     host_audit_entry = results[0]
 

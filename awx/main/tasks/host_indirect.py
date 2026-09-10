@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Tuple, Union
 
 import yaml
@@ -14,6 +15,7 @@ from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 from awx.main.models.event_query import EventQuery
 from awx.main.models import Job
+from awx.main.analytics.subsystem_metrics import IndirectCountingMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,20 @@ def get_hashable_form(input_data: Union[dict, list, Tuple, int, float, str, bool
     raise UnhashableFacts(f'Cannonical facts contains a {type(input_data)} type which can not be hashed.')
 
 
-def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, str]]) -> list[IndirectManagedNodeAudit]:
+def _execute_jq_query(compiled_jq, event_data_res, resolved_action, event_id, s_metrics):
+    """Execute a compiled jq expression against event data, recording metrics."""
+    jq_start = time.perf_counter()
+    try:
+        return compiled_jq.input(event_data_res).all()
+    except Exception as e:
+        s_metrics.inc('indirect_node_jq_query_errors', 1)
+        logger.warning(f'jq error for module {resolved_action} on event {event_id}: {e}')
+        return None
+    finally:
+        s_metrics.inc('indirect_node_query_execution_seconds', time.perf_counter() - jq_start)
+
+
+def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, str]], s_metrics: IndirectCountingMetrics) -> list[IndirectManagedNodeAudit]:
     results = {}
     compiled_jq_expressions = {}  # Cache for compiled jq expressions
     facts_missing_logged = False
@@ -76,10 +91,8 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
             compiled_jq_expressions[resolved_action] = jq.compile(jq_str_for_event)
         compiled_jq = compiled_jq_expressions[resolved_action]
 
-        try:
-            data_source = compiled_jq.input(event.event_data['res']).all()
-        except Exception as e:
-            logger.warning(f'error for module {resolved_action} and data {event.event_data["res"]}: {e}')
+        data_source = _execute_jq_query(compiled_jq, event.event_data['res'], resolved_action, event.id, s_metrics)
+        if data_source is None:
             continue
 
         for data in data_source:
@@ -145,11 +158,13 @@ def fetch_job_event_query(job: Job) -> dict[str, dict[str, str]]:
     return net_job_data
 
 
-def save_indirect_host_entries_of_job(job: Job) -> None:
+def save_indirect_host_entries_of_job(job: Job, s_metrics: IndirectCountingMetrics) -> None:
     "Once we have a job and we know that we want to do indirect host processing, this is called"
     job_event_queries = fetch_job_event_query(job)
-    records = build_indirect_host_data(job, job_event_queries)
+    records = build_indirect_host_data(job, job_event_queries, s_metrics)
     IndirectManagedNodeAudit.objects.bulk_create(records)
+    record_count = len(records)
+    transaction.on_commit(lambda: s_metrics.inc('indirect_node_audit_records_created', record_count))
 
 
 def cleanup_old_indirect_host_entries() -> None:
@@ -181,6 +196,7 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
             return
         job.log_lifecycle(f'finished processing {current_events} events, running save_indirect_host_entries')
 
+    s_metrics = IndirectCountingMetrics()
     try:
         with transaction.atomic():
             try:
@@ -195,17 +211,25 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
                 # 2. the artifacts_handler has not yet been called for this job
                 return
 
-            save_indirect_host_entries_of_job(job)
+            save_indirect_host_entries_of_job(job, s_metrics)
             job.event_queries_processed = True
             job.save(update_fields=['event_queries_processed'])
     except Exception:
         logger.exception(f'Error processing indirect host data for job_id={job_id}')
+    finally:
+        try:
+            s_metrics.pipe_execute()
+        except Exception:
+            logger.warning("Failed to flush indirect counting metrics")
 
 
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def cleanup_and_save_indirect_host_entries_fallback() -> None:
     if not settings.INDIRECT_NODE_COUNTING_ENABLED:
         return
+
+    s_metrics = IndirectCountingMetrics()
+    fallback_start = time.perf_counter()
 
     try:
         cleanup_old_indirect_host_entries()
@@ -221,3 +245,9 @@ def cleanup_and_save_indirect_host_entries_fallback() -> None:
         job_ct += 1
     if job_ct:
         logger.info(f'Restarted event processing for {job_ct} jobs')
+
+    s_metrics.set('indirect_node_fallback_cleanup_seconds', time.perf_counter() - fallback_start)
+    try:
+        s_metrics.pipe_execute()
+    except Exception:
+        logger.warning("Failed to flush indirect counting metrics")
