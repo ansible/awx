@@ -10,6 +10,7 @@ from django.utils.timezone import now, timedelta
 from awx.main.models import Job
 
 from awx.main.tasks.host_indirect import (
+    _execute_jq_query,
     build_indirect_host_data,
     fetch_job_event_query,
     save_indirect_host_entries,
@@ -183,7 +184,7 @@ def new_audit_record(bare_job, organization):
     ),
 )
 def test_build_indirect_host_data(job_with_counted_event, queries: Query, expected_matches: int):
-    data = build_indirect_host_data(job_with_counted_event, {k: v for d in queries for k, v in d.items()})
+    data = build_indirect_host_data(job_with_counted_event, {k: v for d in queries for k, v in d.items()}, mock.MagicMock())
     assert len(data) == expected_matches
 
 
@@ -208,7 +209,7 @@ def test_build_indirect_host_data(job_with_counted_event, queries: Query, expect
 )
 def test_build_indirect_host_data_malformed_module_name(mock_logger_debug, bare_job, task_name: str):
     create_registered_event(bare_job, task_name)
-    assert build_indirect_host_data(bare_job, Query('demo.query.example', TEST_JQ)) == []
+    assert build_indirect_host_data(bare_job, Query('demo.query.example', TEST_JQ), mock.MagicMock()) == []
     mock_logger_debug.assert_called_once_with(f"Malformed invocation module name '{task_name}'. Expected to be of the form 'a.b.c'")
 
 
@@ -232,7 +233,7 @@ def test_build_indirect_host_data_malformed_module_name(mock_logger_debug, bare_
     ),
 )
 def test_build_indirect_host_data_malformed_query(mock_logger_info, job_with_counted_event, query: str):
-    assert build_indirect_host_data(job_with_counted_event, {query: {'query': TEST_JQ}}) == []
+    assert build_indirect_host_data(job_with_counted_event, {query: {'query': TEST_JQ}}, mock.MagicMock()) == []
     mock_logger_info.assert_called_once_with(f"Skiping malformed query '{query}'. Expected to be of the form 'a.b.c'")
 
 
@@ -407,7 +408,7 @@ def test_null_name_event_skipped_with_warning(mock_logger_warning, bare_job, eve
         }
     )
     query = Query('demo.query.example', TEST_JQ)
-    records = build_indirect_host_data(bare_job, query)
+    records = build_indirect_host_data(bare_job, query, mock.MagicMock())
     assert records == []
     mock_logger_warning.assert_called_once()
     assert 'missing name' in mock_logger_warning.call_args[0][0]
@@ -447,6 +448,47 @@ def test_save_failure_leaves_flag_false(bare_job, event_query):
 
     bare_job.refresh_from_db()
     assert bare_job.event_queries_processed is False
+
+
+def test_execute_jq_query_success():
+    """Successful jq execution returns results and records timing."""
+    compiled_jq = mock.MagicMock()
+    compiled_jq.input.return_value.all.return_value = [{'name': 'vm-1'}]
+    s_metrics = mock.MagicMock()
+
+    result = _execute_jq_query(compiled_jq, {'host': 'foo'}, 'demo.query.example', 42, s_metrics)
+
+    assert result == [{'name': 'vm-1'}]
+    compiled_jq.input.assert_called_once_with({'host': 'foo'})
+    s_metrics.inc.assert_called_once_with('indirect_node_query_execution_seconds', mock.ANY)
+
+
+def test_execute_jq_query_error():
+    """Failed jq execution returns None, increments error counter, and records timing."""
+    compiled_jq = mock.MagicMock()
+    compiled_jq.input.return_value.all.side_effect = ValueError('bad input')
+    s_metrics = mock.MagicMock()
+
+    result = _execute_jq_query(compiled_jq, {'host': 'foo'}, 'demo.query.example', 42, s_metrics)
+
+    assert result is None
+    s_metrics.inc.assert_any_call('indirect_node_jq_query_errors', 1)
+    s_metrics.inc.assert_any_call('indirect_node_query_execution_seconds', mock.ANY)
+
+
+@pytest.mark.django_db
+def test_jq_runtime_error_increments_error_metric(bare_job, event_query):
+    """A jq query that errors at runtime should increment the error metric."""
+    create_registered_event(bare_job)
+    s_metrics = mock.MagicMock()
+    query = Query('demo.query.example', TEST_JQ)
+    mock_compiled = mock.MagicMock()
+    mock_compiled.input.return_value.all.side_effect = ValueError('jq runtime error')
+    with mock.patch('jq.compile', return_value=mock_compiled):
+        records = build_indirect_host_data(bare_job, query, s_metrics)
+    assert records == []
+    s_metrics.inc.assert_any_call('indirect_node_jq_query_errors', 1)
+    s_metrics.inc.assert_any_call('indirect_node_query_execution_seconds', mock.ANY)
 
 
 @pytest.mark.django_db
