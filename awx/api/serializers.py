@@ -51,6 +51,7 @@ from ansible_base.rbac.models import RoleEvaluation, ObjectRole
 from ansible_base.rbac import permission_registry
 
 # AWX
+from awx.api.validation_patterns import inject_patterns_into_field_list
 from awx.main.access import get_user_capabilities
 from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 from awx.main.models import (
@@ -3117,6 +3118,11 @@ class CredentialTypeSerializer(CleanTextMixin, BaseSerializer):
 
         # Normalize fields and filter out internal fields
         value['inputs']['fields'] = [f for f in fields if not f.get('internal')]
+
+        # Advertise CleanTextMixin Tier 2 patterns on JSON sub-keys (AAP-87586).
+        # Gated on ENHANCED_INPUT_VALIDATION_ENABLED; secret fields are skipped.
+        inject_patterns_into_field_list(value['inputs']['fields'])
+        inject_patterns_into_field_list(value['inputs'].get('metadata'))
 
         return value
 

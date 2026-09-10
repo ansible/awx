@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pytest
+from django.test import override_settings
 
 from awx.api.versioning import reverse
 from awx.main.models import NotificationTemplate, Organization
@@ -90,3 +91,36 @@ def test_notification_template_names_unique_per_organization(post, admin_user):
         expect=400,
     )
     assert 'Notification template with this Organization and Name already exists' in str(resp3.data)
+
+
+FAKE_TIER2_PATTERN = r'^(?!.*<[a-zA-Z/!][^>]*>)[\s\S]*$'
+
+
+@pytest.fixture
+def fake_tier2_pattern(monkeypatch):
+    monkeypatch.setattr('awx.api.validation_patterns.build_tier2_frontend_pattern', lambda: FAKE_TIER2_PATTERN)
+
+
+@pytest.mark.django_db
+def test_notification_options_include_patterns_when_toggle_on(options, admin, fake_tier2_pattern):
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = options(reverse('api:notification_template_list'), admin)
+    assert response.status_code == 200
+    email = response.data['actions']['POST']['notification_configuration']['email']
+    assert email['host']['pattern'] == FAKE_TIER2_PATTERN
+    assert 'pattern_description' in email['host']
+    assert 'pattern' in email['username']
+    assert 'pattern' in email['sender']
+    assert 'pattern' not in email['password']
+    assert 'pattern' not in email['port']
+    assert 'pattern' not in email['recipients']
+
+
+@pytest.mark.django_db
+def test_notification_options_omit_patterns_when_toggle_off(options, admin, fake_tier2_pattern):
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+        response = options(reverse('api:notification_template_list'), admin)
+    assert response.status_code == 200
+    email = response.data['actions']['POST']['notification_configuration']['email']
+    assert 'pattern' not in email['host']
+    assert 'pattern_description' not in email['host']
