@@ -102,7 +102,7 @@ def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running,
     response_sorted = sorted(response.data['active_jobs'], key=sort_keys)
     expect_sorted = sorted(expect_transformed, key=sort_keys)
 
-    assert response.data['error'] == u"Resource is being used by running jobs."
+    assert response.data['error'] == "Resource is being used by running jobs."
     assert response_sorted == expect_sorted
 
 

@@ -219,11 +219,6 @@ This example allows the Django debug toolbar to work.
 .. code-block:: python
 
     # models/mixins.py
-    class ResourceMixin(models.Model):
-        """Common resource management functionality"""
-        class Meta:
-            abstract = True
-
     class ExecutionEnvironmentMixin(models.Model):
         """Execution environment configuration"""
         class Meta:

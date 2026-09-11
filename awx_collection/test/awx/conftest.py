@@ -20,9 +20,10 @@ from ansible.module_utils.six import raise_from
 from ansible_base.rbac.models import RoleDefinition, DABPermission
 from ansible_base.rbac import permission_registry
 
-from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
+from awx.main.migrations._dab_rbac import setup_managed_role_definitions
+from awx.main.tests.conftest import load_all_credentials  # noqa: F401  # pylint: disable=unused-import
 from awx.main.tests.functional.conftest import _request
-from awx.main.tests.functional.conftest import credentialtype_scm, credentialtype_ssh  # noqa: F401; pylint: disable=unused-import
+from awx.main.tests.functional.conftest import credentialtype_scm, credentialtype_ssh  # noqa: F401  # pylint: disable=unused-import
 from awx.main.models import (
     Organization,
     Project,
@@ -90,6 +91,13 @@ def sanitize_dict(din):
         return din
     else:
         return str(din)  # translation proxies often not string but stringlike
+
+
+@pytest.fixture(autouse=True)
+def _setup_managed_roles(db):
+    from django.apps import apps as global_apps
+
+    setup_managed_role_definitions(global_apps, None)
 
 
 @pytest.fixture(autouse=True)
@@ -236,6 +244,7 @@ def run_module(request, collection_import, mocker):
 
         with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
             mocker.patch('ansible.module_utils.basic._ANSIBLE_PROFILE', 'legacy')
+            mocker.patch('ansible.module_utils.basic._PARSED_MODULE_ARGS', {'_ansible_inject_invocation': True}, create=True)
 
             with mock.patch('ansible.module_utils.urls.Request.open', new=new_open):
                 with _get_tower_cli_mgr(new_request):

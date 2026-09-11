@@ -12,6 +12,7 @@ from ansible_base.lib.dynamic_config import (
 from .functions import (
     assert_production_settings,
     merge_application_name,
+    merge_statement_timeout,
     add_backwards_compatibility,
     load_extra_development_files,
 )
@@ -63,10 +64,24 @@ assert_production_settings(DYNACONF, settings_dir, settings_file_path)
 # Load envvars at the end to allow them to override everything loaded so far
 load_envvars(DYNACONF)
 
+# When deployed as part of AAP (RESOURCE_SERVER__URL is set), enforce JWT-only
+# authentication. This ensures all requests go through the gateway and prevents
+# direct API access to Controller bypassing the platform's authentication.
+if DYNACONF.get('RESOURCE_SERVER__URL', None):
+    DYNACONF.set(
+        "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES",
+        ['ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication'],
+    )
+
 # This must run after all custom settings are loaded
 DYNACONF.update(
     merge_application_name(DYNACONF),
     loader_identifier="awx.settings:merge_application_name",
+    merge=True,
+)
+DYNACONF.update(
+    merge_statement_timeout(DYNACONF),
+    loader_identifier="awx.settings:merge_statement_timeout",
     merge=True,
 )
 

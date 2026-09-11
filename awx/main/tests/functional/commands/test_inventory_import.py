@@ -306,6 +306,47 @@ class TestINIImports:
         assert has_host_group.hosts.count() == 1
 
     @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_overwrite_removes_stale_memberships(self, inventory):
+        """When overwrite is enabled, host-group and group-group memberships
+        that are no longer in the imported data should be removed."""
+        # First import: parent_group has two children, host_group has two hosts
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"host1": {}, "host2": {}}},
+            "all": {"children": ["ungrouped", "parent_group", "child_a", "child_b", "host_group"]},
+            "parent_group": {"children": ["child_a", "child_b"]},
+            "host_group": {"hosts": ["host1", "host2"]},
+            "ungrouped": {"hosts": []},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite=True)
+
+        parent = inventory.groups.get(name='parent_group')
+        assert set(parent.children.values_list('name', flat=True)) == {'child_a', 'child_b'}
+        host_grp = inventory.groups.get(name='host_group')
+        assert set(host_grp.hosts.values_list('name', flat=True)) == {'host1', 'host2'}
+
+        # Second import: child_b removed from parent_group, host2 moved out of host_group
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {"hostvars": {"host1": {}, "host2": {}}},
+            "all": {"children": ["ungrouped", "parent_group", "child_a", "child_b", "host_group"]},
+            "parent_group": {"children": ["child_a"]},
+            "host_group": {"hosts": ["host1"]},
+            "ungrouped": {"hosts": ["host2"]},
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite=True)
+
+        parent.refresh_from_db()
+        host_grp.refresh_from_db()
+        # child_b should be removed from parent_group
+        assert set(parent.children.values_list('name', flat=True)) == {'child_a'}
+        # host2 should be removed from host_group
+        assert set(host_grp.hosts.values_list('name', flat=True)) == {'host1'}
+        # host2 and child_b should still exist in the inventory, just not in those groups
+        assert inventory.hosts.filter(name='host2').exists()
+        assert inventory.groups.filter(name='child_b').exists()
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_recursive_group_error(self, inventory):
         inventory_import.AnsibleInventoryLoader._data = {
             "_meta": {"hostvars": {}},

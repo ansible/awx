@@ -61,7 +61,7 @@ def separate_async_optionals(creation_order):
             continue
         by_count = defaultdict(set)
         has_creates = [cand for cand in group if hasattr(cand, 'dependencies')]
-        counts = {has_create: 0 for has_create in has_creates}
+        counts = dict.fromkeys(has_creates, 0)
         for has_create in has_creates:
             for dependency in has_create.dependencies:
                 for compared in [cand for cand in has_creates if cand != has_create]:
@@ -212,7 +212,7 @@ class HasCreate(object):
         dependency_store = kw.get('ds')
         if dependency_store is None:
             deps = self.dependencies + self.optional_dependencies
-            self._dependency_store = {base_subclass: None for base_subclass in deps}
+            self._dependency_store = dict.fromkeys(deps)
             self.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         else:
             self._dependency_store = dependency_store.dependency_store

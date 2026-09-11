@@ -10,6 +10,7 @@ KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_REPO_NAME ?= $(shell basename `git rev-parse --show-toplevel`)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+GIT_IS_WORKTREE := $(shell test -f .git && echo yes)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
 
@@ -106,6 +107,15 @@ else
  DOCKER_KUBE_CACHE_FLAG=$(DOCKER_CACHE)
 endif
 
+# AWX TUI variables
+AWX_HOST ?= https://localhost:8043
+AWX_USER ?= admin
+AWX_PASSWORD ?= $$(awk -F"'" '/^admin_password:/{print $$2}' tools/docker-compose/_sources/secrets/admin_password.yml 2>/dev/null || echo "admin")
+AWX_VERIFY_SSL ?= false
+
+# For git worktree to find the referenced git dir
+GIT_COMMON_DIR := $(shell git rev-parse --git-common-dir 2>/dev/null || echo .git)
+
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	update_requirements upgrade_requirements update_requirements_dev \
 	docker_update_requirements docker_upgrade_requirements docker_update_requirements_dev \
@@ -113,7 +123,7 @@ endif
 	receiver test test_unit test_coverage coverage_html \
 	sdist \
 	VERSION PYTHON_VERSION docker-compose-sources \
-	.git/hooks/pre-commit
+	pre-commit
 
 clean-tmp:
 	rm -rf tmp/
@@ -338,15 +348,22 @@ run-ws-heartbeat:
 reports:
 	mkdir -p $@
 
-black: reports
-	@command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
-	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
+## awx_collection is excluded: ansible-test sanity runs its own linters which conflict with ruff
+format: reports
+	@command -v ruff >/dev/null 2>&1 || { echo "could not find ruff on your PATH, you may need to \`pip install ruff\`" && exit 1; }
+	@(set -o pipefail && ruff format $(RUFF_FORMAT_ARGS) awx awxkit | tee reports/format.report)
 
-.git/hooks/pre-commit:
-	@echo "if [ -x pre-commit.sh ]; then" > .git/hooks/pre-commit
-	@echo "    ./pre-commit.sh;" >> .git/hooks/pre-commit
-	@echo "fi" >> .git/hooks/pre-commit
-	@chmod +x .git/hooks/pre-commit
+lint: reports
+	@command -v ruff >/dev/null 2>&1 || { echo "could not find ruff on your PATH, you may need to \`pip install ruff\`" && exit 1; }
+	ruff check awx awxkit
+
+## Legacy alias
+black: format
+
+$(GIT_COMMON_DIR)/hooks/pre-commit:
+	ln -sf ../../pre-commit.sh $(GIT_COMMON_DIR)/hooks/pre-commit
+
+pre-commit: $(GIT_COMMON_DIR)/hooks/pre-commit
 
 genschema: awx-link reports
 	@if [ "$(VENV_BASE)" ]; then \
@@ -360,11 +377,11 @@ genschema-yaml: awx-link reports
 	fi; \
 	$(MANAGEMENT_COMMAND) spectacular --format openapi --file schema.yaml
 
-check: black
+check: format
 
 api-lint:
-	BLACK_ARGS="--check" $(MAKE) black
-	flake8 awx
+	RUFF_FORMAT_ARGS="--check" $(MAKE) format
+	$(MAKE) lint
 	yamllint -s .
 
 ## Run egg_info_dev to generate awx.egg-info for development.
@@ -521,7 +538,7 @@ ifneq ($(ADMIN_PASSWORD),)
 	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
 endif
 
-docker-compose-sources: .git/hooks/pre-commit
+docker-compose-sources:
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
 	    $(ANSIBLE_PLAYBOOK) -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
@@ -553,7 +570,7 @@ docker-compose: awx/projects docker-compose-sources
 	$(MAKE) docker-compose-up
 
 docker-compose-up:
-	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
+	$(if $(GIT_IS_WORKTREE),SETUPTOOLS_SCM_PRETEND_VERSION="$(VERSION)") $(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-down:
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) down --remove-orphans
@@ -571,6 +588,20 @@ docker-compose-runtest: awx/projects docker-compose-sources
 docker-compose-build-schema: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 make genschema
 
+awx-tui:
+	@if ! command -v awx-tui > /dev/null 2>&1; then \
+		$(PYTHON) -m pip install awx-tui; \
+	fi
+	@if [ -f "$(HOME)/.config/awx-tui/config.yaml" ]; then \
+		$(PYTHON) -m awx_tui.main; \
+	else \
+		AWX_HOST=$(AWX_HOST) \
+		AWX_USER=$(AWX_USER) \
+		AWX_PASSWORD=$(AWX_PASSWORD) \
+		AWX_VERIFY_SSL=$(AWX_VERIFY_SSL) \
+		$(PYTHON) -m awx_tui.main --host $(AWX_HOST); \
+	fi
+
 SCHEMA_DIFF_BASE_FOLDER ?= awx
 SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
@@ -581,7 +612,7 @@ detect-schema-change: genschema
 
 validate-openapi-schema: genschema
 	@echo "Validating OpenAPI schema from schema.json..."
-	@python3 -c "from openapi_spec_validator import validate; import json; spec = json.load(open('schema.json')); validate(spec); print('✓ OpenAPI Schema is valid!')"
+	@python3 -c "from openapi_spec_validator import validate; import json; spec = json.load(open('schema.json')); validate(spec); print('✓ Schema is valid')"
 
 docker-compose-clean: awx/projects
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml rm -sf

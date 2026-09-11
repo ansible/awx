@@ -35,6 +35,30 @@ if output=$(ANSIBLE_REVERSE_RESOURCE_SYNC=false awx-manage createsuperuser --noi
 fi
 echo "Admin password: ${DJANGO_SUPERUSER_PASSWORD}"
 
+# Configure awx-tui to connect to the local AWX instance
+AWX_TUI_CONFIG_DIR="${HOME}/.config/awx-tui"
+AWX_TUI_CONFIG_FILE="${AWX_TUI_CONFIG_DIR}/config.yaml"
+mkdir -p "${AWX_TUI_CONFIG_DIR}"
+python3 -c "
+import yaml, os
+config = {
+    'instances': {
+        'local': {
+            'url': 'https://localhost:8043',
+            'auth': {
+                'method': 'password',
+                'username': 'admin',
+                'password': os.environ['DJANGO_SUPERUSER_PASSWORD'],
+            },
+            'verify_ssl': False,
+        }
+    }
+}
+with open('${AWX_TUI_CONFIG_FILE}', 'w') as f:
+    yaml.dump(config, f, default_flow_style=False)
+"
+chmod 600 "${AWX_TUI_CONFIG_FILE}"
+
 ANSIBLE_REVERSE_RESOURCE_SYNC=false awx-manage create_preload_data
 awx-manage register_default_execution_environments
 

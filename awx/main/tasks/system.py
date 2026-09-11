@@ -19,6 +19,7 @@ from dispatcherd.publish import task
 # Runner
 import ansible_runner.cleanup
 import psycopg
+from ansible_base.lib.cache.tasks import clear_cache as dab_clear_cache
 from ansible_base.lib.utils.db import advisory_lock
 
 # django-ansible-base
@@ -43,8 +44,6 @@ from django.utils.timezone import now, timedelta
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_noop
 
-# Django flags
-from flags.state import flag_enabled
 from rest_framework.exceptions import PermissionDenied
 
 # AWX
@@ -68,19 +67,37 @@ from awx.main.models import (
     UnifiedJob,
     convert_jsonfields,
 )
+from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
-from awx.main.tasks.receptor import administrative_workunit_reaper, get_receptor_ctl, worker_cleanup, worker_info, write_receptor_config
+from awx.main.tasks.receptor import (
+    administrative_workunit_reaper,
+    get_receptor_ctl,
+    worker_cleanup,
+    worker_info,
+    write_receptor_config,
+)
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
 
 logger = logging.getLogger('awx.main.tasks.system')
 
-OPENSSH_KEY_ERROR = u'''\
+OPENSSH_KEY_ERROR = '''\
 It looks like you're trying to use a private key in OpenSSH format, which \
 isn't supported by the installed version of OpenSSH on this instance. \
 Try upgrading OpenSSH or providing your private key in an different format. \
 '''
+
+
+def _sync_credential_types_to_db():
+    """Ensure CredentialType DB rows match the installed plugins.
+
+    The in-memory registry is populated lazily on first access via LazyLoadDict.
+    This function only handles the DB sync step.
+    """
+    if is_database_synchronized():
+        CredentialType.setup_tower_managed_defaults()
 
 
 def _run_dispatch_startup_common():
@@ -97,6 +114,11 @@ def _run_dispatch_startup_common():
             write_receptor_config()
         except Exception:
             logger.exception("Failed to write receptor config, skipping.")
+
+    try:
+        _sync_credential_types_to_db()
+    except Exception:
+        logger.exception("Failed to sync credential types to DB, skipping.")
 
     try:
         convert_jsonfields()
@@ -240,12 +262,17 @@ def apply_cluster_membership_policies():
         # Process policy instance list first, these will represent manually managed memberships
         instance_hostnames_map = {inst.hostname: inst for inst in all_instances}
         for ig in all_groups:
+            # we don't want to allow execution nodes in the control plane
+            exclude_type = 'execution' if ig.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME else 'control'
             group_actual = Group(obj=ig, instances=[], prior_instances=[instance.pk for instance in ig.instances.all()])  # obtained in prefetch
             for hostname in ig.policy_instance_list:
                 if hostname not in instance_hostnames_map:
                     logger.info("Unknown instance {} in {} policy list".format(hostname, ig.name))
                     continue
                 inst = instance_hostnames_map[hostname]
+                if inst.node_type == exclude_type:
+                    logger.info("Instance {} is excluded in {} policy list".format(hostname, ig.name))
+                    continue
                 group_actual.instances.append(inst.id)
                 # NOTE: arguable behavior: policy-list-group is not added to
                 # instance's group count for consideration in minimum-policy rules
@@ -326,22 +353,20 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_settings_change', timeout=600)
-def clear_setting_cache(setting_keys):
-    # log that cache is being cleared
-    logger.info(f"clear_setting_cache of keys {setting_keys}")
-    orig_len = len(setting_keys)
-    for i in range(orig_len):
-        for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
-            setting_keys.append(dependent_key)
-    cache_keys = set(setting_keys)
-    logger.debug('cache delete_many(%r)', cache_keys)
-    cache.delete_many(cache_keys)
+def _resolve_setting_dependents(key):
+    return settings_registry.get_dependent_settings(key)
 
-    if 'LOG_AGGREGATOR_LEVEL' in setting_keys:
+
+def _post_setting_invalidation(invalidated_keys):
+    if 'LOG_AGGREGATOR_LEVEL' in invalidated_keys:
         ctl = get_control_from_settings()
         ctl.queuename = get_task_queuename()
         ctl.control('set_log_level', data={'level': settings.LOG_AGGREGATOR_LEVEL})
+
+
+@task(queue='tower_settings_change', timeout=600)
+def clear_setting_cache(setting_keys):
+    dab_clear_cache(setting_keys, _resolve_setting_dependents, _post_setting_invalidation)
 
 
 @task(queue='tower_broadcast_all', timeout=600)
@@ -408,7 +433,10 @@ def events_processed_hook(unified_job):
     after the playbook_on_stats/EOF event is processed and final status is saved
     Either one of these events could happen before the other, or there may be no events"""
     unified_job.send_notification_templates('succeeded' if unified_job.status == 'successful' else 'failed')
-    if isinstance(unified_job, Job) and flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+    if isinstance(unified_job, Job):
+        if not settings.INDIRECT_NODE_COUNTING_ENABLED:
+            Job.objects.filter(id=unified_job.id, event_queries_processed=False).update(event_queries_processed=True)
+            return
         if unified_job.event_queries_processed is True:
             # If this is called from callback receiver, it likely does not have updated model data
             # a refresh now is formally robust
@@ -561,24 +589,22 @@ def inspect_established_receptor_connections(mesh_status):
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
 
-def inspect_execution_and_hop_nodes(instance_list):
-    with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
+def inspect_execution_and_hop_nodes(instance_list, mesh_status):
+    with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False) as acquired:
+        if not acquired:
+            logger.debug("Not running inspect_execution_and_hop_nodes, another instance holds lock")
+            return
+        if mesh_status is None:
+            logger.debug("Not running inspect_execution_and_hop_nodes, mesh status unavailable")
+            return
+        start = time.monotonic()
         node_lookup = {inst.hostname: inst for inst in instance_list}
-        try:
-            ctl = get_receptor_ctl()
-        except FileNotFoundError:
-            logger.error('Receptor daemon not running, skipping execution node check')
-            return
-        try:
-            mesh_status = ctl.simple_command('status')
-        except ValueError as exc:
-            logger.error(f'Error running receptorctl status command, error: {str(exc)}')
-            return
 
         inspect_established_receptor_connections(mesh_status)
 
         nowtime = now()
-        workers = mesh_status['Advertisements']
+        workers = mesh_status.get('Advertisements') or []
+        updated_count = 0
 
         for ad in workers:
             hostname = ad['NodeID']
@@ -598,6 +624,7 @@ def inspect_execution_and_hop_nodes(instance_list):
                 continue
             instance.last_seen = last_seen
             instance.save(update_fields=['last_seen'])
+            updated_count += 1
 
             # Only execution nodes should be dealt with by execution_node_health_check
             if instance.node_type == Instance.Types.HOP:
@@ -612,13 +639,19 @@ def inspect_execution_and_hop_nodes(instance_list):
                 # check
                 logger.warning(f'Execution node attempting to rejoin as instance {hostname}.')
                 execution_node_health_check.apply_async([hostname])
-            elif instance.capacity == 0 and instance.enabled:
+            elif (instance.capacity == 0 or (instance.cpu == 0 and instance.memory == 0)) and instance.enabled:
                 # nodes with proven connection but need remediation run health checks are reduced frequency
                 if not instance.last_health_check or (nowtime - instance.last_health_check).total_seconds() >= settings.EXECUTION_NODE_REMEDIATION_CHECKS:
                     # Periodically re-run the health check of errored nodes, in case someone fixed it
                     # TODO: perhaps decrease the frequency of these checks
                     logger.debug(f'Restarting health check for execution node {hostname} with known errors.')
                     execution_node_health_check.apply_async([hostname])
+
+        elapsed = time.monotonic() - start
+        if elapsed > 2.0:
+            logger.warning(f"inspect_execution_and_hop_nodes completed in {elapsed:.1f}s, updated {updated_count} node(s)")
+        else:
+            logger.debug(f"inspect_execution_and_hop_nodes completed in {elapsed:.3f}s, updated {updated_count} node(s)")
 
 
 @task(queue=get_task_queuename, bind=True)
@@ -669,7 +702,6 @@ def _get_active_task_ids_from_dispatcherd(binder):
     """
     active_task_ids = []
     try:
-
         logger.debug("Querying dispatcherd API for running tasks")
         data = binder.control('running')
 
@@ -694,6 +726,27 @@ def _get_active_task_ids_from_dispatcherd(binder):
         return None
 
 
+def _mesh_all_ready_nodes_visible(mesh_status):
+    """Return False if the receptor mesh is still re-establishing after a controller restart.
+
+    Uses KnownConnectionCosts as the stability signal: receptor's routing protocol
+    populates this table as connections establish via gossip. An empty table means no
+    routing has propagated yet (Window A — typically the first ~10s after restart).
+
+    No DB state is consulted. KnownConnectionCosts is maintained entirely by the receptor
+    Go process, making it a reliable mesh-state signal free of stale DB records.
+
+    Fails open (returns True) when mesh_status is None so existing error paths are
+    not bypassed.
+    """
+    if mesh_status is None:
+        return True  # fail open: status unavailable, let normal peer-judgment proceed
+    if not (mesh_status.get('KnownConnectionCosts') or {}):
+        logger.info('Mesh stability gate: routing table empty, deferring peer-judgment (receptor re-establishing)')
+        return False
+    return True
+
+
 def _heartbeat_instance_management():
     """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
@@ -707,7 +760,22 @@ def _heartbeat_instance_management():
             this_inst = inst
             break
 
-    inspect_execution_and_hop_nodes(instance_list)
+    try:
+        ctl = get_receptor_ctl()
+    except FileNotFoundError:
+        logger.error('Receptor not available, marking instance offline.')
+        if this_inst:
+            this_inst.local_health_check()
+            this_inst.mark_offline(errors='Receptor not available')
+        return None, None, None
+
+    try:
+        mesh_status = ctl.simple_command('status')
+    except (OSError, RuntimeError, ValueError) as exc:
+        logger.warning(f'Receptor status unavailable: {exc}')
+        mesh_status = None
+
+    inspect_execution_and_hop_nodes(instance_list, mesh_status)
 
     for inst in list(instance_list):
         if inst == this_inst:
@@ -737,6 +805,9 @@ def _heartbeat_instance_management():
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
             return None, None, None
 
+    if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
+        return this_inst, instance_list, []
+
     return this_inst, instance_list, lost_instances
 
 
@@ -759,39 +830,50 @@ def _heartbeat_check_versions(this_inst, instance_list):
             raise RuntimeError("Shutting down.")
 
 
+def _reap_and_mark_lost_instance(other_inst):
+    """Reap a lost instance's running jobs and mark it offline (or deprovision it)."""
+    try:
+        # Only reap jobs never dispatched to receptor; dispatched jobs are left for adoption (AAP-89602)
+        explanation = "Job reaped due to instance shutdown"
+        reaper.reap(other_inst, job_explanation=explanation)
+        # Any jobs that were waiting to be processed by this node will be handed back to task manager
+        UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
+    except Exception:
+        logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
+    try:
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
+            deprovision_hostname = other_inst.hostname
+            other_inst.delete()  # FIXME: what about associated inbound links?
+            logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
+        elif other_inst.node_state == Instance.States.READY:
+            other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
+            logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
+
+    except DatabaseError as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            logger.debug('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+
+            if sqlstate == psycopg.errors.NoData:
+                logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
+            else:
+                logger.exception("Error marking {} as lost.".format(other_inst.hostname))
+        else:
+            logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+
+
 def _heartbeat_handle_lost_instances(lost_instances, this_inst):
     """Handle lost instances by reaping their running jobs and marking them offline."""
     for other_inst in lost_instances:
-        try:
-            # Any jobs marked as running will be marked as error
-            explanation = "Job reaped due to instance shutdown"
-            reaper.reap(other_inst, job_explanation=explanation)
-            # Any jobs that were waiting to be processed by this node will be handed back to task manager
-            UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
-        except Exception:
-            logger.exception('failed to re-process jobs for lost instance {}'.format(other_inst.hostname))
-        try:
-            if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
-                deprovision_hostname = other_inst.hostname
-                other_inst.delete()  # FIXME: what about associated inbound links?
-                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
-            elif other_inst.node_state == Instance.States.READY:
-                other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
-                logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
-
-        except DatabaseError as e:
-            cause = e.__cause__
-            if cause and hasattr(cause, 'sqlstate'):
-                sqlstate = cause.sqlstate
-                sqlstate_str = psycopg.errors.lookup(sqlstate)
-                logger.debug('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
-
-                if sqlstate == psycopg.errors.NoData:
-                    logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
-                else:
-                    logger.exception("Error marking {} as lost.".format(other_inst.hostname))
-            else:
-                logger.exception('No SQL state available.  Error marking {} as lost'.format(other_inst.hostname))
+        # Serialize offline handling against the task manager so we never reap jobs
+        # mid-schedule; if the lock is held, retry this instance on the next heartbeat.
+        with advisory_lock('task_manager_lock', wait=False) as acquired:
+            if not acquired:
+                logger.info(f'task_manager_lock held, deferring offline handling for {other_inst.hostname} to next heartbeat cycle')
+                continue
+            _reap_and_mark_lost_instance(other_inst)
 
 
 @task(queue=get_task_queuename, timeout=1800, on_duplicate='queue_one')
@@ -913,8 +995,10 @@ def awx_periodic_scheduler():
                 continue
             if not can_start:
                 new_unified_job.status = 'failed'
-                new_unified_job.job_explanation = gettext_noop("Scheduled job could not start because it \
-                    was not in the right state or required manual credentials")
+                new_unified_job.job_explanation = gettext_noop(
+                    "Scheduled job could not start because it \
+                    was not in the right state or required manual credentials"
+                )
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
@@ -1001,6 +1085,34 @@ def update_host_smart_inventory_memberships():
         smart_inventory.update_computed_fields()
 
 
+def _batched_delete_inventory(inventory, batch_size=500):
+    """Delete inventory hosts in batches to avoid high memory usage.
+
+    With ansible facts, loading thousands of hosts at once can use a lot of memory. To avoid
+    this, we delete them in batches (of 500).
+
+    Safe to retry after a crash because inventory.pending_deletion
+    is already set and each batch is its own transaction.
+    """
+    from awx.main.models.inventory import Host
+
+    # first delete all hosts in batches
+    total_deleted = 0
+    while True:
+        pks = list(Host.objects.filter(inventory_id=inventory.id).values_list('pk', flat=True)[:batch_size])
+        if not pks:
+            break
+        with transaction.atomic():
+            deleted_count, _ = Host.objects.filter(pk__in=pks).delete()
+            total_deleted += deleted_count
+        logger.debug('Batch-deleted %d hosts from inventory %d (%d total so far)', len(pks), inventory.id, total_deleted)
+
+    # then delete the inventory itself
+    inv_id = inventory.id
+    inventory.delete()
+    logger.info('Batched deletion of inventory %d complete (%d hosts removed)', inv_id, total_deleted)
+
+
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
@@ -1013,11 +1125,12 @@ def delete_inventory(inventory_id, user_id, retries=5):
             user = None
     with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
-            Inventory.objects.get(id=inventory_id).delete()
+            inv = Inventory.objects.get(id=inventory_id)
+            _batched_delete_inventory(inv)
             emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
             logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
-            logger.exception("Delete Inventory failed due to missing inventory: " + str(inventory_id))
+            logger.warning("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
         except DatabaseError:
             logger.exception('Database error deleting inventory {}, but will retry.'.format(inventory_id))

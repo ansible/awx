@@ -1,6 +1,7 @@
 import copy
+import json
 import warnings
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, mock_open, patch
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -10,6 +11,7 @@ from awx.api.schema import (
     AuthenticatedSpectacularSwaggerView,
     AuthenticatedSpectacularRedocView,
     filter_credential_type_schema,
+    inject_ai_descriptions,
 )
 
 
@@ -422,3 +424,128 @@ class TestFilterCredentialTypeSchema:
 
         # PATCH schema: includes None (optional field)
         assert result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['kind']['enum'] == ['cloud', 'net', None]
+
+
+class TestInjectAiDescriptions:
+    """Unit tests for inject_ai_descriptions postprocessing hook."""
+
+    def _make_result(self, operations):
+        """Build a minimal OpenAPI result dict from a list of (path, method, operationId, existing_desc) tuples."""
+        paths = {}
+        for path, method, op_id, desc in operations:
+            paths.setdefault(path, {})[method] = {'operationId': op_id}
+            if desc:
+                paths[path][method]['x-ai-description'] = desc
+        return {'paths': paths}
+
+    def test_injects_missing_descriptions(self):
+        """Test that descriptions are injected for operations without x-ai-description."""
+        overlay = {'op_list': 'List items', 'op_create': 'Create an item'}
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+                ('/api/v2/items/', 'post', 'op_create', None),
+            ]
+        )
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert result['paths']['/api/v2/items/']['get']['x-ai-description'] == 'List items'
+        assert result['paths']['/api/v2/items/']['post']['x-ai-description'] == 'Create an item'
+        assert returned is result
+
+    def test_does_not_overwrite_existing_descriptions(self):
+        """Test that existing x-ai-description from decorators is preserved."""
+        overlay = {'op_list': 'Overlay description'}
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', 'Decorator description'),
+            ]
+        )
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert result['paths']['/api/v2/items/']['get']['x-ai-description'] == 'Decorator description'
+
+    def test_skips_operations_not_in_overlay(self):
+        """Test that operations without a matching operationId in the overlay are unchanged."""
+        overlay = {'op_other': 'Other description'}
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+            ]
+        )
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert 'x-ai-description' not in result['paths']['/api/v2/items/']['get']
+
+    def test_handles_missing_overlay_file(self):
+        """Test graceful handling when the overlay file doesn't exist."""
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+            ]
+        )
+        original = copy.deepcopy(result)
+
+        with patch('builtins.open', side_effect=FileNotFoundError):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert result == original
+        assert returned is result
+
+    def test_handles_invalid_json(self):
+        """Test graceful handling when the overlay file contains invalid JSON."""
+        result = self._make_result(
+            [
+                ('/api/v2/items/', 'get', 'op_list', None),
+            ]
+        )
+        original = copy.deepcopy(result)
+
+        with patch('builtins.open', mock_open(read_data='not valid json')):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert result == original
+        assert returned is result
+
+    def test_handles_empty_result(self):
+        """Test graceful handling when result has no paths."""
+        result = {}
+        overlay = {'op_list': 'List items'}
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            returned = inject_ai_descriptions(result, None, None, None)
+
+        assert returned is result
+
+    def test_skips_non_dict_path_items(self):
+        """Test that non-dict values in path items (e.g. parameters list) are skipped."""
+        overlay = {'op_list': 'List items'}
+        result = {
+            'paths': {
+                '/api/v2/items/': {
+                    'parameters': [{'name': 'id', 'in': 'path'}],
+                    'get': {'operationId': 'op_list'},
+                }
+            }
+        }
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert result['paths']['/api/v2/items/']['get']['x-ai-description'] == 'List items'
+
+    def test_handles_operation_without_operation_id(self):
+        """Test that operations without operationId are skipped."""
+        overlay = {'op_list': 'List items'}
+        result = {'paths': {'/api/v2/items/': {'get': {'summary': 'List'}}}}
+
+        with patch('builtins.open', mock_open(read_data=json.dumps(overlay))):
+            inject_ai_descriptions(result, None, None, None)
+
+        assert 'x-ai-description' not in result['paths']['/api/v2/items/']['get']

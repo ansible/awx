@@ -393,9 +393,9 @@ def evaluate_policy(instance):
             raise PolicyEvaluationError(_('Following certificate settings are missing for OPA_AUTH_TYPE=Certificate: {}').format(cert_settings_missing))
 
     query_paths = [
-        ('Organization', instance.organization.opa_query_path),
-        ('Inventory', instance.inventory.opa_query_path),
-        ('Job template', instance.job_template.opa_query_path),
+        ('Organization', instance.organization.opa_query_path if instance.organization else None),
+        ('Inventory', instance.inventory.opa_query_path if instance.inventory else None),
+        ('Job template', instance.job_template.opa_query_path if instance.job_template else None),
     ]
     violations = dict()
     errors = dict()

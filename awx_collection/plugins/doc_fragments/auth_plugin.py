@@ -42,13 +42,23 @@ options:
         alternatives: 'TOWER_PASSWORD, AAP_PASSWORD'
   aap_token:
     description:
-    - The OAuth token to use.
+    - The OAuth token to use, sent as a Bearer token in the Authorization header.
+    - When connecting through the AAP gateway, use a token issued by the gateway.
     env:
-    - name: AAP_TOKEN
+    - name: CONTROLLER_OAUTH_TOKEN
       deprecated:
         collection_name: 'awx.awx'
         version: '4.0.0'
         why: Collection name change
+        alternatives: 'AAP_TOKEN'
+    - name: TOWER_OAUTH_TOKEN
+      deprecated:
+        collection_name: 'awx.awx'
+        version: '4.0.0'
+        why: Collection name change
+        alternatives: 'AAP_TOKEN'
+    - name: AAP_TOKEN
+    aliases: [ oauth_token, controller_oauthtoken, tower_oauthtoken ]
   verify_ssl:
     description:
     - Specify whether Ansible should verify the SSL certificate of the controller host.
@@ -76,6 +86,24 @@ options:
         why: Support for AAP variables
         alternatives: 'AAP_REQUEST_TIMEOUT'
     aliases: [ aap_request_timeout ]
+  max_retries:
+    description:
+    - Specify the max retries to be used with some connection issues.
+    - Defaults to 5.
+    - This will not work with the export or import modules.
+    type: int
+    env:
+    - name: AAP_MAX_RETRIES
+    aliases: [ aap_max_retries ]
+  retry_backoff_factor:
+    description:
+    - Backoff factor used when retrying connections.
+    - Defaults to 2.
+    - This will not work with the export or import modules.
+    type: int
+    env:
+    - name: AAP_RETRY_BACKOFF_FACTOR
+    aliases: [ aap_retry_backoff_factor ]
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library
   defaults to find your host information.

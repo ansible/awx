@@ -2,7 +2,6 @@ from contextlib import suppress
 import inspect
 import logging
 import json
-import re
 
 from requests import Response
 import http.client as http
@@ -23,31 +22,31 @@ get_registered_page = _page_registry.get
 
 
 def is_license_invalid(response):
-    if re.match(r".*Invalid license.*", response.text):
+    if "Invalid license" in response.text:
         return True
-    if re.match(r".*Missing 'eula_accepted' property.*", response.text):
+    if "Missing 'eula_accepted' property" in response.text:
         return True
-    if re.match(r".*'eula_accepted' must be True.*", response.text):
+    if "'eula_accepted' must be True" in response.text:
         return True
-    if re.match(r".*Invalid license data.*", response.text):
+    if "Invalid license data" in response.text:
         return True
 
 
 def is_license_exceeded(response):
-    if re.match(r".*license range of.*instances has been exceeded.*", response.text):
+    if "license range of" in response.text and "instances has been exceeded" in response.text:
         return True
-    if re.match(r".*License count of.*instances has been reached.*", response.text):
+    if "License count of" in response.text and "instances has been reached" in response.text:
         return True
-    if re.match(r".*License count of.*instances has been exceeded.*", response.text):
+    if "License count of" in response.text and "instances has been exceeded" in response.text:
         return True
-    if re.match(r".*License has expired.*", response.text):
+    if "License has expired" in response.text:
         return True
-    if re.match(r".*License is missing.*", response.text):
+    if "License is missing" in response.text:
         return True
 
 
 def is_duplicate_error(response):
-    if re.match(r".*already exists.*", response.text):
+    if "already exists" in response.text:
         return True
 
 

@@ -42,7 +42,6 @@ from awx.main.models.notifications import (
 from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
 from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
-    ResourceMixin,
     SurveyJobTemplateMixin,
     SurveyJobMixin,
     TaskManagerJobMixin,
@@ -52,7 +51,7 @@ from awx.main.models.mixins import (
     WebhookTemplateMixin,
     OpaQueryPathMixin,
 )
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -132,8 +131,7 @@ class JobOptions(BaseModel):
         blank=True,
         default=False,
     )
-    skip_tags = models.CharField(
-        max_length=1024,
+    skip_tags = models.TextField(
         blank=True,
         default='',
     )
@@ -191,9 +189,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(
-    UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin
-):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, CustomVirtualEnvMixin, RelatedJobsMixin, WebhookTemplateMixin, OpaQueryPathMixin):
     """
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -347,7 +343,7 @@ class JobTemplate(
             return actual_slice_count
 
     def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         # if project is deleted for some reason, then keep the old organization
         # to retain ownership for organization admins
         if self.project and self.project.organization_id != self.organization_id:
@@ -817,19 +813,20 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def awx_meta_vars(self):
         r = super(Job, self).awx_meta_vars()
+        prefixes = get_job_variable_prefixes()
         if self.project:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_project_revision'.format(name)] = self.project.scm_revision
                 r['{}_project_scm_branch'.format(name)] = self.project.scm_branch
         if self.scm_branch:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_job_scm_branch'.format(name)] = self.scm_branch
         if self.job_template:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
                 r['{}_job_template_name'.format(name)] = self.job_template.name
         if self.execution_node:
-            for name in JOB_VARIABLE_PREFIXES:
+            for name in prefixes:
                 r['{}_execution_node'.format(name)] = self.execution_node
         return r
 
@@ -845,6 +842,21 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
+    def get_source_hosts_for_constructed_inventory(self):
+        """Return a QuerySet of the source (input inventory) hosts for a constructed inventory.
+
+        Constructed inventory hosts have an instance_id pointing to the real
+        host in the input inventory.  This resolves those references and returns
+        a proper QuerySet (never a list), suitable for use with finish_fact_cache.
+        """
+        Host = JobHostSummary._meta.get_field('host').related_model
+        if not self.inventory_id:
+            return Host.objects.none()
+        id_field = Host._meta.get_field('id')
+        return Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field))).only(
+            *HOST_FACTS_FIELDS
+        )
+
     def get_hosts_for_fact_cache(self):
         """
         Builds the queryset to use for writing or finalizing the fact cache
@@ -852,17 +864,15 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         For constructed inventories, that means the original (input inventory) hosts
         when slicing, that means only returning hosts in that slice
         """
-        Host = JobHostSummary._meta.get_field('host').related_model
         if not self.inventory_id:
+            Host = JobHostSummary._meta.get_field('host').related_model
             return Host.objects.none()
 
         if self.inventory.kind == 'constructed':
-            id_field = Host._meta.get_field('id')
-            host_qs = Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field)))
+            host_qs = self.get_source_hosts_for_constructed_inventory()
         else:
-            host_qs = self.inventory.hosts
+            host_qs = self.inventory.hosts.only(*HOST_FACTS_FIELDS)
 
-        host_qs = host_qs.only(*HOST_FACTS_FIELDS)
         host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
         return host_qs
 
@@ -1078,6 +1088,9 @@ class JobHostSummary(CreatedModifiedModel):
         unique_together = [('job', 'host_name')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
+        indexes = [
+            models.Index(fields=['host', '-id'], name='main_jobhostsumm_host_id_desc'),
+        ]
 
     job = models.ForeignKey(
         'Job',
@@ -1135,7 +1148,7 @@ class JobHostSummary(CreatedModifiedModel):
         # if it hasn't been specified, then we're just doing a normal save.
         if self.host is not None:
             self.host_name = self.host.name
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
         self.failed = bool(self.dark or self.failures)
         update_fields.append('failed')
         super(JobHostSummary, self).save(*args, **kwargs)

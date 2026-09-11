@@ -38,7 +38,7 @@ def test_team(get, admin_user):
 
 
 @pytest.mark.django_db
-def test_organization(get, admin_user):
+def test_organization(get, admin_user, setup_managed_roles):
     test_org = Organization.objects.create(name='test_org')
     url = reverse('api:organization_detail', kwargs={'pk': test_org.pk})
     response = get(url, user=admin_user, expect=200)

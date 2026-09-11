@@ -99,7 +99,7 @@ class NotificationTemplate(CommonModelNameNotUnique):
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = kwargs.get('update_fields') or []
 
         # preserve existing notification messages if not overwritten by new messages
         if not new_instance:

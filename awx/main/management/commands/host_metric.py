@@ -43,9 +43,7 @@ class Command(BaseCommand):
                 'hosts_added',
                 'hosts_deleted',
                 'indirectly_managed_hosts',
-            ).order_by(
-                'date'
-            )[offset : offset + limit]
+            ).order_by('date')[offset : offset + limit]
         )
 
         return list_of_queryset
@@ -90,8 +88,8 @@ class Command(BaseCommand):
 
     def csv_for_tar(self, temp_dir, type, filter_kwargs, rows_per_file, always_header=True):
         for index, list_of_queryset in enumerate(self.paginated_db_retrieval(type, filter_kwargs, rows_per_file)):
-            csv_file = f'{temp_dir}/{type}{index+1}.csv'
-            arcname_file = f'{type}{index+1}.csv'
+            csv_file = f'{temp_dir}/{type}{index + 1}.csv'
+            arcname_file = f'{type}{index + 1}.csv'
 
             first_write = True if index == 0 else False
 

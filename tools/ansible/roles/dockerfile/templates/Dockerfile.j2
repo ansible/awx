@@ -184,7 +184,7 @@ RUN dnf module -y enable nodejs:18 && dnf module -y install nodejs:18/common && 
     unzip
 
 RUN pip3.12 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
-RUN pip3.12 install -vv black setuptools-scm build
+RUN pip3.12 install -vv ruff setuptools-scm build
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.

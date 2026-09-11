@@ -126,7 +126,7 @@ class ResourceOptionsParser(object):
             if method not in action_map:
                 continue
             method = action_map[method]
-            parser = self.parser.add_parser(method, help='')
+            parser = self.parser.add_parser(method, help='', add_help=True)
             if method == 'list':
                 parser.add_argument(
                     '--all',
@@ -152,7 +152,7 @@ class ResourceOptionsParser(object):
         if 'DELETE' in self.allowed_options:
             allowed.append('delete')
         for method in allowed:
-            parser = self.parser.add_parser(method, help='')
+            parser = self.parser.add_parser(method, help='', add_help=True)
             self.parser.choices[method].add_argument(
                 'id', type=functools.partial(pk_or_name, self.v2, self.resource), help='the ID (or unique name) of the resource'
             )

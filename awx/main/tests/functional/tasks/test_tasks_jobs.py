@@ -29,3 +29,30 @@ def test_cancel_flag_on_start(jt_linked, caplog):
 
     job = Job.objects.get(id=job.id)
     assert job.status == 'canceled'
+
+
+@pytest.mark.django_db
+def test_runjob_run_can_accept_waiting_status(jt_linked, mocker):
+    """Test that RunJob.run() can accept a job in 'waiting' status and transition it to 'running'
+    before the pre_run_hook is called"""
+    job = jt_linked.create_unified_job()
+    job.status = 'waiting'
+    job.save()
+
+    status_at_pre_run = None
+
+    def capture_status(instance, private_data_dir):
+        nonlocal status_at_pre_run
+        instance.refresh_from_db()
+        status_at_pre_run = instance.status
+
+    mock_pre_run = mocker.patch.object(RunJob, 'pre_run_hook', side_effect=capture_status)
+
+    task = RunJob()
+    try:
+        task.run(job.id)
+    except Exception:
+        pass
+
+    mock_pre_run.assert_called_once()
+    assert status_at_pre_run == 'running'

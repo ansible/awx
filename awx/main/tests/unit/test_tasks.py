@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-import shutil
-import tempfile
 from pathlib import Path
 
 import fcntl
@@ -39,7 +37,7 @@ from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 
 from awx.main.utils.licensing import Licenser
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 from receptorctl.socket_interface import ReceptorControl
 
@@ -60,14 +58,12 @@ class TestJobExecution(object):
 
 
 @pytest.fixture
-def private_data_dir():
-    private_data = tempfile.mkdtemp(prefix='awx_')
+def private_data_dir(tmp_path):
+    private_data = tmp_path / 'awx_pdd'
+    private_data.mkdir()
     for subfolder in ('inventory', 'env'):
-        runner_subfolder = os.path.join(private_data, subfolder)
-        if not os.path.exists(runner_subfolder):
-            os.mkdir(runner_subfolder)
-    yield private_data
-    shutil.rmtree(private_data, True)
+        (private_data / subfolder).mkdir()
+    return str(private_data)
 
 
 @pytest.fixture
@@ -376,12 +372,12 @@ class TestExtraVarSanitation(TestJobExecution):
             extra_vars = yaml.load(fd, Loader=SafeLoader)
 
         # ensure that strings are marked as unsafe
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             for variable_name in ['_job_template_name', '_user_name', '_job_launch_type', '_project_revision', '_inventory_name']:
                 assert hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
         # ensure that non-strings are marked as safe
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             for variable_name in ['_job_template_id', '_job_id', '_user_id', '_inventory_id']:
                 assert not hasattr(extra_vars['{}{}'.format(name, variable_name)], '__UNSAFE__')
 
@@ -528,7 +524,7 @@ class TestGenericRun:
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars, safe_dict = call_args
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
@@ -556,7 +552,8 @@ class TestGenericRun:
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch('awx.main.tasks.jobs.settings.AWX_TASK_ENV', {'FOO': 'BAR'}):
-            env = task.build_env(job, private_data_dir)
+            with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+                env = task.build_env(job, private_data_dir)
         assert env['FOO'] == 'BAR'
 
 
@@ -618,12 +615,17 @@ class TestAdhocRun(TestJobExecution):
         call_args, _ = task._write_extra_vars_file.call_args_list[0]
 
         private_data_dir, extra_vars = call_args
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             assert extra_vars['{}_user_id'.format(name)] == 123
             assert extra_vars['{}_user_name'.format(name)] == "angry-spud"
 
 
 class TestJobCredentials(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
     @pytest.fixture
     def job(self, execution_environment):
         job = Job(pk=1, inventory=Inventory(pk=1), project=Project(pk=1))
@@ -649,7 +651,9 @@ class TestJobCredentials(TestJobExecution):
         )
 
         with mock.patch.object(UnifiedJob, 'credentials', credentials_mock):
-            yield job
+            # Mock build_credentials_list to work with the cached credentials mechanism
+            with mock.patch.object(jobs.RunJob, 'build_credentials_list', return_value=job._credentials, autospec=True):
+                yield job
 
     @pytest.fixture
     def update_model_wrapper(self, job):
@@ -914,6 +918,82 @@ class TestJobCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+class TestCallbacksEnabled(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
+    def test_callbacks_enabled_default(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count'
+
+    def test_callbacks_enabled_preserves_user_config(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.read_ansible_config', return_value={'callbacks_enabled': 'custom_callback,another_callback'}):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,custom_callback,another_callback'
+
+    def test_callbacks_enabled_uses_comma_delimiter(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.read_ansible_config', return_value={'callbacks_enabled': 'my_callback'}):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,my_callback'
+
+    def test_collect_host_queries_set_when_indirect_node_counting_enabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True):
+                env = task.build_env(job, private_data_dir)
+
+        assert env['AWX_COLLECT_HOST_QUERIES'] == '1'
+
+    def test_collect_host_queries_not_set_when_indirect_node_counting_disabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
+        job = Job(project=Project(), inventory=Inventory())
+        job.execution_environment = execution_environment
+
+        task = jobs.RunJob()
+        task.instance = job
+        task._write_extra_vars_file = mock.Mock()
+
+        with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
+                env = task.build_env(job, private_data_dir)
+
+        assert 'AWX_COLLECT_HOST_QUERIES' not in env
+
+
 @pytest.mark.usefixtures("patch_Organization")
 class TestProjectUpdateGalaxyCredentials(TestJobExecution):
     @pytest.fixture
@@ -1090,6 +1170,40 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+class TestProjectUpdateSignatureValidation(TestJobExecution):
+    """Tests that ProjectUpdate.save() adds GPG validation job tags when a
+    signature_validation_credential is set on the project."""
+
+    def test_project_update_with_signature_credential_adds_validation_tags(self):
+        gpg_credential_type = CredentialType(pk=1, namespace='gpg_public_key', kind='cryptography')
+        gpg_credential = Credential(pk=1, credential_type=gpg_credential_type)
+        project = Project(pk=1, organization=Organization(pk=1), scm_type='git', signature_validation_credential=gpg_credential)
+        project_update = ProjectUpdate(pk=1, project=project, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+
+        # Simulate the save logic that sets job_tags without hitting the database
+        with mock.patch.object(UnifiedJob, 'save', return_value=None):
+            project_update.save()
+
+        assert 'validation_gpg_public_key' in project_update.job_tags
+        assert 'validation_checksum_manifest' in project_update.job_tags
+        assert 'update_git' in project_update.job_tags
+
+    def test_project_update_without_signature_credential_no_validation_tags(self):
+        project = Project(pk=1, organization=Organization(pk=1), scm_type='git')
+        project_update = ProjectUpdate(pk=1, project=project, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+
+        with mock.patch.object(UnifiedJob, 'save', return_value=None):
+            project_update.save()
+
+        assert 'validation_gpg_public_key' not in project_update.job_tags
+        assert 'validation_checksum_manifest' not in project_update.job_tags
+        assert 'update_git' in project_update.job_tags
+        assert 'install_roles' in project_update.job_tags
+        assert 'install_collections' in project_update.job_tags
+
+
 @pytest.mark.django_db
 class TestProjectUpdateRefspec(TestJobExecution):
     @pytest.fixture
@@ -1155,6 +1269,11 @@ class TestProjectUpdateRefspec(TestJobExecution):
 
 
 class TestInventoryUpdateCredentials(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
     @pytest.fixture
     def inventory_update(self, execution_environment):
         return InventoryUpdate(pk=1, execution_environment=execution_environment, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
@@ -1219,10 +1338,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             if credential:
                 credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
-        env["VMWARE_USER"] == "bob",
-        env["VMWARE_PASSWORD"] == "secret",
-        env["VMWARE_HOST"] == "https://example.org",
-        env["VMWARE_VALIDATE_CERTS"] == "False",
+        (env["VMWARE_USER"] == "bob",)
+        (env["VMWARE_PASSWORD"] == "secret",)
+        (env["VMWARE_HOST"] == "https://example.org",)
+        (env["VMWARE_VALIDATE_CERTS"] == "False",)
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker, mock_me):
         task = jobs.RunInventoryUpdate()
@@ -1552,6 +1671,100 @@ def test_acquire_lock_acquisition_fail_logged(fcntl_lockf, logger_mock, os_close
     )
 
 
+@pytest.mark.parametrize(
+    'kwargs,expected_flag',
+    [
+        ({}, fcntl.LOCK_EX | fcntl.LOCK_NB),  # default is exclusive
+        ({'exclusive': False}, fcntl.LOCK_SH | fcntl.LOCK_NB),
+    ],
+)
+@mock.patch('os.open')
+@mock.patch('fcntl.lockf')
+def test_acquire_lock_flag(fcntl_lockf, os_open, mock_me, kwargs, expected_flag):
+    """acquire_lock passes the correct fcntl flag based on the exclusive parameter."""
+    instance = mock.Mock()
+    instance.get_lock_file.return_value = '/fake/path.lock'
+    os_open.return_value = 3
+
+    task = jobs.RunProjectUpdate()
+    task.acquire_lock(instance, **kwargs)
+
+    assert fcntl_lockf.call_args[0][1] == expected_flag
+
+
+# Each entry: (sync_needs, has_pk, expected exclusive= sequence, expected refresh_from_db count)
+# - copy-only path: refresh once under LOCK_SH
+# - upgrade path: refresh under LOCK_SH and again under LOCK_EX (POSIX locks cannot
+#   be upgraded atomically, so state may change in the gap between releasing SH and
+#   acquiring EX)
+# - pk=None cases: refresh_from_db is skipped (unsaved model instances used in some tests)
+@pytest.mark.parametrize(
+    'sync_needs,has_pk,expected_exclusive_seq,expected_refresh_count',
+    [
+        ([], True, [False], 1),  # copy-only: shared lock, refresh once
+        (['update_git'], True, [False, True], 2),  # upgrade path: refresh under SH and EX
+        ([], False, [False], 0),  # copy-only, no pk: refresh skipped
+        (['update_git'], False, [False, True], 0),  # upgrade path, no pk: refresh skipped
+    ],
+)
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.release_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.acquire_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.sync_and_copy_without_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.get_sync_needs')
+def test_sync_and_copy_lock_behavior(
+    get_sync_needs, sync_without_lock, acquire_lock, release_lock, mock_me, sync_needs, has_pk, expected_exclusive_seq, expected_refresh_count
+):
+    """sync_and_copy acquires LOCK_SH first, upgrading to LOCK_EX only when a sync is needed.
+    project.refresh_from_db() is called after each lock acquisition to ensure current DB state,
+    but only when the project has a pk (i.e. is persisted to the database)."""
+    get_sync_needs.return_value = sync_needs
+
+    project = mock.Mock()
+    project.pk = 1 if has_pk else None
+    project.get_reason_if_failed.return_value = None
+    project.scm_type = 'git'
+    project.scm_branch = 'main'
+
+    task = jobs.RunJob()
+    task.instance = mock.Mock()
+    task.instance.id = 1
+    task.update_model = mock.Mock(return_value=task.instance)
+
+    task.sync_and_copy(project, '/fake/private_data_dir')
+
+    assert acquire_lock.call_count == len(expected_exclusive_seq)
+    for i, exclusive in enumerate(expected_exclusive_seq):
+        assert acquire_lock.call_args_list[i] == mock.call(project, task.instance.id, exclusive=exclusive)
+    assert release_lock.call_count == len(expected_exclusive_seq)
+    assert project.refresh_from_db.call_count == expected_refresh_count
+
+
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.release_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.acquire_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.sync_and_copy_without_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.get_sync_needs')
+def test_sync_and_copy_get_sync_needs_called_under_shared_lock(get_sync_needs, sync_without_lock, acquire_lock, release_lock, mock_me):
+    """get_sync_needs is called after acquiring LOCK_SH, not before any lock."""
+    call_order = []
+    acquire_lock.side_effect = lambda *a, **kw: call_order.append('acquire')
+    get_sync_needs.side_effect = lambda *a, **kw: call_order.append('get_sync_needs') or []
+
+    project = mock.Mock()
+    project.get_reason_if_failed.return_value = None
+    project.scm_type = 'git'
+    project.scm_branch = 'main'
+
+    task = jobs.RunJob()
+    task.instance = mock.Mock()
+    task.instance.id = 1
+    task.update_model = mock.Mock(return_value=task.instance)
+
+    task.sync_and_copy(project, '/fake/private_data_dir')
+
+    assert call_order[0] == 'acquire', 'lock must be acquired before get_sync_needs is called'
+    assert call_order[1] == 'get_sync_needs'
+
+
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])
 def test_managed_injector_redaction(injector_cls):
     """See awx.main.models.inventory.PluginFileInjector._get_shared_env
@@ -1574,7 +1787,7 @@ def test_managed_injector_redaction(injector_cls):
     assert 'very_secret_value' not in str(build_safe_env(env))
 
 
-def test_job_run_no_ee(mock_me, mock_create_partition):
+def test_job_run_no_ee(mock_me, mock_create_partition, private_data_dir):
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))

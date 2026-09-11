@@ -34,9 +34,6 @@ def get_urlpatterns(prefix=None):
         re_path(r'^(?:api/)?500.html$', handle_500),
         re_path(r'^csp-violation/', handle_csp_violation),
         re_path(r'^login/', handle_login_redirect),
-        # want api/v2/doesnotexist to return a 404, not match the ui urls,
-        # so use a negative lookahead assertion here
-        re_path(r'^(?!api/).*', include('awx.ui.urls', namespace='ui')),
     ]
 
     if settings.DYNACONF.is_development_mode:
@@ -46,6 +43,12 @@ def get_urlpatterns(prefix=None):
             urlpatterns += [re_path(r'^__debug__/', include(debug_toolbar.urls))]
         except ImportError:
             pass
+
+    # want api/v2/doesnotexist to return a 404, not match the ui urls,
+    # so use a negative lookahead assertion in the pattern below
+    urlpatterns += [
+        re_path(r'^(?!api/).*', include('awx.ui.urls', namespace='ui')),
+    ]
 
     return urlpatterns
 

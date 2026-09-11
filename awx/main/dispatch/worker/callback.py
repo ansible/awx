@@ -77,13 +77,13 @@ class CallbackBrokerWorker:
 
     MAX_RETRIES = 2
     INDIVIDUAL_EVENT_RETRIES = 3
-    last_stats = time.time()
-    last_flush = time.time()
     total = 0
     last_event = ''
     prof = None
 
     def __init__(self):
+        self.last_stats = time.time()
+        self.last_flush = time.time()
         self.buff = {}
         self.redis = get_redis_client()
         self.subsystem_metrics = s_metrics.CallbackReceiverMetrics(auto_pipe_execute=False)

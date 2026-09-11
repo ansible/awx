@@ -15,7 +15,7 @@ from awx.api.versioning import reverse
 # These tests are invoked from the awx/main/tests/live/ subfolder
 # so any fixtures from higher-up conftest files must be explicitly included
 from awx.main.tests.functional.conftest import *  # noqa
-from awx.main.tests.conftest import load_all_credentials  # noqa: F401; pylint: disable=unused-import
+from awx.main.tests.conftest import load_all_credentials  # noqa: F401  # pylint: disable=unused-import
 from awx.main.tests import data
 
 from awx.main.models import Project, JobTemplate, Organization, Inventory, WorkflowJob, UnifiedJob
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 PROJ_DATA = os.path.join(os.path.dirname(data.__file__), 'projects')
+COLL_DATA = os.path.join(os.path.dirname(data.__file__), 'collections')
 
 
 def _copy_folders(source_path, dest_path, clear=False):
@@ -56,6 +57,7 @@ def live_tmp_folder():
         shutil.rmtree(path)
     os.mkdir(path)
     _copy_folders(PROJ_DATA, path)
+    _copy_folders(COLL_DATA, path)
     for dirname in os.listdir(path):
         source_dir = os.path.join(path, dirname)
         subprocess.run(GIT_COMMANDS, cwd=source_dir, shell=True)

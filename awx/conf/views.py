@@ -42,7 +42,7 @@ class SettingCategoryList(ListAPIView):
     filter_backends = []
     name = _('Setting Categories')
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to settings."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns a paginated list of Controller setting categories."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 

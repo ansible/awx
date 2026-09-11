@@ -9,9 +9,6 @@ from django.utils.timezone import now, timedelta
 from django.conf import settings
 from django.db import transaction
 
-# Django flags
-from flags.state import flag_enabled
-
 from dispatcherd.publish import task
 from awx.main.dispatch import get_task_queuename
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
@@ -44,6 +41,7 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
     compiled_jq_expressions = {}  # Cache for compiled jq expressions
     facts_missing_logged = False
     unhashable_facts_logged = False
+    name_missing_logged = set()
 
     job_event_queries_fqcn = {}
     for query_k, query_v in job_event_queries.items():
@@ -103,6 +101,11 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
             # Obtain the record based on the hashable canonical_facts now determined
             facts = data.get('facts')
             name = data.get('name')
+            if name is None:
+                if resolved_action not in name_missing_logged:
+                    logger.warning(f'jq output missing name for module {resolved_action} on event {event.id} using jq:{jq_str_for_event}')
+                    name_missing_logged.add(resolved_action)
+                continue
 
             if hashable_facts in results:
                 audit_record = results[hashable_facts]
@@ -147,7 +150,6 @@ def save_indirect_host_entries_of_job(job: Job) -> None:
     job_event_queries = fetch_job_event_query(job)
     records = build_indirect_host_data(job, job_event_queries)
     IndirectManagedNodeAudit.objects.bulk_create(records)
-    job.event_queries_processed = True
 
 
 def cleanup_old_indirect_host_entries() -> None:
@@ -161,6 +163,10 @@ def cleanup_old_indirect_host_entries() -> None:
 
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> None:
+    if not settings.INDIRECT_NODE_COUNTING_ENABLED:
+        Job.objects.filter(id=job_id, event_queries_processed=False).update(event_queries_processed=True)
+        return
+
     try:
         job = Job.objects.get(id=job_id)
     except Job.DoesNotExist:
@@ -175,35 +181,30 @@ def save_indirect_host_entries(job_id: int, wait_for_events: bool = True) -> Non
             return
         job.log_lifecycle(f'finished processing {current_events} events, running save_indirect_host_entries')
 
-    with transaction.atomic():
-        """
-        Pre-emptively set the job marker to 'events processed'. This prevents other instances from running the
-        same task.
-        """
-        try:
-            job = Job.objects.select_for_update().get(id=job_id)
-        except job.DoesNotExist:
-            logger.debug(f'Job {job_id} seems to be deleted, bailing from save_indirect_host_entries')
-            return
-
-        if job.event_queries_processed is True:
-            # this can mean one of two things:
-            # 1. another instance has already processed the events of this job
-            # 2. the artifacts_handler has not yet been called for this job
-            return
-
-        job.event_queries_processed = True
-        job.save(update_fields=['event_queries_processed'])
-
     try:
-        save_indirect_host_entries_of_job(job)
+        with transaction.atomic():
+            try:
+                job = Job.objects.select_for_update().get(id=job_id)
+            except Job.DoesNotExist:
+                logger.debug(f'Job {job_id} seems to be deleted, bailing from save_indirect_host_entries')
+                return
+
+            if job.event_queries_processed is True:
+                # this can mean one of two things:
+                # 1. another instance has already processed the events of this job
+                # 2. the artifacts_handler has not yet been called for this job
+                return
+
+            save_indirect_host_entries_of_job(job)
+            job.event_queries_processed = True
+            job.save(update_fields=['event_queries_processed'])
     except Exception:
         logger.exception(f'Error processing indirect host data for job_id={job_id}')
 
 
 @task(queue=get_task_queuename, timeout=3600 * 5)
 def cleanup_and_save_indirect_host_entries_fallback() -> None:
-    if not flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+    if not settings.INDIRECT_NODE_COUNTING_ENABLED:
         return
 
     try:

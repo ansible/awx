@@ -17,7 +17,6 @@ import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
-from django.db import transaction
 
 # Shared code for the AWX platform
 from awx_plugins.interfaces._temporary_private_container_api import CONTAINER_ROOT, get_incontainer_path
@@ -95,10 +94,7 @@ from flags.state import flag_enabled
 
 # Workload Identity
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
-
-from ansible_base.resource_registry.workload_identity_client import (
-    get_workload_identity_client,
-)
+from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 
 logger = logging.getLogger('awx.main.tasks.jobs')
 
@@ -107,11 +103,6 @@ def populate_claims_for_workload(unified_job) -> dict:
     """
     Extract JWT claims from a Controller workload for the aap_controller_automation_job scope.
     """
-
-    # Related objects in the UnifiedJob model, applies to all job types
-    organization = getattr_dne(unified_job, 'organization')
-    ujt = getattr_dne(unified_job, 'unified_job_template')
-    instance_group = getattr_dne(unified_job, 'instance_group')
 
     claims = {
         AutomationControllerJobScope.CLAIM_JOB_ID: unified_job.id,
@@ -167,16 +158,22 @@ def populate_claims_for_workload(unified_job) -> dict:
     return claims
 
 
-def retrieve_workload_identity_jwt(unified_job: UnifiedJob, audience: str, scope: str) -> str:
+def retrieve_workload_identity_jwt(
+    unified_job: UnifiedJob,
+    audience: str,
+    scope: str,
+    workload_ttl_seconds: int | None = None,
+) -> str:
     """Retrieve JWT token from workload claims.
     Raises:
         RuntimeError: if the workload identity client is not configured.
     """
-    client = get_workload_identity_client()
-    if client is None:
-        raise RuntimeError("Workload identity client is not configured")
-    claims = populate_claims_for_workload(unified_job)
-    return client.request_workload_jwt(claims=claims, scope=scope, audience=audience).jwt
+    return retrieve_workload_identity_jwt_with_claims(
+        populate_claims_for_workload(unified_job),
+        audience,
+        scope,
+        workload_ttl_seconds,
+    )
 
 
 def with_path_cleanup(f):
@@ -205,6 +202,7 @@ def dispatch_waiting_jobs(binder):
         if not kwargs:
             kwargs = {}
         binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
+        UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
 
 
 class BaseTask(object):
@@ -218,6 +216,63 @@ class BaseTask(object):
         self.cleanup_paths = []
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
+
+    @functools.cached_property
+    def _credentials(self):
+        """
+        Credentials for the task execution.
+        Fetches credentials once using build_credentials_list() and stores
+        them for the duration of the task to avoid redundant database queries.
+        """
+        credentials_list = self.build_credentials_list(self.instance)
+        # Convert to list to prevent re-evaluation of QuerySet
+        return list(credentials_list)
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """
+        Populate credentials with workload identity tokens.
+
+        Sets the context on Credential objects that have input sources
+        using compatible external credential types.
+        """
+        credentials = list(self._credentials)
+        if additional_credentials:
+            credentials.extend(additional_credentials)
+        credential_input_sources = (
+            (credential.context, src)
+            for credential in credentials
+            for src in credential.input_sources.all()
+            if any(
+                field.get('id') == 'workload_identity_token' and field.get('internal')
+                for field in src.source_credential.credential_type.inputs.get('fields', [])
+            )
+        )
+        for credential_ctx, input_src in credential_input_sources:
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                effective_timeout = self.get_instance_timeout(self.instance)
+                workload_ttl = effective_timeout if effective_timeout else None
+                try:
+                    jwt = retrieve_workload_identity_jwt(
+                        self.instance,
+                        audience=input_src.source_credential.get_input('url'),
+                        scope=AutomationControllerJobScope.name,
+                        workload_ttl_seconds=workload_ttl,
+                    )
+                    # Store token keyed by input source PK, since a credential can have
+                    # multiple input sources (one per field), each potentially with a different audience
+                    credential_ctx[input_src.pk] = {"workload_identity_token": jwt}
+                except Exception as e:
+                    self.instance.job_explanation = (
+                        f'Could not generate workload identity token for credential {input_src.source_credential.name} used in this job. Error:\n{e}'
+                    )
+                    self.instance.status = 'error'
+                    self.instance.save()
+            else:
+                self.instance.job_explanation = (
+                    f'Flag FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED is not enabled, required for credential {input_src.source_credential.name} used in this job.'
+                )
+                self.instance.status = 'error'
+                self.instance.save()
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -370,6 +425,19 @@ class BaseTask(object):
                     private_data_files['credentials'][credential] = self.write_private_data_file(private_data_dir, None, data, sub_dir='env')
             for credential, data in private_data.get('certificates', {}).items():
                 self.write_private_data_file(private_data_dir, 'ssh_key_data-cert.pub', data, sub_dir=os.path.join('artifacts', str(self.instance.id)))
+
+        # Copy vendor collections to private_data_dir for indirect node counting
+        # This makes external query files available to the callback plugin in EEs
+        if settings.INDIRECT_NODE_COUNTING_ENABLED:
+            vendor_src = '/var/lib/awx/vendor_collections'
+            vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
+            if os.path.exists(vendor_src):
+                try:
+                    shutil.copytree(vendor_src, vendor_dest)
+                    logger.debug(f"Copied vendor collections from {vendor_src} to {vendor_dest}")
+                except Exception as e:
+                    logger.warning(f"Failed to copy vendor collections: {e}")
+
         return private_data_files, ssh_key_data
 
     def build_passwords(self, instance, runtime_passwords):
@@ -443,6 +511,7 @@ class BaseTask(object):
         return []
 
     def get_instance_timeout(self, instance):
+        """Return the effective job timeout in seconds."""
         global_timeout_setting_name = instance._global_timeout_setting()
         if global_timeout_setting_name:
             global_timeout = getattr(settings, global_timeout_setting_name, 0)
@@ -478,7 +547,13 @@ class BaseTask(object):
         os.close(self.lock_fd)
         self.lock_fd = None
 
-    def acquire_lock(self, project, unified_job_id=None):
+    def acquire_lock(self, project, unified_job_id=None, exclusive=True):
+        """Acquire a file lock on the project's local source tree.
+
+        Uses LOCK_EX (exclusive) when the tree will be modified, or LOCK_SH (shared)
+        when only reading (e.g. copying). Polls until the lock is granted, checking
+        for cancellation on each iteration.
+        """
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
 
@@ -488,7 +563,7 @@ class BaseTask(object):
             project.save()
             lock_path = project.get_lock_file()
             if lock_path is None:
-                raise RuntimeError(u'Invalid lock file path')
+                raise RuntimeError('Invalid lock file path')
 
         try:
             self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
@@ -496,11 +571,12 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
-                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.lockf(self.lock_fd, lock_type | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
@@ -551,46 +627,30 @@ class BaseTask(object):
     def should_use_fact_cache(self):
         return False
 
-    def transition_status(self, pk: int) -> bool:
-        """Atomically transition status to running, if False returned, another process got it"""
-        with transaction.atomic():
-            # Explanation of parts for the fetch:
-            # .values - avoid loading a full object, this is known to lead to deadlocks due to signals
-            #   the signals load other related rows which another process may be locking, and happens in practice
-            # of=('self',) - keeps FK tables out of the lock list, another way deadlocks can happen
-            # .get - just load the single job
-            instance_data = UnifiedJob.objects.select_for_update(of=('self',)).values('status', 'cancel_flag').get(pk=pk)
-
-            # If status is not waiting (obtained under lock) then this process does not have clearence to run
-            if instance_data['status'] == 'waiting':
-                if instance_data['cancel_flag']:
-                    updated_status = 'canceled'
-                else:
-                    updated_status = 'running'
-                # Explanation of the update:
-                # .filter - again, do not load the full object
-                # .update - a bulk update on just that one row, avoid loading unintended data
-                UnifiedJob.objects.filter(pk=pk).update(status=updated_status, start_args='')
-            elif instance_data['status'] == 'running':
-                logger.info(f'Job {pk} is being ran by another process, exiting')
-                return False
-        return True
-
     @with_path_cleanup
     @with_signal_handling
     def run(self, pk, **kwargs):
         """
         Run the job/task and capture its output.
         """
-        if not self.instance:  # Used to skip fetch for local runs
-            if not self.transition_status(pk):
-                logger.info(f'Job {pk} is being ran by another process, exiting')
-                return
 
-        # Load the instance
-        self.instance = self.update_model(pk)
+        if not self.instance:  # Used to skip fetch for local runs
+            # Load the instance
+            self.instance = self.update_model(pk)
+
+        # status should be "running" from dispatch_waiting_jobs,
+        # but may still be "waiting" if the worker picked this up before the status update landed.
+        if self.instance.status == 'waiting':
+            UnifiedJob.objects.filter(pk=pk).update(status="running", start_args='')
+            self.instance.refresh_from_db()
+
         if self.instance.status != 'running':
             logger.error(f'Not starting {self.instance.status} task pk={pk} because its status "{self.instance.status}" is not expected')
+            return
+
+        if self.instance.cancel_flag:
+            self.instance = self.update_model(pk, status='canceled')
+            self.instance.websocket_emit_status('canceled')
             return
 
         self.instance.websocket_emit_status("running")
@@ -631,6 +691,12 @@ class BaseTask(object):
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
 
+            if flag_enabled("FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED"):
+                logger.info(f'Generating workload identity tokens for {self.instance.log_format}')
+                self.populate_workload_identity_tokens()
+                if self.instance.status == 'error':
+                    raise RuntimeError('not starting %s task' % self.instance.status)
+
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
             passwords = self.build_passwords(self.instance, kwargs)
@@ -648,7 +714,7 @@ class BaseTask(object):
 
             self.runner_callback.job_created = str(self.instance.created)
 
-            credentials = self.build_credentials_list(self.instance)
+            credentials = self._credentials
 
             container_root = None
             if settings.IS_K8S and isinstance(self.instance, ProjectUpdate):
@@ -826,7 +892,9 @@ class SourceControlMixin(BaseTask):
         # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
         # Galaxy requirements are not supported for manual projects
-        if project.scm_type and ((not has_cache) or branch_override):
+        # If a source update is scheduled, always include roles/collections because
+        # the new revision may have different requirements.
+        if project.scm_type and ((not has_cache) or branch_override or source_update_tag in sync_needs):
             sync_needs.extend(['install_roles', 'install_collections'])
 
         return sync_needs
@@ -897,10 +965,35 @@ class SourceControlMixin(BaseTask):
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
     def sync_and_copy(self, project, private_data_dir, scm_branch=None):
-        self.acquire_lock(project, self.instance.id)
+        """Copy project content to private_data_dir, syncing from SCM only if needed.
+
+        Acquires a shared lock first so concurrent copy-only jobs (e.g. slice jobs) can
+        run in parallel. Upgrades to an exclusive lock only when the project tree needs
+        to be modified (fresh clone, revision mismatch, or missing cache). DB state is
+        refreshed after each lock acquisition to account for concurrent updates.
+        """
+        # Always start with a shared lock so concurrent copy-only jobs don't serialize.
+        # LOCK_SH waits for any in-flight LOCK_EX to drain, making the tree stable.
+        # Refresh DB state after acquiring so get_sync_needs sees the current revision,
+        # then upgrade to LOCK_EX only if a sync is actually required.
+        self.acquire_lock(project, self.instance.id, exclusive=False)
         is_commit = False
         try:
             original_branch = None
+            if project.pk:
+                project.refresh_from_db()
+            sync_needs = self.get_sync_needs(project, scm_branch=scm_branch)
+            if sync_needs:
+                # Tree needs modification — upgrade to exclusive.
+                # POSIX advisory locks cannot be upgraded atomically: LOCK_SH must be
+                # released before LOCK_EX can be granted, leaving a window where another
+                # process may sync the project. Refresh after re-acquiring so
+                # sync_and_copy_without_lock operates on current DB state.
+                self.release_lock(project)
+                self.acquire_lock(project, self.instance.id, exclusive=True)
+                if project.pk:
+                    project.refresh_from_db()
+
             failed_reason = project.get_reason_if_failed()
             if failed_reason:
                 self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
@@ -943,6 +1036,29 @@ class RunJob(SourceControlMixin, BaseTask):
     model = Job
     event_model = JobEvent
 
+    def _extract_credentials_of_kind(self, kind: str):
+        return (cred for cred in self._credentials if cred.credential_type.kind == kind)
+
+    @property
+    def _machine_credential(self) -> object:
+        """Get machine credential."""
+        return next(self._extract_credentials_of_kind('ssh'), None)
+
+    @property
+    def _vault_credentials(self) -> list[object]:
+        """Get vault credentials."""
+        return list(self._extract_credentials_of_kind('vault'))
+
+    @property
+    def _network_credentials(self) -> list[object]:
+        """Get network credentials."""
+        return list(self._extract_credentials_of_kind('net'))
+
+    @property
+    def _cloud_credentials(self) -> list[object]:
+        """Get cloud credentials."""
+        return list(self._extract_credentials_of_kind('cloud'))
+
     def build_private_data(self, job, private_data_dir):
         """
         Returns a dict of the form
@@ -960,7 +1076,7 @@ class RunJob(SourceControlMixin, BaseTask):
         }
         """
         private_data = {'credentials': {}}
-        for credential in job.credentials.prefetch_related('input_sources__source_credential').all():
+        for credential in self._credentials:
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
             if credential.has_input('ssh_key_data'):
@@ -976,14 +1092,14 @@ class RunJob(SourceControlMixin, BaseTask):
         and ansible-vault.
         """
         passwords = super(RunJob, self).build_passwords(job, runtime_passwords)
-        cred = job.machine_credential
+        cred = self._machine_credential
         if cred:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 value = runtime_passwords.get(field, cred.get_input('password' if field == 'ssh_password' else field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
-        for cred in job.vault_credentials:
+        for cred in self._vault_credentials:
             field = 'vault_password'
             vault_id = cred.get_input('vault_id', default=None)
             if vault_id:
@@ -999,7 +1115,7 @@ class RunJob(SourceControlMixin, BaseTask):
         key unlock over network key unlock.
         '''
         if 'ssh_key_unlock' not in passwords:
-            for cred in job.network_credentials:
+            for cred in self._network_credentials:
                 if cred.inputs.get('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = runtime_passwords.get('ssh_key_unlock', cred.get_input('ssh_key_unlock', default=''))
                     break
@@ -1034,11 +1150,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Set environment variables for cloud credentials.
         cred_files = private_data_files.get('credentials', {})
-        for cloud_cred in job.cloud_credentials:
+        for cloud_cred in self._cloud_credentials:
             if cloud_cred and cloud_cred.credential_type.namespace == 'openstack' and cred_files.get(cloud_cred, ''):
                 env['OS_CLIENT_CONFIG_FILE'] = get_incontainer_path(cred_files.get(cloud_cred, ''), private_data_dir)
 
-        for network_cred in job.network_credentials:
+        for network_cred in self._network_credentials:
             env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
             env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
@@ -1056,12 +1172,11 @@ class RunJob(SourceControlMixin, BaseTask):
             ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
         ]
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            path_vars.append(
-                ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
-            )
+        path_vars.append(
+            ('ANSIBLE_CALLBACK_PLUGINS', 'callback_plugins', 'plugins_path', '~/.ansible/plugins:/plugins/callback:/usr/share/ansible/plugins/callback'),
+        )
 
-        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
+        config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)) + ['callbacks_enabled'])
 
         for env_key, config_setting, folder, default in path_vars:
             paths = default.split(':')
@@ -1076,10 +1191,16 @@ class RunJob(SourceControlMixin, BaseTask):
             paths = [os.path.join(CONTAINER_ROOT, folder)] + paths
             env[env_key] = os.pathsep.join(paths)
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
-            if 'callbacks_enabled' in config_values:
-                env['ANSIBLE_CALLBACKS_ENABLED'] += ':' + config_values['callbacks_enabled']
+        env['ANSIBLE_CALLBACKS_ENABLED'] = 'indirect_instance_count'
+        if 'callbacks_enabled' in config_values:
+            env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
+
+        if settings.INDIRECT_NODE_COUNTING_ENABLED:
+            env['AWX_COLLECT_HOST_QUERIES'] = '1'
+            # Add vendor collections path for external query file discovery
+            vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
+            env['ANSIBLE_COLLECTIONS_PATH'] = f"{vendor_collections_path}:{env['ANSIBLE_COLLECTIONS_PATH']}"
+            logger.debug(f"ANSIBLE_COLLECTIONS_PATH updated for vendor collections: {env['ANSIBLE_COLLECTIONS_PATH']}")
 
         return env
 
@@ -1088,7 +1209,7 @@ class RunJob(SourceControlMixin, BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         """
-        creds = job.machine_credential
+        creds = self._machine_credential
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
@@ -1240,10 +1361,17 @@ class RunJob(SourceControlMixin, BaseTask):
             return
         if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
+            if job.inventory.kind == 'constructed':
+                hosts_qs = job.get_source_hosts_for_constructed_inventory()
+            else:
+                hosts_qs = job.inventory.hosts
+            hosts_qs = hosts_qs.only(*HOST_FACTS_FIELDS)
             finish_fact_cache(
+                hosts_qs,
                 artifacts_dir=os.path.join(private_data_dir, 'artifacts', str(job.id)),
                 job_id=job.id,
                 inventory_id=job.inventory_id,
+                job_created=job.created,
             )
 
     def final_run_hook(self, job, status, private_data_dir):
@@ -1518,16 +1646,14 @@ class RunProjectUpdate(BaseTask):
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
-            # copy the special callback (not stdout type) plugin to get list of collections
-            pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
-            if not os.path.exists(pdd_plugins_path):
-                os.mkdir(pdd_plugins_path)
-            from awx.playbooks import library
+        pdd_plugins_path = os.path.join(job_private_data_dir, 'plugins_path')
+        if not os.path.exists(pdd_plugins_path):
+            os.mkdir(pdd_plugins_path)
+        from awx.playbooks import library
 
-            plugin_file_source = os.path.join(library.__path__._path[0], 'indirect_instance_count.py')
-            plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
-            shutil.copyfile(plugin_file_source, plugin_file_dest)
+        plugin_file_source = os.path.join(library.__path__[0], 'indirect_instance_count.py')
+        plugin_file_dest = os.path.join(pdd_plugins_path, 'indirect_instance_count.py')
+        shutil.copyfile(plugin_file_source, plugin_file_dest)
 
     def post_run_hook(self, instance, status):
         super(RunProjectUpdate, self).post_run_hook(instance, status)
@@ -1590,7 +1716,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
     def build_credentials_list(self, project_update):
-        if project_update.scm_type == 'insights' and project_update.credential:
+        if project_update.credential:
             return [project_update.credential]
         return []
 
@@ -1772,6 +1898,24 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
     def build_credentials_list(self, inventory_update):
         # All credentials not used by inventory source injector
         return inventory_update.get_extra_credentials()
+
+    def populate_workload_identity_tokens(self, additional_credentials=None):
+        """Also generate OIDC tokens for the cloud credential.
+
+        The cloud credential is not in _credentials (it is handled by the
+        inventory source injector), but it may still need a workload identity
+        token generated for it.
+        """
+        cloud_cred = self.instance.get_cloud_credential()
+        creds = list(additional_credentials or [])
+        if cloud_cred:
+            creds.append(cloud_cred)
+        super().populate_workload_identity_tokens(additional_credentials=creds or None)
+        # Override get_cloud_credential on this instance so the injector
+        # uses the credential with OIDC context instead of doing a fresh
+        # DB fetch that would lose it.
+        if cloud_cred and cloud_cred.context:
+            self.instance.get_cloud_credential = lambda: cloud_cred
 
     def build_project_dir(self, inventory_update, private_data_dir):
         source_project = None

@@ -112,6 +112,20 @@ def test_notification_template_simple_patch(patch, notification_template, admin)
 
 
 @pytest.mark.django_db
+def test_notification_template_patch_rejects_unsafe_name(patch, notification_template, admin):
+    """Name-only PATCH omits notification_configuration; that branch must still
+    chain into CleanTextMixin.validate() (AAP-78694)."""
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        response = patch(
+            reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}),
+            {'name': '<script>x</script>'},
+            admin,
+            expect=400,
+        )
+    assert 'name' in response.data
+
+
+@pytest.mark.django_db
 def test_notification_template_invalid_notification_type(patch, notification_template, admin):
     patch(reverse('api:notification_template_detail', kwargs={'pk': notification_template.id}), {'notification_type': 'invalid'}, admin, expect=400)
 
@@ -163,9 +177,11 @@ def test_custom_environment_injection(post, user, organization):
         expect=201,
     )
     template = NotificationTemplate.objects.get(pk=response.data['id'])
-    with pytest.raises(ConnectionError), override_settings(AWX_TASK_ENV={'HTTPS_PROXY': '192.168.50.100:1234'}), mock.patch.object(
-        HTTPAdapter, 'send'
-    ) as fake_send:
+    with (
+        pytest.raises(ConnectionError),
+        override_settings(AWX_TASK_ENV={'HTTPS_PROXY': '192.168.50.100:1234'}),
+        mock.patch.object(HTTPAdapter, 'send') as fake_send,
+    ):
 
         def _send_side_effect(request, **kw):
             assert select_proxy(request.url, kw['proxies']) == '192.168.50.100:1234'

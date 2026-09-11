@@ -85,12 +85,12 @@ def test_consolidate_indirect_user_roles_with_nested_teams(setup_managed_roles, 
     assert team_g_users_after == set(team_g.member_role.members.all().values_list('id', flat=True))
 
     # Verify team-to-team relationships are removed after consolidation
-    assert not RoleTeamAssignment.objects.filter(
-        role_definition=team_member_role, team=team_f, object_id=team_e.id
-    ).exists(), "Team-to-team relationship F→E should be removed"
-    assert not RoleTeamAssignment.objects.filter(
-        role_definition=team_member_role, team=team_g, object_id=team_f.id
-    ).exists(), "Team-to-team relationship G→F should be removed"
+    assert not RoleTeamAssignment.objects.filter(role_definition=team_member_role, team=team_f, object_id=team_e.id).exists(), (
+        "Team-to-team relationship F→E should be removed"
+    )
+    assert not RoleTeamAssignment.objects.filter(role_definition=team_member_role, team=team_g, object_id=team_f.id).exists(), (
+        "Team-to-team relationship G→F should be removed"
+    )
 
 
 @pytest.mark.django_db

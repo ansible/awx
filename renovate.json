@@ -1,0 +1,12 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "enabledManagers": ["tekton"],
+  "tekton": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["* */12 * * 1-5"],
+    "postUpgradeTasks": {
+      "commands": []
+    }
+  }
+}

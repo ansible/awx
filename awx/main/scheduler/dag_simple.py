@@ -48,11 +48,6 @@ class SimpleDAG(object):
         '''
         self.node_to_edges_by_label = dict()
 
-    def __contains__(self, obj):
-        if self.node['node_object'] in self.node_obj_to_node_index:
-            return True
-        return False
-
     def __len__(self):
         return len(self.nodes)
 
