@@ -47,6 +47,9 @@ __all__ = [
 
 logger = logging.getLogger('awx.main.models.rbac')
 
+LEGACY_ROLE_NAME_PARTS = 2
+LEGACY_SCOPED_ROLE_NAME_PARTS = 3
+
 ROLE_SINGLETON_SYSTEM_ADMINISTRATOR = 'system_administrator'
 ROLE_SINGLETON_SYSTEM_AUDITOR = 'system_auditor'
 
@@ -586,39 +589,64 @@ def get_role_definition(role):
     return rd
 
 
+def _legacy_role_name_for_compat(rd, name_parts):
+    if len(name_parts) != LEGACY_SCOPED_ROLE_NAME_PARTS:
+        logger.debug(f'Role definition "{rd.name}" has no legacy role equivalent, skipping translation.')
+        return None
+    _model_name, role_name, _suffix = name_parts
+    return role_name.lower() + '_role'
+
+
+def _legacy_role_name_for_org_model_admin(rd, name_parts):
+    # cases like "Organization Project Admin"
+    target_model_name = name_parts[1]
+    try:
+        model_cls = apps.get_model('main', target_model_name)
+    except LookupError:
+        logger.debug(f'Role definition "{rd.name}" has no legacy role equivalent, skipping translation.')
+        return None
+    target_model_name = get_type_for_model(model_cls)
+
+    # exception cases completely specific to one model naming convention
+    if target_model_name == 'notification_template':
+        target_model_name = 'notification'
+    elif target_model_name == 'workflow_job_template':
+        target_model_name = 'workflow'
+
+    return f'{target_model_name}_admin_role'
+
+
+def _legacy_role_name_generic(rd, name_parts):
+    if len(name_parts) != LEGACY_ROLE_NAME_PARTS:
+        logger.debug(f'Role definition "{rd.name}" has no legacy role equivalent, skipping translation.')
+        return None
+    _model_name, role_name = name_parts
+    return role_name.lower() + '_role'
+
+
+def _legacy_role_name(rd, name_parts):
+    if rd.name.endswith(' Compat'):
+        return _legacy_role_name_for_compat(rd, name_parts)
+    if len(name_parts) == LEGACY_SCOPED_ROLE_NAME_PARTS and name_parts[0] == 'Organization' and name_parts[2] == 'Admin':
+        return _legacy_role_name_for_org_model_admin(rd, name_parts)
+    if len(name_parts) == LEGACY_ROLE_NAME_PARTS and name_parts[1] == 'Admin':
+        # cases like "Project Admin"
+        return 'admin_role'
+    if rd.name == 'Organization Audit':
+        return 'auditor_role'
+    return _legacy_role_name_generic(rd, name_parts)
+
+
 def get_role_from_object_role(object_role):
     """
     Given an object role from the new system, return the corresponding role from the old system
     reverses naming from get_role_definition, and the ANSIBLE_BASE_ROLE_PRECREATE setting.
     """
     rd = object_role.role_definition
-    if rd.name.endswith(' Compat'):
-        model_name, role_name, _ = rd.name.split()
-        role_name = role_name.lower()
-        role_name += '_role'
-    elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
-        # cases like "Organization Project Admin"
-        model_name, target_model_name, role_name = rd.name.split()
-        role_name = role_name.lower()
-        model_cls = apps.get_model('main', target_model_name)
-        target_model_name = get_type_for_model(model_cls)
-
-        # exception cases completely specific to one model naming convention
-        if target_model_name == 'notification_template':
-            target_model_name = 'notification'
-        elif target_model_name == 'workflow_job_template':
-            target_model_name = 'workflow'
-
-        role_name = f'{target_model_name}_admin_role'
-    elif rd.name.endswith(' Admin'):
-        # cases like "project-admin"
-        role_name = 'admin_role'
-    elif rd.name == 'Organization Audit':
-        role_name = 'auditor_role'
-    else:
-        model_name, role_name = rd.name.split()
-        role_name = role_name.lower()
-        role_name += '_role'
+    name_parts = rd.name.split()
+    role_name = _legacy_role_name(rd, name_parts)
+    if role_name is None:
+        return None
     return getattr(object_role.content_object, role_name, None)
 
 

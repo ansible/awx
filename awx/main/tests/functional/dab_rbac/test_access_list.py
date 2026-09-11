@@ -1,5 +1,7 @@
 import pytest
 
+from ansible_base.rbac.models import RoleDefinition
+
 from awx.main.models import User
 from awx.api.versioning import reverse
 
@@ -56,6 +58,29 @@ def test_access_list_direct_access(get, admin_user, inventory):
     assert len(by_username['u1']['summary_fields']['indirect_access']) == 0
     access_entry = by_username['u1']['summary_fields']['direct_access'][0]
     assert sorted(access_entry['descendant_roles']) == sorted(['adhoc_role', 'use_role', 'update_role', 'read_role', 'admin_role'])
+
+
+@pytest.mark.django_db
+def test_access_list_custom_role_without_legacy_equivalent(get, admin_user, inventory, setup_managed_roles):
+    user = User.objects.create(username='custom-role-user')
+    managed_rd = RoleDefinition.objects.get(name='Inventory Admin')
+    custom_rd = RoleDefinition.objects.create_from_permissions(
+        name='Custom Inventory Administrator',
+        permissions=managed_rd.permissions.values_list('codename', flat=True),
+        content_type=managed_rd.content_type,
+    )
+    custom_rd.give_permission(user, inventory)
+
+    response = get(
+        reverse('api:inventory_access_list', kwargs={'pk': inventory.id}),
+        user=admin_user,
+        expect=200,
+    )
+    by_username = {item['username']: item for item in response.data['results']}
+
+    assert user.username in by_username
+    assert by_username[user.username]['summary_fields']['direct_access'] == []
+    assert by_username[user.username]['summary_fields']['indirect_access'] == []
 
 
 @pytest.mark.django_db

@@ -6,6 +6,8 @@ import pytest
 from awx.api.versioning import reverse
 from awx.main.models import Project, JobTemplate
 
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+
 from django.core.exceptions import ValidationError
 
 
@@ -422,6 +424,34 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando,
         assert Project.objects.filter(name='Project', organization=organization).exists()
     elif expected_status_code == 403:
         assert 'do not have permission' in str(result.data['detail'])
+
+
+@pytest.mark.django_db
+def test_create_project_when_creator_role_has_no_legacy_equivalent(post, organization, org_admin, setup_managed_roles):
+    organization.project_admin_role.members.add(org_admin)
+    managed_rd = RoleDefinition.objects.get(name='Project Admin')
+    custom_rd = RoleDefinition.objects.create_from_permissions(
+        name='Test Custom 1',
+        permissions=managed_rd.permissions.values_list('codename', flat=True),
+        content_type=managed_rd.content_type,
+    )
+
+    # Keep the Controller compatibility boundary safe even if DAB returns a
+    # creator assignment that cannot be represented by a legacy role.
+    with mock.patch.object(
+        RoleDefinition.objects,
+        'give_creator_permissions',
+        side_effect=lambda user, obj: custom_rd.give_permission(user, obj),
+    ):
+        result = post(
+            reverse('api:project_list'),
+            {'name': 'Project with redundant custom role', 'organization': organization.id},
+            org_admin,
+            expect=201,
+        )
+
+    project = Project.objects.get(pk=result.data['id'])
+    assert RoleUserAssignment.objects.filter(user=org_admin, object_id=project.pk, role_definition=custom_rd).exists()
 
 
 @pytest.mark.django_db
