@@ -593,9 +593,96 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
         approval.deny()
 
 
+def _extract_image_repo(image_ref):
+    """
+    Extract the repository part from an image reference, without tag or digest.
+    Examples:
+        "registry.io/repo:tag" -> "registry.io/repo"
+        "registry.io/repo@sha256:abc" -> "registry.io/repo"
+        "repo:tag" -> "repo"
+    Returns None if the image reference format is unexpected.
+    """
+    if not image_ref:
+        return None
+
+    # Remove digest (everything after '@')
+    if '@' in image_ref:
+        return image_ref.split('@')[0]
+
+    # Remove tag (everything after last ':' that's not part of registry:port)
+    if ':' in image_ref:
+        parts = image_ref.rsplit(':', 1)
+        # If the part after ':' contains '/' it's likely part of a path, not a tag
+        # If it's very long, it might be a malformed reference
+        if '/' in parts[1] or len(parts[1]) > 128:
+            return image_ref
+        # Otherwise assume it's a tag and remove it
+        return parts[0]
+
+    # No tag or digest
+    return image_ref
+
+
+def _is_image_in_settings(image_ref):
+    """Check if an image is referenced in AWX settings (managed images)."""
+    # Check GLOBAL_JOB_EXECUTION_ENVIRONMENTS
+    for ee_config in settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS:
+        if ee_config.get('image') == image_ref:
+            logger.info(f"Skipping cleanup of {image_ref} - referenced in GLOBAL_JOB_EXECUTION_ENVIRONMENTS")
+            return True
+
+    # Check CONTROL_PLANE_EXECUTION_ENVIRONMENT
+    if settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT == image_ref:
+        logger.info(f"Skipping cleanup of {image_ref} - is CONTROL_PLANE_EXECUTION_ENVIRONMENT")
+        return True
+
+    # Check DEFAULT_EXECUTION_ENVIRONMENT
+    default_ee = getattr(settings, 'DEFAULT_EXECUTION_ENVIRONMENT', None)
+    if default_ee and hasattr(default_ee, 'image') and default_ee.image == image_ref:
+        logger.info(f"Skipping cleanup of {image_ref} - referenced in DEFAULT_EXECUTION_ENVIRONMENT")
+        return True
+
+    return False
+
+
 def _handle_image_cleanup(removed_image, pk):
-    if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
+    """
+    Check if an image can be safely cleaned up when an EE is deleted or its image is changed.
+    Skip cleanup if:
+    - The image is referenced in settings (GLOBAL_JOB_EXECUTION_ENVIRONMENTS, CONTROL_PLANE_EXECUTION_ENVIRONMENT, DEFAULT_EXECUTION_ENVIRONMENT)
+    - Other EE objects reference the same image (by exact string match)
+    - The image might be a different reference form (tag vs digest) for an image used by another EE
+
+    See: AAP-89067 for context on why this check is important
+    """
+    if not removed_image:
+        return
+
+    # Skip cleanup of managed images referenced in settings
+    if _is_image_in_settings(removed_image):
+        return
+
+    # Check if other EE objects reference the exact same image string
+    if ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
         return  # if other EE objects reference the tag, then do not purge it
+
+    # Extract the repository part (without tag/digest) to check if this might be
+    # a different reference form (tag vs digest) for the same underlying image.
+    # This prevents the bug where "repo:tag" and "repo@sha256:..." point to the same
+    # image but are purged because string comparison sees them as different.
+    removed_repo = _extract_image_repo(removed_image)
+    if removed_repo:
+        for ee in ExecutionEnvironment.objects.exclude(pk=pk).only('image', 'name'):
+            if ee.image:
+                ee_repo = _extract_image_repo(ee.image)
+                if ee_repo == removed_repo:
+                    logger.warning(
+                        f"Skipping cleanup of {removed_image} - EE '{ee.name}' (id={ee.pk}) "
+                        f"uses image {ee.image} from the same repository ({removed_repo}). "
+                        f"These may be different reference forms (tag vs digest) for the same underlying image."
+                    )
+                    return
+
     handle_removed_image.delay(remove_images=[removed_image])
 
 
