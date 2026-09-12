@@ -69,6 +69,7 @@ class TestJobTemplateLabelList:
             mixin_unattach.assert_called_with(mock_request, None, None)
 
     def test_disassociate_skips_label_limit(self):
+        """Disassociating a label skips the label limit validation."""
         view = JobTemplateLabelList()
         request = mock.MagicMock(data={'id': 1, 'disassociate': True})
 
