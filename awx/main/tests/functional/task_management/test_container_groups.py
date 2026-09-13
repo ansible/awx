@@ -101,3 +101,37 @@ def test_kubectl_ssl_verification(containerized_job, default_job_execution_envir
     receptor_job = AWXReceptorJob(rj, runner_params={'settings': {}})
     ca_data = receptor_job.kube_config['clusters'][0]['cluster']['certificate-authority-data']
     assert cert.stdout == base64.b64decode(ca_data.encode())
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'verify_ssl, ssl_ca_cert, expected',
+    [
+        # a CA was supplied, so pin verification to it
+        (True, 'my-ca-data', {'certificate-authority-data': base64.b64encode(b'my-ca-data').decode()}),
+        # verification is on but no CA was supplied, whether the input is absent
+        # or merely empty: neither key is set, so the client verifies against the
+        # container's system trust store instead of whichever bundle it happens
+        # to default to
+        (True, '', {}),
+        (True, None, {}),
+        (False, '', {'insecure-skip-tls-verify': True}),
+        # an explicitly disabled verify_ssl wins over a stored CA
+        (False, 'my-ca-data', {'insecure-skip-tls-verify': True}),
+    ],
+)
+def test_kube_config_tls_verification(containerized_job, default_job_execution_environment, verify_ssl, ssl_ca_cert, expected):
+    containerized_job.execution_environment = default_job_execution_environment
+    cred = containerized_job.instance_group.credential
+    cred.inputs['verify_ssl'] = verify_ssl
+    if ssl_ca_cert is None:
+        cred.inputs.pop('ssl_ca_cert', None)
+    else:
+        cred.inputs['ssl_ca_cert'] = ssl_ca_cert
+    cred.save()
+
+    RunJob = namedtuple('RunJob', ['instance', 'build_execution_environment_params'])
+    rj = RunJob(instance=containerized_job, build_execution_environment_params=lambda x: {})
+    cluster = AWXReceptorJob(rj, runner_params={'settings': {}}).kube_config['clusters'][0]['cluster']
+
+    assert {key: value for key, value in cluster.items() if key != 'server'} == expected

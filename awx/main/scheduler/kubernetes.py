@@ -144,16 +144,16 @@ class PodManager(object):
         # this feels a little janky, but it's what k8s' own code does
         # internally when it reads kube config files from disk:
         # https://github.com/kubernetes-client/python-base/blob/0b208334ef0247aad9afcaae8003954423b61a0d/config/kube_config.py#L643
+        cfg = type.__call__(client.Configuration)
         if self.credential:
             loader = config.kube_config.KubeConfigLoader(config_dict=self.kube_config)
-            cfg = type.__call__(client.Configuration)
             loader.load_and_set(cfg)
-            api = client.CoreV1Api(api_client=client.ApiClient(configuration=cfg))
         else:
-            config.load_incluster_config()
-            api = client.CoreV1Api()
+            # pass an explicit configuration so the in-cluster loader does not
+            # mutate (and leak its bearer token into) the process-wide default
+            config.load_incluster_config(client_configuration=cfg)
 
-        return api
+        return client.CoreV1Api(api_client=client.ApiClient(configuration=cfg))
 
     @property
     def pod_name(self):
@@ -192,10 +192,24 @@ def generate_tmp_kube_config(credential, namespace):
         "current-context": host_input,
     }
 
-    if credential.get_input('verify_ssl') and 'ssl_ca_cert' in credential.inputs:
-        config["clusters"][0]["cluster"]["certificate-authority-data"] = b64encode(
+    apply_tls_verification(config, credential)
+    return config
+
+
+def apply_tls_verification(kube_config, credential):
+    """Set the cluster's TLS verification keys on a generated kube config.
+
+    The "Certificate Authority data" input is optional, so it can be present but
+    empty. Testing for the key rather than its value leaves verification enabled
+    with no CA at all, which silently falls back to whatever bundle the client
+    happens to default to. Leaving both keys unset is the honest way to express
+    "verify against the container's system trust store", which is what the
+    operator's bundle_cacert_secret populates.
+    """
+    cluster = kube_config["clusters"][0]["cluster"]
+    if not credential.get_input('verify_ssl'):
+        cluster["insecure-skip-tls-verify"] = True
+    elif credential.get_input('ssl_ca_cert', default=''):
+        cluster["certificate-authority-data"] = b64encode(
             credential.get_input('ssl_ca_cert').encode()  # encode to bytes
         ).decode()  # decode the base64 data into a str
-    else:
-        config["clusters"][0]["cluster"]["insecure-skip-tls-verify"] = True
-    return config

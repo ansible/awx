@@ -1,5 +1,4 @@
 # Python
-from base64 import b64encode
 from collections import namedtuple
 import concurrent.futures
 from enum import Enum
@@ -737,6 +736,8 @@ class AWXReceptorJob:
 
     @property
     def kube_config(self):
+        from awx.main.scheduler.kubernetes import apply_tls_verification  # prevent circular import
+
         host_input = self.credential.get_input('host')
         config = {
             "apiVersion": "v1",
@@ -748,12 +749,7 @@ class AWXReceptorJob:
             "current-context": host_input,
         }
 
-        if self.credential.get_input('verify_ssl') and 'ssl_ca_cert' in self.credential.inputs:
-            config["clusters"][0]["cluster"]["certificate-authority-data"] = b64encode(
-                self.credential.get_input('ssl_ca_cert').encode()  # encode to bytes
-            ).decode()  # decode the base64 data into a str
-        else:
-            config["clusters"][0]["cluster"]["insecure-skip-tls-verify"] = True
+        apply_tls_verification(config, self.credential)
         return config
 
 
