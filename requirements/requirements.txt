@@ -365,7 +365,7 @@ psycopg==3.2.10
     #   dispatcherd
 ptyprocess==0.7.0
     # via pexpect
-pyasn1==0.6.2
+pyasn1==0.6.4
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   pyasn1-modules
