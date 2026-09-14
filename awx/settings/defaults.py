@@ -1097,9 +1097,6 @@ ANSIBLE_BASE_ROLE_PRECREATE = {}
 # Name for auto-created roles that give users permissions to what they create
 ANSIBLE_BASE_ROLE_CREATOR_NAME = '{cls.__name__} Creator'
 
-# Use the new Gateway RBAC system for evaluations? You should. We will remove the old system soon.
-ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
-
 # Permissions a user will get when creating a new item
 ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']
 

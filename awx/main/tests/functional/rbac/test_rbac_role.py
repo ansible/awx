@@ -192,3 +192,29 @@ def test_orphaned_user_allowed(org_admin, rando, organization, org_credential):
     # Cannot edit the user directly without adding to org first
     user_access = UserAccess(org_admin)
     assert not user_access.can_change(rando, {'last_name': 'Witzel'})
+
+
+@pytest.mark.django_db
+def test_role_contains_uses_dab_rbac(rando, organization):
+    """Role.__contains__ uses DAB RBAC for permission checks, not the removed ancestors table"""
+    assert rando not in organization.admin_role
+    organization.admin_role.members.add(rando)
+    assert rando in organization.admin_role
+    assert rando in organization.member_role
+    assert rando in organization.read_role
+
+
+@pytest.mark.django_db
+def test_filter_visible_roles(rando, organization):
+    """filter_visible_roles uses DAB RBAC, not the removed RoleAncestorEntry table"""
+    organization.member_role.members.add(rando)
+    visible = Role.filter_visible_roles(rando, Role.objects.all())
+    assert organization.member_role in visible
+    assert organization.read_role in visible
+
+
+@pytest.mark.django_db
+def test_role_model_has_no_ancestors_field():
+    """Verify the ancestors M2M field has been removed from the Role model"""
+    field_names = {f.name for f in Role._meta.get_fields()}
+    assert 'ancestors' not in field_names
