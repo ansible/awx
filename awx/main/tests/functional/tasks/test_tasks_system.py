@@ -549,6 +549,47 @@ def test_heartbeat_defers_lost_instances_when_mesh_gate_blocks(settings):
 
 
 @pytest.mark.django_db
+def test_heartbeat_reaps_execution_nodes_even_when_mesh_gate_blocks(settings):
+    """When mesh gate blocks, execution nodes should be reaped (not deferred)."""
+    settings.CLUSTER_HOST_ID = 'ctrl-0'
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+    settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+
+    this_inst = Instance.objects.create(hostname='ctrl-0', node_type='control', node_state='ready')
+    this_inst.last_seen = now() - timedelta(seconds=30)
+    this_inst.save(update_fields=['last_seen'])
+
+    # Control node that will be lost
+    lost_control = Instance.objects.create(hostname='ctrl-1', node_type='control', node_state='ready')
+    lost_control.last_seen = now() - timedelta(seconds=200)  # > 120s grace → is_lost() True
+    lost_control.save(update_fields=['last_seen'])
+
+    # Execution nodes that will be lost
+    lost_exec_1 = Instance.objects.create(hostname='exec-1', node_type='execution', node_state='ready')
+    lost_exec_1.last_seen = now() - timedelta(seconds=200)
+    lost_exec_1.save(update_fields=['last_seen'])
+
+    lost_exec_2 = Instance.objects.create(hostname='exec-2', node_type='hop', node_state='ready')
+    lost_exec_2.last_seen = now() - timedelta(seconds=200)
+    lost_exec_2.save(update_fields=['last_seen'])
+
+    mock_ctl = mock.MagicMock()
+    mock_ctl.simple_command.return_value = {'KnownConnectionCosts': {}, 'Advertisements': []}
+
+    with (
+        mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl),
+        mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
+        mock.patch.object(Instance, 'local_health_check'),
+    ):
+        _, _, lost_result = _heartbeat_instance_management()
+
+    # Execution nodes should be reaped despite mesh gate blocking
+    assert len(lost_result) == 2
+    assert set(inst.hostname for inst in lost_result) == {'exec-1', 'exec-2'}
+
+
+@pytest.mark.django_db
 def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
     """FileNotFoundError from get_receptor_ctl → this_inst marked offline, returns (None, None, None)."""
     settings.CLUSTER_HOST_ID = 'ctrl-0'

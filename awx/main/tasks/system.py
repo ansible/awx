@@ -805,7 +805,19 @@ def _heartbeat_instance_management():
             return None, None, None
 
     if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
-        return this_inst, instance_list, []
+        # Only defer control nodes (they need mesh consensus)
+        # Execution nodes can be reaped immediately (they don't need mesh)
+        control_lost = [inst for inst in lost_instances if inst.node_type == 'control']
+        execution_lost = [inst for inst in lost_instances if inst.node_type in ('execution', 'hop')]
+
+        if control_lost:
+            logger.info(
+                f'Mesh stability gate: deferring cleanup for {len(control_lost)} control node(s) '
+                f'due to mesh instability, but reaping {len(execution_lost)} execution/hop node(s)'
+            )
+            return this_inst, instance_list, execution_lost
+        # All lost nodes are execution/hop type, safe to reap all
+        return this_inst, instance_list, execution_lost
 
     return this_inst, instance_list, lost_instances
 
