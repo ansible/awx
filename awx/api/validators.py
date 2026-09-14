@@ -4,6 +4,18 @@ from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 
 
+def contains_path_traversal(value):
+    """Return True if value contains a '..' path segment.
+
+    Matches POSIX (`../`) and Windows (`..\\`) traversal. A file name that
+    merely contains two dots (e.g. `backup..yml`) is not traversal.
+    Absolute paths are allowed; they are not parent-directory traversal.
+    """
+    if not isinstance(value, str) or not value:
+        return False
+    return any(part == '..' for part in value.replace('\\', '/').split('/'))
+
+
 class HostnameRegexValidator(RegexValidator):
     """
     Fully validates a domain name that is compliant with norms in Linux/RHEL

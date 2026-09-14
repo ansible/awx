@@ -15,6 +15,7 @@ from awx.main.tasks.host_indirect import (
     save_indirect_host_entries,
     cleanup_and_save_indirect_host_entries_fallback,
 )
+from awx.main.tasks.system import events_processed_hook
 from awx.main.models.event_query import EventQuery
 from awx.main.models.indirect_managed_node_audit import IndirectManagedNodeAudit
 
@@ -88,6 +89,32 @@ def create_audit_record(name, job, organization, created=now()):
     record.created = created
     record.save()
     return record
+
+
+@pytest.mark.django_db
+def test_save_indirect_host_entries_skips_when_disabled(bare_job, event_query, settings):
+    create_registered_event(bare_job)
+    settings.INDIRECT_NODE_COUNTING_ENABLED = False
+
+    save_indirect_host_entries(bare_job.id, wait_for_events=False)
+
+    bare_job.refresh_from_db()
+    assert bare_job.event_queries_processed is True
+    assert not IndirectManagedNodeAudit.objects.filter(job=bare_job).exists()
+
+
+@pytest.mark.django_db
+def test_events_processed_hook_discards_pending_counting_when_disabled(bare_job, settings, mocker):
+    settings.INDIRECT_NODE_COUNTING_ENABLED = False
+    mock_delay = mocker.patch('awx.main.tasks.system.save_indirect_host_entries.delay')
+    mock_refresh = mocker.patch.object(bare_job, 'refresh_from_db')
+    mocker.patch('awx.main.models.notifications.JobNotificationMixin.send_notification_templates')
+
+    events_processed_hook(bare_job)
+
+    assert Job.objects.get(id=bare_job.id).event_queries_processed is True
+    mock_refresh.assert_not_called()
+    mock_delay.assert_not_called()
 
 
 @pytest.fixture

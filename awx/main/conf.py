@@ -35,6 +35,16 @@ register(
 )
 
 register(
+    'INDIRECT_NODE_COUNTING_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Indirect Node Counting'),
+    help_text=_('Controls whether Controller processes indirect managed nodes reported by jobs.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
