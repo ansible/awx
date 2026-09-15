@@ -97,6 +97,60 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
             logout(request)
 
 
+class ForcePasswordChangeMiddleware(MiddlewareMixin):
+    """
+    When a user has password_reset_required, block API access until they change
+    their password. Session login is still allowed so they can reach the change
+    flow; only their own user record (and me/logout) remain reachable.
+    """
+
+    def process_request(self, request):
+        from django.http import JsonResponse
+
+        user = getattr(request, 'user', None)
+        if user is None or not getattr(user, 'is_authenticated', False) or not user.pk:
+            return None
+        if not getattr(user, 'password_reset_required', False):
+            return None
+
+        path = request.path
+        # Non-API routes (UI static assets, SPA) stay reachable.
+        if not path.startswith('/api/'):
+            return None
+
+        method = request.method.upper()
+        if method == 'OPTIONS':
+            return None
+
+        allowed_prefixes = (
+            '/api/login',
+            '/api/logout',
+            '/api/v2/me',
+            f'/api/v2/users/{user.pk}',
+        )
+        optional_prefix = getattr(settings, 'OPTIONAL_API_URLPATTERN_PREFIX', '') or ''
+        if optional_prefix:
+            allowed_prefixes = allowed_prefixes + (
+                f'/api/{optional_prefix}/v2/me',
+                f'/api/{optional_prefix}/v2/users/{user.pk}',
+            )
+
+        for prefix in allowed_prefixes:
+            if path == prefix or path.startswith(prefix + '/') or path.startswith(prefix + '?'):
+                # Own user detail: only read + password update, not delete.
+                if f'/users/{user.pk}' in path and method == 'DELETE':
+                    break
+                return None
+
+        return JsonResponse(
+            {
+                'detail': 'Password reset is required before you can continue.',
+                'password_reset_required': True,
+            },
+            status=403,
+        )
+
+
 class URLModificationMiddleware(MiddlewareMixin):
     @staticmethod
     def _hijack_for_old_jt_name(node, kwargs, named_url):

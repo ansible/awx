@@ -907,6 +907,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'awx.main.middleware.DisableLocalAuthMiddleware',
+    'awx.main.middleware.ForcePasswordChangeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'awx.main.middleware.OptionalURLPrefixPath',
     'crum.CurrentRequestUserMiddleware',
