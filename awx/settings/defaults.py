@@ -444,6 +444,7 @@ DISPATCHER_SCHEDULE = {
     'awx.main.tasks.system.cleanup_images_and_files': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': 10800},
     'awx.main.tasks.host_metrics.cleanup_host_metrics': {'task': 'awx.main.tasks.host_metrics.cleanup_host_metrics', 'schedule': 12600},
     'awx.main.tasks.host_metrics.host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': 14400},
+    'awx.main.tasks.host_metrics.update_host_metric_inventory_counts': {'task': 'awx.main.tasks.host_metrics.update_host_metric_inventory_counts', 'schedule': 14400},
     'awx.main.tasks.system.periodic_resource_sync': {'task': 'awx.main.tasks.system.periodic_resource_sync', 'schedule': 900},
     'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback': {
         'task': 'awx.main.tasks.host_indirect.cleanup_and_save_indirect_host_entries_fallback',
@@ -992,6 +993,10 @@ CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
 # Host metric summary monthly task - last time of run
 HOST_METRIC_SUMMARY_TASK_LAST_TS = None
 HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
+
+# Host metric inventory counts task - last time of run
+HOST_METRIC_INVENTORY_COUNTS_LAST_TS = None
+HOST_METRIC_INVENTORY_COUNTS_INTERVAL = 1  # days
 
 
 # TODO: cmeyers, replace with with register pattern
