@@ -53,10 +53,13 @@ class LabelSubListCreateAttachDetachView(SubListCreateAttachDetachAPIView):
                 del request.data['name']
                 del request.data['organization']
 
-        # Give a 400 error if we have attached too many labels to this object
-        label_filter = self.parent_model._meta.get_field(self.relationship).remote_field.name
-        if Label.objects.filter(**{label_filter: self.kwargs['pk']}).count() > 100:
-            return Response(dict(msg=_(f'Maximum number of labels for {self.parent_model._meta.verbose_name_raw} reached.')), status=HTTP_400_BAD_REQUEST)
+        # Give a 400 error if we have attached too many labels to this object.
+        # Disassociation is handled by the parent post() and must remain available
+        # so an object over the limit can be recovered.
+        if 'disassociate' not in request.data:
+            label_filter = self.parent_model._meta.get_field(self.relationship).remote_field.name
+            if Label.objects.filter(**{label_filter: self.kwargs['pk']}).count() > 100:
+                return Response(dict(msg=_(f'Maximum number of labels for {self.parent_model._meta.verbose_name_raw} reached.')), status=HTTP_400_BAD_REQUEST)
 
         return super().post(request, *args, **kwargs)
 
