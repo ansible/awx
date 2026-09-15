@@ -188,6 +188,7 @@ class ImplicitRoleField(models.ForeignKey):
         kwargs.setdefault('null', 'True')
         kwargs.setdefault('editable', False)
         kwargs.setdefault('on_delete', models.SET_NULL)
+        kwargs.setdefault('db_index', False)
         super(ImplicitRoleField, self).__init__(*args, **kwargs)
 
     def deconstruct(self):
