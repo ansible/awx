@@ -4985,6 +4985,14 @@ class WorkflowApprovalTemplateJobsList(SubListAPIView):
     resource_purpose = 'workflow approvals of a workflow approval template'
 
 
+class WorkflowApprovalTemplateNotificationTemplatesApprovalList(SubListCreateAttachDetachAPIView):
+    model = models.NotificationTemplate
+    serializer_class = serializers.NotificationTemplateSerializer
+    parent_model = models.WorkflowApprovalTemplate
+    relationship = 'notification_templates_approvals'
+    resource_purpose = 'notification templates triggered on this specific approval node'
+
+
 class WorkflowApprovalList(ListAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalListSerializer
