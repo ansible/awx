@@ -2,6 +2,8 @@ from unittest import mock
 import pytest
 import json
 
+from django.test import override_settings
+
 from ansible_base.lib.utils.models import get_type_for_model
 
 from awx.api.versioning import reverse
@@ -279,3 +281,73 @@ def test_redact_survey_passwords_in_activity_stream(job_template_with_survey_pas
     changes_dict = json.loads(AS_record.changes)
     extra_vars = json.loads(changes_dict['extra_vars'])
     assert extra_vars['secret_key'] == '$encrypted$'
+
+
+FAKE_SURVEY_TIER2_PATTERN = r'^(?!.*<[a-zA-Z/!][^>]*>)[\s\S]*$'
+
+
+@pytest.fixture
+def fake_survey_tier2_pattern(monkeypatch):
+    monkeypatch.setattr('awx.api.validation_patterns.build_tier2_frontend_pattern', lambda: FAKE_SURVEY_TIER2_PATTERN)
+
+
+@pytest.mark.django_db
+def test_survey_spec_options_include_patterns_when_toggle_on(options, admin, job_template, fake_survey_tier2_pattern):
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = options(reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}), admin)
+    assert response.status_code == 200
+    post = response.data['actions']['POST']
+    assert post['name']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
+    assert 'pattern_description' in post['name']
+    assert post['description']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
+    assert post['spec']['question_name']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
+    assert post['spec']['variable']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
+    assert post['spec']['question_description']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
+    assert 'default' not in post['spec']
+    assert 'choices' not in post['spec']
+
+
+@pytest.mark.django_db
+def test_survey_spec_options_omit_patterns_when_toggle_off(options, admin, job_template, fake_survey_tier2_pattern):
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+        response = options(reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}), admin)
+    assert response.status_code == 200
+    post = response.data['actions']['POST']
+    assert 'pattern' not in post['name']
+    assert 'pattern' not in post['spec']['question_name']
+    assert post['spec']['variable']['type'] == 'string'
+
+
+@pytest.mark.django_db
+def test_workflow_survey_spec_options_include_patterns(options, admin, workflow_job_template, fake_survey_tier2_pattern):
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = options(reverse('api:workflow_job_template_survey_spec', kwargs={'pk': workflow_job_template.id}), admin)
+    assert response.status_code == 200
+    assert response.data['actions']['POST']['spec']['question_name']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
+
+
+@pytest.mark.django_db
+def test_survey_spec_post_rejects_markup_in_question_name(post, admin_user, job_template, survey_spec_factory):
+    survey_input_data = survey_spec_factory('new_question')
+    survey_input_data['spec'][0]['question_name'] = '<script>alert(1)</script>'
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        resp = post(
+            url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+            data=survey_input_data,
+            user=admin_user,
+            expect=400,
+        )
+    assert 'spec[0].question_name' in resp.data
+
+
+@pytest.mark.django_db
+def test_survey_spec_post_allows_markup_when_toggle_off(post, admin_user, job_template, survey_spec_factory):
+    survey_input_data = survey_spec_factory('new_question')
+    survey_input_data['spec'][0]['question_name'] = '<script>alert(1)</script>'
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+        post(
+            url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
+            data=survey_input_data,
+            user=admin_user,
+            expect=200,
+        )
