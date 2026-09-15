@@ -1935,3 +1935,140 @@ def test_administrative_workunit_reaper(work_unit_data, expected_function_call):
         simple_command.assert_called()
     else:
         simple_command.assert_not_called()
+
+
+class TestMaskProxyPassword:
+    def test_no_credentials(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        assert _mask_proxy_password('http://proxy.example.com:3128') == 'http://proxy.example.com:3128'
+
+    def test_user_and_password(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        result = _mask_proxy_password('http://user:s3cret@proxy.example.com:3128')
+        assert result == 'http://user:$encrypted$@proxy.example.com:3128'
+        assert 's3cret' not in result
+
+    def test_token_only(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        result = _mask_proxy_password('http://:token123@proxy.example.com:3128')
+        assert 'token123' not in result
+
+    def test_empty_string(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        assert _mask_proxy_password('') == ''
+
+    def test_socks_proxy(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        assert _mask_proxy_password('socks5://proxy.example.com:1080') == 'socks5://proxy.example.com:1080'
+
+    def test_socks_proxy_with_credentials(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        result = _mask_proxy_password('socks5://user:s3cret@proxy.example.com:1080')
+        assert result == 'socks5://user:$encrypted$@proxy.example.com:1080'
+        assert 's3cret' not in result
+
+    def test_token_as_username(self):
+        from awx.api.serializers import _mask_proxy_password
+
+        result = _mask_proxy_password('http://mytoken@proxy.example.com:3128')
+        assert 'mytoken' not in result
+        assert '$encrypted$@proxy.example.com:3128' in result
+
+
+@pytest.mark.usefixtures("patch_Organization")
+class TestInventoryUpdateProxy(TestJobExecution):
+    @pytest.fixture(autouse=True)
+    def mock_flag_enabled(self):
+        with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=False):
+            yield
+
+    @pytest.fixture
+    def inventory_update(self, execution_environment):
+        return InventoryUpdate(pk=1, execution_environment=execution_environment, inventory_source=InventorySource(pk=1, inventory=Inventory(pk=1)))
+
+    def test_proxy_sets_env_vars(self, mocker, inventory_update, private_data_dir, mock_me):
+        task = jobs.RunInventoryUpdate()
+        task.instance = inventory_update
+        inventory_update.source = 'ec2'
+        inventory_update.proxy = 'http://squid.example.com:3128'
+        inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
+        inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
+
+        private_data_files, _ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
+
+        for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+            assert env[var] == 'http://squid.example.com:3128'
+
+    def test_proxy_with_credentials(self, mocker, inventory_update, private_data_dir, mock_me):
+        task = jobs.RunInventoryUpdate()
+        task.instance = inventory_update
+        inventory_update.source = 'ec2'
+        inventory_update.proxy = 'http://user:s3cret@squid.example.com:3128'
+        inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
+        inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
+
+        private_data_files, _ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
+
+        for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+            assert env[var] == 'http://user:s3cret@squid.example.com:3128'
+
+    def test_empty_proxy_leaves_env_unchanged(self, mocker, inventory_update, private_data_dir, mock_me):
+        task = jobs.RunInventoryUpdate()
+        task.instance = inventory_update
+        inventory_update.source = 'ec2'
+        inventory_update.proxy = ''
+        inventory_update.get_cloud_credential = mocker.Mock(return_value=None)
+        inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
+
+        private_data_files, _ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
+
+        for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+            assert var not in env
+
+
+@pytest.mark.usefixtures("patch_Organization")
+class TestProjectUpdateProxy(TestJobExecution):
+    @pytest.fixture
+    def project_update(self, execution_environment):
+        org = Organization(pk=1)
+        proj = Project(pk=1, organization=org)
+        project_update = ProjectUpdate(pk=1, project=proj, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+        project_update.execution_environment = execution_environment
+        return project_update
+
+    def test_proxy_sets_env_vars(self, private_data_dir, project_update, mock_me):
+        project_update.proxy = 'https://proxy.example.com:8080'
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        env = task.build_env(project_update, private_data_dir)
+
+        for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+            assert env[var] == 'https://proxy.example.com:8080'
+
+    def test_proxy_with_credentials(self, private_data_dir, project_update, mock_me):
+        project_update.proxy = 'http://admin:p4ss@proxy.example.com:8080'
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        env = task.build_env(project_update, private_data_dir)
+
+        for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+            assert env[var] == 'http://admin:p4ss@proxy.example.com:8080'
+
+    def test_empty_proxy_leaves_env_unchanged(self, private_data_dir, project_update, mock_me):
+        project_update.proxy = ''
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        env = task.build_env(project_update, private_data_dir)
+
+        for var in ('http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY'):
+            assert var not in env
