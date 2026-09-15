@@ -89,6 +89,8 @@ class RunnerCallback:
         self.wrapup_event_dispatched = False
         self.artifacts_processed = False
         self.extra_update_fields = {}
+        self.dedup_threshold = None  # skip events with counter <= this (safe contiguous range already in DB)
+        self.persisted_counters = None  # skip events in this set (collision zone: counters above threshold already in DB)
 
     def update_model(self, pk, _attempt=0, **updates):
         return update_model(self.model, pk, _attempt=0, _max_attempts=self.update_attempts, **updates)
@@ -121,6 +123,57 @@ class RunnerCallback:
             self.delay_update(result_traceback=ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE)
         return self.extra_update_fields
 
+    def configure_for_job(self, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
+        """Initialize callback fields for event processing.
+
+        This is the single source of truth for RunnerCallback initialization, shared
+        between the normal job path (BaseTask.run) and adoption (reattach_to_work_unit).
+        Having both paths call this method means any missing field is caught by the
+        normal test suite rather than only by adoption-specific tests.
+
+        Args:
+            instance: the UnifiedJob model instance being run
+            safe_env: masked environment dict for log output. None → {} (adoption path,
+                where credentials are not available at reconnect time)
+            dedup_threshold: highest counter where all lower counters are in DB (contiguous
+                prefix). event_handler skips counter <= threshold with an O(1) check. None
+                disables dedup (normal jobs, zero overhead).
+            persisted_counters: small set of counters above dedup_threshold that are already
+                in DB (the collision zone from parallel callback worker races). Bounded by
+                worker concurrency, not job size. None when dedup is disabled.
+        """
+        self.instance = instance
+        self.job_created = str(instance.created)  # stamped on every event (callback.py:160)
+        self.safe_env = safe_env if safe_env is not None else {}
+        if getattr(instance, 'spawned_by_workflow', False):
+            try:
+                self.parent_workflow_job_id = instance.get_workflow_job().id
+            except Exception:
+                pass
+        self.dedup_threshold = dedup_threshold
+        self.persisted_counters = persisted_counters
+        # Populate host_map from inventory hostvars using the same logic as normal job path.
+        # This ensures adoption respects inventory types (smart, constructed, normal),
+        # enabled state, and job slicing — the same way write_inventory_file() does.
+        if hasattr(instance, 'inventory') and instance.inventory_id:
+            try:
+                script_params = dict(hostvars=True, towervars=True)
+                if hasattr(instance, 'job_slice_number'):
+                    script_params['slice_number'] = instance.job_slice_number
+                    script_params['slice_count'] = instance.job_slice_count
+                script_data = instance.inventory.get_script_data(**script_params)
+                for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
+                    self.host_map[hostname] = hv.get('remote_tower_id', '')
+            except Exception:
+                pass  # host_map stays {}; host_id won't be set on replayed events
+
+    @classmethod
+    def create_for_job(cls, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
+        """Factory: create and configure a RunnerCallback for a job."""
+        callback = cls(model=type(instance))
+        callback.configure_for_job(instance, safe_env, dedup_threshold, persisted_counters)
+        return callback
+
     def event_handler(self, event_data):
         #
         # ⚠️  D-D-D-DANGER ZONE ⚠️
@@ -144,6 +197,13 @@ class RunnerCallback:
         # logger
         if event_data.get('event') == 'keepalive':
             return
+        if self.dedup_threshold is not None:
+            counter = event_data.get('counter')
+            if counter is not None:
+                if counter <= self.dedup_threshold:
+                    return  # contiguous safe range — all in DB, O(1) check
+                if self.persisted_counters and counter in self.persisted_counters:
+                    return  # collision zone — in DB but above threshold, O(small-set) check
 
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':

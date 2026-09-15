@@ -46,7 +46,6 @@ from awx.main.constants import (
 )
 from awx.main.models import (
     Instance,
-    Inventory,
     InventorySource,
     UnifiedJob,
     Job,
@@ -203,6 +202,42 @@ def dispatch_waiting_jobs(binder):
             kwargs = {}
         binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
         UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
+
+
+def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
+    """Commit terminal status, trigger notifications, and emit websocket status.
+
+    Shared by BaseTask.run() (normal path) and adoption (reattach_to_work_unit path).
+    Uses duck typing on the instance to schedule dependent task/workflow managers.
+    """
+    all_fields = runner_callback.get_delayed_update_fields()
+    if extra_fields:
+        all_fields.update(extra_fields)
+    instance = update_model(model, pk, status=status, select_for_update=True, **all_fields)
+    if not instance:
+        return None
+    if (instance.host_status_counts is not None) or (not runner_callback.wrapup_event_dispatched):
+        events_processed_hook(instance)
+    instance.websocket_emit_status(status)
+
+    # Schedule dependent task/workflow managers via duck typing on the instance.
+    # This works for all job types: Job, ProjectUpdate, InventoryUpdate, etc.
+    instance.log_lifecycle("finalize_run")
+
+    if hasattr(instance, 'unifiedjob_blocked_jobs') and instance.unifiedjob_blocked_jobs.exists():
+        ScheduleTaskManager().schedule()
+
+    if hasattr(instance, 'spawned_by_workflow') and instance.spawned_by_workflow:
+        ScheduleWorkflowManager().schedule()
+
+    # For jobs with inventory, schedule computed fields update (RunJob-specific finalization)
+    if hasattr(instance, 'inventory_id') and instance.inventory_id:
+        try:
+            update_inventory_computed_fields.delay(instance.inventory_id)
+        except Exception:
+            logger.exception(f'{instance.log_format} Error scheduling inventory computed fields update')
+
+    return instance
 
 
 class BaseTask(object):
@@ -486,10 +521,6 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
-        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
-            # maintain a list of host_name --> host_id
-            # so we can associate emitted events to Host objects
-            self.runner_callback.host_map[hostname] = hv.get('remote_tower_id', '')
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
@@ -612,18 +643,6 @@ class BaseTask(object):
         """
         instance.log_lifecycle("post_run")
 
-    def final_run_hook(self, instance, status, private_data_dir):
-        """
-        Hook for any steps to run after job/task is marked as complete.
-        """
-        instance.log_lifecycle("finalize_run")
-
-        # Run task manager appropriately for speculative dependencies
-        if instance.unifiedjob_blocked_jobs.exists():
-            ScheduleTaskManager().schedule()
-        if instance.spawned_by_workflow:
-            ScheduleWorkflowManager().schedule()
-
     def should_use_fact_cache(self):
         return False
 
@@ -663,6 +682,7 @@ class BaseTask(object):
 
         self.safe_cred_env = {}
         private_data_dir = None
+        receptor_job = None
 
         try:
             if self.instance.execution_environment_id is None:
@@ -703,16 +723,9 @@ class BaseTask(object):
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
-            self.runner_callback.safe_env = build_safe_env(env)
-
-            self.runner_callback.instance = self.instance
-
-            # store a reference to the parent workflow job (if any) so we can include
-            # it in event data JSON
-            if self.instance.spawned_by_workflow:
-                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
-
-            self.runner_callback.job_created = str(self.instance.created)
+            # Initialize common callback fields so that the normal job path exercises
+            # the same configuration code as adoption.
+            self.runner_callback.configure_for_job(self.instance, safe_env=build_safe_env(env))
 
             credentials = self._credentials
 
@@ -832,23 +845,14 @@ class BaseTask(object):
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
-        self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
-
-        # Field host_status_counts is used as a metric to check if event processing is finished
-        # we send notifications if it is, if not, callback receiver will send them
+        self.private_data_dir = private_data_dir
+        self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
+        if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+            receptor_job._receptor_release_work(receptor_job.receptor_ctl, status)
         if not self.instance:
             logger.error(f'Unified job pk={pk} appears to be deleted while running')
             return
-        if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            events_processed_hook(self.instance)
 
-        try:
-            self.final_run_hook(self.instance, status, private_data_dir)
-        except Exception:
-            logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
-
-        self.instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
                 raise AwxTaskError.TaskCancel(self.instance, rc)
@@ -1373,16 +1377,6 @@ class RunJob(SourceControlMixin, BaseTask):
                 inventory_id=job.inventory_id,
                 job_created=job.created,
             )
-
-    def final_run_hook(self, job, status, private_data_dir):
-        super(RunJob, self).final_run_hook(job, status, private_data_dir)
-        try:
-            inventory = job.inventory
-        except Inventory.DoesNotExist:
-            pass
-        else:
-            if inventory is not None:
-                update_inventory_computed_fields.delay(inventory.id)
 
 
 @task(queue=get_task_queuename)
