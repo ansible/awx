@@ -40,10 +40,7 @@ from django.http import HttpResponse
 
 
 def mark_deprecated(
-    response: HttpResponse,
-    link: str = "https://docs.ansible.com/aap/latest/changelog#deprecations",
-    detail: str = "",
-    warning_text: Optional[str] = None
+    response: HttpResponse, link: str = "https://docs.ansible.com/aap/latest/changelog#deprecations", detail: str = "", warning_text: Optional[str] = None
 ) -> HttpResponse:
     """
     Mark a response as deprecated by adding deprecation headers.
@@ -96,11 +93,7 @@ def mark_deprecated(
     return response
 
 
-def deprecated(
-    link: str,
-    detail: str,
-    warning_text: Optional[str] = None
-):
+def deprecated(link: str, detail: str, warning_text: Optional[str] = None):
     """
     Decorator to mark an entire view/endpoint as deprecated.
 
@@ -122,6 +115,7 @@ def deprecated(
             def list(self, request):
                 ...
     """
+
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(*args, **kwargs):
@@ -140,4 +134,5 @@ def deprecated(
             return response
 
         return wrapper
+
     return decorator

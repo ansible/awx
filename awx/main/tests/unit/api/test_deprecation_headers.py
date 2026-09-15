@@ -25,10 +25,7 @@ class TestMarkDeprecatedUtility:
     def test_mark_deprecated_adds_required_headers(self):
         """X-Deprecated and Link headers are added."""
         response = Response({"data": "test"})
-        result = mark_deprecated(
-            response,
-            link="https://docs.example.com/deprecations"
-        )
+        result = mark_deprecated(response, link="https://docs.example.com/deprecations")
 
         assert result['X-Deprecated'] == 'true'
         assert 'https://docs.example.com/deprecations' in result['Link']
@@ -38,11 +35,7 @@ class TestMarkDeprecatedUtility:
     def test_mark_deprecated_with_detail(self):
         """X-Deprecated-Detail header is added when detail is provided."""
         response = Response({"data": "test"})
-        mark_deprecated(
-            response,
-            link="https://docs.example.com/deprecations",
-            detail="Use /api/v2/new_endpoint/ instead"
-        )
+        mark_deprecated(response, link="https://docs.example.com/deprecations", detail="Use /api/v2/new_endpoint/ instead")
 
         assert response['X-Deprecated'] == 'true'
         assert response['X-Deprecated-Detail'] == "Use /api/v2/new_endpoint/ instead"
@@ -50,10 +43,7 @@ class TestMarkDeprecatedUtility:
     def test_mark_deprecated_without_detail(self):
         """X-Deprecated-Detail header is not added when detail is omitted."""
         response = Response({"data": "test"})
-        mark_deprecated(
-            response,
-            link="https://docs.example.com/deprecations"
-        )
+        mark_deprecated(response, link="https://docs.example.com/deprecations")
 
         assert response['X-Deprecated'] == 'true'
         assert 'X-Deprecated-Detail' not in response
@@ -63,10 +53,7 @@ class TestMarkDeprecatedUtility:
         response = Response({"data": "test"})
         response['Link'] = '<https://example.com/other>; rel="alternate"'
 
-        mark_deprecated(
-            response,
-            link="https://docs.example.com/deprecations"
-        )
+        mark_deprecated(response, link="https://docs.example.com/deprecations")
 
         link_header = response['Link']
         assert '<https://example.com/other>; rel="alternate"' in link_header
@@ -76,10 +63,7 @@ class TestMarkDeprecatedUtility:
     def test_mark_deprecated_returns_response(self):
         """Function returns the response for chaining convenience."""
         response = Response({"data": "test"})
-        result = mark_deprecated(
-            response,
-            link="https://docs.example.com/deprecations"
-        )
+        result = mark_deprecated(response, link="https://docs.example.com/deprecations")
 
         assert result is response
 
@@ -89,6 +73,7 @@ class TestDeprecatedDecorator:
 
     def test_decorator_adds_headers(self):
         """Decorator adds deprecation headers to response."""
+
         class TestView:
             @deprecated(link="https://docs.example.com/deprecations")
             def get(self, request):
@@ -104,11 +89,9 @@ class TestDeprecatedDecorator:
 
     def test_decorator_with_detail(self):
         """Decorator adds detail header when provided."""
+
         class TestView:
-            @deprecated(
-                link="https://docs.example.com/deprecations",
-                detail="Use the new API instead"
-            )
+            @deprecated(link="https://docs.example.com/deprecations", detail="Use the new API instead")
             def get(self, request):
                 return Response({"data": "test"})
 
@@ -122,6 +105,7 @@ class TestDeprecatedDecorator:
 
     def test_decorator_preserves_response_data(self):
         """Decorator doesn't modify the response body."""
+
         class TestView:
             @deprecated(link="https://docs.example.com/deprecations")
             def get(self, request):
@@ -254,10 +238,8 @@ class TestValidationScript:
         try:
             # Import should not raise
             import importlib.util
-            spec = importlib.util.spec_from_file_location(
-                "validate_deprecation_annotations",
-                script_path / "validate-deprecation-annotations.py"
-            )
+
+            spec = importlib.util.spec_from_file_location("validate_deprecation_annotations", script_path / "validate-deprecation-annotations.py")
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
