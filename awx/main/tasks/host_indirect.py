@@ -85,7 +85,7 @@ def _resolve_event_query(event, job_event_queries, job_event_queries_fqcn):
 
 
 def _process_jq_result(data, resolved_action, event, jq_str, job, results, log_state):
-    """Process a single jq result into an audit record. Returns True if a record was created/updated."""
+    """Process a single jq result into an audit record."""
     if not data.get('canonical_facts'):
         if not log_state['facts_missing']:
             logger.error(f'jq output missing canonical_facts for module {resolved_action} on event {event.id} using jq:{jq_str}')
@@ -137,8 +137,8 @@ def build_indirect_host_data(job: Job, job_event_queries: dict[str, dict[str, st
             continue
 
         if jq_str not in compiled_jq_expressions:
-            compiled_jq_expressions[resolved_action] = jq.compile(jq_str)
-        compiled_jq = compiled_jq_expressions[resolved_action]
+            compiled_jq_expressions[jq_str] = jq.compile(jq_str)
+        compiled_jq = compiled_jq_expressions[jq_str]
 
         data_source = _execute_jq_query(compiled_jq, event.event_data['res'], resolved_action, event.id, s_metrics)
         if data_source is None:
