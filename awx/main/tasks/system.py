@@ -524,6 +524,34 @@ def cleanup_images_and_files():
     CleanupImagesAndFiles.run(image_prune=True)
 
 
+@task(queue=get_task_queuename, timeout=60, on_duplicate='queue_one')
+def control_node_health_check(node):
+    """Run local_health_check on a control or hybrid node.
+
+    Must be dispatched with queue=<target hostname> so it executes on the
+    correct pod, since local_health_check reads the local process's CPU,
+    memory, Redis connectivity, and version.
+    """
+    if not node:
+        logger.warning('Control node health check incorrectly called with blank hostname')
+        return
+    if node != settings.CLUSTER_HOST_ID:
+        logger.warning(f'control_node_health_check for {node} executed on {settings.CLUSTER_HOST_ID}; skipping to avoid recording wrong host metrics.')
+        return
+    try:
+        instance = Instance.objects.get(hostname=node)
+    except Instance.DoesNotExist:
+        logger.warning(f'Instance record for {node} missing, could not run health check.')
+        return
+    if instance.node_type not in ('control', 'hybrid'):
+        logger.warning(f'Control node health check called for {instance.node_type} node {node}')
+        return
+    if instance.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+        logger.warning(f'Control node health check ran against node {instance.hostname} in state {instance.node_state}')
+        return
+    instance.local_health_check()
+
+
 @task(queue=get_task_queuename, timeout=600, on_duplicate='queue_one')
 def execution_node_health_check(node):
     if node == '':

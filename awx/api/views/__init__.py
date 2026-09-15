@@ -524,8 +524,7 @@ class InstanceHealthCheck(GenericAPIView):
     resource_purpose = 'instance health check'
 
     def get_queryset(self):
-        return super().get_queryset().filter(node_type='execution')
-        # FIXME: For now, we don't have a good way of checking the health of a hop node.
+        return super().get_queryset().exclude(node_type='hop')
 
     @extend_schema_if_available(extensions={"x-ai-description": "Get instance health check result"})
     def get(self, request, *args, **kwargs):
@@ -539,16 +538,21 @@ class InstanceHealthCheck(GenericAPIView):
         if obj.health_check_pending:
             return Response({'msg': f"Health check was already in progress for {obj.hostname}."}, status=status.HTTP_200_OK)
 
-        # Note: hop nodes are already excluded by the get_queryset method
-        obj.health_check_started = now()
-        obj.save(update_fields=['health_check_started'])
         if obj.node_type == models.Instance.Types.EXECUTION:
             from awx.main.tasks.system import execution_node_health_check
 
+            obj.health_check_started = now()
+            obj.save(update_fields=['health_check_started'])
             execution_node_health_check.apply_async([obj.hostname])
+        elif obj.node_type in (models.Instance.Types.CONTROL, models.Instance.Types.HYBRID):
+            from awx.main.tasks.system import control_node_health_check
+
+            obj.health_check_started = now()
+            obj.save(update_fields=['health_check_started'])
+            control_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
         else:
             return Response(
-                {"error": f"Cannot run a health check on instances of type {obj.node_type}.  Health checks can only be run on execution nodes."},
+                {"error": f"Cannot run a health check on instances of type {obj.node_type}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response({'msg': f"Health check is running for {obj.hostname}."}, status=status.HTTP_200_OK)
