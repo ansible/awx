@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from awx.main import models
 from awx.main.analytics.metrics import metrics
 from awx.main.analytics.analytics_tasks import send_subsystem_metrics
+import awx.main.analytics.subsystem_metrics as subsystem_metrics_module
 from awx.main.analytics.subsystem_metrics import IndirectCountingMetrics
 from awx.main.analytics.dispatcherd_metrics import get_dispatcherd_metrics
 from awx.api.versioning import reverse
@@ -157,3 +158,16 @@ def test_indirect_counting_metrics_init():
     assert 'indirect_node_query_execution_seconds' in m.METRICS
     assert 'indirect_node_jq_query_errors' in m.METRICS
     assert 'indirect_node_fallback_cleanup_seconds' in m.METRICS
+
+
+@mock.patch.object(subsystem_metrics_module, 'IndirectCountingMetrics')
+@mock.patch.object(subsystem_metrics_module, 'CallbackReceiverMetrics')
+@mock.patch.object(subsystem_metrics_module, 'DispatcherMetrics')
+@mock.patch.object(subsystem_metrics_module, 'get_dispatcherd_metrics', return_value='')
+def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd, mock_dispatcher, mock_callback, mock_indirect):
+    """subsystem_metrics.metrics() calls generate_metrics on IndirectCountingMetrics."""
+    for m in (mock_dispatcher, mock_callback, mock_indirect):
+        m.return_value.generate_metrics.return_value = ''
+    request = mock.MagicMock()
+    subsystem_metrics_module.metrics(request)
+    mock_indirect.return_value.generate_metrics.assert_called_once_with(request)

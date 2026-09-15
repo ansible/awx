@@ -578,3 +578,45 @@ def test_job_deleted_between_fetch_and_lock(bare_job):
 
     with mock.patch('awx.main.tasks.host_indirect.transaction.atomic', side_effect=delete_then_atomic):
         save_indirect_host_entries(job_id, wait_for_events=False)
+
+
+def test_process_jq_result_missing_canonical_facts():
+    """Data without canonical_facts should be skipped and an error logged once; second call skips logging."""
+    data = {'name': 'vm-1'}
+    log_state = {'facts_missing': False, 'unhashable': False, 'name_missing': set()}
+    results = {}
+    event = mock.MagicMock()
+    with mock.patch('awx.main.tasks.host_indirect.logger') as mock_logger:
+        _process_jq_result(data, 'demo.query.example', event, 'jq_str', mock.MagicMock(), results, log_state)
+    assert results == {}
+    assert log_state['facts_missing'] is True
+    mock_logger.error.assert_called_once()
+
+    with mock.patch('awx.main.tasks.host_indirect.logger') as mock_logger2:
+        _process_jq_result(data, 'demo.query.example', event, 'jq_str', mock.MagicMock(), results, log_state)
+    assert results == {}
+    mock_logger2.error.assert_not_called()
+
+
+def test_process_jq_result_unhashable_already_logged():
+    """Second unhashable fact does not log again when already flagged."""
+    data = {'canonical_facts': {frozenset(): 'bad'}, 'name': 'vm-1'}
+    log_state = {'facts_missing': False, 'unhashable': True, 'name_missing': set()}
+    results = {}
+    event = mock.MagicMock()
+    with mock.patch('awx.main.tasks.host_indirect.logger') as mock_logger:
+        _process_jq_result(data, 'demo.query.example', event, 'jq_str', mock.MagicMock(), results, log_state)
+    assert results == {}
+    mock_logger.info.assert_not_called()
+
+
+def test_process_jq_result_null_name_already_logged():
+    """Second null-name event for the same resolved_action does not log again."""
+    data = {'canonical_facts': {'host_name': 'foo'}, 'name': None}
+    log_state = {'facts_missing': False, 'unhashable': False, 'name_missing': {'demo.query.example'}}
+    results = {}
+    event = mock.MagicMock()
+    with mock.patch('awx.main.tasks.host_indirect.logger') as mock_logger:
+        _process_jq_result(data, 'demo.query.example', event, 'jq_str', mock.MagicMock(), results, log_state)
+    assert results == {}
+    mock_logger.warning.assert_not_called()
