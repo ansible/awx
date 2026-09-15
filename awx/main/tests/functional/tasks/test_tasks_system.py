@@ -549,6 +549,39 @@ def test_heartbeat_defers_lost_instances_when_mesh_gate_blocks(settings):
 
 
 @pytest.mark.django_db
+def test_kubernetes_passes_mesh_gate_with_empty_routing(settings):
+    """In Kubernetes (IS_K8S=True), empty routing is normal — gate passes."""
+    settings.CLUSTER_HOST_ID = 'ctrl-0'
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+    settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+    settings.IS_K8S = True
+
+    this_inst = Instance.objects.create(hostname='ctrl-0', node_type='control', node_state='ready')
+    this_inst.last_seen = now() - timedelta(seconds=30)
+    this_inst.save(update_fields=['last_seen'])
+
+    lost_inst = Instance.objects.create(hostname='ctrl-1', node_type='control', node_state='ready')
+    lost_inst.last_seen = now() - timedelta(seconds=200)
+    lost_inst.save(update_fields=['last_seen'])
+
+    mock_ctl = mock.MagicMock()
+    # Empty routing in K8s is expected steady state
+    mock_ctl.simple_command.return_value = {'KnownConnectionCosts': {}, 'Advertisements': []}
+
+    with (
+        mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl),
+        mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
+        mock.patch.object(Instance, 'local_health_check'),
+    ):
+        _, _, lost_result = _heartbeat_instance_management()
+
+    # K8s bypasses the gate — lost instances are reaped even with empty routing
+    assert len(lost_result) == 1
+    assert lost_result[0].hostname == 'ctrl-1'
+
+
+@pytest.mark.django_db
 def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
     """FileNotFoundError from get_receptor_ctl → this_inst marked offline, returns (None, None, None)."""
     settings.CLUSTER_HOST_ID = 'ctrl-0'
