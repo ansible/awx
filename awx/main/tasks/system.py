@@ -732,6 +732,9 @@ def _mesh_all_ready_nodes_visible(mesh_status):
     populates this table as connections establish via gossip. An empty table means no
     routing has propagated yet (Window A — typically the first ~10s after restart).
 
+    In Kubernetes (IS_K8S=True), controller pods are stateless and independent with no
+    peer connections expected. Empty routing is the normal steady state, not instability.
+
     No DB state is consulted. KnownConnectionCosts is maintained entirely by the receptor
     Go process, making it a reliable mesh-state signal free of stale DB records.
 
@@ -740,6 +743,8 @@ def _mesh_all_ready_nodes_visible(mesh_status):
     """
     if mesh_status is None:
         return True  # fail open: status unavailable, let normal peer-judgment proceed
+    if settings.IS_K8S:
+        return True  # K8s pods are stateless; no mesh consensus required
     if not (mesh_status.get('KnownConnectionCosts') or {}):
         logger.info('Mesh stability gate: routing table empty, deferring peer-judgment (receptor re-establishing)')
         return False
@@ -805,19 +810,7 @@ def _heartbeat_instance_management():
             return None, None, None
 
     if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
-        # Only defer control nodes (they need mesh consensus)
-        # Execution nodes can be reaped immediately (they don't need mesh)
-        control_lost = [inst for inst in lost_instances if inst.node_type == 'control']
-        execution_lost = [inst for inst in lost_instances if inst.node_type in ('execution', 'hop')]
-
-        if control_lost:
-            logger.info(
-                f'Mesh stability gate: deferring cleanup for {len(control_lost)} control node(s) '
-                f'due to mesh instability, but reaping {len(execution_lost)} execution/hop node(s)'
-            )
-            return this_inst, instance_list, execution_lost
-        # All lost nodes are execution/hop type, safe to reap all
-        return this_inst, instance_list, execution_lost
+        return this_inst, instance_list, []
 
     return this_inst, instance_list, lost_instances
 
