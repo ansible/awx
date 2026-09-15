@@ -728,7 +728,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Attach the object to the collection.
-        if sub not in relationship.all():
+        if not relationship.contains(sub):
             relationship.add(sub)
 
         if created:
