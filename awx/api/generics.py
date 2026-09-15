@@ -306,8 +306,7 @@ class APIView(views.APIView):
             response['X-Deprecated-Detail'] = detail
 
             # Link to changelog/migration docs
-            link = getattr(self, 'deprecation_link',
-                          'https://docs.ansible.com/ansible-tower/latest/html/release-notes/deprecations.html')
+            link = getattr(self, 'deprecation_link', 'https://docs.ansible.com/ansible-tower/latest/html/release-notes/deprecations.html')
             response['Link'] = f'<{link}>; rel="deprecation"'
 
             # Keep legacy Warning header for backward compatibility during transition
