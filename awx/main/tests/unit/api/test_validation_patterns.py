@@ -234,3 +234,101 @@ class TestInjectTopLevelCleanTextPatterns:
 
         assert result['pattern'] == 'FAKE'
         assert calls == [(sentinel_field, field_info)]
+
+
+class TestBuildSurveySpecOptionsSchema:
+    def test_injects_patterns_when_toggle_on(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            schema = validation_patterns.build_survey_spec_options_schema()
+        assert schema['name']['pattern'] == FAKE_PATTERN
+        assert schema['name']['pattern_description'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
+        assert schema['description']['pattern'] == FAKE_PATTERN
+        assert schema['spec']['type'] == 'json'
+        assert schema['spec']['question_name']['pattern'] == FAKE_PATTERN
+        assert schema['spec']['question_description']['pattern'] == FAKE_PATTERN
+        assert schema['spec']['variable']['pattern'] == FAKE_PATTERN
+        assert 'default' not in schema['spec']
+        assert 'choices' not in schema['spec']
+
+    def test_omits_patterns_when_toggle_off(self, fake_tier2_pattern):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+            schema = validation_patterns.build_survey_spec_options_schema()
+        assert 'pattern' not in schema['name']
+        assert 'pattern' not in schema['description']
+        assert 'pattern' not in schema['spec']['question_name']
+        assert schema['spec']['variable']['type'] == 'string'
+
+
+def _survey_payload(**overrides):
+    question = {
+        'question_name': 'Question',
+        'question_description': 'Help',
+        'variable': 'my_var',
+        'type': 'text',
+        'required': True,
+    }
+    question.update(overrides.pop('question', {}))
+    payload = {'name': 'Survey', 'description': 'Desc', 'spec': [question]}
+    payload.update(overrides)
+    return payload
+
+
+class TestCollectSurveySpecTextErrors:
+    def test_no_op_when_toggle_off(self):
+        payload = _survey_payload(question={'question_name': '<script>x</script>'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+            assert validation_patterns.collect_survey_spec_text_errors(payload) is None
+
+    def test_rejects_markup_in_editor_strings(self):
+        if validation_patterns._validate_free_text is None:
+            pytest.skip('DAB validate_free_text is unavailable')
+        payload = _survey_payload(question={'question_name': '<script>x</script>'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            errors = validation_patterns.collect_survey_spec_text_errors(payload)
+        assert errors is not None
+        assert 'spec[0].question_name' in errors
+
+    def test_rejects_top_level_name(self):
+        if validation_patterns._validate_free_text is None:
+            pytest.skip('DAB validate_free_text is unavailable')
+        payload = _survey_payload()
+        payload['name'] = '<b>bad</b>'
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            errors = validation_patterns.collect_survey_spec_text_errors(payload)
+        assert errors is not None
+        assert 'name' in errors
+
+    def test_skips_default_and_choices(self):
+        if validation_patterns._validate_free_text is None:
+            pytest.skip('DAB validate_free_text is unavailable')
+        payload = _survey_payload(question={'default': '<script>x</script>', 'choices': '{{ foo }}'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            assert validation_patterns.collect_survey_spec_text_errors(payload) is None
+
+    def test_grandfathers_unchanged_invalid_values(self):
+        if validation_patterns._validate_free_text is None:
+            pytest.skip('DAB validate_free_text is unavailable')
+        old = _survey_payload(question={'question_name': '<script>old</script>'})
+        new = _survey_payload(question={'question_name': '<script>old</script>', 'question_description': 'updated'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            assert validation_patterns.collect_survey_spec_text_errors(new, old) is None
+
+    def test_validates_changed_question_name_against_legacy_sibling(self):
+        if validation_patterns._validate_free_text is None:
+            pytest.skip('DAB validate_free_text is unavailable')
+        old = _survey_payload(question={'question_name': '<script>old</script>'})
+        new = _survey_payload(question={'question_name': '<script>new</script>'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            errors = validation_patterns.collect_survey_spec_text_errors(new, old)
+        assert errors is not None
+        assert 'spec[0].question_name' in errors
+
+    def test_ignores_non_dict_payload(self):
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            assert validation_patterns.collect_survey_spec_text_errors('not-a-dict') is None
+
+    def test_no_op_when_validator_missing(self, monkeypatch):
+        monkeypatch.setattr(validation_patterns, '_validate_free_text', None)
+        payload = _survey_payload(question={'question_name': '<script>x</script>'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            assert validation_patterns.collect_survey_spec_text_errors(payload) is None

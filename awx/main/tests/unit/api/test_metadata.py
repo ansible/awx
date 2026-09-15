@@ -104,3 +104,22 @@ class TestMetadataNotificationConfigurationInjection:
         assert len(call_count) == 2
         assert 'email' in field_info
         assert 'slack' in field_info
+
+
+class TestMetadataSurveySpecOptions:
+    def test_post_schema_replaced_when_view_advertises_survey_spec(self, monkeypatch):
+        sentinel = {'name': {'type': 'string', 'pattern': 'FAKE'}}
+        monkeypatch.setattr(awx_metadata, 'build_survey_spec_options_schema', lambda: sentinel)
+        monkeypatch.setattr(awx_metadata, 'clone_request', lambda request, method: request)
+
+        metadata = awx_metadata.Metadata()
+        view = MagicMock()
+        view.advertises_survey_spec_schema = True
+        view.allowed_methods = {'GET', 'POST'}
+        view.check_permissions.return_value = None
+        view.get_serializer.return_value = PlainSerializer()
+
+        request = MagicMock()
+        actions = metadata.determine_actions(request, view)
+
+        assert actions['POST'] is sentinel

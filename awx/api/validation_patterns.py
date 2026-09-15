@@ -8,8 +8,8 @@ rather than using DAB's ``CleanTextMetadata``, so top-level CharField OPTIONS
 metadata is not handled automatically by DAB -- ``inject_top_level_clean_text_patterns``
 below is called directly from ``awx.api.metadata.Metadata.get_field_info`` to cover it.
 JSON sub-keys (credential inputs, notification config, credential input source
-metadata) are domain-owned schemas that DAB has no visibility into at all, so
-pattern injection for those lives here unconditionally.
+metadata, survey_spec question fields) are domain-owned schemas that DAB has no
+visibility into at all, so pattern injection for those lives here unconditionally.
 
 Depends on django-ansible-base PR #1119 (AAP-85987) for
 ``build_tier2_frontend_pattern`` and ``inject_clean_text_patterns``. Until that
@@ -35,7 +35,17 @@ try:
 except ImportError:  # pragma: no cover - DAB without AAP-85987
     TIER2_PATTERN_DESCRIPTION = "This field can't include HTML tags, script markup, unsafe URI schemes, shell or template syntax, or control characters."
 
+try:
+    from ansible_base.lib.utils.validation import validate_free_text as _validate_free_text
+except ImportError:  # pragma: no cover - DAB without CleanTextMixin validators
+    _validate_free_text = None
+
 _STRING_TYPES = frozenset({'string', 'str'})
+
+# Survey editor strings advertised on OPTIONS /survey_spec/ and validated on POST.
+# default/choices are omitted: they may contain Jinja/playbook text or password values.
+SURVEY_SPEC_TOP_LEVEL_TEXT_KEYS = ('name', 'description')
+SURVEY_QUESTION_TEXT_KEYS = ('question_name', 'question_description', 'variable')
 
 
 def enhanced_input_validation_enabled():
@@ -108,6 +118,95 @@ def inject_patterns_into_init_parameters(init_parameters):
             continue
         inject_free_text_pattern(field_schema, secret=field_schema.get('type') == 'password')
     return params
+
+
+def _survey_string_field_schema(*, required, label):
+    schema = {'type': 'string', 'required': required, 'label': label}
+    inject_free_text_pattern(schema)
+    return schema
+
+
+def build_survey_spec_options_schema():
+    """Return OPTIONS ``actions.POST`` metadata for ``/survey_spec/``.
+
+    ``JobTemplateSurveySpec`` uses ``EmptySerializer``, so DRF OPTIONS has no
+    nested field schema to stamp. This builds the JSON sub-key catalog the UI
+    survey editor needs (survey title plus question editor strings).
+    ``default`` / ``choices`` are not included — they may contain Jinja,
+    playbook text, or password values.
+    """
+    return {
+        'name': _survey_string_field_schema(required=True, label='Name'),
+        'description': _survey_string_field_schema(required=True, label='Description'),
+        'spec': {
+            'type': 'json',
+            'required': True,
+            'label': 'Spec',
+            'question_name': _survey_string_field_schema(required=True, label='Question'),
+            'question_description': _survey_string_field_schema(required=False, label='Description'),
+            'variable': _survey_string_field_schema(required=True, label='Answer variable name'),
+        },
+    }
+
+
+def _survey_questions_list(spec):
+    questions = spec.get('spec') if isinstance(spec, dict) else None
+    return questions if isinstance(questions, list) else []
+
+
+def _survey_questions_by_variable(questions):
+    return {q['variable']: q for q in questions if isinstance(q, dict) and isinstance(q.get('variable'), str)}
+
+
+def _matching_old_survey_question(item, idx, old_questions, old_by_var):
+    """Resolve the prior question for grandfathering (by variable, then index)."""
+    old_item = old_by_var.get(item.get('variable'))
+    if old_item is None and idx < len(old_questions) and isinstance(old_questions[idx], dict):
+        return old_questions[idx]
+    return old_item or {}
+
+
+def _record_survey_free_text_error(errors, error_key, value, old_value):
+    """Validate ``value`` with Tier 2 rules unless unchanged from ``old_value``."""
+    if not isinstance(value, str) or value == old_value:
+        return
+    from rest_framework.serializers import ValidationError
+
+    try:
+        _validate_free_text(value)
+    except ValidationError as exc:
+        errors[error_key] = exc.detail
+
+
+def _collect_survey_question_text_errors(errors, new_questions, old_questions):
+    old_by_var = _survey_questions_by_variable(old_questions)
+    for idx, item in enumerate(new_questions):
+        if not isinstance(item, dict):
+            continue
+        old_item = _matching_old_survey_question(item, idx, old_questions, old_by_var)
+        for field in SURVEY_QUESTION_TEXT_KEYS:
+            _record_survey_free_text_error(errors, f'spec[{idx}].{field}', item.get(field), old_item.get(field))
+
+
+def collect_survey_spec_text_errors(new_spec, old_spec=None):
+    """Return field-keyed Tier 2 errors for survey editor strings, or None.
+
+    Grandfathers unchanged values against ``old_spec`` (by variable, then index).
+    No-op when the install-time toggle is off or DAB validators are missing.
+    """
+    if not enhanced_input_validation_enabled() or _validate_free_text is None:
+        return None
+    if not isinstance(new_spec, dict):
+        return None
+
+    old_spec = old_spec if isinstance(old_spec, dict) else {}
+    errors = {}
+
+    for field in SURVEY_SPEC_TOP_LEVEL_TEXT_KEYS:
+        _record_survey_free_text_error(errors, field, new_spec.get(field), old_spec.get(field))
+
+    _collect_survey_question_text_errors(errors, _survey_questions_list(new_spec), _survey_questions_list(old_spec))
+    return errors or None
 
 
 def inject_top_level_clean_text_patterns(field, field_info):

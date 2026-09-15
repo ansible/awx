@@ -23,7 +23,7 @@ from rest_framework.request import clone_request
 
 # AWX
 from awx.api.fields import ChoiceNullField
-from awx.api.validation_patterns import inject_patterns_into_init_parameters, inject_top_level_clean_text_patterns
+from awx.api.validation_patterns import build_survey_spec_options_schema, inject_patterns_into_init_parameters, inject_top_level_clean_text_patterns
 from awx.main.fields import ImplicitRoleField
 from awx.main.models import NotificationTemplate
 from awx.main.utils.execution_environments import get_default_pod_spec
@@ -246,6 +246,11 @@ class Metadata(metadata.SimpleMetadata):
                         if field == 'id' and hasattr(view, 'attach'):
                             continue
                         actions[method].pop(field)
+
+        # Survey spec uses EmptySerializer, so POST has no field metadata unless we
+        # supply the JSON sub-key catalog (AAP-87586).
+        if getattr(view, 'advertises_survey_spec_schema', False) and 'POST' in actions:
+            actions['POST'] = build_survey_spec_options_schema()
 
         return actions
 
