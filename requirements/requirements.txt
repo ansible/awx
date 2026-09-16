@@ -182,7 +182,7 @@ frozenlist==1.8.0
     #   aiosignal
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.49
+gitpython==3.1.62
     # via -r /awx_devel/requirements/requirements.in
 googleapis-common-protos==1.70.0
     # via
@@ -290,6 +290,8 @@ multidict==6.7.0
     # via
     #   aiohttp
     #   yarl
+nh3==0.3.7
+    # via django-ansible-base
 oauthlib==3.3.1
     # via requests-oauthlib
 opa-python-client==2.0.2
@@ -398,9 +400,7 @@ pyopenssl==25.3.0
 pyparsing==3.3.2
     # via -r /awx_devel/requirements/requirements.in
 python-daemon==3.1.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   ansible-runner
+    # via -r /awx_devel/requirements/requirements.in
 python-dateutil==2.9.0.post0
     # via
     #   adal
@@ -437,6 +437,8 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
+regex==2026.9.10
+    # via django-ansible-base
 requests==2.32.5
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -483,7 +485,7 @@ slack-sdk==3.37.0
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.2
     # via gitdb
-sqlparse==0.5.3
+sqlparse==0.6.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
