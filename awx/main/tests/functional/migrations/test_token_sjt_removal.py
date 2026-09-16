@@ -69,20 +69,23 @@ def test_clear_token_sjt_clears_next_schedule():
 
     sjt = SystemJobTemplate.objects.get(name=SJT_NAME)
     sched = Schedule.objects.get(unified_job_template=sjt)
-    UnifiedJobTemplate.objects.filter(pk=sjt.pk).update(next_schedule=sched)
+    surviving_ujt = SystemJobTemplate.objects.get(job_type='cleanup_sessions')
+    UnifiedJobTemplate.objects.filter(pk=surviving_ujt.pk).update(next_schedule=sched)
 
     delete_clear_tokens_sjt(apps, None)
     assert SystemJobTemplate.objects.filter(name=SJT_NAME).count() == 0
     assert Schedule.objects.filter(name=SJT_NAME).count() == 0
-    ujt_refs = UnifiedJobTemplate.objects.filter(next_schedule_id=sched.pk).count()
-    assert ujt_refs == 0, 'Stale next_schedule references should be cleared'
+    surviving_ujt.refresh_from_db()
+    assert surviving_ujt.next_schedule is None, 'Stale next_schedule on surviving template should be cleared'
 
 
 @pytest.mark.django_db
 def test_cleanup_orphaned_token_schedules():
     """Simulate an orphaned schedule (UJT row missing) and verify the
-    cleanup migration removes it."""
+    cleanup migration removes it and clears stale next_schedule on a
+    surviving template."""
     Schedule = apps.get_model('main', 'Schedule')
+    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
     create_cleartokens_jt(apps, None)
 
@@ -90,8 +93,9 @@ def test_cleanup_orphaned_token_schedules():
     sched_id = sched.pk
     ujt_id = sched.unified_job_template_id
 
-    UnifiedJobTemplate.objects.filter(pk=ujt_id).update(next_schedule=sched)
-    # Delete the UJT row directly via SQL to simulate the broken cascade
+    surviving_ujt = SystemJobTemplate.objects.get(job_type='cleanup_sessions')
+    UnifiedJobTemplate.objects.filter(pk=surviving_ujt.pk).update(next_schedule=sched)
+
     from django.db import connection
 
     with connection.cursor() as cursor:
@@ -102,3 +106,5 @@ def test_cleanup_orphaned_token_schedules():
 
     cleanup_orphaned_token_schedules(apps, None)
     assert not Schedule.objects.filter(pk=sched_id).exists(), 'Orphaned schedule should be removed'
+    surviving_ujt.refresh_from_db()
+    assert surviving_ujt.next_schedule is None, 'Stale next_schedule on surviving template should be cleared'
