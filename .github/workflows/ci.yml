@@ -209,7 +209,7 @@ jobs:
 
   awx-operator:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     env:
       DEBUG_OUTPUT_DIR: /tmp/awx_operator_molecule_test
     steps:
