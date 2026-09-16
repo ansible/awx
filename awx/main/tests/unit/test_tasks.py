@@ -965,7 +965,7 @@ class TestCallbacksEnabled(TestJobExecution):
 
         assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,my_callback'
 
-    def test_collect_host_queries_set_when_flag_on(self, patch_Job, private_data_dir, execution_environment, mock_me):
+    def test_collect_host_queries_set_when_indirect_node_counting_enabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
@@ -974,12 +974,12 @@ class TestCallbacksEnabled(TestJobExecution):
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
-            with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True):
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True):
                 env = task.build_env(job, private_data_dir)
 
         assert env['AWX_COLLECT_HOST_QUERIES'] == '1'
 
-    def test_collect_host_queries_not_set_when_flag_off(self, patch_Job, private_data_dir, execution_environment, mock_me):
+    def test_collect_host_queries_not_set_when_indirect_node_counting_disabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
@@ -988,7 +988,8 @@ class TestCallbacksEnabled(TestJobExecution):
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
-            env = task.build_env(job, private_data_dir)
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
+                env = task.build_env(job, private_data_dir)
 
         assert 'AWX_COLLECT_HOST_QUERIES' not in env
 
@@ -1167,6 +1168,40 @@ class TestProjectUpdateCredentials(TestJobExecution):
         env = task.build_env(project_update, private_data_dir)
 
         assert env['FOO'] == 'BAR'
+
+
+class TestProjectUpdateSignatureValidation(TestJobExecution):
+    """Tests that ProjectUpdate.save() adds GPG validation job tags when a
+    signature_validation_credential is set on the project."""
+
+    def test_project_update_with_signature_credential_adds_validation_tags(self):
+        gpg_credential_type = CredentialType(pk=1, namespace='gpg_public_key', kind='cryptography')
+        gpg_credential = Credential(pk=1, credential_type=gpg_credential_type)
+        project = Project(pk=1, organization=Organization(pk=1), scm_type='git', signature_validation_credential=gpg_credential)
+        project_update = ProjectUpdate(pk=1, project=project, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+
+        # Simulate the save logic that sets job_tags without hitting the database
+        with mock.patch.object(UnifiedJob, 'save', return_value=None):
+            project_update.save()
+
+        assert 'validation_gpg_public_key' in project_update.job_tags
+        assert 'validation_checksum_manifest' in project_update.job_tags
+        assert 'update_git' in project_update.job_tags
+
+    def test_project_update_without_signature_credential_no_validation_tags(self):
+        project = Project(pk=1, organization=Organization(pk=1), scm_type='git')
+        project_update = ProjectUpdate(pk=1, project=project, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+
+        with mock.patch.object(UnifiedJob, 'save', return_value=None):
+            project_update.save()
+
+        assert 'validation_gpg_public_key' not in project_update.job_tags
+        assert 'validation_checksum_manifest' not in project_update.job_tags
+        assert 'update_git' in project_update.job_tags
+        assert 'install_roles' in project_update.job_tags
+        assert 'install_collections' in project_update.job_tags
 
 
 @pytest.mark.django_db

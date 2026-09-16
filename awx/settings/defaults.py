@@ -1007,6 +1007,7 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
 METRICS_SERVICE_DISPATCHER = 'dispatcherd'
 METRICS_SERVICE_WEBSOCKETS = 'websockets'
+METRICS_SERVICE_INDIRECT_COUNTING = 'indirect_counting'
 
 METRICS_SUBSYSTEM_CONFIG = {
     'server': {
@@ -1121,6 +1122,7 @@ SYSTEM_USERNAME = None
 # For indirect host query processing
 # if a job is not immediently confirmed to have all events processed
 # it will be eligable for processing after this number of minutes
+INDIRECT_NODE_COUNTING_ENABLED = True
 INDIRECT_HOST_QUERY_FALLBACK_MINUTES = 60
 
 # If an error happens in event collection, give up after this time
@@ -1147,7 +1149,6 @@ OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to
 OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
 
 # feature flags
-FEATURE_INDIRECT_NODE_COUNTING_ENABLED = False
 FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED = False
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired

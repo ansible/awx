@@ -1,5 +1,5 @@
 from awxkit.api.mixins import HasCreate, DSAdapter
-from awxkit.utils import random_title, PseudoNamespace
+from awxkit.utils import random_title, PseudoNamespace, poll_until
 from awxkit.api.resources import resources
 from awxkit.config import config
 
@@ -40,8 +40,13 @@ class User(HasCreate, base.Base):
             # Cleanup controller attributes
             payload["is_platform_auditor"] = payload.get("is_system_auditor")
             payload.pop("is_system_auditor")
-            # Create gw user
+            # Create gw user, then wait for controller sync
             gw_user = gw_users_api.post(payload)
+            poll_until(
+                lambda: len(ctrl_users_api.get(username=gw_user.username).results) > 0,
+                interval=1,
+                timeout=30,
+            )
             user = ctrl_users_api.get(username=gw_user.username).results.pop()
             user.json["password"] = payload.password
             self.update_identity(user)
