@@ -49,10 +49,27 @@ def test_clear_token_sjt():
     assert qs.count() == 1
     sjt = qs.first()
     assert Schedule.objects.filter(unified_job_template=sjt).count() == 1
-    assert Schedule.objects.filter(unified_job_template__systemjobtemplate__name=SJT_NAME).count() == 1
 
-    # Now run the migration logic to remove
     delete_clear_tokens_sjt(apps, None)
     assert SystemJobTemplate.objects.filter(name=SJT_NAME).count() == 0
-    # Making sure that the schedule is cleaned up is the main point of this test
-    assert Schedule.objects.filter(unified_job_template__systemjobtemplate__name=SJT_NAME).count() == 0
+    assert Schedule.objects.filter(name=SJT_NAME).count() == 0
+
+
+@pytest.mark.django_db
+def test_clear_token_sjt_clears_next_schedule():
+    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    Schedule = apps.get_model('main', 'Schedule')
+    UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
+    create_cleartokens_jt(apps, None)
+
+    sjt = SystemJobTemplate.objects.get(name=SJT_NAME)
+    sched = Schedule.objects.get(unified_job_template=sjt)
+    UnifiedJobTemplate.objects.filter(pk=sjt.pk).update(next_schedule=sched)
+
+    delete_clear_tokens_sjt(apps, None)
+    assert SystemJobTemplate.objects.filter(name=SJT_NAME).count() == 0
+    assert Schedule.objects.filter(name=SJT_NAME).count() == 0
+    ujt_refs = UnifiedJobTemplate.objects.filter(next_schedule_id=sched.pk).count()
+    assert ujt_refs == 0, 'Stale next_schedule references should be cleared'
+
+
