@@ -31,7 +31,7 @@ def cleanup_orphaned_token_schedules(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0211_create_metrics_utility_functions'),
+        ('main', '0207_merge_0205_0206'),
     ]
 
     operations = [
