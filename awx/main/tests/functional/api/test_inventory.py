@@ -139,7 +139,8 @@ def test_inventory_hosts_attach_uses_bounded_membership_check(inventory, post, a
     ]
     assert membership_check_queries, "expected a query checking host membership in the inventory"
     for sql in membership_check_queries:
-        assert '"main_host"."id" = ' in sql and 'LIMIT' in sql, f"attach() membership check is not a bounded per-host existence lookup: {sql}"
+        assert '"main_host"."id" = ' in sql, f"attach() membership check is not filtered by the host's own pk: {sql}"
+        assert 'LIMIT' in sql, f"attach() membership check is not LIMIT-bounded: {sql}"
 
 
 @pytest.mark.django_db
