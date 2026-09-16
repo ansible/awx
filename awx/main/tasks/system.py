@@ -810,7 +810,10 @@ def _heartbeat_instance_management():
             return None, None, None
 
     if lost_instances and not _mesh_all_ready_nodes_visible(mesh_status):
-        return this_inst, instance_list, []
+        # Mesh gate blocks cleanup, but execution and hop nodes can still be reaped
+        # (they don't depend on mesh consensus). Defer only control nodes.
+        execution_hop_lost = [inst for inst in lost_instances if inst.node_type in ('execution', 'hop')]
+        return this_inst, instance_list, execution_hop_lost
 
     return this_inst, instance_list, lost_instances
 

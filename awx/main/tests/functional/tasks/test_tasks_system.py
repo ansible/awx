@@ -548,6 +548,27 @@ def test_heartbeat_defers_lost_instances_when_mesh_gate_blocks(settings):
     assert lost_result == []
 
 
+@pytest.mark.parametrize(
+    'mesh_status',
+    [
+        {'KnownConnectionCosts': {}},
+        {'Connections': [], 'KnownConnectionCosts': {}, 'RoutingTable': {}},
+    ],
+)
+@pytest.mark.django_db
+def test_kubernetes_mesh_gate_allows_empty_routing(settings, mesh_status):
+    """In Kubernetes (IS_K8S=True), empty routing is normal — gate passes."""
+    settings.IS_K8S = True
+    assert _mesh_all_ready_nodes_visible(mesh_status) is True
+
+
+@pytest.mark.django_db
+def test_non_kubernetes_mesh_gate_blocks_empty_routing(settings):
+    """Non-Kubernetes deployments block cleanup when routing is empty."""
+    settings.IS_K8S = False
+    assert _mesh_all_ready_nodes_visible({'KnownConnectionCosts': {}}) is False
+
+
 @pytest.mark.django_db
 def test_kubernetes_passes_mesh_gate_with_empty_routing(settings):
     """In Kubernetes (IS_K8S=True), empty routing is normal — gate passes."""
@@ -579,6 +600,51 @@ def test_kubernetes_passes_mesh_gate_with_empty_routing(settings):
     # K8s bypasses the gate — lost instances are reaped even with empty routing
     assert len(lost_result) == 1
     assert lost_result[0].hostname == 'ctrl-1'
+
+
+@pytest.mark.django_db
+def test_mesh_gate_defers_control_but_cleans_execution_hop(settings):
+    """When mesh gate blocks cleanup, execution/hop nodes are reaped but control nodes are deferred."""
+    settings.CLUSTER_HOST_ID = 'ctrl-0'
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+    settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+    settings.IS_K8S = False  # Non-K8s: mesh gate can block
+
+    this_inst = Instance.objects.create(hostname='ctrl-0', node_type='control', node_state='ready')
+    this_inst.last_seen = now() - timedelta(seconds=30)
+    this_inst.save(update_fields=['last_seen'])
+
+    # Create lost instances of different types
+    lost_exec = Instance.objects.create(hostname='exec-1', node_type='execution', node_state='ready')
+    lost_exec.last_seen = now() - timedelta(seconds=200)
+    lost_exec.save(update_fields=['last_seen'])
+
+    lost_hop = Instance.objects.create(hostname='hop-1', node_type='hop', node_state='ready')
+    lost_hop.last_seen = now() - timedelta(seconds=200)
+    lost_hop.save(update_fields=['last_seen'])
+
+    lost_ctrl = Instance.objects.create(hostname='ctrl-1', node_type='control', node_state='ready')
+    lost_ctrl.last_seen = now() - timedelta(seconds=200)
+    lost_ctrl.save(update_fields=['last_seen'])
+
+    mock_ctl = mock.MagicMock()
+    # Empty routing — mesh gate will block
+    mock_ctl.simple_command.return_value = {'KnownConnectionCosts': {}, 'Advertisements': []}
+
+    with (
+        mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl),
+        mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
+        mock.patch.object(Instance, 'local_health_check'),
+    ):
+        _, _, lost_result = _heartbeat_instance_management()
+
+    # Execution and hop nodes should be in lost_result (reaped immediately)
+    # Control node should be deferred (not in lost_result)
+    hostnames = [inst.hostname for inst in lost_result]
+    assert 'exec-1' in hostnames, 'Execution node should be in lost list even when mesh gate blocks'
+    assert 'hop-1' in hostnames, 'Hop node should be in lost list even when mesh gate blocks'
+    assert 'ctrl-1' not in hostnames, 'Control node should be deferred when mesh gate blocks'
 
 
 @pytest.mark.django_db
