@@ -162,3 +162,50 @@ def test_setting_singleton_delete_no_read_only_fields(api_request, dummy_setting
         api_request('delete', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         assert response.data['FOO_BAR'] == 23
+
+
+#
+# CleanTextMixin on SettingSingletonSerializer (via PlainSerializerCleanTextMixin)
+#
+
+UNSAFE_SETTING_INPUT = '<script>x</script>'
+
+
+@pytest.fixture
+def enforce_clean_text():
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        yield
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_char_field(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting('FOO_BAR', field_class=fields.CharField, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_BAR': UNSAFE_SETTING_INPUT})
+        assert response.status_code == 400
+        assert 'FOO_BAR' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_skips_encrypted_fields(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting('FOO_SECRET', field_class=fields.CharField, encrypted=True, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_SECRET': UNSAFE_SETTING_INPUT})
+        assert response.status_code == 200
+        assert decrypt_field(Setting.objects.get(key='FOO_SECRET'), 'value') == UNSAFE_SETTING_INPUT
+
+
+@pytest.mark.django_db
+def test_setting_singleton_skips_custom_login_info_html(api_request, enforce_clean_text):
+    with mock.patch('awx.conf.views.clear_setting_cache'):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'}),
+            data={'CUSTOM_LOGIN_INFO': '<p>Legal notice</p>'},
+        )
+        assert response.status_code == 200
+        assert response.data['CUSTOM_LOGIN_INFO'] == '<p>Legal notice</p>'
