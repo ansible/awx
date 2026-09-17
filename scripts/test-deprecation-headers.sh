@@ -3,24 +3,33 @@
 # Test all 6 deprecation header scenarios against a running AWX instance.
 #
 # Usage:
-#   BASE_URL=https://localhost TOKEN=your_token bash scripts/test-deprecation-headers.sh
+#   TOKEN=your_token bash scripts/test-deprecation-headers.sh
+#   AUTH=admin:password bash scripts/test-deprecation-headers.sh
 #
 # Environment variables:
-#   BASE_URL  - AWX base URL (default: https://localhost)
-#   TOKEN     - OAuth2 token for authentication (required)
+#   BASE_URL  - AWX base URL (default: https://localhost:8043)
+#   TOKEN     - OAuth2 token for authentication
+#   AUTH      - Basic auth credentials (user:pass), used if TOKEN is not set
 #   INSECURE  - Set to "1" to skip TLS verification (default: 1)
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-https://localhost}"
-TOKEN="${TOKEN:?ERROR: TOKEN environment variable is required}"
+BASE_URL="${BASE_URL:-https://localhost:8043}"
 INSECURE="${INSECURE:-1}"
 
 CURL_OPTS=(-s -o /dev/null -D -)
 if [[ "$INSECURE" == "1" ]]; then
     CURL_OPTS+=(-k)
 fi
-AUTH_HEADER="Authorization: Bearer ${TOKEN}"
+
+if [[ -n "${TOKEN:-}" ]]; then
+    AUTH_OPTS=(-H "Authorization: Bearer ${TOKEN}")
+elif [[ -n "${AUTH:-}" ]]; then
+    AUTH_OPTS=(-u "${AUTH}")
+else
+    echo "ERROR: Set TOKEN or AUTH environment variable"
+    exit 1
+fi
 
 PASS=0
 FAIL=0
@@ -72,13 +81,13 @@ run_test() {
     local headers
     if [[ "$method" == "POST" && -n "$body" ]]; then
         headers=$(curl "${CURL_OPTS[@]}" -X POST \
-            -H "$AUTH_HEADER" \
+            "${AUTH_OPTS[@]}" \
             -H "Content-Type: application/json" \
             -d "$body" \
             "${BASE_URL}${url}")
     else
         headers=$(curl "${CURL_OPTS[@]}" -X GET \
-            -H "$AUTH_HEADER" \
+            "${AUTH_OPTS[@]}" \
             "${BASE_URL}${url}")
     fi
 
@@ -115,12 +124,10 @@ run_test 1 "Deprecated endpoint" \
     "Link=rel=\"deprecation\"" \
     "Warning=299"
 
-# Scenario 2: Deprecated parameter (user/team fields on credential create)
-# NOTE: This POST will likely fail (400/403) because it's incomplete,
-# but we only care about the deprecation headers on the response.
+# Scenario 2: Deprecated parameter (user/team fields on credentials endpoint)
+# Now emits on every response, including GET
 run_test 2 "Deprecated parameter (user/team fields)" \
-    POST "/api/v2/credentials/" \
-    '{"name":"dep-test","credential_type":1,"user":1}' \
+    GET "/api/v2/credentials/" "" \
     "X-Deprecated=true" \
     "X-Deprecated-Detail=user"
 
@@ -143,11 +150,12 @@ run_test 5 "Deprecated API version (v2)" \
     "X-Deprecated-Detail=v2" \
     "Link=rel=\"deprecation\""
 
-# Scenario 6: Multiple deprecations on one endpoint
+# Scenario 6: Multiple deprecations on one endpoint (endpoint + parameter in same detail)
 run_test 6 "Multiple deprecations (endpoint + parameter)" \
     GET "/api/v2/dashboard/?legacy_format=true" "" \
     "X-Deprecated=true" \
     "X-Deprecated-Detail=legacy_format" \
+    "Link=rel=\"deprecation\"" \
     "Warning=299"
 
 echo ""
