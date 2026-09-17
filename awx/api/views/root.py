@@ -25,6 +25,7 @@ import requests
 
 from ansible_base.lib.utils.schema import extend_schema_if_available
 
+from awx.api.deprecation import mark_deprecated
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
@@ -130,6 +131,15 @@ class ApiVersionRootView(APIView):
 class ApiV2RootView(ApiVersionRootView):
     name = _('Version 2')
     resource_purpose = 'api v2 root'
+
+    def get(self, request, format=None):
+        response = super().get(request, format=format)
+        mark_deprecated(
+            response,
+            detail="API v2 is deprecated and will be removed in a future release; migrate to /api/v3/ when available",
+            link="https://docs.ansible.com/aap/latest/changelog#api-v2-deprecation",
+        )
+        return response
 
 
 class ApiV2PingView(APIView):
