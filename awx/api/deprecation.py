@@ -35,13 +35,10 @@ Usage:
 """
 
 from functools import wraps
-from typing import Optional
 from django.http import HttpResponse
 
 
-def mark_deprecated(
-    response: HttpResponse, link: str = "https://docs.ansible.com/aap/latest/changelog#deprecations", detail: str = "", warning_text: Optional[str] = None
-) -> HttpResponse:
+def mark_deprecated(response: HttpResponse, link: str, detail: str = "") -> HttpResponse:
     """
     Mark a response as deprecated by adding deprecation headers.
 
@@ -55,9 +52,8 @@ def mark_deprecated(
 
     Args:
         response: HttpResponse object to modify
-        link: URL to changelog/documentation (used in Link header)
+        link: URL to changelog fragment (used in Link header)
         detail: Short description of what's deprecated
-        warning_text: Optional custom text for Warning: 299 header
 
     Returns:
         The modified response object (for chaining)
@@ -81,30 +77,20 @@ def mark_deprecated(
     else:
         response['X-Deprecated-Detail'] = detail
 
-    # Set Link header (idempotent)
-    response['Link'] = f'<{link}>; rel="deprecation"'
-
-    # Add/update Warning: 299 header for backward compatibility
-    warning_msg = warning_text or detail or "This resource has been deprecated"
-    existing_warning = response.get('Warning', '')
-    if not existing_warning:
-        response['Warning'] = f'299 - "{warning_msg}"'
+    # Set Link header if provided
+    if link:
+        response['Link'] = f'<{link}>; rel="deprecation"'
 
     return response
 
 
-def deprecated(link: str, detail: str, warning_text: Optional[str] = None):
+def deprecated(link: str, detail: str):
     """
     Decorator to mark an entire view/endpoint as deprecated.
 
-    Emits both legacy Warning: 299 header and new X-Deprecated headers
-    on every response from the decorated view.
-
     Args:
-        link: URL to changelog/documentation (used in Link header)
+        link: URL to changelog fragment (used in Link header)
         detail: Short description of what's deprecated and migration path
-        warning_text: Optional custom text for Warning: 299 header.
-                     Defaults to generic deprecation message.
 
     Example:
         @deprecated(
@@ -122,14 +108,7 @@ def deprecated(link: str, detail: str, warning_text: Optional[str] = None):
             response = view_func(*args, **kwargs)
 
             if isinstance(response, HttpResponse):
-                # Add new headers
-                response['X-Deprecated'] = 'true'
-                response['X-Deprecated-Detail'] = detail
-                response['Link'] = f'<{link}>; rel="deprecation"'
-
-                # Add legacy Warning: 299 header for backward compatibility
-                warning_msg = warning_text or "This resource has been deprecated and will be removed in a future release."
-                response['Warning'] = f'299 - "{warning_msg}"'
+                mark_deprecated(response, link=link, detail=detail)
 
             return response
 
