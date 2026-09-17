@@ -302,21 +302,13 @@ class APIView(views.APIView):
             response['X-API-Query-Count'] = len(q_times)
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
 
-        if getattr(self, 'deprecated', False):
-            # New deprecation headers per Controller POC (ANSTRAT-2346)
-            # Boolean signal - no version information
-            response['X-Deprecated'] = 'true'
-
-            # Optional detail message
+        if getattr(self, 'deprecated', False) or getattr(self, 'deprecation_detail', None):
             detail = getattr(self, 'deprecation_detail', 'This resource has been deprecated')
-            response['X-Deprecated-Detail'] = detail
-
-            # Link to changelog/migration docs
             link = getattr(self, 'deprecation_link', 'https://docs.ansible.com/ansible-tower/latest/html/release-notes/deprecations.html')
-            response['Link'] = f'<{link}>; rel="deprecation"'
+            mark_deprecated(response, link=link, detail=detail)
 
-            # Keep legacy Warning header for backward compatibility during transition
-            response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
+            if getattr(self, 'deprecated', False):
+                response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
 
         return response
 
