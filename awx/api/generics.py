@@ -48,6 +48,7 @@ from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
 from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
+from awx.api.deprecation import mark_deprecated
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
@@ -137,7 +138,12 @@ class LoggedLogoutView(auth_views.LogoutView):
 
     def get(self, request, *args, **kwargs):
         """Handle GET requests for logout (for backward compatibility)."""
-        return self.post(request, *args, **kwargs)
+        response = self.post(request, *args, **kwargs)
+        mark_deprecated(
+            response,
+            detail="GET method for logout is deprecated; use POST /api/logout/ instead",
+        )
+        return response
 
     def dispatch(self, request, *args, **kwargs):
         if is_proxied_request():
