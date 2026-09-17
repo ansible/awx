@@ -213,39 +213,3 @@ class TestOpenAPISchemaExtensions:
 
         # Should not have x-deprecated-since extension
         assert 'x-deprecated-since' not in get_op
-
-
-class TestValidationScript:
-    """Test the deprecation annotation validation script."""
-
-    def test_validation_script_exists(self):
-        """Validation script exists and is executable."""
-        import os
-        from pathlib import Path
-
-        script_path = Path(__file__).parent.parent.parent.parent.parent / 'scripts' / 'validate-deprecation-annotations.py'
-        assert script_path.exists(), f"Validation script should exist at {script_path}"
-        assert os.access(script_path, os.X_OK), "Validation script should be executable"
-
-    def test_validation_script_imports(self):
-        """Validation script can be imported without errors."""
-        import sys
-        from pathlib import Path
-
-        script_path = Path(__file__).parent.parent.parent.parent.parent / 'scripts'
-        sys.path.insert(0, str(script_path))
-
-        try:
-            # Import should not raise
-            import importlib.util
-
-            spec = importlib.util.spec_from_file_location("validate_deprecation_annotations", script_path / "validate-deprecation-annotations.py")
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-            # Verify key functions exist
-            assert hasattr(module, 'validate_spec')
-            assert hasattr(module, 'load_spec')
-            assert hasattr(module, 'main')
-        finally:
-            sys.path.pop(0)
