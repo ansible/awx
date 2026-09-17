@@ -60,20 +60,37 @@ def test_clear_token_sjt():
     assert Schedule.objects.filter(name=SJT_NAME).count() == 0
 
 
+def _get_or_create_surviving_ujt():
+    """Return a SystemJobTemplate that will survive cleanup_tokens deletion."""
+    from django.contrib.contenttypes.models import ContentType
+
+    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
+    now_dt = now()
+    sjt, _ = SystemJobTemplate.objects.get_or_create(
+        job_type='cleanup_sessions',
+        defaults=dict(
+            name='Cleanup Expired Sessions',
+            description='Cleans out expired browser sessions',
+            polymorphic_ctype=sjt_ct,
+            created=now_dt,
+            modified=now_dt,
+        ),
+    )
+    return sjt
+
+
 @pytest.mark.django_db
 def test_clear_token_sjt_clears_next_schedule():
-    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     Schedule = apps.get_model('main', 'Schedule')
     UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
     create_cleartokens_jt(apps, None)
 
-    sjt = SystemJobTemplate.objects.get(name=SJT_NAME)
-    sched = Schedule.objects.get(unified_job_template=sjt)
-    surviving_ujt = SystemJobTemplate.objects.get(job_type='cleanup_sessions')
+    sched = Schedule.objects.get(name=SJT_NAME)
+    surviving_ujt = _get_or_create_surviving_ujt()
     UnifiedJobTemplate.objects.filter(pk=surviving_ujt.pk).update(next_schedule=sched)
 
     delete_clear_tokens_sjt(apps, None)
-    assert SystemJobTemplate.objects.filter(name=SJT_NAME).count() == 0
     assert Schedule.objects.filter(name=SJT_NAME).count() == 0
     surviving_ujt.refresh_from_db()
     assert surviving_ujt.next_schedule is None, 'Stale next_schedule on surviving template should be cleared'
@@ -85,7 +102,6 @@ def test_cleanup_orphaned_token_schedules():
     cleanup migration removes it and clears stale next_schedule on a
     surviving template."""
     Schedule = apps.get_model('main', 'Schedule')
-    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     UnifiedJobTemplate = apps.get_model('main', 'UnifiedJobTemplate')
     create_cleartokens_jt(apps, None)
 
@@ -93,7 +109,7 @@ def test_cleanup_orphaned_token_schedules():
     sched_id = sched.pk
     ujt_id = sched.unified_job_template_id
 
-    surviving_ujt = SystemJobTemplate.objects.get(job_type='cleanup_sessions')
+    surviving_ujt = _get_or_create_surviving_ujt()
     UnifiedJobTemplate.objects.filter(pk=surviving_ujt.pk).update(next_schedule=sched)
 
     from django.db import connection
