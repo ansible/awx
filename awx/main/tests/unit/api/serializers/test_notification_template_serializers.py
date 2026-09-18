@@ -30,6 +30,14 @@ class TestNotificationTemplateSerializer:
             {'started': {'body': '{{ job_metadata }}'}},
             {'started': {'body': '{{ job.summary_fields.inventory.total_hosts }}'}},
             {'started': {'body': 'Iñtërnâtiônàlizætiøn'}},
+            {
+                'workflow_approval': {
+                    'running': {'message': 'running'},
+                    'approved': None,
+                    'timed_out': {'message': 'timed out'},
+                    'denied': {'body': 'denied'},
+                }
+            },
         ],
     )
     def test_valid_messages(self, valid_messages):
@@ -55,6 +63,8 @@ class TestNotificationTemplateSerializer:
             {'started': {'message': '{{ job.id | bad_filter }}'}},
             {'started': {'message': '{{ job.__class__ }}'}},
             {'started': {'message': 'Newlines \n not allowed\n'}},
+            {'workflow_approval': {'invalid_subevent': {}}},
+            {'workflow_approval': {'running': 'should_be_dict'}},
         ],
     )
     def test_invalid__messages(self, invalid_messages):
