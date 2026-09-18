@@ -172,6 +172,10 @@ def api_exception_handler(exc, context):
 
 class DashboardView(APIView):
     deprecated = True
+    deprecation = {
+        "detail": "The /api/v2/dashboard/ endpoint is deprecated. Use /api/v2/analytics/ for aggregate statistics. Query parameter 'legacy_format' is also deprecated.",
+        "link": "https://docs.ansible.com/aap/latest/changelog#dashboard-deprecation",
+    }
 
     name = _("Dashboard")
     swagger_topic = 'Dashboard'
@@ -1444,6 +1448,10 @@ class CredentialList(ListCreateAPIView):
     model = models.Credential
     serializer_class = serializers.CredentialSerializerCreate
     resource_purpose = 'credentials'
+    deprecation = {
+        "detail": "Fields 'user' and 'team' are deprecated; assign credentials via role_user_assignments or role_team_assignments instead",
+        "link": "https://docs.ansible.com/aap/latest/changelog#deprecations",
+    }
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of credentials"})
     def get(self, request, *args, **kwargs):
@@ -2430,12 +2438,20 @@ class InventorySourceList(ListCreateAPIView):
     serializer_class = serializers.InventorySourceSerializer
     always_allow_superuser = False
     resource_purpose = 'inventory sources'
+    deprecation = {
+        "detail": "Field 'credential' is deprecated; use the 'credentials' relationship instead",
+        "link": "https://docs.ansible.com/aap/latest/changelog#deprecations",
+    }
 
 
 class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
     resource_purpose = 'inventory source detail'
+    deprecation = {
+        "detail": "Field 'credential' is deprecated; use the 'credentials' relationship instead",
+        "link": "https://docs.ansible.com/aap/latest/changelog#deprecations",
+    }
 
 
 class InventorySourceSchedulesList(SubListCreateAPIView):

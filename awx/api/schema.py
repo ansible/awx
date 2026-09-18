@@ -121,7 +121,17 @@ class CustomAutoSchema(AutoSchema):
 
     def is_deprecated(self):
         """Return `True` if this operation is to be marked as deprecated."""
-        return getattr(self.view, 'deprecated', False)
+        return getattr(self.view, 'deprecated', False) or bool(getattr(self.view, 'deprecation', None))
+
+    def get_extensions(self):
+        extensions = super().get_extensions()
+        deprecation = getattr(self.view, 'deprecation', None)
+        if deprecation:
+            if deprecation.get('detail'):
+                extensions['x-deprecated-detail'] = deprecation['detail']
+            if deprecation.get('link'):
+                extensions['x-deprecated-link'] = deprecation['link']
+        return extensions
 
 
 class AuthenticatedSpectacularAPIView(SpectacularAPIView):
