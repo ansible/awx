@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from django.test import override_settings
 
 from ansible_base.lib.testing.util import feature_flag_enabled
 from awx.main.models.credential import CredentialType, Credential
@@ -571,3 +572,67 @@ def test_credential_type_list_filters_internal_fields(get, admin):
         # Internal field should be filtered out
         assert 'workload_identity_token' not in field_ids
         assert 'url' in field_ids
+
+
+FAKE_TIER2_PATTERN = r'^(?!.*<[a-zA-Z/!][^>]*>)[\s\S]*$'
+
+
+@pytest.fixture
+def fake_tier2_pattern(monkeypatch):
+    monkeypatch.setattr('awx.api.validation_patterns.build_tier2_frontend_pattern', lambda: FAKE_TIER2_PATTERN)
+
+
+@pytest.mark.django_db
+def test_credential_type_fields_include_patterns_when_toggle_on(get, admin, fake_tier2_pattern):
+    ct = CredentialType.objects.create(
+        kind='cloud',
+        name='Pattern Type',
+        managed=False,
+        inputs={
+            'fields': [
+                {'id': 'username', 'label': 'Username', 'type': 'string'},
+                {'id': 'api_token', 'label': 'API Token', 'type': 'string', 'secret': True},
+                {'id': 'verify_ssl', 'label': 'Verify SSL', 'type': 'boolean'},
+            ]
+        },
+    )
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = get(url, admin)
+    assert response.status_code == 200
+    fields = {f['id']: f for f in response.data['inputs']['fields']}
+    assert fields['username']['pattern'] == FAKE_TIER2_PATTERN
+    assert 'pattern_description' in fields['username']
+    assert 'pattern' not in fields['api_token']
+    assert 'pattern' not in fields['verify_ssl']
+
+
+@pytest.mark.django_db
+def test_credential_type_fields_omit_patterns_when_toggle_off(get, admin, fake_tier2_pattern):
+    ct = CredentialType.objects.create(
+        kind='cloud',
+        name='Pattern Type Off',
+        managed=False,
+        inputs={'fields': [{'id': 'username', 'label': 'Username', 'type': 'string'}]},
+    )
+    url = reverse('api:credential_type_detail', kwargs={'pk': ct.pk})
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+        response = get(url, admin)
+    assert response.status_code == 200
+    username = response.data['inputs']['fields'][0]
+    assert 'pattern' not in username
+    assert 'pattern_description' not in username
+
+
+@pytest.mark.django_db
+def test_credential_type_metadata_includes_patterns_when_toggle_on(get, admin, credentialtype_external, fake_tier2_pattern):
+    url = reverse('api:credential_type_detail', kwargs={'pk': credentialtype_external.pk})
+    with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+        response = get(url, admin)
+    assert response.status_code == 200
+    metadata = {f['id']: f for f in response.data['inputs']['metadata']}
+    assert metadata['key']['pattern'] == FAKE_TIER2_PATTERN
+    assert metadata['version']['pattern'] == FAKE_TIER2_PATTERN
+    fields = {f['id']: f for f in response.data['inputs']['fields']}
+    assert fields['url']['pattern'] == FAKE_TIER2_PATTERN
+    assert 'pattern' not in fields['token']

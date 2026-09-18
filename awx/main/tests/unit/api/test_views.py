@@ -5,6 +5,8 @@ from unittest import mock
 
 from collections import namedtuple
 
+from django.test import override_settings
+
 from awx.api.views.root import ApiVersionRootView
 from awx.api.views import JobTemplateLabelList, InventoryInventorySourcesUpdate, JobTemplateSurveySpec
 
@@ -316,4 +318,18 @@ class TestSurveySpecValidation:
         """Assert that empty default is allowed for answer."""
         spec = self.spec_from_element({'type': _type, 'default': ''})
         r = JobTemplateSurveySpec._validate_spec_data(spec, {})
+        assert r is None
+
+    def test_rejects_markup_in_question_name_when_toggle_on(self):
+        spec = self.spec_from_element({'question_name': '<script>x</script>'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            r = JobTemplateSurveySpec._validate_spec_data(spec, {})
+        assert r is not None
+        assert r.status_code == 400
+        assert 'spec[0].question_name' in r.data
+
+    def test_allows_markup_in_question_name_when_toggle_off(self):
+        spec = self.spec_from_element({'question_name': '<script>x</script>'})
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+            r = JobTemplateSurveySpec._validate_spec_data(spec, {})
         assert r is None
