@@ -94,6 +94,12 @@ options:
     timeout:
       description: The amount of time (in seconds) to run before the task is canceled.
       type: int
+    proxy:
+      description:
+        - HTTP, HTTPS, or SOCKS proxy URL used for inventory sync requests.
+        - When set, the proxy is injected as http_proxy / https_proxy environment variables for the sync task.
+        - The value is encrypted at rest. To clear, pass an empty string.
+      type: str
     verbosity:
       description: The verbosity level to run this inventory source under.
       type: int
@@ -200,6 +206,7 @@ def main():
         overwrite=dict(type='bool'),
         overwrite_vars=dict(type='bool'),
         timeout=dict(type='int'),
+        proxy=dict(type='str'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
