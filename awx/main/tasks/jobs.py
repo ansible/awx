@@ -375,7 +375,7 @@ class BaseTask(object):
         for subfolder in ('inventory', 'env'):
             runner_subfolder = os.path.join(path, subfolder)
             if not os.path.exists(runner_subfolder):
-                os.mkdir(runner_subfolder)
+                os.mkdir(runner_subfolder, 0o700)
         return path
 
     def build_project_dir(self, instance, private_data_dir):
@@ -385,7 +385,7 @@ class BaseTask(object):
         """
         project_dir = os.path.join(private_data_dir, 'project')
         if not os.path.exists(project_dir):
-            os.mkdir(project_dir)
+            os.mkdir(project_dir, 0o700)
 
     def build_private_data_files(self, instance, private_data_dir):
         """
