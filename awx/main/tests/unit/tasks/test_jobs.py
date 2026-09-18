@@ -661,3 +661,25 @@ class TestRunInventoryUpdatePopulateWorkloadIdentityTokens:
 
         # The instance's get_cloud_credential should now return the same object with context
         assert task.instance.get_cloud_credential() is cloud_cred
+
+
+class TestRunInventoryUpdateBuildProjectDir:
+    def test_uses_inventory_update_scm_branch_not_source_scm_branch(self):
+        """The scm_branch actually checked out must come from the InventoryUpdate
+        instance being run (which may carry a per-run override), not from the
+        InventorySource's static, admin-configured scm_branch field."""
+        source_project = mock.MagicMock(name='source_project')
+        inventory_source = mock.MagicMock(name='inventory_source')
+        inventory_source.source_project = source_project
+        inventory_source.scm_branch = 'pinned-on-source'
+
+        inventory_update = mock.MagicMock(name='inventory_update')
+        inventory_update.source = 'scm'
+        inventory_update.inventory_source = inventory_source
+        inventory_update.scm_branch = 'override-on-update'
+
+        task = jobs.RunInventoryUpdate()
+        with mock.patch.object(task, 'sync_and_copy') as mock_sync_and_copy:
+            task.build_project_dir(inventory_update, '/tmp/private_data_dir')
+
+        mock_sync_and_copy.assert_called_once_with(source_project, '/tmp/private_data_dir', scm_branch='override-on-update')
