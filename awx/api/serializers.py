@@ -5766,24 +5766,33 @@ class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSeria
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
         res.update(dict(unified_jobs=self.reverse('api:schedule_unified_jobs_list', kwargs={'pk': obj.pk})))
-        if obj.unified_job_template:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
+        try:
+            ujt = obj.unified_job_template
+        except ObjectDoesNotExist:
+            ujt = None
+        if ujt:
+            res['unified_job_template'] = ujt.get_absolute_url(self.context.get('request'))
             try:
-                if obj.unified_job_template.project:
-                    res['project'] = obj.unified_job_template.project.get_absolute_url(self.context.get('request'))
+                if ujt.project:
+                    res['project'] = ujt.project.get_absolute_url(self.context.get('request'))
             except ObjectDoesNotExist:
                 pass
         if obj.inventory:
             res['inventory'] = obj.inventory.get_absolute_url(self.context.get('request'))
-        elif obj.unified_job_template and getattr(obj.unified_job_template, 'inventory', None):
-            res['inventory'] = obj.unified_job_template.inventory.get_absolute_url(self.context.get('request'))
+        elif ujt and getattr(ujt, 'inventory', None):
+            res['inventory'] = ujt.inventory.get_absolute_url(self.context.get('request'))
         return res
 
     def get_summary_fields(self, obj):
         summary_fields = super(ScheduleSerializer, self).get_summary_fields(obj)
 
-        if isinstance(obj.unified_job_template, SystemJobTemplate):
-            summary_fields['unified_job_template']['job_type'] = obj.unified_job_template.job_type
+        try:
+            ujt = obj.unified_job_template
+        except ObjectDoesNotExist:
+            return summary_fields
+
+        if isinstance(ujt, SystemJobTemplate):
+            summary_fields['unified_job_template']['job_type'] = ujt.job_type
 
         # We are not showing instance groups on summary fields because JTs don't either
 
@@ -5791,8 +5800,8 @@ class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSeria
             return summary_fields
 
         inventory = None
-        if obj.unified_job_template and getattr(obj.unified_job_template, 'inventory', None):
-            inventory = obj.unified_job_template.inventory
+        if ujt and getattr(ujt, 'inventory', None):
+            inventory = ujt.inventory
         else:
             return summary_fields
 
