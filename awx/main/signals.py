@@ -593,9 +593,93 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
         approval.deny()
 
 
-def _handle_image_cleanup(removed_image, pk):
-    if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
-        return  # if other EE objects reference the tag, then do not purge it
+def _extract_image_repo(image_ref):
+    """Return the repository part of an image reference, without tag or digest."""
+    if not image_ref:
+        return None
+
+    if '@' in image_ref:
+        return image_ref.split('@')[0]
+
+    if ':' in image_ref:
+        parts = image_ref.rsplit(':', 1)
+        # If the part after ':' contains '/' it's part of a path, not a tag
+        if '/' in parts[1]:
+            return image_ref
+        return parts[0]
+
+    return image_ref
+
+
+def _is_managed_image(image_ref, exclude_pk=None):
+    """Check if an image is referenced by managed EE settings or managed EE objects."""
+    for ee_config in getattr(settings, 'GLOBAL_JOB_EXECUTION_ENVIRONMENTS', []):
+        if ee_config.get('image') == image_ref:
+            logger.info("Skipping cleanup of %s - referenced in GLOBAL_JOB_EXECUTION_ENVIRONMENTS", image_ref)
+            return True
+
+    if getattr(settings, 'CONTROL_PLANE_EXECUTION_ENVIRONMENT', None) == image_ref:
+        logger.info("Skipping cleanup of %s - matches CONTROL_PLANE_EXECUTION_ENVIRONMENT", image_ref)
+        return True
+
+    qs = ExecutionEnvironment.objects.filter(managed=True, image=image_ref)
+    if exclude_pk is not None:
+        qs = qs.exclude(pk=exclude_pk)
+    if qs.exists():
+        logger.info("Skipping cleanup of %s - used by a managed EE", image_ref)
+        return True
+
+    return False
+
+
+def _has_digest(image_ref):
+    return '@' in image_ref
+
+
+def _different_ref_forms(ref_a, ref_b):
+    """True when one ref uses a digest and the other uses a tag (or bare name)."""
+    return _has_digest(ref_a) != _has_digest(ref_b)
+
+
+def _handle_image_cleanup(removed_image, pk, new_image=None):
+    if not removed_image:
+        return
+
+    if _is_managed_image(removed_image, exclude_pk=pk):
+        return
+
+    if ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
+        return
+
+    removed_repo = _extract_image_repo(removed_image)
+
+    # Update path: old and new share the same repo but differ in reference form
+    # (tag vs digest) — they likely point to the same underlying image.
+    if new_image and removed_repo:
+        new_repo = _extract_image_repo(new_image)
+        if removed_repo == new_repo and _different_ref_forms(removed_image, new_image):
+            logger.info(
+                "Skipping cleanup of %s - new image %s appears to be a different reference form for the same image",
+                removed_image,
+                new_image,
+            )
+            return
+
+    # Delete path: another EE references the same repo with a different reference
+    # form, so purging could strip names from a still-needed image.
+    if removed_repo:
+        for ee in ExecutionEnvironment.objects.exclude(pk=pk).only('image', 'name'):
+            if ee.image:
+                ee_repo = _extract_image_repo(ee.image)
+                if ee_repo == removed_repo and _different_ref_forms(removed_image, ee.image):
+                    logger.info(
+                        "Skipping cleanup of %s - EE '%s' uses %s from the same repository with a different reference form",
+                        removed_image,
+                        ee.name,
+                        ee.image,
+                    )
+                    return
+
     handle_removed_image.delay(remove_images=[removed_image])
 
 
@@ -612,7 +696,7 @@ def remove_stale_image(sender, instance, created, **kwargs):
         return
     removed_image = instance._prior_values_store.get('image')
     if removed_image and removed_image != instance.image:
-        _handle_image_cleanup(removed_image, instance.pk)
+        _handle_image_cleanup(removed_image, instance.pk, new_image=instance.image)
 
 
 @receiver(post_save, sender=Session)
