@@ -77,6 +77,30 @@ def mark_deprecated(response: HttpResponse, link: str, detail: str) -> HttpRespo
     return response
 
 
+def check_deprecated_fields(request, response, fields, link, detail):
+    """
+    Emit deprecation headers if any of the given fields are present in request.data.
+
+    Call this from view methods (post/put/patch) for field-level deprecations
+    that should only signal when the client sends the deprecated field.
+
+    Args:
+        request: DRF request object
+        response: HttpResponse object to modify
+        fields: Field name (str) or iterable of field names to check
+        link: URL to deprecation details
+        detail: Full-sentence description of what is deprecated
+
+    Returns:
+        The response object (for chaining)
+    """
+    if isinstance(fields, str):
+        fields = (fields,)
+    if any(f in request.data for f in fields):
+        mark_deprecated(response, link=link, detail=detail)
+    return response
+
+
 def deprecated(link: str, detail: str):
     """
     Decorator to mark an entire view/endpoint as deprecated.
