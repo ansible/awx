@@ -675,6 +675,7 @@ def _other_ee_shares_repo_with_different_ref(image_ref, repo, pk):
 
 
 def _handle_image_cleanup(removed_image, pk, new_image=None):
+    """Skip podman rmi when the image is managed, in use, or likely the same image under a different ref form."""
     if not removed_image:
         return
 
