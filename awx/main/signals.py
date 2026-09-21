@@ -641,6 +641,22 @@ def _different_ref_forms(ref_a, ref_b):
     return _has_digest(ref_a) != _has_digest(ref_b)
 
 
+def _other_ee_shares_repo_with_different_ref(image_ref, repo, pk):
+    """Check if another EE uses the same repo with a different reference form (tag vs digest)."""
+    for ee in ExecutionEnvironment.objects.exclude(pk=pk).only('image', 'name'):
+        if not ee.image:
+            continue
+        if _extract_image_repo(ee.image) == repo and _different_ref_forms(image_ref, ee.image):
+            logger.info(
+                "Skipping cleanup of %s - EE '%s' uses %s from the same repository with a different reference form",
+                image_ref,
+                ee.name,
+                ee.image,
+            )
+            return True
+    return False
+
+
 def _handle_image_cleanup(removed_image, pk, new_image=None):
     if not removed_image:
         return
@@ -667,18 +683,8 @@ def _handle_image_cleanup(removed_image, pk, new_image=None):
 
     # Delete path: another EE references the same repo with a different reference
     # form, so purging could strip names from a still-needed image.
-    if removed_repo:
-        for ee in ExecutionEnvironment.objects.exclude(pk=pk).only('image', 'name'):
-            if ee.image:
-                ee_repo = _extract_image_repo(ee.image)
-                if ee_repo == removed_repo and _different_ref_forms(removed_image, ee.image):
-                    logger.info(
-                        "Skipping cleanup of %s - EE '%s' uses %s from the same repository with a different reference form",
-                        removed_image,
-                        ee.name,
-                        ee.image,
-                    )
-                    return
+    if removed_repo and _other_ee_shares_repo_with_different_ref(removed_image, removed_repo, pk):
+        return
 
     handle_removed_image.delay(remove_images=[removed_image])
 
