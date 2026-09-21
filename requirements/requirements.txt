@@ -121,7 +121,7 @@ dispatcherd[pg-notify]==2026.3.25
     # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==5.2.8
+django==5.2.17
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -288,6 +288,8 @@ multidict==6.7.0
     # via
     #   aiohttp
     #   yarl
+nh3==0.3.7
+    # via django-ansible-base
 oauthlib==3.3.1
     # via requests-oauthlib
 opa-python-client==2.0.2
@@ -396,9 +398,7 @@ pyopenssl==25.3.0
 pyparsing==3.3.2
     # via -r /awx_devel/requirements/requirements.in
 python-daemon==3.1.2
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   ansible-runner
+    # via -r /awx_devel/requirements/requirements.in
 python-dateutil==2.9.0.post0
     # via
     #   adal
@@ -435,6 +435,8 @@ referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
+regex==2026.9.10
+    # via django-ansible-base
 requests==2.32.5
     # via
     #   -r /awx_devel/requirements/requirements.in
