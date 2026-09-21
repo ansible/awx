@@ -142,7 +142,7 @@ class LoggedLogoutView(auth_views.LogoutView):
         mark_deprecated(
             response,
             link="https://docs.ansible.com/aap/latest/changelog#logout-get-deprecation",
-            detail="GET method for logout is deprecated; use POST /api/logout/ instead",
+            detail="The GET method for logout is deprecated. Use POST /api/logout/ instead.",
         )
         return response
 
@@ -305,9 +305,14 @@ class APIView(views.APIView):
 
         deprecation = getattr(self, 'deprecation', None)
         if deprecation:
-            mark_deprecated(response, link=deprecation['link'], detail=deprecation.get('detail', ''))
+            mark_deprecated(response, link=deprecation['link'], detail=deprecation['detail'])
         if getattr(self, 'deprecated', False):
-            response['X-Deprecated'] = 'true'
+            if not deprecation:
+                mark_deprecated(
+                    response,
+                    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+                    detail="This resource is deprecated and will be removed in a future release.",
+                )
             response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
 
         return response
