@@ -131,7 +131,7 @@ class ApiV2RootView(ApiVersionRootView):
     name = _('Version 2')
     resource_purpose = 'api v2 root'
     deprecation = {
-        "detail": "API v2 is deprecated and will be removed in a future release; migrate to /api/v3/ when available",
+        "detail": "API v2 is deprecated. Migrate to /api/v3/.",
         "link": "https://docs.ansible.com/aap/latest/changelog#api-v2-deprecation",
     }
 

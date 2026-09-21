@@ -8,28 +8,28 @@ Based on the Controller POC (ANSTRAT-2346).
 
 Headers emitted:
 - X-Deprecated: true - Boolean signal
-- X-Deprecated-Detail: <text> - Description and migration guidance
-- Link: <url>; rel="deprecation" - Changelog URL
-- Warning: 299 - "<text>" - Legacy header (kept for backward compatibility)
+- X-Deprecated-Detail: <text> - Full-sentence description and migration guidance (always required)
+- Link: <url>; rel="deprecation" - Pointer to deprecation details
+- Warning: 299 - "<text>" - Legacy header (kept for backward compatibility on /v2/)
 
 Usage:
 
-    # Decorator for endpoint-level deprecation
+    # Decorator for endpoint-level deprecation (emits on every response)
     @deprecated(
         link="https://docs.ansible.com/aap/latest/changelog#deprecations",
-        detail="Use /api/v2/role_definitions/ instead"
+        detail="The /api/v2/roles/ endpoint is deprecated. Use /api/v2/role_definitions/ instead."
     )
     def list(self, request):
         ...
 
-    # Utility function for conditional deprecation
+    # Utility function for conditional deprecation (field/parameter/behavior)
     def list(self, request):
         response = Response(data)
         if request.query_params.get("legacy_filter"):
             mark_deprecated(
                 response,
                 link="https://docs.ansible.com/aap/latest/changelog#deprecations",
-                detail="Parameter 'legacy_filter' is deprecated; use 'host_filter' instead"
+                detail="The legacy_filter parameter is deprecated. Use the host_filter parameter instead."
             )
         return response
 """
@@ -38,48 +38,41 @@ from functools import wraps
 from django.http import HttpResponse
 
 
-def mark_deprecated(response: HttpResponse, link: str, detail: str = "") -> HttpResponse:
+def mark_deprecated(response: HttpResponse, link: str, detail: str) -> HttpResponse:
     """
     Mark a response as deprecated by adding deprecation headers.
 
     This utility is used for conditional deprecations where only the view
     knows at runtime whether a deprecated code path was taken (e.g.,
-    deprecated parameter used, deprecated field in response, behavioral
+    deprecated parameter used, deprecated field in request, behavioral
     deprecation).
 
     If called multiple times on the same response, details are accumulated
-    with comma-separation.
+    as space-separated sentences.
 
     Args:
         response: HttpResponse object to modify
-        link: URL to changelog fragment (used in Link header)
-        detail: Short description of what's deprecated
+        link: URL to deprecation details (used in Link header)
+        detail: Full-sentence description of what is deprecated, ending with a period
 
     Returns:
         The modified response object (for chaining)
-
-    Example:
-        response = Response(data)
-        if request.query_params.get("legacy_filter"):
-            mark_deprecated(
-                response,
-                detail="Parameter 'legacy_filter' is deprecated"
-            )
-        return response
     """
-    # Set or update X-Deprecated header
     response['X-Deprecated'] = 'true'
 
-    # Append to X-Deprecated-Detail if already present
     existing_detail = response.get('X-Deprecated-Detail', '')
     if existing_detail:
-        response['X-Deprecated-Detail'] = f"{existing_detail}, {detail}"
+        response['X-Deprecated-Detail'] = f"{existing_detail} {detail}"
     else:
         response['X-Deprecated-Detail'] = detail
 
-    # Set Link header if provided
     if link:
-        response['Link'] = f'<{link}>; rel="deprecation"'
+        deprecation_link = f'<{link}>; rel="deprecation"; type="text/html"'
+        existing_link = response.get('Link', '')
+        if existing_link:
+            response['Link'] = f'{existing_link}, {deprecation_link}'
+        else:
+            response['Link'] = deprecation_link
 
     return response
 
@@ -88,18 +81,11 @@ def deprecated(link: str, detail: str):
     """
     Decorator to mark an entire view/endpoint as deprecated.
 
-    Args:
-        link: URL to changelog fragment (used in Link header)
-        detail: Short description of what's deprecated and migration path
+    Emits deprecation headers on every response.
 
-    Example:
-        @deprecated(
-            link="https://docs.ansible.com/aap/latest/changelog#deprecations",
-            detail="Use /api/v2/role_definitions/ instead"
-        )
-        class RolesViewSet(ModelViewSet):
-            def list(self, request):
-                ...
+    Args:
+        link: URL to deprecation details (used in Link header)
+        detail: Full-sentence description of what is deprecated, ending with a period
     """
 
     def decorator(view_func):

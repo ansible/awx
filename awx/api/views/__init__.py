@@ -89,6 +89,7 @@ from awx.api.generics import (
     SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView,
 )
+from awx.api.deprecation import mark_deprecated
 from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
@@ -1445,10 +1446,6 @@ class CredentialList(ListCreateAPIView):
     model = models.Credential
     serializer_class = serializers.CredentialSerializerCreate
     resource_purpose = 'credentials'
-    deprecation = {
-        "detail": "Fields 'user' and 'team' are deprecated; assign credentials via role_user_assignments or role_team_assignments instead",
-        "link": "https://docs.ansible.com/aap/latest/changelog#deprecations",
-    }
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of credentials"})
     def get(self, request, *args, **kwargs):
@@ -1460,7 +1457,14 @@ class CredentialList(ListCreateAPIView):
         }
     )
     def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
+        if 'user' in request.data or 'team' in request.data:
+            mark_deprecated(
+                response,
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+                detail="The 'user' and 'team' fields are deprecated. Assign credentials via role_user_assignments or role_team_assignments instead.",
+            )
+        return response
 
 
 class CredentialOwnerUsersList(SubListAPIView):
@@ -2430,20 +2434,39 @@ class InventorySourceList(ListCreateAPIView):
     serializer_class = serializers.InventorySourceSerializer
     always_allow_superuser = False
     resource_purpose = 'inventory sources'
-    deprecation = {
-        "detail": "Field 'credential' is deprecated; use the 'credentials' relationship instead",
-        "link": "https://docs.ansible.com/aap/latest/changelog#deprecations",
-    }
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if 'credential' in request.data:
+            mark_deprecated(
+                response,
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+                detail="The 'credential' field is deprecated. Use the 'credentials' relationship instead.",
+            )
+        return response
 
 
 class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
     resource_purpose = 'inventory source detail'
-    deprecation = {
-        "detail": "Field 'credential' is deprecated; use the 'credentials' relationship instead",
-        "link": "https://docs.ansible.com/aap/latest/changelog#deprecations",
-    }
+
+    def _check_credential_deprecation(self, request, response):
+        if 'credential' in request.data:
+            mark_deprecated(
+                response,
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+                detail="The 'credential' field is deprecated. Use the 'credentials' relationship instead.",
+            )
+        return response
+
+    def put(self, request, *args, **kwargs):
+        response = super().put(request, *args, **kwargs)
+        return self._check_credential_deprecation(request, response)
+
+    def patch(self, request, *args, **kwargs):
+        response = super().patch(request, *args, **kwargs)
+        return self._check_credential_deprecation(request, response)
 
 
 class InventorySourceSchedulesList(SubListCreateAPIView):
