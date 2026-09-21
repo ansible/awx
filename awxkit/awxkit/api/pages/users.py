@@ -42,12 +42,12 @@ class User(HasCreate, base.Base):
             payload.pop("is_system_auditor")
             # Create gw user, then wait for controller sync
             gw_user = gw_users_api.post(payload)
-            poll_until(
-                lambda: len(ctrl_users_api.get(username=gw_user.username).results) > 0,
-                interval=1,
-                timeout=30,
-            )
-            user = ctrl_users_api.get(username=gw_user.username).results.pop()
+
+            def _get_synced_user():
+                results = ctrl_users_api.get(username=gw_user.username).results
+                return results[0] if results else None
+
+            user = poll_until(_get_synced_user, interval=1, timeout=30)
             user.json["password"] = payload.password
             self.update_identity(user)
         else:
