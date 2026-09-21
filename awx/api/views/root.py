@@ -26,6 +26,7 @@ import requests
 from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.api.generics import APIView
+from awx.api.deprecation import deprecated
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
@@ -127,13 +128,13 @@ class ApiVersionRootView(APIView):
         return Response(data)
 
 
+@deprecated(
+    detail="API v2 is deprecated. Migrate to /api/v3/.",
+    link="https://docs.ansible.com/aap/latest/changelog#api-v2-deprecation",
+)
 class ApiV2RootView(ApiVersionRootView):
     name = _('Version 2')
     resource_purpose = 'api v2 root'
-    deprecation = {
-        "detail": "API v2 is deprecated. Migrate to /api/v3/.",
-        "link": "https://docs.ansible.com/aap/latest/changelog#api-v2-deprecation",
-    }
 
 
 class ApiV2PingView(APIView):

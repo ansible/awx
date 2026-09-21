@@ -48,7 +48,7 @@ from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
 from awx.main.utils.proxy import is_proxy_in_headers, delete_headers_starting_with_http
 from awx.main.views import ApiErrorView
-from awx.api.deprecation import mark_deprecated
+from awx.api.deprecation import mark_deprecated, deprecated
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
@@ -854,6 +854,10 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
     pass
 
 
+@deprecated(
+    detail="Resource access lists are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class ResourceAccessList(ParentMixin, ListAPIView):
     deprecated = True
     serializer_class = ResourceAccessListElementSerializer

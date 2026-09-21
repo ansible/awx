@@ -8,6 +8,9 @@ from django.core.exceptions import ObjectDoesNotExist
 # Django REST Framework
 from rest_framework import serializers
 
+# drf-spectacular
+from drf_spectacular.utils import extend_schema_field
+
 # AWX
 from awx.main.models import Credential
 
@@ -78,6 +81,12 @@ class VerbatimField(serializers.Field):
         return value
 
 
+@extend_schema_field(
+    {
+        "type": "integer",
+        "x-deprecated-detail": "The 'credential' field is deprecated. Use the 'credentials' relationship instead.",
+    }
+)
 class DeprecatedCredentialField(serializers.IntegerField):
     def __init__(self, **kwargs):
         kwargs['allow_null'] = True

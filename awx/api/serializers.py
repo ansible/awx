@@ -38,6 +38,9 @@ from rest_framework import serializers
 from rest_framework import validators
 from rest_framework.utils.serializer_helpers import ReturnList
 
+# drf-spectacular
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
+
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
@@ -2296,6 +2299,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
         model = Group
 
 
+@extend_schema_serializer(deprecate_fields=['credential'])
 class InventorySourceOptionsSerializer(BaseSerializer):
     credential = DeprecatedCredentialField(help_text=_('Cloud credential to use for inventory updates.'))
     source = serializers.ChoiceField(choices=[])
@@ -3090,8 +3094,19 @@ class CredentialSerializer(BaseSerializer):
         return inputs
 
 
+@extend_schema_field(
+    {
+        "type": "integer",
+        "x-deprecated-detail": "The 'user' and 'team' fields are deprecated. Assign credentials via role_user_assignments or role_team_assignments instead.",
+    }
+)
+class _DeprecatedOwnerField(serializers.PrimaryKeyRelatedField):
+    pass
+
+
+@extend_schema_serializer(deprecate_fields=['user', 'team'])
 class CredentialSerializerCreate(CredentialSerializer):
-    user = serializers.PrimaryKeyRelatedField(
+    user = _DeprecatedOwnerField(
         queryset=User.objects.all(),
         required=False,
         default=None,
@@ -3099,7 +3114,7 @@ class CredentialSerializerCreate(CredentialSerializer):
         allow_null=True,
         help_text=_('Write-only field used to add user to owner role. If provided, do not give either team or organization. Only valid for creation.'),
     )
-    team = serializers.PrimaryKeyRelatedField(
+    team = _DeprecatedOwnerField(
         queryset=Team.objects.all(),
         required=False,
         default=None,

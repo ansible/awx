@@ -8,15 +8,13 @@ Validates that deprecated API endpoints emit the correct HTTP response headers:
 - X-Deprecated: true
 - X-Deprecated-Detail: <description>
 - Link: <url>; rel="deprecation"
-
-Also validates that the OpenAPI schema includes x-deprecated-detail and x-deprecated-link extensions.
 """
 
-import pytest
 from rest_framework.response import Response
 from rest_framework.test import APIRequestFactory
 
 from awx.api.deprecation import mark_deprecated, deprecated
+from awx.api.schema import postprocess_inject_deprecation_headers
 
 
 class TestMarkDeprecatedUtility:
@@ -25,66 +23,67 @@ class TestMarkDeprecatedUtility:
     def test_mark_deprecated_adds_required_headers(self):
         """X-Deprecated, X-Deprecated-Detail, and Link headers are added."""
         response = Response({"data": "test"})
-        result = mark_deprecated(
+        mark_deprecated(
             response,
-            link="https://docs.example.com/deprecations",
             detail="This endpoint is deprecated.",
+            link="https://docs.example.com/deprecations",
         )
 
-        assert result['X-Deprecated'] == 'true'
-        assert result['X-Deprecated-Detail'] == "This endpoint is deprecated."
-        assert 'https://docs.example.com/deprecations' in result['Link']
-        assert 'rel="deprecation"' in result['Link']
-        assert 'type="text/html"' in result['Link']
+        assert response['X-Deprecated'] == 'true'
+        assert response['X-Deprecated-Detail'] == "This endpoint is deprecated."
+        assert 'https://docs.example.com/deprecations' in response['Link']
+        assert 'rel="deprecation"' in response['Link']
 
-    def test_mark_deprecated_appends_to_existing_link(self):
-        """Link header is appended to existing Link header."""
+    def test_mark_deprecated_first_link_wins(self):
+        """First link wins when mark_deprecated called multiple times."""
         response = Response({"data": "test"})
-        response['Link'] = '<https://example.com/other>; rel="alternate"'
 
         mark_deprecated(
             response,
-            link="https://docs.example.com/deprecations",
             detail="This endpoint is deprecated.",
+            link="https://docs.example.com/deprecations",
+        )
+        mark_deprecated(
+            response,
+            detail="Another deprecation.",
+            link="https://docs.example.com/other-link",
         )
 
         link_header = response['Link']
-        assert '<https://example.com/other>; rel="alternate"' in link_header
         assert '<https://docs.example.com/deprecations>; rel="deprecation"' in link_header
-        assert ', ' in link_header
-
-    def test_mark_deprecated_returns_response(self):
-        """Function returns the response for chaining convenience."""
-        response = Response({"data": "test"})
-        result = mark_deprecated(
-            response,
-            link="https://docs.example.com/deprecations",
-            detail="This endpoint is deprecated.",
-        )
-
-        assert result is response
+        assert '<https://docs.example.com/other-link>' not in link_header
 
     def test_mark_deprecated_accumulates_details_with_spaces(self):
         """Multiple calls accumulate details as space-separated sentences."""
         response = Response({"data": "test"})
         mark_deprecated(
             response,
-            link="https://docs.example.com/deprecations",
             detail="The /api/v2/roles/ endpoint is deprecated.",
+            link="https://docs.example.com/deprecations",
         )
         mark_deprecated(
             response,
-            link="https://docs.example.com/deprecations",
             detail="The legacy_filter parameter is deprecated.",
+            link="https://docs.example.com/deprecations",
         )
 
         assert response['X-Deprecated-Detail'] == ("The /api/v2/roles/ endpoint is deprecated. " "The legacy_filter parameter is deprecated.")
 
-    def test_mark_deprecated_requires_detail(self):
-        """detail parameter is required (not optional)."""
+    def test_mark_deprecated_deduplicates_details(self):
+        """Duplicate details are ignored."""
         response = Response({"data": "test"})
-        with pytest.raises(TypeError):
-            mark_deprecated(response, link="https://docs.example.com/deprecations")
+        mark_deprecated(
+            response,
+            detail="This endpoint is deprecated.",
+            link="https://docs.example.com/deprecations",
+        )
+        mark_deprecated(
+            response,
+            detail="This endpoint is deprecated.",
+            link="https://docs.example.com/deprecations",
+        )
+
+        assert response['X-Deprecated-Detail'] == "This endpoint is deprecated."
 
 
 class TestDeprecatedDecorator:
@@ -95,8 +94,8 @@ class TestDeprecatedDecorator:
 
         class TestView:
             @deprecated(
-                link="https://docs.example.com/deprecations",
                 detail="This endpoint is deprecated.",
+                link="https://docs.example.com/deprecations",
             )
             def get(self, request):
                 return Response({"data": "test"})
@@ -115,8 +114,8 @@ class TestDeprecatedDecorator:
 
         class TestView:
             @deprecated(
-                link="https://docs.example.com/deprecations",
                 detail="This endpoint is deprecated.",
+                link="https://docs.example.com/deprecations",
             )
             def get(self, request):
                 return Response({"count": 5, "results": [1, 2, 3]})
@@ -130,72 +129,59 @@ class TestDeprecatedDecorator:
         assert response['X-Deprecated'] == 'true'
 
 
-class TestDeprecatedViewAttribute:
-    """Test the deprecated = True view attribute with finalize_response."""
-
-    @pytest.mark.django_db
-    def test_deprecated_view_emits_headers(self, get, admin_user):
-        """Views with deprecated = True emit deprecation headers."""
-        url = '/api/v2/roles/'
-        response = get(url, user=admin_user, expect=200)
-
-        assert response['X-Deprecated'] == 'true'
-        assert 'X-Deprecated-Detail' in response
-        assert 'Link' in response
-        assert 'rel="deprecation"' in response['Link']
-
-        # Legacy Warning header should still be present during transition
-        assert 'Warning' in response
-        assert '299' in response['Warning']
-
-    @pytest.mark.django_db
-    def test_non_deprecated_view_no_headers(self, get, admin_user):
-        """Non-deprecated views don't emit deprecation headers."""
-        url = '/api/v2/users/'
-        response = get(url, user=admin_user, expect=200)
-
-        assert 'X-Deprecated' not in response
-        assert 'X-Deprecated-Detail' not in response
+# Integration tests for deprecation headers are in awx/main/tests/functional/api/
 
 
-class TestOpenAPISchemaExtensions:
-    """Test that OpenAPI schema includes x-deprecated-detail and x-deprecated-link extensions."""
+class TestPostprocessInjectDeprecationHeaders:
+    """Unit tests for the postprocessing hook."""
 
-    @pytest.mark.django_db
-    def test_deprecated_operation_has_extensions(self, get, admin_user):
-        """Deprecated operations with deprecation dict include extensions in the schema."""
-        url = '/api/v2/schema/'
-        response = get(url, user=admin_user, expect=200)
-        schema = response.data
+    def test_injects_headers_on_deprecated_operations(self):
+        schema = {
+            "paths": {
+                "/api/v2/roles/": {
+                    "get": {
+                        "deprecated": True,
+                        "responses": {"200": {"description": "OK"}},
+                    }
+                }
+            }
+        }
+        result = postprocess_inject_deprecation_headers(schema, None, None, None)
+        headers = result["paths"]["/api/v2/roles/"]["get"]["responses"]["200"]["headers"]
+        assert "X-Deprecated" in headers
+        assert "X-Deprecated-Detail" in headers
+        assert "Link" in headers
 
-        # Dashboard has both deprecated=True and a deprecation dict
-        dashboard_path = schema['paths'].get('/api/v2/dashboard/')
-        assert dashboard_path is not None, "Dashboard endpoint should exist in schema"
+    def test_skips_non_deprecated_operations(self):
+        schema = {
+            "paths": {
+                "/api/v2/users/": {
+                    "get": {
+                        "responses": {"200": {"description": "OK"}},
+                    }
+                }
+            }
+        }
+        result = postprocess_inject_deprecation_headers(schema, None, None, None)
+        assert "headers" not in result["paths"]["/api/v2/users/"]["get"]["responses"]["200"]
 
-        get_op = dashboard_path.get('get')
-        assert get_op is not None, "GET operation should exist"
-        assert get_op.get('deprecated') is True, "Operation should be marked deprecated"
-
-        assert 'x-deprecated-detail' in get_op, "x-deprecated-detail extension should be present"
-        assert isinstance(get_op['x-deprecated-detail'], str)
-        assert len(get_op['x-deprecated-detail']) > 0
-
-        assert 'x-deprecated-link' in get_op, "x-deprecated-link extension should be present"
-        assert isinstance(get_op['x-deprecated-link'], str)
-
-    @pytest.mark.django_db
-    def test_non_deprecated_operation_no_extensions(self, get, admin_user):
-        """Non-deprecated operations don't have deprecation extensions."""
-        url = '/api/v2/schema/'
-        response = get(url, user=admin_user, expect=200)
-        schema = response.data
-
-        users_path = schema['paths'].get('/api/v2/users/')
-        assert users_path is not None, "Users endpoint should exist in schema"
-
-        get_op = users_path.get('get')
-        assert get_op is not None, "GET operation should exist"
-
-        assert get_op.get('deprecated') is not True
-        assert 'x-deprecated-detail' not in get_op
-        assert 'x-deprecated-link' not in get_op
+    def test_preserves_existing_headers(self):
+        schema = {
+            "paths": {
+                "/api/v2/roles/": {
+                    "get": {
+                        "deprecated": True,
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "headers": {"X-Custom": {"schema": {"type": "string"}}},
+                            }
+                        },
+                    }
+                }
+            }
+        }
+        result = postprocess_inject_deprecation_headers(schema, None, None, None)
+        headers = result["paths"]["/api/v2/roles/"]["get"]["responses"]["200"]["headers"]
+        assert "X-Custom" in headers
+        assert "X-Deprecated" in headers

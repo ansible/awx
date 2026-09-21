@@ -8,6 +8,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
+from ansible_base.api_documentation.postprocessing_hooks import postprocess_inject_deprecation_headers
+
 
 def filter_credential_type_schema(
     result,
@@ -93,11 +95,8 @@ class CustomAutoSchema(AutoSchema):
     def get_extensions(self):
         extensions = super().get_extensions()
         deprecation = getattr(self.view, 'deprecation', None)
-        if deprecation:
-            if deprecation.get('detail'):
-                extensions['x-deprecated-detail'] = deprecation['detail']
-            if deprecation.get('link'):
-                extensions['x-deprecated-link'] = deprecation['link']
+        if deprecation and deprecation.get('detail'):
+            extensions['x-deprecated-detail'] = deprecation['detail']
         return extensions
 
 

@@ -89,7 +89,7 @@ from awx.api.generics import (
     SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView,
 )
-from awx.api.deprecation import mark_deprecated
+from awx.api.deprecation import mark_deprecated, deprecated
 from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
@@ -170,13 +170,12 @@ def api_exception_handler(exc, context):
     return exception_handler(exc, context)
 
 
+@deprecated(
+    detail="The /api/v2/dashboard/ endpoint is deprecated. Use /api/v2/analytics/ for aggregate statistics. Query parameter 'legacy_format' is also deprecated.",
+    link="https://docs.ansible.com/aap/latest/changelog#dashboard-deprecation",
+)
 class DashboardView(APIView):
     deprecated = True
-    deprecation = {
-        "detail": "The /api/v2/dashboard/ endpoint is deprecated. Use /api/v2/analytics/ for aggregate statistics. Query parameter 'legacy_format' is also deprecated.",
-        "link": "https://docs.ansible.com/aap/latest/changelog#dashboard-deprecation",
-    }
-
     name = _("Dashboard")
     swagger_topic = 'Dashboard'
     resource_purpose = 'dashboard aggregate statistics'
@@ -604,6 +603,10 @@ class InstanceGroupAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the instance group'
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class InstanceGroupObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
@@ -774,6 +777,10 @@ class TeamUsersList(BaseUsersList):
     resource_purpose = 'users of a team'
 
 
+@deprecated(
+    detail="Role-based access is deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class TeamRolesList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.Role
@@ -815,13 +822,16 @@ class TeamRolesList(SubListAttachDetachAPIView):
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class TeamObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Team
     search_fields = ('role_field', 'content_type__model')
-    deprecated = True
     resource_purpose = 'object roles of a team'
 
     def get_queryset(self):
@@ -1191,13 +1201,16 @@ class ProjectAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the project'
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class ProjectObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Project
     search_fields = ('role_field', 'content_type__model')
-    deprecated = True
     resource_purpose = 'roles of a project'
 
     def get_queryset(self):
@@ -1244,6 +1257,10 @@ class UserTeamsList(SubListAPIView):
         return models.Team.accessible_objects(self.request.user, 'read_role').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
 
+@deprecated(
+    detail="Role-based access is deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class UserRolesList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.Role
@@ -1458,11 +1475,11 @@ class CredentialList(ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        if 'user' in request.data or 'team' in request.data:
+        if any(f in request.data for f in ('user', 'team')):
             mark_deprecated(
                 response,
-                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
                 detail="The 'user' and 'team' fields are deprecated. Assign credentials via role_user_assignments or role_team_assignments instead.",
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
             )
         return response
 
@@ -1574,13 +1591,16 @@ class CredentialAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the credential'
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class CredentialObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Credential
     search_fields = ('role_field', 'content_type__model')
-    deprecated = True
     resource_purpose = 'roles of a credential'
 
     def get_queryset(self):
@@ -2440,8 +2460,8 @@ class InventorySourceList(ListCreateAPIView):
         if 'credential' in request.data:
             mark_deprecated(
                 response,
-                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
                 detail="The 'credential' field is deprecated. Use the 'credentials' relationship instead.",
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
             )
         return response
 
@@ -2451,22 +2471,25 @@ class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroy
     serializer_class = serializers.InventorySourceSerializer
     resource_purpose = 'inventory source detail'
 
-    def _check_credential_deprecation(self, request, response):
+    def put(self, request, *args, **kwargs):
+        response = super().put(request, *args, **kwargs)
         if 'credential' in request.data:
             mark_deprecated(
                 response,
-                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
                 detail="The 'credential' field is deprecated. Use the 'credentials' relationship instead.",
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
             )
         return response
 
-    def put(self, request, *args, **kwargs):
-        response = super().put(request, *args, **kwargs)
-        return self._check_credential_deprecation(request, response)
-
     def patch(self, request, *args, **kwargs):
         response = super().patch(request, *args, **kwargs)
-        return self._check_credential_deprecation(request, response)
+        if 'credential' in request.data:
+            mark_deprecated(
+                response,
+                detail="The 'credential' field is deprecated. Use the 'credentials' relationship instead.",
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+            )
+        return response
 
 
 class InventorySourceSchedulesList(SubListCreateAPIView):
@@ -3257,13 +3280,16 @@ class JobTemplateAccessList(ResourceAccessList):
     resource_purpose = 'users who can access a job template'
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class JobTemplateObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.JobTemplate
     search_fields = ('role_field', 'content_type__model')
-    deprecated = True
     resource_purpose = 'roles of a job template'
 
     def get_queryset(self):
@@ -3709,13 +3735,16 @@ class WorkflowJobTemplateAccessList(ResourceAccessList):
     resource_purpose = 'users who can access a workflow job template'
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class WorkflowJobTemplateObjectRolesList(SubListAPIView):
     deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.WorkflowJobTemplate
     search_fields = ('role_field', 'content_type__model')
-    deprecated = True
     resource_purpose = 'roles of a workflow job template'
 
     def get_queryset(self):
@@ -4872,6 +4901,10 @@ class ActivityStreamDetail(RetrieveAPIView):
     resource_purpose = 'activity stream entry detail'
 
 
+@deprecated(
+    detail="The /api/v2/roles/ endpoint is deprecated. Use /api/v2/role_definitions/ instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class RoleList(ListAPIView):
     deprecated = True
     model = models.Role
@@ -4881,6 +4914,10 @@ class RoleList(ListAPIView):
     resource_purpose = 'roles'
 
 
+@deprecated(
+    detail="The /api/v2/roles/ endpoint is deprecated. Use /api/v2/role_definitions/ instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class RoleDetail(RetrieveAPIView):
     deprecated = True
     model = models.Role
@@ -4888,6 +4925,10 @@ class RoleDetail(RetrieveAPIView):
     resource_purpose = 'role detail'
 
 
+@deprecated(
+    detail="Role-based access is deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class RoleUsersList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.User
@@ -4919,6 +4960,10 @@ class RoleUsersList(SubListAttachDetachAPIView):
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
+@deprecated(
+    detail="Role-based access is deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class RoleTeamsList(SubListAttachDetachAPIView):
     deprecated = True
     model = models.Team
