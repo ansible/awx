@@ -71,6 +71,31 @@ def test_managed_image_matching_control_plane_not_cleaned(cleanup_patch, setting
 
 
 @pytest.mark.django_db
+def test_managed_setting_different_ref_form_not_cleaned(cleanup_patch, settings):
+    """Images sharing the same repo as a managed setting but with different ref form should not be cleaned up"""
+    settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT = 'quay.io/control/plane:latest'
+
+    ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/control/plane@sha256:abc123')
+    ee.image = 'quay.io/new/image:v1'
+    ee.save()
+
+    cleanup_patch.delay.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_managed_setting_different_tag_still_cleaned(cleanup_patch, settings):
+    """Images with a different tag from a managed setting should still be cleaned up"""
+    settings.GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'Managed EE', 'image': 'quay.io/managed/ee:latest'}]
+    settings.CONTROL_PLANE_EXECUTION_ENVIRONMENT = ''
+
+    ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/managed/ee:v1')
+    ee.image = 'quay.io/managed/ee:v2'
+    ee.save()
+
+    cleanup_patch.delay.assert_called_once_with(remove_images=['quay.io/managed/ee:v1'])
+
+
+@pytest.mark.django_db
 def test_managed_ee_object_not_cleaned(cleanup_patch):
     """Images belonging to a managed=True EE object should not be cleaned up"""
     ExecutionEnvironment.objects.create(name='managed-ee', image='quay.io/foo/bar:latest', managed=True)

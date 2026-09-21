@@ -611,16 +611,33 @@ def _extract_image_repo(image_ref):
     return image_ref
 
 
-def _is_managed_image(image_ref, exclude_pk=None):
-    """Check if an image is referenced by managed EE settings or managed EE objects."""
+def _managed_setting_images():
+    """Collect all image references from managed EE settings."""
+    images = []
     for ee_config in getattr(settings, 'GLOBAL_JOB_EXECUTION_ENVIRONMENTS', []):
-        if ee_config.get('image') == image_ref:
-            logger.info("Skipping cleanup of %s - referenced in GLOBAL_JOB_EXECUTION_ENVIRONMENTS", image_ref)
-            return True
+        image = ee_config.get('image')
+        if image:
+            images.append(image)
+    cp_image = getattr(settings, 'CONTROL_PLANE_EXECUTION_ENVIRONMENT', None)
+    if cp_image:
+        images.append(cp_image)
+    return images
 
-    if getattr(settings, 'CONTROL_PLANE_EXECUTION_ENVIRONMENT', None) == image_ref:
-        logger.info("Skipping cleanup of %s - matches CONTROL_PLANE_EXECUTION_ENVIRONMENT", image_ref)
-        return True
+
+def _is_managed_image(image_ref, exclude_pk=None):
+    """Check if an image is referenced by managed EE settings or managed EE objects.
+
+    Matches both exact strings and same-repo different-reference-form (tag vs digest).
+    """
+    ref_repo = _extract_image_repo(image_ref)
+
+    for managed_image in _managed_setting_images():
+        if managed_image == image_ref:
+            logger.info("Skipping cleanup of %s - referenced in managed EE settings", image_ref)
+            return True
+        if ref_repo and _extract_image_repo(managed_image) == ref_repo and _different_ref_forms(image_ref, managed_image):
+            logger.info("Skipping cleanup of %s - same repository as managed setting image %s", image_ref, managed_image)
+            return True
 
     qs = ExecutionEnvironment.objects.filter(managed=True, image=image_ref)
     if exclude_pk is not None:
