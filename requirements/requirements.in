@@ -13,7 +13,7 @@ cryptography
 Cython
 daphne>=4.2.2
 distro
-django>=5.2,<5.3  # Django 5.2 LTS, allow patch updates
+django>=5.2.17,<5.3  # Django 5.2 LTS, allow patch updates, CVE-2026-15307
 django-cors-headers
 django-crum
 django-extensions

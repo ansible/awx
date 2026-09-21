@@ -123,7 +123,7 @@ dispatcherd[pg-notify]==2026.3.25
     # via -r /awx_devel/requirements/requirements.in
 distro==1.9.0
     # via -r /awx_devel/requirements/requirements.in
-django==5.2.8
+django==5.2.17
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
