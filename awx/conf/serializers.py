@@ -1,3 +1,6 @@
+# Django
+from django.utils.functional import cached_property
+
 # Django REST Framework
 from rest_framework import serializers
 
@@ -95,7 +98,7 @@ class SettingSingletonSerializer(PlainSerializerCleanTextMixin, serializers.Seri
     class Meta:
         model = _SettingSingletonFakeModel
 
-    @property
+    @cached_property
     def excluded_fields(self):
         encrypted = frozenset(s for s in settings_registry.get_registered_settings() if settings_registry.is_setting_encrypted(s))
         return self._ALWAYS_EXCLUDED | encrypted
