@@ -64,8 +64,8 @@ def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_adm
     settings.ACTIVITY_STREAM_ENABLED = True
     assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
-    assert activity_stream_entry.role.first() == organization.admin_role
-    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+    assert activity_stream_entry.object1 == 'organization'
+    assert activity_stream_entry.object2 == 'user'
 
 
 @pytest.mark.django_db
@@ -73,8 +73,8 @@ def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, 
     settings.ACTIVITY_STREAM_ENABLED = True
     assert activity_stream_entry.user.first() == org_admin
     assert activity_stream_entry.organization.first() == organization
-    assert activity_stream_entry.role.first() == organization.admin_role
-    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+    assert activity_stream_entry.object1 == 'organization'
+    assert activity_stream_entry.object2 == 'user'
 
 
 @pytest.mark.django_db
@@ -140,17 +140,38 @@ def test_stream_queryset_hides_shows_items(
 
 
 @pytest.mark.django_db
+def test_activity_stream_pagination_uses_unfiltered_count(get, organization, project, user, settings):
+    """The pagination count should reflect total activity stream rows, not
+    the RBAC-filtered subset.  The RBAC-filtered COUNT is catastrophically
+    slow on large tables (AAP-83773); an approximate over-count from an
+    unfiltered SELECT COUNT(*) is acceptable for pagination UI."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+
+    no_access_user = user('no-access-user', False)
+
+    total_entries = ActivityStream.objects.count()
+    assert total_entries > 0
+
+    url = reverse('api:activity_stream_list')
+    response = get(url, no_access_user)
+
+    assert response.status_code == 200
+    visible_results = len(response.data['results'])
+    pagination_count = response.data['count']
+    assert pagination_count == total_entries
+    assert visible_results < pagination_count
+
+
+@pytest.mark.django_db
 def test_stream_user_direct_role_updates(get, post, organization_factory):
     objects = organization_factory('test_org', superusers=['admin'], users=['test'], inventories=['inv1'])
 
     url = reverse('api:user_roles_list', kwargs={'pk': objects.users.test.pk})
     post(url, dict(id=objects.inventories.inv1.read_role.pk), objects.superusers.admin)
 
-    activity_stream = ActivityStream.objects.filter(
-        inventory__pk=objects.inventories.inv1.pk, user__pk=objects.users.test.pk, role__pk=objects.inventories.inv1.read_role.pk
-    ).first()
+    activity_stream = ActivityStream.objects.filter(inventory__pk=objects.inventories.inv1.pk, user__pk=objects.users.test.pk, operation='associate').first()
     url = reverse('api:activity_stream_detail', kwargs={'pk': activity_stream.pk})
     response = get(url, objects.users.test)
 
-    assert response.data['object1'] == 'user'
-    assert response.data['object2'] == 'inventory'
+    assert response.data['object1'] == 'inventory'
+    assert response.data['object2'] == 'user'

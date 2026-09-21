@@ -35,6 +35,16 @@ register(
 )
 
 register(
+    'INDIRECT_NODE_COUNTING_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Indirect Node Counting'),
+    help_text=_('Controls whether Controller processes indirect managed nodes reported by jobs.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
@@ -488,7 +498,7 @@ register(
     min_value=0,
     label=_('Job Event Standard Output Maximum Display Size'),
     help_text=_(
-        u'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
+        'Maximum Size of Standard Output in bytes to display for a single job or ad hoc command event. `stdout` will end with `\u2026` when truncated.'
     ),
     category=_('Jobs'),
     category_slug='jobs',
@@ -722,9 +732,7 @@ register(
     default='https',
     label=_('Logging Aggregator Protocol'),
     help_text=_(
-        'Protocol used to communicate with log aggregator.  '
-        'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
-        'the Logging Aggregator hostname.'
+        'Protocol used to communicate with log aggregator.  HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in the Logging Aggregator hostname.'
     ),
     category=_('Logging'),
     category_slug='logging',

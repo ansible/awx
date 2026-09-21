@@ -29,9 +29,9 @@ def test_unified_job_list_field_consistency():
     for cls in UnifiedJob.__subclasses__():
         list_serializer = getattr(serializers, '{}ListSerializer'.format(cls.__name__))
         unified_serializer = serializers.UnifiedJobListSerializer().get_sub_serializer(cls())
-        assert set(list_serializer().fields.keys()) == set(
-            unified_serializer().fields.keys()
-        ), 'Mismatch between {} list serializer & unified list serializer'.format(cls)
+        assert set(list_serializer().fields.keys()) == set(unified_serializer().fields.keys()), (
+            'Mismatch between {} list serializer & unified list serializer'.format(cls)
+        )
 
 
 def test_unified_job_detail_exclusive_fields():
@@ -39,7 +39,7 @@ def test_unified_job_detail_exclusive_fields():
     For each type, assert that the only fields allowed to be exclusive to
     detail view are the allowed types
     """
-    allowed_detail_fields = frozenset(('result_traceback', 'job_args', 'job_cwd', 'job_env', 'event_processing_finished', 'artifacts'))
+    allowed_detail_fields = frozenset(('result_traceback', 'job_args', 'job_cwd', 'job_env', 'event_processing_finished'))
     for cls in UnifiedJob.__subclasses__():
         list_serializer = getattr(serializers, '{}ListSerializer'.format(cls.__name__))
         detail_serializer = getattr(serializers, '{}Serializer'.format(cls.__name__))

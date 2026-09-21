@@ -233,9 +233,10 @@ class TestAnalyticsGenericView:
             request = RequestFactory().post('/some/path')
             view = AnalyticsGenericView()
 
-            with mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client, mock.patch(
-                'awx.api.views.analytics.AnalyticsGenericView._base_auth_request'
-            ) as mock_base_auth_request:
+            with (
+                mock.patch('awx.api.views.analytics.OIDCClient') as mock_oidc_client,
+                mock.patch('awx.api.views.analytics.AnalyticsGenericView._base_auth_request') as mock_base_auth_request,
+            ):
                 # Configure the mock OIDCClient instance and its make_request method
                 mock_client_instance = mock.Mock()
                 mock_oidc_client.return_value = mock_client_instance

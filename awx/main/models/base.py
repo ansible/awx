@@ -102,9 +102,9 @@ class BaseModel(models.Model):
 
     def __str__(self):
         if 'name' in self.__dict__:
-            return u'%s-%s' % (self.name, self.pk)
+            return '%s-%s' % (self.name, self.pk)
         else:
-            return u'%s-%s' % (self._meta.verbose_name, self.pk)
+            return '%s-%s' % (self._meta.verbose_name, self.pk)
 
     def clean_fields(self, exclude=None):
         """

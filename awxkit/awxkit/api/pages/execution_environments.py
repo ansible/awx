@@ -42,7 +42,7 @@ class ExecutionEnvironment(HasCreate, HasCopy, base.Base):
             organization=organization.id if organization else None,
             credential=credential.id if credential else None,
             pull=pull,
-            **kwargs
+            **kwargs,
         )
 
         return payload

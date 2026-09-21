@@ -134,7 +134,7 @@ class MemInventory(object):
             try:
                 port = int(name.split(':')[1])
             except (ValueError, UnicodeDecodeError):
-                logger.warning(u'Invalid port "%s" for host "%s"', name.split(':')[1], host_name)
+                logger.warning('Invalid port "%s" for host "%s"', name.split(':')[1], host_name)
                 port = None
         else:
             host_name = name

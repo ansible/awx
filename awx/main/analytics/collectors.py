@@ -227,7 +227,7 @@ def counts(since, **kwargs):
     counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
     if connection.vendor == 'postgresql':
         with connection.cursor() as cursor:
-            cursor.execute(f"select count(*) from pg_stat_activity where datname=\'{connection.settings_dict['NAME']}\'")
+            cursor.execute(f"select count(*) from pg_stat_activity where datname='{connection.settings_dict['NAME']}'")
             counts['database_connections'] = cursor.fetchone()[0]
     else:
         # We should be using postgresql, but if we do that change that ever we should change the below value
@@ -441,7 +441,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           WHERE ({tbl}.{where_column} > '{since.isoformat()}' AND {tbl}.{where_column} <= '{until.isoformat()}')) TO STDOUT WITH CSV HEADER'''
         return query
 
-    return _copy_table(table='events', query=query(fr"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
+    return _copy_table(table='events', query=query(rf"replace({tbl}.event_data, '\u', '\u005cu')::jsonb"), path=full_path)
 
 
 @register('events_table', '1.5', format='csv', description=_('Automation task records'), expensive=four_hour_slicing)

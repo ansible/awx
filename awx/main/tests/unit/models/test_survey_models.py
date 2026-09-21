@@ -96,8 +96,8 @@ class TestSurveyVariableValidation:
 def job(mocker):
     ret = mocker.MagicMock(
         **{
-            'decrypted_extra_vars.return_value': '{\"secret_key\": \"my_password\"}',
-            'display_extra_vars.return_value': '{\"secret_key\": \"$encrypted$\"}',
+            'decrypted_extra_vars.return_value': '{"secret_key": "my_password"}',
+            'display_extra_vars.return_value': '{"secret_key": "$encrypted$"}',
             'extra_vars_dict': {"secret_key": "my_password"},
             'pk': 1,
             'job_template.pk': 1,
@@ -313,7 +313,7 @@ class TestWorkflowSurveys:
         ({'tmpl_var': 'bar2'}, False),  # different value from template, not okay
         ({'tmpl_var': 'bar', 'a': 2}, False),  # extra key, not okay
         ({'tmpl_var': 'bar', False: 2}, False),  # Falsy key
-        ({'tmpl_var': 'bar', u'🐉': u'🐉'}, False),  # dragons
+        ({'tmpl_var': 'bar', '🐉': '🐉'}, False),  # dragons
     ],
 )
 class TestExtraVarsNoPrompt:
