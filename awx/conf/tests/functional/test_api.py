@@ -230,3 +230,80 @@ def test_setting_singleton_skips_custom_login_info_html(api_request, enforce_cle
         )
         assert response.status_code == 200
         assert response.data['CUSTOM_LOGIN_INFO'] == '<p>Legal notice</p>'
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_string_list_item(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting(
+            'FOO_LIST',
+            field_class=fields.StringListField,
+            default=[],
+            category='FooBar',
+            category_slug='foobar',
+        ),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
+            data={'FOO_LIST': ['ok-value', UNSAFE_SETTING_INPUT]},
+        )
+        assert response.status_code == 400
+        assert 'FOO_LIST' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_dict_value(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting(
+            'FOO_MAP',
+            field_class=fields.KeyValueField,
+            default={},
+            category='FooBar',
+            category_slug='foobar',
+        ),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
+            data={'FOO_MAP': {'HTTP_PROXY': UNSAFE_SETTING_INPUT}},
+        )
+        assert response.status_code == 400
+        assert 'FOO_MAP' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_allows_safe_string_list(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting(
+            'FOO_LIST',
+            field_class=fields.StringListField,
+            default=[],
+            category='FooBar',
+            category_slug='foobar',
+        ),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
+            data={'FOO_LIST': ['HTTP_X_FORWARDED_FOR', 'https://example.com']},
+        )
+        assert response.status_code == 200
+        assert response.data['FOO_LIST'] == ['HTTP_X_FORWARDED_FOR', 'https://example.com']
+
+
+@pytest.mark.django_db
+def test_setting_singleton_skips_task_env_shell_expansion(api_request, enforce_clean_text):
+    """AWX_TASK_ENV values may use ${VAR} / $(...) — excluded from CleanText."""
+    with mock.patch('awx.conf.views.clear_setting_cache'):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'}),
+            data={'AWX_TASK_ENV': {'PATH': '${PATH}:/opt/bin', 'CUSTOM': '$(echo hi)'}},
+        )
+        assert response.status_code == 200
+        assert response.data['AWX_TASK_ENV']['PATH'] == '${PATH}:/opt/bin'
+        assert response.data['AWX_TASK_ENV']['CUSTOM'] == '$(echo hi)'

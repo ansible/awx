@@ -75,7 +75,7 @@ class _SettingSingletonFakeModel:
     """Stand-in for Meta.model on SettingSingletonSerializer (plain Serializer).
 
     Never introspected for real fields -- PlainSerializerCleanTextMixin discovers
-    CharFields from self.fields instead.
+    CharField / ListField / DictField / JSONField entries from self.fields instead.
     """
 
     _meta = _SettingSingletonFakeOpts()
@@ -85,15 +85,18 @@ class SettingSingletonSerializer(PlainSerializerCleanTextMixin, serializers.Seri
     """Present a group of settings (by category) as a single object.
 
     Uses PlainSerializerCleanTextMixin because there is no Django model whose
-    CharField/TextField list matches the dynamic settings registry fields.
-    Known limitation: only top-level CharField settings are validated (ListField/
-    DictField string children are not discovered by PlainSerializerCleanTextMixin).
+    fields match the dynamic settings registry. Top-level CharFields get Tier
+    1/2 text validation; ListField/DictField/JSONField string children are
+    walked via CleanTextMixin's nested JSON validation path.
     """
 
     # CUSTOM_LOGIN_INFO deliberately allows HTML fragments (ui/conf.py).
     # CUSTOM_LOGO is a data:image/...;base64,... URI; Tier 2 blocks data: schemes.
+    # AWX_TASK_ENV / GALAXY_TASK_ENV are key/value maps whose values often use
+    # shell/env expansion (${VAR}, $(...)) or similar — Tier 2's injection
+    # blocklist would reject legitimate automation env config.
     # Encrypted settings (passwords/tokens/PEMs) are excluded dynamically below.
-    _ALWAYS_EXCLUDED = frozenset({'CUSTOM_LOGIN_INFO', 'CUSTOM_LOGO'})
+    _ALWAYS_EXCLUDED = frozenset({'CUSTOM_LOGIN_INFO', 'CUSTOM_LOGO', 'AWX_TASK_ENV', 'GALAXY_TASK_ENV'})
 
     class Meta:
         model = _SettingSingletonFakeModel
