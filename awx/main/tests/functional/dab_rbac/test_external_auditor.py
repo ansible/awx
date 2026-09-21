@@ -46,7 +46,7 @@ def test_access_qs_external_auditor(ext_auditor_rd, rando, job_template):
     ujt_cls = apps.get_model('main', 'UnifiedJobTemplate')
     assert job_template in jt_cls.access_qs(rando)
     assert job_template.id in jt_cls.access_ids_qs(rando)
-    assert job_template.id in ujt_cls.accessible_pk_qs(rando, 'read_role')
+    assert job_template.id in ujt_cls.access_ids_qs(rando, 'view')
 
 
 @pytest.mark.django_db

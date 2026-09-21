@@ -20,7 +20,6 @@ def signame(sig):
 
 
 class AWXConsumerRedis(object):
-
     def __init__(self, name, worker):
         self.name = name
         self.pool = WorkerPool()

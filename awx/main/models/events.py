@@ -525,7 +525,7 @@ class JobEvent(BasePlaybookEvent):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
 
     def __str__(self):
-        return u'%s @ %s' % (self.get_event_display2(), self.created.isoformat())
+        return '%s @ %s' % (self.get_event_display2(), self.created.isoformat())
 
     def _hostnames(self):
         hostnames = set()
@@ -588,9 +588,6 @@ class JobEvent(BasePlaybookEvent):
                     logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
             JobHostSummary.objects.bulk_create(summaries.values())
-
-            # last_job and last_job_host_summary are now derived via
-            # JobHostSummary.latest_for_host / latest_job_for_host
 
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)
@@ -717,7 +714,7 @@ class BaseCommandEvent(CreatedModifiedModel):
     )
 
     def __str__(self):
-        return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
+        return '%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
     @classmethod
     def create_from_data(cls, **kwargs):

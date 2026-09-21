@@ -81,7 +81,6 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):
-
     def get(self, request, *args, **kwargs):
         if is_proxied_request():
             next = request.GET.get('next', "")
@@ -116,7 +115,7 @@ class LoggedLoginView(auth_views.LoginView):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         ip = get_remote_host(request)  # request.META.get('REMOTE_ADDR', None)
         if request.user.is_authenticated:
-            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, ip)))
+            logger.info(smart_str("User {} logged in from {}".format(self.request.user.username, ip)))
             ret.set_cookie(
                 'userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False), samesite=getattr(settings, 'USER_COOKIE_SAMESITE', 'Lax')
             )
@@ -125,7 +124,7 @@ class LoggedLoginView(auth_views.LoginView):
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), ip)))
+                logger.warning(smart_str("Login failed for user {} from {}".format(self.request.POST.get('username'), ip)))
             ret.status_code = 401
             return ret
 

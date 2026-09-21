@@ -7,9 +7,10 @@ import awx.main.notifications.webhook_backend as webhook_backend
 
 
 def test_send_messages_as_POST():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('POST', None)
@@ -38,9 +39,10 @@ def test_send_messages_as_POST():
 
 
 def test_send_messages_as_PUT():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.put.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('PUT', None)
@@ -69,9 +71,10 @@ def test_send_messages_as_PUT():
 
 
 def test_send_messages_with_username():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('POST', None, username='userstring')
@@ -100,9 +103,10 @@ def test_send_messages_with_username():
 
 
 def test_send_messages_with_password():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('POST', None, password='passwordstring')
@@ -131,9 +135,10 @@ def test_send_messages_with_password():
 
 
 def test_send_messages_with_username_and_password():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('POST', None, username='userstring', password='passwordstring')
@@ -162,9 +167,10 @@ def test_send_messages_with_username_and_password():
 
 
 def test_send_messages_with_no_verify_ssl():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('POST', None, disable_ssl_verification=True)
@@ -193,9 +199,10 @@ def test_send_messages_with_no_verify_ssl():
 
 
 def test_send_messages_with_additional_headers():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         requests_mock.post.return_value.status_code = 200
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
         backend = webhook_backend.WebhookBackend('POST', {'X-Test-Header1': 'test-content-1', 'X-Test-Header2': 'test-content-2'})
@@ -229,9 +236,10 @@ def test_send_messages_with_additional_headers():
 
 
 def test_send_messages_with_redirects_ok():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
         # First two calls return redirects, third call returns 200
         requests_mock.post.side_effect = [
             mock.Mock(status_code=301, headers={"Location": "http://redirect1.com"}),
@@ -266,9 +274,11 @@ def test_send_messages_with_redirects_ok():
 
 
 def test_send_messages_with_redirects_blank():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock, mock.patch('awx.main.notifications.webhook_backend.logger') as logger_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+        mock.patch('awx.main.notifications.webhook_backend.logger') as logger_mock,
+    ):
         # First call returns a redirect with Location header, second call returns 301 but NO Location header
         requests_mock.post.side_effect = [
             mock.Mock(status_code=301, headers={"Location": "http://redirect1.com"}),
@@ -299,9 +309,11 @@ def test_send_messages_with_redirects_blank():
 
 
 def test_send_messages_with_redirects_max_retries_exceeded():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock, mock.patch('awx.main.notifications.webhook_backend.logger') as logger_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+        mock.patch('awx.main.notifications.webhook_backend.logger') as logger_mock,
+    ):
         # Return MAX_RETRIES (5) redirect responses to exceed the retry limit
         requests_mock.post.side_effect = [
             mock.Mock(status_code=301, headers={"Location": "http://redirect1.com"}),
@@ -336,9 +348,11 @@ def test_send_messages_with_redirects_max_retries_exceeded():
 
 
 def test_send_messages_with_error_status_code():
-    with mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock, mock.patch(
-        'awx.main.notifications.webhook_backend.get_awx_http_client_headers'
-    ) as version_mock, mock.patch('awx.main.notifications.webhook_backend.logger') as logger_mock:
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+        mock.patch('awx.main.notifications.webhook_backend.logger') as logger_mock,
+    ):
         # Return a 404 error status code
         requests_mock.post.return_value = mock.Mock(status_code=404)
         version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}

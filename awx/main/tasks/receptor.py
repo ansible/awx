@@ -117,6 +117,10 @@ class FuzzyError:
         return UnknownError(msg, node=node, state_name=state_name)
 
 
+def receptor_config_exists():
+    return os.path.exists(__RECEPTOR_CONF)
+
+
 def read_receptor_config():
     # for K8S deployments, getting a lock is necessary as another process
     # may be re-writing the config at this time
@@ -180,7 +184,7 @@ def find_node_in_mesh(node_name, receptor_ctl):
             if node.get('NodeID') == node_name:
                 return node
         else:
-            logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts-attempt} attempts left.")
+            logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts - attempt} attempts left.")
             time.sleep(backoff)
             backoff += 1
     else:
@@ -801,7 +805,11 @@ def should_update_config(new_config):
     tcp-peers in the config
     '''
 
-    current_config = read_receptor_config()  # this gets receptor conf lock
+    try:
+        current_config = read_receptor_config()  # this gets receptor conf lock
+    except FileNotFoundError:
+        logger.warning("Receptor config file not found, config needs to be written.")
+        return True
     for config_entry in current_config:
         if config_entry not in new_config:
             logger.warning(f"{config_entry} should not be in receptor config. Updating.")
@@ -848,7 +856,7 @@ def reload_receptor():
             receptor_ctl.simple_command("reload")
             break
         except ValueError:
-            logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
+            logger.warning(f"Unable to reload Receptor configuration. {attempts - backoff} attempts left.")
             time.sleep(backoff)
     else:
         raise RuntimeError("Receptor reload failed")

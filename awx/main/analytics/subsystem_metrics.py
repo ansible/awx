@@ -181,7 +181,9 @@ class HistogramM(BaseM):
             node_label = f'node="{instance}"'
             subsystem_label = f',subsystem="{namespace}"' if namespace else ''
             for i, b in enumerate(self.buckets):
-                output_text += f'{self.field}_bucket{{le="{b}",{node_label}{subsystem_label}}} {sum(instance_data[instance][self.field]["counts"][0:i+1])}\n'
+                output_text += (
+                    f'{self.field}_bucket{{le="{b}",{node_label}{subsystem_label}}} {sum(instance_data[instance][self.field]["counts"][0 : i + 1])}\n'
+                )
             output_text += f'{self.field}_bucket{{le="+Inf",{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
             output_text += f'{self.field}_count{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["inf"]}\n'
             output_text += f'{self.field}_sum{{{node_label}{subsystem_label}}} {instance_data[instance][self.field]["sum"]}\n'
@@ -405,6 +407,20 @@ class DispatcherMetrics(Metrics):
         super().__init__(settings.METRICS_SERVICE_DISPATCHER, *args, **kwargs)
 
 
+class IndirectCountingMetrics(Metrics):
+    """Subsystem metrics for indirect node counting performance and error tracking."""
+
+    METRICSLIST = [
+        IntM('indirect_node_audit_records_created', 'Number of indirect node audit records created'),
+        FloatM('indirect_node_query_execution_seconds', 'Time spent executing jq queries for indirect node counting'),
+        IntM('indirect_node_jq_query_errors', 'Number of jq query execution errors during indirect node counting'),
+        SetFloatM('indirect_node_fallback_cleanup_seconds', 'Time spent in the fallback cleanup job for indirect node counting'),
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(settings.METRICS_SERVICE_INDIRECT_COUNTING, *args, **kwargs)
+
+
 class CallbackReceiverMetrics(Metrics):
     METRICSLIST = [
         SetIntM('callback_receiver_events_queue_size_redis', 'Current number of events in redis queue'),
@@ -428,6 +444,7 @@ def metrics(request):
     output_text = ''
     output_text += DispatcherMetrics().generate_metrics(request)
     output_text += CallbackReceiverMetrics().generate_metrics(request)
+    output_text += IndirectCountingMetrics().generate_metrics(request)
 
     dispatcherd_metrics = get_dispatcherd_metrics(request)
     if dispatcherd_metrics:

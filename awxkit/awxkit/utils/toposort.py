@@ -42,9 +42,7 @@ class CircularDependencyError(ValueError):
     def __init__(self, data):
         # Sort the data just to make the output consistent, for use in
         #  error messages.  That's convenient for doctests.
-        s = 'Circular dependencies exist among these items: {{{}}}'.format(
-            ', '.join('{!r}:{!r}'.format(key, value) for key, value in sorted(data.items()))
-        )  # noqa
+        s = 'Circular dependencies exist among these items: {{{}}}'.format(', '.join('{!r}:{!r}'.format(key, value) for key, value in sorted(data.items())))  # noqa
         super(CircularDependencyError, self).__init__(s)
         self.data = data
 
