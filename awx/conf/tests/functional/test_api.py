@@ -189,6 +189,27 @@ def test_setting_singleton_rejects_unsafe_char_field(api_request, dummy_setting,
 
 
 @pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_char_field_all_category(api_request, dummy_setting, dummy_validate, enforce_clean_text):
+    # category_slug='all' runs every registered validate_func, then CleanTextMixin.
+    # A validator on a different category only participates via that loop.
+    validate_calls = []
+
+    def record_validate(serializer, attrs):
+        validate_calls.append(True)
+        return attrs
+
+    with (
+        dummy_setting('FOO_BAR', field_class=fields.CharField, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
+        dummy_validate('other', record_validate),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'all'}), data={'FOO_BAR': UNSAFE_SETTING_INPUT})
+        assert validate_calls
+        assert response.status_code == 400
+        assert 'FOO_BAR' in response.data
+
+
+@pytest.mark.django_db
 def test_setting_singleton_skips_encrypted_fields(api_request, dummy_setting, enforce_clean_text):
     with (
         dummy_setting('FOO_SECRET', field_class=fields.CharField, encrypted=True, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
