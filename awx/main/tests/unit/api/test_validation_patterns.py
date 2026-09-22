@@ -32,14 +32,14 @@ class TestInjectFreeTextPattern:
         with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
             validation_patterns.inject_free_text_pattern(schema)
         assert 'pattern' not in schema
-        assert 'pattern_description' not in schema
+        assert 'patternDescription' not in schema
 
     def test_injects_tier2_when_toggle_on(self, fake_tier2_pattern):
         schema = {'id': 'username', 'label': 'Username', 'type': 'string'}
         with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
             validation_patterns.inject_free_text_pattern(schema)
         assert schema['pattern'] == FAKE_PATTERN
-        assert schema['pattern_description'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
+        assert schema['patternDescription'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
         assert schema['flags'] == 'i'
 
     def test_skips_secret_fields(self, fake_tier2_pattern):
@@ -77,7 +77,7 @@ class TestFreeTextPatternMetadata:
         result = validation_patterns.free_text_pattern_metadata()
         assert result is not None
         assert result['pattern'] == FAKE_PATTERN
-        assert result['pattern_description'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
+        assert result['patternDescription'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
         assert result['flags'] == 'i'
 
     def test_returns_none_when_helper_missing(self, monkeypatch):
@@ -376,7 +376,7 @@ class TestBuildSurveySpecOptionsSchema:
         with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
             schema = validation_patterns.build_survey_spec_options_schema()
         assert schema['name']['pattern'] == FAKE_PATTERN
-        assert schema['name']['pattern_description'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
+        assert schema['name']['patternDescription'] == validation_patterns.TIER2_PATTERN_DESCRIPTION
         assert schema['description']['pattern'] == FAKE_PATTERN
         assert schema['spec']['type'] == 'json'
         assert schema['spec']['question_name']['pattern'] == FAKE_PATTERN
