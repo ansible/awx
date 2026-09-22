@@ -6,8 +6,8 @@ from django.utils.timezone import now
 
 from awx.main.migrations._create_system_jobs import delete_clear_tokens_sjt
 
-_migration_0212 = importlib.import_module('awx.main.migrations.0212_cleanup_orphaned_token_schedules')
-cleanup_orphaned_token_schedules = _migration_0212.cleanup_orphaned_token_schedules
+_migration_0208 = importlib.import_module('awx.main.migrations.0208_cleanup_orphaned_token_schedules')
+cleanup_orphaned_token_schedules = _migration_0208.cleanup_orphaned_token_schedules
 
 SJT_NAME = 'Cleanup Expired OAuth 2 Tokens'
 
