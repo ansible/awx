@@ -44,6 +44,7 @@ from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
 from ansible_base.lib.serializers.mixins import CleanTextMixin
+from ansible_base.lib.utils.bulk_validation_audit import audit_bulk_model_instances
 from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.lib.utils.settings import get_setting
 from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
@@ -2277,6 +2278,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         old_total_hosts = validated_data['inventory'].total_hosts
         result = [Host(**attrs) for attrs in validated_data['hosts']]
         try:
+            audit_bulk_model_instances(result, operation='bulk_create')
             Host.objects.bulk_create(result)
         except Exception as e:
             raise serializers.ValidationError({"detail": _(f"cannot create host, host creation error {e}")})
