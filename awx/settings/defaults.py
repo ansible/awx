@@ -422,11 +422,17 @@ CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
 
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
 
-# Seconds after a controller restart before an orphaned dispatched job is failed.
-# Jobs with work_unit_id set are skipped by the reaper and handled by the adoption loop
-# (_attempt_adoption_for_dispatched_jobs). This timeout is the maximum time we wait for
-# the EE to finish before giving up and failing the job.
+# Seconds an orphaned dispatched job may go unreachable before it is failed. Jobs with a
+# work_unit_id are skipped by the reaper and handed to adopt_job_async instead; this bounds
+# how long that job waits for a work unit its receptor cannot reach at all. A unit that
+# answers — running, finished, or already adopted — is never subject to it.
 HADR_JOB_ADOPTION_TIMEOUT = 3600
+
+# How many jobs one controller will stream at once while adopting them. Each adoption holds a
+# dispatcher worker until the job it streams finishes, so an uncapped controller inheriting a
+# large instance's jobs would fill its pool and stop sending heartbeats — and then be declared
+# lost itself. Jobs past the cap stay running and are adopted on a later heartbeat.
+HADR_MAX_CONCURRENT_ADOPTIONS = 5
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work

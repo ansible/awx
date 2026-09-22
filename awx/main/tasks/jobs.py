@@ -521,15 +521,14 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
+        # Reuse the script_data we are about to write rather than making the callback fetch
+        # its own copy, which is what the adoption path has to do.
+        self.runner_callback.populate_host_map(script_data)
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = {"hostvars": True, "towervars": True}
-        if hasattr(instance, 'job_slice_number'):
-            script_params['slice_number'] = instance.job_slice_number
-            script_params['slice_count'] = instance.job_slice_count
-
+        script_params = self.runner_callback.inventory_script_params(instance)
         return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
 
     def build_args(self, instance, private_data_dir, passwords):

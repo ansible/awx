@@ -131,10 +131,13 @@ class RunnerCallback:
         Having both paths call this method means any missing field is caught by the
         normal test suite rather than only by adoption-specific tests.
 
+        host_map is deliberately not set here — each path has a different cheapest source
+        for it. See populate_host_map.
+
         Args:
             instance: the UnifiedJob model instance being run
-            safe_env: masked environment dict for log output. None → {} (adoption path,
-                where credentials are not available at reconnect time)
+            safe_env: masked environment values that win over the pattern masking applied in
+                status_handler. None → {}; status_handler still pattern-masks in that case.
             dedup_threshold: highest counter where all lower counters are in DB (contiguous
                 prefix). event_handler skips counter <= threshold with an O(1) check. None
                 disables dedup (normal jobs, zero overhead).
@@ -143,7 +146,7 @@ class RunnerCallback:
                 worker concurrency, not job size. None when dedup is disabled.
         """
         self.instance = instance
-        self.job_created = str(instance.created)  # stamped on every event (callback.py:160)
+        self.job_created = str(instance.created)  # stamped on every event by event_handler
         self.safe_env = safe_env if safe_env is not None else {}
         if getattr(instance, 'spawned_by_workflow', False):
             try:
@@ -152,20 +155,6 @@ class RunnerCallback:
                 pass
         self.dedup_threshold = dedup_threshold
         self.persisted_counters = persisted_counters
-        # Populate host_map from inventory hostvars using the same logic as normal job path.
-        # This ensures adoption respects inventory types (smart, constructed, normal),
-        # enabled state, and job slicing — the same way write_inventory_file() does.
-        if hasattr(instance, 'inventory') and instance.inventory_id:
-            try:
-                script_params = {"hostvars": True, "towervars": True}
-                if hasattr(instance, 'job_slice_number'):
-                    script_params['slice_number'] = instance.job_slice_number
-                    script_params['slice_count'] = instance.job_slice_count
-                script_data = instance.inventory.get_script_data(**script_params)
-                for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
-                    self.host_map[hostname] = hv.get('remote_tower_id', '')
-            except Exception:
-                pass  # host_map stays {}; host_id won't be set on replayed events
 
     @classmethod
     def create_for_job(cls, instance, safe_env=None, dedup_threshold=None, persisted_counters=None):
@@ -173,6 +162,35 @@ class RunnerCallback:
         callback = cls(model=type(instance))
         callback.configure_for_job(instance, safe_env, dedup_threshold, persisted_counters)
         return callback
+
+    @staticmethod
+    def inventory_script_params(instance):
+        """Arguments for Inventory.get_script_data, matching what build_inventory writes."""
+        script_params = {"hostvars": True, "towervars": True}
+        if hasattr(instance, 'job_slice_number'):
+            script_params['slice_number'] = instance.job_slice_number
+            script_params['slice_count'] = instance.job_slice_count
+        return script_params
+
+    def populate_host_map(self, script_data):
+        """Map hostname -> remote_tower_id so event_handler can stamp host_id on events."""
+        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
+            self.host_map[hostname] = hv.get('remote_tower_id', '')
+
+    def populate_host_map_from_inventory(self, instance):
+        """Adoption path: fetch script_data ourselves, since no inventory file is written.
+
+        The normal path hands us the script_data build_inventory already built, so it never
+        pays for this query. Sourcing host_map from the same script_data either way is what
+        keeps adoption honoring inventory type (smart, constructed), enabled state and
+        job slicing.
+        """
+        if not (hasattr(instance, 'inventory') and instance.inventory_id):
+            return
+        try:
+            self.populate_host_map(instance.inventory.get_script_data(**self.inventory_script_params(instance)))
+        except Exception:
+            pass  # host_map stays {}; host_id won't be set on replayed events
 
     def event_handler(self, event_data):
         #
@@ -310,9 +328,18 @@ class RunnerCallback:
         Ansible runner callback triggered on status transition
         """
         if status_data['status'] == 'starting':
-            job_env = dict(runner_config.env)
+            from awx.main.models.credential import build_safe_env  # Circular import
+
             '''
-            Take the safe environment variables and overwrite
+            Pattern-mask first so nothing sensitive can reach job_env (exposed on the job
+            detail API) even when safe_env is empty — which is the case during adoption of a
+            job whose original controller died before its 'starting' status was persisted.
+            In the normal path safe_env is already build_safe_env(env), so this is a no-op.
+            '''
+            job_env = build_safe_env(runner_config.env)
+            '''
+            Take the safe environment variables and overwrite. These win over the pattern
+            masking above: they also cover credential-plugin values whose names match no pattern.
             '''
             for k, v in self.safe_env.items():
                 if k in job_env:

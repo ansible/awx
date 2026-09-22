@@ -14,14 +14,14 @@ from collections import namedtuple
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from django.test import override_settings
 
-from awx.main.models import Job
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.tasks.jobs import _finalize_job_run
 from awx.main.tasks.receptor import (
     AWXReceptorJob,
+    _AdoptionReceptorJob,
     _AdoptionTask,
-    _compute_adoption_dedup,
     _finalize_adopted_job,
     _get_adoption_exit_code,
     _get_or_create_private_data_dir,
@@ -148,7 +148,142 @@ def test_process_phase_signal_exit(mock_signal, mock_connections):
     res = rj._process_phase(ctl)
 
     assert res.status == 'canceled'
+    assert rj.detached is False
     ctl.simple_command.assert_any_call('work cancel unit-1')
+
+
+# ---------------------------------------------------------------------------
+# _AdoptionReceptorJob — a signal detaches instead of canceling the work unit
+# ---------------------------------------------------------------------------
+
+
+def _make_adoption_receptor_job(cancel_flag=False, refresh_error=None):
+    """Return an _AdoptionReceptorJob whose job row reports the given cancel_flag."""
+    rj = _AdoptionReceptorJob.__new__(_AdoptionReceptorJob)
+    task = Mock()
+    task.instance.id = 7
+    task.instance.pk = 7
+    task.instance.cancel_flag = cancel_flag
+    task.instance.log_format = 'job 7'
+    if refresh_error is not None:
+        task.instance.refresh_from_db.side_effect = refresh_error
+    task.runner_callback.extra_update_fields = {}
+    task.runner_callback.event_ct = 0
+    rj.task = task
+    rj.unit_id = 'unit-1'
+    rj.runner_params = {'private_data_dir': '/tmp/test'}
+    return rj
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=True)
+def test_adoption_process_phase_shutdown_signal_detaches(mock_signal, mock_connections):
+    """Shutdown during adoption leaves the work unit running so it can be adopted again.
+
+    The unit outliving this task is the entire point of adoption, so a shutdown must not
+    cancel it the way it does for a normal run, where the dispatcher task *is* the job.
+    """
+    rj = _make_adoption_receptor_job(cancel_flag=False)
+    rj.processor = Mock()
+    ctl = _make_receptor_ctl()
+
+    res = rj._process_phase(ctl)
+
+    assert res.status == 'canceled'
+    assert rj.detached is True
+    assert not any('work cancel' in str(call) for call in ctl.simple_command.call_args_list)
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=True)
+def test_adoption_process_phase_user_cancel_cancels_unit(mock_signal, mock_connections):
+    """A real user cancel (cancel_flag set) does cancel the adopted work unit."""
+    rj = _make_adoption_receptor_job(cancel_flag=True)
+    rj.processor = Mock()
+    ctl = _make_receptor_ctl()
+
+    res = rj._process_phase(ctl)
+
+    assert res.status == 'canceled'
+    assert rj.detached is False
+    ctl.simple_command.assert_any_call('work cancel unit-1')
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=True)
+def test_adoption_process_phase_detaches_when_cancel_flag_unreadable(mock_signal, mock_connections):
+    """If the cancel_flag cannot be read, detach — killing a healthy job is the worse error."""
+    rj = _make_adoption_receptor_job(cancel_flag=True, refresh_error=RuntimeError('db gone'))
+    rj.processor = Mock()
+    ctl = _make_receptor_ctl()
+
+    res = rj._process_phase(ctl)
+
+    assert res.status == 'canceled'
+    assert rj.detached is True
+    assert not any('work cancel' in str(call) for call in ctl.simple_command.call_args_list)
+
+
+# ---------------------------------------------------------------------------
+# reattach_to_work_unit — detach and cancel outcomes
+# ---------------------------------------------------------------------------
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_detach_leaves_job_running_and_unit_alive(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """A detached stream finalizes nothing and releases nothing — the job stays adoptable."""
+    job = Mock()
+    job.id = 5
+    job.work_unit_id = 'unit-detach'
+    job.spawned_by_workflow = False
+    job.started = None
+    job.execution_node = None
+    job.job_env = {}
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+
+    def _detach(self, receptor_ctl):
+        self.detached = True
+        return _Result(status='canceled', rc=1)
+
+    with patch.object(AWXReceptorJob, '_process_phase', autospec=True, side_effect=_detach):
+        result = reattach_to_work_unit(job, ctl)
+
+    assert result is False
+    mock_finalize_job.assert_not_called()
+    mock_release.assert_not_called()
+    mock_rmtree.assert_called_once_with('/tmp/adopt', ignore_errors=True)
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_user_cancel_finalizes_as_canceled(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """A canceled stream that was not a detach finalizes the job as canceled, not failed."""
+    job = Mock()
+    job.id = 6
+    job.work_unit_id = 'unit-cancel'
+    job.spawned_by_workflow = False
+    job.started = None
+    job.execution_node = None
+    job.job_env = {}
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+
+    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=_Result(status='canceled', rc=1)):
+        result = reattach_to_work_unit(job, ctl)
+
+    assert result is True
+    mock_finalize_job.assert_called_once()
+    assert mock_finalize_job.call_args[1]['final_status'] == 'canceled'
 
 
 # ---------------------------------------------------------------------------
@@ -270,7 +405,7 @@ def test_handle_work_error_get_results_raises():
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -283,6 +418,8 @@ def test_reattach_sets_job_created_on_callback(mock_rmtree, mock_pdd, mock_relea
     job.created = '2026-01-01T00:00:00Z'
     job.spawned_by_workflow = False
     job.status = 'successful'
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
@@ -308,7 +445,7 @@ def test_reattach_sets_job_created_on_callback(mock_rmtree, mock_pdd, mock_relea
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -321,6 +458,8 @@ def test_reattach_releases_work_unit_on_success(mock_rmtree, mock_pdd, mock_rele
     job.spawned_by_workflow = False
     job.status = 'successful'
     job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': ''}
     mock_process.return_value = Mock(status='successful', rc=0)
@@ -331,7 +470,7 @@ def test_reattach_releases_work_unit_on_success(mock_rmtree, mock_pdd, mock_rele
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', side_effect=RuntimeError('network failure'))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -344,6 +483,8 @@ def test_reattach_releases_work_unit_on_failure(mock_rmtree, mock_pdd, mock_rele
     job.spawned_by_workflow = False
     job.started = None
     job.status = 'running'
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.side_effect = [
         {'StateName': ''},  # initial state check (unknown → _process_phase)
@@ -363,7 +504,7 @@ def test_reattach_releases_work_unit_on_failure(mock_rmtree, mock_pdd, mock_rele
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -378,6 +519,8 @@ def test_reattach_sets_parent_workflow_job_id_when_workflow_child(mock_rmtree, m
     job.spawned_by_workflow = True
     job.get_workflow_job.return_value.id = 999
     job.status = 'successful'
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
@@ -398,7 +541,7 @@ def test_reattach_sets_parent_workflow_job_id_when_workflow_child(mock_rmtree, m
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -412,6 +555,8 @@ def test_reattach_workflow_job_lookup_exception_swallowed(mock_rmtree, mock_pdd,
     job.spawned_by_workflow = True
     job.get_workflow_job.side_effect = Exception('workflow lookup failed')
     job.status = 'successful'
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
@@ -526,7 +671,7 @@ def test_configure_runner_callback_swallows_workflow_lookup_error():
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -539,6 +684,8 @@ def test_reattach_non_workflow_job_no_parent_id(mock_rmtree, mock_pdd, mock_rele
     job.created = '2026-01-01T00:00:00Z'
     job.spawned_by_workflow = False
     job.status = 'successful'
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
@@ -563,17 +710,18 @@ def test_reattach_non_workflow_job_no_parent_id(mock_rmtree, mock_pdd, mock_rele
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
-@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=_Result(status='successful', rc=0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
 @patch('awx.main.tasks.receptor.shutil.rmtree')
-def test_reattach_running_defers_without_streaming_variant(mock_rmtree, mock_pdd, mock_release, mock_process, mock_dedup, mock_finalize):
-    """Running state returns False — stdout forwarding is not available for adopted units.
+def test_reattach_running_streams_live(mock_rmtree, mock_pdd, mock_release, mock_process, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """A Running unit is streamed live, not held until the EE finishes.
 
-    PR#1564 work adopt starts a status-monitoring goroutine but does not proxy the EE's
-    stdout bytes to the adopting node.  Calling _process_phase → get_work_results would
-    block forever on the empty local stdout file.  Return False so the heartbeat retries.
+    _process_phase reads the unit with get_work_results, which is exactly what a normal
+    run does from the moment work is submitted — the unit is Pending or Running there too.
+    Deferring a Running unit would hold every event back until the job ended.
     """
     job = Mock()
     job.id = 1
@@ -582,17 +730,20 @@ def test_reattach_running_defers_without_streaming_variant(mock_rmtree, mock_pdd
     job.spawned_by_workflow = False
     job.status = 'running'
     job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Running'}
 
     result = reattach_to_work_unit(job, ctl)
 
-    mock_process.assert_not_called()
-    assert result is False
+    mock_process.assert_called_once()
+    mock_finalize_job.assert_called_once()
+    assert result is True
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
@@ -611,6 +762,8 @@ def test_reattach_process_phase_failure_falls_back_to_work_status(mock_rmtree, m
     job.spawned_by_workflow = False
     job.status = 'running'
     job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     # Initial check: Running (falls through to _process_phase); re-check after raise also raises
     ctl.simple_command.side_effect = [
@@ -630,30 +783,39 @@ def test_reattach_process_phase_failure_falls_back_to_work_status(mock_rmtree, m
 # ---------------------------------------------------------------------------
 
 
-def test_reattach_pending_defers_without_streaming():
-    """Pending state returns False immediately — avoids the infinite get_work_results block.
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_pending_streams_live(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """Pending is streamed too — get_work_results waits for the unit to produce output.
 
-    When work adopt creates a cross-controller adoption unit it starts in Pending while
-    the receptor mesh connects.  get_work_results would block forever because the adopted
-    unit's stdout pipe is not yet (and may never be) forwarded.  We return False so
-    adopt_job_async exits cleanly and _process_running_jobs re-queues it next heartbeat.
+    A cross-controller adoption unit starts in Pending while the mesh connection comes up.
+    That is the same state a freshly submitted unit is in when _run_internal calls
+    _process_phase, so there is nothing to wait for here that the streamer cannot handle.
     """
     job = Mock()
     job.id = 42
     job.work_unit_id = 'unit-pending'
+    job.spawned_by_workflow = False
+    job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Pending'}
 
-    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase') as mock_process:
+    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=_Result(status='successful', rc=0)) as mock_process:
         result = reattach_to_work_unit(job, ctl)
 
-    assert result is False
-    mock_process.assert_not_called()
+    assert result is True
+    mock_process.assert_called_once()
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
 @patch('awx.main.tasks.receptor._finalize_adopted_job')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
 @patch('awx.main.tasks.receptor.shutil.rmtree')
@@ -669,6 +831,8 @@ def test_reattach_succeeded_goes_through_process_phase(mock_rmtree, mock_pdd, mo
     job.work_unit_id = 'unit-done'
     job.spawned_by_workflow = False
     job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
 
@@ -684,7 +848,7 @@ def test_reattach_succeeded_goes_through_process_phase(mock_rmtree, mock_pdd, mo
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
 @patch('awx.main.tasks.receptor._finalize_adopted_job')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
 @patch('awx.main.tasks.receptor.shutil.rmtree')
@@ -695,6 +859,8 @@ def test_reattach_failed_goes_through_process_phase(mock_rmtree, mock_pdd, mock_
     job.work_unit_id = 'unit-failed'
     job.spawned_by_workflow = False
     job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Failed', 'ExitCode': 1, 'Detail': 'exit status 1'}
 
@@ -709,7 +875,7 @@ def test_reattach_failed_goes_through_process_phase(mock_rmtree, mock_pdd, mock_
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
 @patch('awx.main.tasks.receptor._finalize_adopted_job')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
 @patch('awx.main.tasks.receptor.shutil.rmtree')
@@ -720,6 +886,8 @@ def test_reattach_canceled_goes_through_process_phase(mock_rmtree, mock_pdd, moc
     job.work_unit_id = 'unit-canceled'
     job.spawned_by_workflow = False
     job.started = None
+    job.execution_node = None
+    job.job_env = {}
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Canceled', 'Detail': ''}
 
@@ -732,30 +900,110 @@ def test_reattach_canceled_goes_through_process_phase(mock_rmtree, mock_pdd, moc
     assert exit_code == 1
 
 
+# ---------------------------------------------------------------------------
+# reattach_to_work_unit — cross-controller adoption (execution_node set)
+# ---------------------------------------------------------------------------
+
+
 @patch('awx.main.tasks.jobs._finalize_job_run')
-@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set()))
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
 @patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
 @patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.adopt_remote_work')
 @patch('awx.main.tasks.receptor.shutil.rmtree')
-def test_reattach_running_defers_without_streaming(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize):
-    """Running state returns False — get_work_results blocks on the adopted unit's 0-byte
-    local stdout file.  Defer so adopt_job_async exits and _process_running_jobs retries
-    next heartbeat; when the EE finishes the unit becomes terminal and is finalized there.
-    """
+def test_reattach_cross_controller_adoption_calls_adopt_remote_work(
+    mock_rmtree, mock_adopt_remote, mock_pdd, mock_release, mock_process, mock_dedup, mock_finalize
+):
+    """When the local receptor does not know the unit, reattach_to_work_unit adopts from the execution node."""
     job = Mock()
-    job.id = 42
-    job.work_unit_id = 'unit-running'
+    job.id = 1
+    job.work_unit_id = 'unit-1'
     job.spawned_by_workflow = False
-    job.started = None
-    job.status = 'running'
+    job.status = 'successful'
+    job.execution_node = 'remote-ee'  # Cross-controller adoption
+    job.job_env = {}
+    ctl = Mock()
+    ctl.simple_command.side_effect = RuntimeError('unknown work unit unit-1')
+    mock_adopt_remote.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
+    mock_process.return_value = Mock(status='successful', rc=0)
+
+    reattach_to_work_unit(job, ctl)
+
+    mock_adopt_remote.assert_called_once_with(ctl, 'remote-ee', 'unit-1')
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.adopt_remote_work')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_cross_controller_defers_when_adopt_remote_work_raises(mock_rmtree, mock_adopt_remote, mock_pdd, mock_release, mock_dedup, mock_finalize):
+    """When neither the local receptor nor the execution node can be queried, reattach defers."""
+    job = Mock()
+    job.id = 1
+    job.work_unit_id = 'unit-1'
+    job.execution_node = 'remote-ee'
+    ctl = Mock()
+    ctl.simple_command.side_effect = RuntimeError('unknown work unit unit-1')
+    mock_adopt_remote.side_effect = RuntimeError('EE unreachable')
+
+    result = reattach_to_work_unit(job, ctl)
+
+    assert result is False  # Adoption deferred
+
+
+# ---------------------------------------------------------------------------
+# get_adoption_unit_status — local receptor first, remote adopt as fallback
+# ---------------------------------------------------------------------------
+
+
+@patch('awx.main.tasks.receptor.adopt_remote_work')
+def test_adoption_unit_status_prefers_local_receptor(mock_adopt_remote):
+    """A same-controller restart with a remote EE reads real state from the local receptor."""
+    from awx.main.tasks.receptor import get_adoption_unit_status
+
+    job = Mock(id=1, work_unit_id='unit-1', execution_node='remote-ee')
     ctl = Mock()
     ctl.simple_command.return_value = {'StateName': 'Running'}
 
-    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase') as mock_process:
-        result = reattach_to_work_unit(job, ctl)
+    status = get_adoption_unit_status(ctl, job)
 
-    assert result is False
-    mock_process.assert_not_called()
+    assert status['StateName'] == 'Running'
+    ctl.simple_command.assert_called_once_with('work status unit-1')
+    mock_adopt_remote.assert_not_called()
+
+
+@patch('awx.main.tasks.receptor.adopt_remote_work')
+def test_adoption_unit_status_falls_back_to_remote_adopt(mock_adopt_remote):
+    """Unknown to the local receptor → adopt the unit from the execution node."""
+    from awx.main.tasks.receptor import get_adoption_unit_status
+
+    job = Mock(id=1, work_unit_id='unit-1', execution_node='remote-ee')
+    ctl = Mock()
+    ctl.simple_command.side_effect = RuntimeError('unknown work unit unit-1')
+    mock_adopt_remote.return_value = {'unitid': 'unit-1', 'result': 'Adopted'}
+
+    status = get_adoption_unit_status(ctl, job)
+
+    assert status['result'] == 'Adopted'
+    mock_adopt_remote.assert_called_once_with(ctl, 'remote-ee', 'unit-1')
+
+
+@patch('awx.main.tasks.receptor.adopt_remote_work')
+def test_adoption_unit_status_reraises_without_remote_node(mock_adopt_remote):
+    """No execution node to fall back to → the local failure propagates, marking the unit unreachable."""
+    from awx.main.tasks.receptor import get_adoption_unit_status
+
+    job = Mock(id=1, work_unit_id='unit-1', execution_node=None)
+    ctl = Mock()
+    ctl.simple_command.side_effect = RuntimeError('unknown work unit unit-1')
+
+    with pytest.raises(RuntimeError):
+        get_adoption_unit_status(ctl, job)
+
+    mock_adopt_remote.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -775,12 +1023,14 @@ def test_finalize_adopted_job_skips_when_already_finalized(mock_finalize):
     mock_finalize.assert_not_called()
 
 
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
 @patch('awx.main.tasks.jobs._finalize_job_run')
 def test_finalize_adopted_job_successful(mock_finalize):
     """exit_code=0 → _finalize_job_run called with status='successful' and finished in extra_fields."""
     job = Mock()
     job.status = 'running'
     job.started = None
+    job.execution_node = None
     callback = Mock()
 
     _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
@@ -797,12 +1047,14 @@ def test_finalize_adopted_job_successful(mock_finalize):
     assert 'finished' in extra_fields
 
 
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
 @patch('awx.main.tasks.jobs._finalize_job_run')
 def test_finalize_adopted_job_failed(mock_finalize):
     """exit_code=1 → _finalize_job_run called with status='failed'."""
     job = Mock()
     job.status = 'running'
     job.started = None
+    job.execution_node = None
     callback = Mock()
 
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=False)
@@ -811,6 +1063,7 @@ def test_finalize_adopted_job_failed(mock_finalize):
     assert status == 'failed'
 
 
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
 @patch('awx.main.tasks.jobs._finalize_job_run')
 def test_finalize_adopted_job_includes_elapsed_when_started(mock_finalize):
     """elapsed is passed in extra_fields when job.started is set."""
@@ -819,6 +1072,7 @@ def test_finalize_adopted_job_includes_elapsed_when_started(mock_finalize):
     job = Mock()
     job.status = 'running'
     job.started = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    job.execution_node = None
     callback = Mock()
 
     _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
@@ -838,6 +1092,127 @@ def test_finalize_adopted_job_process_phase_failed_label(mock_finalize):
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=True)
 
     mock_finalize.assert_called_once()
+
+
+@override_settings(CLUSTER_HOST_ID='surviving-ctrl-9')
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_records_metadata_when_process_phase_failed(mock_finalize):
+    """Adoption metadata is recorded even when the process phase raised.
+
+    Both branches of this function are adoptions, and knowing which controller took the job
+    over matters most when the adoption itself blew up.
+    """
+    job = Mock()
+    job.id = 7
+    job.work_unit_id = 'unit-boom'
+    job.execution_node = 'remote-ee-9'
+    job.status = 'running'
+    job.started = None
+    callback = Mock()
+
+    _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=True)
+
+    mock_finalize.assert_called_once()
+    callback.delay_update.assert_called_once()
+    explanation = callback.delay_update.call_args[1]['job_explanation']
+    assert 'surviving-ctrl-9' in explanation
+    assert 'unit-boom' in explanation
+
+
+@override_settings(CLUSTER_HOST_ID='surviving-ctrl-1')
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_stores_adoption_metadata(mock_finalize):
+    """job_explanation is set with surviving controller, unit ID, and execution node."""
+    job = Mock()
+    job.id = 42
+    job.work_unit_id = 'unit-xyz'
+    job.execution_node = 'remote-ee-1'
+    job.status = 'running'
+    job.started = None
+    callback = Mock()
+
+    _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
+
+    mock_finalize.assert_called_once()
+    # Goes through delay_update, not extra_fields — _finalize_job_run lets extra_fields
+    # overwrite delayed fields, which would drop any explanation the runner recorded.
+    callback.delay_update.assert_called_once()
+    explanation = callback.delay_update.call_args[1]['job_explanation']
+    assert 'surviving-ctrl-1' in explanation
+    assert 'unit-xyz' in explanation
+    assert 'remote-ee-1' in explanation
+    extra_fields = mock_finalize.call_args[1].get('extra_fields') or mock_finalize.call_args[0][4]
+    assert 'job_explanation' not in extra_fields
+
+
+@override_settings(CLUSTER_HOST_ID='surviving-ctrl-1')
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_preserves_runner_job_explanation(mock_finalize):
+    """Adoption metadata appends to an explanation the runner already recorded, it does not replace it."""
+    from awx.main.tasks.callback import RunnerCallback
+
+    job = Mock()
+    job.id = 42
+    job.work_unit_id = 'unit-xyz'
+    job.execution_node = 'remote-ee-1'
+    job.status = 'running'
+    job.started = None
+
+    callback = RunnerCallback(model=None)
+    # status_handler records the real failure cause during _process_phase
+    callback.status_handler({'status': 'error', 'job_explanation': 'Job terminated due to error'}, None)
+
+    _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=False)
+
+    explanation = callback.get_delayed_update_fields()['job_explanation']
+    assert 'Job terminated due to error' in explanation
+    assert 'surviving-ctrl-1' in explanation
+
+
+# ---------------------------------------------------------------------------
+# status_handler 'starting' — job_env must never be persisted unmasked
+# ---------------------------------------------------------------------------
+
+
+def test_status_handler_masks_env_when_safe_env_is_empty():
+    """A replayed 'starting' status must not write raw credentials into job_env.
+
+    Adoption seeds safe_env from job.job_env, which is empty when the original controller
+    died after submitting the work unit but before the EE's 'starting' status was persisted.
+    The replayed status then carries the EE's real environment, so masking cannot depend on
+    safe_env being populated.
+    """
+    from awx.main.tasks.callback import RunnerCallback
+
+    callback = RunnerCallback(model=None)
+    callback.safe_env = {}  # adoption seeded this from an empty job.job_env
+    callback.instance = Mock(pk=7)
+    callback.update_model = Mock(return_value=callback.instance)
+
+    runner_config = Mock(env={'MY_VAULT_PASSWORD': 'hunter2', 'PATH': '/usr/bin'}, command=['ansible-playbook'], cwd='/tmp')
+    callback.status_handler({'status': 'starting'}, runner_config)
+
+    persisted_env = callback.update_model.call_args.kwargs['job_env']
+    assert persisted_env['MY_VAULT_PASSWORD'] != 'hunter2'
+    assert persisted_env['PATH'] == '/usr/bin'
+
+
+def test_status_handler_safe_env_still_overrides_pattern_masking():
+    """Caller-supplied safe_env wins over regex masking — it covers credential-plugin values."""
+    from awx.main.tasks.callback import RunnerCallback
+
+    callback = RunnerCallback(model=None)
+    # MY_TOKEN would be regex-masked anyway; CUSTOM_VALUE only safe_env knows about.
+    callback.safe_env = {'CUSTOM_VALUE': '$encrypted$'}
+    callback.instance = Mock(pk=8)
+    callback.update_model = Mock(return_value=callback.instance)
+
+    runner_config = Mock(env={'CUSTOM_VALUE': 'secret-from-plugin', 'MY_TOKEN': 'abc'}, command=[], cwd='/tmp')
+    callback.status_handler({'status': 'starting'}, runner_config)
+
+    persisted_env = callback.update_model.call_args.kwargs['job_env']
+    assert persisted_env['CUSTOM_VALUE'] == '$encrypted$'
+    assert persisted_env['MY_TOKEN'] != 'abc'
 
 
 # ---------------------------------------------------------------------------
@@ -954,6 +1329,38 @@ def test_adopt_remote_work_json_fallback_with_tls_and_sign(mock_sign, mock_tls):
 
 
 # ---------------------------------------------------------------------------
+# reattach_to_work_unit — pre-cached unit_status parameter
+# ---------------------------------------------------------------------------
+
+
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+def test_reattach_uses_precached_unit_status(mock_finalize, mock_dedup, mock_release, mock_pdd, mock_rmtree):
+    """Verify reattach_to_work_unit uses provided unit_status instead of refetching."""
+    job = Mock()
+    job.id = 1
+    job.work_unit_id = 'unit-cached'
+    job.spawned_by_workflow = False
+    job.started = None
+    job.execution_node = None
+    job.job_env = {}
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Failed'}  # Should NOT be called for status fetch
+
+    # Pre-cached status from adopt_job_async
+    precached_status = {'StateName': 'Succeeded', 'ExitCode': 0}
+
+    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=Mock(status='successful')):
+        reattach_to_work_unit(job, ctl, unit_status=precached_status)
+
+    # Verify simple_command was NOT called (status was provided)
+    ctl.simple_command.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
 # reattach_to_work_unit — receptor status check exception returns False
 # ---------------------------------------------------------------------------
 
@@ -972,34 +1379,6 @@ def test_reattach_returns_false_when_status_command_raises():
     result = reattach_to_work_unit(job, ctl)
 
     assert result is False
-
-
-# ---------------------------------------------------------------------------
-# _compute_adoption_dedup — collision zone cap warning
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.django_db
-def test_compute_adoption_dedup_logs_warning_when_collision_zone_exceeds_cap(caplog):
-    """When collision_zone_list exceeds the dedup cap, a warning is logged and results are capped."""
-    job = Mock(spec=Job)
-    # Build a queryset-like mock: annotate/filter/values_list chain returns a large list
-    large_list = list(range(10000))
-
-    qs = Mock()
-    qs.annotate.return_value = qs
-    qs.filter.return_value = qs
-    qs.order_by.return_value = qs
-    qs.first.return_value = None  # no gap → safe_threshold=0
-    qs.values_list.return_value = large_list
-
-    job.get_event_queryset.return_value = qs
-
-    with caplog.at_level('WARNING', logger='awx.main.tasks.receptor'):
-        safe_threshold, collision_zone = _compute_adoption_dedup(job)
-
-    assert 'collision_zone' in caplog.text
-    assert safe_threshold == 0
 
 
 # ---------------------------------------------------------------------------
@@ -1256,16 +1635,14 @@ def test_finalize_job_run_logs_lifecycle(mock_update, mock_hook, mock_task_mgr, 
 
 
 # ---------------------------------------------------------------------------
-# _configure_runner_callback — host_map exception swallowed
+# populate_host_map — shared by the normal path and adoption
 # ---------------------------------------------------------------------------
 
 
-def test_configure_runner_callback_populates_host_map():
-    """configure_for_job populates host_map from inventory hostvars."""
+def test_populate_host_map_from_inventory_populates_host_map():
+    """The adoption path sources host_map by fetching script_data itself."""
     cb = RunnerCallback(model=None)
     instance = Mock()
-    instance.created = '2026-01-01'
-    instance.spawned_by_workflow = False
     instance.inventory_id = 42
     instance.inventory.get_script_data.return_value = {
         '_meta': {
@@ -1276,23 +1653,61 @@ def test_configure_runner_callback_populates_host_map():
         }
     }
 
-    cb.configure_for_job(instance)
+    cb.populate_host_map_from_inventory(instance)
 
     assert cb.host_map == {'host1': 'ext-1', 'host2': 'ext-2'}
 
 
-def test_configure_runner_callback_swallows_host_map_error():
+def test_populate_host_map_from_inventory_swallows_error():
     """If fetching inventory hosts raises, the exception is swallowed and host_map stays {}."""
+    cb = RunnerCallback(model=None)
+    instance = Mock()
+    instance.inventory_id = 1
+    instance.inventory.get_script_data.side_effect = Exception('DB error')
+
+    cb.populate_host_map_from_inventory(instance)  # must not raise
+
+    assert cb.host_map == {}
+
+
+def test_populate_host_map_from_inventory_skips_job_without_inventory():
+    """No inventory means no query — an inventory-less job must not hit get_script_data."""
+    cb = RunnerCallback(model=None)
+    instance = Mock()
+    instance.inventory_id = None
+
+    cb.populate_host_map_from_inventory(instance)
+
+    assert cb.host_map == {}
+    instance.inventory.get_script_data.assert_not_called()
+
+
+def test_configure_for_job_does_not_touch_inventory():
+    """host_map is populated by the call sites, so configure_for_job issues no inventory query."""
     cb = RunnerCallback(model=None)
     instance = Mock()
     instance.created = '2026-01-01'
     instance.spawned_by_workflow = False
-    instance.inventory_id = 1
-    instance.inventory.get_script_data.side_effect = Exception('DB error')
+    instance.inventory_id = 42
 
-    cb.configure_for_job(instance)  # must not raise
+    cb.configure_for_job(instance, dedup_threshold=0)
 
     assert cb.host_map == {}
+    instance.inventory.get_script_data.assert_not_called()
+
+
+def test_inventory_script_params_matches_build_inventory():
+    """Adoption must ask for the same script_data shape build_inventory writes, slicing included."""
+    sliced = Mock(job_slice_number=2, job_slice_count=5)
+    assert RunnerCallback.inventory_script_params(sliced) == {
+        'hostvars': True,
+        'towervars': True,
+        'slice_number': 2,
+        'slice_count': 5,
+    }
+
+    unsliced = Mock(spec=[])  # no job_slice_number attribute
+    assert RunnerCallback.inventory_script_params(unsliced) == {'hostvars': True, 'towervars': True}
 
 
 # ---------------------------------------------------------------------------
