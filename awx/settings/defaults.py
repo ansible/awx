@@ -1048,6 +1048,7 @@ SPECTACULAR_SETTINGS = {
     'POSTPROCESSING_HOOKS': [
         'awx.api.schema.filter_credential_type_schema',
         'awx.api.schema.inject_ai_descriptions',
+        'awx.api.schema.inject_clean_text_pattern_components',
     ],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
