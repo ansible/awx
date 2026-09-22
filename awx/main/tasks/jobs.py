@@ -43,6 +43,7 @@ from awx.main.constants import (
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
     HOST_FACTS_FIELDS,
+    CLEANUP_JOBS_RESOURCE_FLAGS,
 )
 from awx.main.models import (
     Instance,
@@ -2188,9 +2189,18 @@ class RunSystemJob(BaseTask):
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
-                args.extend(
-                    ['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands', '--workflow-jobs', '--notifications']
-                )
+                # If a "resources" list is provided, only clean up the requested
+                # resource types; otherwise fall back to cleaning up everything.
+                resources = json_vars.get('resources')
+                if resources:
+                    flags = [CLEANUP_JOBS_RESOURCE_FLAGS[r] for r in resources if r in CLEANUP_JOBS_RESOURCE_FLAGS]
+                else:
+                    flags = list(CLEANUP_JOBS_RESOURCE_FLAGS.values())
+                # Guard against passing no flags, which cleanup_jobs would
+                # interpret as "clean up every resource type".
+                if not flags:
+                    flags = list(CLEANUP_JOBS_RESOURCE_FLAGS.values())
+                args.extend(flags)
         except Exception:
             logger.exception("{} Failed to parse system job".format(system_job.log_format))
         return args
