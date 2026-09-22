@@ -75,12 +75,14 @@ from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
     administrative_workunit_reaper,
+    get_adoption_unit_status,
     get_receptor_ctl,
     reattach_to_work_unit,
     worker_cleanup,
     worker_info,
     write_receptor_config,
 )
+from awx.main.tasks.signals import with_signal_handling
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
@@ -851,6 +853,39 @@ def _heartbeat_check_versions(this_inst, instance_list):
             raise RuntimeError("Shutting down.")
 
 
+def _queue_job_adoption(job_id, source_controller):
+    """Publish adopt_job_async for one job and record the resulting task id on it.
+
+    Shared by all three adoption entry points so the published message is byte-identical
+    between them: on_duplicate='discard' keys on (task, args, kwargs), and that is what lets
+    dispatcherd drop a second submission made before the first message lands. Persisting the
+    id matters because the job still carries the uuid of the dispatch task that died, which
+    would make it look orphaned to every later heartbeat.
+    """
+    obj, _unused = adopt_job_async.apply_async(args=[job_id], kwargs={'source_controller': source_controller}, queue=get_task_queuename())
+    UnifiedJob.objects.filter(pk=job_id).update(celery_task_id=obj['uuid'])
+
+
+def _handle_lost_instance_job(j, other_inst):
+    """Process a single job from a lost instance: adopt if possible, reap otherwise."""
+    adoptable = j.work_unit_id and j.controller_node == other_inst.hostname and j.execution_node != other_inst.hostname
+    if not adoptable:
+        reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
+        return
+
+    claimed = UnifiedJob.objects.filter(pk=j.id, controller_node=other_inst.hostname, status='running').update(controller_node=settings.CLUSTER_HOST_ID)
+    if not claimed:
+        logger.info(f'Cross-controller adoption skipped for job {j.id}: already claimed by another controller')
+        return
+
+    try:
+        _queue_job_adoption(j.id, settings.CLUSTER_HOST_ID)
+        logger.info(f'Cross-controller adoption queued for job {j.id} (unit={j.work_unit_id}) from lost controller {other_inst.hostname}')
+    except Exception:
+        logger.exception(f'Failed to queue cross-controller adoption for job {j.id}, reaping instead')
+        reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
+
+
 def _reap_and_mark_lost_instance(other_inst):
     """Reap a lost instance's running jobs and mark it offline (or deprovision it)."""
     try:
@@ -862,9 +897,7 @@ def _reap_and_mark_lost_instance(other_inst):
             ).exclude(polymorphic_ctype_id=workflow_ctype_id)
         )
         for j in running_jobs:
-            # AAP-89602: cross-controller adoption for dispatched jobs will be added here
-            # once ansible/receptor#1564 merges. Both paths reap identically for now.
-            reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
+            _handle_lost_instance_job(j, other_inst)
         # Any jobs that were waiting to be processed by this node will be handed back to task manager
         UnifiedJob.objects.filter(status='waiting', controller_node=other_inst.hostname).update(status='pending', controller_node='', execution_node='')
     except Exception:
@@ -938,9 +971,6 @@ def _process_startup_jobs(this_inst):
 
     Dispatched jobs (work_unit_id set) are handed off to adopt_job_async, which streams
     events in real-time in a background task. Undispatched jobs are reaped immediately.
-
-    Same-controller only. Cross-controller adoption (jobs from a dead peer controller) is
-    deferred to AAP-89602 and requires ansible/receptor#1564.
     """
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = list(UnifiedJob.objects.filter(status='running', controller_node=this_inst.hostname).exclude(polymorphic_ctype_id=workflow_ctype_id))
@@ -951,8 +981,8 @@ def _process_startup_jobs(this_inst):
     for j in jobs:
         try:
             if j.work_unit_id:
-                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
-                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
+                # Queue adoption. Task will claim ownership atomically when it executes.
+                _queue_job_adoption(j.id, this_inst.hostname)
             else:
                 reaped_ids.append(j.id)
                 reaper.reap_job(
@@ -971,10 +1001,9 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
 
     Jobs still in active_task_ids are legitimately running — leave them alone.
     For orphaned jobs (not in active_task_ids):
-    - Dispatched (work_unit_id set, controller_node=this_inst) → adopt_job_async (real-time streaming).
-    - Undispatched or not owned by this controller → reap.
-
-    Cross-controller adoption (jobs from a dead peer controller) is deferred to AAP-89602.
+    - Dispatched and owned by this controller (work_unit_id set, controller_node=this_inst) → adopt_job_async (real-time streaming).
+    - Owned by another live controller → defer (let the owner handle it).
+    - Undispatched or owned by a lost controller → reap.
     """
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     base_q = Q(status='running') & (Q(execution_node=this_inst.hostname) | Q(controller_node=this_inst.hostname))
@@ -990,43 +1019,181 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
     for j in jobs:
         try:
             if j.work_unit_id and j.controller_node == this_inst.hostname:
-                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
-                # Record the adoption task UUID so subsequent heartbeats see this job
-                # as active and skip it — preventing redundant re-adoption dispatches.
-                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
+                # Queue adoption. Task will claim ownership atomically when it executes.
+                _queue_job_adoption(j.id, this_inst.hostname)
+            elif (
+                j.controller_node != this_inst.hostname
+                and Instance.objects.filter(
+                    hostname=j.controller_node,
+                    node_state__in=(Instance.States.READY, Instance.States.INSTALLED),
+                ).exists()
+            ):
+                # Another live controller owns this job; let it handle adoption or reaping
+                pass
             else:
                 reaper.reap_job(j, 'failed')
         except Exception:
             logger.exception(f'Failed processing job {j.id} in heartbeat job loop')
 
 
-@task(queue=get_task_queuename, timeout=3600 * 2, on_duplicate='discard')
-def adopt_job_async(job_id):
+def _adoption_slot_available():
+    """Is there room on this controller for one more adoption?
+
+    An adoption is the one dispatcher task that occupies its worker for the whole remaining
+    runtime of a job, because it streams that job's events. A controller inheriting a large
+    instance's jobs would otherwise fill the pool with adoptions and starve the heartbeat,
+    at which point the rest of the cluster declares *this* controller lost too and the
+    cascade repeats. Jobs over the bound are simply not adopted this cycle: they stay running
+    and claimed by us, so the next heartbeat re-queues them.
+
+    Control capacity is that bound. It already prices exactly this cost — one
+    AWX_CONTROL_NODE_TASK_IMPACT per running job we are the controller_node for — and an
+    adopted job is controlled by us, so it is already in consumed_capacity. That makes the
+    two adoption shapes fall out correctly without a second knob: re-adopting our own jobs
+    after a restart is net zero, because those jobs counted against us before we died and
+    still do, while inheriting a dead peer's jobs is genuinely new load and is throttled
+    against the same number that bounds normally dispatched work. Operators tune it with the
+    capacity_adjustment slider they already use.
+
+    The claim (_claim_job_for_adoption) runs before this check, so the job being considered
+    is itself counted; remaining_capacity == 0 means it is the one that exactly fills us.
+
+    Fails open. A job nobody adopts has nothing left to finalize it, so an unreadable
+    instance row is a worse reason to strand one than a full controller is.
+    """
+    try:
+        me = Instance.objects.me()
+    except Exception:
+        logger.warning('Could not read the control capacity of this instance; proceeding with this adoption', exc_info=True)
+        return True
+
+    # Zero capacity means draining or not yet sized by the capacity job, not "no room" —
+    # consumed_capacity is not meaningful against it, so do not let it block adoption.
+    if not me.capacity:
+        return True
+
+    return me.remaining_capacity >= 0
+
+
+def _claim_job_for_adoption(job, job_id, source_controller):
+    """Claim a job for adoption, handling various ownership scenarios.
+
+    Returns True if the job is claimed (or already ours), False if we should skip.
+    """
+    if job.controller_node == settings.CLUSTER_HOST_ID:
+        logger.debug(f'adopt_job_async: job {job_id} already transitioned to current controller at queue time')
+        return True
+
+    if job.controller_node == source_controller:
+        updated_count = UnifiedJob.objects.filter(pk=job_id, controller_node=source_controller, status='running').update(
+            controller_node=settings.CLUSTER_HOST_ID
+        )
+        if updated_count == 0:
+            logger.info(f'Adoption skipped for job {job_id}: already claimed by another controller')
+            return False
+        return True
+
+    logger.info(f'Adoption skipped for job {job_id}: belongs to different controller {job.controller_node}')
+    return False
+
+
+@task(queue=get_task_queuename, on_duplicate='discard')
+@with_signal_handling
+def adopt_job_async(job_id, source_controller=None):
     """Adopt a single orphaned job in a background task, streaming events in real-time.
 
-    Called from _process_startup_jobs and _process_running_jobs via apply_async so the
-    heartbeat returns immediately. on_duplicate='discard' ensures only one adoption runs
-    per job across heartbeat cycles.
+    Called from _process_startup_jobs, _process_running_jobs, and _reap_and_mark_lost_instance
+    via apply_async so the heartbeat returns immediately. on_duplicate='discard' ensures only
+    one adoption runs per job across heartbeat cycles.
+
+    Deliberately declared without a task timeout: it runs for as long as the job it is
+    streaming, and a job's own timeout is what bounds that. It takes over signal handling for
+    the same reason the job runner does — so a shutdown unwinds the stream in an orderly way
+    instead of leaving the process-streamer thread blocked on a socket nobody will close.
+
+    Exactly one controller may run the adoption, so ownership is claimed either at queue time
+    (_reap_and_mark_lost_instance does it there, to keep the job visible to this controller
+    even if the lost instance is deprovisioned before the task runs) or atomically here. That
+    is why a job already moved to CLUSTER_HOST_ID is accepted alongside one still carrying
+    source_controller.
+
+    Args:
+        job_id: UnifiedJob primary key
+        source_controller: the controller_node value this job is expected to still carry.
+            Every in-tree caller passes its own hostname (== settings.CLUSTER_HOST_ID),
+            because _reap_and_mark_lost_instance claims ownership before publishing. It stays
+            a parameter so a caller that has *not* pre-claimed can pass the lost controller's
+            hostname and get the task-time atomic claim below instead. Defaults to this
+            controller so a message published by a pre-AAP-89602 controller during a rolling
+            upgrade (args=[job_id] only) still resolves, rather than failing with TypeError
+            and stranding the job.
     """
+    if source_controller is None:
+        source_controller = settings.CLUSTER_HOST_ID
+
     job = UnifiedJob.objects.filter(id=job_id, status='running').first()
     if not job:
         logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
         return
 
-    adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
-    timeout_cutoff = now() - timedelta(seconds=adoption_timeout)
-    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    orphaned_since = last_event_time or job.started
-    if orphaned_since and orphaned_since < timeout_cutoff:
-        logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
-        reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
+    if not _claim_job_for_adoption(job, job_id, source_controller):
         return
 
+    # Checked after the claim, not before: the claim is what keeps the job visible to this
+    # controller's heartbeat, and without it a deferred job whose original controller is gone
+    # would never be re-queued by anyone.
+    if not _adoption_slot_available():
+        logger.info(f'Adoption deferred for job {job_id}: this controller is out of control capacity, retrying next heartbeat')
+        return
+
+    # Single try/finally so the control socket is closed on every exit path, including
+    # the timeout branch below, which returns early.
     receptor_ctl = get_receptor_ctl()
     try:
-        reattach_to_work_unit(job, receptor_ctl)
-    except Exception:
-        logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
+        # Only an *unreachable* unit times out. Reachability means the status query itself
+        # succeeded, not that the state looks alive: an already-adopted unit's response carries
+        # no StateName at all, and terminal units (Succeeded/Failed/Cancelled) still hold
+        # results to harvest. Gating on the state value would reap both.
+        # Pending/Running are reachable like any other answered query, so they are exempt too.
+        # orphaned_since is only as fresh as the last persisted event, and a job that legitimately
+        # runs for hours between events would look orphaned on that measure. Reaping it would
+        # kill a healthy job; its real bound is the EE finishing, which the stream observes.
+        try:
+            # Local receptor first, remote adopt only if it does not know the unit.
+            # Reused in reattach_to_work_unit so adoption never queries the unit twice.
+            unit_status = get_adoption_unit_status(receptor_ctl, job)
+            # Any successful response means the unit is reachable (Pending, Running, Succeeded, or Already Adopted)
+            unit_reachable = True
+        except Exception:
+            unit_status = None
+            unit_reachable = False
+
+        # MAX(created) is only needed to decide the timeout, and JobEvent has no index on
+        # created — it heap-fetches every event row for the job. Keep it inside the unreachable
+        # branch: reachable jobs are re-queued by every heartbeat while reattach defers them,
+        # so computing it up front would rescan the whole event table once a minute per job.
+        if not unit_reachable:
+            adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
+            last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
+            orphaned_since = last_event_time or job.started
+            if orphaned_since and orphaned_since < now() - timedelta(seconds=adoption_timeout):
+                logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
+                # Best effort only: we only get here because the unit is unreachable, so the
+                # cancel is expected to fail too. Not worth a traceback. The unit is not leaked —
+                # awx_receptor_workunit_reaper releases units for any job outside ACTIVE_STATES,
+                # and unlike an inline release it honors RECEPTOR_KEEP_WORK_ON_ERROR for
+                # operators who keep failed work for debugging.
+                try:
+                    receptor_ctl.simple_command(f'work cancel {job.work_unit_id}')
+                except Exception as exc:
+                    logger.warning(f'Failed to cancel work unit {job.work_unit_id} while timing out job {job.id}: {exc}')
+                reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
+                return
+
+        try:
+            reattach_to_work_unit(job, receptor_ctl, unit_status=unit_status)
+        except Exception:
+            logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
     finally:
         try:
             receptor_ctl.close()
