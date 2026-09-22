@@ -118,6 +118,7 @@ from awx.api.permissions import (
 )
 from awx.api import renderers
 from awx.api import serializers
+from awx.api.validation_patterns import collect_survey_spec_text_errors
 from awx.api.metadata import RoleMetadata
 from awx.main.constants import ACTIVE_STATES, SURVEY_TYPE_MAPPING
 from awx.main.scheduler.dag_workflow import WorkflowDAG
@@ -2815,6 +2816,7 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = serializers.EmptySerializer
     resource_purpose = 'job template survey specification'
+    advertises_survey_spec_schema = True
 
     @extend_schema_if_available(extensions={"x-ai-description": "Get job template survey specification"})
     def get(self, request, *args, **kwargs):
@@ -2984,6 +2986,10 @@ class JobTemplateSurveySpec(GenericAPIView):
             elif qtype == "password" and 'default' in survey_item:
                 # Submission provides new encrypted default
                 survey_item['default'] = encrypt_value(survey_item['default'])
+
+        text_errors = collect_survey_spec_text_errors(new_spec, old_spec)
+        if text_errors:
+            return Response(text_errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete job template survey specification"})
     def delete(self, request, *args, **kwargs):
