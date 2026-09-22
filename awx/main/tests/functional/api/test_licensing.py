@@ -1,7 +1,9 @@
 from unittest.mock import patch, MagicMock
 
 import pytest
+from django.test import override_settings
 from awx.api.versioning import reverse
+from awx.api import validation_patterns
 from rest_framework import status
 
 
@@ -242,3 +244,124 @@ class TestApiV2SubscriptionView:
             # Basic auth settings should be cleared
             assert settings.SUBSCRIPTIONS_USERNAME == ""
             assert settings.SUBSCRIPTIONS_PASSWORD == ""
+
+
+# ---------------------------------------------------------------------------
+# CleanTextMixin on SubscriptionCredentialsSerializer (AAP-93690)
+# ---------------------------------------------------------------------------
+
+UNSAFE_INPUT = '<script>alert(1)</script>'
+
+# Deterministic stand-in for the real Tier 2 regex so tests don't depend on
+# DAB's pattern generation being importable in every test environment.
+FAKE_TIER2_PATTERN = r'^[^\<\>]*$'
+
+
+@pytest.fixture
+def enforce_clean_text():
+    """Enable CleanTextMixin enforcement for the duration of a test."""
+    with patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        yield
+
+
+@pytest.mark.django_db
+class TestSubscriptionCleanText:
+    """CleanText validation on /api/v2/config/subscriptions/ (AAP-93690)."""
+
+    def test_rejects_unsafe_client_id(self, post, admin, enforce_clean_text):
+        """AC1: POST rejects unsafe input in subscriptions_client_id."""
+        data = {
+            'subscriptions_client_id': UNSAFE_INPUT,
+            'subscriptions_client_secret': 'valid_secret',
+        }
+        response = post(reverse('api:api_v2_subscription_view'), data, admin)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'subscriptions_client_id' in response.data
+
+    def test_rejects_unsafe_username(self, post, admin, enforce_clean_text):
+        """AC1: POST rejects unsafe input in subscriptions_username."""
+        data = {
+            'subscriptions_username': UNSAFE_INPUT,
+            'subscriptions_password': 'valid_password',
+        }
+        response = post(reverse('api:api_v2_subscription_view'), data, admin)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'subscriptions_username' in response.data
+
+    def test_allows_unsafe_client_secret(self, post, admin, enforce_clean_text):
+        """AC2: client_secret is excluded from CleanText -- unsafe values pass."""
+        data = {
+            'subscriptions_client_id': 'safe_id',
+            'subscriptions_client_secret': UNSAFE_INPUT,
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+
+    def test_allows_unsafe_password(self, post, admin, enforce_clean_text):
+        """AC2: password is excluded from CleanText -- unsafe values pass."""
+        data = {
+            'subscriptions_username': 'safe_user',
+            'subscriptions_password': UNSAFE_INPUT,
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+
+    def test_safe_input_passes_with_enforcement(self, post, admin, enforce_clean_text):
+        """Safe input succeeds even when enforcement is on."""
+        data = {
+            'subscriptions_username': 'my_rh_user',
+            'subscriptions_password': 'my_rh_pass',
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestSubscriptionOptionsPatterns:
+    """OPTIONS metadata exposes validation patterns (AAP-93690 AC4)."""
+
+    @pytest.fixture(autouse=True)
+    def _fake_pattern_helpers(self, monkeypatch):
+        """Provide deterministic Tier 1/2 pattern helpers so tests don't depend
+        on DAB's build_tier*_frontend_pattern being importable."""
+        monkeypatch.setattr(validation_patterns, '_get_tier1_pattern', lambda: {'pattern': 'T1', 'description': 'd1', 'flags': 'u', 'normalize': 'NFC'})
+        monkeypatch.setattr(validation_patterns, '_get_tier2_pattern', lambda: {'pattern': FAKE_TIER2_PATTERN, 'description': 'd2', 'flags': 'i'})
+
+    def test_options_shows_patterns_when_enabled(self, options, admin):
+        """AC4: client_id and username expose Tier 2 patterns when enforcement is on."""
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            response = options(reverse('api:api_v2_subscription_view'), None, admin)
+
+        assert response.status_code == status.HTTP_200_OK
+        post_fields = response.data.get('actions', {}).get('POST', {})
+        # Non-excluded fields should have patterns
+        assert post_fields['subscriptions_client_id']['pattern'] == FAKE_TIER2_PATTERN, 'client_id should have Tier 2 pattern'
+        assert post_fields['subscriptions_username']['pattern'] == FAKE_TIER2_PATTERN, 'username should have Tier 2 pattern'
+        # Excluded (secret) fields should NOT have patterns
+        assert 'pattern' not in post_fields.get('subscriptions_client_secret', {}), 'client_secret should not have a pattern'
+        assert 'pattern' not in post_fields.get('subscriptions_password', {}), 'password should not have a pattern'
+
+    def test_options_no_patterns_when_disabled(self, options, admin):
+        """Patterns are absent when enforcement is off."""
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=False):
+            response = options(reverse('api:api_v2_subscription_view'), None, admin)
+
+        assert response.status_code == status.HTTP_200_OK
+        post_fields = response.data.get('actions', {}).get('POST', {})
+        for field_name in ('subscriptions_client_id', 'subscriptions_username'):
+            assert 'pattern' not in post_fields.get(field_name, {}), f'{field_name} should not have a pattern when disabled'

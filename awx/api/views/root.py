@@ -26,6 +26,7 @@ import requests
 from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.api.generics import APIView
+from awx.api.serializers import SubscriptionCredentialsSerializer
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
@@ -178,6 +179,7 @@ class ApiV2PingView(APIView):
 
 class ApiV2SubscriptionView(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = SubscriptionCredentialsSerializer
     name = _('Subscriptions')
     swagger_topic = 'System Configuration'
     resource_purpose = 'aap subscription validation'
@@ -187,11 +189,22 @@ class ApiV2SubscriptionView(APIView):
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
+    def get_serializer(self, *args, **kwargs):
+        """Expose the serializer for OPTIONS metadata (AAP-93690).
+
+        Plain APIView has no get_serializer(); this minimal implementation lets
+        Metadata.determine_actions() discover the serializer's fields and inject
+        CleanText validation patterns into OPTIONS responses.
+        """
+        return self.serializer_class(*args, **kwargs)
+
     @extend_schema_if_available(
         extensions={'x-ai-description': 'List valid AAP subscriptions'},
     )
     def post(self, request):
-        data = request.data.copy()
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
         try:
             user = None
