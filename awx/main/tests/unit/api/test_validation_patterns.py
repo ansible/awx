@@ -235,6 +235,141 @@ class TestInjectTopLevelCleanTextPatterns:
         assert result['pattern'] == 'FAKE'
         assert calls == [(sentinel_field, field_info)]
 
+    def test_plain_serializer_fake_meta_gets_tier2(self, monkeypatch):
+        from ansible_base.lib.serializers.mixins import CleanTextMixin
+        from rest_framework import serializers as drf_serializers
+
+        monkeypatch.setattr(validation_patterns, '_get_tier1_pattern', lambda: {'pattern': 'T1', 'description': 'd1', 'flags': 'u', 'normalize': 'NFC'})
+        monkeypatch.setattr(validation_patterns, '_get_tier2_pattern', lambda: {'pattern': 'T2', 'description': 'd2', 'flags': 'i'})
+
+        class FakeOpts:
+            app_label = 'conf'
+            object_name = 'SettingSingleton'
+
+        class FakeModel:
+            _meta = FakeOpts()
+
+        class PlainCleanText(CleanTextMixin, drf_serializers.Serializer):
+            class Meta:
+                model = FakeModel
+
+            excluded_fields = frozenset()
+            name_fields = frozenset({'name'})
+
+        serializer = PlainCleanText()
+        field = drf_serializers.CharField()
+        field.bind('FOO_BAR', serializer)
+        field_info = {'type': 'string'}
+
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_top_level_clean_text_patterns(field, field_info)
+
+        assert result['pattern'] == 'T2'
+        assert result['patternDescription'] == 'd2'
+        assert result['flags'] == 'i'
+
+    def test_plain_serializer_name_field_gets_tier1(self, monkeypatch):
+        from ansible_base.lib.serializers.mixins import CleanTextMixin
+        from rest_framework import serializers as drf_serializers
+
+        monkeypatch.setattr(validation_patterns, '_get_tier1_pattern', lambda: {'pattern': 'T1', 'description': 'd1', 'flags': 'u', 'normalize': 'NFC'})
+        monkeypatch.setattr(validation_patterns, '_get_tier2_pattern', lambda: {'pattern': 'T2', 'description': 'd2', 'flags': 'i'})
+
+        class FakeOpts:
+            app_label = 'main'
+            object_name = 'CopySerializer'
+
+        class FakeModel:
+            _meta = FakeOpts()
+
+        class PlainCleanText(CleanTextMixin, drf_serializers.Serializer):
+            class Meta:
+                model = FakeModel
+
+            excluded_fields = frozenset()
+            name_fields = frozenset({'name'})
+
+        serializer = PlainCleanText()
+        field = drf_serializers.CharField()
+        field.bind('name', serializer)
+        field_info = {'type': 'string'}
+
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_top_level_clean_text_patterns(field, field_info)
+
+        assert result['pattern'] == 'T1'
+        assert result['patternDescription'] == 'd1'
+        assert result['flags'] == 'u'
+        assert result['normalize'] == 'NFC'
+
+    def test_plain_serializer_skips_excluded_fields(self, monkeypatch):
+        from ansible_base.lib.serializers.mixins import CleanTextMixin
+        from rest_framework import serializers as drf_serializers
+
+        monkeypatch.setattr(validation_patterns, '_get_tier2_pattern', lambda: {'pattern': 'T2', 'description': 'd2', 'flags': 'i'})
+
+        class FakeOpts:
+            app_label = 'conf'
+            object_name = 'SettingSingleton'
+
+        class FakeModel:
+            _meta = FakeOpts()
+
+        class PlainCleanText(CleanTextMixin, drf_serializers.Serializer):
+            class Meta:
+                model = FakeModel
+
+            excluded_fields = frozenset({'CUSTOM_LOGIN_INFO'})
+            name_fields = frozenset()
+
+        serializer = PlainCleanText()
+        field = drf_serializers.CharField()
+        field.bind('CUSTOM_LOGIN_INFO', serializer)
+        field_info = {'type': 'string'}
+
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_top_level_clean_text_patterns(field, field_info)
+
+        assert 'pattern' not in result
+
+    def test_plain_serializer_does_not_call_dab_inject(self, monkeypatch):
+        from ansible_base.lib.serializers.mixins import CleanTextMixin
+        from rest_framework import serializers as drf_serializers
+
+        called = []
+
+        def boom(field, field_info):
+            called.append(True)
+            raise AttributeError('should not reach DAB inject')
+
+        monkeypatch.setattr(validation_patterns, '_dab_inject_clean_text_patterns', boom)
+        monkeypatch.setattr(validation_patterns, '_get_tier2_pattern', lambda: {'pattern': 'T2', 'description': 'd2', 'flags': 'i'})
+        monkeypatch.setattr(validation_patterns, '_get_tier1_pattern', lambda: {'pattern': 'T1', 'description': 'd1', 'flags': 'u', 'normalize': 'NFC'})
+
+        class FakeOpts:
+            app_label = 'conf'
+            object_name = 'SettingSingleton'
+
+        class FakeModel:
+            _meta = FakeOpts()
+
+        class PlainCleanText(CleanTextMixin, drf_serializers.Serializer):
+            class Meta:
+                model = FakeModel
+
+            excluded_fields = frozenset()
+            name_fields = frozenset()
+
+        serializer = PlainCleanText()
+        field = drf_serializers.CharField()
+        field.bind('FOO', serializer)
+
+        with override_settings(ENHANCED_INPUT_VALIDATION_ENABLED=True):
+            result = validation_patterns.inject_top_level_clean_text_patterns(field, {'type': 'string'})
+
+        assert called == []
+        assert result['pattern'] == 'T2'
+
 
 class TestBuildSurveySpecOptionsSchema:
     def test_injects_patterns_when_toggle_on(self, fake_tier2_pattern):

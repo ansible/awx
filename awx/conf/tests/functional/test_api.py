@@ -162,3 +162,148 @@ def test_setting_singleton_delete_no_read_only_fields(api_request, dummy_setting
         api_request('delete', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         assert response.data['FOO_BAR'] == 23
+
+
+#
+# CleanTextMixin on SettingSingletonSerializer (via PlainSerializerCleanTextMixin)
+#
+
+UNSAFE_SETTING_INPUT = '<script>x</script>'
+
+
+@pytest.fixture
+def enforce_clean_text():
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True):
+        yield
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_char_field(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting('FOO_BAR', field_class=fields.CharField, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_BAR': UNSAFE_SETTING_INPUT})
+        assert response.status_code == 400
+        assert 'FOO_BAR' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_char_field_all_category(api_request, dummy_setting, dummy_validate, enforce_clean_text):
+    # category_slug='all' runs every registered validate_func, then CleanTextMixin.
+    # A validator on a different category only participates via that loop.
+    validate_calls = []
+
+    def record_validate(serializer, attrs):
+        validate_calls.append(True)
+        return attrs
+
+    with (
+        dummy_setting('FOO_BAR', field_class=fields.CharField, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
+        dummy_validate('other', record_validate),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'all'}), data={'FOO_BAR': UNSAFE_SETTING_INPUT})
+        assert validate_calls
+        assert response.status_code == 400
+        assert 'FOO_BAR' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_skips_encrypted_fields(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting('FOO_SECRET', field_class=fields.CharField, encrypted=True, allow_blank=True, default='', category='FooBar', category_slug='foobar'),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_SECRET': UNSAFE_SETTING_INPUT})
+        assert response.status_code == 200
+        assert decrypt_field(Setting.objects.get(key='FOO_SECRET'), 'value') == UNSAFE_SETTING_INPUT
+
+
+@pytest.mark.django_db
+def test_setting_singleton_skips_custom_login_info_html(api_request, enforce_clean_text):
+    with mock.patch('awx.conf.views.clear_setting_cache'):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ui'}),
+            data={'CUSTOM_LOGIN_INFO': '<p>Legal notice</p>'},
+        )
+        assert response.status_code == 200
+        assert response.data['CUSTOM_LOGIN_INFO'] == '<p>Legal notice</p>'
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_string_list_item(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting(
+            'FOO_LIST',
+            field_class=fields.StringListField,
+            default=[],
+            category='FooBar',
+            category_slug='foobar',
+        ),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
+            data={'FOO_LIST': ['ok-value', UNSAFE_SETTING_INPUT]},
+        )
+        assert response.status_code == 400
+        assert 'FOO_LIST' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_rejects_unsafe_dict_value(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting(
+            'FOO_MAP',
+            field_class=fields.KeyValueField,
+            default={},
+            category='FooBar',
+            category_slug='foobar',
+        ),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
+            data={'FOO_MAP': {'HTTP_PROXY': UNSAFE_SETTING_INPUT}},
+        )
+        assert response.status_code == 400
+        assert 'FOO_MAP' in response.data
+
+
+@pytest.mark.django_db
+def test_setting_singleton_allows_safe_string_list(api_request, dummy_setting, enforce_clean_text):
+    with (
+        dummy_setting(
+            'FOO_LIST',
+            field_class=fields.StringListField,
+            default=[],
+            category='FooBar',
+            category_slug='foobar',
+        ),
+        mock.patch('awx.conf.views.clear_setting_cache'),
+    ):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}),
+            data={'FOO_LIST': ['HTTP_X_FORWARDED_FOR', 'https://example.com']},
+        )
+        assert response.status_code == 200
+        assert response.data['FOO_LIST'] == ['HTTP_X_FORWARDED_FOR', 'https://example.com']
+
+
+@pytest.mark.django_db
+def test_setting_singleton_skips_task_env_shell_expansion(api_request, enforce_clean_text):
+    """AWX_TASK_ENV values may use ${VAR} / $(...) — excluded from CleanText."""
+    with mock.patch('awx.conf.views.clear_setting_cache'):
+        response = api_request(
+            'patch',
+            reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'}),
+            data={'AWX_TASK_ENV': {'PATH': '${PATH}:/opt/bin', 'CUSTOM': '$(echo hi)'}},
+        )
+        assert response.status_code == 200
+        assert response.data['AWX_TASK_ENV']['PATH'] == '${PATH}:/opt/bin'
+        assert response.data['AWX_TASK_ENV']['CUSTOM'] == '$(echo hi)'

@@ -18,6 +18,9 @@ lands on DAB devel, injection is a no-op so Controller can still import and run.
 
 import copy
 
+from rest_framework import serializers
+
+from ansible_base.lib.serializers.mixins import CleanTextMixin
 from ansible_base.lib.utils.settings import get_setting
 
 try:
@@ -29,6 +32,13 @@ try:
     from ansible_base.lib.metadata import inject_clean_text_patterns as _dab_inject_clean_text_patterns
 except ImportError:  # pragma: no cover - DAB without AAP-85987
     _dab_inject_clean_text_patterns = None
+
+try:
+    from ansible_base.lib.metadata import get_tier1_pattern as _get_tier1_pattern
+    from ansible_base.lib.metadata import get_tier2_pattern as _get_tier2_pattern
+except ImportError:  # pragma: no cover - DAB without AAP-85987
+    _get_tier1_pattern = None
+    _get_tier2_pattern = None
 
 try:
     from ansible_base.lib.metadata import TIER2_PATTERN_DESCRIPTION
@@ -209,13 +219,62 @@ def collect_survey_spec_text_errors(new_spec, old_spec=None):
     return errors or None
 
 
+def _uses_fake_model_meta(serializer):
+    """True when Meta.model is a stand-in without Django's Options.get_field.
+
+    Plain serializers (SettingSingletonSerializer, CopySerializer) use a fake
+    Meta.model so CleanTextMixin audit logs have app_label/object_name. DAB's
+    inject_clean_text_patterns calls model._meta.get_field() and would 500 on
+    OPTIONS for those endpoints -- handle them here instead.
+    """
+    model = getattr(getattr(serializer, 'Meta', None), 'model', None)
+    if model is None:
+        return False
+    meta = getattr(model, '_meta', None)
+    return meta is not None and not hasattr(meta, 'get_field')
+
+
+def _inject_declared_char_field_patterns(field, field_info, serializer):
+    """Tier 1/2 OPTIONS hints for declared CharFields on plain CleanText serializers."""
+    if _get_tier1_pattern is None or _get_tier2_pattern is None:
+        return field_info
+    if not get_setting('ENHANCED_INPUT_VALIDATION_ENABLED', False):
+        return field_info
+    if not isinstance(serializer, CleanTextMixin):
+        return field_info
+    if not isinstance(field, serializers.CharField):
+        return field_info
+
+    field_name = field.field_name
+    if field_name in getattr(serializer, 'excluded_fields', frozenset()):
+        return field_info
+
+    if field_name in getattr(serializer, 'name_fields', frozenset()):
+        tier1 = _get_tier1_pattern()
+        field_info['pattern'] = tier1['pattern']
+        field_info['patternDescription'] = tier1['description']
+        field_info['flags'] = tier1['flags']
+        field_info['normalize'] = tier1['normalize']
+    else:
+        tier2 = _get_tier2_pattern()
+        field_info['pattern'] = tier2['pattern']
+        field_info['patternDescription'] = tier2['description']
+        field_info['flags'] = tier2['flags']
+
+    return field_info
+
+
 def inject_top_level_clean_text_patterns(field, field_info):
     """Advertise DAB CleanTextMixin Tier 1/Tier 2 patterns on a top-level serializer field.
 
-    Delegates entirely to DAB's ``inject_clean_text_patterns``, which no-ops unless
-    ``ENHANCED_INPUT_VALIDATION_ENABLED`` is on and the field's serializer mixes in
-    ``CleanTextMixin``. No-op when the DAB helper is missing.
+    For model-backed CleanTextMixin serializers, delegates to DAB's
+    ``inject_clean_text_patterns``. For plain serializers with a fake Meta.model
+    (no ``_meta.get_field``), injects the same Tier 1/2 hints via DAB's public
+    ``get_tier1_pattern`` / ``get_tier2_pattern`` helpers so OPTIONS still works.
     """
+    serializer = getattr(field, 'parent', None)
+    if serializer is not None and _uses_fake_model_meta(serializer):
+        return _inject_declared_char_field_patterns(field, field_info, serializer)
     if _dab_inject_clean_text_patterns is None:
         return field_info
     return _dab_inject_clean_text_patterns(field, field_info)

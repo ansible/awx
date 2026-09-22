@@ -218,9 +218,14 @@ def reverse_gfk(content_object, request):
 class PlainSerializerCleanTextMixin(CleanTextMixin):
     """CleanTextMixin for plain `serializers.Serializer` subclasses with no
     backing Django model (AAP-78694). Overrides ONLY field discovery -- treats
-    the serializer's own declared CharFields as the text fields to validate.
-    Everything else (Tier 1/2 dispatch, exclusions, audit logging, the
-    enforcement gate) is reused unchanged from CleanTextMixin.
+    the serializer's own declared fields as the text/JSON containers to validate.
+    Everything else (Tier 1/2 dispatch, nested JSON walk, exclusions, audit
+    logging, the enforcement gate) is reused unchanged from CleanTextMixin.
+
+    CharFields (including URLField) are Tier 1/2 top-level text. ListField,
+    DictField, and JSONField values are walked with CleanTextMixin's nested
+    string validation (same path as model JSONFields) so settings like
+    StringListField / KeyValueField are covered.
 
     Known limitation: unlike the model-field path, this can't replicate the
     get_internal_type() exclusion of SlugField/IPAddressField-style fields
@@ -228,9 +233,24 @@ class PlainSerializerCleanTextMixin(CleanTextMixin):
     using this mixin today, since none declare such fields.
     """
 
+    # Structured containers whose string leaves should get validate_free_text.
+    # Matches model CleanTextMixin's JSONField walk for settings registry
+    # ListField/DictField/KeyValueField (and DRF JSONField if used).
+    _NESTED_TEXT_CONTAINER_FIELDS = (
+        serializers.ListField,
+        serializers.DictField,
+        serializers.JSONField,
+    )
+
     def _classify_fields(self, model):
-        text_fields = [name for name, field in self.fields.items() if isinstance(field, serializers.CharField)]
-        return text_fields, []
+        text_fields = []
+        json_fields = []
+        for name, field in self.fields.items():
+            if isinstance(field, serializers.CharField):
+                text_fields.append(name)
+            elif isinstance(field, self._NESTED_TEXT_CONTAINER_FIELDS):
+                json_fields.append(name)
+        return text_fields, json_fields
 
 
 class _CopySerializerFakeModel:
