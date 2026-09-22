@@ -73,6 +73,9 @@ def test_valid_cleanup_jobs_resources(resources):
         ['jobs', 'bogus'],  # contains an unknown resource
         ['bogus'],
         {'jobs': True},  # wrong type
+        [{}],  # non-string (unhashable) entry
+        ['jobs', 5],  # non-string entry mixed with a valid one
+        [None],  # non-string entry
     ],
 )
 def test_invalid_cleanup_jobs_resources(resources):

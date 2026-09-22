@@ -1236,7 +1236,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
         if self.job_type == 'cleanup_jobs' and 'resources' in data:
             valid_resources = set(CLEANUP_JOBS_RESOURCE_FLAGS.keys())
             resources = data['resources']
-            if not isinstance(resources, list) or any(r not in valid_resources for r in resources):
+            if not isinstance(resources, list) or any(not isinstance(r, str) or r not in valid_resources for r in resources):
                 errors_list.append(
                     _('resources must be a list containing any of: {list_of_resources}.').format(
                         list_of_resources=', '.join(sorted(valid_resources))
