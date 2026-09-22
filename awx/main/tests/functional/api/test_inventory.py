@@ -7,8 +7,12 @@ from django.core.exceptions import ValidationError
 
 from awx.api.versioning import reverse
 
-from awx.main.models import InventorySource, Inventory, ActivityStream, Organization
+from awx.main.models import InventorySource, Inventory, ActivityStream, Organization, Host
 from awx.main.utils.inventory_vars import update_group_variables
+
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+from django.utils.timezone import now
 
 
 @pytest.fixture
@@ -116,6 +120,27 @@ def test_inventory_host_list_ordering(scm_inventory, get, admin_user):
     ).data['results']
     host_list = [host['id'] for host in resp]
     assert host_list == expected_ids
+
+
+@pytest.mark.django_db
+def test_inventory_hosts_attach_uses_bounded_membership_check(inventory, post, admin_user):
+    """attach()'s membership check must filter by the host's own pk and be LIMIT-bounded, not scan every host in the inventory."""
+    _now = now()
+    existing_hosts = [Host(name=f'existing-host-{i}', inventory=inventory, created=_now, modified=_now) for i in range(5)]
+    Host.objects.bulk_create(existing_hosts)
+
+    with CaptureQueriesContext(connection) as ctx:
+        post(reverse('api:inventory_hosts_list', kwargs={'pk': inventory.id}), {'name': 'new-host'}, admin_user, expect=201)
+
+    membership_check_queries = [
+        q['sql']
+        for q in ctx.captured_queries
+        if 'FROM "main_host"' in q['sql'] and '"main_host"."inventory_id" = ' in q['sql'] and '"main_host"."name" = ' not in q['sql']
+    ]
+    assert membership_check_queries, "expected a query checking host membership in the inventory"
+    for sql in membership_check_queries:
+        assert '"main_host"."id" = ' in sql, f"attach() membership check is not filtered by the host's own pk: {sql}"
+        assert 'LIMIT' in sql, f"attach() membership check is not LIMIT-bounded: {sql}"
 
 
 @pytest.mark.django_db
