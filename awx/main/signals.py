@@ -593,9 +593,117 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
         approval.deny()
 
 
-def _handle_image_cleanup(removed_image, pk):
-    if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
-        return  # if other EE objects reference the tag, then do not purge it
+def _extract_image_repo(image_ref):
+    """Return the repository part of an image reference, without tag or digest."""
+    if not image_ref:
+        return None
+
+    if '@' in image_ref:
+        return image_ref.split('@')[0]
+
+    if ':' in image_ref:
+        parts = image_ref.rsplit(':', 1)
+        # If the part after ':' contains '/' it's part of a path, not a tag
+        if '/' in parts[1]:
+            return image_ref
+        return parts[0]
+
+    return image_ref
+
+
+def _managed_setting_images():
+    """Collect all image references from managed EE settings."""
+    images = []
+    for ee_config in getattr(settings, 'GLOBAL_JOB_EXECUTION_ENVIRONMENTS', []):
+        image = ee_config.get('image')
+        if image:
+            images.append(image)
+    cp_image = getattr(settings, 'CONTROL_PLANE_EXECUTION_ENVIRONMENT', None)
+    if cp_image:
+        images.append(cp_image)
+    return images
+
+
+def _is_managed_image(image_ref, exclude_pk=None):
+    """Check if an image is referenced by managed EE settings or managed EE objects.
+
+    Matches both exact strings and same-repo different-reference-form (tag vs digest).
+    """
+    ref_repo = _extract_image_repo(image_ref)
+
+    for managed_image in _managed_setting_images():
+        if managed_image == image_ref:
+            logger.info("Skipping cleanup of %s - referenced in managed EE settings", image_ref)
+            return True
+        if ref_repo and _extract_image_repo(managed_image) == ref_repo and _different_ref_forms(image_ref, managed_image):
+            logger.info("Skipping cleanup of %s - same repository as managed setting image %s", image_ref, managed_image)
+            return True
+
+    qs = ExecutionEnvironment.objects.filter(managed=True, image=image_ref)
+    if exclude_pk is not None:
+        qs = qs.exclude(pk=exclude_pk)
+    if qs.exists():
+        logger.info("Skipping cleanup of %s - used by a managed EE", image_ref)
+        return True
+
+    return False
+
+
+def _has_digest(image_ref):
+    return '@' in image_ref
+
+
+def _different_ref_forms(ref_a, ref_b):
+    """True when one ref uses a digest and the other uses a tag (or bare name)."""
+    return _has_digest(ref_a) != _has_digest(ref_b)
+
+
+def _other_ee_shares_repo_with_different_ref(image_ref, repo, pk):
+    """Check if another EE uses the same repo with a different reference form (tag vs digest)."""
+    for ee in ExecutionEnvironment.objects.exclude(pk=pk).only('image', 'name'):
+        if not ee.image:
+            continue
+        if _extract_image_repo(ee.image) == repo and _different_ref_forms(image_ref, ee.image):
+            logger.info(
+                "Skipping cleanup of %s - EE '%s' uses %s from the same repository with a different reference form",
+                image_ref,
+                ee.name,
+                ee.image,
+            )
+            return True
+    return False
+
+
+def _handle_image_cleanup(removed_image, pk, new_image=None):
+    """Skip podman rmi when the image is managed, in use, or likely the same image under a different ref form."""
+    if not removed_image:
+        return
+
+    if _is_managed_image(removed_image, exclude_pk=pk):
+        return
+
+    if ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
+        return
+
+    removed_repo = _extract_image_repo(removed_image)
+
+    # Update path: old and new share the same repo but differ in reference form
+    # (tag vs digest) — they likely point to the same underlying image.
+    if new_image and removed_repo:
+        new_repo = _extract_image_repo(new_image)
+        if removed_repo == new_repo and _different_ref_forms(removed_image, new_image):
+            logger.info(
+                "Skipping cleanup of %s - new image %s appears to be a different reference form for the same image",
+                removed_image,
+                new_image,
+            )
+            return
+
+    # Delete path: another EE references the same repo with a different reference
+    # form, so purging could strip names from a still-needed image.
+    if removed_repo and _other_ee_shares_repo_with_different_ref(removed_image, removed_repo, pk):
+        return
+
     handle_removed_image.delay(remove_images=[removed_image])
 
 
@@ -612,7 +720,7 @@ def remove_stale_image(sender, instance, created, **kwargs):
         return
     removed_image = instance._prior_values_store.get('image')
     if removed_image and removed_image != instance.image:
-        _handle_image_cleanup(removed_image, instance.pk)
+        _handle_image_cleanup(removed_image, instance.pk, new_image=instance.image)
 
 
 @receiver(post_save, sender=Session)
