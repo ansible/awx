@@ -268,6 +268,7 @@ class _SubscriptionCredentialsFakeOpts:
 
     @property
     def concrete_model(self):
+        """Return the fake model class so CleanTextMixin can resolve the concrete model."""
         return _SubscriptionCredentialsFakeModel
 
 
@@ -295,10 +296,10 @@ class SubscriptionCredentialsSerializer(PlainSerializerCleanTextMixin, serialize
       - subscriptions_client_secret, subscriptions_password: excluded (secrets)
     """
 
-    subscriptions_client_id = serializers.CharField(required=False, allow_blank=True, default='')
-    subscriptions_client_secret = serializers.CharField(required=False, allow_blank=True, default='')
-    subscriptions_username = serializers.CharField(required=False, allow_blank=True, default='')
-    subscriptions_password = serializers.CharField(required=False, allow_blank=True, default='')
+    subscriptions_client_id = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
+    subscriptions_client_secret = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
+    subscriptions_username = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
+    subscriptions_password = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
 
     # Secrets must not be validated by CleanText -- they may contain arbitrary
     # characters and are never rendered in the UI.

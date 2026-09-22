@@ -178,6 +178,8 @@ class ApiV2PingView(APIView):
 
 
 class ApiV2SubscriptionView(APIView):
+    """Validate and list AAP subscription credentials via the Red Hat portal."""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = SubscriptionCredentialsSerializer
     name = _('Subscriptions')
@@ -185,6 +187,7 @@ class ApiV2SubscriptionView(APIView):
     resource_purpose = 'aap subscription validation'
 
     def check_permissions(self, request):
+        """Restrict mutating methods to superusers; allow OPTIONS/HEAD for all authenticated users."""
         super(ApiV2SubscriptionView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
@@ -202,6 +205,7 @@ class ApiV2SubscriptionView(APIView):
         extensions={'x-ai-description': 'List valid AAP subscriptions'},
     )
     def post(self, request):
+        """Validate subscription credentials against the Red Hat portal and persist them on success."""
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data

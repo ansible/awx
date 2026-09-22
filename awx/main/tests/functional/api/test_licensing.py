@@ -332,6 +332,71 @@ class TestSubscriptionCleanText:
 
 
 @pytest.mark.django_db
+class TestSubscriptionWhitespacePreservation:
+    """Credential values with leading/trailing whitespace must reach validate_rh unchanged."""
+
+    def test_whitespace_preserved_in_username(self, post, admin):
+        """Leading/trailing whitespace in subscriptions_username is not stripped."""
+        data = {
+            'subscriptions_username': '  spaced_user  ',
+            'subscriptions_password': 'pw',
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+            mock_licenser.validate_rh.assert_called_once_with('  spaced_user  ', 'pw', True)
+
+    def test_whitespace_preserved_in_password(self, post, admin):
+        """Leading/trailing whitespace in subscriptions_password is not stripped."""
+        data = {
+            'subscriptions_username': 'user',
+            'subscriptions_password': '  secret pass  ',
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+            mock_licenser.validate_rh.assert_called_once_with('user', '  secret pass  ', True)
+
+    def test_whitespace_preserved_in_client_id(self, post, admin):
+        """Leading/trailing whitespace in subscriptions_client_id is not stripped."""
+        data = {
+            'subscriptions_client_id': ' cid ',
+            'subscriptions_client_secret': 'sec',
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+            mock_licenser.validate_rh.assert_called_once_with(' cid ', 'sec', False)
+
+    def test_whitespace_preserved_in_client_secret(self, post, admin):
+        """Leading/trailing whitespace in subscriptions_client_secret is not stripped."""
+        data = {
+            'subscriptions_client_id': 'cid',
+            'subscriptions_client_secret': ' sec ',
+        }
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+            assert response.status_code == status.HTTP_200_OK
+            mock_licenser.validate_rh.assert_called_once_with('cid', ' sec ', False)
+
+
+@pytest.mark.django_db
 class TestSubscriptionOptionsPatterns:
     """OPTIONS metadata exposes validation patterns (AAP-93690 AC4)."""
 
