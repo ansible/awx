@@ -1680,7 +1680,7 @@ class JobAccess(BaseAccess):
         if not org_access_qs.exists():
             return qs.filter(job_template__in=JobTemplate.access_qs(self.user, 'view'))
 
-        return qs.filter(Q(job_template__in=JobTemplate.access_qs(self.user, 'view')) | Q(organization__in=org_access_qs)).distinct()
+        return qs.filter(Q(job_template__in=JobTemplate.access_qs(self.user, 'view')) | Q(organization__in=org_access_qs))
 
     def can_add(self, data, validate_license=True):
         raise NotImplementedError('Direct job creation not possible in v2 API')

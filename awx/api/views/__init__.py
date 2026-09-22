@@ -130,7 +130,7 @@ from awx.api.views.mixin import (
     NoTruncateMixin,
     UnifiedJobExcludeMixin,
 )
-from awx.api.pagination import ActivityStreamPagination, UnifiedJobEventPagination, UnifiedJobPagination
+from awx.api.pagination import ActivityStreamPagination, JobPagination, UnifiedJobEventPagination, UnifiedJobPagination
 from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views')
@@ -3885,6 +3885,7 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SystemJobTemplateNotific
 class JobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.Job
     serializer_class = serializers.JobListSerializer
+    pagination_class = JobPagination
     resource_purpose = 'jobs'
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
