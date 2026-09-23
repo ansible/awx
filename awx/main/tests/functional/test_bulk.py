@@ -633,6 +633,27 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
 
 
 @pytest.mark.django_db
+def test_bulk_job_launch_logs_bypass_for_unsafe_limit_when_enforcement_disabled(organization, inventory, project, post, user, caplog):
+    """Bulk workflow nodes skip post_save; audit before bulk_create must log Tier 2 violations."""
+    import logging
+
+    normal_user = user('normal_user', False)
+    organization.member_role.members.add(normal_user)
+    jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
+    jt.execute_role.members.add(normal_user)
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=False):
+        with caplog.at_level(logging.WARNING, logger='ansible_base.lib.utils.validation_signals'):
+            post(
+                reverse('api:bulk_job_launch'),
+                {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id, 'limit': '<script>x</script>'}]},
+                normal_user,
+                expect=201,
+            )
+    assert 'ORM bypass (bulk_create)' in caplog.text
+    assert 'limit' in caplog.text
+
+
+@pytest.mark.django_db
 def test_bulk_job_launch_rejects_unsafe_limit(organization, inventory, project, post, user):
     """PromptFieldCleanTextMixin._run_clean_text_validation must raise when
     enforcement is on -- BulkJobNodeSerializer skips the normal validate()

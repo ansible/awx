@@ -124,6 +124,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.utils.inventory_vars import update_group_variables
+from awx.main.utils.validation_bypass_observability import audit_workflow_job_nodes_for_bulk_create
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.tasks.system import update_inventory_computed_fields
@@ -5335,6 +5336,7 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
             # we'll need this later when we do the m2m through model bulk create
             node_m2m_objects[node_attrs['identifier']]['node'] = node_obj
 
+        audit_workflow_job_nodes_for_bulk_create(nodes)
         WorkflowJobNode.objects.bulk_create(nodes)
 
         # Deal with the m2m objects we have to create once the node exists
