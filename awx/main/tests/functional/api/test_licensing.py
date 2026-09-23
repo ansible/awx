@@ -245,6 +245,25 @@ class TestApiV2SubscriptionView:
             assert settings.SUBSCRIPTIONS_USERNAME == ""
             assert settings.SUBSCRIPTIONS_PASSWORD == ""
 
+    def test_null_client_fields_with_valid_basic_auth(self, post, admin):
+        """Explicit JSON null on unused client fields must not block a valid username/password pair."""
+        data = {
+            'subscriptions_username': 'test_user',
+            'subscriptions_password': 'test_password',
+            'subscriptions_client_id': None,
+            'subscriptions_client_secret': None,
+        }
+
+        with patch('awx.api.views.root.get_licenser') as mock_get_licenser:
+            mock_licenser = MagicMock()
+            mock_licenser.validate_rh.return_value = []
+            mock_get_licenser.return_value = mock_licenser
+
+            response = post(reverse('api:api_v2_subscription_view'), data, admin)
+
+            assert response.status_code == status.HTTP_200_OK
+            mock_licenser.validate_rh.assert_called_once_with('test_user', 'test_password', True)
+
 
 # ---------------------------------------------------------------------------
 # CleanTextMixin on SubscriptionCredentialsSerializer (AAP-93690)

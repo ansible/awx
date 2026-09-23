@@ -287,19 +287,20 @@ class SubscriptionCredentialsSerializer(PlainSerializerCleanTextMixin, serialize
 
     Uses PlainSerializerCleanTextMixin because there is no Django model behind
     the /api/v2/config/subscriptions/ endpoint. All four credential fields are
-    optional (allow_blank + default='') because only one credential pair is
-    required per request; mutual-exclusion and required-pair validation lives in
-    the view's post() handler to preserve its existing error messages/status codes.
+    optional (allow_blank + allow_null + default='') because only one credential
+    pair is required per request and callers may send explicit JSON ``null`` for
+    unused fields; mutual-exclusion and required-pair validation lives in the
+    view's post() handler to preserve its existing error messages/status codes.
 
     CleanText enforcement:
       - subscriptions_client_id, subscriptions_username: Tier 2 (free-text)
       - subscriptions_client_secret, subscriptions_password: excluded (secrets)
     """
 
-    subscriptions_client_id = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
-    subscriptions_client_secret = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
-    subscriptions_username = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
-    subscriptions_password = serializers.CharField(required=False, allow_blank=True, default='', trim_whitespace=False)
+    subscriptions_client_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_client_secret = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_username = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_password = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
 
     # Secrets must not be validated by CleanText -- they may contain arbitrary
     # characters and are never rendered in the UI.
