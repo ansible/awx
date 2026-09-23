@@ -26,6 +26,7 @@ from awx.main.models import (
     InstanceGroup,
     Credential,
 )
+from ansible_base.lib.utils.views.deprecation import deprecated
 from awx.api.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
@@ -241,6 +242,10 @@ class OrganizationAccessList(ResourceAccessList):
     resource_purpose = 'users who can access the organization'
 
 
+@deprecated(
+    detail="Object roles are deprecated. Use role definitions instead.",
+    link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+)
 class OrganizationObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer

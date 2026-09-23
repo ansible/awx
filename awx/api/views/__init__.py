@@ -171,7 +171,7 @@ def api_exception_handler(exc, context):
 
 
 @deprecated(
-    detail="The /api/v2/dashboard/ endpoint is deprecated. Use /api/v2/analytics/ for aggregate statistics. Query parameter 'legacy_format' is also deprecated.",
+    detail="The /api/v2/dashboard/ endpoint is deprecated. Use /api/v2/analytics/ for aggregate statistics.",
     link="https://docs.ansible.com/aap/latest/changelog#dashboard-deprecation",
 )
 class DashboardView(APIView):
@@ -271,7 +271,20 @@ class DashboardView(APIView):
         data['teams'] = {'url': reverse('api:team_list', request=request), 'total': team_list.count()}
         data['credentials'] = {'url': reverse('api:credential_list', request=request), 'total': credential_list.count()}
         data['job_templates'] = {'url': reverse('api:job_template_list', request=request), 'total': job_template_list.count()}
-        return Response(data)
+
+        response = Response(data)
+
+        # Conditionally emit deprecation for legacy_format query parameter
+        if 'legacy_format' in request.query_params or 'legacy_format' in request.GET:
+            from ansible_base.lib.utils.views.deprecation import mark_deprecated
+
+            mark_deprecated(
+                response,
+                detail="The 'legacy_format' query parameter is deprecated.",
+                link="https://docs.ansible.com/aap/latest/changelog#dashboard-deprecation",
+            )
+
+        return response
 
 
 class DashboardJobsGraphView(APIView):
@@ -1475,10 +1488,16 @@ class CredentialList(ListCreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        if any(f in request.data for f in ('user', 'team')):
+        if 'user' in request.data:
             mark_deprecated(
                 response,
-                detail="The 'user' and 'team' fields are deprecated. Assign credentials via role_user_assignments or role_team_assignments instead.",
+                detail="The 'user' field is deprecated. Assign credentials via role_user_assignments instead.",
+                link="https://docs.ansible.com/aap/latest/changelog#deprecations",
+            )
+        if 'team' in request.data:
+            mark_deprecated(
+                response,
+                detail="The 'team' field is deprecated. Assign credentials via role_team_assignments instead.",
                 link="https://docs.ansible.com/aap/latest/changelog#deprecations",
             )
         return response

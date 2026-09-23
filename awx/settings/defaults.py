@@ -380,7 +380,8 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': 'v2',
     # For OpenAPI schema generation with drf-spectacular
     # see https://github.com/encode/django-rest-framework/pull/6532
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Set CustomAutoSchema as string to avoid circular import at module load time
+    'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
     # 'URL_FORMAT_OVERRIDE': None,
 }
 

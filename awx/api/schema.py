@@ -2,11 +2,6 @@ import warnings
 
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.openapi import AutoSchema
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularSwaggerView,
-    SpectacularRedocView,
-)
 
 from ansible_base.api_documentation.postprocessing_hooks import postprocess_inject_deprecation_headers
 
@@ -90,14 +85,36 @@ class CustomAutoSchema(AutoSchema):
 
     def is_deprecated(self):
         """Return `True` if this operation is to be marked as deprecated."""
-        return getattr(self.view, 'deprecated', False) or bool(getattr(self.view, 'deprecation', None))
+        # Check both the class and instance for deprecation markers
+        view_class = self.view.__class__
+
+        result = (
+            getattr(self.view, 'deprecated', False)
+            or getattr(view_class, 'deprecated', False)
+            or bool(getattr(self.view, 'deprecation', None))
+            or bool(getattr(view_class, 'deprecation', None))
+        )
+
+        return result
 
     def get_extensions(self):
         extensions = super().get_extensions()
-        deprecation = getattr(self.view, 'deprecation', None)
+        # Check both the class and instance for deprecation metadata
+        view_class = self.view.__class__
+
+        deprecation = getattr(self.view, 'deprecation', None) or getattr(view_class, 'deprecation', None)
         if deprecation and deprecation.get('detail'):
             extensions['x-deprecated-detail'] = deprecation['detail']
+
         return extensions
+
+
+# Import drf_spectacular views AFTER CustomAutoSchema is defined to avoid circular import
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 
 class AuthenticatedSpectacularAPIView(SpectacularAPIView):

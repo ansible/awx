@@ -3097,16 +3097,26 @@ class CredentialSerializer(BaseSerializer):
 @extend_schema_field(
     {
         "type": "integer",
-        "x-deprecated-detail": "The 'user' and 'team' fields are deprecated. Assign credentials via role_user_assignments or role_team_assignments instead.",
+        "x-deprecated-detail": "The 'user' field is deprecated. Assign credentials via role_user_assignments instead.",
     }
 )
-class _DeprecatedOwnerField(serializers.PrimaryKeyRelatedField):
+class _DeprecatedUserField(serializers.PrimaryKeyRelatedField):
+    pass
+
+
+@extend_schema_field(
+    {
+        "type": "integer",
+        "x-deprecated-detail": "The 'team' field is deprecated. Assign credentials via role_team_assignments instead.",
+    }
+)
+class _DeprecatedTeamField(serializers.PrimaryKeyRelatedField):
     pass
 
 
 @extend_schema_serializer(deprecate_fields=['user', 'team'])
 class CredentialSerializerCreate(CredentialSerializer):
-    user = _DeprecatedOwnerField(
+    user = _DeprecatedUserField(
         queryset=User.objects.all(),
         required=False,
         default=None,
@@ -3114,7 +3124,7 @@ class CredentialSerializerCreate(CredentialSerializer):
         allow_null=True,
         help_text=_('Write-only field used to add user to owner role. If provided, do not give either team or organization. Only valid for creation.'),
     )
-    team = _DeprecatedOwnerField(
+    team = _DeprecatedTeamField(
         queryset=Team.objects.all(),
         required=False,
         default=None,
