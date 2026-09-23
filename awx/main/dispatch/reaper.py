@@ -8,24 +8,6 @@ from awx.main.models import Instance, UnifiedJob, WorkflowJob
 logger = logging.getLogger('awx.main.dispatch')
 
 
-def startup_reaping():
-    """
-    If this particular instance is starting, then we know that any running jobs are invalid
-    so we will reap those jobs as a special action here
-    """
-    jobs = UnifiedJob.objects.filter(status='running', controller_node=Instance.objects.my_hostname())
-    job_ids = []
-    for j in jobs:
-        job_ids.append(j.id)
-        reap_job(
-            j,
-            'failed',
-            job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
-        )
-    if job_ids:
-        logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
-
-
 def reap_job(j, status, job_explanation=None):
     j.refresh_from_db(fields=['status', 'job_explanation'])
     status_before = j.status
@@ -48,8 +30,11 @@ def reap_job(j, status, job_explanation=None):
 
 
 def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None, ref_time=None):
-    """
-    Reap all jobs in running for this instance.
+    """Reap all running jobs for this instance.
+
+    Per-job adopt-or-reap decisions (based on work_unit_id) belong in the caller's loop,
+    not here as a queryset filter. See _process_startup_jobs and _process_running_jobs
+    in awx.main.tasks.system for the unified loops that replaced undispatched_only filtering.
     """
     if instance is None:
         hostname = Instance.objects.my_hostname()
