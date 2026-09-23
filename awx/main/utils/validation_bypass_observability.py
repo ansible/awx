@@ -10,6 +10,7 @@ from ansible_base.lib.utils.bulk_validation_audit import (
 )
 from ansible_base.lib.utils.validation_signals import (
     _get_caller_info,
+    _get_text_fields,
     _protected_models,
     _validate_field,
     extend_caller_allowlist_prefixes,
@@ -71,3 +72,44 @@ def audit_workflow_job_nodes_for_bulk_create(nodes: Iterable[Model]) -> None:
             if violation:
                 tier, reason = violation
                 _log_bulk_violation('bulk_create', field_name, resource_type, tier, caller_info, reason)
+
+
+def _audited_text_field_names(model: type[Model]) -> frozenset[str]:
+    protected = _protected_models.get(model)
+    if protected is None:
+        return frozenset()
+    _, excluded_fields = protected
+    text_fields, _json_fields = _get_text_fields(model)
+    return frozenset(field_name for field_name in text_fields if field_name not in excluded_fields)
+
+
+def audit_bulk_update_instances(instances: Iterable[Model], fields: Iterable[str]) -> None:
+    """Log Tier 1/2 violations for instances about to be bulk-updated (non-blocking).
+
+    Only fields named in ``fields`` that are registered Char/Text columns are checked,
+    so callers updating JSON or non-text columns (e.g. Host ``ansible_facts``) are not
+    scanned for unrelated text on the in-memory instance.
+    """
+    update_fields = frozenset(fields)
+    if not update_fields or not instances:
+        return
+    caller_info = _get_caller_info()
+    for instance in instances:
+        target_fields = update_fields & _audited_text_field_names(type(instance))
+        if not target_fields:
+            continue
+        protected = _protected_models.get(type(instance))
+        if protected is None:
+            continue
+        name_fields, excluded_fields = protected
+        resource_type = f"{instance._meta.app_label}.{instance._meta.object_name}"
+        for field_name in target_fields:
+            if field_name in excluded_fields:
+                continue
+            value = getattr(instance, field_name, None)
+            if value is None or not isinstance(value, str):
+                continue
+            violation = _validate_field(field_name, value, name_fields)
+            if violation:
+                tier, reason = violation
+                _log_bulk_violation('bulk_update', field_name, resource_type, tier, caller_info, reason)

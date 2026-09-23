@@ -633,6 +633,32 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
 
 
 @pytest.mark.django_db
+def test_bulk_host_create_logs_bypass_for_unsafe_description_when_enforcement_disabled(organization, inventory, post, user, caplog):
+    """Bulk host create skips post_save; audit before bulk_create must log Tier 2 violations."""
+    import logging
+
+    inventory.organization = organization
+    inv_admin = user('inventory_admin', False)
+    organization.member_role.members.add(inv_admin)
+    inventory.admin_role.members.add(inv_admin)
+
+    with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=False):
+        with caplog.at_level(logging.WARNING, logger='ansible_base.lib.utils.validation_signals'):
+            post(
+                reverse('api:bulk_host_create'),
+                {
+                    'inventory': inventory.id,
+                    'hosts': [{'name': f'bulk-host-bypass-{uuid4().hex[:8]}', 'description': '<script>x</script>'}],
+                },
+                inv_admin,
+                expect=201,
+            )
+    assert 'ORM bypass (bulk_create)' in caplog.text
+    assert 'description' in caplog.text
+    assert 'main.Host' in caplog.text
+
+
+@pytest.mark.django_db
 def test_bulk_job_launch_logs_bypass_for_unsafe_limit_when_enforcement_disabled(organization, inventory, project, post, user, caplog):
     """Bulk workflow nodes skip post_save; audit before bulk_create must log Tier 2 violations."""
     import logging

@@ -10,6 +10,8 @@ from awx import MODE
 from django.conf import settings
 from django.db import connection
 
+from awx.main.utils.validation_bypass_observability import audit_bulk_update_instances
+
 
 def set_connection_name(function):
     set_application_name(settings.DATABASES, settings.CLUSTER_HOST_ID, function=function)
@@ -36,6 +38,7 @@ def bulk_update_sorted_by_id(model, objects, fields, batch_size=1000):
         return 0  # Return 0 when nothing is updated
 
     sorted_objects = sorted(objects, key=lambda obj: obj.id)
+    audit_bulk_update_instances(sorted_objects, fields)
     return model.objects.bulk_update(sorted_objects, fields, batch_size=batch_size)
 
 
