@@ -195,7 +195,11 @@ class CallbackBrokerWorker:
 
     def flush(self, force=False):
         now = tz_now()
-        if force or (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS or any([len(events) >= 1000 for events in self.buff.values()]):
+        if (
+            force
+            or (time.time() - self.last_flush) > settings.JOB_EVENT_BUFFER_SECONDS
+            or any(len(events) >= settings.JOB_EVENT_CALLBACK_BUFFER_SIZE for events in self.buff.values())
+        ):
             metrics_bulk_events_saved = 0
             metrics_singular_events_saved = 0
             metrics_events_batch_save_errors = 0
