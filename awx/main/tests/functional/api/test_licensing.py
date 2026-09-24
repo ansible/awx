@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -348,6 +349,21 @@ class TestSubscriptionCleanText:
 
             response = post(reverse('api:api_v2_subscription_view'), data, admin)
             assert response.status_code == status.HTTP_200_OK
+
+    def test_rejected_input_logs_user_and_ip(self, post, admin, enforce_clean_text, caplog):
+        """CleanText rejection warning includes authenticated username and client IP."""
+        data = {
+            'subscriptions_username': UNSAFE_INPUT,
+            'subscriptions_password': 'valid_password',
+        }
+        with caplog.at_level(logging.WARNING, logger='ansible_base.lib.serializers.mixins'):
+            post(reverse('api:api_v2_subscription_view'), data, admin)
+
+        warnings = [r for r in caplog.records if 'Validation rejected' in r.getMessage()]
+        assert warnings, 'Expected a CleanTextMixin warning for unsafe input'
+        msg = warnings[0].getMessage()
+        assert f'for user {admin.username}' in msg, f'Warning should include username; got: {msg}'
+        assert '(ip ' in msg, f'Warning should include client IP; got: {msg}'
 
 
 @pytest.mark.django_db

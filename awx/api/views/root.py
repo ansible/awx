@@ -198,7 +198,19 @@ class ApiV2SubscriptionView(APIView):
         Plain APIView has no get_serializer(); this minimal implementation lets
         Metadata.determine_actions() discover the serializer's fields and inject
         CleanText validation patterns into OPTIONS responses.
+
+        Request and view context is included so that CleanTextMixin's audit
+        logging can attribute rejected input to the authenticated user and
+        client IP.
         """
+        kwargs.setdefault(
+            'context',
+            {
+                'request': self.request,
+                'format': self.format_kwarg,
+                'view': self,
+            },
+        )
         return self.serializer_class(*args, **kwargs)
 
     @extend_schema_if_available(
@@ -206,7 +218,7 @@ class ApiV2SubscriptionView(APIView):
     )
     def post(self, request):
         """Validate subscription credentials against the Red Hat portal and persist them on success."""
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
