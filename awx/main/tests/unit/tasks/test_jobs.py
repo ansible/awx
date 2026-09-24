@@ -892,13 +892,24 @@ class TestRunSystemJobBuildArgs:
         selected = [a for a in args if a.startswith('--') and a != '--days']
         assert selected == ['--jobs', '--notifications']
 
-    def test_unknown_resources_are_ignored(self):
-        # build_args is defensive even though the API validates resources up front
-        args = self._build_args('{"days": 30, "resources": ["bogus"]}')
-        assert [a for a in args if a in self.ALL_FLAGS] == self.ALL_FLAGS
-
     def test_days_and_dry_run_still_applied(self):
         args = self._build_args('{"days": 15, "dry_run": true, "resources": ["jobs"]}')
         assert '--days' in args and args[args.index('--days') + 1] == '15'
         assert '--dry-run' in args
         assert '--jobs' in args and '--notifications' not in args
+
+    @pytest.mark.parametrize(
+        "extra_vars",
+        [
+            '{"days": 30, "resources": ["bogus"]}',  # unknown resource
+            '{"days": 30, "resources": ["jobs", "bogus"]}',  # one unknown
+            '{"days": 30, "resources": [{"jobs": true}]}',  # non-string (unhashable) entry
+            '{"days": 30, "resources": [5]}',  # non-string entry
+            '{"days": 30, "resources": "jobs"}',  # not a list
+        ],
+    )
+    def test_malformed_resources_abort_instead_of_cleaning_everything(self, extra_vars):
+        # The launch endpoint bypasses the model validator, so build_args must
+        # reject malformed input rather than fall back to removing everything.
+        with pytest.raises(ValueError):
+            self._build_args(extra_vars)

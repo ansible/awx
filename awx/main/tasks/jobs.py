@@ -2181,29 +2181,42 @@ class RunSystemJob(BaseTask):
                 json_vars = {}
             else:
                 json_vars = json.loads(system_job.extra_vars)
-            if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
-                if 'days' in json_vars:
-                    args.extend(['--days', str(json_vars.get('days', 60))])
-                if 'batch_size' in json_vars:
-                    args.extend(['--batch-size', str(json_vars['batch_size'])])
-                if 'dry_run' in json_vars and json_vars['dry_run']:
-                    args.extend(['--dry-run'])
-            if system_job.job_type == 'cleanup_jobs':
-                # If a "resources" list is provided, only clean up the requested
-                # resource types; otherwise fall back to cleaning up everything.
-                resources = json_vars.get('resources')
-                if resources:
-                    flags = [CLEANUP_JOBS_RESOURCE_FLAGS[r] for r in resources if r in CLEANUP_JOBS_RESOURCE_FLAGS]
-                else:
-                    flags = list(CLEANUP_JOBS_RESOURCE_FLAGS.values())
-                # Guard against passing no flags, which cleanup_jobs would
-                # interpret as "clean up every resource type".
-                if not flags:
-                    flags = list(CLEANUP_JOBS_RESOURCE_FLAGS.values())
-                args.extend(flags)
         except Exception:
             logger.exception("{} Failed to parse system job".format(system_job.log_format))
+            return args
+
+        if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+            if 'days' in json_vars:
+                args.extend(['--days', str(json_vars.get('days', 60))])
+            if 'batch_size' in json_vars:
+                args.extend(['--batch-size', str(json_vars['batch_size'])])
+            if 'dry_run' in json_vars and json_vars['dry_run']:
+                args.extend(['--dry-run'])
+        if system_job.job_type == 'cleanup_jobs':
+            # Validate outside the try/except above so a malformed "resources"
+            # value aborts the task instead of being swallowed and launching
+            # cleanup_jobs with no flags (which would remove every resource type).
+            args.extend(self._cleanup_jobs_resource_flags(json_vars.get('resources')))
         return args
+
+    @staticmethod
+    def _cleanup_jobs_resource_flags(resources):
+        """Map the cleanup_jobs "resources" extra var to awx-manage flags.
+
+        Not provided -> clean up every resource type (the historical default).
+        A malformed value (not a list, or containing unknown/non-string
+        entries) raises, so the task fails rather than deleting everything.
+        The API validates this too, but the launch endpoint builds the job
+        without that validation, so this is the last line of defense.
+        """
+        if resources is None:
+            return list(CLEANUP_JOBS_RESOURCE_FLAGS.values())
+        if not isinstance(resources, list) or any(not isinstance(r, str) or r not in CLEANUP_JOBS_RESOURCE_FLAGS for r in resources):
+            raise ValueError(
+                'Invalid "resources" for cleanup_jobs; expected a list of: {}'.format(', '.join(sorted(CLEANUP_JOBS_RESOURCE_FLAGS)))
+            )
+        # An empty list means no narrowing, i.e. clean up every resource type.
+        return [CLEANUP_JOBS_RESOURCE_FLAGS[r] for r in resources] or list(CLEANUP_JOBS_RESOURCE_FLAGS.values())
 
     def write_args_file(self, private_data_dir, args):
         return self.write_private_data_file(private_data_dir, 'args', ' '.join(args))
