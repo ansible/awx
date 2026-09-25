@@ -84,6 +84,8 @@ def inject_ai_descriptions(
                 operation['x-ai-description'] = descriptions[op_id]
 
     return result
+
+
 def inject_clean_text_pattern_components(
     result,
     generator,  # NOSONAR
@@ -118,9 +120,7 @@ def inject_clean_text_pattern_components(
             continue
         props = schema.setdefault('properties', {})
         existing = props.get('inputs') if isinstance(props.get('inputs'), dict) else {}
-        base_description = existing.get('description') or (
-            'Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.'
-        )
+        base_description = existing.get('description') or ('Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.')
         note = (
             'When ENHANCED_INPUT_VALIDATION_ENABLED is on, non-secret string '
             'entries in fields[] may include optional pattern, patternDescription, '
@@ -144,10 +144,7 @@ def inject_clean_text_pattern_components(
                 },
                 'metadata': {
                     'type': 'array',
-                    'description': (
-                        'Optional. Present only on some external-secret credential types; '
-                        'same item shape as fields[].'
-                    ),
+                    'description': ('Optional. Present only on some external-secret credential types; same item shape as fields[].'),
                     'items': field_item_ref,
                 },
             },
