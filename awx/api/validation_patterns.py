@@ -68,7 +68,8 @@ def free_text_pattern_metadata():
         return None
     return {
         'pattern': build_tier2_frontend_pattern(),
-        'pattern_description': TIER2_PATTERN_DESCRIPTION,
+        # camelCase to match DAB OPTIONS / authenticator_plugins (patternDescription).
+        'patternDescription': TIER2_PATTERN_DESCRIPTION,
         'flags': 'i',
     }
 

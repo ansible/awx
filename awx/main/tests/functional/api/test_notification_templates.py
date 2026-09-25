@@ -108,7 +108,7 @@ def test_notification_options_include_patterns_when_toggle_on(options, admin, fa
     assert response.status_code == 200
     email = response.data['actions']['POST']['notification_configuration']['email']
     assert email['host']['pattern'] == FAKE_TIER2_PATTERN
-    assert 'pattern_description' in email['host']
+    assert 'patternDescription' in email['host']
     assert 'pattern' in email['username']
     assert 'pattern' in email['sender']
     assert 'pattern' not in email['password']
@@ -123,4 +123,4 @@ def test_notification_options_omit_patterns_when_toggle_off(options, admin, fake
     assert response.status_code == 200
     email = response.data['actions']['POST']['notification_configuration']['email']
     assert 'pattern' not in email['host']
-    assert 'pattern_description' not in email['host']
+    assert 'patternDescription' not in email['host']
