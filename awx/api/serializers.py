@@ -43,7 +43,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
-from ansible_base.lib.serializers.mixins import CleanTextMixin
+from ansible_base.lib.serializers.mixins import CleanTextMixin, serializer_mediated_persistence_context
 from ansible_base.lib.utils.bulk_validation_audit import audit_bulk_model_instances
 from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.lib.utils.settings import get_setting
@@ -5278,6 +5278,10 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
             )
 
     def create(self, validated_data):
+        with serializer_mediated_persistence_context():
+            return self._create_bulk_job_launch(validated_data)
+
+    def _create_bulk_job_launch(self, validated_data):
         request = self.context.get('request', None)
         launch_user = request.user if request else None
         job_node_data = validated_data.pop('jobs')

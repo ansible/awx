@@ -50,6 +50,19 @@ def test_audit_bulk_model_instances_logs_host_description_on_bulk_create(caplog)
 
 
 @pytest.mark.django_db
+def test_audit_workflow_job_nodes_skips_when_serializer_already_logged(caplog):
+    from ansible_base.lib.utils.validation_signals import register_serializer_validation_rejection
+
+    wfj = WorkflowJob.objects.create(name='wf-audit-limit-dedupe')
+    node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
+    node.limit = '<script>x</script>'
+    register_serializer_validation_rejection('main.WorkflowJobNode', 'limit')
+    with caplog.at_level(logging.WARNING, logger=LOGGER):
+        audit_workflow_job_nodes_for_bulk_create([node])
+    assert 'ORM bypass' not in caplog.text
+
+
+@pytest.mark.django_db
 def test_audit_workflow_job_nodes_logs_limit_pseudo_field(caplog):
     wfj = WorkflowJob.objects.create(name='wf-audit-limit')
     node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
