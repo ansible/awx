@@ -39,7 +39,11 @@ class RocketChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
                     payload[optval] = optvalue.strip()
 
             r = requests.post(
-                "{}".format(m.recipients()[0]), data=json.dumps(payload), headers=get_awx_http_client_headers(), verify=(not self.rocketchat_no_verify_ssl)
+                "{}".format(m.recipients()[0]),
+                data=json.dumps(payload),
+                headers=get_awx_http_client_headers(),
+                verify=(not self.rocketchat_no_verify_ssl),
+                allow_redirects=False,
             )
 
             if r.status_code >= 400:

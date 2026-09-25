@@ -4,6 +4,8 @@
 import base64
 import json
 import logging
+from urllib.parse import urlparse
+
 import requests
 
 from awx.main.notifications.base import AWXBaseEmailBackend
@@ -69,6 +71,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
             headers = {**(get_awx_http_client_headers()), **(self.headers or {})}
 
             err = None
+            original_host = urlparse(url).hostname
 
             for retries in range(self.MAX_RETRIES):
                 # Sometimes we hit redirect URLs. We must account for this. We still extract the redirect URL from the response headers and try again. Max retires == 5
@@ -101,6 +104,10 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 if url is None:
                     err = f"Webhook notification received redirect to a blank URL from {url_log_safe}. Response headers={resp.headers}"
                     break
+
+                if urlparse(url).hostname != original_host:
+                    logger.warning("Redirect changed host; stripping auth credentials")
+                    auth = None
             else:
                 # no break condition in the loop encountered; therefore we have hit the maximum number of retries
                 err = f"Webhook notification max number of retries [{self.MAX_RETRIES}] exceeded. Failed to send webhook notification to {url_log_safe}"

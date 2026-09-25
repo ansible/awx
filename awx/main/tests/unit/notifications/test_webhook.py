@@ -377,3 +377,45 @@ def test_send_messages_with_error_status_code():
         error_call_args = logger_mock.error.call_args[0][0]
         assert "Error sending webhook notification: 404" in error_call_args
         assert sent_messages == 0
+
+
+def test_send_messages_redirect_strips_auth_on_host_change():
+    """Auth credentials are stripped when a redirect changes the host."""
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
+        requests_mock.post.side_effect = [
+            mock.Mock(status_code=301, headers={"Location": "http://other-host.com/hook"}),
+            mock.Mock(status_code=200),
+        ]
+        version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
+        backend = webhook_backend.WebhookBackend('POST', None, username='user', password='secret')
+        message = EmailMessage('test subject', {'text': 'test body'}, [], ['http://example.com'])
+        sent_messages = backend.send_messages([message])
+        assert requests_mock.post.call_count == 2
+        first_call = requests_mock.post.call_args_list[0]
+        assert first_call.kwargs['auth'] == ('user', 'secret')
+        second_call = requests_mock.post.call_args_list[1]
+        assert second_call.kwargs['auth'] is None
+        assert sent_messages == 1
+
+
+def test_send_messages_redirect_keeps_auth_on_same_host():
+    """Auth credentials are preserved when a redirect stays on the same host."""
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
+        requests_mock.post.side_effect = [
+            mock.Mock(status_code=301, headers={"Location": "http://example.com/new-path"}),
+            mock.Mock(status_code=200),
+        ]
+        version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
+        backend = webhook_backend.WebhookBackend('POST', None, username='user', password='secret')
+        message = EmailMessage('test subject', {'text': 'test body'}, [], ['http://example.com'])
+        sent_messages = backend.send_messages([message])
+        assert requests_mock.post.call_count == 2
+        for call in requests_mock.post.call_args_list:
+            assert call.kwargs['auth'] == ('user', 'secret')
+        assert sent_messages == 1
