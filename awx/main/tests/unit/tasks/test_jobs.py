@@ -867,3 +867,49 @@ def test_acquire_lock_exclusive(mock_exists, mock_os_open, mock_lockf):
     call_args = mock_lockf.call_args
     lock_flags = call_args[0][1]
     assert lock_flags & fcntl.LOCK_EX  # Should have LOCK_EX bit
+
+
+class TestRunSystemJobBuildArgs:
+    """RunSystemJob.build_args honors the cleanup_jobs "resources" extra var."""
+
+    ALL_FLAGS = ['--jobs', '--ad-hoc-commands', '--project-updates', '--inventory-updates', '--management-jobs', '--workflow-jobs', '--notifications']
+
+    def _build_args(self, extra_vars, job_type='cleanup_jobs'):
+        system_job = mock.MagicMock(job_type=job_type, extra_vars=extra_vars)
+        return jobs.RunSystemJob().build_args(system_job, private_data_dir=None, passwords={})
+
+    def test_no_resources_cleans_up_everything(self):
+        args = self._build_args('{"days": 30}')
+        assert args[:2] == ['awx-manage', 'cleanup_jobs']
+        assert [a for a in args if a in self.ALL_FLAGS] == self.ALL_FLAGS
+
+    def test_empty_resources_cleans_up_everything(self):
+        args = self._build_args('{"days": 30, "resources": []}')
+        assert [a for a in args if a in self.ALL_FLAGS] == self.ALL_FLAGS
+
+    def test_resources_subset_only_passes_selected_flags(self):
+        args = self._build_args('{"days": 30, "resources": ["jobs", "notifications"]}')
+        selected = [a for a in args if a.startswith('--') and a != '--days']
+        assert selected == ['--jobs', '--notifications']
+
+    def test_days_and_dry_run_still_applied(self):
+        args = self._build_args('{"days": 15, "dry_run": true, "resources": ["jobs"]}')
+        assert '--days' in args and args[args.index('--days') + 1] == '15'
+        assert '--dry-run' in args
+        assert '--jobs' in args and '--notifications' not in args
+
+    @pytest.mark.parametrize(
+        "extra_vars",
+        [
+            '{"days": 30, "resources": ["bogus"]}',  # unknown resource
+            '{"days": 30, "resources": ["jobs", "bogus"]}',  # one unknown
+            '{"days": 30, "resources": [{"jobs": true}]}',  # non-string (unhashable) entry
+            '{"days": 30, "resources": [5]}',  # non-string entry
+            '{"days": 30, "resources": "jobs"}',  # not a list
+        ],
+    )
+    def test_malformed_resources_abort_instead_of_cleaning_everything(self, extra_vars):
+        # The launch endpoint bypasses the model validator, so build_args must
+        # reject malformed input rather than fall back to removing everything.
+        with pytest.raises(ValueError):
+            self._build_args(extra_vars)
