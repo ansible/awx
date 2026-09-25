@@ -221,7 +221,7 @@ def main():
         if input_inventory_names is not None:
             association_fields['input_inventories'] = []
             for item in input_inventory_names:
-                association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item))
+                association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item, data={'organization': org_id}))
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
     module.create_or_update_if_needed(
