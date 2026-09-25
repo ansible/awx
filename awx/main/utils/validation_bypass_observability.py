@@ -61,6 +61,11 @@ def audit_workflow_job_nodes_for_bulk_create(nodes: Iterable[Model]) -> None:
     columns. Node prompt values (limit, job_tags, etc.) live in ``char_prompts`` via
     ``NullablePromptPseudoField`` and must be read with ``getattr`` after deferred
     attrs are applied on the in-memory instances.
+
+    When called from a DRF ``create()`` after ``is_valid()``, the caller must run
+    inside DAB ``serializer_mediated_persistence_context`` so duplicate
+    ``Validation rejected`` / ``ORM bypass`` lines are not emitted (see DAB
+    ``docs/lib/validation_bypass_observability.md``).
     """
     materialized = list(nodes)
     if not materialized:

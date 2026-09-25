@@ -2274,6 +2274,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
+        # DAB: dedupe Validation rejected (child BulkHostSerializer is_valid) vs ORM bypass bulk_create.
         with serializer_mediated_persistence_context():
             return self._create_bulk_hosts(validated_data)
 
@@ -5282,6 +5283,7 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
             )
 
     def create(self, validated_data):
+        # DAB: dedupe Validation rejected (is_valid) vs audit_workflow_job_nodes / bulk_create bypass logs.
         with serializer_mediated_persistence_context():
             return self._create_bulk_job_launch(validated_data)
 
