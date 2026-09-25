@@ -38,6 +38,27 @@ def test_configure_validation_bypass_observability_wires_dab(mocker):
 
 
 @pytest.mark.django_db
+def test_audit_bulk_model_instances_skips_host_description_when_serializer_already_logged(caplog):
+    from ansible_base.lib.utils.validation_signals import (
+        get_validation_context_token,
+        register_serializer_validation_rejection,
+        reset_validation_context,
+    )
+
+    org = Organization.objects.create(name='org-bulk-host-dedupe')
+    inv = Inventory.objects.create(name='inv-bulk-host-dedupe', organization=org)
+    host = Host(name='host-bulk-dedupe', description='<script>x</script>', inventory=inv)
+    register_serializer_validation_rejection('main.Host', 'description')
+    token = get_validation_context_token()
+    try:
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            audit_bulk_model_instances([host], operation='bulk_create')
+    finally:
+        reset_validation_context(token)
+    assert 'ORM bypass' not in caplog.text
+
+
+@pytest.mark.django_db
 def test_audit_bulk_model_instances_logs_host_description_on_bulk_create(caplog):
     org = Organization.objects.create(name='org-bulk-host-audit')
     inv = Inventory.objects.create(name='inv-bulk-host-audit', organization=org)

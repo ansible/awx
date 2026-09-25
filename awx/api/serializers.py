@@ -2274,6 +2274,10 @@ class BulkHostCreateSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
+        with serializer_mediated_persistence_context():
+            return self._create_bulk_hosts(validated_data)
+
+    def _create_bulk_hosts(self, validated_data):
         # This assumes total_hosts is up to date, and it can get out of date if the inventory computed fields have not been updated lately.
         # If we wanted to side step this we could query Hosts.objects.filter(inventory...)
         old_total_hosts = validated_data['inventory'].total_hosts
