@@ -341,3 +341,47 @@ class TestHostnameRegexValidator:
     def test_bad_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
         h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
         assert h("@#$%)$#(TUFAS_DG") is None
+
+
+class TestTruncateEventData:
+    def test_noop_when_under_limit(self):
+        data = {'res': {'msg': 'short'}}
+        result = common.truncate_event_data(data, 1024)
+        assert result == data
+
+    def test_truncates_long_string(self):
+        data = {'res': {'msg': 'x' * 2000}}
+        result = common.truncate_event_data(data, 1024)
+        assert len(result['res']['msg']) == 1024
+        assert result['res']['msg'].endswith('\u2026')
+
+    def test_preserves_short_siblings(self):
+        data = {'res': {'msg': 'x' * 2000, 'rc': 0, 'cmd': 'echo hello'}}
+        result = common.truncate_event_data(data, 1024)
+        assert result['res']['rc'] == 0
+        assert result['res']['cmd'] == 'echo hello'
+
+    def test_truncates_inside_lists(self):
+        data = {'results': [{'msg': 'y' * 2000}, {'msg': 'ok'}]}
+        result = common.truncate_event_data(data, 1024)
+        assert len(result['results'][0]['msg']) == 1024
+        assert result['results'][1]['msg'] == 'ok'
+
+    def test_noop_for_zero_limit(self):
+        data = {'res': {'msg': 'x' * 2000}}
+        result = common.truncate_event_data(data, 0)
+        assert result == data
+
+    def test_does_not_mutate_original(self):
+        original_msg = 'x' * 2000
+        data = {'res': {'msg': original_msg}}
+        common.truncate_event_data(data, 1024)
+        assert data['res']['msg'] == original_msg
+
+    def test_handles_empty_dict(self):
+        assert common.truncate_event_data({}, 1024) == {}
+
+    def test_handles_nested_depth(self):
+        data = {'a': {'b': {'c': {'d': 'z' * 2000}}}}
+        result = common.truncate_event_data(data, 100)
+        assert len(result['a']['b']['c']['d']) == 100

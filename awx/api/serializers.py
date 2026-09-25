@@ -116,6 +116,7 @@ from awx.main.utils import (
     encrypt_dict,
     prefetch_page_capabilities,
     truncate_stdout,
+    truncate_event_data,
     get_licenser,
 )
 
@@ -4689,6 +4690,8 @@ class JobEventSerializer(BaseSerializer):
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if 'stdout' in data:
             data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
+        if 'event_data' in data:
+            data['event_data'] = truncate_event_data(data['event_data'], max_bytes)
         return data
 
 
@@ -4764,6 +4767,8 @@ class AdHocCommandEventSerializer(BaseSerializer):
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if 'stdout' in data:
             data['stdout'] = truncate_stdout(data['stdout'], max_bytes)
+        if 'event_data' in data:
+            data['event_data'] = truncate_event_data(data['event_data'], max_bytes)
         return data
 
 
