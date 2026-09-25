@@ -8,6 +8,7 @@
   loop:
     - secrets
     - receptor
+    - overrides
 
 - name: Detect secrets
   stat:
@@ -130,6 +131,77 @@
     src: docker-compose.yml.j2
     dest: "{{ sources_dest }}/{{ compose_name }}"
     mode: '0600'
+
+# --- Override files (activated into _sources/overrides/) ---
+# The Makefile includes every file in _sources/overrides/ via $(wildcard),
+# so this directory is the single source of truth for which optional
+# services are enabled. Static overrides are copied from
+# tools/docker-compose/overrides/, dynamic ones are rendered from J2.
+
+- name: Clean stale override files
+  file:
+    path: "{{ sources_dest }}/overrides"
+    state: absent
+
+- name: Recreate overrides directory
+  file:
+    path: "{{ sources_dest }}/overrides"
+    state: directory
+    mode: '0700'
+
+- name: Activate static overrides for enabled services
+  copy:
+    src: "{{ playbook_dir }}/../overrides/{{ item.name }}.yml"
+    dest: "{{ sources_dest }}/overrides/{{ item.name }}.yml"
+    mode: '0600'
+  when: item.enabled | bool
+  loop_control:
+    label: "{{ item.name }}"
+  loop:
+    - name: splunk
+      enabled: "{{ enable_splunk }}"
+    - name: prometheus
+      enabled: "{{ enable_prometheus }}"
+    - name: grafana
+      enabled: "{{ enable_grafana }}"
+    - name: otel
+      enabled: "{{ enable_otel }}"
+    - name: loki
+      enabled: "{{ enable_loki }}"
+    - name: minikube
+      enabled: "{{ minikube_container_group }}"
+
+- name: Render pgbouncer override
+  template:
+    src: "overrides/pgbouncer.yml.j2"
+    dest: "{{ sources_dest }}/overrides/pgbouncer.yml"
+    mode: '0600'
+  when: enable_pgbouncer | bool
+
+- name: Render vault override
+  template:
+    src: "overrides/vault.yml.j2"
+    dest: "{{ sources_dest }}/overrides/vault.yml"
+    mode: '0600'
+  when: enable_vault | bool
+
+- name: Render execution-nodes override
+  template:
+    src: "overrides/execution-nodes.yml.j2"
+    dest: "{{ sources_dest }}/overrides/execution-nodes.yml"
+    mode: '0600'
+  when: execution_node_count | int > 0
+
+- name: Render editable-deps override
+  template:
+    src: "overrides/editable-deps.yml.j2"
+    dest: "{{ sources_dest }}/overrides/editable-deps.yml"
+    mode: '0600'
+  when:
+    - install_editable_dependencies | bool
+    - editable_dependencies | default([]) | length > 0
+
+# --- End override files ---
 
 - name: Render Receptor Config(s) for Control Plane
   template:
