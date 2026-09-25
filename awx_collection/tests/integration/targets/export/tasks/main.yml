@@ -9,6 +9,8 @@
     org_name1: "AWX-Collection-tests-export-organization-{{ test_id }}"
     org_name2: "AWX-Collection-tests-export-organization2-{{ test_id }}"
     inventory_name1: "AWX-Collection-tests-export-inv1-{{ test_id }}"
+    group_name1: "AWX-Collection-tests-export-group1-{{ test_id }}"
+    host_name1: "AWX-Collection-tests-export-host1-{{ test_id }}"
 
 - block:
     - name: Create some organizations
@@ -95,6 +97,53 @@
           - string_asserts is successful
           - string_asserts['assets']['organizations'] | length() >= 1
           - "org_name2 in (string_asserts['assets']['organizations'] | map(attribute='name') )"
+
+    - name: Add a group to the inventory
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inventory_name1 }}"
+
+    - name: Add a host to the inventory
+      host:
+        name: "{{ host_name1 }}"
+        inventory: "{{ inventory_name1 }}"
+
+    - name: Export inventories with their children
+      export:
+        inventory: 'all'
+      register: children_export
+
+    - name: Pick out the inventory we created
+      set_fact:
+        exported_inventory: "{{ children_export['assets']['inventory'] | selectattr('name', 'equalto', inventory_name1) | first }}"
+
+    - assert:
+        that:
+          - children_export is successful
+          - children_export is not changed
+          - "host_name1 in (exported_inventory['related']['hosts'] | map(attribute='name'))"
+          - "group_name1 in (exported_inventory['related']['groups'] | map(attribute='name'))"
+
+    # Note that exclude_dynamic_inventory_children is only covered by the unit tests.  It keys off the
+    # has_inventory_sources computed field, which is refreshed by a background task after an inventory
+    # source is created, so asserting on it here would race with that task.
+    - name: Export inventories, leaving out the children of the one we created
+      export:
+        inventory: 'all'
+        exclude_inventory_children:
+          - "{{ inventory_name1 }}"
+      register: excluded_children_export
+
+    - name: Pick out the inventory we excluded
+      set_fact:
+        excluded_inventory: "{{ excluded_children_export['assets']['inventory'] | selectattr('name', 'equalto', inventory_name1) | first }}"
+
+    - assert:
+        that:
+          - excluded_children_export is successful
+          - excluded_children_export is not changed
+          - "'hosts' not in (excluded_inventory['related'] | default({}))"
+          - "'groups' not in (excluded_inventory['related'] | default({}))"
   always:
     - name: Remove our inventory
       inventory:
