@@ -163,7 +163,7 @@ options:
       required: False
       default: 2
       type: float
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 RETURN = '''

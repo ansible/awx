@@ -52,7 +52,7 @@ options:
         - Maximum time in seconds to wait for a workflow job to to reach approval node.
       default: 10
       type: int
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 """
 
 

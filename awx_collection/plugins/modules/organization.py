@@ -84,7 +84,7 @@ options:
         - list of Ansible Galaxy credential names, IDs, or named URLs to associate to the organization
       type: list
       elements: str
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 

@@ -166,7 +166,7 @@ options:
         - If signature validation credential is provided, signature validation will be enabled.
       type: str
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 

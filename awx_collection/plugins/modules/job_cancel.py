@@ -31,7 +31,7 @@ options:
         - Fail loudly if the I(job_id) can not be canceled
       default: False
       type: bool
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''
