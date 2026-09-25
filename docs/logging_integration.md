@@ -33,6 +33,7 @@ Committed to support:
 
  - Splunk
  - Elastic Stack / ELK Stack / Elastic Cloud
+ - Dynatrace
 
 Have tested:
 
@@ -84,6 +85,21 @@ filter {
 Backward-incompatible changes were introduced with Elastic 5.0.0, and
 customers may need different configurations depending on what
 versions they are using.
+
+
+### Dynatrace Instructions
+
+AWX sends logs to the Dynatrace [Log Ingest API v2](https://docs.dynatrace.com/docs/dynatrace-api/environment-api/log-monitoring-v2/post-ingest-logs) endpoint.
+
+Configure the following settings:
+
+| Setting | Value |
+|---|---|
+| Logging Aggregator Type | `dynatrace` |
+| Logging Aggregator Host | `https://<your-environment-id>.live.dynatrace.com/api/v2/logs/ingest` |
+| Logging Aggregator Password/Token | Dynatrace API token with `logs.ingest` scope |
+
+AWX sets the `Authorization: Api-Token <token>` header automatically when the type is `dynatrace`.
 
 
 # Log Message Schema
