@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Label Issue
-        uses: github/issue-labeler@v3.1
+        uses: github/issue-labeler@e24a3eb6b2e28c8904d086302a2b760647f5f45c # v3.1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           not-before: 2021-12-07T07:00:00Z
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 20
     name: Label Issue - Community
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           show-progress: false
 
@@ -40,7 +40,7 @@ jobs:
         run: pip install requests
 
       - name: Check if user is a member of Ansible org
-        uses: jannekem/run-python-script-action@v1
+        uses: jannekem/run-python-script-action@9d8e2e0878d575fb6073277f38ce3f10ebf4f059 # v1
         id: check_user
         with:
           script: |
