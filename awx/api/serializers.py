@@ -4029,7 +4029,7 @@ class WorkflowJobTemplateSerializer(PromptFieldCleanTextMixin, JobTemplateMixin,
     excluded_fields = frozenset({'extra_vars'})
 
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
-    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None, max_length=1024)
 
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -4124,7 +4124,7 @@ class WorkflowJobTemplateWithSpecSerializer(WorkflowJobTemplateSerializer):
 
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
-    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None, max_length=1024)
 
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -4257,7 +4257,7 @@ class WorkflowApprovalTemplateSerializer(CleanTextMixin, UnifiedJobTemplateSeria
 
 
 class LaunchConfigurationBaseSerializer(BaseSerializer):
-    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None, max_length=1024)
     job_type = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default=None, choices=NEW_JOB_TYPE_CHOICES)
     job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
@@ -4811,7 +4811,7 @@ class JobLaunchSerializer(CleanTextMixin, BaseSerializer):
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
     credentials = serializers.PrimaryKeyRelatedField(many=True, queryset=Credential.objects.all(), required=False, write_only=True)
     credential_passwords = VerbatimField(required=False, write_only=True)
-    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True, max_length=1024)
     diff_mode = serializers.BooleanField(required=False, write_only=True)
     job_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
     job_type = serializers.ChoiceField(required=False, choices=NEW_JOB_TYPE_CHOICES, write_only=True)
@@ -5025,7 +5025,7 @@ class WorkflowJobLaunchSerializer(PromptFieldCleanTextMixin, BaseSerializer):
     extra_vars = VerbatimField(required=False, write_only=True)
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
     limit = serializers.CharField(required=False, write_only=True, allow_blank=True)
-    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True, max_length=1024)
     workflow_job_template_data = serializers.SerializerMethodField()
 
     labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
@@ -5176,7 +5176,7 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
     )
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
     limit = serializers.CharField(write_only=True, required=False, allow_blank=False)
-    scm_branch = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    scm_branch = serializers.CharField(write_only=True, required=False, allow_blank=False, max_length=1024)
     skip_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
     job_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
 
