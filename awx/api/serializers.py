@@ -43,7 +43,8 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
-from ansible_base.lib.serializers.mixins import CleanTextMixin
+from ansible_base.lib.serializers.mixins import CleanTextMixin, serializer_mediated_persistence_context
+from ansible_base.lib.utils.bulk_validation_audit import audit_bulk_model_instances
 from ansible_base.lib.utils.models import get_type_for_model
 from ansible_base.lib.utils.settings import get_setting
 from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
@@ -123,6 +124,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.plugins import load_combined_inventory_source_options
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.utils.inventory_vars import update_group_variables
+from awx.main.utils.validation_bypass_observability import audit_workflow_job_nodes_for_bulk_create
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.tasks.system import update_inventory_computed_fields
@@ -2272,11 +2274,17 @@ class BulkHostCreateSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
+        # DAB: dedupe Validation rejected (child BulkHostSerializer is_valid) vs ORM bypass bulk_create.
+        with serializer_mediated_persistence_context():
+            return self._create_bulk_hosts(validated_data)
+
+    def _create_bulk_hosts(self, validated_data):
         # This assumes total_hosts is up to date, and it can get out of date if the inventory computed fields have not been updated lately.
         # If we wanted to side step this we could query Hosts.objects.filter(inventory...)
         old_total_hosts = validated_data['inventory'].total_hosts
         result = [Host(**attrs) for attrs in validated_data['hosts']]
         try:
+            audit_bulk_model_instances(result, operation='bulk_create')
             Host.objects.bulk_create(result)
         except Exception as e:
             raise serializers.ValidationError({"detail": _(f"cannot create host, host creation error {e}")})
@@ -5275,6 +5283,11 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
             )
 
     def create(self, validated_data):
+        # DAB: dedupe Validation rejected (is_valid) vs audit_workflow_job_nodes / bulk_create bypass logs.
+        with serializer_mediated_persistence_context():
+            return self._create_bulk_job_launch(validated_data)
+
+    def _create_bulk_job_launch(self, validated_data):
         request = self.context.get('request', None)
         launch_user = request.user if request else None
         job_node_data = validated_data.pop('jobs')
@@ -5333,6 +5346,7 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
             # we'll need this later when we do the m2m through model bulk create
             node_m2m_objects[node_attrs['identifier']]['node'] = node_obj
 
+        audit_workflow_job_nodes_for_bulk_create(nodes)
         WorkflowJobNode.objects.bulk_create(nodes)
 
         # Deal with the m2m objects we have to create once the node exists
