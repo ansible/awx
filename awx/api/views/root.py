@@ -26,6 +26,7 @@ import requests
 from ansible_base.lib.utils.schema import extend_schema_if_available
 
 from awx.api.generics import APIView
+from awx.api.serializers import SubscriptionCredentialsSerializer
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
@@ -177,21 +178,49 @@ class ApiV2PingView(APIView):
 
 
 class ApiV2SubscriptionView(APIView):
+    """Validate and list AAP subscription credentials via the Red Hat portal."""
+
     permission_classes = (IsAuthenticated,)
+    serializer_class = SubscriptionCredentialsSerializer
     name = _('Subscriptions')
     swagger_topic = 'System Configuration'
     resource_purpose = 'aap subscription validation'
 
     def check_permissions(self, request):
+        """Restrict mutating methods to superusers; allow OPTIONS/HEAD for all authenticated users."""
         super(ApiV2SubscriptionView, self).check_permissions(request)
         if not request.user.is_superuser and request.method.lower() not in {'options', 'head'}:
             self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def get_serializer(self, *args, **kwargs):
+        """Expose the serializer for OPTIONS metadata (AAP-93690).
+
+        Plain APIView has no get_serializer(); this minimal implementation lets
+        Metadata.determine_actions() discover the serializer's fields and inject
+        CleanText validation patterns into OPTIONS responses.
+
+        Request and view context is included so that CleanTextMixin's audit
+        logging can attribute rejected input to the authenticated user and
+        client IP.
+        """
+        kwargs.setdefault(
+            'context',
+            {
+                'request': self.request,
+                'format': self.format_kwarg,
+                'view': self,
+            },
+        )
+        return self.serializer_class(*args, **kwargs)
 
     @extend_schema_if_available(
         extensions={'x-ai-description': 'List valid AAP subscriptions'},
     )
     def post(self, request):
-        data = request.data.copy()
+        """Validate subscription credentials against the Red Hat portal and persist them on success."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
         try:
             user = None

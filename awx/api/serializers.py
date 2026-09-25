@@ -253,6 +253,70 @@ class PlainSerializerCleanTextMixin(CleanTextMixin):
         return text_fields, json_fields
 
 
+class _SubscriptionCredentialsFakeOpts:
+    """Minimal stand-in for Django model._meta (AAP-93690).
+
+    CleanTextMixin audit logs need app_label/object_name. OPTIONS metadata
+    (awx.api.metadata.get_field_info) walks Meta.model._meta.fields when
+    Meta.model is present -- an empty tuple keeps that path safe.
+    """
+
+    app_label = 'main'
+    object_name = 'SubscriptionCredentials'
+    verbose_name = 'subscription credentials'
+    fields = ()
+
+    @property
+    def concrete_model(self):
+        """Return the fake model class so CleanTextMixin can resolve the concrete model."""
+        return _SubscriptionCredentialsFakeModel
+
+
+class _SubscriptionCredentialsFakeModel:
+    """Stand-in for Meta.model on SubscriptionCredentialsSerializer (AAP-93690).
+
+    Never introspected for real fields -- PlainSerializerCleanTextMixin discovers
+    CharField entries from self.fields instead.
+    """
+
+    _meta = _SubscriptionCredentialsFakeOpts()
+
+
+class SubscriptionCredentialsSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
+    """Validate subscription credential fields via CleanTextMixin (AAP-93690).
+
+    Uses PlainSerializerCleanTextMixin because there is no Django model behind
+    the /api/v2/config/subscriptions/ endpoint. All four credential fields are
+    optional (allow_blank + allow_null + default='') because only one credential
+    pair is required per request and callers may send explicit JSON ``null`` for
+    unused fields; mutual-exclusion and required-pair validation lives in the
+    view's post() handler to preserve its existing error messages/status codes.
+
+    CleanText enforcement:
+      - subscriptions_client_id, subscriptions_username: Tier 2 (free-text)
+      - subscriptions_client_secret, subscriptions_password: excluded (secrets)
+    """
+
+    subscriptions_client_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_client_secret = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_username = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_password = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+
+    # Secrets must not be validated by CleanText -- they may contain arbitrary
+    # characters and are never rendered in the UI.
+    excluded_fields = frozenset({'subscriptions_client_secret', 'subscriptions_password'})
+
+    # AC3: client_id and username must use Tier 2 (free-text), not Tier 1
+    # (resource-name). DEFAULT_NAME_FIELDS includes 'username', which would
+    # promote *any* field named exactly 'username' to Tier 1 -- our fields are
+    # 'subscriptions_username' (no match), but an empty set makes the intent
+    # explicit and future-proof.
+    name_fields = frozenset()
+
+    class Meta:
+        model = _SubscriptionCredentialsFakeModel
+
+
 class _CopySerializerFakeModel:
     """Stand-in for Meta.model on CopySerializer, a plain serializers.Serializer
     with no backing model of its own (it's reused across many resource types via
