@@ -20,5 +20,6 @@
 certifi @ git+https://github.com/ansible/system-certifi.git@devel
 ansible-runner @ git+https://github.com/ansible/ansible-runner.git@devel
 awx-plugins-core[credentials-github-app] @ git+https://github.com/ansible/awx-plugins.git@devel
-django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel
+# AAP-86051: bulk_validation_audit + validation bypass observability (django-ansible-base#1147); revert to @devel after merge
+django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/vidyanambiar/django-ansible-base@d9f99d6bf0286d444aa67a00f6b06339e166bdce
 awx-plugins-interfaces @ git+https://github.com/ansible/awx_plugins.interfaces.git

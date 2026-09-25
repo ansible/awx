@@ -120,7 +120,7 @@ def test_task_manager_audits_before_job_explanation_bulk_update():
     """Regression: scheduler must not bulk_update job_explanation without audit."""
     task_manager_py = Path(__file__).resolve().parents[3] / 'scheduler' / 'task_manager.py'
     source = task_manager_py.read_text()
-    audit_marker = "audit_bulk_model_instances(\n            tasks_to_update_job_explanation, operation='bulk_update', update_fields=['job_explanation']"
+    audit_marker = "audit_bulk_model_instances(tasks_to_update_job_explanation, operation='bulk_update', update_fields=['job_explanation'])"
     bulk_marker = "UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])"
     assert audit_marker in source
     assert bulk_marker in source

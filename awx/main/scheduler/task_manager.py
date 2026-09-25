@@ -667,9 +667,7 @@ class TaskManager(TaskBase):
                     )
             if not found_acceptable_queue:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
-        audit_bulk_model_instances(
-            tasks_to_update_job_explanation, operation='bulk_update', update_fields=['job_explanation']
-        )
+        audit_bulk_model_instances(tasks_to_update_job_explanation, operation='bulk_update', update_fields=['job_explanation'])
         UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
 
     def task_needs_capacity(self, task, tasks_to_update_job_explanation):
