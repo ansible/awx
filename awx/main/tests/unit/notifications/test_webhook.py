@@ -379,8 +379,9 @@ def test_send_messages_with_error_status_code():
         assert sent_messages == 0
 
 
-def test_send_messages_redirect_strips_auth_on_host_change():
-    """Auth credentials are stripped when a redirect changes the host."""
+def test_send_messages_redirect_strips_credentials_on_host_change():
+    """Auth and custom headers are stripped when a redirect changes the host."""
+    safe_headers = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
     with (
         mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
         mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
@@ -389,20 +390,43 @@ def test_send_messages_redirect_strips_auth_on_host_change():
             mock.Mock(status_code=301, headers={"Location": "http://other-host.com/hook"}),
             mock.Mock(status_code=200),
         ]
-        version_mock.return_value = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
-        backend = webhook_backend.WebhookBackend('POST', None, username='user', password='secret')
+        version_mock.return_value = safe_headers
+        backend = webhook_backend.WebhookBackend('POST', {'Authorization': 'Bearer secret-token'}, username='user', password='secret')
         message = EmailMessage('test subject', {'text': 'test body'}, [], ['http://example.com'])
         sent_messages = backend.send_messages([message])
         assert requests_mock.post.call_count == 2
         first_call = requests_mock.post.call_args_list[0]
         assert first_call.kwargs['auth'] == ('user', 'secret')
+        assert 'Authorization' in first_call.kwargs['headers']
+        second_call = requests_mock.post.call_args_list[1]
+        assert second_call.kwargs['auth'] is None
+        assert second_call.kwargs['headers'] == safe_headers
+        assert sent_messages == 1
+
+
+def test_send_messages_redirect_strips_credentials_on_scheme_downgrade():
+    """Auth is stripped when a redirect downgrades from HTTPS to HTTP."""
+    safe_headers = {'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'}
+    with (
+        mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
+        mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+    ):
+        requests_mock.post.side_effect = [
+            mock.Mock(status_code=301, headers={"Location": "http://example.com/hook"}),
+            mock.Mock(status_code=200),
+        ]
+        version_mock.return_value = safe_headers
+        backend = webhook_backend.WebhookBackend('POST', None, username='user', password='secret')
+        message = EmailMessage('test subject', {'text': 'test body'}, [], ['https://example.com'])
+        sent_messages = backend.send_messages([message])
+        assert requests_mock.post.call_count == 2
         second_call = requests_mock.post.call_args_list[1]
         assert second_call.kwargs['auth'] is None
         assert sent_messages == 1
 
 
-def test_send_messages_redirect_keeps_auth_on_same_host():
-    """Auth credentials are preserved when a redirect stays on the same host."""
+def test_send_messages_redirect_keeps_auth_on_same_origin():
+    """Auth credentials are preserved when a redirect stays on the same origin."""
     with (
         mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
         mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
