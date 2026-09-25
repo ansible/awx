@@ -316,6 +316,10 @@ options:
       description:
         - Prevent falling back to instance groups set on the associated inventory or organization
       type: bool
+    opa_query_path:
+      description:
+        - The optional path (formatted as package/rule) to an OPA policy to be applied to the Job Template.
+      type: str
 
 extends_documentation_fragment: awx.awx.auth
 
@@ -444,6 +448,7 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type="bool"),
+        opa_query_path=dict(type='str'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
@@ -543,6 +548,7 @@ def main():
         'job_slice_count',
         'webhook_service',
         'prevent_instance_group_fallback',
+        'opa_query_path',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
