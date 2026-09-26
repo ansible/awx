@@ -62,3 +62,30 @@ def test_update_inventory_computed_fields_database_error_nosqlstate(mock_logger,
             mock_filter.assert_called_once_with(id=1)
             mock_update_computed_fields.assert_called_once()
             mock_inventory.update_computed_fields.assert_called_once()
+
+
+def test_purge_old_stdout_files_skips_when_dir_missing(mock_logger):
+    # Regression test for ansible/awx#11903: the stdout directory is created
+    # lazily on first job write, so a fresh/idle install can lack it. The task
+    # should skip cleanly instead of raising FileNotFoundError.
+    from awx.main.tasks.system import purge_old_stdout_files
+
+    with patch("awx.main.tasks.system.settings.JOBOUTPUT_ROOT", "/nonexistent/awx/job_status"):
+        with patch("awx.main.tasks.system.os.path.isdir", return_value=False):
+            purge_old_stdout_files()
+
+    mock_logger.debug.assert_called_once_with("Skipping stdout purge, /nonexistent/awx/job_status does not exist")
+
+
+def test_purge_old_stdout_files_removes_expired_when_dir_present(mock_logger):
+    from awx.main.tasks.system import purge_old_stdout_files
+
+    with patch("awx.main.tasks.system.settings.JOBOUTPUT_ROOT", "/tmp/awx/job_status"):
+        with patch("awx.main.tasks.system.os.path.isdir", return_value=True):
+            with patch("awx.main.tasks.system.os.listdir", return_value=["old.out"]):
+                with patch("awx.main.tasks.system.os.path.getctime", return_value=0.0):
+                    with patch("awx.main.tasks.system.settings.LOCAL_STDOUT_EXPIRE_TIME", 3600):
+                        with patch("awx.main.tasks.system.os.unlink") as mock_unlink:
+                            purge_old_stdout_files()
+
+    mock_unlink.assert_called_once_with("/tmp/awx/job_status/old.out")
