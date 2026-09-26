@@ -1525,6 +1525,12 @@ class ProjectSerializer(CleanTextMixin, UnifiedJobTemplateSerializer, ProjectOpt
 
     def to_representation(self, obj):
         ret = super(ProjectSerializer, self).to_representation(obj)
+        # Fix: project.status in DB never transitions to 'running' because
+        # the pending->running transition in tasks/jobs.py uses queryset.update()
+        # which bypasses save()/signals. Prefer live status from current_job
+        # when a sync is actively in progress.
+        if obj.current_job and obj.current_job.status in ('pending', 'waiting', 'running'):
+            ret['status'] = obj.current_job.status
         if 'scm_revision' in ret and obj.scm_type == '':
             ret['scm_revision'] = ''
         return ret
