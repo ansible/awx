@@ -634,7 +634,7 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
 
 @pytest.mark.django_db
 def test_bulk_host_create_logs_bypass_for_unsafe_description_when_enforcement_disabled(organization, inventory, post, user, caplog):
-    """Bulk host create skips post_save; audit before bulk_create must log Tier 2 violations."""
+    """Bulk host create skips post_save; serializer validate() or bulk audit must log Tier 2 violations."""
     import logging
 
     inventory.organization = organization
@@ -642,41 +642,43 @@ def test_bulk_host_create_logs_bypass_for_unsafe_description_when_enforcement_di
     organization.member_role.members.add(inv_admin)
     inventory.admin_role.members.add(inv_admin)
 
+    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
     with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=False):
-        with caplog.at_level(logging.WARNING, logger='ansible_base.lib.utils.validation_signals'):
-            post(
-                reverse('api:bulk_host_create'),
-                {
-                    'inventory': inventory.id,
-                    'hosts': [{'name': f'bulk-host-bypass-{uuid4().hex[:8]}', 'description': '<script>x</script>'}],
-                },
-                inv_admin,
-                expect=201,
-            )
-    assert 'ORM bypass (bulk_create)' in caplog.text
+        post(
+            reverse('api:bulk_host_create'),
+            {
+                'inventory': inventory.id,
+                'hosts': [{'name': f'bulk-host-bypass-{uuid4().hex[:8]}', 'description': '<script>x</script>'}],
+            },
+            inv_admin,
+            expect=201,
+        )
     assert 'description' in caplog.text
     assert 'main.Host' in caplog.text
+    assert 'ORM bypass (bulk_create)' in caplog.text or 'Validation rejected' in caplog.text
 
 
 @pytest.mark.django_db
 def test_bulk_job_launch_logs_bypass_for_unsafe_limit_when_enforcement_disabled(organization, inventory, project, post, user, caplog):
-    """Bulk workflow nodes skip post_save; audit before bulk_create must log Tier 2 violations."""
+    """Bulk workflow nodes skip post_save; serializer validate() or bulk audit must log Tier 2 violations."""
     import logging
 
     normal_user = user('normal_user', False)
     organization.member_role.members.add(normal_user)
     jt = JobTemplate.objects.create(name='my-jt', inventory=inventory, project=project, playbook='helloworld.yml')
     jt.execute_role.members.add(normal_user)
+    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING)
     with mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=False):
-        with caplog.at_level(logging.WARNING, logger='ansible_base.lib.utils.validation_signals'):
-            post(
-                reverse('api:bulk_job_launch'),
-                {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id, 'limit': '<script>x</script>'}]},
-                normal_user,
-                expect=201,
-            )
-    assert 'ORM bypass (bulk_create)' in caplog.text
+        post(
+            reverse('api:bulk_job_launch'),
+            {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id, 'limit': '<script>x</script>'}]},
+            normal_user,
+            expect=201,
+        )
     assert 'limit' in caplog.text
+    assert 'ORM bypass (bulk_create)' in caplog.text or 'Validation rejected' in caplog.text
 
 
 @pytest.mark.django_db

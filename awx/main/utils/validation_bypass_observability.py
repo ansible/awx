@@ -87,7 +87,7 @@ def audit_workflow_job_nodes_for_bulk_create(nodes: Iterable[Model]) -> None:
                 continue
             violation = _validate_field(field_name, value, name_fields)
             if violation:
-                tier, reason = violation
+                _tier, reason = violation
                 if caller_info is None:
                     caller_info = _get_caller_info()
-                log_orm_bypass_violation('bulk_create', field_name, resource_type, tier, caller_info, reason)
+                log_orm_bypass_violation('bulk_create', field_name, resource_type, caller_info, reason)

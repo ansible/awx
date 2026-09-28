@@ -17,6 +17,13 @@ from awx.main.utils.validation_bypass_observability import (
 LOGGER = 'ansible_base.lib.utils.validation_signals'
 
 
+@pytest.fixture
+def capture_validation_signal_logs(caplog):
+    """Match DAB test_app caplog setup (pytest + xdist safe)."""
+    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.WARNING, logger=LOGGER)
+
+
 @pytest.mark.django_db
 def test_configure_validation_bypass_observability_wires_dab(mocker):
     mocker.patch('awx.main.utils.validation_bypass_observability.register_validation_signals')
@@ -38,6 +45,7 @@ def test_configure_validation_bypass_observability_wires_dab(mocker):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_bulk_model_instances_skips_host_description_when_serializer_already_logged(caplog):
     from ansible_base.lib.utils.validation_signals import (
         get_validation_context_token,
@@ -51,26 +59,26 @@ def test_audit_bulk_model_instances_skips_host_description_when_serializer_alrea
     register_serializer_validation_rejection('main.Host', 'description')
     token = get_validation_context_token()
     try:
-        with caplog.at_level(logging.WARNING, logger=LOGGER):
-            audit_bulk_model_instances([host], operation='bulk_create')
+        audit_bulk_model_instances([host], operation='bulk_create')
     finally:
         reset_validation_context(token)
     assert 'ORM bypass' not in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_bulk_model_instances_logs_host_description_on_bulk_create(caplog):
     org = Organization.objects.create(name='org-bulk-host-audit')
     inv = Inventory.objects.create(name='inv-bulk-host-audit', organization=org)
     host = Host(name='host-bulk', description='<script>x</script>', inventory=inv)
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_bulk_model_instances([host], operation='bulk_create')
+    audit_bulk_model_instances([host], operation='bulk_create')
     assert 'ORM bypass (bulk_create)' in caplog.text
     assert 'description' in caplog.text
     assert 'main.Host' in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_workflow_job_nodes_skips_when_serializer_already_logged(caplog):
     from ansible_base.lib.utils.validation_signals import register_serializer_validation_rejection
 
@@ -78,74 +86,86 @@ def test_audit_workflow_job_nodes_skips_when_serializer_already_logged(caplog):
     node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
     node.limit = '<script>x</script>'
     register_serializer_validation_rejection('main.WorkflowJobNode', 'limit')
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_workflow_job_nodes_for_bulk_create([node])
+    audit_workflow_job_nodes_for_bulk_create([node])
     assert 'ORM bypass' not in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_workflow_job_nodes_logs_limit_pseudo_field(caplog):
     wfj = WorkflowJob.objects.create(name='wf-audit-limit')
     node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
     node.limit = '<script>x</script>'
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_workflow_job_nodes_for_bulk_create([node])
+    audit_workflow_job_nodes_for_bulk_create([node])
     assert 'ORM bypass (bulk_create)' in caplog.text
     assert 'limit' in caplog.text
     assert 'WorkflowJobNode' in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_workflow_job_nodes_no_op_for_empty_list(caplog):
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_workflow_job_nodes_for_bulk_create([])
+    audit_workflow_job_nodes_for_bulk_create([])
     assert 'ORM bypass' not in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_bulk_model_instances_logs_registered_text_field_on_bulk_update(caplog):
     job = Job.objects.create(job_explanation='<script>x</script>')
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_bulk_model_instances([job], operation='bulk_update', update_fields=['job_explanation'])
+    audit_bulk_model_instances([job], operation='bulk_update', update_fields=['job_explanation'])
     assert 'ORM bypass (bulk_update)' in caplog.text
     assert 'job_explanation' in caplog.text
 
 
 @pytest.mark.django_db
-def test_audit_bulk_model_instances_skips_unregistered_workflow_job_on_bulk_update(caplog):
-    wj = WorkflowJob.objects.create(name='wf-job', job_explanation='<script>x</script>')
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_bulk_model_instances([wj], operation='bulk_update', update_fields=['job_explanation'])
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_skips_unregistered_instance_on_bulk_update(caplog):
+    from ansible_base.resource_registry.models import Resource
+
+    unregistered = Resource.__new__(Resource)
+    audit_bulk_model_instances([unregistered], operation='bulk_update', update_fields=['name'])
     assert 'ORM bypass (bulk_update)' not in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_audit_bulk_model_instances_logs_workflow_job_job_explanation_on_bulk_update(caplog):
+    """WorkflowJob is registered via BulkJobLaunchSerializer (PromptFieldCleanTextMixin)."""
+    wj = WorkflowJob.objects.create(name='wf-job', job_explanation='<script>x</script>')
+    audit_bulk_model_instances([wj], operation='bulk_update', update_fields=['job_explanation'])
+    assert 'ORM bypass (bulk_update)' in caplog.text
+    assert 'job_explanation' in caplog.text
+    assert 'main.WorkflowJob' in caplog.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_bulk_model_instances_bulk_update_no_op_when_update_fields_empty(caplog):
     job = Job.objects.create(job_explanation='<script>x</script>')
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        audit_bulk_model_instances([job], operation='bulk_update', update_fields=[])
+    audit_bulk_model_instances([job], operation='bulk_update', update_fields=[])
     assert 'ORM bypass (bulk_update)' not in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_bulk_update_sorted_by_id_skips_audit_when_fields_are_not_text(caplog):
     org = Organization.objects.create(name='org-bulk-update-audit')
     inv = Inventory.objects.create(name='inv-bulk-update-audit', organization=org)
     host = Host.objects.create(name='host-1', description='<script>x</script>', inventory=inv)
     host.ansible_facts = {'k': 'v'}
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        bulk_update_sorted_by_id(Host, [host], fields=['ansible_facts'])
+    bulk_update_sorted_by_id(Host, [host], fields=['ansible_facts'])
     assert 'ORM bypass (bulk_update)' not in caplog.text
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_bulk_update_sorted_by_id_audits_text_fields_in_fields_list(caplog):
     org = Organization.objects.create(name='org-bulk-update-desc')
     inv = Inventory.objects.create(name='inv-bulk-update-desc', organization=org)
     host = Host.objects.create(name='host-desc', description='clean', inventory=inv)
     host.description = '<script>x</script>'
-    with caplog.at_level(logging.WARNING, logger=LOGGER):
-        bulk_update_sorted_by_id(Host, [host], fields=['description'])
+    bulk_update_sorted_by_id(Host, [host], fields=['description'])
     assert 'ORM bypass (bulk_update)' in caplog.text
     assert 'description' in caplog.text
 
