@@ -80,13 +80,21 @@ def test_audit_bulk_model_instances_logs_host_description_on_bulk_create(caplog)
 @pytest.mark.django_db
 @pytest.mark.usefixtures('capture_validation_signal_logs')
 def test_audit_workflow_job_nodes_skips_when_serializer_already_logged(caplog):
-    from ansible_base.lib.utils.validation_signals import register_serializer_validation_rejection
+    from ansible_base.lib.utils.validation_signals import (
+        get_validation_context_token,
+        register_serializer_validation_rejection,
+        reset_validation_context,
+    )
 
     wfj = WorkflowJob.objects.create(name='wf-audit-limit-dedupe')
     node = WorkflowJobNode(workflow_job=wfj, identifier='wf-node-1')
     node.limit = '<script>x</script>'
     register_serializer_validation_rejection('main.WorkflowJobNode', 'limit')
-    audit_workflow_job_nodes_for_bulk_create([node])
+    token = get_validation_context_token()
+    try:
+        audit_workflow_job_nodes_for_bulk_create([node])
+    finally:
+        reset_validation_context(token)
     assert 'ORM bypass' not in caplog.text
 
 
