@@ -34,3 +34,17 @@ class TestInvalidOptions:
             cmd.handle(inventory_id=42)
         assert '--source' in str(err.value)
         assert 'required' in str(err.value)
+
+
+@pytest.mark.inventory_import
+def test_base_args_remove_container_on_exit():
+    from unittest import mock
+    from awx.main.management.commands.inventory_import import AnsibleInventoryLoader
+
+    ee = mock.Mock(image='quay.io/ansible/awx-ee:latest', credential=None)
+    with mock.patch('awx.main.management.commands.inventory_import.get_default_execution_environment', return_value=ee), mock.patch(
+        'awx.main.management.commands.inventory_import.settings'
+    ) as s:
+        s.IS_K8S = False
+        bargs = AnsibleInventoryLoader('/tmp/inv').get_base_args()
+    assert bargs[:3] == ['podman', 'run', '--rm']
