@@ -11,6 +11,7 @@ import requests
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.utils import get_awx_http_client_headers
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
+from awx.main.notifications.url_validation import SSRFBlockedError, validate_url
 
 logger = logging.getLogger('awx.main.notifications.webhook_backend')
 
@@ -72,6 +73,15 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
             err = None
 
+            try:
+                validate_url(url)
+            except SSRFBlockedError as e:
+                err = str(e)
+                logger.error(err)
+                if not self.fail_silently:
+                    raise Exception(err)
+                continue
+
             def _origin(value):
                 parsed = urlparse(value)
                 scheme = parsed.scheme.lower()
@@ -110,6 +120,12 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
                 if url is None:
                     err = f"Webhook notification received redirect to a blank URL from {url_log_safe}. Response headers={resp.headers}"
+                    break
+
+                try:
+                    validate_url(url)
+                except SSRFBlockedError as e:
+                    err = str(e)
                     break
 
                 if _origin(url) != original_origin:
