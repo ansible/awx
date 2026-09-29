@@ -1182,8 +1182,11 @@ class UserSerializer(CleanTextMixin, BaseSerializer):
         return ret
 
     def validate_password(self, value):
+        # A new user may be created without a password. _update_password then stores an unusable
+        # one, which suits accounts that only ever authenticate with an OAuth2 token. The checks
+        # below apply to passwords that are set, not to their absence.
         if not self.instance and value in (None, ''):
-            raise serializers.ValidationError(_('Password required for new User.'))
+            return value
 
         # Check if a password is too long
         password_max_length = User._meta.get_field('password').max_length
