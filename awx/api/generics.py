@@ -999,6 +999,8 @@ class CopyAPIView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if not request.user.can_access(obj.__class__, 'read', obj):
+            raise PermissionDenied()
         create_kwargs = self._build_create_dict(obj)
         create_kwargs_check = {}
         for key in create_kwargs:
