@@ -1,4 +1,5 @@
 import logging
+import re
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -351,7 +352,14 @@ class TestSubscriptionCleanText:
             assert response.status_code == status.HTTP_200_OK
 
     def test_rejected_input_logs_user_and_ip(self, post, admin, enforce_clean_text, caplog):
-        """CleanText rejection warning includes authenticated username and client IP."""
+        """CleanText rejection warning includes authenticated username and client IP.
+
+        The assertion checks that a WARNING-level log record is emitted from the
+        CleanTextMixin logger and that the formatted message contains the
+        requesting user's identity and a client IP address.  It deliberately
+        avoids hard-coding DAB's exact message template so the test stays stable
+        across upstream wording changes.
+        """
         data = {
             'subscriptions_username': UNSAFE_INPUT,
             'subscriptions_password': 'valid_password',
@@ -359,11 +367,12 @@ class TestSubscriptionCleanText:
         with caplog.at_level(logging.WARNING, logger='ansible_base.lib.serializers.mixins'):
             post(reverse('api:api_v2_subscription_view'), data, admin)
 
-        warnings = [r for r in caplog.records if 'Validation rejected' in r.getMessage()]
-        assert warnings, 'Expected a CleanTextMixin warning for unsafe input'
-        msg = warnings[0].getMessage()
-        assert f'for user {admin.username}' in msg, f'Warning should include username; got: {msg}'
-        assert '(ip ' in msg, f'Warning should include client IP; got: {msg}'
+        mixin_warnings = [r for r in caplog.records if r.levelno >= logging.WARNING and r.name == 'ansible_base.lib.serializers.mixins']
+        assert mixin_warnings, 'Expected a CleanTextMixin warning for unsafe input'
+        msg = mixin_warnings[0].getMessage()
+        assert admin.username in msg, f'Warning should contain the authenticated username; got: {msg}'
+        # Client IP: in the test harness this is typically 127.0.0.1 or similar
+        assert re.search(r'\d{1,3}(?:\.\d{1,3}){3}', msg), f'Warning should contain a client IP address; got: {msg}'
 
 
 @pytest.mark.django_db

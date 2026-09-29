@@ -193,7 +193,7 @@ class ApiV2SubscriptionView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def get_serializer(self, *args, **kwargs):
-        """Expose the serializer for OPTIONS metadata (AAP-93690).
+        """Expose the serializer for OPTIONS metadata.
 
         Plain APIView has no get_serializer(); this minimal implementation lets
         Metadata.determine_actions() discover the serializer's fields and inject
