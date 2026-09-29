@@ -24,6 +24,52 @@ from ansible_base.lib.utils.validation_signals import (
 _WORKFLOW_JOB_NODE_PROMPT_PSEUDO_FIELDS = frozenset({'scm_branch', 'limit', 'job_tags', 'skip_tags'})
 
 
+def _workflow_job_node_resource_type(instance: Model) -> str:
+    return f"{instance._meta.app_label}.{instance._meta.object_name}"
+
+
+def _log_workflow_pseudo_field_bypass_if_invalid(
+    instance: Model,
+    field_name: str,
+    name_fields,
+    excluded_fields,
+    resource_type: str,
+    caller_info,
+):
+    if field_name in excluded_fields:
+        return caller_info
+    value = getattr(instance, field_name, None)
+    if value is None or not isinstance(value, str):
+        return caller_info
+    violation = _validate_field(field_name, value, name_fields)
+    if not violation:
+        return caller_info
+    _tier, reason = violation
+    if caller_info is None:
+        caller_info = _get_caller_info()
+    log_orm_bypass_violation('bulk_create', field_name, resource_type, caller_info, reason)
+    return caller_info
+
+
+def _audit_workflow_pseudo_fields_on_instances(
+    instances: list[Model],
+    name_fields,
+    excluded_fields,
+    resource_type: str,
+) -> None:
+    caller_info = None
+    for instance in instances:
+        for field_name in _WORKFLOW_JOB_NODE_PROMPT_PSEUDO_FIELDS:
+            caller_info = _log_workflow_pseudo_field_bypass_if_invalid(
+                instance,
+                field_name,
+                name_fields,
+                excluded_fields,
+                resource_type,
+                caller_info,
+            )
+
+
 def configure_validation_bypass_observability() -> None:
     """Call from AppConfig.ready() so ORM bypass logs show AWX entry points.
 
@@ -76,18 +122,5 @@ def audit_workflow_job_nodes_for_bulk_create(nodes: Iterable[Model]) -> None:
     if protected is None:
         return
     name_fields, excluded_fields = protected
-    resource_type = f"{sample._meta.app_label}.{sample._meta.object_name}"
-    caller_info = None
-    for instance in materialized:
-        for field_name in _WORKFLOW_JOB_NODE_PROMPT_PSEUDO_FIELDS:
-            if field_name in excluded_fields:
-                continue
-            value = getattr(instance, field_name, None)
-            if value is None or not isinstance(value, str):
-                continue
-            violation = _validate_field(field_name, value, name_fields)
-            if violation:
-                _tier, reason = violation
-                if caller_info is None:
-                    caller_info = _get_caller_info()
-                log_orm_bypass_violation('bulk_create', field_name, resource_type, caller_info, reason)
+    resource_type = _workflow_job_node_resource_type(sample)
+    _audit_workflow_pseudo_fields_on_instances(materialized, name_fields, excluded_fields, resource_type)

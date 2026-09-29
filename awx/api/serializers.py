@@ -5155,6 +5155,94 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
         return ret
 
 
+_BULK_LAUNCH_WFJ_DEFERRED_ATTRS = ('skip_tags', 'limit', 'job_tags')
+
+_BULK_LAUNCH_NODE_M2M_FIELD_TO_THROUGH = {
+    'credentials': WorkflowJobNode.credentials.through,
+    'labels': WorkflowJobNode.labels.through,
+    'instance_groups': WorkflowJobNode.instance_groups.through,
+}
+
+_BULK_LAUNCH_NODE_DEFERRED_ATTRS = (
+    'limit',
+    'scm_branch',
+    'verbosity',
+    'forks',
+    'diff_mode',
+    'job_tags',
+    'job_type',
+    'skip_tags',
+    'job_slice_count',
+    'timeout',
+)
+
+
+def _create_workflow_job_for_bulk_launch(validated_data, launch_user):
+    wfj_deferred_vals = {item: validated_data.pop(item, None) for item in _BULK_LAUNCH_WFJ_DEFERRED_ATTRS}
+    wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True, launch_type='manual', created_by=launch_user)
+    for key, val in wfj_deferred_vals.items():
+        if val:
+            setattr(wfj, key, val)
+    return wfj
+
+
+def _pop_node_attrs_into_buckets(node_attrs, node_m2m_objects, node_deferred_attrs, identifier):
+    node_m2m_objects[identifier] = {}
+    node_deferred_attrs[identifier] = {}
+    for item in _BULK_LAUNCH_NODE_M2M_FIELD_TO_THROUGH:
+        if item in node_attrs:
+            node_m2m_objects[identifier][item] = node_attrs.pop(item)
+    for item in _BULK_LAUNCH_NODE_DEFERRED_ATTRS:
+        if item in node_attrs:
+            node_deferred_attrs[identifier][item] = node_attrs.pop(item)
+
+
+def _build_workflow_job_nodes_for_bulk_launch(wfj, job_node_data):
+    nodes = []
+    node_m2m_objects = {}
+    node_deferred_attrs = {}
+    for node_attrs in job_node_data:
+        identifier = node_attrs['identifier']
+        _pop_node_attrs_into_buckets(node_attrs, node_m2m_objects, node_deferred_attrs, identifier)
+        node_obj = WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node_attrs)
+        for item, value in node_deferred_attrs[identifier].items():
+            setattr(node_obj, item, value)
+        nodes.append(node_obj)
+        node_m2m_objects[identifier]['node'] = node_obj
+    return nodes, node_m2m_objects
+
+
+def _extend_through_objects_for_m2m_field(through_model_objects, through_model, field_name, values, node_obj):
+    if field_name == 'credentials':
+        for cred in values:
+            through_model_objects.append(through_model(credential=cred, workflowjobnode=node_obj))
+        return
+    if field_name == 'labels':
+        for label in values:
+            through_model_objects.append(through_model(label=label, workflowjobnode=node_obj))
+        return
+    if field_name == 'instance_groups':
+        for instance_group in values:
+            through_model_objects.append(through_model(instancegroup=instance_group, workflowjobnode=node_obj))
+
+
+def _bulk_create_workflow_job_node_m2m(node_m2m_objects):
+    for field_name, through_model in _BULK_LAUNCH_NODE_M2M_FIELD_TO_THROUGH.items():
+        through_model_objects = []
+        for node_data in node_m2m_objects.values():
+            if field_name not in node_data:
+                continue
+            _extend_through_objects_for_m2m_field(
+                through_model_objects,
+                through_model,
+                field_name,
+                node_data[field_name],
+                node_data['node'],
+            )
+        if through_model_objects:
+            through_model.objects.bulk_create(through_model_objects)
+
+
 class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer):
     # extra_vars is raw YAML/JSON that legitimately contains Jinja2 syntax
     # ("{{ var }}"); by the time this mixin's validate() runs it has already
@@ -5291,83 +5379,13 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
         request = self.context.get('request', None)
         launch_user = request.user if request else None
         job_node_data = validated_data.pop('jobs')
-        wfj_deferred_attr_names = ('skip_tags', 'limit', 'job_tags')
-        wfj_deferred_vals = {}
-        for item in wfj_deferred_attr_names:
-            wfj_deferred_vals[item] = validated_data.pop(item, None)
-
-        wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True, launch_type='manual', created_by=launch_user)
-        for key, val in wfj_deferred_vals.items():
-            if val:
-                setattr(wfj, key, val)
-        nodes = []
-        node_m2m_objects = {}
-        node_m2m_object_types_to_through_model = {
-            'credentials': WorkflowJobNode.credentials.through,
-            'labels': WorkflowJobNode.labels.through,
-            'instance_groups': WorkflowJobNode.instance_groups.through,
-        }
-        node_deferred_attr_names = (
-            'limit',
-            'scm_branch',
-            'verbosity',
-            'forks',
-            'diff_mode',
-            'job_tags',
-            'job_type',
-            'skip_tags',
-            'job_slice_count',
-            'timeout',
-        )
-        node_deferred_attrs = {}
-        for node_attrs in job_node_data:
-            # we need to add any m2m objects after creation via the through model
-            node_m2m_objects[node_attrs['identifier']] = {}
-            node_deferred_attrs[node_attrs['identifier']] = {}
-            for item in node_m2m_object_types_to_through_model.keys():
-                if item in node_attrs:
-                    node_m2m_objects[node_attrs['identifier']][item] = node_attrs.pop(item)
-
-            # Some attributes are not accepted by WorkflowJobNode __init__, we have to set them after
-            for item in node_deferred_attr_names:
-                if item in node_attrs:
-                    node_deferred_attrs[node_attrs['identifier']][item] = node_attrs.pop(item)
-
-            # Create the node objects
-            node_obj = WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node_attrs)
-
-            # we can set the deferred attrs now
-            for item, value in node_deferred_attrs[node_attrs['identifier']].items():
-                setattr(node_obj, item, value)
-
-            # the node is now ready to be bulk created
-            nodes.append(node_obj)
-
-            # we'll need this later when we do the m2m through model bulk create
-            node_m2m_objects[node_attrs['identifier']]['node'] = node_obj
-
+        wfj = _create_workflow_job_for_bulk_launch(validated_data, launch_user)
+        nodes, node_m2m_objects = _build_workflow_job_nodes_for_bulk_launch(wfj, job_node_data)
         audit_workflow_job_nodes_for_bulk_create(nodes)
         WorkflowJobNode.objects.bulk_create(nodes)
-
-        # Deal with the m2m objects we have to create once the node exists
-        for field_name, through_model in node_m2m_object_types_to_through_model.items():
-            through_model_objects = []
-            for node_identifier in node_m2m_objects.keys():
-                if field_name in node_m2m_objects[node_identifier] and field_name == 'credentials':
-                    for cred in node_m2m_objects[node_identifier][field_name]:
-                        through_model_objects.append(through_model(credential=cred, workflowjobnode=node_m2m_objects[node_identifier]['node']))
-                if field_name in node_m2m_objects[node_identifier] and field_name == 'labels':
-                    for label in node_m2m_objects[node_identifier][field_name]:
-                        through_model_objects.append(through_model(label=label, workflowjobnode=node_m2m_objects[node_identifier]['node']))
-                if field_name in node_m2m_objects[node_identifier] and field_name == 'instance_groups':
-                    for instance_group in node_m2m_objects[node_identifier][field_name]:
-                        through_model_objects.append(through_model(instancegroup=instance_group, workflowjobnode=node_m2m_objects[node_identifier]['node']))
-            if through_model_objects:
-                through_model.objects.bulk_create(through_model_objects)
-
+        _bulk_create_workflow_job_node_m2m(node_m2m_objects)
         wfj.save()
         wfj.signal_start()
-
         return WorkflowJobSerializer().to_representation(wfj)
 
     def check_organization_permission(self, attrs, request):
