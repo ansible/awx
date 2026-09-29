@@ -367,6 +367,10 @@ class ControllerAPIModule(ControllerModule):
     session = None
     IDENTITY_FIELDS = {'users': 'username', 'workflow_job_template_nodes': 'identifier', 'instances': 'hostname'}
     ENCRYPTED_STRING = "$encrypted$"
+    # Fields the API stores as a text blob while the modules declare them type='dict'.
+    # Both directions need handling: _normalize_vars_field for comparison,
+    # _serialize_vars_fields for the outgoing payload.
+    VARS_TEXT_FIELDS = frozenset(('extra_vars', 'variables', 'source_vars'))
 
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
@@ -954,6 +958,7 @@ class ControllerAPIModule(ControllerModule):
         return new_existing_item
 
     def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, auto_exit=True, item_type='unknown', associations=None):
+        new_item = self._serialize_vars_fields(new_item)
 
         # This will exit from the module on its own
         # If the method successfully creates an item and on_create param is defined,
@@ -1061,12 +1066,62 @@ class ControllerAPIModule(ControllerModule):
                 return True
             return bool(new_field == old_field)
 
+    @staticmethod
+    def _normalize_vars_field(value):
+        """Return a comparable object for a field the API stores as text.
+
+        The modules take these as dicts, the API returns them as a YAML or JSON
+        string, and comparing the two forms directly always differs, so the module
+        reports changed on every run for any object that sets one. Normalizing both
+        sides makes the comparison structural. An unset field reads back as '' and
+        is equivalent to an empty mapping.
+        """
+        if value is None or value == '':
+            return {}
+        if isinstance(value, str):
+            if not HAS_YAML:
+                return value
+            try:
+                loaded = yaml.safe_load(value)
+            except yaml.YAMLError:
+                # Not parseable, so compare it as the opaque string it is.
+                return value
+            return {} if loaded is None else loaded
+        return value
+
+    @classmethod
+    def _serialize_vars_fields(cls, new_item):
+        """Render dict values for text-blob fields as YAML before sending them.
+
+        Without this the dict is serialized as JSON, so the value shown in the UI
+        and returned by export is {"key": "value"} rather than YAML. An empty dict
+        becomes an empty string, which is how these fields are cleared.
+
+        Returns a copy when there is anything to convert, leaving the caller's dict
+        as the caller built it.
+        """
+        if not HAS_YAML or not isinstance(new_item, dict):
+            return new_item
+        fields = cls.VARS_TEXT_FIELDS.intersection(new_item)
+        if not fields:
+            return new_item
+        new_item = dict(new_item)
+        for field in fields:
+            value = new_item[field]
+            if isinstance(value, dict):
+                new_item[field] = '' if not value else yaml.safe_dump(value, default_flow_style=False, explicit_start=True)
+        return new_item
+
     def objects_could_be_different(self, old, new, field_set=None, warning=False):
         if field_set is None:
             field_set = set(fd for fd in new.keys() if fd not in ('modified', 'related', 'summary_fields'))
         for field in field_set:
             new_field = new.get(field, None)
             old_field = old.get(field, None)
+            if field in self.VARS_TEXT_FIELDS:
+                if self._normalize_vars_field(old_field) != self._normalize_vars_field(new_field):
+                    return True
+                continue
             if old_field != new_field:
                 if self.update_secrets or (not self.fields_could_be_same(old_field, new_field)):
                     return True  # Something doesn't match, or something might not match
@@ -1078,6 +1133,7 @@ class ControllerAPIModule(ControllerModule):
         return False
 
     def update_if_needed(self, existing_item, new_item, item_type=None, on_update=None, auto_exit=True, associations=None):
+        new_item = self._serialize_vars_fields(new_item)
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
