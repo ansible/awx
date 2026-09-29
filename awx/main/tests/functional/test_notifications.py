@@ -208,8 +208,9 @@ def mock_post(*args, **kwargs):
 
 
 @pytest.mark.django_db
+@mock.patch('awx.main.notifications.webhook_backend.validate_url', side_effect=lambda url: url)
 @mock.patch('requests.post', side_effect=mock_post)
-def test_webhook_notification_pointed_to_a_redirect_launch_endpoint(post, admin, organization):
+def test_webhook_notification_pointed_to_a_redirect_launch_endpoint(post, mock_validate, admin, organization):
     n1 = NotificationTemplate.objects.create(
         name="test-webhook",
         description="test webhook",
