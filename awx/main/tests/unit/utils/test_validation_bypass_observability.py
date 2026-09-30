@@ -195,3 +195,15 @@ def test_db_bulk_update_sorted_by_id_audits_before_orm_bulk_update():
     source = db_py.read_text()
     assert "audit_bulk_model_instances(sorted_objects, operation='bulk_update', update_fields=fields)" in source
     assert source.index('audit_bulk_model_instances') < source.index('model.objects.bulk_update')
+
+
+def test_host_manager_audits_before_bulk_create():
+    """Regression: Host bulk_create must audit via HostManager, not only serializers."""
+    managers_py = Path(__file__).resolve().parents[3] / 'managers.py'
+    source = managers_py.read_text()
+    assert "audit_bulk_model_instances(objs, operation='bulk_create')" in source
+    assert 'class HostManager' in source
+    bulk_create_idx = source.index('def bulk_create', source.index('class HostManager'))
+    audit_idx = source.index("audit_bulk_model_instances(objs, operation='bulk_create')", bulk_create_idx)
+    super_idx = source.index('super().bulk_create', audit_idx)
+    assert audit_idx < super_idx
