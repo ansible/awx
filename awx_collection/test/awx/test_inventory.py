@@ -24,13 +24,26 @@ def test_inventory_create(run_module, admin_user, organization):
     assert not result.get('failed', False), result.get('msg', result)
 
     inv = Inventory.objects.get(name='foo-inventory')
-    assert inv.variables == '{"foo": "bar", "another-foo": {"barz": "bar2"}}'
+    assert inv.variables == '---\nanother-foo:\n  barz: bar2\nfoo: bar\n'
 
     result.pop('module_args', None)
     result.pop('invocation', None)
     assert result == {"name": "foo-inventory", "id": inv.id, "changed": True}
 
     assert inv.organization_id == organization.id
+
+
+@pytest.mark.django_db
+def test_inventory_empty_variables_clears(run_module, admin_user, organization):
+    """An empty dict clears the field: it reaches the API as '', not as the JSON text '{}'."""
+    inv_args = {'name': 'clear-vars-inventory', 'organization': organization.name, 'state': 'present'}
+    result = run_module('inventory', dict(inv_args, variables={'foo': 'bar'}), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+
+    result = run_module('inventory', dict(inv_args, variables={}), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed'), result
+    assert Inventory.objects.get(name='clear-vars-inventory').variables == ''
 
 
 @pytest.mark.django_db
