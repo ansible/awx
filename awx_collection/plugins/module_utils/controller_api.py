@@ -1090,6 +1090,21 @@ class ControllerAPIModule(ControllerModule):
         return value
 
     @classmethod
+    def _vars_equal(cls, a, b):
+        """Compare normalized vars structurally, requiring matching types.
+
+        Plain == treats True as equal to 1 and False to 0, so changing a variable
+        between a boolean and an integer would be reported as no change.
+        """
+        if type(a) is not type(b):
+            return False
+        if isinstance(a, dict):
+            return a.keys() == b.keys() and all(cls._vars_equal(a[k], b[k]) for k in a)
+        if isinstance(a, list):
+            return len(a) == len(b) and all(cls._vars_equal(x, y) for x, y in zip(a, b))
+        return a == b
+
+    @classmethod
     def _serialize_vars_fields(cls, new_item):
         """Render dict values for text-blob fields as YAML before sending them.
 
@@ -1119,7 +1134,7 @@ class ControllerAPIModule(ControllerModule):
             new_field = new.get(field, None)
             old_field = old.get(field, None)
             if field in self.VARS_TEXT_FIELDS:
-                if self._normalize_vars_field(old_field) != self._normalize_vars_field(new_field):
+                if not self._vars_equal(self._normalize_vars_field(old_field), self._normalize_vars_field(new_field)):
                     return True
                 continue
             if old_field != new_field:
