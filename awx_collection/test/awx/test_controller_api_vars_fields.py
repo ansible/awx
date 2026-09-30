@@ -80,6 +80,14 @@ def test_serialize_vars_fields_leaves_other_values_alone(collection_import):
         ['foo: bar\n', {'foo': 'baz'}, True],
         ['foo: bar\n', {}, True],
         ['', {'foo': 'bar'}, True],
+        # booleans and integers compare equal under ==, but are different values
+        ['flag: true\n', {'flag': 1}, True],
+        ['flag: false\n', {'flag': 0}, True],
+        ['flag: 1\n', {'flag': True}, True],
+        ['items: [true]\n', {'items': [1]}, True],
+        ['outer: {flag: true}\n', {'outer': {'flag': 1}}, True],
+        ['flag: true\n', {'flag': True}, False],
+        ['items: [1, 2]\n', {'items': [1, 2]}, False],
     ],
 )
 @pytest.mark.parametrize("field", VARS_TEXT_FIELDS)
