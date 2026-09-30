@@ -24,12 +24,11 @@ def test_user_create(post, admin):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("password", [None, ""])
-def test_user_create_without_password(post, admin, password):
+@pytest.mark.parametrize("password_attrs", [{}, {"password": ""}], ids=["omitted", "empty"])
+def test_user_create_without_password(post, admin, password_attrs):
     """A user created without a password gets an unusable one, for token-only accounts."""
     user_attrs = {k: v for k, v in EXAMPLE_USER_DATA.items() if k != "password"}
-    if password is not None:
-        user_attrs["password"] = password
+    user_attrs.update(password_attrs)
     response = post(reverse('api:user_list'), user_attrs, admin, middleware=SessionMiddleware(mock.Mock()))
     assert response.status_code == 201
     assert not User.objects.get(username=user_attrs["username"]).has_usable_password()
