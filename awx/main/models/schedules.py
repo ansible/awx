@@ -310,7 +310,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         starting_values = {}
         for field_name in affects_fields:
             starting_values[field_name] = getattr(self, field_name)
-        not_fast_forward_rs = dateutil.rrule.rrulestr(self.rrule, tzinfos=UTC_TIMEZONES)
+        not_fast_forward_rs = dateutil.rrule.rrulestr(self.rrule, tzinfos=UTC_TIMEZONES, forceset=True)
         future_rs = Schedule.rrulestr(self.rrule)
 
         if self.enabled:

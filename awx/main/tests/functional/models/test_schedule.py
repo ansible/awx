@@ -119,6 +119,14 @@ class TestComputedFields:
         assert s.dtstart != original_dtstart
         assert s.dtstart == datetime(2016, 1, 1, 5, tzinfo=timezone.utc)
 
+    def test_rrule_with_only_dtstart(self, job_template):
+        rrule = 'DTSTART;TZID=America/New_York:20300504T150000'
+        s = Schedule.objects.create(name='Some Schedule', rrule=rrule, unified_job_template=job_template)
+
+        assert s.next_run is None
+        assert s.dtstart is None
+        assert s.dtend is None
+
     def test_computed_fields_turning_off_by_deleting(self, job_template):
         s1 = Schedule.objects.create(name='first schedule', rrule=self.distant_rrule, unified_job_template=job_template)
         s2 = Schedule.objects.create(name='second schedule', rrule=self.distant_rrule, unified_job_template=job_template)
