@@ -634,7 +634,7 @@ def test_bulk_host_create_performance_large_inventory(organization, inventory, p
 
 @pytest.mark.django_db
 def test_bulk_host_create_logs_bypass_for_unsafe_description_when_enforcement_disabled(organization, inventory, post, user, caplog):
-    """Bulk host create skips post_save; serializer validate() or bulk audit must log Tier 2 violations."""
+    """Bulk host create skips post_save; validate() or HostManager.bulk_create audit must log Tier 2 violations."""
     import logging
 
     inventory.organization = organization

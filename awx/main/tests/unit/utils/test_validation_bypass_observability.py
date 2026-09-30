@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import pytest
+from django.utils.timezone import now
 
 import awx.api.serializers  # noqa: F401 — register CleanTextMixin models
 
@@ -207,3 +208,34 @@ def test_host_manager_audits_before_bulk_create():
     audit_idx = source.index("audit_bulk_model_instances(objs, operation='bulk_create')", bulk_create_idx)
     super_idx = source.index('super().bulk_create', audit_idx)
     assert audit_idx < super_idx
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('capture_validation_signal_logs')
+def test_host_manager_bulk_create_logs_registered_text_violations(caplog):
+    """HostManager.bulk_create runs DAB audit before persisting (not only via serializers)."""
+    org = Organization.objects.create(name='org-host-mgr-bulk')
+    inv = Inventory.objects.create(name='inv-host-mgr-bulk', organization=org)
+    _now = now()
+    host = Host(
+        name='host-mgr-bulk',
+        description='<script>x</script>',
+        inventory=inv,
+        created=_now,
+        modified=_now,
+    )
+    Host.objects.bulk_create([host])
+    assert 'ORM bypass (bulk_create)' in caplog.text
+    assert 'description' in caplog.text
+    assert 'main.Host' in caplog.text
+
+
+def test_bulk_host_create_serializer_does_not_call_audit_bulk():
+    """Bulk host API relies on HostManager.bulk_create for ORM bypass logging."""
+    serializers_py = Path(__file__).resolve().parents[3] / 'api' / 'serializers.py'
+    source = serializers_py.read_text()
+    start = source.index('def _create_bulk_hosts')
+    end = source.index('class BulkHostDeleteSerializer')
+    block = source[start:end]
+    assert 'audit_bulk_model_instances' not in block
+    assert 'Host.objects.bulk_create' in block
