@@ -333,6 +333,8 @@ jobs:
         with:
           ansible-core-version: ${{ matrix.ansible }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
+          # skip action-managed Codecov upload for merge queue runs
+          coverage: ${{ github.event_name == 'merge_group' && 'never' || 'auto' }}
           collection-root: awx_collection
           pre-test-cmd: >-
             ansible-playbook
