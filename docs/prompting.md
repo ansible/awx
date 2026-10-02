@@ -254,6 +254,13 @@ If a job is spawned from schedule or a workflow in a state that has rejected
 prompts, this should be logged, but the job should still be launched, without
 those prompts applied.
 
+Inventory on a schedule is an exception. If the schedule stores an inventory
+that is different from the job template inventory, and `ask_inventory_on_launch`
+is no longer enabled, the scheduled job is created in an "error" state and is
+not started. `job_explanation` names the schedule inventory and the template
+inventory. A schedule inventory that is empty, or the same as the template
+inventory, is unchanged and the job still starts.
+
 If the job is spawned from a schedule or workflow in a state that cannot be
 launched (typical example is a null `inventory`), then the job should be
 created in an "error" state with `job_explanation` containing a summary
