@@ -4,7 +4,7 @@ env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DEV_DOCKER_OWNER: ${{ github.repository_owner }}
-  COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
+  # COMPOSE_TAG is resolved by the awx_devel_image action (merge-queue aware)
   UPSTREAM_REPOSITORY_ID: 91594105
 
 on:
@@ -14,6 +14,7 @@ on:
       - release_**
       - feature_**
       - stable-**
+  merge_group:
 
 jobs:
   api-schema-detection:
@@ -39,9 +40,11 @@ jobs:
       - name: Detect API schema changes
         id: schema-check
         continue-on-error: true
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref || github.event.merge_group.base_ref }}
         run: |
           AWX_DOCKER_ARGS='-e GITHUB_ACTIONS' \
-          AWX_DOCKER_CMD='make detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}' \
+          AWX_DOCKER_CMD="make detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${BASE_REF#refs/heads/}" \
           make docker-runner 2>&1 | tee schema-diff.txt
           exit ${PIPESTATUS[0]}
 

@@ -4,10 +4,11 @@ env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DEV_DOCKER_OWNER: ${{ github.repository_owner }}
-  COMPOSE_TAG: ${{ github.base_ref || github.ref_name || 'devel' }}
+  # COMPOSE_TAG is resolved by the awx_devel_image action (merge-queue aware)
   UPSTREAM_REPOSITORY_ID: 91594105
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - devel  # needed to publish code coverage post-merge
@@ -112,6 +113,7 @@ jobs:
       - name: Upload test coverage to Codecov
         if: >-
           !cancelled()
+          && github.event_name != 'merge_group'
           && steps.make-run.outputs.cov-report-files != ''
         uses: codecov/codecov-action@v4
         with:
@@ -131,6 +133,7 @@ jobs:
       - name: Upload test results to Codecov
         if: >-
           !cancelled()
+          && github.event_name != 'merge_group'
           && steps.make-run.outputs.test-result-files != ''
         uses: codecov/test-results-action@v1
         with:
@@ -330,6 +333,8 @@ jobs:
         with:
           ansible-core-version: ${{ matrix.ansible }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
+          # skip action-managed Codecov upload for merge queue runs
+          coverage: ${{ github.event_name == 'merge_group' && 'never' || 'auto' }}
           collection-root: awx_collection
           pre-test-cmd: >-
             ansible-playbook
@@ -417,6 +422,7 @@ jobs:
       - name: Upload test coverage to Codecov
         if: >-
           !cancelled()
+          && github.event_name != 'merge_group'
           && steps.make-run.outputs.cov-report-files != ''
         uses: codecov/codecov-action@v4
         with:
