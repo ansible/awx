@@ -1183,7 +1183,7 @@ class ControllerAPIModule(ControllerModule):
         wait_on_field = 'event_processing_finished'
         if wait_on_field not in result['json']:
             wait_on_field = 'finished'
-        while not result['json'][wait_on_field]:
+        while (not result['json'][wait_on_field]) or (not self.is_job_done(result['json'].get('status'))):
             # If we are past our time out fail with a message
             if timeout and timeout < time.time() - start:
                 # Account for Legacy messages
