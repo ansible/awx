@@ -147,6 +147,9 @@ def main():
 
     # Attempt to look up organization based on the provided name
     organization = module.get_one('organizations', name_or_id=name, check_exists=(state == 'exists'))
+    # If already renamed, look up by new_name so reruns stay idempotent
+    if new_name and not organization:
+        organization = module.get_one('organizations', name_or_id=new_name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
