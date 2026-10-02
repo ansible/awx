@@ -12,6 +12,7 @@ from awx.api.schema import (
     AuthenticatedSpectacularRedocView,
     filter_credential_type_schema,
     inject_ai_descriptions,
+    inject_clean_text_pattern_components,
 )
 
 
@@ -549,3 +550,167 @@ class TestInjectAiDescriptions:
             inject_ai_descriptions(result, None, None, None)
 
         assert 'x-ai-description' not in result['paths']['/api/v2/items/']['get']
+
+
+class TestInjectCleanTextPatternComponents:
+    """Unit tests for inject_clean_text_pattern_components postprocessing hook."""
+
+    FIELD_ITEM_REF = {'$ref': '#/components/schemas/CleanTextNestedStringField'}
+    TARGET_SCHEMAS = (
+        'CredentialType',
+        'CredentialTypeRequest',
+        'PatchedCredentialTypeRequest',
+    )
+    ENHANCED_NOTE = (
+        'When ENHANCED_INPUT_VALIDATION_ENABLED is on, non-secret string '
+        'entries in fields[] may include optional pattern, patternDescription, '
+        'and flags (Tier 2). Secret and non-string fields omit them. '
+        'Requiredness is expressed via inputs.required, not per-field required.'
+    )
+
+    def _make_result(self, schemas=None):
+        """Build a minimal OpenAPI result with optional CredentialType schemas."""
+        if schemas is None:
+            schemas = {name: {'properties': {'inputs': {'type': 'object'}}} for name in self.TARGET_SCHEMAS}
+        return {'components': {'schemas': schemas}}
+
+    def _assert_inputs_shape(self, inputs, *, expect_default=False, expect_note=True):
+        assert inputs['type'] == 'object'
+        assert inputs['additionalProperties'] is True
+        assert inputs['properties']['fields'] == {
+            'type': 'array',
+            'description': 'Input field catalog. Dynamic per credential type.',
+            'items': self.FIELD_ITEM_REF,
+        }
+        assert inputs['properties']['required'] == {
+            'type': 'array',
+            'items': {'type': 'string'},
+            'description': 'Optional list of field ids that are required.',
+        }
+        assert inputs['properties']['metadata']['type'] == 'array'
+        assert inputs['properties']['metadata']['items'] == self.FIELD_ITEM_REF
+        if expect_note:
+            assert self.ENHANCED_NOTE in inputs['description']
+        if expect_default:
+            assert 'default' in inputs
+        else:
+            assert 'default' not in inputs
+
+    def test_injects_dab_components_and_shapes_credential_type_inputs(self):
+        """Hook registers shared CleanText components and shapes CredentialType.inputs."""
+        result = self._make_result()
+
+        returned = inject_clean_text_pattern_components(result, None, None, None)
+
+        schemas = result['components']['schemas']
+        assert 'CleanTextNestedStringField' in schemas
+        assert 'CleanTextFieldInfo' in schemas
+        for name in self.TARGET_SCHEMAS:
+            self._assert_inputs_shape(schemas[name]['properties']['inputs'])
+        assert returned is result
+
+    def test_preserves_existing_description_and_appends_note(self):
+        """Existing inputs.description is kept and the enhanced-validation note is appended once."""
+        existing = 'Custom inputs description.'
+        result = self._make_result(
+            {
+                'CredentialType': {
+                    'properties': {
+                        'inputs': {
+                            'type': 'object',
+                            'description': existing,
+                        }
+                    }
+                }
+            }
+        )
+
+        inject_clean_text_pattern_components(result, None, None, None)
+
+        description = result['components']['schemas']['CredentialType']['properties']['inputs']['description']
+        assert description.startswith(existing)
+        assert self.ENHANCED_NOTE in description
+        assert description.count(self.ENHANCED_NOTE) == 1
+
+    def test_does_not_duplicate_note_when_already_present(self):
+        """Re-running the hook must not append the enhanced-validation note twice."""
+        base = 'Enter inputs using either JSON or YAML syntax.'
+        result = self._make_result(
+            {
+                'CredentialTypeRequest': {
+                    'properties': {
+                        'inputs': {
+                            'type': 'object',
+                            'description': f'{base} {self.ENHANCED_NOTE}',
+                        }
+                    }
+                }
+            }
+        )
+
+        inject_clean_text_pattern_components(result, None, None, None)
+
+        description = result['components']['schemas']['CredentialTypeRequest']['properties']['inputs']['description']
+        assert description.count(self.ENHANCED_NOTE) == 1
+
+    def test_preserves_existing_default(self):
+        """Existing inputs.default is preserved on the reshaped schema."""
+        result = self._make_result(
+            {
+                'PatchedCredentialTypeRequest': {
+                    'properties': {
+                        'inputs': {
+                            'type': 'object',
+                            'default': {'fields': []},
+                        }
+                    }
+                }
+            }
+        )
+
+        inject_clean_text_pattern_components(result, None, None, None)
+
+        inputs = result['components']['schemas']['PatchedCredentialTypeRequest']['properties']['inputs']
+        self._assert_inputs_shape(inputs, expect_default=True)
+        assert inputs['default'] == {'fields': []}
+
+    def test_skips_missing_and_non_dict_schemas(self):
+        """Missing or non-dict schemas are left alone; other schemas are untouched."""
+        result = {
+            'components': {
+                'schemas': {
+                    'CredentialType': 'not-a-dict',
+                    'OtherSchema': {'properties': {'inputs': {'type': 'string'}}},
+                }
+            }
+        }
+        other_before = copy.deepcopy(result['components']['schemas']['OtherSchema'])
+
+        inject_clean_text_pattern_components(result, None, None, None)
+
+        assert result['components']['schemas']['CredentialType'] == 'not-a-dict'
+        assert result['components']['schemas']['OtherSchema'] == other_before
+        assert 'CredentialTypeRequest' not in result['components']['schemas']
+
+    def test_handles_empty_result(self):
+        """Empty result still gets shared CleanText components from DAB."""
+        result = {}
+
+        returned = inject_clean_text_pattern_components(result, None, None, None)
+
+        assert 'CleanTextNestedStringField' in result['components']['schemas']
+        assert returned is result
+
+    def test_import_error_returns_result_unchanged(self):
+        """When DAB shared schemas are unavailable, the hook is a no-op."""
+        result = self._make_result()
+        original = copy.deepcopy(result)
+
+        with patch.dict(
+            'sys.modules',
+            {'ansible_base.api_documentation.clean_text_schema_hooks': None},
+        ):
+            returned = inject_clean_text_pattern_components(result, None, None, None)
+
+        assert result == original
+        assert returned is result

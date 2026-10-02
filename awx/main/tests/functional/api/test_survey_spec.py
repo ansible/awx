@@ -298,7 +298,7 @@ def test_survey_spec_options_include_patterns_when_toggle_on(options, admin, job
     assert response.status_code == 200
     post = response.data['actions']['POST']
     assert post['name']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
-    assert 'pattern_description' in post['name']
+    assert 'patternDescription' in post['name']
     assert post['description']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
     assert post['spec']['question_name']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
     assert post['spec']['variable']['pattern'] == FAKE_SURVEY_TIER2_PATTERN
