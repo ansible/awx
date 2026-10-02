@@ -45,6 +45,15 @@ class UnifiedJobPaginator(DjangoPaginator):
         return UnifiedJob.objects.count()
 
 
+class JobPaginator(DjangoPaginator):
+    """Count visible jobs through a primary-key subquery instead of full rows."""
+
+    @cached_property
+    def count(self):
+        visible_pks = self.object_list.order_by().values("pk")
+        return self.object_list.model.objects.filter(pk__in=visible_pks).count()
+
+
 class Pagination(pagination.PageNumberPagination):
     page_size_query_param = "page_size"
     max_page_size = settings.MAX_PAGE_SIZE
@@ -133,6 +142,10 @@ class UnifiedJobPagination(Pagination):
 
     def get_filtered_paginator_class(self):
         return DjangoPaginator
+
+
+class JobPagination(Pagination):
+    django_paginator_class = JobPaginator
 
 
 class LimitPagination(pagination.BasePagination):

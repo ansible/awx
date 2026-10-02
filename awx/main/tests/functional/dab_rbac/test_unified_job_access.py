@@ -139,6 +139,41 @@ def test_unified_job_list_team_member_sees_team_granted_jobs(user, setup_managed
 
 
 @pytest.mark.django_db
+def test_job_list_non_superuser_count_matches_visible_jobs(user, setup_managed_roles, get):
+    """The job list count must include only jobs visible to the requesting user."""
+    visible_org = Organization.objects.create(name='job-list-visible-org')
+    visible_inventory = visible_org.inventories.create(name='job-list-visible-inv')
+    visible_project = Project.objects.create(name='job-list-visible-project', organization=visible_org)
+    visible_jt = JobTemplate.objects.create(
+        name='job-list-visible-jt',
+        project=visible_project,
+        inventory=visible_inventory,
+        organization=visible_org,
+    )
+    visible_job = visible_jt.create_unified_job()
+
+    hidden_org = Organization.objects.create(name='job-list-hidden-org')
+    hidden_inventory = hidden_org.inventories.create(name='job-list-hidden-inv')
+    hidden_project = Project.objects.create(name='job-list-hidden-project', organization=hidden_org)
+    hidden_jt = JobTemplate.objects.create(
+        name='job-list-hidden-jt',
+        project=hidden_project,
+        inventory=hidden_inventory,
+        organization=hidden_org,
+    )
+    hidden_jt.create_unified_job()
+
+    org_admin = user('job-list-org-admin')
+    RoleDefinition.objects.get(name='Organization Admin').give_permission(org_admin, visible_org)
+
+    response = get(reverse('api:job_list'), org_admin)
+
+    assert response.status_code == 200
+    assert response.data['count'] == 1
+    assert [result['id'] for result in response.data['results']] == [visible_job.pk]
+
+
+@pytest.mark.django_db
 def test_unified_job_list_rando_sees_nothing(rando, setup_managed_roles, get):
     """Unprivileged user sees no unified jobs."""
     org = Organization.objects.create(name='uj-rando-org')
