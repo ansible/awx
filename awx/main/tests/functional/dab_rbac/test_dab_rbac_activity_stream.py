@@ -4,7 +4,7 @@ import pytest
 
 from awx.api.versioning import reverse
 
-from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+from ansible_base.rbac.models import RoleDefinition
 from ansible_base.rbac import permission_registry
 
 from awx.main.models import ActivityStream, Inventory, Organization
@@ -122,8 +122,12 @@ class TestRoleAssignmentActivityStream:
         assert entry.object2 == 'team'
 
     def test_global_role_assignment_recorded(self, rando, setup_managed_roles):
+        # Global (singleton) roles have no content object, so they cannot go through the
+        # object-scoped bulk pipeline. give_global_permission is the supported entry point;
+        # it routes through the pipeline and fires dab_rbac_assignments_created. A raw
+        # RoleUserAssignment.objects.create() would NOT record an entry (see triggers.py).
         rd, _ = RoleDefinition.objects.get_or_create(name='global-view-role', content_type=None)
-        RoleUserAssignment.objects.create(user=rando, role_definition=rd)
+        rd.give_global_permission(rando)
 
         entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
         assert entries.count() == 1
@@ -133,6 +137,128 @@ class TestRoleAssignmentActivityStream:
         assert entry.object1 == ''
         assert entry.object2 == 'user'
         assert entry.object_relationship_type == str(rd.id)
+
+    def test_global_role_removal_recorded(self, rando, setup_managed_roles):
+        rd, _ = RoleDefinition.objects.get_or_create(name='global-view-role', content_type=None)
+        rd.give_global_permission(rando)
+        rd.remove_global_permission(rando)
+
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.object2 == 'user'
+        assert entry.object_relationship_type == str(rd.id)
+
+    def test_platform_auditor_global_role_recorded(self, rando, setup_managed_roles):
+        # Platform Auditor is the one real managed singleton role (content_type=None); it is
+        # created by a data migration, not by setup_managed_role_definitions, so the fixture
+        # does not provide it and the test materializes it the same way the migration does.
+        rd, _ = RoleDefinition.objects.get_or_create(name='Platform Auditor', defaults={'managed': True})
+        rd.give_global_permission(rando)
+
+        entries = ActivityStream.objects.filter(operation='associate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.object2 == 'user'
+        assert entry.object_relationship_type == str(rd.id)
+
+        rd.remove_global_permission(rando)
+        removals = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert removals.count() == 1
+        assert removals.get().object1 == ''
+
+    def test_object_not_supplied_by_dab_records_bare_entry_without_link(self, rando, setup_managed_roles):
+        # When DAB does not hand us the resolved object (the narrow direct-give_assignments
+        # path, or an object row that is already gone), we deliberately do NOT fetch it — that
+        # per-row fetch is the regression this migration removes (AAP-85842). The entry is
+        # still recorded with the role and actor, but with no object metadata and no m2m link,
+        # so it can never reference a row that does not exist. The call must not raise.
+        from ansible_base.rbac.models import RoleUserAssignment
+
+        from awx.main.models.rbac import _record_role_assignment_activity_stream
+
+        ct = permission_registry.content_type_model.objects.get_for_model(Inventory)
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        missing_id = 99999999
+        assert not Inventory.objects.filter(pk=missing_id).exists()
+        # Force-create an assignment pointing at a non-existent object; object_role is None.
+        assignment = RoleUserAssignment.objects.create(role_definition=rd, user=rando, content_type=ct, object_id=str(missing_id))
+
+        # No content_objects passed: the recorder relies solely on DAB's dict.
+        _record_role_assignment_activity_stream(assignment, 'disassociate')
+
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        # Only the role and actor are captured; no object type/id/name and no link.
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.inventory.count() == 0
+
+    def test_non_integer_object_id_records_bare_entry_without_link(self, rando, setup_managed_roles):
+        # A degenerate assignment (e.g. a row another service wrote into our database) can
+        # carry a non-integer object_id. DAB would never resolve such a key into
+        # content_objects, so it falls into the same "object not supplied" path: the bare
+        # assignment is recorded (role + actor) and no bogus object link is attempted. Because
+        # we never cast object_id ourselves, the degenerate value cannot raise.
+        from ansible_base.rbac.models import RoleUserAssignment
+
+        from awx.main.models.rbac import _record_role_assignment_activity_stream
+
+        ct = permission_registry.content_type_model.objects.get_for_model(Inventory)
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        # Materialize an assignment with a degenerate generic foreign key.
+        assignment = RoleUserAssignment.objects.create(role_definition=rd, user=rando, content_type=ct, object_id='not-an-int')
+
+        _record_role_assignment_activity_stream(assignment, 'disassociate')
+
+        entries = ActivityStream.objects.filter(operation='disassociate', user=rando, changes__icontains=rd.name)
+        assert entries.count() == 1
+        entry = entries.get()
+        assert json.loads(entry.changes) == {'role_definition': rd.name, 'user': rando.username}
+        assert entry.object1 == ''
+        assert entry.inventory.count() == 0
+
+    def test_role_definition_materialized_on_signal_instances(self, rando, inventory, django_assert_num_queries, setup_managed_roles):
+        # The old-RBAC mirror resolves the legacy Role field from instance.role_definition.name
+        # per row instead of a batch query, which is only free because DAB materializes
+        # role_definition on the assignments it hands to both bulk signals. Guard that: reading
+        # .role_definition.name on the delivered instances must issue no query. If it regresses,
+        # the mirror (and the activity-stream recorder) would do a per-row SELECT again.
+        from ansible_base.rbac.triggers import dab_rbac_assignments_created, dab_rbac_assignments_pre_delete
+
+        rd = RoleDefinition.objects.get(name='Inventory Admin')
+        captured = []
+
+        def probe(sender, assignments, **kwargs):
+            captured.extend(assignments)
+
+        dab_rbac_assignments_created.connect(probe)
+        try:
+            rd.give_permission(rando, inventory)
+        finally:
+            dab_rbac_assignments_created.disconnect(probe)
+
+        assert captured
+        with django_assert_num_queries(0):
+            for assignment in captured:
+                assert assignment.role_definition.name == rd.name
+
+        captured.clear()
+        dab_rbac_assignments_pre_delete.connect(probe)
+        try:
+            rd.remove_permission(rando, inventory)
+        finally:
+            dab_rbac_assignments_pre_delete.disconnect(probe)
+
+        assert captured
+        with django_assert_num_queries(0):
+            for assignment in captured:
+                assert assignment.role_definition.name == rd.name
 
     def test_cascade_delete_does_not_record_contentless_entry(self, rando, setup_managed_roles):
         '''
