@@ -30,7 +30,6 @@ from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 # other AWX imports
-from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.inventory_vars import update_group_variables
@@ -1019,49 +1018,49 @@ class Command(BaseCommand):
                 # https://github.com/ansible/ansible-tower/issues/7414#issuecomment-321615104
                 self.all_group.debug_tree()
 
-            with batch_role_ancestor_rebuilding():
-                # If using with transaction.atomic() with try ... catch,
-                # with transaction.atomic() must be inside the try section of the code as per Django docs
-                try:
-                    # Ensure that this is managed as an atomic SQL transaction,
-                    # and thus properly rolled back if there is an issue.
-                    with transaction.atomic():
-                        # Merge/overwrite inventory into database.
-                        if settings.SQL_DEBUG:
-                            logger.warning('loading into database...')
-                        with ignore_inventory_computed_fields():
-                            if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
+            # If using with transaction.atomic() with try ... catch,
+            # with transaction.atomic() must be inside the try section of the code as per Django docs
+            try:
+                license_fail = False
+                # Ensure that this is managed as an atomic SQL transaction,
+                # and thus properly rolled back if there is an issue.
+                with transaction.atomic():
+                    # Merge/overwrite inventory into database.
+                    if settings.SQL_DEBUG:
+                        logger.warning('loading into database...')
+                    with ignore_inventory_computed_fields():
+                        if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
+                            self.load_into_database()
+                        else:
+                            with disable_activity_stream():
                                 self.load_into_database()
-                            else:
-                                with disable_activity_stream():
-                                    self.load_into_database()
-                            if settings.SQL_DEBUG:
-                                queries_before2 = len(connection.queries)
-                            self.inventory.update_computed_fields()
                         if settings.SQL_DEBUG:
-                            logger.warning('update computed fields took %d queries', len(connection.queries) - queries_before2)
+                            queries_before2 = len(connection.queries)
+                        self.inventory.update_computed_fields()
+                    if settings.SQL_DEBUG:
+                        logger.warning('update computed fields took %d queries', len(connection.queries) - queries_before2)
 
-                        # Check if the license is valid.
-                        # If the license is not valid, a CommandError will be thrown,
-                        # and inventory update will be marked as invalid.
-                        # with transaction.atomic() will roll back the changes.
-                        license_fail = True
-                        self.check_license()
+                    # Check if the license is valid.
+                    # If the license is not valid, a CommandError will be thrown,
+                    # and inventory update will be marked as invalid.
+                    # with transaction.atomic() will roll back the changes.
+                    license_fail = True
+                    self.check_license()
 
-                        # Check the per-org host limits
-                        license_fail = False
-                        self.check_org_host_limit()
-                except PermissionDenied as e:
-                    if license_fail:
-                        self.mark_license_failure(save=True)
-                    else:
-                        self.mark_org_limits_failure(save=True)
-                    raise e
-
-                if settings.SQL_DEBUG:
-                    logger.warning('Inventory import completed for %s in %0.1fs', self.inventory_source.name, time.time() - begin)
+                    # Check the per-org host limits
+                    license_fail = False
+                    self.check_org_host_limit()
+            except PermissionDenied as e:
+                if license_fail:
+                    self.mark_license_failure(save=True)
                 else:
-                    logger.info('Inventory import completed for %s in %0.1fs', self.inventory_source.name, time.time() - begin)
+                    self.mark_org_limits_failure(save=True)
+                raise e
+
+            if settings.SQL_DEBUG:
+                logger.warning('Inventory import completed for %s in %0.1fs', self.inventory_source.name, time.time() - begin)
+            else:
+                logger.info('Inventory import completed for %s in %0.1fs', self.inventory_source.name, time.time() - begin)
 
             # If we're in debug mode, then log the queries and time
             # used to do the operation.
