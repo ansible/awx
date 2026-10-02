@@ -137,6 +137,15 @@ class ApiV2(base.Base):
             if not rel_endpoint:
                 continue
 
+            # Smart and constructed inventories generate their hosts and groups
+            # dynamically (via host_filter / the constructed inventory plugin).
+            # Those members cannot be created directly, so the API rejects them
+            # on import with "Cannot create Host/Group for Smart or Constructed
+            # Inventories". Skip exporting them so the resulting assets import
+            # cleanly.
+            if _page.__item_class__.__name__ == 'Inventory' and key in ('hosts', 'groups') and _page.json.get('kind') in ('smart', 'constructed'):
+                continue
+
             rel = rel_endpoint._create()
 
             if rel.__item_class__.__name__ != 'WorkflowApprovalTemplate':
