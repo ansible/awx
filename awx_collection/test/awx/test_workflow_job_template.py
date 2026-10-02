@@ -26,7 +26,7 @@ def test_create_workflow_job_template(run_module, admin_user, organization, surv
     assert not result.get('failed', False), result.get('msg', result)
 
     wfjt = WorkflowJobTemplate.objects.get(name='foo-workflow')
-    assert wfjt.extra_vars == '{"foo": "bar", "another-foo": {"barz": "bar2"}}'
+    assert wfjt.extra_vars == '---\nanother-foo:\n  barz: bar2\nfoo: bar\n'
 
     result.pop('invocation', None)
     assert result == {"name": "foo-workflow", "id": wfjt.id, "changed": True}
