@@ -19,6 +19,8 @@ aiosignal==1.4.0
     # via aiohttp
 ansi2html==1.9.2
     # via -r /awx_devel/requirements/requirements.in
+anyio==4.15.1
+    # via httpx2
 # ansible-runner @ git+https://github.com/ansible/ansible-runner.git@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 asgiref==3.11.0
@@ -192,16 +194,24 @@ grpcio==1.75.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
+h11==0.16.0
+    # via httpcore2
 hiredis==3.2.1
     # via redis
+httpcore2==2.13.1
+    # via httpx2
+httpx2==2.13.1
+    # via pagerduty
 hyperlink==21.0.0
     # via
     #   autobahn
     #   twisted
-idna==3.10
+idna==3.20
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   anyio
     #   hyperlink
+    #   httpx2
     #   requests
     #   twisted
     #   yarl
@@ -342,6 +352,8 @@ packaging==25.0
     #   opentelemetry-instrumentation
     #   setuptools-scm
     #   wheel
+pagerduty==7.0.1
+    # via -r /awx_devel/requirements/requirements.in
 pexpect==4.9.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -378,8 +390,6 @@ pycares==4.11.0
     # via aiodns
 pycparser==2.23
     # via cffi
-pygerduty==0.38.3
-    # via -r /awx_devel/requirements/requirements.in
 pygithub==2.8.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -479,7 +489,6 @@ six==1.17.0
     #   kubernetes
     #   msrestazure
     #   openshift
-    #   pygerduty
     #   python-dateutil
 slack-sdk==3.37.0
     # via -r /awx_devel/requirements/requirements.in
@@ -494,6 +503,10 @@ tempora==5.8.1
     # via
     #   irc
     #   jaraco-logging
+truststore==0.10.4
+    # via
+    #   httpcore2
+    #   httpx2
 twilio==9.8.3
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==25.5.0
@@ -502,9 +515,10 @@ twisted[tls]==25.5.0
     #   daphne
 txaio==25.9.2
     # via autobahn
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via
     #   aiohttp
+    #   anyio
     #   aiosignal
     #   azure-core
     #   azure-identity
@@ -512,6 +526,7 @@ typing-extensions==4.15.0
     #   azure-keyvault-keys
     #   azure-keyvault-secrets
     #   grpcio
+    #   httpx2
     #   opentelemetry-api
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http

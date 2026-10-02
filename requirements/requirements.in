@@ -47,7 +47,7 @@ prometheus-client
 psycopg
 psutil
 pyasn1>=0.6.2  # CVE-2026-2349
-pygerduty
+pagerduty
 PyGithub
 pyopenssl
 pyparsing>3.0 # Upgraded to v3 and changed import patterns
