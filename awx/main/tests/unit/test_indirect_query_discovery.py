@@ -3,6 +3,7 @@ Unit tests for external query discovery and version fallback logic.
 Tests for AAP-58456: Unit Test Suite for External Query Handling
 """
 
+import json
 import sys
 from io import StringIO
 from unittest import mock
@@ -414,6 +415,62 @@ class TestExternalQueryDiscovery:
         mock_list_collections.assert_called_once()
         mock_files.assert_not_called()
         mock_fallback.assert_not_called()
+
+
+class TestListCollectionsFailureResilience:
+    """list_collections() reuses ansible-galaxy CLI internals (with_collection_artifacts_manager)
+    that read CLI-only context.CLIARGS entries directly. Since AAP-74343 this callback always
+    runs (previously it only ran when FEATURE_INDIRECT_NODE_COUNTING_ENABLED was on), so any
+    latent fragility in those internals now affects every job, not just opted-in ones. A failure
+    here should degrade gracefully instead of aborting the whole callback and losing
+    ansible_version/installed_collections for the job.
+    """
+
+    @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
+    def test_ansible_data_still_written_when_list_collections_raises(self, mock_list_collections, tmp_path):
+        from awx.playbooks.library.indirect_instance_count import CallbackModule
+
+        mock_list_collections.side_effect = KeyError('ignore_certs')
+
+        callback = CallbackModule()
+        callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
+
+        written = {}
+
+        def fake_open(path, mode='r', *args, **kwargs):
+            handle = mock.mock_open()()
+            if 'w' in mode:
+                handle.write = lambda data: written.setdefault('data', data)
+            return handle
+
+        with mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': str(tmp_path)}):
+            with mock.patch('builtins.open', side_effect=fake_open):
+                callback.v2_playbook_on_stats(mock.Mock())
+
+        callback._display.warning.assert_called_once()
+        assert "ignore_certs" in callback._display.warning.call_args[0][0]
+
+        payload = json.loads(written['data'])
+        assert payload['installed_collections'] == {}
+        assert 'ansible_version' in payload
+
+    @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
+    def test_no_warning_when_list_collections_succeeds(self, mock_list_collections, tmp_path):
+        from awx.playbooks.library.indirect_instance_count import CallbackModule
+
+        mock_list_collections.return_value = [mock.Mock(namespace='demo', name='query', ver='1.0.0', fqcn='demo.query')]
+
+        callback = CallbackModule()
+        callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', False)
+
+        with mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': str(tmp_path)}):
+            with mock.patch('builtins.open', mock.mock_open()):
+                with mock.patch('json.dumps', return_value='{}'):
+                    callback.v2_playbook_on_stats(mock.Mock())
+
+        callback._display.warning.assert_not_called()
 
 
 class TestPrivateDataDirIntegration:
