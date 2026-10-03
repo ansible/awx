@@ -1,0 +1,33 @@
+#jinja2: lstrip_blocks: True
+---
+services:
+  receptor-hop:
+    image: {{ receptor_image }}
+    user: root
+    container_name: tools_receptor_hop
+    hostname: receptor-hop
+    command: 'receptor --config /etc/receptor/receptor.conf'
+    networks:
+      - awx
+    ports:
+      - "5555:5555"
+    volumes:
+      - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
+{% for i in range(execution_node_count|int) %}
+  receptor-{{ loop.index }}:
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    user: "{{ ansible_user_uid }}"
+    container_name: tools_receptor_{{ loop.index }}
+    hostname: receptor-{{ loop.index }}
+    command: 'receptor --config /etc/receptor/receptor.conf'
+    environment:
+      RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
+    networks:
+      - awx
+    volumes:
+      - "../../../:/awx_devel"
+      - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "/sys/fs/cgroup:/sys/fs/cgroup"
+      - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
+    privileged: true
+{% endfor %}
