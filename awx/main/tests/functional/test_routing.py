@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from django.contrib.auth.models import AnonymousUser
@@ -62,6 +64,26 @@ class TestWebsocketRelay:
         server.scope['headers'] = (websocket_relay_secret_generator('foobar', set_broadcast_websocket_secret=False),)
         connected, _ = await server.connect()
         assert connected is False
+
+
+@pytest.mark.django_db
+class TestWebsocketSecretAuthHelper:
+    def test_empty_secret_logs_warning(self, settings, caplog):
+        settings.BROADCAST_WEBSOCKET_SECRET = ''
+        secret = WebsocketSecretAuthHelper.construct_secret()
+        with caplog.at_level(logging.WARNING, logger='awx.main.consumers'):
+            WebsocketSecretAuthHelper.verify_secret(secret)
+        assert "BROADCAST_WEBSOCKET_SECRET is empty" in caplog.text
+
+    def test_timing_safe_comparison(self, settings):
+        """Verify that verify_secret uses hmac.compare_digest (constant-time comparison)."""
+        settings.BROADCAST_WEBSOCKET_SECRET = 'test-secret'
+        secret = WebsocketSecretAuthHelper.construct_secret()
+        WebsocketSecretAuthHelper.verify_secret(secret)
+
+        settings.BROADCAST_WEBSOCKET_SECRET = 'wrong-secret'
+        with pytest.raises(ValueError, match="Invalid secret"):
+            WebsocketSecretAuthHelper.verify_secret(secret)
 
 
 @pytest.mark.asyncio
