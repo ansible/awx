@@ -3,6 +3,7 @@ from copy import deepcopy
 import datetime
 
 import pytest
+from django.test import override_settings
 
 # from awx.main.models import NotificationTemplates, Notifications, JobNotificationMixin
 from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobNotificationMixin, ProjectUpdate, Schedule, SystemJob, WorkflowJob
@@ -130,6 +131,66 @@ class TestJobNotificationMixin(object):
         job_serialization = UnifiedJobSerializer(job).to_representation(job)
         context = job.context(job_serialization)
         assert '批量安装项目' in context['job_metadata']
+
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='')
+    def test_context_stub_url_no_prefix(self):
+        context = JobNotificationMixin.context_stub()
+        assert context['job']['url'] == '/api/v2/jobs/13/'
+
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='myprefix')
+    def test_context_stub_url_with_prefix(self):
+        context = JobNotificationMixin.context_stub()
+        assert context['job']['url'] == '/api/myprefix/v2/jobs/13/'
+
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='/myprefix/')
+    def test_context_stub_url_prefix_strips_slashes(self):
+        context = JobNotificationMixin.context_stub()
+        assert context['job']['url'] == '/api/myprefix/v2/jobs/13/'
+
+    @pytest.mark.django_db
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='')
+    def test_build_notification_message_url_no_prefix(self, notification_template):
+        notification_template.messages = {'started': {'message': '{{ job.url }}', 'body': '{{ job.url }}'}}
+        notification_template.save()
+        job = Job.objects.create(name='test-job')
+        msg, body = job.build_notification_message(notification_template, 'running')
+        assert msg == f'/api/v2/jobs/{job.pk}/'
+        assert body == f'/api/v2/jobs/{job.pk}/'
+
+    @pytest.mark.django_db
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='myprefix')
+    def test_build_notification_message_url_with_prefix(self, notification_template):
+        notification_template.messages = {'started': {'message': '{{ job.url }}', 'body': '{{ job.url }}'}}
+        notification_template.save()
+        job = Job.objects.create(name='test-job')
+        msg, body = job.build_notification_message(notification_template, 'running')
+        assert msg == f'/api/myprefix/v2/jobs/{job.pk}/'
+        assert body == f'/api/myprefix/v2/jobs/{job.pk}/'
+
+    @pytest.mark.django_db
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='/myprefix/')
+    def test_build_notification_message_url_prefix_strips_slashes(self, notification_template):
+        notification_template.messages = {'started': {'message': '{{ job.url }}', 'body': '{{ job.url }}'}}
+        notification_template.save()
+        job = Job.objects.create(name='test-job')
+        msg, body = job.build_notification_message(notification_template, 'running')
+        assert msg == f'/api/myprefix/v2/jobs/{job.pk}/'
+        assert body == f'/api/myprefix/v2/jobs/{job.pk}/'
+
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='///')
+    def test_context_stub_url_prefix_all_slashes(self):
+        context = JobNotificationMixin.context_stub()
+        assert context['job']['url'] == '/api/v2/jobs/13/'
+
+    @pytest.mark.django_db
+    @override_settings(OPTIONAL_API_URLPATTERN_PREFIX='///')
+    def test_build_notification_message_url_prefix_all_slashes(self, notification_template):
+        notification_template.messages = {'started': {'message': '{{ job.url }}', 'body': '{{ job.url }}'}}
+        notification_template.save()
+        job = Job.objects.create(name='test-job')
+        msg, body = job.build_notification_message(notification_template, 'running')
+        assert msg == f'/api/v2/jobs/{job.pk}/'
+        assert body == f'/api/v2/jobs/{job.pk}/'
 
     def test_context_stub(self):
         """The context stub is a fake context used to validate custom notification messages. Ensure that
