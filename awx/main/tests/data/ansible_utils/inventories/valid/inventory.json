@@ -1,0 +1,36 @@
+{
+  "all": {
+    "hosts": {
+      "test1": null, 
+      "test2": {
+        "var1": "value1"
+      }
+    }, 
+    "children": {
+      "other_group": {
+        "hosts": {
+          "test4": {
+            "ansible_host": "127.0.0.1"
+          }
+        }, 
+        "children": {
+          "group_x": {
+            "hosts": "test5"
+          }
+        }, 
+        "vars": {
+          "g2_var2": "value3"
+        }
+      }, 
+      "last_group": {
+        "hosts": "test1", 
+        "vars": {
+          "last_var": "MYVALUE"
+        }
+      }
+    }, 
+    "vars": {
+      "group_var1": "value2"
+    }
+  }
+}
