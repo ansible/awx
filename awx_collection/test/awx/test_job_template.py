@@ -54,6 +54,7 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
         'ask_job_slice_count_on_launch': True,
         'ask_labels_on_launch': True,
         'ask_timeout_on_launch': True,
+        'opa_query_path': 'foo/bar'
     }
 
     result = run_module('job_template', module_args, admin_user)
@@ -69,6 +70,7 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
     assert jt.ask_job_slice_count_on_launch
     assert jt.ask_labels_on_launch
     assert jt.ask_timeout_on_launch
+    assert jt.opa_query_path == 'foo/bar'
 
     module_args = {
         'name': 'foo',
