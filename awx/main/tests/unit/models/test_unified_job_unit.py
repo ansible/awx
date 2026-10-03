@@ -21,6 +21,31 @@ def test_unified_job_workflow_attributes():
         assert job.workflow_job_id == 1
 
 
+def test_ancestor_job_returns_self_when_not_workflow():
+    job = UnifiedJob(id=1, name="job-1", launch_type="manual")
+    assert job.ancestor_job is job
+
+
+def test_ancestor_job_returns_self_when_workflow_job_deleted():
+    """Regression test for https://github.com/ansible/awx/issues/16250
+
+    When a workflow job is deleted while its child jobs still exist,
+    get_workflow_job() returns None. ancestor_job must not crash.
+    """
+    job = UnifiedJob(id=1, name="job-1", launch_type="workflow")
+    with mock.patch.object(UnifiedJob, 'get_workflow_job', return_value=None):
+        assert job.ancestor_job is job
+
+
+def test_ancestor_job_traverses_workflow():
+    with mock.patch('django.db.ConnectionRouter.db_for_write'):
+        wj = WorkflowJob(pk=1, launch_type="manual")
+        child = UnifiedJob(id=2, name="child", launch_type="workflow")
+        child.unified_job_node = WorkflowJobNode(workflow_job=wj)
+
+        assert child.ancestor_job is wj
+
+
 def test_organization_copy_to_jobs():
     """
     All unified job types should infer their organization from their template organization
