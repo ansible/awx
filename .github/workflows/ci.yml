@@ -226,7 +226,7 @@ jobs:
       - name: Checkout awx-operator
         uses: actions/checkout@v4
         with:
-          show-progress: false\
+          show-progress: false
           repository: ansible/awx-operator
           path: awx-operator
 
