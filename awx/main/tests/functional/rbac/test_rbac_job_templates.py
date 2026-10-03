@@ -290,3 +290,98 @@ class TestProjectOrganization:
         assert org_admin not in jt.admin_role
         patch(url=jt.get_absolute_url(), data={'project': project.id}, user=admin_user, expect=200)
         assert org_admin in jt.admin_role
+
+    def test_inventory_read_transfer_direct(self, patch):
+        orgs = []
+        invs = []
+        admins = []
+        for i in range(2):
+            org = Organization.objects.create(name='org{}'.format(i))
+            org_admin = User.objects.create(username='user{}'.format(i))
+            inv = Inventory.objects.create(organization=org, name='inv{}'.format(i))
+            org.auditor_role.members.add(org_admin)
+
+            orgs.append(org)
+            admins.append(org_admin)
+            invs.append(inv)
+
+        jt = JobTemplate.objects.create(name='foo', inventory=invs[0])
+        assert admins[0] in jt.read_role
+        assert admins[1] not in jt.read_role
+
+        jt.inventory = invs[1]
+        jt.save(update_fields=['inventory'])
+        assert admins[0] not in jt.read_role
+        assert admins[1] in jt.read_role
+
+    def test_inventory_read_transfer_indirect(self, patch):
+        orgs = []
+        admins = []
+        for i in range(2):
+            org = Organization.objects.create(name='org{}'.format(i))
+            org_admin = User.objects.create(username='user{}'.format(i))
+            org.auditor_role.members.add(org_admin)
+
+            orgs.append(org)
+            admins.append(org_admin)
+
+        inv = Inventory.objects.create(organization=orgs[0], name='inv{}'.format(i))
+
+        jt = JobTemplate.objects.create(name='foo', inventory=inv)
+        assert admins[0] in jt.read_role
+        assert admins[1] not in jt.read_role
+
+        inv.organization = orgs[1]
+        inv.save(update_fields=['organization'])
+        assert admins[0] not in jt.read_role
+        assert admins[1] in jt.read_role
+
+
+@pytest.mark.django_db
+def test_job_template_mixed_permission(rando, bob, project, inventory):
+    """The job template permissions are a bit tricky when it comes to jt admin and use permissions on related objects
+    This test tries to test different variation of use permissions
+    """
+    # Create new inventory and projects to associate
+    job_template = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory, ask_credential_on_launch=True)
+    access = JobTemplateAccess(rando)
+    inv1 = Inventory.objects.create(name='test', organization=project.organization)
+    proj1 = Project.objects.create(name='new_proj', scm_type=project.scm_type, playbook_files=project.playbook_files, organization=project.organization)
+    proj2 = Project.objects.create(name='proj2', scm_type=project.scm_type, playbook_files=project.playbook_files, organization=project.organization)
+
+    assert not access.can_change(job_template, {'project': proj1.pk})
+    assert not access.can_change(job_template, {'inventory': inv1.pk})
+
+    # assign permissions to new project to associate and existing job template admin and inv use
+    proj1.use_role.members.add(rando)
+    job_template.admin_role.members.add(rando)
+    job_template.inventory.use_role.members.add(rando)
+
+    assert not access.can_change(job_template, {'inventory': inv1.pk})
+    assert access.can_change(job_template, {'project': proj1.pk})
+
+    # remove use perm on inventory and add use to associated project
+    job_template.inventory.use_role.members.remove(rando)
+    job_template.project.use_role.members.add(rando)
+
+    assert not access.can_change(job_template, {'project': proj1.pk})  # blocked by inventory
+
+    proj1.use_role.members.remove(rando)
+    inv1.use_role.members.add(rando)
+
+    assert not access.can_change(job_template, {'project': proj2.pk})
+    assert access.can_change(job_template, {'project': job_template.project.pk})  # no change...
+    assert not access.can_change(job_template, {'inventory': inv1.pk})  # lacks inv1 access
+
+    # remove project and inventory permission
+    job_template.project.use_role.members.remove(rando)
+    job_template.update_fields(project=project)
+    job_template.inventory.use_role.members.remove(rando)
+
+    assert not access.can_change(job_template, {'project': proj1.pk})
+    assert not access.can_change(job_template, {'inventory': inv1.pk})
+
+    jt = JobTemplate.objects.create(name='test-jt', project=project, playbook='helloworld.yml', inventory=inventory, ask_credential_on_launch=True)
+    jt.admin_role.members.add(bob)
+    assert not access.can_change(jt, {'project': proj1.pk})
+    assert not access.can_change(jt, {'inventory': inv1.pk})
