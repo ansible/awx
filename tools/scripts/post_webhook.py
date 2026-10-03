@@ -128,7 +128,7 @@ def post_webhook(file, webhook_key, url, verbose, event_type, insecure):
         click.echo("Response body:")
     try:
         click.echo(json.dumps(r.json(), indent=4))
-    except:
+    except Exception:
         click.echo(r.text)
 
 
