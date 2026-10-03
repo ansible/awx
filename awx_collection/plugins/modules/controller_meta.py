@@ -49,7 +49,8 @@ version:
 
 
 EXAMPLES = '''
-- controller_meta:
+- name: Gather collection metadata
+  controller_meta:
   register: result
 
 - name: Show details about the collection
