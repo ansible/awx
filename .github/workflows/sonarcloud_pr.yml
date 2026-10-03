@@ -44,7 +44,7 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.repository == 'ansible/awx'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Download all individual coverage artifacts from CI workflow
       - name: Download coverage artifacts
@@ -207,7 +207,7 @@ jobs:
       github.event.workflow_run.event == 'push' &&
       github.repository == 'ansible/awx'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # Download all individual coverage artifacts from CI workflow (optional for branch pushes)
       - name: Download coverage artifacts
