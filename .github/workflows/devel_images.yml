@@ -3,6 +3,7 @@ name: Build/Push Development Images
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   DOCKER_CACHE: "--no-cache" # using the cache will not rebuild git requirements and other things
+  QUAY_OWNER: "aap"
 on:
   workflow_dispatch:
   push:
@@ -28,6 +29,8 @@ jobs:
         build-targets:
           - image-name: awx_devel
             make-target: docker-compose-buildx
+          - image-name: tower_devel
+            make-target: docker-compose-buildx
           - image-name: awx_kube_devel
             make-target: awx-kube-dev-buildx
           - image-name: awx
@@ -51,11 +54,21 @@ jobs:
         env:
           OWNER: '${{ github.repository_owner }}'
 
+      - name: Overwrite DEV_DOCKER_TAG_BASE to Quay registry
+        run: |
+          echo "DEV_DOCKER_TAG_BASE=quay.io/${{ env.QUAY_OWNER }}" >> $GITHUB_ENV
+        if: matrix.build-targets.image-name == 'tower_devel'
+
       - uses: ./.github/actions/setup-python
 
       - name: Log in to registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Log in to Quay
+        run: |
+          echo "${{ secrets.QUAY_TOKEN }}" | docker login quay.io -u ${{ vars.QUAY_USER }} --password-stdin
+        if: matrix.build-targets.image-name == 'tower_devel'
 
       - name: Setup node and npm for the new UI build
         uses: actions/setup-node@v2
