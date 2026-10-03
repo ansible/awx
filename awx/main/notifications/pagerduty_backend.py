@@ -3,10 +3,10 @@
 
 import json
 import logging
-import pygerduty
 
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
+from pagerduty import EventsApiV2Client
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
@@ -57,33 +57,44 @@ class PagerDutyBackend(AWXBaseEmailBackend, CustomNotificationBase):
         self.token = token
 
     def format_body(self, body):
-        # cast to dict if possible  # TODO: is it true that this can be a dict or str?
+        if isinstance(body, dict):
+            return body
+
         try:
             potential_body = json.loads(body)
             if isinstance(potential_body, dict):
-                body = potential_body
-        except json.JSONDecodeError:
+                return potential_body
+        except (TypeError, json.JSONDecodeError):
             pass
-
-        # but it's okay if this is also just a string
 
         return body
 
     def send_messages(self, messages):
         sent_messages = 0
 
-        try:
-            pager = pygerduty.PagerDuty(self.subdomain, self.token)
-        except Exception as e:
-            if not self.fail_silently:
-                raise
-            logger.error(smart_str(_("Exception connecting to PagerDuty: {}").format(e)))
         for m in messages:
             try:
-                pager.trigger_incident(m.recipients()[0], description=m.subject, details=m.body, client=m.from_email)
+                pager = EventsApiV2Client(m.recipients()[0])
+            except Exception as e:
+                logger.error(smart_str(_("Exception connecting to PagerDuty: {}").format(e)))
+                if not self.fail_silently:
+                    raise
+                continue
+
+            try:
+                body = self.format_body(m.body)
+                if not isinstance(body, dict):
+                    body = {"body": body}
+
+                pager.trigger(
+                    summary=m.subject,
+                    source=m.from_email,
+                    custom_details=body,
+                )
                 sent_messages += 1
             except Exception as e:
                 logger.error(smart_str(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:
                     raise
+
         return sent_messages
