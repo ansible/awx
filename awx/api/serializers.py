@@ -253,6 +253,70 @@ class PlainSerializerCleanTextMixin(CleanTextMixin):
         return text_fields, json_fields
 
 
+class _SubscriptionCredentialsFakeOpts:
+    """Minimal stand-in for Django model._meta (AAP-93690).
+
+    CleanTextMixin audit logs need app_label/object_name. OPTIONS metadata
+    (awx.api.metadata.get_field_info) walks Meta.model._meta.fields when
+    Meta.model is present -- an empty tuple keeps that path safe.
+    """
+
+    app_label = 'main'
+    object_name = 'SubscriptionCredentials'
+    verbose_name = 'subscription credentials'
+    fields = ()
+
+    @property
+    def concrete_model(self):
+        """Return the fake model class so CleanTextMixin can resolve the concrete model."""
+        return _SubscriptionCredentialsFakeModel
+
+
+class _SubscriptionCredentialsFakeModel:
+    """Stand-in for Meta.model on SubscriptionCredentialsSerializer (AAP-93690).
+
+    Never introspected for real fields -- PlainSerializerCleanTextMixin discovers
+    CharField entries from self.fields instead.
+    """
+
+    _meta = _SubscriptionCredentialsFakeOpts()
+
+
+class SubscriptionCredentialsSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
+    """Validate subscription credential fields via CleanTextMixin (AAP-93690).
+
+    Uses PlainSerializerCleanTextMixin because there is no Django model behind
+    the /api/v2/config/subscriptions/ endpoint. All four credential fields are
+    optional (allow_blank + allow_null + default='') because only one credential
+    pair is required per request and callers may send explicit JSON ``null`` for
+    unused fields; mutual-exclusion and required-pair validation lives in the
+    view's post() handler to preserve its existing error messages/status codes.
+
+    CleanText enforcement:
+      - subscriptions_client_id, subscriptions_username: Tier 2 (free-text)
+      - subscriptions_client_secret, subscriptions_password: excluded (secrets)
+    """
+
+    subscriptions_client_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_client_secret = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_username = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+    subscriptions_password = serializers.CharField(required=False, allow_blank=True, allow_null=True, default='', trim_whitespace=False)
+
+    # Secrets must not be validated by CleanText -- they may contain arbitrary
+    # characters and are never rendered in the UI.
+    excluded_fields = frozenset({'subscriptions_client_secret', 'subscriptions_password'})
+
+    # AC3: client_id and username must use Tier 2 (free-text), not Tier 1
+    # (resource-name). DEFAULT_NAME_FIELDS includes 'username', which would
+    # promote *any* field named exactly 'username' to Tier 1 -- our fields are
+    # 'subscriptions_username' (no match), but an empty set makes the intent
+    # explicit and future-proof.
+    name_fields = frozenset()
+
+    class Meta:
+        model = _SubscriptionCredentialsFakeModel
+
+
 class _CopySerializerFakeModel:
     """Stand-in for Meta.model on CopySerializer, a plain serializers.Serializer
     with no backing model of its own (it's reused across many resource types via
@@ -5792,24 +5856,33 @@ class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSeria
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
         res.update(dict(unified_jobs=self.reverse('api:schedule_unified_jobs_list', kwargs={'pk': obj.pk})))
-        if obj.unified_job_template:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
+        try:
+            ujt = obj.unified_job_template
+        except ObjectDoesNotExist:
+            ujt = None
+        if ujt:
+            res['unified_job_template'] = ujt.get_absolute_url(self.context.get('request'))
             try:
-                if obj.unified_job_template.project:
-                    res['project'] = obj.unified_job_template.project.get_absolute_url(self.context.get('request'))
+                if ujt.project:
+                    res['project'] = ujt.project.get_absolute_url(self.context.get('request'))
             except ObjectDoesNotExist:
                 pass
         if obj.inventory:
             res['inventory'] = obj.inventory.get_absolute_url(self.context.get('request'))
-        elif obj.unified_job_template and getattr(obj.unified_job_template, 'inventory', None):
-            res['inventory'] = obj.unified_job_template.inventory.get_absolute_url(self.context.get('request'))
+        elif ujt and getattr(ujt, 'inventory', None):
+            res['inventory'] = ujt.inventory.get_absolute_url(self.context.get('request'))
         return res
 
     def get_summary_fields(self, obj):
         summary_fields = super(ScheduleSerializer, self).get_summary_fields(obj)
 
-        if isinstance(obj.unified_job_template, SystemJobTemplate):
-            summary_fields['unified_job_template']['job_type'] = obj.unified_job_template.job_type
+        try:
+            ujt = obj.unified_job_template
+        except ObjectDoesNotExist:
+            return summary_fields
+
+        if isinstance(ujt, SystemJobTemplate):
+            summary_fields['unified_job_template']['job_type'] = ujt.job_type
 
         # We are not showing instance groups on summary fields because JTs don't either
 
@@ -5817,8 +5890,8 @@ class ScheduleSerializer(PromptFieldCleanTextMixin, LaunchConfigurationBaseSeria
             return summary_fields
 
         inventory = None
-        if obj.unified_job_template and getattr(obj.unified_job_template, 'inventory', None):
-            inventory = obj.unified_job_template.inventory
+        if ujt and getattr(ujt, 'inventory', None):
+            inventory = ujt.inventory
         else:
             return summary_fields
 

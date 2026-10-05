@@ -469,11 +469,12 @@ class TestGenericRun:
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with mock.patch('awx.main.tasks.jobs.shutil.copytree'), mock.patch('awx.main.tasks.jobs.evaluate_policy'):
-            with pytest.raises(Exception):
-                task.run(1)
+        with mock.patch('awx.main.tasks.jobs.update_model', return_value=job) as mock_update_model:
+            with mock.patch('awx.main.tasks.jobs.shutil.copytree'), mock.patch('awx.main.tasks.jobs.evaluate_policy'):
+                with pytest.raises(Exception):
+                    task.run(1)
 
-        update_model_call = task.update_model.call_args[1]
+        update_model_call = mock_update_model.call_args[1]
         assert 'OSError' in update_model_call['result_traceback']
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
@@ -574,11 +575,12 @@ class TestAdhocRun(TestJobExecution):
         task.model.objects.get = mock.Mock(return_value=adhoc_job)
         task.build_inventory = mock.Mock()
 
-        with pytest.raises(Exception):
-            task.run(adhoc_job.pk)
+        with mock.patch('awx.main.tasks.jobs.update_model', return_value=adhoc_job) as mock_update_model:
+            with pytest.raises(Exception):
+                task.run(adhoc_job.pk)
 
         call_args, _ = task.update_model.call_args_list[0]
-        update_model_call = task.update_model.call_args[1]
+        update_model_call = mock_update_model.call_args[1]
         assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
 
     '''

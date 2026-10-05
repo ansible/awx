@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0207_merge_0205_0206'),
+        ('main', '0208_cleanup_orphaned_token_schedules'),
     ]
 
     operations = [

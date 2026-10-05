@@ -244,6 +244,27 @@ def test_workflow_approval_node_copy(workflow_job_template, post, get, admin, or
 
 
 @pytest.mark.django_db
+def test_copy_post_requires_read_access(post, project, inventory, admin, alice, organization):
+    jt = JobTemplate.objects.create(
+        name='private-jt',
+        project=project,
+        inventory=inventory,
+        organization=organization,
+    )
+    copy_url = reverse('api:job_template_copy', kwargs={'pk': jt.pk})
+
+    project.use_role.members.add(alice)
+    inventory.use_role.members.add(alice)
+
+    post(copy_url, {'name': 'stolen copy'}, alice, expect=403)
+
+    jt_copy_pk = post(copy_url, {'name': 'legit copy'}, admin, expect=201).data['id']
+    jt_copy = JobTemplate.objects.get(pk=jt_copy_pk)
+    assert jt_copy.name == 'legit copy'
+    assert jt_copy.created_by == admin
+
+
+@pytest.mark.django_db
 def test_credential_copy(post, get, machine_credential, credentialtype_ssh, admin):
     assert get(reverse('api:credential_copy', kwargs={'pk': machine_credential.pk}), admin, expect=200).data['can_copy'] is True
     credential_copy_pk = post(reverse('api:credential_copy', kwargs={'pk': machine_credential.pk}), {'name': 'copied credential'}, admin, expect=201).data['id']

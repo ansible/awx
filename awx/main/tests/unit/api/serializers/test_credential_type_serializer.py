@@ -55,7 +55,7 @@ class TestCredentialTypeSerializerInjectsPatterns:
 
         fields = {f['id']: f for f in result['inputs']['fields']}
         assert fields['username'].get('pattern') == FAKE_TIER2_PATTERN
-        assert 'pattern_description' in fields['username']
+        assert 'patternDescription' in fields['username']
         assert 'pattern' not in fields['token']
         metadata = {f['id']: f for f in result['inputs']['metadata']}
         assert metadata['key'].get('pattern') == FAKE_TIER2_PATTERN

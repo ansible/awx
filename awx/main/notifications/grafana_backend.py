@@ -97,12 +97,17 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
             grafana_headers['Authorization'] = "Bearer {}".format(self.grafana_key)
             grafana_headers['Content-Type'] = "application/json"
             r = requests.post(
-                "{}/api/annotations".format(m.recipients()[0]), json=grafana_data, headers=grafana_headers, verify=(not self.grafana_no_verify_ssl)
+                "{}/api/annotations".format(m.recipients()[0]),
+                json=grafana_data,
+                headers=grafana_headers,
+                verify=(not self.grafana_no_verify_ssl),
+                allow_redirects=False,
             )
 
-            if r.status_code >= 400:
+            if r.status_code < 200 or r.status_code >= 300:
                 logger.error(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
                 if not self.fail_silently:
                     raise Exception(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
+                continue
             sent_messages += 1
         return sent_messages
