@@ -76,7 +76,7 @@ class TestJobSerializerGetRelated:
 class TestJobSerializerSubstitution:
     def test_survey_password_hide(self, mocker):
         job = mocker.MagicMock(
-            **{'display_extra_vars.return_value': '{\"secret_key\": \"$encrypted$\"}', 'extra_vars.return_value': '{\"secret_key\": \"my_password\"}'}
+            **{'display_extra_vars.return_value': '{"secret_key": "$encrypted$"}', 'extra_vars.return_value': '{"secret_key": "my_password"}'}
         )
         serializer = JobSerializer(job)
         rep = serializer.to_representation(job)

@@ -42,9 +42,7 @@ def migrate_event_data(apps, schema_editor):
 
             # create parent table
             cursor.execute(
-                f'CREATE TABLE {tblname} '
-                f'(LIKE tmp_{tblname} INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) '
-                f'PARTITION BY RANGE(job_created);'
+                f'CREATE TABLE {tblname} (LIKE tmp_{tblname} INCLUDING ALL, job_created TIMESTAMP WITH TIME ZONE NOT NULL) PARTITION BY RANGE(job_created);'
             )
 
             cursor.execute(f'DROP TABLE tmp_{tblname}')

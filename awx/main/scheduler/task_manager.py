@@ -12,6 +12,8 @@ import signal
 
 import redis
 
+from cryptography.fernet import InvalidToken
+
 # Django
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _, gettext_noop
@@ -256,8 +258,7 @@ class WorkflowManager(TaskBase):
                             )
                             display_list = [spawn_node.unified_job_template] + workflow_ancestors
                             job.job_explanation = gettext_noop(
-                                "Workflow Job spawned from workflow could not start because it "
-                                "would result in recursion (spawn order, most recent first: {})"
+                                "Workflow Job spawned from workflow could not start because it would result in recursion (spawn order, most recent first: {})"
                             ).format(', '.join('<{}>'.format(tmp) for tmp in display_list))
                         else:
                             logger.debug(
@@ -272,7 +273,10 @@ class WorkflowManager(TaskBase):
                         )
                     if can_start:
                         if workflow_job.start_args:
-                            start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
+                            try:
+                                start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
+                            except (ValueError, InvalidToken):
+                                start_args = {}
                         else:
                             start_args = {}
                         can_start = job.signal_start(**start_args)
@@ -344,7 +348,7 @@ class DependencyManager(TaskBase):
         if update.status in ['waiting', 'pending', 'running']:
             return False
 
-        return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
+        return bool((update.finished + timedelta(seconds=cache_timeout)) < tz_now())
 
     def get_or_create_project_update(self, project_id):
         project = self.all_projects.get(project_id, None)
@@ -363,7 +367,7 @@ class DependencyManager(TaskBase):
 
         try:
             start_args = json.loads(decrypt_field(task, field_name="start_args"))
-        except ValueError:
+        except (ValueError, InvalidToken):
             start_args = dict()
         # generator for update-on-launch inventory sources related to this task
         for inventory_source in self.all_inventory_sources.get(task.inventory_id, []):
@@ -687,6 +691,17 @@ class TaskManager(TaskBase):
             if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
+
+        # Reset waiting jobs whose controller_node was deprovisioned (e.g. K8s pod replaced).
+        # These jobs will never be picked up because no live node is listening for them.
+        registered_control_nodes = Instance.objects.filter(node_type__in=('control', 'hybrid')).values_list('hostname', flat=True)
+        orphaned_waiting = UnifiedJob.objects.filter(status='waiting').exclude(controller_node__in=registered_control_nodes)
+        for j in orphaned_waiting:
+            logger.warning(f'{j.controller_node} is not a registered instance; resetting {j.log_format} to pending')
+            j.status = 'pending'
+            j.controller_node = ''
+            j.execution_node = ''
+            j.save(update_fields=['status', 'controller_node', 'execution_node'])
 
     def process_tasks(self):
         # maintain a list of jobs that went to an early failure state,

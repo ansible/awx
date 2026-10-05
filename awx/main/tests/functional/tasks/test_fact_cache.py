@@ -171,7 +171,7 @@ class TestFinishFactCacheConcurrentProtection:
         )
 
         host.refresh_from_db()
-        assert host.ansible_facts == {}, 'Stale facts should have been cleared when the fact file is missing ' 'and ansible_facts_modified predates job_created'
+        assert host.ansible_facts == {}, 'Stale facts should have been cleared when the fact file is missing and ansible_facts_modified predates job_created'
 
 
 @pytest.mark.django_db

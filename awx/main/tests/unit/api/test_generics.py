@@ -31,7 +31,9 @@ def mock_organization():
 @pytest.fixture
 def parent_relationship_factory(mocker):
     def rf(serializer_class, relationship_name, relationship_value=mocker.Mock()):
-        mock_parent_relationship = mocker.MagicMock(**{'%s.add.return_value' % relationship_name: relationship_value})
+        mock_parent_relationship = mocker.MagicMock(
+            **{'%s.add.return_value' % relationship_name: relationship_value, '%s.contains.return_value' % relationship_name: False}
+        )
         mocker.patch('awx.api.generics.ParentMixin.get_parent_object', return_value=mock_parent_relationship)
 
         serializer = serializer_class()

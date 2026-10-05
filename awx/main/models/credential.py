@@ -40,13 +40,13 @@ from awx.main.fields import (
 from awx.main.utils import decrypt_field, classproperty, set_environ
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, PrimordialModel
-from awx.main.models.mixins import ResourceMixin
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models import Team, Organization
 from awx.main.utils import encrypt_field
+from awx.main.utils.lazy_registry import LazyLoadDict
 from awx_plugins.interfaces._temporary_private_licensing_api import detect_server_product_name
 
 __all__ = ['Credential', 'CredentialType', 'CredentialInputSource', 'build_safe_env']
@@ -76,7 +76,7 @@ def build_safe_env(env):
     return safe_env
 
 
-class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
+class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     """
     A credential contains information about how to talk to a remote resource
     Usually this is a SSH key location, and possibly an unlock password.
@@ -569,7 +569,7 @@ class CredentialTypeHelper:
 
 
 class ManagedCredentialType(SimpleNamespace):
-    registry = {}
+    registry = None  # initialized as LazyLoadDict after load_credentials is defined
 
 
 class CredentialInputSource(PrimordialModel):
@@ -661,6 +661,8 @@ def _is_oidc_namespace_disabled(ns):
 
 
 def load_credentials():
+    ManagedCredentialType.registry.clear()
+
     awx_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials')}
     supported_entry_points = {ep.name: ep for ep in entry_points(group='awx_plugins.managed_credentials.supported')}
     plugin_entry_points = awx_entry_points if detect_server_product_name() == 'AWX' else {**awx_entry_points, **supported_entry_points}
@@ -692,3 +694,8 @@ def load_credentials():
 
         plugin = ep.load()
         CredentialType.load_plugin(ns, plugin)
+
+
+# load_credentials writes directly into this dict via registry[ns] = ...,
+# LazyLoadDict just ensures it runs once before the first read access
+ManagedCredentialType.registry = LazyLoadDict(load_credentials)

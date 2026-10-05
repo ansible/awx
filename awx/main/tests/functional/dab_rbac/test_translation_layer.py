@@ -7,7 +7,8 @@ from crum import impersonate
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions, get_role_codenames, get_role_definition
-from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
+from awx.main.models import ActivityStream, User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
+from awx.main.constants import org_role_to_permission
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
@@ -42,6 +43,49 @@ def test_round_trip_roles(organization, rando, role_name, setup_managed_roles):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('custom_name', ('Test Custom 1', 'Test Custom Admin', 'This Is A Custom Admin', 'Organization Widget Admin'))
+def test_custom_role_with_unrecognized_name_has_no_legacy_role(organization, rando, setup_managed_roles, custom_name):
+    managed_rd = RoleDefinition.objects.get(name='Organization Project Admin')
+    custom_rd = RoleDefinition.objects.create_from_permissions(
+        name=custom_name,
+        permissions=managed_rd.permissions.values_list('codename', flat=True),
+        content_type=managed_rd.content_type,
+    )
+    assignment = custom_rd.give_permission(rando, organization)
+
+    assert get_role_from_object_role(assignment.object_role) is None
+
+
+@pytest.mark.django_db
+def test_custom_role_with_legacy_compatible_name_still_maps(project, rando, setup_managed_roles):
+    managed_rd = RoleDefinition.objects.get(name='Project Admin')
+    custom_rd = RoleDefinition.objects.create_from_permissions(
+        name='Custom Admin',
+        permissions=managed_rd.permissions.values_list('codename', flat=True),
+        content_type=managed_rd.content_type,
+    )
+    assignment = custom_rd.give_permission(rando, project)
+
+    assert get_role_from_object_role(assignment.object_role) == project.admin_role
+
+
+@pytest.mark.django_db
+def test_bulk_member_addition_records_one_entry_per_user(organization, rando, alice, setup_managed_roles):
+    """
+    Adding multiple users to a legacy role in one m2m .add() call syncs each user to the
+    new RBAC system individually (sync_members_to_new_rbac). The legacy-side add already
+    records one ActivityStream entry per user via rbac_activity_stream; the new-side mirror
+    must stay suppressed so this doesn't turn into two entries per user.
+    """
+    organization.admin_role.members.add(rando, alice)
+
+    assert RoleUserAssignment.objects.filter(user=rando, role_definition__name='Organization Admin').exists()
+    assert RoleUserAssignment.objects.filter(user=alice, role_definition__name='Organization Admin').exists()
+    assert ActivityStream.objects.filter(operation='associate', user=rando).count() == 1
+    assert ActivityStream.objects.filter(operation='associate', user=alice).count() == 1
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('model', sorted(permission_registry.all_registered_models, key=lambda cls: cls._meta.model_name))
 def test_role_migration_matches(request, model, setup_managed_roles):
     fixture_name = model._meta.verbose_name.replace(' ', '_')
@@ -57,14 +101,14 @@ def test_role_migration_matches(request, model, setup_managed_roles):
             rd = get_role_definition(old_role)
             new_codenames = set(rd.permissions.values_list('codename', flat=True))
             # all the old roles should map to a non-Compat role definition
+            rd_data = {}
             if 'Compat' not in rd.name:
                 model_rds = RoleDefinition.objects.filter(content_type=permission_registry.content_type_model.objects.get_for_model(obj))
-                rd_data = {}
-                for rd in model_rds:
-                    rd_data[rd.name] = list(rd.permissions.values_list('codename', flat=True))
-            assert (
-                'Compat' not in rd.name
-            ), f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+                for other_rd in model_rds:
+                    rd_data[other_rd.name] = list(other_rd.permissions.values_list('codename', flat=True))
+            assert 'Compat' not in rd.name, (
+                f'Permissions for old vs new roles did not match.\nold {field.name}: {old_codenames}\nnew:\n{json.dumps(rd_data, indent=2)}'
+            )
             assert new_codenames == set(old_codenames)
 
     # In the old system these models did not have object-level roles, all others expect some model roles
@@ -131,11 +175,11 @@ def test_organization_level_permissions(organization, inventory, setup_managed_r
     assert u1 not in organization.workflow_admin_role
     assert not (set(u1.has_roles.all()) & set(u2.has_roles.all()))  # user have no roles in common
 
-    # Old style
-    assert set(Organization.accessible_objects(u1, 'inventory_admin_role')) == set([organization])
-    assert set(Organization.accessible_objects(u2, 'inventory_admin_role')) == set()
-    assert set(Organization.accessible_objects(u1, 'workflow_admin_role')) == set()
-    assert set(Organization.accessible_objects(u2, 'workflow_admin_role')) == set([organization])
+    # Old style (converted to new style)
+    assert set(Organization.access_qs(u1, org_role_to_permission['inventory_admin_role'])) == set([organization])
+    assert set(Organization.access_qs(u2, org_role_to_permission['inventory_admin_role'])) == set()
+    assert set(Organization.access_qs(u1, org_role_to_permission['workflow_admin_role'])) == set()
+    assert set(Organization.access_qs(u2, org_role_to_permission['workflow_admin_role'])) == set([organization])
 
     # New style
     assert set(Organization.access_qs(u1, 'add_inventory')) == set([organization])
@@ -149,7 +193,7 @@ def test_organization_level_permissions(organization, inventory, setup_managed_r
 def test_organization_execute_role(organization, rando, setup_managed_roles):
     organization.execute_role.members.add(rando)
     assert rando in organization.execute_role
-    assert set(Organization.accessible_objects(rando, 'execute_role')) == set([organization])
+    assert set(Organization.access_qs(rando, org_role_to_permission['execute_role'])) == set([organization])
 
 
 @pytest.mark.django_db

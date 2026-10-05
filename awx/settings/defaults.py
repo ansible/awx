@@ -43,6 +43,11 @@ LISTENER_DATABASES = {
     }
 }
 
+# Optional manual override for statement_timeout (ms) on web worker DB
+# connections.  When running under uwsgi, the timeout is auto-derived from
+# the harakiri value.  Set this for non-uwsgi deployments or to override.
+DATABASE_STATEMENT_TIMEOUT = None
+
 # Whether or not the deployment is a K8S-based deployment
 # In K8S-based deployments, instances have zero capacity - all playbook
 # automation is intended to flow through defined Container Groups that
@@ -217,6 +222,9 @@ JOB_EVENT_WORKERS = 4
 
 # Minimum number of workers for the dispatcher (dispatcherd) process pool
 DISPATCHER_MIN_WORKERS = 4
+
+# Maximum number of events buffered per callback worker before flushing via bulk_create()
+JOB_EVENT_CALLBACK_BUFFER_SIZE = 1000
 
 # The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
@@ -413,6 +421,12 @@ CLUSTER_NODE_HEARTBEAT_PERIOD = 60
 CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
 
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
+
+# Seconds after a controller restart before an orphaned dispatched job is failed.
+# Jobs with work_unit_id set are skipped by the reaper and handled by the adoption loop
+# (_attempt_adoption_for_dispatched_jobs). This timeout is the maximum time we wait for
+# the EE to finish before giving up and failing the job.
+HADR_JOB_ADOPTION_TIMEOUT = 3600
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
@@ -448,7 +462,7 @@ DISPATCHER_SCHEDULE = {
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
-CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
+CACHES = {'default': {'BACKEND': 'ansible_base.lib.cache.redis_cache.DABRedisCache', 'LOCATION': 'unix:///var/run/redis/redis.sock?db=1'}}
 
 ROLE_SINGLETON_USER_RELATIONSHIP = ''
 ROLE_SINGLETON_TEAM_RELATIONSHIP = ''
@@ -1002,6 +1016,7 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
 METRICS_SERVICE_DISPATCHER = 'dispatcherd'
 METRICS_SERVICE_WEBSOCKETS = 'websockets'
+METRICS_SERVICE_INDIRECT_COUNTING = 'indirect_counting'
 
 METRICS_SUBSYSTEM_CONFIG = {
     'server': {
@@ -1038,8 +1053,12 @@ SPECTACULAR_SETTINGS = {
     # Use our custom schema class that handles swagger_topic and deprecated views
     'DEFAULT_SCHEMA_CLASS': 'awx.api.schema.CustomAutoSchema',
     'COMPONENT_SPLIT_REQUEST': True,
-    # Postprocessing hook to filter CredentialType enum values
-    'POSTPROCESSING_HOOKS': ['awx.api.schema.filter_credential_type_schema'],
+    # Postprocessing hooks for OpenAPI schema generation
+    'POSTPROCESSING_HOOKS': [
+        'awx.api.schema.filter_credential_type_schema',
+        'awx.api.schema.inject_ai_descriptions',
+        'awx.api.schema.inject_clean_text_pattern_components',
+    ],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,
@@ -1113,6 +1132,7 @@ SYSTEM_USERNAME = None
 # For indirect host query processing
 # if a job is not immediently confirmed to have all events processed
 # it will be eligable for processing after this number of minutes
+INDIRECT_NODE_COUNTING_ENABLED = True
 INDIRECT_HOST_QUERY_FALLBACK_MINUTES = 60
 
 # If an error happens in event collection, give up after this time
@@ -1139,7 +1159,6 @@ OPA_REQUEST_TIMEOUT = 1.5  # The number of seconds after which the connection to
 OPA_REQUEST_RETRIES = 2  # The number of retry attempts for connecting to the OPA server. Default is 2.
 
 # feature flags
-FEATURE_INDIRECT_NODE_COUNTING_ENABLED = False
 FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED = False
 
 # Dispatcher worker lifetime. If set to None, workers will never be retired

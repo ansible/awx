@@ -92,7 +92,7 @@ def test_team_accessible_by(team, user, project):
     u = user('team_member', False)
 
     team.member_role.children.add(project.use_role)
-    assert list(Project.accessible_objects(team, 'read_role')) == [project]
+    assert list(Project.access_qs(team, 'view')) == [project]
     assert u not in project.read_role
 
     team.member_role.members.add(u)
@@ -104,11 +104,11 @@ def test_team_accessible_objects(team, user, project):
     u = user('team_member', False)
 
     team.member_role.children.add(project.use_role)
-    assert len(Project.accessible_objects(team, 'read_role')) == 1
-    assert not Project.accessible_objects(u, 'read_role')
+    assert len(Project.access_qs(team, 'view')) == 1
+    assert not Project.access_qs(u, 'view')
 
     team.member_role.members.add(u)
-    assert len(Project.accessible_objects(u, 'read_role')) == 1
+    assert len(Project.access_qs(u, 'view')) == 1
 
 
 @pytest.mark.django_db
@@ -117,7 +117,7 @@ def test_team_admin_member_access(team, user, project):
     team.member_role.children.add(project.use_role)
     team.admin_role.members.add(u)
 
-    assert len(Project.accessible_objects(u, 'use_role')) == 1
+    assert len(Project.access_qs(u, 'use')) == 1
 
 
 @pytest.mark.django_db
@@ -154,7 +154,7 @@ def test_org_admin_team_access(organization, team, user, project):
 
     team.member_role.children.add(project.use_role)
 
-    assert len(Project.accessible_objects(u, 'use_role')) == 1
+    assert len(Project.access_qs(u, 'use')) == 1
 
 
 @pytest.mark.django_db

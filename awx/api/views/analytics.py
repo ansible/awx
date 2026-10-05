@@ -9,7 +9,7 @@ from django.utils import translation
 from awx.api.generics import APIView, Response
 from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
-from awx.main.utils import get_awx_version, set_environ
+from awx.main.utils import get_awx_version
 from awx.main.utils.analytics_proxy import OIDCClient
 from rest_framework import status
 
@@ -51,7 +51,7 @@ class AnalyticsRootView(APIView):
     name = _('Automation Analytics')
     resource_purpose = 'automation analytics endpoints'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of additional API endpoints related to analytics"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns available analytics API endpoints and their descriptions."})
     def get(self, request, format=None):
         data = OrderedDict()
         data['authorized'] = reverse('api:analytics_authorized', request=request)
@@ -210,32 +210,31 @@ class AnalyticsGenericView(APIView):
                 return self._error_response(ERROR_UNSUPPORTED_METHOD, method, remote=False, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
             url = self._get_analytics_url(request.path)
             using_subscriptions_credentials = False
-            with set_environ(**settings.AWX_TASK_ENV):
-                try:
-                    rh_user = getattr(settings, 'REDHAT_USERNAME', None)
-                    rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
-                    if not (rh_user and rh_password):
-                        rh_user = self._get_setting('SUBSCRIPTIONS_CLIENT_ID', None, ERROR_MISSING_USER)
-                        rh_password = self._get_setting('SUBSCRIPTIONS_CLIENT_SECRET', None, ERROR_MISSING_PASSWORD)
-                        using_subscriptions_credentials = True
+            try:
+                rh_user = getattr(settings, 'REDHAT_USERNAME', None)
+                rh_password = getattr(settings, 'REDHAT_PASSWORD', None)
+                if not (rh_user and rh_password):
+                    rh_user = self._get_setting('SUBSCRIPTIONS_CLIENT_ID', None, ERROR_MISSING_USER)
+                    rh_password = self._get_setting('SUBSCRIPTIONS_CLIENT_SECRET', None, ERROR_MISSING_PASSWORD)
+                    using_subscriptions_credentials = True
 
-                    client = OIDCClient(rh_user, rh_password)
-                    response = client.make_request(
-                        method,
-                        url,
-                        headers=headers,
-                        verify=settings.INSIGHTS_CERT_PATH,
-                        params=getattr(request, 'query_params', {}),
-                        json=getattr(request, 'data', {}),
-                        timeout=(31, 31),
-                    )
-                except requests.RequestException:
-                    # subscriptions credentials are not valid for basic auth, so just return 401
-                    if using_subscriptions_credentials:
-                        response = Response(status=status.HTTP_401_UNAUTHORIZED)
-                    else:
-                        logger.error("Automation Analytics API request failed, trying base auth method")
-                        response = self._base_auth_request(request, method, url, rh_user, rh_password, headers)
+                client = OIDCClient(rh_user, rh_password)
+                response = client.make_request(
+                    method,
+                    url,
+                    headers=headers,
+                    verify=settings.INSIGHTS_CERT_PATH,
+                    params=getattr(request, 'query_params', {}),
+                    json=getattr(request, 'data', {}),
+                    timeout=(31, 31),
+                )
+            except requests.RequestException:
+                # subscriptions credentials are not valid for basic auth, so just return 401
+                if using_subscriptions_credentials:
+                    response = Response(status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    logger.error("Automation Analytics API request failed, trying base auth method")
+                    response = self._base_auth_request(request, method, url, rh_user, rh_password, headers)
             #
             # Missing or wrong user/pass
             #

@@ -120,7 +120,7 @@ def test_nested_workflow_set_stats_precedence(live_tmp_folder, demo_inv, project
     reader_extra_vars = json.loads(reader_node.job.extra_vars)
 
     # var1: only set by outer job_first, no conflict — should propagate through
-    assert reader_extra_vars.get('var1') == 'outer-only', f'var1: expected "outer-only" (uncontested outer artifact), ' f'got "{reader_extra_vars.get("var1")}"'
+    assert reader_extra_vars.get('var1') == 'outer-only', f'var1: expected "outer-only" (uncontested outer artifact), got "{reader_extra_vars.get("var1")}"'
 
     # var2: set by outer as "should-be-overridden", then by inner as "from-inner"
     # Inner workflow's own ancestor artifacts should take precedence
@@ -132,7 +132,7 @@ def test_nested_workflow_set_stats_precedence(live_tmp_folder, demo_inv, project
     )
 
     # var3: only set by inner job_second — should propagate normally
-    assert reader_extra_vars.get('var3') == 'inner-only', f'var3: expected "inner-only" (inner-only artifact), ' f'got "{reader_extra_vars.get("var3")}"'
+    assert reader_extra_vars.get('var3') == 'inner-only', f'var3: expected "inner-only" (inner-only artifact), got "{reader_extra_vars.get("var3")}"'
 
 
 @pytest.mark.django_db(transaction=True)

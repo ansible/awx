@@ -150,13 +150,13 @@ def test_host_filter_unicode(post, admin_user, smart_inv_org):
             'name': 'unicode-smart',
             'kind': 'smart',
             'organization': smart_inv_org.pk,
-            'host_filter': u'ansible_facts__ansible_distribution=レッドハット',
+            'host_filter': 'ansible_facts__ansible_distribution=レッドハット',
         },
         user=admin_user,
         expect=201,
     )
     si = Inventory.objects.get(name='unicode-smart')
-    assert si.host_filter == u'ansible_facts__ansible_distribution=レッドハット'
+    assert si.host_filter == 'ansible_facts__ansible_distribution=レッドハット'
 
 
 @pytest.mark.django_db
@@ -168,7 +168,7 @@ def test_host_filter_invalid_ansible_facts_lookup(post, admin_user, smart_inv_or
             'name': 'invalid-lookup-smart',
             'kind': 'smart',
             'organization': smart_inv_org.pk,
-            'host_filter': u'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
+            'host_filter': 'ansible_facts__ansible_distribution__{}=cent'.format(lookup),
         },
         user=admin_user,
         expect=400,

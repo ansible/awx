@@ -5,7 +5,7 @@ import logging
 from dispatcherd.publish import task
 
 # AWX
-from awx.main.analytics.subsystem_metrics import DispatcherMetrics, CallbackReceiverMetrics
+from awx.main.analytics.subsystem_metrics import DispatcherMetrics, CallbackReceiverMetrics, IndirectCountingMetrics
 from awx.main.dispatch import get_task_queuename
 
 logger = logging.getLogger('awx.main.scheduler')
@@ -15,3 +15,4 @@ logger = logging.getLogger('awx.main.scheduler')
 def send_subsystem_metrics():
     DispatcherMetrics().send_metrics()
     CallbackReceiverMetrics().send_metrics()
+    IndirectCountingMetrics().send_metrics()

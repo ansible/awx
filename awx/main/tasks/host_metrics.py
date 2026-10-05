@@ -120,7 +120,6 @@ class HostMetricSummaryMonthlyTask:
         self.records_to_update = []
 
     def execute(self):
-
         with advisory_lock(
             HostMetricSummaryMonthlyTask.LOCK_KEY, lock_session_timeout_milliseconds=HostMetricSummaryMonthlyTask.LOCK_SESSION_TIMEOUT, wait=False
         ) as acquired:

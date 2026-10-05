@@ -28,7 +28,7 @@ class TestHostManagerDeferral:
         """ansible_facts should be in the deferred set for default Host queries."""
         qs = Host.objects.all()
         deferred = qs.query.deferred_loading[0]
-        assert 'ansible_facts' in deferred, f'ansible_facts should be deferred by the HostManager. ' f'Deferred fields: {deferred}'
+        assert 'ansible_facts' in deferred, f'ansible_facts should be deferred by the HostManager. Deferred fields: {deferred}'
 
     def test_ansible_facts_accessible_when_needed(self, inventory):
         """Deferred fields are still accessible — Django fetches on access."""

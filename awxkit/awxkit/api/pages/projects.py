@@ -70,7 +70,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             scm_url=scm_url,
             scm_branch=scm_branch,
             credential=credential,
-            **kwargs
+            **kwargs,
         )
         payload.ds = DSAdapter(self.__class__.__name__, self._dependency_store)
         return payload
@@ -84,7 +84,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             scm_branch=scm_branch,
             organization=organization,
             credential=credential,
-            **kwargs
+            **kwargs,
         )
         self.update_identity(Projects(self.connection).post(payload))
 

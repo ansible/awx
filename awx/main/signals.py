@@ -9,7 +9,7 @@ import json
 import sys
 
 # Django
-from django.db import connection
+from django.db import connection, models
 from django.conf import settings
 from django.db.models.signals import (
     pre_save,
@@ -26,6 +26,9 @@ from django.utils import timezone
 # Django-CRUM
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
+
+# Ansible_base app
+from ansible_base.rbac.models import RoleUserAssignment, RoleTeamAssignment
 
 # AWX
 from awx.main.models import (
@@ -53,8 +56,6 @@ from awx.main.models import (
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
-from awx.main.fields import is_implicit_parent
-
 from awx.main import consumers
 
 from awx.conf.utils import conf_to_dict
@@ -152,32 +153,85 @@ def sync_rbac_to_superuser_status(instance, sender, **kwargs):
                 user.save(update_fields=['is_superuser'])
 
 
-def rbac_activity_stream(instance, sender, **kwargs):
-    # Only if we are associating/disassociating
-    if kwargs['action'] in ['pre_add', 'pre_remove']:
-        if hasattr(instance, 'content_type'):  # Duck typing, migration-independent isinstance(instance, Role)
-            if instance.content_type_id is None and instance.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR:
-                # Skip entries for the system admin role because user serializer covers it
-                # System auditor role is shown in the serializer, but its relationship is
-                # managed separately, its value is incorrect, and a correction entry is needed
-                return
-            # This juggles which role to use, because could be A->B or B->A association
-            if sender.__name__ == 'Role_parents':
-                role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
-                # don't record implicit creation / parents in activity stream
-                if role is not None and is_implicit_parent(parent_role=role, child_role=instance):
-                    return
-            else:
-                role = instance
-            # If a singleton role is the instance, the singleton role is acted on
-            # otherwise the related object is considered to be acted on
-            if instance.content_object:
-                instance = instance.content_object
-        else:
-            # Association with actor, like role->user
-            role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+def _record_role_assignment_activity_stream(instance, operation):
+    if not activity_stream_enabled:
+        return
+    # Avoid flooding the activity stream when assignments are cascade-deleted as part
+    # of setup_managed_role_definitions() pruning stale managed RoleDefinitions on migrate.
+    if 'migrate' in sys.argv:
+        return
 
-        activity_stream_associate(sender, instance, role=role, **kwargs)
+    if isinstance(instance, RoleUserAssignment):
+        actor_field = 'user'
+        actor_obj = instance.user
+    else:
+        actor_field = 'team'
+        actor_obj = instance.team
+
+    content_object = None
+    if instance.object_id:
+        content_object = instance.content_object
+        if content_object is None and operation == 'disassociate':
+            # The target object is unresolvable, e.g. cascade-deleted along with its
+            # parent object, or a federated/remote content type. Skip recording a
+            # contentless entry rather than guessing at what changed.
+            # Note: FederatedForeignKey swallows ObjectDoesNotExist and returns None
+            # rather than raising, so there's no exception to catch here.
+            return
+
+    changes = {'role_definition': instance.role_definition.name, actor_field: getattr(actor_obj, 'username', None) or str(actor_obj)}
+
+    # object1 is the role's content object and object2 the associated user/team, matching
+    # the convention used for legacy Role.members association entries (rbac_activity_stream
+    # below), so this reads e.g. "disassociated organization X from user Y".
+    object1 = ''
+    activity_stream_cls = get_activity_stream_class()
+    if content_object is not None:
+        object1 = camelcase_to_underscore(content_object.__class__.__name__)
+        changes['object_type'] = object1
+        changes['object_id'] = content_object.pk
+        changes['object_name'] = str(content_object)
+        obj_rel = f'{content_object.__class__.__module__}.{content_object.__class__.__name__}.{instance.role_definition_id}'
+        if not hasattr(activity_stream_cls, object1):
+            logger.warning('ActivityStream has no relation field for object type %r; role assignment entry will not be linked to it', object1)
+            object1 = ''
+    else:
+        obj_rel = str(instance.role_definition_id)
+
+    activity_entry = activity_stream_cls(
+        operation=operation,
+        object1=object1,
+        object2=actor_field,
+        object_relationship_type=obj_rel,
+        changes=json.dumps(changes),
+        actor=get_current_user_or_none(),
+    )
+    activity_entry.save()
+    getattr(activity_entry, actor_field).add(actor_obj.pk)
+    if object1:
+        getattr(activity_entry, object1).add(content_object.pk)
+    connection.on_commit(lambda: emit_activity_stream_change(activity_entry))
+
+
+@receiver(post_save, sender=RoleUserAssignment)
+@receiver(post_save, sender=RoleTeamAssignment)
+def record_role_assignment_activity_stream(instance, created, **kwargs):
+    if created:
+        _record_role_assignment_activity_stream(instance, 'associate')
+
+
+@receiver(post_delete, sender=RoleUserAssignment)
+@receiver(post_delete, sender=RoleTeamAssignment)
+def record_role_unassignment_activity_stream(instance, origin=None, **kwargs):
+    # Skip cascade deletes from non-assignment origins, same reasoning as
+    # sync_assignments_to_old_rbac_delete: the actor or content object is itself
+    # being deleted in the same cascade, so linking a new activity stream entry
+    # to it would leave a dangling foreign key once the cascade completes.
+    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
+        return
+    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
+        return
+    _record_role_assignment_activity_stream(instance, 'disassociate')
 
 
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
@@ -200,8 +254,6 @@ def connect_computed_field_signals():
 connect_computed_field_signals()
 
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
-m2m_changed.connect(rbac_activity_stream, Role.members.through)
-m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 m2m_changed.connect(sync_rbac_to_superuser_status, Role.members.through)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
@@ -248,11 +300,6 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                         inventory.update_computed_fields()
                     except (Inventory.DoesNotExist, Project.DoesNotExist):
                         pass
-
-
-# Host.last_job and Host.last_job_host_summary are now derived from
-# JobHostSummary.latest_for_host / latest_job_for_host.
-# No signal handlers needed to maintain these denormalized FKs.
 
 
 # Set via ActivityStreamRegistrar to record activity stream events
@@ -488,16 +535,10 @@ def activity_stream_associate(sender, instance, **kwargs):
             getattr(activity_entry, object1).add(obj1.pk)
             getattr(activity_entry, object2).add(obj2_actual.pk)
 
-            # Record the role for RBAC changes
             if 'role' in kwargs:
                 role = kwargs['role']
                 if role.content_object is not None:
                     obj_rel = '.'.join([role.content_object.__module__, role.content_object.__class__.__name__, role.role_field])
-
-                # If the m2m is from the User side we need to
-                # set the content_object of the Role for our entry.
-                if type(instance) == User and role.content_object is not None:
-                    getattr(activity_entry, role.content_type.name.replace(' ', '_')).add(role.content_object)
 
                 activity_entry.role.add(role)
                 activity_entry.object_relationship_type = obj_rel
@@ -552,9 +593,117 @@ def deny_orphaned_approvals(sender, instance, **kwargs):
         approval.deny()
 
 
-def _handle_image_cleanup(removed_image, pk):
-    if (not removed_image) or ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
-        return  # if other EE objects reference the tag, then do not purge it
+def _extract_image_repo(image_ref):
+    """Return the repository part of an image reference, without tag or digest."""
+    if not image_ref:
+        return None
+
+    if '@' in image_ref:
+        return image_ref.split('@')[0]
+
+    if ':' in image_ref:
+        parts = image_ref.rsplit(':', 1)
+        # If the part after ':' contains '/' it's part of a path, not a tag
+        if '/' in parts[1]:
+            return image_ref
+        return parts[0]
+
+    return image_ref
+
+
+def _managed_setting_images():
+    """Collect all image references from managed EE settings."""
+    images = []
+    for ee_config in getattr(settings, 'GLOBAL_JOB_EXECUTION_ENVIRONMENTS', []):
+        image = ee_config.get('image')
+        if image:
+            images.append(image)
+    cp_image = getattr(settings, 'CONTROL_PLANE_EXECUTION_ENVIRONMENT', None)
+    if cp_image:
+        images.append(cp_image)
+    return images
+
+
+def _is_managed_image(image_ref, exclude_pk=None):
+    """Check if an image is referenced by managed EE settings or managed EE objects.
+
+    Matches both exact strings and same-repo different-reference-form (tag vs digest).
+    """
+    ref_repo = _extract_image_repo(image_ref)
+
+    for managed_image in _managed_setting_images():
+        if managed_image == image_ref:
+            logger.info("Skipping cleanup of %s - referenced in managed EE settings", image_ref)
+            return True
+        if ref_repo and _extract_image_repo(managed_image) == ref_repo and _different_ref_forms(image_ref, managed_image):
+            logger.info("Skipping cleanup of %s - same repository as managed setting image %s", image_ref, managed_image)
+            return True
+
+    qs = ExecutionEnvironment.objects.filter(managed=True, image=image_ref)
+    if exclude_pk is not None:
+        qs = qs.exclude(pk=exclude_pk)
+    if qs.exists():
+        logger.info("Skipping cleanup of %s - used by a managed EE", image_ref)
+        return True
+
+    return False
+
+
+def _has_digest(image_ref):
+    return '@' in image_ref
+
+
+def _different_ref_forms(ref_a, ref_b):
+    """True when one ref uses a digest and the other uses a tag (or bare name)."""
+    return _has_digest(ref_a) != _has_digest(ref_b)
+
+
+def _other_ee_shares_repo_with_different_ref(image_ref, repo, pk):
+    """Check if another EE uses the same repo with a different reference form (tag vs digest)."""
+    for ee in ExecutionEnvironment.objects.exclude(pk=pk).only('image', 'name'):
+        if not ee.image:
+            continue
+        if _extract_image_repo(ee.image) == repo and _different_ref_forms(image_ref, ee.image):
+            logger.info(
+                "Skipping cleanup of %s - EE '%s' uses %s from the same repository with a different reference form",
+                image_ref,
+                ee.name,
+                ee.image,
+            )
+            return True
+    return False
+
+
+def _handle_image_cleanup(removed_image, pk, new_image=None):
+    """Skip podman rmi when the image is managed, in use, or likely the same image under a different ref form."""
+    if not removed_image:
+        return
+
+    if _is_managed_image(removed_image, exclude_pk=pk):
+        return
+
+    if ExecutionEnvironment.objects.filter(image=removed_image).exclude(pk=pk).exists():
+        return
+
+    removed_repo = _extract_image_repo(removed_image)
+
+    # Update path: old and new share the same repo but differ in reference form
+    # (tag vs digest) — they likely point to the same underlying image.
+    if new_image and removed_repo:
+        new_repo = _extract_image_repo(new_image)
+        if removed_repo == new_repo and _different_ref_forms(removed_image, new_image):
+            logger.info(
+                "Skipping cleanup of %s - new image %s appears to be a different reference form for the same image",
+                removed_image,
+                new_image,
+            )
+            return
+
+    # Delete path: another EE references the same repo with a different reference
+    # form, so purging could strip names from a still-needed image.
+    if removed_repo and _other_ee_shares_repo_with_different_ref(removed_image, removed_repo, pk):
+        return
+
     handle_removed_image.delay(remove_images=[removed_image])
 
 
@@ -571,7 +720,7 @@ def remove_stale_image(sender, instance, created, **kwargs):
         return
     removed_image = instance._prior_values_store.get('image')
     if removed_image and removed_image != instance.image:
-        _handle_image_cleanup(removed_image, instance.pk)
+        _handle_image_cleanup(removed_image, instance.pk, new_image=instance.image)
 
 
 @receiver(post_save, sender=Session)

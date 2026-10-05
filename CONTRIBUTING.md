@@ -109,7 +109,7 @@ Install the pre-commit hook before contributing:
 make pre-commit
 ```
 
-When you attempt to perform a `git commit` there will be a pre-commit hook that gets run before the commit is allowed to your local repository. For example, python's [black](https://pypi.org/project/black/) will be run to test the formatting of any python files.
+When you attempt to perform a `git commit` there will be a pre-commit hook that gets run before the commit is allowed to your local repository. For example, [ruff](https://docs.astral.sh/ruff/) will be run to check the formatting of any python files.
 
 While you can use environment variables to skip the pre-commit hooks GitHub will run similar tests and prevent merging of PRs if the tests do not pass.
 
@@ -148,7 +148,7 @@ Fixes and Features for AWX will go through the Github pull request process. Subm
 Here are a few things you can do to help the visibility of your change, and increase the likelihood that it will be accepted:
 
 - No issues when running linters/code checkers
-  - Python: black: `(container)/awx_devel$ make black`
+  - Python: ruff: `(container)/awx_devel$ make format`
 - No issues from unit tests
   - Python: py.test: `(container)/awx_devel$ make test`
 - Write tests for new functionality, update/add tests for bug fixes

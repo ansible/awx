@@ -830,14 +830,13 @@ class MockCopy:
     events = []
     index = -1
 
-    def __init__(self, sql):
+    def __init__(self):
         self.events = []
-        parts = sql.split(' ')
-        tablename = parts[parts.index('from') + 1]
         for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
-            if cls._meta.db_table == tablename:
-                for event in cls.objects.order_by('start_line').all():
-                    self.events.append(event.stdout)
+            events = list(cls.objects.order_by('start_line').values_list('stdout', flat=True))
+            if events:
+                self.events = events
+                break
 
     def read(self):
         self.index = self.index + 1
@@ -858,9 +857,8 @@ def sqlite_copy(request, mocker):
     # copy is postgres-specific, and SQLite doesn't support it; mock its
     # behavior to test that it writes a file that contains stdout from events
 
-    def write_stdout(self, sql):
-        mock_copy = MockCopy(sql)
-        return mock_copy
+    def write_stdout(self, sql, params=None):
+        return MockCopy()
 
     mocker.patch.object(SQLiteCursorWrapper, 'copy', write_stdout, create=True)
 

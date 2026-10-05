@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         # delete all sso application content permissions
         # Added reverse_sql=migrations.RunSQL.noop to make this reversible for tests
         migrations.RunSQL(
-            "DELETE FROM auth_permission " "WHERE content_type_id IN (SELECT id FROM django_content_type WHERE app_label = 'sso');",
+            "DELETE FROM auth_permission WHERE content_type_id IN (SELECT id FROM django_content_type WHERE app_label = 'sso');",
             reverse_sql=migrations.RunSQL.noop,
         ),
         # delete sso application content type

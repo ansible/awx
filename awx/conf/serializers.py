@@ -1,9 +1,12 @@
+# Django
+from django.utils.functional import cached_property
+
 # Django REST Framework
 from rest_framework import serializers
 
 # AWX
 from awx.api.fields import VerbatimField
-from awx.api.serializers import BaseSerializer
+from awx.api.serializers import BaseSerializer, PlainSerializerCleanTextMixin
 from awx.conf.models import Setting
 from awx.conf import settings_registry
 
@@ -50,8 +53,58 @@ class SettingFieldMixin(object):
         return super(SettingFieldMixin, self).to_representation(obj)
 
 
-class SettingSingletonSerializer(serializers.Serializer):
-    """Present a group of settings (by category) as a single object."""
+class _SettingSingletonFakeOpts:
+    """Minimal stand-in for Django model._meta.
+
+    CleanTextMixin audit logs need app_label/object_name. OPTIONS metadata
+    (awx.api.metadata.get_field_info) also walks Meta.model._meta.fields when
+    Meta.model is present -- an empty tuple keeps that path from crashing.
+    """
+
+    app_label = 'conf'
+    object_name = 'SettingSingleton'
+    verbose_name = 'setting singleton'
+    fields = ()
+
+    @property
+    def concrete_model(self):
+        return _SettingSingletonFakeModel
+
+
+class _SettingSingletonFakeModel:
+    """Stand-in for Meta.model on SettingSingletonSerializer (plain Serializer).
+
+    Never introspected for real fields -- PlainSerializerCleanTextMixin discovers
+    CharField / ListField / DictField / JSONField entries from self.fields instead.
+    """
+
+    _meta = _SettingSingletonFakeOpts()
+
+
+class SettingSingletonSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
+    """Present a group of settings (by category) as a single object.
+
+    Uses PlainSerializerCleanTextMixin because there is no Django model whose
+    fields match the dynamic settings registry. Top-level CharFields get Tier
+    1/2 text validation; ListField/DictField/JSONField string children are
+    walked via CleanTextMixin's nested JSON validation path.
+    """
+
+    # CUSTOM_LOGIN_INFO deliberately allows HTML fragments (ui/conf.py).
+    # CUSTOM_LOGO is a data:image/...;base64,... URI; Tier 2 blocks data: schemes.
+    # AWX_TASK_ENV / GALAXY_TASK_ENV are key/value maps whose values often use
+    # shell/env expansion (${VAR}, $(...)) or similar — Tier 2's injection
+    # blocklist would reject legitimate automation env config.
+    # Encrypted settings (passwords/tokens/PEMs) are excluded dynamically below.
+    _ALWAYS_EXCLUDED = frozenset({'CUSTOM_LOGIN_INFO', 'CUSTOM_LOGO', 'AWX_TASK_ENV', 'GALAXY_TASK_ENV'})
+
+    class Meta:
+        model = _SettingSingletonFakeModel
+
+    @cached_property
+    def excluded_fields(self):
+        encrypted = frozenset(s for s in settings_registry.get_registered_settings() if settings_registry.is_setting_encrypted(s))
+        return self._ALWAYS_EXCLUDED | encrypted
 
     def __init__(self, instance=None, data=serializers.empty, **kwargs):
         # Instance (if given) should be an object with attributes for all of the
@@ -67,9 +120,12 @@ class SettingSingletonSerializer(serializers.Serializer):
         if self.context['view'].kwargs.get('category_slug', '') == 'all':
             for validate_func in settings_registry._validate_registry.values():
                 attrs = validate_func(self, attrs)
-            return attrs
-        custom_validate = settings_registry.get_registered_validate_func(category_slug)
-        return custom_validate(self, attrs) if custom_validate else attrs
+        else:
+            custom_validate = settings_registry.get_registered_validate_func(category_slug)
+            if custom_validate:
+                attrs = custom_validate(self, attrs)
+        # Chain into CleanTextMixin (via PlainSerializerCleanTextMixin).
+        return super().validate(attrs)
 
     def get_fields(self):
         fields = super(SettingSingletonSerializer, self).get_fields()

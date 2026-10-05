@@ -46,7 +46,6 @@ from awx.main.constants import (
 )
 from awx.main.models import (
     Instance,
-    Inventory,
     InventorySource,
     UnifiedJob,
     Job,
@@ -203,6 +202,42 @@ def dispatch_waiting_jobs(binder):
             kwargs = {}
         binder.control('run', data={'task': serialize_task(uj._get_task_class()), 'args': [uj.id], 'kwargs': kwargs, 'uuid': uj.celery_task_id})
         UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
+
+
+def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
+    """Commit terminal status, trigger notifications, and emit websocket status.
+
+    Shared by BaseTask.run() (normal path) and adoption (reattach_to_work_unit path).
+    Uses duck typing on the instance to schedule dependent task/workflow managers.
+    """
+    all_fields = runner_callback.get_delayed_update_fields()
+    if extra_fields:
+        all_fields.update(extra_fields)
+    instance = update_model(model, pk, status=status, select_for_update=True, **all_fields)
+    if not instance:
+        return None
+    if (instance.host_status_counts is not None) or (not runner_callback.wrapup_event_dispatched):
+        events_processed_hook(instance)
+    instance.websocket_emit_status(status)
+
+    # Schedule dependent task/workflow managers via duck typing on the instance.
+    # This works for all job types: Job, ProjectUpdate, InventoryUpdate, etc.
+    instance.log_lifecycle("finalize_run")
+
+    if hasattr(instance, 'unifiedjob_blocked_jobs') and instance.unifiedjob_blocked_jobs.exists():
+        ScheduleTaskManager().schedule()
+
+    if hasattr(instance, 'spawned_by_workflow') and instance.spawned_by_workflow:
+        ScheduleWorkflowManager().schedule()
+
+    # For jobs with inventory, schedule computed fields update (RunJob-specific finalization)
+    if hasattr(instance, 'inventory_id') and instance.inventory_id:
+        try:
+            update_inventory_computed_fields.delay(instance.inventory_id)
+        except Exception:
+            logger.exception(f'{instance.log_format} Error scheduling inventory computed fields update')
+
+    return instance
 
 
 class BaseTask(object):
@@ -428,7 +463,7 @@ class BaseTask(object):
 
         # Copy vendor collections to private_data_dir for indirect node counting
         # This makes external query files available to the callback plugin in EEs
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        if settings.INDIRECT_NODE_COUNTING_ENABLED:
             vendor_src = '/var/lib/awx/vendor_collections'
             vendor_dest = os.path.join(private_data_dir, 'vendor_collections')
             if os.path.exists(vendor_src):
@@ -486,15 +521,11 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
-        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
-            # maintain a list of host_name --> host_id
-            # so we can associate emitted events to Host objects
-            self.runner_callback.host_map[hostname] = hv.get('remote_tower_id', '')
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = dict(hostvars=True, towervars=True)
+        script_params = {"hostvars": True, "towervars": True}
         if hasattr(instance, 'job_slice_number'):
             script_params['slice_number'] = instance.job_slice_number
             script_params['slice_count'] = instance.job_slice_count
@@ -547,7 +578,13 @@ class BaseTask(object):
         os.close(self.lock_fd)
         self.lock_fd = None
 
-    def acquire_lock(self, project, unified_job_id=None):
+    def acquire_lock(self, project, unified_job_id=None, exclusive=True):
+        """Acquire a file lock on the project's local source tree.
+
+        Uses LOCK_EX (exclusive) when the tree will be modified, or LOCK_SH (shared)
+        when only reading (e.g. copying). Polls until the lock is granted, checking
+        for cancellation on each iteration.
+        """
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
 
@@ -557,7 +594,7 @@ class BaseTask(object):
             project.save()
             lock_path = project.get_lock_file()
             if lock_path is None:
-                raise RuntimeError(u'Invalid lock file path')
+                raise RuntimeError('Invalid lock file path')
 
         try:
             self.lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT)
@@ -565,11 +602,12 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
-                fcntl.lockf(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.lockf(self.lock_fd, lock_type | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
@@ -604,18 +642,6 @@ class BaseTask(object):
         Hook for any steps to run before job/task is marked as complete.
         """
         instance.log_lifecycle("post_run")
-
-    def final_run_hook(self, instance, status, private_data_dir):
-        """
-        Hook for any steps to run after job/task is marked as complete.
-        """
-        instance.log_lifecycle("finalize_run")
-
-        # Run task manager appropriately for speculative dependencies
-        if instance.unifiedjob_blocked_jobs.exists():
-            ScheduleTaskManager().schedule()
-        if instance.spawned_by_workflow:
-            ScheduleWorkflowManager().schedule()
 
     def should_use_fact_cache(self):
         return False
@@ -656,6 +682,7 @@ class BaseTask(object):
 
         self.safe_cred_env = {}
         private_data_dir = None
+        receptor_job = None
 
         try:
             if self.instance.execution_environment_id is None:
@@ -696,16 +723,9 @@ class BaseTask(object):
             self.build_extra_vars_file(self.instance, private_data_dir)
             args = self.build_args(self.instance, private_data_dir, passwords)
             env = self.build_env(self.instance, private_data_dir, private_data_files=private_data_files)
-            self.runner_callback.safe_env = build_safe_env(env)
-
-            self.runner_callback.instance = self.instance
-
-            # store a reference to the parent workflow job (if any) so we can include
-            # it in event data JSON
-            if self.instance.spawned_by_workflow:
-                self.runner_callback.parent_workflow_job_id = self.instance.get_workflow_job().id
-
-            self.runner_callback.job_created = str(self.instance.created)
+            # Initialize common callback fields so that the normal job path exercises
+            # the same configuration code as adoption.
+            self.runner_callback.configure_for_job(self.instance, safe_env=build_safe_env(env))
 
             credentials = self._credentials
 
@@ -788,6 +808,13 @@ class BaseTask(object):
                 self.unit_id = receptor_job.unit_id
 
                 if not res:
+                    # res is None when quota exceeded or other early-return condition.
+                    # Must release work unit here before returning, or it will leak.
+                    if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+                        try:
+                            receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+                        except Exception:
+                            logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")} on early return')
                     return
 
             status = res.status
@@ -825,23 +852,21 @@ class BaseTask(object):
         except Exception:
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
-        self.instance = self.update_model(pk)
-        self.instance = self.update_model(pk, status=status, select_for_update=True, **self.runner_callback.get_delayed_update_fields())
+        self.private_data_dir = private_data_dir
+        try:
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
+        finally:
+            # Guarantee work unit release even if finalization throws
+            if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+                try:
+                    receptor_job._receptor_release_work(receptor_job.receptor_ctl, status)
+                except Exception:
+                    logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
 
-        # Field host_status_counts is used as a metric to check if event processing is finished
-        # we send notifications if it is, if not, callback receiver will send them
         if not self.instance:
             logger.error(f'Unified job pk={pk} appears to be deleted while running')
             return
-        if (self.instance.host_status_counts is not None) or (not self.runner_callback.wrapup_event_dispatched):
-            events_processed_hook(self.instance)
 
-        try:
-            self.final_run_hook(self.instance, status, private_data_dir)
-        except Exception:
-            logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
-
-        self.instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
                 raise AwxTaskError.TaskCancel(self.instance, rc)
@@ -885,7 +910,9 @@ class SourceControlMixin(BaseTask):
         # Determine whether or not this project sync needs to populate the cache for Ansible content, roles and collections
         has_cache = os.path.exists(os.path.join(project.get_cache_path(), project.cache_id))
         # Galaxy requirements are not supported for manual projects
-        if project.scm_type and ((not has_cache) or branch_override):
+        # If a source update is scheduled, always include roles/collections because
+        # the new revision may have different requirements.
+        if project.scm_type and ((not has_cache) or branch_override or source_update_tag in sync_needs):
             sync_needs.extend(['install_roles', 'install_collections'])
 
         return sync_needs
@@ -956,10 +983,35 @@ class SourceControlMixin(BaseTask):
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
     def sync_and_copy(self, project, private_data_dir, scm_branch=None):
-        self.acquire_lock(project, self.instance.id)
+        """Copy project content to private_data_dir, syncing from SCM only if needed.
+
+        Acquires a shared lock first so concurrent copy-only jobs (e.g. slice jobs) can
+        run in parallel. Upgrades to an exclusive lock only when the project tree needs
+        to be modified (fresh clone, revision mismatch, or missing cache). DB state is
+        refreshed after each lock acquisition to account for concurrent updates.
+        """
+        # Always start with a shared lock so concurrent copy-only jobs don't serialize.
+        # LOCK_SH waits for any in-flight LOCK_EX to drain, making the tree stable.
+        # Refresh DB state after acquiring so get_sync_needs sees the current revision,
+        # then upgrade to LOCK_EX only if a sync is actually required.
+        self.acquire_lock(project, self.instance.id, exclusive=False)
         is_commit = False
         try:
             original_branch = None
+            if project.pk:
+                project.refresh_from_db()
+            sync_needs = self.get_sync_needs(project, scm_branch=scm_branch)
+            if sync_needs:
+                # Tree needs modification — upgrade to exclusive.
+                # POSIX advisory locks cannot be upgraded atomically: LOCK_SH must be
+                # released before LOCK_EX can be granted, leaving a window where another
+                # process may sync the project. Refresh after re-acquiring so
+                # sync_and_copy_without_lock operates on current DB state.
+                self.release_lock(project)
+                self.acquire_lock(project, self.instance.id, exclusive=True)
+                if project.pk:
+                    project.refresh_from_db()
+
             failed_reason = project.get_reason_if_failed()
             if failed_reason:
                 self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
@@ -1161,7 +1213,7 @@ class RunJob(SourceControlMixin, BaseTask):
         if 'callbacks_enabled' in config_values:
             env['ANSIBLE_CALLBACKS_ENABLED'] += ',' + config_values['callbacks_enabled']
 
-        if flag_enabled("FEATURE_INDIRECT_NODE_COUNTING_ENABLED"):
+        if settings.INDIRECT_NODE_COUNTING_ENABLED:
             env['AWX_COLLECT_HOST_QUERIES'] = '1'
             # Add vendor collections path for external query file discovery
             vendor_collections_path = os.path.join(CONTAINER_ROOT, 'vendor_collections')
@@ -1339,16 +1391,6 @@ class RunJob(SourceControlMixin, BaseTask):
                 inventory_id=job.inventory_id,
                 job_created=job.created,
             )
-
-    def final_run_hook(self, job, status, private_data_dir):
-        super(RunJob, self).final_run_hook(job, status, private_data_dir)
-        try:
-            inventory = job.inventory
-        except Inventory.DoesNotExist:
-            pass
-        else:
-            if inventory is not None:
-                update_inventory_computed_fields.delay(inventory.id)
 
 
 @task(queue=get_task_queuename)
@@ -1792,7 +1834,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             inventory_update.log_lifecycle("start_job_fact_cache")
             for input_inventory in inventory_update.inventory.input_inventories.all():
                 args.append('-i')
-                script_params = dict(hostvars=True, towervars=True)
+                script_params = {"hostvars": True, "towervars": True}
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
                 args.append(get_incontainer_path(source_inv_path, private_data_dir))
                 # Include any facts from input inventories so they can be used in filters

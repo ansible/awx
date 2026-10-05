@@ -358,3 +358,95 @@ def test_centrify_vault_credential_source(run_module, admin_user, organization, 
     assert cis.target_credential.name == tgt_cred.name
     assert cis.input_field_name == 'password'
     assert result['id'] == cis.pk
+
+
+@pytest.mark.django_db
+def test_credential_input_source_delete(run_module, admin_user, organization, source_cred_aim, silence_deprecation):
+    ct = CredentialType.defaults['ssh']()
+    ct.save()
+    tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'nick'})
+
+    result = run_module(
+        'credential_input_source',
+        dict(
+            source_credential=source_cred_aim.name,
+            target_credential=tgt_cred.name,
+            input_field_name='password',
+            metadata={"object_query": "Safe=SUPERSAFE;Object=MyAccount"},
+            state='present',
+        ),
+        admin_user,
+    )
+
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed'), result
+    assert CredentialInputSource.objects.count() == 1
+
+    delete_result = run_module(
+        'credential_input_source',
+        dict(
+            target_credential=tgt_cred.name,
+            input_field_name='password',
+            state='absent',
+        ),
+        admin_user,
+    )
+
+    assert not delete_result.get('failed', False), delete_result.get('msg', delete_result)
+    assert delete_result.get('changed'), delete_result
+    assert CredentialInputSource.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_credential_input_source_delete_nonexistent(run_module, admin_user, organization, source_cred_aim, silence_deprecation):
+    ct = CredentialType.defaults['ssh']()
+    ct.save()
+    tgt_cred = Credential.objects.create(name='Test Machine Credential', organization=organization, credential_type=ct, inputs={'username': 'bob'})
+
+    result = run_module(
+        'credential_input_source',
+        dict(
+            target_credential=tgt_cred.name,
+            input_field_name='password',
+            state='absent',
+        ),
+        admin_user,
+    )
+
+    assert not result.get('failed', False), result.get('msg', result)
+    assert not result.get('changed'), result
+    assert CredentialInputSource.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_credential_input_source_delete_missing_target_credential(run_module, admin_user, organization, silence_deprecation):
+    result = run_module(
+        'credential_input_source',
+        dict(
+            target_credential='nonexistent-credential',
+            input_field_name='password',
+            state='absent',
+        ),
+        admin_user,
+    )
+
+    assert not result.get('failed', False), result.get('msg', result)
+    assert not result.get('changed'), result
+    assert CredentialInputSource.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_credential_input_source_create_missing_target_credential(run_module, admin_user, organization, source_cred_aim, silence_deprecation):
+    result = run_module(
+        'credential_input_source',
+        dict(
+            source_credential=source_cred_aim.name,
+            target_credential='nonexistent-credential',
+            input_field_name='password',
+            state='present',
+        ),
+        admin_user,
+    )
+
+    assert result.get('failed', True), "Should fail when target credential doesn't exist with state: present"
+    assert CredentialInputSource.objects.count() == 0

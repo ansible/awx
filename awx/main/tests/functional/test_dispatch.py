@@ -160,3 +160,38 @@ class TestJobReaper(object):
         assert job.started > ref_time
         assert job.status == 'running'
         assert job.job_explanation == ''
+
+    def test_waiting_job_reset_when_controller_node_deprovisioned(self):
+        """When a controller pod is replaced (e.g. K8s rollout), waiting jobs
+        assigned to the now-gone controller_node should be reset to pending
+        by the task manager so they can be re-dispatched."""
+        from awx.main.scheduler import TaskManager
+
+        live_inst = Instance(hostname='awx-task-live', node_type='control')
+        live_inst.save()
+        # No instance record for 'awx-task-dead' — it was already deprovisioned
+        job = Job.objects.create(status='waiting', controller_node='awx-task-dead', execution_node='')
+
+        tm = TaskManager()
+        tm.reap_jobs_from_orphaned_instances()
+
+        job.refresh_from_db()
+        assert job.status == 'pending'
+        assert job.controller_node == ''
+        assert job.execution_node == ''
+
+    @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
+    def test_waiting_job_not_reset_when_controller_node_alive(self, node_type):
+        """Waiting jobs on a live control or hybrid node should not be touched."""
+        from awx.main.scheduler import TaskManager
+
+        live_inst = Instance(hostname='awx-task-live', node_type=node_type)
+        live_inst.save()
+        job = Job.objects.create(status='waiting', controller_node='awx-task-live', execution_node='')
+
+        tm = TaskManager()
+        tm.reap_jobs_from_orphaned_instances()
+
+        job.refresh_from_db()
+        assert job.status == 'waiting'
+        assert job.controller_node == 'awx-task-live'

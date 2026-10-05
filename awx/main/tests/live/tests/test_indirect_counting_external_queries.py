@@ -18,7 +18,6 @@ import time
 import yaml
 
 import pytest
-from flags.state import enable_flag, disable_flag, flag_enabled
 
 from awx.main.tests.live.tests.conftest import wait_for_events, unified_job_stdout
 from awx.main.tasks.host_indirect import save_indirect_host_entries
@@ -47,23 +46,6 @@ VENDOR_COLLECTIONS_BASE = '/var/lib/awx/vendor_collections'
 
 
 # --- Fixtures ---
-
-
-@pytest.fixture
-def enable_indirect_host_counting():
-    """Enable FEATURE_INDIRECT_NODE_COUNTING_ENABLED flag for the test.
-
-    Only creates a FlagState DB record if the flag isn't already enabled
-    (e.g. via development_defaults.py), to avoid UniqueViolation errors
-    and to avoid leaking state to other tests.
-    """
-    flag_name = "FEATURE_INDIRECT_NODE_COUNTING_ENABLED"
-    was_enabled = flag_enabled(flag_name)
-    if not was_enabled:
-        enable_flag(flag_name)
-    yield
-    if not was_enabled:
-        disable_flag(flag_name)
 
 
 @pytest.fixture
@@ -166,7 +148,7 @@ def wait_for_indirect_processing(job, expect_records=True, timeout=5):
 # --- AC8.1: External query populates IndirectManagedNodeAudit correctly ---
 
 
-def test_external_query_populates_audit_table(live_tmp_folder, run_job_from_playbook, enable_indirect_host_counting, vendor_collections_dir):
+def test_external_query_populates_audit_table(live_tmp_folder, run_job_from_playbook, vendor_collections_dir):
     """AC8.1: Job using demo.external.example with external query file populates
     IndirectManagedNodeAudit table correctly.
 
@@ -198,7 +180,7 @@ def test_external_query_populates_audit_table(live_tmp_folder, run_job_from_play
 # --- AC8.2: Precedence - embedded query takes precedence over external ---
 
 
-def test_embedded_query_takes_precedence(live_tmp_folder, run_job_from_playbook, enable_indirect_host_counting, vendor_collections_dir):
+def test_embedded_query_takes_precedence(live_tmp_folder, run_job_from_playbook, vendor_collections_dir):
     """AC8.2: When collection has both embedded and external query files,
     the embedded query takes precedence.
 
@@ -218,14 +200,14 @@ def test_embedded_query_takes_precedence(live_tmp_folder, run_job_from_playbook,
     # Verify the embedded query was used (includes device_type in facts)
     host_audit = IndirectManagedNodeAudit.objects.filter(job=job).first()
     assert host_audit.facts == {'device_type': 'Fake Host'}, (
-        'Expected embedded query output (with device_type). ' 'If facts is {}, the external query was incorrectly used instead.'
+        'Expected embedded query output (with device_type). If facts is {}, the external query was incorrectly used instead.'
     )
 
 
 # --- AC8.3: Version fallback to compatible version ---
 
 
-def test_fallback_to_compatible_version(live_tmp_folder, run_job_from_playbook, enable_indirect_host_counting, vendor_collections_dir):
+def test_fallback_to_compatible_version(live_tmp_folder, run_job_from_playbook, vendor_collections_dir):
     """AC8.3: Job using collection version with no exact query file falls back
     correctly to compatible version.
 
@@ -257,7 +239,7 @@ def test_fallback_to_compatible_version(live_tmp_folder, run_job_from_playbook, 
 # --- AC8.4: Fallback queries don't overcount ---
 
 
-def test_fallback_does_not_overcount(live_tmp_folder, run_job_from_playbook, enable_indirect_host_counting, vendor_collections_dir):
+def test_fallback_does_not_overcount(live_tmp_folder, run_job_from_playbook, vendor_collections_dir):
     """AC8.4: Fallback queries don't count MORE nodes than exact-version queries.
 
     Runs two jobs:
@@ -288,7 +270,7 @@ def test_fallback_does_not_overcount(live_tmp_folder, run_job_from_playbook, ena
 
     # Critical safety check: fallback must never count MORE than exact
     assert fallback_count <= exact_count, (
-        f'Overcounting detected! Fallback produced {fallback_count} records ' f'but exact match produced only {exact_count} records.'
+        f'Overcounting detected! Fallback produced {fallback_count} records but exact match produced only {exact_count} records.'
     )
 
     # Both use the same jq expression and same module, so counts should be equal
@@ -298,7 +280,7 @@ def test_fallback_does_not_overcount(live_tmp_folder, run_job_from_playbook, ena
 # --- AC8.5: Warning logs contain correct version information ---
 
 
-def test_fallback_log_contains_version_info(live_tmp_folder, run_job_from_playbook, enable_indirect_host_counting, vendor_collections_dir):
+def test_fallback_log_contains_version_info(live_tmp_folder, run_job_from_playbook, vendor_collections_dir):
     """AC8.5: Warning logs contain correct version information when fallback is used.
 
     Runs a job with verbosity=1 so callback plugin verbose output is captured.
@@ -326,7 +308,7 @@ def test_fallback_log_contains_version_info(live_tmp_folder, run_job_from_playbo
 # --- AC8.6: No counting when no compatible fallback exists ---
 
 
-def test_no_counting_without_compatible_fallback(live_tmp_folder, run_job_from_playbook, enable_indirect_host_counting, vendor_collections_dir):
+def test_no_counting_without_compatible_fallback(live_tmp_folder, run_job_from_playbook, vendor_collections_dir):
     """AC8.6: No counting occurs when no compatible fallback exists.
 
     Uses demo.external v3.0.0 with only v1.x external query files available.
@@ -343,5 +325,5 @@ def test_no_counting_without_compatible_fallback(live_tmp_folder, run_job_from_p
 
     # No audit records should exist for this job
     assert IndirectManagedNodeAudit.objects.filter(job=job).count() == 0, (
-        'IndirectManagedNodeAudit records were created despite no compatible ' 'fallback existing for demo.external v3.0.0 (only v1.x queries available).'
+        'IndirectManagedNodeAudit records were created despite no compatible fallback existing for demo.external v3.0.0 (only v1.x queries available).'
     )

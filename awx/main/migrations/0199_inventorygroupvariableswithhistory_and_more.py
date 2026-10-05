@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0198_alter_inventorysource_source_and_more'),
     ]
