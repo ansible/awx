@@ -174,7 +174,7 @@ class Metadata(metadata.SimpleMetadata):
         ):
             field_info['type'] = 'json'
         elif (
-            isinstance(field, ManyRelatedField) and field.field_name == 'credentials'
+            isinstance(field, ManyRelatedField) and field.field_name in ('credentials', 'instance_groups')
             # launch-time credentials
         ):
             field_info['type'] = 'list_of_ids'
