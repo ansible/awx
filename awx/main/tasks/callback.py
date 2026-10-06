@@ -87,6 +87,7 @@ class RunnerCallback:
         self.model = model
         self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.wrapup_event_dispatched = False
+        self.wrapup_event_created = None  # execution node's clock on the wrapup event; see event_handler
         self.artifacts_processed = False
         self.extra_update_fields = {}
         self.dedup_threshold = None  # skip events with counter <= this (safe contiguous range already in DB)
@@ -296,6 +297,14 @@ class RunnerCallback:
 
         if event_data.get('event', '') == self.wrapup_event_type:
             self.wrapup_event_dispatched = True
+            # Keep the execution node's own timestamp for when the play actually wrapped up.
+            # Adoption needs it to back-date `finished`, and it cannot read it back out of the
+            # database: dispatch above is asynchronous, so at the moment adoption finalizes the
+            # job only a prefix of these events has been persisted. Measured on hadr-rosa-a,
+            # that prefix ended ~194 s short of the real last event, which back-dated `finished`
+            # into the middle of the run. This costs one dict lookup, once per job, inside a
+            # branch that already exists — the per-event budget in the warning above is untouched.
+            self.wrapup_event_created = event_data.get('created')
 
         event_data.setdefault(self.event_data_key, self.instance.id)
         self.dispatcher.dispatch(event_data)

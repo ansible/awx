@@ -843,6 +843,17 @@ class BaseTask(object):
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
+            if receptor_job is not None and receptor_job.detached:
+                # The decision to walk away from a still-running EE was already made; an
+                # exception after that point is the shutdown taking the sockets down with
+                # it, not a failed job. Recording 'error' here would clear the 'running' +
+                # work_unit_id pair that is the only thing the orphan scan matches on, so
+                # the same reasoning as the clean detach above applies — leave it alone.
+                logger.info(
+                    f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} during shutdown and then errored, leaving it to be adopted',
+                    exc_info=True,
+                )
+                return
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
             logger.exception('%s Exception occurred while running task', self.instance.log_format)

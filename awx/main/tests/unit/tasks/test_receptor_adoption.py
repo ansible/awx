@@ -8,20 +8,28 @@ Covers:
   - should_update_config FileNotFoundError path
 """
 
+import concurrent.futures
 import json
 import signal
 import socket
+import threading
+import time
 from collections import namedtuple
+from datetime import timedelta
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from django.test import override_settings
+from django.utils.timezone import now
 
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.tasks.jobs import _finalize_job_run
 from awx.main.tasks.receptor import (
     AWXReceptorJob,
     _AdoptionTask,
+    _CountingReader,
+    _adopted_finished_at,
+    _adoption_stall_budget_exhausted,
     _finalize_adopted_job,
     _get_adoption_exit_code,
     _get_or_create_private_data_dir,
@@ -73,6 +81,17 @@ def _make_receptor_ctl(state='Succeeded', exit_code=None, detail='', stdout_size
     file_mock.readlines.return_value = [b'some output']
     ctl.get_work_results.return_value = (sock_mock, file_mock)
     return ctl
+
+
+def _stub_last_event(job, last=None):
+    """Give a Mock job an event queryset that answers the back-dating aggregate.
+
+    `_finalize_adopted_job` reads the last job event to recover when the playbook really
+    ended, so a bare Mock is no longer enough — `aggregate()` has to hand back a real dict.
+    `last=None` models a job with no events at all, which is the fall-back-to-now() path.
+    """
+    job.get_event_queryset.return_value.aggregate.return_value = {'last': last}
+    return job
 
 
 # ---------------------------------------------------------------------------
@@ -168,9 +187,31 @@ def test_process_phase_shutdown_signal_detaches(mock_signal, mock_connections):
 
 @patch('awx.main.tasks.receptor.connections')
 @patch('awx.main.tasks.receptor.signal_callback', return_value=True)
-def test_process_phase_cancel_signal_cancels_unit(mock_signal, mock_connections):
-    """SIGUSR1 is dispatcherd's cancel signal, and it settles the question without a DB read."""
+def test_process_phase_sigusr1_without_cancel_flag_detaches(mock_signal, mock_connections):
+    """SIGUSR1 alone does not mean the user canceled the job.
+
+    This is the exact production shutdown: dispatcherd signals every running worker with
+    SIGUSR1 while 'canceling for shutdown', so SIGUSR1 arrives with no SIGTERM and no
+    cancel_flag. Reading it as a cancel kills a healthy EE on every pod restart, which is
+    the whole failure adoption exists to prevent.
+    """
     rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock()
+    ctl = _make_receptor_ctl()
+
+    with patch.dict(signal_state.signal_flags, {signal.SIGUSR1: True}):
+        res = rj._process_phase(ctl)
+
+    assert res.status == 'canceled'
+    assert rj.detached is True
+    assert not any('work cancel' in str(call) for call in ctl.simple_command.call_args_list)
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=True)
+def test_process_phase_cancel_flag_cancels_unit(mock_signal, mock_connections):
+    """A real cancel is identified by the job row, which cancel() commits before it signals."""
+    rj = _make_receptor_job(cancel_flag=True)
     rj.processor = Mock()
     ctl = _make_receptor_ctl()
 
@@ -180,22 +221,28 @@ def test_process_phase_cancel_signal_cancels_unit(mock_signal, mock_connections)
     assert res.status == 'canceled'
     assert rj.detached is False
     ctl.simple_command.assert_any_call('work cancel unit-1')
-    rj.task.instance.refresh_from_db.assert_not_called()
 
 
 @patch('awx.main.tasks.receptor.connections')
 @patch('awx.main.tasks.receptor.signal_callback', return_value=True)
-def test_process_phase_cancel_flag_cancels_unit(mock_signal, mock_connections):
-    """A cancel that raced its signal is still a cancel — the job row is the tiebreaker."""
+def test_process_phase_cancel_survives_dead_control_socket(mock_signal, mock_connections):
+    """A failed 'work cancel' must not escape as an unhandled exception.
+
+    The receptor control socket lives in a sibling container that dies alongside this one,
+    so on shutdown the cancel attempt routinely hits ConnectionRefusedError. If that
+    propagates it lands in BaseTask.run()'s generic handler, which records the job 'error'
+    and destroys the running + work_unit_id pair the orphan scan matches on.
+    """
     rj = _make_receptor_job(cancel_flag=True)
     rj.processor = Mock()
     ctl = _make_receptor_ctl()
+    ctl.simple_command.side_effect = ConnectionRefusedError(111, 'Connection refused')
 
-    res = rj._process_phase(ctl)
+    with patch.dict(signal_state.signal_flags, {signal.SIGUSR1: True}):
+        res = rj._process_phase(ctl)
 
     assert res.status == 'canceled'
     assert rj.detached is False
-    ctl.simple_command.assert_any_call('work cancel unit-1')
 
 
 @patch('awx.main.tasks.receptor.connections')
@@ -305,6 +352,52 @@ def test_handle_work_error_status_command_raises():
     # should not raise; falls through and returns res
     result = rj._handle_work_error(ctl, err_res)
     assert result is err_res
+
+
+def test_handle_work_error_detaches_when_unit_status_unreachable():
+    """An unreachable receptor is not evidence that the job failed.
+
+    The second half of the production shutdown: the results stream dies with the pod and
+    ansible-runner reports 'error', but the control socket needed to check the unit is
+    gone too. Recording the error would clear the running + work_unit_id pair the orphan
+    scan matches on, failing a job whose EE is still working on another node.
+    """
+    rj = _make_receptor_job(cancel_flag=False)
+    ctl = Mock()
+    ctl.simple_command.side_effect = ConnectionResetError(104, 'Connection reset by peer')
+    err_res = _Result(status='error', rc=1)
+
+    result = rj._handle_work_error(ctl, err_res)
+
+    assert result is err_res
+    assert rj.detached is True
+    rj.task.runner_callback.delay_update.assert_not_called()
+
+
+def test_handle_work_error_does_not_detach_a_canceled_job():
+    """A canceled job is meant to stop, so an unreadable status must not keep it alive."""
+    rj = _make_receptor_job(cancel_flag=True)
+    ctl = Mock()
+    ctl.simple_command.side_effect = ConnectionResetError(104, 'Connection reset by peer')
+    err_res = _Result(status='error', rc=1)
+
+    result = rj._handle_work_error(ctl, err_res)
+
+    assert result is err_res
+    assert rj.detached is False
+
+
+def test_handle_work_error_still_reports_a_reachable_units_failure():
+    """The guard must only fire when the status is unknown — a real failure still reports."""
+    rj = _make_receptor_job(cancel_flag=False)
+    ctl = _make_receptor_ctl(state='Failed', detail='container image not found')
+    err_res = _Result(status='error', rc=1)
+
+    result = rj._handle_work_error(ctl, err_res)
+
+    assert result is err_res
+    assert rj.detached is False
+    rj.task.runner_callback.delay_update.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -474,6 +567,7 @@ def test_reattach_releases_work_unit_on_failure(mock_rmtree, mock_pdd, mock_rele
     job.status = 'running'
     job.execution_node = None
     job.job_env = {}
+    _stub_last_event(job)
     ctl = Mock()
     ctl.simple_command.side_effect = [
         {'StateName': ''},  # initial state check (unknown → _process_phase)
@@ -1020,7 +1114,8 @@ def test_finalize_adopted_job_successful(mock_finalize):
     job.status = 'running'
     job.started = None
     job.execution_node = None
-    callback = Mock()
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
 
     _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
 
@@ -1044,7 +1139,8 @@ def test_finalize_adopted_job_failed(mock_finalize):
     job.status = 'running'
     job.started = None
     job.execution_node = None
-    callback = Mock()
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
 
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=False)
 
@@ -1062,12 +1158,15 @@ def test_finalize_adopted_job_includes_elapsed_when_started(mock_finalize):
     job.status = 'running'
     job.started = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     job.execution_node = None
+    # The playbook ended 30 s in; the adoption that notices it happens much later.
+    _stub_last_event(job, job.started + timedelta(seconds=30))
     callback = Mock()
 
     _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
 
     extra_fields = mock_finalize.call_args[1].get('extra_fields') or mock_finalize.call_args[0][4]
-    assert 'elapsed' in extra_fields
+    assert extra_fields['elapsed'] == 30.0
+    assert extra_fields['finished'] == job.started + timedelta(seconds=30)
 
 
 @patch('awx.main.tasks.jobs._finalize_job_run')
@@ -1076,7 +1175,8 @@ def test_finalize_adopted_job_process_phase_failed_label(mock_finalize):
     job = Mock()
     job.status = 'running'
     job.started = None
-    callback = Mock()
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
 
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=True)
 
@@ -1097,7 +1197,8 @@ def test_finalize_adopted_job_records_metadata_when_process_phase_failed(mock_fi
     job.execution_node = 'remote-ee-9'
     job.status = 'running'
     job.started = None
-    callback = Mock()
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
 
     _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=True)
 
@@ -1118,7 +1219,8 @@ def test_finalize_adopted_job_stores_adoption_metadata(mock_finalize):
     job.execution_node = 'remote-ee-1'
     job.status = 'running'
     job.started = None
-    callback = Mock()
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
 
     _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
 
@@ -1146,6 +1248,7 @@ def test_finalize_adopted_job_preserves_runner_job_explanation(mock_finalize):
     job.execution_node = 'remote-ee-1'
     job.status = 'running'
     job.started = None
+    _stub_last_event(job)
 
     callback = RunnerCallback(model=None)
     # status_handler records the real failure cause during _process_phase
@@ -1156,6 +1259,126 @@ def test_finalize_adopted_job_preserves_runner_job_explanation(mock_finalize):
     explanation = callback.get_delayed_update_fields()['job_explanation']
     assert 'Job terminated due to error' in explanation
     assert 'surviving-ctrl-1' in explanation
+
+
+# ---------------------------------------------------------------------------
+# _adopted_finished_at — recovering the real end time of an adopted job
+# ---------------------------------------------------------------------------
+
+
+def test_adopted_finished_at_uses_the_wrapup_event_the_callback_saw():
+    """The playbook's own wrapup event, not the moment we got around to noticing it."""
+    started = now() - timedelta(seconds=300)
+    ended = started + timedelta(seconds=27)
+    job = _stub_last_event(Mock(started=started), None)
+
+    finished_at, lag = _adopted_finished_at(job, Mock(wrapup_event_created=ended))
+
+    assert finished_at == ended
+    # ~273 s sat between the playbook ending and this controller committing the status.
+    assert 270 < lag < 280
+
+
+def test_adopted_finished_at_parses_a_string_wrapup_timestamp():
+    """Runner hands the timestamp over as an ISO string, not a datetime."""
+    started = now() - timedelta(seconds=300)
+    ended = (started + timedelta(seconds=27)).replace(microsecond=0)
+    job = _stub_last_event(Mock(started=started), None)
+
+    finished_at, _ = _adopted_finished_at(job, Mock(wrapup_event_created=ended.isoformat()))
+
+    assert finished_at == ended
+
+
+def test_adopted_finished_at_assumes_utc_for_a_naive_wrapup_timestamp():
+    """A payload without an offset must not blow up on a naive/aware comparison."""
+    started = now() - timedelta(seconds=300)
+    ended = (started + timedelta(seconds=27)).replace(microsecond=0)
+    job = _stub_last_event(Mock(started=started), None)
+
+    finished_at, _ = _adopted_finished_at(job, Mock(wrapup_event_created=ended.replace(tzinfo=None).isoformat()))
+
+    assert finished_at == ended
+
+
+def test_adopted_finished_at_beats_the_database_which_lags_ingestion():
+    """The callback wins over the queryset — that is the whole point of plumbing it through.
+
+    Event dispatch is asynchronous, so at finalization time the database holds only a prefix
+    of the adopted job's events. Trusting it back-dates `finished` into the middle of the run.
+    """
+    started = now() - timedelta(seconds=300)
+    really_ended = started + timedelta(seconds=240)
+    job = _stub_last_event(Mock(started=started), started + timedelta(seconds=46))  # all that landed so far
+
+    finished_at, _ = _adopted_finished_at(job, Mock(wrapup_event_created=really_ended))
+
+    assert finished_at == really_ended
+
+
+def test_adopted_finished_at_discards_an_unparseable_wrapup_timestamp():
+    """A malformed runner payload degrades the measurement; it must not abort finalization."""
+    started = now() - timedelta(seconds=300)
+    last = started + timedelta(seconds=27)
+    job = _stub_last_event(Mock(started=started), last)
+
+    finished_at, _ = _adopted_finished_at(job, Mock(wrapup_event_created='not a timestamp'))
+
+    assert finished_at == last
+
+
+def test_adopted_finished_at_falls_back_to_the_database_without_a_callback_event():
+    """On a re-adoption this process never sees a wrapup event, but the old ones are persisted."""
+    started = now() - timedelta(seconds=300)
+    last = started + timedelta(seconds=27)
+    job = _stub_last_event(Mock(started=started), last)
+
+    finished_at, _ = _adopted_finished_at(job, Mock(wrapup_event_created=None))
+
+    assert finished_at == last
+
+
+def test_adopted_finished_at_falls_back_to_now_without_events():
+    """No events means no second clock to read — and for a wedged pod the gap is real work time."""
+    before = now()
+    job = _stub_last_event(Mock(started=before - timedelta(seconds=10)), None)
+
+    finished_at, lag = _adopted_finished_at(job)
+
+    assert before <= finished_at <= now()
+    assert lag == 0.0
+
+
+def test_adopted_finished_at_never_precedes_started():
+    """Clock skew on a mesh execution node must not produce a negative elapsed."""
+    started = now() - timedelta(seconds=60)
+    job = _stub_last_event(Mock(started=started), started - timedelta(seconds=90))
+
+    finished_at, _ = _adopted_finished_at(job)
+
+    assert finished_at == started
+
+
+def test_adopted_finished_at_never_lands_in_the_future():
+    """An execution node running ahead of us must not stamp a finished time we have not reached."""
+    started = now() - timedelta(seconds=60)
+    job = _stub_last_event(Mock(started=started), now() + timedelta(seconds=600))
+
+    finished_at, lag = _adopted_finished_at(job)
+
+    assert finished_at <= now()
+    assert lag >= 0.0
+
+
+def test_adopted_finished_at_tolerates_a_job_that_never_started():
+    """`started` is nullable on the model; the clamp has to survive it."""
+    last = now() - timedelta(seconds=45)
+    job = _stub_last_event(Mock(started=None), last)
+
+    finished_at, lag = _adopted_finished_at(job)
+
+    assert finished_at == last
+    assert 40 < lag < 50
 
 
 # ---------------------------------------------------------------------------
@@ -1314,7 +1537,29 @@ def test_adopt_remote_work_json_fallback_with_tls_and_sign(mock_sign, mock_tls):
 
     payload = json.loads(ctl.writestr.call_args[0][0].rstrip())
     assert payload['tlsclient'] == 'my-tls'
-    assert payload['signwork'] is True
+    assert payload['signwork'] == 'true'
+
+
+@patch('awx.main.tasks.receptor.get_tls_client', return_value=None)
+@patch('awx.main.tasks.receptor.work_signing_enabled', return_value=True)
+def test_adopt_remote_work_json_fallback_signwork_is_a_string_not_a_bool(mock_sign, mock_tls):
+    """signwork must be the *string* "true", never a JSON boolean.
+
+    receptor's boolFromMap() asserts value.(string) and accepts only "true"/"false".
+    A JSON bool fails that assertion, and the adopt handler discards the error and
+    defaults to signWork=false. The adopted unit then sends `work results` unsigned,
+    the remote rejects it, and remote_work.go loops forever on "did not stream
+    results" — the stream delivers 0 bytes. receptorctl's own submit_work() sends
+    the string, which is why only adoptions were affected.
+    """
+    ctl = Mock(spec=['connect', 'writestr', 'read_and_parse_json'])  # no adopt_work
+    ctl.read_and_parse_json.return_value = {}
+
+    adopt_remote_work(ctl, node='ee-node', unit_id='u4', config_data={})
+
+    raw = ctl.writestr.call_args[0][0]
+    assert '"signwork": true' not in raw
+    assert isinstance(json.loads(raw.rstrip())['signwork'], str)
 
 
 # ---------------------------------------------------------------------------
@@ -1933,3 +2178,310 @@ def test_adoption_finalizes_when_stream_fails_but_unit_succeeded():
     assert result is True, "Adoption should be finalized when unit is Succeeded"
     job.refresh_from_db()
     assert job.status == 'successful', "Job should be marked successful when unit Succeeded"
+
+
+# ---------------------------------------------------------------------------
+# Stalled results stream (AAP-89602 follow-up)
+#
+# Receptor can adopt a work unit's metadata while its stdout monitor never manages to
+# reach the execution node. The unit then reports a terminal state with a non-zero
+# StdoutSize copied from the remote, while the local stdout file stays empty — so the
+# results stream delivers nothing and never EOFs, and the dispatcher worker blocks
+# forever. These cover the watchdog that breaks that deadlock.
+# ---------------------------------------------------------------------------
+
+
+def _stalling_reader(bytes_read=0, idle_for=999):
+    """A _CountingReader-shaped stub that has read `bytes_read` and been idle `idle_for`s."""
+    reader = Mock()
+    reader.bytes_read = bytes_read
+    reader.last_progress = time.monotonic() - idle_for
+    return reader
+
+
+def test_counting_reader_tallies_readline_and_read():
+    inner = MagicMock()
+    inner.readline.side_effect = [b'abc\n', b'de\n']
+    inner.read.return_value = b'fghi'
+    reader = _CountingReader(inner)
+
+    assert reader.readline() == b'abc\n'
+    assert reader.bytes_read == 4
+    assert reader.readline() == b'de\n'
+    assert reader.bytes_read == 7
+    assert reader.read() == b'fghi'
+    assert reader.bytes_read == 11
+
+
+def test_counting_reader_empty_read_does_not_advance_progress():
+    """An empty read is EOF, not progress — it must not reset the idle clock."""
+    inner = MagicMock()
+    inner.readline.return_value = b''
+    reader = _CountingReader(inner)
+    reader.last_progress = time.monotonic() - 500
+
+    before = reader.last_progress
+    assert reader.readline() == b''
+
+    assert reader.bytes_read == 0
+    assert reader.last_progress == before
+
+
+def test_counting_reader_proxies_unknown_attributes():
+    inner = MagicMock()
+    inner.fileno.return_value = 7
+    reader = _CountingReader(inner)
+
+    assert reader.fileno() == 7
+    reader.close()
+    inner.close.assert_called_once()
+
+
+def test_stream_is_stalled_false_before_idle_timeout():
+    """Still receiving data — never ask receptor anything."""
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    ctl = Mock()
+
+    assert rj._stream_is_stalled(ctl, _stalling_reader(bytes_read=10, idle_for=5)) is False
+    ctl.simple_command.assert_not_called()
+
+
+def test_stream_is_stalled_false_while_unit_still_running():
+    """A running job may legitimately emit nothing for a long time."""
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running', 'StdoutSize': 5000}
+
+    assert rj._stream_is_stalled(ctl, _stalling_reader()) is False
+
+
+def test_stream_is_stalled_false_when_all_bytes_received():
+    """Terminal and idle, but we already have everything — this is normal end of stream."""
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'StdoutSize': 5000}
+
+    assert rj._stream_is_stalled(ctl, _stalling_reader(bytes_read=5000)) is False
+
+
+def test_stream_is_stalled_false_when_status_query_raises():
+    """Without a status we cannot prove a stall, so keep waiting rather than abandon."""
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    ctl = Mock()
+    ctl.simple_command.side_effect = RuntimeError('socket closed')
+
+    assert rj._stream_is_stalled(ctl, _stalling_reader()) is False
+
+
+def test_stream_is_stalled_true_on_terminal_idle_short_read():
+    """The real bug: Succeeded with StdoutSize 194807 and nothing delivered locally."""
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'StdoutSize': 194807}
+
+    assert rj._stream_is_stalled(ctl, _stalling_reader(bytes_read=0)) is True
+
+
+def test_await_processor_without_timeout_never_polls_receptor():
+    """Normal job submission must be completely untouched by the watchdog."""
+    rj = _make_receptor_job()
+    assert rj.stream_idle_timeout is None
+    ctl = Mock()
+    future = Mock()
+    future.result.return_value = _Result(status='successful', rc=0)
+
+    res = rj._await_processor(future, ctl, Mock(), Mock())
+
+    assert res.status == 'successful'
+    future.result.assert_called_once_with()
+    ctl.simple_command.assert_not_called()
+    assert rj.stream_stalled is False
+
+
+def test_await_processor_shuts_down_socket_on_stall():
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    ctl = Mock()
+    resultsock = Mock()
+    stalled_res = _Result(status='error', rc=1)
+    future = Mock()
+    future.result.side_effect = [concurrent.futures.TimeoutError(), stalled_res]
+
+    with patch.object(AWXReceptorJob, '_stream_is_stalled', return_value=True):
+        res = rj._await_processor(future, ctl, Mock(), resultsock)
+
+    assert rj.stream_stalled is True
+    assert res.status == 'error'
+    resultsock.shutdown.assert_called_once_with(socket.SHUT_RDWR)
+
+
+def test_await_processor_keeps_waiting_while_not_stalled():
+    """A slow but healthy stream must not be abandoned."""
+    rj = _make_receptor_job()
+    rj.stream_idle_timeout = 120
+    good_res = _Result(status='successful', rc=0)
+    future = Mock()
+    future.result.side_effect = [concurrent.futures.TimeoutError(), good_res]
+    resultsock = Mock()
+
+    with patch.object(AWXReceptorJob, '_stream_is_stalled', return_value=False):
+        res = rj._await_processor(future, Mock(), Mock(), resultsock)
+
+    assert rj.stream_stalled is False
+    assert res.status == 'successful'
+    resultsock.shutdown.assert_not_called()
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor._adoption_stall_budget_exhausted', return_value=False)
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_stalled_stream_within_budget_defers(mock_rmtree, mock_pdd, mock_release, mock_process, mock_budget, mock_dedup, mock_finalize):
+    """Deferring keeps the unit alive so a later attempt can stream the full event set."""
+    job = Mock()
+    job.id = 1
+    job.work_unit_id = 'unit-1'
+    job.spawned_by_workflow = False
+    job.status = 'running'
+    job.started = None
+    job.execution_node = 'ee-node'
+    job.job_env = {}
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'StdoutSize': 194807}
+    mock_process.return_value = _Result(status='error', rc=1)
+
+    with patch.object(AWXReceptorJob, 'stream_stalled', True):
+        result = reattach_to_work_unit(job, ctl)
+
+    assert result is False, 'a stalled stream inside the budget must defer, not finalize'
+    mock_release.assert_not_called()
+    mock_finalize.assert_not_called()
+
+
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor.invoke_adoption_hooks', return_value=(True, {}))
+@patch('awx.main.tasks.receptor._build_adoption_callback')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor._adoption_stall_budget_exhausted', return_value=True)
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_stalled_stream_past_budget_finalizes_from_unit_status(
+    mock_rmtree, mock_pdd, mock_release, mock_process, mock_budget, mock_dedup, mock_callback, mock_hooks, mock_finalize
+):
+    """The truncated stream reads as 'error'; the unit status says the job succeeded.
+
+    The unit status is the truthful source. Recording this job as failed — the behaviour
+    before the stall branch existed — would be wrong, and releasing the unit would destroy
+    the output that is still sitting on the execution node.
+    """
+    job = Mock()
+    job.id = 1
+    job.work_unit_id = 'unit-1'
+    job.spawned_by_workflow = False
+    job.status = 'running'
+    job.started = None
+    job.execution_node = 'ee-node'
+    job.job_env = {}
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': '', 'StdoutSize': 194807}
+    mock_process.return_value = _Result(status='error', rc=1)
+
+    with patch.object(AWXReceptorJob, 'stream_stalled', True):
+        result = reattach_to_work_unit(job, ctl)
+
+    assert result is True
+    mock_release.assert_called_once()
+    assert mock_finalize.call_args.kwargs['final_status'] == 'successful'
+    assert mock_finalize.call_args.args[2] == 0, 'exit code must come from the unit, not the failed stream'
+
+    explanation = mock_callback.return_value.delay_update.call_args.kwargs['job_explanation']
+    assert 'could not be retrieved' in explanation
+
+
+@patch('awx.main.tasks.receptor.settings')
+def test_adoption_stall_budget_exhausted_uses_last_event_time(mock_settings):
+    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Mock()
+    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': now() - timedelta(seconds=7200)}
+
+    assert _adoption_stall_budget_exhausted(job) is True
+
+
+@patch('awx.main.tasks.receptor.settings')
+def test_adoption_stall_budget_not_exhausted_for_recent_event(mock_settings):
+    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Mock()
+    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': now() - timedelta(seconds=60)}
+
+    assert _adoption_stall_budget_exhausted(job) is False
+
+
+@patch('awx.main.tasks.receptor.settings')
+def test_adoption_stall_budget_falls_back_to_job_started(mock_settings):
+    """A job that never emitted an event is measured from when it started."""
+    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Mock()
+    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': None}
+    job.started = now() - timedelta(seconds=7200)
+
+    assert _adoption_stall_budget_exhausted(job) is True
+
+
+@patch('awx.main.tasks.receptor.settings')
+def test_adoption_stall_budget_never_exhausted_without_timestamps(mock_settings):
+    """No clock to measure against — defer rather than finalize on a guess."""
+    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Mock()
+    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': None}
+    job.started = None
+
+    assert _adoption_stall_budget_exhausted(job) is False
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_breaks_out_of_a_stream_that_never_delivers(mock_signal, mock_connections):
+    """Reproduces the production hang end-to-end through the real _process_phase.
+
+    The unit reports Succeeded with StdoutSize 194807 while the local stdout file is
+    empty, so the processor thread sits in readline() on a stream nobody will ever write
+    to. Before the watchdog this wedged the dispatcher worker permanently.
+    """
+    rj = _make_receptor_job(unit_id='unit-stalled')
+    rj.stream_idle_timeout = 0  # treat the stream as idle straight away
+    rj.STREAM_POLL_INTERVAL = 0.05
+
+    torn_down = threading.Event()
+
+    inner = MagicMock()
+    inner.readline.side_effect = lambda *a: b'' if torn_down.wait(10) else b''
+
+    sock = Mock(spec=socket.socket)
+    sock.shutdown.side_effect = lambda *a: torn_down.set()
+
+    ctl = Mock()
+    ctl.get_work_results.return_value = (sock, inner)
+    ctl.simple_command.return_value = {'StateName': 'Succeeded', 'StdoutSize': 194807, 'Detail': 'exit status 0'}
+
+    def fake_processor(reader):
+        while reader.readline():
+            pass
+        return _Result(status='error', rc=1)
+
+    rj.processor = fake_processor
+
+    res = rj._process_phase(ctl)
+
+    assert rj.stream_stalled is True, 'the watchdog must recognise a stream that will never deliver'
+    assert res.status == 'error'
+    sock.shutdown.assert_called_once_with(socket.SHUT_RDWR)

@@ -104,6 +104,39 @@ def test_run_leaves_detached_job_running_and_adoptable(jt_linked, execution_envi
 
 
 @pytest.mark.django_db
+def test_run_leaves_detached_job_running_when_shutdown_raises(jt_linked, execution_environment, mocker):
+    """Detaching must survive an exception thrown after the decision to detach was made.
+
+    Everything the shutdown path touches afterwards — the receptor control socket, the
+    results socket — is dying at the same moment, so it can fail. Reaching the generic
+    handler would mark the job 'error' and strand the live EE, which is the one outcome
+    detaching exists to avoid. The decision, not a clean return, is what counts.
+    """
+    job = jt_linked.create_unified_job()
+    job.status = 'running'
+    job.work_unit_id = 'unit-detach'
+    job.execution_environment = execution_environment
+    job.save()
+
+    receptor_job = _detached_receptor_job(mocker)
+    receptor_job.run.side_effect = ConnectionRefusedError(111, 'Connection refused')
+    mocker.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job)
+    mocker.patch.object(RunJob, 'pre_run_hook')
+    mocker.patch.object(RunJob, 'build_project_dir')
+    mock_finalize = mocker.patch('awx.main.tasks.jobs._finalize_job_run')
+    mock_post_run = mocker.patch.object(RunJob, 'post_run_hook')
+
+    RunJob().run(job.id)
+
+    job.refresh_from_db()
+    assert job.status == 'running'
+    assert job.work_unit_id == 'unit-detach'
+    mock_finalize.assert_not_called()
+    mock_post_run.assert_not_called()
+    receptor_job._receptor_release_work.assert_not_called()
+
+
+@pytest.mark.django_db
 def test_run_finalizes_normally_when_not_detached(jt_linked, execution_environment, mocker):
     """The guard must not swallow the shutdown path it replaces: an undetached stream still
     finalizes and releases, exactly as it did before."""
