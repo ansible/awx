@@ -28,6 +28,7 @@ import shutil
 import ansible_runner
 
 from django.conf import settings
+from django.utils.timezone import now
 
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import UnifiedJob
@@ -128,8 +129,6 @@ def classify_job_pod(pod, has_output, wedge_timeout=None, reference_time=None):
         return PodState.WAITING
 
     if reference_time is None:
-        from django.utils.timezone import now
-
         reference_time = now()
 
     if (reference_time - started).total_seconds() > wedge_timeout:
@@ -153,22 +152,13 @@ def pod_exit_code(pod):
     return 0 if pod.get('status', {}).get('phase') == 'Succeeded' else 1
 
 
-def _pod_manager(job):
-    """A PodManager bound to this job, for namespace and credential resolution.
-
-    PodManager takes the job as its ``task`` and derives the namespace and kube client from
-    ``job.instance_group`` — the same path ``awx_k8s_reaper`` already uses in production.
-    """
-    return PodManager(job)
-
-
 def find_job_pod(job):
     """The surviving pod for a container-group job, or None.
 
     Selects on both AWX labels: the job id alone would match a same-numbered job from another
     AWX installation sharing the namespace.
     """
-    pm = _pod_manager(job)
+    pm = PodManager(job)
     selector = f'ansible-awx={settings.INSTALL_UUID},ansible-awx-job-id={job.id}'
     response = pm.kube_api.list_namespaced_pod(
         pm.namespace,
@@ -203,7 +193,7 @@ def pod_has_output(job, pod_name):
     this function return True for every pod, silently turning WEDGED into STREAMING and
     disabling wedge detection entirely. Reading ``.data`` gives the real bytes.
     """
-    pm = _pod_manager(job)
+    pm = PodManager(job)
     resp = pm.kube_api.read_namespaced_pod_log(
         name=pod_name,
         namespace=pm.namespace,
@@ -229,7 +219,7 @@ def open_pod_log_stream(job, pod_name, follow):
     an entire multi-megabyte log into memory before the first event is handled. With
     ``follow=True`` it would never return at all.
     """
-    pm = _pod_manager(job)
+    pm = PodManager(job)
     return pm.kube_api.read_namespaced_pod_log(
         name=pod_name,
         namespace=pm.namespace,
@@ -246,7 +236,7 @@ def delete_job_pod(job, pod_name):
     rather than raised so one unreachable pod does not abort the rest of the sweep.
     """
     try:
-        pm = _pod_manager(job)
+        pm = PodManager(job)
         pm.kube_api.delete_namespaced_pod(
             name=pod_name,
             namespace=pm.namespace,

@@ -191,7 +191,7 @@ class RunnerCallback:
         try:
             self.populate_host_map(instance.inventory.get_script_data(**self.inventory_script_params(instance)))
         except Exception:
-            pass  # host_map stays {}; host_id won't be set on replayed events
+            logger.warning('Could not populate host map for job %s; host_id will be unset on replayed events', instance.id, exc_info=True)
 
     def event_handler(self, event_data):
         #

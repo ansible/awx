@@ -666,7 +666,11 @@ class AWXReceptorJob:
                     resultsock.shutdown(socket.SHUT_RDWR)
                 except Exception:
                     pass
-                return processor_future.result()
+                try:
+                    return processor_future.result(timeout=self.STREAM_POLL_INTERVAL)
+                except concurrent.futures.TimeoutError:
+                    logger.error(f'Work unit {self.unit_id}: processor thread did not exit after socket shutdown; abandoning')
+                    return None
 
     def _process_phase(self, receptor_ctl):
         """Stream events from the receptor work unit via the ansible-runner process streamer.

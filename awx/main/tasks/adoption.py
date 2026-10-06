@@ -12,6 +12,7 @@ import os
 import time
 import traceback
 
+from awx.main.exceptions import PostRunError
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.models.inventory import InventoryUpdate
@@ -84,7 +85,7 @@ def _build_hook_error_info(exc, hook_start_time):
     elapsed = time.time() - hook_start_time
     exc_type = type(exc).__name__
 
-    if exc_type == 'PostRunError':
+    if isinstance(exc, PostRunError):
         logger.warning(f'Adoption hook raised PostRunError after {elapsed:.2f}s: {exc.args[0] if exc.args else str(exc)}')
         return {
             'explanation': exc.args[0] if exc.args else str(exc),
@@ -102,14 +103,17 @@ def _build_hook_error_info(exc, hook_start_time):
 def _override_job_env(job, private_data_dir):
     """Temporarily override job's AWX_PRIVATE_DATA_DIR for hook execution.
 
-    Returns (original_env_copy, restore_fn) where restore_fn() restores original.
+    Saves the override to the database so that refresh_from_db() calls inside
+    post_run_hook see the adoption private_data_dir rather than the original
+    controller's (now-deleted) path. Returns the original env dict; caller
+    must restore it to job.job_env and save in a finally block.
     """
     job.refresh_from_db(fields=['job_env'])
     original_env = dict(job.job_env or {})
 
-    if job.job_env is None:
-        job.job_env = {}
+    job.job_env = dict(original_env)
     job.job_env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
+    job.save(update_fields=['job_env'])
 
     return original_env
 
@@ -168,6 +172,7 @@ def invoke_adoption_hooks(job, callback, private_data_dir, status):
             return True, None
         finally:
             job.job_env = original_env
+            job.save(update_fields=['job_env'])
 
     except Exception as exc:
         error_info = _build_hook_error_info(exc, hook_start_time)

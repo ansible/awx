@@ -38,7 +38,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
 from django.db import DatabaseError, IntegrityError, connection, transaction
-from django.db.models import Max, Q
+from django.db.models import Q
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
@@ -74,6 +74,7 @@ from awx.main.models.credential import CredentialType
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
+    _adoption_stall_budget_exhausted,
     administrative_workunit_reaper,
     get_adoption_unit_status,
     get_receptor_ctl,
@@ -159,6 +160,13 @@ def _run_dispatch_startup_common():
     # (receptor unavailable, rejoining cluster). _process_startup_jobs handles adoption; this
     # handles the reap-only case. reap_job() is idempotent — already-reaped jobs are skipped.
     _startup_reap_undispatched(settings.CLUSTER_HOST_ID)
+    # Then mark any peer whose pod is gone, so the sweep below can see the jobs it left. Order
+    # matters: the sweep decides what is orphaned from node_state, so the state has to be
+    # written first or the jobs are invisible for another heartbeat.
+    _startup_mark_departed_peers()
+    # And sweep jobs left behind by a controller that is already gone. Separate from the reap
+    # above: that one looks at jobs this node owns, this one at jobs nobody live owns.
+    _startup_sweep_orphaned_jobs()
     m = DispatcherMetrics()
     m.reset_values()
 
@@ -1087,7 +1095,7 @@ def _sweep_orphaned_jobs(this_inst):
         # An unset controller_node also satisfies "not a live instance", but there may be a
         # window during dispatch where it is unset while the job is already running, and
         # sweeping then would steal live work. The gap is hypothetical; the theft would not be.
-        .exclude(controller_node__in=list(live_hostnames))
+        .exclude(controller_node__in=live_hostnames)
         .exclude(polymorphic_ctype_id=workflow_ctype_id)
         .order_by('started')  # longest-stranded first: they are closest to their deadline
         .values_list('pk', 'controller_node')[: settings.HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT]
@@ -1112,6 +1120,187 @@ def _sweep_orphaned_jobs(this_inst):
 
     if swept:
         logger.info(f'Orphan sweep queued {swept} adoption(s) for jobs whose controller is gone')
+
+
+def _current_namespace():
+    return settings.AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE
+
+
+def _control_pod_is_gone(hostname):
+    """Does the Kubernetes pod backing this control instance still exist?
+
+    Returns True only on a definitive 404 for that exact pod name. Anything else — a timeout,
+    a 5xx, an unreadable serviceaccount token, a VM install — returns None, meaning "cannot
+    tell", and the caller must leave the instance alone.
+
+    The asymmetry is deliberate. Marking a live controller unavailable lets a peer adopt jobs
+    it is still streaming; the claim is atomic so that is not corruption, but both nodes would
+    stream the same events into the same job. Failing to mark a dead one costs nothing but the
+    is_lost() timeout, which is what happens today anyway. Only one of those two mistakes is
+    worth avoiding at the price of the other.
+
+    On OpenShift the Instance hostname is the pod name, which is what makes a lookup by name
+    possible at all. A read per name is used rather than one list call because a 404 for a
+    name we asked about is unambiguous, whereas an empty or mis-selected list is
+    indistinguishable from "every peer is gone".
+    """
+    if not settings.IS_K8S:
+        return None
+
+    try:
+        from kubernetes import client, config
+        from kubernetes.client.rest import ApiException
+    except ImportError:
+        logger.warning('No kubernetes client available; cannot tell whether departed peers still have pods')
+        return None
+
+    try:
+        config.load_incluster_config()
+        client.CoreV1Api().read_namespaced_pod(name=hostname, namespace=_current_namespace())
+    except ApiException as exc:
+        if exc.status == 404:
+            return True
+        logger.warning(f'Could not tell whether pod {hostname} still exists (HTTP {exc.status}); treating it as alive')
+        return None
+    except Exception:
+        logger.warning(f'Could not tell whether pod {hostname} still exists; treating it as alive', exc_info=True)
+        return None
+
+    return False
+
+
+def _startup_mark_departed_peers():
+    """Mark control instances whose pod is gone, so their jobs become sweepable now.
+
+    This is the writer of node_state for the case announce_shutdown structurally cannot cover:
+    a node SIGKILLed before it could speak for itself — grace period exceeded, `--force
+    --grace-period=0`, or a kubelet that stopped delivering signals at all. The replacement
+    pod OpenShift schedules is a witness to that death, and until is_lost() times out 120 s
+    later it is the only witness the cluster has.
+
+    Only READY and INSTALLED rows are worth probing. An UNAVAILABLE one needs nothing from us,
+    and a row already deleted by AWX_AUTO_DEPROVISION_INSTANCES is absent from the live set
+    the sweep computes, so its jobs are sweepable without our help. INSTALLED earns its place
+    separately: _reap_and_mark_lost_instance only marks offline when node_state is READY, so a
+    node that died between registering and showing up on the mesh is marked by no other path.
+    """
+    try:
+        peers = list(
+            Instance.objects.filter(
+                node_type='control',
+                node_state__in=(Instance.States.READY, Instance.States.INSTALLED),
+            ).exclude(hostname=settings.CLUSTER_HOST_ID)
+        )
+    except Exception:
+        logger.exception('Could not list peer instances at startup; leaving them to lost-instance detection')
+        return
+
+    for peer in peers:
+        if _control_pod_is_gone(peer.hostname) is not True:
+            continue
+        try:
+            peer.mark_offline(errors=_('Pod no longer exists; detected by a peer at startup'))
+        except Exception:
+            # One unmarkable peer must not cost us the others.
+            logger.exception(f'Failed to mark departed peer {peer.hostname} offline')
+            continue
+        logger.warning(f'Marked {peer.hostname} unavailable at startup: its pod no longer exists, so its jobs can be adopted now')
+
+
+def _startup_sweep_orphaned_jobs():
+    """Sweep orphaned jobs at startup, which the heartbeat's startup pass never reaches.
+
+    `cluster_node_heartbeat(None)` returns at its `binder is None` branch, which sits above
+    the `_sweep_orphaned_jobs()` call in the periodic path — and `_heartbeat_instance_management()`
+    can return earlier still when this node is rejoining the cluster. So a booting pod has
+    never once looked for jobs whose controller is already gone.
+
+    That gap is widest when the whole control plane went down together. Each departing node
+    marked itself unavailable on the way out (`announce_shutdown`), so its jobs are sweepable
+    the moment anything looks — but its peers were leaving too, and the broadcast reached
+    nobody. Until the first periodic heartbeat, up to CLUSTER_NODE_HEARTBEAT_PERIOD later,
+    there is no one in the cluster whose job it is to look. This is the thing that looks.
+
+    Publishing adoptions from here is safe: `dispatch_startup` runs as an OnStartProducer task
+    inside the already-listening service, which is where `_process_startup_jobs` publishes its
+    own adoptions from today. Calling it before `run_service()` would not be — the only broker
+    is pg_notify, and a NOTIFY with no LISTEN is dropped, which would leave the job claimed by
+    a live node with no task to run it and invisible to every later sweep.
+    """
+    try:
+        _sweep_orphaned_jobs(Instance.objects.me())
+    except RuntimeError:
+        logger.warning('Skipping the startup orphan sweep: this node has no Instance row yet')
+    except Exception:
+        logger.exception('Startup orphan sweep failed; the next heartbeat will retry')
+
+
+@task(queue='tower_broadcast_all')
+def sweep_orphaned_jobs_now():
+    """Run the orphan sweep off a broadcast instead of waiting for the next heartbeat.
+
+    Published by announce_shutdown. Every control node subscribes to tower_broadcast_all, so
+    the departing node's peers all sweep at once and share the work by capacity, exactly as
+    they would on a heartbeat tick — only without the tick's 0-60 s of schedule jitter.
+    """
+    try:
+        this_inst = Instance.objects.me()
+    except RuntimeError:
+        logger.warning('Sweep-now broadcast received, but this instance has no Instance row; skipping')
+        return
+
+    # The broadcast reaches every subscriber, the sender included. A node that has already
+    # marked itself unavailable is on its way out: anything it claimed here would be
+    # controlled by a node that is about to stop being live, so the jobs would simply need
+    # sweeping again.
+    if this_inst.node_state not in (Instance.States.READY, Instance.States.INSTALLED):
+        logger.debug(f'Sweep-now broadcast received while {this_inst.node_state}; leaving the sweep to live nodes')
+        return
+
+    _sweep_orphaned_jobs(this_inst)
+
+
+def announce_shutdown():
+    """Tell the cluster this node is leaving, rather than letting it time out.
+
+    A graceful shutdown used to be indistinguishable from a crash. Peers learned of a
+    departed controller only once `is_lost()` fired, which costs
+    CLUSTER_NODE_HEARTBEAT_PERIOD * CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE (120 s) plus up
+    to one period of schedule jitter before anyone looks. Its jobs sat `running` and unowned
+    for that whole window — the 90-180 s adoption lag measured on hadr-rosa-a.
+
+    None of that wait is inherent. `_sweep_orphaned_jobs` does not gate on `is_lost()`; it
+    gates on `node_state`. `is_lost()` is only how that state eventually gets written when
+    nobody was around to write it. A node that is shutting down knows the answer already, so
+    it writes the state itself and tells its peers to look — one UPDATE and one pg_notify.
+    The `is_lost()` path is untouched and still covers the crash case, so this can make
+    discovery faster but never slower.
+
+    Call only after every job has detached from its work unit. Marking ourselves unavailable
+    while still streaming would let a peer claim a job we have not let go of; the claim is
+    atomic so it is not corruption, but both controllers would stream the same events.
+    """
+    try:
+        this_inst = Instance.objects.me()
+        this_inst.mark_offline(errors=_('Instance is shutting down'))
+        logger.info(f'Announced shutdown of {this_inst.hostname}: marked unavailable so peers can adopt its jobs now')
+    except RuntimeError:
+        # Our row is already gone — the shape of job 2068378. There is nothing left to mark,
+        # but the jobs we controlled are orphaned and no peer knows yet, so the broadcast
+        # below is the only thing that can still reach them.
+        logger.warning('No Instance row for this node at shutdown; broadcasting the sweep anyway')
+    except Exception:
+        # Still broadcast: peers that find nothing to do lose a query, whereas a peer that is
+        # never told waits out the full is_lost() window.
+        logger.exception('Failed to mark this instance offline at shutdown; broadcasting the sweep anyway')
+
+    try:
+        sweep_orphaned_jobs_now.apply_async(queue='tower_broadcast_all')
+    except Exception:
+        # This runs from a `finally` as the process exits. An exception escaping here would
+        # replace whatever actually ended the process, which is the one thing an operator
+        # needs from the logs. Degrading to the is_lost() timeout is the correct fallback.
+        logger.exception('Failed to broadcast the shutdown sweep; peers will fall back to lost-instance detection')
 
 
 def _adoption_slot_available(headroom_needed=0):
@@ -1158,21 +1347,6 @@ def _adoption_slot_available(headroom_needed=0):
         return True
 
     return me.remaining_capacity >= headroom_needed
-
-
-def _adoption_deadline_passed(job):
-    """Has this job gone unadopted for longer than HADR_JOB_ADOPTION_TIMEOUT?
-
-    Measured from the last persisted event, falling back to when the job started. Both ways
-    an adoption can stall — no capacity to run it, no reachable work unit to run it against —
-    use this one measure, so they cannot disagree about when a job has waited long enough.
-
-    MAX(created) is not cheap: JobEvent has no index on created, so this heap-fetches the
-    job's event rows. Call it only on a path that has already decided it cannot proceed.
-    """
-    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    orphaned_since = last_event_time or job.started
-    return bool(orphaned_since and orphaned_since < now() - timedelta(seconds=settings.HADR_JOB_ADOPTION_TIMEOUT))
 
 
 def _claim_job_for_adoption(job, job_id, source_controller):
@@ -1249,7 +1423,7 @@ def adopt_job_async(job_id, source_controller=None):
         # the controller full — the same condition that parked it. Without a deadline the
         # backlog only ever grows (observed: 570 jobs, still climbing after 100+ minutes).
         # Failing the oldest releases capacity for the rest.
-        if _adoption_deadline_passed(job):
+        if _adoption_stall_budget_exhausted(job):
             logger.error(f'Job {job_id} could not be adopted within HADR_JOB_ADOPTION_TIMEOUT while this controller was out of control capacity, failing')
             reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT waiting for control capacity to adopt it')
             return
@@ -1299,7 +1473,7 @@ def adopt_job_async(job_id, source_controller=None):
                     logger.exception(f'adopt_job_async: container-group adoption failed for job {job.id}')
                 return
 
-            if _adoption_deadline_passed(job):
+            if _adoption_stall_budget_exhausted(job):
                 logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
                 # Best effort only: we only get here because the unit is unreachable, so the
                 # cancel is expected to fail too. Not worth a traceback. The unit is not leaked —

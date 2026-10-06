@@ -28,7 +28,13 @@ from awx.main.tasks.system import (
     _adoption_slot_available,
     cluster_node_heartbeat,
     _startup_reap_undispatched,
+    _startup_sweep_orphaned_jobs,
+    _startup_mark_departed_peers,
+    _control_pod_is_gone,
+    _run_dispatch_startup_common,
     adopt_job_async,
+    announce_shutdown,
+    sweep_orphaned_jobs_now,
 )
 from awx.main.dispatch.reaper import reap
 from awx.main.management.commands.dispatcherd import Command
@@ -2235,7 +2241,7 @@ class TestOrphanSweep:
         queue.assert_not_called()
 
     def test_non_running_jobs_are_left_alone(self, me_inst):
-        job = self._orphan(status='pending')
+        self._orphan(status='pending')
 
         with patch('awx.main.tasks.system._queue_job_adoption') as queue:
             _sweep_orphaned_jobs(me_inst)
@@ -2460,3 +2466,372 @@ class TestLostInstanceCapacity:
         Job.objects.create(controller_node=me_inst.hostname, status='running')
 
         assert _adoption_slot_available(headroom_needed=django_settings.AWX_CONTROL_NODE_TASK_IMPACT) is False
+
+
+@pytest.mark.django_db
+class TestAnnounceShutdown:
+    """A graceful shutdown used to be indistinguishable from a crash.
+
+    Peers learned of a departed controller only when `is_lost()` fired, which costs
+    CLUSTER_NODE_HEARTBEAT_PERIOD * CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE (120 s) plus up to
+    one period of schedule jitter. The jobs that controller owned sat `running` and unowned
+    for that whole window, which is the 90-180 s adoption lag measured on hadr-rosa-a.
+
+    The sweep does not actually gate on `is_lost()` — it gates on `node_state` (see
+    `_sweep_orphaned_jobs`). So a node that writes that state on its way out collapses the
+    wait to the cost of one UPDATE and one pg_notify, without touching the `is_lost()` path
+    that still covers the crash case.
+    """
+
+    def test_the_departing_node_marks_itself_unavailable(self, me_inst):
+        me_inst.node_type = 'control'
+        me_inst.capacity = 100
+        me_inst.save()
+
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now'):
+            announce_shutdown()
+
+        me_inst.refresh_from_db()
+        assert me_inst.node_state == Instance.States.UNAVAILABLE
+        assert me_inst.capacity == 0
+
+    def test_peers_are_told_to_sweep_immediately(self, me_inst):
+        """Without the broadcast the state change is only noticed on the next heartbeat, which
+        leaves up to CLUSTER_NODE_HEARTBEAT_PERIOD of the original lag in place."""
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now:
+            announce_shutdown()
+
+        sweep_now.apply_async.assert_called_once_with(queue='tower_broadcast_all')
+
+    def test_a_missing_instance_row_still_broadcasts(self, me_inst):
+        """Job 2068378's exact shape: the row the lost-instance path keys on is already gone,
+        so there is nothing to mark — but the jobs it controlled are orphaned and no peer
+        knows yet. The broadcast is the only thing that can still help them."""
+        with (
+            patch.object(Instance.objects, 'me', side_effect=RuntimeError('No instance found with the current cluster host id')),
+            patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now,
+        ):
+            announce_shutdown()
+
+        sweep_now.apply_async.assert_called_once_with(queue='tower_broadcast_all')
+
+    def test_a_failed_mark_does_not_cost_us_the_broadcast(self, me_inst):
+        with (
+            patch.object(Instance, 'mark_offline', side_effect=DatabaseError('connection already closed')),
+            patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now,
+        ):
+            announce_shutdown()
+
+        sweep_now.apply_async.assert_called_once_with(queue='tower_broadcast_all')
+
+    def test_nothing_here_may_raise(self, me_inst):
+        """This runs in a `finally` during interpreter shutdown. An exception escaping it
+        would replace whatever actually ended the process, which is the one piece of
+        information an operator needs."""
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now:
+            sweep_now.apply_async.side_effect = RuntimeError('pg_notify connection gone')
+            announce_shutdown()  # must not raise
+
+
+@pytest.mark.django_db
+class TestSweepOrphanedJobsNow:
+    def test_it_sweeps_on_behalf_of_this_node(self, me_inst):
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep:
+            sweep_orphaned_jobs_now()
+
+        assert sweep.call_args[0][0].hostname == me_inst.hostname
+
+    def test_the_departing_node_does_not_claim_the_jobs_it_is_walking_away_from(self, me_inst):
+        """The broadcast reaches every subscriber including the sender. If its pool is still
+        draining when it arrives, an unguarded sweep would hand this node jobs it is in the
+        middle of abandoning — and its `controller_node` is about to stop being live again,
+        so they would need sweeping a second time."""
+        me_inst.mark_offline()
+
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep:
+            sweep_orphaned_jobs_now()
+
+        sweep.assert_not_called()
+
+    def test_a_missing_instance_row_is_not_an_error(self, me_inst):
+        with (
+            patch.object(Instance.objects, 'me', side_effect=RuntimeError('No instance found with the current cluster host id')),
+            patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep,
+        ):
+            sweep_orphaned_jobs_now()
+
+        sweep.assert_not_called()
+
+
+@pytest.mark.django_db
+class TestDispatcherdAnnouncesOnExit:
+    @contextmanager
+    def _service(self, run_service):
+        """Stub out everything `handle()` does before the service loop, so the test is about
+        the loop's exit and nothing else."""
+        with (
+            patch('awx.main.management.commands.dispatcherd.ensure_no_dispatcherd_env_config'),
+            patch('awx.main.management.commands.dispatcherd.receptor_config_exists', return_value=True),
+            patch('awx.main.management.commands.dispatcherd.get_dispatcherd_config', return_value={}),
+            patch('awx.main.management.commands.dispatcherd.dispatcher_setup'),
+            patch('awx.main.management.commands.dispatcherd.connection'),
+            patch('awx.main.management.commands.dispatcherd.django_cache'),
+            patch.object(Command, 'configure_dispatcher_logging'),
+            patch('awx.main.management.commands.dispatcherd.run_service', run_service),
+            patch('awx.main.tasks.system.announce_shutdown') as announce,
+        ):
+            yield announce
+
+    def test_a_clean_exit_announces_after_the_pool_has_drained(self):
+        """Ordering is the whole correctness argument. `run_service()` returns only after
+        dispatcherd's own SIGTERM handler has run `pool.shutdown()`, so every job has already
+        detached from its work unit by the time we mark ourselves unavailable. Announcing
+        first would let a peer claim a job this node is still streaming."""
+        calls = []
+
+        with self._service(lambda: calls.append('run_service')) as announce:
+            announce.side_effect = lambda: calls.append('announce')
+            Command().handle()
+
+        assert calls == ['run_service', 'announce']
+
+    def test_a_crashing_service_still_announces(self):
+        """The crash case is the one where adoption matters most, and it is also the one where
+        no SIGTERM arrived to trigger anything else."""
+
+        def boom():
+            raise RuntimeError('broker died')
+
+        with self._service(boom) as announce:
+            with pytest.raises(RuntimeError, match='broker died'):
+                Command().handle()
+
+        announce.assert_called_once()
+
+
+@pytest.mark.django_db
+class TestStartupOrphanSweep:
+    """`cluster_node_heartbeat(None)` returns at its `binder is None` branch, above the
+    `_sweep_orphaned_jobs()` call in the periodic path, so a booting pod never swept. That is
+    the hole when the whole control plane goes down together: the departing nodes marked
+    themselves unavailable, but every peer that could have acted on it was leaving too."""
+
+    def test_it_sweeps_on_behalf_of_this_node(self, me_inst):
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep:
+            _startup_sweep_orphaned_jobs()
+
+        sweep.assert_called_once_with(me_inst)
+
+    def test_a_missing_instance_row_is_not_an_error(self):
+        """Startup is exactly when the row may not exist yet. Nothing to sweep on behalf of,
+        and the next heartbeat will have one."""
+        with (
+            patch.object(Instance.objects, 'me', side_effect=RuntimeError('No instance found with the current cluster host id')),
+            patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep,
+        ):
+            _startup_sweep_orphaned_jobs()
+
+        sweep.assert_not_called()
+
+    def test_a_failing_sweep_does_not_block_the_rest_of_startup(self, me_inst):
+        """This runs inside dispatch_startup, ahead of metrics reset. A sweep that raises
+        must not take the node's whole startup with it — the periodic heartbeat retries."""
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs', side_effect=DatabaseError('nope')):
+            _startup_sweep_orphaned_jobs()
+
+    def test_the_startup_path_actually_calls_it(self, me_inst):
+        """The regression guard. The bug was never in the sweep, it was that nothing on the
+        startup path reached it."""
+        with (
+            patch('awx.main.tasks.system._sync_credential_types_to_db'),
+            patch('awx.main.tasks.system.convert_jsonfields'),
+            patch('awx.main.tasks.system.apply_cluster_membership_policies'),
+            patch('awx.main.tasks.system.cluster_node_heartbeat'),
+            patch('awx.main.tasks.system._startup_reap_undispatched'),
+            patch('awx.main.tasks.system.DispatcherMetrics'),
+            patch('awx.main.tasks.system._startup_sweep_orphaned_jobs') as startup_sweep,
+        ):
+            _run_dispatch_startup_common()
+
+        startup_sweep.assert_called_once()
+
+    def test_it_sweeps_after_the_heartbeat_so_capacity_is_known(self, me_inst):
+        """`_sweep_orphaned_jobs` stops at `_adoption_slot_available()`, which reads this
+        node's capacity. `cluster_node_heartbeat(None)` is what runs `local_health_check()` to
+        set it, so sweeping first would adopt nothing."""
+        calls = []
+
+        with (
+            patch('awx.main.tasks.system._sync_credential_types_to_db'),
+            patch('awx.main.tasks.system.convert_jsonfields'),
+            patch('awx.main.tasks.system.apply_cluster_membership_policies'),
+            patch('awx.main.tasks.system.cluster_node_heartbeat', side_effect=lambda *a: calls.append('heartbeat')),
+            patch('awx.main.tasks.system._startup_reap_undispatched'),
+            patch('awx.main.tasks.system.DispatcherMetrics'),
+            patch('awx.main.tasks.system._startup_sweep_orphaned_jobs', side_effect=lambda: calls.append('sweep')),
+        ):
+            _run_dispatch_startup_common()
+
+        assert calls == ['heartbeat', 'sweep']
+
+
+@pytest.mark.django_db
+class TestControlPodIsGone:
+    """The probe must only ever say "gone" when it is certain. Saying it wrongly means
+    adopting jobs off a controller that is still streaming them."""
+
+    @contextmanager
+    def _api(self, side_effect=None):
+        # IS_K8S is a read-only AWX setting (conf.py:938), so the settings object itself has
+        # to be stood in for rather than the attribute patched.
+        with (
+            patch('awx.main.tasks.system.settings', MagicMock(IS_K8S=True)),
+            patch('awx.main.tasks.system._current_namespace', return_value='aap'),
+            patch('kubernetes.config.load_incluster_config'),
+            patch('kubernetes.client.CoreV1Api') as api,
+        ):
+            api.return_value.read_namespaced_pod.side_effect = side_effect
+            yield api
+
+    def test_a_404_is_the_only_thing_that_means_gone(self):
+        from kubernetes.client.rest import ApiException
+
+        with self._api(side_effect=ApiException(status=404, reason='Not Found')):
+            assert _control_pod_is_gone('aap-controller-task-dead') is True
+
+    def test_a_live_pod_is_not_gone(self):
+        with self._api():
+            assert _control_pod_is_gone('aap-controller-task-live') is False
+
+    def test_a_server_error_means_cannot_tell(self):
+        from kubernetes.client.rest import ApiException
+
+        with self._api(side_effect=ApiException(status=503, reason='Service Unavailable')):
+            assert _control_pod_is_gone('aap-controller-task-x') is None
+
+    def test_a_broken_client_means_cannot_tell(self):
+        with self._api(side_effect=OSError('connection reset')):
+            assert _control_pod_is_gone('aap-controller-task-x') is None
+
+    def test_a_vm_install_means_cannot_tell(self):
+        """No pods to ask about. Falls back to is_lost(), which is what VM installs use."""
+        with patch('awx.main.tasks.system.settings', MagicMock(IS_K8S=False)):
+            assert _control_pod_is_gone('some-vm-host') is None
+
+
+@pytest.mark.django_db
+class TestStartupMarkDepartedPeers:
+    """Covers the case announce_shutdown structurally cannot: a node SIGKILLed before it
+    could speak for itself. The replacement pod is the only witness until is_lost() fires."""
+
+    @contextmanager
+    def _probe(self, gone):
+        """gone: hostname -> True / False / None"""
+        with patch('awx.main.tasks.system._control_pod_is_gone', side_effect=lambda h: gone.get(h)) as probe:
+            yield probe
+
+    def _state(self, hostname):
+        return Instance.objects.get(hostname=hostname).node_state
+
+    def test_a_peer_whose_pod_is_gone_is_marked_unavailable(self):
+        Instance.objects.create(hostname='ctrl-dead', node_type='control', node_state='ready')
+
+        with self._probe({'ctrl-dead': True}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-dead') == Instance.States.UNAVAILABLE
+
+    def test_a_peer_whose_pod_still_exists_is_left_alone(self):
+        Instance.objects.create(hostname='ctrl-live', node_type='control', node_state='ready')
+
+        with self._probe({'ctrl-live': False}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-live') == Instance.States.READY
+
+    def test_an_indeterminate_probe_is_left_alone(self):
+        """The whole safety argument. An API blip must never cost a live controller its jobs."""
+        Instance.objects.create(hostname='ctrl-unknown', node_type='control', node_state='ready')
+
+        with self._probe({'ctrl-unknown': None}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-unknown') == Instance.States.READY
+
+    def test_this_node_is_never_probed_or_marked(self):
+        """We are demonstrably alive; we are the one running this."""
+        Instance.objects.create(hostname=django_settings.CLUSTER_HOST_ID, node_type='control', node_state='ready')
+
+        with self._probe({django_settings.CLUSTER_HOST_ID: True}) as probe:
+            _startup_mark_departed_peers()
+
+        probe.assert_not_called()
+        assert self._state(django_settings.CLUSTER_HOST_ID) == Instance.States.READY
+
+    def test_an_installed_peer_is_covered_too(self):
+        """_reap_and_mark_lost_instance only marks offline when node_state is READY, so a node
+        that died between registering and reaching the mesh is marked by no other path."""
+        Instance.objects.create(hostname='ctrl-installed', node_type='control', node_state='installed')
+
+        with self._probe({'ctrl-installed': True}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-installed') == Instance.States.UNAVAILABLE
+
+    def test_an_already_unavailable_peer_is_not_probed(self):
+        """Nothing to do, and an API call per boot per dead row is worth not making."""
+        Instance.objects.create(hostname='ctrl-offline', node_type='control', node_state='unavailable')
+
+        with self._probe({'ctrl-offline': True}) as probe:
+            _startup_mark_departed_peers()
+
+        probe.assert_not_called()
+
+    def test_execution_nodes_are_not_probed(self):
+        """Execution and hop nodes are not pods, and their lostness has its own grace period."""
+        Instance.objects.create(hostname='exec-1', node_type='execution', node_state='ready')
+
+        with self._probe({'exec-1': True}) as probe:
+            _startup_mark_departed_peers()
+
+        probe.assert_not_called()
+
+    def test_one_unmarkable_peer_does_not_cost_us_the_others(self):
+        Instance.objects.create(hostname='ctrl-a', node_type='control', node_state='ready')
+        Instance.objects.create(hostname='ctrl-b', node_type='control', node_state='ready')
+
+        real = Instance.mark_offline
+
+        def explode(self, *args, **kwargs):
+            if self.hostname == 'ctrl-a':
+                raise DatabaseError('nope')
+            return real(self, *args, **kwargs)
+
+        with self._probe({'ctrl-a': True, 'ctrl-b': True}), patch.object(Instance, 'mark_offline', explode):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-a') == Instance.States.READY
+        assert self._state('ctrl-b') == Instance.States.UNAVAILABLE
+
+    def test_a_failed_peer_query_does_not_block_startup(self):
+        with patch.object(Instance.objects, 'filter', side_effect=DatabaseError('nope')):
+            _startup_mark_departed_peers()
+
+    def test_peers_are_marked_before_the_sweep_looks(self, me_inst):
+        """The sweep decides what is orphaned from node_state, so writing it afterwards would
+        leave the jobs invisible for another heartbeat."""
+        calls = []
+
+        with (
+            patch('awx.main.tasks.system._sync_credential_types_to_db'),
+            patch('awx.main.tasks.system.convert_jsonfields'),
+            patch('awx.main.tasks.system.apply_cluster_membership_policies'),
+            patch('awx.main.tasks.system.cluster_node_heartbeat'),
+            patch('awx.main.tasks.system._startup_reap_undispatched'),
+            patch('awx.main.tasks.system.DispatcherMetrics'),
+            patch('awx.main.tasks.system._startup_mark_departed_peers', side_effect=lambda: calls.append('mark')),
+            patch('awx.main.tasks.system._startup_sweep_orphaned_jobs', side_effect=lambda: calls.append('sweep')),
+        ):
+            _run_dispatch_startup_common()
+
+        assert calls == ['mark', 'sweep']
