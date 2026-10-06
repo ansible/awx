@@ -365,3 +365,28 @@ def test_group_all_hosts_not_last_job_host_summary_failed_filter(hosts_with_job_
     assert response.status_code == 200
     names = get_host_names(response)
     assert names == ['host-ok']
+
+
+@pytest.mark.django_db
+def test_group_hosts_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    group = hosts_with_job_summaries['group']
+    url = reverse('api:group_hosts_list', kwargs={'pk': group.pk}) + '?last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-failed']
+
+
+@pytest.mark.django_db
+def test_last_job_host_summary_failed_filter_invalid_value(hosts_with_job_summaries, get, admin_user):
+    url = reverse('api:host_list') + '?last_job_host_summary__failed=False'
+    response = get(url, admin_user)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_last_job_host_summary_failed_filter_both_params(hosts_with_job_summaries, get, admin_user):
+    url = reverse('api:host_list') + '?last_job_host_summary__failed=True&not__last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    assert get_host_names(response) == []

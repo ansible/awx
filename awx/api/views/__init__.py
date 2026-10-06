@@ -35,7 +35,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
-from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
+from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound, ValidationError
 from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
@@ -1881,21 +1881,36 @@ class HostRelatedSearchMixin(object):
         ret.append('ansible_facts')
         return ret
 
+    def _validate_host_latest_summary_filter_value(self, param_name, value):
+        """Latest-summary host filters only support the documented ``?param=True`` form."""
+        if value != 'True':
+            raise ValidationError({param_name: _('filter value must be True')})
+
     def _apply_latest_summary_failed_filter(self, qs):
+        """Filter hosts by whether their latest JobHostSummary failed.
+
+        Honors ``last_job_host_summary__failed`` and ``not__last_job_host_summary__failed``
+        with the same AND semantics as other list query string filters.
+        """
         params = self.request.query_params
         failed_param = params.get('last_job_host_summary__failed', None)
         not_failed_param = params.get('not__last_job_host_summary__failed', None)
         if failed_param is None and not_failed_param is None:
             return qs
+        if failed_param is not None:
+            self._validate_host_latest_summary_filter_value('last_job_host_summary__failed', failed_param)
+        if not_failed_param is not None:
+            self._validate_host_latest_summary_filter_value('not__last_job_host_summary__failed', not_failed_param)
         latest_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
         qs = qs.annotate(_latest_failed=latest_failed)
         if failed_param is not None:
             qs = qs.filter(_latest_failed=True)
-        else:
+        if not_failed_param is not None:
             qs = qs.filter(_latest_failed=False)
         return qs
 
     def _with_host_list_queryset(self, qs):
+        """Apply latest-summary list filters and serializer annotations."""
         qs = self._apply_latest_summary_failed_filter(qs)
         return qs.with_latest_summary_id()
 
