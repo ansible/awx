@@ -1872,12 +1872,32 @@ class CredentialTypeExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
 
 
 class HostRelatedSearchMixin(object):
+    rest_filters_reserved_names = ('last_job_host_summary__failed', 'not__last_job_host_summary__failed')
+
     @property
     def related_search_fields(self):
         # Edge-case handle: https://github.com/ansible/ansible-tower/issues/7712
         ret = super(HostRelatedSearchMixin, self).related_search_fields
         ret.append('ansible_facts')
         return ret
+
+    def _apply_latest_summary_failed_filter(self, qs):
+        params = self.request.query_params
+        failed_param = params.get('last_job_host_summary__failed', None)
+        not_failed_param = params.get('not__last_job_host_summary__failed', None)
+        if failed_param is None and not_failed_param is None:
+            return qs
+        latest_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
+        qs = qs.annotate(_latest_failed=latest_failed)
+        if failed_param is not None:
+            qs = qs.filter(_latest_failed=True)
+        else:
+            qs = qs.filter(_latest_failed=False)
+        return qs
+
+    def _with_host_list_queryset(self, qs):
+        qs = self._apply_latest_summary_failed_filter(qs)
+        return qs.with_latest_summary_id()
 
 
 class HostMetricList(ListAPIView):
@@ -1923,7 +1943,6 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'hosts'
-    rest_filters_reserved_names = ('last_job_host_summary__failed', 'not__last_job_host_summary__failed')
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of hosts."})
     def get(self, request, *args, **kwargs):
@@ -1936,22 +1955,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
             qs = qs.distinct()
-        qs = self._apply_latest_summary_failed_filter(qs)
-        return qs.with_latest_summary_id()
-
-    def _apply_latest_summary_failed_filter(self, qs):
-        params = self.request.query_params
-        failed_param = params.get('last_job_host_summary__failed', None)
-        not_failed_param = params.get('not__last_job_host_summary__failed', None)
-        if failed_param is None and not_failed_param is None:
-            return qs
-        latest_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
-        qs = qs.annotate(_latest_failed=latest_failed)
-        if failed_param is not None:
-            qs = qs.filter(_latest_failed=True)
-        else:
-            qs = qs.filter(_latest_failed=False)
-        return qs
+        return self._with_host_list_queryset(qs)
 
     def list(self, *args, **kwargs):
         try:
@@ -2003,7 +2007,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     resource_purpose = 'hosts of an inventory'
 
     def get_queryset(self):
-        return super().get_queryset().with_latest_summary_id()
+        return self._with_host_list_queryset(super().get_queryset())
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2189,7 +2193,7 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     resource_purpose = 'hosts of a group'
 
     def get_queryset(self):
-        return super().get_queryset().with_latest_summary_id()
+        return self._with_host_list_queryset(super().get_queryset())
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2222,7 +2226,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
-        return (qs & sublist_qs).with_latest_summary_id()
+        return self._with_host_list_queryset(qs & sublist_qs)
 
 
 class GroupInventorySourcesList(SubListAPIView):
