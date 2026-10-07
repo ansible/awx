@@ -13,7 +13,9 @@ from django.utils import timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-from awx.main.models import JobTemplate, User, Job, AdHocCommand, ProjectUpdate, InstanceGroup, Label, Organization
+from awx.main.models import Credential, CredentialType, ExecutionEnvironment, JobTemplate, User, Job, AdHocCommand, ProjectUpdate, InstanceGroup, Label, Organization
+
+from ansible_base.rbac.models import RoleDefinition
 
 
 @pytest.mark.django_db
@@ -277,3 +279,83 @@ class TestControllerNode:
 
         r = get(reverse('api:system_job_detail', kwargs={'pk': system_job.pk}), admin_user, expect=200)
         assert 'controller_node' not in r.data
+
+
+@pytest.mark.django_db
+def test_job_list_query_count_scales_constantly(user, organization, setup_managed_roles, get, django_assert_max_num_queries):
+    """The job list endpoint must use select_related/prefetch_related so that
+    query count does not grow with the number of returned jobs."""
+    inventory = organization.inventories.create(name='query-count-inv')
+    project = Project.objects.create(name='query-count-project', organization=organization)
+    ee = ExecutionEnvironment.objects.create(name='query-count-ee')
+    ct = CredentialType.defaults['ssh']()
+    cred = Credential.objects.create(name='query-count-cred', credential_type=ct)
+
+    jt = JobTemplate.objects.create(
+        name='query-count-jt',
+        project=project,
+        inventory=inventory,
+        organization=organization,
+        execution_environment=ee,
+    )
+    jt.credentials.add(cred)
+
+    org_admin = user('query-count-orgadmin', False)
+    RoleDefinition.objects.get(name='Organization Admin').give_permission(org_admin, organization)
+
+    for i in range(5):
+        job = jt.create_unified_job()
+        job.credentials.add(cred)
+        job.labels.add(Label.objects.create(name=f'label-{i}', organization=organization))
+
+    # Warm up any caches (content types, etc.)
+    get(reverse('api:job_list'), org_admin, expect=200)
+
+    with django_assert_max_num_queries(40):
+        response = get(reverse('api:job_list'), org_admin, expect=200)
+
+    assert response.data['count'] >= 5
+    assert len(response.data['results']) >= 5
+
+
+@pytest.mark.django_db
+def test_job_list_includes_summary_fields_with_prefetch(user, organization, setup_managed_roles, get):
+    """Verify that select_related/prefetch_related does not break the response
+    structure — summary_fields must still contain the expected related objects."""
+    inventory = organization.inventories.create(name='summary-inv')
+    project = Project.objects.create(name='summary-project', organization=organization)
+    ee = ExecutionEnvironment.objects.create(name='summary-ee')
+    ct = CredentialType.defaults['ssh']()
+    cred = Credential.objects.create(name='summary-cred', credential_type=ct)
+
+    jt = JobTemplate.objects.create(
+        name='summary-jt',
+        project=project,
+        inventory=inventory,
+        organization=organization,
+        execution_environment=ee,
+    )
+
+    creator = user('summary-creator', False)
+    RoleDefinition.objects.get(name='Organization Admin').give_permission(creator, organization)
+
+    with impersonate(creator):
+        job = jt.create_unified_job()
+    job.credentials.add(cred)
+    label = Label.objects.create(name='summary-label', organization=organization)
+    job.labels.add(label)
+
+    response = get(reverse('api:job_list'), creator, expect=200)
+    assert len(response.data['results']) >= 1
+
+    result = next(r for r in response.data['results'] if r['id'] == job.pk)
+    sf = result['summary_fields']
+
+    assert sf['organization']['id'] == organization.pk
+    assert sf['inventory']['id'] == inventory.pk
+    assert sf['project']['id'] == project.pk
+    assert sf['job_template']['id'] == jt.pk
+    assert sf['execution_environment']['id'] == ee.pk
+    assert sf['created_by']['id'] == creator.pk
+    assert any(c['id'] == cred.pk for c in sf['credentials'])
+    assert any(l['id'] == label.pk for l in sf['labels'])

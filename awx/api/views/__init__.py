@@ -21,7 +21,7 @@ from urllib3.exceptions import ConnectTimeoutError
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum, Count, Subquery, OuterRef
+from django.db.models import Prefetch, Q, Sum, Count, Subquery, OuterRef
 from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.db.models.fields.related import ManyToManyField, ForeignKey
 from django.db.models.functions import Trunc
@@ -3886,6 +3886,24 @@ class JobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.Job
     serializer_class = serializers.JobListSerializer
     resource_purpose = 'jobs'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.select_related(
+            'unified_job_template',
+            'job_template',
+            'created_by',
+            'modified_by',
+            'inventory',
+            'organization',
+            'execution_environment',
+            'instance_group',
+            'project',
+            'schedule',
+        ).prefetch_related(
+            Prefetch('credentials', queryset=models.Credential.objects.select_related('credential_type')),
+            'labels',
+        )
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
     def get(self, request, *args, **kwargs):
