@@ -1104,6 +1104,90 @@ class TestProjectUpdateGalaxyCredentials(TestJobExecution):
             ('ANSIBLE_GALAXY_SERVER_SERVER1_URL', 'https://cloud.redhat.com/api/automation-hub/'),
         ]
 
+    def test_galaxy_service_account_credentials(self, private_data_dir, project_update, mock_me):
+        """Test that Galaxy Service Account credentials inject CLIENT_ID and CLIENT_SECRET"""
+        # Note: This test assumes the galaxy_service_account credential type exists
+        # The credential type is defined in awx-plugins
+        service_account_cred_type = CredentialType(
+            kind='galaxy',
+            inputs={
+                'fields': [
+                    {'id': 'url', 'label': 'Galaxy Server URL', 'type': 'string'},
+                    {'id': 'auth_url', 'label': 'Auth Server URL', 'type': 'string'},
+                    {'id': 'client_id', 'label': 'Client ID', 'type': 'string'},
+                    {'id': 'client_secret', 'label': 'Client Secret', 'type': 'string', 'secret': True},
+                ],
+            },
+        )
+        service_account = Credential(
+            pk=1,
+            credential_type=service_account_cred_type,
+            inputs={
+                'url': 'https://console.redhat.com/api/automation-hub/content/published/',
+                'auth_url': 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token',
+                'client_id': 'test-client-id',
+                'client_secret': 'test-client-secret',
+            },
+        )
+        project_update.project.organization.galaxy_credentials.add(service_account)
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        env = task.build_env(project_update, private_data_dir)
+        assert sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')]) == [
+            ('ANSIBLE_GALAXY_SERVER_LIST', 'server0'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER0_AUTH_URL', 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token'),  # noqa
+            ('ANSIBLE_GALAXY_SERVER_SERVER0_CLIENT_ID', 'test-client-id'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER0_CLIENT_SECRET', 'test-client-secret'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER0_URL', 'https://console.redhat.com/api/automation-hub/content/published/'),
+        ]
+
+    def test_galaxy_mixed_token_and_service_account(self, private_data_dir, project_update, mock_me):
+        """Test that both token and service account credentials work together"""
+        token_cred_type = CredentialType.defaults['galaxy_api_token']()
+        service_account_cred_type = CredentialType(
+            kind='galaxy',
+            inputs={
+                'fields': [
+                    {'id': 'url', 'label': 'Galaxy Server URL', 'type': 'string'},
+                    {'id': 'auth_url', 'label': 'Auth Server URL', 'type': 'string'},
+                    {'id': 'client_id', 'label': 'Client ID', 'type': 'string'},
+                    {'id': 'client_secret', 'label': 'Client Secret', 'type': 'string', 'secret': True},
+                ],
+            },
+        )
+        token_cred = Credential(
+            pk=1,
+            credential_type=token_cred_type,
+            inputs={
+                'url': 'https://galaxy.ansible.com/',
+            },
+        )
+        service_account_cred = Credential(
+            pk=2,
+            credential_type=service_account_cred_type,
+            inputs={
+                'url': 'https://console.redhat.com/api/automation-hub/content/published/',
+                'auth_url': 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token',
+                'client_id': 'console-client-id',
+                'client_secret': 'console-client-secret',
+            },
+        )
+        project_update.project.organization.galaxy_credentials.add(token_cred)
+        project_update.project.organization.galaxy_credentials.add(service_account_cred)
+        task = jobs.RunProjectUpdate()
+        task.instance = project_update
+        env = task.build_env(project_update, private_data_dir)
+        # Both credentials should be present with their respective auth methods
+        galaxy_env = sorted([(k, v) for k, v in env.items() if k.startswith('ANSIBLE_GALAXY')])
+        assert galaxy_env == [
+            ('ANSIBLE_GALAXY_SERVER_LIST', 'server0,server1'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER0_URL', 'https://galaxy.ansible.com/'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER1_AUTH_URL', 'https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token'),  # noqa
+            ('ANSIBLE_GALAXY_SERVER_SERVER1_CLIENT_ID', 'console-client-id'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER1_CLIENT_SECRET', 'console-client-secret'),
+            ('ANSIBLE_GALAXY_SERVER_SERVER1_URL', 'https://console.redhat.com/api/automation-hub/content/published/'),
+        ]
+
 
 @pytest.mark.usefixtures("patch_Organization")
 class TestProjectUpdateCredentials(TestJobExecution):
