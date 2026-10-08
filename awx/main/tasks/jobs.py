@@ -1620,7 +1620,7 @@ class RunProjectUpdate(BaseTask):
         if os.path.isdir(cache_dir):
             for entry in os.listdir(cache_dir):
                 old_path = os.path.join(cache_dir, entry)
-                if entry not in (keep_value, 'stage'):
+                if entry not in (keep_value, 'stage') and not entry.startswith('reqcache_'):
                     # invalidate, then delete
                     new_path = os.path.join(cache_dir, '.~~delete~~' + entry)
                     try:
@@ -1628,6 +1628,37 @@ class RunProjectUpdate(BaseTask):
                         shutil.rmtree(new_path)
                     except OSError:
                         logger.warning(f"Could not remove cache directory {old_path}")
+
+    @staticmethod
+    def _sync_requirements_cache(base_path, cache_path):
+        """After a successful install, sync the requirements hash cache.
+
+        If galaxy install ran (collections/roles exist in cache_path), save them
+        to a hash-keyed reqcache directory for reuse across commits.
+        If galaxy install was skipped (cache hit), the reqcache already has the content.
+        """
+        hash_file = os.path.join(cache_path, '.requirements_hash')
+        if not os.path.exists(hash_file):
+            return
+
+        try:
+            with open(hash_file) as f:
+                req_hash = f.read().strip()
+        except OSError:
+            return
+
+        if not req_hash:
+            return
+
+        reqcache_path = os.path.join(base_path, f'reqcache_{req_hash}')
+
+        for subfolder in ('requirements_collections', 'requirements_roles'):
+            src = os.path.join(cache_path, subfolder)
+            dst = os.path.join(reqcache_path, subfolder)
+            if os.path.exists(src) and not os.path.exists(dst):
+                os.makedirs(reqcache_path, exist_ok=True)
+                shutil.copytree(src, dst, symlinks=True)
+                logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
 
     @staticmethod
     def make_local_copy(project, job_private_data_dir):
@@ -1649,6 +1680,20 @@ class RunProjectUpdate(BaseTask):
             subfolders.append('requirements_roles')
         for subfolder in subfolders:
             cache_subpath = os.path.join(cache_path, subfolder)
+            if not os.path.exists(cache_subpath):
+                # Fall back to requirements-hash-keyed cache (reqcache)
+                hash_file = os.path.join(cache_path, '.requirements_hash')
+                if os.path.exists(hash_file):
+                    try:
+                        with open(hash_file) as f:
+                            req_hash = f.read().strip()
+                        if req_hash:
+                            reqcache_subpath = os.path.join(project.get_cache_path(), f'reqcache_{req_hash}', subfolder)
+                            if os.path.exists(reqcache_subpath):
+                                cache_subpath = reqcache_subpath
+                                logger.debug(f'Using requirements cache for {subfolder} (hash {req_hash[:12]})')
+                    except OSError:
+                        pass
             if os.path.exists(cache_subpath):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
@@ -1685,6 +1730,8 @@ class RunProjectUpdate(BaseTask):
                         shutil.rmtree(cache_path)
                     os.rename(stage_path, cache_path)
                     logger.debug('{0} wrote to cache at {1}'.format(instance.log_format, cache_path))
+
+                self._sync_requirements_cache(base_path, cache_path)
             elif os.path.exists(stage_path):
                 shutil.rmtree(stage_path)  # cannot trust content update produced
 

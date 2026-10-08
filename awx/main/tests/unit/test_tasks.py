@@ -1767,6 +1767,172 @@ def test_sync_and_copy_get_sync_needs_called_under_shared_lock(get_sync_needs, s
     assert call_order[1] == 'get_sync_needs'
 
 
+class TestClearProjectCachePreservesReqcache:
+    def test_reqcache_entries_preserved(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'abc123').mkdir()
+        (cache_dir / 'reqcache_deadbeef').mkdir()
+        (cache_dir / 'reqcache_cafebabe').mkdir()
+        (cache_dir / 'old_revision').mkdir()
+        (cache_dir / 'stage').mkdir()
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'abc123')
+
+        remaining = set(os.listdir(cache_dir))
+        assert 'abc123' in remaining
+        assert 'reqcache_deadbeef' in remaining
+        assert 'reqcache_cafebabe' in remaining
+        assert 'stage' in remaining
+        assert 'old_revision' not in remaining
+
+    def test_no_reqcache_entries(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'keep_me').mkdir()
+        (cache_dir / 'delete_me').mkdir()
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'keep_me')
+
+        remaining = set(os.listdir(cache_dir))
+        assert 'keep_me' in remaining
+        assert 'delete_me' not in remaining
+
+
+class TestSyncRequirementsCache:
+    def test_saves_collections_to_reqcache(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        # Simulate a galaxy install that produced collections
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'ansible_collections').mkdir()
+        (collections_dir / 'ansible_collections' / 'test.txt').write_text('test')
+
+        # Write the hash marker
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        reqcache = base_path / 'reqcache_deadbeef1234' / 'requirements_collections'
+        assert reqcache.exists()
+        assert (reqcache / 'ansible_collections' / 'test.txt').read_text() == 'test'
+
+    def test_skips_when_no_hash_file(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        entries = os.listdir(base_path)
+        assert not any(e.startswith('reqcache_') for e in entries)
+
+    def test_skips_when_reqcache_already_exists(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        # Pre-existing reqcache
+        reqcache = base_path / 'reqcache_deadbeef1234' / 'requirements_collections'
+        reqcache.mkdir(parents=True)
+        (reqcache / 'existing.txt').write_text('original')
+
+        # New cache with same hash but different content
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'new.txt').write_text('new')
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        # Should not overwrite existing reqcache
+        assert (reqcache / 'existing.txt').read_text() == 'original'
+        assert not (reqcache / 'new.txt').exists()
+
+
+class TestMakeLocalCopyReqcacheFallback:
+    def test_falls_back_to_reqcache(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        # Create cache_id directory with hash pointer but no collections
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Create reqcache with collections
+        reqcache_collections = cache_base / 'reqcache_deadbeef1234' / 'requirements_collections'
+        reqcache_collections.mkdir(parents=True)
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        # Create project path
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        # Create job private data dir
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        # Collections should be copied from reqcache
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_uses_direct_cache_when_available(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        # Create cache_id directory with collections directly present
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        direct_collections = cache_id_dir / 'requirements_collections'
+        direct_collections.mkdir()
+        (direct_collections / 'direct.txt').write_text('direct content')
+
+        # Create project path
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        # Should use direct cache, not reqcache
+        dest = job_dir / 'requirements_collections' / 'direct.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'direct content'
+
+
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])
 def test_managed_injector_redaction(injector_cls):
     """See awx.main.models.inventory.PluginFileInjector._get_shared_env
