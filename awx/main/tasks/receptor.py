@@ -731,6 +731,28 @@ class AWXReceptorJob:
                         pass
                 result = namedtuple('result', ['status', 'rc'])
                 res = result('canceled', 1)
+            except Exception as exc:
+                # The processor raised — typically a ConnectionError (Redis
+                # sidecar gone) or OperationalError (transient DB failure).
+                # The error is on this controller, not the EE. Detach so the
+                # next controller can adopt and finalize correctly.
+                if not self._cancel_unit_on_signal():
+                    try:
+                        probe = receptor_ctl.simple_command(f'work status {self.unit_id}')
+                        probe_state = probe.get('StateName', '')
+                    except Exception:
+                        probe_state = None
+                    self.detached = True
+                    logger.info(f'Work unit {self.unit_id} (state={probe_state!r}) but process phase raised ({type(exc).__name__}); detaching for adoption')
+                    if resultsock:
+                        try:
+                            resultsock.shutdown(socket.SHUT_RDWR)
+                        except Exception:
+                            pass
+                    result = namedtuple('result', ['status', 'rc'])
+                    res = result('error', 1)
+                else:
+                    raise
             finally:
                 signal_state.raise_exception = False
 
@@ -759,18 +781,24 @@ class AWXReceptorJob:
             status_unknown = True
             logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
-        if status_unknown and not self._cancel_unit_on_signal():
-            # We reached here because the results stream reported an error, but the control
-            # socket that could confirm it is unreachable — and unreachable is not failed.
-            # That pair is the ordinary shape of this controller shutting down: receptor
-            # lives in a sibling container going down alongside us, so the stream breaking
-            # says something about this pod, not about the EE on another node. Recording
-            # the error would clear the running + work_unit_id pair the orphan scan matches
-            # on, so detach for the same reason the signal path does and let the job be
-            # adopted. A canceled job is excluded — it is meant to stop.
-            self.detached = True
-            logger.info(f'Work unit {self.unit_id} reported an error but its status is unreachable; detaching instead of failing the job')
-            return res
+        if not self._cancel_unit_on_signal():
+            if status_unknown:
+                # Results stream reported an error and the control socket is unreachable.
+                # That pair is the ordinary shape of this controller shutting down: receptor
+                # lives in a sibling container going down alongside us, so the stream breaking
+                # says something about this pod, not about the EE on another node. Detach
+                # so the job can be adopted.
+                self.detached = True
+                logger.info(f'Work unit {self.unit_id} reported an error but its status is unreachable; detaching instead of failing the job')
+                return res
+            if state_name in ('Pending', 'Running'):
+                # The work unit is still alive on the EE but our results stream broke.
+                # The control socket responded (so status_unknown is False) but a live
+                # unit means the EE is fine — the error is local (e.g., this pod is
+                # shutting down and the results socket died before the control socket).
+                self.detached = True
+                logger.info(f'Work unit {self.unit_id} is {state_name} but results stream errored; detaching for adoption')
+                return res
 
         if 'exceeded quota' in detail:
             logger.warning(detail)
@@ -1174,7 +1202,7 @@ def _adopted_finished_at(job, callback=None):
     return finished_at, (right_now - finished_at).total_seconds()
 
 
-def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=None):
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=None, pod_name=None):
     """Commit terminal status for an adopted job via the shared _finalize_job_run path.
 
     The shared finalization function uses duck typing to schedule task/workflow managers
@@ -1210,7 +1238,14 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     # when no row matches. Letting that escape would skip finalization while the caller's
     # `finally` still releases the work unit, stranding the job in `running` forever.
     surviving_controller = settings.CLUSTER_HOST_ID
-    callback.delay_update(job_explanation=f'Job adopted by {surviving_controller}. Work unit: {job.work_unit_id}. Execution node: {job.execution_node}.')
+    ee_node = job.execution_node or pod_name or ''
+    lag_str = f'{adoption_lag:.0f}s' if adoption_lag >= 1 else '<1s'
+    explanation = f'Job adopted by {surviving_controller} (lag {lag_str}).'
+    if job.work_unit_id:
+        explanation += f' Work unit: {job.work_unit_id}.'
+    if ee_node:
+        explanation += f' Execution node: {ee_node}.'
+    callback.delay_update(job_explanation=explanation)
 
     _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra)
 
@@ -1342,7 +1377,7 @@ def _determine_adoption_status_from_unit(job, receptor_ctl, unit_id):
     return status, exit_code, True
 
 
-def _finalize_adoption_result(job, callback, res, process_phase_failed, receptor_ctl, unit_id, private_data_dir):
+def _finalize_adoption_result(job, callback, res, process_phase_failed, receptor_ctl, unit_id, private_data_dir, pod_name=None):
     """Finalize a job after adoption completes or fails.
 
     Calls post-run hooks (if any) before marking status terminal.
@@ -1375,11 +1410,11 @@ def _finalize_adoption_result(job, callback, res, process_phase_failed, receptor
         if hook_error.get('traceback'):
             callback.delay_update(result_traceback=hook_error['traceback'])
 
-    _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=status)
+    _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_status=status, pod_name=pod_name)
     return True
 
 
-def reattach_to_work_unit(job, receptor_ctl, unit_status=None):
+def reattach_to_work_unit(job, receptor_ctl, unit_status=None, pod_name=None):
     """Reconnect to a receptor work unit and stream events in real-time until it completes.
 
     Reconstructs the minimal process-phase context from the DB job record, then calls
@@ -1481,7 +1516,7 @@ def reattach_to_work_unit(job, receptor_ctl, unit_status=None):
     # in that case, do NOT release the work unit.
     finalized = None
     try:
-        finalized = _finalize_adoption_result(job, callback, res, process_phase_failed, receptor_ctl, unit_id, private_data_dir)
+        finalized = _finalize_adoption_result(job, callback, res, process_phase_failed, receptor_ctl, unit_id, private_data_dir, pod_name=pod_name)
     finally:
         # Release work unit based on finalization result:
         # - finalized=True: adoption succeeded, release unit

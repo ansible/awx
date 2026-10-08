@@ -2467,6 +2467,76 @@ class TestLostInstanceCapacity:
 
         assert _adoption_slot_available(headroom_needed=django_settings.AWX_CONTROL_NODE_TASK_IMPACT) is False
 
+    # ------------------------------------------------------------------
+    # AAP-96141: never-started jobs are re-queued, not reaped as failed
+    # ------------------------------------------------------------------
+
+    def test_never_started_job_is_reset_to_pending(self, me_inst, settings):
+        """A job with no started time and no work_unit_id never reached the EE.
+        Reaping it as failed permanently loses a job that could have run on any
+        controller. Reset to pending instead."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost, work_unit_id='')
+        # Django's save() auto-sets started when status='running'; undo it
+        # to simulate a job that was dispatched but never reached the EE.
+        Job.objects.filter(pk=job.pk).update(started=None)
+        job.refresh_from_db()
+
+        with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
+            _handle_lost_instance_job(job, lost)
+
+        job.refresh_from_db()
+        assert job.status == 'pending'
+        assert job.controller_node == ''
+        assert job.execution_node == ''
+        reap_job.assert_not_called()
+
+    def test_never_started_waiting_job_is_reset_to_pending(self, me_inst, settings):
+        """Same as above but the job is in 'waiting' instead of 'running'.
+        _handle_lost_instance_job is called from a loop that fetches running jobs,
+        but the refresh_from_db inside sees the real status."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost, work_unit_id='', status='waiting')
+
+        with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
+            _handle_lost_instance_job(job, lost)
+
+        job.refresh_from_db()
+        assert job.status == 'pending'
+        reap_job.assert_not_called()
+
+    def test_never_started_but_already_terminal_is_not_reset(self, me_inst, settings):
+        """A race: another controller already marked the job as error between
+        the list and this call. The CAS guard (status in running/waiting) prevents
+        a reset to pending; the job falls through to the reaper instead."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost, work_unit_id='')
+        Job.objects.filter(pk=job.pk).update(started=None, status='error')
+        job.refresh_from_db()
+
+        with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
+            _handle_lost_instance_job(job, lost)
+
+        job.refresh_from_db()
+        assert job.status == 'error', 'must not overwrite a terminal status back to pending'
+        reap_job.assert_called_once()
+
+    def test_started_but_unadoptable_job_is_still_reaped(self, me_inst, settings):
+        """A job that started (has a started time) but has no work_unit_id is genuinely
+        broken — there's nothing to reconnect to. It must still be reaped."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost, work_unit_id='')
+        # started is auto-set by the model save — so this job has a started time
+
+        with patch('awx.main.tasks.system.reaper.reap_job') as reap_job:
+            _handle_lost_instance_job(job, lost)
+
+        reap_job.assert_called_once()
+
 
 @pytest.mark.django_db
 class TestAnnounceShutdown:

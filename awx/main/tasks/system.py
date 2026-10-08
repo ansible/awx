@@ -884,6 +884,17 @@ def _handle_lost_instance_job(j, other_inst):
     """Process a single job from a lost instance: adopt if possible, reap otherwise."""
     adoptable = j.work_unit_id and j.controller_node == other_inst.hostname and j.execution_node != other_inst.hostname
     if not adoptable:
+        if not j.started and not j.work_unit_id:
+            # Job never reached an EE — re-queue so any controller can dispatch it.
+            j.refresh_from_db(fields=['status'])
+            if j.status in ('running', 'waiting'):
+                UnifiedJob.objects.filter(pk=j.id, status=j.status).update(
+                    status='pending',
+                    controller_node='',
+                    execution_node='',
+                )
+                logger.info(f'Job {j.id} never started on lost controller {other_inst.hostname}; reset to pending for re-dispatch')
+                return
         reaper.reap_job(j, 'failed', job_explanation='Job reaped due to instance shutdown')
         return
 

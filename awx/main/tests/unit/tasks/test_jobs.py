@@ -867,3 +867,87 @@ def test_acquire_lock_exclusive(mock_exists, mock_os_open, mock_lockf):
     call_args = mock_lockf.call_args
     lock_flags = call_args[0][1]
     assert lock_flags & fcntl.LOCK_EX  # Should have LOCK_EX bit
+
+
+# ---------------------------------------------------------------------------
+# AAP-96144: pre-transmit shutdown signal resets to pending, not canceled
+#
+# When a controller task pod is shutting down, dispatcherd sends SIGUSR1 to
+# all workers. A worker in the pre-transmit phase (between dispatch and EE
+# submission) previously marked the job as 'canceled' — even though the user
+# didn't cancel it. These tests verify that a shutdown signal (no cancel_flag)
+# resets the job to 'pending' for re-dispatch, while a real user cancel still
+# marks 'canceled'.
+# ---------------------------------------------------------------------------
+
+
+class TestPreTransmitShutdownSignal:
+    """Tests for the pre-transmit signal handling in BaseTask.run() (jobs.py:699)."""
+
+    def _make_task(self):
+        """Create a minimal BaseTask with mocked internals for the pre-transmit path."""
+        task = jobs.BaseTask()
+        task.instance = mock.MagicMock()
+        task.instance.pk = 42
+        task.instance.id = 42
+        task.instance.log_format = 'job 42'
+        task.instance.cancel_flag = False
+        task.instance.status = 'running'
+        task.instance.execution_environment_id = 1
+        task.update_model = mock.MagicMock(return_value=task.instance)
+        task.build_private_data_dir = mock.MagicMock(return_value='/tmp/private')
+        task.pre_run_hook = mock.MagicMock()
+        task.build_project_dir = mock.MagicMock()
+        return task
+
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
+    def test_shutdown_signal_resets_to_pending(self, mock_signal, mock_policy):
+        """SIGUSR1 without cancel_flag = controller shutdown, not user cancel.
+        Job should be reset to pending, not marked canceled."""
+        task = self._make_task()
+        task.instance.cancel_flag = False
+
+        task.run(42)
+
+        task.update_model.assert_any_call(42, status='pending', controller_node='', execution_node='')
+
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
+    def test_shutdown_signal_returns_early(self, mock_signal, mock_policy):
+        """After resetting to pending, BaseTask.run() must return immediately.
+        If it falls through, the RuntimeError 'not starting pending task' would
+        be caught by the except block and the job finalized as error."""
+        task = self._make_task()
+        task.instance.cancel_flag = False
+        task.final_run_hook = mock.MagicMock()
+
+        task.run(42)
+
+        task.final_run_hook.assert_not_called()
+
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback', return_value=True)
+    def test_cancel_flag_still_marks_canceled(self, mock_signal, mock_policy):
+        """A real user cancel (cancel_flag=True) must still set status='canceled'."""
+        task = self._make_task()
+        task.instance.cancel_flag = True
+
+        task.run(42)
+
+        task.update_model.assert_any_call(42, status='canceled')
+
+    @mock.patch('awx.main.tasks.jobs.evaluate_policy')
+    @mock.patch('awx.main.tasks.jobs.signal_callback')
+    def test_signal_check_order_cancel_flag_first(self, mock_signal, mock_policy):
+        """The cancel_flag check must come before signal_callback() in the conditional.
+        With both true, cancel_flag wins — the user asked to cancel the job."""
+        task = self._make_task()
+        task.instance.cancel_flag = True
+        mock_signal.return_value = True
+
+        task.run(42)
+
+        task.update_model.assert_any_call(42, status='canceled')
+        calls_with_pending = [c for c in task.update_model.call_args_list if c[1].get('status') == 'pending']
+        assert not calls_with_pending, 'cancel_flag=True must win over shutdown signal'

@@ -2485,3 +2485,174 @@ def test_process_phase_breaks_out_of_a_stream_that_never_delivers(mock_signal, m
     assert rj.stream_stalled is True, 'the watchdog must recognise a stream that will never deliver'
     assert res.status == 'error'
     sock.shutdown.assert_called_once_with(socket.SHUT_RDWR)
+
+
+# ---------------------------------------------------------------------------
+# AAP-96137: _process_phase — non-signal exceptions always detach
+#
+# When the processor raises a non-SignalExit exception (e.g. Redis
+# ConnectionError, psycopg OperationalError), the error is on this
+# controller's infrastructure, not the EE. Always detach regardless of
+# work-unit state so the next controller can adopt and finalize correctly.
+# ---------------------------------------------------------------------------
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_exception_detaches_when_unit_running(mock_signal, mock_connections):
+    """Redis dies first, processor raises ConnectionError, but the EE is still Running."""
+    rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock(side_effect=ConnectionError('Redis sidecar gone'))
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+    ctl.get_work_results.return_value = (Mock(spec=socket.socket), MagicMock())
+
+    res = rj._process_phase(ctl)
+
+    assert rj.detached is True
+    assert res.status == 'error'
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_exception_detaches_when_unit_pending(mock_signal, mock_connections):
+    """The work unit hasn't even started yet — definitely detach."""
+    rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock(side_effect=RuntimeError('stream broke'))
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Pending'}
+    ctl.get_work_results.return_value = (Mock(spec=socket.socket), MagicMock())
+
+    res = rj._process_phase(ctl)
+
+    assert rj.detached is True
+    assert res.status == 'error'
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_exception_detaches_when_probe_unreachable(mock_signal, mock_connections):
+    """Control socket is also gone — the pair says this pod is dying, not the EE."""
+    rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock(side_effect=ConnectionError('Redis sidecar gone'))
+    ctl = Mock()
+    ctl.simple_command.side_effect = ConnectionRefusedError('receptor gone too')
+    ctl.get_work_results.return_value = (Mock(spec=socket.socket), MagicMock())
+
+    res = rj._process_phase(ctl)
+
+    assert rj.detached is True
+    assert res.status == 'error'
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_exception_detaches_when_unit_completed(mock_signal, mock_connections):
+    """Unit already Succeeded but processor raised (e.g. DB connection died).
+    The error is on this controller, not the EE — detach so the next controller
+    can adopt and finalize the successful job correctly."""
+    rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock(side_effect=RuntimeError('DB connection closed unexpectedly'))
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded'}
+    ctl.get_work_results.return_value = (Mock(spec=socket.socket), MagicMock())
+
+    res = rj._process_phase(ctl)
+
+    assert rj.detached is True
+    assert res.status == 'error'
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_exception_reraises_when_canceled(mock_signal, mock_connections):
+    """User canceled the job — the exception must propagate, not detach."""
+    rj = _make_receptor_job(cancel_flag=True)
+    rj.processor = Mock(side_effect=ConnectionError('Redis gone'))
+    ctl = Mock()
+    ctl.get_work_results.return_value = (Mock(spec=socket.socket), MagicMock())
+
+    with pytest.raises(ConnectionError):
+        rj._process_phase(ctl)
+
+    assert not hasattr(rj, 'detached') or rj.detached is not True
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_exception_shuts_down_resultsock(mock_signal, mock_connections):
+    """The detach path must close the results socket to unblock the processor thread."""
+    rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock(side_effect=ConnectionError('Redis gone'))
+    resultsock = Mock(spec=socket.socket)
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+    ctl.get_work_results.return_value = (resultsock, MagicMock())
+
+    rj._process_phase(ctl)
+
+    resultsock.shutdown.assert_called_once_with(socket.SHUT_RDWR)
+
+
+@patch('awx.main.tasks.receptor.connections')
+@patch('awx.main.tasks.receptor.signal_callback', return_value=False)
+def test_process_phase_db_error_detaches_succeeded_unit(mock_signal, mock_connections):
+    """Transient DB failure (psycopg OperationalError) during a successful run.
+    The playbook completed on the EE (Succeeded), but the processor thread's
+    finished_callback failed because PostgreSQL closed the connection. The job
+    must detach for adoption, NOT be marked error."""
+    from django.db.utils import OperationalError
+
+    rj = _make_receptor_job(cancel_flag=False)
+    rj.processor = Mock(side_effect=OperationalError('connection to server at "172.30.152.254", port 5432 failed: server closed the connection unexpectedly'))
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Succeeded'}
+    ctl.get_work_results.return_value = (Mock(spec=socket.socket), MagicMock())
+
+    res = rj._process_phase(ctl)
+
+    assert rj.detached is True
+    assert res.status == 'error'
+
+
+# ---------------------------------------------------------------------------
+# AAP-96137: _handle_work_error — detach when unit is still Running/Pending
+# ---------------------------------------------------------------------------
+
+
+def test_handle_work_error_detaches_when_unit_still_running():
+    """The control socket responded but the work unit is still alive. The error is
+    local (e.g. this pod shutting down broke the results stream before the control
+    socket); detach so the next controller can adopt."""
+    rj = _make_receptor_job(cancel_flag=False)
+    ctl = _make_receptor_ctl(state='Running')
+    err_res = _Result(status='error', rc=1)
+
+    result = rj._handle_work_error(ctl, err_res)
+
+    assert result is err_res
+    assert rj.detached is True
+
+
+def test_handle_work_error_detaches_when_unit_still_pending():
+    """Same as Running — a Pending unit hasn't even started yet."""
+    rj = _make_receptor_job(cancel_flag=False)
+    ctl = _make_receptor_ctl(state='Pending')
+    err_res = _Result(status='error', rc=1)
+
+    result = rj._handle_work_error(ctl, err_res)
+
+    assert result is err_res
+    assert rj.detached is True
+
+
+def test_handle_work_error_does_not_detach_running_when_canceled():
+    """A canceled job must not be kept alive just because the unit is Running."""
+    rj = _make_receptor_job(cancel_flag=True)
+    ctl = _make_receptor_ctl(state='Running')
+    err_res = _Result(status='error', rc=1)
+
+    result = rj._handle_work_error(ctl, err_res)
+
+    assert result is err_res
+    assert rj.detached is False

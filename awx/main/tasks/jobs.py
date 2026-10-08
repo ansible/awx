@@ -697,8 +697,15 @@ class BaseTask(object):
             self.build_project_dir(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
-                logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
-                self.instance = self.update_model(self.instance.pk, status='canceled')
+                if self.instance.cancel_flag:
+                    logger.debug(f'detected pre-run cancel flag for {self.instance.log_format}')
+                    self.instance = self.update_model(self.instance.pk, status='canceled')
+                else:
+                    # Signal without cancel_flag is a controller shutdown, not a user cancel.
+                    # Reset to pending so any controller can re-dispatch the job.
+                    logger.info(f'{self.instance.log_format} received shutdown signal before reaching EE; resetting to pending')
+                    self.instance = self.update_model(self.instance.pk, status='pending', controller_node='', execution_node='')
+                    return
 
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has

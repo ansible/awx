@@ -317,7 +317,7 @@ def harvest_terminal_pod(job, pod_name, pod):
             if hook_error.get('traceback'):
                 callback.delay_update(result_traceback=hook_error['traceback'])
 
-        _finalize_adopted_job(job, callback, exit_code, process_phase_failed=False, final_status=status)
+        _finalize_adopted_job(job, callback, exit_code, process_phase_failed=False, final_status=status, pod_name=pod_name)
         return True
     finally:
         shutil.rmtree(private_data_dir, ignore_errors=True)
@@ -396,11 +396,26 @@ def attach_to_streaming_pod(job, pod_name, pod, receptor_ctl=None):
             logger.exception(f'{job.log_format}: could not attach a work unit to running pod {pod_name}, deferring adoption')
             return False
 
+        actual_pod_name = unit_status.get('ExtraData', {}).get('PodName', '')
+        if actual_pod_name != pod_name:
+            # Old receptor ignores the pod_name param and creates a new empty pod instead of
+            # attaching. Release the broken unit before it wastes resources.
+            try:
+                receptor_ctl.simple_command(f'work release {unit_id}')
+            except Exception:
+                pass
+            logger.error(
+                f'{job.log_format}: receptor did not accept pod_name param (got PodName={actual_pod_name!r}, '
+                f'expected {pod_name!r}). The receptor image must be updated to a version that supports '
+                f'the pod_name runtime parameter (receptor PR #1595 or later). Deferring adoption.'
+            )
+            return False
+
         logger.info(f'{job.log_format}: attached work unit {unit_id} to running pod {pod_name} in {namespace}, streaming live')
         UnifiedJob.objects.filter(pk=job.pk).update(work_unit_id=unit_id)
         job.work_unit_id = unit_id
 
-        return bool(reattach_to_work_unit(job, receptor_ctl, unit_status=unit_status))
+        return bool(reattach_to_work_unit(job, receptor_ctl, unit_status=unit_status, pod_name=pod_name))
     finally:
         if close_ctl:
             try:

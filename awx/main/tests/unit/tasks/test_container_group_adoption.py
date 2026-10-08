@@ -65,6 +65,13 @@ def _classify(pod, has_output=False, started_ago=None):
     return classify_job_pod(pod, has_output=has_output, wedge_timeout=WEDGE_TIMEOUT, reference_time=NOW)
 
 
+def _receptor_ctl(pod_name='automation-job-42-abcde'):
+    """A mock receptor control connection whose work-status response includes PodName."""
+    ctl = Mock()
+    ctl.simple_command.return_value = {'ExtraData': {'PodName': pod_name}}
+    return ctl
+
+
 # ---------------------------------------------------------------------------
 # classify_job_pod — the four-way triage
 # ---------------------------------------------------------------------------
@@ -477,11 +484,12 @@ def attach_env():
     with patch.multiple('awx.main.tasks.container_groups', **{t: DEFAULT for t in targets}) as mocks:
         mocks['AWXReceptorJob'].return_value.submit_pod_attach.return_value = 'new-unit-id'
         mocks['reattach_to_work_unit'].return_value = True
+        mocks['get_receptor_ctl'].return_value = _receptor_ctl()
         yield mocks
 
 
 def test_attach_submits_a_unit_for_the_pod_in_its_own_namespace(attach_env):
-    ctl = Mock()
+    ctl = _receptor_ctl()
     pod = _pod()
 
     attach_to_streaming_pod(_job(), pod['metadata']['name'], pod, receptor_ctl=ctl)
@@ -495,7 +503,7 @@ def test_attach_repoints_the_job_at_the_unit_it_now_owns(attach_env):
     is replaced, `work cancel` has nothing to reach and the next heartbeat re-does this."""
     job = _job()
 
-    attach_to_streaming_pod(job, 'automation-job-42-abcde', _pod(), receptor_ctl=Mock())
+    attach_to_streaming_pod(job, 'automation-job-42-abcde', _pod(), receptor_ctl=_receptor_ctl())
 
     assert attach_env['UnifiedJob'].objects.filter.call_args.kwargs == {'pk': 42}
     assert attach_env['UnifiedJob'].objects.filter.return_value.update.call_args.kwargs == {'work_unit_id': 'new-unit-id'}
@@ -505,15 +513,15 @@ def test_attach_repoints_the_job_at_the_unit_it_now_owns(attach_env):
 def test_attach_hands_off_to_the_ordinary_adoption_path(attach_env):
     """Everything after the submit — dedup, the stall watchdog, finalize, release — is the
     mesh path. Re-implementing any of it here is how the two drift apart."""
-    ctl = Mock()
-    ctl.simple_command.return_value = {'StateName': 'Running'}
+    ctl = _receptor_ctl()
+    ctl.simple_command.return_value = {'StateName': 'Running', 'ExtraData': {'PodName': 'automation-job-42-abcde'}}
     job = _job()
 
     assert attach_to_streaming_pod(job, 'automation-job-42-abcde', _pod(), receptor_ctl=ctl) is True
 
     ctl.simple_command.assert_called_once_with('work status new-unit-id')
     assert attach_env['reattach_to_work_unit'].call_args[0] == (job, ctl)
-    assert attach_env['reattach_to_work_unit'].call_args.kwargs['unit_status'] == {'StateName': 'Running'}
+    assert attach_env['reattach_to_work_unit'].call_args.kwargs['unit_status'] == {'StateName': 'Running', 'ExtraData': {'PodName': 'automation-job-42-abcde'}}
 
 
 def test_attach_defers_when_the_submit_fails_and_leaves_the_job_alone(attach_env):
@@ -526,7 +534,7 @@ def test_attach_defers_when_the_submit_fails_and_leaves_the_job_alone(attach_env
 
 
 def test_attach_does_not_close_a_control_connection_it_was_handed(attach_env):
-    ctl = Mock()
+    ctl = _receptor_ctl()
     attach_to_streaming_pod(_job(), 'automation-job-42-abcde', _pod(), receptor_ctl=ctl)
     ctl.close.assert_not_called()
 
@@ -537,6 +545,30 @@ def test_attach_closes_the_control_connection_it_opened_itself(attach_env):
     attach_to_streaming_pod(_job(), 'automation-job-42-abcde', _pod())
 
     ctl.close.assert_called_once()
+
+
+def test_attach_rejects_old_receptor_that_ignores_pod_name(attach_env):
+    """Old receptor silently ignores the pod_name param and creates a new empty pod.
+    The guard checks PodName in the work status and releases the broken unit."""
+    ctl = Mock()
+    ctl.simple_command.return_value = {'ExtraData': {'PodName': ''}}
+
+    assert attach_to_streaming_pod(_job(), 'automation-job-42-abcde', _pod(), receptor_ctl=ctl) is False
+
+    ctl.simple_command.assert_any_call('work release new-unit-id')
+    attach_env['UnifiedJob'].objects.filter.assert_not_called()
+    attach_env['reattach_to_work_unit'].assert_not_called()
+
+
+def test_attach_rejects_when_pod_name_differs(attach_env):
+    """If receptor returns a different PodName than expected, do not proceed."""
+    ctl = Mock()
+    ctl.simple_command.return_value = {'ExtraData': {'PodName': 'some-other-pod'}}
+
+    assert attach_to_streaming_pod(_job(), 'automation-job-42-abcde', _pod(), receptor_ctl=ctl) is False
+
+    ctl.simple_command.assert_any_call('work release new-unit-id')
+    attach_env['reattach_to_work_unit'].assert_not_called()
 
 
 # ---------------------------------------------------------------------------
