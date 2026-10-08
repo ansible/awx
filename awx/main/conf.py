@@ -804,7 +804,7 @@ register(
         'Messages whose syslog severity number is greater than or equal to this value '
         'are discarded once the action queue reaches 90% of '
         'LOG_AGGREGATOR_ACTION_QUEUE_SIZE. Severity numbers run from 0 (EMERGENCY) to '
-        '7 (DEBUG), so a lower value here discards fewer messages. Equivalent to the '
+        '7 (DEBUG), so a higher value here discards fewer messages (8 discards none). Equivalent to the '
         'rsyslogd queue.discardSeverity setting on the action. '
         'Discarding is silent: no error, warning or counter records that a message was '
         'dropped, and every message AWX emits is INFO (6) or less severe, so the '
