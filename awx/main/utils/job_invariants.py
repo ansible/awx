@@ -84,6 +84,26 @@ def check_cancel_respected(job):
     return {'name': 'cancel_respected', 'ok': ok, 'detail': f'cancel_flag set, status={job.status}'}
 
 
+def check_status_matches_playbook(job):
+    """A job whose own playbook_on_stats reports no failed or unreachable host should be
+    successful. Catches a status overwritten by a controller that lost a race, which the
+    other checks cannot see because the event stream itself is complete."""
+    if not hasattr(job, 'job_host_summaries'):
+        return {'name': 'status_matches_playbook', 'ok': True, 'detail': 'not applicable'}
+    stats = job.get_event_queryset().filter(event='playbook_on_stats').order_by('counter').first()
+    if stats is None:
+        return {'name': 'status_matches_playbook', 'ok': True, 'detail': 'no playbook_on_stats event'}
+    data = stats.event_data or {}
+    bad = sorted(set(data.get('failures') or {}) | set(data.get('dark') or {}))
+    expected = 'failed' if bad else 'successful'
+    ok = job.status == expected or job.cancel_flag
+    return {
+        'name': 'status_matches_playbook',
+        'ok': ok,
+        'detail': f'playbook_on_stats says {expected} (failed/dark hosts: {bad or "none"}), status={job.status}',
+    }
+
+
 def check_host_summaries_unique(job):
     if not hasattr(job, 'job_host_summaries'):
         return {'name': 'host_summaries', 'ok': True, 'detail': 'not applicable'}
@@ -99,6 +119,7 @@ CHECKS = (
     check_event_count_matches,
     check_single_notification_per_status,
     check_cancel_respected,
+    check_status_matches_playbook,
     check_host_summaries_unique,
 )
 
