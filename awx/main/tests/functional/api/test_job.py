@@ -13,7 +13,20 @@ from django.utils import timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-from awx.main.models import Credential, CredentialType, ExecutionEnvironment, JobTemplate, User, Job, AdHocCommand, Project, ProjectUpdate, InstanceGroup, Label, Organization
+from awx.main.models import (
+    Credential,
+    CredentialType,
+    ExecutionEnvironment,
+    JobTemplate,
+    User,
+    Job,
+    AdHocCommand,
+    Project,
+    ProjectUpdate,
+    InstanceGroup,
+    Label,
+    Organization,
+)
 
 from ansible_base.rbac.models import RoleDefinition
 
@@ -289,6 +302,7 @@ def test_job_list_query_count_scales_constantly(user, organization, setup_manage
     project = Project.objects.create(name='query-count-project', organization=organization)
     ee = ExecutionEnvironment.objects.create(name='query-count-ee')
     ct = CredentialType.defaults['ssh']()
+    ct.save()
     cred = Credential.objects.create(name='query-count-cred', credential_type=ct)
 
     jt = JobTemplate.objects.create(
@@ -326,6 +340,7 @@ def test_job_list_includes_summary_fields_with_prefetch(user, organization, setu
     project = Project.objects.create(name='summary-project', organization=organization)
     ee = ExecutionEnvironment.objects.create(name='summary-ee')
     ct = CredentialType.defaults['ssh']()
+    ct.save()
     cred = Credential.objects.create(name='summary-cred', credential_type=ct)
 
     jt = JobTemplate.objects.create(
