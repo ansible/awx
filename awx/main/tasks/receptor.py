@@ -756,7 +756,7 @@ class AWXReceptorJob:
             finally:
                 signal_state.raise_exception = False
 
-            if res.status == 'error':
+            if res.status == 'error' and not self.detached:
                 return self._handle_work_error(receptor_ctl, res)
 
         return res
@@ -1247,7 +1247,7 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
         explanation += f' Execution node: {ee_node}.'
     callback.delay_update(job_explanation=explanation)
 
-    _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra)
+    _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra, _required_status='running')
 
     label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
     # adoption_lag is no longer visible in `finished` now that it is back-dated, and it is the

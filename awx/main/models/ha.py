@@ -297,20 +297,27 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             grace_period += settings.RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
-    def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
+    def mark_offline(self, update_last_seen=False, perform_save=True, errors='', backdate_last_seen=False):
         if self.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
             return []
-        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen):
+        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen) and (not backdate_last_seen):
             return []
         self.node_state = Instance.States.UNAVAILABLE
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
         self.errors = errors
-        if update_last_seen:
-            self.last_seen = now()
 
         update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
-        if update_last_seen:
-            update_fields += ['last_seen']
+        if backdate_last_seen:
+            # Push last_seen past the grace cutoff so is_lost() returns True immediately.
+            # Used by explicit departure paths (announce_shutdown, _startup_mark_departed_peers)
+            # so peers don't need to wait out the full grace period before sweeping.
+            grace = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE
+            self.last_seen = now() - timedelta(seconds=grace + 1)
+            update_fields.append('last_seen')
+        elif update_last_seen:
+            self.last_seen = now()
+            update_fields.append('last_seen')
+
         if perform_save:
             from awx.main.signals import disable_activity_stream
 

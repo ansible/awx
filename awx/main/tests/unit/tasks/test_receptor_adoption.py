@@ -1261,6 +1261,32 @@ def test_finalize_adopted_job_preserves_runner_job_explanation(mock_finalize):
     assert 'surviving-ctrl-1' in explanation
 
 
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_passes_required_status_fence(mock_finalize):
+    """_finalize_adopted_job must pass _required_status='running' to _finalize_job_run.
+
+    This threads the double-finalization fence down to update_model: the check and write
+    happen inside the same select_for_update transaction, so a second controller that
+    arrives after the first already committed cannot overwrite the terminal status.
+    """
+    job = Mock()
+    job.status = 'running'
+    job.started = None
+    job.execution_node = None
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
+
+    _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
+
+    mock_finalize.assert_called_once()
+    call_kwargs = mock_finalize.call_args[1]
+    assert call_kwargs.get('_required_status') == 'running', (
+        '_finalize_job_run must be called with _required_status="running" so that '
+        'update_model can fence out a second controller that races to finalize the same job'
+    )
+
+
 # ---------------------------------------------------------------------------
 # _adopted_finished_at — recovering the real end time of an adopted job
 # ---------------------------------------------------------------------------

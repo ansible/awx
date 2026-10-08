@@ -2321,6 +2321,31 @@ class TestOrphanSweep:
 
         assert queue.call_count == 2
 
+    def test_transiently_unavailable_controller_not_swept(self, me_inst, settings):
+        """A controller whose Redis ping failed for one heartbeat marks itself UNAVAILABLE
+        but still updates last_seen — it is alive and streaming its jobs.  The sweep must
+        leave those jobs alone; stealing them would cause two controllers to stream the same
+        work unit concurrently (Finding 1 from the AAP-89602 correctness review)."""
+        settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
+        settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4  # grace = 120 s
+
+        # Simulates local_health_check() calling save_health_data(update_last_seen=True, errors=...)
+        # which marks the node UNAVAILABLE but also updates last_seen to now().
+        sick_but_alive = Instance.objects.create(
+            hostname='sick-but-alive',
+            node_type='control',
+            node_state=Instance.States.UNAVAILABLE,
+            last_seen=now(),
+        )
+        job = self._orphan(controller_node=sick_but_alive.hostname)
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == sick_but_alive.hostname, 'must not sweep a transiently-unhealthy controller'
+        queue.assert_not_called()
+
     def test_heartbeat_runs_the_sweep_after_processing_its_own_jobs(self, me_inst):
         """Ordering matters: the owner-driven path gets first crack each cycle, and the sweep
         reconciles behind it rather than racing it."""
@@ -2601,6 +2626,25 @@ class TestAnnounceShutdown:
         with patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now:
             sweep_now.apply_async.side_effect = RuntimeError('pg_notify connection gone')
             announce_shutdown()  # must not raise
+
+    def test_the_departing_node_backdates_its_last_seen(self, me_inst, settings):
+        """After announce_shutdown, is_lost() must return True immediately.
+
+        A node departing gracefully has a recent last_seen (it just heartbeated).  Without
+        backdating, the sweep's UNAVAILABLE-but-recent-last_seen guard would protect it from
+        being swept — the exact opposite of what we want.  Backdating collapses the is_lost()
+        wait to zero so the broadcast-triggered sweep can act on the job immediately."""
+        settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
+        settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4  # grace = 120 s
+
+        me_inst.last_seen = now()
+        me_inst.save(update_fields=['last_seen'])
+
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now'):
+            announce_shutdown()
+
+        me_inst.refresh_from_db()
+        assert me_inst.is_lost(), 'departed node must appear lost so the sweep can claim its jobs'
 
 
 @pytest.mark.django_db
@@ -2883,6 +2927,29 @@ class TestStartupMarkDepartedPeers:
         assert self._state('ctrl-a') == Instance.States.READY
         assert self._state('ctrl-b') == Instance.States.UNAVAILABLE
 
+    def test_a_pod_gone_peer_has_its_last_seen_backdated(self, settings):
+        """A peer confirmed gone by a K8s 404 must look lost immediately so the sweep can
+        claim its jobs without waiting for the 120 s is_lost() timeout.
+
+        Without backdating, a freshly-killed pod (last_seen=now) would be UNAVAILABLE but
+        recent — the sweep's new guard would keep it out of the orphan set and its jobs
+        would sit unowned for a full grace period."""
+        settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
+        settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4  # grace = 120 s
+
+        peer = Instance.objects.create(
+            hostname='ctrl-just-killed',
+            node_type='control',
+            node_state='ready',
+            last_seen=now(),
+        )
+
+        with self._probe({'ctrl-just-killed': True}):
+            _startup_mark_departed_peers()
+
+        peer.refresh_from_db()
+        assert peer.is_lost(), 'pod-gone peer must look lost so the sweep can claim its jobs at once'
+
     def test_a_failed_peer_query_does_not_block_startup(self):
         with patch.object(Instance.objects, 'filter', side_effect=DatabaseError('nope')):
             _startup_mark_departed_peers()
@@ -2905,3 +2972,45 @@ class TestStartupMarkDepartedPeers:
             _run_dispatch_startup_common()
 
         assert calls == ['mark', 'sweep']
+
+
+@pytest.mark.django_db
+class TestMarkOfflineBackdate:
+    """Instance.mark_offline(backdate_last_seen=True) must make is_lost() return True
+    immediately so the orphan sweep can treat an explicitly-departed node as gone without
+    waiting for the grace period to expire."""
+
+    def test_backdate_makes_is_lost_true(self, settings):
+        settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
+        settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4  # grace = 120 s
+
+        inst = Instance.objects.create(
+            hostname='ctrl-backdate-test',
+            node_type='control',
+            node_state=Instance.States.READY,
+            last_seen=now(),
+        )
+        inst.mark_offline(backdate_last_seen=True)
+        inst.refresh_from_db()
+
+        assert inst.node_state == Instance.States.UNAVAILABLE
+        assert inst.is_lost(), 'last_seen must be past the grace cutoff after backdate'
+
+    def test_plain_mark_offline_does_not_backdate(self, settings):
+        """Existing callers that pass no argument keep their current behavior: last_seen is
+        unchanged, so a recently-heartbeating node still looks alive after a transient
+        health-check failure."""
+        settings.CLUSTER_NODE_HEARTBEAT_PERIOD = 30
+        settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 4
+
+        inst = Instance.objects.create(
+            hostname='ctrl-no-backdate-test',
+            node_type='control',
+            node_state=Instance.States.READY,
+            last_seen=now(),
+        )
+        inst.mark_offline()
+        inst.refresh_from_db()
+
+        assert inst.node_state == Instance.States.UNAVAILABLE
+        assert not inst.is_lost(), 'last_seen must be unchanged when backdate_last_seen is not set'

@@ -204,16 +204,20 @@ def dispatch_waiting_jobs(binder):
         UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
 
 
-def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
+def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None, _required_status=None):
     """Commit terminal status, trigger notifications, and emit websocket status.
 
     Shared by BaseTask.run() (normal path) and adoption (reattach_to_work_unit path).
     Uses duck typing on the instance to schedule dependent task/workflow managers.
+
+    _required_status: when set, the write is skipped and None is returned if the row's
+    current status does not match. Passed by the adoption path to prevent a second
+    controller from overwriting a terminal status already committed by the first.
     """
     all_fields = runner_callback.get_delayed_update_fields()
     if extra_fields:
         all_fields.update(extra_fields)
-    instance = update_model(model, pk, status=status, select_for_update=True, **all_fields)
+    instance = update_model(model, pk, status=status, select_for_update=True, _required_status=_required_status, **all_fields)
     if not instance:
         return None
     if (instance.host_status_counts is not None) or (not runner_callback.wrapup_event_dispatched):

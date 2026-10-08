@@ -1094,8 +1094,9 @@ def _sweep_orphaned_jobs(this_inst):
     hold and leaves the rest owned by the dead controller, where the peer's own sweep will
     find them.
     """
+    grace_cutoff = now() - timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD * settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE)
     live_hostnames = Instance.objects.filter(
-        node_state__in=(Instance.States.READY, Instance.States.INSTALLED),
+        Q(node_state__in=(Instance.States.READY, Instance.States.INSTALLED)) | Q(node_state=Instance.States.UNAVAILABLE, last_seen__gte=grace_cutoff)
     ).values_list('hostname', flat=True)
 
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
@@ -1210,7 +1211,7 @@ def _startup_mark_departed_peers():
         if _control_pod_is_gone(peer.hostname) is not True:
             continue
         try:
-            peer.mark_offline(errors=_('Pod no longer exists; detected by a peer at startup'))
+            peer.mark_offline(errors=_('Pod no longer exists; detected by a peer at startup'), backdate_last_seen=True)
         except Exception:
             # One unmarkable peer must not cost us the others.
             logger.exception(f'Failed to mark departed peer {peer.hostname} offline')
@@ -1293,7 +1294,7 @@ def announce_shutdown():
     """
     try:
         this_inst = Instance.objects.me()
-        this_inst.mark_offline(errors=_('Instance is shutting down'))
+        this_inst.mark_offline(errors=_('Instance is shutting down'), backdate_last_seen=True)
         logger.info(f'Announced shutdown of {this_inst.hostname}: marked unavailable so peers can adopt its jobs now')
     except RuntimeError:
         # Our row is already gone — the shape of job 2068378. There is nothing left to mark,
