@@ -728,11 +728,13 @@ register(
 register(
     'LOG_AGGREGATOR_PROTOCOL',
     field_class=fields.ChoiceField,
-    choices=[('https', 'HTTPS/HTTP'), ('tcp', 'TCP'), ('udp', 'UDP')],
+    choices=[('https', 'HTTPS/HTTP'), ('tcp', 'TCP'), ('udp', 'UDP'), ('relp', 'RELP')],
     default='https',
     label=_('Logging Aggregator Protocol'),
     help_text=_(
-        'Protocol used to communicate with log aggregator.  HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in the Logging Aggregator hostname.'
+        'Protocol used to communicate with log aggregator.  HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in the Logging Aggregator hostname.  '
+        'RELP acknowledges each message and retransmits anything the aggregator did not confirm, where TCP loses whatever was in flight when a connection '
+        'resets.  It does not currently support TLS.'
     ),
     category=_('Logging'),
     category_slug='logging',
