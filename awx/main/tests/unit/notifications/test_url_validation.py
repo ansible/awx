@@ -23,7 +23,7 @@ def test_validate_url_blocked_addresses(ip, should_block):
     addrinfo = [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, '', (ip, 443))]
     with mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=addrinfo):
         if should_block:
-            with pytest.raises(SSRFBlockedError, match="blocked address"):
+            with pytest.raises(SSRFBlockedError):
                 validate_url("https://example.com/hook")
         else:
             assert validate_url("https://example.com/hook") == "https://example.com/hook"
@@ -92,13 +92,14 @@ class TestAllowList:
             mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['127.0.0.0/8']
             assert validate_url("https://localhost/hook") == "https://localhost/hook"
 
-    def test_metadata_ip_allowed_when_explicitly_listed(self):
+    def test_metadata_ip_blocked_even_when_explicitly_listed(self):
         with (
             mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=self._addrinfo('169.254.169.254')),
             mock.patch('awx.main.notifications.url_validation.settings') as mock_settings,
         ):
             mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['169.254.169.254']
-            assert validate_url("https://metadata.internal/hook") == "https://metadata.internal/hook"
+            with pytest.raises(SSRFBlockedError, match="link-local"):
+                validate_url("https://metadata.internal/hook")
 
     def test_multiple_cidrs(self):
         with (
@@ -169,11 +170,11 @@ class TestHostnameAllowList:
             with pytest.raises(SSRFBlockedError, match="blocked address"):
                 validate_url("https://other.internal.example.com/hook")
 
-    def test_hostname_bypasses_dns_resolution_for_allowed_host(self):
-        """When hostname is allowlisted, DNS resolution is not attempted."""
+    def test_hostname_allowed_when_dns_fails(self):
+        """When hostname is allowlisted but DNS resolution fails, the request is still allowed."""
         with mock.patch('awx.main.notifications.url_validation.settings') as mock_settings:
             mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['elastic.internal.example.com']
-            with mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', side_effect=socket.gaierror("should not be called")):
+            with mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', side_effect=socket.gaierror("Name or service not known")):
                 assert validate_url("https://elastic.internal.example.com/hook") == "https://elastic.internal.example.com/hook"
 
     def test_mixed_cidr_and_hostname_entries(self):
@@ -189,3 +190,56 @@ class TestHostnameAllowList:
         ):
             mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['10.50.0.0/16', 'grafana.corp.internal']
             assert validate_url("https://unknown.host/hook") == "https://unknown.host/hook"
+
+
+class TestLinkLocalDenyList:
+    """Link-local addresses are always blocked, even if allowlisted."""
+
+    def _addrinfo(self, ip):
+        return [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, '', (ip, 443))]
+
+    def _addrinfo6(self, ip):
+        return [(socket.AF_INET6, socket.SOCK_STREAM, socket.IPPROTO_TCP, '', (ip, 443, 0, 0))]
+
+    def test_link_local_blocked_with_cidr_allowlist(self):
+        with (
+            mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=self._addrinfo('169.254.169.254')),
+            mock.patch('awx.main.notifications.url_validation.settings') as mock_settings,
+        ):
+            mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['169.254.0.0/16']
+            with pytest.raises(SSRFBlockedError, match="link-local"):
+                validate_url("https://metadata.example.com/hook")
+
+    def test_link_local_blocked_with_hostname_allowlist(self):
+        with (
+            mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=self._addrinfo('169.254.169.254')),
+            mock.patch('awx.main.notifications.url_validation.settings') as mock_settings,
+        ):
+            mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['metadata.example.com']
+            with pytest.raises(SSRFBlockedError, match="link-local"):
+                validate_url("https://metadata.example.com/hook")
+
+    def test_ipv6_link_local_blocked_with_allowlist(self):
+        with (
+            mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=self._addrinfo6('fe80::1')),
+            mock.patch('awx.main.notifications.url_validation.settings') as mock_settings,
+        ):
+            mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['fe80::/10']
+            with pytest.raises(SSRFBlockedError, match="link-local"):
+                validate_url("https://metadata.example.com/hook")
+
+    def test_hostname_allowed_for_non_link_local_private_ip(self):
+        with (
+            mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=self._addrinfo('10.50.1.20')),
+            mock.patch('awx.main.notifications.url_validation.settings') as mock_settings,
+        ):
+            mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['elastic.internal.example.com']
+            assert validate_url("https://elastic.internal.example.com/hook") == "https://elastic.internal.example.com/hook"
+
+    def test_loopback_still_allowable(self):
+        with (
+            mock.patch('awx.main.notifications.url_validation.socket.getaddrinfo', return_value=self._addrinfo('127.0.0.1')),
+            mock.patch('awx.main.notifications.url_validation.settings') as mock_settings,
+        ):
+            mock_settings.NOTIFICATION_IP_ALLOW_LIST = ['127.0.0.0/8']
+            assert validate_url("https://localhost/hook") == "https://localhost/hook"
