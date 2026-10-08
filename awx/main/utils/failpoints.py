@@ -54,6 +54,7 @@ REGISTRY = {
     'job.after_finalize_before_release': 'Normal job path: terminal status saved, before the work unit is released.',
     'lost_instance.before_claim': 'Lost-instance path: job judged adoptable and capacity available, before the claim UPDATE.',
     'sweep.before_claim': 'Orphan sweep: capacity available, before the claim UPDATE.',
+    'adoption.before_task_id_saved': '_queue_job_adoption: adopt_job_async published, its task id not yet saved on the job (a cancel here targets the old task id).',
     'adoption.after_claim': 'adopt_job_async: job claimed for this controller, before the capacity check and streaming.',
     'adoption.after_snapshot': 'reattach_to_work_unit: dedup snapshot taken, before the replay starts.',
     'adoption.before_finalize': 'reattach_to_work_unit: stream finished, before hooks and the terminal status.',

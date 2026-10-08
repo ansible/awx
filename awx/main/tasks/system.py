@@ -879,6 +879,7 @@ def _queue_job_adoption(job_id, source_controller):
     would make it look orphaned to every later heartbeat.
     """
     obj, _unused = adopt_job_async.apply_async(args=[job_id], kwargs={'source_controller': source_controller}, queue=get_task_queuename())
+    failpoint('adoption.before_task_id_saved', job_id=job_id, task_id=obj['uuid'])
     UnifiedJob.objects.filter(pk=job_id).update(celery_task_id=obj['uuid'])
 
 
