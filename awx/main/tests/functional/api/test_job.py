@@ -13,7 +13,7 @@ from django.utils import timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-from awx.main.models import Credential, CredentialType, ExecutionEnvironment, JobTemplate, User, Job, AdHocCommand, ProjectUpdate, InstanceGroup, Label, Organization
+from awx.main.models import Credential, CredentialType, ExecutionEnvironment, JobTemplate, User, Job, AdHocCommand, Project, ProjectUpdate, InstanceGroup, Label, Organization
 
 from ansible_base.rbac.models import RoleDefinition
 

@@ -21,7 +21,7 @@ from urllib3.exceptions import ConnectTimeoutError
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Prefetch, Q, Sum, Count, Subquery, OuterRef
+from django.db.models import Q, Sum, Count, Subquery, OuterRef
 from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.db.models.fields.related import ManyToManyField, ForeignKey
 from django.db.models.functions import Trunc
@@ -3901,7 +3901,7 @@ class JobList(UnifiedJobExcludeMixin, ListAPIView):
             'project',
             'schedule',
         ).prefetch_related(
-            Prefetch('credentials', queryset=models.Credential.objects.select_related('credential_type')),
+            'credentials',
             'labels',
         )
 
