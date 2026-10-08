@@ -24,6 +24,7 @@ from awx.main.managers import DeferJobCreatedManager
 from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
+from awx.main.utils.failpoints import failpoint
 
 analytics_logger = logging.getLogger('awx.analytics.job_events')
 
@@ -600,6 +601,7 @@ class JobEvent(BasePlaybookEvent):
 
             # ignore_conflicts is the backstop for a genuine cross-process race, where the
             # peer writes between the query above and this insert.
+            failpoint('events.stats_before_insert', job_id=job.id, new=len(summaries), existing=len(already_recorded))
             JobHostSummary.objects.bulk_create(summaries.values(), ignore_conflicts=True)
 
             # Create/update Host Metrics

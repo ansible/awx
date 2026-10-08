@@ -19,6 +19,7 @@ import redis
 
 from awx.main.utils.redis import get_redis_client
 from awx.main.utils.db import set_connection_name
+from awx.main.utils.failpoints import failpoint
 from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
@@ -210,6 +211,7 @@ class CallbackBrokerWorker:
                 if not events:
                     continue
                 logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})')
+                failpoint('callback_receiver.before_flush', model=cls.__name__, count=len(events))
                 for e in events:
                     e.modified = now  # this can be set before created because now is set above on line 149
                     if not e.created:

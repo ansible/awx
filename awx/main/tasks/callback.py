@@ -18,6 +18,7 @@ from django.db import connections
 from awx.main.redact import UriCleaner
 from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
+from awx.main.utils.failpoints import failpoint
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.main.tasks.callback')
@@ -216,6 +217,7 @@ class RunnerCallback:
         # logger
         if event_data.get('event') == 'keepalive':
             return
+        failpoint('callback.event', job_id=getattr(self.instance, 'id', None), counter=event_data.get('counter'))
         if self.dedup_threshold is not None:
             counter = event_data.get('counter')
             if counter is not None:

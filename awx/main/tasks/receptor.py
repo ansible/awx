@@ -32,6 +32,7 @@ from dispatcherd.publish import task
 
 # AWX
 from awx.main.utils.execution_environments import get_default_pod_spec
+from awx.main.utils.failpoints import failpoint
 from awx.main.exceptions import ReceptorNodeNotFound
 from awx.main.utils.common import (
     deepmerge,
@@ -577,6 +578,7 @@ class AWXReceptorJob:
             # work_unit_id_assigned event then this case may have occured.
             self.task.instance.work_unit_id = result['unitid']  # Set work_unit_id in-memory only
             self.task.instance.log_lifecycle("work_unit_id_received")
+            failpoint('job.after_submit_before_unit_saved', job_id=self.task.instance.pk, unit_id=result['unitid'])
             self.task.update_model(self.task.instance.pk, work_unit_id=result['unitid'])
             self.task.instance.log_lifecycle("work_unit_id_assigned")
 
@@ -688,6 +690,7 @@ class AWXReceptorJob:
             raise
 
         reader = _CountingReader(resultfile)
+        failpoint('job.stream_started', job_id=self.task.instance.pk, unit_id=self.unit_id)
 
         connections.close_all()
 
@@ -1304,6 +1307,7 @@ def get_adoption_unit_status(receptor_ctl, job):
     directory was lost (e.g. /tmp wiped on an OCP pod restart).
     """
     unit_id = job.work_unit_id
+    failpoint('adoption.unit_status', job_id=job.id, unit_id=unit_id)
     try:
         return receptor_ctl.simple_command(f'work status {unit_id}')
     except Exception:
@@ -1415,6 +1419,7 @@ def reattach_to_work_unit(job, receptor_ctl, unit_status=None):
     # event back until the job ended, and for a remotely adopted unit that is the one window
     # where receptor can lose the final stdout flush.
     safe_threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
+    failpoint('adoption.after_snapshot', job_id=job.id, safe_threshold=safe_threshold, persisted=persisted_ct)
     max_counter = max(collision_zone) if collision_zone else safe_threshold
     logger.info(
         f'Job {job.id}: safe_threshold={safe_threshold} collision_zone_size={len(collision_zone)} '
@@ -1481,6 +1486,7 @@ def reattach_to_work_unit(job, receptor_ctl, unit_status=None):
     # in that case, do NOT release the work unit.
     finalized = None
     try:
+        failpoint('adoption.before_finalize', job_id=job.id)
         finalized = _finalize_adoption_result(job, callback, res, process_phase_failed, receptor_ctl, unit_id, private_data_dir)
     finally:
         # Release work unit based on finalization result:
@@ -1488,6 +1494,7 @@ def reattach_to_work_unit(job, receptor_ctl, unit_status=None):
         # - finalized=False: adoption deferred (unit still running), don't release
         # - finalized=None: already handled (e.g., quota exceeded), release unit
         if finalized is not False:
+            failpoint('adoption.after_finalize_before_release', job_id=job.id, finalized=finalized)
             receptor_job._receptor_release_work(receptor_ctl, getattr(res, 'status', 'error'))
         shutil.rmtree(private_data_dir, ignore_errors=True)
 

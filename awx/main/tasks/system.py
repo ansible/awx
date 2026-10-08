@@ -85,6 +85,7 @@ from awx.main.tasks.receptor import (
 )
 from awx.main.tasks.signals import with_signal_handling
 from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
+from awx.main.utils.failpoints import failpoint
 from awx.main.utils.migration import is_database_synchronized
 from awx.main.utils.reload import stop_local_services
 
@@ -680,6 +681,7 @@ def cluster_node_heartbeat(binder):
 
     # Run common instance management logic — ctl is the same receptor connection used for
     # mesh status; we reuse it for the job processing loop to avoid a second socket open.
+    failpoint('heartbeat.start', periodic=binder is not None)
     this_inst, instance_list, lost_instances, _ctl = _heartbeat_instance_management()
     if this_inst is None:
         return  # Early return case from instance management
@@ -898,6 +900,7 @@ def _handle_lost_instance_job(j, other_inst):
         logger.info(f'Cross-controller adoption deferred for job {j.id}: no control capacity here, leaving it for another controller to sweep')
         return
 
+    failpoint('lost_instance.before_claim', job_id=j.id, lost=other_inst.hostname)
     claimed = UnifiedJob.objects.filter(pk=j.id, controller_node=other_inst.hostname, status='running').update(controller_node=settings.CLUSTER_HOST_ID)
     if not claimed:
         logger.info(f'Cross-controller adoption skipped for job {j.id}: already claimed by another controller')
@@ -1107,6 +1110,7 @@ def _sweep_orphaned_jobs(this_inst):
             if not _adoption_slot_available():
                 logger.info(f'Orphan sweep stopping at {swept} adoptions: out of control capacity, peer or next heartbeat takes the rest')
                 break
+            failpoint('sweep.before_claim', job_id=job_id, former=former_controller)
             claimed = UnifiedJob.objects.filter(pk=job_id, controller_node=former_controller, status='running').update(controller_node=this_inst.hostname)
             if not claimed:
                 # Another node swept it between the query and here, or it just finished.
@@ -1412,6 +1416,7 @@ def adopt_job_async(job_id, source_controller=None):
 
     if not _claim_job_for_adoption(job, job_id, source_controller):
         return
+    failpoint('adoption.after_claim', job_id=job_id)
 
     # Checked after the claim, not before: the claim is what keeps the job visible to this
     # controller's heartbeat, and without it a deferred job whose original controller is gone

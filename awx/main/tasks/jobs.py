@@ -87,6 +87,7 @@ from awx.main.utils.common import (
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.utils.update_model import update_model
+from awx.main.utils.failpoints import failpoint
 
 # Django flags
 from flags.state import flag_enabled
@@ -873,11 +874,13 @@ class BaseTask(object):
 
         self.private_data_dir = private_data_dir
         try:
+            failpoint('job.before_finalize', job_id=pk, status=status)
             self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
         finally:
             # Guarantee work unit release even if finalization throws
             if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
                 try:
+                    failpoint('job.after_finalize_before_release', job_id=pk, status=status)
                     receptor_job._receptor_release_work(receptor_job.receptor_ctl, status)
                 except Exception:
                     logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')

@@ -17,6 +17,7 @@ from dispatcherd.config import setup as dispatcher_setup
 
 from awx.main.dispatch.config import get_dispatcherd_config
 from awx.main.tasks.receptor import receptor_config_exists
+from awx.main.utils.failpoints import failpoint
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -89,6 +90,7 @@ class Command(BaseCommand):
             try:
                 from awx.main.tasks.system import announce_shutdown
 
+                failpoint('shutdown.before_announce')
                 announce_shutdown()
             except Exception:
                 logger.exception('Could not announce shutdown; peers will fall back to lost-instance detection')
