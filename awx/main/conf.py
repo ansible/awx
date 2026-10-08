@@ -786,9 +786,32 @@ register(
         'Defines how large the rsyslog action queue can grow in number of messages '
         'stored. This can have an impact on memory utilization. When the queue '
         'reaches 75% of this number, the queue will start writing to disk '
-        '(queue.highWatermark in rsyslog). When it reaches 90%, NOTICE, INFO, and '
-        'DEBUG messages will start to be discarded (queue.discardMark with '
-        'queue.discardSeverity=5).'
+        '(queue.highWatermark in rsyslog). When it reaches 90% (queue.discardMark), '
+        'messages start to be discarded, according to '
+        'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY.'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY',
+    field_class=fields.IntegerField,
+    default=5,
+    min_value=0,
+    max_value=8,
+    label=_('Severity at which messages are discarded when the log action queue is nearly full'),
+    help_text=_(
+        'Messages whose syslog severity number is greater than or equal to this value '
+        'are discarded once the action queue reaches 90% of '
+        'LOG_AGGREGATOR_ACTION_QUEUE_SIZE. Severity numbers run from 0 (EMERGENCY) to '
+        '7 (DEBUG), so a lower value here discards fewer messages. Equivalent to the '
+        'rsyslogd queue.discardSeverity setting on the action. '
+        'Discarding is silent: no error, warning or counter records that a message was '
+        'dropped, and every message AWX emits is INFO (6) or less severe, so the '
+        'default of 5 permits all of them to be discarded. '
+        'Set this to 8, the rsyslog default, to discard nothing; rsyslog then blocks '
+        'the sender for queue.timeoutEnqueue (2 seconds) when the queue is full and '
+        'drops the message only if it has still not drained.'
     ),
     category=_('Logging'),
     category_slug='logging',
