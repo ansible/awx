@@ -21,8 +21,9 @@ class SSRFBlockedError(Exception):
 
 
 def _is_always_denied(ip):
+    check_ip = getattr(ip, 'ipv4_mapped', None) or ip
     for net in _DENY_NETWORKS:
-        if ip in net:
+        if check_ip in net:
             return True
     return False
 
