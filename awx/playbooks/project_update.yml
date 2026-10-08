@@ -244,8 +244,10 @@
 
         - name: Build combined requirements hash
           ansible.builtin.set_fact:
-            requirements_hash: "{{ req_files_stat.results | selectattr('stat.exists', 'defined') | selectattr('stat.exists') | map(attribute='stat.checksum') | sort | join(':') | hash('sha256') }}"
-            has_requirements: "{{ req_files_stat.results | selectattr('stat.exists', 'defined') | selectattr('stat.exists') | list | length > 0 }}"
+            requirements_hash: "{{ _existing | map(attribute='item') | zip(_existing | map(attribute='stat.checksum')) | list | to_json | hash('sha256') }}"
+            has_requirements: "{{ _existing | length > 0 }}"
+          vars:
+            _existing: "{{ req_files_stat.results | selectattr('stat.exists', 'defined') | selectattr('stat.exists') | list }}"
 
         - name: Check requirements hash cache
           ansible.builtin.stat:

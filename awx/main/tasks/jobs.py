@@ -1616,18 +1616,28 @@ class RunProjectUpdate(BaseTask):
         shutil.copytree(awx_playbooks, os.path.join(private_data_dir, 'project'))
 
     @staticmethod
-    def clear_project_cache(cache_dir, keep_value):
+    def clear_project_cache(cache_dir, keep_value, max_reqcache=10):
         if os.path.isdir(cache_dir):
+            reqcache_entries = []
             for entry in os.listdir(cache_dir):
                 old_path = os.path.join(cache_dir, entry)
-                if entry not in (keep_value, 'stage') and not entry.startswith('reqcache_'):
-                    # invalidate, then delete
+                if entry.startswith('reqcache_'):
+                    reqcache_entries.append(old_path)
+                elif entry not in (keep_value, 'stage'):
                     new_path = os.path.join(cache_dir, '.~~delete~~' + entry)
                     try:
                         os.rename(old_path, new_path)
                         shutil.rmtree(new_path)
                     except OSError:
                         logger.warning(f"Could not remove cache directory {old_path}")
+            if len(reqcache_entries) > max_reqcache:
+                reqcache_entries.sort(key=lambda p: os.path.getmtime(p))
+                for stale in reqcache_entries[: len(reqcache_entries) - max_reqcache]:
+                    try:
+                        shutil.rmtree(stale)
+                        logger.debug(f'Evicted stale requirements cache {stale}')
+                    except OSError:
+                        logger.warning(f"Could not remove stale requirements cache {stale}")
 
     @staticmethod
     def _sync_requirements_cache(base_path, cache_path):
@@ -1656,9 +1666,18 @@ class RunProjectUpdate(BaseTask):
             src = os.path.join(cache_path, subfolder)
             dst = os.path.join(reqcache_path, subfolder)
             if os.path.exists(src) and not os.path.exists(dst):
-                os.makedirs(reqcache_path, exist_ok=True)
-                shutil.copytree(src, dst, symlinks=True)
-                logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
+                tmp_path = tempfile.mkdtemp(dir=base_path, prefix=f'.reqcache_{req_hash}_tmp_')
+                try:
+                    tmp_dst = os.path.join(tmp_path, subfolder)
+                    shutil.copytree(src, tmp_dst, symlinks=True)
+                    os.makedirs(reqcache_path, exist_ok=True)
+                    os.rename(tmp_dst, dst)
+                    logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
+                except Exception:
+                    logger.warning(f'Failed to save {subfolder} to requirements cache, cleaning up')
+                    raise
+                finally:
+                    shutil.rmtree(tmp_path, ignore_errors=True)
 
     @staticmethod
     def make_local_copy(project, job_private_data_dir):

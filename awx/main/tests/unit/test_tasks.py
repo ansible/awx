@@ -1798,6 +1798,25 @@ class TestClearProjectCachePreservesReqcache:
         assert 'keep_me' in remaining
         assert 'delete_me' not in remaining
 
+    def test_evicts_oldest_reqcache_when_over_limit(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'current').mkdir()
+
+        for i in range(12):
+            entry = cache_dir / f'reqcache_hash{i:02d}'
+            entry.mkdir()
+            os.utime(str(entry), (1000 + i, 1000 + i))
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'current', max_reqcache=10)
+
+        remaining = set(os.listdir(cache_dir))
+        assert 'reqcache_hash00' not in remaining
+        assert 'reqcache_hash01' not in remaining
+        assert 'reqcache_hash02' in remaining
+        assert 'reqcache_hash11' in remaining
+        assert len([e for e in remaining if e.startswith('reqcache_')]) == 10
+
 
 class TestSyncRequirementsCache:
     def test_saves_collections_to_reqcache(self, tmp_path):
@@ -1831,6 +1850,28 @@ class TestSyncRequirementsCache:
 
         entries = os.listdir(base_path)
         assert not any(e.startswith('reqcache_') for e in entries)
+
+    def test_no_partial_cache_on_copytree_failure(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'test.txt').write_text('test')
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        with mock.patch('shutil.copytree', side_effect=OSError('disk full')):
+            try:
+                jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+            except OSError:
+                pass
+
+        reqcache = base_path / 'reqcache_deadbeef1234'
+        assert not reqcache.exists()
+        tmp_dirs = [e for e in os.listdir(base_path) if e.startswith('.reqcache_')]
+        assert len(tmp_dirs) == 0
 
     def test_skips_when_reqcache_already_exists(self, tmp_path):
         base_path = tmp_path / 'cache'
