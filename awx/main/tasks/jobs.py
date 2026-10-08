@@ -1618,6 +1618,18 @@ class RunProjectUpdate(BaseTask):
     @staticmethod
     def clear_project_cache(cache_dir, keep_value, max_reqcache=10):
         if os.path.isdir(cache_dir):
+            # Read the current requirements hash from stage so we don't evict it
+            current_reqcache = None
+            stage_hash_file = os.path.join(cache_dir, 'stage', '.requirements_hash')
+            try:
+                if os.path.exists(stage_hash_file):
+                    with open(stage_hash_file) as f:
+                        req_hash = f.read().strip()
+                    if req_hash:
+                        current_reqcache = f'reqcache_{req_hash}'
+            except OSError:
+                pass
+
             reqcache_entries = []
             for entry in os.listdir(cache_dir):
                 old_path = os.path.join(cache_dir, entry)
@@ -1633,6 +1645,8 @@ class RunProjectUpdate(BaseTask):
             if len(reqcache_entries) > max_reqcache:
                 reqcache_entries.sort(key=lambda p: os.path.getmtime(p))
                 for stale in reqcache_entries[: len(reqcache_entries) - max_reqcache]:
+                    if current_reqcache and os.path.basename(stale) == current_reqcache:
+                        continue
                     try:
                         shutil.rmtree(stale)
                         logger.debug(f'Evicted stale requirements cache {stale}')

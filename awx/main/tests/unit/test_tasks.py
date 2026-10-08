@@ -1817,6 +1817,31 @@ class TestClearProjectCachePreservesReqcache:
         assert 'reqcache_hash11' in remaining
         assert len([e for e in remaining if e.startswith('reqcache_')]) == 10
 
+    def test_eviction_protects_current_reqcache(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'current').mkdir()
+
+        stage_dir = cache_dir / 'stage'
+        stage_dir.mkdir()
+        (stage_dir / '.requirements_hash').write_text('hash00')
+
+        for i in range(12):
+            entry = cache_dir / f'reqcache_hash{i:02d}'
+            entry.mkdir()
+            os.utime(str(entry), (1000 + i, 1000 + i))
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'current', max_reqcache=10)
+
+        remaining = set(os.listdir(cache_dir))
+        # hash00 is the oldest but should be protected (current update's hash)
+        assert 'reqcache_hash00' in remaining
+        # hash01 is the next oldest and should be evicted
+        assert 'reqcache_hash01' not in remaining
+        # hash02+ should survive (only 1 non-protected entry evicted)
+        assert 'reqcache_hash02' in remaining
+        assert 'reqcache_hash11' in remaining
+
 
 class TestSyncRequirementsCache:
     def test_saves_collections_to_reqcache(self, tmp_path):
