@@ -17,6 +17,10 @@ def construct_rsyslog_conf_template(settings=settings):
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
+    keepalive = getattr(settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE', True)
+    keepalive_time = getattr(settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE_TIME', 120)
+    keepalive_interval = getattr(settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE_INTERVAL', 30)
+    keepalive_probes = getattr(settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE_PROBES', 3)
     action_queue_size = getattr(settings, 'LOG_AGGREGATOR_ACTION_QUEUE_SIZE', 131072)
     max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
@@ -35,6 +39,18 @@ def construct_rsyslog_conf_template(settings=settings):
         f'queue.highwaterMark="{int(action_queue_size * 0.75)}"',  # 75% of queue.size
         f'queue.discardMark="{int(action_queue_size * 0.9)}"',  # 90% of queue.size
         'queue.discardSeverity="5"',  # Only discard notice, info, debug if we must discard anything
+    ]
+
+    # Probes an idle connection rather than discovering it is dead on the next write. Firewalls and
+    # load balancers discard idle flows without notifying either end -- an AWS Network Load Balancer
+    # does so after 350 seconds -- and the operating system default of two hours is far longer than
+    # that, so the first messages sent after a quiet period go into a dead socket and are lost. omfwd
+    # applies these only when the transport is TCP.
+    keepalive_options = [
+        'KeepAlive="on"',
+        f'KeepAlive.Time="{keepalive_time}"',
+        f'KeepAlive.Interval="{keepalive_interval}"',
+        f'KeepAlive.Probes="{keepalive_probes}"',
     ]
 
     if not os.access(spool_directory, os.W_OK):
@@ -131,7 +147,10 @@ def construct_rsyslog_conf_template(settings=settings):
             'action.resumeRetryCount="-1"',
             f'action.resumeInterval="{timeout}"',
             'template="awx"',
-        ] + queue_options
+        ]
+        if protocol == 'tcp' and keepalive:
+            params += keepalive_options
+        params += queue_options
         params = ' '.join(params)
         parts.append(f'action({params})')
 

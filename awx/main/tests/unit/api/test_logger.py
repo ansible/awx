@@ -75,7 +75,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")',
-                    'action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxDiskSpace="1g" queue.maxFileSize="100m" queue.type="LinkedList" queue.saveOnShutdown="on" queue.syncqueuefiles="on" queue.checkpointInterval="1000" queue.size="131072" queue.highwaterMark="98304" queue.discardMark="117964" queue.discardSeverity="5")',  # noqa
+                    'action(type="omfwd" target="localhost" port="9000" protocol="tcp" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx" KeepAlive="on" KeepAlive.Time="120" KeepAlive.Interval="30" KeepAlive.Probes="3" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxDiskSpace="1g" queue.maxFileSize="100m" queue.type="LinkedList" queue.saveOnShutdown="on" queue.syncqueuefiles="on" queue.checkpointInterval="1000" queue.size="131072" queue.highwaterMark="98304" queue.discardMark="117964" queue.discardSeverity="5")',  # noqa
                 ]
             ),
         ),
@@ -200,6 +200,35 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
 
     # check validity of created template
     assert expected_config in tmpl
+
+
+@pytest.mark.parametrize(
+    'protocol, keepalive, expected, not_expected',
+    [
+        # the idle-flow case the keepalives exist for
+        ('tcp', True, 'KeepAlive="on" KeepAlive.Time="120" KeepAlive.Interval="30" KeepAlive.Probes="3"', None),
+        # opt out and the action is what it was before the setting existed
+        ('tcp', False, 'template="awx" queue.spoolDirectory="/var/lib/awx"', 'KeepAlive'),
+        # UDP has no connection to keep alive, so the parameters are never emitted for it
+        ('udp', True, 'template="awx" queue.spoolDirectory="/var/lib/awx"', 'KeepAlive'),
+    ],
+)
+def test_rsyslog_conf_tcp_keepalive(protocol, keepalive, expected, not_expected):
+    mock_settings, _ = _mock_logging_defaults()
+
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'localhost')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 9000)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', protocol)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE', keepalive)
+
+    tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert expected in tmpl
+    if not_expected:
+        assert not_expected not in tmpl
 
 
 def test_splunk_auth():
