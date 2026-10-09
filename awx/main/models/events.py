@@ -486,6 +486,12 @@ class JobEvent(BasePlaybookEvent):
             models.Index(fields=['job', 'job_created', 'parent_uuid']),
             models.Index(fields=['job', 'job_created', 'counter']),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['job', 'counter', 'job_created'],
+                name='main_jobevent_job_counter_unique',
+            ),
+        ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     job = models.ForeignKey(

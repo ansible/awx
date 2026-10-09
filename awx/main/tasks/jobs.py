@@ -884,7 +884,10 @@ class BaseTask(object):
 
         self.private_data_dir = private_data_dir
         try:
-            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
+            # _required_status='running' is a CAS fence: if another controller already
+            # finalized this job, the update is skipped and None is returned, preventing
+            # double-finalization and a duplicate terminal notification.
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, _required_status='running')
         finally:
             # Guarantee work unit release even if finalization throws
             if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
@@ -894,7 +897,7 @@ class BaseTask(object):
                     logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
 
         if not self.instance:
-            logger.error(f'Unified job pk={pk} appears to be deleted while running')
+            logger.info(f'Job {pk} finalization skipped: already finalized by another controller or job was deleted')
             return
 
         if status != 'successful':

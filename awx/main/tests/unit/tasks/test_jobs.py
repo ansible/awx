@@ -811,6 +811,29 @@ def test_finalize_job_run_calls_websocket_emit(mock_update, mock_hook, mock_task
     instance.websocket_emit_status.assert_called_once_with('failed')
 
 
+@mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
+@mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
+@mock.patch('awx.main.tasks.jobs.events_processed_hook')
+@mock.patch('awx.main.tasks.jobs.update_model')
+def test_finalize_job_run_required_status_not_met(mock_update, mock_hook, mock_task_mgr, mock_workflow_mgr):
+    """Fix 3 (AAP-96718): when _required_status='running' is passed and the job is already in a
+    terminal state, update_model returns None and _finalize_job_run must return None without
+    calling events_processed_hook or websocket_emit_status."""
+    mock_update.return_value = None
+
+    cb = mock.MagicMock()
+    cb.get_delayed_update_fields.return_value = {}
+    cb.wrapup_event_dispatched = True
+
+    result = jobs._finalize_job_run(mock.MagicMock, pk=1, runner_callback=cb, status='successful', _required_status='running')
+
+    assert result is None
+    mock_hook.assert_not_called()
+    mock_update.assert_called_once()
+    _, kwargs = mock_update.call_args
+    assert kwargs.get('_required_status') == 'running'
+
+
 @mock.patch('awx.main.tasks.jobs.fcntl.lockf')
 @mock.patch('awx.main.tasks.jobs.os.open')
 @mock.patch('awx.main.tasks.jobs.os.path.exists')
