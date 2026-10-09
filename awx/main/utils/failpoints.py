@@ -20,6 +20,16 @@ Actions:
             a specific type (e.g. redis.exceptions.ConnectionError) the call site handles
     kill    SIGKILL the current process
     kill_parent  SIGKILL the parent process (for a dispatcher worker, the dispatcher)
+    trigger do nothing at the call site except make failpoint() return True. Call sites
+            written as ``if <real condition> or failpoint(...)`` use it to force a decision
+            now instead of waiting for a timer (e.g. heartbeat.force_lost).
+
+Pausing:
+    A paused caller continues when the failpoint is released, disarmed, or re-armed.
+    Re-arming (arm again with a new --match or --nth) moves a hold forward: callers held by
+    the previous arming continue, and the new arming catches the next matching hit. That is
+    how a scenario lets exactly N more events through, e.g. callback.event counter=10, then
+    counter=30.
 
 Matching:
     ``--match key=value`` must equal the call's context (all values compared as strings).
@@ -64,9 +74,13 @@ REGISTRY = {
     'shutdown.before_announce': 'dispatcherd exit path: run_service returned, before announce_shutdown.',
     'adoption.unit_status': 'get_adoption_unit_status: about to query the work unit. raise here reads as an unreachable unit.',
     'health_check.redis_ping': 'Instance.local_health_check: about to ping Redis. raise --exception redis.exceptions.ConnectionError marks this node unavailable.',
+    'heartbeat.force_lost': 'Heartbeat lost check for a peer (ctx: other). --action trigger treats that peer as lost on this heartbeat, regardless of last_seen.',
+    'adoption.before_queue': '_queue_job_adoption: about to publish adopt_job_async (ctx: job_id, source). Holds startup, re-queue, lost-instance and sweep adoptions before they exist.',
+    'callback.artifacts': 'RunnerCallback.artifacts_handler: end-of-run artifacts received (ctx: job_id), before EventQuery inserts, the final status and finalization.',
+    'callback_receiver.before_read': 'Callback receiver worker: about to pop the next event from Redis. pause keeps every queued event in Redis (none in worker buffers).',
 }
 
-ACTIONS = ('pause', 'sleep', 'raise', 'kill', 'kill_parent')
+ACTIONS = ('pause', 'sleep', 'raise', 'kill', 'kill_parent', 'trigger')
 
 TABLE = 'awx_failpoint'
 HIT_TABLE = 'awx_failpoint_hit'
@@ -170,8 +184,9 @@ def _matches(match, ctx):
 def _record_hit(name, ctx):
     """Count this hit against the armed row and decide whether it fires.
 
-    Returns the row (action, arg) when it fires, None otherwise. Done in one UPDATE so
-    concurrent hits on different nodes cannot both claim the Nth hit.
+    Returns (action, arg, armed_at) when it fires, None otherwise. armed_at identifies this
+    arming, so a pause can tell a re-arm from its own. Done in one UPDATE so concurrent hits on
+    different nodes cannot both claim the Nth hit.
     """
     with transaction.atomic():
         with connection.cursor() as cursor:
@@ -179,14 +194,14 @@ def _record_hit(name, ctx):
                 f'''
                 UPDATE {TABLE} SET hits = hits + 1
                 WHERE name = %s
-                RETURNING action, arg, nth, times, hits, fired
+                RETURNING action, arg, nth, times, hits, fired, armed_at
                 ''',
                 [name],
             )
             row = cursor.fetchone()
             if row is None:
                 return None
-            action, arg, nth, times, hits, fired = row
+            action, arg, nth, times, hits, fired, armed_at = row
             fire = (nth is None or hits == nth) and (times is None or fired < times)
             if fire:
                 cursor.execute(f'UPDATE {TABLE} SET fired = fired + 1 WHERE name = %s', [name])
@@ -194,18 +209,19 @@ def _record_hit(name, ctx):
                 f'INSERT INTO {HIT_TABLE} (name, node, pid, ctx, fired, action) VALUES (%s, %s, %s, %s, %s, %s)',
                 [name, ctx['node'], ctx['pid'], json.dumps(ctx, default=str), fire, action if fire else None],
             )
-    return (action, _json(arg)) if fire else None
+    return (action, _json(arg), armed_at) if fire else None
 
 
-def _pause(name, arg):
+def _pause(name, arg, armed_at=None):
+    """Block until this arming is released, disarmed or replaced by a re-arm."""
     timeout = float(arg.get('timeout', 600))
     deadline = time.monotonic() + timeout
     logger.warning(f'Failpoint {name}: pausing pid={os.getpid()} until released (timeout {timeout}s)')
     while time.monotonic() < deadline:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT released FROM {TABLE} WHERE name = %s', [name])
+            cursor.execute(f'SELECT released, armed_at FROM {TABLE} WHERE name = %s', [name])
             row = cursor.fetchone()
-        if row is None or row[0]:
+        if row is None or row[0] or (armed_at is not None and row[1] != armed_at):
             logger.warning(f'Failpoint {name}: released pid={os.getpid()}')
             return
         time.sleep(PAUSE_POLL_SECONDS)
@@ -224,32 +240,36 @@ def _exception_class(path):
 
 
 def failpoint(name, **ctx):
-    """Mark a spot where a test may inject a fault. Inert unless enabled and armed."""
+    """Mark a spot where a test may inject a fault. Inert unless enabled and armed.
+
+    Returns True when the failpoint fired (after its action, for actions that return), and
+    False otherwise, so ``if real_condition or failpoint(...)`` can force a decision.
+    """
     if not enabled():
-        return
+        return False
     if name not in REGISTRY:
         raise KeyError(f'Unregistered failpoint {name!r}; add it to awx.main.utils.failpoints.REGISTRY')
     armed = _load_armed()
     if name not in armed:
-        return
+        return False
     ctx = dict(ctx, node=settings.CLUSTER_HOST_ID, pid=os.getpid())
     try:
         if not _matches(armed[name], ctx):
-            return
+            return False
     except Exception:
         logger.exception(f'Failpoint {name}: bad match {armed[name]!r}; not firing')
-        return
+        return False
     try:
         fired = _record_hit(name, ctx)
     except Exception:
         logger.exception(f'Failpoint {name}: could not record hit; not firing')
-        return
+        return False
     if not fired:
-        return
-    action, arg = fired
+        return False
+    action, arg, armed_at = fired
     logger.warning(f'Failpoint {name} fired: action={action} ctx={ctx}')
     if action == 'pause':
-        _pause(name, arg)
+        _pause(name, arg, armed_at)
     elif action == 'sleep':
         time.sleep(float(arg.get('seconds', 1)))
     elif action == 'raise':
@@ -258,6 +278,7 @@ def failpoint(name, **ctx):
         os.kill(os.getpid(), signal.SIGKILL)
     elif action == 'kill_parent':
         os.kill(os.getppid(), signal.SIGKILL)
+    return True
 
 
 # --- Control API, used by the management command and by tests ---------------------------

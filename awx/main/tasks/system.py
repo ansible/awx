@@ -816,7 +816,7 @@ def _heartbeat_instance_management():
     for inst in list(instance_list):
         if inst == this_inst:
             continue
-        if inst.is_lost(ref_time=nowtime):
+        if inst.is_lost(ref_time=nowtime) or failpoint('heartbeat.force_lost', other=inst.hostname):
             lost_instances.append(inst)
             instance_list.remove(inst)
 
@@ -878,6 +878,7 @@ def _queue_job_adoption(job_id, source_controller):
     id matters because the job still carries the uuid of the dispatch task that died, which
     would make it look orphaned to every later heartbeat.
     """
+    failpoint('adoption.before_queue', job_id=job_id, source=source_controller)
     obj, _unused = adopt_job_async.apply_async(args=[job_id], kwargs={'source_controller': source_controller}, queue=get_task_queuename())
     failpoint('adoption.before_task_id_saved', job_id=job_id, task_id=obj['uuid'])
     UnifiedJob.objects.filter(pk=job_id).update(celery_task_id=obj['uuid'])

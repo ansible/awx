@@ -102,6 +102,7 @@ class CallbackBrokerWorker:
     def read(self):
         has_redis_error = False
         try:
+            failpoint('callback_receiver.before_read')
             res = self.redis.blpop(self.queue_name, timeout=1)
             if res is None:
                 return {'event': 'FLUSH'}

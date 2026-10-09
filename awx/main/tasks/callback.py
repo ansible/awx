@@ -368,6 +368,7 @@ class RunnerCallback:
                     self.delay_update(**{field_name: field_value})
 
     def artifacts_handler(self, artifact_dir):
+        failpoint('callback.artifacts', job_id=getattr(self.instance, 'id', None))
         success, query_file_contents = try_load_query_file(artifact_dir)
         if success:
             if 'installed_collections' in query_file_contents:

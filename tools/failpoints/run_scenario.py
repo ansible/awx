@@ -17,6 +17,19 @@ Each scenario prints a timeline, the failpoint hits, the adoption-related log li
 invariant results for the job, and exits non-zero if any invariant failed. With --out it
 also saves the full timestamped container logs, every traceback, and a merged per-node
 event timeline (UTC, ms) for the run.
+
+Modes (--mode), for the scenarios that support both (slow-controller, event-queue,
+cancel-orphan dead/deferred):
+    timing  the original drive: sleeps (--lead, --backlog, --settle), docker kill/start at
+            wall-clock moments, and waiting on heartbeat / is_lost timers.
+    seam    every step is gated on a failpoint at a code seam instead: faults land after
+            event counter --seam-counter (callback.event pause), backlogs are counted in
+            events (--seam-backlog, callback_receiver.before_read), the lost-instance decision
+            is forced and the heartbeat triggered explicitly (heartbeat.force_lost), adoptions
+            are held before they are published (adoption.before_queue), and slow-controller's
+            two finalizers run in a fixed --order (callback.artifacts).
+Each run also writes metrics.json (outcome, magnitudes, key step timings, duration) next to
+result.json.
 """
 
 import argparse
@@ -234,6 +247,109 @@ def wait_finished(container, job_id, timeout):
     return st
 
 
+def arm(container, name, action, match=None, nth=None, times=None, **opts):
+    """awx-manage failpoint arm, with match given as a dict."""
+    cmd = ['failpoint', 'arm', name, '--action', action]
+    for k, v in (match or {}).items():
+        cmd += ['--match', f'{k}={v}']
+    if nth is not None:
+        cmd += ['--nth', str(nth)]
+    if times is not None:
+        cmd += ['--times', str(times)]
+    for k, v in opts.items():
+        cmd += [f'--{k}', str(v)]
+    manage(container, *cmd)
+
+
+def fired_hits(container, name):
+    return json.loads(manage(container, 'failpoint', 'hits', name, '--fired').stdout)
+
+
+def wait_hits(container, name, pred=None, count=1, timeout=300, poll=1, desc=None):
+    """Wait until `count` fired hits of name satisfy pred(hit); return them."""
+
+    def found():
+        hs = [h for h in fired_hits(container, name) if pred is None or pred(h)]
+        return hs if len(hs) >= count else None
+
+    return wait_for(desc or f'{name} to fire', found, timeout, poll=poll)
+
+
+def at_seconds(ts):
+    """A hit's 'at' (or any ISO timestamp) as epoch seconds."""
+    return datetime.fromisoformat(str(ts).replace('Z', '+00:00')).timestamp()
+
+
+def wait_db_events(container, job_id, below):
+    """Wait until every counter below `below` is stored: the receiver has drained them."""
+    code = f'''
+from awx.main.models import UnifiedJob
+j = UnifiedJob.objects.get(pk={job_id}).get_real_instance()
+emit(j.get_event_queryset().filter(counter__lt={below}).values('counter').distinct().count())
+'''
+    return wait_for(f'counters 1..{below - 1} stored', lambda: orm(container, code) == below - 1 or None, 120, poll=2)
+
+
+def trigger_heartbeat(container):
+    """Publish cluster_node_heartbeat to this node's own queue: a heartbeat now, not in up to 60 s."""
+    return orm(
+        container,
+        '''
+from awx.main.dispatch import get_task_queuename
+from awx.main.tasks.system import cluster_node_heartbeat
+cluster_node_heartbeat.apply_async(queue=get_task_queuename())
+emit(get_task_queuename())
+''',
+    )
+
+
+def guard_peer(container, job_id):
+    """Seam: a peer may not claim this job (no lost-instance or sweep claim), so a slow restart
+    of its controller cannot turn the scenario into a different one (the job-38 class)."""
+    arm(container, 'lost_instance.before_claim', 'raise', {'job_id': job_id})
+    arm(container, 'sweep.before_claim', 'raise', {'job_id': job_id})
+    log(f'seam: peer claims of job {job_id} vetoed (lost_instance.before_claim / sweep.before_claim raise)')
+
+
+def hold_at_counter(container, job_id, owner, counter):
+    """Seam: hold the owner's job task before it handles event `counter`; return the hit."""
+    arm(container, 'callback.event', 'pause', {'job_id': job_id, 'node': owner, 'counter': counter}, timeout=1800)
+    hit = wait_hits(container, 'callback.event', lambda h: str(h['ctx'].get('counter')) == str(counter), timeout=600)[0]
+    log(f'seam: {owner} holds job {job_id} before event counter {counter} (at {hit["at"]})')
+    return hit
+
+
+def job_metrics(container, job_id):
+    """Outcome and magnitudes, straight from the DB."""
+    return orm(
+        container,
+        f'''
+from django.db import connection
+from awx.main.models import UnifiedJob
+j = UnifiedJob.objects.get(pk={job_id}).get_real_instance()
+qs = j.get_event_queryset()
+table = qs.model._meta.db_table
+fk = qs.model.JOB_REFERENCE
+with connection.cursor() as cur:
+    cur.execute(f'SELECT counter, count(*) FROM {{table}} WHERE {{fk}} = %s AND job_created = %s GROUP BY counter HAVING count(*) > 1 ORDER BY counter', [j.id, j.created])
+    dups = cur.fetchall()
+def _body_status(body):
+    if isinstance(body, str):
+        try:
+            body = json.loads(body)
+        except ValueError:
+            return None
+    return body.get('status') if isinstance(body, dict) else None
+notes = [dict(status=_body_status(n.body), created=n.created) for n in j.notifications.all().order_by('created')]
+emit(dict(status=j.status, explanation=j.job_explanation, controller=j.controller_node, cancel_flag=j.cancel_flag,
+          started=j.started, finished=j.finished, stored=qs.count(), distinct=qs.values('counter').distinct().count(),
+          dup_counters=len(dups), dup_extra_rows=sum(c - 1 for _, c in dups), dup_lo=dups[0][0] if dups else None,
+          dup_hi=dups[-1][0] if dups else None, stats_rows=qs.filter(event='playbook_on_stats').count(),
+          notifications=len(notes), notification_statuses=[n['status'] for n in notes]))
+''',
+    )
+
+
 def kill_and_restart(owner_container, peer_container, owner_host, wait_before_start=0):
     """Crash a control node the way a node failure does (SIGKILL to everything), then bring it back."""
     run(['docker', 'kill', owner_container])
@@ -344,14 +460,26 @@ emit([(str(at), node, what) for node, what, at in rows if at])
     )
 
 
-def report(containers, job_id, since, args, unit_id=None, notes=()):
+def run_label(args):
+    parts = [args.scenario]
+    if args.scenario == 'cancel-orphan':
+        parts.append(args.variant)
+    if args.scenario in ('event-queue', 'hybrid-resume'):
+        parts.append(args.trigger)
+    parts.append(args.mode)
+    if args.scenario == 'slow-controller' and args.mode == 'seam':
+        parts.append(args.order)
+    return '-'.join(parts)
+
+
+def report(containers, job_id, since, args, unit_id=None, notes=(), metrics=None):
     alive = [c for c in containers if manage(c, 'failpoint', 'list', check=False).returncode == 0]
     c = alive[0]
     hits = json.loads(manage(c, 'failpoint', 'hits', '--fired').stdout)
     result = json.loads(manage(c, 'failpoint', 'check-job', str(job_id)).stdout)
     out_dir = None
     if args.out:
-        out_dir = os.path.join(args.out, f'{args.scenario}-job{job_id}')
+        out_dir = os.path.join(args.out, f'{run_label(args)}-job{job_id}')
         os.makedirs(out_dir, exist_ok=True)
     logs = save_logs(containers, since, out_dir)
     print('\n=== Failpoint hits that fired ===')
@@ -380,9 +508,20 @@ def report(containers, job_id, since, args, unit_id=None, notes=()):
     print(f"  job_explanation: {result['job_explanation']!r}")
     for chk in result['checks']:
         print(f"  [{'PASS' if chk['ok'] else 'FAIL'}] {chk['name']:<24} {chk['detail']}")
+    if metrics is not None:
+        metrics = dict(metrics, job_id=job_id, label=run_label(args), mode=args.mode)
+        metrics.update(job_metrics(c, job_id))
+        metrics['failed_invariants'] = sorted(chk['name'] for chk in result['checks'] if not chk['ok'])
+        metrics['tracebacks'] = len(tbs)
+        metrics['duration_s'] = round(time.monotonic() - T0, 1)
+        print('\n=== Metrics ===')
+        print(json.dumps(metrics, indent=2, default=str))
     if out_dir:
         with open(os.path.join(out_dir, 'result.json'), 'w') as fh:
             json.dump({'job_id': job_id, 'hits': hits, 'result': result, 'events': events, 'tracebacks': tbs}, fh, indent=2, default=str)
+        if metrics is not None:
+            with open(os.path.join(out_dir, 'metrics.json'), 'w') as fh:
+                json.dump(metrics, fh, indent=2, default=str)
         print(f'\nartifacts: {out_dir}')
     return result
 
@@ -404,36 +543,105 @@ def scenario_slow_controller(containers, args):
     3. Wait for a peer to claim the job through the lost-instance path.
     4. Release C's heartbeat so both controllers are alive and both own the job's stream.
     5. Let the job finish and check invariants.
+
+    --mode seam replaces the timers and the finalize race with seams:
+      2a. C's job task is held before event --seam-counter (callback.event), so the adopter's
+          dedup snapshot is exactly counter-1 instead of "whatever was stored at claim time".
+      3.  The peer's lost check is forced (heartbeat.force_lost trigger) and its heartbeat
+          published now, instead of waiting for C's last_seen to age past is_lost.
+      5.  The second finalizer of --order is held at the start of its end-of-run processing
+          (callback.artifacts) until the first has finalized and released the unit.
+    --fresh-event-queries deletes the EventQuery rows first, so both finalizers race to insert
+    them (the IntegrityError that made job 1 'error').
     """
     if len(containers) < 2:
         raise SystemExit('slow-controller needs at least two control nodes')
     c0 = containers[0]
+    seam = args.mode == 'seam'
     since = since_now()
+    if args.fresh_event_queries:
+        n = orm(c0, 'from awx.main.models.event_query import EventQuery\nemit(EventQuery.objects.all().delete()[0])\n')
+        log(f'deleted {n} EventQuery rows: both finalizers will try to create them')
     job_id, st = start_job(containers, args)
     owner = st['controller_node']
+    peer = next(c for c in containers if c != container_for(owner))
+    peer_host = container_for_host(peer)
+    m = {'owner': owner, 'peer': peer_host}
+    # Recording only (sleep 0), in both modes: when each side snapshots and finalizes.
+    for name in ('adoption.after_snapshot', 'job.after_finalize_before_release', 'adoption.after_finalize_before_release'):
+        arm(c0, name, 'sleep', {'job_id': job_id}, seconds=0)
+    second = None
+    if seam:
+        # Armed before the claim: an adopter that replays a short job can reach the end of the
+        # stream within a second of its snapshot.
+        second = owner if args.order == 'adopter-first' else peer_host
+        arm(c0, 'callback.artifacts', 'pause', {'job_id': job_id, 'node': second}, timeout=1800)
+        log(f'seam: {second} will hold its end-of-run processing (order {args.order})')
+        hold_at_counter(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+    else:
+        arm(c0, 'callback.artifacts', 'sleep', {'job_id': job_id}, seconds=0)
 
     manage(c0, 'failpoint', 'arm', 'heartbeat.start', '--action', 'pause', '--match', f'node={owner}', '--match', 'periodic=True', '--timeout', '1200')
     log(f'armed heartbeat.start pause on {owner}')
-    manage(c0, 'failpoint', 'wait', 'heartbeat.start', '--timeout', '120')
+    hb = json.loads(manage(c0, 'failpoint', 'wait', 'heartbeat.start', '--timeout', '120').stdout)
+    m['heartbeat_paused_at'] = hb['at']
     log(f'{owner} heartbeat is paused; waiting for a peer to claim job {job_id}')
 
     notes = []
     try:
-        st = wait_for('a peer to claim the job', lambda: (s := job_state(c0, job_id))['controller_node'] != owner and s, args.claim_timeout)
-        log(f"job {job_id} claimed by {st['controller_node']} (status={st['status']})")
+        if seam:
+            arm(c0, 'heartbeat.force_lost', 'trigger', {'node': peer_host, 'other': owner})
+            log(f'seam: {peer_host} will treat {owner} as lost on its next heartbeat; triggering one now ({trigger_heartbeat(peer)})')
+        snap = wait_hits(c0, 'adoption.after_snapshot', timeout=args.claim_timeout, desc='a peer to claim and snapshot the job')[0]
+        m['claim_snapshot_at'] = snap['at']
+        m['claim_node'] = snap['node']
+        m['safe_threshold'] = int(snap['ctx']['safe_threshold'])
+        m['claim_delay_s'] = round(at_seconds(snap['at']) - at_seconds(hb['at']), 1)
+        log(f"job {job_id} claimed by {snap['node']}: snapshot safe_threshold={m['safe_threshold']}, {m['claim_delay_s']}s after the heartbeat pause")
+        if seam:
+            manage(c0, 'failpoint', 'disarm', 'heartbeat.force_lost')
+            manage(c0, 'failpoint', 'disarm', 'callback.event')
+            log(f'seam: released {owner} at counter {args.seam_counter}')
     except TimeoutError as exc:
         notes.append(f'no peer claimed the job: {exc}')
+        m['invalid'] = 'no claim'
         log(notes[-1])
+        if seam:
+            manage(c0, 'failpoint', 'disarm', 'callback.event')
     finally:
-        peer = next(c for c in containers if c != container_for(owner))
         manage(peer, 'failpoint', 'release', 'heartbeat.start', check=False)
         manage(peer, 'failpoint', 'disarm', 'heartbeat.start', check=False)
         log(f'released {owner} heartbeat; both controllers are live again')
 
+    if seam and second:
+        first_hit = 'job.after_finalize_before_release' if second == peer_host else 'adoption.after_finalize_before_release'
+        try:
+            h = wait_hits(c0, first_hit, timeout=args.finish_timeout, poll=3)[0]
+            log(f'seam: first finalizer done ({first_hit} on {h["node"]} at {h["at"]}); releasing {second}')
+        except TimeoutError as exc:
+            notes.append(f'first finalizer never reached {first_hit}: {exc}')
+            log(notes[-1])
+        manage(c0, 'failpoint', 'disarm', 'callback.artifacts')
+
     wait_finished(c0, job_id, args.finish_timeout)
     log(f'waiting {args.settle}s for callback receivers and notifications to settle')
     time.sleep(args.settle)
-    return report(containers, job_id, since, args, st['work_unit_id'], notes)
+    fin = {h['name']: h for name in ('job.after_finalize_before_release', 'adoption.after_finalize_before_release') for h in fired_hits(c0, name)[:1]}
+    if len(fin) == 2:
+        a, b = sorted(fin.values(), key=lambda h: at_seconds(h['at']))
+        m['first_finalizer'] = f"{a['node']} ({'job task' if a['name'].startswith('job.') else 'adoption'})"
+        m['finalize_gap_ms'] = round((at_seconds(b['at']) - at_seconds(a['at'])) * 1000)
+    elif fin:
+        h = next(iter(fin.values()))
+        m['first_finalizer'] = f"{h['node']} ({'job task' if h['name'].startswith('job.') else 'adoption'}) only"
+    arts = sorted(fired_hits(c0, 'callback.artifacts'), key=lambda h: at_seconds(h['at']))
+    if len(arts) >= 2 and not seam:
+        m['artifacts_order'] = [h['node'] for h in arts]
+        m['artifacts_gap_ms'] = round((at_seconds(arts[1]['at']) - at_seconds(arts[0]['at'])) * 1000)
+    m['adoptions'] = len(fired_hits(c0, 'adoption.after_snapshot'))
+    m['streams'] = 1 + m['adoptions']
+    return report(containers, job_id, since, args, st['work_unit_id'], notes, metrics=m)
 
 
 def scenario_finalize_strand(containers, args):
@@ -724,16 +932,39 @@ def scenario_cancel_orphan(containers, args):
                       pauses before saving the new celery_task_id (adoption.before_task_id_saved); cancel there
       deferred        controller killed and restarted; the first adoption is deferred (adoption.unit_status
                       raises twice); cancel during the deferral, before the next heartbeat re-queues it
+
+    --mode seam (dead, deferred): the kill lands with the owner held before event
+    --seam-counter instead of after --lead seconds. dead: the cancel follows the kill directly,
+    and the peer's lost check is forced and its heartbeat triggered instead of waiting about two
+    minutes for is_lost. deferred: peer claims are vetoed (a slow restart cannot hand the job to
+    awx-2, the job-38 class), and the re-queue of the deferred adoption is held before it is
+    published (adoption.before_queue, 2nd hit) until the cancel has been issued.
     """
     c0 = containers[0]
     pr = is_pr_branch(c0)
+    seam = args.mode == 'seam'
+    if seam and args.variant not in ('dead', 'deferred'):
+        raise SystemExit('cancel-orphan --mode seam supports --variant dead and deferred')
     since = since_now()
     job_id, st = start_job(containers, args)
     owner, unit = st['controller_node'], st['work_unit_id']
     oc = container_for(owner)
     peer = next(c for c in containers if c != oc)
-    notes = [f'branch={"PR" if pr else "devel"} variant={args.variant}']
-    time.sleep(args.lead)
+    peer_host = container_for_host(peer)
+    notes = [f'branch={"PR" if pr else "devel"} variant={args.variant} mode={args.mode}']
+    m = {'owner': owner}
+    # Recording only (sleep 0): each adoption's snapshot, and each adoption publish.
+    arm(peer, 'adoption.after_snapshot', 'sleep', {'job_id': job_id}, seconds=0)
+    if seam:
+        if args.variant == 'deferred':
+            guard_peer(peer, job_id)
+            arm(peer, 'adoption.before_queue', 'pause', {'job_id': job_id, 'node': owner}, nth=2, timeout=1800)
+            log('seam: the 2nd adoption publish on the owner (the re-queue after the deferral) will hold')
+        hold_at_counter(peer, job_id, owner, args.seam_counter)
+    else:
+        if args.variant == 'deferred':
+            arm(peer, 'adoption.before_queue', 'sleep', {'job_id': job_id}, seconds=0)
+        time.sleep(args.lead)
 
     if args.variant == 'task-id-window':
         if not pr:
@@ -744,32 +975,59 @@ def scenario_cancel_orphan(containers, args):
         manage(peer, 'failpoint', 'arm', 'adoption.unit_status', '--action', 'raise', '--match', f'job_id={job_id}', '--times', '2')
         log('armed adoption.unit_status raise (times=2): the first adoption attempt defers')
 
+    t_kill = time.monotonic()
     run(['docker', 'kill', oc])
+    m['killed_at'] = utcnow()
     log(f'docker kill {oc}')
+    if seam:
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    m['events_at_kill'] = job_state(peer, job_id)['events']
 
     def do_cancel(why):
         res = cancel_job(peer, job_id)
         log(f'cancel ({why}): {res}')
+        m['cancel_at'] = res['at']
+        m['cancel_sent_to'] = f"{res['sent_to']['controller_node']}/{res['sent_to']['celery_task_id']}"
         notes.append(
             f"cancel issued at {res['at']} ({why}); addressed to controller_node={res['sent_to']['controller_node']} task={res['sent_to']['celery_task_id']}; log: {res['log']!r}"
         )
 
     if args.variant in ('dead', 'restart'):
-        time.sleep(5)
+        if not seam:
+            time.sleep(5)
         do_cancel(f'{owner} is dead')
+    if args.variant == 'dead' and seam:
+        arm(peer, 'heartbeat.force_lost', 'trigger', {'node': peer_host, 'other': owner})
+        log(f'seam: {peer_host} treats {owner} as lost on its next heartbeat; triggering one now ({trigger_heartbeat(peer)})')
+        try:
+            wait_hits(peer, 'adoption.after_snapshot', timeout=args.claim_timeout, desc=f'{peer_host} to claim and snapshot the job')
+        except TimeoutError as exc:
+            notes.append(str(exc))
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost')
     if args.variant == 'restart':
         start_back(oc, owner)
     if args.variant == 'deferred':
         start_back(oc, owner)
+        m['restart_s'] = round(time.monotonic() - t_kill, 1)
+        if seam:
+            hold = wait_hits(peer, 'adoption.before_queue', timeout=600, desc='the re-queue of the deferred adoption to hold')[0]
+            m['requeue_held_at'] = hold['at']
+            log(f"seam: re-queue held on {hold['node']} at {hold['at']}")
         hits = wait_for(
             'two adoption.unit_status raises',
             lambda: len(json.loads(manage(peer, 'failpoint', 'hits', 'adoption.unit_status', '--fired').stdout)) >= 2 or None,
             300,
             poll=1,
         )
+        uh = fired_hits(peer, 'adoption.unit_status')
+        m['deferred_at'] = uh[-1]['at']
         log(f'adoption.unit_status fired twice; the adoption deferred ({hits})')
-        time.sleep(2)
+        if not seam:
+            time.sleep(2)
         do_cancel('adoption deferred, before the next heartbeat re-queues it')
+        if seam:
+            manage(peer, 'failpoint', 'disarm', 'adoption.before_queue')
+            log('seam: released the re-queue')
     if args.variant == 'task-id-window':
         hit = json.loads(manage(peer, 'failpoint', 'wait', 'adoption.before_task_id_saved', '--timeout', str(args.claim_timeout)).stdout)
         log(f"adoption.before_task_id_saved fired on {hit['node']} at {hit['at']} ctx={hit['ctx']}")
@@ -781,6 +1039,24 @@ def scenario_cancel_orphan(containers, args):
 
     s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=10)
     notes.append(f"job terminal at about {utcnow()}: status={s['status']} cancel_flag={s['cancel_flag']} controller={s['controller_node']}")
+    snaps = fired_hits(peer, 'adoption.after_snapshot')
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in snaps]
+    if snaps:
+        first = snaps[0] if args.variant == 'dead' else snaps[-1]
+        m['adoption_node'] = first['node']
+        m['safe_threshold'] = int(first['ctx']['safe_threshold'])
+        m['kill_to_adoption_s'] = round(at_seconds(first['at']) - at_seconds(m['killed_at']), 1)
+    if args.variant == 'deferred':
+        queued = fired_hits(peer, 'adoption.before_queue') if not seam else []
+        m['queues'] = [f"{h['node']}@{h['at']}" for h in queued]
+        if m.get('cancel_at') and m.get('deferred_at'):
+            m['deferral_to_cancel_s'] = round(at_seconds(m['cancel_at']) - at_seconds(m['deferred_at']), 1)
+        if m.get('cancel_at') and snaps:
+            m['cancel_to_readoption_s'] = round(at_seconds(snaps[-1]['at']) - at_seconds(m['cancel_at']), 1)
+        if s['controller_node'] != owner:
+            m['invalid'] = f"a peer took the job ({s['controller_node']}) instead of the restarted owner"
+    if args.variant == 'dead' and not snaps:
+        m['invalid'] = 'no adoption (reaped or never claimed)'
     # Whatever the job row says, did the work itself stop?
     watch(
         peer,
@@ -791,13 +1067,14 @@ def scenario_cancel_orphan(containers, args):
         poll=15,
         label='after terminal',
     )
-    notes.append(f"exec-node unit after the job ended: {unit_status(unit)}; playbook processes: {exec_node_processes(r'ansible-playbook')}")
+    m['unit_end'] = unit_status(unit)
+    notes.append(f"exec-node unit after the job ended: {m['unit_end']}; playbook processes: {exec_node_processes(r'ansible-playbook')}")
     log(notes[-1])
     if args.variant in ('dead', 'task-id-window'):
         start_back(oc, owner)
     manage(peer, 'failpoint', 'disarm', '--all')
     time.sleep(args.settle)
-    return report(containers, job_id, since, args, unit, notes)
+    return report(containers, job_id, since, args, unit, notes, metrics=m)
 
 
 # --- capacity ------------------------------------------------------------------------------
@@ -1083,27 +1360,64 @@ def scenario_event_queue(containers, args):
        awx-2's sweep is disabled with sweep.before_claim raise so the adoption stays on C).
     3. C's adoption snapshots the DB (which lacks the queued events) and replays from byte 0.
     4. Release the flush; count duplicate counters.
+
+    --mode seam (trigger kill): the backlog is counted in events, not seconds. C's job task is
+    held before event --seam-counter until the receiver has stored everything before it; then
+    every receiver worker on C is held before its next Redis pop (callback_receiver.before_read,
+    so no event sits in a worker buffer that dies with the kill), and the hold on the job task
+    moves to counter + --seam-backlog. Exactly --seam-backlog events are in Redis at the kill.
+    Peer claims are vetoed so a slow restart cannot hand the job to awx-2.
     """
     c0 = containers[0]
     pr = is_pr_branch(c0)
+    seam = args.mode == 'seam'
+    if seam and args.trigger != 'kill':
+        raise SystemExit('event-queue --mode seam supports --trigger kill only')
     since = since_now()
     job_id, st = start_job(containers, args)
     owner, unit = st['controller_node'], st['work_unit_id']
     oc = container_for(owner)
     peer = next(c for c in containers if c != oc)
-    notes = [f"branch={'PR' if pr else 'devel'} trigger={args.trigger}"]
+    notes = [f"branch={'PR' if pr else 'devel'} trigger={args.trigger} mode={args.mode}"]
+    m = {'owner': owner}
     # Armed only to record the snapshot: an unarmed failpoint leaves no hit to wait on.
     manage(peer, 'failpoint', 'arm', 'adoption.after_snapshot', '--action', 'sleep', '--seconds', '0', '--match', f'job_id={job_id}')
-    time.sleep(args.lead)
-    manage(peer, 'failpoint', 'arm', 'callback_receiver.before_flush', '--action', 'pause', '--match', f'node={owner}', '--timeout', '1200')
-    log(f'armed callback_receiver.before_flush pause on {owner}')
-    manage(peer, 'failpoint', 'wait', 'callback_receiver.before_flush', '--timeout', '60')
-    time.sleep(args.backlog)
+    if seam:
+        n, b = args.seam_counter, args.seam_backlog
+        guard_peer(peer, job_id)
+        hold_at_counter(peer, job_id, owner, n)
+        wait_db_events(peer, job_id, n)
+        arm(peer, 'callback_receiver.before_read', 'pause', {'node': owner}, timeout=1800)
+        workers = setting(oc, 'JOB_EVENT_WORKERS')
+        wait_hits(peer, 'callback_receiver.before_read', count=workers, timeout=60, desc=f'{workers} receiver workers on {owner} to hold')
+        log(f'seam: all {workers} receiver workers on {owner} hold before their next Redis pop')
+        arm(peer, 'callback.event', 'pause', {'job_id': job_id, 'node': owner, 'counter': n + b}, timeout=1800)
+        wait_hits(peer, 'callback.event', lambda h: str(h['ctx'].get('counter')) == str(n + b), timeout=300)
+        log(f'seam: {owner} let events {n}..{n + b - 1} through and holds before {n + b}')
+    else:
+        time.sleep(args.lead)
+        manage(peer, 'failpoint', 'arm', 'callback_receiver.before_flush', '--action', 'pause', '--match', f'node={owner}', '--timeout', '1200')
+        log(f'armed callback_receiver.before_flush pause on {owner}')
+        manage(peer, 'failpoint', 'wait', 'callback_receiver.before_flush', '--timeout', '60')
+        time.sleep(args.backlog)
     s = job_state(peer, job_id)
-    notes.append(f"before restart: {s['events']} events in DB, Redis backlog on {owner}: {redis_backlog(oc)}")
+    m['db_events_at_kill'] = s['events']
+    m['redis_backlog_at_kill'] = redis_backlog(oc)
+    notes.append(f"before restart: {s['events']} events in DB, Redis backlog on {owner}: {m['redis_backlog_at_kill']}")
     log(notes[-1])
     if args.trigger == 'kill':
-        kill_and_restart(oc, peer, owner)
+        t_kill = time.monotonic()
+        run(['docker', 'kill', oc])
+        m['killed_at'] = utcnow()
+        log(f'docker kill {oc}')
+        if seam:
+            # The held job task died with the node; the restarted node's replay must not stop.
+            manage(peer, 'failpoint', 'disarm', 'callback.event')
+        run(['docker', 'start', oc])
+        log(f'docker start {oc}')
+        wait_for(f'{owner} to answer awx-manage', lambda: manage(oc, 'failpoint', 'list', check=False).returncode == 0, 600, poll=10)
+        m['restart_s'] = round(time.monotonic() - t_kill, 1)
+        log(f'{owner} is back (awx-manage answers) after {m["restart_s"]}s')
     else:
         if pr:
             manage(peer, 'failpoint', 'arm', 'sweep.before_claim', '--action', 'raise', '--match', f'node={container_for_host(peer)}')
@@ -1113,17 +1427,28 @@ def scenario_event_queue(containers, args):
     hit = json.loads(manage(peer, 'failpoint', 'wait', 'adoption.after_snapshot', '--timeout', str(args.finish_timeout)).stdout)
     log(f"adoption snapshot on {hit['node']} at {hit['at']}: {hit['ctx']}")
     notes.append(f"adoption snapshot at {hit['at']} on {hit['node']}: {hit['ctx']}")
-    time.sleep(10)
-    notes.append(f"at release: {job_state(peer, job_id)['events']} events in DB, Redis backlog: {redis_backlog(oc)}")
+    m['snapshot_node'] = hit['node']
+    m['kill_to_snapshot_s'] = round(at_seconds(hit['at']) - at_seconds(m['killed_at']), 1) if 'killed_at' in m else None
+    m['safe_threshold'] = int(hit['ctx']['safe_threshold'])
+    if hit['node'] != owner:
+        m['invalid'] = f"adopted by {hit['node']}, not the restarted owner"
+    if not seam:
+        time.sleep(10)
+    m['redis_backlog_at_release'] = redis_backlog(oc)
+    notes.append(f"at release: {job_state(peer, job_id)['events']} events in DB, Redis backlog: {m['redis_backlog_at_release']}")
     log(notes[-1])
-    manage(peer, 'failpoint', 'release', 'callback_receiver.before_flush')
-    time.sleep(2)
-    manage(peer, 'failpoint', 'disarm', 'callback_receiver.before_flush')
-    log('released and disarmed callback_receiver.before_flush')
+    release = 'callback_receiver.before_read' if seam else 'callback_receiver.before_flush'
+    if not seam:
+        manage(peer, 'failpoint', 'release', release)
+        time.sleep(2)
+    # Disarming releases every held worker too; a released-but-armed before_read would
+    # record a hit for every Redis pop.
+    manage(peer, 'failpoint', 'disarm', release)
+    log(f'released and disarmed {release}')
     wait_finished(peer, job_id, args.finish_timeout)
     manage(peer, 'failpoint', 'disarm', '--all')
     time.sleep(args.settle)
-    return report(containers, job_id, since, args, unit, notes)
+    return report(containers, job_id, since, args, unit, notes, metrics=m)
 
 
 def container_for_host(container):
@@ -1428,6 +1753,13 @@ def main():
     parser.add_argument('--job', type=int, help='report: job id')
     parser.add_argument('--since', help='report: log start, UTC ISO with Z')
     parser.add_argument('--note', action='append', help='report: a note to print with the result')
+    parser.add_argument('--mode', choices=['timing', 'seam'], default='timing', help='Drive the fault with sleeps and timers, or with failpoint seams')
+    parser.add_argument('--seam-counter', type=int, default=25, help='seam: event counter before which the owner is held (the fault point)')
+    parser.add_argument('--seam-backlog', type=int, default=20, help='event-queue seam: events queued in Redis at the kill')
+    parser.add_argument(
+        '--order', choices=['owner-first', 'adopter-first'], default='owner-first', help='slow-controller seam: which controller finalizes first'
+    )
+    parser.add_argument('--fresh-event-queries', action='store_true', help='slow-controller: delete EventQuery rows first so both finalizers insert them')
     parser.add_argument('--out', help='Directory to save logs, tracebacks and the timeline into')
     parser.add_argument('--max-lines', type=int, default=150)
     args = parser.parse_args()
