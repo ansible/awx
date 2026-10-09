@@ -1747,19 +1747,6 @@ class RunProjectUpdate(BaseTask):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
                 # Prefer cached tarball for fewer file operations on SAN storage
                 tar_path = cache_subpath + '.tar'
-                if not os.path.exists(tar_path):
-                    # Direct cache hit — look for tarball in reqcache via hash file
-                    _hash_file = os.path.join(os.path.dirname(cache_subpath), '.requirements_hash')
-                    if os.path.exists(_hash_file):
-                        try:
-                            with open(_hash_file) as f:
-                                _hash = f.read().strip()
-                            if _hash:
-                                _candidate = os.path.join(project.get_cache_path(), f'reqcache_{_hash}', f'{subfolder}.tar')
-                                if os.path.exists(_candidate):
-                                    tar_path = _candidate
-                        except OSError:
-                            pass
                 if os.path.exists(tar_path):
                     try:
                         with tarfile.open(tar_path, 'r') as tar:
@@ -1768,6 +1755,8 @@ class RunProjectUpdate(BaseTask):
                         continue
                     except Exception:
                         logger.warning(f'Failed to extract tarball {tar_path}, falling back to copytree')
+                        if os.path.exists(dest_subpath):
+                            shutil.rmtree(dest_subpath)
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 

@@ -2026,11 +2026,11 @@ class TestMakeLocalCopyReqcacheFallback:
         assert dest.exists()
         assert dest.read_text() == 'collection content'
 
-    def test_uses_tarball_from_direct_cache_via_hash(self, tmp_path):
+    def test_direct_cache_ignores_reqcache_tarball(self, tmp_path):
+        """Direct cache hit must use copytree, not a reqcache tarball that could have stale content."""
         cache_base = tmp_path / 'cache'
         cache_base.mkdir()
 
-        # Direct cache hit: collections exist in cache_id dir
         cache_id_dir = cache_base / 'abc123'
         cache_id_dir.mkdir()
         direct_collections = cache_id_dir / 'requirements_collections'
@@ -2038,12 +2038,17 @@ class TestMakeLocalCopyReqcacheFallback:
         (direct_collections / 'direct.txt').write_text('direct content')
         (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
 
-        # Tarball exists in reqcache
+        # Reqcache tarball with DIFFERENT content — must not be used
         reqcache = cache_base / 'reqcache_deadbeef1234'
         reqcache.mkdir()
+        stale_dir = tmp_path / '_stale'
+        stale_dir.mkdir()
+        stale_collections = stale_dir / 'requirements_collections'
+        stale_collections.mkdir()
+        (stale_collections / 'direct.txt').write_text('stale tarball content')
         tar_path = reqcache / 'requirements_collections.tar'
         with tarfile.open(str(tar_path), 'w') as tar:
-            tar.add(str(direct_collections), arcname='requirements_collections')
+            tar.add(str(stale_collections), arcname='requirements_collections')
 
         project_path = tmp_path / 'project'
         project_path.mkdir()
@@ -2066,6 +2071,65 @@ class TestMakeLocalCopyReqcacheFallback:
         dest = job_dir / 'requirements_collections' / 'direct.txt'
         assert dest.exists()
         assert dest.read_text() == 'direct content'
+
+    def test_tarball_partial_extract_falls_back_to_copytree(self, tmp_path):
+        """If tarball extraction partially writes then fails, copytree fallback must still work."""
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        reqcache = cache_base / 'reqcache_deadbeef1234'
+        reqcache.mkdir()
+        reqcache_collections = reqcache / 'requirements_collections'
+        reqcache_collections.mkdir()
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        # Create a valid tarball that we'll make fail during extraction
+        tar_path = reqcache / 'requirements_collections.tar'
+        with tarfile.open(str(tar_path), 'w') as tar:
+            tar.add(str(reqcache_collections), arcname='requirements_collections')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        # Simulate partial extraction: create dest dir to mimic what a failed extractall leaves behind
+        partial_dest = job_dir / 'requirements_collections'
+        partial_dest.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        original_open = tarfile.open
+
+        def failing_tarfile_open(*args, **kwargs):
+            tar = original_open(*args, **kwargs)
+
+            def raise_after_partial(*a, **kw):
+                raise OSError("Simulated extraction failure")
+
+            tar.extractall = raise_after_partial
+            return tar
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            with mock.patch('awx.main.tasks.jobs.tarfile.open', side_effect=failing_tarfile_open):
+                jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
 
     def test_falls_back_to_copytree_when_no_tarball(self, tmp_path):
         cache_base = tmp_path / 'cache'
