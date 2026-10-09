@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+import tarfile
 import yaml
 import tempfile
 import traceback
@@ -1693,6 +1694,21 @@ class RunProjectUpdate(BaseTask):
                 finally:
                     shutil.rmtree(tmp_path, ignore_errors=True)
 
+            # Create a cached tarball for faster per-job copies (AAP-96176)
+            tar_path = os.path.join(reqcache_path, f'{subfolder}.tar')
+            if os.path.exists(dst) and not os.path.exists(tar_path):
+                tmp_tar = tar_path + '.tmp'
+                try:
+                    with tarfile.open(tmp_tar, 'w') as tar:
+                        tar.add(dst, arcname=subfolder)
+                    os.rename(tmp_tar, tar_path)
+                    logger.debug(f'Created tarball cache {tar_path}')
+                except Exception:
+                    logger.warning(f'Failed to create tarball cache {tar_path}')
+                    if os.path.exists(tmp_tar):
+                        os.remove(tmp_tar)
+                    # Non-fatal: copytree fallback still works
+
     @staticmethod
     def make_local_copy(project, job_private_data_dir):
         """Copy project content (roles and collections) to a job private_data_dir
@@ -1729,6 +1745,29 @@ class RunProjectUpdate(BaseTask):
                         pass
             if os.path.exists(cache_subpath):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
+                # Prefer cached tarball for fewer file operations on SAN storage
+                tar_path = cache_subpath + '.tar'
+                if not os.path.exists(tar_path):
+                    # Direct cache hit — look for tarball in reqcache via hash file
+                    _hash_file = os.path.join(os.path.dirname(cache_subpath), '.requirements_hash')
+                    if os.path.exists(_hash_file):
+                        try:
+                            with open(_hash_file) as f:
+                                _hash = f.read().strip()
+                            if _hash:
+                                _candidate = os.path.join(project.get_cache_path(), f'reqcache_{_hash}', f'{subfolder}.tar')
+                                if os.path.exists(_candidate):
+                                    tar_path = _candidate
+                        except OSError:
+                            pass
+                if os.path.exists(tar_path):
+                    try:
+                        with tarfile.open(tar_path, 'r') as tar:
+                            tar.extractall(path=job_private_data_dir, filter='data')
+                        logger.debug('{0} {1} prepared {2} from tarball'.format(type(project).__name__, project.pk, dest_subpath))
+                        continue
+                    except Exception:
+                        logger.warning(f'Failed to extract tarball {tar_path}, falling back to copytree')
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 

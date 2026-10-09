@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import tarfile
 from pathlib import Path
 
 import fcntl
@@ -1898,6 +1899,26 @@ class TestSyncRequirementsCache:
         tmp_dirs = [e for e in os.listdir(base_path) if e.startswith('.reqcache_')]
         assert len(tmp_dirs) == 0
 
+    def test_creates_tarball_after_sync(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'ansible_collections').mkdir()
+        (collections_dir / 'ansible_collections' / 'test.txt').write_text('test')
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        tar_path = base_path / 'reqcache_deadbeef1234' / 'requirements_collections.tar'
+        assert tar_path.exists()
+        with tarfile.open(str(tar_path), 'r') as tar:
+            names = tar.getnames()
+            assert 'requirements_collections/ansible_collections/test.txt' in names
+
     def test_skips_when_reqcache_already_exists(self, tmp_path):
         base_path = tmp_path / 'cache'
         base_path.mkdir()
@@ -1959,6 +1980,126 @@ class TestMakeLocalCopyReqcacheFallback:
             jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
 
         # Collections should be copied from reqcache
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_uses_tarball_from_reqcache(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Create reqcache with collections directory AND tarball
+        reqcache = cache_base / 'reqcache_deadbeef1234'
+        reqcache.mkdir()
+        reqcache_collections = reqcache / 'requirements_collections'
+        reqcache_collections.mkdir()
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        tar_path = reqcache / 'requirements_collections.tar'
+        with tarfile.open(str(tar_path), 'w') as tar:
+            tar.add(str(reqcache_collections), arcname='requirements_collections')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_uses_tarball_from_direct_cache_via_hash(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        # Direct cache hit: collections exist in cache_id dir
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        direct_collections = cache_id_dir / 'requirements_collections'
+        direct_collections.mkdir()
+        (direct_collections / 'direct.txt').write_text('direct content')
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Tarball exists in reqcache
+        reqcache = cache_base / 'reqcache_deadbeef1234'
+        reqcache.mkdir()
+        tar_path = reqcache / 'requirements_collections.tar'
+        with tarfile.open(str(tar_path), 'w') as tar:
+            tar.add(str(direct_collections), arcname='requirements_collections')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        dest = job_dir / 'requirements_collections' / 'direct.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'direct content'
+
+    def test_falls_back_to_copytree_when_no_tarball(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Reqcache with directory but NO tarball
+        reqcache_collections = cache_base / 'reqcache_deadbeef1234' / 'requirements_collections'
+        reqcache_collections.mkdir(parents=True)
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        # Should still work via copytree fallback
         dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
         assert dest.exists()
         assert dest.read_text() == 'collection content'
