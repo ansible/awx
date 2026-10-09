@@ -2405,6 +2405,48 @@ class TestOrphanSweep:
         assert job.controller_node == 'dead-controller'
         queue.assert_not_called()
 
+    def test_job_executed_by_its_own_dead_controller_is_not_adopted(self, me_inst):
+        """A hybrid node runs the EE inside the node that controls the job, so when it goes the
+        playbook goes with it and there is nothing left to stream. `_handle_lost_instance_job`
+        already declines these (`j.execution_node != other_inst.hostname`); the sweep has to
+        agree, or the graceful path diverges from the lost-instance path. Observed on the
+        cluster: a `docker stop` of hybrid awx-1 runs announce_shutdown, which drops it from
+        live_hostnames at once, so the sweep claimed job 38 and streamed a unit whose state came
+        back empty until the reaper cleaned up 20s later."""
+        job = self._orphan(execution_node='dead-controller')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == 'dead-controller'
+        queue.assert_not_called()
+
+    def test_job_executed_on_a_separate_node_is_still_adopted(self, me_inst):
+        """The case the whole feature exists for: the EE is on an execution node that outlived
+        the controller, so the work unit is still there to reattach to."""
+        job = self._orphan(execution_node='exec-node-1')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == me_inst.hostname
+        queue.assert_called_once_with(job.id, me_inst.hostname)
+
+    def test_container_group_job_without_an_execution_node_is_still_adopted(self, me_inst):
+        """A container group job carries no execution_node — its pod runs in Kubernetes and
+        outlives the controller, so it must stay adoptable. The guard above compares
+        execution_node to controller_node, which an empty value never matches."""
+        job = self._orphan(execution_node='')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == me_inst.hostname
+        queue.assert_called_once_with(job.id, me_inst.hostname)
+
     def test_workflow_jobs_are_excluded(self, me_inst):
         """A workflow job has no work unit of its own; its nodes are separate jobs."""
         wfj = WorkflowJob.objects.create(controller_node='dead-controller', status='running', work_unit_id='unit-wf')

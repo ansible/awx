@@ -39,7 +39,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
 from django.db import DatabaseError, IntegrityError, connection, transaction
-from django.db.models import Q
+from django.db.models import F, Q
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
@@ -1120,6 +1120,14 @@ def _sweep_orphaned_jobs(this_inst):
         # window during dispatch where it is unset while the job is already running, and
         # sweeping then would steal live work. The gap is hypothetical; the theft would not be.
         .exclude(controller_node__in=live_hostnames)
+        # A hybrid node runs the EE inside the node that controls the job, so when it leaves the
+        # playbook leaves with it and there is no work unit left to stream — only a row to reap.
+        # _handle_lost_instance_job declines these for the same reason; the sweep has to agree,
+        # because the graceful path gets here first: announce_shutdown drops the node from
+        # live_hostnames at once, while a hard kill leaves it UNAVAILABLE within grace and so
+        # still live. A container group job carries no execution_node and its pod outlives the
+        # controller, which an equality test never matches.
+        .exclude(execution_node=F('controller_node'))
         .exclude(polymorphic_ctype_id=workflow_ctype_id)
         .order_by('started')  # longest-stranded first: they are closest to their deadline
         .values_list('pk', 'controller_node')[: settings.HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT]
