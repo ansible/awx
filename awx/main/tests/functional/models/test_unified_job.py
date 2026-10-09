@@ -304,37 +304,46 @@ class TestUpdateParentInstance:
         job_template.refresh_from_db()
         assert job_template.last_job == job
 
-    def test_skip_locked_skips_when_row_locked(self, job_template):
-        job = job_template.jobs.create(status='new')
+
+@pytest.mark.django_db(transaction=True)
+class TestUpdateParentInstanceSkipLocked:
+    @pytest.mark.skipif(
+        'sqlite' in __import__('django').conf.settings.DATABASES['default']['ENGINE'],
+        reason='select_for_update(skip_locked=True) is a no-op on SQLite',
+    )
+    def test_skip_locked_skips_when_row_locked(self):
+        jt = JobTemplate.objects.create(name='test-skip-locked')
+        job = jt.jobs.create(status='new')
         job.status = 'successful'
         job.failed = False
 
         lock_acquired = threading.Event()
         proceed = threading.Event()
+        lock_error = []
 
         def hold_lock():
-            from django.db import connections
+            try:
+                from django.db import transaction as db_transaction, connections
 
-            conn = connections['default']
-            cursor = conn.cursor()
-            cursor.execute('BEGIN')
-            cursor.execute(
-                'SELECT 1 FROM main_unifiedjobtemplate WHERE id = %s FOR UPDATE',
-                [job_template.pk],
-            )
-            lock_acquired.set()
-            proceed.wait(timeout=10)
-            cursor.execute('ROLLBACK')
-            conn.close()
+                with db_transaction.atomic():
+                    locked = JobTemplate.objects.select_for_update().filter(pk=jt.pk).first()
+                    assert locked is not None, f"Could not find JT pk={jt.pk} to lock"
+                    lock_acquired.set()
+                    proceed.wait(timeout=10)
+                connections['default'].close()
+            except Exception as e:
+                lock_error.append(str(e))
+                lock_acquired.set()
 
         t = threading.Thread(target=hold_lock)
         t.start()
         lock_acquired.wait(timeout=10)
 
         try:
+            assert not lock_error, f"Lock thread failed: {lock_error}"
             job._update_parent_instance(skip_locked=True)
-            job_template.refresh_from_db()
-            assert job_template.last_job is None
+            jt.refresh_from_db()
+            assert jt.last_job is None
         finally:
             proceed.set()
             t.join(timeout=10)
