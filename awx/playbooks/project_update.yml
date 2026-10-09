@@ -198,14 +198,15 @@
   name: Install content with ansible-galaxy command if necessary
   vars:
     galaxy_task_env:  # configured in settings
+    awx_cache_path: "{{ projects_root }}/.__awx_cache/{{ local_path }}"
     # additional_galaxy_env contains environment variables are used for installing roles and collections and will take precedence over items in galaxy_task_env
     additional_galaxy_env:
       # These paths control where ansible-galaxy installs collections and roles on top the filesystem
-      ANSIBLE_COLLECTIONS_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_collections"
-      ANSIBLE_ROLES_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_roles"
+      ANSIBLE_COLLECTIONS_PATH: "{{ awx_cache_path }}/stage/requirements_collections"
+      ANSIBLE_ROLES_PATH: "{{ awx_cache_path }}/stage/requirements_roles"
       # Put the local tmp directory in same volume as collection destination
       # otherwise, files cannot be moved accross volumes and will cause error
-      ANSIBLE_LOCAL_TEMP: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/tmp"
+      ANSIBLE_LOCAL_TEMP: "{{ awx_cache_path }}/stage/tmp"
   tasks:
     - name: Check content sync settings
       when: not roles_enabled | bool and not collections_enabled | bool
@@ -220,6 +221,49 @@
               AWX_COLLECTIONS_ENABLED settings and Galaxy credentials on the project's organization.
         - name: End play due to disabled content sync
           ansible.builtin.meta: end_play
+
+    - name: Compute requirements hash for cache reuse
+      tags:
+        - install_roles
+        - install_collections
+      block:
+        - name: Find all requirements files
+          ansible.builtin.stat:
+            path: "{{ item }}"
+            checksum_algorithm: sha256
+            get_attributes: false
+            get_mime: false
+          register: req_files_stat
+          loop:
+            - "{{ project_path | quote }}/collections/requirements.yml"
+            - "{{ project_path | quote }}/collections/requirements.yaml"
+            - "{{ project_path | quote }}/roles/requirements.yml"
+            - "{{ project_path | quote }}/roles/requirements.yaml"
+            - "{{ project_path | quote }}/requirements.yml"
+            - "{{ project_path | quote }}/requirements.yaml"
+
+        - name: Build combined requirements hash
+          ansible.builtin.set_fact:
+            requirements_hash: "{{ _existing | map(attribute='item') | zip(_existing | map(attribute='stat.checksum')) | list | to_json | hash('sha256') }}"
+            has_requirements: "{{ _existing | length > 0 }}"
+          vars:
+            _existing: "{{ req_files_stat.results | selectattr('stat.exists', 'defined') | selectattr('stat.exists') | list }}"
+
+        - name: Check requirements hash cache
+          ansible.builtin.stat:
+            path: "{{ awx_cache_path }}/reqcache_{{ requirements_hash }}"
+          register: reqcache_stat
+          when: has_requirements | bool
+
+        - name: Write requirements hash marker for post-run cache management
+          ansible.builtin.copy:
+            content: "{{ requirements_hash }}"
+            dest: "{{ awx_cache_path }}/stage/.requirements_hash"
+          when: has_requirements | bool
+
+        - name: Set cache hit fact
+          ansible.builtin.set_fact:
+            requirements_cache_hit: "{{ has_requirements | bool and (reqcache_stat.stat.exists | default(false)) }}"
 
     - block:
         - name: Fetch galaxy roles from roles/requirements.(yml/yaml)
@@ -237,6 +281,7 @@
           when:
             - roles_enabled | bool
             - req_file | length > 0
+            - not (requirements_cache_hit | default(false) | bool)
           tags:
             - install_roles
 
@@ -255,6 +300,7 @@
           when:
             - collections_enabled | bool
             - req_file | length > 0
+            - not (requirements_cache_hit | default(false) | bool)
           tags:
             - install_collections
 
@@ -275,6 +321,7 @@
             - collections_enabled | bool
             - roles_enabled | bool
             - req_file | length > 0
+            - not (requirements_cache_hit | default(false) | bool)
           tags:
             - install_collections
             - install_roles

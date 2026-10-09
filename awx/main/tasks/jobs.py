@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+import tarfile
 import yaml
 import tempfile
 import traceback
@@ -1616,18 +1617,97 @@ class RunProjectUpdate(BaseTask):
         shutil.copytree(awx_playbooks, os.path.join(private_data_dir, 'project'))
 
     @staticmethod
-    def clear_project_cache(cache_dir, keep_value):
+    def clear_project_cache(cache_dir, keep_value, max_reqcache=10):
         if os.path.isdir(cache_dir):
+            # Read the current requirements hash from stage so we don't evict it
+            current_reqcache = None
+            stage_hash_file = os.path.join(cache_dir, 'stage', '.requirements_hash')
+            try:
+                if os.path.exists(stage_hash_file):
+                    with open(stage_hash_file) as f:
+                        req_hash = f.read().strip()
+                    if req_hash:
+                        current_reqcache = f'reqcache_{req_hash}'
+            except OSError:
+                pass
+
+            reqcache_entries = []
             for entry in os.listdir(cache_dir):
                 old_path = os.path.join(cache_dir, entry)
-                if entry not in (keep_value, 'stage'):
-                    # invalidate, then delete
+                if entry.startswith('reqcache_'):
+                    reqcache_entries.append(old_path)
+                elif entry not in (keep_value, 'stage'):
                     new_path = os.path.join(cache_dir, '.~~delete~~' + entry)
                     try:
                         os.rename(old_path, new_path)
                         shutil.rmtree(new_path)
                     except OSError:
                         logger.warning(f"Could not remove cache directory {old_path}")
+            if len(reqcache_entries) > max_reqcache:
+                reqcache_entries.sort(key=lambda p: os.path.getmtime(p))
+                for stale in reqcache_entries[: len(reqcache_entries) - max_reqcache]:
+                    if current_reqcache and os.path.basename(stale) == current_reqcache:
+                        continue
+                    try:
+                        shutil.rmtree(stale)
+                        logger.debug(f'Evicted stale requirements cache {stale}')
+                    except OSError:
+                        logger.warning(f"Could not remove stale requirements cache {stale}")
+
+    @staticmethod
+    def _sync_requirements_cache(base_path, cache_path):
+        """After a successful install, sync the requirements hash cache.
+
+        If galaxy install ran (collections/roles exist in cache_path), save them
+        to a hash-keyed reqcache directory for reuse across commits.
+        If galaxy install was skipped (cache hit), the reqcache already has the content.
+        """
+        hash_file = os.path.join(cache_path, '.requirements_hash')
+        if not os.path.exists(hash_file):
+            return
+
+        try:
+            with open(hash_file) as f:
+                req_hash = f.read().strip()
+        except OSError:
+            return
+
+        if not req_hash:
+            return
+
+        reqcache_path = os.path.join(base_path, f'reqcache_{req_hash}')
+
+        for subfolder in ('requirements_collections', 'requirements_roles'):
+            src = os.path.join(cache_path, subfolder)
+            dst = os.path.join(reqcache_path, subfolder)
+            if os.path.exists(src) and not os.path.exists(dst):
+                tmp_path = tempfile.mkdtemp(dir=base_path, prefix=f'.reqcache_{req_hash}_tmp_')
+                try:
+                    tmp_dst = os.path.join(tmp_path, subfolder)
+                    shutil.copytree(src, tmp_dst, symlinks=True)
+                    os.makedirs(reqcache_path, exist_ok=True)
+                    os.rename(tmp_dst, dst)
+                    logger.debug(f'Saved {subfolder} to requirements cache {reqcache_path}')
+                except Exception:
+                    logger.warning(f'Failed to save {subfolder} to requirements cache, cleaning up')
+                    raise
+                finally:
+                    shutil.rmtree(tmp_path, ignore_errors=True)
+
+            # Create a cached tarball for faster per-job copies (AAP-96176)
+            tar_path = os.path.join(reqcache_path, f'{subfolder}.tar')
+            if os.path.exists(dst) and not os.path.exists(tar_path):
+                tmp_tar = tar_path + '.tmp'
+                try:
+                    with tarfile.open(tmp_tar, 'w') as tar:
+                        tar.add(dst, arcname=subfolder)
+                    os.rename(tmp_tar, tar_path)
+                    logger.debug(f'Created tarball cache {tar_path}')
+                except Exception:
+                    logger.warning(f'Failed to create tarball cache {tar_path}')
+                    if os.path.exists(tmp_tar):
+                        os.remove(tmp_tar)
+                    # Non-fatal: copytree fallback still works
 
     @staticmethod
     def make_local_copy(project, job_private_data_dir):
@@ -1649,8 +1729,34 @@ class RunProjectUpdate(BaseTask):
             subfolders.append('requirements_roles')
         for subfolder in subfolders:
             cache_subpath = os.path.join(cache_path, subfolder)
+            if not os.path.exists(cache_subpath):
+                # Fall back to requirements-hash-keyed cache (reqcache)
+                hash_file = os.path.join(cache_path, '.requirements_hash')
+                if os.path.exists(hash_file):
+                    try:
+                        with open(hash_file) as f:
+                            req_hash = f.read().strip()
+                        if req_hash:
+                            reqcache_subpath = os.path.join(project.get_cache_path(), f'reqcache_{req_hash}', subfolder)
+                            if os.path.exists(reqcache_subpath):
+                                cache_subpath = reqcache_subpath
+                                logger.debug(f'Using requirements cache for {subfolder} (hash {req_hash[:12]})')
+                    except OSError:
+                        pass
             if os.path.exists(cache_subpath):
                 dest_subpath = os.path.join(job_private_data_dir, subfolder)
+                # Prefer cached tarball for fewer file operations on SAN storage
+                tar_path = cache_subpath + '.tar'
+                if os.path.exists(tar_path):
+                    try:
+                        with tarfile.open(tar_path, 'r') as tar:
+                            tar.extractall(path=job_private_data_dir, filter='data')
+                        logger.debug('{0} {1} prepared {2} from tarball'.format(type(project).__name__, project.pk, dest_subpath))
+                        continue
+                    except Exception:
+                        logger.warning(f'Failed to extract tarball {tar_path}, falling back to copytree')
+                        if os.path.exists(dest_subpath):
+                            shutil.rmtree(dest_subpath)
                 shutil.copytree(cache_subpath, dest_subpath, symlinks=True)
                 logger.debug('{0} {1} prepared {2} from cache'.format(type(project).__name__, project.pk, dest_subpath))
 
@@ -1685,6 +1791,8 @@ class RunProjectUpdate(BaseTask):
                         shutil.rmtree(cache_path)
                     os.rename(stage_path, cache_path)
                     logger.debug('{0} wrote to cache at {1}'.format(instance.log_format, cache_path))
+
+                self._sync_requirements_cache(base_path, cache_path)
             elif os.path.exists(stage_path):
                 shutil.rmtree(stage_path)  # cannot trust content update produced
 
