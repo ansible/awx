@@ -240,6 +240,15 @@ def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
     return instance
 
 
+def env_flag_enabled(env, name):
+    """Return True when env maps name to a common truthy string.
+
+    Missing and unrecognized values are False (does not raise). Truthy spellings
+    match distutils.util.strtobool: 1, true, yes, on, y, t.
+    """
+    return str(env.get(name, '')).strip().lower() in ('1', 'true', 'yes', 'on', 'y', 't')
+
+
 class BaseTask(object):
     model = None
     event_model = None
@@ -752,6 +761,10 @@ class BaseTask(object):
                 'passwords': expect_passwords,
                 'suppress_env_files': getattr(settings, 'AWX_RUNNER_OMIT_ENV_FILES', True),
                 'envvars': env,
+                # ansible-runner overwrites RUNNER_OMIT_EVENTS / RUNNER_ONLY_FAILED_EVENTS from
+                # these kwargs after merging envvars, so AWX_TASK_ENV flags only take effect here.
+                'omit_event_data': env_flag_enabled(env, 'RUNNER_OMIT_EVENTS'),
+                'only_failed_event_data': env_flag_enabled(env, 'RUNNER_ONLY_FAILED_EVENTS'),
             }
 
             if ssh_key_data is not None:
