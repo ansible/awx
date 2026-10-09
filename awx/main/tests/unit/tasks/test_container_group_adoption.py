@@ -332,15 +332,18 @@ def adoption_env():
         'attach_to_streaming_pod',
         'delete_job_pod',
         'requeue_wedged_job',
-        'budget_exhausted',
         'reap_job',
     ]
+    # budget_exhausted is autospec'd: it takes a stall reason, and a call that omits one
+    # would fail only at runtime, on the rare path where the pod is gone.
     with patch.multiple('awx.main.tasks.container_groups', **{t: DEFAULT for t in targets}) as mocks:
-        mocks['find_job_pod'].return_value = _pod()
-        mocks['pod_has_output'].return_value = False
-        mocks['budget_exhausted'].return_value = False
-        mocks['harvest_terminal_pod'].return_value = True
-        yield mocks
+        with patch('awx.main.tasks.container_groups.budget_exhausted', autospec=True) as budget:
+            mocks['budget_exhausted'] = budget
+            mocks['find_job_pod'].return_value = _pod()
+            mocks['pod_has_output'].return_value = False
+            budget.return_value = False
+            mocks['harvest_terminal_pod'].return_value = True
+            yield mocks
 
 
 def test_absent_pod_within_budget_defers(adoption_env):
@@ -361,6 +364,7 @@ def test_absent_pod_past_budget_fails_the_job(adoption_env):
     job = _job()
     assert adopt_container_group_job(job) is True
     assert adoption_env['reap_job'].call_args[0][1] == 'failed'
+    assert adoption_env['budget_exhausted'].call_args[0][1] == 'pod_absent', 'an absent pod needs its own stall clock'
 
 
 def test_waiting_pod_defers_without_touching_the_job(adoption_env):

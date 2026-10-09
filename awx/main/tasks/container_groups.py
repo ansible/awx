@@ -461,7 +461,7 @@ def adopt_container_group_job(job, receptor_ctl=None):
         return True
 
     if state == PodState.ABSENT:
-        if not budget_exhausted(job):
+        if not budget_exhausted(job, 'pod_absent'):
             # The pod may simply not have been created yet when the controller died.
             logger.info(f'{job.log_format}: no container-group pod found yet, deferring adoption')
             return False

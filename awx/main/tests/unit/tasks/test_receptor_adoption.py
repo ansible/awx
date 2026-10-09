@@ -30,10 +30,12 @@ from awx.main.tasks.receptor import (
     _CountingReader,
     _adopted_finished_at,
     _adoption_stall_budget_exhausted,
+    _adoption_stall_key,
     _finalize_adopted_job,
     _get_adoption_exit_code,
     _get_or_create_private_data_dir,
     adopt_remote_work,
+    clear_adoption_stall,
     receptor_config_exists,
     reattach_to_work_unit,
     should_update_config,
@@ -2434,44 +2436,123 @@ def test_reattach_stalled_stream_past_budget_finalizes_from_unit_status(
     assert 'could not be retrieved' in explanation
 
 
-@patch('awx.main.tasks.receptor.settings')
-def test_adoption_stall_budget_exhausted_uses_last_event_time(mock_settings):
-    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+def _stall_job(last_event_ago=None, started_ago=None):
     job = Mock()
-    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': now() - timedelta(seconds=7200)}
-
-    assert _adoption_stall_budget_exhausted(job) is True
-
-
-@patch('awx.main.tasks.receptor.settings')
-def test_adoption_stall_budget_not_exhausted_for_recent_event(mock_settings):
-    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
-    job = Mock()
-    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': now() - timedelta(seconds=60)}
-
-    assert _adoption_stall_budget_exhausted(job) is False
+    job.id = 21
+    job.work_unit_id = 'unit-quiet'
+    created_max = now() - timedelta(seconds=last_event_ago) if last_event_ago is not None else None
+    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': created_max}
+    job.started = now() - timedelta(seconds=started_ago) if started_ago is not None else None
+    return job
 
 
-@patch('awx.main.tasks.receptor.settings')
-def test_adoption_stall_budget_falls_back_to_job_started(mock_settings):
-    """A job that never emitted an event is measured from when it started."""
-    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
-    job = Mock()
-    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': None}
-    job.started = now() - timedelta(seconds=7200)
+@pytest.fixture
+def stall_cache():
+    from django.core.cache import cache
 
-    assert _adoption_stall_budget_exhausted(job) is True
+    cache.clear()
+    yield cache
+    cache.clear()
 
 
-@patch('awx.main.tasks.receptor.settings')
-def test_adoption_stall_budget_never_exhausted_without_timestamps(mock_settings):
-    """No clock to measure against — defer rather than finalize on a guess."""
-    mock_settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
-    job = Mock()
-    job.get_event_queryset.return_value.aggregate.return_value = {'created__max': None}
-    job.started = None
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_first_deferral_of_a_quiet_job_is_not_exhausted(stall_cache):
+    """quiet-deadline: a healthy job in a long silent task must survive its first failed adoption.
 
-    assert _adoption_stall_budget_exhausted(job) is False
+    Its last event is far older than the timeout because the playbook is quiet, not because
+    adoption has been failing. The clock starts at the first deferral.
+    """
+    job = _stall_job(last_event_ago=208, started_ago=211)
+
+    assert _adoption_stall_budget_exhausted(job, 'unreachable') is False
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_exhausted_after_continuous_stall(stall_cache):
+    job = _stall_job(last_event_ago=7200)
+    stall_cache.set(_adoption_stall_key(job, 'unreachable'), now() - timedelta(seconds=121))
+
+    assert _adoption_stall_budget_exhausted(job, 'unreachable') is True
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_not_exhausted_within_timeout_of_first_deferral(stall_cache):
+    job = _stall_job(last_event_ago=7200)
+    stall_cache.set(_adoption_stall_key(job, 'unreachable'), now() - timedelta(seconds=60))
+
+    assert _adoption_stall_budget_exhausted(job, 'unreachable') is False
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_first_deferral_is_remembered(stall_cache):
+    """Later deferrals measure from the first one, not from themselves."""
+    job = _stall_job(last_event_ago=7200)
+    _adoption_stall_budget_exhausted(job, 'unreachable')
+    first = stall_cache.get(_adoption_stall_key(job, 'unreachable'))
+
+    _adoption_stall_budget_exhausted(job, 'unreachable')
+
+    assert first is not None
+    assert stall_cache.get(_adoption_stall_key(job, 'unreachable')) == first
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_newer_event_restarts_the_clock(stall_cache):
+    """Events persisted after the first deferral prove progress; measure from the newest."""
+    job = _stall_job(last_event_ago=30)
+    stall_cache.set(_adoption_stall_key(job, 'stall'), now() - timedelta(seconds=7200))
+
+    assert _adoption_stall_budget_exhausted(job, 'stall') is False
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_clocks_are_per_reason(stall_cache):
+    """A successful status query precedes every stalled-stream retry; it must not reset the stall clock."""
+    job = _stall_job(last_event_ago=7200)
+    stall_cache.set(_adoption_stall_key(job, 'stall'), now() - timedelta(seconds=7200))
+
+    clear_adoption_stall(job, 'unreachable')
+
+    assert _adoption_stall_budget_exhausted(job, 'stall') is True
+    assert _adoption_stall_budget_exhausted(job, 'unreachable') is False
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_clocks_are_per_work_unit(stall_cache):
+    """A relaunch (new work unit) for the same job id does not inherit an old clock."""
+    job = _stall_job(last_event_ago=7200)
+    stall_cache.set(_adoption_stall_key(job, 'unreachable'), now() - timedelta(seconds=7200))
+    job.work_unit_id = 'unit-new'
+
+    assert _adoption_stall_budget_exhausted(job, 'unreachable') is False
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_clear_adoption_stall_restarts_the_clock(stall_cache):
+    """Fail, recover, fail again: the second outage gets the full timeout."""
+    job = _stall_job(last_event_ago=7200)
+    stall_cache.set(_adoption_stall_key(job, 'unreachable'), now() - timedelta(seconds=7200))
+
+    clear_adoption_stall(job, 'unreachable')
+
+    assert _adoption_stall_budget_exhausted(job, 'unreachable') is False
+
+
+@override_settings(HADR_JOB_ADOPTION_TIMEOUT=120)
+def test_adoption_stall_budget_defers_when_cache_is_unavailable():
+    """No clock to measure against: defer rather than fail a job on a guess."""
+    job = _stall_job(last_event_ago=7200)
+    with patch('awx.main.tasks.receptor.cache') as mock_cache:
+        mock_cache.add.side_effect = ConnectionError('redis down')
+        mock_cache.get.side_effect = ConnectionError('redis down')
+        assert _adoption_stall_budget_exhausted(job, 'unreachable') is False
+
+
+def test_clear_adoption_stall_tolerates_cache_errors():
+    job = _stall_job()
+    with patch('awx.main.tasks.receptor.cache') as mock_cache:
+        mock_cache.delete.side_effect = ConnectionError('redis down')
+        clear_adoption_stall(job, 'unreachable')
 
 
 @patch('awx.main.tasks.receptor.connections')

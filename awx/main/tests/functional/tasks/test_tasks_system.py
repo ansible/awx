@@ -44,6 +44,24 @@ from django.utils.timezone import now, timedelta
 
 from awx.main.models import Instance, Inventory, Job, Organization, ReceptorAddress, InstanceLink, WorkflowJob
 from awx.main.models.inventory import Group, Host
+from awx.main.tasks.receptor import _adoption_stall_key
+
+
+@pytest.fixture(autouse=True)
+def _clear_adoption_stall_clocks():
+    # Adoption stall clocks live in the cache, which outlives a test's DB transaction.
+    from django.core.cache import cache
+
+    cache.clear()
+    yield
+    cache.clear()
+
+
+def _seed_adoption_stall(job, reason, seconds_ago):
+    """Pretend adoption of `job` was first deferred for `reason` this long ago."""
+    from django.core.cache import cache
+
+    cache.set(_adoption_stall_key(job, reason), now() - timedelta(seconds=seconds_ago))
 
 
 @pytest.mark.django_db
@@ -934,8 +952,8 @@ def test_adoption_skips_still_running_work_unit(me_inst):
 def test_adoption_timeout_fails_job(me_inst, settings):
     """Jobs orphaned longer than HADR_JOB_ADOPTION_TIMEOUT are reaped if status query fails.
 
-    Timeout is measured from the last event received, not from job.started.
-    Unit status must be unreachable (query fails) to trigger timeout.
+    Timeout is measured from the first failed adoption attempt (seeded here), not from
+    job.started. Unit status must be unreachable (query fails) to trigger timeout.
     """
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     from awx.main.tasks.system import adopt_job_async
@@ -946,6 +964,7 @@ def test_adoption_timeout_fails_job(me_inst, settings):
         work_unit_id='old-unit',
         started=now() - timedelta(seconds=7200),
     )
+    _seed_adoption_stall(job, 'unreachable', 7200)
     mock_ctl = MagicMock()
     # Status query fails (network error, unit unreachable)
     # This is the ONLY case where timeout should trigger
@@ -956,6 +975,52 @@ def test_adoption_timeout_fails_job(me_inst, settings):
     job.refresh_from_db()
     assert job.status == 'failed', 'timed-out job should be reaped by adopt_job_async'
     assert 'HADR_JOB_ADOPTION_TIMEOUT' in job.job_explanation
+
+
+@pytest.mark.django_db
+def test_adoption_first_unreachable_query_spares_a_quiet_job(me_inst, settings):
+    """quiet-deadline: one failed status query must not fail a healthy job in a long silent task.
+
+    Its last event is old because the playbook is quiet. Before the fix the orphan age was
+    measured from that event, so the first transient error after a controller restart reaped
+    the job and cancelled its still-running work unit.
+    """
+    from awx.main.models import JobEvent
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 120
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='quiet-unit', started=now() - timedelta(seconds=211))
+    JobEvent.objects.create(job=job, counter=10, event='runner_on_ok', job_created=job.created)
+    JobEvent.objects.filter(job=job).update(created=now() - timedelta(seconds=208))
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.side_effect = RuntimeError('transient receptor error')
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit'):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    job.refresh_from_db()
+    assert job.status == 'running', 'a single failed status query must defer, not fail the job'
+    assert not any('work cancel' in str(c) for c in mock_ctl.simple_command.call_args_list), 'the live work unit must not be cancelled'
+
+
+@pytest.mark.django_db
+def test_adoption_reachable_unit_restarts_the_unreachable_clock(me_inst, settings):
+    """Fail, recover, fail again: the second outage gets the full timeout."""
+    from django.core.cache import cache
+
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 120
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='flaky-unit', started=now() - timedelta(seconds=7200))
+    _seed_adoption_stall(job, 'unreachable', 60)
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.return_value = {'StateName': 'Running'}
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reattach.assert_called_once()
+    assert cache.get(_adoption_stall_key(job, 'unreachable')) is None
 
 
 @pytest.mark.django_db
@@ -1676,6 +1741,7 @@ def test_adopt_job_async_reaps_on_timeout(me_inst, settings):
         work_unit_id='unit-old',
         started=now() - timedelta(seconds=7200),
     )
+    _seed_adoption_stall(job, 'unreachable', 7200)
 
     mock_ctl = MagicMock()
     # Simulate status lookup failure (network error, unit unreachable)
@@ -1708,6 +1774,7 @@ def test_adopt_job_async_closes_receptor_ctl_when_reap_raises(me_inst, settings)
         work_unit_id='unit-reap-raises',
         started=now() - timedelta(seconds=7200),
     )
+    _seed_adoption_stall(job, 'unreachable', 7200)
 
     mock_ctl = MagicMock()
     mock_ctl.simple_command.side_effect = RuntimeError('work unit unreachable')
@@ -2051,6 +2118,7 @@ class TestAdoptionCapacityDeadlock:
     def test_a_deferred_job_past_the_deadline_is_failed_and_releases_its_capacity(self, me_inst, settings):
         settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
         job = self._running_job(me_inst, started_ago_seconds=7200)
+        _seed_adoption_stall(job, 'capacity', 7200)
 
         with (
             patch('awx.main.tasks.system._adoption_slot_available', return_value=False),
@@ -2062,6 +2130,33 @@ class TestAdoptionCapacityDeadlock:
         assert job.status == 'failed'
         # No receptor round trip: there was never a slot in which to make one.
         mock_ctl.assert_not_called()
+
+    def test_first_capacity_deferral_of_a_long_running_job_is_left_running(self, me_inst, settings):
+        """Started 2h ago with no recent events is not 2h of waiting for capacity."""
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+        job = self._running_job(me_inst, started_ago_seconds=7200)
+
+        with patch('awx.main.tasks.system._adoption_slot_available', return_value=False):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+        job.refresh_from_db()
+        assert job.status == 'running'
+
+    def test_a_free_slot_restarts_the_capacity_clock(self, me_inst, settings):
+        from django.core.cache import cache
+
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+        job = self._running_job(me_inst, started_ago_seconds=7200)
+        _seed_adoption_stall(job, 'capacity', 600)
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=True),
+            patch('awx.main.tasks.system.get_receptor_ctl'),
+            patch('awx.main.tasks.system.reattach_to_work_unit'),
+        ):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+        assert cache.get(_adoption_stall_key(job, 'capacity')) is None
 
     def test_a_deferred_job_within_the_deadline_is_left_running(self, me_inst, settings):
         settings.HADR_JOB_ADOPTION_TIMEOUT = 3600

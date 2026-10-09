@@ -76,6 +76,7 @@ from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
     _adoption_stall_budget_exhausted,
     administrative_workunit_reaper,
+    clear_adoption_stall,
     get_adoption_unit_status,
     get_receptor_ctl,
     reattach_to_work_unit,
@@ -1435,12 +1436,13 @@ def adopt_job_async(job_id, source_controller=None):
         # the controller full — the same condition that parked it. Without a deadline the
         # backlog only ever grows (observed: 570 jobs, still climbing after 100+ minutes).
         # Failing the oldest releases capacity for the rest.
-        if _adoption_stall_budget_exhausted(job):
+        if _adoption_stall_budget_exhausted(job, 'capacity'):
             logger.error(f'Job {job_id} could not be adopted within HADR_JOB_ADOPTION_TIMEOUT while this controller was out of control capacity, failing')
             reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT waiting for control capacity to adopt it')
             return
         logger.info(f'Adoption deferred for job {job_id}: this controller is out of control capacity, retrying next heartbeat')
         return
+    clear_adoption_stall(job, 'capacity')
 
     # Single try/finally so the control socket is closed on every exit path, including
     # the timeout branch below, which returns early.
@@ -1451,9 +1453,10 @@ def adopt_job_async(job_id, source_controller=None):
         # no StateName at all, and terminal units (Succeeded/Failed/Cancelled) still hold
         # results to harvest. Gating on the state value would reap both.
         # Pending/Running are reachable like any other answered query, so they are exempt too.
-        # orphaned_since is only as fresh as the last persisted event, and a job that legitimately
-        # runs for hours between events would look orphaned on that measure. Reaping it would
-        # kill a healthy job; its real bound is the EE finishing, which the stream observes.
+        # A reachable unit's real bound is the EE finishing, which the stream observes.
+        # An unreachable one is failed only after HADR_JOB_ADOPTION_TIMEOUT of continuous
+        # unreachability since the first failed query: a single transient error, or a playbook
+        # that is merely quiet, must not kill a healthy job.
         try:
             # Local receptor first, remote adopt only if it does not know the unit.
             # Reused in reattach_to_work_unit so adoption never queries the unit twice.
@@ -1463,6 +1466,8 @@ def adopt_job_async(job_id, source_controller=None):
         except Exception:
             unit_status = None
             unit_reachable = False
+        if unit_reachable:
+            clear_adoption_stall(job, 'unreachable')
 
         # MAX(created) is only needed to decide the timeout, and JobEvent has no index on
         # created — it heap-fetches every event row for the job. Keep it inside the unreachable
@@ -1485,8 +1490,8 @@ def adopt_job_async(job_id, source_controller=None):
                     logger.exception(f'adopt_job_async: container-group adoption failed for job {job.id}')
                 return
 
-            if _adoption_stall_budget_exhausted(job):
-                logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
+            if _adoption_stall_budget_exhausted(job, 'unreachable'):
+                logger.error(f'Job {job.id} (unit={job.work_unit_id}) unreachable for >{settings.HADR_JOB_ADOPTION_TIMEOUT}s, failing')
                 # Best effort only: we only get here because the unit is unreachable, so the
                 # cancel is expected to fail too. Not worth a traceback. The unit is not leaked —
                 # awx_receptor_workunit_reaper releases units for any job outside ACTIVE_STATES,

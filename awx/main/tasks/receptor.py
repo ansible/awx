@@ -16,6 +16,7 @@ import yaml
 
 # Django
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connections
 from django.db.models import Exists, Max, OuterRef
 from django.utils.dateparse import parse_datetime
@@ -1326,21 +1327,51 @@ def _compute_adoption_dedup(job):
     return safe_threshold, collision_zone, safe_threshold + persisted_above
 
 
-def _adoption_stall_budget_exhausted(job):
-    """Has this job gone without new events for longer than HADR_JOB_ADOPTION_TIMEOUT?
+def _adoption_stall_key(job, reason):
+    return f'awx_adoption_stall_{reason}_{job.id}_{job.work_unit_id}'
 
-    Bounds how long a stalled results stream may be retried. Reuses the orphan-age
-    measure from adopt_job_async's unreachable-unit branch so the two ways an adoption
-    can fail to make progress converge on one deadline instead of two that can disagree.
 
-    With no timestamp to measure from there is no deadline to be past, so the caller
-    keeps deferring rather than finalizing on a guess.
+def clear_adoption_stall(job, reason):
+    """Adoption made progress past `reason`; a later stall of the same kind gets a fresh budget."""
+    try:
+        cache.delete(_adoption_stall_key(job, reason))
+    except Exception as exc:
+        logger.warning(f'Could not clear adoption stall clock {reason} for job {job.id}: {exc}')
+
+
+def _adoption_stall_budget_exhausted(job, reason):
+    """Has adoption of this job been stalled on `reason` for longer than HADR_JOB_ADOPTION_TIMEOUT?
+
+    Bounds how long an adoption that cannot make progress is retried. `reason` is one of
+    'capacity', 'unreachable' or 'stall' and each has its own clock: a successful status query
+    precedes every stalled-stream retry, so a shared clock would never let the stall converge.
+
+    The clock starts at the first deferral this controller records, not at the job's last
+    event. A playbook can legitimately run for longer than the timeout without emitting an
+    event, and measuring from that event failed such a job on its very first transient error
+    after a controller restart. An event persisted after the first deferral proves progress,
+    so the newer of the two is used.
+
+    The first-deferral time lives in this controller's cache. Losing it (cache restart,
+    eviction, another controller adopting) only restarts the clock, which defers longer but
+    never fails a job early. For the same reason, with no clock to read, the caller defers.
     """
-    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    orphaned_since = last_event_time or job.started
-    if not orphaned_since:
+    timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
+    key = _adoption_stall_key(job, reason)
+    try:
+        # add() is a no-op when the key exists, so the first deferral's time is kept.
+        # The TTL only bounds leftovers; it outlives the timeout so the deadline is reached first.
+        cache.add(key, now(), timeout=timeout * 2 + 3600)
+        stalled_since = cache.get(key)
+    except Exception as exc:
+        logger.warning(f'Could not read adoption stall clock {reason} for job {job.id}, deferring: {exc}')
         return False
-    return orphaned_since < now() - timedelta(seconds=settings.HADR_JOB_ADOPTION_TIMEOUT)
+    if stalled_since is None:
+        return False
+    last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
+    if last_event_time and last_event_time > stalled_since:
+        stalled_since = last_event_time
+    return stalled_since < now() - timedelta(seconds=timeout)
 
 
 def get_adoption_unit_status(receptor_ctl, job):
@@ -1522,8 +1553,9 @@ def reattach_to_work_unit(job, receptor_ctl, unit_status=None, pod_name=None):
         # transport between here and there is down. Deferring keeps the job 'running'
         # with its unit intact and the heartbeat re-queues it, so a later attempt can
         # stream the full event set rather than finalizing on a truncated one. Bounded
-        # by the orphan age so a path that never recovers still converges.
-        if not _adoption_stall_budget_exhausted(job):
+        # by HADR_JOB_ADOPTION_TIMEOUT from the first stall so a path that never recovers
+        # still converges.
+        if not _adoption_stall_budget_exhausted(job, 'stall'):
             logger.info(f'Job {job.id}: results stream for unit {unit_id} stalled, deferring adoption for retry on next heartbeat')
             shutil.rmtree(private_data_dir, ignore_errors=True)
             return False
