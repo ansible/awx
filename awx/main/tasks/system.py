@@ -1574,8 +1574,19 @@ def awx_receptor_workunit_reaper():
         jobs_with_unreleased_receptor_units = jobs_with_unreleased_receptor_units.exclude(status__in=ERROR_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        # receptor can keep listing a unit whose remote side has already forgotten it, and both
+        # commands then raise. UnifiedJob orders by id, so letting that escape wedges every later
+        # pass on the same unit: the units behind it leak and administrative_workunit_reaper below
+        # never runs. The cancel is only the precaution the docstring describes, so it is guarded
+        # separately -- a remote that refuses it still has local files to release.
+        try:
+            receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
+        except Exception as exc:
+            logger.warning(f"Could not cancel receptor work unit {job.work_unit_id} for {job.log_format}: {exc}")
+        try:
+            receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        except Exception as exc:
+            logger.warning(f"Could not release receptor work unit {job.work_unit_id} for {job.log_format}: {exc}")
 
     administrative_workunit_reaper(receptor_work_list)
 

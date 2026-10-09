@@ -34,6 +34,7 @@ from awx.main.tasks.system import (
     _control_pod_is_gone,
     _run_dispatch_startup_common,
     adopt_job_async,
+    awx_receptor_workunit_reaper,
     announce_shutdown,
     sweep_orphaned_jobs_now,
 )
@@ -3245,3 +3246,79 @@ class TestMarkOfflineBackdate:
 
         assert inst.node_state == Instance.States.UNAVAILABLE
         assert not inst.is_lost(), 'last_seen must be unchanged when backdate_last_seen is not set'
+
+
+@pytest.mark.django_db
+class TestWorkunitReaperResilience:
+    """The reaper walks every unit receptor still holds and releases the ones whose job is finished.
+
+    Receptor can report a unit in `work list` whose remote side has already forgotten it, and
+    `work cancel` on such a unit makes receptorctl raise. `UnifiedJob` orders by id, so an
+    unguarded raise aborts the same pass every time: every unit behind the forgotten one is
+    never released and `administrative_workunit_reaper` never runs. Observed on the local
+    cluster as 2035 identical `unknown work unit awx12G3Xi7kY` errors, 9 distinct wedged ids,
+    and 20 unreleased units going back to job 1 — whose unit sorts first.
+    """
+
+    # Created in this order, so the forgotten unit is the one the queryset reaches first.
+    UNITS = ('unit-forgotten', 'unit-second', 'unit-third')
+
+    def _finished_jobs(self):
+        for unit_id in self.UNITS:
+            Job.objects.create(status='successful', work_unit_id=unit_id, controller_node='awx-1')
+
+    @contextmanager
+    def _receptor_raising_on(self, failing_command):
+        """A receptor that answers `work list` with every unit and raises for one command."""
+        calls = []
+
+        def simple_command(command):
+            calls.append(command)
+            if command == failing_command:
+                raise RuntimeError(f'error cancelling remote unit:  unknown work unit {command.split()[-1]}')
+            if command == 'work list':
+                return {unit_id: {} for unit_id in self.UNITS}
+            return {}
+
+        ctl = MagicMock()
+        ctl.simple_command.side_effect = simple_command
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
+            with patch('awx.main.tasks.system.administrative_workunit_reaper') as admin:
+                yield calls, admin
+
+    def test_a_unit_receptor_has_forgotten_does_not_strand_the_units_behind_it(self, settings):
+        settings.RECEPTOR_RELEASE_WORK = True
+        settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
+        self._finished_jobs()
+
+        with self._receptor_raising_on('work cancel unit-forgotten') as (calls, admin):
+            awx_receptor_workunit_reaper()
+
+        assert 'work release unit-second' in calls
+        assert 'work release unit-third' in calls
+        admin.assert_called_once()
+
+    def test_a_release_that_raises_does_not_strand_the_units_behind_it(self, settings):
+        settings.RECEPTOR_RELEASE_WORK = True
+        settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
+        self._finished_jobs()
+
+        with self._receptor_raising_on('work release unit-forgotten') as (calls, admin):
+            awx_receptor_workunit_reaper()
+
+        assert 'work release unit-second' in calls
+        assert 'work release unit-third' in calls
+        admin.assert_called_once()
+
+    def test_a_cancel_that_raises_still_releases_that_unit(self, settings):
+        """`work cancel` is only the precaution the docstring describes; the release is the point.
+        A remote that has forgotten the unit refuses the cancel but the local files still need to
+        go, so the cancel failure must not skip this unit's own release."""
+        settings.RECEPTOR_RELEASE_WORK = True
+        settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
+        self._finished_jobs()
+
+        with self._receptor_raising_on('work cancel unit-forgotten') as (calls, admin):
+            awx_receptor_workunit_reaper()
+
+        assert 'work release unit-forgotten' in calls

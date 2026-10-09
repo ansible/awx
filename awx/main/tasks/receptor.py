@@ -275,7 +275,12 @@ def administrative_workunit_reaper(work_list=None):
             if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
                 continue  # do not want to touch active work units
             logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
-        receptor_ctl.simple_command(f"work release {unit_id}")
+        # A unit the remote has forgotten makes this raise; without the guard the first such unit
+        # ends the loop and every unit behind it leaks on this and every later pass.
+        try:
+            receptor_ctl.simple_command(f"work release {unit_id}")
+        except Exception as exc:
+            logger.warning(f'Could not release orphaned work unit {unit_id}: {exc}')
 
 
 class RemoteJobError(RuntimeError):
