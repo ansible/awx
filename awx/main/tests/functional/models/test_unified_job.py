@@ -1,4 +1,5 @@
 import itertools
+import threading
 import pytest
 from uuid import uuid4
 
@@ -294,6 +295,49 @@ class TestUpdateParentInstance:
         self.run_update(project, status='failed')
         assert project.last_job == pu_check
         assert project.status == 'successful'
+
+    def test_skip_locked_updates_when_row_free(self, job_template):
+        job = job_template.jobs.create(status='new')
+        job.status = 'successful'
+        job.failed = False
+        job._update_parent_instance(skip_locked=True)
+        job_template.refresh_from_db()
+        assert job_template.last_job == job
+
+    def test_skip_locked_skips_when_row_locked(self, job_template):
+        job = job_template.jobs.create(status='new')
+        job.status = 'successful'
+        job.failed = False
+
+        lock_acquired = threading.Event()
+        proceed = threading.Event()
+
+        def hold_lock():
+            from django.db import connections
+
+            conn = connections['default']
+            cursor = conn.cursor()
+            cursor.execute('BEGIN')
+            cursor.execute(
+                'SELECT 1 FROM main_unifiedjobtemplate WHERE id = %s FOR UPDATE',
+                [job_template.pk],
+            )
+            lock_acquired.set()
+            proceed.wait(timeout=10)
+            cursor.execute('ROLLBACK')
+            conn.close()
+
+        t = threading.Thread(target=hold_lock)
+        t.start()
+        lock_acquired.wait(timeout=10)
+
+        try:
+            job._update_parent_instance(skip_locked=True)
+            job_template.refresh_from_db()
+            assert job_template.last_job is None
+        finally:
+            proceed.set()
+            t.join(timeout=10)
 
 
 @pytest.mark.django_db
