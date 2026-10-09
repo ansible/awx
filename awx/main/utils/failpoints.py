@@ -70,6 +70,7 @@ ACTIONS = ('pause', 'sleep', 'raise', 'kill', 'kill_parent')
 
 TABLE = 'awx_failpoint'
 HIT_TABLE = 'awx_failpoint_hit'
+SNAPSHOT_TABLE = 'awx_failpoint_snapshot'
 
 # How long an armed-set snapshot is trusted before it is re-read. Keeps the cost of a hot
 # failpoint (callback.event) to a dict lookup between refreshes.
@@ -131,6 +132,17 @@ def ensure_tables():
                 fired boolean NOT NULL,
                 action text,
                 at timestamptz NOT NULL DEFAULT now()
+            )'''
+        )
+        cursor.execute(
+            f'''
+            CREATE TABLE IF NOT EXISTS {SNAPSHOT_TABLE} (
+                kind text NOT NULL,
+                key text NOT NULL,
+                data jsonb NOT NULL,
+                node text NOT NULL,
+                at timestamptz NOT NULL DEFAULT now(),
+                PRIMARY KEY (kind, key)
             )'''
         )
     _table_ready = True
@@ -258,6 +270,35 @@ def failpoint(name, **ctx):
         os.kill(os.getpid(), signal.SIGKILL)
     elif action == 'kill_parent':
         os.kill(os.getppid(), signal.SIGKILL)
+
+
+def record_snapshot(kind, key, data):
+    """Keep a reference copy of some state for the invariants to compare against later.
+
+    Inert unless failpoints are enabled. The first write for a (kind, key) wins, so a job's
+    snapshot stays the one taken at job start even if adoption rebuilds the same state.
+    Never raises: a test aid must not break the job it is observing.
+    """
+    if not enabled():
+        return
+    try:
+        ensure_tables()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f'INSERT INTO {SNAPSHOT_TABLE} (kind, key, data, node) VALUES (%s, %s, %s, %s) ON CONFLICT (kind, key) DO NOTHING',
+                [kind, str(key), json.dumps(data, default=str), settings.CLUSTER_HOST_ID],
+            )
+    except Exception:
+        logger.exception(f'Could not record {kind} snapshot for {key}')
+
+
+def get_snapshot(kind, key):
+    """Return the recorded snapshot data, or None if there is none."""
+    ensure_tables()
+    with connection.cursor() as cursor:
+        cursor.execute(f'SELECT data FROM {SNAPSHOT_TABLE} WHERE kind = %s AND key = %s', [kind, str(key)])
+        row = cursor.fetchone()
+    return _json(row[0]) if row else None
 
 
 # --- Control API, used by the management command and by tests ---------------------------

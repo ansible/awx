@@ -154,3 +154,16 @@ def test_bad_match_never_crashes_call_site(settings):
     with _arm_in_memory({'heartbeat.start': 'not-a-dict'}), mock.patch.object(failpoints, '_record_hit') as record:
         failpoints.failpoint('heartbeat.start')
     record.assert_not_called()
+
+
+def test_record_snapshot_is_inert_when_disabled(settings):
+    settings.AWX_FAILPOINTS_ENABLED = False
+    with mock.patch.object(failpoints, 'ensure_tables') as ensure:
+        failpoints.record_snapshot('host_map', 1, {'h1': 1})
+    ensure.assert_not_called()
+
+
+def test_record_snapshot_never_raises(settings):
+    settings.AWX_FAILPOINTS_ENABLED = True
+    with mock.patch.object(failpoints, 'ensure_tables', side_effect=RuntimeError('db down')):
+        failpoints.record_snapshot('host_map', 1, {'h1': 1})
