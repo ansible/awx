@@ -1,4 +1,5 @@
 import json
+import time
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -38,8 +39,11 @@ class Command(BaseCommand):
         p.add_argument('--seconds', type=float, help='sleep: how long to sleep')
         p.add_argument('--exception', help='raise: dotted exception class to raise instead of FailpointError')
 
-        p = sub.add_parser('release', help='Let paused callers of a failpoint continue')
-        p.add_argument('name')
+        p = sub.add_parser('release', help='Let paused callers of one or more failpoints continue (one UPDATE)')
+        p.add_argument('names', nargs='+', metavar='name')
+        when = p.add_mutually_exclusive_group()
+        when.add_argument('--in', dest='in_seconds', type=float, help='Resume every holder together, this many seconds from now (at least 0.5)')
+        when.add_argument('--at', type=float, help='Resume every holder together at this epoch time (seconds)')
 
         p = sub.add_parser('disarm', help='Remove a failpoint, or all with --all')
         p.add_argument('name', nargs='?')
@@ -74,8 +78,13 @@ class Command(BaseCommand):
                 raise CommandError(str(exc))
             self.stdout.write(f"armed {options['name']}")
         elif cmd == 'release':
-            n = failpoints.release(options['name'])
-            self.stdout.write(f"released {options['name']} ({n} row)")
+            at = options['at']
+            if options['in_seconds'] is not None:
+                if options['in_seconds'] < 2 * failpoints.PAUSE_POLL_SECONDS:
+                    raise CommandError(f'--in must leave holders time to see the schedule (>= {2 * failpoints.PAUSE_POLL_SECONDS}s)')
+                at = time.time() + options['in_seconds']
+            n = failpoints.release(*options['names'], at=at)
+            self.stdout.write(_dump({'released': options['names'], 'rows': n, 'at': at}))
         elif cmd == 'disarm':
             if not options['name'] and not options['all']:
                 raise CommandError('give a name or --all')

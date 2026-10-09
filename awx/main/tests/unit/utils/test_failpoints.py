@@ -5,6 +5,8 @@ from unittest import mock
 
 import pytest
 import redis
+from django.core.management import call_command
+from django.core.management.base import CommandError
 
 from awx.main.utils import failpoints
 
@@ -104,7 +106,10 @@ def test_pause_action_delegates(settings):
     with _arm_in_memory({'heartbeat.start': {}}), mock.patch.object(failpoints, '_record_hit', return_value=('pause', {'timeout': 5}, 'gen-1')):
         with mock.patch.object(failpoints, '_pause') as pause:
             failpoints.failpoint('heartbeat.start')
-    pause.assert_called_once_with('heartbeat.start', {'timeout': 5}, 'gen-1')
+    pause.assert_called_once()
+    name, arg, armed_at, ctx = pause.call_args.args
+    assert (name, arg, armed_at) == ('heartbeat.start', {'timeout': 5}, 'gen-1')
+    assert {'node', 'pid'} <= set(ctx)
 
 
 def test_hit_not_fired_continues(settings):
@@ -214,9 +219,9 @@ class _Rows:
 @pytest.mark.parametrize(
     'rows, polls',
     [
-        ([(False, 'gen-1'), (True, 'gen-1')], 2),  # released
-        ([(False, 'gen-1'), None], 2),  # disarmed
-        ([(False, 'gen-1'), (False, 'gen-1'), (False, 'gen-2')], 3),  # re-armed: the hold moves on
+        ([(False, 'gen-1', None), (True, 'gen-1', None)], 2),  # released
+        ([(False, 'gen-1', None), None], 2),  # disarmed
+        ([(False, 'gen-1', None), (False, 'gen-1', None), (False, 'gen-2', None)], 3),  # re-armed: the hold moves on
     ],
 )
 def test_pause_ends_on_release_disarm_or_rearm(rows, polls):
@@ -227,7 +232,7 @@ def test_pause_ends_on_release_disarm_or_rearm(rows, polls):
 
 
 def test_pause_without_generation_ignores_rearm():
-    cursor = _Rows([(False, 'gen-2'), (True, 'gen-2')])
+    cursor = _Rows([(False, 'gen-2', None), (True, 'gen-2', None)])
     with mock.patch.object(failpoints.connection, 'cursor', return_value=cursor), mock.patch.object(failpoints.time, 'sleep'):
         failpoints._pause('callback.event', {'timeout': 60})
     assert cursor.polls == 2
@@ -244,3 +249,84 @@ def test_record_snapshot_never_raises(settings):
     settings.AWX_FAILPOINTS_ENABLED = True
     with mock.patch.object(failpoints, 'ensure_tables', side_effect=RuntimeError('db down')):
         failpoints.record_snapshot('host_map', 1, {'h1': 1})
+
+
+def test_pause_sleeps_until_a_scheduled_release():
+    """A release scheduled for an instant: the holder sleeps until exactly that instant."""
+    cursor = _Rows([(False, 'gen-1', None), (True, 'gen-1', 1000.75)])
+    with (
+        mock.patch.object(failpoints.connection, 'cursor', return_value=cursor),
+        mock.patch.object(failpoints.time, 'sleep') as sleep,
+        mock.patch.object(failpoints.time, 'time', return_value=1000.25),
+    ):
+        failpoints._pause('sweep.before_claim', {'timeout': 60}, 'gen-1')
+    assert [c.args[0] for c in sleep.call_args_list] == [failpoints.PAUSE_POLL_SECONDS, 0.5]
+
+
+def test_pause_past_schedule_resumes_at_once():
+    cursor = _Rows([(True, 'gen-1', 1000.0)])
+    with (
+        mock.patch.object(failpoints.connection, 'cursor', return_value=cursor),
+        mock.patch.object(failpoints.time, 'sleep') as sleep,
+        mock.patch.object(failpoints.time, 'time', return_value=1000.2),
+    ):
+        failpoints._pause('sweep.before_claim', {'timeout': 60}, 'gen-1')
+    sleep.assert_not_called()
+
+
+class _Recorder:
+    def __init__(self, rowcount=0):
+        self.calls = []
+        self.rowcount = rowcount
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, params=None):
+        self.calls.append((sql, params))
+
+
+def test_resume_records_lateness_as_unfired_hit():
+    cursor = _Recorder()
+    with mock.patch.object(failpoints.connection, 'cursor', return_value=cursor), mock.patch.object(failpoints.time, 'time', return_value=1000.002):
+        failpoints._resume_at('sweep.before_claim', 1000.0, {'node': 'awx-3', 'pid': 7, 'job_id': 5})
+    ((sql, params),) = cursor.calls
+    assert sql.startswith(f'INSERT INTO {failpoints.HIT_TABLE}')
+    assert params[:3] == ['sweep.before_claim', 'awx-3', 7] and params[4] == 'resumed'
+    assert '"late_ms": 2.0' in params[3]
+
+
+def test_release_several_names_in_one_update():
+    cursor = _Recorder(rowcount=2)
+    with mock.patch.object(failpoints, 'ensure_tables'), mock.patch.object(failpoints.connection, 'cursor', return_value=cursor):
+        n = failpoints.release('lost_instance.before_claim', 'sweep.before_claim', at=1234.5)
+    assert n == 2
+    ((sql, params),) = cursor.calls
+    assert sql.startswith(f'UPDATE {failpoints.TABLE} SET released = true, release_at = %s WHERE name = ANY(%s)')
+    assert params == [1234.5, ['lost_instance.before_claim', 'sweep.before_claim']]
+
+
+def test_release_now_clears_any_schedule():
+    cursor = _Recorder(rowcount=1)
+    with mock.patch.object(failpoints, 'ensure_tables'), mock.patch.object(failpoints.connection, 'cursor', return_value=cursor):
+        failpoints.release('heartbeat.start')
+    assert cursor.calls[0][1] == [None, ['heartbeat.start']]
+
+
+def test_release_needs_a_name():
+    with pytest.raises(ValueError):
+        failpoints.release()
+
+
+def test_release_command_schedules_one_instant_for_all_names():
+    with mock.patch.object(failpoints, 'release', return_value=2) as release, mock.patch('time.time', return_value=500.0):
+        call_command('failpoint', 'release', 'lost_instance.before_claim', 'sweep.before_claim', '--in', '2', stdout=mock.MagicMock())
+    release.assert_called_once_with('lost_instance.before_claim', 'sweep.before_claim', at=502.0)
+
+
+def test_release_command_rejects_too_short_lead():
+    with pytest.raises(CommandError):
+        call_command('failpoint', 'release', 'sweep.before_claim', '--in', '0.1')

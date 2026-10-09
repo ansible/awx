@@ -26,6 +26,14 @@ Actions:
 
 Pausing:
     A paused caller continues when the failpoint is released, disarmed, or re-armed.
+    ``release`` takes several names and updates them in one statement. With ``--in SECONDS``
+    (or ``--at``) it schedules the release for one wall-clock instant instead of "now": every
+    holder of every named failpoint sees the schedule on its next poll and sleeps until that
+    instant, so callers held on different nodes resume together (within scheduler jitter,
+    since the containers share the host clock) instead of up to one poll interval apart.
+    That is what a claim race needs: two nodes held just before the same UPDATE, let go at once.
+    Each resumed caller logs, and records as an unfired hit with action ``resumed``, how late
+    it woke relative to the scheduled instant.
     Re-arming (arm again with a new --match or --nth) moves a hold forward: callers held by
     the previous arming continue, and the new arming catches the next matching hit. That is
     how a scenario lets exactly N more events through, e.g. callback.event counter=10, then
@@ -135,6 +143,8 @@ def ensure_tables():
                 armed_at timestamptz NOT NULL DEFAULT now()
             )'''
         )
+        # Added after the first version of the table; existing tables gain it here.
+        cursor.execute(f'ALTER TABLE {TABLE} ADD COLUMN IF NOT EXISTS release_at double precision')
         cursor.execute(
             f'''
             CREATE TABLE IF NOT EXISTS {HIT_TABLE} (
@@ -224,20 +234,48 @@ def _record_hit(name, ctx):
     return (action, _json(arg), armed_at) if fire else None
 
 
-def _pause(name, arg, armed_at=None):
-    """Block until this arming is released, disarmed or replaced by a re-arm."""
+def _pause(name, arg, armed_at=None, ctx=None):
+    """Block until this arming is released, disarmed or replaced by a re-arm.
+
+    A release scheduled for an instant (release_at, epoch seconds) is honored by sleeping
+    until that instant, so every holder resumes at the same moment.
+    """
     timeout = float(arg.get('timeout', 600))
     deadline = time.monotonic() + timeout
     logger.warning(f'Failpoint {name}: pausing pid={os.getpid()} until released (timeout {timeout}s)')
     while time.monotonic() < deadline:
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT released, armed_at FROM {TABLE} WHERE name = %s', [name])
+            cursor.execute(f'SELECT released, armed_at, release_at FROM {TABLE} WHERE name = %s', [name])
             row = cursor.fetchone()
-        if row is None or row[0] or (armed_at is not None and row[1] != armed_at):
+        if row is None or (armed_at is not None and row[1] != armed_at):
             logger.warning(f'Failpoint {name}: released pid={os.getpid()}')
+            return
+        if row[0]:
+            _resume_at(name, row[2], ctx)
             return
         time.sleep(PAUSE_POLL_SECONDS)
     logger.error(f'Failpoint {name}: pause timed out after {timeout}s, continuing')
+
+
+def _resume_at(name, release_at, ctx):
+    """Sleep until a scheduled release instant (if any), then log and record how late we woke."""
+    if release_at is not None:
+        delay = float(release_at) - time.time()
+        if delay > 0:
+            time.sleep(delay)
+    woke = time.time()
+    late_ms = round((woke - float(release_at)) * 1000, 3) if release_at is not None else None
+    logger.warning(f'Failpoint {name}: released pid={os.getpid()} scheduled_at={release_at} late_ms={late_ms}')
+    if ctx is None:
+        return
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f'INSERT INTO {HIT_TABLE} (name, node, pid, ctx, fired, action) VALUES (%s, %s, %s, %s, false, %s)',
+                [name, ctx['node'], ctx['pid'], json.dumps(dict(ctx, woke=woke, scheduled_at=release_at, late_ms=late_ms), default=str), 'resumed'],
+            )
+    except Exception:
+        logger.exception(f'Failpoint {name}: could not record the resume')
 
 
 def _exception_class(path):
@@ -281,7 +319,7 @@ def failpoint(name, **ctx):
     action, arg, armed_at = fired
     logger.warning(f'Failpoint {name} fired: action={action} ctx={ctx}')
     if action == 'pause':
-        _pause(name, arg, armed_at)
+        _pause(name, arg, armed_at, ctx)
     elif action == 'sleep':
         time.sleep(float(arg.get('seconds', 1)))
     elif action == 'raise':
@@ -340,16 +378,25 @@ def arm(name, action, match=None, nth=None, times=None, **arg):
             VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT (name) DO UPDATE SET action = EXCLUDED.action, arg = EXCLUDED.arg,
                 match = EXCLUDED.match, nth = EXCLUDED.nth, times = EXCLUDED.times,
-                hits = 0, fired = 0, released = false, armed_at = now()
+                hits = 0, fired = 0, released = false, release_at = NULL, armed_at = now()
             ''',
             [name, action, json.dumps(arg), json.dumps(match or {}), nth, times],
         )
 
 
-def release(name):
+def release(*names, at=None):
+    """Let paused callers of these failpoints continue; return how many rows were released.
+
+    All names are released by one UPDATE. ``at`` (epoch seconds) schedules the release for that
+    instant instead of now: holders that see it sleep until then, so callers held on different
+    nodes, or on different failpoints, resume together. Give it at least a poll interval of lead
+    time (PAUSE_POLL_SECONDS) so every holder has seen it before the instant arrives.
+    """
+    if not names:
+        raise ValueError('release needs at least one failpoint name')
     ensure_tables()
     with connection.cursor() as cursor:
-        cursor.execute(f'UPDATE {TABLE} SET released = true WHERE name = %s', [name])
+        cursor.execute(f'UPDATE {TABLE} SET released = true, release_at = %s WHERE name = ANY(%s)', [at, list(names)])
         return cursor.rowcount
 
 
