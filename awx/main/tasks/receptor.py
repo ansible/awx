@@ -1217,11 +1217,30 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     """
     from awx.main.tasks.jobs import _finalize_job_run
 
-    job.refresh_from_db(fields=['status'])
+    job.refresh_from_db(fields=['status', 'host_status_counts'])
     if job.status != 'running':
         return
 
     final_status = final_status or ('successful' if exit_code == 0 else 'failed')
+
+    # If the stream result says 'failed' but host_status_counts is already set,
+    # the first adoption attempt streamed and processed playbook_on_stats before
+    # raising (e.g., an exception just before finalization). The work unit may have been
+    # released, making the retry stream empty/errored. Use the real playbook outcome
+    # from host_status_counts rather than the unreliable retry stream result.
+    if final_status == 'failed' and job.host_status_counts is not None:
+        corrected = _status_from_host_counts(job.host_status_counts)
+        if corrected != 'failed':
+            logger.info(
+                f'Job {job.id}: stream result was {final_status!r} but host_status_counts '
+                f'({job.host_status_counts}) indicates actual outcome is {corrected!r}; using {corrected!r}'
+            )
+            final_status = corrected
+            exit_code = 0
+            process_phase_failed = False
+            # Drop any error explanation queued by the failed retry stream — it would
+            # be misleading on a job that is about to be marked successful.
+            callback.extra_update_fields.pop('job_explanation', None)
     finished_at, adoption_lag = _adopted_finished_at(job, callback)
     extra = {'finished': finished_at}
     if job.started:
@@ -1346,6 +1365,20 @@ def get_adoption_unit_status(receptor_ctl, job):
             raise
         logger.info(f'Job {job.id}: unit {unit_id} unknown to local receptor, adopting from execution node {job.execution_node}')
         return adopt_remote_work(receptor_ctl, job.execution_node, unit_id)
+
+
+def _status_from_host_counts(host_status_counts):
+    """Derive terminal job status from playbook_on_stats host_status_counts.
+
+    An empty dict means no hosts were matched (e.g. system job or empty inventory),
+    which is a successful outcome. Non-zero 'failures' or 'dark' keys indicate the
+    playbook had task failures or unreachable hosts → failed.
+    """
+    if not host_status_counts:
+        return 'successful'
+    failures = host_status_counts.get('failures', 0) or 0
+    dark = host_status_counts.get('dark', 0) or 0
+    return 'failed' if (failures or dark) else 'successful'
 
 
 def _determine_adoption_status_from_res(res):
