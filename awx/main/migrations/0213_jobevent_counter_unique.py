@@ -1,5 +1,7 @@
 from django.db import migrations, models
 
+from ._sqlite_helper import dbawaremigrations
+
 
 def dedup_jobevent(apps, schema_editor):
     """Remove duplicate (job_id, counter, job_created) rows before adding the unique
@@ -39,7 +41,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(dedup_jobevent, migrations.RunPython.noop),
+        dbawaremigrations.RunPython(
+            dedup_jobevent,
+            migrations.RunPython.noop,
+            sqlite_code=migrations.RunPython.noop,
+        ),
         migrations.AddConstraint(
             model_name='jobevent',
             constraint=models.UniqueConstraint(fields=('job', 'counter', 'job_created'), name='main_jobevent_job_counter_unique'),

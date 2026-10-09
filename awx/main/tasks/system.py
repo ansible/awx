@@ -77,9 +77,12 @@ from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
     _adoption_stall_budget_exhausted,
     administrative_workunit_reaper,
+    reset_receptor_connection,
     clear_adoption_stall,
     get_adoption_unit_status,
     get_receptor_ctl,
+    get_receptor_data_dir,
+    get_receptor_node_id,
     reattach_to_work_unit,
     worker_cleanup,
     worker_info,
@@ -1064,19 +1067,22 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
     if not jobs:
         return
 
+    live_controller_hostnames = set(
+        Instance.objects.filter(
+            node_state__in=(Instance.States.READY, Instance.States.INSTALLED),
+        ).values_list('hostname', flat=True)
+    )
+
     for j in jobs:
         try:
             if j.work_unit_id and j.controller_node == this_inst.hostname:
                 # Queue adoption. Task will claim ownership atomically when it executes.
                 _queue_job_adoption(j.id, this_inst.hostname)
-            elif (
-                j.controller_node != this_inst.hostname
-                and Instance.objects.filter(
-                    hostname=j.controller_node,
-                    node_state__in=(Instance.States.READY, Instance.States.INSTALLED),
-                ).exists()
-            ):
+            elif j.controller_node != this_inst.hostname and j.controller_node in live_controller_hostnames:
                 # Another live controller owns this job; let it handle adoption or reaping
+                pass
+            elif j.work_unit_id:
+                # This node is the execution node but not the controller; orphan sweep adopts it.
                 pass
             else:
                 reaper.reap_job(j, 'failed')
@@ -1583,10 +1589,27 @@ def awx_receptor_workunit_reaper():
             receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
         except Exception as exc:
             logger.warning(f"Could not cancel receptor work unit {job.work_unit_id} for {job.log_format}: {exc}")
+            reset_receptor_connection(receptor_ctl)
         try:
             receptor_ctl.simple_command(f"work release {job.work_unit_id}")
         except Exception as exc:
             logger.warning(f"Could not release receptor work unit {job.work_unit_id} for {job.log_format}: {exc}")
+            reset_receptor_connection(receptor_ctl)
+            # The release failure is most likely because the original controller's local proxy
+            # for this unit has a remote that was already cleaned up during adoption on another
+            # controller. Receptor's in-memory state still lists the unit; `work release` fails
+            # because the remote EE is gone. Remove the directory directly so the disk is freed
+            # and the unit stops appearing in `work list` after the next receptor restart.
+            unit_dir = os.path.join(get_receptor_data_dir(), get_receptor_node_id(), job.work_unit_id)
+            if os.path.isdir(unit_dir):
+                try:
+                    shutil.rmtree(unit_dir)
+                    logger.info(
+                        f"Removed stale receptor work directory {unit_dir} for {job.log_format}: "
+                        f"the remote was already released during adoption on another controller"
+                    )
+                except Exception as exc2:
+                    logger.warning(f"Could not remove stale receptor work directory {unit_dir} for {job.log_format}: {exc2}")
 
     administrative_workunit_reaper(receptor_work_list)
 

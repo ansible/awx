@@ -164,6 +164,29 @@ def get_receptor_sockfile(config_data):
         raise RuntimeError(f'Receptor conf {__RECEPTOR_CONF} does not have control-service entry needed to get sockfile')
 
 
+def _get_receptor_node_stanza(config_data=None):
+    """Return the ``node`` stanza dict from the receptor config, or ``{}`` if absent."""
+    if config_data is None:
+        config_data = read_receptor_config()
+    for section in config_data:
+        for entry_name, entry_data in section.items():
+            if entry_name == 'node' and isinstance(entry_data, dict):
+                return entry_data
+    return {}
+
+
+def get_receptor_data_dir(config_data=None):
+    """Return the receptor data directory (``node.datadir``, default ``/tmp/receptor``)."""
+    return _get_receptor_node_stanza(config_data).get('datadir', '/tmp/receptor')
+
+
+def get_receptor_node_id(config_data=None):
+    """Return the receptor node ID (``node.id``, default: local hostname)."""
+    import socket
+
+    return _get_receptor_node_stanza(config_data).get('id', socket.gethostname())
+
+
 def get_tls_client(config_data, use_stream_tls=None):
     if not use_stream_tls:
         return None
@@ -244,6 +267,22 @@ def get_conn_type(node_name, receptor_ctl):
     return ReceptorConnectionType(node.get('ConnType'))
 
 
+def reset_receptor_connection(receptor_ctl):
+    """Drop the socket so the next command reconnects.
+
+    receptorctl keeps one connection per control object, and `read_and_parse_json` raises on an
+    `ERROR:` reply without draining what follows it. Every later command on that connection then
+    reads the previous command's reply -- on the cluster this showed up as cancels reporting
+    `unknown work unit <some other id>` and releases failing with `Expecting value: line 1
+    column 1 (char 0)`. Any command that raised has to be followed by this or the rest of the
+    pass acts on garbage.
+    """
+    try:
+        receptor_ctl.close()
+    except Exception:
+        logger.debug('Could not close the receptor connection after a failed command', exc_info=True)
+
+
 def administrative_workunit_reaper(work_list=None):
     """
     This releases completed work units that were spawned by actions inside of this module
@@ -281,10 +320,14 @@ def administrative_workunit_reaper(work_list=None):
             receptor_ctl.simple_command(f"work release {unit_id}")
         except Exception as exc:
             logger.warning(f'Could not release orphaned work unit {unit_id}: {exc}')
+            reset_receptor_connection(receptor_ctl)
 
 
 class RemoteJobError(RuntimeError):
     pass
+
+
+_PhaseResult = namedtuple('_PhaseResult', ['status', 'rc'])
 
 
 def run_until_complete(node, timing_data=None, worktype='ansible-runner', ttl='20s', **kwargs):
@@ -735,8 +778,7 @@ class AWXReceptorJob:
                         resultfile.close()
                     except Exception:
                         pass
-                result = namedtuple('result', ['status', 'rc'])
-                res = result('canceled', 1)
+                res = _PhaseResult('canceled', 1)
             except Exception as exc:
                 # The processor raised — typically a ConnectionError (Redis
                 # sidecar gone) or OperationalError (transient DB failure).
@@ -755,8 +797,7 @@ class AWXReceptorJob:
                             resultsock.shutdown(socket.SHUT_RDWR)
                         except Exception:
                             pass
-                    result = namedtuple('result', ['status', 'rc'])
-                    res = result('error', 1)
+                    res = _PhaseResult('error', 1)
                 else:
                     raise
             finally:

@@ -1285,6 +1285,27 @@ def test_process_running_jobs_exception_does_not_abort_loop(me_inst):
 
 
 @pytest.mark.django_db
+def test_process_running_jobs_leaves_dispatched_job_for_sweep_when_execution_node_only(me_inst):
+    """_process_running_jobs() must not reap a job where this node is execution_node but a dead node was controller."""
+    # No Instance row for 'dead-controller' — simulates a controller that has been deleted.
+    job = Job.objects.create(
+        execution_node=me_inst.hostname,
+        controller_node='dead-controller',
+        status='running',
+        work_unit_id='some-unit-id',
+        celery_task_id='orphan-uuid',
+    )
+    with patch('awx.main.tasks.system.reaper') as mock_reaper, patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock()
+        _process_running_jobs(me_inst, active_task_ids=set(), ref_time=None)
+
+    mock_reaper.reap_job.assert_not_called()
+    mock_adopt.apply_async.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'running', 'orphan sweep, not _process_running_jobs, must adopt this job'
+
+
+@pytest.mark.django_db
 def test_process_startup_jobs_exception_does_not_abort_loop(me_inst, settings):
     """Exception in _process_startup_jobs job loop is caught — remaining jobs still processed."""
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
@@ -3248,6 +3269,34 @@ class TestMarkOfflineBackdate:
         assert not inst.is_lost(), 'last_seen must be unchanged when backdate_last_seen is not set'
 
 
+class _DesyncingReceptor:
+    """Models receptorctl on a live mesh: an `ERROR:` reply leaves the socket one line behind, so
+    every later command on the same connection reads the previous command's reply. `close()` drops
+    the socket and the next command reconnects clean."""
+
+    def __init__(self, units, forgotten):
+        self.units = units
+        self.forgotten = forgotten
+        self.desynced = False
+        self.released = []
+
+    def simple_command(self, command):
+        if command == 'work list':
+            return {unit_id: {} for unit_id in self.units}
+        action, unit_id = command.rsplit(' ', 1)
+        if self.desynced:
+            raise ValueError('Expecting value: line 1 column 1 (char 0)')
+        if unit_id in self.forgotten:
+            self.desynced = True
+            raise RuntimeError(f'error cancelling remote unit:  unknown work unit {unit_id}')
+        if action == 'work release':
+            self.released.append(unit_id)
+        return {}
+
+    def close(self):
+        self.desynced = False
+
+
 @pytest.mark.django_db
 class TestWorkunitReaperResilience:
     """The reaper walks every unit receptor still holds and releases the ones whose job is finished.
@@ -3268,8 +3317,13 @@ class TestWorkunitReaperResilience:
             Job.objects.create(status='successful', work_unit_id=unit_id, controller_node='awx-1')
 
     @contextmanager
-    def _receptor_raising_on(self, failing_command):
-        """A receptor that answers `work list` with every unit and raises for one command."""
+    def _receptor_raising_on(self, failing_command, receptor_data_dir='/tmp/no-such-receptor-data-dir', receptor_node_id='test-node'):
+        """A receptor that answers `work list` with every unit and raises for one command.
+
+        ``get_receptor_data_dir`` and ``get_receptor_node_id`` are patched to a directory that
+        does not exist on disk, so the post-release fallback cleanup path is exercised only
+        by the test that explicitly creates the directory.
+        """
         calls = []
 
         def simple_command(command):
@@ -3283,8 +3337,10 @@ class TestWorkunitReaperResilience:
         ctl = MagicMock()
         ctl.simple_command.side_effect = simple_command
         with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
-            with patch('awx.main.tasks.system.administrative_workunit_reaper') as admin:
-                yield calls, admin
+            with patch('awx.main.tasks.system.get_receptor_data_dir', return_value=receptor_data_dir):
+                with patch('awx.main.tasks.system.get_receptor_node_id', return_value=receptor_node_id):
+                    with patch('awx.main.tasks.system.administrative_workunit_reaper') as admin:
+                        yield calls, admin
 
     def test_a_unit_receptor_has_forgotten_does_not_strand_the_units_behind_it(self, settings):
         settings.RECEPTOR_RELEASE_WORK = True
@@ -3322,3 +3378,54 @@ class TestWorkunitReaperResilience:
             awx_receptor_workunit_reaper()
 
         assert 'work release unit-forgotten' in calls
+
+    def test_later_units_are_really_released_after_a_failure(self, settings):
+        """Guarding the call is not enough. receptorctl keeps one socket for the whole pass and
+        `read_and_parse_json` raises on the `ERROR:` reply without draining what follows, so every
+        later command reads the previous command's reply. Measured on the cluster: each cancel
+        after the first failure reported `unknown work unit <some other id>` and each release then
+        failed with `Expecting value: line 1 column 1 (char 0)` — 18 units stayed in `work list`
+        although all 18 belonged to finished jobs. The connection has to be dropped so the next
+        command reconnects clean.
+        """
+        settings.RECEPTOR_RELEASE_WORK = True
+        settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
+        self._finished_jobs()
+        ctl = _DesyncingReceptor(self.UNITS, forgotten={'unit-forgotten'})
+
+        with patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
+            with patch('awx.main.tasks.system.get_receptor_data_dir', return_value='/tmp/no-such-receptor-data-dir'):
+                with patch('awx.main.tasks.system.get_receptor_node_id', return_value='test-node'):
+                    with patch('awx.main.tasks.system.administrative_workunit_reaper'):
+                        awx_receptor_workunit_reaper()
+
+        assert ctl.released == ['unit-second', 'unit-third']
+
+    def test_a_stale_local_proxy_directory_is_deleted_when_release_fails(self, settings):
+        """After adoption on another controller, the original ctrl0's local proxy directory for
+        the work unit survives on disk: `work release` still fails because the remote EE has
+        already cleaned up, but the local files remain indefinitely.
+
+        When the release command fails AND the unit's directory exists under receptor's data dir
+        (`<datadir>/<node_id>/<unit_id>/`), the reaper should remove it directly so the disk
+        space is freed and the unit stops appearing in `work list` after the next receptor restart.
+        Measured on the cluster: 18 stale directories, all for finished jobs, logging warnings on
+        every 60-second reaper pass because receptor's in-memory state keeps showing them until
+        the process is restarted.
+        """
+        settings.RECEPTOR_RELEASE_WORK = True
+        settings.RECEPTOR_KEEP_WORK_ON_ERROR = False
+        self._finished_jobs()
+
+        with tempfile.TemporaryDirectory() as receptor_data_dir:
+            # Build the expected unit directory path that the reaper should clean up.
+            unit_dir = os.path.join(receptor_data_dir, 'awx-test-node', 'unit-forgotten')
+            os.makedirs(unit_dir)
+            (open(os.path.join(unit_dir, 'status'), 'w')).close()  # non-empty dir
+
+            with self._receptor_raising_on('work release unit-forgotten') as (calls, _admin):
+                with patch('awx.main.tasks.system.get_receptor_data_dir', return_value=receptor_data_dir):
+                    with patch('awx.main.tasks.system.get_receptor_node_id', return_value='awx-test-node'):
+                        awx_receptor_workunit_reaper()
+
+            assert not os.path.exists(unit_dir), 'stale proxy directory should have been removed'

@@ -172,7 +172,10 @@ def invoke_adoption_hooks(job, callback, private_data_dir, status):
             return True, None
         finally:
             job.job_env = original_env
-            job.save(update_fields=['job_env'])
+            try:
+                job.save(update_fields=['job_env'])
+            except Exception:
+                logger.warning(f'Job {job.id}: failed to restore job_env after adoption hook', exc_info=True)
 
     except Exception as exc:
         error_info = _build_hook_error_info(exc, hook_start_time)

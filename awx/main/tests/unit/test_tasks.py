@@ -1959,3 +1959,33 @@ def test_administrative_workunit_reaper_continues_past_a_forgotten_unit():
         receptor.administrative_workunit_reaper(work_list=work_list)
 
     assert 'work release healthy' in calls
+
+
+def test_administrative_workunit_reaper_resets_the_connection_after_a_failure():
+    """Guarding the release is not enough: an `ERROR:` reply leaves receptorctl's socket one line
+    behind, so the next release reads the previous reply and fails on garbage. Measured on the
+    cluster as `Expecting value: line 1 column 1 (char 0)` for every unit after the first failure.
+    """
+    work_list = {
+        'forgotten': {'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}}, 'StateName': 'Succeeded'},
+        'healthy': {'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}}, 'StateName': 'Succeeded'},
+    }
+    released = []
+    state = {'desynced': False}
+
+    def simple_command(command):
+        unit_id = command.rsplit(' ', 1)[1]
+        if state['desynced']:
+            raise ValueError('Expecting value: line 1 column 1 (char 0)')
+        if unit_id == 'forgotten':
+            state['desynced'] = True
+            raise RuntimeError('error releasing remote unit:  unknown work unit forgotten')
+        released.append(unit_id)
+
+    ctl = mock.MagicMock(simple_command=mock.MagicMock(side_effect=simple_command))
+    ctl.close.side_effect = lambda: state.update(desynced=False)
+
+    with mock.patch('awx.main.tasks.receptor.get_receptor_ctl', return_value=ctl):
+        receptor.administrative_workunit_reaper(work_list=work_list)
+
+    assert released == ['healthy']
