@@ -25,6 +25,7 @@ from awx.main.tasks.system import (
     _process_running_jobs,
     _sweep_orphaned_jobs,
     _handle_lost_instance_job,
+    _queue_job_adoption,
     _adoption_slot_available,
     cluster_node_heartbeat,
     _startup_reap_undispatched,
@@ -519,7 +520,10 @@ class TestReapAndMarkLostInstance:
         # time, so source_controller is CLUSTER_HOST_ID — same kwargs the startup and heartbeat
         # paths publish, which is what on_duplicate='discard' keys on.
         mock_adopt.apply_async.assert_called_once_with(
-            args=[job.id], kwargs={'source_controller': settings.CLUSTER_HOST_ID}, queue=mock_adopt.apply_async.call_args[1]['queue']
+            args=[job.id],
+            kwargs={'source_controller': settings.CLUSTER_HOST_ID},
+            queue=mock_adopt.apply_async.call_args[1]['queue'],
+            uuid=mock_adopt.apply_async.call_args[1]['uuid'],
         )
         mock_reaper.reap_job.assert_not_called()
 
@@ -541,7 +545,7 @@ class TestReapAndMarkLostInstance:
 
         assert owner_at_publish['controller_node'] == settings.CLUSTER_HOST_ID
         job.refresh_from_db()
-        assert job.celery_task_id == 'adopt-uuid'
+        assert job.celery_task_id == mock_adopt.apply_async.call_args[1]['uuid']
 
     def test_reap_skips_adoption_when_another_controller_claimed_first(self, settings):
         """A survivor that loses the conditional UPDATE must neither publish nor reap the job."""
@@ -567,7 +571,8 @@ class TestReapAndMarkLostInstance:
         assert mock_adopt.apply_async.call_count == 1
         mock_reaper.reap_job.assert_not_called()
         assert Job.objects.filter(controller_node='other-survivor', celery_task_id='untouched').count() == 1
-        assert Job.objects.filter(controller_node=settings.CLUSTER_HOST_ID, celery_task_id='adopt-uuid').count() == 1
+        adopted = mock_adopt.apply_async.call_args[1]['uuid']
+        assert Job.objects.filter(controller_node=settings.CLUSTER_HOST_ID, celery_task_id=adopted).count() == 1
 
     def test_reap_does_not_adopt_when_only_execution_node_is_lost(self, settings):
         """A lost EE leaves the job's controller alive and still running it — reap, never adopt."""
@@ -888,7 +893,8 @@ def test_process_startup_jobs_persists_adoption_task_id(me_inst):
         mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
         _process_startup_jobs(me_inst)
     job.refresh_from_db()
-    assert job.celery_task_id == 'adopt-uuid'
+    assert job.celery_task_id == mock_adopt.apply_async.call_args[1]['uuid']
+    assert job.celery_task_id != 'original-dispatch-uuid'
 
 
 @pytest.mark.django_db
@@ -899,7 +905,8 @@ def test_process_running_jobs_persists_adoption_task_id(me_inst):
         mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
         _process_running_jobs(me_inst, active_task_ids={'some-other-uuid'}, ref_time=None)
     job.refresh_from_db()
-    assert job.celery_task_id == 'adopt-uuid'
+    assert job.celery_task_id == mock_adopt.apply_async.call_args[1]['uuid']
+    assert job.celery_task_id != 'stale-uuid'
 
 
 @pytest.mark.django_db
@@ -942,7 +949,10 @@ def test_adoption_skips_still_running_work_unit(me_inst):
         _process_startup_jobs(me_inst)
 
     mock_adopt.apply_async.assert_called_once_with(
-        args=[job.id], kwargs={'source_controller': me_inst.hostname}, queue=mock_adopt.apply_async.call_args[1]['queue']
+        args=[job.id],
+        kwargs={'source_controller': me_inst.hostname},
+        queue=mock_adopt.apply_async.call_args[1]['queue'],
+        uuid=mock_adopt.apply_async.call_args[1]['uuid'],
     )
     job.refresh_from_db()
     assert job.status == 'running', 'job must not be reaped — adoption deferred to background task'
@@ -1107,6 +1117,90 @@ def test_adoption_finalizes_failed_job(me_inst):
 
     job.refresh_from_db()
     assert job.status == 'failed'
+
+
+@pytest.mark.django_db
+def test_queue_job_adoption_records_the_task_id_before_publishing(me_inst):
+    """cancel-orphan: the adoption's task id must reach the job row before the task can run.
+
+    UnifiedJob.cancel() addresses the dispatcher by (controller_node, celery_task_id). The
+    claim moves controller_node to the adopter immediately, so while the row still carries
+    the dead controller's task id a cancel is published to this controller with a uuid no
+    worker here owns, and it is dropped. Observed on the dev cluster with that window held
+    open: the adoption streamed on and the EE ran its remaining seven minutes to completion.
+    """
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='window-unit', celery_task_id='dead-controller-uuid')
+    seen = {}
+
+    def _publish(args=None, kwargs=None, queue=None, uuid=None, **_unused):
+        from uuid import uuid4
+
+        seen['uuid'] = uuid
+        seen['on_row_at_publish'] = Job.objects.get(pk=job.id).celery_task_id
+        # dispatcherd invents one when the caller does not supply it
+        return {'uuid': uuid or str(uuid4())}, None
+
+    with patch('awx.main.tasks.system.adopt_job_async.apply_async', side_effect=_publish):
+        _queue_job_adoption(job.id, me_inst.hostname)
+
+    assert seen['uuid'], 'the adoption task id has to be chosen here, not handed back by the broker'
+    assert seen['on_row_at_publish'] == seen['uuid'], 'a cancel racing the publish must already find the new task id'
+    job.refresh_from_db()
+    assert job.celery_task_id == seen['uuid']
+
+
+@pytest.mark.django_db
+def test_adoption_honors_a_cancel_issued_while_the_job_was_orphaned(me_inst):
+    """cancel-orphan: a cancel that reached nobody is carried out by whoever adopts the job.
+
+    UnifiedJob.cancel() commits cancel_flag and then signals the dispatcher on
+    controller_node; when that controller is already dead the signal is lost and the flag is
+    all that survives. Observed on the dev cluster: the adopter streamed the job to a clean
+    'successful' while cancel_flag was set the whole way.
+    """
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='orphan-canceled-unit', cancel_flag=True)
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_instance = _mock_receptor_job()
+        mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
+        mock_job_cls.return_value = mock_instance
+
+        reattach_to_work_unit(job, ctl)
+
+    assert 'work cancel orphan-canceled-unit' in [c.args[0] for c in ctl.simple_command.call_args_list], 'the live work unit must be stopped'
+    job.refresh_from_db()
+    assert job.status == 'canceled'
+
+
+@pytest.mark.django_db
+def test_adoption_does_not_cancel_the_work_unit_of_an_uncanceled_job(me_inst):
+    """The ordinary adoption still takes the EE over untouched."""
+    from awx.main.tasks.receptor import reattach_to_work_unit
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='orphan-live-unit')
+    ctl = MagicMock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+
+    with (
+        patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
+        patch('awx.main.tasks.callback.RunnerCallback'),
+    ):
+        mock_instance = _mock_receptor_job()
+        mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
+        mock_job_cls.return_value = mock_instance
+
+        reattach_to_work_unit(job, ctl)
+
+    assert not [c for c in ctl.simple_command.call_args_list if str(c.args[0]).startswith('work cancel')]
+    job.refresh_from_db()
+    assert job.status == 'successful'
 
 
 @pytest.mark.django_db

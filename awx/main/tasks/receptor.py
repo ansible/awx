@@ -1218,11 +1218,19 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, final_
     """
     from awx.main.tasks.jobs import _finalize_job_run
 
-    job.refresh_from_db(fields=['status', 'host_status_counts'])
+    job.refresh_from_db(fields=['status', 'host_status_counts', 'cancel_flag'])
     if job.status != 'running':
         return
 
     final_status = final_status or ('successful' if exit_code == 0 else 'failed')
+
+    # A cancel outranks whatever the stream made of the EE's last moments. Stopping a work
+    # unit ends the playbook mid-task, and the stream reads that as a failure — or as a
+    # success, if the EE got as far as playbook_on_stats first — for a job that was stopped
+    # on request. Re-read above rather than trusted from the caller because the cancel can
+    # land at any point in the stream, including after the status was derived.
+    if job.cancel_flag:
+        final_status, exit_code = 'canceled', 1
 
     # If the stream result says 'failed' but host_status_counts is already set,
     # the first adoption attempt streamed and processed playbook_on_stats before
@@ -1507,6 +1515,24 @@ def reattach_to_work_unit(job, receptor_ctl, unit_status=None, pod_name=None):
     except Exception:
         logger.warning(f'Cannot get receptor status for work unit {unit_id} (job {job.id}, execution_node={job.execution_node}), deferring adoption')
         return False
+
+    # A cancel issued while this job was orphaned reached nobody: UnifiedJob.cancel() commits
+    # cancel_flag and then signals the dispatcher on controller_node, which by then was gone.
+    # Nothing re-sends it, so the flag is all that survives, and this is the first process in
+    # a position to act on it — BaseTask.run() makes the same check before it starts work.
+    # Unlike BaseTask we inherit a live EE, so the work unit has to be stopped as well as the
+    # job row marked. The stream below still runs: it is what carries the events the EE
+    # already produced, and it is how the cancel's own last events arrive.
+    if job.cancel_flag:
+        logger.info(f'Job {job.id}: canceled while orphaned, canceling work unit {unit_id} before streaming it out')
+        try:
+            receptor_ctl.simple_command(f'work cancel {unit_id}')
+        except Exception as exc:
+            # The status is committed as canceled either way. Leaving the job running
+            # because receptor refused the command would hide the cancel entirely, and the
+            # unit is not leaked: awx_receptor_workunit_reaper releases units for any job
+            # outside ACTIVE_STATES.
+            logger.warning(f'Could not cancel work unit {unit_id} for canceled job {job.id}: {exc}')
 
     # Pending and Running are streamed, not deferred. get_work_results blocks until the unit
     # produces output, which is exactly what _run_internal does the moment it submits work —

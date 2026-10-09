@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import time
+import uuid
 from collections import namedtuple
 from contextlib import redirect_stdout
 from packaging.version import Version
@@ -876,9 +877,19 @@ def _queue_job_adoption(job_id, source_controller):
     dispatcherd drop a second submission made before the first message lands. Persisting the
     id matters because the job still carries the uuid of the dispatch task that died, which
     would make it look orphaned to every later heartbeat.
+
+    The uuid is chosen here and written before the message goes out, rather than taken from
+    what apply_async hands back. UnifiedJob.cancel() addresses the dispatcher by
+    (controller_node, celery_task_id), and the claim has already moved controller_node to
+    this node, so a cancel issued while the row still carried the dead controller's uuid was
+    published to this node for a task nobody here runs — silently dropped. Writing first
+    makes that window deliver to the adoption worker instead. The row is only ever read by a
+    cancel or by the orphan scan, both of which treat an id with no live worker as orphaned,
+    so recording an id for a publish that then fails costs nothing.
     """
-    obj, _unused = adopt_job_async.apply_async(args=[job_id], kwargs={'source_controller': source_controller}, queue=get_task_queuename())
-    UnifiedJob.objects.filter(pk=job_id).update(celery_task_id=obj['uuid'])
+    task_id = str(uuid.uuid4())
+    UnifiedJob.objects.filter(pk=job_id).update(celery_task_id=task_id)
+    adopt_job_async.apply_async(args=[job_id], kwargs={'source_controller': source_controller}, queue=get_task_queuename(), uuid=task_id)
 
 
 def _handle_lost_instance_job(j, other_inst):

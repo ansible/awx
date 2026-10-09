@@ -325,6 +325,98 @@ def test_reattach_user_cancel_finalizes_as_canceled(mock_rmtree, mock_pdd, mock_
 
 
 # ---------------------------------------------------------------------------
+# reattach_to_work_unit — a cancel issued while the job had no controller
+# ---------------------------------------------------------------------------
+
+
+def _orphan_job(job_id, unit_id, cancel_flag):
+    """A Mock job as adopt_job_async hands it to reattach_to_work_unit."""
+    job = Mock()
+    job.id = job_id
+    job.work_unit_id = unit_id
+    job.cancel_flag = cancel_flag
+    job.spawned_by_workflow = False
+    job.started = None
+    job.execution_node = None
+    job.job_env = {}
+    return job
+
+
+def _work_cancels(ctl):
+    return [c.args[0] for c in ctl.simple_command.call_args_list if str(c.args[0]).startswith('work cancel')]
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_cancels_the_unit_of_a_job_canceled_while_orphaned(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """cancel-orphan: the adopter stops the EE a cancel could not reach.
+
+    UnifiedJob.cancel() commits cancel_flag and then signals the dispatcher on
+    controller_node. With that controller dead the signal lands nowhere, so the adopter is
+    the first process able to act on the flag — and it inherits a live work unit.
+    """
+    job = _orphan_job(7, 'unit-orphan-cancel', cancel_flag=True)
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+
+    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=_Result(status='successful', rc=0)):
+        reattach_to_work_unit(job, ctl)
+
+    assert _work_cancels(ctl) == ['work cancel unit-orphan-cancel']
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_leaves_the_unit_of_an_uncanceled_job_alone(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """Adoption exists to keep healthy EEs running — it must not cancel one on its way in."""
+    job = _orphan_job(8, 'unit-healthy', cancel_flag=False)
+    ctl = Mock()
+    ctl.simple_command.return_value = {'StateName': 'Running'}
+
+    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=_Result(status='successful', rc=0)):
+        reattach_to_work_unit(job, ctl)
+
+    assert _work_cancels(ctl) == []
+
+
+@patch('awx.main.tasks.jobs._finalize_job_run')
+@patch('awx.main.tasks.receptor._finalize_adopted_job')
+@patch('awx.main.tasks.receptor._compute_adoption_dedup', return_value=(0, set(), 0))
+@patch('awx.main.tasks.receptor.AWXReceptorJob._receptor_release_work')
+@patch('awx.main.tasks.receptor._get_or_create_private_data_dir', return_value='/tmp/adopt')
+@patch('awx.main.tasks.receptor.shutil.rmtree')
+def test_reattach_streams_on_when_the_work_cancel_fails(mock_rmtree, mock_pdd, mock_release, mock_dedup, mock_finalize_job, mock_finalize_run):
+    """A work unit that will not take the cancel must not strand the job in 'running'.
+
+    The status still has to be committed: the user asked for the job to stop, and leaving it
+    running because receptor refused the command would hide the cancel entirely.
+    """
+    job = _orphan_job(9, 'unit-stubborn', cancel_flag=True)
+    ctl = Mock()
+
+    def _commands(cmd):
+        if cmd.startswith('work cancel'):
+            raise RuntimeError('receptor said no')
+        return {'StateName': 'Running'}
+
+    ctl.simple_command.side_effect = _commands
+
+    with patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value=_Result(status='successful', rc=0)):
+        result = reattach_to_work_unit(job, ctl)
+
+    assert result is True
+    mock_finalize_job.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
 # _handle_work_error — result_traceback already recorded → return res early
 # ---------------------------------------------------------------------------
 
@@ -567,6 +659,7 @@ def test_reattach_releases_work_unit_on_failure(mock_rmtree, mock_pdd, mock_rele
     job.spawned_by_workflow = False
     job.started = None
     job.status = 'running'
+    job.cancel_flag = False
     job.execution_node = None
     job.job_env = {}
     _stub_last_event(job)
@@ -1114,6 +1207,7 @@ def test_finalize_adopted_job_successful(mock_finalize):
     """exit_code=0 → _finalize_job_run called with status='successful' and finished in extra_fields."""
     job = Mock()
     job.status = 'running'
+    job.cancel_flag = False
     job.started = None
     job.execution_node = None
     _stub_last_event(job)
@@ -1139,6 +1233,7 @@ def test_finalize_adopted_job_failed(mock_finalize):
     """exit_code=1 → _finalize_job_run called with status='failed'."""
     job = Mock()
     job.status = 'running'
+    job.cancel_flag = False
     job.started = None
     job.execution_node = None
     _stub_last_event(job)
@@ -1287,6 +1382,50 @@ def test_finalize_adopted_job_passes_required_status_fence(mock_finalize):
         '_finalize_job_run must be called with _required_status="running" so that '
         'update_model can fence out a second controller that races to finalize the same job'
     )
+
+
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_records_a_canceled_job_as_canceled(mock_finalize):
+    """A cancel outranks the stream's own verdict.
+
+    Canceling the work unit ends the playbook mid-task, and whichever way the stream reads
+    that — a failure, or a success if the EE got far enough first — the job was stopped on
+    request and must say so.
+    """
+    job = Mock()
+    job.status = 'running'
+    job.cancel_flag = True
+    job.started = None
+    job.execution_node = None
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
+
+    _finalize_adopted_job(job, callback, exit_code=0, process_phase_failed=False)
+
+    assert mock_finalize.call_args[0][3] == 'canceled'
+
+
+@override_settings(CLUSTER_HOST_ID='surviving-controller')
+@patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_adopted_job_cancel_outranks_the_host_counts_correction(mock_finalize):
+    """host_status_counts rescues a failed stream, but not one the user canceled.
+
+    A canceled job can easily have a clean host_status_counts — the stats were written
+    before the cancel landed — and the correction would quietly turn it into 'successful'.
+    """
+    job = Mock()
+    job.status = 'running'
+    job.cancel_flag = True
+    job.host_status_counts = {'ok': 1}
+    job.started = None
+    job.execution_node = None
+    _stub_last_event(job)
+    callback = Mock(wrapup_event_created=None)
+
+    _finalize_adopted_job(job, callback, exit_code=1, process_phase_failed=True)
+
+    assert mock_finalize.call_args[0][3] == 'canceled'
 
 
 # ---------------------------------------------------------------------------
@@ -1607,6 +1746,7 @@ def test_reattach_uses_precached_unit_status(mock_finalize, mock_dedup, mock_rel
     job.work_unit_id = 'unit-cached'
     job.spawned_by_workflow = False
     job.started = None
+    job.cancel_flag = False
     job.execution_node = None
     job.job_env = {}
     ctl = Mock()
