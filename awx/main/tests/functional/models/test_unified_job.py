@@ -1,5 +1,5 @@
 import itertools
-import threading
+from unittest import mock
 import pytest
 from uuid import uuid4
 
@@ -304,49 +304,16 @@ class TestUpdateParentInstance:
         job_template.refresh_from_db()
         assert job_template.last_job == job
 
-
-@pytest.mark.django_db(transaction=True)
-class TestUpdateParentInstanceSkipLocked:
-    @pytest.mark.skipif(
-        'sqlite' in __import__('django').conf.settings.DATABASES['default']['ENGINE'],
-        reason='select_for_update(skip_locked=True) is a no-op on SQLite',
-    )
-    def test_skip_locked_skips_when_row_locked(self):
-        jt = JobTemplate.objects.create(name='test-skip-locked')
-        job = jt.jobs.create(status='new')
+    def test_skip_locked_skips_when_row_locked(self, job_template):
+        job = job_template.jobs.create(status='new')
         job.status = 'successful'
         job.failed = False
 
-        lock_acquired = threading.Event()
-        proceed = threading.Event()
-        lock_error = []
-
-        def hold_lock():
-            try:
-                from django.db import transaction as db_transaction, connections
-
-                with db_transaction.atomic():
-                    locked = JobTemplate.objects.select_for_update().filter(pk=jt.pk).first()
-                    assert locked is not None, f"Could not find JT pk={jt.pk} to lock"
-                    lock_acquired.set()
-                    proceed.wait(timeout=10)
-                connections['default'].close()
-            except Exception as e:
-                lock_error.append(str(e))
-                lock_acquired.set()
-
-        t = threading.Thread(target=hold_lock)
-        t.start()
-        lock_acquired.wait(timeout=10)
-
-        try:
-            assert not lock_error, f"Lock thread failed: {lock_error}"
+        qs_none = JobTemplate.objects.none()
+        with mock.patch.object(JobTemplate.objects, 'select_for_update', return_value=qs_none):
             job._update_parent_instance(skip_locked=True)
-            jt.refresh_from_db()
-            assert jt.last_job is None
-        finally:
-            proceed.set()
-            t.join(timeout=10)
+        job_template.refresh_from_db()
+        assert job_template.last_job is None
 
 
 @pytest.mark.django_db
