@@ -231,3 +231,16 @@ def test_pause_without_generation_ignores_rearm():
     with mock.patch.object(failpoints.connection, 'cursor', return_value=cursor), mock.patch.object(failpoints.time, 'sleep'):
         failpoints._pause('callback.event', {'timeout': 60})
     assert cursor.polls == 2
+
+
+def test_record_snapshot_is_inert_when_disabled(settings):
+    settings.AWX_FAILPOINTS_ENABLED = False
+    with mock.patch.object(failpoints, 'ensure_tables') as ensure:
+        failpoints.record_snapshot('host_map', 1, {'h1': 1})
+    ensure.assert_not_called()
+
+
+def test_record_snapshot_never_raises(settings):
+    settings.AWX_FAILPOINTS_ENABLED = True
+    with mock.patch.object(failpoints, 'ensure_tables', side_effect=RuntimeError('db down')):
+        failpoints.record_snapshot('host_map', 1, {'h1': 1})

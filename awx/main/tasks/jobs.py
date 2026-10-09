@@ -87,7 +87,7 @@ from awx.main.utils.common import (
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.utils.update_model import update_model
-from awx.main.utils.failpoints import failpoint
+from awx.main.utils.failpoints import failpoint, record_snapshot
 
 # Django flags
 from flags.state import flag_enabled
@@ -530,7 +530,9 @@ class BaseTask(object):
 
     def build_inventory(self, instance, private_data_dir):
         script_params = self.runner_callback.inventory_script_params(instance)
-        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
+        path = self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
+        record_snapshot('host_map', instance.id, self.runner_callback.host_map)
+        return path
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError

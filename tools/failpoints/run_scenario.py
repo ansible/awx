@@ -11,7 +11,12 @@ execution node first, for example:
 Then:
 
     tools/failpoints/run_scenario.py list
+    tools/failpoints/run_scenario.py preflight
     tools/failpoints/run_scenario.py slow-controller --out /tmp/fp-runs
+
+Every scenario first runs the preflight checks (mesh routes, receptor health, instance
+state, failpoints enabled and none left armed, no leftover active jobs) and exits 2 without
+starting anything if one fails, so an environment fault cannot produce an invalid run.
 
 Each scenario prints a timeline, the failpoint hits, the adoption-related log lines and the
 invariant results for the job, and exits non-zero if any invariant failed. With --out it
@@ -78,7 +83,18 @@ def container_for(hostname):
 
 
 def manage(container, *args, check=True):
+    if args[:2] == ('failpoint', 'wait'):
+        # Waiting on a failpoint nobody armed blocks until the timeout, because an unarmed
+        # failpoint records no hit. Fail at once instead of producing a stalled run.
+        name = args[2]
+        if name not in armed_names(container):
+            raise RuntimeError(f'refusing to wait on failpoint {name!r}: it is not armed')
     return run(['docker', 'exec', '-i', container, 'awx-manage', *args], check=check)
+
+
+def armed_names(container):
+    out = run(['docker', 'exec', '-i', container, 'awx-manage', 'failpoint', 'list']).stdout
+    return {row['name'] for row in json.loads(out[out.index('[') :])}
 
 
 def orm(container, code):
@@ -147,6 +163,79 @@ def wait_cluster_ready(container, hostnames, timeout=600):
     for h in (h for h in hostnames if h.startswith('awx-')):
         wait_for(f'{h} receptor to see {EXEC_CONTAINER}', lambda: mesh_sees(container_for(h), 'receptor-1'), 180, poll=5)
     return inst
+
+
+def receptor_status(container):
+    out = run(['docker', 'exec', container, 'receptorctl', '--socket', RECEPTOR_SOCK, 'status', '--json'], check=False)
+    try:
+        return json.loads(out.stdout[out.stdout.index('{') :])
+    except ValueError:
+        return None
+
+
+def preflight(containers, hostnames):
+    """Check the environment before a run, so a broken cluster fails fast instead of
+    producing a run that has to be thrown away. Returns a list of problems.
+
+    Each check maps to a run that was invalid for that reason:
+    - a control node reaching the execution node only through another control node
+      (the dev mesh chain): a peer cannot adopt once the first node is down;
+    - a control node's receptor not answering, or the execution node's receptor not
+      listing work: adoption fails and reads as an adoption bug;
+    - failpoints disabled: every arm is inert and the scenario injects nothing;
+    - failpoints still armed from an earlier run: they fire in this one;
+    - active jobs left over from an earlier run: they hold capacity and block launches.
+    """
+    problems = []
+    control = {h for h in hostnames if h.startswith('awx-')}
+    exec_nodes = [h for h in hostnames if h not in control]
+
+    for host in sorted(control):
+        status = receptor_status(container_for(host))
+        if status is None:
+            problems.append(f'{host}: receptor not answering on {RECEPTOR_SOCK}')
+            continue
+        routes = status.get('RoutingTable') or {}
+        for node in exec_nodes:
+            hop = routes.get(node)
+            if hop is None:
+                problems.append(f'{host}: no route to {node}')
+            elif hop in control:
+                problems.append(
+                    f'{host}: reaches {node} only through control node {hop}; with {hop} down it cannot adopt. '
+                    'Peer the hop node with every control node (receptor-hop.conf.j2).'
+                )
+
+    out = run(['docker', 'exec', EXEC_CONTAINER, 'receptorctl', '--socket', RECEPTOR_SOCK, 'work', 'list'], check=False)
+    if out.returncode != 0 or '{' not in out.stdout:
+        problems.append(f'{EXEC_CONTAINER}: receptor work list failed: {(out.stdout + out.stderr).strip()[-200:]}')
+
+    inst = instances(containers[0])
+    for host in sorted(hostnames):
+        i = inst.get(host)
+        if i is None:
+            problems.append(f'{host}: not registered as an instance')
+        elif i['state'] != 'ready' or not i['capacity'] or i['errors']:
+            problems.append(f'{host}: state={i["state"]} capacity={i["capacity"]} errors={i["errors"]!r}')
+
+    for container in containers:
+        if setting(container, 'AWX_FAILPOINTS_ENABLED') is not True:
+            problems.append(f'{container}: AWX_FAILPOINTS_ENABLED is not true, so failpoints are inert')
+    stale = armed_names(containers[0])
+    if stale:
+        problems.append(f'failpoints still armed from an earlier run: {", ".join(sorted(stale))} (awx-manage failpoint disarm --all)')
+
+    active = orm(
+        containers[0],
+        """
+from awx.main.constants import ACTIVE_STATES
+from awx.main.models import UnifiedJob
+emit(list(UnifiedJob.objects.filter(status__in=ACTIVE_STATES).values_list('id', 'status', 'name')))
+""",
+    )
+    if active:
+        problems.append('active jobs left over: ' + ', '.join(f'{i} {st} {n!r}' for i, st, n in active[:10]))
+    return problems
 
 
 def mesh_sees(container, node):
@@ -1725,7 +1814,7 @@ SCENARIOS = {
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('scenario', choices=['list', *SCENARIOS])
+    parser.add_argument('scenario', choices=['list', 'preflight', *SCENARIOS])
     parser.add_argument('--iterations', type=int, default=420, help='Loop items in the chatty playbook, about one second each')
     parser.add_argument('--claim-timeout', type=int, default=480)
     parser.add_argument('--finish-timeout', type=int, default=1200)
@@ -1760,6 +1849,7 @@ def main():
         '--order', choices=['owner-first', 'adopter-first'], default='owner-first', help='slow-controller seam: which controller finalizes first'
     )
     parser.add_argument('--fresh-event-queries', action='store_true', help='slow-controller: delete EventQuery rows first so both finalizers insert them')
+    parser.add_argument('--skip-preflight', action='store_true', help='Run even if the environment checks fail')
     parser.add_argument('--out', help='Directory to save logs, tracebacks and the timeline into')
     parser.add_argument('--max-lines', type=int, default=150)
     args = parser.parse_args()
@@ -1776,6 +1866,15 @@ def main():
     hosts = [c.replace('tools_', '').replace('_', '-') for c in containers] + ['receptor-1']
     if args.scenario != 'report':
         wait_cluster_ready(containers[0], hosts)
+        problems = preflight(containers, hosts)
+        for problem in problems:
+            log(f'PREFLIGHT FAIL: {problem}')
+        if args.scenario == 'preflight':
+            log('preflight ok' if not problems else f'preflight: {len(problems)} problem(s)')
+            return 1 if problems else 0
+        if problems and not args.skip_preflight:
+            log('environment not fit for a valid run; fix the above or pass --skip-preflight')
+            return 2
     result = SCENARIOS[args.scenario](containers, args)
     return 0 if result['ok'] else 1
 
