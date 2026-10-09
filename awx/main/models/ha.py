@@ -530,6 +530,11 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 def schedule_write_receptor_config(broadcast=True):
     from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
+    # receptor.conf is generated from a K8S-only template; outside K8S it is
+    # managed by the installer (or docker-compose) and must not be overwritten
+    if not settings.IS_K8S:
+        return
+
     # broadcast to all control instances to update their receptor configs
     if broadcast:
         connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
