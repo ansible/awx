@@ -70,6 +70,29 @@ class TestJobTemplateLabelList:
             super(JobTemplateLabelList, view).unattach(mock_request, None, None)
             mixin_unattach.assert_called_with(mock_request, None, None)
 
+    def test_disassociate_skips_label_limit(self):
+        """Disassociating a label skips the label limit validation."""
+        view = JobTemplateLabelList()
+        request = mock.MagicMock(data={'id': 1, 'disassociate': True})
+
+        with mock.patch.object(view, 'unattach') as unattach, mock.patch('awx.api.views.labels.Label.objects.filter') as label_filter:
+            view.post(request)
+
+        label_filter.assert_not_called()
+        unattach.assert_called_once_with(request)
+
+    def test_attach_rejects_label_limit(self):
+        view = JobTemplateLabelList()
+        view.kwargs = {'pk': 1}
+        request = mock.MagicMock(data={'id': 1})
+
+        with mock.patch.object(view, 'attach') as attach, mock.patch('awx.api.views.labels.Label.objects.filter') as label_filter:
+            label_filter.return_value.count.return_value = 101
+            response = view.post(request)
+
+        assert response.status_code == 400
+        attach.assert_not_called()
+
 
 class TestInventoryInventorySourcesUpdate:
     @pytest.mark.parametrize(
