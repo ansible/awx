@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from awx.main.models import Job, JobEvent, JobHostSummary
+from awx.main.models import HostMetric, Inventory, Job, JobEvent, JobHostSummary
 from awx.main.utils import job_invariants
 
 
@@ -139,3 +139,133 @@ def test_playbook_events_complete_counts_duplicates_once(job):
     result = job_invariants.check_playbook_events_complete(job)
     assert result['ok'], result
     assert '4 of 4 stored' in result['detail']
+
+
+def _stats(job, counter, hosts, failures=(), dark=()):
+    data = {
+        'ok': {h.name: 2 for h in hosts if h.name not in dark},
+        'processed': {h.name: 1 for h in hosts},
+        'failures': {name: 1 for name in failures},
+        'dark': {name: 1 for name in dark},
+        'changed': {},
+        'skipped': {},
+    }
+    return _event(job, counter, event='playbook_on_stats', event_data=data)
+
+
+def _summaries(job, hosts, failures=(), dark=()):
+    for h in hosts:
+        f, d = int(h.name in failures), int(h.name in dark)
+        JobHostSummary.objects.create(job=job, host=h, host_name=h.name, ok=0 if d else 2, processed=1, failures=f, dark=d, failed=bool(f or d))
+
+
+@pytest.mark.django_db
+def test_host_metrics_counted_once(job, hosts):
+    _summaries(job, hosts, dark=('h3',))
+    snap = {'h1': 4, 'h2': None, 'h3': 7}
+    HostMetric.objects.create(hostname='h1', last_automation=job.created, automated_counter=5)
+    HostMetric.objects.create(hostname='h2', last_automation=job.created, automated_counter=1)
+    HostMetric.objects.create(hostname='h3', last_automation=job.created, automated_counter=7)
+    with mock.patch.object(job_invariants, 'get_snapshot', return_value=snap):
+        result = job_invariants.check_host_metrics_counted_once(job)
+    assert result['ok'], result
+
+    HostMetric.objects.filter(hostname='h1').update(automated_counter=6)
+    with mock.patch.object(job_invariants, 'get_snapshot', return_value=snap):
+        result = job_invariants.check_host_metrics_counted_once(job)
+    assert not result['ok']
+    assert result['detail'] == 'h1 +2 (want +1)'
+
+
+@pytest.mark.django_db
+def test_host_metrics_without_snapshot_is_not_checked(job, hosts):
+    with mock.patch.object(job_invariants, 'get_snapshot', return_value=None):
+        result = job_invariants.check_host_metrics_counted_once(job)
+    assert result['ok'] and 'not checked' in result['detail']
+
+
+@pytest.mark.django_db
+def test_host_pointers_consistent(job, hosts, inventory):
+    _stats(job, 5, hosts, failures=('h2',))
+    _summaries(job, hosts, failures=('h2',))
+    inventory.update_computed_fields()
+    job.refresh_from_db()
+    result = job_invariants.check_host_pointers(job)
+    assert result['ok'], result
+    assert 'hosts_with_active_failures=1' in result['detail']
+
+
+@pytest.mark.django_db
+def test_host_pointers_flag_stale_inventory_fields_and_summary_mismatch(job, hosts, inventory):
+    _stats(job, 5, hosts, failures=('h2',))
+    _summaries(job, hosts)  # h2's failure is missing from its summary
+    inventory.update_computed_fields()
+    job.refresh_from_db()
+    result = job_invariants.check_host_pointers(job)
+    assert not result['ok']
+    assert 'h2 failures=0 != stats 1' in result['detail']
+
+    JobHostSummary.objects.filter(job=job, host_name='h2').update(failures=1, failed=True)
+    result = job_invariants.check_host_pointers(job)
+    assert not result['ok']
+    assert 'inventory hosts_with_active_failures=0 != computed 1' in result['detail']
+
+
+@pytest.mark.django_db
+def test_host_pointers_superseded_and_no_stats(job, hosts, inventory):
+    _stats(job, 5, hosts)
+    _summaries(job, hosts)
+    later = Job.objects.create(inventory=inventory, status='successful')
+    _summaries(later, hosts[:1])
+    inventory.update_computed_fields()
+    job.refresh_from_db()
+    result = job_invariants.check_host_pointers(job)
+    assert result['ok'], result
+    assert 'superseded by later jobs: h1' in result['detail']
+
+    no_stats = Job.objects.create(inventory=inventory, status='failed')
+    result = job_invariants.check_host_pointers(no_stats)
+    assert result['ok'] and 'no playbook_on_stats; 0 summaries' in result['detail']
+
+
+def _lines(job, ranges):
+    for counter, (start, end) in enumerate(ranges, start=1):
+        _event(job, counter, start_line=start, end_line=end, stdout='x\n' * (end - start))
+
+
+@pytest.mark.django_db
+def test_stdout_lines_contiguous(job):
+    _lines(job, [(0, 2), (2, 2), (2, 5), (5, 6)])
+    result = job_invariants.check_stdout_lines_contiguous(job)
+    assert result['ok'], result
+    assert 'lines 0-6' in result['detail']
+
+
+@pytest.mark.django_db
+def test_stdout_lines_flag_gaps_and_overlaps(job):
+    _lines(job, [(0, 2), (4, 6), (4, 6), (5, 7)])
+    result = job_invariants.check_stdout_lines_contiguous(job)
+    assert not result['ok']
+    assert '1 gaps (lines 2-4 before counter 2)' in result['detail']
+    assert '2 overlapping events' in result['detail']
+
+
+@pytest.mark.django_db
+def test_host_ids_constructed_inventory_summaries(organization, inventory, hosts):
+    ci = Inventory.objects.create(name='constructed', organization=organization, kind='constructed')
+    chosts = [ci.hosts.create(name=h.name, instance_id=str(h.id)) for h in hosts]
+    job = Job.objects.create(inventory=ci, status='successful')
+    snap = {h.name: h.id for h in chosts}
+    for i, (c, h) in enumerate(zip(chosts, hosts), start=1):
+        _event(job, i, host=c)
+        JobHostSummary.objects.create(job=job, host=h, constructed_host=c, host_name=c.name)
+    with mock.patch.object(job_invariants, 'get_snapshot', return_value=snap):
+        result = job_invariants.check_host_ids_match_job_start(job)
+    assert result['ok'], result
+
+    JobHostSummary.objects.filter(job=job, host_name='h2').update(host=None, constructed_host=hosts[1])
+    with mock.patch.object(job_invariants, 'get_snapshot', return_value=snap):
+        result = job_invariants.check_host_ids_match_job_start(job)
+    assert not result['ok']
+    assert f'h2 constructed_host_id {hosts[1].id} != {chosts[1].id}' in result['detail']
+    assert f'h2 host_id None != {hosts[1].id}' in result['detail']

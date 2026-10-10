@@ -79,6 +79,7 @@ REGISTRY = {
     'adoption.after_finalize_before_release': 'reattach_to_work_unit: finalization done, before the work unit is released.',
     'callback_receiver.before_flush': 'Callback receiver worker: about to bulk insert its buffered events.',
     'events.stats_before_insert': 'Stats event: existing host summaries read, before the insert and host metrics update.',
+    'events.stats_after_insert': 'Stats event: host summaries inserted (ctx: new, metric_hosts), before the host metrics update.',
     'shutdown.before_announce': 'dispatcherd exit path: run_service returned, before announce_shutdown.',
     'adoption.unit_status': 'get_adoption_unit_status: about to query the work unit. raise here reads as an unreachable unit.',
     'health_check.redis_ping': 'Instance.local_health_check: about to ping Redis. raise --exception redis.exceptions.ConnectionError marks this node unavailable.',

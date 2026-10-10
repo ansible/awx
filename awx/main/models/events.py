@@ -603,6 +603,7 @@ class JobEvent(BasePlaybookEvent):
             # peer writes between the query above and this insert.
             failpoint('events.stats_before_insert', job_id=job.id, new=len(summaries), existing=len(already_recorded))
             JobHostSummary.objects.bulk_create(summaries.values(), ignore_conflicts=True)
+            failpoint('events.stats_after_insert', job_id=job.id, new=len(summaries), metric_hosts=len(updated_hosts_list))
 
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)

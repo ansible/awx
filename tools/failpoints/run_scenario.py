@@ -51,7 +51,7 @@ from datetime import datetime, timezone
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.join(HERE, 'project')
 PROJECT_NAME = 'failpoint_scenarios'
-PLAYBOOKS = ('chatty.yml', 'quiet.yml', 'facts.yml', 'setstats.yml', 'bulk.yml')
+PLAYBOOKS = ('chatty.yml', 'quiet.yml', 'facts.yml', 'setstats.yml', 'bulk.yml', 'datacheck.yml', 'overlap.yml')
 MARK = '@@FP@@'
 T0 = time.monotonic()
 EXEC_CONTAINER = 'tools_receptor_1'
@@ -590,6 +590,15 @@ emit([(str(at), node, what) for node, what, at in rows if at])
 
 
 def run_label(args):
+    if args.scenario in ('data-check', 'stats-insert-race', 'same-hosts', 'few-workers', 'disable-live', 'capacity-race'):
+        parts = [args.scenario, getattr(args, 'branch', '') or 'unknown'] + ([args.variant] if args.variant else [])
+        if args.variant in ('slow', 'streams') and args.mode == 'seam':
+            parts.append(args.order)
+        if args.fail_host:
+            parts.append('failhost')
+        if args.constructed:
+            parts.append('constructed')
+        return '-'.join(parts)
     parts = [args.scenario]
     if args.scenario in VARIANTS:
         parts.append(args.variant)
@@ -3413,6 +3422,1086 @@ def scenario_deprovision(containers, args):
     return result
 
 
+# --- data correctness: host metrics, host pointers, stdout, notifications, activity stream ---
+
+DC_INV = 'failpoint dc'
+DC_CINV = 'failpoint dc constructed'
+DC_HOSTS = ['dc-h1', 'dc-h2', 'dc-h3']
+DC_NT = 'failpoint dc sink'
+SINK = 'fp-sink'
+SINK_URL = f'http://{SINK}:8080/'
+SINK_IMAGE = 'ghcr.io/ansible/awx_devel:devel'
+# A webhook sink: prints one JSON line per POST (UTC time, sender address, body) to its log.
+SINK_CODE = r'''
+import json
+from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers.get('Content-Length') or 0)).decode('utf-8', 'replace')
+        at = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        print(json.dumps({'at': at, 'peer': self.client_address[0], 'path': self.path, 'body': body}), flush=True)
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'ok')
+
+    def log_message(self, *args):
+        pass
+
+
+HTTPServer(('0.0.0.0', 8080), Handler).serve_forever()
+'''
+
+
+def branch_tag(container):
+    return 'pr' if is_pr_branch(container) else 'devel'
+
+
+def sink_start():
+    """Start the webhook sink container (once; later runs reuse it). Stop it with sink_stop()."""
+    if run(['docker', 'ps', '-q', '-f', f'name=^{SINK}$']).stdout.strip():
+        return
+    run(['docker', 'rm', '-f', SINK], check=False)
+    run(
+        [
+            'docker', 'run', '-d', '--rm', '--name', SINK, '--network', 'awx', '--cgroup-parent', 'awx-failpoints.slice',
+            '--entrypoint', '/usr/bin/python3', SINK_IMAGE, '-u', '-c', SINK_CODE,
+        ]
+    )  # fmt: skip
+    log(f'webhook sink {SINK} started ({SINK_URL})')
+
+
+def sink_stop():
+    run(['docker', 'rm', '-f', SINK], check=False)
+    log(f'webhook sink {SINK} removed')
+
+
+def container_ips(containers):
+    """{ip on the awx network: hostname}, to tell which node posted a notification."""
+    out = {}
+    for c in containers:
+        ip = run(['docker', 'inspect', c, '--format', '{{(index .NetworkSettings.Networks "awx").IPAddress}}'], check=False).stdout.strip()
+        if ip:
+            out[ip] = container_for_host(c)
+    return out
+
+
+def sink_posts(job_id, ips):
+    """Every POST the sink received for this job: time, sending node, status, hosts."""
+    out = run(['docker', 'logs', SINK], check=False).stdout
+    posts = []
+    for line in out.splitlines():
+        try:
+            rec = json.loads(line)
+            body = json.loads(rec['body'])
+        except ValueError:
+            continue
+        if not isinstance(body, dict) or body.get('id') != job_id:
+            continue
+        posts.append({'at': rec['at'], 'node': ips.get(rec['peer'], rec['peer']), 'status': body.get('status'), 'hosts': body.get('hosts')})
+    return posts
+
+
+def dc_inventory(container, constructed=False):
+    """The 3-host inventory (created once, ids kept across runs), and optionally a constructed
+    inventory over it, updated until it has the same 3 hosts. Returns names and ids."""
+    info = orm(
+        container,
+        f'''
+from awx.main.models import Inventory, Organization, Host, InventorySource
+org = Organization.objects.get(name='Default')
+inv, _ = Inventory.objects.get_or_create(name={DC_INV!r}, organization=org)
+for n in {DC_HOSTS!r}:
+    Host.objects.get_or_create(name=n, inventory=inv, defaults=dict(variables='ansible_connection: local', enabled=True))
+out = dict(inv=inv.id, hosts={{h.name: h.id for h in inv.hosts.all()}}, update=None)
+if {constructed!r}:
+    ci, _ = Inventory.objects.get_or_create(name={DC_CINV!r}, organization=org, kind='constructed')
+    if not ci.input_inventories.filter(pk=inv.pk).exists():
+        ci.input_inventories.add(inv)
+    src = ci.inventory_sources.first()
+    if src is None:
+        src = InventorySource.objects.create(inventory=ci, name='failpoint dc constructed source', source='constructed', overwrite=True)
+    if ci.hosts.count() != {len(DC_HOSTS)}:
+        out['update'] = src.update().id
+    out['cinv'] = ci.id
+emit(out)
+''',
+    )
+    if info.get('update'):
+        log(f"constructed inventory update {info['update']} launched")
+        wait_for('constructed inventory update', lambda: terminal(job_state(container, info['update'])), 300, poll=5)
+    if constructed:
+        info['constructed_hosts'] = orm(
+            container,
+            f'''
+from awx.main.models import Inventory
+ci = Inventory.objects.get(name={DC_CINV!r})
+emit({{h.name: dict(id=h.id, instance_id=h.instance_id) for h in ci.hosts.all()}})
+''',
+        )
+        if len(info['constructed_hosts']) != len(DC_HOSTS):
+            raise SystemExit(f"constructed inventory has {info['constructed_hosts']}, expected {DC_HOSTS}")
+    return info
+
+
+def dc_template(containers, args):
+    """Template over the dc inventory (or its constructed inventory): datacheck.yml, forks=1,
+    notifications to the sink only (not the port-9 webhook)."""
+    constructed = bool(getattr(args, 'constructed', False))
+    name = 'failpoint dc constructed' if constructed else 'failpoint dc'
+    extra = {'iterations': args.iterations, 'fail_host': args.fail_host or ''}
+    jt = setup(containers, name, 'datacheck.yml', extra, inventory=DC_CINV if constructed else DC_INV, jt_fields={'forks': 1})
+    orm(
+        containers[0],
+        f'''
+from awx.main.models import JobTemplate, NotificationTemplate, Organization
+org = Organization.objects.get(name='Default')
+jt = JobTemplate.objects.get(pk={jt})
+nt, _ = NotificationTemplate.objects.get_or_create(name={DC_NT!r}, organization=org, notification_type='webhook',
+    defaults=dict(notification_configuration={{'url': {SINK_URL!r}, 'headers': {{}}, 'http_method': 'POST',
+        'disable_ssl_verification': True, 'username': '', 'password': ''}}))
+for rel in (jt.notification_templates_success, jt.notification_templates_error, jt.notification_templates_started):
+    rel.clear()
+jt.notification_templates_success.add(nt)
+jt.notification_templates_error.add(nt)
+emit(jt.id)
+''',
+    )
+    return jt
+
+
+def dc_launch(container, jt_id):
+    """Create the job, snapshot its hosts' HostMetric counters (for host_metrics_counted_once)
+    and their pointers before the job, then start it."""
+    return orm(
+        container,
+        f'''
+from awx.main.models import JobTemplate, HostMetric
+from awx.main.utils import failpoints
+job = JobTemplate.objects.get(pk={jt_id}).create_unified_job()
+names = sorted(h.name.lower() for h in job.inventory.hosts.all())
+counters = dict(HostMetric.objects.filter(hostname__in=names).values_list('hostname', 'automated_counter'))
+failpoints.record_snapshot('host_metrics', job.id, {{n: counters.get(n) for n in names}})
+job.signal_start()
+emit(job.id)
+''',
+    )
+
+
+def dc_collect(container, job_id):
+    """Everything the data-correctness scenarios compare, read from the DB."""
+    return orm(
+        container,
+        f'''
+from datetime import timedelta
+from django.db.models import OuterRef, Subquery
+from awx.main.models import ActivityStream, Host, HostMetric, Inventory, Job, JobHostSummary
+from awx.main.utils.failpoints import get_snapshot
+j = Job.objects.get(pk={job_id})
+inv = j.inventory
+summ = list(j.job_host_summaries.order_by('host_name').values('id', 'host_name', 'host_id', 'constructed_host_id', 'ok', 'changed',
+    'failures', 'dark', 'processed', 'skipped', 'rescued', 'ignored', 'failed', 'created'))
+def pointers(hosts):
+    out = {{}}
+    for h in hosts:
+        s = JobHostSummary.objects.filter(host_id=h.id).order_by('-id').first()
+        out[h.name + '#' + str(h.id)] = dict(last_job=s.job_id if s else None, last_job_host_summary=s.id if s else None,
+                                             has_active_failures=bool(s and s.failed))
+    return out
+def computed(i):
+    i.refresh_from_db()
+    latest = JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1]
+    failed = i.hosts.annotate(_f=Subquery(latest)).filter(_f=True).count()
+    return dict(stored=dict(total_hosts=i.total_hosts, hosts_with_active_failures=i.hosts_with_active_failures,
+                            has_active_failures=i.has_active_failures),
+                computed=dict(total_hosts=i.hosts.count(), hosts_with_active_failures=failed, has_active_failures=bool(failed)))
+inventories = {{inv.name: computed(inv)}}
+originals = []
+if inv.kind == 'constructed':
+    originals = Host.objects.filter(pk__in=[int(x) for x in inv.hosts.values_list('instance_id', flat=True) if x])
+    for src in inv.input_inventories.all():
+        inventories[src.name] = computed(src)
+names = sorted(h.name.lower() for h in inv.hosts.all())
+qs = j.get_event_queryset()
+def body(n):
+    try:
+        b = json.loads(n.body) if isinstance(n.body, str) else n.body
+    except ValueError:
+        b = None
+    return b if isinstance(b, dict) else {{}}
+notes = [dict(id=n.id, template=n.notification_template.name, created=n.created, delivery=n.status,
+              status=body(n).get('status'), hosts=body(n).get('hosts')) for n in j.notifications.all().order_by('id')]
+host_ids = set(inv.hosts.values_list('id', flat=True)) | set(h.id for h in originals)
+since = j.created - timedelta(seconds=2)
+acts = []
+for a in ActivityStream.objects.filter(timestamp__gte=since).order_by('id'):
+    acts.append(dict(id=a.id, at=a.timestamp, node=a.action_node, op=a.operation, object1=a.object1, object2=a.object2,
+                     actor=a.actor.username if a.actor else None,
+                     job=list(a.job.values_list('id', flat=True)), host=list(a.host.values_list('id', flat=True)),
+                     notification=list(a.notification.values_list('id', flat=True)),
+                     instance=list(a.instance.values_list('hostname', flat=True)),
+                     changes=(a.changes or '')[:400]))
+emit(dict(
+    status=j.status, explanation=j.job_explanation, controller=j.controller_node, started=j.started, finished=j.finished,
+    inventory=inv.name, inventory_kind=inv.kind, host_status_counts=j.host_status_counts,
+    summaries=summ,
+    pointers=pointers(inv.hosts.all()), original_pointers=pointers(originals),
+    inventories=inventories,
+    host_metrics_before=get_snapshot('host_metrics', j.id),
+    host_metrics={{m.hostname: dict(automated_counter=m.automated_counter, first_automation=m.first_automation,
+        last_automation=m.last_automation, deleted=m.deleted, deleted_counter=m.deleted_counter)
+        for m in HostMetric.objects.filter(hostname__in=names)}},
+    event_hosts=sorted(set(qs.exclude(host_name='').values_list('host_name', 'host_id'))),
+    stats_rows=list(qs.filter(event='playbook_on_stats').values_list('counter', 'created')),
+    events=qs.count(), distinct_counters=qs.values('counter').distinct().count(),
+    stdout=j.result_stdout_raw,
+    notifications=notes,
+    activity=acts,
+    activity_for_job=[a['id'] for a in acts if {job_id} in a['job']],
+    activity_for_hosts=[a['id'] for a in acts if host_ids & set(a['host'])],
+))
+''',
+    )
+
+
+HOST_STAT_FIELDS = ('failed', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped', 'rescued', 'ignored')
+
+
+def body_vs_summaries(status, hosts, summaries, job_status):
+    """Compare one notification body (status, hosts) with the job's final status and summaries."""
+    summ = {s['host_name']: s for s in summaries}
+    hosts = hosts or {}
+    bad = sorted(h for h in set(hosts) | set(summ) if h not in hosts or h not in summ or any(hosts[h].get(k) != summ[h][k] for k in HOST_STAT_FIELDS))
+    return {
+        'status': status,
+        'status_matches_job': status == job_status,
+        'hosts_in_body': len(hosts),
+        'hosts_match_summaries': not bad,
+        'mismatched_hosts': bad,
+    }
+
+
+def dc_summarize(d, posts):
+    """The per-run numbers the write-up tables use."""
+    before = d['host_metrics_before'] or {}
+    counted = {s['host_name'].lower() for s in d['summaries'] if not s['dark']}
+    deltas = {h: (d['host_metrics'].get(h, {}).get('automated_counter') or 0) - (before.get(h) or 0) for h in sorted(before)}
+    last_jobs = {k: v['last_job'] for k, v in d['pointers'].items()}
+    acts = d['activity']
+    by_kind = Counter(f"{a['object1']}:{a['op']}" for a in acts)
+    return {
+        'status': d['status'],
+        'summaries': len(d['summaries']),
+        'summary_failed': sorted(s['host_name'] for s in d['summaries'] if s['failed']),
+        'stats_rows': len(d['stats_rows']),
+        'metric_deltas': deltas,
+        'metrics_counted_once': all(deltas.get(h) == (1 if h in counted else 0) for h in deltas) if before else None,
+        'last_job': last_jobs,
+        'last_job_is_this': sorted({v for v in last_jobs.values()}),
+        'has_active_failures': {k: v['has_active_failures'] for k, v in d['pointers'].items()},
+        'original_last_job': {k: v['last_job'] for k, v in d['original_pointers'].items()},
+        'inventories': d['inventories'],
+        'inventory_fields_ok': all(v['stored'] == v['computed'] for v in d['inventories'].values()),
+        'stdout_lines': d['stdout'].count('\n'),
+        'notifications_db': [
+            dict(id=n['id'], delivery=n['delivery'], **body_vs_summaries(n['status'], n['hosts'], d['summaries'], d['status'])) for n in d['notifications']
+        ],
+        'notifications_sink': [dict(at=p['at'], node=p['node'], **body_vs_summaries(p['status'], p['hosts'], d['summaries'], d['status'])) for p in posts],
+        'activity_total': len(acts),
+        'activity_by_kind': dict(by_kind),
+        'activity_job_entries': [(a['op'], a['node'], a['changes'][:160]) for a in acts if a['id'] in d['activity_for_job']],
+        'activity_host_entries': len(d['activity_for_hosts']),
+    }
+
+
+def dc_write(args, label, d, posts, summary):
+    if not args.out:
+        return
+    out_dir = os.path.join(args.out, label)
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, 'stdout.txt'), 'w') as fh:
+        fh.write(d['stdout'])
+    with open(os.path.join(out_dir, 'dc.json'), 'w') as fh:
+        json.dump({k: v for k, v in d.items() if k != 'stdout'} | {'sink_posts': posts, 'summary': summary}, fh, indent=2, default=str)
+
+
+def dc_start(containers, args):
+    """Reset failpoints, launch a dc job and wait until it runs remotely with a work unit."""
+    c0 = containers[0]
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    inv = dc_inventory(c0, constructed=bool(args.constructed))
+    jt = dc_template(containers, args)
+    job_id = dc_launch(c0, jt)
+    log(
+        f"launched job {job_id} (datacheck.yml, iterations={args.iterations}, fail_host={args.fail_host or '-'}, inventory={DC_CINV if args.constructed else DC_INV})"
+    )
+    st = wait_for('job running with a work unit', lambda: (s := job_state(c0, job_id))['status'] == 'running' and s['work_unit_id'] and s, 300)
+    log(f"job {job_id} running: controller={st['controller_node']} execution={st['execution_node']} unit={st['work_unit_id']}")
+    return job_id, st, inv
+
+
+def slow_seam(c0, peer, ph, owner, job_id, args, m, notes, on_both_streaming=None):
+    """slow-controller's seam drive, PR only: the owner is held before --seam-counter, its periodic
+    heartbeat paused, the peer told it is lost (claim + second stream), then the owner is let go.
+    The second finalizer of --order waits at callback.artifacts until the first has finalized.
+    on_both_streaming() runs once both streams are live (stats-insert-race holds its writers there)."""
+    second = owner if args.order == 'adopter-first' else ph
+    arm(c0, 'callback.artifacts', 'pause', {'job_id': job_id, 'node': second}, timeout=1800)
+    hold_at_counter(c0, job_id, owner, args.seam_counter)
+    wait_db_events(c0, job_id, args.seam_counter)
+    manage(c0, 'failpoint', 'arm', 'heartbeat.start', '--action', 'pause', '--match', f'node={owner}', '--match', 'periodic=True', '--timeout', '1200')
+    hb = json.loads(manage(c0, 'failpoint', 'wait', 'heartbeat.start', '--timeout', '120').stdout)
+    m['heartbeat_paused_at'] = hb['at']
+    try:
+        arm(c0, 'heartbeat.force_lost', 'trigger', {'node': ph, 'other': owner})
+        log(f'seam: {ph} treats {owner} as lost; triggering its heartbeat ({trigger_heartbeat(peer)})')
+        snap = wait_hits(c0, 'adoption.after_snapshot', timeout=args.claim_timeout, desc='the peer to claim and snapshot')[0]
+        m['claim_node'], m['safe_threshold'] = snap['node'], int(snap['ctx']['safe_threshold'])
+        manage(c0, 'failpoint', 'disarm', 'heartbeat.force_lost')
+        manage(c0, 'failpoint', 'disarm', 'callback.event')
+        log(f'seam: {snap["node"]} streams from threshold {m["safe_threshold"]}; released {owner} at counter {args.seam_counter}')
+    finally:
+        manage(peer, 'failpoint', 'release', 'heartbeat.start', check=False)
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.start', check=False)
+    if on_both_streaming:
+        on_both_streaming()
+    first_hit = 'job.after_finalize_before_release' if second == ph else 'adoption.after_finalize_before_release'
+    try:
+        h = wait_hits(c0, first_hit, timeout=args.finish_timeout, poll=3)[0]
+        log(f'seam: first finalizer done ({first_hit} on {h["node"]} at {h["at"]}); releasing {second}')
+        m['first_finalizer'] = h['node']
+    except TimeoutError as exc:
+        notes.append(f'first finalizer never reached {first_hit}: {exc}')
+    manage(c0, 'failpoint', 'disarm', 'callback.artifacts')
+
+
+def slow_timing_devel(c0, peer, owner, job_id, args, m, notes):
+    """devel has no claim: pause the owner's periodic heartbeat until the peer's lost path reaps
+    the job (natural is_lost), then let the owner go on streaming and finalize it again."""
+    manage(c0, 'failpoint', 'arm', 'heartbeat.start', '--action', 'pause', '--match', f'node={owner}', '--match', 'periodic=True', '--timeout', '1200')
+    hb = json.loads(manage(c0, 'failpoint', 'wait', 'heartbeat.start', '--timeout', '120').stdout)
+    m['heartbeat_paused_at'] = hb['at']
+    try:
+        s = wait_for('the peer to reap the job', lambda: (s := job_state(c0, job_id))['status'] != 'running' and s, args.claim_timeout, poll=5)
+        m['reaped'] = {k: s[k] for k in ('status', 'job_explanation')}
+        log(f'devel: job {job_id} now {m["reaped"]} while {owner} still streams')
+    except TimeoutError as exc:
+        notes.append(f'not reaped: {exc}')
+    finally:
+        manage(peer, 'failpoint', 'release', 'heartbeat.start', check=False)
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.start', check=False)
+
+
+def scenario_data_check(containers, args):
+    """Data correctness of an adopted job: host metrics, host pointers, inventory computed fields,
+    stdout and its line ranges, notification bodies and the activity stream.
+
+    datacheck.yml (forks=1, deterministic stdout) over the 3-host 'failpoint dc' inventory, or with
+    --constructed over a constructed inventory of it. --fail-host NAME makes one host fail. The
+    job notifies a webhook sink container (fp-sink) on success and failure.
+      --variant normal      no fault (the reference)
+      --variant same-node   owner held before --seam-counter, killed and restarted; it re-adopts
+                            its own job (PR: peer claims vetoed)
+      --variant cross-node  owner held and killed (left down until the end); PR: the peer adopts;
+                            devel: the peer's lost path reaps after is_lost
+      --variant slow        PR (--mode seam): slow-controller, both controllers stream and
+                            finalize in --order; devel: the owner's heartbeat is paused until the
+                            peer reaps, then the owner finalizes again
+      --variant reap        a job that ends with no stats: PR, the peer's lost path claims and
+                            adoption.before_queue raises once, so it reaps; devel: as cross-node
+    Before launch the hosts' HostMetric counters are recorded as the host_metrics snapshot.
+    Writes dc.json (all collected data) and stdout.txt next to result.json and metrics.json.
+    """
+    need_two(containers, 'data-check')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    if args.variant == 'slow' and pr and args.mode != 'seam':
+        raise SystemExit('data-check slow on the PR runs with --mode seam')
+    sink_start()
+    ips = container_ips(containers)
+    since = since_now()
+    job_id, st, inv = dc_start(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'fail_host': args.fail_host,
+         'constructed': bool(args.constructed), 'inventory': inv}  # fmt: skip
+    notes = [f"data-check {args.variant} on {m['branch']}: owner {owner}, peer {ph}"]
+    arm_recorders(
+        c0,
+        job_id,
+        [
+            'adoption.after_claim',
+            'adoption.after_snapshot',
+            'job.after_finalize_before_release',
+            'adoption.after_finalize_before_release',
+            'events.stats_after_insert',
+        ],
+    )
+    if args.variant == 'same-node':
+        arm_hold(c0, job_id, owner, args.seam_counter)
+        if pr:
+            guard_peer(peer, job_id)
+        wait_hold(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+        m['killed_at'] = utcnow()
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    elif args.variant in ('cross-node', 'reap'):
+        arm_hold(c0, job_id, owner, args.seam_counter)
+        if args.variant == 'reap' and pr:
+            arm(peer, 'adoption.before_queue', 'raise', {'job_id': job_id, 'node': ph}, times=1)
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    elif args.variant == 'slow':
+        if pr:
+            slow_seam(c0, peer, ph, owner, job_id, args, m, notes)
+        else:
+            slow_timing_devel(c0, peer, owner, job_id, args, m, notes)
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']} explanation={s['job_explanation']!r}")
+    m['unit_end'] = unit_end(peer, job_id, unit)
+    if args.variant == 'slow' and not pr:
+        # the owner's own stream ends after the reap; wait for its stats row
+        wait_for('the owner to store playbook_on_stats', lambda: job_metrics(peer, job_id)['stats_rows'], args.finish_timeout, poll=10)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in fired_hits(peer, 'adoption.after_snapshot')]
+    m['stats_writers'] = [
+        f"{h['node']}@{h['at']} new={h['ctx'].get('new')} metric_hosts={h['ctx'].get('metric_hosts')}" for h in fired_hits(peer, 'events.stats_after_insert')
+    ]
+    d = dc_collect(peer, job_id)
+    posts = sink_posts(job_id, ips)
+    summary = dc_summarize(d, posts)
+    m['dc'] = summary
+    label = f'{run_label(args)}-job{job_id}'
+    result = report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+    dc_write(args, label, d, posts, summary)
+    return result
+
+
+def synthetic_stats_race(containers, args, job_id, m):
+    """Two awx-manage shells (one per control node) process the job's stored playbook_on_stats
+    at the same instant, after its summaries are deleted: the code-level race without streams."""
+    c0 = containers[0]
+    n = orm(c0, f'from awx.main.models import JobHostSummary\nemit(JobHostSummary.objects.filter(job_id={job_id}).delete()[0])\n')
+    before = orm(
+        c0,
+        f"from awx.main.models import HostMetric\nemit(dict(HostMetric.objects.filter(hostname__in={DC_HOSTS!r}).values_list('hostname', 'automated_counter')))\n",
+    )
+    m['synthetic'] = {'deleted_summaries': n, 'metrics_before': before}
+    manage(c0, 'failpoint', 'clear-hits')
+    arm(c0, 'events.stats_before_insert', 'pause', {'job_id': job_id}, timeout=600)
+    arm(c0, 'events.stats_after_insert', 'sleep', {'job_id': job_id}, seconds=0)
+    code = f'''
+from awx.main.models import Job
+from awx.main.utils.failpoints import get_snapshot
+j = Job.objects.get(pk={job_id})
+ev = j.get_event_queryset().filter(event='playbook_on_stats').order_by('counter').first()
+ev.host_map = get_snapshot('host_map', j.id) or {{h.name: h.id for h in j.inventory.hosts.all()}}
+try:
+    ev._update_host_summary_from_stats(set(ev._hostnames()))
+    emit('ok')
+except Exception as exc:
+    emit(f'{{type(exc).__name__}}: {{str(exc)[:300]}}')
+'''
+    results = {}
+
+    def writer(c):
+        try:
+            results[c] = orm(c, code)
+        except RuntimeError as exc:
+            results[c] = f'shell failed: {str(exc)[-300:]}'
+
+    threads = [threading.Thread(target=writer, args=(c,)) for c in containers]
+    for t in threads:
+        t.start()
+    held = wait_hits(c0, 'events.stats_before_insert', lambda h: h['action'] == 'pause', count=len(containers), timeout=120)
+    m['synthetic']['held'] = [f"{h['node']} pid={h['pid']} at={h['at']} existing={h['ctx'].get('existing')}" for h in held]
+    if has_release_in(c0):
+        rel = release_together(c0, ['events.stats_before_insert'])
+        m['synthetic']['release'] = rel.get('at_utc')
+        m['synthetic']['resumed'] = resumed(c0, ['events.stats_before_insert'])
+    else:
+        manage(c0, 'failpoint', 'release', 'events.stats_before_insert')
+        m['synthetic']['release'] = utcnow() + ' (plain release: holders resume within one 0.25 s poll)'
+    for t in threads:
+        t.join(timeout=120)
+    m['synthetic']['writers'] = results
+    m['synthetic']['after_insert'] = [
+        f"{h['node']} at={h['at']} new={h['ctx'].get('new')} metric_hosts={h['ctx'].get('metric_hosts')}" for h in fired_hits(c0, 'events.stats_after_insert')
+    ]
+    after = orm(
+        c0,
+        f"from awx.main.models import HostMetric\nemit(dict(HostMetric.objects.filter(hostname__in={DC_HOSTS!r}).values_list('hostname', 'automated_counter')))\n",
+    )
+    m['synthetic']['metric_deltas'] = {h: (after.get(h) or 0) - (before.get(h) or 0) for h in sorted(after)}
+    m['synthetic']['summaries_after'] = orm(c0, f'from awx.main.models import JobHostSummary\nemit(JobHostSummary.objects.filter(job_id={job_id}).count())\n')
+    manage(c0, 'failpoint', 'disarm', '--all')
+    log(f"synthetic race: {json.dumps(m['synthetic'], default=str)}")
+
+
+def has_release_in(container):
+    return '--in' in manage(container, 'failpoint', 'release', '--help', check=False).stdout
+
+
+def scenario_stats_insert_race(containers, args):
+    """Two writers process the same playbook_on_stats at the same instant.
+
+      --variant streams    (PR, --mode seam) slow-controller: the owner and the adopter both stream
+                           the job, so each node's callback receiver processes its own copy of
+                           playbook_on_stats. Both are held at events.stats_before_insert (after
+                           reading the existing summaries, before the insert and the host metrics
+                           update), then released at one scheduled instant.
+      --variant synthetic  (both branches) a normal run, then its summaries are deleted and two
+                           awx-manage shells, one per control node, re-process its stored stats
+                           event, held and released the same way (devel: plain release).
+    Measures: unique-constraint errors, aborted inserts, the summary count, the HostMetric
+    automated_counter delta per host, and tracebacks.
+    """
+    need_two(containers, 'stats-insert-race')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    if args.variant == 'streams' and not (pr and args.mode == 'seam'):
+        raise SystemExit('stats-insert-race streams needs the PR branch and --mode seam')
+    sink_start()
+    ips = container_ips(containers)
+    since = since_now()
+    job_id, st, inv = dc_start(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'order': args.order}
+    notes = [f"stats-insert-race {args.variant} on {m['branch']}"]
+    arm_recorders(
+        c0, job_id, ['adoption.after_snapshot', 'job.after_finalize_before_release', 'adoption.after_finalize_before_release', 'events.stats_after_insert']
+    )
+    if args.variant == 'streams':
+
+        def hold_both_writers():
+            held = wait_hits(c0, 'events.stats_before_insert', lambda h: h['action'] == 'pause', count=2, timeout=args.finish_timeout, poll=2)
+            m['held'] = [f"{h['node']} pid={h['pid']} at={h['at']} new={h['ctx'].get('new')} existing={h['ctx'].get('existing')}" for h in held]
+            m['held_nodes'] = sorted(h['node'] for h in held)
+            log(f"both stats writers held: {m['held']}")
+            rel = release_together(c0, ['events.stats_before_insert'])
+            m['release_at'] = rel.get('at_utc')
+            time.sleep(3)
+            r = resumed(c0, ['events.stats_before_insert'])
+            m['resumed'] = r
+            wakes = [float(x['woke']) for x in r if x.get('woke')]
+            m['resume_spread_ms'] = round((max(wakes) - min(wakes)) * 1000, 3) if len(wakes) > 1 else None
+
+        arm(c0, 'events.stats_before_insert', 'pause', {'job_id': job_id}, timeout=1800)
+        slow_seam(c0, peer, ph, owner, job_id, args, m, notes, on_both_streaming=hold_both_writers)
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    m['unit_end'] = unit_end(peer, job_id, unit)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['stats_writers'] = [
+        f"{h['node']}@{h['at']} new={h['ctx'].get('new')} metric_hosts={h['ctx'].get('metric_hosts')}" for h in fired_hits(c0, 'events.stats_after_insert')
+    ]
+    d = dc_collect(c0, job_id)
+    posts = sink_posts(job_id, ips)
+    m['dc'] = dc_summarize(d, posts)
+    notes.append(f"job terminal: status={s['status']}; summaries={m['dc']['summaries']} metric deltas={m['dc']['metric_deltas']}")
+    if args.variant == 'synthetic':
+        synthetic_stats_race(containers, args, job_id, m)
+
+    def from_logs(logs):
+        pat = re.compile(r'IntegrityError|UniqueViolation|duplicate key value')
+        hits = {container_for_host(c): sum(1 for line in lines if pat.search(line)) for c, lines in logs.items()}
+        return {'unique_errors_in_logs': {k: v for k, v in hits.items() if v}, 'log_counts': count_log_lines(logs, job_id, unit)}
+
+    label = f'{run_label(args)}-job{job_id}'
+    result = report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=from_logs)
+    dc_write(args, label, d, posts, m['dc'])
+    return result
+
+
+def scenario_dc_cleanup(containers, args):
+    """Remove what data-check and stats-insert-race created: templates, the sink notification
+    template, the constructed and plain dc inventories (and their hosts), the dc-* HostMetric
+    rows, and the sink container."""
+    out = orm(
+        containers[0],
+        f'''
+from awx.main.models import HostMetric, Inventory, JobTemplate, NotificationTemplate
+done = {{}}
+done['templates'] = JobTemplate.objects.filter(name__in=['failpoint dc', 'failpoint dc constructed']).delete()[0]
+done['notification_templates'] = NotificationTemplate.objects.filter(name={DC_NT!r}).delete()[0]
+for name in ({DC_CINV!r}, {DC_INV!r}):
+    for inv in Inventory.objects.filter(name=name):
+        inv.hosts.all().delete()
+        inv.delete()
+        done[name] = 'deleted'
+done['host_metrics'] = HostMetric.objects.filter(hostname__in={[h.lower() for h in DC_HOSTS]!r}).delete()[0]
+emit(done)
+''',
+    )
+    log(f'dc cleanup: {out}')
+    sink_stop()
+    return {'ok': True}
+
+
+# --- job control and capacity, part 4 extras -------------------------------------------------
+
+OVERLAP_MARKER = '/tmp/fp-overlap.log'
+LOCAL_SETTINGS = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'tools', 'docker-compose', '_sources', 'local_settings.py')
+AWX2_OVERRIDE_MARK = '# failpoint scenarios: awx-2 override (remove after the run)'
+
+
+def unit_events(unit):
+    """Per-host (first, last) event 'created' epoch from a work unit's raw stdout on receptor-1.
+    The unit keeps the whole runner stream until it is released, also for a reaped job."""
+    out = run(['docker', 'exec', EXEC_CONTAINER, 'sh', '-c', f'cat /tmp/receptor/*/{unit}/stdout 2>/dev/null'], check=False).stdout
+    per = {}
+    for line in out.splitlines():
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        host = (ev.get('event_data') or {}).get('host') if isinstance(ev, dict) else None
+        if not host or not ev.get('created'):
+            continue
+        t = at_seconds(ev['created'] if ev['created'].endswith('Z') or '+' in ev['created'] else ev['created'] + '+00:00')
+        lo, hi = per.get(host, (t, t))
+        per[host] = (min(lo, t), max(hi, t))
+    return per
+
+
+def marker_ranges():
+    """{job_id: {host: (first, last)}} from the shared marker file, if the playbooks could write it."""
+    out = run(['docker', 'exec', EXEC_CONTAINER, 'cat', OVERLAP_MARKER], check=False).stdout
+    per = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) != 4:
+            continue
+        job, host, _, t = parts
+        lo, hi = per.setdefault(job, {}).get(host, (float(t), float(t)))
+        per[job][host] = (min(lo, float(t)), max(hi, float(t)))
+    return per
+
+
+def db_host_ranges(container, job_id):
+    return orm(
+        container,
+        f'''
+from django.db.models import Min, Max
+from awx.main.models import Job
+j = Job.objects.get(pk={job_id})
+emit({{r['host_name']: (r['lo'].timestamp(), r['hi'].timestamp()) for r in
+      j.get_event_queryset().exclude(host_name='').values('host_name').annotate(lo=Min('created'), hi=Max('created'))}})
+''',
+    )
+
+
+def overlaps(a, b):
+    """Per host: seconds both ranges cover."""
+    return {h: round(max(0.0, min(a[h][1], b[h][1]) - max(a[h][0], b[h][0])), 1) for h in sorted(set(a) & set(b))}
+
+
+def scenario_same_hosts(containers, args):
+    """Two playbooks on the same hosts: allow_simultaneous=False, the first job orphaned.
+
+    overlap.yml (each loop item appends job id, host and time to a marker file on receptor-1,
+    then sleeps 1 s) over the 3 dc hosts. Job A's owner is held before --seam-counter and killed
+    (left down until the end). Job B, from the same template, is launched right after the kill.
+      --variant kill  PR: the peer adopts A (seam); devel: the peer's lost path reaps A after is_lost
+      --variant reap  PR: the peer claims A and adoption.before_queue raises once, so A is reaped
+    Measures when B starts against when A's playbook really ends, and the per-host overlap of
+    A's and B's playbook activity (marker file; else the work units' event times).
+    """
+    need_two(containers, 'same-hosts')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    run(['docker', 'exec', EXEC_CONTAINER, 'rm', '-f', OVERLAP_MARKER], check=False)
+    dc_inventory(c0)
+    jt = setup(containers, 'failpoint overlap', 'overlap.yml', {'iterations': args.iterations}, inventory=DC_INV, allow_simultaneous=False)
+    since = since_now()
+    a = launch(c0, jt)
+    st = wait_for('job A running with a work unit', lambda: (s := job_state(c0, a))['status'] == 'running' and s['work_unit_id'] and s, 300)
+    owner, unit_a = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'job_a': a, 'unit_a': unit_a}
+    notes = [f"same-hosts {args.variant} on {m['branch']}: A={a} owner {owner}"]
+    arm_hold(c0, a, owner, args.seam_counter)
+    arm_recorders(peer, a, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    if args.variant == 'reap' and pr:
+        arm(peer, 'adoption.before_queue', 'raise', {'job_id': a, 'node': ph}, times=1)
+    wait_hold(c0, a, owner, args.seam_counter)
+    wait_db_events(c0, a, args.seam_counter)
+    m['killed_at'] = kill(oc)
+    manage(peer, 'failpoint', 'disarm', 'callback.event')
+    b = launch(peer, jt)
+    m['job_b'] = b
+    m['b_launched_at'] = utcnow()
+    log(f'launched B = job {b} from the same template')
+    if pr:
+        force_lost(peer, ph, owner)
+
+    def both():
+        sa, sb = job_state(peer, a), job_state(peer, b)
+        return {'A': (sa['status'], sa['controller_node']), 'B': (sb['status'], sb['controller_node'])}
+
+    watch(peer, a, unit_a, args.finish_timeout, until=terminal, poll=5, label='A', extra=both)
+    m['a_terminal_at'] = utcnow()
+    sb = wait_for('B to start', lambda: (s := job_state(peer, b))['status'] not in ('pending', 'waiting') and s, args.finish_timeout, poll=3)
+    m['b_running_at'] = utcnow()
+    unit_b = sb['work_unit_id']
+    m['unit_a_end'] = unit_end(peer, a, unit_a, seconds=args.finish_timeout)
+    m['a_events_on_unit'] = unit_events(unit_a)
+    watch(peer, b, unit_b, args.finish_timeout, until=terminal, poll=10, label='B')
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    times = orm(
+        peer,
+        f'''
+from awx.main.models import Job
+out = {{}}
+for jid in ({a}, {b}):
+    j = Job.objects.get(pk=jid)
+    out[jid] = dict(created=j.created, started=j.started, finished=j.finished, status=j.status, explanation=j.job_explanation, controller=j.controller_node)
+emit(out)
+''',
+    )
+    m['jobs'] = times
+    m['b_wait_s'] = round(at_seconds(times[str(b)]['started']) - at_seconds(times[str(b)]['created']), 1) if times[str(b)]['started'] else None
+    markers = marker_ranges()
+    m['marker_file'] = bool(markers)
+    if markers:
+        ra, rb = markers.get(str(a), {}), markers.get(str(b), {})
+    else:
+        ra = m['a_events_on_unit'] or db_host_ranges(peer, a)
+        rb = db_host_ranges(peer, b)
+    m['a_ranges'], m['b_ranges'] = ra, rb
+    m['overlap_s'] = overlaps(ra, rb)
+    m['a_playbook_end'] = max((v[1] for v in ra.values()), default=None)
+    m['b_playbook_start'] = min((v[0] for v in rb.values()), default=None)
+    notes.append(f"A {times[str(a)]['status']}, B started {m['b_wait_s']}s after launch; per-host overlap {m['overlap_s']}")
+    report(containers, b, since, args, unit_b, (), out_name=f'{run_label(args)}-B-job{b}')
+    return report(containers, a, since, args, unit_a, notes, metrics=m, out_name=f'{run_label(args)}-A-job{a}')
+
+
+def awx2_override(lines):
+    """Append a guarded block to the shared local_settings.py that applies on awx-2 only.
+    Returns the original text; restore it with awx2_restore()."""
+    with open(LOCAL_SETTINGS) as fh:
+        orig = fh.read()
+    block = '\n' + AWX2_OVERRIDE_MARK + '\nif CLUSTER_HOST_ID == "awx-2":\n' + ''.join(f'    {line}\n' for line in lines)
+    with open(LOCAL_SETTINGS, 'w') as fh:
+        fh.write(orig + block)
+    log(f'local_settings.py: awx-2 override {lines}')
+    return orig
+
+
+def awx2_restore(orig):
+    with open(LOCAL_SETTINGS, 'w') as fh:
+        fh.write(orig)
+    log('local_settings.py restored')
+
+
+def restart_workers(container):
+    run(['docker', 'exec', container, 'supervisorctl', 'restart', 'tower-processes:awx-dispatcher', 'tower-processes:awx-receiver'])
+    log(f'{container}: dispatcher and receiver restarted')
+
+
+def pool_info(container):
+    """Effective dispatcher pool: max_workers from the running config, and current workers."""
+    cfg = orm(container, 'from awx.main.utils.common import get_auto_max_workers\nemit(get_auto_max_workers())\n')
+    out = run(['docker', 'exec', container, 'dispatcherctl', 'status'], check=False).stdout
+    mw = re.findall(r'max_workers\D+(\d+)', out)
+    return {'get_auto_max_workers': cfg, 'status_max_workers': mw[:1], 'workers': len(dispatcher_workers(container))}
+
+
+def scenario_few_workers(containers, args):
+    """Too few dispatcher workers on the adopter.
+
+    The dispatcher has no max_workers setting: it uses get_auto_max_workers() =
+    max(cpu capacity, memory capacity) + 7, from SYSTEM_TASK_ABS_CPU / SYSTEM_TASK_ABS_MEM (setting
+    or env). Those same values size the node's capacity. awx-2 gets small values (local_settings.py,
+    awx-2 only) so its pool is --workers-ish, then --orphans jobs placed on awx-1 are orphaned
+    (awx-1 killed and left down; PR: awx-2 told at once). Samples awx-2's pool, its heartbeat
+    (last_seen), job states and a probe job and project update launched after the kill.
+    """
+    need_two(containers, 'few-workers')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    m = {'branch': 'PR' if pr else 'devel', 'orphans': args.orphans}
+    notes = []
+    orig = awx2_override([f"SYSTEM_TASK_ABS_CPU = '{args.abs_cpu}'", f"SYSTEM_TASK_ABS_MEM = '{args.abs_mem}'"])
+    try:
+        restart_workers(c2)
+        wait_for('awx-2 heartbeat with new capacity', lambda: (i := instances(c2)['awx-2'])['capacity'] and i['capacity'] < 100 and i, 240, poll=10)
+        m['awx2_before'] = instances(c2)['awx-2']
+        m['pool_before'] = pool_info(c2)
+        log(f"awx-2 now {m['awx2_before']}; pool {m['pool_before']}")
+        set_instance(c2, 'awx-2', enabled=False)
+        jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+        since = since_now()
+        ids = orm(
+            c0,
+            f'''
+from awx.main.models import JobTemplate
+jt = JobTemplate.objects.get(pk={jt})
+ids = []
+for _ in range({args.orphans}):
+    j = jt.create_unified_job()
+    j.signal_start()
+    ids.append(j.id)
+emit(ids)
+''',
+        )
+        m['jobs'] = ids
+        wait_for('all orphans running on awx-1', lambda: all(s == 'running' for s in _job_statuses(c0, ids).values()), 300, poll=5)
+        set_instance(c2, 'awx-2', enabled=True)
+        probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+        time.sleep(args.lead)
+        m['killed_at'] = kill(c0)
+        if pr:
+            force_lost(c2, 'awx-2', 'awx-1')
+        samples = []
+        probes = {}
+        t_kill = time.monotonic()
+
+        def sample():
+            st = orm(
+                c2,
+                f'''
+from awx.main.models import UnifiedJob, Instance
+from django.utils.timezone import now
+emit(dict(at=now(), jobs={{j.id: (j.status, j.controller_node) for j in UnifiedJob.objects.filter(pk__in={ids!r})}},
+          awx2_last_seen=Instance.objects.get(hostname='awx-2').last_seen, awx2_state=Instance.objects.get(hostname='awx-2').node_state,
+          awx2_consumed=Instance.objects.get(hostname='awx-2').consumed_capacity, awx2_capacity=Instance.objects.get(hostname='awx-2').capacity))
+''',
+            )
+            w = dispatcher_workers(c2)
+            st['workers'] = len(w)
+            st['busy'] = sum(1 for x in w if x.get('task'))
+            st['adoptions_running'] = len(running_tasks(c2))
+            st['by_status'] = dict(Counter(v[0] + '@' + (v[1] or '-') for v in st['jobs'].values()))
+            del st['jobs']
+            samples.append(st)
+            log(f"sample: workers={st['workers']} busy={st['busy']} adopt={st['adoptions_running']} {st['by_status']} last_seen={st['awx2_last_seen']}")
+
+        while time.monotonic() - t_kill < args.observe:
+            sample()
+            if not probes and time.monotonic() - t_kill > 30:
+                probes['job'] = launch(c2, probe_jt)
+                probes['project_update'] = orm(c2, "from awx.main.models import Project\nemit(Project.objects.get(name='Demo Project').update().id)\n")
+                m['probes_launched_at'] = utcnow()
+                log(f'probes launched: {probes}')
+            if all(s not in ('pending', 'waiting', 'running') for s in _job_statuses(c2, ids).values()):
+                break
+            time.sleep(args.sample)
+        m['samples'] = samples
+        m['probes'] = probes
+        m['probe_times'] = orm(
+            c2,
+            f'''
+from awx.main.models import UnifiedJob
+emit({{j.id: dict(created=j.created, started=j.started, finished=j.finished, status=j.status, controller=j.controller_node)
+      for j in UnifiedJob.objects.filter(pk__in={list(probes.values())!r})}})
+''',
+        )
+        final = _job_statuses(c2, ids)
+        m['final'] = dict(Counter(final.values()))
+        m['kill_to_all_terminal_s'] = round(time.monotonic() - t_kill, 1) if all(s not in ('pending', 'waiting', 'running') for s in final.values()) else None
+        m['adoptions'] = by_node(fired_hits(c2, 'adoption.after_snapshot'))
+    finally:
+        awx2_restore(orig)
+        restart_workers(c2)
+        start_back(c0, 'awx-1')
+        set_instance(c2, 'awx-2', enabled=True)
+    wait_for('awx-2 capacity restored', lambda: instances(c2)['awx-2']['capacity'] > 100, 300, poll=10)
+    m['pool_after'] = pool_info(c2)
+    time.sleep(args.settle)
+
+    def from_logs(logs):
+        out = count_log_lines(logs, ids[0])
+        pat = re.compile(r'max_workers|queue pressure|capacity may be insufficient|deferring|out of control capacity')
+        out['pool_pressure_lines'] = {container_for_host(c): sum(1 for line in lines if pat.search(line)) for c, lines in logs.items()}
+        return out
+
+    return report(containers, ids[0], since, args, None, notes, metrics=m, from_logs=from_logs)
+
+
+def scenario_disable_live(containers, args):
+    """Disabling a live controller while it runs a job (it is not killed).
+
+      --variant disable        enabled=False on the owner
+      --variant deprovisioning node_state='deprovisioning' on the owner (the nearest thing to
+                               draining in this version; written straight to the row)
+    Watches --observe seconds (several of the peer's heartbeats; the peer's heartbeat is also
+    triggered) for any claim, adoption, second stream, duplicate event or extra notification,
+    then restores the owner and lets the job finish.
+    """
+    need_two(containers, 'disable-live')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel'}
+    notes = [f"disable-live {args.variant} on {m['branch']}"]
+    arm_recorders(c0, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.before_queue', 'sweep.before_claim', 'lost_instance.before_claim'])
+    time.sleep(args.lead)
+    if args.variant == 'disable':
+        m['changed'] = set_instance(c0, owner, enabled=False)
+    else:
+        m['changed'] = set_instance(c0, owner, node_state='deprovisioning')
+    m['changed_at'] = utcnow()
+    try:
+        for _ in range(3):
+            time.sleep(args.observe / 3)
+            if pr:
+                trigger_heartbeat(peer)
+            s = job_state(c0, job_id)
+            log(f"observe: job {s['status']} controller={s['controller_node']} events={s['events']}; {owner}={instances(c0)[owner]}")
+        m['during'] = {k: s[k] for k in ('status', 'controller_node', 'events')}
+        m['owner_state_during'] = instances(c0)[owner]
+    finally:
+        if args.variant == 'disable':
+            set_instance(c0, owner, enabled=True)
+        else:
+            set_instance(c0, owner, node_state='ready')
+        m['restored_at'] = utcnow()
+    m['claims'] = {
+        name: by_node(fired_hits(c0, name)) for name in ('sweep.before_claim', 'lost_instance.before_claim', 'adoption.after_claim', 'adoption.after_snapshot')
+    }
+    s = watch(c0, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+    time.sleep(args.settle)
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']}")
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def scenario_capacity_race(containers, args):
+    """Orphans and new launches competing for capacity.
+
+    awx-2's cpu capacity is forced to 1 (SYSTEM_TASK_ABS_CPU='0.25', awx-2 only) and two long
+    fillers are placed on it; capacity_adjustment=0 gives capacity 1, consumed 2. The scenario
+    job O runs on awx-1, which is killed and left down (PR: awx-2 told at once; its lost path
+    declines for lack of room, so O stays owned by the dead awx-1). --pending launches of a short
+    template are queued; they cannot be placed either. Then capacity is freed:
+      --variant free-one   cancel one filler: remaining capacity goes from -1 to 0
+      --variant free-two   cancel both fillers: remaining capacity goes from -1 to 1
+    Records who takes the freed capacity first (the sweep claiming O, or the task manager
+    starting a pending launch), and what happens next, for --observe seconds.
+    """
+    need_two(containers, 'capacity-race')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'pending': args.pending}
+    notes = []
+    orig = awx2_override(["SYSTEM_TASK_ABS_CPU = '0.25'"])
+    fillers, pend = [], []
+    try:
+        restart_workers(c2)
+        time.sleep(15)
+        set_instance(c2, 'awx-1', enabled=False)
+        filler_jt = setup(containers, 'failpoint filler', 'quiet.yml', {'quiet_seconds': 1800}, allow_simultaneous=True)
+        fillers = [launch(c2, filler_jt) for _ in range(2)]
+        for f in fillers:
+            wait_for(f'filler {f} running on awx-2', lambda f=f: (s := job_state(c2, f))['status'] == 'running' and s['controller_node'] == 'awx-2' and s, 300)
+        set_instance(c2, 'awx-1', enabled=True)
+        wait_for('awx-1 capacity back', lambda: instances(c2)['awx-1']['capacity'] > 0, 180, poll=5)
+        since = since_now()
+        job_id, st = start_job(containers, args, reset=False)
+        unit = st['work_unit_id']
+        if st['controller_node'] != 'awx-1':
+            raise SystemExit(f"O went to {st['controller_node']}, expected awx-1")
+        arm_recorders(c2, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'sweep.before_claim', 'lost_instance.before_claim'])
+        set_instance(c2, 'awx-2', capacity_adjustment=0)
+        m['awx2'] = wait_for('awx-2 capacity 1', lambda: (i := instances(c2))['awx-2']['capacity'] == 1 and i['awx-2'], 180, poll=5)
+        pend_jt = setup(containers, 'failpoint pending', 'chatty.yml', {'iterations': 60}, allow_simultaneous=True)
+        m['killed_at'] = kill(c0)
+        if pr:
+            force_lost(c2, 'awx-2', 'awx-1')
+        wait_for('awx-1 marked lost', lambda: instances(c2)['awx-1']['state'] != 'ready' or None, 600, poll=10)
+        time.sleep(20)
+        m['o_before_free'] = job_state(c2, job_id)
+        pend = [launch(c2, pend_jt) for _ in range(args.pending)]
+        time.sleep(30)
+        m['pending_before_free'] = _job_statuses(c2, pend)
+        to_cancel = fillers[:1] if args.variant == 'free-one' else fillers
+        cancel_at = utcnow()
+        for f in to_cancel:
+            cancel_job(c2, f)
+        m['freed_at'] = cancel_at
+        log(f'canceled fillers {to_cancel} at {cancel_at}')
+        timeline = []
+        t0 = time.monotonic()
+        last = None
+        while time.monotonic() - t0 < args.observe:
+            o = job_state(c2, job_id)
+            ps = orm(
+                c2,
+                f'''
+from awx.main.models import UnifiedJob, Instance
+i = Instance.objects.get(hostname='awx-2')
+emit(dict(pending={{j.id: (j.status, j.controller_node, j.started) for j in UnifiedJob.objects.filter(pk__in={pend!r})}},
+          capacity=i.capacity, consumed=i.consumed_capacity))
+''',
+            )
+            snap = (o['status'], o['controller_node'], json.dumps({k: v[:2] for k, v in ps['pending'].items()}), ps['consumed'])
+            if snap != last:
+                row = {
+                    't': round(time.monotonic() - t0, 1),
+                    'at': utcnow(),
+                    'O': (o['status'], o['controller_node']),
+                    'pending': ps['pending'],
+                    'consumed': ps['consumed'],
+                    'capacity': ps['capacity'],
+                }
+                timeline.append(row)
+                log(f'after free: {row}')
+                last = snap
+            if terminal(o) and all(v[0] not in ('pending', 'waiting') for v in ps['pending'].values()):
+                break
+            time.sleep(3)
+        m['timeline'] = timeline
+        snaps = fired_hits(c2, 'adoption.after_snapshot')
+        m['o_adopted_at'] = snaps[0]['at'] if snaps else None
+        starts = orm(
+            c2,
+            f'''
+from awx.main.models import UnifiedJob
+emit({{j.id: dict(started=j.started, status=j.status, controller=j.controller_node) for j in UnifiedJob.objects.filter(pk__in={pend!r})}})
+''',
+        )
+        m['pending_starts'] = starts
+        first_launch = min((at_seconds(v['started']) for v in starts.values() if v['started']), default=None)
+        m['first_launch_started'] = first_launch
+        m['winner'] = 'orphan' if snaps and (first_launch is None or at_seconds(snaps[0]['at']) < first_launch) else ('launch' if first_launch else 'none')
+        s = watch(c2, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+        notes.append(f"O terminal: {s['status']} controller={s['controller_node']}; winner of the freed capacity: {m['winner']}")
+    finally:
+        for j in fillers + pend:
+            try:
+                cancel_job(c2, j)
+            except RuntimeError:
+                pass
+        set_instance(c2, 'awx-2', capacity_adjustment=1)
+        awx2_restore(orig)
+        restart_workers(c2)
+        start_back(c0, 'awx-1')
+        set_instance(c2, 'awx-1', enabled=True)
+    time.sleep(args.settle)
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
 def scenario_report(containers, args):
     """Report only: invariants, timeline and saved logs for --job since --since (a run cut short)."""
     if not (args.job and args.since):
@@ -3436,6 +4525,11 @@ VARIANTS = {
     'other-job-types': ('adhoc', 'project-update', 'inventory-update'),
     'waiting-jobs': ('waiting', 'unit-unsaved'),
     'large-replay': ('peer', 'restart'),
+    'data-check': ('normal', 'same-node', 'cross-node', 'slow', 'reap'),
+    'stats-insert-race': ('streams', 'synthetic'),
+    'same-hosts': ('kill', 'reap'),
+    'disable-live': ('disable', 'deprovisioning'),
+    'capacity-race': ('free-one', 'free-two'),
 }
 
 SCENARIOS = {
@@ -3466,6 +4560,13 @@ SCENARIOS = {
     'repeated-restarts': scenario_repeated_restarts,
     'large-replay': scenario_large_replay,
     'deprovision': scenario_deprovision,
+    'data-check': scenario_data_check,
+    'stats-insert-race': scenario_stats_insert_race,
+    'dc-cleanup': scenario_dc_cleanup,
+    'same-hosts': scenario_same_hosts,
+    'few-workers': scenario_few_workers,
+    'disable-live': scenario_disable_live,
+    'capacity-race': scenario_capacity_race,
     'report': scenario_report,
 }
 
@@ -3517,6 +4618,11 @@ def main():
         '--order', choices=['owner-first', 'adopter-first'], default='owner-first', help='slow-controller seam: which controller finalizes first'
     )
     parser.add_argument('--fresh-event-queries', action='store_true', help='slow-controller: delete EventQuery rows first so both finalizers insert them')
+    parser.add_argument('--fail-host', default='', help='data-check / stats-insert-race: this host fails at the end of datacheck.yml')
+    parser.add_argument('--constructed', action='store_true', help='data-check: run over a constructed inventory of the dc hosts')
+    parser.add_argument('--abs-cpu', default='0.25', help='few-workers: SYSTEM_TASK_ABS_CPU for awx-2')
+    parser.add_argument('--abs-mem', default='2348Mi', help='few-workers: SYSTEM_TASK_ABS_MEM for awx-2 (2 GiB is deducted, 100 MiB per fork)')
+    parser.add_argument('--pending', type=int, default=3, help='capacity-race: pending launches queued before capacity is freed')
     parser.add_argument('--skip-preflight', action='store_true', help='Run even if the environment checks fail')
     parser.add_argument('--out', help='Directory to save logs, tracebacks and the timeline into')
     parser.add_argument('--max-lines', type=int, default=150)
@@ -3536,6 +4642,7 @@ def main():
     if not containers:
         raise SystemExit('no tools_awx_N containers running')
     log(f'control containers: {", ".join(containers)}')
+    args.branch = 'pr' if is_pr_branch(containers[0]) else 'devel'
     hosts = [c.replace('tools_', '').replace('_', '-') for c in containers] + ['receptor-1']
     if args.scenario != 'report':
         wait_cluster_ready(containers[0], hosts)

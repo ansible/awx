@@ -1,0 +1,23 @@
+---
+# Deterministic output for data-correctness runs. With the template's forks=1, every run over
+# the same inventory and vars prints the same stdout, so an adopted job's stdout can be
+# compared with a normal run's. One event per loop item, about one per second per host.
+# fail_host (a host name) makes that one host fail at the end.
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars:
+    iterations: 30
+    fail_host: ''
+  tasks:
+    - name: tick
+      command: sleep 1
+      loop: "{{ range(iterations | int) | list }}"
+      changed_when: false
+    - name: change
+      command: /bin/true
+      changed_when: true
+    - name: fail one host
+      fail:
+        msg: "failing {{ inventory_hostname }} on purpose"
+      when: inventory_hostname == fail_host

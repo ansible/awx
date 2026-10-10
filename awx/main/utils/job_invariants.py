@@ -7,10 +7,10 @@ the baseline a scenario is compared against.
 """
 
 from django.db import connection
-from django.db.models import Max
+from django.db.models import Max, OuterRef, Subquery
 
 from awx.main.constants import ACTIVE_STATES
-from awx.main.models import Host, UnifiedJob
+from awx.main.models import Host, HostMetric, JobHostSummary, UnifiedJob
 from awx.main.utils.failpoints import get_snapshot
 
 
@@ -166,6 +166,22 @@ def check_host_ids_match_job_start(job):
             want = expected[name] if expected[name] in existing else None
             if host_id != want:
                 bad_summaries.append(f'{name} {host_id} != {want}')
+    elif job.inventory_id:
+        # Constructed inventory: the job-start map holds the constructed hosts' ids. A summary
+        # carries that id as constructed_host_id, and the original (input inventory) host's id,
+        # the constructed host's instance_id, as host_id.
+        constructed = {h.pk: _host_id(h.instance_id) for h in Host.objects.filter(pk__in=[i for i in expected.values() if i is not None])}
+        originals = set(Host.objects.filter(pk__in=[i for i in constructed.values() if i is not None]).values_list('pk', flat=True))
+        for name, host_id, constructed_id in job.job_host_summaries.values_list('host_name', 'host_id', 'constructed_host_id'):
+            if name not in expected:
+                continue
+            want_constructed = expected[name] if expected[name] in constructed else None
+            original = constructed.get(expected[name])
+            want_host = original if original in originals else None
+            if constructed_id != want_constructed:
+                bad_summaries.append(f'{name} constructed_host_id {constructed_id} != {want_constructed}')
+            if host_id != want_host:
+                bad_summaries.append(f'{name} host_id {host_id} != {want_host}')
     bad_summaries.sort()
 
     problems = []
@@ -177,6 +193,131 @@ def check_host_ids_match_job_start(job):
         'name': 'host_ids_match_job_start',
         'ok': not problems,
         'detail': ' | '.join(problems) if problems else f'{len(expected)} hosts in the job-start map, events and summaries match',
+    }
+
+
+def check_host_metrics_counted_once(job):
+    """Each host the job automated should add exactly one to its HostMetric.automated_counter.
+
+    A normal run counts a host once, when its playbook_on_stats is processed, and skips dark
+    (unreachable) hosts. Processing the same stats twice (two controllers streaming one job, or
+    a replay after adoption) must not count it again. Compares the counter now with a copy
+    taken at job start (failpoints.record_snapshot('host_metrics', job.id, ...), hostname ->
+    automated_counter, None for no row), so it is only exact while no other job has
+    automated the same hosts since; run it right after the job ends.
+    """
+    if not hasattr(job, 'job_host_summaries'):
+        return {'name': 'host_metrics_counted_once', 'ok': True, 'detail': 'not applicable'}
+    snapshot = get_snapshot('host_metrics', job.id)
+    if snapshot is None:
+        return {'name': 'host_metrics_counted_once', 'ok': True, 'detail': 'no job-start host_metrics snapshot; not checked'}
+    counted = {name.lower() for name, dark in job.job_host_summaries.values_list('host_name', 'dark') if not dark}
+    now = dict(HostMetric.objects.filter(hostname__in=list(snapshot)).values_list('hostname', 'automated_counter'))
+    wrong = []
+    for name, before in sorted(snapshot.items()):
+        delta = (now.get(name) or 0) - (before or 0)
+        want = 1 if name in counted else 0
+        if delta != want:
+            wrong.append(f'{name} +{delta} (want +{want})')
+    return {
+        'name': 'host_metrics_counted_once',
+        'ok': not wrong,
+        'detail': '; '.join(wrong[:10]) if wrong else f'{len(snapshot)} hosts in the snapshot, {len(counted)} counted once each',
+    }
+
+
+def check_host_pointers(job):
+    """Host and inventory fields derived from this job's summaries should be consistent.
+
+    A host's last_job, last_job_host_summary and has_active_failures come from its newest
+    JobHostSummary. For every host in this job's summaries, unless a later job has summarized
+    it since: the newest summary is this job's, there is one per host, and its failed flag
+    matches its own counts. The summary counts must equal the stored playbook_on_stats. The
+    inventory's stored computed fields (total_hosts, hosts_with_active_failures,
+    has_active_failures) must equal what update_computed_fields would compute now.
+
+    A job with no playbook_on_stats has no summaries, so its hosts keep pointing at earlier
+    jobs. That is reported, not failed (playbook_events_complete fails such a job).
+    """
+    if not hasattr(job, 'job_host_summaries'):
+        return {'name': 'host_pointers', 'ok': True, 'detail': 'not applicable'}
+    problems = []
+    notes = []
+    summaries = list(job.job_host_summaries.all())
+    stats = job.get_event_queryset().filter(event='playbook_on_stats').order_by('counter').first()
+    if stats is None:
+        notes.append(f'no playbook_on_stats; {len(summaries)} summaries')
+    else:
+        data = stats.event_data or {}
+        for s in summaries:
+            for field in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped', 'rescued', 'ignored'):
+                want = (data.get(field) or {}).get(s.host_name, 0)
+                if getattr(s, field) != want:
+                    problems.append(f'{s.host_name} {field}={getattr(s, field)} != stats {want}')
+            if s.failed != bool(s.dark or s.failures):
+                problems.append(f'{s.host_name} failed={s.failed} with dark={s.dark} failures={s.failures}')
+        named = set()
+        for field in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+            named.update((data.get(field) or {}).keys())
+        missing = sorted(named - {s.host_name for s in summaries})
+        if missing:
+            problems.append(f'no summary for {", ".join(missing[:10])}')
+    superseded = []
+    for s in summaries:
+        if s.host_id is None:
+            continue
+        newest = JobHostSummary.objects.filter(host_id=s.host_id).order_by('-id').first()
+        if newest.id == s.id:
+            continue
+        if newest.job_id != job.id and newest.id > s.id:
+            superseded.append(s.host_name)
+        else:
+            problems.append(f'{s.host_name} newest summary {newest.id} (job {newest.job_id}) is not this job\'s {s.id}')
+    if superseded:
+        notes.append(f'superseded by later jobs: {", ".join(sorted(superseded)[:10])}')
+    inv = job.inventory
+    if inv is not None:
+        latest_failed = JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1]
+        failed_hosts = inv.hosts.annotate(_latest_failed=Subquery(latest_failed)).filter(_latest_failed=True).count()
+        want = {'total_hosts': inv.hosts.count(), 'hosts_with_active_failures': failed_hosts, 'has_active_failures': bool(failed_hosts)}
+        for field, value in want.items():
+            if getattr(inv, field) != value:
+                problems.append(f'inventory {field}={getattr(inv, field)} != computed {value}')
+        notes.append(f'inventory total_hosts={inv.total_hosts} hosts_with_active_failures={inv.hosts_with_active_failures}')
+    detail = '; '.join(problems[:10]) if problems else f'{len(summaries)} summaries consistent'
+    if notes:
+        detail += ' (' + '; '.join(notes) + ')'
+    return {'name': 'host_pointers', 'ok': not problems, 'detail': detail}
+
+
+def check_stdout_lines_contiguous(job):
+    """Events' stdout line ranges should tile the output: each event's start_line is the
+    previous event's end_line, from line 0, with no gap and no overlap.
+
+    The job's stdout is the events' stdout ordered by start_line, so a gap is output lost from
+    the middle and an overlap (a range stored twice, e.g. by two streams of one job) is output
+    printed twice. Events with no stdout (start_line == end_line) cannot overlap anything.
+    """
+    rows = list(job.get_event_queryset().order_by('start_line', 'end_line', 'counter').values_list('start_line', 'end_line', 'counter'))
+    if not rows:
+        return {'name': 'stdout_lines_contiguous', 'ok': True, 'detail': 'no events'}
+    expected = 0
+    gaps, overlaps = [], []
+    for start, end, counter in rows:
+        if start > expected:
+            gaps.append(f'lines {expected}-{start} before counter {counter}')
+        elif start < expected and end > start:
+            overlaps.append(f'counter {counter} lines {start}-{end}')
+        expected = max(expected, end)
+    problems = []
+    if gaps:
+        problems.append(f'{len(gaps)} gaps ({"; ".join(gaps[:5])})')
+    if overlaps:
+        problems.append(f'{len(overlaps)} overlapping events ({"; ".join(overlaps[:5])})')
+    return {
+        'name': 'stdout_lines_contiguous',
+        'ok': not problems,
+        'detail': ' | '.join(problems) if problems else f'{len(rows)} events tile lines 0-{expected}',
     }
 
 
@@ -226,6 +367,9 @@ CHECKS = (
     check_host_summaries_unique,
     check_host_ids_match_job_start,
     check_playbook_events_complete,
+    check_host_metrics_counted_once,
+    check_host_pointers,
+    check_stdout_lines_contiguous,
 )
 
 
