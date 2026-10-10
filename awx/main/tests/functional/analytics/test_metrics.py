@@ -170,4 +170,28 @@ def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd,
         m.return_value.generate_metrics.return_value = ''
     request = mock.MagicMock()
     subsystem_metrics_module.metrics(request)
-    mock_indirect.return_value.generate_metrics.assert_called_once_with(request)
+    mock_indirect.return_value.generate_metrics.assert_called_once()
+    assert mock_indirect.return_value.generate_metrics.call_args.args[0] is request
+    assert 'emitted_meta' in mock_indirect.return_value.generate_metrics.call_args.kwargs
+
+
+def test_shared_subsystem_metrics_emit_help_type_once():
+    """Operational metrics shared across subsystems must emit HELP/TYPE only once (AAP-84834)."""
+    instance_data = {'awx-1': {'subsystem_metrics_pipe_execute_seconds': 1.5}}
+    metric = subsystem_metrics_module.FloatM(
+        'subsystem_metrics_pipe_execute_seconds', 'Time spent saving metrics to redis'
+    )
+    emitted_meta = set()
+
+    first = metric.to_prometheus(instance_data, namespace='dispatcher', include_meta=True)
+    emitted_meta.add(metric.field)
+    second = metric.to_prometheus(
+        instance_data, namespace='callback_receiver', include_meta=metric.field not in emitted_meta
+    )
+
+    assert first.count('# HELP subsystem_metrics_pipe_execute_seconds') == 1
+    assert first.count('# TYPE subsystem_metrics_pipe_execute_seconds') == 1
+    assert second.count('# HELP subsystem_metrics_pipe_execute_seconds') == 0
+    assert second.count('# TYPE subsystem_metrics_pipe_execute_seconds') == 0
+    assert 'subsystem="dispatcher"' in first
+    assert 'subsystem="callback_receiver"' in second
