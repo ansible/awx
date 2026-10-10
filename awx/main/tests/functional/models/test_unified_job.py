@@ -1,4 +1,5 @@
 import itertools
+from unittest import mock
 import pytest
 from uuid import uuid4
 
@@ -294,6 +295,25 @@ class TestUpdateParentInstance:
         self.run_update(project, status='failed')
         assert project.last_job == pu_check
         assert project.status == 'successful'
+
+    def test_skip_locked_updates_when_row_free(self, job_template):
+        job = job_template.jobs.create(status='new')
+        job.status = 'successful'
+        job.failed = False
+        job._update_parent_instance(skip_locked=True)
+        job_template.refresh_from_db()
+        assert job_template.last_job == job
+
+    def test_skip_locked_skips_when_row_locked(self, job_template):
+        job = job_template.jobs.create(status='new')
+        job.status = 'successful'
+        job.failed = False
+
+        qs_none = JobTemplate.objects.none()
+        with mock.patch.object(JobTemplate.objects, 'select_for_update', return_value=qs_none):
+            job._update_parent_instance(skip_locked=True)
+        job_template.refresh_from_db()
+        assert job_template.last_job is None
 
 
 @pytest.mark.django_db

@@ -575,7 +575,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def _get_parent_field_name(self):
         return 'project'
 
-    def _update_parent_instance(self):
+    def _update_parent_instance(self, skip_locked=False):
         if not self.project:
             return  # no parent instance to update
         if self.job_type == PERM_INVENTORY_DEPLOY:
@@ -588,7 +588,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
                 first_update = True
             if not first_update:
                 return
-        return super(ProjectUpdate, self)._update_parent_instance()
+        return super(ProjectUpdate, self)._update_parent_instance(skip_locked=skip_locked)
 
     @classmethod
     def _get_task_class(cls):
