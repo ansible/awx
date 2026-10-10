@@ -202,6 +202,31 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
     assert expected_config in tmpl
 
 
+@pytest.mark.parametrize(
+    'discard_severity, expected',
+    [
+        (None, 'queue.discardSeverity="5"'),  # registered default, unchanged from before the setting existed
+        (8, 'queue.discardSeverity="8"'),  # rsyslog's own default: discard nothing
+        (0, 'queue.discardSeverity="0"'),  # discard anything, including EMERGENCY
+    ],
+)
+def test_rsyslog_conf_discard_severity(discard_severity, expected):
+    mock_settings, _ = _mock_logging_defaults()
+
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'localhost')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 9000)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', 'tcp')
+    if discard_severity is not None:
+        setattr(mock_settings, 'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY', discard_severity)
+
+    tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert expected in tmpl
+
+
 def test_splunk_auth():
     mock_settings, _ = _mock_logging_defaults()
     # Set test settings
