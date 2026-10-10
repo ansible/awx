@@ -75,7 +75,18 @@ class AnsibleInventoryLoader(object):
         self.verbosity = verbosity
 
     def get_base_args(self):
-        bargs = ['podman', 'run', '--user=root', '--quiet']
+        """
+        Build base Podman arguments for running ansible-inventory in a container.
+
+        Returns a list of command-line arguments for executing ansible-inventory
+        inside the default execution environment container. Includes volume mounts
+        for the inventory source, environment variables, and the --rm flag to
+        automatically remove the container after execution.
+
+        Returns:
+            list: Base command arguments for Podman container execution
+        """
+        bargs = ['podman', 'run', '--rm', '--user=root', '--quiet']
         bargs.extend(['-v', '{0}:{0}:Z'.format(self.source)])
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
