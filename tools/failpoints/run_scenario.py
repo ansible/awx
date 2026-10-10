@@ -5573,7 +5573,7 @@ def scenario_cancel_wf_orphan(containers, args):
     t0 = time.monotonic()
     while time.monotonic() - t0 < args.observe:
         tree = wf_state(c2, wj, ids)
-        if tree['workflow']['status'] not in ('pending', 'waiting', 'running') and all(
+        if tree['status'] not in ('pending', 'waiting', 'running') and all(
             n['status'] not in ('pending', 'waiting', 'running') for n in tree['nodes'].values() if n['job']
         ):
             break
@@ -5821,8 +5821,8 @@ emit(ig.id)
         set_instance(c2, 'awx-2', enabled=True)
     m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'jobs': ids, 'iterations': args.iterations}
     arm_recorders(c2, None, ['adoption.after_snapshot'])
-    for j in ids:
-        arm(c2, 'callback.event', 'pause', {'job_id': j, 'counter': args.seam_counter}, timeout=1800)
+    # One armed row per failpoint name: hold every job at the same counter (only these two run).
+    arm(c2, 'callback.event', 'pause', {'counter': args.seam_counter}, timeout=1800)
     wait_hits(c2, 'callback.event', lambda h: h['action'] == 'pause', count=2, timeout=300, poll=2)
     m['killed_at'] = kill(c0)
     manage(c2, 'failpoint', 'disarm', 'callback.event')
@@ -6137,6 +6137,22 @@ def scenario_scale_down(containers, args):
     return report(containers, m['jobs'][0], m['killed_at'][:19] + 'Z', args, None, [], metrics=m)
 
 
+def set_exec_adjustment(container, value):
+    """capacity_adjustment on receptor-1, applied at once (set_capacity_value), as the API does."""
+    return orm(
+        container,
+        f'''
+from decimal import Decimal
+from awx.main.models import Instance
+i = Instance.objects.get(hostname='receptor-1')
+i.capacity_adjustment = Decimal({value!r})
+i.set_capacity_value()
+i.save(update_fields=['capacity_adjustment', 'capacity'])
+emit(dict(capacity=i.capacity, adj=str(i.capacity_adjustment)))
+''',
+    )
+
+
 def scenario_exec_full(containers, args):
     """Execution node at full capacity: receptor-1's capacity_adjustment is set to 0, and jobs over a
     --hosts-host inventory (forks = hosts, so impact = hosts + 1) fill it. One filler's controller is
@@ -6170,7 +6186,7 @@ emit(inv.hosts.count())
     probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
     m = {'branch': 'PR' if pr else 'devel', 'iterations': args.iterations, 'hosts': args.hosts}
     try:
-        set_instance(c2, 'receptor-1', capacity_adjustment=0)
+        set_exec_adjustment(c2, 0)
         cap = wait_for('receptor-1 capacity lowered', lambda: (i := instances(c2)['receptor-1'])['capacity'] < 616 and i['capacity'], 240, poll=10)
         m['receptor_capacity'] = cap
         n = max(1, cap // (args.hosts + 1))
@@ -6191,8 +6207,11 @@ emit(inv.hosts.count())
 
         m['receptor_before'] = consumed()
         arm_recorders(c2, None, ['adoption.after_snapshot'])
-        arm_hold(c2, ids[0], 'awx-1', args.seam_counter)
-        wait_hold(c2, ids[0], 'awx-1', args.seam_counter)
+        # 20 hosts emit ~20 events a second: hold a little ahead of where the job is now.
+        hold_at = job_state(c2, ids[0])['events'] + 100
+        m['held_before_counter'] = hold_at
+        arm_hold(c2, ids[0], 'awx-1', hold_at)
+        wait_hold(c2, ids[0], 'awx-1', hold_at)
         m['killed_at'] = kill(c0)
         manage(c2, 'failpoint', 'disarm', 'callback.event')
         if pr:
@@ -6223,7 +6242,7 @@ emit(inv.hosts.count())
                 cancel_job(c2, j)
             except RuntimeError:
                 pass
-        set_instance(c2, 'receptor-1', capacity_adjustment=1)
+        set_exec_adjustment(c2, 1)
         if pr:
             manage(c2, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
         start_back(c0, 'awx-1')
@@ -6274,6 +6293,18 @@ PART5 = (
     'live-output',
     'metrics',
     'workflow-nested',
+    'relaunch-orphan',
+    'cancel-wf-orphan',
+    'cancel-finalize',
+    'cancel-many',
+    'overcommit',
+    'ig-limits',
+    'schedule-outage',
+    'return-capacity',
+    'relaunch-failed',
+    'cancel-sliced',
+    'scale-down',
+    'exec-full',
 )
 
 VARIANTS = {
