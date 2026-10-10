@@ -51,7 +51,7 @@ from datetime import datetime, timezone
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.join(HERE, 'project')
 PROJECT_NAME = 'failpoint_scenarios'
-PLAYBOOKS = ('chatty.yml', 'quiet.yml')
+PLAYBOOKS = ('chatty.yml', 'quiet.yml', 'facts.yml', 'setstats.yml', 'bulk.yml')
 MARK = '@@FP@@'
 T0 = time.monotonic()
 EXEC_CONTAINER = 'tools_receptor_1'
@@ -289,7 +289,7 @@ def exec_node_processes(pattern):
     return [line.strip()[:160] for line in out.splitlines() if re.search(pattern, line)]
 
 
-def setup(containers, jt_name, playbook, extra_vars, inventory='Demo Inventory', allow_simultaneous=False, instance_group=None):
+def setup(containers, jt_name, playbook, extra_vars, inventory='Demo Inventory', allow_simultaneous=False, instance_group=None, jt_fields=None):
     """Copy the scenario project to every control node and create the template once."""
     for c in containers:
         run(['docker', 'exec', c, 'mkdir', '-p', f'/var/lib/awx/projects/{PROJECT_NAME}'])
@@ -309,6 +309,8 @@ jt, _ = JobTemplate.objects.get_or_create(name={jt_name!r},
 jt.extra_vars = json.dumps({extra_vars!r})
 jt.inventory = inv
 jt.allow_simultaneous = {allow_simultaneous!r}
+for k, v in {jt_fields or {}!r}.items():
+    setattr(jt, k, v)
 jt.save()
 jt.instance_groups.clear()
 if {instance_group!r}:
@@ -469,7 +471,8 @@ notes = [dict(status=_body_status(n.body), created=n.created) for n in j.notific
 emit(dict(status=j.status, explanation=j.job_explanation, controller=j.controller_node, cancel_flag=j.cancel_flag,
           started=j.started, finished=j.finished, stored=qs.count(), distinct=qs.values('counter').distinct().count(),
           dup_counters=len(dups), dup_extra_rows=sum(c - 1 for _, c in dups), dup_lo=dups[0][0] if dups else None,
-          dup_hi=dups[-1][0] if dups else None, stats_rows=qs.filter(event='playbook_on_stats').count(),
+          dup_hi=dups[-1][0] if dups else None,
+          stats_rows=qs.filter(event='playbook_on_stats').count() if any(f.name == 'event' for f in qs.model._meta.fields) else None,
           notifications=len(notes), notification_statuses=[n['status'] for n in notes]))
 ''',
     )
@@ -573,7 +576,8 @@ rows = [('db', 'job created', j.created), ('db', 'job started', j.started), ('db
 qs = j.get_event_queryset()
 agg = qs.aggregate(first=Min('created'), last=Max('created'))
 rows += [('db', 'first event row created', agg['first']), ('db', 'last event row created', agg['last'])]
-stats = list(qs.filter(event='playbook_on_stats').values_list('created', 'counter'))
+has_event = any(f.name == 'event' for f in qs.model._meta.fields)
+stats = list(qs.filter(event='playbook_on_stats').values_list('created', 'counter')) if has_event else []
 for created, counter in stats:
     rows.append(('db', f'playbook_on_stats row (counter {{counter}})', created))
 for n in j.notifications.all().order_by('created'):
@@ -587,7 +591,7 @@ emit([(str(at), node, what) for node, what, at in rows if at])
 
 def run_label(args):
     parts = [args.scenario]
-    if args.scenario in ('cancel-orphan', 'adopter-dies', 'claim-race', 'workflow-orphan'):
+    if args.scenario in VARIANTS:
         parts.append(args.variant)
     if args.scenario == 'claim-race' and args.cancel_in_adoption:
         parts.append('cancel')
@@ -596,7 +600,7 @@ def run_label(args):
     if args.scenario in ('event-queue', 'hybrid-resume'):
         parts.append(args.trigger)
     parts.append(args.mode)
-    if (args.scenario == 'slow-controller' or (args.scenario == 'workflow-orphan' and args.variant == 'slow')) and args.mode == 'seam':
+    if (args.scenario == 'slow-controller' or (args.scenario in ('workflow-orphan', 'set-stats-artifacts') and args.variant == 'slow')) and args.mode == 'seam':
         parts.append(args.order)
     return '-'.join(parts)
 
@@ -2302,7 +2306,8 @@ WF_NAME = 'failpoint workflow'
 
 def wf_setup(containers, args):
     """A (chatty, --iterations) --success--> B, --failure--> C (both 3 iterations)."""
-    jt_a = setup(containers, 'failpoint wf A', 'chatty.yml', {'iterations': args.iterations})
+    pb = getattr(args, 'a_playbook', 'chatty.yml')
+    jt_a = setup(containers, 'failpoint wf A' if pb == 'chatty.yml' else f'failpoint wf A {pb}', pb, {'iterations': args.iterations})
     jt_b = setup(containers, 'failpoint wf B success', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
     jt_c = setup(containers, 'failpoint wf C failure', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
     return orm(
@@ -2357,7 +2362,12 @@ def _status(body):
         except ValueError:
             return None
     return body.get('status') if isinstance(body, dict) else None
-emit(dict(status=wj.status, finished=wj.finished, explanation=wj.job_explanation, nodes=nodes,
+arts = {{}}
+for n in wj.workflow_job_nodes.all():
+    if n.job:
+        real = n.job.get_real_instance()
+        arts[n.identifier] = dict(artifacts=getattr(real, 'artifacts', None), fp_artifact=json.loads(real.extra_vars or '{{}}').get('fp_artifact'))
+emit(dict(status=wj.status, finished=wj.finished, explanation=wj.job_explanation, nodes=nodes, artifacts=arts,
           b_jobs=spawned({ids['b']}), c_jobs=spawned({ids['c']}),
           notifications=[_status(n.body) for n in wj.notifications.all().order_by('created')]))
 ''',
@@ -2434,7 +2444,7 @@ def scenario_workflow_orphan(containers, args):
                 # devel: the peer decides on its own once O's last_seen passes is_lost.
                 s = wait_for(
                     'the peer to claim or reap A',
-                    lambda: (x := job_state(c0, job_id))['status'] != 'running' or x['controller_node'] != owner or None,
+                    lambda: ((x := job_state(c0, job_id))['status'] != 'running' or x['controller_node'] != owner) and x or None,
                     args.claim_timeout,
                     poll=3,
                 )
@@ -2482,6 +2492,7 @@ def scenario_workflow_orphan(containers, args):
         a_final_status=a_final,
         nodes=w['nodes'],
         acted_matches_final=(took == ['B']) == (a_final == 'successful') and len(took) == 1,
+        artifacts=w.get('artifacts'),
     )
     notes.append(f'workflow {wj}: {json.dumps(w, default=str)}')
     log(f"workflow {wj} {w['status']}: B jobs {len(w['b_jobs'])}, C jobs {len(w['c_jobs'])}, A final {a_final}")
@@ -2699,6 +2710,709 @@ emit(ids)
     return report(containers, jobs[0], since, args, unit, notes, metrics=m, out_name=f'{run_label(args)}-n{len(jobs)}-job{jobs[0]}')
 
 
+# --- Part 3, extra queue -------------------------------------------------------------------
+
+
+def peer_of(containers, owner):
+    oc = container_for(owner)
+    peer = next(c for c in containers if c != oc)
+    return oc, peer, container_for_host(peer)
+
+
+def unit_end(c, job_id, unit, seconds=420):
+    """Wait until the exec-node unit is terminal or gone; return what receptor-1 says."""
+    if not unit:
+        return {'error': 'no work unit id'}
+    watch(
+        c,
+        job_id,
+        unit,
+        seconds,
+        until=lambda _s: 'error' in unit_status(unit) or unit_status(unit).get('StateName') in ('Succeeded', 'Failed', 'Canceled'),
+        poll=15,
+        label='after terminal',
+    )
+    return unit_status(unit)
+
+
+def ensure_up(containers):
+    for c in containers:
+        if manage(c, 'failpoint', 'list', check=False).returncode != 0:
+            start_back(c, container_for_host(c))
+
+
+def orphan_owner(peer, ph, owner, job_id, args, m, pr, counter=None):
+    """Seam: the owner is held before event `counter` (armed by arm_hold), its events before
+    that are stored, then it is killed and left down; on the PR the peer is told at once."""
+    counter = counter or args.seam_counter
+    wait_hold(peer, job_id, owner, counter)
+    wait_db_events(peer, job_id, counter)
+    m['killed_at'] = kill(container_for(owner))
+    manage(peer, 'failpoint', 'disarm', 'callback.event')
+    m['events_at_kill'] = job_state(peer, job_id)['events']
+    if pr:
+        force_lost(peer, ph, owner)
+
+
+def finish_and_report(containers, peer, job_id, unit, since, args, notes, m, pr, oc=None, owner=None):
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    m['kill_to_terminal_s'] = round(time.time() - at_seconds(m['killed_at']), 1) if m.get('killed_at') else None
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']} explanation={s['job_explanation']!r}")
+    m['unit_end'] = unit_end(peer, job_id, unit)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    snaps = fired_hits(peer, 'adoption.after_snapshot')
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in snaps]
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def need_two(containers, name):
+    if len(containers) != 2:
+        raise SystemExit(f'{name} needs exactly two control nodes')
+
+
+def scenario_claim_no_queue(containers, args):
+    """Claim, then no queue: the claim UPDATE commits but publishing adopt_job_async fails.
+
+    PR only (devel has no cross-controller claim). Two control nodes. The owner is held before
+    event --seam-counter and killed; the peer is told it is lost.
+      --variant lost           the lost-instance path claims; adoption.before_queue raises once
+                               (after the claim, before adopt_job_async is published)
+      --variant sweep          the lost path only marks the owner offline (its claim vetoed);
+                               the sweep claims and adoption.before_queue raises once
+      --variant after-publish  the lost path claims and publishes; saving the task id raises once
+                               (adoption.before_task_id_saved)
+    Watches --observe seconds for a retry (an adoption snapshot) and records the final status.
+    """
+    need_two(containers, 'claim-no-queue')
+    c0 = containers[0]
+    if 'sweep.before_claim' not in registry(c0):
+        raise SystemExit('claim-no-queue needs the PR branch: devel never claims a lost peer job')
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant}
+    notes = [f'claim-no-queue {args.variant}: owner {owner}, peer {ph}']
+    arm_hold(peer, job_id, owner, args.seam_counter)
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    inject = 'adoption.before_task_id_saved' if args.variant == 'after-publish' else 'adoption.before_queue'
+    arm(peer, inject, 'raise', {'job_id': job_id, 'node': ph}, times=1)
+    if args.variant == 'sweep':
+        arm(peer, 'lost_instance.before_claim', 'raise', {'job_id': job_id})
+    orphan_owner(peer, ph, owner, job_id, args, m, True)
+    h = wait_hits(peer, inject, lambda h: h['action'] == 'raise', timeout=args.claim_timeout)[0]
+    m['injected_at'] = h['at']
+    manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    time.sleep(2)
+    s = job_state(peer, job_id)
+    m['after_injection'] = {k: s[k] for k in ('status', 'controller_node', 'celery_task_id', 'job_explanation')}
+    log(f"{inject} raised at {h['at']}; job now {m['after_injection']}")
+
+    def retried():
+        if fired_hits(peer, 'adoption.after_snapshot'):
+            return 'adopted'
+        return terminal(job_state(peer, job_id)) and 'terminal'
+
+    try:
+        what = wait_for('an adoption retry or a terminal status', retried, args.observe, poll=5)
+        m['outcome_within_observe'] = what
+    except TimeoutError:
+        m['outcome_within_observe'] = f'stranded: no adoption and not terminal after {args.observe}s'
+        notes.append(m['outcome_within_observe'])
+    snaps = fired_hits(peer, 'adoption.after_snapshot')
+    if snaps:
+        m['retry_after_s'] = round(at_seconds(snaps[0]['at']) - at_seconds(h['at']), 1)
+        m['retry_node'] = snaps[0]['node']
+    return finish_and_report(containers, peer, job_id, unit, since, args, notes, m, True)
+
+
+def scenario_both_controllers_lost(containers, args):
+    """Both controllers lost: kill both control nodes, wait --down seconds (past is_lost), bring one back.
+
+      --variant peer-returns   the node that did not control the job comes back
+      --variant owner-returns  the job's controller comes back
+    Nothing is forced: this is about the real lost threshold and startup paths. Measures who
+    adopts or reaps, when (strand length from the kill), and the final status.
+    """
+    need_two(containers, 'both-controllers-lost')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'down_s': args.down}
+    notes = [f"both-controllers-lost {args.variant} on {m['branch']}: owner {owner}"]
+    arm_hold(peer, job_id, owner, args.seam_counter)
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    wait_hold(peer, job_id, owner, args.seam_counter)
+    wait_db_events(peer, job_id, args.seam_counter)
+    manage(peer, 'failpoint', 'disarm', 'callback.event')
+    m['killed_at'] = kill(oc)
+    m['peer_killed_at'] = kill(peer)
+    log(f'both control nodes down; waiting {args.down}s')
+    time.sleep(args.down)
+    back, bh = (peer, ph) if args.variant == 'peer-returns' else (oc, owner)
+    m['returned'] = bh
+    m['restart_at'] = utcnow()
+    start_back(back, bh)
+    s = watch(back, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    m['kill_to_terminal_s'] = round(time.time() - at_seconds(m['killed_at']), 1)
+    snaps = fired_hits(back, 'adoption.after_snapshot')
+    if snaps:
+        m['adopted_by'] = snaps[0]['node']
+        m['kill_to_adoption_s'] = round(at_seconds(snaps[0]['at']) - at_seconds(m['killed_at']), 1)
+        m['restart_to_adoption_s'] = round(at_seconds(snaps[0]['at']) - at_seconds(m['restart_at']), 1)
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']} explanation={s['job_explanation']!r}")
+    m['unit_end'] = unit_end(back, job_id, unit)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in fired_hits(back, 'adoption.after_snapshot')]
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def scenario_exec_node_dies(containers, args):
+    """Exec node dies while orphaned: the controller is killed, then receptor-1 is restarted
+    (--variant restart) or killed and started 20 s later (--variant kill-start) before anyone
+    adopts. PR: the peer is then told the owner is lost and adopts a unit that was reset. devel:
+    the lost-instance path decides. Watches --observe seconds; a job still running then is
+    recorded as stranded and canceled to clean up."""
+    need_two(containers, 'exec-node-dies')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel'}
+    notes = [f"exec-node-dies {args.variant} on {m['branch']}: owner {owner}, unit {unit}"]
+    arm_hold(peer, job_id, owner, args.seam_counter)
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    wait_hold(peer, job_id, owner, args.seam_counter)
+    wait_db_events(peer, job_id, args.seam_counter)
+    m['killed_at'] = kill(oc)
+    manage(peer, 'failpoint', 'disarm', 'callback.event')
+    m['unit_before_exec_restart'] = unit_status(unit)
+    if args.variant == 'restart':
+        run(['docker', 'restart', EXEC_CONTAINER])
+    else:
+        run(['docker', 'kill', EXEC_CONTAINER])
+        time.sleep(20)
+        run(['docker', 'start', EXEC_CONTAINER])
+    m['exec_restarted_at'] = utcnow()
+    log(f'{EXEC_CONTAINER} {args.variant} done')
+    wait_for(f'{ph} to route to receptor-1 again', lambda: mesh_sees(peer, 'receptor-1'), 180, poll=3)
+    m['unit_after_exec_restart'] = unit_status(unit)
+    m['playbooks_after_exec_restart'] = len(exec_node_processes(r'ansible-playbook'))
+    log(f"unit after the exec-node restart: {m['unit_after_exec_restart']}; playbook processes: {m['playbooks_after_exec_restart']}")
+    if pr:
+        force_lost(peer, ph, owner)
+    s = watch(peer, job_id, unit, args.observe, until=terminal, poll=10)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    if not terminal(s):
+        m['stranded'] = f"still {s['status']} {args.observe}s after the adoption trigger (controller {s['controller_node']}, {s['events']} events)"
+        notes.append(m['stranded'])
+        log(m['stranded'])
+        res = cancel_job(peer, job_id)
+        notes.append(f'canceled to clean up at {res["at"]}')
+        s = watch(peer, job_id, unit, 300, until=terminal, poll=10)
+        m['after_cancel'] = f"{s['status']} {s['job_explanation']!r}"
+    m['final_explanation'] = s['job_explanation']
+    m['unit_end'] = unit_status(unit)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in fired_hits(peer, 'adoption.after_snapshot')]
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def scenario_job_timeout(containers, args):
+    """Job timeout while orphaned: a template with timeout=--job-timeout, orphaned partway through.
+
+      --variant none  baseline: no fault; how a timeout normally ends the job
+      --variant kill  the owner is held before event --seam-counter and killed; PR: the peer adopts
+    Measures when and how the job ended against the timeout (status, explanation, runtime).
+    """
+    need_two(containers, 'job-timeout')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args, jt_name='failpoint timeout', jt_fields={'timeout': args.job_timeout})
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'timeout_s': args.job_timeout}
+    notes = [f"job-timeout {args.variant} on {m['branch']}: timeout {args.job_timeout}s, playbook {args.iterations}s"]
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    if args.variant == 'kill':
+        arm_hold(peer, job_id, owner, args.seam_counter)
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    t = orm(
+        peer,
+        f'from awx.main.models import Job\nj = Job.objects.get(pk={job_id})\nemit(dict(started=j.started, finished=j.finished, elapsed=j.elapsed, timed_out=j.job_explanation))\n',
+    )
+    m['started'], m['finished'] = t['started'], t['finished']
+    m['runtime_s'] = round(at_seconds(t['finished']) - at_seconds(t['started']), 1) if t['finished'] else None
+    notes.append(f"job terminal: status={s['status']} after {m['runtime_s']}s (timeout {args.job_timeout}s); explanation={s['job_explanation']!r}")
+    m['unit_end'] = unit_end(peer, job_id, unit)
+    m['unit_detail'] = m['unit_end'].get('Detail')
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['adoptions'] = [f"{h['node']}@{h['at']}" for h in fired_hits(peer, 'adoption.after_snapshot')]
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def host_facts(container, inventory='Demo Inventory', reset=False):
+    return orm(
+        container,
+        f'''
+from awx.main.models import Inventory
+inv = Inventory.objects.get(name={inventory!r})
+out = {{}}
+for h in inv.hosts.all():
+    if {reset!r}:
+        h.ansible_facts = {{}}
+        h.ansible_facts_modified = None
+        h.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
+    out[h.name] = dict(keys=len(h.ansible_facts or {{}}), modified=h.ansible_facts_modified,
+                       hostname=(h.ansible_facts or {{}}).get('ansible_hostname'), date=((h.ansible_facts or {{}}).get('ansible_date_time') or {{}}).get('iso8601'))
+emit(out)
+''',
+    )
+
+
+def scenario_fact_cache(containers, args):
+    """Fact cache: a use_fact_cache job that gathers facts, adopted cross-node.
+
+      --variant none  baseline: facts saved by a normal run
+      --variant kill  the owner is held before event --seam-counter (facts already gathered) and
+                      killed; PR: the peer adopts
+    Host facts are cleared before the run and compared after it (keys, ansible_facts_modified
+    against the job's start, the gathered date).
+    """
+    need_two(containers, 'fact-cache')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    before = host_facts(c0, reset=True)
+    since = since_now()
+    job_id, st = start_job(
+        containers, args, jt_name='failpoint facts', playbook='facts.yml', extra_vars={'iterations': args.iterations}, jt_fields={'use_fact_cache': True}
+    )
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'facts_before': before}
+    notes = [f"fact-cache {args.variant} on {m['branch']}"]
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    if args.variant == 'kill':
+        arm_hold(peer, job_id, owner, args.seam_counter)
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    after = host_facts(peer)
+    js = orm(peer, f'from awx.main.models import Job\nj = Job.objects.get(pk={job_id})\nemit(dict(started=j.started, finished=j.finished))\n')
+    m['facts_after'] = after
+    m['facts_saved'] = {h: bool(v['keys']) and v['modified'] is not None and at_seconds(v['modified']) >= at_seconds(js['started']) for h, v in after.items()}
+    notes.append(f"job {s['status']}; facts after: {after}; saved by this job: {m['facts_saved']}")
+    m['adoptions'] = [f"{h['node']}@{h['at']}" for h in fired_hits(peer, 'adoption.after_snapshot')]
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def scenario_set_stats_artifacts(containers, args):
+    """set_stats artifacts: workflow-orphan with node A running setstats.yml (set_stats
+    fp_artifact before the first tick). Same variants and orders as workflow-orphan; adds A's
+    artifacts and the fp_artifact extra var node B received."""
+    args.a_playbook = 'setstats.yml'
+    return scenario_workflow_orphan(containers, args)
+
+
+def scenario_job_slicing(containers, args):
+    """Job slicing: a template with job_slice_count=2 over the 5-host inventory; slice 1's
+    controller is held before event --seam-counter and killed (PR: the peer adopts). Checks that
+    each slice's events and host summaries name only that slice's hosts, with the job-start ids."""
+    need_two(containers, 'job-slicing')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    original = hostmap_inventory(c0)
+    jt = setup(containers, 'failpoint sliced', 'chatty.yml', {'iterations': args.iterations}, inventory=HOSTMAP_INV, jt_fields={'job_slice_count': 2})
+    since = since_now()
+    wf = launch(c0, jt)
+    log(f'launched sliced job (workflow job {wf}) over {original}')
+
+    def slices():
+        out = orm(
+            c0,
+            f'''
+from awx.main.models import WorkflowJob
+wj = WorkflowJob.objects.get(pk={wf})
+emit([dict(id=n.job.id, status=n.job.status, controller=n.job.controller_node, unit=n.job.work_unit_id, slice=n.job.job_slice_number)
+      for n in wj.workflow_job_nodes.all() if n.job])
+''',
+        )
+        return len(out) == 2 and all(x['status'] == 'running' and x['unit'] for x in out) and sorted(out, key=lambda x: x['slice'])
+
+    sl = wait_for('both slices running', slices, 300, poll=3)
+    s1 = sl[0]
+    job_id, owner, unit = s1['id'], s1['controller'], s1['unit']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'workflow_job': wf, 'slices': sl, 'owner_slice_1': owner, 'branch': 'PR' if pr else 'devel', 'host_ids': original}
+    notes = [f"job-slicing on {m['branch']}: slices {sl}"]
+    arm_hold(peer, job_id, owner, args.seam_counter)
+    arm_recorders(peer, None, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    for x in sl:
+        watch(peer, x['id'], x['unit'], args.finish_timeout, until=terminal, poll=10, label=f"slice {x['slice']} job")
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    per = orm(
+        peer,
+        f'''
+from awx.main.models import Job
+out = {{}}
+for jid in {[x['id'] for x in sl]!r}:
+    j = Job.objects.get(pk=jid)
+    ev = sorted(set(j.get_event_queryset().exclude(host_name='').values_list('host_name', 'host_id')))
+    su = sorted(j.job_host_summaries.values_list('host_name', 'host_id'))
+    out[jid] = dict(slice=j.job_slice_number, status=j.status, controller=j.controller_node, event_hosts=ev, summaries=su)
+emit(out)
+''',
+    )
+    names = [{h for h, _ in v['event_hosts']} for v in per.values()]
+    m['per_slice'] = per
+    m['slices_disjoint'] = not (names[0] & names[1]) if len(names) == 2 else None
+    m['slices_cover_inventory'] = (names[0] | names[1]) == set(original) if len(names) == 2 else None
+    m['ids_original'] = all(original.get(h) == i for v in per.values() for h, i in v['event_hosts'] + v['summaries'])
+    notes.append(f"per slice: {json.dumps(per, default=str)}")
+    for jid, v in per.items():
+        if int(jid) != job_id:
+            report(containers, int(jid), since, args, None, (), out_name=f'{run_label(args)}-slice{v["slice"]}-job{jid}')
+    m['adoptions'] = [
+        f"{h['node']}@{h['at']} job={h['ctx'].get('job_id')} thr={h['ctx'].get('safe_threshold')}" for h in fired_hits(peer, 'adoption.after_snapshot')
+    ]
+    return report(containers, job_id, since, args, unit, notes, metrics=m, out_name=f'{run_label(args)}-slice1-job{job_id}')
+
+
+def scenario_other_job_types(containers, args):
+    """Other job types orphaned: --variant adhoc | project-update | inventory-update.
+
+    The first results stream that opens on any controller is held (job.stream_started), so the
+    job is caught after its work unit exists and before the controller reads it; that
+    controller is killed and left down (PR: the peer is told at once). Then: adopted, reaped
+    or stranded? adhoc runs a shell loop of --iterations seconds on receptor-1;
+    project-update updates Demo Project; inventory-update runs a constructed inventory update.
+    """
+    need_two(containers, 'other-job-types')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    since = since_now()
+    arm(c0, 'job.stream_started', 'pause', None, timeout=1800)
+    if args.variant == 'adhoc':
+        code = f'''
+from awx.main.models import AdHocCommand, Inventory, Credential
+inv = Inventory.objects.get(name='Demo Inventory')
+cmd = AdHocCommand.objects.create(inventory=inv, credential=Credential.objects.get(name='Demo Credential'), module_name='shell',
+    module_args='for i in $(seq 1 {args.iterations}); do echo tick $i; sleep 1; done', limit='all')
+cmd.signal_start()
+emit(cmd.id)
+'''
+    elif args.variant == 'project-update':
+        code = "from awx.main.models import Project\npu = Project.objects.get(name='Demo Project').update()\nemit(pu.id)\n"
+    else:
+        code = '''
+from awx.main.models import Inventory, Organization
+org = Organization.objects.get(name='Default')
+ci, _ = Inventory.objects.get_or_create(name='failpoint constructed', organization=org, kind='constructed')
+demo = Inventory.objects.get(name='Demo Inventory')
+if not ci.input_inventories.filter(pk=demo.pk).exists():
+    ci.input_inventories.add(demo)
+src = ci.inventory_sources.first()
+if src is None:
+    from awx.main.models import InventorySource
+    src = InventorySource.objects.create(inventory=ci, name='failpoint constructed source', source='constructed', overwrite=True)
+iu = src.update()
+emit(iu.id)
+'''
+    job_id = orm(c0, code)
+    log(f'launched {args.variant} {job_id}; the first results stream will hold')
+    hit = wait_hits(c0, 'job.stream_started', timeout=300)[0]
+    st = job_state(c0, job_id)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'job_type_id': job_id, 'owner': owner, 'execution_node': st['execution_node'], 'held': hit}
+    notes = [f"other-job-types {args.variant} on {m['branch']}: {job_id} controller={owner} execution={st['execution_node']} unit={unit}"]
+    if str(hit['ctx'].get('job_id')) != str(job_id):
+        m['invalid'] = f"held stream belongs to {hit['ctx'].get('job_id')}, not {job_id}"
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    if args.variant == 'adhoc':
+        time.sleep(args.lead)
+    m['killed_at'] = kill(oc)
+    manage(peer, 'failpoint', 'disarm', 'job.stream_started')
+    if pr:
+        force_lost(peer, ph, owner)
+    return finish_and_report(containers, peer, job_id, unit, since, args, notes, m, pr)
+
+
+def scenario_waiting_jobs(containers, args):
+    """Waiting jobs: the controller dies holding jobs that have no work unit yet.
+
+      --variant waiting       awx-1's dispatcher is frozen (SIGSTOP) and awx-2 disabled, so --orphans jobs
+                              are assigned to awx-1 and stay 'waiting' (their start message is
+                              never consumed); awx-2 is re-enabled and awx-1 killed
+      --variant unit-unsaved  one job is held on awx-1 after its unit was submitted and before
+                              work_unit_id is saved (job.after_submit_before_unit_saved); awx-1 is killed
+    PR: awx-2 is told awx-1 is lost. Records what happens to each job and to the unit.
+    """
+    need_two(containers, 'waiting-jobs')
+    c = 'tools_awx_2'
+    pr = 'sweep.before_claim' in registry(c)
+    manage(c, 'failpoint', 'disarm', '--all')
+    manage(c, 'failpoint', 'clear-hits')
+    since = since_now()
+    m = {'variant': args.variant, 'branch': 'PR' if pr else 'devel'}
+    notes = [f"waiting-jobs {args.variant} on {m['branch']}"]
+    frozen = False
+    jt = setup(containers, 'failpoint orphan', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+    units_before = set(json.loads(run(['docker', 'exec', EXEC_CONTAINER, 'receptorctl', '--socket', RECEPTOR_SOCK, 'work', 'list']).stdout or '{}'))
+    set_instance(c, 'awx-2', enabled=False)
+    wait_for('awx-2 capacity 0', lambda: instances(c)['awx-2']['capacity'] == 0, 180, poll=5)
+    try:
+        if args.variant == 'waiting':
+            # SIGSTOP, not supervisorctl stop: a graceful stop runs dispatcherd's exit path, which
+            # announces the shutdown and takes awx-1 out of capacity, so nothing would be placed there.
+            run(['docker', 'exec', 'tools_awx_1', 'pkill', '-STOP', '-f', 'awx-manage dispatcherd'])
+            frozen = True
+            log("froze awx-1's dispatcher (SIGSTOP): start messages to awx-1 are never consumed")
+            jobs = [launch(c, jt) for _ in range(args.orphans)]
+            st = wait_for(
+                f'{len(jobs)} jobs waiting on awx-1',
+                lambda: (x := job_statuses(c, jobs)) and all(v['status'] == 'waiting' and v['controller'] == 'awx-1' for v in x.values()) and x,
+                300,
+                poll=5,
+            )
+        else:
+            arm(c, 'job.after_submit_before_unit_saved', 'pause', {'node': 'awx-1'}, timeout=1800)
+            jobs = [launch(c, jt)]
+            wait_hits(c, 'job.after_submit_before_unit_saved', timeout=300)
+            st = job_statuses(c, jobs)
+            m['held_job_unit_id'] = job_state(c, jobs[0])['work_unit_id']
+    except BaseException:
+        if args.variant == 'waiting':
+            run(['docker', 'exec', 'tools_awx_1', 'pkill', '-CONT', '-f', 'awx-manage dispatcherd'], check=False)
+        raise
+    finally:
+        set_instance(c, 'awx-2', enabled=True)
+    m['jobs'] = jobs
+    m['before_kill'] = {j: (v['status'], v['controller']) for j, v in st.items()}
+    wait_for('awx-2 capacity back', lambda: instances(c)['awx-2']['capacity'] > 0, 180, poll=5)
+    m['killed_at'] = kill('tools_awx_1')
+    m['dispatcher_frozen_until_kill'] = frozen
+    manage(c, 'failpoint', 'disarm', '--all')
+    if pr:
+        force_lost(c, 'awx-2', 'awx-1')
+
+    def done():
+        x = job_statuses(c, jobs)
+        return all(v['status'] not in ('pending', 'waiting', 'running') for v in x.values()) and x
+
+    try:
+        fin = wait_for('every job terminal', done, args.finish_timeout, poll=10)
+    except TimeoutError as exc:
+        notes.append(str(exc))
+        fin = job_statuses(c, jobs)
+    if pr:
+        manage(c, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    units_after = json.loads(run(['docker', 'exec', EXEC_CONTAINER, 'receptorctl', '--socket', RECEPTOR_SOCK, 'work', 'list']).stdout or '{}')
+    new_units = {u: v.get('StateName') for u, v in units_after.items() if u not in units_before}
+    m['final'] = {j: dict(status=v['status'], controller=v['controller'], explanation=v['explanation']) for j, v in fin.items()}
+    m['new_units_on_receptor_1'] = new_units
+    m['playbooks_still_running'] = len(exec_node_processes(r'ansible-playbook'))
+    start_back('tools_awx_1', 'awx-1')
+    wait_for('execution node playbooks to drain', lambda: not exec_node_processes(r'ansible-playbook') or None, args.finish_timeout, poll=15)
+    time.sleep(args.settle)
+    notes.append(f"final: {m['final']}; new units on receptor-1: {new_units}")
+    return report(containers, jobs[0], since, args, job_state(c, jobs[0])['work_unit_id'], notes, metrics=m)
+
+
+def scenario_repeated_restarts(containers, args):
+    """Repeated restarts: the controller is killed and restarted --restarts times during one job,
+    each time held before an event counter (--seam-counter, then +--restart-step each time) so
+    every restart lands at a known point. PR: peer claims are vetoed so every adoption is the
+    owner's own. Do duplicates or gaps accumulate across the snapshots?"""
+    need_two(containers, 'repeated-restarts')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'branch': 'PR' if pr else 'devel', 'restarts': args.restarts, 'snapshots': []}
+    notes = [f"repeated-restarts x{args.restarts} on {m['branch']}"]
+    arm_hold(peer, job_id, owner, args.seam_counter)
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    if pr:
+        guard_peer(peer, job_id)
+    for k in range(args.restarts):
+        counter = args.seam_counter + k * args.restart_step
+        if k:
+            arm_hold(peer, job_id, owner, counter)
+        wait_hold(peer, job_id, owner, counter)
+        wait_db_events(peer, job_id, counter)
+        n = len(fired_hits(peer, 'adoption.after_snapshot'))
+        t = time.monotonic()
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+        snap = wait_for(
+            f'adoption {k + 1}', lambda n=n: (h := fired_hits(peer, 'adoption.after_snapshot')) and len(h) > n and h[-1], args.claim_timeout, poll=3
+        )
+        m['snapshots'].append(
+            {
+                'restart': k + 1,
+                'held_before': counter,
+                'node': snap['node'],
+                'threshold': snap['ctx'].get('safe_threshold'),
+                'kill_to_snapshot_s': round(time.monotonic() - t, 1),
+            }
+        )
+        log(f"restart {k + 1}: adoption on {snap['node']} with threshold {snap['ctx'].get('safe_threshold')}")
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']}")
+    m['unit_end'] = unit_end(peer, job_id, unit)
+    time.sleep(args.settle)
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def scenario_large_replay(containers, args):
+    """Large replay: a job of --events fast events (bulk.yml) orphaned near the end of its burst.
+
+      --variant peer     (PR) the owner is killed and left down; the peer adopts cross-node
+      --variant restart  the owner is killed and restarted; it re-adopts its own job (both branches)
+    The owner is held before event --events * 0.9. Samples the adopting worker's RSS every 2 s and
+    times claim -> snapshot (the dedup query) and snapshot -> finalize (the replay).
+    """
+    need_two(containers, 'large-replay')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    if args.variant == 'peer' and not pr:
+        raise SystemExit('large-replay --variant peer needs the PR branch')
+    since = since_now()
+    job_id, st = start_job(containers, args, jt_name='failpoint bulk', playbook='bulk.yml', extra_vars={'count': args.events})
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    hold = int(args.events * 0.9)
+    m = {'owner': owner, 'variant': args.variant, 'branch': 'PR' if pr else 'devel', 'count': args.events, 'held_before': hold}
+    notes = [f"large-replay {args.variant} on {m['branch']}: {args.events} burst events"]
+    arm_hold(peer, job_id, owner, hold)
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release', 'adoption.before_finalize'])
+    if pr and args.variant == 'restart':
+        guard_peer(peer, job_id)
+    t0 = time.monotonic()
+    wait_for(f'job to reach event {hold}', lambda: pause_hits(peer, 'callback.event') or None, args.finish_timeout, poll=10)
+    m['launch_to_hold_s'] = round(time.monotonic() - t0, 1)
+    wait_db_events(peer, job_id, hold)
+    m['events_at_kill'] = job_state(peer, job_id)['events']
+    adopter, ac = (ph, peer) if args.variant == 'peer' else (owner, oc)
+    if args.variant == 'peer':
+        m['killed_at'] = kill(oc)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+        force_lost(peer, ph, owner)
+    else:
+        m['killed_at'] = utcnow()
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    claim = wait_for('the adoption to claim', lambda: (h := fired_hits(peer, 'adoption.after_claim')) and h[0], args.claim_timeout, poll=1)
+    pid = claim['pid']
+    rss = []
+    stop = threading.Event()
+
+    def sampler():
+        while not stop.is_set():
+            out = run(['docker', 'exec', ac, 'ps', '-o', 'rss=', '-p', str(pid)], check=False).stdout.strip()
+            if out:
+                rss.append((utcnow(), int(out)))
+            stop.wait(2)
+
+    th = threading.Thread(target=sampler, daemon=True)
+    th.start()
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    stop.set()
+    th.join()
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    snap = fired_hits(peer, 'adoption.after_snapshot')
+    fin = fired_hits(peer, 'adoption.before_finalize')
+    m['adopter'] = adopter
+    m['claim_at'] = claim['at']
+    if snap:
+        m['claim_to_snapshot_s'] = round(at_seconds(snap[0]['at']) - at_seconds(claim['at']), 2)
+        m['safe_threshold'] = snap[0]['ctx'].get('safe_threshold')
+    if snap and fin:
+        m['snapshot_to_stream_end_s'] = round(at_seconds(fin[0]['at']) - at_seconds(snap[0]['at']), 1)
+    m['rss_kb_peak'] = max((r for _, r in rss), default=None)
+    m['rss_kb_first'] = rss[0][1] if rss else None
+    m['rss_samples'] = len(rss)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    notes.append(f"job terminal: status={s['status']}; adopter {adopter} RSS {m['rss_kb_first']} -> peak {m['rss_kb_peak']} kB")
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+def scenario_deprovision(containers, args):
+    """Deprovision: awx-manage deprovision_instance on a controller that is alive and running a job.
+
+    The owner is held before event --seam-counter (so the deprovision lands at a known point),
+    deprovisioned from the peer, and released. PR: the peer's heartbeat is triggered (its sweep
+    sees a job whose controller is no longer an instance). The owner is restarted afterwards so
+    its bootstrap registers it again.
+    """
+    need_two(containers, 'deprovision')
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'owner': owner, 'branch': 'PR' if pr else 'devel'}
+    notes = [f"deprovision on {m['branch']}: owner {owner}"]
+    arm_hold(peer, job_id, owner, args.seam_counter)
+    arm_recorders(
+        peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot', 'job.after_finalize_before_release', 'adoption.after_finalize_before_release']
+    )
+    wait_hold(peer, job_id, owner, args.seam_counter)
+    out = manage(peer, 'deprovision_instance', f'--hostname={owner}', check=False)
+    m['deprovisioned_at'] = utcnow()
+    m['deprovision_output'] = (out.stdout + out.stderr).strip()[-300:]
+    log(f'deprovisioned {owner}: {m["deprovision_output"]}')
+    manage(peer, 'failpoint', 'disarm', 'callback.event')
+    if pr:
+        log(f'triggering a heartbeat on {ph} ({trigger_heartbeat(peer)})')
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']} explanation={s['job_explanation']!r}")
+    m['owner_instance_after'] = orm(peer, f'from awx.main.models import Instance\nemit(Instance.objects.filter(hostname={owner!r}).exists())\n')
+    time.sleep(args.settle)
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in fired_hits(peer, 'adoption.after_snapshot')]
+    m['finalizers'] = by_node(fired_hits(peer, 'job.after_finalize_before_release')) | {
+        f'{k} (adoption)': v for k, v in by_node(fired_hits(peer, 'adoption.after_finalize_before_release')).items()
+    }
+    result = report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+    run(['docker', 'restart', oc])
+    log(f'restarted {oc} so its bootstrap registers {owner} again')
+    wait_for(f'{owner} registered and ready', lambda: instances(peer).get(owner, {}).get('state') == 'ready', 600, poll=10)
+    return result
+
+
 def scenario_report(containers, args):
     """Report only: invariants, timeline and saved logs for --job since --since (a run cut short)."""
     if not (args.job and args.since):
@@ -2707,6 +3421,22 @@ def scenario_report(containers, args):
     unit = job_state(alive[0], args.job)['work_unit_id']
     return report(containers, args.job, args.since, args, unit, args.note or ())
 
+
+VARIANTS = {
+    'cancel-orphan': ('dead', 'restart', 'task-id-window', 'deferred'),
+    'adopter-dies': ('third', 'return'),
+    'claim-race': ('sweep-sweep', 'lost-sweep', 'lost-lost', 'lost-then-sweep'),
+    'workflow-orphan': ('slow', 'kill'),
+    'set-stats-artifacts': ('kill', 'slow'),
+    'claim-no-queue': ('lost', 'sweep', 'after-publish'),
+    'both-controllers-lost': ('peer-returns', 'owner-returns'),
+    'exec-node-dies': ('restart', 'kill-start'),
+    'job-timeout': ('kill', 'none'),
+    'fact-cache': ('kill', 'none'),
+    'other-job-types': ('adhoc', 'project-update', 'inventory-update'),
+    'waiting-jobs': ('waiting', 'unit-unsaved'),
+    'large-replay': ('peer', 'restart'),
+}
 
 SCENARIOS = {
     'slow-controller': scenario_slow_controller,
@@ -2724,6 +3454,18 @@ SCENARIOS = {
     'claim-race': scenario_claim_race,
     'workflow-orphan': scenario_workflow_orphan,
     'many-orphans': scenario_many_orphans,
+    'claim-no-queue': scenario_claim_no_queue,
+    'both-controllers-lost': scenario_both_controllers_lost,
+    'exec-node-dies': scenario_exec_node_dies,
+    'job-timeout': scenario_job_timeout,
+    'fact-cache': scenario_fact_cache,
+    'set-stats-artifacts': scenario_set_stats_artifacts,
+    'job-slicing': scenario_job_slicing,
+    'other-job-types': scenario_other_job_types,
+    'waiting-jobs': scenario_waiting_jobs,
+    'repeated-restarts': scenario_repeated_restarts,
+    'large-replay': scenario_large_replay,
+    'deprovision': scenario_deprovision,
     'report': scenario_report,
 }
 
@@ -2741,25 +3483,12 @@ def main():
     parser.add_argument('--quiet', type=int, default=360, help='quiet-deadline: seconds the silent task runs')
     parser.add_argument('--no-inject', action='store_true', help='quiet-deadline: do not fail the first unit status query')
     parser.add_argument('--outages', type=int, default=1, help='self-unavailable: consecutive failed health checks')
-    parser.add_argument(
-        '--variant',
-        choices=[
-            'dead',
-            'restart',
-            'task-id-window',
-            'deferred',
-            'third',
-            'return',
-            'sweep-sweep',
-            'lost-sweep',
-            'lost-lost',
-            'lost-then-sweep',
-            'slow',
-            'kill',
-        ],
-        help='cancel-orphan: dead|restart|task-id-window|deferred (default dead); adopter-dies: third|return (default third); '
-        'claim-race: sweep-sweep|lost-sweep|lost-lost (default sweep-sweep); workflow-orphan: slow|kill (default slow)',
-    )
+    parser.add_argument('--variant', help='per scenario; the first is the default: ' + '; '.join(f'{k}: {"|".join(v)}' for k, v in VARIANTS.items()))
+    parser.add_argument('--down', type=int, default=150, help='both-controllers-lost: seconds both control nodes stay down')
+    parser.add_argument('--job-timeout', type=int, default=90, help='job-timeout: the template timeout in seconds')
+    parser.add_argument('--restarts', type=int, default=3, help='repeated-restarts: how many times the controller restarts')
+    parser.add_argument('--restart-step', type=int, default=35, help='repeated-restarts: events between restarts')
+    parser.add_argument('--events', type=int, default=20000, help='large-replay: burst events in bulk.yml')
     parser.add_argument('--hold-at', choices=['claim', 'stream'], default='stream', help='adopter-dies: where the first adopter is held and killed')
     parser.add_argument('--adopter-counter', type=int, default=60, help='adopter-dies --hold-at stream: the first adopter is held before this event')
     parser.add_argument('--cancel-in-adoption', action='store_true', help='claim-race: cancel the job once the winner is streaming')
@@ -2798,17 +3527,10 @@ def main():
             print(f'{name}\n    {fn.__doc__.strip().splitlines()[0]}')
         return 0
 
-    variants = {'cancel-orphan': 'dead', 'adopter-dies': 'third', 'claim-race': 'sweep-sweep', 'workflow-orphan': 'slow'}
-    allowed = {
-        'cancel-orphan': ('dead', 'restart', 'task-id-window', 'deferred'),
-        'adopter-dies': ('third', 'return'),
-        'claim-race': ('sweep-sweep', 'lost-sweep', 'lost-lost', 'lost-then-sweep'),
-        'workflow-orphan': ('slow', 'kill'),
-    }
-    if args.scenario in variants:
-        args.variant = args.variant or variants[args.scenario]
-        if args.variant not in allowed[args.scenario]:
-            parser.error(f'{args.scenario} --variant must be one of {allowed[args.scenario]}')
+    if args.scenario in VARIANTS:
+        args.variant = args.variant or VARIANTS[args.scenario][0]
+        if args.variant not in VARIANTS[args.scenario]:
+            parser.error(f'{args.scenario} --variant must be one of {VARIANTS[args.scenario]}')
 
     containers = control_containers()
     if not containers:

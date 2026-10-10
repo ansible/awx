@@ -1,0 +1,16 @@
+---
+# Many events fast: one debug event per loop item, no sleeps, for large-replay runs.
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars:
+    count: 20000
+  tasks:
+    - name: burst
+      debug:
+        msg: "event {{ item }}"
+      loop: "{{ range(count | int) | list }}"
+    - name: tail
+      command: sleep 1
+      loop: "{{ range(30) | list }}"
+      changed_when: false
