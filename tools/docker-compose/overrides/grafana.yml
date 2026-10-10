@@ -1,0 +1,19 @@
+---
+services:
+  grafana:
+    image: mirror.gcr.io/grafana/grafana-enterprise:12.3.4
+    container_name: tools_grafana_1
+    hostname: grafana
+    networks:
+      - awx
+    ports:
+      - "3001:3000"
+    volumes:
+      - "../../grafana:/etc/grafana/provisioning"
+      - "grafana_storage:/var/lib/grafana:rw"
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana_storage:
+    name: tools_grafana_storage

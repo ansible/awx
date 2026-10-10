@@ -1,0 +1,18 @@
+---
+services:
+  loki:
+    image: mirror.gcr.io/grafana/loki:2.9.5
+    container_name: tools_loki_1
+    hostname: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - awx
+    volumes:
+      - "loki_storage:/loki:rw"
+      - "../../loki/local-config.yaml:/etc/loki/local-config.yaml"
+
+volumes:
+  loki_storage:
+    name: tools_loki_storage
