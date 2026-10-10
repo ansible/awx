@@ -5425,6 +5425,835 @@ emit(done)
     return {'ok': True}
 
 
+# --- job control and capacity, part 6 queue --------------------------------------------------
+
+FP_IG = 'failpoint limited'
+FP_SCHED = 'failpoint every minute'
+EXEC_INV = 'failpoint exec hosts'
+
+
+def api(container, method, path, body=None):
+    """Call the REST API on a node as the observer superuser; return (status, json or text)."""
+    cmd = ['docker', 'exec', container, 'curl', '-s', '-o', '/dev/stdout', '-w', '\n%{http_code}', '-u', f'{FP_USER}:fp-observer-pw', '-X', method,
+           '-H', 'Content-Type: application/json', f'http://localhost:8013{path}']  # fmt: skip
+    if body is not None:
+        cmd += ['-d', json.dumps(body)]
+    out = run(cmd, check=False).stdout
+    text, _, code = out.rpartition('\n')
+    try:
+        return int(code), json.loads(text)
+    except ValueError:
+        return int(code or 0), text[:500]
+
+
+def orphan_and_decide(c0, peer, ph, owner, job_id, args, m, pr, reap_on_pr=False):
+    """Hold the owner before --seam-counter, kill it; PR: adopt (or, with reap_on_pr, reap via the
+    claim-no-queue lost path); devel: wait for the natural reap."""
+    arm_hold(c0, job_id, owner, args.seam_counter)
+    if pr and reap_on_pr:
+        arm(peer, 'adoption.before_queue', 'raise', {'job_id': job_id, 'node': ph}, times=1)
+    orphan_owner(peer, ph, owner, job_id, args, m, pr)
+
+
+def latest_jobs_of(container, inventory):
+    return orm(
+        container,
+        f'''
+from awx.main.models import Inventory, JobHostSummary
+inv = Inventory.objects.get(name={inventory!r})
+out = {{}}
+for h in inv.hosts.all():
+    s = JobHostSummary.objects.filter(host_id=h.id).order_by('-id').first()
+    out[h.name] = dict(last_job=s.job_id if s else None, failed=bool(s and s.failed))
+emit(out)
+''',
+    )
+
+
+def scenario_relaunch_orphan(containers, args):
+    """Relaunching an orphaned job: A (overlap.yml over the dc hosts) is reaped while its playbook
+    runs (devel: natural reap; PR: claim-no-queue lost path), then relaunched through the API.
+    Measures overlap of A's and the relaunch's playbooks per host, and the hosts' last_job."""
+    need_two(containers, 'relaunch-orphan')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    observer_session(c0)
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    dc_inventory(c0)
+    jt = setup(containers, 'failpoint overlap', 'overlap.yml', {'iterations': args.iterations}, inventory=DC_INV, allow_simultaneous=False)
+    since = since_now()
+    a = launch(c0, jt)
+    st = wait_for('A running', lambda: (s := job_state(c0, a))['status'] == 'running' and s['work_unit_id'] and s, 300)
+    owner, unit_a = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'job_a': a, 'iterations': args.iterations}
+    orphan_and_decide(c0, peer, ph, owner, a, args, m, pr, reap_on_pr=True)
+    sa = wait_for('A terminal', lambda: (s := job_state(peer, a)) and terminal(s) and s, args.claim_timeout, poll=3)
+    m['a_terminal'] = {k: sa[k] for k in ('status', 'job_explanation')}
+    m['a_unit_at_relaunch'] = unit_status(unit_a)
+    code, body = api(peer, 'POST', f'/api/v2/jobs/{a}/relaunch/', {})
+    m['relaunch'] = {'at': utcnow(), 'http': code, 'body': body if code >= 300 else {'id': body.get('id')}}
+    b = body.get('id') if isinstance(body, dict) else None
+    m['job_b'] = b
+    log(f'relaunch of {a}: http {code} -> {b}')
+    if b:
+        sb = wait_for('B terminal', lambda: (s := job_state(peer, b)) and terminal(s) and s, args.finish_timeout, poll=5)
+        m['b'] = {k: sb[k] for k in ('status', 'controller_node')}
+    m['unit_a_end'] = unit_end(peer, a, unit_a, seconds=args.finish_timeout)
+    ra = unit_events(unit_a) or db_host_ranges(peer, a)
+    rb = db_host_ranges(peer, b) if b else {}
+    m['overlap_s'] = overlaps(ra, rb)
+    m['last_job'] = latest_jobs_of(peer, DC_INV)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, a, since, args, unit_a, [f"overlap {m['overlap_s']}"], metrics=m)
+
+
+def scenario_cancel_wf_orphan(containers, args):
+    """Cancel a workflow while its running node's job is orphaned, in one window:
+      --variant dead       owner killed, nobody told yet (PR) / before devel's reap
+      --variant claim      PR: held at adoption.before_queue (claimed, not published)
+      --variant deferred   PR: held at adoption.after_claim (adoption task running, before the snapshot)
+      --variant streaming  PR: after the adoption snapshot
+    Then the workflow job is canceled (WorkflowJob.cancel()). Final states of the workflow, node A's
+    job and its downstream nodes B (success) and C (failure)."""
+    need_two(containers, 'cancel-wf-orphan')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    if not pr and args.variant != 'dead':
+        raise SystemExit('cancel-wf-orphan: only the dead window applies on devel')
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    ids = wf_setup(containers, args)
+    since = since_now()
+    set_instance(c2, 'awx-2', enabled=False)
+    try:
+        wj = wf_launch(c2, ids['wf'])
+        a = wait_for(
+            'A running',
+            lambda: orm(
+                c2,
+                f"from awx.main.models import Job\nq = Job.objects.filter(unified_job_template_id={ids['a']}, created__gte='{since}', status='running').exclude(work_unit_id='')\nemit(q.first().id if q.exists() else None)\n",
+            ),
+            300,
+            poll=3,
+        )
+    finally:
+        set_instance(c2, 'awx-2', enabled=True)
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'workflow_job': wj, 'a_job': a, 'iterations': args.iterations}
+    seam = {'claim': 'adoption.before_queue', 'deferred': 'adoption.after_claim'}.get(args.variant)
+    arm_recorders(c2, a, ['adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+    if seam:
+        arm(c2, seam, 'pause', {'job_id': a}, timeout=1800)
+    arm_hold(c2, a, 'awx-1', args.seam_counter)
+    wait_hold(c2, a, 'awx-1', args.seam_counter)
+    wait_db_events(c2, a, args.seam_counter)
+    m['killed_at'] = kill(c0)
+    manage(c2, 'failpoint', 'disarm', 'callback.event')
+    if pr and args.variant != 'dead':
+        force_lost(c2, 'awx-2', 'awx-1')
+        if seam:
+            wait_hits(c2, seam, lambda h: h['action'] == 'pause', timeout=120)
+        else:
+            wait_hits(c2, 'adoption.after_snapshot', timeout=120)
+    m['a_before_cancel'] = job_state(c2, a)
+    m['cancel'] = orm(
+        c2,
+        f'from awx.main.models import WorkflowJob\nfrom django.utils.timezone import now\nw = WorkflowJob.objects.get(pk={wj})\nemit(dict(at=now(), returned=w.cancel()))\n',
+    )
+    log(f"workflow {wj} canceled: {m['cancel']}; A was {m['a_before_cancel']['status']} on {m['a_before_cancel']['controller_node']}")
+    if seam:
+        time.sleep(5)
+        manage(c2, 'failpoint', 'release', seam)
+    if pr and args.variant == 'dead':
+        force_lost(c2, 'awx-2', 'awx-1')
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < args.observe:
+        tree = wf_state(c2, wj, ids)
+        if tree['workflow']['status'] not in ('pending', 'waiting', 'running') and all(
+            n['status'] not in ('pending', 'waiting', 'running') for n in tree['nodes'].values() if n['job']
+        ):
+            break
+        time.sleep(5)
+    m['tree'] = wf_state(c2, wj, ids)
+    m['a_final'] = job_state(c2, a)
+    if pr:
+        manage(c2, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, a, since, args, None, [f"tree {json.dumps(m['tree'], default=str)[:600]}"], metrics=m)
+
+
+def scenario_cancel_finalize(containers, args):
+    """Cancel during the adopter's finalize: the adopter is held at adoption.before_finalize
+    (stream done, status not saved); the job is canceled; then released.
+    PR: cross-node adoption; devel: same-node (owner restarted)."""
+    need_two(containers, 'cancel-finalize')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'iterations': args.iterations}
+    arm(c0, 'adoption.before_finalize', 'pause', {'job_id': job_id}, timeout=1800)
+    arm_hold(c0, job_id, owner, args.seam_counter)
+    if pr:
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    else:
+        wait_hold(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    h = wait_hits(peer, 'adoption.before_finalize', lambda h: h['action'] == 'pause', timeout=args.finish_timeout, poll=2)[0]
+    m['held'] = f"{h['node']} at {h['at']}"
+    m['cancel'] = cancel_job(peer, job_id)
+    log(f"canceled while the adopter finalizes: {m['cancel']}")
+    time.sleep(5)
+    manage(peer, 'failpoint', 'release', 'adoption.before_finalize')
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, job_id, since, args, unit, [f"terminal {s['status']} cancel_flag={s['cancel_flag']}"], metrics=m)
+
+
+def lock_holders(container):
+    return orm(
+        container,
+        '''
+from django.db import connection
+with connection.cursor() as c:
+    c.execute("""SELECT a.pid, a.application_name, now() - a.xact_start, now() - a.query_start, left(a.query, 80)
+                 FROM pg_locks l JOIN pg_stat_activity a ON a.pid = l.pid
+                 WHERE l.locktype = 'advisory' AND l.granted AND l.objid = 1226251610""")
+    emit([dict(pid=r[0], app=r[1], xact_age=str(r[2]), query_age=str(r[3]), query=r[4]) for r in c.fetchall()])
+''',
+    )
+
+
+def scenario_cancel_many(containers, args):
+    """Cancel many orphans at once: --orphans jobs on awx-1, which is killed (PR: awx-2 told).
+      --variant during   canceled together while the adoptions run (held at adoption.after_snapshot)
+      --variant after    canceled together once every orphan is streaming on awx-2
+    devel: canceled while they wait for the reap. task_manager_lock holders sampled every 2 s; a probe
+    job launched right after the cancels."""
+    need_two(containers, 'cancel-many')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+    probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+    set_instance(c2, 'awx-2', enabled=False)
+    since = since_now()
+    try:
+        ids = orm(
+            c2,
+            f'from awx.main.models import JobTemplate\njt = JobTemplate.objects.get(pk={jt})\nids = []\nfor _ in range({args.orphans}):\n    j = jt.create_unified_job()\n    j.signal_start()\n    ids.append(j.id)\nemit(ids)\n',
+        )
+        wait_for('all orphans running on awx-1', lambda: all(s == 'running' for s in status_only(c2, ids).values()), 300, poll=5)
+    finally:
+        set_instance(c2, 'awx-2', enabled=True)
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'jobs': ids, 'iterations': args.iterations}
+    arm_recorders(c2, None, ['adoption.after_claim', 'adoption.after_finalize_before_release'])
+    if pr and args.variant == 'during':
+        arm(c2, 'adoption.after_snapshot', 'pause', {}, timeout=1800)
+    else:
+        arm_recorders(c2, None, ['adoption.after_snapshot'])
+    time.sleep(args.lead)
+    m['killed_at'] = kill(c0)
+    samples = []
+    stop = threading.Event()
+
+    def sampler():
+        while not stop.is_set():
+            try:
+                samples.append({'at': utcnow(), 'holders': lock_holders(c2)})
+            except RuntimeError:
+                pass
+            stop.wait(2)
+
+    th = threading.Thread(target=sampler, daemon=True)
+    th.start()
+    try:
+        if pr:
+            force_lost(c2, 'awx-2', 'awx-1')
+            if args.variant == 'during':
+                wait_hits(c2, 'adoption.after_snapshot', lambda h: h['action'] == 'pause', count=len(ids), timeout=180, poll=2)
+            else:
+                wait_hits(c2, 'adoption.after_snapshot', count=len(ids), timeout=180, poll=2)
+        m['before_cancel'] = dict(Counter(f"{v['status']}@{v['controller']}" for v in _job_statuses(c2, ids).values()))
+        m['cancel_at'] = utcnow()
+        m['cancel_returned'] = orm(
+            c2, f'from awx.main.models import UnifiedJob\nemit([j.cancel() for j in UnifiedJob.objects.filter(pk__in={ids!r})])\n'
+        ).count(True)
+        m['probe'] = launch(c2, probe_jt)
+        if pr and args.variant == 'during':
+            time.sleep(5)
+            manage(c2, 'failpoint', 'release', 'adoption.after_snapshot')
+        wait_for(
+            'all orphans terminal', lambda: all(s not in ('pending', 'waiting', 'running') for s in status_only(c2, ids).values()), args.finish_timeout, poll=5
+        )
+        m['all_terminal_at'] = utcnow()
+    finally:
+        stop.set()
+        th.join(timeout=30)
+    m['final'] = dict(Counter(f"{v['status']} cancel_flag" for v in _job_statuses(c2, ids).values()))
+    m['final_detail'] = {k: (v['status'], v['explanation'][:60]) for k, v in _job_statuses(c2, ids).items()}
+    m['probe_job'] = job_state(c2, m['probe'])
+    m['probe_times'] = orm(
+        c2,
+        f"from awx.main.models import UnifiedJob\nj = UnifiedJob.objects.get(pk={m['probe']})\nemit(dict(created=j.created, started=j.started, finished=j.finished))\n",
+    )
+    m['lock_samples'] = [s for s in samples if s['holders']]
+    if pr:
+        manage(c2, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, ids[0], since, args, None, [], metrics=m)
+
+
+def scenario_overcommit(containers, args):
+    """Overcommit after adoption: awx-2's capacity is set small (SYSTEM_TASK_ABS_CPU/MEM for awx-2 only,
+    capacity --capacity), it runs --fill jobs, and --orphans jobs on awx-1 are orphaned. Records awx-2's
+    consumed vs capacity, whether new launches still go to awx-2, and the adoption slot decisions.
+      --variant enabled    awx-2 enabled (capacity > 0)
+      --variant disabled   awx-2 disabled while it adopts (capacity 0: the fail-open path)"""
+    need_two(containers, 'overcommit')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    if not pr:
+        raise SystemExit('overcommit: does not apply on devel (no cross-node adoption)')
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    m = {'branch': 'PR', 'variant': args.variant, 'iterations': args.iterations}
+    orig = awx2_override(["SYSTEM_TASK_ABS_CPU = '0.25'", "SYSTEM_TASK_ABS_MEM = '2548Mi'"])
+    try:
+        restart_workers(c2)
+        wait_for('awx-2 small capacity', lambda: (i := instances(c2)['awx-2'])['capacity'] and i['capacity'] < 100 and i, 240, poll=10)
+        m['awx2_capacity'] = instances(c2)['awx-2']['capacity']
+        jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+        probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+        set_instance(c2, 'awx-1', enabled=False)
+        fill = [launch(c2, jt) for _ in range(args.fill)]
+        wait_for('fill running on awx-2', lambda: all(v == 'running' for v in status_only(c2, fill).values()), 300, poll=3)
+        set_instance(c2, 'awx-1', enabled=True)
+        wait_for('awx-1 capacity back', lambda: instances(c2)['awx-1']['capacity'] > 0, 180, poll=5)
+        set_instance(c2, 'awx-2', enabled=False)
+        orph = [launch(c2, jt) for _ in range(args.orphans)]
+        wait_for('orphans running on awx-1', lambda: all(v == 'running' for v in status_only(c2, orph).values()), 300, poll=3)
+        set_instance(c2, 'awx-2', enabled=args.variant == 'enabled')
+        arm_recorders(c2, None, ['adoption.after_claim', 'adoption.after_snapshot'])
+        m['fill'], m['orphans'] = fill, orph
+        m['killed_at'] = kill(c0)
+        force_lost(c2, 'awx-2', 'awx-1')
+        samples = []
+        t0 = time.monotonic()
+        probe = None
+        while time.monotonic() - t0 < args.observe:
+            i = instances(c2)['awx-2']
+            st = _job_statuses(c2, fill + orph + ([probe] if probe else []))
+            samples.append({'at': utcnow(), 'capacity': i['capacity'], 'enabled': i['enabled'],
+                            'consumed': orm(c2, "from awx.main.models import Instance\nemit(Instance.objects.get(hostname='awx-2').consumed_capacity)\n"),
+                            'jobs': dict(Counter(f"{v['status']}@{v['controller']}" for v in st.values()))})  # fmt: skip
+            log(f'sample: {samples[-1]}')
+            if probe is None and time.monotonic() - t0 > 20:
+                probe = launch(c2, probe_jt)
+                m['probe'] = probe
+            time.sleep(10)
+        m['samples'] = samples
+        m['adoptions'] = len(fired_hits(c2, 'adoption.after_snapshot'))
+        m['claims'] = len(fired_hits(c2, 'adoption.after_claim'))
+        m['probe_job'] = job_state(c2, probe) if probe else None
+    finally:
+        for j in m.get('fill', []) + m.get('orphans', []) + ([m['probe']] if m.get('probe') else []):
+            try:
+                cancel_job(c2, j)
+            except RuntimeError:
+                pass
+        awx2_restore(orig)
+        restart_workers(c2)
+        start_back(c0, 'awx-1')
+        set_instance(c2, 'awx-2', enabled=True)
+        set_instance(c2, 'awx-1', enabled=True)
+    wait_for('awx-2 capacity restored', lambda: instances(c2)['awx-2']['capacity'] > 100, 300, poll=10)
+    since = m['killed_at'][:19] + 'Z'
+    time.sleep(args.settle)
+    return report(containers, m['orphans'][0], since, args, None, [], metrics=m)
+
+
+def scenario_ig_limits(containers, args):
+    """Instance group job limits: the template runs in instance group 'failpoint limited' (receptor-1)
+    with --variant max-jobs (max_concurrent_jobs=2) or max-forks (max_forks = 2 jobs' worth).
+    Two jobs run (controller awx-1), are orphaned (PR: adopted; devel: reaped), then a third is
+    launched: does it wait for the group limit?"""
+    need_two(containers, 'ig-limits')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    orm(
+        c2,
+        f'''
+from awx.main.models import InstanceGroup, Instance
+ig, _ = InstanceGroup.objects.get_or_create(name={FP_IG!r})
+ig.max_concurrent_jobs = {2 if args.variant == 'max-jobs' else 0}
+ig.max_forks = {0 if args.variant == 'max-jobs' else 4}
+ig.save()
+ig.instances.add(Instance.objects.get(hostname='receptor-1'))
+emit(ig.id)
+''',
+    )
+    jt = setup(
+        containers, 'failpoint limited', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True, instance_group=FP_IG, jt_fields={'forks': 1}
+    )
+    set_instance(c2, 'awx-2', enabled=False)
+    since = since_now()
+    try:
+        ids = [launch(c2, jt) for _ in range(2)]
+        wait_for('two running on awx-1', lambda: all(v == 'running' for v in status_only(c2, ids).values()), 300, poll=3)
+    finally:
+        set_instance(c2, 'awx-2', enabled=True)
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'jobs': ids, 'iterations': args.iterations}
+    arm_recorders(c2, None, ['adoption.after_snapshot'])
+    for j in ids:
+        arm(c2, 'callback.event', 'pause', {'job_id': j, 'counter': args.seam_counter}, timeout=1800)
+    wait_hits(c2, 'callback.event', lambda h: h['action'] == 'pause', count=2, timeout=300, poll=2)
+    m['killed_at'] = kill(c0)
+    manage(c2, 'failpoint', 'disarm', 'callback.event')
+    if pr:
+        force_lost(c2, 'awx-2', 'awx-1')
+        wait_hits(c2, 'adoption.after_snapshot', count=2, timeout=180, poll=2)
+    else:
+        wait_for('reap', lambda: all(v != 'running' for v in status_only(c2, ids).values()), args.claim_timeout, poll=5)
+    m['first_two_after_decision'] = _job_statuses(c2, ids)
+    third = launch(c2, jt)
+    m['third'] = third
+    m['third_launched_at'] = utcnow()
+    t0 = time.monotonic()
+    samples = []
+    while time.monotonic() - t0 < args.observe:
+        st = _job_statuses(c2, ids + [third])
+        samples.append({'at': utcnow(), 'jobs': {k: (v['status'], str(v['started'])[11:19]) for k, v in st.items()}})
+        if terminal(job_state(c2, third)):
+            break
+        time.sleep(5)
+    m['samples'] = samples
+    m['units'] = {j: unit_status(job_state(c2, j)['work_unit_id']) for j in ids}
+    if pr:
+        manage(c2, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, third, since, args, None, [], metrics=m)
+
+
+def scenario_schedule_outage(containers, args):
+    """Schedules firing during an outage: a minutely schedule on a template (allow_simultaneous=False).
+      --variant both-down  both controllers down for --down s across at least one due time, then awx-2 back
+      --variant orphan     the scheduled job's controller is held at event 25 and killed (PR: adopted,
+                           devel: reaped) while the next due time passes
+    Counts scheduled jobs, overlap, and which node ran the scheduler."""
+    need_two(containers, 'schedule-outage')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    jt = setup(containers, 'failpoint scheduled', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=False)
+    since = since_now()
+    sched = orm(
+        c2,
+        f'''
+from datetime import timedelta
+from django.utils.timezone import now
+from awx.main.models import Schedule, JobTemplate
+start = (now() + timedelta(seconds=40)).strftime('%Y%m%dT%H%M%SZ')
+s, _ = Schedule.objects.get_or_create(name={FP_SCHED!r}, unified_job_template=JobTemplate.objects.get(pk={jt}),
+    defaults=dict(rrule=f'DTSTART:{{start}} RRULE:FREQ=MINUTELY;INTERVAL=1'))
+s.rrule = f'DTSTART:{{start}} RRULE:FREQ=MINUTELY;INTERVAL=1'
+s.enabled = True
+s.save()
+emit(dict(id=s.id, next_run=s.next_run))
+''',
+    )
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'schedule': sched, 'iterations': args.iterations}
+
+    def scheduled():
+        return orm(
+            c2,
+            f"from awx.main.models import UnifiedJob\nemit([dict(id=j.id, status=j.status, controller=j.controller_node, created=j.created, started=j.started, finished=j.finished, launch_type=j.launch_type) for j in UnifiedJob.objects.filter(schedule_id={sched['id']}).order_by('id')])\n",
+        )
+
+    try:
+        first = wait_for('first scheduled job running', lambda: (js := scheduled()) and any(j['status'] == 'running' for j in js) and js, 180, poll=3)
+        job_id = next(j['id'] for j in first if j['status'] == 'running')
+        st = job_state(c2, job_id)
+        owner = st['controller_node']
+        oc, peer, ph = peer_of(containers, owner)
+        m['first'] = job_id
+        if args.variant == 'both-down':
+            m['down_at'] = utcnow()
+            run(['docker', 'kill', c0, c2])
+            time.sleep(args.down)
+            start_back(c2, 'awx-2')
+            m['awx2_back_at'] = utcnow()
+            peer, ph = c2, 'awx-2'
+        else:
+            arm_hold(c2, job_id, owner, args.seam_counter)
+            orphan_owner(peer, ph, owner, job_id, args, m, pr)
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < args.observe:
+            time.sleep(15)
+            log(f'scheduled jobs: {[(j["id"], j["status"], j["controller"]) for j in scheduled()]}')
+        m['jobs'] = scheduled()
+    finally:
+        orm(c2, f"from awx.main.models import Schedule\ns = Schedule.objects.get(pk={sched['id']})\ns.enabled = False\ns.save()\nemit(True)\n")
+    ensure_up(containers)
+    wait_for('scheduled jobs terminal', lambda: all(j['status'] not in ('pending', 'waiting', 'running') for j in scheduled()), args.finish_timeout, poll=10)
+    m['jobs_final'] = scheduled()
+    if pr:
+        manage(c2, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    time.sleep(args.settle)
+
+    def from_logs(logs):
+        pat = re.compile(r'periodic scheduler|Not running periodic scheduler|Starting periodic scheduler|Schedule .* launch')
+        return {'scheduler_lines': {container_for_host(c): [line[:180] for line in lines if pat.search(line)][-10:] for c, lines in logs.items()}}
+
+    return report(containers, m['first'], since, args, None, [], metrics=m, from_logs=from_logs)
+
+
+def scenario_return_capacity(containers, args):
+    """Capacity of a returning controller: the owner is held at event 25 and killed with its job, then
+    started again (PR: peer claims vetoed). Its Instance row (capacity, last_seen) is sampled every
+    second from the start until its startup adoption, which is recorded (claim, snapshot, deferrals)."""
+    need_two(containers, 'return-capacity')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'iterations': args.iterations}
+    arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot'])
+    arm_hold(c0, job_id, owner, args.seam_counter)
+    if pr:
+        guard_peer(peer, job_id)
+    wait_hold(c0, job_id, owner, args.seam_counter)
+    wait_db_events(c0, job_id, args.seam_counter)
+    run(['docker', 'kill', oc])
+    m['killed_at'] = utcnow()
+    manage(peer, 'failpoint', 'disarm', 'callback.event')
+    run(['docker', 'start', oc])
+    m['started_at'] = utcnow()
+    samples = []
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < 180:
+        try:
+            i = instances(peer)[owner]
+            samples.append({'at': utcnow(), 'state': i['state'], 'capacity': i['capacity'], 'last_seen': i['last_seen'], 'errors': i['errors']})
+        except (RuntimeError, KeyError):
+            pass
+        if fired_hits(peer, 'adoption.after_snapshot'):
+            break
+        time.sleep(1)
+    m['samples'] = [s for k, s in enumerate(samples) if k == 0 or s['capacity'] != samples[k - 1]['capacity'] or s['state'] != samples[k - 1]['state']]
+    m['snapshot'] = fired_hits(peer, 'adoption.after_snapshot')[:1]
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    time.sleep(args.settle)
+
+    def from_logs(logs):
+        pat = re.compile(r'out of control capacity|deferr|Adopting job|capacity')
+        return {'adoption_lines': [line[:200] for line in logs.get(oc, []) if pat.search(line) and str(job_id) in line][:10]}
+
+    return report(containers, job_id, since, args, unit, [f"terminal {s['status']}"], metrics=m, from_logs=from_logs)
+
+
+def scenario_relaunch_failed(containers, args):
+    """Relaunch on failed hosts after a reap: the dc template (datacheck.yml, no failing host) is
+    orphaned and reaped (devel: natural; PR: claim-no-queue lost path) while its playbook succeeds,
+    then relaunched with hosts=failed through the API. PR also: an adopted job relaunched the same way."""
+    need_two(containers, 'relaunch-failed')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    observer_session(c0)
+    sink_start()
+    since = since_now()
+    job_id, st, inv = dc_start(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'iterations': args.iterations}
+    orphan_and_decide(c0, peer, ph, owner, job_id, args, m, pr, reap_on_pr=args.variant == 'reap')
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    m['unit_end'] = unit_end(peer, job_id, unit, seconds=240)
+    m['retry_qs'] = orm(
+        peer, f"from awx.main.models import Job\nemit(sorted(Job.objects.get(pk={job_id}).retry_qs('failed').values_list('name', flat=True)))\n"
+    )
+    code, body = api(peer, 'POST', f'/api/v2/jobs/{job_id}/relaunch/', {'hosts': 'failed'})
+    m['relaunch'] = {'http': code, 'body': body if code >= 300 else {'id': body.get('id'), 'limit': body.get('limit')}}
+    log(f'relaunch hosts=failed of {job_id} ({s["status"]}): http {code} {m["relaunch"]}')
+    b = body.get('id') if isinstance(body, dict) and code < 300 else None
+    if b:
+        sb = wait_for('relaunch terminal', lambda: (x := job_state(peer, b)) and terminal(x) and x, args.finish_timeout, poll=5)
+        m['relaunched'] = orm(
+            peer,
+            f"from awx.main.models import Job\nj = Job.objects.get(pk={b})\nemit(dict(status=j.status, limit=j.limit, hosts=sorted(j.job_host_summaries.values_list('host_name', flat=True))))\n",
+        )
+        m['relaunched']['status_seen'] = sb['status']
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, job_id, since, args, unit, [], metrics=m)
+
+
+def scenario_cancel_sliced(containers, args):
+    """Cancel a sliced job: job_slice_count=2 over the dc hosts; slice 1's controller is held at event
+    25 and killed (PR: the peer is told, adoption held at adoption.after_claim; devel: before the reap);
+    the parent (the slice workflow job) is canceled. Do all slices end canceled?"""
+    need_two(containers, 'cancel-sliced')
+    c2 = 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    dc_inventory(c2)
+    jt = setup(containers, 'failpoint sliced dc', 'chatty.yml', {'iterations': args.iterations}, inventory=DC_INV, jt_fields={'job_slice_count': 2})
+    since = since_now()
+    wf = launch(c2, jt)
+
+    def slices():
+        return orm(
+            c2,
+            f"from awx.main.models import WorkflowJob\nwj = WorkflowJob.objects.get(pk={wf})\nemit(sorted([dict(id=n.job.id, status=n.job.status, controller=n.job.controller_node, unit=n.job.work_unit_id, slice=n.job.job_slice_number, cancel_flag=n.job.cancel_flag, explanation=(n.job.job_explanation or '')[:80]) for n in wj.workflow_job_nodes.all() if n.job], key=lambda x: x['slice']))\n",
+        )
+
+    sl = wait_for('both slices running', lambda: (x := slices()) and len(x) == 2 and all(s['status'] == 'running' and s['unit'] for s in x) and x, 300, poll=3)
+    s1 = next(s for s in sl if s['controller'] == 'awx-1') if any(s['controller'] == 'awx-1' for s in sl) else sl[0]
+    owner = s1['controller']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'workflow_job': wf, 'slices': sl, 'orphaned_slice': s1['id'], 'iterations': args.iterations}
+    if pr:
+        arm(peer, 'adoption.after_claim', 'pause', {'job_id': s1['id']}, timeout=1800)
+    arm_hold(peer, s1['id'], owner, args.seam_counter)
+    orphan_owner(peer, ph, owner, s1['id'], args, m, pr)
+    if pr:
+        wait_hits(peer, 'adoption.after_claim', lambda h: h['action'] == 'pause', timeout=120)
+    m['before_cancel'] = slices()
+    m['cancel'] = orm(c2 if c2 != oc else peer, f'from awx.main.models import WorkflowJob\nemit(WorkflowJob.objects.get(pk={wf}).cancel())\n')
+    m['canceled_at'] = utcnow()
+    if pr:
+        time.sleep(5)
+        manage(peer, 'failpoint', 'release', 'adoption.after_claim')
+    wait_for('slices terminal', lambda: all(s['status'] not in ('pending', 'waiting', 'running') for s in slices()), args.finish_timeout, poll=5)
+    m['after'] = slices()
+    m['workflow'] = orm(
+        peer, f'from awx.main.models import WorkflowJob\nw = WorkflowJob.objects.get(pk={wf})\nemit(dict(status=w.status, cancel_flag=w.cancel_flag))\n'
+    )
+    m['units'] = {s['id']: unit_status(s['unit']) for s in sl}
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    return report(containers, s1['id'], since, args, None, [], metrics=m)
+
+
+def scenario_scale_down(containers, args):
+    """Scaling a controller down mid-adoption: --orphans jobs on awx-1 are orphaned; awx-2's adoptions
+    are held at adoption.after_claim; awx-2's capacity is lowered (--variant adjust: SYSTEM_TASK_ABS_CPU
+    0.25 and capacity_adjustment 0, capacity 1) or awx-2 disabled (--variant disable); then released."""
+    need_two(containers, 'scale-down')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    if not pr:
+        raise SystemExit('scale-down: does not apply on devel (no cross-node adoption)')
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    m = {'branch': 'PR', 'variant': args.variant, 'iterations': args.iterations}
+    orig = awx2_override(["SYSTEM_TASK_ABS_CPU = '0.25'"]) if args.variant == 'adjust' else None
+    try:
+        if orig is not None:
+            restart_workers(c2)
+            time.sleep(15)
+        jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+        set_instance(c2, 'awx-2', enabled=False)
+        ids = [launch(c2, jt) for _ in range(args.orphans)]
+        wait_for('orphans running on awx-1', lambda: all(v == 'running' for v in status_only(c2, ids).values()), 300, poll=3)
+        set_instance(c2, 'awx-2', enabled=True)
+        wait_for('awx-2 capacity', lambda: instances(c2)['awx-2']['capacity'] > 0, 180, poll=5)
+        m['jobs'] = ids
+        arm(c2, 'adoption.after_claim', 'pause', {}, timeout=1800)
+        arm_recorders(c2, None, ['adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+        m['killed_at'] = kill(c0)
+        force_lost(c2, 'awx-2', 'awx-1')
+        held = wait_hits(c2, 'adoption.after_claim', lambda h: h['action'] == 'pause', count=args.orphans, timeout=180, poll=2)
+        m['held'] = len(held)
+        if args.variant == 'adjust':
+            m['changed'] = set_instance(c2, 'awx-2', capacity_adjustment=0)
+            wait_for('awx-2 capacity 1', lambda: instances(c2)['awx-2']['capacity'] == 1, 180, poll=5)
+        else:
+            m['changed'] = set_instance(c2, 'awx-2', enabled=False)
+        m['awx2_after_change'] = instances(c2)['awx-2']
+        manage(c2, 'failpoint', 'release', 'adoption.after_claim')
+        m['released_at'] = utcnow()
+        t0 = time.monotonic()
+        samples = []
+        while time.monotonic() - t0 < args.observe:
+            st = _job_statuses(c2, ids)
+            samples.append(
+                {
+                    'at': utcnow(),
+                    'jobs': dict(Counter(f"{v['status']}@{v['controller']}" for v in st.values())),
+                    'snapshots': len(fired_hits(c2, 'adoption.after_snapshot')),
+                }
+            )
+            if all(v['status'] not in ('pending', 'waiting', 'running') for v in st.values()):
+                break
+            time.sleep(10)
+        m['samples'] = samples
+    finally:
+        manage(c2, 'failpoint', 'disarm', '--all')
+        set_instance(c2, 'awx-2', enabled=True, capacity_adjustment=1)
+        if orig is not None:
+            awx2_restore(orig)
+            restart_workers(c2)
+        start_back(c0, 'awx-1')
+        for j in m.get('jobs', []):
+            try:
+                if not terminal(job_state(c2, j)):
+                    pass
+            except RuntimeError:
+                pass
+    wait_for(
+        'all orphans terminal',
+        lambda: all(v not in ('pending', 'waiting', 'running') for v in status_only(c2, m['jobs']).values()),
+        args.finish_timeout,
+        poll=10,
+    )
+    m['final'] = dict(Counter(status_only(c2, m['jobs']).values()))
+    time.sleep(args.settle)
+    return report(containers, m['jobs'][0], m['killed_at'][:19] + 'Z', args, None, [], metrics=m)
+
+
+def scenario_exec_full(containers, args):
+    """Execution node at full capacity: receptor-1's capacity_adjustment is set to 0, and jobs over a
+    --hosts-host inventory (forks = hosts, so impact = hosts + 1) fill it. One filler's controller is
+    orphaned (PR: adopted; devel: reaped). receptor-1's consumed capacity and a probe job's placement
+    are recorded."""
+    need_two(containers, 'exec-full')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    orm(
+        c2,
+        f'''
+from awx.main.models import Inventory, Organization, Host
+org = Organization.objects.get(name='Default')
+inv, _ = Inventory.objects.get_or_create(name={EXEC_INV!r}, organization=org)
+for i in range({args.hosts}):
+    Host.objects.get_or_create(name=f'fx-h{{i}}', inventory=inv, defaults=dict(variables='ansible_connection: local'))
+emit(inv.hosts.count())
+''',
+    )
+    jt = setup(
+        containers,
+        'failpoint exec filler',
+        'chatty.yml',
+        {'iterations': args.iterations},
+        inventory=EXEC_INV,
+        allow_simultaneous=True,
+        jt_fields={'forks': args.hosts},
+    )
+    probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+    m = {'branch': 'PR' if pr else 'devel', 'iterations': args.iterations, 'hosts': args.hosts}
+    try:
+        set_instance(c2, 'receptor-1', capacity_adjustment=0)
+        cap = wait_for('receptor-1 capacity lowered', lambda: (i := instances(c2)['receptor-1'])['capacity'] < 616 and i['capacity'], 240, poll=10)
+        m['receptor_capacity'] = cap
+        n = max(1, cap // (args.hosts + 1))
+        set_instance(c2, 'awx-2', enabled=False)
+        since = since_now()
+        try:
+            ids = [launch(c2, jt) for _ in range(n)]
+            wait_for('fillers running', lambda: all(v == 'running' for v in status_only(c2, ids).values()), 300, poll=3)
+        finally:
+            set_instance(c2, 'awx-2', enabled=True)
+        m['fillers'] = ids
+
+        def consumed():
+            return orm(
+                c2,
+                "from awx.main.models import Instance\ni = Instance.objects.get(hostname='receptor-1')\nemit(dict(capacity=i.capacity, consumed=i.consumed_capacity, remaining=i.remaining_capacity))\n",
+            )
+
+        m['receptor_before'] = consumed()
+        arm_recorders(c2, None, ['adoption.after_snapshot'])
+        arm_hold(c2, ids[0], 'awx-1', args.seam_counter)
+        wait_hold(c2, ids[0], 'awx-1', args.seam_counter)
+        m['killed_at'] = kill(c0)
+        manage(c2, 'failpoint', 'disarm', 'callback.event')
+        if pr:
+            force_lost(c2, 'awx-2', 'awx-1')
+            wait_hits(c2, 'adoption.after_snapshot', timeout=180, poll=2)
+        else:
+            wait_for('reap', lambda: job_state(c2, ids[0])['status'] != 'running', args.claim_timeout, poll=5)
+        m['receptor_after_decision'] = consumed()
+        probe = launch(c2, probe_jt)
+        m['probe'] = probe
+        t0 = time.monotonic()
+        samples = []
+        while time.monotonic() - t0 < args.observe:
+            samples.append(
+                {'at': utcnow(), 'receptor': consumed(), 'probe': job_state(c2, probe)['status'], 'fillers': dict(Counter(status_only(c2, ids).values()))}
+            )
+            if terminal(job_state(c2, probe)) and all(v not in ('pending', 'waiting', 'running') for v in status_only(c2, ids).values()):
+                break
+            time.sleep(10)
+        m['samples'] = samples
+        m['probe_times'] = orm(
+            c2,
+            f"from awx.main.models import UnifiedJob\nj = UnifiedJob.objects.get(pk={probe})\nemit(dict(created=j.created, started=j.started, status=j.status, execution=j.execution_node))\n",
+        )
+    finally:
+        for j in m.get('fillers', []):
+            try:
+                cancel_job(c2, j)
+            except RuntimeError:
+                pass
+        set_instance(c2, 'receptor-1', capacity_adjustment=1)
+        if pr:
+            manage(c2, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+        start_back(c0, 'awx-1')
+    wait_for('receptor-1 capacity restored', lambda: instances(c2)['receptor-1']['capacity'] >= 616, 300, poll=10)
+    time.sleep(args.settle)
+    return report(containers, m['fillers'][0], since, args, None, [], metrics=m)
+
+
+def scenario_s6_cleanup(containers, args):
+    """Remove what the part-6 queue created: the limited instance group, the schedule, the exec-host
+    inventory and the templates of this queue."""
+    out = orm(
+        containers[0],
+        f'''
+from awx.main.models import InstanceGroup, Schedule, Inventory, JobTemplate
+done = {{}}
+done['schedule'] = Schedule.objects.filter(name={FP_SCHED!r}).delete()[0]
+done['templates'] = JobTemplate.objects.filter(name__in=['failpoint limited', 'failpoint scheduled', 'failpoint exec filler', 'failpoint sliced dc', 'failpoint overlap']).delete()[0]
+done['ig'] = InstanceGroup.objects.filter(name={FP_IG!r}).delete()[0]
+for inv in Inventory.objects.filter(name={EXEC_INV!r}):
+    inv.hosts.all().delete()
+    inv.delete()
+    done['inventory'] = 'deleted'
+emit(done)
+''',
+    )
+    log(f'part-6 cleanup: {out}')
+    return {'ok': True}
+
+
 def scenario_report(containers, args):
     """Report only: invariants, timeline and saved logs for --job since --since (a run cut short)."""
     if not (args.job and args.since):
@@ -5472,6 +6301,13 @@ VARIANTS = {
     'live-output': ('normal', 'same-node', 'cross-node', 'slow'),
     'metrics': ('cross-node', 'slow'),
     'workflow-nested': ('approval', 'nested'),
+    'cancel-wf-orphan': ('dead', 'claim', 'deferred', 'streaming'),
+    'cancel-many': ('during', 'after'),
+    'overcommit': ('enabled', 'disabled'),
+    'ig-limits': ('max-jobs', 'max-forks'),
+    'schedule-outage': ('orphan', 'both-down'),
+    'relaunch-failed': ('reap', 'adopted'),
+    'scale-down': ('adjust', 'disable'),
 }
 
 SCENARIOS = {
@@ -5520,6 +6356,19 @@ SCENARIOS = {
     'metrics': scenario_metrics,
     'workflow-nested': scenario_workflow_nested,
     's5-cleanup': scenario_s5_cleanup,
+    'relaunch-orphan': scenario_relaunch_orphan,
+    'cancel-wf-orphan': scenario_cancel_wf_orphan,
+    'cancel-finalize': scenario_cancel_finalize,
+    'cancel-many': scenario_cancel_many,
+    'overcommit': scenario_overcommit,
+    'ig-limits': scenario_ig_limits,
+    'schedule-outage': scenario_schedule_outage,
+    'return-capacity': scenario_return_capacity,
+    'relaunch-failed': scenario_relaunch_failed,
+    'cancel-sliced': scenario_cancel_sliced,
+    'scale-down': scenario_scale_down,
+    'exec-full': scenario_exec_full,
+    's6-cleanup': scenario_s6_cleanup,
     'report': scenario_report,
 }
 
@@ -5576,6 +6425,8 @@ def main():
     parser.add_argument('--abs-cpu', default='0.25', help='few-workers: SYSTEM_TASK_ABS_CPU for awx-2')
     parser.add_argument('--abs-mem', default='2348Mi', help='few-workers: SYSTEM_TASK_ABS_MEM for awx-2 (2 GiB is deducted, 100 MiB per fork)')
     parser.add_argument('--pending', type=int, default=3, help='capacity-race: pending launches queued before capacity is freed')
+    parser.add_argument('--fill', type=int, default=2, help='overcommit: jobs that fill awx-2 before the orphans')
+    parser.add_argument('--hosts', type=int, default=20, help='exec-full: hosts in the filler inventory (forks = hosts)')
     parser.add_argument('--jobs', type=int, default=4, help='rolling-restart: jobs running during the restarts')
     parser.add_argument('--skip-preflight', action='store_true', help='Run even if the environment checks fail')
     parser.add_argument('--out', help='Directory to save logs, tracebacks and the timeline into')
