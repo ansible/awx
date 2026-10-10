@@ -88,6 +88,9 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
+- name: Create an instance group
+  instance_group:
+    name: example-instance-group
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
