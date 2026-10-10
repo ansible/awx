@@ -56,7 +56,7 @@ import threading
 import time
 
 from django.conf import settings
-from django.db import connection, transaction
+from django.db import DatabaseError, connection, transaction
 
 logger = logging.getLogger('awx.main.utils.failpoints')
 
@@ -245,9 +245,18 @@ def _pause(name, arg, armed_at=None, ctx=None):
     deadline = time.monotonic() + timeout
     logger.warning(f'Failpoint {name}: pausing pid={os.getpid()} until released (timeout {timeout}s)')
     while time.monotonic() < deadline:
-        with connection.cursor() as cursor:
-            cursor.execute(f'SELECT released, armed_at, release_at FROM {TABLE} WHERE name = %s', [name])
-            row = cursor.fetchone()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(f'SELECT released, armed_at, release_at FROM {TABLE} WHERE name = %s', [name])
+                row = cursor.fetchone()
+        except DatabaseError:
+            # The database went away while held (a scenario restarting or cutting it off). Keep
+            # holding and reconnect, so the caller resumes only when released, not when the
+            # database comes back.
+            logger.warning(f'Failpoint {name}: database unavailable while paused pid={os.getpid()}; retrying')
+            connection.close()
+            time.sleep(1)
+            continue
         if row is None or (armed_at is not None and row[1] != armed_at):
             logger.warning(f'Failpoint {name}: released pid={os.getpid()}')
             return

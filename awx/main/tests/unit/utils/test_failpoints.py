@@ -330,3 +330,25 @@ def test_release_command_schedules_one_instant_for_all_names():
 def test_release_command_rejects_too_short_lead():
     with pytest.raises(CommandError):
         call_command('failpoint', 'release', 'sweep.before_claim', '--in', '0.1')
+
+
+class _FlakyRows(_Rows):
+    """The first poll fails as if the database restarted."""
+
+    def execute(self, sql, params):
+        if self.polls == 0 and not getattr(self, 'failed', False):
+            self.failed = True
+            raise failpoints.DatabaseError('server closed the connection unexpectedly')
+        super().execute(sql, params)
+
+
+def test_pause_survives_a_database_restart():
+    cursor = _FlakyRows([(False, 'gen-1', None), (True, 'gen-1', None)])
+    with (
+        mock.patch.object(failpoints.connection, 'cursor', return_value=cursor),
+        mock.patch.object(failpoints.connection, 'close') as close,
+        mock.patch.object(failpoints.time, 'sleep'),
+    ):
+        failpoints._pause('adoption.before_finalize', {'timeout': 60}, 'gen-1')
+    assert close.call_count == 1
+    assert cursor.polls == 2
