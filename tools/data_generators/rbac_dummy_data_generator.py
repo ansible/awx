@@ -10,11 +10,9 @@ from optparse import make_option, OptionParser
 from datetime import datetime
 import logging
 
-
 # Django
 import django
 from django.utils.timezone import now
-
 
 base_dir = os.path.abspath(  # Convert into absolute path string
     os.path.join(  # Current file's grandparent directory
@@ -51,12 +49,10 @@ from awx.main.models import (  # noqa
     User,
     WorkflowJobTemplate,
     WorkflowJobTemplateNode,
-    batch_role_ancestor_rebuilding,
 )
 from awx.main.models.schedules import Schedule  # noqa
 
 from awx.main.signals import disable_activity_stream, disable_computed_fields  # noqa
-
 
 option_list = [
     make_option('--organizations', action='store', type='int', default=3, help='Number of organizations to create'),
@@ -202,7 +198,7 @@ startTime = datetime.now()
 
 def make_the_data():
     with disable_activity_stream():
-        with batch_role_ancestor_rebuilding(), disable_computed_fields():
+        with disable_computed_fields():
             admin, created = User.objects.get_or_create(username='admin', is_superuser=True)
             if created:
                 admin.is_superuser = True
