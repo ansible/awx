@@ -682,8 +682,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
                 job_tags.append('validation_checksum_manifest')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
-        if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':
-            self.job_tags = ','.join([self.job_tags, 'delete'])
+        tags = [tag for tag in self.job_tags.split(',') if tag]
+        has_scm_update = any(tag.startswith('update_') for tag in tags)
+        if self.scm_delete_on_update and 'delete' not in tags and has_scm_update:
+            self.job_tags = ','.join(tags + ['delete'])
             added_update_fields.append('job_tags')
         elif (not self.scm_delete_on_update) and 'delete' in self.job_tags:
             job_tags = self.job_tags.split(',')
