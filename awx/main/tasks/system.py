@@ -637,6 +637,10 @@ def inspect_execution_and_hop_nodes(instance_list, mesh_status):
             if instance.node_type in (Instance.Types.CONTROL, Instance.Types.HYBRID):
                 continue
 
+            # Test seam: pretend this node's advertisement was not seen (a false lost-node report).
+            if failpoint('mesh.ignore_advertisement', advertised=hostname):
+                continue
+
             last_seen = parse_date(ad['Time'])
             if instance.last_seen and instance.last_seen >= last_seen:
                 continue

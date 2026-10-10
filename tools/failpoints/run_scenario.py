@@ -6273,6 +6273,558 @@ emit(done)
     return {'ok': True}
 
 
+# --- part 7 queue -----------------------------------------------------------------------------
+
+FP_DIR = os.path.join(os.path.dirname(os.path.dirname(HERE)), '.fp')  # inside the repo, so /awx_devel/.fp in the containers
+SUPERVISOR_CONF = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'tools', 'docker-compose', 'supervisor.conf')
+DEL_INV = 'failpoint delete inventory'
+CRED_NAME = 'failpoint ssh key'
+
+SKEW_SITECUSTOMIZE = r'''
+"""Test-only clock skew for one control node's dispatcher and callback receiver.
+
+Shifts time.time()/time.time_ns() and django.utils.timezone.now() by FP_SKEW_SECONDS. The Django
+patch is applied the moment django.utils.timezone is first imported, so every later
+`from django.utils.timezone import now` gets the skewed function.
+"""
+import importlib.abc
+import importlib.machinery
+import os
+import sys
+import time
+
+_OFF = float(os.environ.get('FP_SKEW_SECONDS', '0') or 0)
+if _OFF:
+    _time, _time_ns = time.time, time.time_ns
+    time.time = lambda: _time() + _OFF
+    time.time_ns = lambda: _time_ns() + int(_OFF * 1e9)
+
+    class _Patch(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+        def find_spec(self, name, path, target=None):
+            if name != 'django.utils.timezone':
+                return None
+            sys.meta_path.remove(self)
+            spec = importlib.machinery.PathFinder.find_spec(name, path)
+            self._orig = spec.loader
+            spec.loader = self
+            return spec
+
+        def create_module(self, spec):
+            return self._orig.create_module(spec)
+
+        def exec_module(self, module):
+            self._orig.exec_module(module)
+            from datetime import datetime, timedelta, timezone
+
+            def now():
+                return datetime.now(tz=timezone.utc) + timedelta(seconds=_OFF)
+
+            module.now = now
+
+    sys.meta_path.insert(0, _Patch())
+'''
+
+
+def supervisor_env_wrap(enable):
+    """Make the dispatcher and receiver source /awx_devel/.fp/env-$HOSTNAME when it exists (per node),
+    or restore the original commands. Returns the original text when enabling."""
+    with open(SUPERVISOR_CONF) as fh:
+        text = fh.read()
+    pairs = [
+        ('command = awx-manage dispatcherd\n', 'command = sh -c \'f=/awx_devel/.fp/env-$HOSTNAME; [ -f $f ] && . $f; exec awx-manage dispatcherd\'\n'),
+        (
+            'command = awx-manage run_callback_receiver\n',
+            'command = sh -c \'f=/awx_devel/.fp/env-$HOSTNAME; [ -f $f ] && . $f; exec awx-manage run_callback_receiver\'\n',
+        ),
+    ]
+    new = text
+    for a, b in pairs:
+        new = new.replace(a, b) if enable else new.replace(b, a)
+    with open(SUPERVISOR_CONF, 'w') as fh:
+        fh.write(new)
+    return text
+
+
+def supervisor_apply(containers):
+    for c in containers:
+        run(['docker', 'exec', c, 'supervisorctl', 'reread'], check=False)
+        run(['docker', 'exec', c, 'supervisorctl', 'update'], check=False)
+        run(['docker', 'exec', c, 'supervisorctl', 'restart', 'tower-processes:awx-dispatcher', 'tower-processes:awx-receiver'], check=False)
+    log('supervisor config re-read; dispatcher and receiver restarted')
+
+
+def node_env(host, lines):
+    os.makedirs(FP_DIR, exist_ok=True)
+    path = os.path.join(FP_DIR, f'env-{host}')
+    if lines:
+        with open(path, 'w') as fh:
+            fh.write(''.join(f'export {line}\n' for line in lines))
+    elif os.path.exists(path):
+        os.remove(path)
+    return path
+
+
+def scenario_hop_restart(containers, args):
+    """Hop node restarts: two jobs run on receptor-1 (one per controller); `docker restart
+    tools_receptor_hop`; the jobs, receptor-1's and the hop's node_state, and any reap are watched."""
+    need_two(containers, 'hop-restart')
+    c2 = 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+    since = since_now()
+    ids = []
+    for other in ('awx-2', 'awx-1'):
+        set_instance(c2, other, enabled=False)
+        try:
+            j = launch(c2, jt)
+            wait_for(f'job {j} running', lambda j=j: job_state(c2, j)['status'] == 'running', 120, poll=2)
+            ids.append(j)
+        finally:
+            set_instance(c2, other, enabled=True)
+    m = {'branch': 'PR' if pr else 'devel', 'jobs': {j: job_state(c2, j)['controller_node'] for j in ids}, 'iterations': args.iterations}
+    arm_recorders(c2, None, ['adoption.after_claim', 'adoption.after_snapshot'])
+    time.sleep(10)
+    m['restart_at'] = utcnow()
+    run(['docker', 'restart', 'tools_receptor_hop'], timeout=120)
+    m['hop_back_at'] = utcnow()
+    log('receptor-hop restarted')
+    samples = []
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < args.observe:
+        inst = instances(c2)
+        st = _job_statuses(c2, ids)
+        samples.append({'at': utcnow(), 'receptor-1': inst['receptor-1']['state'], 'receptor-hop': inst['receptor-hop']['state'],
+                        'jobs': {k: (v['status'], v['controller']) for k, v in st.items()}})  # fmt: skip
+        if all(v['status'] not in ('pending', 'waiting', 'running') for v in st.values()):
+            break
+        time.sleep(10)
+    m['samples'] = [
+        s for k, s in enumerate(samples) if k == 0 or {x: s[x] for x in s if x != 'at'} != {x: samples[k - 1][x] for x in samples[k - 1] if x != 'at'}
+    ]
+    wait_for('jobs terminal', lambda: all(v not in ('pending', 'waiting', 'running') for v in status_only(c2, ids).values()), args.finish_timeout, poll=10)
+    m['final'] = {k: (v['status'], v['explanation'][:80]) for k, v in _job_statuses(c2, ids).items()}
+    m['adoptions'] = len(fired_hits(c2, 'adoption.after_snapshot'))
+    time.sleep(args.settle)
+    for j in ids[1:]:
+        report(containers, j, since, args, None, (), out_name=f'{run_label(args)}-job{j}')
+    return report(containers, ids[0], since, args, None, [], metrics=m)
+
+
+def scenario_delete_during(containers, args):
+    """Deleting the job or its inventory during adoption: the adopter is held at --variant's seam
+    (claim: adoption.before_queue, snapshot: adoption.after_claim, finalize: adoption.before_finalize);
+    the job, then its inventory, are deleted through the API; then the hold is released.
+    PR: cross-node; devel: same-node (finalize only)."""
+    need_two(containers, 'delete-during')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    seam = {'claim': 'adoption.before_queue', 'snapshot': 'adoption.after_claim', 'finalize': 'adoption.before_finalize'}[args.variant]
+    if not pr and args.variant != 'finalize':
+        raise SystemExit('delete-during: only finalize applies on devel')
+    observer_session(c0)
+    inv_id = orm(
+        c0,
+        f'''
+from awx.main.models import Inventory, Organization, Host
+org = Organization.objects.get(name='Default')
+inv, _ = Inventory.objects.get_or_create(name={DEL_INV!r}, organization=org)
+Host.objects.get_or_create(name='localhost', inventory=inv, defaults=dict(variables='ansible_connection: local'))
+emit(inv.id)
+''',
+    )
+    since = since_now()
+    job_id, st = start_job(containers, args, jt_name='failpoint delete', inventory=DEL_INV)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'variant': args.variant, 'inventory': inv_id, 'iterations': args.iterations}
+    arm(c0, seam, 'pause', {'job_id': job_id}, timeout=1800)
+    arm_hold(c0, job_id, owner, args.seam_counter)
+    if pr:
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    else:
+        wait_hold(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    wait_hits(peer, seam, lambda h: h['action'] == 'pause', timeout=args.finish_timeout, poll=2)
+    m['delete_job'] = api(peer, 'DELETE', f'/api/v2/jobs/{job_id}/')
+    m['delete_inventory'] = api(peer, 'DELETE', f'/api/v2/inventories/{inv_id}/')
+    log(f"deletes: job {m['delete_job']}, inventory {m['delete_inventory']}")
+    time.sleep(10)
+    m['inventory_after_delete'] = orm(
+        peer,
+        f'from awx.main.models import Inventory\nq = Inventory.objects.filter(pk={inv_id})\nemit(dict(exists=q.exists(), pending_deletion=q.first().pending_deletion if q.exists() else None))\n',
+    )
+    manage(peer, 'failpoint', 'release', seam)
+    m['released_at'] = utcnow()
+    watch(peer, job_id, unit, args.finish_timeout, until=lambda s: terminal(s) or s['status'] == 'missing', poll=5)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    m['unit_end'] = unit_end(peer, job_id, unit, seconds=180)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['job_after'] = orm(
+        peer,
+        f'from awx.main.models import UnifiedJob\nq = UnifiedJob.objects.filter(pk={job_id})\nemit(dict(exists=q.exists(), status=q.first().status if q.exists() else None))\n',
+    )
+    m['inventory_final'] = orm(
+        peer,
+        f'from awx.main.models import Inventory\nq = Inventory.objects.filter(pk={inv_id})\nemit(dict(exists=q.exists(), pending_deletion=q.first().pending_deletion if q.exists() else None))\n',
+    )
+    m['orphan_rows'] = orm(
+        peer,
+        f'''
+from awx.main.models import JobEvent, JobHostSummary
+emit(dict(events=JobEvent.objects.filter(job_id={job_id}).count(), summaries=JobHostSummary.objects.filter(job_id={job_id}).count()))
+''',
+    )
+
+    def from_logs(logs):
+        pat = re.compile(r'DoesNotExist|IntegrityError|Traceback')
+        return {
+            'error_lines': {container_for_host(c): [line[:200] for line in lines if pat.search(line) and str(job_id) in line][:8] for c, lines in logs.items()}
+        }
+
+    if m['job_after']['exists']:
+        return report(containers, job_id, since, args, unit, [], metrics=m, from_logs=from_logs)
+    log(f'job deleted; metrics: {json.dumps(m, default=str)[:3000]}')
+    if args.out:
+        d = os.path.join(args.out, f'{run_label(args)}-job{job_id}')
+        os.makedirs(d, exist_ok=True)
+        save_logs(containers, since, d)
+        with open(os.path.join(d, 'metrics.json'), 'w') as fh:
+            json.dump(m, fh, indent=2, default=str)
+    return {'ok': True}
+
+
+def private_dirs(container, job_id):
+    out = run(
+        [
+            'docker',
+            'exec',
+            container,
+            'sh',
+            '-c',
+            f'ls -d /tmp/awx_{job_id}_* 2>/dev/null; for d in /tmp/awx_{job_id}_*; do find $d -maxdepth 3 \\( -name "ssh_key_data" -o -name "*.pem" -o -name "*key*" \\) 2>/dev/null; done',
+        ],
+        check=False,
+    ).stdout
+    return [line for line in out.splitlines() if line.strip()]
+
+
+def scenario_creds_on_disk(containers, args):
+    """Credentials left on disk: a job using an SSH machine credential (a generated, unused key) on
+    awx-1 is held before event 25, awx-1 killed (PR: awx-2 adopts; devel: awx-1 is restarted and
+    re-adopts). After the job ends and awx-1 has been back for --observe s, the job's private data
+    directories (/tmp/awx_<id>_*) and key files on both controllers are listed."""
+    need_two(containers, 'creds-on-disk')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    cred = orm(
+        c0,
+        f'''
+import subprocess, tempfile, os
+from awx.main.models import Credential, CredentialType, Organization
+d = tempfile.mkdtemp()
+subprocess.run(['ssh-keygen', '-q', '-t', 'ed25519', '-N', '', '-f', d + '/k'], check=True)
+key = open(d + '/k').read()
+org = Organization.objects.get(name='Default')
+ct = CredentialType.objects.get(kind='ssh', managed=True)
+c, _ = Credential.objects.get_or_create(name={CRED_NAME!r}, credential_type=ct, organization=org)
+c.inputs = {{'username': 'fp', 'ssh_key_data': key}}
+c.save()
+emit(c.id)
+''',
+    )
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    jt = setup(containers, 'failpoint cred', 'chatty.yml', {'iterations': args.iterations})
+    orm(
+        c0,
+        f'from awx.main.models import JobTemplate, Credential\njt = JobTemplate.objects.get(pk={jt})\njt.credentials.add(Credential.objects.get(pk={cred}))\nemit(jt.credentials.count())\n',
+    )
+    since = since_now()
+    job_id = launch(c0, jt)
+    st = wait_for('job running with a work unit', lambda: (s := job_state(c0, job_id))['status'] == 'running' and s['work_unit_id'] and s, 300)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'credential': cred, 'iterations': args.iterations}
+    m['dirs_at_start'] = {container_for_host(c): private_dirs(c, job_id) for c in containers}
+    arm_hold(c0, job_id, owner, args.seam_counter)
+    if pr:
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    else:
+        wait_hold(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    m['dirs_at_terminal'] = {container_for_host(c): private_dirs(c, job_id) for c in containers if c != oc or not pr}
+    ensure_up(containers)
+    m['owner_back_at'] = utcnow()
+    time.sleep(args.observe)
+    m['dirs_after'] = {container_for_host(c): private_dirs(c, job_id) for c in containers}
+    notes = [f"terminal {s['status']}; dirs after {m['dirs_after']}"]
+    return report(containers, job_id, since, args, unit, notes, metrics=m)
+
+
+def scenario_event_cleanup(containers, args):
+    """Event cleanup during replay: the adopter is held at adoption.after_snapshot, the job's stored
+    events are deleted (as an event cleanup would), then the hold is released. PR: cross-node;
+    devel: same-node (owner restarted)."""
+    need_two(containers, 'event-cleanup')
+    c0 = containers[0]
+    pr = is_pr_branch(c0)
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc, peer, ph = peer_of(containers, owner)
+    m = {'branch': 'PR' if pr else 'devel', 'iterations': args.iterations}
+    arm(c0, 'adoption.after_snapshot', 'pause', {'job_id': job_id}, timeout=1800)
+    arm_hold(c0, job_id, owner, args.seam_counter)
+    if pr:
+        orphan_owner(peer, ph, owner, job_id, args, m, pr)
+    else:
+        wait_hold(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+        kill_and_restart(oc, peer, owner)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+    h = wait_hits(peer, 'adoption.after_snapshot', lambda h: h['action'] == 'pause', timeout=args.finish_timeout, poll=2)[0]
+    m['snapshot'] = h['ctx']
+    m['deleted'] = orm(peer, f'from awx.main.models import Job\nj = Job.objects.get(pk={job_id})\nemit(j.get_event_queryset().delete()[0])\n')
+    log(f"deleted {m['deleted']} stored events of job {job_id} while the adopter is held after its snapshot")
+    manage(peer, 'failpoint', 'release', 'adoption.after_snapshot')
+    s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+    if pr:
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    ensure_up(containers)
+    time.sleep(args.settle)
+    m['counters'] = orm(
+        peer,
+        f'from awx.main.models import Job\nj = Job.objects.get(pk={job_id})\nc = sorted(set(j.get_event_queryset().values_list("counter", flat=True)))\nemit(dict(n=len(c), lo=c[0] if c else None, hi=c[-1] if c else None))\n',
+    )
+    return report(containers, job_id, since, args, unit, [f"terminal {s['status']}"], metrics=m)
+
+
+def scenario_false_lost(containers, args):
+    """False lost-node report: every node ignores receptor-1's mesh advertisements
+    (mesh.ignore_advertisement, sleep 0, advertised=receptor-1), so receptor-1's last_seen stops moving
+    while its jobs run normally. Do the controllers declare it lost and reap its jobs?"""
+    need_two(containers, 'false-lost')
+    c2 = 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    if 'mesh.ignore_advertisement' not in registry(c2):
+        raise SystemExit('false-lost needs the mesh.ignore_advertisement failpoint')
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+    since = since_now()
+    ids = []
+    for other in ('awx-2', 'awx-1'):
+        set_instance(c2, other, enabled=False)
+        try:
+            j = launch(c2, jt)
+            wait_for(f'job {j} running', lambda j=j: job_state(c2, j)['status'] == 'running', 120, poll=2)
+            ids.append(j)
+        finally:
+            set_instance(c2, other, enabled=True)
+    m = {'branch': 'PR' if pr else 'devel', 'jobs': ids, 'iterations': args.iterations}
+    arm(c2, 'mesh.ignore_advertisement', 'sleep', {'advertised': 'receptor-1'}, seconds=0)
+    m['armed_at'] = utcnow()
+    samples = []
+    t0 = time.monotonic()
+    try:
+        while time.monotonic() - t0 < args.observe:
+            inst = instances(c2)['receptor-1']
+            st = _job_statuses(c2, ids)
+            samples.append(
+                {
+                    'at': utcnow(),
+                    'receptor-1': (inst['state'], str(inst['last_seen'])[11:19]),
+                    'jobs': {k: (v['status'], v['explanation'][:60]) for k, v in st.items()},
+                }
+            )
+            log(f'sample: {samples[-1]}')
+            if all(v['status'] not in ('pending', 'waiting', 'running') for v in st.values()):
+                break
+            time.sleep(15)
+    finally:
+        manage(c2, 'failpoint', 'disarm', 'mesh.ignore_advertisement')
+        m['disarmed_at'] = utcnow()
+    m['samples'] = samples
+    m['units'] = {j: unit_status(job_state(c2, j)['work_unit_id']) for j in ids}
+    wait_for('receptor-1 ready again', lambda: instances(c2)['receptor-1']['state'] == 'ready', 300, poll=10)
+    wait_for('jobs terminal', lambda: all(v not in ('pending', 'waiting', 'running') for v in status_only(c2, ids).values()), args.finish_timeout, poll=10)
+    m['final'] = {k: (v['status'], v['explanation'][:80]) for k, v in _job_statuses(c2, ids).items()}
+    time.sleep(args.settle)
+    for j in ids[1:]:
+        report(containers, j, since, args, None, (), out_name=f'{run_label(args)}-job{j}')
+    return report(containers, ids[0], since, args, None, [], metrics=m)
+
+
+def scenario_clock_skew(containers, args):
+    """Clock skew: awx-1's dispatcher and callback receiver run with their clock shifted by --skew
+    seconds (a sitecustomize in /awx_devel/.fp/skew, loaded through PYTHONPATH from a per-node env
+    file; the host clock is untouched). One job runs on each controller for --observe seconds. Is a
+    healthy controller judged lost (a claim, a second stream, a reap)?"""
+    need_two(containers, 'clock-skew')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    pr = is_pr_branch(c2)
+    manage(c2, 'failpoint', 'disarm', '--all')
+    manage(c2, 'failpoint', 'clear-hits')
+    skew_dir = os.path.join(FP_DIR, 'skew')
+    os.makedirs(skew_dir, exist_ok=True)
+    with open(os.path.join(skew_dir, 'sitecustomize.py'), 'w') as fh:
+        fh.write(SKEW_SITECUSTOMIZE)
+    m = {'branch': 'PR' if pr else 'devel', 'skew_s': args.skew, 'iterations': args.iterations}
+    orig = supervisor_env_wrap(True)
+    node_env('awx-1', [f'FP_SKEW_SECONDS={args.skew}', 'PYTHONPATH=/awx_devel/.fp/skew'])
+    try:
+        supervisor_apply(containers)
+        time.sleep(20)
+        m['awx1_clock'] = run(
+            ['docker', 'exec', c0, 'sh', '-c', '. /awx_devel/.fp/env-awx-1; /var/lib/awx/venv/awx/bin/python -c "import time; print(time.time())"; date +%s'],
+            check=False,
+        ).stdout.split()
+        jt = setup(containers, 'failpoint chatty multi', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+        arm_recorders(c2, None, ['adoption.after_claim', 'adoption.after_snapshot', 'lost_instance.before_claim', 'sweep.before_claim'])
+        since = since_now()
+        ids = []
+        for other in ('awx-2', 'awx-1'):
+            set_instance(c2, other, enabled=False)
+            try:
+                j = launch(c2, jt)
+                wait_for(f'job {j} running', lambda j=j: job_state(c2, j)['status'] == 'running', 180, poll=2)
+                ids.append(j)
+            finally:
+                set_instance(c2, other, enabled=True)
+        m['jobs'] = {j: job_state(c2, j)['controller_node'] for j in ids}
+        samples = []
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < args.observe:
+            inst = instances(c2)
+            st = _job_statuses(c2, ids)
+            samples.append({'at': utcnow(), 'awx-1': (inst['awx-1']['state'], str(inst['awx-1']['last_seen'])[11:19]),
+                            'awx-2': (inst['awx-2']['state'], str(inst['awx-2']['last_seen'])[11:19]),
+                            'jobs': {k: (v['status'], v['controller']) for k, v in st.items()}})  # fmt: skip
+            log(f'sample: {samples[-1]}')
+            if all(v['status'] not in ('pending', 'waiting', 'running') for v in st.values()):
+                break
+            time.sleep(15)
+        m['samples'] = samples
+        m['claims'] = {
+            n: by_node(fired_hits(c2, n)) for n in ('lost_instance.before_claim', 'sweep.before_claim', 'adoption.after_claim', 'adoption.after_snapshot')
+        }
+    finally:
+        node_env('awx-1', None)
+        with open(SUPERVISOR_CONF, 'w') as fh:
+            fh.write(orig)
+        supervisor_apply(containers)
+    wait_for('jobs terminal', lambda: all(v not in ('pending', 'waiting', 'running') for v in status_only(c2, ids).values()), args.finish_timeout, poll=10)
+    wait_cluster_ready(c2, ['awx-1', 'awx-2', 'receptor-1'])
+    time.sleep(args.settle)
+    for j in ids[1:]:
+        report(containers, j, since, args, None, (), out_name=f'{run_label(args)}-job{j}')
+    return report(containers, ids[0], since, args, None, [], metrics=m)
+
+
+def scenario_mixed_versions(containers, args):
+    """Mixed versions: awx-1's dispatcher and callback receiver import a devel worktree
+    (/awx_devel/.fp/devel-src, PYTHONPATH) while awx-2 runs the PR checkout; same database (no
+    migration differs between the two branches).
+      --variant devel-owner  a job on awx-1 (devel) is held before event 25 and awx-1 killed; the PR
+                             node is told and adopts; then awx-1 (devel) returns
+      --variant pr-owner     a job on awx-2 (PR) is held and awx-2 killed; devel awx-1 decides
+                             after its natural is_lost; then awx-2 returns
+    """
+    need_two(containers, 'mixed-versions')
+    c0, c2 = 'tools_awx_1', 'tools_awx_2'
+    if not is_pr_branch(c2):
+        raise SystemExit('mixed-versions: run with the PR branch checked out')
+    src = os.path.join(FP_DIR, 'devel-src')
+    if not os.path.isdir(src):
+        raise SystemExit(f'missing devel worktree {src}')
+    m = {'variant': args.variant, 'iterations': args.iterations}
+    orig = supervisor_env_wrap(True)
+    node_env('awx-1', ['PYTHONPATH=/awx_devel/.fp/devel-src'])
+    try:
+        supervisor_apply(containers)
+        time.sleep(20)
+        m['awx1_code'] = run(
+            [
+                'docker',
+                'exec',
+                c0,
+                'sh',
+                '-c',
+                'for p in $(pgrep -f "awx-manage (dispatcherd|run_callback_receiver)"); do tr "\\0" "\\n" < /proc/$p/environ | grep ^PYTHONPATH; done',
+            ],
+            check=False,
+        ).stdout.split()
+        manage(c2, 'failpoint', 'disarm', '--all')
+        manage(c2, 'failpoint', 'clear-hits')
+        jt = setup(containers, 'failpoint chatty', 'chatty.yml', {'iterations': args.iterations})
+        owner = 'awx-1' if args.variant == 'devel-owner' else 'awx-2'
+        other = 'awx-2' if owner == 'awx-1' else 'awx-1'
+        oc, peer = container_for(owner), container_for(other)
+        set_instance(c2 if oc != c2 else c0, other, enabled=False)
+        try:
+            since = since_now()
+            job_id = launch(peer, jt)
+            st = wait_for('job running', lambda: (s := job_state(peer, job_id))['status'] == 'running' and s['work_unit_id'] and s, 300)
+        finally:
+            set_instance(peer, other, enabled=True)
+        unit = st['work_unit_id']
+        m.update({'owner': owner, 'job': job_id})
+        arm_recorders(peer, job_id, ['adoption.after_claim', 'adoption.after_snapshot'])
+        arm_hold(peer, job_id, owner, args.seam_counter)
+        wait_hold(peer, job_id, owner, args.seam_counter)
+        wait_db_events(peer, job_id, args.seam_counter)
+        m['killed_at'] = kill(oc)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+        if owner == 'awx-1':
+            force_lost(peer, other, owner)
+        s = watch(peer, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+        m['decided'] = {k: s[k] for k in ('status', 'controller_node', 'job_explanation')}
+        start_back(oc, owner)
+        m['owner_back_at'] = utcnow()
+        time.sleep(args.observe)
+        m['after_owner_back'] = job_state(peer, job_id)
+        m['unit_end'] = unit_status(unit)
+        manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost', check=False)
+    finally:
+        node_env('awx-1', None)
+        with open(SUPERVISOR_CONF, 'w') as fh:
+            fh.write(orig)
+        supervisor_apply(containers)
+    time.sleep(args.settle)
+    return report(containers, job_id, since, args, unit, [], metrics=m)
+
+
+def scenario_s7_cleanup(containers, args):
+    """Remove what the part-7 queue created."""
+    out = orm(
+        containers[0],
+        f'''
+from awx.main.models import Credential, Inventory, JobTemplate
+done = {{}}
+done['templates'] = JobTemplate.objects.filter(name__in=['failpoint delete', 'failpoint cred']).delete()[0]
+done['credential'] = Credential.objects.filter(name={CRED_NAME!r}).delete()[0]
+for inv in Inventory.objects.filter(name={DEL_INV!r}):
+    inv.hosts.all().delete()
+    inv.delete()
+    done['inventory'] = 'deleted'
+emit(done)
+''',
+    )
+    log(f'part-7 cleanup: {out}')
+    return {'ok': True}
+
+
 def scenario_report(containers, args):
     """Report only: invariants, timeline and saved logs for --job since --since (a run cut short)."""
     if not (args.job and args.since):
@@ -6305,6 +6857,13 @@ PART5 = (
     'cancel-sliced',
     'scale-down',
     'exec-full',
+    'hop-restart',
+    'delete-during',
+    'creds-on-disk',
+    'event-cleanup',
+    'false-lost',
+    'clock-skew',
+    'mixed-versions',
 )
 
 VARIANTS = {
@@ -6339,6 +6898,8 @@ VARIANTS = {
     'schedule-outage': ('orphan', 'both-down'),
     'relaunch-failed': ('reap', 'adopted'),
     'scale-down': ('adjust', 'disable'),
+    'delete-during': ('claim', 'snapshot', 'finalize'),
+    'mixed-versions': ('devel-owner', 'pr-owner'),
 }
 
 SCENARIOS = {
@@ -6400,6 +6961,14 @@ SCENARIOS = {
     'scale-down': scenario_scale_down,
     'exec-full': scenario_exec_full,
     's6-cleanup': scenario_s6_cleanup,
+    'hop-restart': scenario_hop_restart,
+    'delete-during': scenario_delete_during,
+    'creds-on-disk': scenario_creds_on_disk,
+    'event-cleanup': scenario_event_cleanup,
+    'false-lost': scenario_false_lost,
+    'clock-skew': scenario_clock_skew,
+    'mixed-versions': scenario_mixed_versions,
+    's7-cleanup': scenario_s7_cleanup,
     'report': scenario_report,
 }
 
@@ -6456,6 +7025,7 @@ def main():
     parser.add_argument('--abs-cpu', default='0.25', help='few-workers: SYSTEM_TASK_ABS_CPU for awx-2')
     parser.add_argument('--abs-mem', default='2348Mi', help='few-workers: SYSTEM_TASK_ABS_MEM for awx-2 (2 GiB is deducted, 100 MiB per fork)')
     parser.add_argument('--pending', type=int, default=3, help='capacity-race: pending launches queued before capacity is freed')
+    parser.add_argument('--skew', type=int, default=300, help='clock-skew: seconds added to awx-1 dispatcher and receiver clocks')
     parser.add_argument('--fill', type=int, default=2, help='overcommit: jobs that fill awx-2 before the orphans')
     parser.add_argument('--hosts', type=int, default=20, help='exec-full: hosts in the filler inventory (forks = hosts)')
     parser.add_argument('--jobs', type=int, default=4, help='rolling-restart: jobs running during the restarts')
