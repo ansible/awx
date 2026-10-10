@@ -80,6 +80,20 @@ data_loggly = {
             ),
         ),
         (
+            True,  # localhost w/ RELP, which has no protocol parameter of its own
+            'other',
+            'localhost',
+            20514,
+            'relp',
+            '',  # empty errorfile
+            '\n'.join(
+                [
+                    'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omrelp")',
+                    'action(type="omrelp" target="localhost" port="20514" action.resumeRetryCount="-1" action.resumeInterval="5" template="awx" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxDiskSpace="1g" queue.maxFileSize="100m" queue.type="LinkedList" queue.saveOnShutdown="on" queue.syncqueuefiles="on" queue.checkpointInterval="1000" queue.size="131072" queue.highwaterMark="98304" queue.discardMark="117964" queue.discardSeverity="5")',  # noqa
+                ]
+            ),
+        ),
+        (
             True,  # https, default port 443
             'splunk',
             'https://yoursplunk/services/collector/event',
