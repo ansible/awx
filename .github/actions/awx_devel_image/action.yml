@@ -11,6 +11,17 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Resolve COMPOSE_TAG
+      # Use the target branch so the cached devel image matches. In a merge
+      # queue run github.base_ref is empty and github.ref_name is the
+      # temporary gh-readonly-queue/<branch>/... ref, so fall back to
+      # merge_group.base_ref (refs/heads/<branch>) and trim the prefix.
+      # A COMPOSE_TAG already set by the caller is kept.
+      shell: bash
+      run: echo "COMPOSE_TAG=${COMPOSE_TAG:-${BASE_REF#refs/heads/}}" >> $GITHUB_ENV
+      env:
+        BASE_REF: ${{ github.event.merge_group.base_ref || github.base_ref || github.ref_name || 'devel' }}
+
     - name: Set lower case owner name
       shell: bash
       run: echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
@@ -30,7 +41,6 @@ runs:
       shell: bash
       run: |
         DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-        COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
         docker pull -q `make print-DEVEL_IMAGE_NAME`
       continue-on-error: true
 
@@ -38,5 +48,4 @@ runs:
       shell: bash
       run: |
         DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} \
-        COMPOSE_TAG=${{ github.base_ref || github.ref_name }} \
         make docker-compose-build
