@@ -140,3 +140,17 @@ org_role_to_permission = {
 
 # OIDC credential type namespaces for feature flag filtering
 OIDC_CREDENTIAL_TYPE_NAMESPACES = ['hashivault-kv-oidc', 'hashivault-ssh-oidc']
+
+# Resource types that the cleanup_jobs management job can remove, mapped to the
+# awx-manage cleanup_jobs command flag that selects each one. Used to let a
+# cleanup_jobs system job target a subset of resources via the "resources"
+# extra var (e.g. {"days": 30, "resources": ["jobs", "notifications"]}).
+CLEANUP_JOBS_RESOURCE_FLAGS = {
+    'jobs': '--jobs',
+    'ad_hoc_commands': '--ad-hoc-commands',
+    'project_updates': '--project-updates',
+    'inventory_updates': '--inventory-updates',
+    'management_jobs': '--management-jobs',
+    'workflow_jobs': '--workflow-jobs',
+    'notifications': '--notifications',
+}
