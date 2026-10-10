@@ -21,6 +21,7 @@ def construct_rsyslog_conf_template(settings=settings):
     max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
+    stats_interval = getattr(settings, 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL', 0)
 
     queue_options = [
         f'queue.spoolDirectory="{spool_directory}"',
@@ -53,6 +54,15 @@ def construct_rsyslog_conf_template(settings=settings):
             'template(name="awx" type="string" string="%rawmsg-after-pri%")',
         ]
     )
+    if enabled and stats_interval > 0:
+        # impstats counters (queue size, discarded.nf, discarded.full) go to rsyslogd's stdout, the
+        # container log. Their own ruleset keeps them out of the external action in the default ruleset.
+        parts.extend(
+            [
+                f'module(load="impstats" interval="{stats_interval}" format="json" resetCounters="off" ruleset="awx_queue_stats")',
+                'ruleset(name="awx_queue_stats") { action(type="omfile" file="/dev/stdout") }',
+            ]
+        )
 
     def escape_quotes(x):
         if x is None:

@@ -202,6 +202,37 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
     assert expected_config in tmpl
 
 
+STATS_MODULE = 'module(load="impstats" interval="60" format="json" resetCounters="off" ruleset="awx_queue_stats")'
+STATS_RULESET = 'ruleset(name="awx_queue_stats") { action(type="omfile" file="/dev/stdout") }'
+
+
+@pytest.mark.parametrize(
+    'enabled, stats_interval, expect_stats',
+    [
+        (True, None, False),  # registered default (0): no impstats, configuration unchanged
+        (True, 0, False),
+        (True, 60, True),
+        (False, 60, False),  # no external action, so no queue to report on
+    ],
+)
+def test_rsyslog_conf_queue_stats(enabled, stats_interval, expect_stats):
+    mock_settings, _ = _mock_logging_defaults()
+
+    logging_defaults = getattr(settings, 'LOGGING')
+    setattr(mock_settings, 'LOGGING', logging_defaults)
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', enabled)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'localhost')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 9000)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', 'tcp')
+    if stats_interval is not None:
+        setattr(mock_settings, 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL', stats_interval)
+
+    lines = construct_rsyslog_conf_template(mock_settings).split('\n')
+    assert (STATS_MODULE in lines) is expect_stats
+    assert (STATS_RULESET in lines) is expect_stats
+
+
 def test_splunk_auth():
     mock_settings, _ = _mock_logging_defaults()
     # Set test settings

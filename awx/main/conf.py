@@ -809,6 +809,23 @@ register(
     category_slug='logging',
 )
 register(
+    'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL',
+    field_class=fields.IntegerField,
+    default=0,
+    min_value=0,
+    label=_('Interval (in seconds) between rsyslogd queue statistics'),
+    help_text=_(
+        'When greater than 0, rsyslogd writes its counters to its standard output, '
+        'which is the container log, once per interval: one JSON object per queue '
+        'and action, including the external logging action queue\'s current size, '
+        'peak size, and cumulative discarded.nf and discarded.full counts. '
+        'Equivalent to loading the rsyslogd impstats module. '
+        'The statistics are never sent to the log aggregator. 0 disables them (the default).'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
     'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH',
     field_class=fields.CharField,
     default='/var/lib/awx',
