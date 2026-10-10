@@ -4218,7 +4218,12 @@ def pool_info(container):
     cfg = orm(container, 'from awx.main.utils.common import get_auto_max_workers\nemit(get_auto_max_workers())\n')
     out = run(['docker', 'exec', container, 'dispatcherctl', 'status'], check=False).stdout
     mw = re.findall(r'max_workers\D+(\d+)', out)
-    return {'get_auto_max_workers': cfg, 'status_max_workers': mw[:1], 'workers': len(dispatcher_workers(container))}
+    return {'get_auto_max_workers': cfg, 'status_max_workers': mw[:1], 'workers': dispatcher_workers(container)['workers']}
+
+
+def status_only(container, job_ids):
+    """{job id: status}."""
+    return {k: v['status'] for k, v in _job_statuses(container, job_ids).items()}
 
 
 def scenario_few_workers(containers, args):
@@ -4262,9 +4267,10 @@ emit(ids)
 ''',
         )
         m['jobs'] = ids
-        wait_for('all orphans running on awx-1', lambda: all(s == 'running' for s in _job_statuses(c0, ids).values()), 300, poll=5)
+        wait_for('all orphans running on awx-1', lambda: all(s == 'running' for s in status_only(c0, ids).values()), 300, poll=5)
         set_instance(c2, 'awx-2', enabled=True)
         probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+        arm_recorders(c2, None, ['adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
         time.sleep(args.lead)
         m['killed_at'] = kill(c0)
         if pr:
@@ -4285,9 +4291,10 @@ emit(dict(at=now(), jobs={{j.id: (j.status, j.controller_node) for j in UnifiedJ
 ''',
             )
             w = dispatcher_workers(c2)
-            st['workers'] = len(w)
-            st['busy'] = sum(1 for x in w if x.get('task'))
-            st['adoptions_running'] = len(running_tasks(c2))
+            st['workers'] = w['workers']
+            st['busy'] = w['busy']
+            st['adoptions_running'] = w['adopt']
+            st['tasks'] = w['tasks']
             st['by_status'] = dict(Counter(v[0] + '@' + (v[1] or '-') for v in st['jobs'].values()))
             del st['jobs']
             samples.append(st)
@@ -4300,7 +4307,7 @@ emit(dict(at=now(), jobs={{j.id: (j.status, j.controller_node) for j in UnifiedJ
                 probes['project_update'] = orm(c2, "from awx.main.models import Project\nemit(Project.objects.get(name='Demo Project').update().id)\n")
                 m['probes_launched_at'] = utcnow()
                 log(f'probes launched: {probes}')
-            if all(s not in ('pending', 'waiting', 'running') for s in _job_statuses(c2, ids).values()):
+            if all(s not in ('pending', 'waiting', 'running') for s in status_only(c2, ids).values()):
                 break
             time.sleep(args.sample)
         m['samples'] = samples
@@ -4313,10 +4320,12 @@ emit({{j.id: dict(created=j.created, started=j.started, finished=j.finished, sta
       for j in UnifiedJob.objects.filter(pk__in={list(probes.values())!r})}})
 ''',
         )
-        final = _job_statuses(c2, ids)
+        final = status_only(c2, ids)
         m['final'] = dict(Counter(final.values()))
         m['kill_to_all_terminal_s'] = round(time.monotonic() - t_kill, 1) if all(s not in ('pending', 'waiting', 'running') for s in final.values()) else None
         m['adoptions'] = by_node(fired_hits(c2, 'adoption.after_snapshot'))
+        m['adoption_snapshots'] = sorted(h['at'] for h in fired_hits(c2, 'adoption.after_snapshot'))
+        m['adoption_claims'] = sorted(h['at'] for h in fired_hits(c2, 'adoption.after_claim'))
     finally:
         awx2_restore(orig)
         restart_workers(c2)
@@ -4474,6 +4483,10 @@ emit(dict(pending={{j.id: (j.status, j.controller_node, j.started) for j in Unif
         m['timeline'] = timeline
         snaps = fired_hits(c2, 'adoption.after_snapshot')
         m['o_adopted_at'] = snaps[0]['at'] if snaps else None
+        claims = fired_hits(c2, 'adoption.after_claim')
+        m['o_claimed_at'] = claims[0]['at'] if claims else None
+        m['o_claim_attempts'] = [f"{h['node']}@{h['at']}" for h in fired_hits(c2, 'sweep.before_claim') + fired_hits(c2, 'lost_instance.before_claim')]
+        m['o_adoption_tasks'] = len(claims)
         starts = orm(
             c2,
             f'''
@@ -4484,7 +4497,13 @@ emit({{j.id: dict(started=j.started, status=j.status, controller=j.controller_no
         m['pending_starts'] = starts
         first_launch = min((at_seconds(v['started']) for v in starts.values() if v['started']), default=None)
         m['first_launch_started'] = first_launch
-        m['winner'] = 'orphan' if snaps and (first_launch is None or at_seconds(snaps[0]['at']) < first_launch) else ('launch' if first_launch else 'none')
+        first_claim = at_seconds(claims[0]['at']) if claims else None
+        if first_claim is not None and (first_launch is None or first_claim < first_launch):
+            m['winner'] = 'orphan claimed first' + ('' if snaps else ', never streamed while observed')
+        elif first_launch is not None:
+            m['winner'] = 'launch started first'
+        else:
+            m['winner'] = 'none'
         s = watch(c2, job_id, unit, args.finish_timeout, until=terminal, poll=10)
         notes.append(f"O terminal: {s['status']} controller={s['controller_node']}; winner of the freed capacity: {m['winner']}")
     finally:
