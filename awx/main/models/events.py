@@ -562,9 +562,20 @@ class JobEvent(BasePlaybookEvent):
 
             existing_host_ids = set(h.id for h in all_hosts)
 
+            # A job's playbook_on_stats can be processed more than once: when a controller is
+            # lost mid-job, the dying pod's callback receiver drains its queue while the
+            # adopting controller replays the same stream. The second pass used to violate the
+            # (job_id, host_name) unique constraint, which aborted the whole bulk_create and
+            # left a traceback in the log even though the first pass had recorded everything
+            # correctly. Skip what is already recorded so the replay is a no-op — in particular
+            # so host metrics are not counted twice for the same automation.
+            already_recorded = set(JobHostSummary.objects.filter(job_id=job.id).values_list('host_name', flat=True))
+
             summaries = dict()
             updated_hosts_list = list()
             for host in hostnames:
+                if host in already_recorded:
+                    continue
                 host_id = host_map.get(host)
                 if host_id not in existing_host_ids:
                     host_id = None
@@ -587,7 +598,9 @@ class JobEvent(BasePlaybookEvent):
                 else:
                     logger.warning(f'host {host.lower()} is dark / unreachable, not marking it as updated')
 
-            JobHostSummary.objects.bulk_create(summaries.values())
+            # ignore_conflicts is the backstop for a genuine cross-process race, where the
+            # peer writes between the query above and this insert.
+            JobHostSummary.objects.bulk_create(summaries.values(), ignore_conflicts=True)
 
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)

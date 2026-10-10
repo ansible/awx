@@ -23,10 +23,22 @@ from awx.main.tasks.system import (
     _heartbeat_instance_management,
     _process_startup_jobs,
     _process_running_jobs,
+    _sweep_orphaned_jobs,
+    _handle_lost_instance_job,
+    _adoption_slot_available,
+    cluster_node_heartbeat,
     _startup_reap_undispatched,
+    _startup_sweep_orphaned_jobs,
+    _startup_mark_departed_peers,
+    _control_pod_is_gone,
+    _run_dispatch_startup_common,
+    adopt_job_async,
+    announce_shutdown,
+    sweep_orphaned_jobs_now,
 )
 from awx.main.dispatch.reaper import reap
 from awx.main.management.commands.dispatcherd import Command
+from django.conf import settings as django_settings
 from django.db import DatabaseError
 from django.utils.timezone import now, timedelta
 
@@ -436,6 +448,164 @@ class TestReapAndMarkLostInstance:
         assert mock_log.exception.called
         assert 'No SQL state' in mock_log.exception.call_args[0][0]
 
+    def test_mark_offline_message_stays_translatable_after_queueing_adoption(self, settings):
+        """The offline reason must remain lazily translated even on the adoption code path.
+
+        Unpacking apply_async into `_` would rebind the module-level gettext alias for the
+        whole function, so the only safe way to keep `_()` working here is to not use `_`
+        as the throwaway name.
+        """
+        from django.utils.functional import Promise
+        from unittest.mock import MagicMock
+
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ctrl-i18n')
+        Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id='unit-i18n', execution_node='remote-ee')
+
+        with (
+            mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt,
+            mock.patch('awx.main.tasks.system.reaper'),
+            mock.patch.object(inst, 'mark_offline') as mock_offline,
+        ):
+            mock_result = MagicMock()
+            mock_result.__getitem__.return_value = 'task-uuid'
+            mock_adopt.apply_async.return_value = (mock_result, None)
+            _reap_and_mark_lost_instance(inst)
+
+        mock_offline.assert_called_once()
+        errors = mock_offline.call_args[1]['errors']
+        assert isinstance(errors, Promise), f'offline reason is not lazily translated: {errors!r}'
+        assert 'unresponsive' in str(errors)
+
+    def test_reap_queues_cross_controller_adoption_for_dispatched_jobs(self, settings):
+        """Jobs with work_unit_id are queued for cross-controller adoption, not reaped."""
+        from unittest.mock import MagicMock
+
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ctrl-lost')
+        # Dispatched job (work_unit_id set) — should be adopted, not reaped
+        job = Job.objects.create(
+            controller_node=inst.hostname,
+            status='running',
+            work_unit_id='unit-123',
+            execution_node='remote-ee',
+        )
+        with mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt, mock.patch('awx.main.tasks.system.reaper') as mock_reaper:
+            # Mock apply_async to return (result_dict, None) where result_dict['uuid'] == task-uuid
+            mock_result = MagicMock()
+            mock_result.__getitem__.return_value = 'task-uuid'
+            mock_adopt.apply_async.return_value = (mock_result, None)
+            _reap_and_mark_lost_instance(inst)
+
+        # Adoption should be queued, not reaped. Ownership has already moved to us by publish
+        # time, so source_controller is CLUSTER_HOST_ID — same kwargs the startup and heartbeat
+        # paths publish, which is what on_duplicate='discard' keys on.
+        mock_adopt.apply_async.assert_called_once_with(
+            args=[job.id], kwargs={'source_controller': settings.CLUSTER_HOST_ID}, queue=mock_adopt.apply_async.call_args[1]['queue']
+        )
+        mock_reaper.reap_job.assert_not_called()
+
+    def test_reap_claims_ownership_before_publishing_adoption(self, settings):
+        """The conditional UPDATE is the mutual-exclusion point, so it has to land before publish."""
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ctrl-lost')
+        job = Job.objects.create(controller_node=inst.hostname, status='running', work_unit_id='unit-123', execution_node='remote-ee')
+
+        owner_at_publish = {}
+
+        def _capture(*args, **kwargs):
+            owner_at_publish['controller_node'] = Job.objects.get(pk=job.id).controller_node
+            return ({'uuid': 'adopt-uuid'}, 'celery')
+
+        with mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt, mock.patch('awx.main.tasks.system.reaper'):
+            mock_adopt.apply_async = MagicMock(side_effect=_capture)
+            _reap_and_mark_lost_instance(inst)
+
+        assert owner_at_publish['controller_node'] == settings.CLUSTER_HOST_ID
+        job.refresh_from_db()
+        assert job.celery_task_id == 'adopt-uuid'
+
+    def test_reap_skips_adoption_when_another_controller_claimed_first(self, settings):
+        """A survivor that loses the conditional UPDATE must neither publish nor reap the job."""
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ctrl-lost')
+        job_a = Job.objects.create(
+            controller_node=inst.hostname, status='running', work_unit_id='unit-1', execution_node='remote-ee', celery_task_id='untouched'
+        )
+        job_b = Job.objects.create(
+            controller_node=inst.hostname, status='running', work_unit_id='unit-2', execution_node='remote-ee', celery_task_id='untouched'
+        )
+
+        def _steal(args=None, **kwargs):
+            # Another survivor claims the job we have not reached yet, after our queryset was built
+            other = job_b.id if args[0] == job_a.id else job_a.id
+            Job.objects.filter(pk=other).update(controller_node='other-survivor')
+            return ({'uuid': 'adopt-uuid'}, 'celery')
+
+        with mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt, mock.patch('awx.main.tasks.system.reaper') as mock_reaper:
+            mock_adopt.apply_async = MagicMock(side_effect=_steal)
+            _reap_and_mark_lost_instance(inst)
+
+        assert mock_adopt.apply_async.call_count == 1
+        mock_reaper.reap_job.assert_not_called()
+        assert Job.objects.filter(controller_node='other-survivor', celery_task_id='untouched').count() == 1
+        assert Job.objects.filter(controller_node=settings.CLUSTER_HOST_ID, celery_task_id='adopt-uuid').count() == 1
+
+    def test_reap_does_not_adopt_when_only_execution_node_is_lost(self, settings):
+        """A lost EE leaves the job's controller alive and still running it — reap, never adopt."""
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ee-lost', node_type='execution')
+        job = Job.objects.create(
+            controller_node='live-ctrl',
+            status='running',
+            work_unit_id='unit-abc',
+            execution_node=inst.hostname,
+            celery_task_id='original-uuid',
+        )
+        with mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt, mock.patch('awx.main.tasks.system.reaper') as mock_reaper:
+            _reap_and_mark_lost_instance(inst)
+
+        mock_adopt.apply_async.assert_not_called()
+        mock_reaper.reap_job.assert_called_once()
+        # The live controller keeps ownership and its dispatcher task id.
+        job.refresh_from_db()
+        assert job.controller_node == 'live-ctrl'
+        assert job.celery_task_id == 'original-uuid'
+
+    def test_reap_does_not_adopt_when_lost_node_is_both_controller_and_execution_node(self, settings):
+        """A lost hybrid node takes its work unit with it — there is nothing left to adopt."""
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='hybrid-lost', node_type='hybrid')
+        Job.objects.create(
+            controller_node=inst.hostname,
+            status='running',
+            work_unit_id='unit-def',
+            execution_node=inst.hostname,
+        )
+        with mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt, mock.patch('awx.main.tasks.system.reaper') as mock_reaper:
+            _reap_and_mark_lost_instance(inst)
+
+        mock_adopt.apply_async.assert_not_called()
+        mock_reaper.reap_job.assert_called_once()
+
+    def test_reap_reaped_undispatched_jobs_when_lost_instance(self, settings):
+        """Jobs without work_unit_id are reaped immediately, not adopted."""
+        settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+        inst = self._inst(hostname='ctrl-lost')
+        # Undispatched job (no work_unit_id) — should be reaped
+        Job.objects.create(
+            controller_node=inst.hostname,
+            status='running',
+            work_unit_id=None,
+        )
+        with mock.patch('awx.main.tasks.system.adopt_job_async') as mock_adopt, mock.patch('awx.main.tasks.system.reaper') as mock_reaper:
+            _reap_and_mark_lost_instance(inst)
+
+        # Adoption should NOT be queued
+        mock_adopt.apply_async.assert_not_called()
+        # Job should be reaped
+        mock_reaper.reap_job.assert_called_once()
+
     def test_database_error_with_sqlstate_logs_details(self, settings):
         settings.AWX_AUTO_DEPROVISION_INSTANCES = False
         inst = self._inst()
@@ -685,11 +855,33 @@ def test_process_startup_jobs_skips_dispatched_job(me_inst, settings):
     """
     dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='abc12345')
     with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
-        mock_adopt.apply_async = MagicMock()
+        mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
         _process_startup_jobs(me_inst)
     dispatched.refresh_from_db()
     assert dispatched.status == 'running', 'dispatched job was wrongly reaped by _process_startup_jobs()'
     mock_adopt.apply_async.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_process_startup_jobs_persists_adoption_task_id(me_inst):
+    """celery_task_id must point at the adoption task, otherwise the next heartbeat re-queues it."""
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1', celery_task_id='original-dispatch-uuid')
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
+        _process_startup_jobs(me_inst)
+    job.refresh_from_db()
+    assert job.celery_task_id == 'adopt-uuid'
+
+
+@pytest.mark.django_db
+def test_process_running_jobs_persists_adoption_task_id(me_inst):
+    """Same as startup: without this the job looks orphaned forever and is re-queued every heartbeat."""
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1', celery_task_id='stale-uuid')
+    with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
+        mock_adopt.apply_async = MagicMock(return_value=({'uuid': 'adopt-uuid'}, 'celery'))
+        _process_running_jobs(me_inst, active_task_ids={'some-other-uuid'}, ref_time=None)
+    job.refresh_from_db()
+    assert job.celery_task_id == 'adopt-uuid'
 
 
 @pytest.mark.django_db
@@ -731,16 +923,19 @@ def test_adoption_skips_still_running_work_unit(me_inst):
         mock_adopt.apply_async = MagicMock()
         _process_startup_jobs(me_inst)
 
-    mock_adopt.apply_async.assert_called_once_with(args=[job.id], queue=mock_adopt.apply_async.call_args[1]['queue'])
+    mock_adopt.apply_async.assert_called_once_with(
+        args=[job.id], kwargs={'source_controller': me_inst.hostname}, queue=mock_adopt.apply_async.call_args[1]['queue']
+    )
     job.refresh_from_db()
     assert job.status == 'running', 'job must not be reaped — adoption deferred to background task'
 
 
 @pytest.mark.django_db
 def test_adoption_timeout_fails_job(me_inst, settings):
-    """Jobs orphaned longer than HADR_JOB_ADOPTION_TIMEOUT are reaped by adopt_job_async.
+    """Jobs orphaned longer than HADR_JOB_ADOPTION_TIMEOUT are reaped if status query fails.
 
     Timeout is measured from the last event received, not from job.started.
+    Unit status must be unreachable (query fails) to trigger timeout.
     """
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     from awx.main.tasks.system import adopt_job_async
@@ -751,8 +946,12 @@ def test_adoption_timeout_fails_job(me_inst, settings):
         work_unit_id='old-unit',
         started=now() - timedelta(seconds=7200),
     )
-    with patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
-        adopt_job_async(job.id)
+    mock_ctl = MagicMock()
+    # Status query fails (network error, unit unreachable)
+    # This is the ONLY case where timeout should trigger
+    mock_ctl.simple_command.side_effect = RuntimeError('work unit unreachable')
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
     mock_reattach.assert_not_called()
     job.refresh_from_db()
     assert job.status == 'failed', 'timed-out job should be reaped by adopt_job_async'
@@ -780,10 +979,23 @@ def test_adoption_timeout_spares_long_running_job_with_recent_events(me_inst, se
     JobEvent.objects.filter(job=job).update(created=now() - timedelta(seconds=300))
 
     with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
-        adopt_job_async(job.id)
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
     mock_reattach.assert_called_once()
     job.refresh_from_db()
     assert job.status == 'running', 'Long-running job with recent events must not be failed'
+
+
+def _mock_receptor_job():
+    """Stand-in for the AWXReceptorJob that reattach_to_work_unit builds.
+
+    detached and stream_stalled have to be set explicitly: on a bare MagicMock they read
+    truthy, which would silently route every one of these tests down the shutdown-detach
+    or stalled-stream path instead of the finalization path they are asserting on.
+    """
+    mock_instance = MagicMock()
+    mock_instance.detached = False
+    mock_instance.stream_stalled = False
+    return mock_instance
 
 
 @pytest.mark.django_db
@@ -799,7 +1011,7 @@ def test_adoption_finalizes_successful_job(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_instance = MagicMock()
+        mock_instance = _mock_receptor_job()
         mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
         mock_job_cls.return_value = mock_instance
 
@@ -822,7 +1034,7 @@ def test_adoption_finalizes_failed_job(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_instance = MagicMock()
+        mock_instance = _mock_receptor_job()
         mock_instance._process_phase.return_value = MagicMock(status='failed', rc=1)
         mock_job_cls.return_value = mock_instance
 
@@ -839,8 +1051,13 @@ def test_process_running_jobs_adopts_dispatched_skips_active(me_inst):
     orphaned_dispatched = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='orphaned-unit', celery_task_id='orphan-uuid')
 
     dispatched_ids = []
+
+    def _record(args, **kw):
+        dispatched_ids.append(args[0])
+        return ({'uuid': f'adopt-{args[0]}'}, 'celery')
+
     with patch('awx.main.tasks.system.adopt_job_async') as mock_adopt:
-        mock_adopt.apply_async = MagicMock(side_effect=lambda args, **kw: dispatched_ids.append(args[0]))
+        mock_adopt.apply_async = MagicMock(side_effect=_record)
         _process_running_jobs(me_inst, active_task_ids={'active-uuid'}, ref_time=None)
 
     assert orphaned_dispatched.id in dispatched_ids, 'orphaned dispatched job should be queued for adoption'
@@ -976,8 +1193,8 @@ def test_process_startup_jobs_skips_workflow_jobs(me_inst, settings):
 
 
 @pytest.mark.django_db
-def test_configure_runner_callback_populates_host_map(me_inst):
-    """RunnerCallback.configure_for_job populates host_map from inventory hosts for adoption."""
+def test_populate_host_map_from_inventory_resolves_real_hosts(me_inst):
+    """Against a real inventory, the adoption path maps host name to the id events are stamped with."""
     from awx.main.tasks.callback import RunnerCallback
     from awx.main.models import Organization, Inventory, Host
 
@@ -987,7 +1204,7 @@ def test_configure_runner_callback_populates_host_map(me_inst):
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-hm', inventory=inv)
 
     cb = RunnerCallback(model=Job)
-    cb.configure_for_job(job)
+    cb.populate_host_map_from_inventory(job)
 
     assert cb.host_map.get('myhost') == host.id
 
@@ -998,9 +1215,10 @@ def test_compute_adoption_dedup_no_events(me_inst):
     from awx.main.tasks.receptor import _compute_adoption_dedup
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
-    threshold, collision_zone = _compute_adoption_dedup(job)
+    threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
     assert threshold == 0
     assert collision_zone == set()
+    assert persisted_ct == 0
 
 
 @pytest.mark.django_db
@@ -1011,27 +1229,80 @@ def test_compute_adoption_dedup_contiguous_events(me_inst):
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
     for ctr in [1, 2, 3, 4, 5]:
-        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok')
+        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok', job_created=job.created)
 
-    threshold, collision_zone = _compute_adoption_dedup(job)
+    threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
     assert threshold == 5
     assert collision_zone == set()
+    assert persisted_ct == 5
 
 
 @pytest.mark.django_db
 def test_compute_adoption_dedup_gap_produces_collision_zone(me_inst):
-    """_compute_adoption_dedup finds gap and puts above-gap events in collision_zone."""
+    """_compute_adoption_dedup finds gap and puts above-gap events in collision_zone.
+
+    Stage 1 detects gap and continues to Stage 2, which loads all counters above safe_threshold.
+    For events [1, 2, 3, 5, 6]: gap at 4 sets safe_threshold=3, then collision_zone={5, 6}.
+    """
     from awx.main.tasks.receptor import _compute_adoption_dedup
     from awx.main.models import JobEvent
 
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1')
     # Events 1-3 contiguous, then gap at 4, then 5 and 6 committed out of order
     for ctr in [1, 2, 3, 5, 6]:
-        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok')
+        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok', job_created=job.created)
 
-    threshold, collision_zone = _compute_adoption_dedup(job)
+    threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
+    # Gap detected at 4, safe_threshold stops at 3, collision_zone contains 5 and 6
     assert threshold == 3
     assert collision_zone == {5, 6}
+    assert persisted_ct == 5
+
+
+@pytest.mark.django_db
+def test_compute_adoption_dedup_requires_prefix_anchored_at_one(me_inst):
+    """A missing counter 1 means nothing is contiguous, so the whole tail is collision zone."""
+    from awx.main.tasks.receptor import _compute_adoption_dedup
+    from awx.main.models import JobEvent
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-nogap1')
+    # Counter 1 never committed; 2-5 did. Treating 5 as contiguous would skip real events.
+    for ctr in [2, 3, 4, 5]:
+        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok', job_created=job.created)
+
+    threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
+    assert threshold == 0
+    assert collision_zone == {2, 3, 4, 5}
+    assert persisted_ct == 4
+
+
+@pytest.mark.django_db
+def test_compute_adoption_dedup_counts_events_beyond_the_cap(me_inst, settings, caplog):
+    """persisted_ct reflects every persisted event, not just the truncated collision zone.
+
+    event_ct is seeded from this, so using the capped set would undercount exactly when
+    truncation happens and leave emitted_events / the EOF final_counter inconsistent.
+    """
+    from awx.main.tasks.receptor import _compute_adoption_dedup
+    from awx.main.models import JobEvent
+
+    settings.JOB_EVENT_WORKERS = 1
+    settings.JOB_EVENT_CALLBACK_BUFFER_SIZE = 2  # cap == 2
+
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-capped')
+    # Counter 1 missing, so all five land above safe_threshold and the cap truncates.
+    for ctr in [2, 3, 4, 5, 6]:
+        JobEvent.objects.create(job=job, counter=ctr, event='runner_on_ok', job_created=job.created)
+
+    with caplog.at_level('WARNING', logger='awx.main.tasks.receptor'):
+        threshold, collision_zone, persisted_ct = _compute_adoption_dedup(job)
+    # Truncating silently would hide that some replayed events are about to be re-persisted.
+    assert 'collision_zone' in caplog.text
+    assert threshold == 0
+    assert len(collision_zone) == 2
+    # Deterministic truncation: keep the counters closest to the contiguous prefix.
+    assert collision_zone == {2, 3}
+    assert persisted_ct == 5
 
 
 @pytest.mark.django_db
@@ -1042,7 +1313,7 @@ def test_adopt_job_async_exception_is_swallowed(me_inst, settings):
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-err')
     with patch('awx.main.tasks.system.get_receptor_ctl'), patch('awx.main.tasks.system.reattach_to_work_unit', side_effect=RuntimeError('network failure')):
-        adopt_job_async(job.id)  # must not raise
+        adopt_job_async(job.id, source_controller=me_inst.hostname)  # must not raise
 
 
 @pytest.mark.django_db
@@ -1126,7 +1397,7 @@ def test_reattach_exit_code_from_detail(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_job_cls.return_value = MagicMock()
+        mock_job_cls.return_value = _mock_receptor_job()
         reattach_to_work_unit(job, ctl)
 
     job.refresh_from_db()
@@ -1146,7 +1417,7 @@ def test_reattach_exit_code_fallback_succeeded(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_instance = MagicMock()
+        mock_instance = _mock_receptor_job()
         mock_instance._process_phase.return_value = MagicMock(status='successful', rc=0)
         mock_job_cls.return_value = mock_instance
         reattach_to_work_unit(job, ctl)
@@ -1168,7 +1439,7 @@ def test_reattach_exit_code_fallback_failed(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_job_cls.return_value = MagicMock()
+        mock_job_cls.return_value = _mock_receptor_job()
         reattach_to_work_unit(job, ctl)
 
     job.refresh_from_db()
@@ -1188,7 +1459,7 @@ def test_reattach_process_phase_raises(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_instance = MagicMock()
+        mock_instance = _mock_receptor_job()
         mock_instance._process_phase.side_effect = RuntimeError('boom')
         mock_job_cls.return_value = mock_instance
         result = reattach_to_work_unit(job, ctl)
@@ -1214,7 +1485,7 @@ def test_reattach_job_already_finalized(me_inst):
         patch('awx.main.tasks.receptor.AWXReceptorJob') as mock_job_cls,
         patch('awx.main.tasks.callback.RunnerCallback'),
     ):
-        mock_instance = MagicMock()
+        mock_instance = _mock_receptor_job()
         mock_instance._process_phase.side_effect = _finalize_in_db
         mock_job_cls.return_value = mock_instance
         reattach_to_work_unit(job, ctl)
@@ -1225,17 +1496,158 @@ def test_reattach_job_already_finalized(me_inst):
 
 @pytest.mark.django_db
 def test_adopt_job_async_calls_reattach(me_inst, settings):
-    """adopt_job_async creates its own receptor_ctl and calls reattach_to_work_unit."""
+    """adopt_job_async creates its own receptor_ctl and calls reattach_to_work_unit with unit_status."""
     from awx.main.tasks.system import adopt_job_async
 
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-async')
 
     with patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl_factory, patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
-        adopt_job_async(job.id)
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
 
     mock_ctl_factory.assert_called_once()
-    mock_reattach.assert_called_once_with(job, mock_ctl_factory.return_value)
+    mock_reattach.assert_called_once()
+    # Verify unit_status parameter is passed
+    call_args, call_kwargs = mock_reattach.call_args
+    assert 'unit_status' in call_kwargs
+
+
+def _make_owned_running_jobs(hostname, count):
+    """Create `count` running jobs owned by this controller, returning the last one."""
+    job = None
+    for i in range(count):
+        job = Job.objects.create(controller_node=hostname, status='running', work_unit_id=f'unit-slot-{i}')
+    return job
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_defers_when_controller_is_over_capacity(me_inst, settings):
+    """An adoption costs a controller the same as running the job, so capacity bounds it.
+
+    Over capacity the job is simply not adopted this cycle — the next heartbeat re-queues it,
+    because a deferred adoption leaves no running task for _process_running_jobs to exclude.
+    """
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    settings.AWX_CONTROL_NODE_TASK_IMPACT = 1
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    me_inst.capacity = 2
+    job = _make_owned_running_jobs(me_inst.hostname, 3)
+
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl'),
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+        patch('awx.main.tasks.system.reaper.reap_job') as mock_reap,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reattach.assert_not_called()
+    mock_reap.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'running'
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_adopts_when_within_capacity(me_inst, settings):
+    """Within the load this controller is sized for, adoption proceeds."""
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    settings.AWX_CONTROL_NODE_TASK_IMPACT = 1
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    me_inst.capacity = 100
+    job = _make_owned_running_jobs(me_inst.hostname, 3)
+
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl'),
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_adopts_the_job_that_exactly_fills_capacity(me_inst, settings):
+    """The claim happens before this check, so the job under consideration is already counted.
+
+    Three owned jobs against a capacity of three must still adopt: remaining_capacity is 0,
+    not negative. Getting this boundary wrong strands the last job on every controller that
+    is running at its sizing, which is the normal state of a busy controller.
+    """
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    settings.AWX_CONTROL_NODE_TASK_IMPACT = 1
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    me_inst.capacity = 3
+    job = _make_owned_running_jobs(me_inst.hostname, 3)
+
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl'),
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_adopts_when_capacity_cannot_be_read(me_inst, settings):
+    """The bound fails open: an unadopted job has nothing else to finalize it."""
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    job = _make_owned_running_jobs(me_inst.hostname, 3)
+
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl'),
+        patch.object(Instance.objects, 'me', side_effect=RuntimeError('no instance row')),
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_adopts_when_controller_is_draining(me_inst, settings):
+    """Zero capacity means draining or unsized, not "room for nothing".
+
+    Jobs this controller still owns have to reach a terminal state, and no peer will adopt
+    them while it is alive, so refusing here would strand them for the whole drain.
+    """
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    settings.AWX_CONTROL_NODE_TASK_IMPACT = 1
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    me_inst.capacity = 0
+    job = _make_owned_running_jobs(me_inst.hostname, 3)
+
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl'),
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_makes_no_dispatcher_round_trip(me_inst, settings):
+    """Capacity is read from the instance row, so no control socket is involved.
+
+    The previous count-of-running-adoptions bound needed a control_with_reply on every
+    adoption past the cap, with a timeout to get wrong and a fail-open path to maintain.
+    """
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    settings.AWX_CONTROL_NODE_TASK_IMPACT = 1
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    me_inst.capacity = 100
+    job = _make_owned_running_jobs(me_inst.hostname, 20)
+
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl'),
+        patch('awx.main.tasks.system.get_control_from_settings') as mock_control_factory,
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_control_factory.assert_not_called()
+    mock_reattach.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -1247,14 +1659,14 @@ def test_adopt_job_async_skips_already_finalized(me_inst, settings):
     job = Job.objects.create(controller_node=me_inst.hostname, status='successful', work_unit_id='unit-done')
 
     with patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
-        adopt_job_async(job.id)
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
 
     mock_reattach.assert_not_called()
 
 
 @pytest.mark.django_db
 def test_adopt_job_async_reaps_on_timeout(me_inst, settings):
-    """adopt_job_async reaps a job orphaned longer than HADR_JOB_ADOPTION_TIMEOUT."""
+    """adopt_job_async reaps a job only when status query fails (unit unreachable)."""
     from awx.main.tasks.system import adopt_job_async
 
     settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
@@ -1265,12 +1677,175 @@ def test_adopt_job_async_reaps_on_timeout(me_inst, settings):
         started=now() - timedelta(seconds=7200),
     )
 
-    with patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+    mock_ctl = MagicMock()
+    # Simulate status lookup failure (network error, unit unreachable)
+    # This is the ONLY case where timeout should trigger
+    mock_ctl.simple_command.side_effect = RuntimeError('work unit unreachable')
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl),
+        patch('awx.main.tasks.system.reaper.reap_job') as mock_reap,
+        patch('awx.main.tasks.system.logger') as mock_log,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reap.assert_called_once()
+    # The timeout branch returns early — the control socket must still be closed.
+    mock_ctl.close.assert_called_once()
+    # The cancel is expected to fail on an unreachable unit, so it must not log a traceback.
+    mock_log.exception.assert_not_called()
+    assert any('Failed to cancel work unit' in call.args[0] for call in mock_log.warning.call_args_list)
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_closes_receptor_ctl_when_reap_raises(me_inst, settings):
+    """adopt_job_async closes the control socket even if reaping the timed-out job raises."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='unit-reap-raises',
+        started=now() - timedelta(seconds=7200),
+    )
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.side_effect = RuntimeError('work unit unreachable')
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reaper.reap_job') as mock_reap:
+        mock_reap.side_effect = RuntimeError('reap failed')
+        with pytest.raises(RuntimeError):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_ctl.close.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_accepts_legacy_message_without_source_controller(me_inst, settings):
+    """Messages published by a pre-AAP-89602 controller carry args=[job_id] only.
+
+    During a rolling upgrade an older controller can publish into a newer worker's queue,
+    so source_controller has to stay optional or that job is dropped with a TypeError.
+    """
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    # In a real deployment CLUSTER_HOST_ID is this instance's hostname; the me_inst fixture
+    # does not set it, and the legacy default resolves against CLUSTER_HOST_ID.
+    settings.CLUSTER_HOST_ID = me_inst.hostname
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-legacy')
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
         adopt_job_async(job.id)
 
-    mock_reattach.assert_not_called()
-    job.refresh_from_db()
-    assert job.status == 'failed'
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_never_reaps_a_reachable_active_unit(me_inst, settings):
+    """A reachable Pending/Running unit is never reaped, however long it has been orphaned.
+
+    orphaned_since is only as recent as the last persisted event, and a job that goes an hour
+    between events is ordinary — jobs longer than HADR_JOB_ADOPTION_TIMEOUT are ordinary too.
+    Reaping on that measure would kill healthy jobs. Only a unit whose status query fails
+    times out; a reachable one is handed to reattach, which streams it to completion.
+    """
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    for state in ('Pending', 'Running'):
+        job = Job.objects.create(
+            controller_node=me_inst.hostname,
+            status='running',
+            work_unit_id=f'unit-longrunning-{state.lower()}',
+            started=now() - timedelta(seconds=7200),
+        )
+
+        mock_ctl = MagicMock()
+        mock_ctl.simple_command.return_value = {'StateName': state}
+        with (
+            patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl),
+            patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+            patch('awx.main.tasks.system.reaper.reap_job') as mock_reap,
+        ):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+        mock_reap.assert_not_called()
+        assert mock_reattach.call_count == 1, f'state {state!r} should be streamed, not reaped'
+        mock_ctl.close.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_streams_active_unit_within_timeout(me_inst, settings):
+    """A Running unit that has not yet exceeded the timeout is handed straight to reattach."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='unit-running-fresh',
+        started=now() - timedelta(seconds=60),
+    )
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.return_value = {'StateName': 'Running'}
+    with (
+        patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl),
+        patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach,
+        patch('awx.main.tasks.system.reaper.reap_job') as mock_reap,
+    ):
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    mock_reap.assert_not_called()
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_no_timeout_on_terminal_state(me_inst, settings):
+    """adopt_job_async does NOT timeout when work unit has terminal state."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='unit-succeeded',
+        started=now() - timedelta(seconds=7200),
+    )
+
+    mock_ctl = MagicMock()
+    # Terminal state: status query succeeds with Succeeded
+    mock_ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    # Should reattach, NOT timeout
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_no_timeout_on_already_adopted(me_inst, settings):
+    """adopt_job_async does NOT timeout when work unit is already adopted."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(
+        controller_node=me_inst.hostname,
+        status='running',
+        work_unit_id='unit-already-adopted',
+        started=now() - timedelta(seconds=7200),
+    )
+
+    mock_ctl = MagicMock()
+    # Already adopted response: no StateName field
+    mock_ctl.simple_command.return_value = {'result': 'Already Adopted', 'unitid': 'unit-already-adopted'}
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    # Should reattach, NOT timeout
+    mock_reattach.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -1285,7 +1860,75 @@ def test_adopt_job_async_ctl_close_exception_is_swallowed(me_inst, settings):
     mock_ctl.close.side_effect = RuntimeError('socket already closed')
 
     with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit'):
-        adopt_job_async(job.id)  # must not raise
+        adopt_job_async(job.id, source_controller=me_inst.hostname)  # must not raise
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_passes_unit_status_to_reattach(me_inst, settings):
+    """adopt_job_async fetches unit_status once and passes it to reattach_to_work_unit."""
+    from awx.main.tasks.system import adopt_job_async
+
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-status-test')
+
+    # Mock receptor_ctl to return a status dict
+    mock_ctl = MagicMock()
+    precached_status = {'StateName': 'Succeeded', 'ExitCode': 0, 'Detail': ''}
+    mock_ctl.simple_command.return_value = precached_status
+
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+    # Verify reattach_to_work_unit was called with unit_status parameter
+    mock_reattach.assert_called_once()
+    call_args, call_kwargs = mock_reattach.call_args
+    assert 'unit_status' in call_kwargs
+    assert call_kwargs['unit_status'] == precached_status
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_recognizes_queue_time_transfer(me_inst, settings):
+    """adopt_job_async proceeds when _reap_and_mark_lost_instance already transitioned the job."""
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    lost_controller = 'lost-host'
+    job = Job.objects.create(controller_node=lost_controller, status='running', work_unit_id='unit-queue-transfer')
+
+    # Simulate the queue-time claim _reap_and_mark_lost_instance makes before publishing
+    job.controller_node = django_settings.CLUSTER_HOST_ID
+    job.save()
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        # Adoption still carries the lost controller as source, as published
+        adopt_job_async(job.id, source_controller=lost_controller)
+
+    # Verify adoption proceeded despite queue-time controller change
+    mock_reattach.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_adopt_job_async_atomic_claim_on_task_time(me_inst, settings):
+    """adopt_job_async atomically claims job when still on source at task execution time."""
+    settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+    lost_controller = 'lost-host'
+    job = Job.objects.create(controller_node=lost_controller, status='running', work_unit_id='unit-atomic-claim')
+    # controller_node deliberately NOT changed: the task runs before any queue-time claim
+
+    mock_ctl = MagicMock()
+    mock_ctl.simple_command.return_value = {'StateName': 'Succeeded', 'ExitCode': 0}
+
+    with patch('awx.main.tasks.system.get_receptor_ctl', return_value=mock_ctl), patch('awx.main.tasks.system.reattach_to_work_unit') as mock_reattach:
+        # Adoption called with job still on lost_controller
+        adopt_job_async(job.id, source_controller=lost_controller)
+
+    # Verify job was atomically claimed
+    job.refresh_from_db()
+    assert job.controller_node == django_settings.CLUSTER_HOST_ID
+
+    # Verify adoption proceeded after claim
+    mock_reattach.assert_called_once()
 
 
 # ── _finalize_job_run coverage ──────────────────────────────────────────────
@@ -1385,3 +2028,810 @@ def test_finalize_job_run_inventory_update_exception_logged(me_inst):
         with patch('awx.main.tasks.jobs.logger') as mock_logger:
             _finalize_job_run(Job, job.pk, callback, 'successful')
             mock_logger.exception.assert_called()
+
+
+@pytest.mark.django_db
+class TestAdoptionCapacityDeadlock:
+    """Adoption claims a job before checking whether it has room to run it, and the claim is
+    what makes the job consume control capacity. A job that is claimed and then deferred
+    therefore holds capacity while making no progress, and since it never finishes it holds
+    it forever — so the deferral that caused it also blocks every later adoption. Observed on
+    hadr-rosa-a as 570 jobs deferring 'out of control capacity' and still growing.
+    """
+
+    def _running_job(self, me_inst, started_ago_seconds):
+        return Job.objects.create(
+            controller_node=me_inst.hostname,
+            status='running',
+            work_unit_id='unit-cap',
+            execution_node='remote-ee',
+            started=now() - timedelta(seconds=started_ago_seconds),
+        )
+
+    def test_a_deferred_job_past_the_deadline_is_failed_and_releases_its_capacity(self, me_inst, settings):
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+        job = self._running_job(me_inst, started_ago_seconds=7200)
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=False),
+            patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl,
+        ):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+        job.refresh_from_db()
+        assert job.status == 'failed'
+        # No receptor round trip: there was never a slot in which to make one.
+        mock_ctl.assert_not_called()
+
+    def test_a_deferred_job_within_the_deadline_is_left_running(self, me_inst, settings):
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+        job = self._running_job(me_inst, started_ago_seconds=60)
+
+        with patch('awx.main.tasks.system._adoption_slot_available', return_value=False):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+        job.refresh_from_db()
+        assert job.status == 'running'
+
+    def test_capacity_is_still_checked_before_any_receptor_work(self, me_inst, settings):
+        """The point of the bound is to avoid occupying a dispatcher worker, so a deferral
+        must happen before the control socket is opened, not after."""
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+        job = self._running_job(me_inst, started_ago_seconds=60)
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=False),
+            patch('awx.main.tasks.system.get_receptor_ctl') as mock_ctl,
+        ):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+
+        mock_ctl.assert_not_called()
+
+
+@pytest.mark.django_db
+class TestContainerGroupAdoptionRouting:
+    """A container-group job's work unit dies with its controller, so the receptor path can
+    only ever report it unreachable. Routing it to the Kubernetes path is what turns a
+    permanent deferral into a recovery.
+    """
+
+    def _job(self, me_inst, is_container_group):
+        job = Job.objects.create(
+            controller_node=me_inst.hostname,
+            status='running',
+            work_unit_id='unit-cg',
+            execution_node='' if is_container_group else 'remote-ee',
+            started=now() - timedelta(seconds=30),
+        )
+        patcher = patch.object(type(job), 'is_container_group_task', property(lambda self: is_container_group))
+        return job, patcher
+
+    def _adopt(self, job, me_inst, patcher):
+        with (
+            patcher,
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=True),
+            patch('awx.main.tasks.system.get_receptor_ctl'),
+            patch('awx.main.tasks.system.get_adoption_unit_status', side_effect=RuntimeError('unit is gone')),
+            patch('awx.main.tasks.container_groups.adopt_container_group_job') as mock_cg,
+            patch('awx.main.tasks.system.reattach_to_work_unit') as mock_mesh,
+            patch('awx.main.tasks.system.reaper') as mock_reaper,
+        ):
+            adopt_job_async(job.id, source_controller=me_inst.hostname)
+            return mock_cg, mock_mesh, mock_reaper
+
+    def test_unreachable_container_group_job_goes_to_the_kubernetes_path(self, me_inst):
+        job, patcher = self._job(me_inst, is_container_group=True)
+        mock_cg, mock_mesh, mock_reaper = self._adopt(job, me_inst, patcher)
+
+        assert mock_cg.call_args[0][0].id == job.id
+        mock_mesh.assert_not_called()
+
+    def test_container_group_job_is_not_failed_by_the_mesh_adoption_deadline(self, me_inst, settings):
+        """The mesh deadline exists to bound waiting on an unreachable work unit. For a
+        container group the unit is gone by definition, so applying it would fail every such
+        job the moment it aged out, pod or no pod."""
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 0
+        job, patcher = self._job(me_inst, is_container_group=True)
+        mock_cg, _mock_mesh, mock_reaper = self._adopt(job, me_inst, patcher)
+
+        mock_cg.assert_called_once()
+        mock_reaper.reap_job.assert_not_called()
+
+    def test_unreachable_mesh_job_still_uses_the_receptor_path(self, me_inst, settings):
+        settings.HADR_JOB_ADOPTION_TIMEOUT = 3600
+        job, patcher = self._job(me_inst, is_container_group=False)
+        mock_cg, mock_mesh, _mock_reaper = self._adopt(job, me_inst, patcher)
+
+        mock_cg.assert_not_called()
+        mock_mesh.assert_called_once()
+
+
+@pytest.mark.django_db
+class TestOrphanSweep:
+    """Adoption discovery was a one-shot, winner-takes-all event keyed on a row that the same
+    operation deletes.
+
+    `_heartbeat_handle_lost_instances` takes a cluster-wide lock, the winner claims every job
+    of the lost controller and publishes each adoption to its *own* queue, and then
+    `_reap_and_mark_lost_instance` deletes the Instance row. The peer's next heartbeat derives
+    lost instances from that table, finds nothing, and is structurally excluded — while
+    `_process_running_jobs` only ever looks at jobs this node already owns. So a job whose
+    controller row is gone is invisible to every path on every node (observed: job 2068378,
+    running since 2026-10-02).
+
+    The sweep keys on job state instead, so it needs no lock: a claim makes `controller_node`
+    a live instance, which removes the job from every other node's sweep.
+    """
+
+    def _orphan(self, controller_node='dead-controller', work_unit_id='unit-orphan', **kwargs):
+        kwargs.setdefault('status', 'running')
+        kwargs.setdefault('started', now() - timedelta(seconds=600))
+        return Job.objects.create(controller_node=controller_node, work_unit_id=work_unit_id, **kwargs)
+
+    def test_job_whose_controller_row_was_deleted_is_adopted(self, me_inst):
+        """The 2068378 case. Nothing else can see this job: it matches no live node's
+        `controller_node`, and the Instance row the lost-instance path keys on is gone."""
+        job = self._orphan(controller_node='aap-controller-task-5d8697944-b4xlf')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == me_inst.hostname
+        queue.assert_called_once_with(job.id, me_inst.hostname)
+
+    def test_job_owned_by_a_non_live_instance_is_adopted(self, me_inst):
+        Instance.objects.create(hostname='offline-node', node_type='control', node_state=Instance.States.UNAVAILABLE)
+        job = self._orphan(controller_node='offline-node')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == me_inst.hostname
+        queue.assert_called_once()
+
+    def test_job_owned_by_a_live_peer_is_never_stolen(self, me_inst):
+        """The core anti-theft guarantee. A live peer may be mid-stream on this job; taking it
+        would finalize a job whose events are still arriving somewhere else."""
+        Instance.objects.create(hostname='live-peer', node_type='control', node_state=Instance.States.READY)
+        job = self._orphan(controller_node='live-peer')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == 'live-peer'
+        queue.assert_not_called()
+
+    def test_job_without_a_work_unit_is_not_adopted(self, me_inst):
+        """Adoption streams a work unit. A job that never got one has nothing to attach to and
+        belongs to the reaper, not here."""
+        job = self._orphan(work_unit_id='')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == 'dead-controller'
+        queue.assert_not_called()
+
+    def test_workflow_jobs_are_excluded(self, me_inst):
+        """A workflow job has no work unit of its own; its nodes are separate jobs."""
+        wfj = WorkflowJob.objects.create(controller_node='dead-controller', status='running', work_unit_id='unit-wf')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        wfj.refresh_from_db()
+        assert wfj.controller_node == 'dead-controller'
+        queue.assert_not_called()
+
+    def test_empty_controller_node_is_left_alone(self, me_inst):
+        """Deliberate limit. An unset controller_node also satisfies "not a live instance", but
+        there may be a window during normal dispatch where it is unset while the job is already
+        running, and sweeping then would steal live work."""
+        job = self._orphan(controller_node='')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        job.refresh_from_db()
+        assert job.controller_node == ''
+        queue.assert_not_called()
+
+    def test_non_running_jobs_are_left_alone(self, me_inst):
+        self._orphan(status='pending')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        queue.assert_not_called()
+
+    def test_sweep_stops_when_this_controller_is_full(self, me_inst):
+        """Capacity is what splits the work between peers: this pod takes what it can hold and
+        leaves the rest claimable, rather than claiming all N and starving (register item 4b)."""
+        jobs = [self._orphan(work_unit_id=f'unit-{i}') for i in range(4)]
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', side_effect=[True, True, False, False]),
+            patch('awx.main.tasks.system._queue_job_adoption') as queue,
+        ):
+            _sweep_orphaned_jobs(me_inst)
+
+        claimed = [j for j in jobs if Job.objects.get(pk=j.pk).controller_node == me_inst.hostname]
+        assert len(claimed) == 2
+        assert queue.call_count == 2
+        # The remainder must stay owned by the dead controller so the peer's sweep still sees them.
+        assert all(Job.objects.get(pk=j.pk).controller_node == 'dead-controller' for j in jobs if j not in claimed)
+
+    def test_oldest_jobs_are_swept_first(self, me_inst):
+        """When capacity is short, the job that has been stranded longest is the one closest to
+        its adoption deadline, so it is the one that must not wait another cycle."""
+        newest = self._orphan(work_unit_id='unit-new', started=now() - timedelta(seconds=60))
+        oldest = self._orphan(work_unit_id='unit-old', started=now() - timedelta(seconds=9000))
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', side_effect=[True, False]),
+            patch('awx.main.tasks.system._queue_job_adoption') as queue,
+        ):
+            _sweep_orphaned_jobs(me_inst)
+
+        queue.assert_called_once_with(oldest.id, me_inst.hostname)
+        assert Job.objects.get(pk=newest.pk).controller_node == 'dead-controller'
+
+    def test_a_lost_claim_race_does_not_publish_an_adoption(self, me_inst):
+        """Two pods sweep concurrently. The claim is the interlock; the loser's UPDATE matches
+        0 rows and it must not then queue an adoption for a job the winner now owns."""
+        job = self._orphan()
+
+        def peer_wins_the_claim():
+            # Runs between the orphan query and our UPDATE, exactly where the race lives.
+            Job.objects.filter(pk=job.pk).update(controller_node='live-peer')
+            return True
+
+        with (
+            patch('awx.main.tasks.system._queue_job_adoption') as queue,
+            patch('awx.main.tasks.system._adoption_slot_available', side_effect=peer_wins_the_claim),
+        ):
+            _sweep_orphaned_jobs(me_inst)
+
+        queue.assert_not_called()
+        assert Job.objects.get(pk=job.pk).controller_node == 'live-peer', 'must not overwrite the winner'
+
+    def test_per_heartbeat_cap_is_honored(self, me_inst, settings):
+        """The heartbeat carries expires=50 in DISPATCHER_SCHEDULE; an unbounded loop with a
+        capacity query per iteration could outlive its own schedule slot and be dropped."""
+        settings.HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT = 2
+        for i in range(5):
+            self._orphan(work_unit_id=f'unit-cap-{i}')
+
+        with patch('awx.main.tasks.system._queue_job_adoption') as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        assert queue.call_count == 2
+
+    def test_a_failure_on_one_job_does_not_abort_the_sweep(self, me_inst):
+        """One unadoptable job must not strand every job behind it in the list."""
+        self._orphan(work_unit_id='unit-a', started=now() - timedelta(seconds=9000))
+        self._orphan(work_unit_id='unit-b', started=now() - timedelta(seconds=600))
+
+        with patch('awx.main.tasks.system._queue_job_adoption', side_effect=[RuntimeError('boom'), None]) as queue:
+            _sweep_orphaned_jobs(me_inst)
+
+        assert queue.call_count == 2
+
+    def test_heartbeat_runs_the_sweep_after_processing_its_own_jobs(self, me_inst):
+        """Ordering matters: the owner-driven path gets first crack each cycle, and the sweep
+        reconciles behind it rather than racing it."""
+        calls = []
+        binder = MagicMock()
+
+        with (
+            patch('awx.main.tasks.system._heartbeat_instance_management', return_value=(me_inst, [], [], MagicMock())),
+            patch('awx.main.tasks.system._heartbeat_check_versions'),
+            patch('awx.main.tasks.system._heartbeat_handle_lost_instances'),
+            patch('awx.main.tasks.system._get_active_task_ids_from_dispatcherd', return_value=['some-uuid']),
+            patch('awx.main.tasks.system._process_running_jobs', side_effect=lambda *a, **k: calls.append('process')),
+            patch('awx.main.tasks.system._sweep_orphaned_jobs', side_effect=lambda *a, **k: calls.append('sweep')),
+        ):
+            cluster_node_heartbeat(binder)
+
+        assert calls == ['process', 'sweep']
+
+
+@pytest.mark.django_db
+class TestLostInstanceCapacity:
+    """The lost-instance path claims every job of a dead controller unconditionally.
+
+    Kill test 7 (2026-10-05) showed what that costs: the survivor took all 10 adoptions and the
+    replacement took none, because a claim makes `controller_node` a *live* node and the orphan
+    sweep — correctly — never steals from a live node. So the sweep alone cannot spread load;
+    the claimer has to decline what it cannot hold.
+
+    Declining means leaving the job `running` and still owned by the dead controller, which is
+    exactly the orphan sweep's predicate. The Instance row is deleted right after this loop
+    (`_reap_and_mark_lost_instance`), so a declined job becomes sweepable and the peer picks it
+    up. Declining is only safe *because* the sweep exists — before it, this would have stranded
+    the job forever.
+    """
+
+    def _lost(self):
+        return Instance.objects.create(hostname='dead-controller', node_type='control', node_state=Instance.States.UNAVAILABLE)
+
+    def _job(self, lost, **kwargs):
+        kwargs.setdefault('status', 'running')
+        kwargs.setdefault('work_unit_id', 'unit-1')
+        kwargs.setdefault('controller_node', lost.hostname)
+        kwargs.setdefault('execution_node', 'some-ee')
+        return Job.objects.create(**kwargs)
+
+    def test_a_full_controller_leaves_the_job_for_the_sweep(self, me_inst, settings):
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost)
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=False),
+            patch('awx.main.tasks.system._queue_job_adoption') as queue,
+        ):
+            _handle_lost_instance_job(job, lost)
+
+        job.refresh_from_db()
+        assert job.controller_node == lost.hostname, 'must stay owned by the dead controller, which is what makes it sweepable'
+        assert job.status == 'running', 'declining for capacity must not reap a live job'
+        queue.assert_not_called()
+
+    def test_capacity_is_checked_before_the_claim(self, me_inst, settings):
+        """Order is the whole point. Claim first and the job is ours; ours is live; the sweep
+        skips live owners — so no other node could ever take it and we are back to kill test 7."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost)
+        observed = {}
+
+        def record(*args, **kwargs):
+            observed['owner_at_check'] = Job.objects.get(pk=job.pk).controller_node
+            return False
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', side_effect=record),
+            patch('awx.main.tasks.system._queue_job_adoption'),
+        ):
+            _handle_lost_instance_job(job, lost)
+
+        assert observed['owner_at_check'] == lost.hostname
+
+    def test_an_unadoptable_job_is_still_reaped_when_full(self, me_inst, settings):
+        """A job with no work unit has nothing to stream and is not the sweep's business either.
+        The capacity check must sit after the adoptable test, or a full controller would quietly
+        leave un-adoptable jobs running forever."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost, work_unit_id='')
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=False),
+            patch('awx.main.tasks.system.reaper.reap_job') as reap_job,
+        ):
+            _handle_lost_instance_job(job, lost)
+
+        reap_job.assert_called_once()
+
+    def test_a_controller_with_room_still_claims_and_queues(self, me_inst, settings):
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost)
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=True),
+            patch('awx.main.tasks.system._queue_job_adoption') as queue,
+        ):
+            _handle_lost_instance_job(job, lost)
+
+        job.refresh_from_db()
+        assert job.controller_node == me_inst.hostname
+        queue.assert_called_once_with(job.id, me_inst.hostname)
+
+    def test_headroom_is_requested_for_a_job_not_yet_claimed(self, me_inst, settings):
+        """_adoption_slot_available answers the post-claim question by default ("does the job I
+        already own fit?"). Here the job is not ours yet, so a full impact-unit of headroom has
+        to be asked for, or a controller at exactly capacity takes one job too many."""
+        settings.CLUSTER_HOST_ID = me_inst.hostname
+        lost = self._lost()
+        job = self._job(lost)
+
+        with (
+            patch('awx.main.tasks.system._adoption_slot_available', return_value=True) as slot,
+            patch('awx.main.tasks.system._queue_job_adoption'),
+        ):
+            _handle_lost_instance_job(job, lost)
+
+        assert slot.call_args.kwargs.get('headroom_needed') == django_settings.AWX_CONTROL_NODE_TASK_IMPACT
+
+    def test_an_already_claimed_job_fits_at_exactly_capacity(self, me_inst):
+        """Default behaviour, unchanged: the job is already counted in consumed_capacity, so
+        remaining_capacity == 0 means it is the one that exactly fills us, not one too many."""
+        me_inst.node_type = 'control'
+        me_inst.capacity = 1
+        me_inst.save()
+        Job.objects.create(controller_node=me_inst.hostname, status='running')
+
+        assert _adoption_slot_available() is True
+
+    def test_an_unclaimed_job_is_refused_at_exactly_capacity(self, me_inst):
+        me_inst.node_type = 'control'
+        me_inst.capacity = 1
+        me_inst.save()
+        Job.objects.create(controller_node=me_inst.hostname, status='running')
+
+        assert _adoption_slot_available(headroom_needed=django_settings.AWX_CONTROL_NODE_TASK_IMPACT) is False
+
+
+@pytest.mark.django_db
+class TestAnnounceShutdown:
+    """A graceful shutdown used to be indistinguishable from a crash.
+
+    Peers learned of a departed controller only when `is_lost()` fired, which costs
+    CLUSTER_NODE_HEARTBEAT_PERIOD * CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE (120 s) plus up to
+    one period of schedule jitter. The jobs that controller owned sat `running` and unowned
+    for that whole window, which is the 90-180 s adoption lag measured on hadr-rosa-a.
+
+    The sweep does not actually gate on `is_lost()` — it gates on `node_state` (see
+    `_sweep_orphaned_jobs`). So a node that writes that state on its way out collapses the
+    wait to the cost of one UPDATE and one pg_notify, without touching the `is_lost()` path
+    that still covers the crash case.
+    """
+
+    def test_the_departing_node_marks_itself_unavailable(self, me_inst):
+        me_inst.node_type = 'control'
+        me_inst.capacity = 100
+        me_inst.save()
+
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now'):
+            announce_shutdown()
+
+        me_inst.refresh_from_db()
+        assert me_inst.node_state == Instance.States.UNAVAILABLE
+        assert me_inst.capacity == 0
+
+    def test_peers_are_told_to_sweep_immediately(self, me_inst):
+        """Without the broadcast the state change is only noticed on the next heartbeat, which
+        leaves up to CLUSTER_NODE_HEARTBEAT_PERIOD of the original lag in place."""
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now:
+            announce_shutdown()
+
+        sweep_now.apply_async.assert_called_once_with(queue='tower_broadcast_all')
+
+    def test_a_missing_instance_row_still_broadcasts(self, me_inst):
+        """Job 2068378's exact shape: the row the lost-instance path keys on is already gone,
+        so there is nothing to mark — but the jobs it controlled are orphaned and no peer
+        knows yet. The broadcast is the only thing that can still help them."""
+        with (
+            patch.object(Instance.objects, 'me', side_effect=RuntimeError('No instance found with the current cluster host id')),
+            patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now,
+        ):
+            announce_shutdown()
+
+        sweep_now.apply_async.assert_called_once_with(queue='tower_broadcast_all')
+
+    def test_a_failed_mark_does_not_cost_us_the_broadcast(self, me_inst):
+        with (
+            patch.object(Instance, 'mark_offline', side_effect=DatabaseError('connection already closed')),
+            patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now,
+        ):
+            announce_shutdown()
+
+        sweep_now.apply_async.assert_called_once_with(queue='tower_broadcast_all')
+
+    def test_nothing_here_may_raise(self, me_inst):
+        """This runs in a `finally` during interpreter shutdown. An exception escaping it
+        would replace whatever actually ended the process, which is the one piece of
+        information an operator needs."""
+        with patch('awx.main.tasks.system.sweep_orphaned_jobs_now') as sweep_now:
+            sweep_now.apply_async.side_effect = RuntimeError('pg_notify connection gone')
+            announce_shutdown()  # must not raise
+
+
+@pytest.mark.django_db
+class TestSweepOrphanedJobsNow:
+    def test_it_sweeps_on_behalf_of_this_node(self, me_inst):
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep:
+            sweep_orphaned_jobs_now()
+
+        assert sweep.call_args[0][0].hostname == me_inst.hostname
+
+    def test_the_departing_node_does_not_claim_the_jobs_it_is_walking_away_from(self, me_inst):
+        """The broadcast reaches every subscriber including the sender. If its pool is still
+        draining when it arrives, an unguarded sweep would hand this node jobs it is in the
+        middle of abandoning — and its `controller_node` is about to stop being live again,
+        so they would need sweeping a second time."""
+        me_inst.mark_offline()
+
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep:
+            sweep_orphaned_jobs_now()
+
+        sweep.assert_not_called()
+
+    def test_a_missing_instance_row_is_not_an_error(self, me_inst):
+        with (
+            patch.object(Instance.objects, 'me', side_effect=RuntimeError('No instance found with the current cluster host id')),
+            patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep,
+        ):
+            sweep_orphaned_jobs_now()
+
+        sweep.assert_not_called()
+
+
+@pytest.mark.django_db
+class TestDispatcherdAnnouncesOnExit:
+    @contextmanager
+    def _service(self, run_service):
+        """Stub out everything `handle()` does before the service loop, so the test is about
+        the loop's exit and nothing else."""
+        with (
+            patch('awx.main.management.commands.dispatcherd.ensure_no_dispatcherd_env_config'),
+            patch('awx.main.management.commands.dispatcherd.receptor_config_exists', return_value=True),
+            patch('awx.main.management.commands.dispatcherd.get_dispatcherd_config', return_value={}),
+            patch('awx.main.management.commands.dispatcherd.dispatcher_setup'),
+            patch('awx.main.management.commands.dispatcherd.connection'),
+            patch('awx.main.management.commands.dispatcherd.django_cache'),
+            patch.object(Command, 'configure_dispatcher_logging'),
+            patch('awx.main.management.commands.dispatcherd.run_service', run_service),
+            patch('awx.main.tasks.system.announce_shutdown') as announce,
+        ):
+            yield announce
+
+    def test_a_clean_exit_announces_after_the_pool_has_drained(self):
+        """Ordering is the whole correctness argument. `run_service()` returns only after
+        dispatcherd's own SIGTERM handler has run `pool.shutdown()`, so every job has already
+        detached from its work unit by the time we mark ourselves unavailable. Announcing
+        first would let a peer claim a job this node is still streaming."""
+        calls = []
+
+        with self._service(lambda: calls.append('run_service')) as announce:
+            announce.side_effect = lambda: calls.append('announce')
+            Command().handle()
+
+        assert calls == ['run_service', 'announce']
+
+    def test_a_crashing_service_still_announces(self):
+        """The crash case is the one where adoption matters most, and it is also the one where
+        no SIGTERM arrived to trigger anything else."""
+
+        def boom():
+            raise RuntimeError('broker died')
+
+        with self._service(boom) as announce:
+            with pytest.raises(RuntimeError, match='broker died'):
+                Command().handle()
+
+        announce.assert_called_once()
+
+
+@pytest.mark.django_db
+class TestStartupOrphanSweep:
+    """`cluster_node_heartbeat(None)` returns at its `binder is None` branch, above the
+    `_sweep_orphaned_jobs()` call in the periodic path, so a booting pod never swept. That is
+    the hole when the whole control plane goes down together: the departing nodes marked
+    themselves unavailable, but every peer that could have acted on it was leaving too."""
+
+    def test_it_sweeps_on_behalf_of_this_node(self, me_inst):
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep:
+            _startup_sweep_orphaned_jobs()
+
+        sweep.assert_called_once_with(me_inst)
+
+    def test_a_missing_instance_row_is_not_an_error(self):
+        """Startup is exactly when the row may not exist yet. Nothing to sweep on behalf of,
+        and the next heartbeat will have one."""
+        with (
+            patch.object(Instance.objects, 'me', side_effect=RuntimeError('No instance found with the current cluster host id')),
+            patch('awx.main.tasks.system._sweep_orphaned_jobs') as sweep,
+        ):
+            _startup_sweep_orphaned_jobs()
+
+        sweep.assert_not_called()
+
+    def test_a_failing_sweep_does_not_block_the_rest_of_startup(self, me_inst):
+        """This runs inside dispatch_startup, ahead of metrics reset. A sweep that raises
+        must not take the node's whole startup with it — the periodic heartbeat retries."""
+        with patch('awx.main.tasks.system._sweep_orphaned_jobs', side_effect=DatabaseError('nope')):
+            _startup_sweep_orphaned_jobs()
+
+    def test_the_startup_path_actually_calls_it(self, me_inst):
+        """The regression guard. The bug was never in the sweep, it was that nothing on the
+        startup path reached it."""
+        with (
+            patch('awx.main.tasks.system._sync_credential_types_to_db'),
+            patch('awx.main.tasks.system.convert_jsonfields'),
+            patch('awx.main.tasks.system.apply_cluster_membership_policies'),
+            patch('awx.main.tasks.system.cluster_node_heartbeat'),
+            patch('awx.main.tasks.system._startup_reap_undispatched'),
+            patch('awx.main.tasks.system.DispatcherMetrics'),
+            patch('awx.main.tasks.system._startup_sweep_orphaned_jobs') as startup_sweep,
+        ):
+            _run_dispatch_startup_common()
+
+        startup_sweep.assert_called_once()
+
+    def test_it_sweeps_after_the_heartbeat_so_capacity_is_known(self, me_inst):
+        """`_sweep_orphaned_jobs` stops at `_adoption_slot_available()`, which reads this
+        node's capacity. `cluster_node_heartbeat(None)` is what runs `local_health_check()` to
+        set it, so sweeping first would adopt nothing."""
+        calls = []
+
+        with (
+            patch('awx.main.tasks.system._sync_credential_types_to_db'),
+            patch('awx.main.tasks.system.convert_jsonfields'),
+            patch('awx.main.tasks.system.apply_cluster_membership_policies'),
+            patch('awx.main.tasks.system.cluster_node_heartbeat', side_effect=lambda *a: calls.append('heartbeat')),
+            patch('awx.main.tasks.system._startup_reap_undispatched'),
+            patch('awx.main.tasks.system.DispatcherMetrics'),
+            patch('awx.main.tasks.system._startup_sweep_orphaned_jobs', side_effect=lambda: calls.append('sweep')),
+        ):
+            _run_dispatch_startup_common()
+
+        assert calls == ['heartbeat', 'sweep']
+
+
+@pytest.mark.django_db
+class TestControlPodIsGone:
+    """The probe must only ever say "gone" when it is certain. Saying it wrongly means
+    adopting jobs off a controller that is still streaming them."""
+
+    @contextmanager
+    def _api(self, side_effect=None):
+        # IS_K8S is a read-only AWX setting (conf.py:938), so the settings object itself has
+        # to be stood in for rather than the attribute patched.
+        with (
+            patch('awx.main.tasks.system.settings', MagicMock(IS_K8S=True)),
+            patch('awx.main.tasks.system._current_namespace', return_value='aap'),
+            patch('kubernetes.config.load_incluster_config'),
+            patch('kubernetes.client.CoreV1Api') as api,
+        ):
+            api.return_value.read_namespaced_pod.side_effect = side_effect
+            yield api
+
+    def test_a_404_is_the_only_thing_that_means_gone(self):
+        from kubernetes.client.rest import ApiException
+
+        with self._api(side_effect=ApiException(status=404, reason='Not Found')):
+            assert _control_pod_is_gone('aap-controller-task-dead') is True
+
+    def test_a_live_pod_is_not_gone(self):
+        with self._api():
+            assert _control_pod_is_gone('aap-controller-task-live') is False
+
+    def test_a_server_error_means_cannot_tell(self):
+        from kubernetes.client.rest import ApiException
+
+        with self._api(side_effect=ApiException(status=503, reason='Service Unavailable')):
+            assert _control_pod_is_gone('aap-controller-task-x') is None
+
+    def test_a_broken_client_means_cannot_tell(self):
+        with self._api(side_effect=OSError('connection reset')):
+            assert _control_pod_is_gone('aap-controller-task-x') is None
+
+    def test_a_vm_install_means_cannot_tell(self):
+        """No pods to ask about. Falls back to is_lost(), which is what VM installs use."""
+        with patch('awx.main.tasks.system.settings', MagicMock(IS_K8S=False)):
+            assert _control_pod_is_gone('some-vm-host') is None
+
+
+@pytest.mark.django_db
+class TestStartupMarkDepartedPeers:
+    """Covers the case announce_shutdown structurally cannot: a node SIGKILLed before it
+    could speak for itself. The replacement pod is the only witness until is_lost() fires."""
+
+    @contextmanager
+    def _probe(self, gone):
+        """gone: hostname -> True / False / None"""
+        with patch('awx.main.tasks.system._control_pod_is_gone', side_effect=lambda h: gone.get(h)) as probe:
+            yield probe
+
+    def _state(self, hostname):
+        return Instance.objects.get(hostname=hostname).node_state
+
+    def test_a_peer_whose_pod_is_gone_is_marked_unavailable(self):
+        Instance.objects.create(hostname='ctrl-dead', node_type='control', node_state='ready')
+
+        with self._probe({'ctrl-dead': True}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-dead') == Instance.States.UNAVAILABLE
+
+    def test_a_peer_whose_pod_still_exists_is_left_alone(self):
+        Instance.objects.create(hostname='ctrl-live', node_type='control', node_state='ready')
+
+        with self._probe({'ctrl-live': False}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-live') == Instance.States.READY
+
+    def test_an_indeterminate_probe_is_left_alone(self):
+        """The whole safety argument. An API blip must never cost a live controller its jobs."""
+        Instance.objects.create(hostname='ctrl-unknown', node_type='control', node_state='ready')
+
+        with self._probe({'ctrl-unknown': None}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-unknown') == Instance.States.READY
+
+    def test_this_node_is_never_probed_or_marked(self):
+        """We are demonstrably alive; we are the one running this."""
+        Instance.objects.create(hostname=django_settings.CLUSTER_HOST_ID, node_type='control', node_state='ready')
+
+        with self._probe({django_settings.CLUSTER_HOST_ID: True}) as probe:
+            _startup_mark_departed_peers()
+
+        probe.assert_not_called()
+        assert self._state(django_settings.CLUSTER_HOST_ID) == Instance.States.READY
+
+    def test_an_installed_peer_is_covered_too(self):
+        """_reap_and_mark_lost_instance only marks offline when node_state is READY, so a node
+        that died between registering and reaching the mesh is marked by no other path."""
+        Instance.objects.create(hostname='ctrl-installed', node_type='control', node_state='installed')
+
+        with self._probe({'ctrl-installed': True}):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-installed') == Instance.States.UNAVAILABLE
+
+    def test_an_already_unavailable_peer_is_not_probed(self):
+        """Nothing to do, and an API call per boot per dead row is worth not making."""
+        Instance.objects.create(hostname='ctrl-offline', node_type='control', node_state='unavailable')
+
+        with self._probe({'ctrl-offline': True}) as probe:
+            _startup_mark_departed_peers()
+
+        probe.assert_not_called()
+
+    def test_execution_nodes_are_not_probed(self):
+        """Execution and hop nodes are not pods, and their lostness has its own grace period."""
+        Instance.objects.create(hostname='exec-1', node_type='execution', node_state='ready')
+
+        with self._probe({'exec-1': True}) as probe:
+            _startup_mark_departed_peers()
+
+        probe.assert_not_called()
+
+    def test_one_unmarkable_peer_does_not_cost_us_the_others(self):
+        Instance.objects.create(hostname='ctrl-a', node_type='control', node_state='ready')
+        Instance.objects.create(hostname='ctrl-b', node_type='control', node_state='ready')
+
+        real = Instance.mark_offline
+
+        def explode(self, *args, **kwargs):
+            if self.hostname == 'ctrl-a':
+                raise DatabaseError('nope')
+            return real(self, *args, **kwargs)
+
+        with self._probe({'ctrl-a': True, 'ctrl-b': True}), patch.object(Instance, 'mark_offline', explode):
+            _startup_mark_departed_peers()
+
+        assert self._state('ctrl-a') == Instance.States.READY
+        assert self._state('ctrl-b') == Instance.States.UNAVAILABLE
+
+    def test_a_failed_peer_query_does_not_block_startup(self):
+        with patch.object(Instance.objects, 'filter', side_effect=DatabaseError('nope')):
+            _startup_mark_departed_peers()
+
+    def test_peers_are_marked_before_the_sweep_looks(self, me_inst):
+        """The sweep decides what is orphaned from node_state, so writing it afterwards would
+        leave the jobs invisible for another heartbeat."""
+        calls = []
+
+        with (
+            patch('awx.main.tasks.system._sync_credential_types_to_db'),
+            patch('awx.main.tasks.system.convert_jsonfields'),
+            patch('awx.main.tasks.system.apply_cluster_membership_policies'),
+            patch('awx.main.tasks.system.cluster_node_heartbeat'),
+            patch('awx.main.tasks.system._startup_reap_undispatched'),
+            patch('awx.main.tasks.system.DispatcherMetrics'),
+            patch('awx.main.tasks.system._startup_mark_departed_peers', side_effect=lambda: calls.append('mark')),
+            patch('awx.main.tasks.system._startup_sweep_orphaned_jobs', side_effect=lambda: calls.append('sweep')),
+        ):
+            _run_dispatch_startup_common()
+
+        assert calls == ['mark', 'sweep']

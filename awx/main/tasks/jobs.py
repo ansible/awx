@@ -521,15 +521,14 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
+        # Reuse the script_data we are about to write rather than making the callback fetch
+        # its own copy, which is what the adoption path has to do.
+        self.runner_callback.populate_host_map(script_data)
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = {"hostvars": True, "towervars": True}
-        if hasattr(instance, 'job_slice_number'):
-            script_params['slice_number'] = instance.job_slice_number
-            script_params['slice_count'] = instance.job_slice_count
-
+        script_params = self.runner_callback.inventory_script_params(instance)
         return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
 
     def build_args(self, instance, private_data_dir, passwords):
@@ -807,6 +806,15 @@ class BaseTask(object):
                 res = receptor_job.run()
                 self.unit_id = receptor_job.unit_id
 
+                if receptor_job.detached:
+                    # This controller is shutting down while the EE keeps working. Leave the
+                    # job 'running' with its work_unit_id: that pair is the only thing the
+                    # orphan scan matches on, so finalizing it, running post-run hooks or
+                    # releasing the unit here would each on their own strand a live EE that
+                    # nothing can ever reach again.
+                    logger.info(f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} on shutdown, leaving it to be adopted')
+                    return
+
                 if not res:
                     # res is None when quota exceeded or other early-return condition.
                     # Must release work unit here before returning, or it will leak.
@@ -835,6 +843,17 @@ class BaseTask(object):
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
+            if receptor_job is not None and receptor_job.detached:
+                # The decision to walk away from a still-running EE was already made; an
+                # exception after that point is the shutdown taking the sockets down with
+                # it, not a failed job. Recording 'error' here would clear the 'running' +
+                # work_unit_id pair that is the only thing the orphan scan matches on, so
+                # the same reasoning as the clean detach above applies — leave it alone.
+                logger.info(
+                    f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} during shutdown and then errored, leaving it to be adopted',
+                    exc_info=True,
+                )
+                return
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
