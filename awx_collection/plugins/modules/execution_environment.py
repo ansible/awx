@@ -58,7 +58,7 @@ options:
       choices: ["always", "missing", "never"]
       default: 'missing'
       type: str
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 

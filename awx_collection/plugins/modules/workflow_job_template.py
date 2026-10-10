@@ -435,7 +435,7 @@ options:
       aliases:
         - destroy_current_schema
 
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''

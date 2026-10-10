@@ -77,7 +77,7 @@ options:
         - If enabled, control plane nodes will automatically peer to this node.
       required: False
       type: bool
-extends_documentation_fragment: awx.awx.auth
+extends_documentation_fragment: awx.awx.auth_session_id, awx.awx.auth
 '''
 
 EXAMPLES = '''
