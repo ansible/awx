@@ -24,6 +24,9 @@
 # authentication: The authentication method to use against the Insights API
 # client_id and client_secret are required for the 'service_account' authentication method
 # scm_username and scm_password are required for the 'basic' authentication method
+# NOTE: Galaxy credentials (both API Token and Service Account types) inject ANSIBLE_GALAXY_SERVER_*
+#       environment variables for ansible-galaxy authentication. Service Account credentials inject
+#       CLIENT_ID and CLIENT_SECRET for Keycloak auth (requires ansible-core 2.19+).
 
 - hosts: localhost
   gather_facts: false
