@@ -3888,6 +3888,24 @@ class JobList(UnifiedJobExcludeMixin, ListAPIView):
     pagination_class = JobPagination
     resource_purpose = 'jobs'
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.select_related(
+            'unified_job_template',
+            'job_template',
+            'created_by',
+            'modified_by',
+            'inventory',
+            'organization',
+            'execution_environment',
+            'instance_group',
+            'project',
+            'schedule',
+        ).prefetch_related(
+            'credentials',
+            'labels',
+        )
+
     @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
