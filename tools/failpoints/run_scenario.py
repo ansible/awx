@@ -43,7 +43,9 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
+from collections import Counter
 from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -180,8 +182,9 @@ def preflight(containers, hostnames):
     Each check maps to a run that was invalid for that reason:
     - a control node reaching the execution node only through another control node
       (the dev mesh chain): a peer cannot adopt once the first node is down;
-    - a control node's receptor not answering, or the execution node's receptor not
-      listing work: adoption fails and reads as an adoption bug;
+    - a control node's receptor not answering, AWX on that node not reaching it through
+      receptor.conf (a clobbered config), or the execution node's receptor not listing work:
+      adoption fails and reads as an adoption bug;
     - failpoints disabled: every arm is inert and the scenario injects nothing;
     - failpoints still armed from an earlier run: they fire in this one;
     - active jobs left over from an earlier run: they hold capacity and block launches.
@@ -205,6 +208,25 @@ def preflight(containers, hostnames):
                     f'{host}: reaches {node} only through control node {hop}; with {hop} down it cannot adopt. '
                     'Peer the hop node with every control node (receptor-hop.conf.j2).'
                 )
+
+    # receptorctl above talks to the socket directly; AWX instead reads the socket path from
+    # /etc/receptor/receptor.conf. The dev bootstrap's write_receptor_config can rewrite that
+    # bind-mounted file with a k8s-style config (wrong socket path) while the running receptor
+    # keeps the old one, so receptorctl works and AWX does not (part 1 job 3, part 3 job 105).
+    for container in containers:
+        try:
+            seen = orm(
+                container,
+                "from awx.main.tasks.receptor import get_receptor_ctl\n"
+                "ctl = get_receptor_ctl()\n"
+                "emit(sorted((ctl.simple_command('status').get('RoutingTable') or {}).keys()))\n",
+            )
+        except RuntimeError as exc:
+            problems.append(f'{container}: AWX cannot reach its receptor via receptor.conf: {str(exc).strip()[-200:]}')
+            continue
+        missing = [n for n in exec_nodes if n not in seen]
+        if missing:
+            problems.append(f'{container}: AWX receptor connection sees no route to {", ".join(missing)}')
 
     out = run(['docker', 'exec', EXEC_CONTAINER, 'receptorctl', '--socket', RECEPTOR_SOCK, 'work', 'list'], check=False)
     if out.returncode != 0 or '{' not in out.stdout:
@@ -336,8 +358,22 @@ def wait_finished(container, job_id, timeout):
     return st
 
 
+_REGISTRY = {}
+
+
 def arm(container, name, action, match=None, nth=None, times=None, **opts):
-    """awx-manage failpoint arm, with match given as a dict."""
+    """awx-manage failpoint arm, with match given as a dict.
+
+    A no-op recorder (sleep 0) for a failpoint this branch does not have is skipped: devel
+    lacks the PR's seams, and a recorder only ever observes. Anything that injects still fails
+    loudly on an unknown name.
+    """
+    if action == 'sleep' and float(opts.get('seconds', 1)) == 0:
+        if container not in _REGISTRY:
+            _REGISTRY[container] = registry(container)
+        if name not in _REGISTRY[container]:
+            log(f'not arming recorder {name}: this branch has no such failpoint')
+            return
     cmd = ['failpoint', 'arm', name, '--action', action]
     for k, v in (match or {}).items():
         cmd += ['--match', f'{k}={v}']
@@ -551,24 +587,30 @@ emit([(str(at), node, what) for node, what, at in rows if at])
 
 def run_label(args):
     parts = [args.scenario]
-    if args.scenario == 'cancel-orphan':
+    if args.scenario in ('cancel-orphan', 'adopter-dies', 'claim-race', 'workflow-orphan'):
         parts.append(args.variant)
+    if args.scenario == 'claim-race' and args.cancel_in_adoption:
+        parts.append('cancel')
+    if args.scenario == 'adopter-dies':
+        parts.append(args.hold_at)
     if args.scenario in ('event-queue', 'hybrid-resume'):
         parts.append(args.trigger)
     parts.append(args.mode)
-    if args.scenario == 'slow-controller' and args.mode == 'seam':
+    if (args.scenario == 'slow-controller' or (args.scenario == 'workflow-orphan' and args.variant == 'slow')) and args.mode == 'seam':
         parts.append(args.order)
     return '-'.join(parts)
 
 
-def report(containers, job_id, since, args, unit_id=None, notes=(), metrics=None):
+def report(containers, job_id, since, args, unit_id=None, notes=(), metrics=None, from_logs=None, out_name=None):
+    """Print and save everything about one job. from_logs(logs) -> dict adds log-derived
+    metrics; out_name overrides the artifact directory name (several jobs in one run)."""
     alive = [c for c in containers if manage(c, 'failpoint', 'list', check=False).returncode == 0]
     c = alive[0]
     hits = json.loads(manage(c, 'failpoint', 'hits', '--fired').stdout)
     result = json.loads(manage(c, 'failpoint', 'check-job', str(job_id)).stdout)
     out_dir = None
     if args.out:
-        out_dir = os.path.join(args.out, f'{run_label(args)}-job{job_id}')
+        out_dir = os.path.join(args.out, out_name or f'{run_label(args)}-job{job_id}')
         os.makedirs(out_dir, exist_ok=True)
     logs = save_logs(containers, since, out_dir)
     print('\n=== Failpoint hits that fired ===')
@@ -602,6 +644,8 @@ def report(containers, job_id, since, args, unit_id=None, notes=(), metrics=None
         metrics.update(job_metrics(c, job_id))
         metrics['failed_invariants'] = sorted(chk['name'] for chk in result['checks'] if not chk['ok'])
         metrics['tracebacks'] = len(tbs)
+        if from_logs:
+            metrics.update(from_logs(logs))
         metrics['duration_s'] = round(time.monotonic() - T0, 1)
         print('\n=== Metrics ===')
         print(json.dumps(metrics, indent=2, default=str))
@@ -1668,7 +1712,7 @@ def scenario_host_map(containers, args):
     notes.append(f'host map analysis: {json.dumps(a, default=str)}')
     result = report(containers, job_id, since, args, unit, notes)
     if args.out:
-        with open(os.path.join(args.out, f'{args.scenario}-job{job_id}', 'hostmap.json'), 'w') as fh:
+        with open(os.path.join(args.out, f'{run_label(args)}-job{job_id}', 'hostmap.json'), 'w') as fh:
             json.dump(a, fh, indent=2, default=str)
     return result
 
@@ -1787,6 +1831,874 @@ emit(dict(stored=qs.count(), distinct=len(cs), lo=cs[0] if cs else None, hi=cs[-
     return report(containers, job_id, since, args, unit, notes)
 
 
+# --- Part 3: adopter dies, claim race, workflow orphan, many orphans ---------------------
+
+
+def registry(container):
+    """Failpoint names this branch registers (the PR has more than devel)."""
+    return set(re.findall(r'^(\S+)$', manage(container, 'failpoint', 'registry').stdout, re.M))
+
+
+def all_hits(container, name):
+    """Every recorded hit of name, fired or not (includes 'resumed' records)."""
+    return json.loads(manage(container, 'failpoint', 'hits', name).stdout)
+
+
+def pause_hits(container, name):
+    return [h for h in fired_hits(container, name) if h['action'] == 'pause']
+
+
+def by_node(hits):
+    return dict(Counter(h['node'] for h in hits))
+
+
+def parallel(*fns):
+    """Run the callables at the same time (each is a docker exec round trip); return their results."""
+    results = [None] * len(fns)
+
+    def runner(i, fn):
+        results[i] = fn()
+
+    threads = [threading.Thread(target=runner, args=(i, fn)) for i, fn in enumerate(fns)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    return results
+
+
+def release_together(container, names, lead=2.0):
+    """One UPDATE releases every name; every holder resumes at the same scheduled instant."""
+    out = manage(container, 'failpoint', 'release', *names, '--in', str(lead)).stdout
+    res = json.loads(out[out.index('{') :])
+    res['at_utc'] = datetime.fromtimestamp(res['at'], timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    log(f"released {', '.join(names)} together: scheduled for {res['at_utc']} ({res['rows']} rows)")
+    return res
+
+
+def resumed(container, names):
+    """The 'resumed' records of held callers: node, pid, lateness, wake time."""
+    rows = []
+    for name in names:
+        for h in all_hits(container, name):
+            if h['action'] == 'resumed':
+                rows.append({'name': name, 'node': h['node'], 'pid': h['pid'], 'late_ms': h['ctx'].get('late_ms'), 'woke': h['ctx'].get('woke')})
+    return rows
+
+
+def arm_recorders(container, job_id, names):
+    """Arm no-op recorders (sleep 0) for the names this branch has, in one awx-manage shell
+    (one docker exec per arm costs about 3 s, enough for a job to run past a hold point)."""
+    match = {'job_id': str(job_id)} if job_id else {}
+    done = orm(
+        container,
+        f'''
+from awx.main.utils import failpoints
+done = []
+for name in {list(names)!r}:
+    if name in failpoints.REGISTRY:
+        failpoints.arm(name, 'sleep', match={match!r}, seconds=0)
+        done.append(name)
+emit(done)
+''',
+    )
+    log(f'recorders armed: {", ".join(done)}')
+    return done
+
+
+def arm_hold(container, job_id, owner, counter):
+    """Seam, first half of hold_at_counter: arm the hold as soon as the job runs."""
+    arm(container, 'callback.event', 'pause', {'job_id': job_id, 'node': owner, 'counter': counter}, timeout=1800)
+
+
+def wait_hold(container, job_id, owner, counter):
+    hit = wait_hits(container, 'callback.event', lambda h: h['node'] == owner and str(h['ctx'].get('counter')) == str(counter), timeout=600)[0]
+    log(f'seam: {owner} holds job {job_id} before event counter {counter} (at {hit["at"]})')
+    return hit
+
+
+def force_lost(container, node, other):
+    """Seam: `node` treats `other` as lost on its next heartbeat, and one is triggered now."""
+    arm(container, 'heartbeat.force_lost', 'trigger', {'node': node, 'other': other})
+    log(f'seam: {node} treats {other} as lost; triggering its heartbeat now ({trigger_heartbeat(container_for(node))})')
+
+
+def kill(container):
+    run(['docker', 'kill', container])
+    at = utcnow()
+    log(f'docker kill {container} (left down)')
+    return at
+
+
+# Log lines that say what each claimant decided. {j} is the job id.
+CLAIM_PATTERNS = {
+    'lost_claimed': r'Cross-controller adoption queued for job {j}\b',
+    'lost_already_claimed': r'Cross-controller adoption skipped for job {j}: already claimed',
+    'lost_deferred_capacity': r'Cross-controller adoption deferred for job {j}\b',
+    'sweep_claimed': r'Orphan sweep adopting job {j}:',
+    'sweep_failed': r'Orphan sweep failed to adopt job {j}\b',
+    'task_claim_skipped': r'Adoption skipped for job {j}\b',
+    'adopting': r'Adopting job {j}\b',
+    'finalized_via_adoption': r'Job {j} finalized via adoption',
+    'lock_busy': r'task_manager_lock held, deferring offline handling',
+    'release_errors': r'Error releasing work unit|Could not confirm release of receptor work unit|While releasing work',
+}
+
+
+def count_log_lines(logs, job_id, unit_id=None):
+    """Per pattern, per node: how many log lines match (a message is logged once per node)."""
+    out = {}
+    for key, pat in CLAIM_PATTERNS.items():
+        rx = re.compile(pat.format(j=job_id))
+        per = {}
+        for c, lines in logs.items():
+            n = sum(1 for line in lines if rx.search(line) and (key != 'release_errors' or not unit_id or unit_id in line))
+            if n:
+                per[container_for_host(c)] = n
+        out[key] = per
+    return out
+
+
+def scenario_claim_race(containers, args):
+    """Claim race: two live controllers try to claim the same orphan at the same instant.
+
+    Needs 3 control nodes and the PR branch (devel never claims across nodes). The job's
+    controller O is held before event --seam-counter and killed; the other two (A < B) race:
+      sweep-sweep  O is first marked offline by A's lost path with its claim vetoed
+                   (lost_instance.before_claim raise); then A's and B's orphan sweeps are both
+                   held at sweep.before_claim and released at one instant.
+      lost-sweep   as above, then A is held at lost_instance.before_claim (A holds
+                   task_manager_lock) and B at sweep.before_claim; released at one instant.
+      lost-lost    both lost paths are forced at once with lost_instance.before_claim held:
+                   shows that task_manager_lock admits only one of them.
+      lost-then-sweep  no race: A's lost path is held, A's next heartbeat sweeps and claims,
+                   then the lost path resumes on the same node (forces the interleaving in
+                   which the job ends up carrying a discarded duplicate's task id).
+    --cancel-in-adoption cancels once the winner streams and records whether the cancel is
+    addressed to the adoption task that is actually running.
+    Only A is told O is lost (heartbeat.force_lost on A), so B's own lost path cannot run before
+    O's natural is_lost (120 s). Recorders count claims (adoption.before_queue), adoption tasks
+    (adoption.after_claim) and streams (adoption.after_snapshot) per node.
+    """
+    if len(containers) < 3:
+        raise SystemExit('claim-race needs three control nodes')
+    c0 = containers[0]
+    if 'sweep.before_claim' not in registry(c0):
+        raise SystemExit('claim-race needs the PR branch: devel has no cross-controller claim to race')
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc = container_for(owner)
+    a, b = sorted(container_for_host(c) for c in containers if c != oc)
+    ca, cb = container_for(a), container_for(b)
+    m = {'owner': owner, 'racer_a': a, 'racer_b': b, 'variant': args.variant}
+    notes = [f'claim-race {args.variant}: owner {owner}, racers {a} and {b}']
+    arm_hold(ca, job_id, owner, args.seam_counter)
+    arm_recorders(
+        ca,
+        job_id,
+        [
+            'adoption.before_queue',
+            'adoption.after_claim',
+            'adoption.after_snapshot',
+            'job.after_finalize_before_release',
+            'adoption.after_finalize_before_release',
+        ],
+    )
+    if args.variant == 'lost-lost':
+        arm(ca, 'lost_instance.before_claim', 'pause', {'job_id': job_id}, timeout=900)
+    else:
+        arm(ca, 'lost_instance.before_claim', 'raise', {'job_id': job_id})
+    arm(ca, 'sweep.before_claim', 'raise', {'job_id': job_id})
+    wait_hold(ca, job_id, owner, args.seam_counter)
+    m['killed_at'] = kill(oc)
+    manage(ca, 'failpoint', 'disarm', 'callback.event')
+    m['events_at_kill'] = job_state(ca, job_id)['events']
+
+    if args.variant == 'lost-lost':
+        names = ['lost_instance.before_claim']
+        arm(ca, 'heartbeat.force_lost', 'trigger', {'other': owner})
+        parallel(lambda: trigger_heartbeat(ca), lambda: trigger_heartbeat(cb))
+        log(f'seam: {a} and {b} both treat {owner} as lost; heartbeats triggered together')
+        wait_hits(ca, 'lost_instance.before_claim', lambda h: h['action'] == 'pause', timeout=120, desc='a lost path to hold')
+        time.sleep(5)
+        # A second chance for the other node, while the first still holds the lock.
+        parallel(lambda: trigger_heartbeat(ca), lambda: trigger_heartbeat(cb))
+        time.sleep(15)
+    else:
+        arm(ca, 'heartbeat.force_lost', 'trigger', {'node': a, 'other': owner})
+        log(f'seam: only {a} treats {owner} as lost; its claim is vetoed so it just marks {owner} offline ({trigger_heartbeat(ca)})')
+        wait_for(f'{owner} marked offline', lambda: instances(ca)[owner]['state'] != 'ready', 180, poll=2)
+        m['owner_offline_at'] = utcnow()
+        log(f'{owner} is offline; the job is still running and still owned by {owner}: an orphan for every sweep')
+        if args.variant == 'sweep-sweep':
+            names = ['sweep.before_claim']
+            arm(ca, 'sweep.before_claim', 'pause', {'job_id': job_id}, timeout=900)
+            # Wait for each node's own periodic heartbeat, so each node has exactly one holder
+            # (a triggered heartbeat close to a periodic one gives a node two). Trigger only a
+            # node whose heartbeat has not come within one period.
+            try:
+                wait_for(
+                    f'the periodic heartbeats of {a} and {b} to hold at sweep.before_claim',
+                    lambda: {a, b} <= set(by_node(pause_hits(ca, 'sweep.before_claim'))),
+                    70,
+                    poll=1,
+                )
+            except TimeoutError:
+                for host, cont in ((a, ca), (b, cb)):
+                    if host not in by_node(pause_hits(ca, 'sweep.before_claim')):
+                        log(f'{host} has no holder after 70 s; triggering its heartbeat ({trigger_heartbeat(cont)})')
+                wait_for(f'both {a} and {b} held', lambda: {a, b} <= set(by_node(pause_hits(ca, 'sweep.before_claim'))), 60, poll=1)
+        elif args.variant == 'lost-then-sweep':
+            # Not a race: the interleaving seen in jobs 112 and 115, forced step by step on A.
+            #  1. A's lost path holds before its claim (it keeps task_manager_lock).
+            #  2. A's next heartbeat sweeps and claims; its adoption X is published and starts,
+            #     but X's task id is held before it is saved (adoption.before_task_id_saved).
+            #  3. The lost path resumes, fails its claim, and on the same heartbeat
+            #     _process_running_jobs sees the job owned by A with a task id that is not running
+            #     (the dead owner's), so it re-queues: held before publishing (adoption.before_queue).
+            #  4. X's task id is saved. 5. The re-queue publishes: dispatcherd discards it as a
+            #     duplicate of the running X, and _queue_job_adoption saves the discarded uuid.
+            names = ['lost_instance.before_claim']
+            arm(ca, 'lost_instance.before_claim', 'pause', {'job_id': job_id, 'node': a}, timeout=900)
+            arm(ca, 'adoption.before_task_id_saved', 'pause', {'job_id': job_id, 'node': a}, timeout=900)
+            arm(ca, 'sweep.before_claim', 'sleep', {'job_id': job_id}, seconds=0)
+            trigger_heartbeat(ca)
+            wait_hits(ca, 'lost_instance.before_claim', lambda h: h['action'] == 'pause', timeout=120, desc=f'{a} to hold in its lost path')
+            log(f'step 1: {a} holds its lost path; triggering another heartbeat on {a} to sweep ({trigger_heartbeat(ca)})')
+            x = wait_hits(ca, 'adoption.before_task_id_saved', timeout=120, desc=f'{a} to sweep, claim and publish X')[0]
+            m['adoption_x'] = x['ctx'].get('task_id')
+            log(f"step 2: {a} swept and published adoption X={m['adoption_x']}; its task id is held before it is saved")
+            arm(ca, 'adoption.before_queue', 'pause', {'job_id': job_id, 'node': a}, timeout=900)
+            release_together(ca, ['lost_instance.before_claim'], lead=1.0)
+            wait_hits(ca, 'adoption.before_queue', lambda h: h['action'] == 'pause', timeout=120, desc='the lost path heartbeat to re-queue')
+            log('step 3: the resumed heartbeat re-queues an adoption (held before publishing)')
+            manage(ca, 'failpoint', 'disarm', 'adoption.before_task_id_saved')
+            wait_for('X task id saved', lambda: job_state(ca, job_id)['celery_task_id'] == m['adoption_x'], 30, poll=1)
+            log(f"step 4: job celery_task_id = X ({m['adoption_x']})")
+            manage(ca, 'failpoint', 'disarm', 'adoption.before_queue')
+            time.sleep(3)
+            m['job_task_id_after_requeue'] = job_state(ca, job_id)['celery_task_id']
+            log(f"step 5: re-queue published; job celery_task_id now {m['job_task_id_after_requeue']}")
+        else:
+            names = ['lost_instance.before_claim', 'sweep.before_claim']
+            arm(ca, 'lost_instance.before_claim', 'pause', {'job_id': job_id, 'node': a}, timeout=900)
+            # Any node's sweep holds: a periodic heartbeat on A (its lost path blocked by its own
+            # held one, which keeps task_manager_lock) would otherwise sweep and claim unheld.
+            arm(ca, 'sweep.before_claim', 'pause', {'job_id': job_id}, timeout=900)
+            trigger_heartbeat(ca)
+            wait_hits(ca, 'lost_instance.before_claim', lambda h: h['action'] == 'pause', timeout=120, desc=f'{a} to hold in its lost path')
+            trigger_heartbeat(cb)
+            wait_hits(ca, 'sweep.before_claim', lambda h: h['action'] == 'pause', timeout=120, desc=f'{b} to hold in its sweep')
+        time.sleep(2)
+    held = {n: by_node(pause_hits(ca, n)) for n in names}
+    m['held'] = held
+    m['held_total'] = sum(sum(v.values()) for v in held.values())
+    log(f'held before the claim UPDATE: {held}')
+    if args.variant != 'lost-then-sweep':
+        rel = release_together(ca, names)
+        m['release_at'] = rel['at_utc']
+    try:
+        wait_hits(ca, 'adoption.after_snapshot', timeout=180, desc='an adoption to start streaming')
+    except TimeoutError as exc:
+        notes.append(str(exc))
+        m['invalid'] = 'no adoption after the release'
+    time.sleep(15)  # a losing claimant's adoption, if any, has started by now
+    snaps = fired_hits(ca, 'adoption.after_snapshot')
+    if snaps:
+        winner = container_for(snaps[0]['node'])
+        m['adoption_task_uuids'] = running_tasks(winner)
+        m['job_task_id'] = job_state(ca, job_id)['celery_task_id']
+        m['job_task_id_is_running_adoption'] = m['job_task_id'] in m['adoption_task_uuids']
+        log(f"job celery_task_id={m['job_task_id']}; adoption task(s) running on {winner}: {m['adoption_task_uuids']}")
+    if args.cancel_in_adoption and snaps:
+        res = cancel_job(ca, job_id)
+        m['cancel_sent_to'] = f"{res['sent_to']['controller_node']}/{res['sent_to']['celery_task_id']}"
+        m['cancel_hits_running_adoption'] = res['sent_to']['celery_task_id'] in m['adoption_task_uuids']
+        notes.append(f"cancel during adoption at {res['at']}: sent to {m['cancel_sent_to']}; adoption task(s) running on {winner}: {m['adoption_task_uuids']}")
+        log(notes[-1])
+    rs = resumed(ca, names)
+    m['resumed'] = rs
+    wakes = [r['woke'] for r in rs if r['woke'] is not None]
+    m['resume_spread_ms'] = round((max(wakes) - min(wakes)) * 1000, 3) if len(wakes) > 1 else None
+    for name in names:
+        arm(ca, name, 'sleep', {'job_id': job_id}, seconds=0)  # keep recording later attempts, hold nothing
+    manage(ca, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    wait_finished(ca, job_id, args.finish_timeout)
+    start_back(oc, owner)
+    time.sleep(args.settle)
+    m['claims_queued'] = by_node(fired_hits(ca, 'adoption.before_queue'))
+    m['adoption_tasks'] = by_node(fired_hits(ca, 'adoption.after_claim'))
+    m['streams_adopted'] = by_node(fired_hits(ca, 'adoption.after_snapshot'))
+    m['adoption_finalize'] = by_node(fired_hits(ca, 'adoption.after_finalize_before_release'))
+    m['unit_end'] = unit_status(unit)
+
+    def from_logs(logs):
+        counts = count_log_lines(logs, job_id, unit)
+        sweeps_held = held.get('sweep.before_claim', {})
+        sweep_won = counts['sweep_claimed']
+        return {
+            'log_counts': counts,
+            'claims_succeeded': sum(counts['lost_claimed'].values()) + sum(sweep_won.values()),
+            'claims_lost': sum(counts['lost_already_claimed'].values()) + sum(max(0, n - sweep_won.get(node, 0)) for node, n in sweeps_held.items()),
+        }
+
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=from_logs)
+
+
+def scenario_adopter_dies(containers, args):
+    """Adopter dies: the controller dies, its adopter dies too, and a third party adopts.
+
+    1. A chatty job's controller O is held before event --seam-counter and killed.
+    2. PR: adopter A1 (the next node) is told O is lost and claims; it is held either right
+       after its claim (--hold-at claim, adoption.after_claim) or mid-stream before event
+       --adopter-counter once every event before it is stored (--hold-at stream). A1 is killed.
+    3. --variant third: the third control node T is told A1 is lost and adopts.
+       --variant return: O is started again, told A1 is lost, and adopts (run with 2 nodes, so
+       no third node can step in first).
+    devel: nobody adopts across nodes; the lost-instance path reaps the job (the baseline).
+    Measures: whether the second adoption happens, both snapshots, duplicates and gaps, final
+    status, notifications, and how often the work unit is released (finalize hits) or never.
+    """
+    c0 = containers[0]
+    pr = 'sweep.before_claim' in registry(c0)
+    if pr and args.variant == 'third' and len(containers) < 3:
+        raise SystemExit('adopter-dies --variant third needs three control nodes')
+    if pr and args.variant == 'return' and len(containers) != 2:
+        raise SystemExit('adopter-dies --variant return needs exactly two control nodes (a third would adopt first)')
+    since = since_now()
+    job_id, st = start_job(containers, args)
+    owner, unit = st['controller_node'], st['work_unit_id']
+    oc = container_for(owner)
+    others = sorted(container_for_host(c) for c in containers if c != oc)
+    a1 = others[0]
+    ca1 = container_for(a1)
+    m = {'owner': owner, 'adopter_1': a1, 'variant': args.variant, 'hold_at': args.hold_at, 'branch': 'PR' if pr else 'devel'}
+    notes = [f"adopter-dies {args.variant} hold-at={args.hold_at} on {m['branch']}: owner {owner}, first adopter {a1}"]
+    arm_hold(ca1, job_id, owner, args.seam_counter)
+    arm_recorders(
+        ca1,
+        job_id,
+        [
+            'adoption.before_queue',
+            'adoption.after_claim',
+            'adoption.after_snapshot',
+            'job.after_finalize_before_release',
+            'adoption.after_finalize_before_release',
+        ],
+    )
+    wait_hold(ca1, job_id, owner, args.seam_counter)
+    wait_db_events(ca1, job_id, args.seam_counter)
+    m['killed_owner_at'] = kill(oc)
+    manage(ca1, 'failpoint', 'disarm', 'callback.event')
+    m['events_at_owner_kill'] = job_state(ca1, job_id)['events']
+
+    if not pr:
+        s = watch(ca1, job_id, unit, args.finish_timeout, until=terminal, poll=5)
+        m['owner_kill_to_terminal_s'] = round(time.time() - at_seconds(m['killed_owner_at']), 1)
+        notes.append(
+            f"devel: job terminal {m['owner_kill_to_terminal_s']}s after the kill: status={s['status']} controller={s['controller_node']} explanation={s['job_explanation']!r}"
+        )
+        log(notes[-1])
+        watch(
+            ca1,
+            job_id,
+            unit,
+            600,
+            until=lambda _s: unit_status(unit).get('StateName') in ('Succeeded', 'Failed', 'Canceled') or 'error' in unit_status(unit),
+            poll=15,
+            label='after terminal',
+        )
+        m['unit_end'] = unit_status(unit)
+        notes.append(f"exec-node unit after the job ended: {m['unit_end']}")
+        start_back(oc, owner)
+        time.sleep(args.settle)
+        m['adoptions'] = [f"{h['node']} thr={h['ctx'].get('safe_threshold')}" for h in fired_hits(ca1, 'adoption.after_snapshot')]
+        return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+    if args.hold_at == 'claim':
+        arm(ca1, 'adoption.after_claim', 'pause', {'job_id': job_id, 'node': a1}, timeout=1800)
+    else:
+        arm(ca1, 'callback.event', 'pause', {'job_id': job_id, 'node': a1, 'counter': args.adopter_counter}, timeout=1800)
+    force_lost(ca1, a1, owner)
+    if args.hold_at == 'claim':
+        hold = wait_hits(ca1, 'adoption.after_claim', lambda h: h['action'] == 'pause', timeout=args.claim_timeout, desc=f'{a1} to claim and hold')[0]
+    else:
+        hold = wait_hits(
+            ca1, 'callback.event', lambda h: h['node'] == a1 and str(h['ctx'].get('counter')) == str(args.adopter_counter), timeout=args.claim_timeout
+        )[0]
+        wait_db_events(ca1, job_id, args.adopter_counter)
+    m['adopter_1_held_at'] = hold['at']
+    manage(ca1, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    snaps = fired_hits(ca1, 'adoption.after_snapshot')
+    m['snapshot_1'] = snaps[0]['ctx'].get('safe_threshold') if snaps else None
+    js = job_state(ca1, job_id)
+    m['events_at_adopter_kill'] = js['events']
+    log(f"{a1} holds job {job_id} (controller={js['controller_node']}, {js['events']} events stored, snapshot {m['snapshot_1']})")
+
+    if args.variant == 'third':
+        second, cs = others[1], container_for(others[1])
+    else:
+        second, cs = owner, oc
+    m['adopter_2_expected'] = second
+    m['killed_adopter_1_at'] = kill(ca1)
+    if args.variant == 'return':
+        start_back(oc, owner)
+    # The held caller died with the node; the second adopter must not hold anywhere.
+    for name in ('adoption.after_claim', 'callback.event'):
+        manage(cs, 'failpoint', 'disarm', name)
+    arm_recorders(cs, job_id, ['adoption.after_claim'])
+    n_snaps = len(snaps)
+
+    def second_snapshot():
+        return len(fired_hits(cs, 'adoption.after_snapshot')) > n_snaps
+
+    arm(cs, 'heartbeat.force_lost', 'trigger', {'node': second, 'other': a1})
+    t_end = time.monotonic() + args.claim_timeout
+    while time.monotonic() < t_end and not second_snapshot():
+        log(f'seam: {second} treats {a1} as lost; triggering its heartbeat ({trigger_heartbeat(cs)})')
+        try:
+            wait_for('the second adoption', second_snapshot, 20, poll=2)
+        except TimeoutError:
+            continue
+    manage(cs, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    snaps = fired_hits(cs, 'adoption.after_snapshot')
+    m['adoptions'] = [f"{h['node']}@{h['at']} thr={h['ctx'].get('safe_threshold')}" for h in snaps]
+    m['second_adoption'] = len(snaps) > n_snaps
+    if m['second_adoption']:
+        m['adopter_2'] = snaps[-1]['node']
+        m['snapshot_2'] = snaps[-1]['ctx'].get('safe_threshold')
+        m['adopter_1_kill_to_snapshot_2_s'] = round(at_seconds(snaps[-1]['at']) - at_seconds(m['killed_adopter_1_at']), 1)
+    else:
+        notes.append(f'no second adoption within {args.claim_timeout}s')
+    s = watch(cs, job_id, unit, args.finish_timeout, until=terminal, poll=10)
+    notes.append(f"job terminal: status={s['status']} controller={s['controller_node']} explanation={s['job_explanation']!r}")
+    watch(
+        cs,
+        job_id,
+        unit,
+        300,
+        until=lambda _s: 'error' in unit_status(unit) or unit_status(unit).get('StateName') in ('Succeeded', 'Failed', 'Canceled'),
+        poll=15,
+        label='after terminal',
+    )
+    for c, h in ((ca1, a1), (oc, owner)):
+        if manage(c, 'failpoint', 'list', check=False).returncode != 0:
+            start_back(c, h)
+    time.sleep(args.settle)
+    m['unit_end'] = unit_status(unit)
+    m['adoption_tasks'] = by_node(fired_hits(cs, 'adoption.after_claim'))
+    m['claims_queued'] = by_node(fired_hits(cs, 'adoption.before_queue'))
+    m['finalize_then_release'] = by_node(fired_hits(cs, 'adoption.after_finalize_before_release')) | {
+        f"{k} (job task)": v for k, v in by_node(fired_hits(cs, 'job.after_finalize_before_release')).items()
+    }
+    return report(containers, job_id, since, args, unit, notes, metrics=m, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)})
+
+
+# --- workflow orphan -----------------------------------------------------------------------
+
+WF_NAME = 'failpoint workflow'
+
+
+def wf_setup(containers, args):
+    """A (chatty, --iterations) --success--> B, --failure--> C (both 3 iterations)."""
+    jt_a = setup(containers, 'failpoint wf A', 'chatty.yml', {'iterations': args.iterations})
+    jt_b = setup(containers, 'failpoint wf B success', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+    jt_c = setup(containers, 'failpoint wf C failure', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+    return orm(
+        containers[0],
+        f'''
+from awx.main.models import Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, NotificationTemplate
+org = Organization.objects.get(name='Default')
+wf, _ = WorkflowJobTemplate.objects.get_or_create(name={WF_NAME!r}, defaults=dict(organization=org))
+wf.workflow_job_template_nodes.all().delete()
+a = WorkflowJobTemplateNode.objects.create(workflow_job_template=wf, unified_job_template_id={jt_a}, identifier='A')
+b = WorkflowJobTemplateNode.objects.create(workflow_job_template=wf, unified_job_template_id={jt_b}, identifier='B')
+c = WorkflowJobTemplateNode.objects.create(workflow_job_template=wf, unified_job_template_id={jt_c}, identifier='C')
+a.success_nodes.add(b)
+a.failure_nodes.add(c)
+nt = NotificationTemplate.objects.get(name='failpoint webhook')
+wf.notification_templates_success.add(nt)
+wf.notification_templates_error.add(nt)
+emit(dict(wf=wf.id, a={jt_a}, b={jt_b}, c={jt_c}))
+''',
+    )
+
+
+def wf_launch(container, wf_id):
+    return orm(
+        container,
+        f'''
+from awx.main.models import WorkflowJobTemplate
+wj = WorkflowJobTemplate.objects.get(pk={wf_id}).create_unified_job()
+wj.signal_start()
+emit(wj.id)
+''',
+    )
+
+
+def wf_state(container, wj_id, ids):
+    return orm(
+        container,
+        f'''
+from awx.main.models import WorkflowJob, UnifiedJob
+wj = WorkflowJob.objects.get(pk={wj_id})
+nodes = {{}}
+for n in wj.workflow_job_nodes.all():
+    j = n.job
+    nodes[n.identifier] = dict(job=j.id if j else None, status=j.status if j else None, do_not_run=n.do_not_run,
+                               created=j.created if j else None, finished=j.finished if j else None)
+def spawned(tid):
+    return [dict(id=j.id, status=j.status, created=j.created) for j in UnifiedJob.objects.filter(unified_job_template_id=tid, created__gte=wj.created).order_by('id')]
+def _status(body):
+    if isinstance(body, str):
+        try:
+            body = json.loads(body)
+        except ValueError:
+            return None
+    return body.get('status') if isinstance(body, dict) else None
+emit(dict(status=wj.status, finished=wj.finished, explanation=wj.job_explanation, nodes=nodes,
+          b_jobs=spawned({ids['b']}), c_jobs=spawned({ids['c']}),
+          notifications=[_status(n.body) for n in wj.notifications.all().order_by('created')]))
+''',
+    )
+
+
+def scenario_workflow_orphan(containers, args):
+    """Workflow orphan: node A's job is orphaned mid-run; does the workflow act once, and on the truth?
+
+    Workflow: A (chatty) -> on success B, on failure C (short jobs). Two control nodes.
+      --variant slow  A's controller O misses heartbeats while alive (heartbeat.start pause).
+                      PR --mode seam: O held before event --seam-counter, the peer's lost check
+                      forced, both controllers stream, and the second finalizer (--order) held at
+                      callback.artifacts until the first has finalized. devel (timing): the
+                      peer's natural is_lost decides (devel reaps A 'failed' while it still runs).
+      --variant kill  O is held before event --seam-counter and killed (left down until A ends).
+                      PR: the peer is told O is lost and adopts. devel: the lost path reaps.
+    Measures: B and C jobs launched (double automation), workflow status and notifications,
+    and whether A's final status matches the branch the workflow took.
+    """
+    if len(containers) != 2:
+        raise SystemExit('workflow-orphan needs exactly two control nodes')
+    c0 = containers[0]
+    have = registry(c0)
+    pr = 'sweep.before_claim' in have
+    seam = args.mode == 'seam'
+    if seam and not pr:
+        raise SystemExit('--mode seam needs the PR branch (heartbeat.force_lost, callback.artifacts)')
+    manage(c0, 'failpoint', 'disarm', '--all')
+    manage(c0, 'failpoint', 'clear-hits')
+    ids = wf_setup(containers, args)
+    since = since_now()
+    wj = wf_launch(c0, ids['wf'])
+    log(f"launched workflow job {wj} from {WF_NAME!r} {ids}")
+
+    def a_running():
+        s = wf_state(c0, wj, ids)['nodes'].get('A') or {}
+        if s.get('job') and s.get('status') == 'running':
+            js = job_state(c0, s['job'])
+            return js['work_unit_id'] and dict(js, id=s['job'])
+        return None
+
+    st = wait_for('node A job running with a work unit', a_running, 300, poll=3)
+    job_id, owner, unit = st['id'], st['controller_node'], st['work_unit_id']
+    oc = container_for(owner)
+    peer = next(c for c in containers if c != oc)
+    ph = container_for_host(peer)
+    m = {'workflow_job': wj, 'a_job': job_id, 'owner': owner, 'peer': ph, 'variant': args.variant, 'branch': 'PR' if pr else 'devel'}
+    notes = [f"workflow-orphan {args.variant} mode={args.mode} on {m['branch']}: workflow job {wj}, A job {job_id} on {owner}"]
+    held = seam or args.variant == 'kill'
+    if held:
+        arm_hold(c0, job_id, owner, args.seam_counter)
+    arm_recorders(c0, job_id, ['adoption.after_snapshot', 'job.after_finalize_before_release', 'adoption.after_finalize_before_release'])
+
+    if args.variant == 'slow':
+        second = None
+        if seam:
+            second = owner if args.order == 'adopter-first' else ph
+            arm(c0, 'callback.artifacts', 'pause', {'job_id': job_id, 'node': second}, timeout=1800)
+            wait_hold(c0, job_id, owner, args.seam_counter)
+            wait_db_events(c0, job_id, args.seam_counter)
+        arm(c0, 'heartbeat.start', 'pause', {'node': owner, 'periodic': True}, timeout=1200)
+        hb = wait_hits(c0, 'heartbeat.start', timeout=120)[0]
+        m['heartbeat_paused_at'] = hb['at']
+        log(f'{owner} heartbeat paused')
+        try:
+            if seam:
+                force_lost(c0, ph, owner)
+                snap = wait_hits(c0, 'adoption.after_snapshot', timeout=args.claim_timeout)[0]
+                m['snapshot'] = f"{snap['node']} thr={snap['ctx'].get('safe_threshold')} at {snap['at']}"
+                manage(c0, 'failpoint', 'disarm', 'heartbeat.force_lost')
+                manage(c0, 'failpoint', 'disarm', 'callback.event')
+            else:
+                # devel: the peer decides on its own once O's last_seen passes is_lost.
+                s = wait_for(
+                    'the peer to claim or reap A',
+                    lambda: (x := job_state(c0, job_id))['status'] != 'running' or x['controller_node'] != owner or None,
+                    args.claim_timeout,
+                    poll=3,
+                )
+                m['peer_decision'] = f"status={s['status']} controller={s['controller_node']} at {utcnow()}"
+                log(f"peer decided: {m['peer_decision']}")
+        finally:
+            manage(c0, 'failpoint', 'release', 'heartbeat.start', check=False)
+            manage(c0, 'failpoint', 'disarm', 'heartbeat.start', check=False)
+            log(f'released {owner} heartbeat')
+        if seam:
+            first_hit = 'job.after_finalize_before_release' if second == ph else 'adoption.after_finalize_before_release'
+            h = wait_hits(c0, first_hit, timeout=args.finish_timeout, poll=3)[0]
+            log(f'seam: first finalizer done ({first_hit} on {h["node"]}); releasing {second}')
+            manage(c0, 'failpoint', 'disarm', 'callback.artifacts')
+    else:
+        wait_hold(c0, job_id, owner, args.seam_counter)
+        wait_db_events(c0, job_id, args.seam_counter)
+        m['killed_at'] = kill(oc)
+        manage(peer, 'failpoint', 'disarm', 'callback.event')
+        if pr:
+            force_lost(peer, ph, owner)
+            try:
+                snap = wait_hits(peer, 'adoption.after_snapshot', timeout=args.claim_timeout)[0]
+                m['snapshot'] = f"{snap['node']} thr={snap['ctx'].get('safe_threshold')} at {snap['at']}"
+            except TimeoutError as exc:
+                notes.append(str(exc))
+            manage(peer, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    cw = peer if args.variant == 'kill' else c0
+    wait_for(
+        'workflow job terminal', lambda: (w := wf_state(cw, wj, ids))['status'] not in ('pending', 'waiting', 'running') and w, args.finish_timeout, poll=10
+    )
+    wait_finished(cw, job_id, args.finish_timeout)
+    if args.variant == 'kill':
+        start_back(oc, owner)
+    time.sleep(args.settle)
+    w = wf_state(cw, wj, ids)
+    a_final = job_state(cw, job_id)['status']
+    took = sorted(x for x, k in (('B', 'b_jobs'), ('C', 'c_jobs')) if w[k])
+    m.update(
+        workflow_status=w['status'],
+        workflow_notifications=w['notifications'],
+        b_jobs=len(w['b_jobs']),
+        c_jobs=len(w['c_jobs']),
+        branches_taken=took,
+        a_final_status=a_final,
+        nodes=w['nodes'],
+        acted_matches_final=(took == ['B']) == (a_final == 'successful') and len(took) == 1,
+    )
+    notes.append(f'workflow {wj}: {json.dumps(w, default=str)}')
+    log(f"workflow {wj} {w['status']}: B jobs {len(w['b_jobs'])}, C jobs {len(w['c_jobs'])}, A final {a_final}")
+    out_name = f'{run_label(args)}-wf{wj}-job{job_id}'
+    return report(
+        containers, job_id, since, args, unit, notes, metrics=m, out_name=out_name, from_logs=lambda logs: {'log_counts': count_log_lines(logs, job_id, unit)}
+    )
+
+
+# --- many orphans --------------------------------------------------------------------------
+
+
+def dispatcher_workers(container):
+    """Dispatcher pool on a node: workers, busy workers, and what the busy ones run."""
+    out = run(['docker', 'exec', container, 'awx-manage', 'dispatcherctl', 'workers'], check=False).stdout
+    tasks = [t.strip().strip("'\"") for t in re.findall(r'^\s+current_task: (.*)$', out, re.M)]
+    busy = [t for t in tasks if t not in ('null', '', 'None')]
+    return {
+        'workers': len(tasks),
+        'busy': len(busy),
+        'adopt': sum('adopt_job_async' in t for t in busy),
+        'tasks': dict(Counter(t.rsplit('.', 1)[-1] for t in busy)),
+    }
+
+
+def running_tasks(container, task='adopt_job_async'):
+    """uuids of the dispatcher workers on a node currently running `task`."""
+    out = run(['docker', 'exec', container, 'awx-manage', 'dispatcherctl', 'workers'], check=False).stdout
+    pairs = re.findall(r'^\s+current_task: (.*)\n\s+current_task_uuid: (.*)$', out, re.M)
+    return [u.strip().strip("'\"") for t, u in pairs if task in t]
+
+
+def job_statuses(container, job_ids):
+    """{job id: status fields}; ids come back as ints (JSON object keys are strings)."""
+    return {int(k): v for k, v in _job_statuses(container, job_ids).items()}
+
+
+def _job_statuses(container, job_ids):
+    return orm(
+        container,
+        f'''
+from awx.main.models import UnifiedJob
+emit({{j.id: dict(status=j.status, controller=j.controller_node, explanation=j.job_explanation, started=j.started, finished=j.finished, created=j.created)
+      for j in UnifiedJob.objects.filter(pk__in={list(job_ids)!r})}})
+''',
+    )
+
+
+def scenario_many_orphans(containers, args):
+    """Many orphans: --orphans jobs controlled by awx-1 when it dies; awx-2 adopts (PR) or reaps (devel).
+
+    Two control nodes. awx-2 is disabled while the jobs are placed, so all go to awx-1, then
+    re-enabled. awx-1 is killed and left down; PR --mode seam tells awx-2 at once that awx-1 is
+    lost (otherwise the natural is_lost decides). While the orphans are handled, a sampler
+    records awx-2's dispatcher pool (workers, busy, busy with adopt_job_async) every
+    --sample seconds, and two probes measure whether unrelated work is delayed: a new short job
+    and a Demo Project update, launched once the first orphan has been claimed or reaped.
+    """
+    if len(containers) != 2:
+        raise SystemExit('many-orphans needs exactly two control nodes')
+    c = 'tools_awx_2'
+    pr = 'sweep.before_claim' in registry(c)
+    seam = args.mode == 'seam' and pr
+    manage(c, 'failpoint', 'disarm', '--all')
+    manage(c, 'failpoint', 'clear-hits')
+    since = since_now()
+    m = {'branch': 'PR' if pr else 'devel', 'orphans_requested': args.orphans, 'iterations': args.iterations}
+    notes = [f"many-orphans on {m['branch']}: {args.orphans} jobs of chatty.yml x{args.iterations}"]
+    m['awx_2_max_workers'] = orm(c, 'from awx.main.utils.common import get_auto_max_workers\nemit(get_auto_max_workers())\n')
+    set_instance(c, 'awx-2', enabled=False)
+    wait_for('awx-2 capacity 0', lambda: instances(c)['awx-2']['capacity'] == 0, 180, poll=5)
+    jt = setup(containers, 'failpoint orphan', 'chatty.yml', {'iterations': args.iterations}, allow_simultaneous=True)
+    # Templates for the probes are created now: setup() copies the playbooks into every
+    # control container, and awx-1 will be dead when the probes launch.
+    probe_jt = setup(containers, 'failpoint probe', 'chatty.yml', {'iterations': 3}, allow_simultaneous=True)
+    jobs = orm(
+        c,
+        f'''
+from awx.main.models import JobTemplate
+jt = JobTemplate.objects.get(pk={jt})
+ids = []
+for _ in range({args.orphans}):
+    job = jt.create_unified_job()
+    job.signal_start()
+    ids.append(job.id)
+emit(ids)
+''',
+    )
+    log(f'launched {len(jobs)} jobs: {jobs[0]}..{jobs[-1]}')
+
+    def all_running():
+        st = job_statuses(c, jobs)
+        n = sum(1 for s in st.values() if s['status'] == 'running')
+        return n == len(jobs) and st
+
+    try:
+        st = wait_for(f'all {len(jobs)} jobs running', all_running, 600, poll=10)
+    finally:
+        set_instance(c, 'awx-2', enabled=True)
+    m['launch_to_all_running_s'] = round(max(at_seconds(s['started']) for s in st.values()) - min(at_seconds(s['created']) for s in st.values()), 1)
+    m['controllers'] = dict(Counter(s['controller'] for s in st.values()))
+    log(f"all running: controllers {m['controllers']}; awx-2 re-enabled")
+    if set(m['controllers']) != {'awx-1'}:
+        m['invalid'] = f"not all jobs controlled by awx-1: {m['controllers']}"
+    wait_for('awx-2 capacity back', lambda: instances(c)['awx-2']['capacity'] > 0, 180, poll=5)
+    m['exec_playbooks_before_kill'] = len(exec_node_processes(r'ansible-playbook'))
+    arm_recorders(c, None, ['adoption.before_queue', 'adoption.after_claim', 'adoption.after_snapshot', 'adoption.after_finalize_before_release'])
+
+    samples = []
+    stop = threading.Event()
+
+    def sampler():
+        while not stop.is_set():
+            try:
+                w = dispatcher_workers(c)
+                st = job_statuses(c, jobs)
+                w['at'] = utcnow()
+                w['jobs'] = dict(Counter(s['status'] for s in st.values()))
+                w['adopted_by_awx_2'] = sum(1 for s in st.values() if s['controller'] == 'awx-2')
+                samples.append(w)
+            except Exception as exc:  # a sample lost to a restarting container is not fatal
+                samples.append({'at': utcnow(), 'error': str(exc)[:200]})
+            stop.wait(args.sample)
+
+    th = threading.Thread(target=sampler, daemon=True)
+    th.start()
+    time.sleep(args.lead)
+    m['killed_at'] = kill('tools_awx_1')
+    if seam:
+        force_lost(c, 'awx-2', 'awx-1')
+
+    def first_decision():
+        st = job_statuses(c, jobs)
+        return any(s['controller'] != 'awx-1' or s['status'] != 'running' for s in st.values()) or None
+
+    wait_for('the first orphan to be claimed or reaped', first_decision, args.claim_timeout, poll=2)
+    m['first_decision_at'] = utcnow()
+    probe_job = launch(c, probe_jt)
+    probe_pu = orm(c, "from awx.main.models import Project\npu = Project.objects.get(name='Demo Project').update()\nemit(pu.id if pu else None)\n")
+    m['probe_launched_at'] = utcnow()
+    log(f'probes launched: job {probe_job}, project update {probe_pu}')
+
+    def all_terminal():
+        st = job_statuses(c, jobs + [probe_job] + ([probe_pu] if probe_pu else []))
+        return all(s['status'] not in ('pending', 'waiting', 'running') for s in st.values()) and st
+
+    try:
+        final = wait_for('every orphan and probe terminal', all_terminal, args.finish_timeout, poll=10)
+    except TimeoutError as exc:
+        notes.append(str(exc))
+        final = job_statuses(c, jobs + [probe_job] + ([probe_pu] if probe_pu else []))
+    if seam:
+        manage(c, 'failpoint', 'disarm', 'heartbeat.force_lost')
+    # Keep sampling a little after the end: do adoption workers leak (stay busy)?
+    time.sleep(max(args.settle, 3 * args.sample))
+    stop.set()
+    th.join()
+    orphans = {j: final[j] for j in jobs}
+    kill_s = at_seconds(m['killed_at'])
+    m['outcome'] = {
+        'adopted': sum(1 for s in orphans.values() if s['controller'] == 'awx-2' and s['status'] not in ('pending', 'waiting', 'running')),
+        'reaped': sum(1 for s in orphans.values() if 'reaped' in (s['explanation'] or '')),
+        'stranded': sum(1 for s in orphans.values() if s['status'] in ('pending', 'waiting', 'running')),
+        'statuses': dict(Counter(s['status'] for s in orphans.values())),
+    }
+    ends = [at_seconds(s['finished']) for s in orphans.values() if s['finished']]
+    m['kill_to_all_terminal_s'] = round(max(ends) - kill_s, 1) if ends and not m['outcome']['stranded'] else None
+    for key, jid in (('probe_job', probe_job), ('probe_project_update', probe_pu)):
+        if jid:
+            s = final[jid]
+            m[key] = dict(
+                id=jid,
+                status=s['status'],
+                controller=s['controller'],
+                wait_s=round(at_seconds(s['started']) - at_seconds(s['created']), 1) if s['started'] else None,
+                total_s=round(at_seconds(s['finished']) - at_seconds(s['created']), 1) if s['finished'] else None,
+            )
+    ok_samples = [s for s in samples if 'workers' in s]
+    m['pool'] = {
+        'max_workers': m['awx_2_max_workers'],
+        'peak_workers': max((s['workers'] for s in ok_samples), default=None),
+        'peak_busy': max((s['busy'] for s in ok_samples), default=None),
+        'peak_adopt': max((s['adopt'] for s in ok_samples), default=None),
+        'adopt_busy_after_all_terminal': ok_samples[-1]['adopt'] if ok_samples else None,
+    }
+    m['snapshots'] = len(fired_hits(c, 'adoption.after_snapshot')) if pr else 0
+    m['adoption_tasks'] = len(fired_hits(c, 'adoption.after_claim')) if pr else 0
+    start_back('tools_awx_1', 'awx-1')
+    # devel's reaped orphans keep running unseen on the execution node; let them drain so the
+    # next run starts clean.
+    wait_for('execution node playbooks to drain', lambda: not exec_node_processes(r'ansible-playbook') or None, args.finish_timeout, poll=15)
+    time.sleep(args.settle)
+    invariants = {}
+    failed_by_check = Counter()
+    for j in jobs:
+        res = json.loads(manage(c, 'failpoint', 'check-job', str(j)).stdout)
+        bad = sorted(chk['name'] for chk in res['checks'] if not chk['ok'])
+        invariants[j] = bad
+        failed_by_check.update(bad)
+    m['invariants_failed_by_check'] = dict(failed_by_check)
+    m['jobs_with_any_failure'] = sum(1 for v in invariants.values() if v)
+    if args.out:
+        out_dir = os.path.join(args.out, f'{run_label(args)}-n{len(jobs)}-job{jobs[0]}')
+        os.makedirs(out_dir, exist_ok=True)
+        with open(os.path.join(out_dir, 'many.json'), 'w') as fh:
+            json.dump(
+                {'jobs': orphans, 'probes': {k: m.get(k) for k in ('probe_job', 'probe_project_update')}, 'samples': samples, 'invariants': invariants},
+                fh,
+                indent=2,
+                default=str,
+            )
+    notes.append(f"outcome {m['outcome']}; pool {m['pool']}; probes {m.get('probe_job')} {m.get('probe_project_update')}")
+    log(notes[-1])
+    unit = job_state(c, jobs[0])['work_unit_id']
+    return report(containers, jobs[0], since, args, unit, notes, metrics=m, out_name=f'{run_label(args)}-n{len(jobs)}-job{jobs[0]}')
+
+
 def scenario_report(containers, args):
     """Report only: invariants, timeline and saved logs for --job since --since (a run cut short)."""
     if not (args.job and args.since):
@@ -1808,6 +2720,10 @@ SCENARIOS = {
     'event-queue': scenario_event_queue,
     'host-map': scenario_host_map,
     'log-rotation': scenario_log_rotation,
+    'adopter-dies': scenario_adopter_dies,
+    'claim-race': scenario_claim_race,
+    'workflow-orphan': scenario_workflow_orphan,
+    'many-orphans': scenario_many_orphans,
     'report': scenario_report,
 }
 
@@ -1825,7 +2741,30 @@ def main():
     parser.add_argument('--quiet', type=int, default=360, help='quiet-deadline: seconds the silent task runs')
     parser.add_argument('--no-inject', action='store_true', help='quiet-deadline: do not fail the first unit status query')
     parser.add_argument('--outages', type=int, default=1, help='self-unavailable: consecutive failed health checks')
-    parser.add_argument('--variant', choices=['dead', 'restart', 'task-id-window', 'deferred'], default='dead', help='cancel-orphan: when the cancel is issued')
+    parser.add_argument(
+        '--variant',
+        choices=[
+            'dead',
+            'restart',
+            'task-id-window',
+            'deferred',
+            'third',
+            'return',
+            'sweep-sweep',
+            'lost-sweep',
+            'lost-lost',
+            'lost-then-sweep',
+            'slow',
+            'kill',
+        ],
+        help='cancel-orphan: dead|restart|task-id-window|deferred (default dead); adopter-dies: third|return (default third); '
+        'claim-race: sweep-sweep|lost-sweep|lost-lost (default sweep-sweep); workflow-orphan: slow|kill (default slow)',
+    )
+    parser.add_argument('--hold-at', choices=['claim', 'stream'], default='stream', help='adopter-dies: where the first adopter is held and killed')
+    parser.add_argument('--adopter-counter', type=int, default=60, help='adopter-dies --hold-at stream: the first adopter is held before this event')
+    parser.add_argument('--cancel-in-adoption', action='store_true', help='claim-race: cancel the job once the winner is streaming')
+    parser.add_argument('--orphans', type=int, default=30, help='many-orphans: jobs on the controller that dies')
+    parser.add_argument('--sample', type=int, default=10, help='many-orphans: seconds between dispatcher pool samples')
     parser.add_argument('--count', type=int, default=3, help='capacity-disabled: jobs on the controller that dies')
     parser.add_argument(
         '--trigger', choices=['kill', 'stop', 'redis-blip', 'dispatcher'], default='kill', help='hybrid-resume / event-queue: how the node goes away'
@@ -1859,6 +2798,18 @@ def main():
             print(f'{name}\n    {fn.__doc__.strip().splitlines()[0]}')
         return 0
 
+    variants = {'cancel-orphan': 'dead', 'adopter-dies': 'third', 'claim-race': 'sweep-sweep', 'workflow-orphan': 'slow'}
+    allowed = {
+        'cancel-orphan': ('dead', 'restart', 'task-id-window', 'deferred'),
+        'adopter-dies': ('third', 'return'),
+        'claim-race': ('sweep-sweep', 'lost-sweep', 'lost-lost', 'lost-then-sweep'),
+        'workflow-orphan': ('slow', 'kill'),
+    }
+    if args.scenario in variants:
+        args.variant = args.variant or variants[args.scenario]
+        if args.variant not in allowed[args.scenario]:
+            parser.error(f'{args.scenario} --variant must be one of {allowed[args.scenario]}')
+
     containers = control_containers()
     if not containers:
         raise SystemExit('no tools_awx_N containers running')
@@ -1875,7 +2826,13 @@ def main():
         if problems and not args.skip_preflight:
             log('environment not fit for a valid run; fix the above or pass --skip-preflight')
             return 2
-    result = SCENARIOS[args.scenario](containers, args)
+    try:
+        result = SCENARIOS[args.scenario](containers, args)
+    finally:
+        # Leave nothing armed for the next run (the hits stay for inspection).
+        for c in containers:
+            if manage(c, 'failpoint', 'disarm', '--all', check=False).returncode == 0:
+                break
     return 0 if result['ok'] else 1
 
 
