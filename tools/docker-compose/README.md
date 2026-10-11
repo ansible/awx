@@ -449,6 +449,6 @@ See docs at https://github.com/ansible/awx/blob/devel/tools/grafana/README.md
 OTEL=true GRAFANA=true LOKI=true PROMETHEUS=true make docker-compose
 ```
 
-This will start the sidecar container `tools_otel_1` and configure AWX logging to send to it. The OpenTelemetry Collector is configured to export logs to Loki. Grafana is configured with Loki as a datasource. AWX logs can be viewed in Grafana.
+This starts the OpenTelemetry Collector (`tools_otel_1`) and Tempo (`tools_tempo_1`) and sets `ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT`, so AWX sends its traces and logs to the collector through django-ansible-base's observability. The collector exports logs to Loki and traces to Tempo; Grafana has both as data sources, and log lines carry the trace id of their request.
 
 `http://localhost:3001` grafana
