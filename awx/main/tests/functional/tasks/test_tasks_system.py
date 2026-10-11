@@ -676,6 +676,18 @@ def test_heartbeat_marks_offline_when_receptor_unavailable(settings):
     assert this_inst.node_state == Instance.States.UNAVAILABLE
 
 
+@pytest.mark.django_db
+def test_heartbeat_stops_when_this_instance_is_missing(settings):
+    """No record for this node and no auto-deprovision → returns (None, None, None, None)."""
+    settings.CLUSTER_HOST_ID = 'ctrl-0'
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    ctl = mock.MagicMock()
+    ctl.simple_command.return_value = {'KnownConnectionCosts': {'ctrl-0': {}}}
+
+    with mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl):
+        assert _heartbeat_instance_management() == (None, None, None, None)
+
+
 # ── AAP-89607: unified startup job processing ─────────────────────────────────
 
 
