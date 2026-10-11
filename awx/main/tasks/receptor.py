@@ -234,6 +234,9 @@ class ReceptorWork:
     def release(self, unit_id):
         return self.receptor_ctl.simple_command(f'work release {unit_id}')
 
+    def close(self):
+        self.receptor_ctl.close()
+
 
 def adopt_remote_work(receptor_ctl, node, unit_id, config_data=None):
     """Adopt a running work unit from a remote node, passing TLS/signwork when configured.
@@ -1056,7 +1059,7 @@ def _get_or_create_private_data_dir(job):
     )
 
 
-def _finalize_adopted_job(job, callback, exit_code, process_phase_failed):
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=None):
     """Commit terminal status for an adopted job via the shared _finalize_job_run path.
 
     The shared finalization function uses duck typing to schedule task/workflow managers
@@ -1072,7 +1075,7 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed):
         return
 
     final_status = 'successful' if exit_code == 0 else 'failed'
-    finished_at = now()
+    finished_at = (clock or now)()
     extra = {'finished': finished_at}
     if job.started:
         extra['elapsed'] = (finished_at - job.started).total_seconds()
@@ -1114,7 +1117,7 @@ def _compute_adoption_dedup(job):
     return safe_threshold, collision_zone
 
 
-def reattach_to_work_unit(job, work: ReceptorWork):
+def reattach_to_work_unit(job, work: ReceptorWork, clock=None):
     """Reconnect to a receptor work unit and stream events in real-time until it completes.
 
     Reconstructs the minimal process-phase context from the DB job record, then calls
@@ -1174,7 +1177,7 @@ def reattach_to_work_unit(job, work: ReceptorWork):
     try:
         if res is not None:
             exit_code = 0 if getattr(res, 'status', '') == 'successful' else 1
-            _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=clock)
         elif not process_phase_failed:
             logger.info(f'Job {job.id}: adoption deferred (handled in _handle_work_error)')
         else:
@@ -1187,7 +1190,7 @@ def reattach_to_work_unit(job, work: ReceptorWork):
                 unit_status = {}
                 state_name = ''
             exit_code = _get_adoption_exit_code(unit_status, state_name)
-            _finalize_adopted_job(job, callback, exit_code, process_phase_failed)
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=clock)
     finally:
         receptor_job._receptor_release_work(work, getattr(res, 'status', 'error'))
         shutil.rmtree(private_data_dir, ignore_errors=True)
