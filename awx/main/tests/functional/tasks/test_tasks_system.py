@@ -733,8 +733,10 @@ def test_adoption_skips_still_running_work_unit(me_inst):
         mock_adopt.apply_async = MagicMock()
         _process_startup_jobs(me_inst)
 
-    mock_adopt.apply_async.assert_called_once_with(args=[job.id], queue=mock_adopt.apply_async.call_args[1]['queue'])
     job.refresh_from_db()
+    mock_adopt.apply_async.assert_called_once_with(
+        args=[job.id], kwargs={'owner_task_id': job.celery_task_id}, uuid=job.celery_task_id, queue=mock_adopt.apply_async.call_args[1]['queue']
+    )
     assert job.status == 'running', 'job must not be reaped — adoption deferred to background task'
 
 
