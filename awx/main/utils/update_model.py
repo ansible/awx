@@ -19,6 +19,39 @@ class NotOwner(Exception):
         super().__init__(f'pk={pk} is owned by task {current_task_id!r}, not {owner_task_id!r}')
 
 
+def _write_fields(model, pk, select_for_update, owner_task_id, updates):
+    """Load the row, check ownership, and save the given fields in one transaction."""
+    with transaction.atomic():
+        # Retrieve the model instance.
+        if select_for_update:
+            instance = model.objects.select_for_update().get(pk=pk)
+        else:
+            instance = model.objects.get(pk=pk)
+
+        if owner_task_id and instance.celery_task_id != owner_task_id:
+            raise NotOwner(pk, owner_task_id, instance.celery_task_id)
+
+        # Update the appropriate fields and save the model
+        # instance, then return the new instance.
+        if updates:
+            update_fields = ['modified']
+            for field, value in updates.items():
+                setattr(instance, field, value)
+                update_fields.append(field)
+                if field == 'status':
+                    update_fields.append('failed')
+            instance.save(update_fields=update_fields)
+        return instance
+
+
+def _wait_before_retry(pk):
+    """Sleep five seconds before a retry, giving up early on an abort signal."""
+    for i in range(5):
+        time.sleep(1)
+        if signal_callback():
+            raise RuntimeError(f'Could not fetch {pk} because of receiving abort signal')
+
+
 def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False, owner_task_id=None, **updates):
     """Reload the model instance from the database and update the
     given fields.
@@ -29,27 +62,7 @@ def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False
     if owner_task_id:
         select_for_update = True
     try:
-        with transaction.atomic():
-            # Retrieve the model instance.
-            if select_for_update:
-                instance = model.objects.select_for_update().get(pk=pk)
-            else:
-                instance = model.objects.get(pk=pk)
-
-            if owner_task_id and instance.celery_task_id != owner_task_id:
-                raise NotOwner(pk, owner_task_id, instance.celery_task_id)
-
-            # Update the appropriate fields and save the model
-            # instance, then return the new instance.
-            if updates:
-                update_fields = ['modified']
-                for field, value in updates.items():
-                    setattr(instance, field, value)
-                    update_fields.append(field)
-                    if field == 'status':
-                        update_fields.append('failed')
-                instance.save(update_fields=update_fields)
-            return instance
+        return _write_fields(model, pk, select_for_update, owner_task_id, updates)
     except ObjectDoesNotExist:
         return None
     except (DatabaseError, InterfaceError) as e:
@@ -58,14 +71,10 @@ def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False
 
         # Attempt to retry the update, assuming we haven't already
         # tried too many times.
-        if _attempt < _max_attempts:
-            for i in range(5):
-                time.sleep(1)
-                if signal_callback():
-                    raise RuntimeError(f'Could not fetch {pk} because of receiving abort signal')
-            return update_model(
-                model, pk, _attempt=_attempt + 1, _max_attempts=_max_attempts, select_for_update=select_for_update, owner_task_id=owner_task_id, **updates
-            )
-        else:
+        if _attempt >= _max_attempts:
             logger.warning(f'Failed to update {model._meta.object_name} pk={pk} after {_attempt} retries.')
             raise
+        _wait_before_retry(pk)
+        return update_model(
+            model, pk, _attempt=_attempt + 1, _max_attempts=_max_attempts, select_for_update=select_for_update, owner_task_id=owner_task_id, **updates
+        )

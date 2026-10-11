@@ -24,6 +24,7 @@ from awx.main.models import (
     AdHocCommand,
 )
 from awx.main.tasks import jobs
+from awx.main.utils.update_model import NotOwner
 from ansible_base.lib.workload_identity.controller import AutomationControllerJobScope
 
 
@@ -721,6 +722,44 @@ def test_work_unit_not_released_if_no_receptor_work():
 
     # Verify _receptor_release_work was NOT called
     assert receptor_job._receptor_release_work.call_count == 0
+
+
+def _finalizing_task():
+    task = jobs.BaseTask.__new__(jobs.BaseTask)
+    task.model = Job
+    task.instance = mock.MagicMock(log_format='job 1 (running)')
+    task.runner_callback = mock.MagicMock()
+    return task
+
+
+@mock.patch('awx.main.tasks.jobs._finalize_job_run')
+def test_finalize_and_release_releases_the_work_unit(mock_finalize):
+    task = _finalizing_task()
+    receptor_job = mock.MagicMock()
+
+    assert task._finalize_and_release(1, 'successful', receptor_job, 'task-1') is True
+    mock_finalize.assert_called_once_with(Job, 1, task.runner_callback, 'successful', owner_task_id='task-1')
+    receptor_job._receptor_release_work.assert_called_once_with(receptor_job.work, 'successful')
+
+
+@mock.patch('awx.main.tasks.jobs._finalize_job_run', side_effect=NotOwner(1, 'task-1', 'adoption-task'))
+def test_finalize_and_release_leaves_an_adopted_job_alone(mock_finalize):
+    task = _finalizing_task()
+    receptor_job = mock.MagicMock()
+
+    assert task._finalize_and_release(1, 'successful', receptor_job, 'task-1') is False
+    receptor_job._receptor_release_work.assert_not_called()
+
+
+@mock.patch('awx.main.tasks.jobs._finalize_job_run', side_effect=RuntimeError('db down'))
+def test_finalize_and_release_still_releases_when_finalize_raises(mock_finalize):
+    task = _finalizing_task()
+    receptor_job = mock.MagicMock()
+    receptor_job._receptor_release_work.side_effect = Exception('receptor gone')
+
+    with pytest.raises(RuntimeError):
+        task._finalize_and_release(1, 'failed', receptor_job, None)
+    receptor_job._receptor_release_work.assert_called_once_with(receptor_job.work, 'failed')
 
 
 @mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
