@@ -85,6 +85,7 @@ from awx.main.tasks.adoption_decisions import (
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.host_indirect import save_indirect_host_entries
 from awx.main.tasks.receptor import (
+    ReceptorWork,
     administrative_workunit_reaper,
     get_receptor_ctl,
     reattach_to_work_unit,
@@ -1026,7 +1027,7 @@ def adopt_job_async(job_id):
 
     receptor_ctl = get_receptor_ctl()
     try:
-        reattach_to_work_unit(job, receptor_ctl)
+        reattach_to_work_unit(job, ReceptorWork(receptor_ctl))
     except Exception:
         logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
     finally:
@@ -1064,8 +1065,9 @@ def awx_receptor_workunit_reaper():
     except FileNotFoundError:
         logger.info('Receptorctl sockfile not found for workunit reaper, doing nothing')
         return
+    work = ReceptorWork(receptor_ctl)
     try:
-        receptor_work_list = receptor_ctl.simple_command("work list")
+        receptor_work_list = work.list()
     except ValueError as exc:
         logger.info(f'Error getting work list for workunit reaper, error: {str(exc)}')
         return
@@ -1076,8 +1078,8 @@ def awx_receptor_workunit_reaper():
         jobs_with_unreleased_receptor_units = jobs_with_unreleased_receptor_units.exclude(status__in=ERROR_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        work.cancel(job.work_unit_id)
+        work.release(job.work_unit_id)
 
     administrative_workunit_reaper(receptor_work_list)
 
