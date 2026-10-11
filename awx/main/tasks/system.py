@@ -679,10 +679,21 @@ def cluster_node_heartbeat(binder):
     Dispatcherd implementation.
     Uses Control API to get running tasks.
     """
+    run_heartbeat(binder)
+
+
+def run_heartbeat(binder, clock=None):
+    """One heartbeat of this instance.
+
+    clock returns the current time and defaults to django.utils.timezone.now. Tests pass
+    their own to judge peers or orphaned jobs as of any moment, or to give two simulated
+    controllers different clocks.
+    """
+    clock = clock or now
 
     # Run common instance management logic — ctl is the same receptor connection used for
     # mesh status; we reuse it for the job processing loop to avoid a second socket open.
-    this_inst, instance_list, lost_instances, _ctl = _heartbeat_instance_management()
+    this_inst, instance_list, lost_instances, _ctl = _heartbeat_instance_management(clock)
     if this_inst is None:
         return  # Early return case from instance management
 
@@ -706,7 +717,7 @@ def cluster_node_heartbeat(binder):
         return  # Failed to get task IDs, don't attempt reaping
 
     # One loop over all orphaned running jobs — adopt dispatched, reap undispatched.
-    ref_time = now()
+    ref_time = clock()
     logger.debug(f"Running job processing loop with {len(active_task_ids)} excluded UUIDs")
     _process_running_jobs(this_inst, active_task_ids, ref_time)
 
@@ -777,10 +788,10 @@ def _mesh_all_ready_nodes_visible(mesh_status):
     return True
 
 
-def _heartbeat_instance_management():
+def _heartbeat_instance_management(clock=None):
     """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
-    nowtime = now()
+    nowtime = (clock or now)()
     instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
     this_inst = None
 
@@ -1013,6 +1024,16 @@ def adopt_job_async(job_id):
     heartbeat returns immediately. on_duplicate='discard' ensures only one adoption runs
     per job across heartbeat cycles.
     """
+    adopt_job(job_id, open_work=lambda: ReceptorWork(get_receptor_ctl()))
+
+
+def adopt_job(job_id, open_work, clock=None):
+    """Adopt one orphaned job: fail it if it has been silent too long, else reattach to its work unit.
+
+    open_work returns the ReceptorWork to stream from; it is only called when the job is
+    actually reattached. clock defaults to django.utils.timezone.now.
+    """
+    clock = clock or now
     job = UnifiedJob.objects.filter(id=job_id, status='running').first()
     if not job:
         logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
@@ -1020,19 +1041,19 @@ def adopt_job_async(job_id):
 
     adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
     last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    if adoption_deadline_passed(last_event_time, job.started, now(), adoption_timeout):
+    if adoption_deadline_passed(last_event_time, job.started, clock(), adoption_timeout):
         logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
         reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
         return
 
-    receptor_ctl = get_receptor_ctl()
+    work = open_work()
     try:
-        reattach_to_work_unit(job, ReceptorWork(receptor_ctl))
+        reattach_to_work_unit(job, work, clock=clock)
     except Exception:
         logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
     finally:
         try:
-            receptor_ctl.close()
+            work.close()
         except Exception:
             pass
 
