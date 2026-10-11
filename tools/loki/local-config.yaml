@@ -6,7 +6,6 @@ server:
   grpc_server_max_send_msg_size: 524288000 # 500 MB, might be too much, be careful
 
 frontend_worker:
-  match_max_concurrent: true
   grpc_client_config:
     max_send_msg_size: 524288000 # 500 MB
 
@@ -33,17 +32,17 @@ common:
 schema_config:
   configs:
     - from: 2020-10-24
-      store: boltdb-shipper
+      store: tsdb
       object_store: filesystem
-      schema: v11
+      schema: v13
       index:
         prefix: index_
         period: 24h
 
 storage_config:
-  boltdb_shipper:
+  tsdb_shipper:
     active_index_directory: /loki/index
-    cache_location: /loki/boltdb-cache
+    cache_location: /loki/tsdb-cache
 
 ruler:
   alertmanager_url: http://localhost:9093
@@ -80,7 +79,6 @@ query_scheduler:
 
 query_range:
   parallelise_shardable_queries: false
-  split_queries_by_interval: 0
 
 # By default, Loki will send anonymous, but uniquely-identifiable usage and configuration
 # analytics to Grafana Labs. These statistics are sent to https://stats.grafana.org/
