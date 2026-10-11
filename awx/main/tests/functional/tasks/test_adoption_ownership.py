@@ -12,7 +12,7 @@ import pytest
 from awx.main.models import Job
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.tasks.jobs import _finalize_job_run
-from awx.main.tasks.system import _process_running_jobs, adopt_job, claim_for_adoption
+from awx.main.tasks.system import _dispatch_adoption, _process_running_jobs, adopt_job, claim_for_adoption
 from awx.main.tests.fake_receptor import FakeReceptorWork, FakeWorkUnit, RecordingDispatcher, make_events
 from awx.main.utils.update_model import NotOwner, update_model
 
@@ -82,9 +82,21 @@ def test_write_without_an_owner_is_not_fenced(running_job):
 def test_claim_records_a_new_task_id(running_job):
     task_id = claim_for_adoption(running_job)
 
-    assert task_id and task_id != ORIGINAL
+    assert task_id is not None
+    assert task_id != ORIGINAL
     running_job.refresh_from_db()
     assert running_job.celery_task_id == task_id
+
+
+@pytest.mark.django_db
+def test_dispatch_after_a_lost_claim_sends_nothing(running_job):
+    stale_read = Job.objects.get(pk=running_job.pk)
+    Job.objects.filter(pk=running_job.pk).update(celery_task_id='another-heartbeat')
+
+    with mock.patch('awx.main.tasks.system.adopt_job_async.apply_async') as apply_async:
+        _dispatch_adoption(stale_read)
+
+    apply_async.assert_not_called()
 
 
 @pytest.mark.django_db

@@ -649,6 +649,27 @@ class BaseTask(object):
     def should_use_fact_cache(self):
         return False
 
+    def _finalize_and_release(self, pk, status, receptor_job, owner_task_id):
+        """Write the job's final status, then release its work unit.
+
+        Return False when another task adopted the job while it ran; its final status
+        and work unit are then that task's, so neither is touched here.
+        """
+        release_work = True
+        try:
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, owner_task_id=owner_task_id)
+        except NotOwner as exc:
+            logger.warning(f'{self.instance.log_format} was taken over by task {exc.current_task_id}; not writing status {status} or releasing its work unit')
+            release_work = False
+        finally:
+            # Guarantee work unit release even if finalization throws
+            if release_work and receptor_job and getattr(receptor_job, 'work', None):
+                try:
+                    receptor_job._receptor_release_work(receptor_job.work, status)
+                except Exception:
+                    logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
+        return release_work
+
     @with_path_cleanup
     @with_signal_handling
     def run(self, pk, **kwargs):
@@ -859,21 +880,8 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.private_data_dir = private_data_dir
-        release_work = True
-        try:
-            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, owner_task_id=owner_task_id)
-        except NotOwner as exc:
-            # Another task adopted this job while it ran; its final status and work unit are theirs.
-            logger.warning(f'{self.instance.log_format} was taken over by task {exc.current_task_id}; not writing status {status} or releasing its work unit')
-            release_work = False
+        if not self._finalize_and_release(pk, status, receptor_job, owner_task_id):
             return
-        finally:
-            # Guarantee work unit release even if finalization throws
-            if release_work and receptor_job and getattr(receptor_job, 'work', None):
-                try:
-                    receptor_job._receptor_release_work(receptor_job.work, status)
-                except Exception:
-                    logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
 
         if not self.instance:
             logger.error(f'Unified job pk={pk} appears to be deleted while running')
