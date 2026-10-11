@@ -43,22 +43,7 @@ OPTIONAL_API_URLPATTERN_PREFIX = '{{ api_urlpattern_prefix }}'
 # LOGGING['loggers']['awx.conf']['level'] = 'DEBUG'
 
 {% if enable_otel|bool %}
-LOGGING['handlers']['otel'] |= {
-    'class': 'awx.main.utils.handlers.OTLPHandler',
-    'endpoint': 'http://otel:4317',
-}
-# Add otel log handler to all log handlers where propagate is False
-for name in LOGGING['loggers'].keys():
-    if not LOGGING['loggers'][name].get('propagate', True):
-        handler = LOGGING['loggers'][name].get('handlers', [])
-        if 'otel' not in handler:
-            LOGGING['loggers'][name].get('handlers', []).append('otel')
-
-# Everything without explicit propagate=False ends up logging to 'awx' so add it
-handler = LOGGING['loggers']['awx'].get('handlers', [])
-if 'otel' not in handler:
-    LOGGING['loggers']['awx'].get('handlers', []).append('otel')
-
+ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT = 'http://otel:4317'
 {% endif %}
 
 BROADCAST_WEBSOCKET_PORT = 8013
