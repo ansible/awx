@@ -10,9 +10,11 @@ from awx.main.models.event_query import EventQuery
 # Django
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django_guid import get_guid
 from django.utils.functional import cached_property
 from django.db import connections
+
+# django-ansible-base
+from ansible_base.lib.logging.context import trace_id_var
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -78,7 +80,7 @@ class RunnerCallback:
         self.instance = None
         self.parent_workflow_job_id = None
         self.host_map = {}
-        self.guid = get_guid()
+        self.guid = trace_id_var.get()
         self.job_created = None
         self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
         self.dispatcher = CallbackQueueDispatcher()
