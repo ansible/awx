@@ -224,7 +224,7 @@ services:
 {% endif %}
 {% if enable_otel|bool %}
   otel:
-    image: mirror.gcr.io/otel/opentelemetry-collector-contrib:0.88.0
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.162.0
     container_name: tools_otel_1
     hostname: otel
     command: ["--config=/etc/otel-collector-config.yaml", ""]
@@ -237,10 +237,22 @@ services:
     volumes:
       - "../../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml"
       - "../../otel/awx-logs:/awx-logs/"
+  tempo:
+    image: mirror.gcr.io/grafana/tempo:3.1.0
+    container_name: tools_tempo_1
+    hostname: tempo
+    command: -config.file=/etc/tempo/tempo.yaml
+    networks:
+      - awx
+    ports:
+      - "3200:3200"
+    volumes:
+      - "tempo_storage:/var/tempo:rw"
+      - "../../tempo/tempo.yaml:/etc/tempo/tempo.yaml"
 {% endif %}
 {% if enable_loki|bool %}
   loki:
-    image: mirror.gcr.io/grafana/loki:2.9.5
+    image: mirror.gcr.io/grafana/loki:3.7.8
     container_name: tools_loki_1
     hostname: loki
     ports:
@@ -338,6 +350,10 @@ volumes:
 {% if enable_loki|bool %}
   loki_storage:
     name: tools_loki_storage
+{% endif %}
+{% if enable_otel|bool %}
+  tempo_storage:
+    name: tools_tempo_storage
 {% endif %}
 
 networks:

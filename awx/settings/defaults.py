@@ -779,7 +779,6 @@ LOGGING = {
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
             'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
         },
-        'otel': {'class': 'logging.NullHandler'},
     },
     'loggers': {
         'django': {'handlers': ['console']},
@@ -906,7 +905,7 @@ RECEPTOR_LOG_LEVEL = 'info'
 # Set ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT (an OTLP gRPC endpoint, e.g. 'http://collector:4317') to enable it:
 # 'ansible_base.observability' is then added to INSTALLED_APPS (awx/settings/functions.py:merge_observability) and
 # every Django process traces its requests, database queries and outgoing HTTP calls, and exports its log records
-# carrying their trace and span ids. Leave the OTLPHandler log aggregator off when this is on (both would export logs).
+# carrying their trace and span ids.
 ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT = None
 # None: named after the process, e.g. 'controller-uwsgi', 'controller-daphne', 'controller-dispatcher' (functions.py:observability_service_name)
 ANSIBLE_OBSERVABILITY_SERVICE_NAME = None
