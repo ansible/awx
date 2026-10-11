@@ -2,7 +2,7 @@ import logging
 import importlib
 import time
 
-from django_guid import set_guid
+from ansible_base.lib.logging.context import trace_id_var
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -34,7 +34,7 @@ def run_callable(body):
     args = body.get('args', [])
     kwargs = body.get('kwargs', {})
     if 'guid' in body:
-        set_guid(body.pop('guid'))
+        trace_id_var.set(body.pop('guid'))
     _call = resolve_callable(task)
     log_extra = ''
     logger_method = logger.debug

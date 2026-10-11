@@ -4,7 +4,6 @@
 import functools
 import logging
 import threading
-import time
 import urllib.parse
 from pathlib import Path, PurePosixPath
 
@@ -37,7 +36,39 @@ class SettingsCacheMiddleware(MiddlewareMixin):
         settings._awx_conf_memoizedcache.clear()
 
 
+class RequestIdHeaderMiddleware(MiddlewareMixin):
+    """Keeps awx's own request id header working on top of django-ansible-base's ObservabilityMiddleware, which reads
+    and returns X-Request-ID (and puts it in ansible_base.lib.logging.context.trace_id_var for the log records).
+
+    awx has always answered with ``X-API-Request-Id`` (formerly django-guid's GUID_HEADER_NAME) and accepted it from a
+    client to name the request. Listed before ObservabilityMiddleware: a client's X-API-Request-Id becomes the request's
+    X-Request-ID when that header is absent, and the response carries the id under both names, both exposed to CORS."""
+
+    HEADER = 'X-API-Request-Id'
+
+    def process_request(self, request):
+        legacy = request.META.get('HTTP_X_API_REQUEST_ID')
+        if legacy and not request.META.get('HTTP_X_REQUEST_ID'):
+            request.META['HTTP_X_REQUEST_ID'] = legacy
+
+    def process_response(self, request, response):
+        request_id = response.get('X-Request-ID')
+        if request_id:
+            response[self.HEADER] = request_id
+            exposed = [h.strip() for h in response.get('Access-Control-Expose-Headers', '').split(',') if h.strip()]
+            for name in ('X-Request-ID', self.HEADER):
+                if name not in exposed:
+                    exposed.append(name)
+            response['Access-Control-Expose-Headers'] = ', '.join(exposed)
+        return response
+
+
 class TimingMiddleware(threading.local, MiddlewareMixin):
+    """AWX_REQUEST_PROFILE profiling and the awx.analytics.performance log line of every request.
+
+    The X-API-Total-Time header itself is set by django-ansible-base's ObservabilityMiddleware, listed after this one
+    (inside it), so the header is already on the response this middleware sees."""
+
     dest = '/var/log/tower/profile'
 
     def __init__(self, *args, **kwargs):
@@ -45,20 +76,16 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
         self.prof = AWXProfiler("TimingMiddleware")
 
     def process_request(self, request):
-        self.start_time = time.time()
         if settings.AWX_REQUEST_PROFILE:
             self.prof.start()
 
     def process_response(self, request, response):
-        if not hasattr(self, 'start_time'):  # some tools may not invoke process_request
-            return response
-        total_time = time.time() - self.start_time
-        response['X-API-Total-Time'] = '%0.3fs' % total_time
         if settings.AWX_REQUEST_PROFILE:
             response['X-API-Profile-File'] = self.prof.stop()
+        total_time = response.get('X-API-Total-Time')
         perf_logger.debug(
-            f'request: {request}, response_time: {response["X-API-Total-Time"]}',
-            extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=response["X-API-Total-Time"])),
+            f'request: {request}, response_time: {total_time}',
+            extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=total_time)),
         )
         return response
 
