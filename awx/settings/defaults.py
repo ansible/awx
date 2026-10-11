@@ -422,11 +422,41 @@ CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
 
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
 
-# Seconds after a controller restart before an orphaned dispatched job is failed.
-# Jobs with work_unit_id set are skipped by the reaper and handled by the adoption loop
-# (_attempt_adoption_for_dispatched_jobs). This timeout is the maximum time we wait for
-# the EE to finish before giving up and failing the job.
+# Seconds an orphaned dispatched job may go unreachable before it is failed. Jobs with a
+# work_unit_id are skipped by the reaper and handed to adopt_job_async instead; this bounds
+# how long that job waits for a work unit its receptor cannot reach at all. A unit that
+# answers — running, finished, or already adopted — is never subject to it.
 HADR_JOB_ADOPTION_TIMEOUT = 3600
+
+# Seconds an adopted job's results stream may sit idle *after its work unit has reached a
+# terminal state* before the stream is abandoned. Covers the gap left by the timeout above:
+# receptor can adopt a unit's metadata while its stdout monitor never reaches the execution
+# node, so the unit answers normally while its output never arrives, and the dispatcher
+# worker streaming it blocks permanently. Terminal state is required, so a job that is
+# legitimately quiet for long stretches is unaffected.
+HADR_ADOPTION_STREAM_IDLE_TIMEOUT = 120
+
+# Seconds a container-group job pod may stay silent before it is considered wedged rather
+# than slow. `ansible-runner worker` blocks reading the private data dir from stdin, which
+# receptor streams over the work unit; if the submitting controller died mid-transmit the
+# worker waits forever and never runs the playbook. Such a pod is not adoptable — there is no
+# output to recover and none is coming — so it is deleted and its job requeued. Healthy pods
+# emit their first event within seconds (measured: 5-9s), so this is deliberately generous:
+# the cost of waiting is one more heartbeat, the cost of being wrong is a deleted live job.
+HADR_CONTAINER_GROUP_WEDGE_TIMEOUT = 300
+
+# Maximum jobs the orphan sweep will adopt in a single heartbeat. The sweep reconciles jobs
+# whose controller is gone from the Instance table, which no other path can see. It makes one
+# control-capacity query per iteration, and cluster_node_heartbeat carries 'expires': 50 in
+# DISPATCHER_SCHEDULE, so an unbounded loop could outlive its own schedule slot and be dropped
+# — taking the rest of the heartbeat with it. Whatever is left over is picked up by the peer's
+# sweep or by the next heartbeat, so a low cap costs latency, never correctness.
+HADR_ORPHAN_SWEEP_MAX_PER_HEARTBEAT = 50
+
+# Test facility: lets tests inject faults at named failpoints (awx.main.utils.failpoints).
+# Inert until a failpoint is armed, but never enable it in production.
+AWX_FAILPOINTS_ENABLED = False
+
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work

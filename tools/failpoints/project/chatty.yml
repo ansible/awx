@@ -1,0 +1,13 @@
+---
+# Steady stream of events for failure-scenario runs: one event per loop item, about one
+# per second, for `iterations` seconds. Runs against localhost on the execution node.
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars:
+    iterations: 420
+  tasks:
+    - name: tick
+      command: sleep 1
+      loop: "{{ range(iterations | int) | list }}"
+      changed_when: false

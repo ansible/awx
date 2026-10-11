@@ -4,10 +4,12 @@
 
 - log-level: info
 
+{% for i in range(1, control_plane_node_count | int + 1) %}
 - tcp-peer:
-    address: awx_1:2222
+    address: awx_{{ i }}:2222
     redial: true
 
+{% endfor %}
 - tcp-listener:
     port: 5555
 

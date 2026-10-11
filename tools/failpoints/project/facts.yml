@@ -1,0 +1,13 @@
+---
+# chatty.yml with fact gathering first, for use_fact_cache runs: the facts are written to the
+# fact cache at the start, then about one event per second for `iterations` seconds.
+- hosts: all
+  gather_facts: true
+  connection: local
+  vars:
+    iterations: 120
+  tasks:
+    - name: tick
+      command: sleep 1
+      loop: "{{ range(iterations | int) | list }}"
+      changed_when: false

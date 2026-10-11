@@ -34,6 +34,7 @@ from awx.main.models.rbac import (
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
 from awx.main.utils.redis import get_redis_client
+from awx.main.utils.failpoints import failpoint
 from awx.main.models.mixins import RelatedJobsMixin
 from awx.main.models.receptor_address import ReceptorAddress
 
@@ -402,6 +403,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         try:
             # if redis is down for some reason, that means we can't persist
             # playbook event data; we should consider this a zero capacity event
+            failpoint('health_check.redis_ping')
             get_redis_client().ping()
         except redis.ConnectionError:
             errors = _('Failed to connect to Redis')

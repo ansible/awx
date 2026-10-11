@@ -87,6 +87,7 @@ from awx.main.utils.common import (
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.utils.update_model import update_model
+from awx.main.utils.failpoints import failpoint, record_snapshot
 
 # Django flags
 from flags.state import flag_enabled
@@ -521,16 +522,17 @@ class BaseTask(object):
 
     def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
+        # Reuse the script_data we are about to write rather than making the callback fetch
+        # its own copy, which is what the adoption path has to do.
+        self.runner_callback.populate_host_map(script_data)
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
-        script_params = {"hostvars": True, "towervars": True}
-        if hasattr(instance, 'job_slice_number'):
-            script_params['slice_number'] = instance.job_slice_number
-            script_params['slice_count'] = instance.job_slice_count
-
-        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
+        script_params = self.runner_callback.inventory_script_params(instance)
+        path = self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
+        record_snapshot('host_map', instance.id, self.runner_callback.host_map)
+        return path
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
@@ -807,6 +809,15 @@ class BaseTask(object):
                 res = receptor_job.run()
                 self.unit_id = receptor_job.unit_id
 
+                if receptor_job.detached:
+                    # This controller is shutting down while the EE keeps working. Leave the
+                    # job 'running' with its work_unit_id: that pair is the only thing the
+                    # orphan scan matches on, so finalizing it, running post-run hooks or
+                    # releasing the unit here would each on their own strand a live EE that
+                    # nothing can ever reach again.
+                    logger.info(f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} on shutdown, leaving it to be adopted')
+                    return
+
                 if not res:
                     # res is None when quota exceeded or other early-return condition.
                     # Must release work unit here before returning, or it will leak.
@@ -835,6 +846,17 @@ class BaseTask(object):
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
+            if receptor_job is not None and receptor_job.detached:
+                # The decision to walk away from a still-running EE was already made; an
+                # exception after that point is the shutdown taking the sockets down with
+                # it, not a failed job. Recording 'error' here would clear the 'running' +
+                # work_unit_id pair that is the only thing the orphan scan matches on, so
+                # the same reasoning as the clean detach above applies — leave it alone.
+                logger.info(
+                    f'{self.instance.log_format} detached from work unit {receptor_job.unit_id} during shutdown and then errored, leaving it to be adopted',
+                    exc_info=True,
+                )
+                return
             # this could catch programming or file system errors
             self.runner_callback.delay_update(result_traceback=traceback.format_exc())
             logger.exception('%s Exception occurred while running task', self.instance.log_format)
@@ -854,11 +876,13 @@ class BaseTask(object):
 
         self.private_data_dir = private_data_dir
         try:
+            failpoint('job.before_finalize', job_id=pk, status=status)
             self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
         finally:
             # Guarantee work unit release even if finalization throws
             if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
                 try:
+                    failpoint('job.after_finalize_before_release', job_id=pk, status=status)
                     receptor_job._receptor_release_work(receptor_job.receptor_ctl, status)
                 except Exception:
                     logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
