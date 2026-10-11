@@ -71,7 +71,7 @@ def run_process_phase(job, ctl, signal=False):
         mock.patch.object(receptor.connections, 'close_all'),
         mock.patch.object(receptor, 'signal_callback', return_value=signal),
     ):
-        return job._process_phase(ctl)
+        return job._process_phase(receptor.ReceptorWork(ctl))
 
 
 def test_process_phase_closes_results_on_success():
@@ -94,7 +94,7 @@ def test_results_teardown_precedes_work_release():
     job = make_process_phase_job(mock.Mock(status='successful', rc=0))
 
     run_process_phase(job, ctl)
-    job._receptor_release_work(ctl, 'successful')
+    job._receptor_release_work(receptor.ReceptorWork(ctl), 'successful')
 
     assert 'release' in events
     assert 'sock-shutdown' in events
@@ -157,7 +157,7 @@ def test_adoption_process_phase_closes_before_release():
 
     run_process_phase(job, ctl)
     with mock.patch.object(receptor, '_finalize_adopted_job', return_value=None):
-        job._receptor_release_work(ctl, 'successful')
+        job._receptor_release_work(receptor.ReceptorWork(ctl), 'successful')
 
     assert 'release' in events
     assert events.index('sock-shutdown') < events.index('release')
@@ -228,7 +228,7 @@ def test_cancel_path_unblocks_blocked_processor():
         mock.patch.object(receptor.connections, 'close_all'),
         mock.patch.object(receptor, 'signal_callback', side_effect=signal),
     ):
-        res = job._process_phase(ctl)
+        res = job._process_phase(receptor.ReceptorWork(ctl))
     elapsed = time.monotonic() - start
 
     assert started.is_set()
@@ -272,7 +272,7 @@ def test_cancel_path_closes_stream_when_work_cancel_fails():
         mock.patch.object(receptor, 'signal_callback', side_effect=signal),
         pytest.raises(RuntimeError, match='control socket is gone'),
     ):
-        job._process_phase(ctl)
+        job._process_phase(receptor.ReceptorWork(ctl))
     elapsed = time.monotonic() - start
 
     assert 'sock-shutdown' in events
@@ -302,7 +302,7 @@ def test_reattach_to_work_unit_orders_teardown_before_finalize_and_release():
         mock.patch.object(receptor, '_finalize_adopted_job', side_effect=finalize),
         mock.patch.object(receptor.shutil, 'rmtree'),
     ):
-        assert receptor.reattach_to_work_unit(job, ctl) is True
+        assert receptor.reattach_to_work_unit(job, receptor.ReceptorWork(ctl)) is True
 
     assert 'finalize' in events
     assert 'release' in events
