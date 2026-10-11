@@ -268,7 +268,7 @@ def test_orphaned_job_and_its_inventory_cannot_be_deleted(delete, admin_user, in
 # ── What an adopted job records ───────────────────────────────────────────────
 
 
-@pytest.mark.xfail(strict=True, reason='devel: an adopted job that timed out does not say so (bug not filed yet)')
+@pytest.mark.xfail(strict=True, reason='AAP-96857: an adopted job that timed out does not say so')
 @pytest.mark.django_db
 def test_adopted_job_that_timed_out_says_so(me_inst):
     # 4.2 Job timeout while orphaned. The timeout is enforced on the execution node, so
