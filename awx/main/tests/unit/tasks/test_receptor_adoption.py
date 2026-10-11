@@ -73,6 +73,52 @@ def _make_receptor_ctl(state='Succeeded', exit_code=None, detail='', stdout_size
 
 
 # ---------------------------------------------------------------------------
+# ReceptorWork — each operation maps to one receptorctl command
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    'call, command',
+    [
+        (lambda w: w.list(), 'work list'),
+        (lambda w: w.status('unit-1'), 'work status unit-1'),
+        (lambda w: w.cancel('unit-1'), 'work cancel unit-1'),
+        (lambda w: w.release('unit-1'), 'work release unit-1'),
+    ],
+)
+def test_receptor_work_simple_commands(call, command):
+    ctl = Mock()
+
+    call(ReceptorWork(ctl))
+
+    ctl.simple_command.assert_called_once_with(command)
+
+
+def test_receptor_work_results_passes_startpos_only_when_given():
+    ctl = Mock()
+    work = ReceptorWork(ctl)
+
+    work.results('unit-1')
+    work.results('unit-1', startpos=42)
+
+    assert ctl.get_work_results.call_args_list[0].kwargs == {'return_socket': True, 'return_sockfile': True}
+    assert ctl.get_work_results.call_args_list[1].kwargs == {'return_socket': True, 'return_sockfile': True, 'startpos': 42}
+
+
+@patch('awx.main.tasks.receptor.AWXReceptorJob._process_phase', return_value='res')
+@patch('awx.main.tasks.receptor.AWXReceptorJob._transmit_phase')
+def test_run_internal_streams_through_receptor_work(mock_transmit, mock_process):
+    rj = _make_receptor_job()
+    ctl = Mock()
+
+    assert rj._run_internal(ctl) == 'res'
+
+    mock_transmit.assert_called_once_with(ctl)
+    assert rj.work.receptor_ctl is ctl
+    mock_process.assert_called_once_with(rj.work)
+
+
+# ---------------------------------------------------------------------------
 # receptor_config_exists
 # ---------------------------------------------------------------------------
 
@@ -260,9 +306,10 @@ def test_handle_work_error_get_results_raises():
     ctl = _make_receptor_ctl(state='Failed', stdout_size=500)
     ctl.get_work_results.side_effect = Exception('socket error')
     err_res = _Result(status='error', rc=1)
+    work = ReceptorWork(ctl)
 
     with pytest.raises(RuntimeError):
-        rj._handle_work_error(ReceptorWork(ctl), err_res)
+        rj._handle_work_error(work, err_res)
 
 
 # ---------------------------------------------------------------------------
