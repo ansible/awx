@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import time
+import uuid
 from collections import namedtuple
 from contextlib import redirect_stdout
 from packaging.version import Version
@@ -965,8 +966,7 @@ def _process_startup_jobs(this_inst):
     for j in jobs:
         try:
             if startup_job_action(j) == JobAction.ADOPT:
-                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
-                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
+                _dispatch_adoption(j)
             else:
                 reaped_ids.append(j.id)
                 reaper.reap_job(
@@ -1006,37 +1006,61 @@ def _process_running_jobs(this_inst, active_task_ids, ref_time):
         try:
             action = running_job_action(j, this_inst.hostname, active_task_ids, ref_time, workflow_ctype_id)
             if action == JobAction.ADOPT:
-                obj, _ = adopt_job_async.apply_async(args=[j.id], queue=get_task_queuename())
-                # Record the adoption task UUID so subsequent heartbeats see this job
-                # as active and skip it — preventing redundant re-adoption dispatches.
-                UnifiedJob.objects.filter(pk=j.id).update(celery_task_id=obj['uuid'])
+                _dispatch_adoption(j)
             elif action == JobAction.REAP:
                 reaper.reap_job(j, 'failed')
         except Exception:
             logger.exception(f'Failed processing job {j.id} in heartbeat job loop')
 
 
+def claim_for_adoption(job):
+    """Make a new adoption task the job's owner. Return its task id, or None if the job changed.
+
+    The claim replaces celery_task_id only if it still holds the value this heartbeat read,
+    so two claims can't both win. Once claimed, the previous owner's final status write is
+    refused (see NotOwner) and cancels go to the adoption task.
+    """
+    task_id = str(uuid.uuid4())
+    claimed = UnifiedJob.objects.filter(pk=job.id, status='running', celery_task_id=job.celery_task_id).update(celery_task_id=task_id)
+    return task_id if claimed else None
+
+
+def _dispatch_adoption(job):
+    """Claim the job, then dispatch its adoption under the claimed task id."""
+    task_id = claim_for_adoption(job)
+    if task_id is None:
+        logger.info(f'Job {job.id} changed since it was read; not adopting it on this heartbeat')
+        return
+    # The claim is recorded before dispatch, so subsequent heartbeats see this job as
+    # active and skip it, and the adoption task can check that it still owns the job.
+    adopt_job_async.apply_async(args=[job.id], kwargs={'owner_task_id': task_id}, uuid=task_id, queue=get_task_queuename())
+
+
 @task(queue=get_task_queuename, timeout=3600 * 2, on_duplicate='discard')
-def adopt_job_async(job_id):
+def adopt_job_async(job_id, owner_task_id=None):
     """Adopt a single orphaned job in a background task, streaming events in real-time.
 
     Called from _process_startup_jobs and _process_running_jobs via apply_async so the
     heartbeat returns immediately. on_duplicate='discard' ensures only one adoption runs
     per job across heartbeat cycles.
     """
-    adopt_job(job_id, open_work=lambda: ReceptorWork(get_receptor_ctl()))
+    adopt_job(job_id, open_work=lambda: ReceptorWork(get_receptor_ctl()), owner_task_id=owner_task_id)
 
 
-def adopt_job(job_id, open_work, clock=None):
+def adopt_job(job_id, open_work, clock=None, owner_task_id=None):
     """Adopt one orphaned job: fail it if it has been silent too long, else reattach to its work unit.
 
     open_work returns the ReceptorWork to stream from; it is only called when the job is
-    actually reattached. clock defaults to django.utils.timezone.now.
+    actually reattached. clock defaults to django.utils.timezone.now. owner_task_id is the
+    task id the job was claimed under; if a later claim replaced it, this adoption does nothing.
     """
     clock = clock or now
     job = UnifiedJob.objects.filter(id=job_id, status='running').first()
     if not job:
         logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
+        return
+    if owner_task_id and job.celery_task_id != owner_task_id:
+        logger.info(f'adopt_job_async: job {job_id} was claimed again by task {job.celery_task_id}, skipping')
         return
 
     adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
@@ -1048,7 +1072,7 @@ def adopt_job(job_id, open_work, clock=None):
 
     work = open_work()
     try:
-        reattach_to_work_unit(job, work, clock=clock)
+        reattach_to_work_unit(job, work, clock=clock, owner_task_id=owner_task_id)
     except Exception:
         logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
     finally:
