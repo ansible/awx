@@ -44,8 +44,12 @@ def gate_lost_instances(lost_instances, mesh_ready):
     While the receptor mesh is re-establishing, a control node may only look lost, so its
     handling waits for a later heartbeat. Execution and hop nodes don't depend on mesh
     consensus and are handled either way.
+
+    mesh_ready is a callable, asked only when something is lost.
     """
-    if mesh_ready:
+    if not lost_instances:
+        return []
+    if mesh_ready():
         return list(lost_instances)
     return [inst for inst in lost_instances if inst.node_type in ('execution', 'hop')]
 

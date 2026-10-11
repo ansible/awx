@@ -99,14 +99,20 @@ class TestFindLostInstances:
 class TestGateLostInstances:
     def test_mesh_ready_handles_every_lost_instance(self):
         lost = [make_instance(PEER), make_instance(EXEC, node_type='execution'), make_instance('hop-1', node_type='hop')]
-        assert gate_lost_instances(lost, mesh_ready=True) == lost
+        assert gate_lost_instances(lost, mesh_ready=lambda: True) == lost
 
     def test_mesh_not_ready_defers_only_control_nodes(self):
         control = make_instance(PEER)
         execution = make_instance(EXEC, node_type='execution')
         hop = make_instance('hop-1', node_type='hop')
         hybrid = make_instance('hybrid-1', node_type='hybrid')
-        assert gate_lost_instances([control, execution, hop, hybrid], mesh_ready=False) == [execution, hop]
+        assert gate_lost_instances([control, execution, hop, hybrid], mesh_ready=lambda: False) == [execution, hop]
+
+    def test_mesh_is_not_checked_when_nothing_is_lost(self):
+        def mesh_ready():
+            raise AssertionError('mesh checked with nothing lost')
+
+        assert gate_lost_instances([], mesh_ready) == []
 
 
 class TestLostInstanceDecisions:
