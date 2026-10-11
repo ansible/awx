@@ -86,7 +86,7 @@ from awx.main.utils.common import (
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
-from awx.main.utils.update_model import update_model
+from awx.main.utils.update_model import NotOwner, update_model
 
 # Django flags
 from flags.state import flag_enabled
@@ -204,16 +204,19 @@ def dispatch_waiting_jobs(binder):
         UnifiedJob.objects.filter(pk=uj.pk, status='waiting').update(status='running', start_args='')
 
 
-def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None):
+def _finalize_job_run(model, pk, runner_callback, status, extra_fields=None, owner_task_id=None):
     """Commit terminal status, trigger notifications, and emit websocket status.
 
     Shared by BaseTask.run() (normal path) and adoption (reattach_to_work_unit path).
     Uses duck typing on the instance to schedule dependent task/workflow managers.
+
+    With owner_task_id, nothing is written and NotOwner is raised if another task has
+    taken the job over (adoption records its own task id in celery_task_id).
     """
     all_fields = runner_callback.get_delayed_update_fields()
     if extra_fields:
         all_fields.update(extra_fields)
-    instance = update_model(model, pk, status=status, select_for_update=True, **all_fields)
+    instance = update_model(model, pk, status=status, select_for_update=True, owner_task_id=owner_task_id, **all_fields)
     if not instance:
         return None
     if (instance.host_status_counts is not None) or (not runner_callback.wrapup_event_dispatched):
@@ -673,6 +676,9 @@ class BaseTask(object):
             return
 
         self.instance.websocket_emit_status("running")
+        # The task id this run was dispatched under. If adoption records a different one,
+        # this run no longer owns the job and must not write its final status.
+        owner_task_id = self.instance.celery_task_id or None
         status, rc = 'error', None
         self.runner_callback.event_ct = 0
 
@@ -853,11 +859,17 @@ class BaseTask(object):
             logger.exception('{} Post run hook errored.'.format(self.instance.log_format))
 
         self.private_data_dir = private_data_dir
+        release_work = True
         try:
-            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
+            self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status, owner_task_id=owner_task_id)
+        except NotOwner as exc:
+            # Another task adopted this job while it ran; its final status and work unit are theirs.
+            logger.warning(f'{self.instance.log_format} was taken over by task {exc.current_task_id}; not writing status {status} or releasing its work unit')
+            release_work = False
+            return
         finally:
             # Guarantee work unit release even if finalization throws
-            if receptor_job and getattr(receptor_job, 'work', None):
+            if release_work and receptor_job and getattr(receptor_job, 'work', None):
                 try:
                     receptor_job._receptor_release_work(receptor_job.work, status)
                 except Exception:
