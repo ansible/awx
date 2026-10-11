@@ -828,8 +828,7 @@ def _heartbeat_instance_management():
             logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
             return None, None, None, None
 
-    if lost_instances:
-        lost_instances = gate_lost_instances(lost_instances, _mesh_all_ready_nodes_visible(mesh_status))
+    lost_instances = gate_lost_instances(lost_instances, lambda: _mesh_all_ready_nodes_visible(mesh_status))
 
     return this_inst, instance_list, lost_instances, ctl
 
