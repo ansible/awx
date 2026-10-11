@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from awx.main.tasks.adoption_decisions import JobAction
 from awx.main.tasks.system import (
     CleanupImagesAndFiles,
     execution_node_health_check,
@@ -1385,3 +1386,35 @@ def test_finalize_job_run_inventory_update_exception_logged(me_inst):
         with patch('awx.main.tasks.jobs.logger') as mock_logger:
             _finalize_job_run(Job, job.pk, callback, 'successful')
             mock_logger.exception.assert_called()
+
+
+@pytest.mark.django_db
+def test_lost_instance_job_not_marked_for_reaping_is_left_running(settings):
+    """Only jobs the decision says to reap are reaped; AAP-89602 will return ADOPT here."""
+    settings.AWX_AUTO_DEPROVISION_INSTANCES = False
+    lost = Instance.objects.create(hostname='lost-node', node_type='control', node_state='ready')
+    job = Job.objects.create(controller_node='lost-node', status='running', work_unit_id='unit-1')
+
+    with patch('awx.main.tasks.system.lost_instance_job_action', return_value=JobAction.ADOPT), patch('awx.main.tasks.system.reaper') as mock_reaper:
+        _reap_and_mark_lost_instance(lost)
+
+    mock_reaper.reap_job.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'running'
+
+
+@pytest.mark.django_db
+def test_heartbeat_job_the_decision_skips_is_neither_adopted_nor_reaped(me_inst):
+    job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id='unit-1', started=now() - timedelta(minutes=1))
+
+    with (
+        patch('awx.main.tasks.system.running_job_action', return_value=JobAction.SKIP),
+        patch('awx.main.tasks.system.adopt_job_async') as mock_adopt,
+        patch('awx.main.tasks.system.reaper') as mock_reaper,
+    ):
+        _process_running_jobs(me_inst, ['other-task'], now())
+
+    mock_adopt.apply_async.assert_not_called()
+    mock_reaper.reap_job.assert_not_called()
+    job.refresh_from_db()
+    assert job.status == 'running'
