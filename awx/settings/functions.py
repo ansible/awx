@@ -1,7 +1,8 @@
 import os
+import sys
 from ansible_base.lib.dynamic_config import load_python_file_with_injected_context
 from dynaconf import Dynaconf
-from .application_name import get_application_name
+from .application_name import get_application_name, get_service_name
 
 
 def merge_application_name(settings):
@@ -45,6 +46,36 @@ def merge_statement_timeout(settings):
     value = f"{existing} {new_opt}".strip() if existing else new_opt
 
     return {"DATABASES__default__OPTIONS__options": value}
+
+
+OBSERVABILITY_APP = 'ansible_base.observability'
+
+
+def observability_service_name(argv=None):
+    """The OpenTelemetry service.name of this process, from the same guess as the database application name
+    (application_name.get_service_name): 'awx-uwsgi', 'awx-daphne', 'awx-dispatcher' (awx-manage run_dispatcher),
+    'awx-callback-receiver', 'awx-migrate' (awx-manage migrate), else 'awx'."""
+    name = get_service_name(sys.argv if argv is None else argv)
+    name = os.path.basename(name or '').replace('_', '-')
+    return f'awx-{name}' if name and not name.startswith('-') else 'awx'
+
+
+def merge_observability(settings, argv=None):
+    """Return the settings that turn on django-ansible-base's observability app when
+    ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT is set, else {}.
+
+    Its AppConfig.ready() calls ansible_base.observability.setup_observability(), which instruments Django, psycopg,
+    requests and logging for this process (log records then carry trace and span ids). DAB's ObservabilityMiddleware
+    is not added: awx already sets X-Request-ID (django_guid) and X-API-Total-Time (TimingMiddleware)."""
+    if not settings.get("ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT"):
+        return {}
+    data = {}
+    installed = list(settings.get("INSTALLED_APPS", []))
+    if OBSERVABILITY_APP not in installed:
+        data["INSTALLED_APPS"] = installed + [OBSERVABILITY_APP]
+    if not settings.get("ANSIBLE_OBSERVABILITY_SERVICE_NAME"):
+        data["ANSIBLE_OBSERVABILITY_SERVICE_NAME"] = observability_service_name(argv)
+    return data
 
 
 def add_backwards_compatibility():

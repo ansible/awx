@@ -12,6 +12,7 @@ from ansible_base.lib.dynamic_config import (
 from .functions import (
     assert_production_settings,
     merge_application_name,
+    merge_observability,
     merge_statement_timeout,
     add_backwards_compatibility,
     load_extra_development_files,
@@ -83,6 +84,13 @@ DYNACONF.update(
     merge_statement_timeout(DYNACONF),
     loader_identifier="awx.settings:merge_statement_timeout",
     merge=True,
+)
+
+# Opt-in OpenTelemetry (ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT), after all custom settings are loaded
+DYNACONF.update(
+    merge_observability(DYNACONF),
+    loader_identifier="awx.settings:merge_observability",
+    merge=False,  # INSTALLED_APPS is replaced by the full list, never appended to
 )
 
 # Update django.conf.settings with DYNACONF values
