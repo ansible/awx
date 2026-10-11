@@ -132,7 +132,6 @@ django==5.2.17
     #   django-crum
     #   django-extensions
     #   django-flags
-    #   django-guid
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
@@ -151,8 +150,6 @@ django-flags==5.1.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
-django-guid==3.5.2
-    # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==4.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.4.0
@@ -385,7 +382,6 @@ opentelemetry-util-http==0.58b0
 packaging==25.0
     # via
     #   ansible-runner
-    #   django-guid
     #   opentelemetry-instrumentation
     #   setuptools-scm
     #   wheel
