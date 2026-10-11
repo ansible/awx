@@ -117,6 +117,9 @@ class FakeReceptorWork(ReceptorWork):
         self._unit(unit_id)
         del self.units[unit_id]
 
+    def close(self):
+        self.calls.append(('close',))
+
 
 class RecordingDispatcher:
     """Collects callback-receiver messages instead of sending them to Redis."""
