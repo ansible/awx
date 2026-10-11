@@ -903,6 +903,15 @@ RECEPTOR_KEEP_WORK_ON_ERROR = False
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
 
+# OpenTelemetry tracing and logs through django-ansible-base's observability app (opt-in).
+# Set ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT (an OTLP gRPC endpoint, e.g. 'http://collector:4317') to enable it:
+# 'ansible_base.observability' is then added to INSTALLED_APPS (awx/settings/functions.py:merge_observability) and
+# every Django process traces its requests, database queries and outgoing HTTP calls, and exports its log records
+# carrying their trace and span ids. Leave the OTLPHandler log aggregator off when this is on (both would export logs).
+ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT = None
+# None: named after the process, e.g. 'awx-uwsgi', 'awx-daphne', 'awx-dispatcher' (functions.py:observability_service_name)
+ANSIBLE_OBSERVABILITY_SERVICE_NAME = None
+
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
     'ansible_base.lib.middleware.logging.log_request.LogTracebackMiddleware',
