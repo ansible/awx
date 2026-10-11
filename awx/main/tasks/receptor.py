@@ -201,7 +201,7 @@ class ReceptorWork:
 
     def results(self, unit_id, startpos=None):
         """Return (socket, file) streaming the unit's ansible-runner output."""
-        kwargs = dict(return_socket=True, return_sockfile=True)
+        kwargs = {'return_socket': True, 'return_sockfile': True}
         if startpos is not None:
             kwargs['startpos'] = startpos
         return self.receptor_ctl.get_work_results(unit_id, **kwargs)
