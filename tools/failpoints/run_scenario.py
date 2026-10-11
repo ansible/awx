@@ -6750,21 +6750,24 @@ def scenario_mixed_versions(containers, args):
         raise SystemExit(f'missing devel worktree {src}')
     m = {'variant': args.variant, 'iterations': args.iterations}
     orig = supervisor_env_wrap(True)
-    node_env('awx-1', ['PYTHONPATH=/awx_devel/.fp/devel-src'])
+    # PYTHONPATH alone does not win over the editable install: a sitecustomize in devel-boot puts
+    # the worktree first on sys.path (awx-manage's own sys.path[0] is /usr/local/bin, not the cwd).
+    boot = os.path.join(FP_DIR, 'devel-boot')
+    os.makedirs(boot, exist_ok=True)
+    with open(os.path.join(boot, 'sitecustomize.py'), 'w') as fh:
+        fh.write('import sys\n\nsys.path.insert(0, "/awx_devel/.fp/devel-src")\n')
+    node_env('awx-1', ['PYTHONPATH=/awx_devel/.fp/devel-boot'])
     try:
         supervisor_apply(containers)
         time.sleep(20)
+        # Which code the restarted processes import: the devel registry has no heartbeat.force_lost.
         m['awx1_code'] = run(
-            [
-                'docker',
-                'exec',
-                c0,
-                'sh',
-                '-c',
-                'for p in $(pgrep -f "awx-manage (dispatcherd|run_callback_receiver)"); do tr "\\0" "\\n" < /proc/$p/environ | grep ^PYTHONPATH; done',
-            ],
-            check=False,
-        ).stdout.split()
+            ['docker', 'exec', '-w', '/tmp', c0, 'sh', '-c', '. /awx_devel/.fp/env-awx-1; awx-manage failpoint registry | grep -c force_lost'], check=False
+        ).stdout.strip()
+        envs = 'for p in $(pgrep -f "awx-manage (dispatcherd|run_callback_receiver)"); do tr "\\0" "\\n" < /proc/$p/environ | grep ^PYTHONPATH; done'
+        m['awx1_env'] = run(['docker', 'exec', c0, 'sh', '-c', envs], check=False).stdout.split()
+        if m['awx1_code'] != '0' or not m['awx1_env']:
+            raise SystemExit(f"awx-1 is not running devel code: {m['awx1_code']!r} {m['awx1_env']!r}")
         manage(c2, 'failpoint', 'disarm', '--all')
         manage(c2, 'failpoint', 'clear-hits')
         jt = setup(containers, 'failpoint chatty', 'chatty.yml', {'iterations': args.iterations})
