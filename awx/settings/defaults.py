@@ -350,7 +350,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'polymorphic',
-    'django_guid',
     'corsheaders',
     'awx.conf',
     'awx.main',
@@ -913,10 +912,14 @@ ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT = None
 ANSIBLE_OBSERVABILITY_SERVICE_NAME = None
 
 MIDDLEWARE = [
-    'django_guid.middleware.guid_middleware',
+    # X-API-Request-Id <-> X-Request-ID, then X-Request-ID (ansible_base.lib.logging.context.trace_id_var, the `guid` of
+    # every log record) and X-API-Total-Time from django-ansible-base, with AWX_REQUEST_PROFILE and the performance log
+    # wrapped around them
+    'awx.main.middleware.RequestIdHeaderMiddleware',
+    'awx.main.middleware.TimingMiddleware',
+    'ansible_base.lib.middleware.observability.ObservabilityMiddleware',
     'ansible_base.lib.middleware.logging.log_request.LogTracebackMiddleware',
     'awx.main.middleware.SettingsCacheMiddleware',
-    'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -960,8 +963,6 @@ BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
 # How often should web instances advertise themselves?
 BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
-
-DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'

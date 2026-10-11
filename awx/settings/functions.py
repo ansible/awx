@@ -67,7 +67,7 @@ def merge_observability(settings, argv=None):
 
     Its AppConfig.ready() calls ansible_base.observability.setup_observability(), which instruments Django, psycopg,
     requests and logging for this process (log records then carry trace and span ids). DAB's ObservabilityMiddleware
-    is not added: awx already sets X-Request-ID (django_guid) and X-API-Total-Time (TimingMiddleware)."""
+    (X-Request-ID, X-API-Total-Time) is in MIDDLEWARE whether or not this is on."""
     if not settings.get("ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT"):
         return {}
     data = {}
