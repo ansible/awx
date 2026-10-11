@@ -118,13 +118,13 @@ def test_reap_is_recorded_in_the_activity_stream():
 # ── Files left on disk ────────────────────────────────────────────────────────
 
 
-@pytest.mark.xfail(strict=True, reason='AAP-96852: a dead controller\'s job files stay on disk after it returns')
+@pytest.mark.xfail(strict=True, reason='AAP-96852: a resumed job\'s original private data directory stays on disk after it ends')
 @pytest.mark.django_db
 def test_resumed_job_removes_its_original_private_data_dir(me_inst, settings):
     # 5.20 Credentials left on disk. The job's private data directory from before the
     # restart holds its inventory and extra variables. Adoption works in a new directory
-    # and removes only that one, so the original stays until periodic cleanup's grace
-    # period (60 minutes by default) has passed.
+    # and removes only that one, so the original stays until cleanup_images_and_files,
+    # which runs every 3 hours, finds it older than 60 minutes.
     job = Job.objects.create(controller_node=me_inst.hostname, status='running', work_unit_id=UNIT)
     original = os.path.join(settings.AWX_ISOLATION_BASE_PATH, f'awx_{job.pk}_before_restart')
     os.makedirs(os.path.join(original, 'env'))
