@@ -53,11 +53,12 @@ OBSERVABILITY_APP = 'ansible_base.observability'
 
 def observability_service_name(argv=None):
     """The OpenTelemetry service.name of this process, from the same guess as the database application name
-    (application_name.get_service_name): 'awx-uwsgi', 'awx-daphne', 'awx-dispatcher' (awx-manage run_dispatcher),
-    'awx-callback-receiver', 'awx-migrate' (awx-manage migrate), else 'awx'."""
+    (application_name.get_service_name), in the gateway's style (gateway-uwsgi): 'controller-uwsgi', 'controller-daphne',
+    'controller-dispatcher' (awx-manage run_dispatcher), 'controller-callback-receiver', 'controller-wsrelay',
+    'controller-migrate' (awx-manage migrate), else 'controller'."""
     name = get_service_name(sys.argv if argv is None else argv)
     name = os.path.basename(name or '').replace('_', '-')
-    return f'awx-{name}' if name and not name.startswith('-') else 'awx'
+    return f'controller-{name}' if name and not name.startswith('-') else 'controller'
 
 
 def merge_observability(settings, argv=None):

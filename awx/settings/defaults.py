@@ -909,7 +909,7 @@ RECEPTOR_LOG_LEVEL = 'info'
 # every Django process traces its requests, database queries and outgoing HTTP calls, and exports its log records
 # carrying their trace and span ids. Leave the OTLPHandler log aggregator off when this is on (both would export logs).
 ANSIBLE_OBSERVABILITY_OTLP_ENDPOINT = None
-# None: named after the process, e.g. 'awx-uwsgi', 'awx-daphne', 'awx-dispatcher' (functions.py:observability_service_name)
+# None: named after the process, e.g. 'controller-uwsgi', 'controller-daphne', 'controller-dispatcher' (functions.py:observability_service_name)
 ANSIBLE_OBSERVABILITY_SERVICE_NAME = None
 
 MIDDLEWARE = [
