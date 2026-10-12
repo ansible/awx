@@ -216,6 +216,43 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
     assert expected_config in tmpl
 
 
+def test_rsyslog_conf_relp_uses_the_configured_port_and_timeout():
+    mock_settings, _ = _mock_logging_defaults()
+
+    setattr(mock_settings, 'LOGGING', getattr(settings, 'LOGGING'))
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'relp.example.com')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 2514)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', 'relp')
+    setattr(mock_settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 11)
+
+    lines = construct_rsyslog_conf_template(mock_settings).split('\n')
+    actions = [line for line in lines if line.startswith('action(')]
+    assert lines.count('module(load="omrelp")') == 1
+    assert len(actions) == 1
+    assert lines.index('module(load="omrelp")') < lines.index(actions[0])
+    assert actions[0].startswith('action(type="omrelp" target="relp.example.com" port="2514" ')
+    assert 'action.resumeInterval="11"' in actions[0]
+    assert 'protocol=' not in actions[0]  # omfwd's parameter; omrelp has none
+
+
+@pytest.mark.parametrize('port', [None, ''])
+def test_rsyslog_conf_relp_without_a_port_sends_nowhere(port):
+    mock_settings, _ = _mock_logging_defaults()
+
+    setattr(mock_settings, 'LOGGING', getattr(settings, 'LOGGING'))
+    setattr(mock_settings, 'LOG_AGGREGATOR_ENABLED', True)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TYPE', 'other')
+    setattr(mock_settings, 'LOG_AGGREGATOR_HOST', 'relp.example.com')
+    setattr(mock_settings, 'LOG_AGGREGATOR_PORT', port)
+    setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', 'relp')
+
+    tmpl = construct_rsyslog_conf_template(mock_settings)
+    assert 'omrelp' not in tmpl
+    assert tmpl.endswith('action(type="omfile" file="/dev/null")')
+
+
 def test_splunk_auth():
     mock_settings, _ = _mock_logging_defaults()
     # Set test settings

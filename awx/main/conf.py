@@ -744,7 +744,7 @@ register(
     field_class=fields.IntegerField,
     default=5,
     label=_('TCP Connection Timeout'),
-    help_text=_('Number of seconds for a TCP connection to external log aggregator to timeout. Applies to HTTPS and TCP log aggregator protocols.'),
+    help_text=_('Number of seconds for a TCP connection to external log aggregator to timeout. Applies to HTTPS, TCP and RELP log aggregator protocols.'),
     category=_('Logging'),
     category_slug='logging',
     unit=_('seconds'),

@@ -3,6 +3,9 @@
 # All Rights Reserved.
 
 # Python
+import socket
+from unittest import mock
+
 import pytest
 
 # AWX
@@ -193,3 +196,30 @@ def test_logging_aggregator_connection_test_valid(put, post, admin):
     # "Test" the logger
     url = reverse('api:setting_logging_test')
     post(url, {}, user=admin, expect=202)
+
+
+@pytest.mark.django_db
+def test_logging_aggregator_connection_test_relp(put, post, admin):
+    # RELP runs over TCP, so the connectivity test needs a port and connects to it
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.bind(('127.0.0.1', 0))
+    listener.listen(1)
+    try:
+        _, mock_settings = _mock_logging_defaults()
+        mock_settings['LOG_AGGREGATOR_ENABLED'] = True
+        mock_settings['LOG_AGGREGATOR_TYPE'] = 'other'
+        mock_settings['LOG_AGGREGATOR_HOST'] = '127.0.0.1'
+        mock_settings['LOG_AGGREGATOR_PROTOCOL'] = 'relp'
+        url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+        test_url = reverse('api:setting_logging_test')
+        put(url, data=mock_settings, user=admin, expect=200)
+        # the view validates the written rsyslog.conf first; that file is not under test here
+        with mock.patch('awx.conf.views.subprocess.check_output'):
+            resp = post(test_url, {}, user=admin, expect=400)
+            assert resp.data['error'] == 'Port required for relp'
+
+            mock_settings['LOG_AGGREGATOR_PORT'] = listener.getsockname()[1]
+            put(url, data=mock_settings, user=admin, expect=200)
+            post(test_url, {}, user=admin, expect=202)
+    finally:
+        listener.close()
