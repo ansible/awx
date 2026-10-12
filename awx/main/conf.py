@@ -808,11 +808,14 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+# impstats stores the interval in a C int: 2147483648 wraps negative and rsyslogd writes statistics
+# as fast as it can, 4294967296 wraps to 0, which it refuses. rsyslogd -N1 passes both.
 register(
     'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL',
     field_class=fields.IntegerField,
     default=0,
     min_value=0,
+    max_value=2147483647,
     label=_('Interval (in seconds) between rsyslogd queue statistics'),
     help_text=_(
         'When greater than 0, rsyslogd writes its counters to its standard output, '

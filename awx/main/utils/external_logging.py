@@ -56,11 +56,12 @@ def construct_rsyslog_conf_template(settings=settings):
     )
     if enabled and stats_interval > 0:
         # impstats counters (queue size, discarded.nf, discarded.full) go to rsyslogd's stdout, the
-        # container log. Their own ruleset keeps them out of the external action in the default ruleset.
+        # container log. Their own ruleset keeps them out of the external action in the default ruleset,
+        # and its Direct queue keeps them off the main queue, which stalls while the action queue is full.
         parts.extend(
             [
                 f'module(load="impstats" interval="{stats_interval}" format="json" resetCounters="off" ruleset="awx_queue_stats")',
-                'ruleset(name="awx_queue_stats") { action(type="omfile" file="/dev/stdout") }',
+                'ruleset(name="awx_queue_stats" queue.type="Direct") { action(type="omfile" file="/dev/stdout") }',
             ]
         )
 

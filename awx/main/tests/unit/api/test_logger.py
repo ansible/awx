@@ -202,20 +202,22 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
     assert expected_config in tmpl
 
 
-STATS_MODULE = 'module(load="impstats" interval="60" format="json" resetCounters="off" ruleset="awx_queue_stats")'
-STATS_RULESET = 'ruleset(name="awx_queue_stats") { action(type="omfile" file="/dev/stdout") }'
+STATS_MODULE = 'module(load="impstats" interval="{}" format="json" resetCounters="off" ruleset="awx_queue_stats")'
+STATS_RULESET = 'ruleset(name="awx_queue_stats" queue.type="Direct") { action(type="omfile" file="/dev/stdout") }'
 
 
 @pytest.mark.parametrize(
-    'enabled, stats_interval, expect_stats',
+    'enabled, stats_interval, expected_interval',
     [
-        (True, None, False),  # registered default (0): no impstats, configuration unchanged
-        (True, 0, False),
-        (True, 60, True),
-        (False, 60, False),  # no external action, so no queue to report on
+        (True, None, None),  # registered default (0): no impstats, configuration unchanged
+        (True, 0, None),
+        (True, 60, 60),
+        (True, 1, 1),
+        (True, 2147483647, 2147483647),  # the largest impstats can hold
+        (False, 60, None),  # no external action, so no queue to report on
     ],
 )
-def test_rsyslog_conf_queue_stats(enabled, stats_interval, expect_stats):
+def test_rsyslog_conf_queue_stats(enabled, stats_interval, expected_interval):
     mock_settings, _ = _mock_logging_defaults()
 
     logging_defaults = getattr(settings, 'LOGGING')
@@ -229,8 +231,8 @@ def test_rsyslog_conf_queue_stats(enabled, stats_interval, expect_stats):
         setattr(mock_settings, 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL', stats_interval)
 
     lines = construct_rsyslog_conf_template(mock_settings).split('\n')
-    assert (STATS_MODULE in lines) is expect_stats
-    assert (STATS_RULESET in lines) is expect_stats
+    stats = [line for line in lines if 'impstats' in line or 'awx_queue_stats' in line]
+    assert stats == ([] if expected_interval is None else [STATS_MODULE.format(expected_interval), STATS_RULESET])
 
 
 def test_splunk_auth():
