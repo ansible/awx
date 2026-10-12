@@ -277,6 +277,10 @@ class Project(UnifiedJobTemplate, ProjectOptions, CustomVirtualEnvMixin, Related
         default=False,
         help_text=_('Update the project when a job is launched that uses the project.'),
     )
+    galaxy_update_on_launch = models.BooleanField(
+        default=False,
+        help_text=_('Bypass the ansible-galaxy response cache to fetch latest collection metadata when a job is launched that uses the project.'),
+    )
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
