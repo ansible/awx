@@ -154,6 +154,26 @@ def populate_claims_for_workload(unified_job) -> dict:
     if 'id' in launched_by:
         claims[AutomationControllerJobScope.CLAIM_LAUNCHED_BY_ID] = launched_by['id']
 
+    # Build hierarchical groups list for Vault groups_claim integration.
+    # Each level is included only when the corresponding object exists,
+    # using tagged prefixes (e.g. "org:", "project:") to prevent
+    # in-band separator impersonation.
+    groups = []
+    org_name = claims.get(AutomationControllerJobScope.CLAIM_ORGANIZATION_NAME)
+    if org_name is not None:
+        groups.append(f"org:{org_name}")
+        project_name = claims.get(AutomationControllerJobScope.CLAIM_PROJECT_NAME)
+        if project_name is not None:
+            groups.append(f"org:{org_name}/project:{project_name}")
+            jt_name = claims.get(AutomationControllerJobScope.CLAIM_JOB_TEMPLATE_NAME)
+            if jt_name is not None:
+                groups.append(f"org:{org_name}/project:{project_name}/jt:{jt_name}")
+                playbook_name = claims.get(AutomationControllerJobScope.CLAIM_PLAYBOOK_NAME)
+                if playbook_name is not None:
+                    groups.append(f"org:{org_name}/project:{project_name}/jt:{jt_name}/playbook:{playbook_name}")
+    if groups:
+        claims[AutomationControllerJobScope.CLAIM_GROUPS] = groups
+
     return claims
 
 
