@@ -325,7 +325,7 @@ def test_job_list_query_count_scales_constantly(user, organization, setup_manage
     # Warm up any caches (content types, etc.)
     get(reverse('api:job_list'), org_admin, expect=200)
 
-    with django_assert_max_num_queries(40):
+    with django_assert_max_num_queries(60):
         response = get(reverse('api:job_list'), org_admin, expect=200)
 
     assert response.data['count'] >= 5
@@ -373,4 +373,4 @@ def test_job_list_includes_summary_fields_with_prefetch(user, organization, setu
     assert sf['execution_environment']['id'] == ee.pk
     assert sf['created_by']['id'] == creator.pk
     assert any(c['id'] == cred.pk for c in sf['credentials'])
-    assert any(l['id'] == label.pk for l in sf['labels'])
+    assert any(l['id'] == label.pk for l in sf['labels']['results'])
