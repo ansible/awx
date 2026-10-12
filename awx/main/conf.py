@@ -766,7 +766,10 @@ register(
     'LOG_AGGREGATOR_TCP_KEEPALIVE_TIME',
     field_class=fields.IntegerField,
     default=120,
+    # Linux rejects TCP_KEEPIDLE, TCP_KEEPINTVL and TCP_KEEPCNT outside these (MAX_TCP_KEEP* in
+    # include/net/tcp.h), and rsyslog then logs "cannot set keepalive ... - ignored" and uses the kernel default.
     min_value=1,
+    max_value=32767,
     label=_('Idle time before the first TCP keepalive probe'),
     help_text=_(
         'Number of seconds a connection to the external log aggregator may be idle '
@@ -784,6 +787,7 @@ register(
     field_class=fields.IntegerField,
     default=30,
     min_value=1,
+    max_value=32767,
     label=_('Interval between TCP keepalive probes'),
     help_text=_(
         'Number of seconds between keepalive probes to the external log aggregator '
@@ -799,6 +803,7 @@ register(
     field_class=fields.IntegerField,
     default=3,
     min_value=1,
+    max_value=127,
     label=_('Number of unanswered TCP keepalive probes before the connection is dropped'),
     help_text=_(
         'Number of unanswered keepalive probes after which the connection to the '

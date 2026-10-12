@@ -205,8 +205,8 @@ def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfil
 @pytest.mark.parametrize(
     'protocol, keepalive, expected, not_expected',
     [
-        # the idle-flow case the keepalives exist for
-        ('tcp', True, 'KeepAlive="on" KeepAlive.Time="120" KeepAlive.Interval="30" KeepAlive.Probes="3"', None),
+        # the idle-flow case the keepalives exist for; non-default values, so a misspelled or ignored setting fails
+        ('tcp', True, 'KeepAlive="on" KeepAlive.Time="7200" KeepAlive.Interval="75" KeepAlive.Probes="9"', None),
         # opt out and the action is what it was before the setting existed
         ('tcp', False, 'template="awx" queue.spoolDirectory="/var/lib/awx"', 'KeepAlive'),
         # UDP has no connection to keep alive, so the parameters are never emitted for it
@@ -224,6 +224,9 @@ def test_rsyslog_conf_tcp_keepalive(protocol, keepalive, expected, not_expected)
     setattr(mock_settings, 'LOG_AGGREGATOR_PORT', 9000)
     setattr(mock_settings, 'LOG_AGGREGATOR_PROTOCOL', protocol)
     setattr(mock_settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE', keepalive)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE_TIME', 7200)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE_INTERVAL', 75)
+    setattr(mock_settings, 'LOG_AGGREGATOR_TCP_KEEPALIVE_PROBES', 9)
 
     tmpl = construct_rsyslog_conf_template(mock_settings)
     assert expected in tmpl
