@@ -865,11 +865,26 @@ class UnifiedJob(
 
         return update_fields
 
-    def _update_parent_instance(self):
+    def _update_parent_instance(self, skip_locked=False):
         parent_instance = self._get_parent_instance()
-        if parent_instance:
+        if not parent_instance:
+            return
+        if skip_locked:
+            with transaction.atomic():
+                locked = type(parent_instance).objects.select_for_update(skip_locked=True).filter(pk=parent_instance.pk).first()
+                if locked is None:
+                    logger.debug(
+                        '%s skipping parent instance update, row locked by another session',
+                        self.log_format,
+                    )
+                    return
+                update_fields = self._update_parent_instance_no_save(locked)
+                if update_fields:
+                    locked.save(update_fields=update_fields)
+        else:
             update_fields = self._update_parent_instance_no_save(parent_instance)
-            parent_instance.save(update_fields=update_fields)
+            if update_fields:
+                parent_instance.save(update_fields=update_fields)
 
     def _set_default_dependencies_processed(self):
         pass
@@ -951,7 +966,7 @@ class UnifiedJob(
             # This dodges lock contention at the expense of the foreign key not being
             # completely correct.
             if getattr(self, 'allow_simultaneous', False):
-                connection.on_commit(self._update_parent_instance)
+                connection.on_commit(lambda: self._update_parent_instance(skip_locked=True))
             else:
                 self._update_parent_instance()
 
