@@ -823,7 +823,10 @@ register(
         'and action, including the external logging action queue\'s current size, '
         'peak size, and cumulative discarded.nf and discarded.full counts. '
         'Equivalent to loading the rsyslogd impstats module. '
-        'The statistics are never sent to the log aggregator. 0 disables them (the default).'
+        'The statistics are never sent to the log aggregator. 0 disables them (the default). '
+        'Only takes effect when external logging is enabled. '
+        'If a drop-in under /var/lib/awx/rsyslog/conf.d already loads impstats, '
+        'that drop-in takes precedence and this setting is ignored.'
     ),
     category=_('Logging'),
     category_slug='logging',

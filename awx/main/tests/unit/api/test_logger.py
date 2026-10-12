@@ -2,6 +2,7 @@ import pytest
 
 from django.conf import settings
 
+from awx.main.utils import external_logging
 from awx.main.utils.external_logging import construct_rsyslog_conf_template
 from awx.main.tests.functional.api.test_settings import _mock_logging_defaults
 
@@ -206,18 +207,14 @@ STATS_MODULE = 'module(load="impstats" interval="{}" format="json" resetCounters
 STATS_RULESET = 'ruleset(name="awx_queue_stats" queue.type="Direct") { action(type="omfile" file="/dev/stdout") }'
 
 
-@pytest.mark.parametrize(
-    'enabled, stats_interval, expected_interval',
-    [
-        (True, None, None),  # registered default (0): no impstats, configuration unchanged
-        (True, 0, None),
-        (True, 60, 60),
-        (True, 1, 1),
-        (True, 2147483647, 2147483647),  # the largest impstats can hold
-        (False, 60, None),  # no external action, so no queue to report on
-    ],
-)
-def test_rsyslog_conf_queue_stats(enabled, stats_interval, expected_interval):
+@pytest.fixture
+def conf_d(tmp_path, monkeypatch):
+    """An empty drop-in directory in place of /var/lib/awx/rsyslog/conf.d."""
+    monkeypatch.setattr(external_logging, 'CONF_D_DIRECTORY', str(tmp_path))
+    return tmp_path
+
+
+def _queue_stats_lines(enabled, stats_interval):
     mock_settings, _ = _mock_logging_defaults()
 
     logging_defaults = getattr(settings, 'LOGGING')
@@ -231,8 +228,93 @@ def test_rsyslog_conf_queue_stats(enabled, stats_interval, expected_interval):
         setattr(mock_settings, 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL', stats_interval)
 
     lines = construct_rsyslog_conf_template(mock_settings).split('\n')
-    stats = [line for line in lines if 'impstats' in line or 'awx_queue_stats' in line]
+    return [line for line in lines if 'impstats' in line or 'awx_queue_stats' in line]
+
+
+@pytest.mark.parametrize(
+    'enabled, stats_interval, expected_interval',
+    [
+        (True, None, None),  # registered default (0): no impstats, configuration unchanged
+        (True, 0, None),
+        (True, 60, 60),
+        (True, 1, 1),
+        (True, 2147483647, 2147483647),  # the largest impstats can hold
+        (False, 60, None),  # no external action, so no queue to report on
+    ],
+)
+def test_rsyslog_conf_queue_stats(conf_d, enabled, stats_interval, expected_interval):
+    stats = _queue_stats_lines(enabled, stats_interval)
     assert stats == ([] if expected_interval is None else [STATS_MODULE.format(expected_interval), STATS_RULESET])
+
+
+@pytest.mark.parametrize(
+    'drop_in',
+    [
+        'module(load="impstats" interval="5" log.syslog="off" log.file="/tmp/impstats.log")',
+        "module ( load = 'impstats' interval='5' )",
+        'module(\n  load="impstats"\n  interval="5"\n)',
+        'module(interval="5" load="impstats")',
+        'module(load="/usr/lib64/rsyslog/impstats.so")',
+        '$ModLoad impstats',
+        '$modload impstats.so  # legacy directives are case-insensitive',
+    ],
+)
+def test_rsyslog_conf_queue_stats_defers_to_a_drop_in(conf_d, caplog, drop_in):
+    # rsyslog refuses a second load of a module, which fails rsyslogd -N1 and the logging test,
+    # so the drop-in's impstats stands and neither our module nor its ruleset is emitted.
+    (conf_d / 'other.conf').write_text('module(load="imfile")\n')
+    (conf_d / 'impstats.conf').write_text(drop_in + '\n')
+
+    with caplog.at_level('WARNING'):
+        stats = _queue_stats_lines(True, 60)
+
+    assert stats == []
+    assert str(conf_d / 'impstats.conf') in caplog.text
+    assert str(conf_d / 'other.conf') not in caplog.text
+    assert 'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL is ignored' in caplog.text
+
+
+@pytest.mark.parametrize(
+    'name, drop_in',
+    [
+        ('impstats.conf', '# module(load="impstats" interval="5")'),
+        ('impstats.conf', '#$ModLoad impstats'),
+        ('impstats.conf', '/*\nmodule(load="impstats" interval="5")\n*/'),
+        ('impstats.conf', 'action(type="omfile" file="/tmp/impstats.log")'),  # names impstats, does not load it
+        ('impstats.conf', 'module(load="impstatsx")'),
+        ('impstats.conf.disabled', 'module(load="impstats" interval="5")'),  # outside the include's *.conf
+    ],
+)
+def test_rsyslog_conf_queue_stats_ignores_drop_ins_that_do_not_load_impstats(conf_d, caplog, name, drop_in):
+    (conf_d / name).write_text(drop_in + '\n')
+
+    with caplog.at_level('WARNING'):
+        stats = _queue_stats_lines(True, 60)
+
+    assert stats == [STATS_MODULE.format(60), STATS_RULESET]
+    assert 'impstats is already loaded' not in caplog.text
+
+
+def test_rsyslog_conf_queue_stats_without_a_conf_d_directory(tmp_path, monkeypatch, caplog):
+    monkeypatch.setattr(external_logging, 'CONF_D_DIRECTORY', str(tmp_path / 'not-created'))
+
+    with caplog.at_level('WARNING'):
+        stats = _queue_stats_lines(True, 60)
+
+    assert stats == [STATS_MODULE.format(60), STATS_RULESET]
+    assert 'impstats is already loaded' not in caplog.text
+
+
+@pytest.mark.parametrize('enabled, stats_interval', [(True, 0), (False, 60)])
+def test_rsyslog_conf_queue_stats_off_says_nothing_about_a_drop_in(conf_d, caplog, enabled, stats_interval):
+    # With the setting off there is no conflict to report.
+    (conf_d / 'impstats.conf').write_text('module(load="impstats" interval="5")\n')
+
+    with caplog.at_level('WARNING'):
+        stats = _queue_stats_lines(enabled, stats_interval)
+
+    assert stats == []
+    assert 'impstats is already loaded' not in caplog.text
 
 
 def test_splunk_auth():

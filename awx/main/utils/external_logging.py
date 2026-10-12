@@ -1,4 +1,7 @@
+import glob
+import logging
 import os
+import re
 import shutil
 import tempfile
 import urllib.parse as urlparse
@@ -7,6 +10,35 @@ from django.conf import settings
 from dispatcherd.publish import task
 
 from awx.main.utils.reload import supervisor_service_command
+
+logger = logging.getLogger('awx.main.utils.external_logging')
+
+# Operator drop-ins, read by the generated config's $IncludeConfig.
+CONF_D_DIRECTORY = '/var/lib/awx/rsyslog/conf.d'
+
+# rsyslog loads a module once per config, so a second impstats load is an error.
+# Quoted strings are matched first so a '#' or '/*' inside one is not taken for a comment.
+_STRINGS_OR_COMMENTS = re.compile(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'|/\*.*?\*/|#[^\n]*', re.DOTALL)
+_IMPSTATS_LOAD = re.compile(
+    r"""\bmodule\s*\([^)]*?\bload\s*=\s*["']?(?:[^"'\s)]*/)?impstats(?:\.so)?["'\s)]"""  # module(load="impstats" ...)
+    r'|^\s*\$ModLoad\s+(?:\S*/)?impstats(?:\.so)?\s*$',  # legacy $ModLoad impstats
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def drop_ins_loading_impstats():
+    """The conf.d drop-ins, as the generated $IncludeConfig reads them, that already load impstats."""
+    found = []
+    for path in sorted(glob.glob(os.path.join(CONF_D_DIRECTORY, '*.conf'))):
+        try:
+            with open(path, errors='replace') as f:
+                text = f.read()
+        except OSError:
+            continue
+        text = _STRINGS_OR_COMMENTS.sub(lambda m: m.group() if m.group()[0] in '"\'' else ' ', text)
+        if _IMPSTATS_LOAD.search(text):
+            found.append(path)
+    return found
 
 
 def construct_rsyslog_conf_template(settings=settings):
@@ -48,16 +80,23 @@ def construct_rsyslog_conf_template(settings=settings):
         [
             '$WorkDirectory /var/lib/awx/rsyslog',
             f'$MaxMessageSize {max_bytes}',
-            '$IncludeConfig /var/lib/awx/rsyslog/conf.d/*.conf',
+            f'$IncludeConfig {CONF_D_DIRECTORY}/*.conf',
             'module(load="imuxsock" SysSock.Use="off")',
             'input(type="imuxsock" Socket="' + settings.LOGGING['handlers']['external_logger']['address'] + '" unlink="on" RateLimit.Burst="0")',
             'template(name="awx" type="string" string="%rawmsg-after-pri%")',
         ]
     )
-    if enabled and stats_interval > 0:
-        # impstats counters (queue size, discarded.nf, discarded.full) go to rsyslogd's stdout, the
-        # container log. Their own ruleset keeps them out of the external action in the default ruleset,
-        # and its Direct queue keeps them off the main queue, which stalls while the action queue is full.
+    # impstats counters (queue size, discarded.nf, discarded.full) go to rsyslogd's stdout, the
+    # container log. Their own ruleset keeps them out of the external action in the default ruleset,
+    # and its Direct queue keeps them off the main queue, which stalls while the action queue is full.
+    # A drop-in that loads impstats wins: loading it again would fail rsyslogd -N1.
+    stats_drop_ins = drop_ins_loading_impstats() if enabled and stats_interval > 0 else []
+    if stats_drop_ins:
+        logger.warning(
+            'impstats is already loaded by %s, so LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL is ignored in favor of that drop-in.',
+            ', '.join(stats_drop_ins),
+        )
+    elif enabled and stats_interval > 0:
         parts.extend(
             [
                 f'module(load="impstats" interval="{stats_interval}" format="json" resetCounters="off" ruleset="awx_queue_stats")',
