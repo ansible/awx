@@ -16,6 +16,7 @@
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
 # galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
+# galaxy_update_on_launch: true/false to bypass ansible-galaxy response cache
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 # gpg_pubkey: the GPG public key to use for validation, when enabled
@@ -242,7 +243,7 @@
 
         - name: Fetch galaxy collections from collections/requirements.(yml/yaml)
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -r {{ req_file }} {{ verbosity }}"
+            cmd: "ansible-galaxy collection install {% if galaxy_update_on_launch | default(false) | bool %}--no-cache {% endif %}-r {{ req_file }} {{ verbosity }}"
           register: galaxy_collection_result
           vars:
             req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
