@@ -36,8 +36,8 @@ def construct_rsyslog_conf_template(settings=settings):
         f'queue.highwaterMark="{int(action_queue_size * 0.75)}"',  # 75% of queue.size
         f'queue.discardMark="{int(action_queue_size * 0.9)}"',  # 90% of queue.size
         # Messages whose severity number is >= this value are discarded once queue.discardMark is
-        # reached. 5 discards notice, info and debug; 8 is rsyslog's own default and discards nothing,
-        # at the cost of blocking the sender for queue.timeoutEnqueue when the queue is full.
+        # reached. 5 discards notice, info and debug; 8 is rsyslog's own default and turns that off.
+        # A full queue drops any message that waits queue.timeoutEnqueue (2 s) for room, whatever this says.
         f'queue.discardSeverity="{discard_severity}"',
     ]
 

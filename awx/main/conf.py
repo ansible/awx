@@ -788,11 +788,14 @@ register(
         'reaches 75% of this number, the queue will start writing to disk '
         '(queue.highWatermark in rsyslog). When it reaches 90% (queue.discardMark), '
         'messages start to be discarded, according to '
-        'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY.'
+        'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY. When it is full, every new '
+        'message, whatever its severity, is dropped if no room frees up within 2 seconds.'
     ),
     category=_('Logging'),
     category_slug='logging',
 )
+# rsyslog range-checks nothing here (9 and up act as 8, below 0 as 0) and decodes a name with its
+# facility table (runtime/queue.c), so "debug" or "info" discards everything. Hence an integer 0-8.
 register(
     'LOG_AGGREGATOR_ACTION_QUEUE_DISCARD_SEVERITY',
     field_class=fields.IntegerField,
@@ -802,16 +805,17 @@ register(
     label=_('Severity at which messages are discarded when the log action queue is nearly full'),
     help_text=_(
         'Messages whose syslog severity number is greater than or equal to this value '
-        'are discarded once the action queue reaches 90% of '
-        'LOG_AGGREGATOR_ACTION_QUEUE_SIZE. Severity numbers run from 0 (EMERGENCY) to '
-        '7 (DEBUG), so a higher value here discards fewer messages (8 discards none). Equivalent to the '
-        'rsyslogd queue.discardSeverity setting on the action. '
-        'Discarding is silent: no error, warning or counter records that a message was '
-        'dropped, and every message AWX emits is INFO (6) or less severe, so the '
+        'are discarded while the action queue holds 90% or more of '
+        'LOG_AGGREGATOR_ACTION_QUEUE_SIZE (queue.discardMark). Severity numbers run from '
+        '0 (EMERGENCY) to 7 (DEBUG), so a higher value here discards fewer messages, and 8, '
+        'the rsyslog default, turns this discarding off. Equivalent to the rsyslogd '
+        'queue.discardSeverity setting on the action. '
+        'Every message AWX emits is INFO (6) or less severe, so the '
         'default of 5 permits all of them to be discarded. '
-        'Set this to 8, the rsyslog default, to discard nothing; rsyslog then blocks '
-        'the sender for queue.timeoutEnqueue (2 seconds) when the queue is full and '
-        'drops the message only if it has still not drained.'
+        'This setting does not apply once the queue is completely full: each new message, '
+        'whatever its severity, then waits up to 2 seconds (queue.timeoutEnqueue) for room '
+        'and is dropped if none frees up. So 8 prevents loss only while the queue has room. '
+        'Neither kind of discard is logged as an error or a warning.'
     ),
     category=_('Logging'),
     category_slug='logging',
