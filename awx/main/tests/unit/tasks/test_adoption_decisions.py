@@ -53,60 +53,41 @@ def heartbeat_settings(settings):
 
 
 class TestFindLostInstances:
-    def test_peer_within_grace_period_is_not_lost(self, heartbeat_settings):
-        peer = make_instance(PEER, seconds_since_seen=119)
-        lost, remaining = find_lost_instances([peer], ME, NOW)
-        assert lost == []
-        assert remaining == [peer]
-
-    def test_peer_past_grace_period_is_lost(self, heartbeat_settings):
-        peer = make_instance(PEER, seconds_since_seen=121)
-        lost, remaining = find_lost_instances([peer], ME, NOW)
-        assert lost == [peer]
-        assert remaining == []
-
-    def test_peer_never_seen_is_lost(self, heartbeat_settings):
-        peer = make_instance(PEER, seconds_since_seen=None)
-        lost, _ = find_lost_instances([peer], ME, NOW)
-        assert lost == [peer]
-
-    def test_this_instance_is_never_lost_here(self, heartbeat_settings):
-        me = make_instance(ME, seconds_since_seen=10_000)
-        lost, remaining = find_lost_instances([me], ME, NOW)
-        assert lost == []
-        assert remaining == [me]
-
-    def test_execution_node_gets_advertisement_period_added(self, heartbeat_settings):
-        node = make_instance(EXEC, node_type='execution', seconds_since_seen=150)
-        lost, _ = find_lost_instances([node], ME, NOW)
-        assert lost == []
-
-    def test_slow_controller_is_judged_lost_while_still_running(self, heartbeat_settings):
-        # A controller whose heartbeat is delayed past the grace period looks exactly like
-        # a dead one. The decision has only last_seen to go on.
-        slow = make_instance(PEER, seconds_since_seen=125)
-        lost, _ = find_lost_instances([slow], ME, NOW)
-        assert lost == [slow]
-
-    def test_clock_skew_on_the_judge_makes_a_healthy_peer_look_lost(self, heartbeat_settings):
-        # The peer heartbeated just now by its own clock, but this instance's clock runs
-        # five minutes ahead.
-        peer = make_instance(PEER, seconds_since_seen=0)
-        lost, _ = find_lost_instances([peer], ME, NOW + timedelta(minutes=5))
-        assert lost == [peer]
+    @pytest.mark.parametrize(
+        'hostname, node_type, seconds_since_seen, judge_ahead, expected_lost',
+        [
+            pytest.param(PEER, 'control', 119, 0, False, id='peer-within-grace-period'),
+            pytest.param(PEER, 'control', 121, 0, True, id='peer-past-grace-period'),
+            pytest.param(PEER, 'control', None, 0, True, id='peer-never-seen'),
+            pytest.param(ME, 'control', 10_000, 0, False, id='this-instance-is-never-lost-here'),
+            pytest.param(EXEC, 'execution', 150, 0, False, id='execution-node-gets-advertisement-period-added'),
+            # A controller whose heartbeat is delayed past the grace period looks exactly like
+            # a dead one. The decision has only last_seen to go on.
+            pytest.param(PEER, 'control', 125, 0, True, id='slow-controller-is-judged-lost-while-still-running'),
+            # The peer heartbeated just now by its own clock, but this instance's clock runs
+            # five minutes ahead.
+            pytest.param(PEER, 'control', 0, 300, True, id='clock-skew-on-the-judge-makes-a-healthy-peer-look-lost'),
+        ],
+    )
+    def test_lost(self, heartbeat_settings, hostname, node_type, seconds_since_seen, judge_ahead, expected_lost):
+        inst = make_instance(hostname, node_type=node_type, seconds_since_seen=seconds_since_seen)
+        lost, remaining = find_lost_instances([inst], ME, NOW + timedelta(seconds=judge_ahead))
+        assert lost == ([inst] if expected_lost else [])
+        assert remaining == ([] if expected_lost else [inst])
 
 
 class TestGateLostInstances:
-    def test_mesh_ready_handles_every_lost_instance(self):
-        lost = [make_instance(PEER), make_instance(EXEC, node_type='execution'), make_instance('hop-1', node_type='hop')]
-        assert gate_lost_instances(lost, mesh_ready=lambda: True) == lost
-
-    def test_mesh_not_ready_defers_only_control_nodes(self):
-        control = make_instance(PEER)
-        execution = make_instance(EXEC, node_type='execution')
-        hop = make_instance('hop-1', node_type='hop')
-        hybrid = make_instance('hybrid-1', node_type='hybrid')
-        assert gate_lost_instances([control, execution, hop, hybrid], mesh_ready=lambda: False) == [execution, hop]
+    @pytest.mark.parametrize(
+        'mesh_ready, handled_node_types',
+        [
+            pytest.param(True, ['control', 'execution', 'hop', 'hybrid'], id='mesh-ready-handles-every-lost-instance'),
+            pytest.param(False, ['execution', 'hop'], id='mesh-not-ready-defers-only-control-nodes'),
+        ],
+    )
+    def test_gate(self, mesh_ready, handled_node_types):
+        lost = [make_instance(f'{node_type}-1', node_type=node_type) for node_type in ('control', 'execution', 'hop', 'hybrid')]
+        handled = gate_lost_instances(lost, mesh_ready=lambda: mesh_ready)
+        assert [inst.node_type for inst in handled] == handled_node_types
 
     def test_mesh_is_not_checked_when_nothing_is_lost(self):
         def mesh_ready():
@@ -138,76 +119,68 @@ class TestLostInstanceDecisions:
 
 
 class TestStartupJobAction:
-    def test_dispatched_job_is_adopted(self):
-        assert startup_job_action(make_job(work_unit_id='unit-1')) == JobAction.ADOPT
+    @pytest.mark.parametrize(
+        'work_unit_id, expected',
+        [
+            pytest.param('unit-1', JobAction.ADOPT, id='dispatched-job-is-adopted'),
+            pytest.param('', JobAction.REAP, id='undispatched-job-is-reaped'),
+            pytest.param(None, JobAction.REAP, id='job-without-work-unit-is-reaped'),
+        ],
+    )
+    def test_startup_job_action(self, work_unit_id, expected):
+        assert startup_job_action(make_job(work_unit_id=work_unit_id)) == expected
 
-    @pytest.mark.parametrize('work_unit_id', ['', None])
-    def test_undispatched_job_is_reaped(self, work_unit_id):
-        assert startup_job_action(make_job(work_unit_id=work_unit_id)) == JobAction.REAP
+
+OTHER_TASK = ['other-task']
 
 
 class TestRunningJobAction:
-    def decide(self, job, active_task_ids=('other-task',), ref_time=NOW):
-        return running_job_action(job, ME, list(active_task_ids), ref_time, WORKFLOW_CTYPE)
+    @pytest.mark.parametrize(
+        'job_fields, active_task_ids, ref_time, expected',
+        [
+            pytest.param({}, OTHER_TASK, NOW, JobAction.ADOPT, id='orphan-this-instance-controls-is-adopted'),
+            pytest.param({'celery_task_id': 'task-1'}, ['task-1'], NOW, JobAction.SKIP, id='job-a-dispatcher-task-still-tracks-is-left-alone'),
+            pytest.param({'work_unit_id': ''}, OTHER_TASK, NOW, JobAction.REAP, id='orphan-not-yet-dispatched-to-receptor-is-reaped'),
+            # A hybrid node running a job for another controller: it can't adopt, so it reaps.
+            pytest.param({'controller_node': PEER, 'execution_node': ME}, OTHER_TASK, NOW, JobAction.REAP, id='orphan-this-instance-only-executes-is-reaped'),
+            pytest.param({'controller_node': PEER}, OTHER_TASK, NOW, JobAction.SKIP, id='job-of-another-instance-is-left-alone'),
+            *[
+                pytest.param({'status': status}, OTHER_TASK, NOW, JobAction.SKIP, id=f'{status}-job-is-left-alone')
+                for status in ('pending', 'waiting', 'successful', 'failed', 'canceled')
+            ],
+            pytest.param({'polymorphic_ctype_id': WORKFLOW_CTYPE}, OTHER_TASK, NOW, JobAction.SKIP, id='workflow-job-is-left-alone'),
+            pytest.param({'started': NOW + timedelta(seconds=1)}, OTHER_TASK, NOW, JobAction.SKIP, id='job-started-after-ref-time-is-left-alone'),
+            pytest.param({'started': None}, OTHER_TASK, NOW, JobAction.SKIP, id='job-without-start-time-is-left-alone'),
+            pytest.param({'started': NOW + timedelta(days=1)}, OTHER_TASK, None, JobAction.ADOPT, id='no-ref-time-considers-every-start-time'),
+            pytest.param({}, [], NOW, JobAction.ADOPT, id='empty-active-list-treats-every-job-as-orphaned'),
+        ],
+    )
+    def test_running_job_action(self, job_fields, active_task_ids, ref_time, expected):
+        assert running_job_action(make_job(**job_fields), ME, active_task_ids, ref_time, WORKFLOW_CTYPE) == expected
 
-    def test_orphan_this_instance_controls_is_adopted(self):
-        assert self.decide(make_job()) == JobAction.ADOPT
 
-    def test_job_a_dispatcher_task_still_tracks_is_left_alone(self):
-        assert self.decide(make_job(celery_task_id='task-1'), active_task_ids=['task-1']) == JobAction.SKIP
+def seconds_ago(seconds):
+    return None if seconds is None else NOW - timedelta(seconds=seconds)
 
-    def test_orphan_not_yet_dispatched_to_receptor_is_reaped(self):
-        assert self.decide(make_job(work_unit_id='')) == JobAction.REAP
 
-    def test_orphan_this_instance_only_executes_is_reaped(self):
-        # A hybrid node running a job for another controller: it can't adopt, so it reaps.
-        assert self.decide(make_job(controller_node=PEER, execution_node=ME)) == JobAction.REAP
-
-    def test_job_of_another_instance_is_left_alone(self):
-        assert self.decide(make_job(controller_node=PEER)) == JobAction.SKIP
-
-    @pytest.mark.parametrize('status', ['pending', 'waiting', 'successful', 'failed', 'canceled'])
-    def test_job_not_running_is_left_alone(self, status):
-        assert self.decide(make_job(status=status)) == JobAction.SKIP
-
-    def test_workflow_job_is_left_alone(self):
-        assert self.decide(make_job(polymorphic_ctype_id=WORKFLOW_CTYPE)) == JobAction.SKIP
-
-    def test_job_started_after_ref_time_is_left_alone(self):
-        assert self.decide(make_job(started=NOW + timedelta(seconds=1))) == JobAction.SKIP
-
-    def test_job_without_start_time_is_left_alone(self):
-        assert self.decide(make_job(started=None)) == JobAction.SKIP
-
-    def test_no_ref_time_considers_every_start_time(self):
-        assert self.decide(make_job(started=NOW + timedelta(days=1)), ref_time=None) == JobAction.ADOPT
-
-    def test_empty_active_list_treats_every_job_as_orphaned(self):
-        assert self.decide(make_job(), active_task_ids=()) == JobAction.ADOPT
+TIMEOUT = 300
 
 
 class TestAdoptionDeadline:
-    TIMEOUT = 300
-
-    def test_recent_event_is_within_deadline(self):
-        assert not adoption_deadline_passed(NOW - timedelta(seconds=299), NOW - timedelta(hours=1), NOW, self.TIMEOUT)
-
-    def test_old_last_event_is_past_deadline(self):
-        assert adoption_deadline_passed(NOW - timedelta(seconds=301), NOW - timedelta(hours=1), NOW, self.TIMEOUT)
-
-    def test_last_event_wins_over_start_time(self):
-        # A long job that is still producing events is not timed out by its age.
-        assert not adoption_deadline_passed(NOW - timedelta(seconds=10), NOW - timedelta(days=1), NOW, self.TIMEOUT)
-
-    def test_start_time_used_when_no_events(self):
-        assert adoption_deadline_passed(None, NOW - timedelta(seconds=301), NOW, self.TIMEOUT)
-        assert not adoption_deadline_passed(None, NOW - timedelta(seconds=299), NOW, self.TIMEOUT)
-
-    def test_job_with_no_events_or_start_is_never_past_deadline(self):
-        assert not adoption_deadline_passed(None, None, NOW, self.TIMEOUT)
-
-    def test_quiet_job_is_past_deadline_even_while_healthy(self):
-        # A playbook task that runs silently longer than the timeout (a long pause, a slow
-        # package install) looks the same as a dead one.
-        last_event = NOW - timedelta(seconds=self.TIMEOUT + 1)
-        assert adoption_deadline_passed(last_event, NOW - timedelta(seconds=self.TIMEOUT + 60), NOW, self.TIMEOUT)
+    @pytest.mark.parametrize(
+        'last_event_age, started_age, expected_passed',
+        [
+            pytest.param(299, 3600, False, id='recent-event-is-within-deadline'),
+            pytest.param(301, 3600, True, id='old-last-event-is-past-deadline'),
+            # A long job that is still producing events is not timed out by its age.
+            pytest.param(10, 86400, False, id='last-event-wins-over-start-time'),
+            pytest.param(None, 301, True, id='no-events-and-old-start-is-past-deadline'),
+            pytest.param(None, 299, False, id='no-events-and-recent-start-is-within-deadline'),
+            pytest.param(None, None, False, id='job-with-no-events-or-start-is-never-past-deadline'),
+            # A playbook task that runs silently longer than the timeout (a long pause, a slow
+            # package install) looks the same as a dead one.
+            pytest.param(TIMEOUT + 1, TIMEOUT + 60, True, id='quiet-job-is-past-deadline-even-while-healthy'),
+        ],
+    )
+    def test_adoption_deadline_passed(self, last_event_age, started_age, expected_passed):
+        assert adoption_deadline_passed(seconds_ago(last_event_age), seconds_ago(started_age), NOW, TIMEOUT) == expected_passed
