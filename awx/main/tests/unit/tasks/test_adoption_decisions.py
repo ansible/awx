@@ -62,10 +62,11 @@ class TestFindLostInstances:
             pytest.param(ME, 'control', 10_000, 0, False, id='this-instance-is-never-lost-here'),
             pytest.param(EXEC, 'execution', 150, 0, False, id='execution-node-gets-advertisement-period-added'),
             # A controller whose heartbeat is delayed past the grace period looks exactly like
-            # a dead one. The decision has only last_seen to go on.
+            # a dead one. The decision has only last_seen to go on (AAP-96824; the expected
+            # behavior is in test_scenarios_liveness.py).
             pytest.param(PEER, 'control', 125, 0, True, id='slow-controller-is-judged-lost-while-still-running'),
             # The peer heartbeated just now by its own clock, but this instance's clock runs
-            # five minutes ahead.
+            # five minutes ahead (AAP-96827; the expected behavior is in test_adoption_clock.py).
             pytest.param(PEER, 'control', 0, 300, True, id='clock-skew-on-the-judge-makes-a-healthy-peer-look-lost'),
         ],
     )
@@ -178,7 +179,8 @@ class TestAdoptionDeadline:
             pytest.param(None, 299, False, id='no-events-and-recent-start-is-within-deadline'),
             pytest.param(None, None, False, id='job-with-no-events-or-start-is-never-past-deadline'),
             # A playbook task that runs silently longer than the timeout (a long pause, a slow
-            # package install) looks the same as a dead one.
+            # package install) looks the same as a dead one (AAP-96829; the expected behavior
+            # is in test_scenarios_adoption.py).
             pytest.param(TIMEOUT + 1, TIMEOUT + 60, True, id='quiet-job-is-past-deadline-even-while-healthy'),
         ],
     )
