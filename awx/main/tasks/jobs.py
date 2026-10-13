@@ -810,9 +810,9 @@ class BaseTask(object):
                 if not res:
                     # res is None when quota exceeded or other early-return condition.
                     # Must release work unit here before returning, or it will leak.
-                    if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+                    if receptor_job and getattr(receptor_job, 'work', None):
                         try:
-                            receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+                            receptor_job._receptor_release_work(receptor_job.work, 'error')
                         except Exception:
                             logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")} on early return')
                     return
@@ -857,9 +857,9 @@ class BaseTask(object):
             self.instance = _finalize_job_run(self.model, pk, self.runner_callback, status)
         finally:
             # Guarantee work unit release even if finalization throws
-            if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+            if receptor_job and getattr(receptor_job, 'work', None):
                 try:
-                    receptor_job._receptor_release_work(receptor_job.receptor_ctl, status)
+                    receptor_job._receptor_release_work(receptor_job.work, status)
                 except Exception:
                     logger.exception(f'Failed to release work unit {getattr(receptor_job, "unit_id", "unknown")}')
 
