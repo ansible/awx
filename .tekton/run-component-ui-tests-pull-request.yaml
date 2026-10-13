@@ -45,9 +45,9 @@ spec:
       - name: pathInRepo
         value: pipelines/test/aap-component-ui-tests/0.1/development/pipeline.yaml
       - name: token
-        value: "{{ git_auth_secret }}"             # PaC per-PR secret (git-provider-token key); reads public aap-konflux-pipelines
+        value: github-aap-pde-ci-bot-credentials-ansible-automation-platform   # AAP-org bot; reads internal aap-konflux-pipelines
       - name: tokenKey
-        value: git-provider-token
+        value: password
       - name: scmType
         value: github
 
@@ -83,9 +83,9 @@ spec:
     - name: git-resolver-revision
       value: feat/aap-component-ui-tests             # <<< SET: same as pipelineRef revision
     - name: git-resolver-token-secret
-      value: "{{ git_auth_secret }}"               # same PaC per-PR secret as pipelineRef token
+      value: github-aap-pde-ci-bot-credentials-ansible-automation-platform   # AAP-org bot (reads internal aap-konflux-pipelines)
     - name: git-resolver-token-key
-      value: git-provider-token
+      value: password
 
     # UI test knobs (defaults are fine for a devel-targeted PR):
     #   ui-git-url defaults to https://github.com/ansible/ansible-ui, ui-revision defaults to devel,
