@@ -87,12 +87,6 @@ spec:
     - name: git-resolver-token-key
       value: password
 
-    # UI test knobs (defaults are fine for a devel-targeted PR):
-    #   ui-git-url defaults to https://github.com/ansible/ansible-ui, ui-revision defaults to devel,
-    #   currents-credentials-secret defaults to ansible-ui-currents-dashboard,
-    #   specs-per-shard=10 / max-shards=6 / min-shards=1 (adaptive sharding).
-    # For a stable-branch PR, also set ui-git-url (aap-ui fork) + ui-revision here.
-
   workspaces:
     - name: workspace
       volumeClaimTemplate:
