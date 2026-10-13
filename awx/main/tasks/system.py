@@ -679,10 +679,21 @@ def cluster_node_heartbeat(binder):
     Dispatcherd implementation.
     Uses Control API to get running tasks.
     """
+    run_heartbeat(binder)
+
+
+def run_heartbeat(binder, clock=None):
+    """One heartbeat of this instance.
+
+    clock returns the current time and defaults to django.utils.timezone.now. Tests pass
+    their own to judge peers or orphaned jobs as of any moment, or to give two simulated
+    controllers different clocks.
+    """
+    clock = clock or now
 
     # Run common instance management logic — ctl is the same receptor connection used for
     # mesh status; we reuse it for the job processing loop to avoid a second socket open.
-    this_inst, instance_list, lost_instances, _ctl = _heartbeat_instance_management()
+    this_inst, instance_list, lost_instances, _ctl = _heartbeat_instance_management(clock)
     if this_inst is None:
         return  # Early return case from instance management
 
@@ -706,7 +717,7 @@ def cluster_node_heartbeat(binder):
         return  # Failed to get task IDs, don't attempt reaping
 
     # One loop over all orphaned running jobs — adopt dispatched, reap undispatched.
-    ref_time = now()
+    ref_time = clock()
     logger.debug(f"Running job processing loop with {len(active_task_ids)} excluded UUIDs")
     _process_running_jobs(this_inst, active_task_ids, ref_time)
 
@@ -777,17 +788,48 @@ def _mesh_all_ready_nodes_visible(mesh_status):
     return True
 
 
-def _heartbeat_instance_management():
+def _receptor_mesh_status(ctl):
+    """Return receptor's status, or None when it can't be read."""
+    try:
+        return ctl.simple_command('status')
+    except (OSError, RuntimeError, ValueError) as exc:
+        logger.warning(f'Receptor status unavailable: {exc}')
+        return None
+
+
+def _check_in_this_instance(this_inst, nowtime):
+    """Run this instance's health check. Return False when it is rejoining the cluster."""
+    startup_event = this_inst.is_lost(ref_time=nowtime)
+    last_last_seen = this_inst.last_seen
+    this_inst.local_health_check()
+    if startup_event and this_inst.capacity != 0:
+        logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
+        return False
+    if not last_last_seen:
+        logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
+    elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
+        logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
+    return True
+
+
+def _register_missing_this_instance():
+    """Recreate this instance's record when auto-deprovisioning removed it. Return None when it can't."""
+    if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
+        logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+        return None
+    changed, this_inst = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
+    if changed:
+        logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
+    this_inst.local_health_check()
+    return this_inst
+
+
+def _heartbeat_instance_management(clock=None):
     """Common logic for heartbeat instance management."""
     logger.debug("Cluster node heartbeat task.")
-    nowtime = now()
+    nowtime = (clock or now)()
     instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
-    this_inst = None
-
-    for inst in instance_list:
-        if inst.hostname == settings.CLUSTER_HOST_ID:
-            this_inst = inst
-            break
+    this_inst = next((inst for inst in instance_list if inst.hostname == settings.CLUSTER_HOST_ID), None)
 
     try:
         ctl = get_receptor_ctl()
@@ -798,35 +840,18 @@ def _heartbeat_instance_management():
             this_inst.mark_offline(errors='Receptor not available')
         return None, None, None, None
 
-    try:
-        mesh_status = ctl.simple_command('status')
-    except (OSError, RuntimeError, ValueError) as exc:
-        logger.warning(f'Receptor status unavailable: {exc}')
-        mesh_status = None
+    mesh_status = _receptor_mesh_status(ctl)
 
     inspect_execution_and_hop_nodes(instance_list, mesh_status)
 
     lost_instances, instance_list = find_lost_instances(instance_list, settings.CLUSTER_HOST_ID, nowtime)
 
     if this_inst:
-        startup_event = this_inst.is_lost(ref_time=nowtime)
-        last_last_seen = this_inst.last_seen
-        this_inst.local_health_check()
-        if startup_event and this_inst.capacity != 0:
-            logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
+        if not _check_in_this_instance(this_inst, nowtime):
             return None, None, None, None  # Early return case
-        elif not last_last_seen:
-            logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
-        elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
-            logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
-        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            changed, this_inst = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
-            if changed:
-                logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
-            this_inst.local_health_check()
-        else:
-            logger.error("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+        this_inst = _register_missing_this_instance()
+        if this_inst is None:
             return None, None, None, None
 
     lost_instances = gate_lost_instances(lost_instances, lambda: _mesh_all_ready_nodes_visible(mesh_status))
@@ -1012,6 +1037,16 @@ def adopt_job_async(job_id):
     heartbeat returns immediately. on_duplicate='discard' ensures only one adoption runs
     per job across heartbeat cycles.
     """
+    adopt_job(job_id, open_work=lambda: ReceptorWork(get_receptor_ctl()))
+
+
+def adopt_job(job_id, open_work, clock=None):
+    """Adopt one orphaned job: fail it if it has been silent too long, else reattach to its work unit.
+
+    open_work returns the ReceptorWork to stream from; it is only called when the job is
+    actually reattached. clock defaults to django.utils.timezone.now.
+    """
+    clock = clock or now
     job = UnifiedJob.objects.filter(id=job_id, status='running').first()
     if not job:
         logger.debug(f'adopt_job_async: job {job_id} is no longer running, skipping')
@@ -1019,19 +1054,19 @@ def adopt_job_async(job_id):
 
     adoption_timeout = settings.HADR_JOB_ADOPTION_TIMEOUT
     last_event_time = job.get_event_queryset().aggregate(Max('created'))['created__max']
-    if adoption_deadline_passed(last_event_time, job.started, now(), adoption_timeout):
+    if adoption_deadline_passed(last_event_time, job.started, clock(), adoption_timeout):
         logger.error(f'Job {job.id} (unit={job.work_unit_id}) orphaned for >{adoption_timeout}s, failing')
         reaper.reap_job(job, 'failed', job_explanation='Job exceeded HADR_JOB_ADOPTION_TIMEOUT during controller restart')
         return
 
-    receptor_ctl = get_receptor_ctl()
+    work = open_work()
     try:
-        reattach_to_work_unit(job, ReceptorWork(receptor_ctl))
+        reattach_to_work_unit(job, work, clock=clock)
     except Exception:
         logger.exception(f'adopt_job_async: adoption failed for job {job.id} (unit={job.work_unit_id})')
     finally:
         try:
-            receptor_ctl.close()
+            work.close()
         except Exception:
             pass
 
