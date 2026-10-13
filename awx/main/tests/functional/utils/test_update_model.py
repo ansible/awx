@@ -45,3 +45,22 @@ def test_deleted_job(normal_job):
     job_pk = normal_job.pk
     normal_job.delete()
     assert update_model(Job, job_pk) is None
+
+
+@pytest.mark.django_db
+def test_abort_signal_stops_the_retry(normal_job, mocker):
+    mocker.patch.object(Job.objects, 'get', side_effect=DatabaseError)
+    mocker.patch('awx.main.utils.update_model.time.sleep')
+    mocker.patch('awx.main.utils.update_model.signal_callback', return_value=True)
+    with pytest.raises(RuntimeError, match='abort signal'):
+        update_model(Job, normal_job.pk)
+
+
+@pytest.mark.django_db
+def test_retry_keeps_the_owner_fence(normal_job, mocker):
+    Job.objects.filter(pk=normal_job.pk).update(celery_task_id='adoption-task')
+    write = mocker.patch('awx.main.utils.update_model._write_fields', side_effect=[DatabaseError, normal_job])
+    mocker.patch('awx.main.utils.update_model.time.sleep')
+
+    assert update_model(Job, normal_job.pk, owner_task_id='adoption-task', status='failed') is normal_job
+    assert write.call_args_list[1].args == (Job, normal_job.pk, True, 'adoption-task', {'status': 'failed'})
