@@ -15,10 +15,12 @@ adoption and finalize code runs without a mesh.
 import contextlib
 from unittest import mock
 
+import redis
+from django.test import override_settings
 from django.utils.timezone import now, timedelta
 
-from awx.main.models import Instance
-from awx.main.tasks.system import _heartbeat_handle_lost_instances, _heartbeat_instance_management
+from awx.main.models import Instance, JobEvent
+from awx.main.tasks.system import _heartbeat_handle_lost_instances, _heartbeat_instance_management, cluster_node_heartbeat
 from awx.main.tests.fake_receptor import RecordingDispatcher
 
 THIS = 'ctrl-0'
@@ -66,6 +68,42 @@ def run_lost_instance_handling(mesh_status, work=None, clock=None):
         this_inst, _, lost, _ = _heartbeat_instance_management(clock)
         _heartbeat_handle_lost_instances(lost, this_inst)
     return sorted(inst.hostname for inst in lost)
+
+
+def heartbeat(hostname, mesh_status, running_task_ids=(), startup=False, redis_up=True):
+    """Run one heartbeat of hostname the way its dispatcher does. Return the ids of jobs it queued for adoption.
+
+    running_task_ids are the dispatcher tasks hostname is running; a job whose task is
+    among them is not orphaned. startup runs the heartbeat a starting dispatcher runs.
+    redis_up=False makes the node's Redis ping fail once, as in a one-second Redis blip.
+    The node's own health check runs for real, so its state and capacity follow from it.
+    """
+    binder = None
+    if not startup:
+        binder = mock.MagicMock()
+        binder.control.return_value = {'node_id': hostname, **{task_id: {'uuid': task_id} for task_id in running_task_ids}}
+    ctl = mock.MagicMock()
+    ctl.simple_command.return_value = mesh_status
+    redis_client = mock.MagicMock()
+    if not redis_up:
+        redis_client.ping.side_effect = redis.ConnectionError('redis blip')
+    with (
+        override_settings(CLUSTER_HOST_ID=hostname),
+        mock.patch('awx.main.tasks.system.get_receptor_ctl', return_value=ctl),
+        mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes'),
+        mock.patch('awx.main.models.ha.get_redis_client', return_value=redis_client),
+        mock.patch('awx.main.tasks.system.adopt_job_async') as adopt_job_async,
+        mock.patch('awx.main.tasks.jobs.dispatch_waiting_jobs'),
+    ):
+        cluster_node_heartbeat(binder)
+    return [call.kwargs['args'][0] for call in adopt_job_async.apply_async.call_args_list]
+
+
+def save_dispatched_events():
+    """Save the events adoption sent to the callback receiver, as the callback receiver would."""
+    for event in RecordingDispatcher.dispatched:
+        if 'counter' in event:
+            JobEvent.create_from_data(**event).save()
 
 
 @contextlib.contextmanager
