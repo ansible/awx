@@ -1,0 +1,107 @@
+---
+# DRAFT — test trigger for the aap-component-ui-tests pipeline (component = controller).
+# Put this on your PR branch. PaC reads .tekton from the PR head, so it takes effect
+# on the PR you open. It uses the GIT RESOLVER against the development/ overlay of the
+# pipeline (no published bundle needed) — see aap-konflux-pipelines CONTRIBUTING "End-to-end
+# while iterating". After testing, the production version switches pipelineRef to resolver:
+# bundles once the pipeline is merged + bundled.
+#
+# >>> SET THE 3 PLACEHOLDERS MARKED  # <<< SET  (where you pushed the pipeline branch + a
+#     token secret in ansible-ci-tenant that can read that repo).
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: awx-component-ui-tests-pull-request
+  annotations:
+    build.appstudio.openshift.io/repo: https://github.com/{{repo_owner}}/{{repo_name}}?rev={{revision}}
+    build.appstudio.redhat.com/commit_sha: '{{revision}}'
+    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
+    build.appstudio.redhat.com/target_branch: '{{target_branch}}'
+    pipelinesascode.tekton.dev/cancel-in-progress: "true"
+    pipelinesascode.tekton.dev/max-keep-runs: "3"
+    # Opt-in: comment this on the PR to launch the run.
+    pipelinesascode.tekton.dev/on-comment: "^/run-component-ui-tests$"
+    pipelinesascode.tekton.dev/target-namespace: ansible-ci-tenant
+  labels:
+    appstudio.openshift.io/application: '{{repo_owner}}'
+    appstudio.openshift.io/component: '{{repo_owner}}-{{repo_name}}'
+    pipelines.appstudio.openshift.io/type: build
+spec:
+  timeouts:
+    pipeline: "8h"
+    tasks: "7h"
+    finally: "1h"
+
+  # Resolve the pipeline from the development/ overlay on your pushed branch (git resolver).
+  pipelineRef:
+    resolver: git
+    params:
+      - name: org
+        value: ansible-automation-platform          # <<< SET: org you pushed the pipeline branch to (or your fork)
+      - name: repo
+        value: aap-konflux-pipelines
+      - name: revision
+        value: feat/aap-component-ui-tests           # <<< SET: your pushed WIP branch
+      - name: pathInRepo
+        value: pipelines/test/aap-component-ui-tests/0.1/development/pipeline.yaml
+      - name: token
+        value: "{{ git_auth_secret }}"             # PaC per-PR secret (git-provider-token key); reads public aap-konflux-pipelines
+      - name: tokenKey
+        value: git-provider-token
+      - name: scmType
+        value: github
+
+  taskRunTemplate:
+    serviceAccountName: konflux-integration-runner
+
+  params:
+    # --- PR identity (filled by Pipelines-as-Code) ---
+    - name: git-url
+      value: "{{source_url}}"
+    - name: pipeline-github-org
+      value: "{{repo_owner}}"
+    - name: pipeline-github-repo
+      value: "{{repo_name}}"
+    - name: pipeline-github-target-branch
+      value: "{{target_branch}}"
+    - name: pipeline-github-pr-revision
+      value: "{{revision}}"
+    - name: pipeline-github-pr-number
+      value: "{{pull_request_number}}"
+    - name: pipeline-sender
+      value: "{{sender}}"
+
+    # --- which component this PR is (tower = controller) ---
+    - name: aap-dev-component-source-name
+      value: "controller"
+
+    # --- git-resolver inputs so the overlay can resolve its in-repo tasks from the same branch ---
+    - name: git-resolver-org
+      value: ansible-automation-platform             # <<< SET: same as pipelineRef org
+    - name: git-resolver-repo
+      value: aap-konflux-pipelines
+    - name: git-resolver-revision
+      value: feat/aap-component-ui-tests             # <<< SET: same as pipelineRef revision
+    - name: git-resolver-token-secret
+      value: "{{ git_auth_secret }}"               # same PaC per-PR secret as pipelineRef token
+    - name: git-resolver-token-key
+      value: git-provider-token
+
+    # UI test knobs (defaults are fine for a devel-targeted PR):
+    #   ui-git-url defaults to https://github.com/ansible/ansible-ui, ui-revision defaults to devel,
+    #   currents-credentials-secret defaults to ansible-ui-currents-dashboard,
+    #   specs-per-shard=10 / max-shards=6 / min-shards=1 (adaptive sharding).
+    # For a stable-branch PR, also set ui-git-url (aap-ui fork) + ui-revision here.
+
+  workspaces:
+    - name: workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+    - name: git-auth
+      secret:
+        secretName: "{{ git_auth_secret }}"
