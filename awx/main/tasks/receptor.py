@@ -38,6 +38,7 @@ from awx.main.utils.common import (
 from awx.main.constants import JOB_FOLDER_PREFIX, MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.tasks.callback import RunnerCallback
+from awx.main.utils.update_model import NotOwner
 from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 
@@ -943,7 +944,7 @@ def _get_or_create_private_data_dir(job):
     )
 
 
-def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=None):
+def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=None, owner_task_id=None):
     """Commit terminal status for an adopted job via the shared _finalize_job_run path.
 
     The shared finalization function uses duck typing to schedule task/workflow managers
@@ -964,7 +965,7 @@ def _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=
     if job.started:
         extra['elapsed'] = (finished_at - job.started).total_seconds()
 
-    _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra)
+    _finalize_job_run(type(job), job.pk, callback, final_status, extra_fields=extra, owner_task_id=owner_task_id)
 
     label = 'exit_code (process phase raised)' if process_phase_failed else 'adoption'
     logger.info(f'Job {job.id} finalized via {label}: {final_status}')
@@ -1001,7 +1002,7 @@ def _compute_adoption_dedup(job):
     return safe_threshold, collision_zone
 
 
-def reattach_to_work_unit(job, work: ReceptorWork, clock=None):
+def reattach_to_work_unit(job, work: ReceptorWork, clock=None, owner_task_id=None):
     """Reconnect to a receptor work unit and stream events in real-time until it completes.
 
     Reconstructs the minimal process-phase context from the DB job record, then calls
@@ -1058,10 +1059,11 @@ def reattach_to_work_unit(job, work: ReceptorWork, clock=None):
     #
     # _process_phase -> _handle_work_error may return None for 'exceeded quota' where
     # the job is already set to 'pending' — don't finalize, let the next dispatch handle it.
+    release_work = True
     try:
         if res is not None:
             exit_code = 0 if getattr(res, 'status', '') == 'successful' else 1
-            _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=clock)
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=clock, owner_task_id=owner_task_id)
         elif not process_phase_failed:
             logger.info(f'Job {job.id}: adoption deferred (handled in _handle_work_error)')
         else:
@@ -1074,9 +1076,14 @@ def reattach_to_work_unit(job, work: ReceptorWork, clock=None):
                 unit_status = {}
                 state_name = ''
             exit_code = _get_adoption_exit_code(unit_status, state_name)
-            _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=clock)
+            _finalize_adopted_job(job, callback, exit_code, process_phase_failed, clock=clock, owner_task_id=owner_task_id)
+    except NotOwner as exc:
+        # A later claim took the job over; its final status and work unit are that task's.
+        logger.warning(f'Job {job.id} was claimed by task {exc.current_task_id} during adoption; not finalizing or releasing unit {unit_id}')
+        release_work = False
     finally:
-        receptor_job._receptor_release_work(work, getattr(res, 'status', 'error'))
+        if release_work:
+            receptor_job._receptor_release_work(work, getattr(res, 'status', 'error'))
         shutil.rmtree(private_data_dir, ignore_errors=True)
 
     return True
