@@ -63,15 +63,17 @@ def test_peer_is_lost_only_after_the_grace_period(heartbeat_settings):
     assert lost_hostnames(clock) == ['ctrl-1']
 
 
+@pytest.mark.xfail(strict=True, reason='AAP-96827: a controller with a fast clock marks a healthy peer lost')
 @pytest.mark.django_db
-def test_judge_with_a_fast_clock_finds_a_healthy_peer_lost(heartbeat_settings):
-    # ctrl-0's clock runs five minutes fast, so its own last_seen is five minutes ahead.
-    # ctrl-1 heartbeated just now by the correct clock and is healthy.
+def test_judge_with_a_fast_clock_does_not_find_a_healthy_peer_lost(heartbeat_settings):
+    # 2.8 Clock skew. ctrl-0's clock runs five minutes fast, so its own last_seen is five
+    # minutes ahead. ctrl-1 heartbeated just now by the correct clock and is healthy.
+    # Today ctrl-0 judges it by its own clock and finds it lost.
     t = now()
     control_node('ctrl-0', t + timedelta(minutes=5))
     control_node('ctrl-1', t)
 
-    assert lost_hostnames(FakeClock(t + timedelta(minutes=5))) == ['ctrl-1']
+    assert lost_hostnames(FakeClock(t + timedelta(minutes=5))) == []
 
 
 @pytest.mark.django_db
