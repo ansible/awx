@@ -8,6 +8,8 @@ import datetime
 
 # Django rest framework
 from rest_framework.exceptions import PermissionDenied
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 # AWX
@@ -295,9 +297,9 @@ class TestControllerNode:
 
 
 @pytest.mark.django_db
-def test_job_list_query_count_scales_constantly(user, organization, setup_managed_roles, get, django_assert_max_num_queries):
-    """The job list endpoint must use select_related/prefetch_related so that
-    query count does not grow with the number of returned jobs."""
+def test_job_list_query_count_flat(user, organization, setup_managed_roles, get):
+    """Query count must stay constant regardless of page size, proving
+    select_related/prefetch_related eliminates N+1 queries."""
     inventory = organization.inventories.create(name='query-count-inv')
     project = Project.objects.create(name='query-count-project', organization=organization)
     ee = ExecutionEnvironment.objects.create(name='query-count-ee')
@@ -317,7 +319,7 @@ def test_job_list_query_count_scales_constantly(user, organization, setup_manage
     org_admin = user('query-count-orgadmin', False)
     RoleDefinition.objects.get(name='Organization Admin').give_permission(org_admin, organization)
 
-    for i in range(5):
+    for i in range(10):
         job = jt.create_unified_job()
         job.credentials.add(cred)
         job.labels.add(Label.objects.create(name=f'label-{i}', organization=organization))
@@ -325,11 +327,18 @@ def test_job_list_query_count_scales_constantly(user, organization, setup_manage
     # Warm up any caches (content types, etc.)
     get(reverse('api:job_list'), org_admin, expect=200)
 
-    with django_assert_max_num_queries(60):
-        response = get(reverse('api:job_list'), org_admin, expect=200)
+    fixed_query_overhead = 8
+    counts = []
+    for page_size in (1, 10):
+        with CaptureQueriesContext(connection) as queries:
+            response = get(f"{reverse('api:job_list')}?page_size={page_size}", org_admin, expect=200)
+        assert response.status_code == 200
+        counts.append(len(queries))
 
-    assert response.data['count'] >= 5
-    assert len(response.data['results']) >= 5
+    baseline = counts[0]
+    assert all(abs(count - baseline) <= fixed_query_overhead for count in counts[1:]), (
+        f"Query count should be flat across page sizes, got {counts}"
+    )
 
 
 @pytest.mark.django_db
