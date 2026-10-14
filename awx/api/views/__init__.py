@@ -1923,6 +1923,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     resource_purpose = 'hosts'
+    rest_filters_reserved_names = ('last_job_host_summary__failed', 'not__last_job_host_summary__failed')
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of hosts."})
     def get(self, request, *args, **kwargs):
@@ -1935,7 +1936,22 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
             qs = qs.distinct()
+        qs = self._apply_latest_summary_failed_filter(qs)
         return qs.with_latest_summary_id()
+
+    def _apply_latest_summary_failed_filter(self, qs):
+        params = self.request.query_params
+        failed_param = params.get('last_job_host_summary__failed', None)
+        not_failed_param = params.get('not__last_job_host_summary__failed', None)
+        if failed_param is None and not_failed_param is None:
+            return qs
+        latest_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
+        qs = qs.annotate(_latest_failed=latest_failed)
+        if failed_param is not None:
+            qs = qs.filter(_latest_failed=True)
+        else:
+            qs = qs.filter(_latest_failed=False)
+        return qs
 
     def list(self, *args, **kwargs):
         try:
