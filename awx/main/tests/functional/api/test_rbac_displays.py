@@ -6,6 +6,8 @@ from awx.api.versioning import reverse
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+
 from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate, WorkflowJobTemplate
 from awx.main.access import access_registry, WorkflowJobTemplateAccess, get_user_capabilities
 from awx.main.utils import prefetch_page_capabilities
@@ -270,6 +272,8 @@ def test_prefetch_user_capabilities_matches_self_delete(organization, alice):
     expected = get_user_capabilities(alice, alice, method_list=['edit', 'delete'])
 
     assert mapping[alice.id] == {key: expected[key] for key in ('edit', 'delete')}
+    assert mapping[alice.id]['edit'] is True
+    assert mapping[alice.id]['delete'] is False
 
 
 @pytest.mark.django_db
@@ -338,6 +342,24 @@ def test_prefetch_user_capabilities_protected_target(organization, alice, bob):
         alice,
     )
 
+    assert mapping[bob.id] == {'edit': False, 'delete': False}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_platform_auditor(organization, alice, bob, setup_managed_roles):
+    organization.admin_role.members.add(alice)
+    platform_auditor, _ = RoleDefinition.objects.get_or_create(name='Platform Auditor', content_type=None)
+    RoleUserAssignment.objects.create(user=bob, role_definition=platform_auditor)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
     assert mapping[bob.id] == {'edit': False, 'delete': False}
 
 
