@@ -15,6 +15,8 @@ from django.utils import timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
+from awx.main.access import get_user_capabilities
+from awx.main.utils.common import _prefetch_job_capabilities
 from awx.main.models import (
     Credential,
     CredentialType,
@@ -383,3 +385,72 @@ def test_job_list_includes_summary_fields_with_prefetch(user, organization, setu
     assert sf['created_by']['id'] == creator.pk
     assert any(c['id'] == cred.pk for c in sf['credentials'])
     assert any(l['id'] == label.pk for l in sf['labels']['results'])
+
+
+@pytest.mark.django_db
+def test_job_batch_capabilities_parity(user, organization, setup_managed_roles):
+    """Batch capability results must match per-object get_user_capabilities."""
+    inventory = organization.inventories.create(name='parity-inv')
+    project = Project.objects.create(name='parity-project', organization=organization)
+
+    jt = JobTemplate.objects.create(
+        name='parity-jt',
+        project=project,
+        inventory=inventory,
+        organization=organization,
+    )
+
+    other_org = Organization.objects.create(name='parity-other-org')
+    other_project = Project.objects.create(name='parity-other-project', organization=other_org)
+    other_jt = JobTemplate.objects.create(
+        name='parity-other-jt',
+        project=other_project,
+        inventory=inventory,
+        organization=other_org,
+    )
+
+    org_admin = user('parity-orgadmin', False)
+    RoleDefinition.objects.get(name='Organization Admin').give_permission(org_admin, organization)
+
+    jobs = []
+    # Job with JT in user's org (should have delete + start)
+    jobs.append(jt.create_unified_job())
+    # Job with JT in other org (no delete, no start)
+    jobs.append(other_jt.create_unified_job())
+    # Orphaned job — no JT, no org
+    orphan = Job.objects.create()
+    jobs.append(orphan)
+
+    page = list(Job.objects.filter(pk__in=[j.pk for j in jobs]).select_related('job_template', 'organization'))
+
+    batch_result = _prefetch_job_capabilities(page, org_admin)
+
+    for obj in page:
+        slow = get_user_capabilities(org_admin, obj, method_list=['delete', 'start'])
+        assert batch_result[obj.id]['delete'] == slow['delete'], (
+            f"delete mismatch for job {obj.id}: batch={batch_result[obj.id]['delete']}, slow={slow['delete']}"
+        )
+        assert batch_result[obj.id]['start'] == slow['start'], (
+            f"start mismatch for job {obj.id}: batch={batch_result[obj.id]['start']}, slow={slow['start']}"
+        )
+
+
+@pytest.mark.django_db
+def test_job_batch_capabilities_superuser(admin_user, organization, setup_managed_roles):
+    """Superusers get all capabilities True from batch path."""
+    project = Project.objects.create(name='su-project', organization=organization)
+    jt = JobTemplate.objects.create(
+        name='su-jt',
+        project=project,
+        inventory=organization.inventories.create(name='su-inv'),
+        organization=organization,
+    )
+
+    job = jt.create_unified_job()
+    orphan = Job.objects.create()
+    page = list(Job.objects.filter(pk__in=[job.pk, orphan.pk]))
+
+    batch_result = _prefetch_job_capabilities(page, admin_user)
+
+    for obj in page:
+        assert batch_result[obj.id] == {'delete': True, 'start': True}
