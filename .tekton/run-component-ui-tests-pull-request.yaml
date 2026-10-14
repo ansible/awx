@@ -75,6 +75,11 @@ spec:
     - name: aap-dev-component-source-name
       value: "controller"
 
+    # --- deploy diagnostics: -vv so the deploy-aap ansible log shows which
+    #     step runs at the ~90s control-plane collapse (TEST ONLY) ---
+    - name: aap-deploy-ansible-verbosity
+      value: "2"
+
     # --- git-resolver inputs so the overlay can resolve its in-repo tasks from the same branch ---
     - name: git-resolver-org
       value: ansible-automation-platform             # <<< SET: same as pipelineRef org
