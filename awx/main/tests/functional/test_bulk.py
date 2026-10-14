@@ -35,6 +35,12 @@ def test_bulk_host_create_num_queries(organization, inventory, post, get, user, 
     organization.inventory_admin_role.members.add(org_inv_admin)
     inventory.admin_role.members.add(inventory_admin)
 
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': uuid4()}]}, superuser, expect=201)
+
     for u in [org_admin, inventory_admin, org_inv_admin, superuser]:
         hosts = [{'name': uuid4()} for i in range(num_hosts)]
         with django_assert_max_num_queries(num_queries):
