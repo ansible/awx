@@ -35,7 +35,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
-from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
+from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound, ValidationError
 from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
@@ -1872,12 +1872,47 @@ class CredentialTypeExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
 
 
 class HostRelatedSearchMixin(object):
+    rest_filters_reserved_names = ('last_job_host_summary__failed', 'not__last_job_host_summary__failed')
+
     @property
     def related_search_fields(self):
         # Edge-case handle: https://github.com/ansible/ansible-tower/issues/7712
         ret = super(HostRelatedSearchMixin, self).related_search_fields
         ret.append('ansible_facts')
         return ret
+
+    def _validate_host_latest_summary_filter_value(self, param_name, value):
+        """Latest-summary host filters only support the documented ``?param=True`` form."""
+        if value != 'True':
+            raise ValidationError({param_name: _('filter value must be True')})
+
+    def _apply_latest_summary_failed_filter(self, qs):
+        """Filter hosts by whether their latest JobHostSummary failed.
+
+        Honors ``last_job_host_summary__failed`` and ``not__last_job_host_summary__failed``
+        with the same AND semantics as other list query string filters.
+        """
+        params = self.request.query_params
+        failed_param = params.get('last_job_host_summary__failed', None)
+        not_failed_param = params.get('not__last_job_host_summary__failed', None)
+        if failed_param is None and not_failed_param is None:
+            return qs
+        if failed_param is not None:
+            self._validate_host_latest_summary_filter_value('last_job_host_summary__failed', failed_param)
+        if not_failed_param is not None:
+            self._validate_host_latest_summary_filter_value('not__last_job_host_summary__failed', not_failed_param)
+        latest_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
+        qs = qs.annotate(_latest_failed=latest_failed)
+        if failed_param is not None:
+            qs = qs.filter(_latest_failed=True)
+        if not_failed_param is not None:
+            qs = qs.filter(_latest_failed=False)
+        return qs
+
+    def _with_host_list_queryset(self, qs):
+        """Apply latest-summary list filters and serializer annotations."""
+        qs = self._apply_latest_summary_failed_filter(qs)
+        return qs.with_latest_summary_id()
 
 
 class HostMetricList(ListAPIView):
@@ -1935,7 +1970,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
             qs = qs.distinct()
-        return qs.with_latest_summary_id()
+        return self._with_host_list_queryset(qs)
 
     def list(self, *args, **kwargs):
         try:
@@ -1987,7 +2022,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     resource_purpose = 'hosts of an inventory'
 
     def get_queryset(self):
-        return super().get_queryset().with_latest_summary_id()
+        return self._with_host_list_queryset(super().get_queryset())
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2173,7 +2208,7 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     resource_purpose = 'hosts of a group'
 
     def get_queryset(self):
-        return super().get_queryset().with_latest_summary_id()
+        return self._with_host_list_queryset(super().get_queryset())
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2206,7 +2241,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
-        return (qs & sublist_qs).with_latest_summary_id()
+        return self._with_host_list_queryset(qs & sublist_qs)
 
 
 class GroupInventorySourcesList(SubListAPIView):

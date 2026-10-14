@@ -3,7 +3,7 @@ import urllib.parse
 
 from awx.api.versioning import reverse
 
-from awx.main.models import Organization, Host, Group, Inventory
+from awx.main.models import Organization, Host, Group, Inventory, Job, JobEvent
 
 
 @pytest.fixture
@@ -271,3 +271,122 @@ def test_invalid_host_filter(get, admin_user, invalid_filter):
     params = "?host_filter=%s" % urllib.parse.quote(invalid_filter, safe='')
     response = get(url + params, admin_user)
     assert response.status_code == 400
+
+
+@pytest.fixture
+def hosts_with_job_summaries():
+    """Three hosts: one with a failed last job, one with a successful last job, one with no job."""
+    org = Organization.objects.create(name='summary-org')
+    inv = Inventory.objects.create(name='summary-inv', organization=org)
+    host_failed = Host.objects.create(name='host-failed', inventory=inv)
+    host_ok = Host.objects.create(name='host-ok', inventory=inv)
+    Host.objects.create(name='host-no-job', inventory=inv)
+    group = Group.objects.create(name='summary-group', inventory=inv)
+    group.hosts.add(host_failed, host_ok)
+
+    job = Job(inventory=inv)
+    job.save()
+    host_map = {h.name: h.id for h in inv.hosts.all()}
+    JobEvent.create_from_data(
+        job_id=job.pk,
+        parent_uuid='abc123',
+        event='playbook_on_stats',
+        event_data={
+            'ok': {host_ok.name: 1},
+            'changed': {},
+            'dark': {},
+            'failures': {host_failed.name: 1},
+            'ignored': {},
+            'processed': {},
+            'rescued': {},
+            'skipped': {},
+        },
+        host_map=host_map,
+    ).save()
+
+    return {'inventory': inv, 'group': group}
+
+
+@pytest.mark.django_db
+def test_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    """?last_job_host_summary__failed=True returns only hosts whose latest job summary is failed."""
+    url = reverse('api:host_list') + '?last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-failed']
+
+
+@pytest.mark.django_db
+def test_not_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    """?not__last_job_host_summary__failed=True returns only hosts whose latest job summary is not failed."""
+    url = reverse('api:host_list') + '?not__last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-ok']
+
+
+@pytest.mark.django_db
+def test_inventory_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    inv = hosts_with_job_summaries['inventory']
+    url = reverse('api:inventory_hosts_list', kwargs={'pk': inv.pk}) + '?last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-failed']
+
+
+@pytest.mark.django_db
+def test_inventory_not_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    inv = hosts_with_job_summaries['inventory']
+    url = reverse('api:inventory_hosts_list', kwargs={'pk': inv.pk}) + '?not__last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-ok']
+
+
+@pytest.mark.django_db
+def test_group_all_hosts_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    group = hosts_with_job_summaries['group']
+    url = reverse('api:group_all_hosts_list', kwargs={'pk': group.pk}) + '?last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-failed']
+
+
+@pytest.mark.django_db
+def test_group_all_hosts_not_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    group = hosts_with_job_summaries['group']
+    url = reverse('api:group_all_hosts_list', kwargs={'pk': group.pk}) + '?not__last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-ok']
+
+
+@pytest.mark.django_db
+def test_group_hosts_last_job_host_summary_failed_filter(hosts_with_job_summaries, get, admin_user):
+    group = hosts_with_job_summaries['group']
+    url = reverse('api:group_hosts_list', kwargs={'pk': group.pk}) + '?last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    names = get_host_names(response)
+    assert names == ['host-failed']
+
+
+@pytest.mark.django_db
+def test_last_job_host_summary_failed_filter_invalid_value(hosts_with_job_summaries, get, admin_user):
+    url = reverse('api:host_list') + '?last_job_host_summary__failed=False'
+    response = get(url, admin_user)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_last_job_host_summary_failed_filter_both_params(hosts_with_job_summaries, get, admin_user):
+    url = reverse('api:host_list') + '?last_job_host_summary__failed=True&not__last_job_host_summary__failed=True'
+    response = get(url, admin_user)
+    assert response.status_code == 200
+    assert get_host_names(response) == []
