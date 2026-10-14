@@ -143,6 +143,21 @@ def test_logging_aggregator_missing_settings(put, post, admin, key, value, error
     assert error in str(response.data)
 
 
+@pytest.mark.django_db
+def test_logging_aggregator_port_bounds(get, patch, admin):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+    for port in (1, 65535, None):
+        patch(url, user=admin, data={'LOG_AGGREGATOR_PORT': port}, expect=200)
+        assert get(url, user=admin, expect=200).data['LOG_AGGREGATOR_PORT'] == port
+    patch(url, user=admin, data={'LOG_AGGREGATOR_PORT': 8080}, expect=200)
+    # rsyslogd -N1 accepts these, so the connection test can't catch them
+    for port in (0, -1, 65536, 99999999999):
+        response = patch(url, user=admin, data={'LOG_AGGREGATOR_PORT': port}, expect=400)
+        assert 'LOG_AGGREGATOR_PORT' in response.data
+    # a rejected value is not stored
+    assert get(url, user=admin, expect=200).data['LOG_AGGREGATOR_PORT'] == 8080
+
+
 @pytest.mark.parametrize(
     'type, host, port, username, password',
     [
