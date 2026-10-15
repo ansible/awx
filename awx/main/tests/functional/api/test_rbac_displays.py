@@ -1,10 +1,15 @@
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from awx.api.versioning import reverse
 from django.test.client import RequestFactory
+from django.contrib.auth.models import User
+
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 
 from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate, WorkflowJobTemplate
-from awx.main.access import access_registry, WorkflowJobTemplateAccess
+from awx.main.access import access_registry, WorkflowJobTemplateAccess, get_user_capabilities
 from awx.main.utils import prefetch_page_capabilities
 from awx.api.serializers import JobTemplateSerializer, UnifiedJobTemplateSerializer
 
@@ -236,6 +241,162 @@ def test_user_roles_unattach_functional(organization, alice, bob, get):
     response = get(reverse('api:user_roles_list', kwargs={'pk': alice.id}), bob)
     # Org members cannot revoke the membership of other members
     assert not response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities(organization, alice, bob):
+    organization.admin_role.members.add(alice)
+    organization.member_role.members.add(bob)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_matches_self_delete(organization, alice):
+    organization.admin_role.members.add(alice)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(pk=alice.pk),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+    expected = get_user_capabilities(alice, alice, method_list=['edit', 'delete'])
+
+    assert mapping[alice.id] == {key: expected[key] for key in ('edit', 'delete')}
+    assert mapping[alice.id]['edit'] is True
+    assert mapping[alice.id]['delete'] is False
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_matches_multi_org_access(organization, organization_factory, alice, bob):
+    other_org = organization_factory('capability-prefetch-other-org').organization
+    organization.admin_role.members.add(alice)
+    organization.member_role.members.add(bob)
+    other_org.member_role.members.add(bob)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_orphan(organization, alice, bob):
+    organization.admin_role.members.add(alice)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+
+    # The existing slow path is the authorization reference; orphan users can
+    # be deletable even when they cannot be edited.
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_other_superuser(organization, alice, bob):
+    alice.is_superuser = True
+    alice.save(update_fields=['is_superuser'])
+    bob.is_superuser = True
+    bob.save(update_fields=['is_superuser'])
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_protected_target(organization, alice, bob):
+    organization.admin_role.members.add(alice)
+    bob.is_superuser = True
+    bob.save(update_fields=['is_superuser'])
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+
+    assert mapping[bob.id] == {'edit': False, 'delete': False}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_platform_auditor(organization, alice, bob, setup_managed_roles):
+    organization.admin_role.members.add(alice)
+    platform_auditor, _ = RoleDefinition.objects.get_or_create(name='Platform Auditor', content_type=None)
+    RoleUserAssignment.objects.create(user=bob, role_definition=platform_auditor)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+    assert mapping[bob.id] == {'edit': False, 'delete': False}
+
+
+@pytest.mark.django_db
+def test_prefetch_user_capabilities_team_member(organization, alice, bob, team_factory):
+    organization.admin_role.members.add(alice)
+    team = team_factory('capability-prefetch-team')
+    team.member_role.members.add(bob)
+
+    mapping = prefetch_page_capabilities(
+        User,
+        User.objects.filter(id__in=[alice.id, bob.id]),
+        [{'edit': 'change'}, {'delete': 'change'}],
+        alice,
+    )
+
+    expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+    assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+
+
+@pytest.mark.django_db
+def test_user_list_query_count_flat(organization, alice, bob, user, get):
+    organization.admin_role.members.add(alice)
+    organization.member_role.members.add(bob)
+    for idx in range(8):
+        user(f'capability-prefetch-api-user-{idx}', False)
+
+    counts = []
+    fixed_query_overhead = 8
+    for page_size in (1, 10):
+        with CaptureQueriesContext(connection) as queries:
+            response = get(f"{reverse('api:user_list')}?page_size={page_size}", alice)
+        assert response.status_code == 200
+        counts.append(len(queries))
+
+    baseline = counts[0]
+    assert all(abs(count - baseline) <= fixed_query_overhead for count in counts[1:]), counts
 
 
 @pytest.mark.django_db
