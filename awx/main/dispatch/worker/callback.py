@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
 from django import db
-from django.db import transaction, connection as django_connection
+from django.db import transaction, IntegrityError, connection as django_connection
 from django_guid import set_guid
 
 import psutil
@@ -30,6 +30,14 @@ import awx.main.analytics.subsystem_metrics as s_metrics
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
+def _is_unique_constraint_violation(exc):
+    """Return True if exc is a unique-key IntegrityError (already stored, safe to skip)."""
+    cause = getattr(exc, '__cause__', None)
+    if hasattr(cause, 'pgcode') and cause.pgcode == '23505':
+        return True
+    return 'UNIQUE constraint failed' in str(exc)
+
+
 def job_stats_wrapup(job_identifier, event=None):
     """Fill in the unified job host_status_counts, fire off notifications if needed"""
     try:
@@ -42,14 +50,20 @@ def job_stats_wrapup(job_identifier, event=None):
         # Update host_status_counts while holding the row lock
         with transaction.atomic():
             uj = UnifiedJob.objects.select_for_update().get(pk=job_identifier)
+            # If host_status_counts is already set, another controller already ran stats_wrapup
+            # for this job. Capturing this before the save lets us avoid sending a duplicate
+            # notification below when both controllers process playbook_on_stats concurrently.
+            already_processed = uj.host_status_counts is not None
             uj.host_status_counts = host_status_counts
             uj.save(update_fields=['host_status_counts'])
 
         uj.log_lifecycle("stats_wrapup_finished")
 
         # If the status was a finished state before this update was made, send notifications
-        # If not, we will send notifications when the status changes
-        if uj.status not in ACTIVE_STATES:
+        # If not, we will send notifications when the status changes.
+        # Guard on already_processed: if another controller ran stats_wrapup first and the job
+        # is already terminal, that controller's finalization already sent the notification.
+        if uj.status not in ACTIVE_STATES and not already_processed:
             events_processed_hook(uj)
 
     except Exception:
@@ -240,6 +254,11 @@ class CallbackBrokerWorker:
                             events.remove(e)
                             saved_events.append(e)  # Importantly, remove successfully saved events from the buffer
                         except Exception as exc_indv:
+                            if isinstance(exc_indv, IntegrityError) and _is_unique_constraint_violation(exc_indv):
+                                # Duplicate event from concurrent adoption stream — already stored.
+                                events.remove(e)
+                                continue
+
                             retry_count = getattr(e, '_retry_count', 0) + 1
                             e._retry_count = retry_count
 
