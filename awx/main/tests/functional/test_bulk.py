@@ -107,6 +107,17 @@ def test_bulk_job_launch_queries(job_template, organization, inventory, project,
     inventory.save()
     jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(num_jobs)]
 
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(
+        reverse('api:bulk_job_launch'),
+        {'name': 'Bulk Job Launch Warmup', 'jobs': [{'unified_job_template': jt.id, 'inventory': inventory.id}]},
+        normal_user,
+        expect=201,
+    )
+
     # This is not working, we need to figure that out if we want to include tests for more jobs
     # with mock.patch('awx.api.serializers.settings.BULK_JOB_MAX_LAUNCH', num_jobs + 1):
     with django_assert_max_num_queries(num_queries):
