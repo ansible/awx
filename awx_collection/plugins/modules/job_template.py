@@ -274,6 +274,7 @@ options:
       type: str
       choices:
         - ''
+        - 'bitbucket_dc'
         - 'github'
         - 'gitlab'
         - 'bitbucket_dc'
