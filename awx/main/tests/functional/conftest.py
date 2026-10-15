@@ -76,6 +76,16 @@ def swagger_autogen(requests=__SWAGGER_REQUESTS__):
     return requests
 
 
+class FakeLock:
+    # Never acquirable, so callers that guard work with a redis lock take the
+    # "someone else holds it" branch instead of reaching for real services.
+    def acquire(self, *args, **kwargs):
+        return False
+
+    def release(self, *args, **kwargs):
+        pass
+
+
 class FakeRedis:
     def __init__(self, *args, **kwargs):
         # Accept and ignore all arguments to match redis.Redis signature
@@ -89,6 +99,21 @@ class FakeRedis:
 
     def get(self, *args, **kwargs):
         return None
+
+    def hset(self, *args, **kwargs):
+        return 1
+
+    def hget(self, *args, **kwargs):
+        return None
+
+    def hincrby(self, *args, **kwargs):
+        return 0
+
+    def hincrbyfloat(self, *args, **kwargs):
+        return 0.0
+
+    def lock(self, *args, **kwargs):
+        return FakeLock()
 
     def rpush(self, *args, **kwargs):
         return 1
@@ -111,6 +136,9 @@ class FakeRedis:
 
     def pipeline(self):
         return self
+
+    def execute(self, *args, **kwargs):
+        return []
 
     def ping(self):
         return
