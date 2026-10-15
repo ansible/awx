@@ -17,7 +17,6 @@ django>=5.2.17,<5.3  # Django 5.2 LTS, allow patch updates, CVE-2026-15307
 django-cors-headers
 django-crum
 django-extensions
-django-guid
 django-polymorphic
 django-solo
 djangorestframework==3.15.2  # upgrading to 3.16+ throws NOT_REQUIRED_DEFAULT error on required fields in serializer that have no default
@@ -38,10 +37,8 @@ msrestazure
 OPA-python-client==2.0.2 # upgrading requires urllib3 2.5.0+ which is blocked by other deps
 kubernetes>=36.0.2  # fixes NO_PROXY silently being reset to None
 openshift
-opentelemetry-api~=1.37     # new y streams can be drastically different, in a good way
-opentelemetry-sdk~=1.37
-opentelemetry-instrumentation-logging
-opentelemetry-exporter-otlp
+opentelemetry-api~=1.45     # the rest comes with django-ansible-base[observability]; these hold the version line, new y streams can be drastically different, in a good way
+opentelemetry-sdk~=1.45     # DAB's observability needs >= 1.39 (it imports LogRecordExporter)
 pexpect
 prometheus-client
 psycopg
