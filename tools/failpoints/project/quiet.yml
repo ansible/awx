@@ -1,0 +1,21 @@
+---
+# A healthy job with one long quiet stretch: a few events, then a single task that runs for
+# `quiet_seconds` without emitting anything, then a few more events. Used to show that an
+# adoption deadline measured from the last event can fail a job that is still working.
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars:
+    quiet_seconds: 360
+  tasks:
+    - name: before
+      command: "true"
+      loop: [1, 2, 3]
+      changed_when: false
+    - name: quiet stretch
+      command: "sleep {{ quiet_seconds }}"
+      changed_when: false
+    - name: after
+      command: "true"
+      loop: [1, 2, 3]
+      changed_when: false

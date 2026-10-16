@@ -27,6 +27,9 @@ ALLOWED_HOSTS = ['*']
 mimetypes.add_type("image/svg+xml", ".svg", True)
 mimetypes.add_type("image/svg+xml", ".svgz", True)
 
+# Allow tests to arm failpoints (awx.main.utils.failpoints). Inert until one is armed.
+AWX_FAILPOINTS_ENABLED = os.environ.get('AWX_FAILPOINTS_ENABLED', 'true').lower() in ('1', 'true', 'yes')
+
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = False
 
