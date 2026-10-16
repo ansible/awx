@@ -481,6 +481,11 @@ class Inventory(CommonModelNameNotUnique, RelatedJobsMixin, OpaQueryPathMixin):
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).save(*args, **kwargs)
+        update_fields = kwargs.get('update_fields')
+        if update_fields is None or {'organization', 'organization_id'} & set(update_fields):
+            # An inventory source takes its organization from its inventory and can't set its own, so keep it in step
+            # when the inventory moves.
+            self.inventory_sources.exclude(organization_id=self.organization_id).update(organization_id=self.organization_id)
         if self.kind == 'smart' and 'host_filter' in kwargs.get('update_fields', ['host_filter']) and connection.vendor != 'sqlite':
             # Minimal update of host_count for smart inventory host filter changes
             self.update_computed_fields()
