@@ -66,3 +66,40 @@ def test_create_project_copy_from(run_module, admin_user, organization, silence_
         admin_user,
     )
     silence_warning.assert_called_with("A project with the name {0} already exists.".format(proj_name))
+
+
+@pytest.mark.django_db
+def test_clear_project_credential(run_module, admin_user, organization, scm_credential):
+    result = run_module(
+        'project',
+        dict(
+            name='foo',
+            organization=organization.name,
+            scm_type='git',
+            scm_url='https://foo.invalid',
+            credential=scm_credential.name,
+            wait=False,
+        ),
+        admin_user,
+    )
+    assert result.pop('changed', None), result
+
+    proj = Project.objects.get(name='foo')
+    assert proj.credential_id == scm_credential.id
+
+    result = run_module(
+        'project',
+        dict(
+            name='foo',
+            organization=organization.name,
+            scm_type='git',
+            scm_url='https://foo.invalid',
+            credential='',
+            wait=False,
+        ),
+        admin_user,
+    )
+    assert result.pop('changed', None), result
+
+    proj.refresh_from_db()
+    assert proj.credential_id is None
