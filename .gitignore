@@ -131,6 +131,7 @@ requirements/vendor
 awx/lib/.deps_built
 awx/lib/site-packages
 venv/*
+.venv*
 use_dev_supervisor.txt
 
 
