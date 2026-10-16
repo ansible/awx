@@ -1,6 +1,6 @@
 -include awx/ui/Makefile
 
-PYTHON := $(notdir $(shell for i in python3.12 python3.11 python3; do command -v $$i; done|sed 1q))
+PYTHON := $(notdir $(shell for i in python3.12 python3; do command -v $$i; done|sed 1q))
 SHELL := bash
 DOCKER_COMPOSE ?= docker compose
 OFFICIAL ?= no
@@ -28,7 +28,7 @@ TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests
 PARALLEL_TESTS ?= -n auto
 # collection integration test directories (defaults to all)
 COLLECTION_TEST_TARGET ?=
-# Python version for ansible-test (must be 3.11, 3.12, or 3.13)
+# Python version for ansible-test (must be 3.12 or 3.13)
 ANSIBLE_TEST_PYTHON_VERSION ?= 3.13
 # args for collection install
 COLLECTION_PACKAGE ?= awx
