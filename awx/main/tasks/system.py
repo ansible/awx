@@ -460,6 +460,11 @@ def gather_analytics():
 
 @task(queue=get_task_queuename, timeout=600, on_duplicate='queue_one')
 def purge_old_stdout_files():
+    # The directory is created lazily when the first job's stdout file is
+    # written, so on a fresh or idle install it may not exist yet.
+    if not os.path.isdir(settings.JOBOUTPUT_ROOT):
+        logger.debug("Skipping stdout purge, {} does not exist".format(settings.JOBOUTPUT_ROOT))
+        return
     nowtime = time.time()
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
         if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT, f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
