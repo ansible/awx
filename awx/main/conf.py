@@ -808,6 +808,29 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+# impstats stores the interval in a C int: 2147483648 wraps negative and rsyslogd writes statistics
+# as fast as it can, 4294967296 wraps to 0, which it refuses. rsyslogd -N1 passes both.
+register(
+    'LOG_AGGREGATOR_ACTION_QUEUE_STATS_INTERVAL',
+    field_class=fields.IntegerField,
+    default=0,
+    min_value=0,
+    max_value=2147483647,
+    label=_('Interval (in seconds) between rsyslogd queue statistics'),
+    help_text=_(
+        'When greater than 0, rsyslogd writes its counters to its standard output, '
+        'which is the container log, once per interval: one JSON object per queue '
+        'and action, including the external logging action queue\'s current size, '
+        'peak size, and cumulative discarded.nf and discarded.full counts. '
+        'Equivalent to loading the rsyslogd impstats module. '
+        'The statistics are never sent to the log aggregator. 0 disables them (the default). '
+        'Only takes effect when external logging is enabled. '
+        'If a drop-in under /var/lib/awx/rsyslog/conf.d already loads impstats, '
+        'that drop-in takes precedence and this setting is ignored.'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
 register(
     'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH',
     field_class=fields.CharField,
