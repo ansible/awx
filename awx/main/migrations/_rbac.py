@@ -3,8 +3,6 @@ from time import time
 
 from django.db.models import Subquery, OuterRef, F
 
-from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
-
 logger = logging.getLogger('rbac_migrations')
 
 
@@ -32,10 +30,9 @@ def create_roles(apps, schema_editor):
         ]
     ]
 
-    with batch_role_ancestor_rebuilding():
-        for model in models:
-            for obj in model.objects.iterator():
-                obj.save()
+    for model in models:
+        for obj in model.objects.iterator():
+            obj.save()
 
 
 def delete_all_user_roles(apps, schema_editor):
@@ -174,6 +171,7 @@ def _restore_inventory_admins(apps, schema_editor, backward=False):
     start = time()
     JobTemplate = apps.get_model('main', 'JobTemplate')
     User = apps.get_model('auth', 'User')
+    Role = apps.get_model('main', "Role")
     changed_ct = 0
     jt_qs = JobTemplate.objects.filter(inventory__isnull=False)
     jt_qs = jt_qs.exclude(inventory__organization=F('project__organization'))
