@@ -236,7 +236,7 @@ class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
     resource_purpose = 'galaxy credentials of an organization'
 
     def is_valid_relation(self, parent, sub, created=False):
-        if sub.kind != 'galaxy_api_token':
+        if sub.credential_type.kind != 'galaxy':
             return {'msg': _(f"Credential must be a Galaxy credential, not {sub.credential_type.name}.")}
 
 
