@@ -1015,6 +1015,16 @@ register(
 )
 
 register(
+    'HOST_METRIC_INVENTORY_COUNTS_LAST_TS',
+    field_class=fields.DateTimeField,
+    label=_('Last run date for update_host_metric_inventory_counts'),
+    allow_null=True,
+    category=_('System'),
+    category_slug='system',
+    hidden=True,
+)
+
+register(
     'AWX_CLEANUP_PATHS',
     field_class=fields.BooleanField,
     label=_('Enable or Disable tmp dir cleanup'),
