@@ -29,9 +29,9 @@ from ansible_base.lib.utils.models import prevent_search
 from awx.api.versioning import reverse
 from awx.main.models import accepts_json, UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
-from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
+from awx.main.models.base import CreatedModifiedModel, NEW_JOB_TYPE_CHOICES, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, JSONBlob, OrderedManyToManyField
+from awx.main.fields import AskForField, ImplicitRoleField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     SurveyJobTemplateMixin,
     SurveyJobMixin,
@@ -412,6 +412,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
         'InstanceGroup', related_name='workflow_job_instance_groups', blank=True, editable=False, through='WorkflowJobInstanceGroupMembership'
     )
     allow_simultaneous = models.BooleanField(default=False)
+    ask_nodes_job_type_on_launch = models.BooleanField(default=False)
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -422,7 +423,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     @classmethod
     def _get_unified_job_field_names(cls):
         r = set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch', 'job_tags', 'skip_tags']
+            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch', 'job_tags', 'skip_tags', 'nodes_job_type']
         )
         r.remove('char_prompts')  # needed due to copying launch config to launch config
         return r
@@ -440,6 +441,10 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     def _inherit_node_relationships(self, old_node_list, node_links):
         for old_node in old_node_list:
             new_node = node_links[old_node.pk]
+
+            if self.ask_nodes_job_type_on_launch:
+                new_node.char_prompts['job_type'] = self.nodes_job_type
+                new_node.save(update_fields=["char_prompts"])
             for relationship in ['always_nodes', 'success_nodes', 'failure_nodes']:
                 old_manager = getattr(old_node, relationship)
                 for old_child_node in old_manager.all():
@@ -471,6 +476,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         'skip_tags',
         'job_tags',
         'execution_environment',
+        'nodes_job_type',
     ]
 
     class Meta:
@@ -508,6 +514,16 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
             'organization.approval_role',
             'admin_role',
         ]
+    )
+    ask_nodes_job_type_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    nodes_job_type = models.CharField(
+        max_length=32,
+        choices=NEW_JOB_TYPE_CHOICES,
+        default='',
+        blank=True,
     )
 
     @property
@@ -570,6 +586,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     def create_unified_job(self, **kwargs):
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
         workflow_job.copy_nodes_from_original(original=self)
+
         return workflow_job
 
     def _accept_or_ignore_job_kwargs(self, **kwargs):
@@ -665,6 +682,12 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     )
     is_sliced_job = models.BooleanField(default=False)
     is_bulk_job = models.BooleanField(default=False)
+    nodes_job_type = models.CharField(
+        max_length=32,
+        choices=NEW_JOB_TYPE_CHOICES,
+        blank=True,
+        default='',
+    )
 
     def _set_default_dependencies_processed(self):
         self.dependencies_processed = True
