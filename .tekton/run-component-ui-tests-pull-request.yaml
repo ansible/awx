@@ -71,9 +71,10 @@ spec:
     - name: pipeline-sender
       value: "{{sender}}"
 
-    # --- which component this PR is (tower = controller) ---
-    - name: aap-dev-component-source-name
-      value: "controller"
+    # --- which component this PR is: AUTO-DETECTED from repo name (awx→controller) ---
+    # Leave empty for auto-detection. Explicit value overrides auto-detection.
+    # - name: aap-dev-component-source-name
+    #   value: ""
 
     # --- deploy diagnostics: -vv so the deploy-aap ansible log shows which
     #     step runs at the ~90s control-plane collapse (TEST ONLY) ---
