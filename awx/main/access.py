@@ -711,10 +711,12 @@ class UserAccess(BaseAccess):
                 return False
             if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
                 target_perms = set(
-                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(obj)).values_list('object_id', 'content_type_id', 'codename').distinct()
+                    RoleEvaluation.objects.filter(role_id__in=RoleEvaluation.actor_role_ids(obj))
+                    .values_list('object_id', 'content_type_id', 'codename')
+                    .distinct()
                 )
                 user_perms = set(
-                    RoleEvaluation.objects.filter(**RoleEvaluation._actor_role_filter(self.user))
+                    RoleEvaluation.objects.filter(role_id__in=RoleEvaluation.actor_role_ids(self.user))
                     .values_list('object_id', 'content_type_id', 'codename')
                     .distinct()
                 )
