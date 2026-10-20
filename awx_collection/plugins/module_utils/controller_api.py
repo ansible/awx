@@ -1075,17 +1075,26 @@ class ControllerAPIModule(ControllerModule):
         reports changed on every run for any object that sets one. Normalizing both
         sides makes the comparison structural. An unset field reads back as '' and
         is equivalent to an empty mapping.
+
+        JSON is tried first: earlier versions of the modules stored these fields as
+        JSON, and YAML 1.1 reads some JSON numbers, such as 1e+20, as strings. YAML
+        is the fallback, when PyYAML is available. '""' is empty too, as the API
+        treats it.
         """
-        if value is None or value == '':
+        if value is None or value in ('', '""'):
             return {}
         if isinstance(value, str):
-            if not HAS_YAML:
-                return value
             try:
-                loaded = yaml.safe_load(value)
-            except yaml.YAMLError:
-                # Not parseable, so compare it as the opaque string it is.
-                return value
+                loaded = loads(value)
+            except (ValueError, RecursionError):  # JSONDecodeError is a ValueError; so is an over-long integer
+                if not HAS_YAML:
+                    return value
+                try:
+                    loaded = yaml.safe_load(value)
+                except (yaml.YAMLError, ValueError, RecursionError):
+                    # Not parseable (PyYAML raises ValueError for an invalid date), so
+                    # compare it as the opaque string it is.
+                    return value
             return {} if loaded is None else loaded
         return value
 
@@ -1106,16 +1115,17 @@ class ControllerAPIModule(ControllerModule):
 
     @classmethod
     def _serialize_vars_fields(cls, new_item):
-        """Render dict values for text-blob fields as YAML before sending them.
+        """Render dict values for text-blob fields as text before sending them.
 
-        Without this the dict is serialized as JSON, so the value shown in the UI
-        and returned by export is {"key": "value"} rather than YAML. An empty dict
-        becomes an empty string, which is how these fields are cleared.
+        The API stores these fields as text, so a dict is rendered as YAML, which is
+        what the UI shows and export returns, or as JSON when PyYAML isn't
+        available. An empty dict becomes an empty string, which is how these fields
+        are cleared.
 
         Returns a copy when there is anything to convert, leaving the caller's dict
         as the caller built it.
         """
-        if not HAS_YAML or not isinstance(new_item, dict):
+        if not isinstance(new_item, dict):
             return new_item
         fields = cls.VARS_TEXT_FIELDS.intersection(new_item)
         if not fields:
@@ -1124,7 +1134,12 @@ class ControllerAPIModule(ControllerModule):
         for field in fields:
             value = new_item[field]
             if isinstance(value, dict):
-                new_item[field] = '' if not value else yaml.safe_dump(value, default_flow_style=False, explicit_start=True)
+                if not value:
+                    new_item[field] = ''
+                elif HAS_YAML:
+                    new_item[field] = yaml.safe_dump(value, default_flow_style=False, explicit_start=True)
+                else:
+                    new_item[field] = dumps(value)
         return new_item
 
     def objects_could_be_different(self, old, new, field_set=None, warning=False):

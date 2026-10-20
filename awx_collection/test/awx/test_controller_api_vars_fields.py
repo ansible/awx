@@ -2,6 +2,9 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import json
+import sys
+
 import pytest
 
 VARS_TEXT_FIELDS = ['extra_vars', 'variables', 'source_vars']
@@ -29,6 +32,19 @@ def controller_api_module(collection_import):
         [{}, {}],
         # unparseable text is compared as the opaque string it is, not raised on
         ['foo: [unbalanced', 'foo: [unbalanced'],
+        # JSON is read as JSON: YAML 1.1 would read 1e+20 as a string
+        ['{"threshold": 1e+20}', {'threshold': 1e+20}],
+        # the API treats '""' as empty
+        ['""', {}],
+        # PyYAML raises ValueError, not YAMLError, for an invalid date: compared as text, not raised
+        ['a: 2001-02-30\n', 'a: 2001-02-30\n'],
+        # nesting deeper than the recursion limit is compared as text, not raised
+        pytest.param('[' * 100000, '[' * 100000, id='deeply-nested'),
+        # an integer longer than the int conversion limit fails both parsers, so it is compared as text
+        pytest.param(
+            '1' * 5000, '1' * 5000, id='over-long-integer',
+            marks=pytest.mark.skipif(not hasattr(sys, 'get_int_max_str_digits'), reason='no int conversion limit'),
+        ),
     ],
 )
 def test_normalize_vars_field(collection_import, value, expected):
@@ -106,3 +122,57 @@ def test_serialized_vars_match_what_the_api_returns(controller_api_module, field
 def test_objects_could_be_different_keeps_dict_comparison_for_other_fields(controller_api_module):
     assert controller_api_module.objects_could_be_different({'inputs': {'foo': 'bar'}}, {'inputs': {'foo': 'bar'}}) is False
     assert controller_api_module.objects_could_be_different({'inputs': {'foo': 'bar'}}, {'inputs': {'foo': 'baz'}}) is True
+
+
+def test_json_number_differs_from_a_string(collection_import):
+    """A number stored as JSON must not compare equal to the same text requested as a string."""
+    controller_api_class = collection_import('plugins.module_utils.controller_api').ControllerAPIModule
+    stored = controller_api_class._normalize_vars_field('{"threshold": 1e+20}')
+    requested = controller_api_class._normalize_vars_field({'threshold': '1e+20'})
+    assert not controller_api_class._vars_equal(stored, requested)
+
+
+@pytest.fixture
+def without_yaml(collection_import, monkeypatch):
+    controller_api = collection_import('plugins.module_utils.controller_api')
+    monkeypatch.setattr(controller_api, 'HAS_YAML', False)
+    return controller_api.ControllerAPIModule
+
+
+@pytest.mark.parametrize("field", VARS_TEXT_FIELDS)
+def test_serialize_vars_fields_without_yaml_sends_json_text(without_yaml, field):
+    new_item = without_yaml._serialize_vars_fields({'name': 'test', field: {'foo': 'bar'}})
+    assert isinstance(new_item[field], str)
+    assert json.loads(new_item[field]) == {'foo': 'bar'}
+
+
+@pytest.mark.parametrize("field", VARS_TEXT_FIELDS)
+def test_serialize_vars_fields_without_yaml_clears_empty(without_yaml, field):
+    assert without_yaml._serialize_vars_fields({field: {}})[field] == ''
+
+
+def test_normalize_vars_field_without_yaml(without_yaml):
+    # JSON still compares structurally; YAML is kept as the opaque string it is
+    assert without_yaml._normalize_vars_field('{"foo": "bar"}') == {'foo': 'bar'}
+    assert without_yaml._normalize_vars_field('foo: bar\n') == 'foo: bar\n'
+    assert without_yaml._vars_equal(without_yaml._normalize_vars_field('{"a": 1}'), without_yaml._normalize_vars_field({'a': 1}))
+
+
+@pytest.mark.parametrize("has_yaml", [True, False])
+@pytest.mark.parametrize(
+    "requested",
+    [
+        {'threshold': 1e20, 'ratio': 0.5, 'count': 3},
+        {'enabled': True, 'level': 1},
+        {'nested': {'list': [1, 'two', {'three': 3.0}]}},
+        {'unicode': 'caf\u00e9 \U0001f600'},
+    ],
+)
+def test_sent_value_reads_back_as_requested(collection_import, monkeypatch, has_yaml, requested):
+    """What the module sends compares equal to the request when read back, with or without PyYAML."""
+    controller_api = collection_import('plugins.module_utils.controller_api')
+    monkeypatch.setattr(controller_api, 'HAS_YAML', has_yaml)
+    module_class = controller_api.ControllerAPIModule
+    sent = module_class._serialize_vars_fields({'variables': requested})['variables']
+    assert isinstance(sent, str)
+    assert module_class._vars_equal(module_class._normalize_vars_field(sent), module_class._normalize_vars_field(requested))

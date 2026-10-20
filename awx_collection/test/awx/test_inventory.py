@@ -24,7 +24,7 @@ def test_inventory_create(run_module, admin_user, organization):
     assert not result.get('failed', False), result.get('msg', result)
 
     inv = Inventory.objects.get(name='foo-inventory')
-    assert inv.variables == '---\nanother-foo:\n  barz: bar2\nfoo: bar\n'
+    assert inv.variables == '---\nanother-foo:\n  barz: bar2\nfoo: bar'
 
     result.pop('module_args', None)
     result.pop('invocation', None)
