@@ -12,12 +12,11 @@ on:
       - feature_*
       - stable-*
 jobs:
-  check-ownership:
-    uses: ./.github/workflows/_repo-owns-branch.yml
-
   push-development-images:
-    needs: check-ownership
-    if: needs.check-ownership.outputs.should_run == 'true'
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.repository == 'ansible/awx' && (github.ref_name == 'devel' || startsWith(github.ref_name, 'feature_'))) ||
+      (github.repository == 'ansible/tower' && (startsWith(github.ref_name, 'stable-') || startsWith(github.ref_name, 'release_')))
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:

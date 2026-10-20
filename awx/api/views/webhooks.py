@@ -17,7 +17,7 @@ from awx.api import serializers
 from awx.api.generics import APIView, GenericAPIView
 from awx.api.permissions import WebhookKeyPermission
 from awx.main.models import Job, JobTemplate, WorkflowJob, WorkflowJobTemplate
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.utils.common import get_job_variable_prefixes
 
 logger = logging.getLogger('awx.api.views.webhooks')
 
@@ -166,7 +166,7 @@ class WebhookReceiverBase(APIView):
             'extra_vars': {},
         }
 
-        for name in JOB_VARIABLE_PREFIXES:
+        for name in get_job_variable_prefixes():
             kwargs['extra_vars']['{}_webhook_event_type'.format(name)] = event_type
             kwargs['extra_vars']['{}_webhook_event_guid'.format(name)] = event_guid
             kwargs['extra_vars']['{}_webhook_event_ref'.format(name)] = event_ref

@@ -100,10 +100,6 @@ MAX_ISOLATED_PATH_COLON_DELIMITER = 2
 
 SURVEY_TYPE_MAPPING = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': (float, int)}
 
-JOB_VARIABLE_PREFIXES = [
-    'awx',
-    'tower',
-]
 
 # Note, the \u001b[... are ansi color codes. We don't currenly import any of the python modules which define the codes.
 # Importing a library just for this message seemed like overkill

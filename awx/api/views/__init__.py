@@ -35,7 +35,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
-from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound
+from rest_framework.exceptions import APIException, PermissionDenied, ParseError, NotFound, ValidationError
 from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, StaticHTMLRenderer
@@ -118,6 +118,7 @@ from awx.api.permissions import (
 )
 from awx.api import renderers
 from awx.api import serializers
+from awx.api.validation_patterns import collect_survey_spec_text_errors
 from awx.api.metadata import RoleMetadata
 from awx.main.constants import ACTIVE_STATES, SURVEY_TYPE_MAPPING
 from awx.main.scheduler.dag_workflow import WorkflowDAG
@@ -127,8 +128,9 @@ from awx.api.views.mixin import (
     RelatedJobsPreventDeleteMixin,
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
+    UnifiedJobExcludeMixin,
 )
-from awx.api.pagination import UnifiedJobEventPagination
+from awx.api.pagination import ActivityStreamPagination, JobPagination, UnifiedJobEventPagination, UnifiedJobPagination
 from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views')
@@ -801,22 +803,11 @@ class TeamRolesList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
-        if role.content_type == credential_content_type:
-            if not role.content_object.organization:
-                data = dict(
-                    msg=_("You cannot grant access to a credential that is not assigned to an organization (private credentials cannot be assigned to teams)")
-                )
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            elif role.content_object.organization.id != team.organization.id:
-                if not request.user.is_superuser:
-                    data = dict(
-                        msg=_(
-                            "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
-                        )
-                    )
-                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('disassociate'):
+            team = get_object_or_404(models.Team, pk=self.kwargs['pk'])
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(team, role_definition=None, requesting_user=request.user)
 
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
@@ -845,8 +836,8 @@ class TeamProjectsList(SubListAPIView):
     def get_queryset(self):
         team = self.get_parent_object()
         self.check_parent_access(team)
-        my_qs = self.model.accessible_objects(self.request.user, 'read_role')
-        team_qs = models.Project.accessible_objects(team, 'read_role')
+        my_qs = self.model.access_qs(self.request.user, 'view')
+        team_qs = models.Project.access_qs(team, 'view')
         return my_qs & team_qs
 
 
@@ -900,7 +891,7 @@ class ExecutionEnvironmentList(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment. Once associated with JT/org/etc"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new execution environment container image reference."})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -973,7 +964,9 @@ class ProjectList(ListCreateAPIView):
     serializer_class = serializers.ProjectSerializer
     resource_purpose = 'projects'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of projects."})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Returns a paginated list of all projects. Projects represent playbook collections sourced from version control."}
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1017,7 +1010,7 @@ class ProjectTeamsList(ListAPIView):
         team_member_parent_roles = models.Role.objects.filter(children__in=roles_on_project, role_field='member_role', content_type=team_ct).distinct()
 
         team_ids = team_member_parent_roles.values_list('object_id', flat=True)
-        my_qs = self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=team_ids)
+        my_qs = self.model.access_qs(self.request.user, 'view').filter(pk__in=team_ids)
         return my_qs
 
 
@@ -1247,7 +1240,7 @@ class UserTeamsList(SubListAPIView):
         u = get_object_or_404(models.User, pk=self.kwargs['pk'])
         if not self.request.user.can_access(models.User, 'read', u):
             raise PermissionDenied()
-        return models.Team.accessible_objects(self.request.user, 'read_role').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
+        return models.Team.access_qs(self.request.user, 'view').filter(Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
 
 class UserRolesList(SubListAttachDetachAPIView):
@@ -1275,19 +1268,12 @@ class UserRolesList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(UserRolesList, self).post(request)
 
-        user = get_object_or_400(models.User, pk=self.kwargs['pk'])
-        role = get_object_or_400(models.Role, pk=sub_id)
-
-        content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        credential_content_type = content_types[models.Credential]
-        if role.content_type == credential_content_type:
-            if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
-                data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-            if not role.content_object.organization and not request.user.is_superuser:
-                data = dict(msg=_("You cannot grant private credential access to another user"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('disassociate'):
+            role = get_object_or_400(models.Role, pk=sub_id)
+            user = get_object_or_400(models.User, pk=self.kwargs['pk'])
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(user, role_definition=None, requesting_user=request.user)
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -1305,8 +1291,8 @@ class UserProjectsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = models.Project.accessible_objects(self.request.user, 'read_role')
-        user_qs = models.Project.accessible_objects(parent, 'read_role')
+        my_qs = models.Project.access_qs(self.request.user, 'view')
+        user_qs = models.Project.access_qs(parent, 'view')
         return my_qs & user_qs
 
 
@@ -1319,7 +1305,7 @@ class UserOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = models.Organization.accessible_objects(self.request.user, 'read_role')
+        my_qs = models.Organization.access_qs(self.request.user, 'view')
         user_qs = models.Organization.objects.filter(member_role__members=parent)
         return my_qs & user_qs
 
@@ -1333,7 +1319,7 @@ class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        my_qs = models.Organization.accessible_objects(self.request.user, 'read_role')
+        my_qs = models.Organization.access_qs(self.request.user, 'view')
         user_qs = models.Organization.objects.filter(admin_role__members=parent)
         return my_qs & user_qs
 
@@ -1402,7 +1388,7 @@ class CredentialTypeList(ListCreateAPIView):
     serializer_class = serializers.CredentialTypeSerializer
     resource_purpose = 'credential types'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of credential types"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns a paginated list of all credential types (machine, vault, cloud, etc.)."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -1510,8 +1496,8 @@ class UserCredentialsList(SubListCreateAPIView):
         user = self.get_parent_object()
         self.check_parent_access(user)
 
-        visible_creds = models.Credential.accessible_objects(self.request.user, 'read_role')
-        user_creds = models.Credential.accessible_objects(user, 'read_role')
+        visible_creds = models.Credential.access_qs(self.request.user, 'view')
+        user_creds = models.Credential.access_qs(user, 'view')
         return user_creds & visible_creds
 
 
@@ -1526,7 +1512,7 @@ class TeamCredentialsList(SubListCreateAPIView):
         team = self.get_parent_object()
         self.check_parent_access(team)
 
-        visible_creds = models.Credential.accessible_objects(self.request.user, 'read_role')
+        visible_creds = models.Credential.access_qs(self.request.user, 'view')
         team_creds = models.Credential.objects.filter(Q(use_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
         return (team_creds & visible_creds).distinct()
 
@@ -1542,7 +1528,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         organization = self.get_parent_object()
         self.check_parent_access(organization)
 
-        user_visible = models.Credential.accessible_objects(self.request.user, 'read_role').all()
+        user_visible = models.Credential.access_qs(self.request.user, 'view').all()
         org_set = models.Credential.objects.filter(organization=organization)
 
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
@@ -1783,11 +1769,15 @@ class CredentialExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
     obj_permission_type = 'use'
     resource_purpose = 'test external credential'
 
-    @extend_schema_if_available(extensions={"x-ai-description": """Test update the input values and metadata of an external credential.
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": """Test update the input values and metadata of an external credential.
         This endpoint supports testing credentials that connect to external secret management systems
         such as CyberArk AIM, CyberArk Conjur, HashiCorp Vault, AWS Secrets Manager, Azure Key Vault,
         Centrify Vault, Thycotic DevOps Secrets Vault, and GitHub App Installation Access Token Lookup.
-        It does not support standard credential types such as Machine, SCM, and Cloud."""})
+        It does not support standard credential types such as Machine, SCM, and Cloud."""
+        }
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.credential_type.kind != 'external':
@@ -1882,12 +1872,47 @@ class CredentialTypeExternalTest(OIDCCredentialTestMixin, SubDetailAPIView):
 
 
 class HostRelatedSearchMixin(object):
+    rest_filters_reserved_names = ('last_job_host_summary__failed', 'not__last_job_host_summary__failed')
+
     @property
     def related_search_fields(self):
         # Edge-case handle: https://github.com/ansible/ansible-tower/issues/7712
         ret = super(HostRelatedSearchMixin, self).related_search_fields
         ret.append('ansible_facts')
         return ret
+
+    def _validate_host_latest_summary_filter_value(self, param_name, value):
+        """Latest-summary host filters only support the documented ``?param=True`` form."""
+        if value != 'True':
+            raise ValidationError({param_name: _('filter value must be True')})
+
+    def _apply_latest_summary_failed_filter(self, qs):
+        """Filter hosts by whether their latest JobHostSummary failed.
+
+        Honors ``last_job_host_summary__failed`` and ``not__last_job_host_summary__failed``
+        with the same AND semantics as other list query string filters.
+        """
+        params = self.request.query_params
+        failed_param = params.get('last_job_host_summary__failed', None)
+        not_failed_param = params.get('not__last_job_host_summary__failed', None)
+        if failed_param is None and not_failed_param is None:
+            return qs
+        if failed_param is not None:
+            self._validate_host_latest_summary_filter_value('last_job_host_summary__failed', failed_param)
+        if not_failed_param is not None:
+            self._validate_host_latest_summary_filter_value('not__last_job_host_summary__failed', not_failed_param)
+        latest_failed = Subquery(models.JobHostSummary.objects.filter(host_id=OuterRef('pk')).order_by('-id').values('failed')[:1])
+        qs = qs.annotate(_latest_failed=latest_failed)
+        if failed_param is not None:
+            qs = qs.filter(_latest_failed=True)
+        if not_failed_param is not None:
+            qs = qs.filter(_latest_failed=False)
+        return qs
+
+    def _with_host_list_queryset(self, qs):
+        """Apply latest-summary list filters and serializer annotations."""
+        qs = self._apply_latest_summary_failed_filter(qs)
+        return qs.with_latest_summary_id()
 
 
 class HostMetricList(ListAPIView):
@@ -1944,7 +1969,8 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         if filter_string:
             filter_qs = SmartFilter.query_from_string(filter_string)
             qs &= filter_qs
-        return qs.distinct().with_latest_summary_id()
+            qs = qs.distinct()
+        return self._with_host_list_queryset(qs)
 
     def list(self, *args, **kwargs):
         try:
@@ -1996,7 +2022,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     resource_purpose = 'hosts of an inventory'
 
     def get_queryset(self):
-        return super().get_queryset().with_latest_summary_id()
+        return self._with_host_list_queryset(super().get_queryset())
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2087,11 +2113,11 @@ class GroupList(ListCreateAPIView):
     serializer_class = serializers.GroupSerializer
     resource_purpose = 'groups'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of groups."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns a paginated list of all host groups."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new group."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new host group within an inventory."})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -2182,7 +2208,7 @@ class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     resource_purpose = 'hosts of a group'
 
     def get_queryset(self):
-        return super().get_queryset().with_latest_summary_id()
+        return self._with_host_list_queryset(super().get_queryset())
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2215,7 +2241,7 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()  # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
-        return (qs & sublist_qs).with_latest_summary_id()
+        return self._with_host_list_queryset(qs & sublist_qs)
 
 
 class GroupInventorySourcesList(SubListAPIView):
@@ -2297,7 +2323,7 @@ class HostVariableData(BaseVariableData):
     serializer_class = serializers.HostVariableDataSerializer
     resource_purpose = 'variable data for a host'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "The extra variable configuration for this host."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Returns the extra variables (YAML/JSON) configured for a specific host by ID."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -2591,7 +2617,9 @@ class InventorySourceUpdateView(RetrieveAPIView):
     serializer_class = serializers.InventorySourceUpdateSerializer
     resource_purpose = 'update an inventory source'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Sync the inventory source"})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Trigger a sync of an inventory source by ID. Pulls latest host data from the external source."}
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(instance=obj, data=request.data)
@@ -2651,7 +2679,11 @@ class JobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'job templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of job templates."})
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Returns a paginated list of all job templates. A job template defines the playbook, inventory, credentials, and settings for launching a job."
+        }
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -2700,11 +2732,11 @@ class JobTemplateLaunch(RetrieveAPIView):
             if needed_passwords:
                 data['credential_passwords'] = {}
                 for p in needed_passwords:
-                    data['credential_passwords'][p] = u''
+                    data['credential_passwords'][p] = ''
             else:
                 data.pop('credential_passwords')
             for v in obj.variables_needed_to_start:
-                extra_vars.setdefault(v, u'')
+                extra_vars.setdefault(v, '')
             if extra_vars:
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.JobTemplate.get_ask_mapping()
@@ -2740,7 +2772,9 @@ class JobTemplateLaunch(RetrieveAPIView):
 
         return modern_data
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Launch the job template"})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Launch a job from a job template by ID. Starts execution of the playbook defined in the template."}
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -2817,13 +2851,18 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = serializers.EmptySerializer
     resource_purpose = 'job template survey specification'
+    advertises_survey_spec_schema = True
 
     @extend_schema_if_available(extensions={"x-ai-description": "Get job template survey specification"})
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         return Response(obj.display_survey_spec())
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Update job template survey specification"})
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Create or update the survey specification for a job template. Surveys prompt users for input variables at launch time."
+        }
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
@@ -2982,6 +3021,10 @@ class JobTemplateSurveySpec(GenericAPIView):
             elif qtype == "password" and 'default' in survey_item:
                 # Submission provides new encrypted default
                 survey_item['default'] = encrypt_value(survey_item['default'])
+
+        text_errors = collect_survey_spec_text_errors(new_spec, old_spec)
+        if text_errors:
+            return Response(text_errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema_if_available(extensions={"x-ai-description": "Delete job template survey specification"})
     def delete(self, request, *args, **kwargs):
@@ -3349,7 +3392,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         '''
         relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
         relationships.remove(self.relationship)
-        qs = functools.reduce(lambda x, y: (x | y), (Q(**{'{}__in'.format(r): [sub.id]}) for r in relationships))
+        qs = functools.reduce(lambda x, y: x | y, (Q(**{'{}__in'.format(r): [sub.id]}) for r in relationships))
 
         if models.WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
             return {"Error": _("Relationship not allowed.")}
@@ -3439,7 +3482,11 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     always_allow_superuser = False
     resource_purpose = 'workflow job templates'
 
-    @extend_schema_if_available(extensions={"x-ai-description": "A list of workflow job templates."})
+    @extend_schema_if_available(
+        extensions={
+            "x-ai-description": "Returns a paginated list of all workflow job templates. Workflow templates chain multiple node types—job templates, other workflows, project syncs, inventory syncs, management jobs, and approval gates—into a single automated workflow."
+        }
+    )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -3546,7 +3593,7 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
         extra_vars = data.pop('extra_vars', None) or {}
         if obj:
             for v in obj.variables_needed_to_start:
-                extra_vars.setdefault(v, u'')
+                extra_vars.setdefault(v, '')
             if extra_vars:
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
@@ -3606,7 +3653,9 @@ class WorkflowJobRelaunch(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return Response({})
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a workflow job"})
+    @extend_schema_if_available(
+        extensions={"x-ai-description": "Relaunch a previously completed or failed workflow job using the same parameters as the original run."}
+    )
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.is_sliced_job:
@@ -3868,9 +3917,10 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SystemJobTemplateNotific
     resource_purpose = 'notification templates triggered on system job success'
 
 
-class JobList(ListAPIView):
+class JobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.Job
     serializer_class = serializers.JobListSerializer
+    pagination_class = JobPagination
     resource_purpose = 'jobs'
 
     @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
@@ -3954,7 +4004,7 @@ class JobRelaunch(RetrieveAPIView):
             if needed_passwords:
                 data['credential_passwords'] = {}
                 for p in needed_passwords:
-                    data['credential_passwords'][p] = u''
+                    data['credential_passwords'][p] = ''
             else:
                 data.pop('credential_passwords', None)
         return data
@@ -3970,7 +4020,7 @@ class JobRelaunch(RetrieveAPIView):
                 self.permission_denied(request, message=messages['detail'])
         return super(JobRelaunch, self).check_object_permissions(request, obj)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a job"})
+    @extend_schema_if_available(extensions={"x-ai-description": "Relaunch a previously completed or failed job using the same parameters as the original run."})
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         context = self.get_serializer_context()
@@ -4585,10 +4635,11 @@ class UnifiedJobTemplateList(ListAPIView):
     resource_purpose = 'unified job templates'
 
 
-class UnifiedJobList(ListAPIView):
+class UnifiedJobList(UnifiedJobExcludeMixin, ListAPIView):
     model = models.UnifiedJob
     serializer_class = serializers.UnifiedJobListSerializer
     search_fields = ('description', 'name', 'job__playbook')
+    pagination_class = UnifiedJobPagination
     resource_purpose = 'unified jobs'
 
 
@@ -4739,7 +4790,7 @@ class NotificationTemplateList(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    @extend_schema_if_available(extensions={"x-ai-description": "Create a new notification template."})
+    @extend_schema_if_available(extensions={"x-ai-description": "Create a new notification template (email, Slack, webhook, etc.)."})
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -4834,6 +4885,7 @@ class ActivityStreamList(SimpleListAPIView):
     model = models.ActivityStream
     serializer_class = serializers.ActivityStreamSerializer
     search_fields = ('changes',)
+    pagination_class = ActivityStreamPagination
     resource_purpose = 'audit trail entries for tracking system changes'
 
     @extend_schema_if_available(
@@ -4888,19 +4940,12 @@ class RoleUsersList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(RoleUsersList, self).post(request)
 
-        user = get_object_or_400(models.User, pk=sub_id)
-        role = self.get_parent_object()
-
-        content_types = ContentType.objects.get_for_models(models.Organization, models.Team, models.Credential)  # dict of {model: content_type}
-        credential_content_type = content_types[models.Credential]
-        if role.content_type == credential_content_type:
-            if 'disassociate' not in request.data and role.content_object.organization and user not in role.content_object.organization.member_role:
-                data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-            if not role.content_object.organization and not request.user.is_superuser:
-                data = dict(msg=_("You cannot grant private credential access to another user"))
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('disassociate'):
+            user = get_object_or_400(models.User, pk=sub_id)
+            role = self.get_parent_object()
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(user, role_definition=None, requesting_user=request.user)
 
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
@@ -4933,24 +4978,6 @@ class RoleTeamsList(SubListAttachDetachAPIView):
             data = dict(msg=_("You cannot assign an Organization participation role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        credential_content_type = ContentType.objects.get_for_model(models.Credential)
-        if role.content_type == credential_content_type:
-            # Private credentials (no organization) are never allowed for teams
-            if not role.content_object.organization:
-                data = dict(
-                    msg=_("You cannot grant access to a credential that is not assigned to an organization (private credentials cannot be assigned to teams)")
-                )
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            # Cross-organization credentials are only allowed for superusers
-            elif role.content_object.organization.id != team.organization.id:
-                if not request.user.is_superuser:
-                    data = dict(
-                        msg=_(
-                            "You cannot grant a team access to a credential in a different organization. Only superusers can grant cross-organization credential access to teams"
-                        )
-                    )
-                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
         action = 'attach'
         if request.data.get('disassociate', None):
             action = 'unattach'
@@ -4958,6 +4985,11 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         if role.is_singleton() and action == 'attach':
             data = dict(msg=_("You cannot grant system-level permissions to a team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if action == 'attach':
+            content_object = role.content_object
+            if hasattr(content_object, 'validate_role_assignment'):
+                content_object.validate_role_assignment(team, role_definition=None, requesting_user=request.user)
 
         if not request.user.can_access(self.parent_model, action, role, team, self.relationship, request.data, skip_sub_obj_read_check=False):
             raise PermissionDenied()

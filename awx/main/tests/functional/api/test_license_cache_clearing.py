@@ -13,10 +13,12 @@ class TestLicenseCacheClearing:
         """Test that posting a manifest to /api/v2/config/ clears the LICENSE cache"""
 
         # Mock the licenser and clear_setting_cache
-        with patch('awx.api.views.root.get_licenser') as mock_get_licenser, patch('awx.api.views.root.validate_entitlement_manifest') as mock_validate, patch(
-            'awx.api.views.root.clear_setting_cache'
-        ) as mock_clear_cache, patch('django.db.connection.on_commit') as mock_on_commit:
-
+        with (
+            patch('awx.api.views.root.get_licenser') as mock_get_licenser,
+            patch('awx.api.views.root.validate_entitlement_manifest') as mock_validate,
+            patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache,
+            patch('django.db.connection.on_commit') as mock_on_commit,
+        ):
             # Set up mock license data
             mock_license_data = {'valid_key': True, 'license_type': 'enterprise', 'instance_count': 100, 'subscription_name': 'Test Enterprise License'}
 
@@ -54,7 +56,6 @@ class TestLicenseCacheClearing:
         """Test that DELETE /api/v2/config/ clears the LICENSE cache"""
 
         with patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache, patch('django.db.connection.on_commit') as mock_on_commit:
-
             # Make the DELETE request
             url = reverse('api:api_v2_config_view')
             delete(url, admin_user, expect=204)
@@ -72,10 +73,12 @@ class TestLicenseCacheClearing:
     def test_attach_view_clears_cache(self, admin_user, post):
         """Test that posting to /api/v2/config/attach/ clears the LICENSE cache"""
 
-        with patch('awx.api.views.root.get_licenser') as mock_get_licenser, patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache, patch(
-            'django.db.connection.on_commit'
-        ) as mock_on_commit, patch('awx.api.views.root.settings') as mock_settings:
-
+        with (
+            patch('awx.api.views.root.get_licenser') as mock_get_licenser,
+            patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache,
+            patch('django.db.connection.on_commit') as mock_on_commit,
+            patch('awx.api.views.root.settings') as mock_settings,
+        ):
             # Set up subscription credentials in settings
             mock_settings.SUBSCRIPTIONS_CLIENT_ID = 'test-client-id'
             mock_settings.SUBSCRIPTIONS_CLIENT_SECRET = 'test-client-secret'
@@ -113,10 +116,11 @@ class TestLicenseCacheClearing:
     def test_attach_view_subscription_not_found_no_cache_clear(self, admin_user, post):
         """Test that attach view doesn't clear cache when subscription is not found"""
 
-        with patch('awx.api.views.root.get_licenser') as mock_get_licenser, patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache, patch(
-            'django.db.connection.on_commit'
-        ) as mock_on_commit:
-
+        with (
+            patch('awx.api.views.root.get_licenser') as mock_get_licenser,
+            patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache,
+            patch('django.db.connection.on_commit') as mock_on_commit,
+        ):
             # Set up mock licenser with different subscription
             mock_licenser = MagicMock()
             subscription_data = {'subscription_id': 'different-subscription-456', 'valid_key': False, 'license_type': 'enterprise'}  # Different ID
@@ -142,10 +146,11 @@ class TestLicenseCacheClearing:
     def test_manifest_validation_error_no_cache_clear(self, admin_user, post):
         """Test that config view doesn't clear cache when manifest validation fails"""
 
-        with patch('awx.api.views.root.validate_entitlement_manifest') as mock_validate, patch(
-            'awx.api.views.root.clear_setting_cache'
-        ) as mock_clear_cache, patch('django.db.connection.on_commit') as mock_on_commit:
-
+        with (
+            patch('awx.api.views.root.validate_entitlement_manifest') as mock_validate,
+            patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache,
+            patch('django.db.connection.on_commit') as mock_on_commit,
+        ):
             # Mock validation to raise ValueError
             mock_validate.side_effect = ValueError("Invalid manifest")
 
@@ -166,10 +171,12 @@ class TestLicenseCacheClearing:
     def test_license_processing_error_no_cache_clear(self, admin_user, post):
         """Test that config view doesn't clear cache when license processing fails"""
 
-        with patch('awx.api.views.root.get_licenser') as mock_get_licenser, patch('awx.api.views.root.validate_entitlement_manifest') as mock_validate, patch(
-            'awx.api.views.root.clear_setting_cache'
-        ) as mock_clear_cache, patch('django.db.connection.on_commit') as mock_on_commit:
-
+        with (
+            patch('awx.api.views.root.get_licenser') as mock_get_licenser,
+            patch('awx.api.views.root.validate_entitlement_manifest') as mock_validate,
+            patch('awx.api.views.root.clear_setting_cache') as mock_clear_cache,
+            patch('django.db.connection.on_commit') as mock_on_commit,
+        ):
             # Mock validation to succeed but license processing to fail
             mock_validate.return_value = [{'some': 'manifest_data'}]
             mock_licenser = MagicMock()

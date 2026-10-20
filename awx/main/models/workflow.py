@@ -33,7 +33,6 @@ from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.fields import ImplicitRoleField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
-    ResourceMixin,
     SurveyJobTemplateMixin,
     SurveyJobMixin,
     RelatedJobsMixin,
@@ -460,7 +459,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
         return new_workflow_job
 
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, RelatedJobsMixin, WebhookTemplateMixin):
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = [
         'labels',
@@ -900,7 +899,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         return 'workflow_approval_template'
 
     def save(self, *args, **kwargs):
-        update_fields = list(kwargs.get('update_fields', []))
+        update_fields = list(kwargs.get('update_fields') or [])
         if self.timeout != 0 and ((not self.pk) or (not update_fields) or ('timeout' in update_fields)):
             if not self.created:  # on creation, created will be set by parent class, so we fudge it here
                 created = now()

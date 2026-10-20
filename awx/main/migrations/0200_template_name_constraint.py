@@ -31,7 +31,6 @@ def rename_wfjt(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0199_inventorygroupvariableswithhistory_and_more'),
     ]

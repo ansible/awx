@@ -2,14 +2,7 @@ import re
 from functools import reduce
 
 from django.core.exceptions import FieldDoesNotExist
-from pyparsing import (
-    infixNotation,
-    opAssoc,
-    Optional,
-    Literal,
-    CharsNotIn,
-    ParseException,
-)
+import pyparsing as pp
 import logging
 from logging import Filter
 
@@ -125,11 +118,11 @@ class DynamicLevelFilter(Filter):
 
 
 def string_to_type(t):
-    if t == u'null':
+    if t == 'null':
         return None
-    if t == u'true':
+    if t == 'true':
         return True
-    elif t == u'false':
+    elif t == 'false':
         return False
 
     if re.search(r'^[-+]?[0-9]+$', t):
@@ -158,7 +151,7 @@ class SmartFilter(object):
             search_kwargs = self._expand_search(k, v)
             if search_kwargs:
                 kwargs.update(search_kwargs)
-                q = reduce(lambda x, y: x | y, [models.Q(**{u'%s__icontains' % _k: _v}) for _k, _v in kwargs.items()])
+                q = reduce(lambda x, y: x | y, [models.Q(**{'%s__icontains' % _k: _v}) for _k, _v in kwargs.items()])
                 self.result = Host.objects.filter(q)
             else:
                 # detect loops and restrict access to sensitive fields
@@ -175,7 +168,7 @@ class SmartFilter(object):
             return v
 
         def strip_quotes_json_logic(self, v):
-            if type(v) is str and v.startswith('"') and v.endswith('"') and v != u'"null"':
+            if type(v) is str and v.startswith('"') and v.endswith('"') and v != '"null"':
                 return v[1:-1]
             return v
 
@@ -210,9 +203,9 @@ class SmartFilter(object):
                 strip_len = len(SmartFilter.SEARCHABLE_RELATIONSHIP)
             k = k[strip_len:]
 
-            pieces = k.split(u'__')
+            pieces = k.split('__')
 
-            assembled_k = u'%s__contains' % (SmartFilter.SEARCHABLE_RELATIONSHIP)
+            assembled_k = '%s__contains' % (SmartFilter.SEARCHABLE_RELATIONSHIP)
             assembled_v = None
 
             last_v = None
@@ -220,7 +213,7 @@ class SmartFilter(object):
 
             for i, piece in enumerate(pieces):
                 new_kv = dict()
-                if piece.endswith(u'[]'):
+                if piece.endswith('[]'):
                     new_v = []
                     new_kv[piece[0:-2]] = new_v
                 else:
@@ -247,32 +240,19 @@ class SmartFilter(object):
             return (assembled_k, assembled_v)
 
         def _extract_key_value(self, t):
-            t_len = len(t)
+            k = t[0]
+            v = t[1] if len(t) > 1 else ""
 
-            k = None
-            v = None
+            # Strip quotes from key
+            if isinstance(k, str) and k.startswith('"') and k.endswith('"'):
+                k = k[1:-1]
 
-            # key
-            # "something"=
-            v_offset = 2
-            if t_len >= 2 and t[0] == "\"" and t[2] == "\"":
-                k = t[1]
-                v_offset = 4
-            # something=
+            # For quoted values, keep the quotes (strip_quotes_* will handle them later).
+            # For unquoted values, convert to the appropriate Python type.
+            if isinstance(v, str) and v.startswith('"') and v.endswith('"'):
+                pass  # keep as-is, e.g. '"true"', '""', '"null"'
             else:
-                k = t[0]
-
-            # value
-            # ="something"
-            if t_len > (v_offset + 2) and t[v_offset] == "\"" and t[v_offset + 2] == "\"":
-                v = u'"' + str(t[v_offset + 1]) + u'"'
-                # v = t[v_offset + 1]
-            # empty ""
-            elif t_len > (v_offset + 1):
-                v = u""
-            # no ""
-            else:
-                v = string_to_type(t[v_offset])
+                v = string_to_type(v)
 
             return (k, v)
 
@@ -288,7 +268,7 @@ class SmartFilter(object):
                 try:
                     model = get_model(relation)
                 except LookupError:
-                    raise ParseException('No related field named %s' % relation)
+                    raise pp.ParseException('No related field named %s' % relation)
 
             search_kwargs = {}
             if model is not None:
@@ -328,35 +308,32 @@ class SmartFilter(object):
     def query_from_string(cls, filter_string):
         """
         TODO:
-        * handle values with " via: a.b.c.d="hello\"world"
         * handle keys with " via: a.\"b.c="yeah"
         * handle key with __ in it
         """
         filter_string_raw = filter_string
         filter_string = str(filter_string)
 
-        unicode_spaces = list(set(str(c) for c in filter_string if c.isspace()))
-        unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
-        atom = CharsNotIn(unicode_spaces_other)
-        atom_inside_quotes = CharsNotIn(u'"')
-        atom_quoted = Literal('"') + Optional(atom_inside_quotes) + Literal('"')
-        EQUAL = Literal('=')
+        unquoted = pp.CharsNotIn('()= \t\r\n"')
+        unquoted.skipWhitespace = True
+        quoted = pp.QuotedString('"', esc_char='\\', unquote_results=False)
+        token = quoted | unquoted
 
-        grammar = (atom_quoted | atom) + EQUAL + Optional((atom_quoted | atom))
-        grammar.setParseAction(cls.BoolOperand)
+        operand = token + pp.Suppress("=") + pp.Optional(token, default="")
+        operand.set_parse_action(cls.BoolOperand)
 
-        boolExpr = infixNotation(
-            grammar,
+        bool_expr = pp.infix_notation(
+            operand,
             [
-                ("and", 2, opAssoc.LEFT, cls.BoolAnd),
-                ("or", 2, opAssoc.LEFT, cls.BoolOr),
+                (pp.Keyword("and"), 2, pp.OpAssoc.LEFT, cls.BoolAnd),
+                (pp.Keyword("or"), 2, pp.OpAssoc.LEFT, cls.BoolOr),
             ],
         )
 
         try:
-            res = boolExpr.parseString('(' + filter_string + ')')
-        except (ParseException, FieldDoesNotExist):
-            raise RuntimeError(u"Invalid query %s" % filter_string_raw)
+            res = bool_expr.parse_string(filter_string, parse_all=True)
+        except (pp.ParseException, FieldDoesNotExist):
+            raise RuntimeError("Invalid query %s" % filter_string_raw)
 
         if len(res) > 0:
             return res[0].result

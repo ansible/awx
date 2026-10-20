@@ -131,14 +131,18 @@ def test_workflow_creation_permissions(setup_managed_roles, organization, workfl
 
 @pytest.mark.django_db
 def test_assign_credential_to_user_of_another_org(setup_managed_roles, credential, admin_user, rando, org_admin, organization, post):
-    '''Test that a credential can only be assigned to a user in the same organization'''
-    # cannot assign credential to rando, as rando is not in the same org as the credential
+    '''Test that a credential can only be assigned to a user in the same organization by non-superusers'''
     rd = RoleDefinition.objects.get(name="Credential Admin")
     credential.organization = organization
     credential.save(update_fields=['organization'])
     assert credential.organization not in Organization.access_qs(rando, 'member')
     url = django_reverse('roleuserassignment-list')
-    resp = post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=400)
+
+    # superuser can assign cross-org
+    post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=201)
+
+    # non-superuser (org_admin) cannot assign cross-org
+    resp = post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": credential.id}, user=org_admin, expect=400)
     assert "You cannot grant credential access to a User not in the credentials' organization" in str(resp.data)
 
     # can assign credential to superuser
@@ -146,7 +150,7 @@ def test_assign_credential_to_user_of_another_org(setup_managed_roles, credentia
     rando.save()
     post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=201)
 
-    # can assign credential to org_admin
+    # can assign credential to org_admin (same org)
     assert credential.organization in Organization.access_qs(org_admin, 'member')
     post(url=url, data={"user": org_admin.id, "role_definition": rd.id, "object_id": credential.id}, user=admin_user, expect=201)
 

@@ -8,7 +8,6 @@ logger = logging.getLogger('awx.main.migrations')
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0202_convert_controller_role_definitions'),
     ]

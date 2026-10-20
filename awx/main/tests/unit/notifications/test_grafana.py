@@ -10,8 +10,8 @@ def test_send_messages():
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='')
         message = EmailMessage(
@@ -32,6 +32,7 @@ def test_send_messages():
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -40,8 +41,8 @@ def test_send_messages_with_no_verify_ssl():
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='', grafana_no_verify_ssl=True)
         message = EmailMessage(
@@ -62,6 +63,7 @@ def test_send_messages_with_no_verify_ssl():
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=False,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -71,8 +73,8 @@ def test_send_messages_with_dashboardid(dashboardId):
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=dashboardId, panelId='')
         message = EmailMessage(
@@ -93,6 +95,7 @@ def test_send_messages_with_dashboardid(dashboardId):
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000, 'dashboardId': dashboardId},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -102,8 +105,8 @@ def test_send_messages_with_panelid(panelId):
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId=panelId)
         message = EmailMessage(
@@ -124,6 +127,7 @@ def test_send_messages_with_panelid(panelId):
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': int(panelId), 'time': 60000},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -132,8 +136,8 @@ def test_send_messages_with_bothids():
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='42', panelId='42')
         message = EmailMessage(
@@ -154,6 +158,7 @@ def test_send_messages_with_bothids():
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': 42, 'time': 60000, 'dashboardId': 42},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -162,8 +167,8 @@ def test_send_messages_with_emptyids():
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='')
         message = EmailMessage(
@@ -184,6 +189,7 @@ def test_send_messages_with_emptyids():
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -192,8 +198,8 @@ def test_send_messages_with_tags():
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
-        m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
-        m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
+        m['started'] = dt.datetime.fromtimestamp(60, tz=dt.timezone.utc).isoformat()
+        m['finished'] = dt.datetime.fromtimestamp(120, tz=dt.timezone.utc).isoformat()
         m['subject'] = "test subject"
         backend = grafana_backend.GrafanaBackend("testapikey", dashboardId='', panelId='', annotation_tags=["ansible"])
         message = EmailMessage(
@@ -214,5 +220,6 @@ def test_send_messages_with_tags():
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
             json={'tags': ['ansible'], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1

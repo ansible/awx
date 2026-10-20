@@ -39,6 +39,13 @@ def create_queries_dir_mock(file_lookup_func):
 class MockCallbackBase:
     def __init__(self):
         self._display = mock.MagicMock()
+        self._plugin_options = {}
+
+    def get_option(self, key):
+        return self._plugin_options.get(key)
+
+    def set_option(self, key, value):
+        self._plugin_options[key] = value
 
     def v2_playbook_on_stats(self, stats):
         pass
@@ -289,6 +296,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -318,6 +326,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -342,6 +351,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -372,6 +382,7 @@ class TestExternalQueryDiscovery:
 
         callback = CallbackModule()
         callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', True)
 
         with mock.patch('builtins.open', mock.mock_open()):
             with mock.patch('json.dumps', return_value='{}'):
@@ -382,18 +393,39 @@ class TestExternalQueryDiscovery:
         assert '4.1.0' in call_args
         assert 'community.vmware' in call_args
 
+    @mock.patch('awx.playbooks.library.indirect_instance_count.list_collections')
+    @mock.patch('awx.playbooks.library.indirect_instance_count.files')
+    @mock.patch('awx.playbooks.library.indirect_instance_count.find_external_query_with_fallback')
+    @mock.patch.dict('os.environ', {'AWX_ISOLATED_DATA_DIR': '/tmp/artifacts'})
+    def test_queries_not_collected_when_option_disabled(self, mock_fallback, mock_files, mock_list_collections):
+        """Host query scanning is skipped when collect_host_queries is disabled."""
+        from awx.playbooks.library.indirect_instance_count import CallbackModule
+
+        mock_list_collections.return_value = [mock.Mock(namespace='demo', name='query', ver='1.0.0', fqcn='demo.query')]
+
+        callback = CallbackModule()
+        callback._display = mock.Mock()
+        callback.set_option('collect_host_queries', False)
+
+        with mock.patch('builtins.open', mock.mock_open()):
+            with mock.patch('json.dumps', return_value='{}'):
+                callback.v2_playbook_on_stats(mock.Mock())
+
+        mock_list_collections.assert_called_once()
+        mock_files.assert_not_called()
+        mock_fallback.assert_not_called()
+
 
 class TestPrivateDataDirIntegration:
     """Tests for vendor collection copying (AC7.10-AC7.11)."""
 
-    @mock.patch('awx.main.tasks.jobs.flag_enabled')
+    @mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True)
     @mock.patch('awx.main.tasks.jobs.shutil.copytree')
     @mock.patch('awx.main.tasks.jobs.os.path.exists')
-    def test_vendor_collections_copied(self, mock_exists, mock_copytree, mock_flag):
+    def test_vendor_collections_copied(self, mock_exists, mock_copytree):
         """AC7.10: build_private_data_files() copies vendor collections to private_data_dir."""
         from awx.main.tasks.jobs import BaseTask
 
-        mock_flag.return_value = True
         mock_exists.return_value = True
 
         task = BaseTask()
@@ -406,15 +438,14 @@ class TestPrivateDataDirIntegration:
 
         mock_copytree.assert_called_once_with('/var/lib/awx/vendor_collections', f'{private_data_dir}/vendor_collections')
 
-    @mock.patch('awx.main.tasks.jobs.flag_enabled')
+    @mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True)
     @mock.patch('awx.main.tasks.jobs.logger')
     @mock.patch('awx.main.tasks.jobs.shutil.copytree')
     @mock.patch('awx.main.tasks.jobs.os.path.exists')
-    def test_missing_source_handled_gracefully(self, mock_exists, mock_copytree, mock_logger, mock_flag):
+    def test_missing_source_handled_gracefully(self, mock_exists, mock_copytree, mock_logger):
         """AC7.11: Collection copy handles missing source directory gracefully."""
         from awx.main.tasks.jobs import BaseTask
 
-        mock_flag.return_value = True
         mock_exists.return_value = False
 
         task = BaseTask()

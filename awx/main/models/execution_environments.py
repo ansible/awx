@@ -58,8 +58,6 @@ class ExecutionEnvironment(CommonModel):
         return reverse('api:execution_environment_detail', kwargs={'pk': self.pk}, request=request)
 
     def validate_role_assignment(self, actor, role_definition, **kwargs):
-        from awx.main.models.credential import check_resource_server_for_user_in_organization
-
         if self.managed:
             raise ValidationError({'object_id': _('Can not assign object roles to managed Execution Environments')})
         if self.organization_id is None:
@@ -67,10 +65,6 @@ class ExecutionEnvironment(CommonModel):
 
         if actor._meta.model_name == 'user':
             if actor.has_obj_perm(self.organization, 'view'):
-                return
-
-            requesting_user = kwargs.get('requesting_user', None)
-            if check_resource_server_for_user_in_organization(actor, self.organization, requesting_user):
                 return
 
             raise ValidationError({'user': _('User must have view permission to Execution Environment organization')})
