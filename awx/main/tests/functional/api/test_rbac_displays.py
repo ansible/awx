@@ -255,8 +255,10 @@ def test_prefetch_user_capabilities(organization, alice, bob):
         alice,
     )
     expected = get_user_capabilities(alice, bob, method_list=['edit', 'delete'])
+    expected_self = get_user_capabilities(alice, alice, method_list=['edit', 'delete'])
 
     assert mapping[bob.id] == {key: expected[key] for key in ('edit', 'delete')}
+    assert mapping[alice.id] == {key: expected_self[key] for key in ('edit', 'delete')}
 
 
 @pytest.mark.django_db
