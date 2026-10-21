@@ -269,6 +269,39 @@ def test_unified_job_list_count_matches_for_mixed_roles(admin, user, setup_manag
 
 
 @pytest.mark.django_db
+def test_unified_job_count_deduplicates_multiple_access_routes(user, setup_managed_roles, get):
+    """A job reachable through multiple permission paths (direct JT role,
+    org auditor role, and team role) must appear exactly once in the
+    results and count."""
+    org = Organization.objects.create(name="triple-route-org")
+    inventory = org.inventories.create(name="triple-route-inventory")
+    project = Project.objects.create(name="triple-route-project", organization=org)
+    jt = JobTemplate.objects.create(
+        name="triple-route-template",
+        project=project,
+        inventory=inventory,
+        organization=org,
+    )
+    job = jt.create_unified_job()
+
+    viewer = user("triple-route-viewer")
+
+    RoleDefinition.objects.get(name="JobTemplate Execute").give_permission(viewer, jt)
+    RoleDefinition.objects.get(name="Organization Audit").give_permission(viewer, org)
+
+    team = Team.objects.create(name="triple-route-team", organization=org)
+    team.member_role.members.add(viewer)
+    RoleDefinition.objects.get(name="JobTemplate Execute").give_permission(team, jt)
+
+    response = get(reverse("api:unified_job_list"), viewer)
+
+    assert response.status_code == 200
+    ids = [result["id"] for result in response.data["results"]]
+    assert ids == [job.pk]
+    assert response.data["count"] == 1
+
+
+@pytest.mark.django_db
 def test_direct_jt_permission_only_sees_jt_jobs(user, setup_managed_roles, get):
     """A user with a direct JT permission (but no inventory or org permissions)
     sees only jobs from that JT — inventory updates are not visible."""
