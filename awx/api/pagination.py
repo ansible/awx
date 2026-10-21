@@ -38,10 +38,17 @@ class ActivityStreamPaginator(DjangoPaginator):
 
 
 class UnifiedJobPaginator(DjangoPaginator):
-    """Count visible unified jobs through a primary-key subquery instead of full rows."""
+    """Count only the unified jobs the requesting user can see.
+
+    Uses a PK subquery so the database can index-scan the RBAC-filtered
+    primary keys instead of counting the full UNION queryset directly.
+    Same approach as JobPaginator.
+    """
 
     @cached_property
     def count(self):
+        # Collect PKs from the RBAC-filtered queryset (stripping ORDER BY for efficiency),
+        # then COUNT against the base table using an index-only scan on the PK.
         visible_pks = self.object_list.order_by().values("pk")
         return self.object_list.model.objects.filter(pk__in=visible_pks).count()
 

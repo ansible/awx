@@ -225,6 +225,50 @@ def test_unified_job_list_pagination_count_matches_rbac_filtered_results(rando, 
 
 
 @pytest.mark.django_db
+def test_unified_job_list_count_matches_for_mixed_roles(admin, user, setup_managed_roles, get):
+    """A user with a mix of roles should see a count that matches exactly
+    the number of results they are permitted to view, not the global total."""
+    org = Organization.objects.create(name='uj-mixed-count-org')
+    inventory = org.inventories.create(name='uj-mixed-count-inv')
+    project = Project.objects.create(name='uj-mixed-count-project', organization=org)
+
+    # Two job templates — user will only get access to jt_visible
+    jt_visible = JobTemplate.objects.create(name='uj-mixed-visible-jt', project=project, inventory=inventory, organization=org)
+    jt_hidden = JobTemplate.objects.create(name='uj-mixed-hidden-jt', project=project, inventory=inventory, organization=org)
+
+    visible_job_1 = jt_visible.create_unified_job()
+    visible_job_2 = jt_visible.create_unified_job()
+    jt_hidden.create_unified_job()
+    jt_hidden.create_unified_job()
+
+    # Inventory source — user will get access via inventory view
+    inv_src = InventorySource.objects.create(name='uj-mixed-count-invsrc', inventory=inventory, source='ec2')
+    visible_inv_update = InventoryUpdate.objects.create(inventory_source=inv_src, source=inv_src.source)
+
+    # Ad hoc command — also visible via inventory view
+    visible_adhoc = AdHocCommand.objects.create(name='uj-mixed-count-adhoc', inventory=inventory)
+
+    mixed_user = user('uj-mixed-role-user')
+    RoleDefinition.objects.get(name='JobTemplate Execute').give_permission(mixed_user, jt_visible)
+    RoleDefinition.objects.get(name='Inventory Admin').give_permission(mixed_user, inventory)
+
+    expected_visible_ids = {visible_job_1.pk, visible_job_2.pk, visible_inv_update.pk, visible_adhoc.pk}
+
+    # Admin sees everything
+    admin_response = get(reverse('api:unified_job_list'), admin)
+    assert admin_response.status_code == 200
+    assert admin_response.data['count'] == len(admin_response.data['results'])
+
+    # Mixed-role user sees only their permitted jobs, and count matches
+    user_response = get(reverse('api:unified_job_list'), mixed_user)
+    assert user_response.status_code == 200
+    user_result_ids = {r['id'] for r in user_response.data['results']}
+    assert user_result_ids == expected_visible_ids
+    assert user_response.data['count'] == len(expected_visible_ids)
+    assert user_response.data['count'] < admin_response.data['count']
+
+
+@pytest.mark.django_db
 def test_direct_jt_permission_only_sees_jt_jobs(user, setup_managed_roles, get):
     """A user with a direct JT permission (but no inventory or org permissions)
     sees only jobs from that JT — inventory updates are not visible."""
