@@ -2,11 +2,16 @@
 # All Rights Reserved.
 
 import ipaddress
+import logging
 import socket
 
+from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend
 
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
+from awx.main.notifications.url_validation import _is_always_denied, _is_hostname_allowed, _is_ip_allowed
+
+logger = logging.getLogger('awx.main.notifications.email_backend')
 
 DEFAULT_MSG = CustomNotificationBase.DEFAULT_MSG
 DEFAULT_BODY = CustomNotificationBase.DEFAULT_BODY
@@ -61,17 +66,26 @@ class CustomEmailBackend(EmailBackend, CustomNotificationBase):
             return
         if host.startswith('[') and host.endswith(']'):
             host = host[1:-1]
+
+        allow_list = getattr(settings, 'NOTIFICATION_IP_ALLOW_LIST', [])
+        hostname_allowed = _is_hostname_allowed(host, allow_list)
+
         try:
             addrinfo = socket.getaddrinfo(host, None)
         except socket.gaierror:
             return
+
         for family, type_, proto, canonname, sockaddr in addrinfo:
             try:
                 ip = ipaddress.ip_address(sockaddr[0])
             except ValueError:
                 continue
-            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
-                raise ValueError('SMTP host is not allowed: the host resolves to a private or reserved network address.')
+            if _is_always_denied(ip):
+                raise ValueError(f'SMTP host {host!r} resolves to link-local address {ip} (always blocked)')
+            if not hostname_allowed:
+                if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+                    if not _is_ip_allowed(ip, allow_list):
+                        raise ValueError(f'SMTP host is not allowed: {host!r} resolves to blocked address {ip}')
 
     def open(self):
         self._validate_host_not_internal(self.host)
