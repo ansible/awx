@@ -605,6 +605,8 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
       --> prefetch logical combination of use permission to inventory AND
           project, put into cache dictionary as 'copy'
     """
+    from awx.main.access import UserAccess
+
     page_ids = [obj.id for obj in page]
     mapping = {}
     for obj in page:
@@ -705,28 +707,21 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                         if actor_permissions is None
                         else actor_permissions
                     )
-                    allowed_ids = set()
-                    for target in page:
-                        if target == user:
-                            allowed_ids.add(target.pk)
-                            continue
-                        if target.is_superuser:
-                            can_manage_other_superuser = (
-                                user.is_superuser and target != user and (display_method == 'edit' or (display_method == 'delete' and superuser_count > 1))
-                            )
-                            if can_manage_other_superuser:
-                                allowed_ids.add(target.pk)
-                            continue
-                        if target.pk in system_auditor_ids:
-                            continue
-                        target_org_ids = memberships.get(target.pk, set())
-                        if target_org_ids and target_org_ids.issubset(admin_org_ids):
-                            allowed_ids.add(target.pk)
-                        elif display_method == 'delete' and not target_org_ids:
-                            if target_permissions.get(target.pk, set()).issubset(actor_permissions):
-                                allowed_ids.add(target.pk)
-                    if display_method == 'delete':
-                        allowed_ids.discard(user.pk)
+                    user_access = UserAccess(user)
+                    allowed_ids = {
+                        target.pk
+                        for target in page
+                        if user_access.prefetched_capability_allowed(
+                            target,
+                            display_method,
+                            admin_org_ids,
+                            memberships,
+                            system_auditor_ids,
+                            target_permissions,
+                            actor_permissions,
+                            superuser_count,
+                        )
+                    }
                     filter_args.append(Q(pk__in=allowed_ids))
                 elif hasattr(model, 'access_qs'):
                     filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
