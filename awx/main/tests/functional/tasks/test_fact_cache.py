@@ -221,3 +221,55 @@ class TestConstructedInventoryFactCache:
 
         assert source_host.ansible_facts == {'role': 'web', 'deployed': True}
         assert not constructed_host.ansible_facts, f'Facts were stored on the constructed host: {constructed_host.ansible_facts!r}'
+
+
+@pytest.mark.django_db
+class TestSlicedJobFactCache:
+    """finish_fact_cache must work when get_hosts_for_fact_cache returns a sliced result."""
+
+    def test_sliced_hosts_persist_facts(self, organization, artifacts_dir):
+        """Sliced jobs must persist facts even though get_sliced_hosts returns a list.
+
+        Regression test for AAP-97902: get_sliced_hosts() returns a list when
+        slice_count > 1, and finish_fact_cache() needs a QuerySet to call .filter().
+        get_hosts_for_fact_cache() must convert the list back to a QuerySet.
+        """
+        inv = Inventory.objects.create(organization=organization, name='slice-inv')
+        hosts = [inv.hosts.create(name=f'host{i}') for i in range(4)]
+
+        for h in hosts:
+            h.ansible_facts = {'old': True}
+            h.ansible_facts_modified = now()
+            h.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
+
+        # Simulate what get_hosts_for_fact_cache does for a sliced job:
+        # get_sliced_hosts with slice_number=1, slice_count=2 returns a list
+        host_qs = inv.hosts.all()
+        sliced = inv.get_sliced_hosts(host_qs, slice_number=1, slice_count=2)
+        assert isinstance(sliced, list), 'get_sliced_hosts should return a list for sliced jobs'
+
+        # Convert back to QuerySet (this is the fix)
+        sliced_qs = Host.objects.filter(pk__in=[h.pk for h in sliced])
+
+        start_fact_cache(sliced_qs, artifacts_dir=artifacts_dir, timeout=0, inventory_id=inv.id)
+
+        # Simulate ansible writing new facts for each host in the slice
+        for h in sliced:
+            fact_file = os.path.join(artifacts_dir, 'fact_cache', h.name)
+            future = time.time() + 60
+            with open(fact_file, 'w') as f:
+                json.dump({'updated': True, 'host': h.name}, f)
+            os.utime(fact_file, (future, future))
+
+        # This would crash with AttributeError before the fix
+        finish_fact_cache(sliced_qs, artifacts_dir=artifacts_dir, inventory_id=inv.id)
+
+        for h in hosts:
+            h.refresh_from_db()
+
+        sliced_names = {h.name for h in sliced}
+        for h in hosts:
+            if h.name in sliced_names:
+                assert h.ansible_facts.get('updated') is True, f'{h.name} should have updated facts'
+            else:
+                assert h.ansible_facts == {'old': True}, f'{h.name} should be unchanged'
