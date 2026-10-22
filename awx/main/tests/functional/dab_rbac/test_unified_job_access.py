@@ -205,10 +205,10 @@ def test_unified_job_list_filtered_count_matches_results(admin, organization, in
 
 
 @pytest.mark.django_db
-def test_unified_job_list_pagination_uses_unfiltered_count(rando, setup_managed_roles, get):
-    """The pagination count should reflect total unified job rows, not
-    the RBAC-filtered subset.  The RBAC-filtered COUNT is catastrophically
-    slow on large tables with pk__in UNION subqueries."""
+def test_unified_job_list_pagination_count_matches_rbac_filtered_results(rando, setup_managed_roles, get):
+    """The pagination count should reflect the RBAC-filtered result set,
+    not the unfiltered table total.  A user who cannot see any jobs
+    should see count == 0."""
     org = Organization.objects.create(name='uj-count-org')
     inventory = org.inventories.create(name='uj-count-inv')
     project = Project.objects.create(name='uj-count-project', organization=org)
@@ -221,7 +221,84 @@ def test_unified_job_list_pagination_uses_unfiltered_count(rando, setup_managed_
     response = get(reverse('api:unified_job_list'), rando)
     assert response.status_code == 200
     assert len(response.data['results']) == 0
-    assert response.data['count'] == total_jobs
+    assert response.data['count'] == 0
+
+
+@pytest.mark.django_db
+def test_unified_job_list_count_matches_for_mixed_roles(admin, user, setup_managed_roles, get):
+    """A user with a mix of roles should see a count that matches exactly
+    the number of results they are permitted to view, not the global total."""
+    org = Organization.objects.create(name='uj-mixed-count-org')
+    inventory = org.inventories.create(name='uj-mixed-count-inv')
+    project = Project.objects.create(name='uj-mixed-count-project', organization=org)
+
+    # Two job templates — user will only get access to jt_visible
+    jt_visible = JobTemplate.objects.create(name='uj-mixed-visible-jt', project=project, inventory=inventory, organization=org)
+    jt_hidden = JobTemplate.objects.create(name='uj-mixed-hidden-jt', project=project, inventory=inventory, organization=org)
+
+    visible_job_1 = jt_visible.create_unified_job()
+    visible_job_2 = jt_visible.create_unified_job()
+    jt_hidden.create_unified_job()
+    jt_hidden.create_unified_job()
+
+    # Inventory source — user will get access via inventory view
+    inv_src = InventorySource.objects.create(name='uj-mixed-count-invsrc', inventory=inventory, source='ec2')
+    visible_inv_update = InventoryUpdate.objects.create(inventory_source=inv_src, source=inv_src.source)
+
+    # Ad hoc command — also visible via inventory view
+    visible_adhoc = AdHocCommand.objects.create(name='uj-mixed-count-adhoc', inventory=inventory)
+
+    mixed_user = user('uj-mixed-role-user')
+    RoleDefinition.objects.get(name='JobTemplate Execute').give_permission(mixed_user, jt_visible)
+    RoleDefinition.objects.get(name='Inventory Admin').give_permission(mixed_user, inventory)
+
+    expected_visible_ids = {visible_job_1.pk, visible_job_2.pk, visible_inv_update.pk, visible_adhoc.pk}
+
+    # Admin sees everything
+    admin_response = get(reverse('api:unified_job_list'), admin)
+    assert admin_response.status_code == 200
+    assert admin_response.data['count'] == len(admin_response.data['results'])
+
+    # Mixed-role user sees only their permitted jobs, and count matches
+    user_response = get(reverse('api:unified_job_list'), mixed_user)
+    assert user_response.status_code == 200
+    user_result_ids = {r['id'] for r in user_response.data['results']}
+    assert user_result_ids == expected_visible_ids
+    assert user_response.data['count'] == len(expected_visible_ids)
+    assert user_response.data['count'] < admin_response.data['count']
+
+
+@pytest.mark.django_db
+def test_unified_job_count_deduplicates_multiple_access_routes(user, setup_managed_roles, get):
+    """A job reachable through multiple permission paths (direct JT role,
+    org auditor role, and team role) must appear exactly once in the
+    results and count."""
+    org = Organization.objects.create(name="triple-route-org")
+    inventory = org.inventories.create(name="triple-route-inventory")
+    project = Project.objects.create(name="triple-route-project", organization=org)
+    jt = JobTemplate.objects.create(
+        name="triple-route-template",
+        project=project,
+        inventory=inventory,
+        organization=org,
+    )
+    job = jt.create_unified_job()
+
+    viewer = user("triple-route-viewer")
+
+    RoleDefinition.objects.get(name="JobTemplate Execute").give_permission(viewer, jt)
+    RoleDefinition.objects.get(name="Organization Audit").give_permission(viewer, org)
+
+    team = Team.objects.create(name="triple-route-team", organization=org)
+    team.member_role.members.add(viewer)
+    RoleDefinition.objects.get(name="JobTemplate Execute").give_permission(team, jt)
+
+    response = get(reverse("api:unified_job_list"), viewer)
+
+    assert response.status_code == 200
+    ids = [result["id"] for result in response.data["results"]]
+    assert ids == [job.pk]
+    assert response.data["count"] == 1
 
 
 @pytest.mark.django_db
