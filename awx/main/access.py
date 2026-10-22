@@ -723,7 +723,9 @@ class UserAccess(BaseAccess):
         else:
             return self.is_all_org_admin(obj)
 
-    def prefetched_capability_allowed(self, target, display_method, admin_org_ids, memberships, system_auditor_ids, target_permissions, actor_permissions, superuser_count):
+    def prefetched_capability_allowed(
+        self, target, display_method, admin_org_ids, memberships, system_auditor_ids, target_permissions, actor_permissions, superuser_count
+    ):
         """Apply UserAccess capability rules to page-prefetched permission data."""
         if target == self.user:
             return display_method == 'edit'
