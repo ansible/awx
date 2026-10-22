@@ -874,9 +874,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             host_qs = self.inventory.hosts.only(*HOST_FACTS_FIELDS)
 
         host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
-        if isinstance(host_qs, list):
-            Host = JobHostSummary._meta.get_field('host').related_model
-            host_qs = Host.objects.filter(pk__in=[h.pk for h in host_qs]).only(*HOST_FACTS_FIELDS)
         return host_qs
 
 

@@ -228,11 +228,12 @@ class TestSlicedJobFactCache:
     """finish_fact_cache must work when get_hosts_for_fact_cache returns a sliced result."""
 
     def test_sliced_hosts_persist_facts(self, organization, artifacts_dir):
-        """Sliced jobs must persist facts even though get_sliced_hosts returns a list.
+        """Sliced jobs must persist facts via get_sliced_hosts queryset.
 
-        Regression test for AAP-97902: get_sliced_hosts() returns a list when
-        slice_count > 1, and finish_fact_cache() needs a QuerySet to call .filter().
-        get_hosts_for_fact_cache() must convert the list back to a QuerySet.
+        Regression test for AAP-97902: get_sliced_hosts() used to return a list
+        when slice_count > 1, causing finish_fact_cache() to crash with
+        AttributeError when calling .filter(). get_sliced_hosts() now converts
+        the step-sliced list back to a QuerySet.
         """
         inv = Inventory.objects.create(organization=organization, name='slice-inv')
         hosts = [inv.hosts.create(name=f'host{i}') for i in range(4)]
@@ -242,19 +243,17 @@ class TestSlicedJobFactCache:
             h.ansible_facts_modified = now()
             h.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
 
-        # Simulate what get_hosts_for_fact_cache does for a sliced job:
-        # get_sliced_hosts with slice_number=1, slice_count=2 returns a list
         host_qs = inv.hosts.all()
-        sliced = inv.get_sliced_hosts(host_qs, slice_number=1, slice_count=2)
-        assert isinstance(sliced, list), 'get_sliced_hosts should return a list for sliced jobs'
+        sliced_qs = inv.get_sliced_hosts(host_qs, slice_number=1, slice_count=2)
 
-        # Convert back to QuerySet (this is the fix)
-        sliced_qs = Host.objects.filter(pk__in=[h.pk for h in sliced])
+        # get_sliced_hosts must return a QuerySet, not a list
+        assert hasattr(sliced_qs, 'filter'), 'get_sliced_hosts must return a QuerySet'
 
+        sliced_hosts = list(sliced_qs)
         start_fact_cache(sliced_qs, artifacts_dir=artifacts_dir, timeout=0, inventory_id=inv.id)
 
         # Simulate ansible writing new facts for each host in the slice
-        for h in sliced:
+        for h in sliced_hosts:
             fact_file = os.path.join(artifacts_dir, 'fact_cache', h.name)
             future = time.time() + 60
             with open(fact_file, 'w') as f:
@@ -267,7 +266,7 @@ class TestSlicedJobFactCache:
         for h in hosts:
             h.refresh_from_db()
 
-        sliced_names = {h.name for h in sliced}
+        sliced_names = {h.name for h in sliced_hosts}
         for h in hosts:
             if h.name in sliced_names:
                 assert h.ansible_facts.get('updated') is True, f'{h.name} should have updated facts'
