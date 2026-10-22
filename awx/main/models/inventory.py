@@ -292,7 +292,7 @@ class Inventory(CommonModelNameNotUnique, RelatedJobsMixin, OpaQueryPathMixin):
             # no good way to slice a queryset without converting it to a list first
             all_pks = list(host_queryset.values_list('pk', flat=True))
             sliced_pks = all_pks[offset::slice_count]
-            host_queryset = host_queryset.model.objects.filter(pk__in=sliced_pks)
+            host_queryset = host_queryset.filter(pk__in=sliced_pks)
         return host_queryset
 
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
