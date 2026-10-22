@@ -15,7 +15,7 @@ jobs:
       - uses: ./.github/actions/setup-python
 
       - name: install tox
-        run: pip install --only-binary :all: tox==4.67.1
+        run: 'pip install --only-binary :all: tox==4.67.1'
 
       - name: Assure docs can be built
         run: tox -e docs

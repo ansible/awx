@@ -37,7 +37,7 @@ jobs:
       - uses: ./.github/actions/setup-python
 
       - name: Install python requests
-        run: pip install --only-binary :all: requests==2.34.2
+        run: 'pip install --only-binary :all: requests==2.34.2'
       - name: Check if user is a member of Ansible org
         uses: jannekem/run-python-script-action@9d8e2e0878d575fb6073277f38ce3f10ebf4f059 # v1
         id: check_user
