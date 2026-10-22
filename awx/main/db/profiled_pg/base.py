@@ -15,16 +15,20 @@ __loc__ = LocMemCache(str(uuid.uuid4()), {})
 __all__ = ['DatabaseWrapper']
 
 
+@memoize(ttl=1, cache=__loc__)
+def get_threshold_value():
+    try:
+        return cache.get('awx-profile-sql-threshold')
+    except Exception:
+        # if we can't reach the cache, just assume profiling's off
+        return None
+
+
 class RecordedQueryLog(object):
     def __init__(self, log, db, dest='/var/log/tower/profile'):
         self.log = log
         self.db = db
         self.dest = dest
-        try:
-            self.threshold = cache.get('awx-profile-sql-threshold')
-        except Exception:
-            # if we can't reach the cache, just assume profiling's off
-            self.threshold = None
 
     def append(self, query):
         ret = self.log.append(query)
@@ -39,12 +43,12 @@ class RecordedQueryLog(object):
         return ret
 
     def write(self, query):
-        if self.threshold is None:
+        if get_threshold_value() is None:
             return
         seconds = float(query['time'])
 
         # if the query is slow enough...
-        if seconds >= self.threshold:
+        if seconds >= get_threshold_value():
             sql = query['sql']
             if sql.startswith('EXPLAIN'):
                 return
@@ -137,13 +141,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         # per executed query); doing a cache.get()  _at most_ once per
         # second is a good enough window to detect when profiling is turned
         # on/off by a system administrator
-        try:
-            threshold = cache.get('awx-profile-sql-threshold')
-        except Exception:
-            # if we can't reach the cache, just assume profiling's off
-            threshold = None
-        self.queries_log.threshold = threshold
-        return threshold is not None
+        return get_threshold_value() is not None
 
     @force_debug_cursor.setter
     def force_debug_cursor(self, v):
