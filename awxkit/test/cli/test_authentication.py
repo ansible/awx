@@ -9,8 +9,8 @@ from awxkit import config
 @pytest.fixture(autouse=True)
 def reset_config_state(monkeypatch: pytest.MonkeyPatch) -> None:
     """Ensure clean config state for each test to prevent parallel test interference"""
-    monkeypatch.setattr(config, 'force_basic_auth', False, raising=False)
-    monkeypatch.setattr(config, 'use_sessions', False, raising=False)
+    monkeypatch.setitem(config, 'force_basic_auth', False)
+    monkeypatch.setitem(config, 'use_sessions', False)
 
 
 # ============================================================================
