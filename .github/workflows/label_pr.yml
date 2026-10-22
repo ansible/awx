@@ -34,8 +34,6 @@ jobs:
           show-progress: false
 
       - uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.x'
 
       - name: Install python requests
         run: pip install requests

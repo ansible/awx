@@ -13,8 +13,6 @@ jobs:
           show-progress: false
 
       - uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.x'
 
       - name: install tox
         run: pip install tox
