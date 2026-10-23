@@ -292,12 +292,12 @@ class Command(BaseCommand):
         info = qs.aggregate(min=Min('id'), max=Max('id'))
         if info['min'] is not None:
             for start in range(info['min'], info['max'] + 1, self.batch_size):
-                qs_batch = qs.filter(id__gte=start, id__lte=start + self.batch_size)
+                qs_batch = qs.filter(id__gte=start, id__lt=start + self.batch_size)
                 pk_list = list(qs_batch.values_list('id', flat=True))
 
                 _pre_delete_job_host_summaries(pk_list, self.logger)
                 _, results = qs_batch.delete()
-                deleted += results['main.Job']
+                deleted += results.get('main.Job', 0)
                 # Avoid dropping the job event table in case we have interacted with it already
                 self._delete_unpartitioned_events(Job, pk_list)
 
