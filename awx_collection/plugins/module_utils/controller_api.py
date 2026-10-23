@@ -537,8 +537,8 @@ class ControllerAPIModule(ControllerModule):
     def get_exactly_one(self, endpoint, name_or_id=None, **kwargs):
         return self.get_one(endpoint, name_or_id=name_or_id, allow_none=False, **kwargs)
 
-    def resolve_name_to_id(self, endpoint, name_or_id):
-        return self.get_exactly_one(endpoint, name_or_id)['id']
+    def resolve_name_to_id(self, endpoint, name_or_id, **kwargs):
+        return self.get_exactly_one(endpoint, name_or_id, **kwargs)['id']
 
     def is_retryable(self, status_code, method, endpoint):
         """
