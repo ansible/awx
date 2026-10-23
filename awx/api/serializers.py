@@ -6662,6 +6662,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
+        launched_by_actor = None
         for fk, related_fields in self._local_summarizable_fk_fields(obj):
             try:
                 if not hasattr(obj, fk):
@@ -6677,9 +6678,15 @@ class ActivityStreamSerializer(BaseSerializer):
                             if fval is not None:
                                 thisItemDict[field] = fval
                         summary_fields[fk].append(thisItemDict)
+                        if fk == obj.object1:
+                            launched_by = getattr(thisItem, 'launched_by', None)
+                            if launched_by and launched_by.get('type') == 'schedule':
+                                launched_by_actor = launched_by
             except ObjectDoesNotExist:
                 pass
-        if obj.actor is not None:
+        if launched_by_actor:
+            summary_fields['actor'] = launched_by_actor
+        elif obj.actor is not None:
             summary_fields['actor'] = dict(id=obj.actor.id, username=obj.actor.username, first_name=obj.actor.first_name, last_name=obj.actor.last_name)
         elif obj.deleted_actor:
             summary_fields['actor'] = obj.deleted_actor.copy()
