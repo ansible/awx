@@ -170,3 +170,27 @@ def test_scm_source_needs_project(run_module, admin_user, base_inventory):
     assert result.pop('failed', None), result
 
     assert 'Project required for scm type sources' in result.get('msg', '')
+
+
+@pytest.mark.django_db
+def test_inventory_source_source_vars_idempotent(run_module, admin_user, base_inventory):
+    """source_vars is stored as YAML like the other vars fields, and an unchanged dict is not a change."""
+    args = dict(name='vars-src', inventory=base_inventory.name, source='ec2', state='present', source_vars={'regions': ['us-east-1'], 'debug': True})
+    # run_module fills the module's defaults into the dict it is given, so each run gets its own copy
+    result = run_module('inventory_source', dict(args), admin_user)
+    assert result.get('changed'), result
+    assert InventorySource.objects.get(name='vars-src').source_vars == '---\ndebug: true\nregions:\n- us-east-1'
+
+    result = run_module('inventory_source', dict(args), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert not result.get('changed'), result
+
+
+@pytest.mark.django_db
+def test_inventory_source_empty_source_vars_clears(run_module, admin_user, base_inventory):
+    """Regression guard: an empty dict still clears source_vars now that it goes through the shared serializer."""
+    args = dict(name='clear-src', inventory=base_inventory.name, source='ec2', state='present')
+    run_module('inventory_source', dict(args, source_vars={'regions': ['us-east-1']}), admin_user)
+    result = run_module('inventory_source', dict(args, source_vars={}), admin_user)
+    assert result.get('changed'), result
+    assert InventorySource.objects.get(name='clear-src').source_vars == ''

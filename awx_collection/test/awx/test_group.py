@@ -18,7 +18,7 @@ def test_create_group(run_module, admin_user):
 
     group = Group.objects.get(name='Test Group')
     assert group.inventory == inv
-    assert group.variables == '{"ansible_network_os": "iosxr"}'
+    assert group.variables == '---\nansible_network_os: iosxr'
 
     result.pop('invocation')
     assert result == {
