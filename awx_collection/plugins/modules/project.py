@@ -247,6 +247,18 @@ def wait_for_project_update(module, last_request):
 
 
 def main():
+    """Entry point for the project module.
+
+    Builds the argument spec, resolves related resources (organization,
+    execution environment, credential, signature_validation_credential,
+    notification templates), and creates, updates, or deletes the
+    Automation Platform Controller project accordingly.
+
+    For credential and signature_validation_credential specifically: an
+    empty string ("") is treated as an explicit request to clear the
+    field, mapping it to None instead of attempting (and failing) to
+    resolve a credential literally named "".
+    """
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         name=dict(required=True),
@@ -383,7 +395,7 @@ def main():
         (signature_validation_credential, 'signature_validation_credential', 'credentials'),
     ):
         if variable is not None:
-            project_fields[field] = module.resolve_name_to_id(endpoint, variable)
+            project_fields[field] = module.resolve_name_to_id(endpoint, variable) if variable else None
 
     if org_id is not None:
         # this is resolved earlier, so save an API call and don't do it again in the loop above
