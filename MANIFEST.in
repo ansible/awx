@@ -20,6 +20,7 @@ include tools/scripts/request_tower_configuration.sh
 include tools/scripts/request_tower_configuration.ps1
 include tools/scripts/automation-controller-service
 include tools/scripts/rsyslog-4xx-recovery
+include tools/scripts/run-rsyslogd
 include tools/scripts/awx-python
 include awx/playbooks/library/mkfifo.py
 include tools/sosreport/*
