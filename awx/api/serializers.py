@@ -1217,6 +1217,7 @@ class UserSerializer(CleanTextMixin, BaseSerializer):
     password = serializers.CharField(required=False, default='', allow_blank=True, help_text=_('Field used to change the password.'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
+    capabilities_prefetch = [{'edit': 'change'}, {'delete': 'change'}]
 
     class Meta:
         model = User
