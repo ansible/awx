@@ -96,6 +96,7 @@ from awx.main.models.workflow import (  # noqa
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
+from django.db import models as django_models  # noqa
 from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors  # noqa
 
 User.add_to_class('get_queryset', get_user_queryset)
@@ -103,6 +104,15 @@ User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('resource', AnsibleResourceField(primary_key_field="id"))
 User.add_to_class('summary_fields', user_summary_fields)
+# Persisted on auth_user via migration 0209; not part of Django's stock User.
+if not hasattr(User, 'password_reset_required'):
+    User.add_to_class(
+        'password_reset_required',
+        django_models.BooleanField(
+            default=False,
+            help_text='Force the user to reset their password at next login.',
+        ),
+    )
 
 
 def convert_jsonfields():
