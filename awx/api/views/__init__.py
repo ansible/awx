@@ -3923,6 +3923,13 @@ class JobList(UnifiedJobExcludeMixin, ListAPIView):
     pagination_class = JobPagination
     resource_purpose = 'jobs'
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.select_related(
+            'execution_environment',
+            'schedule',
+            )
+
     @extend_schema_if_available(extensions={"x-ai-description": "A list of jobs."})
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
