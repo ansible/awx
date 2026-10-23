@@ -23,16 +23,17 @@ from awx.main.models import (
 )
 from awx.main.exceptions import PolicyEvaluationError
 from awx.main.tasks import policy
-from awx.main.tasks.policy import JobSerializer, OPA_AUTH_TYPES
+from awx.main.tasks.policy import JobSerializer, OPA_AUTH_TYPES, format_policy_results
 
 
-def _parse_exception_message(exception: PolicyEvaluationError):
+def _policy_details(exception: PolicyEvaluationError) -> str:
+    """Return the formatted details the user sees, without the leading sentence."""
     pe_plain = str(exception.value)
 
-    assert "This job cannot be executed due to a policy violation or error. See the following details:" in pe_plain
-
     violation_message = "This job cannot be executed due to a policy violation or error. See the following details:"
-    return eval(pe_plain.split(violation_message)[1].strip())
+    assert violation_message in pe_plain
+
+    return pe_plain.split(violation_message)[1].strip()
 
 
 @pytest.fixture(autouse=True)
@@ -271,11 +272,9 @@ def test_evaluate_policy_not_allowed(opa_client, job):
     pe_plain = str(pe.value)
     assert "Errors:" not in pe_plain
 
-    exception = _parse_exception_message(pe)
-
-    assert exception["Violations"]["Organization"] == ["Access not allowed."]
-    assert exception["Violations"]["Inventory"] == ["Access not allowed."]
-    assert exception["Violations"]["Job template"] == ["Access not allowed."]
+    assert _policy_details(pe) == (
+        "Violations:\n  Organization:\n    - Access not allowed.\n  Inventory:\n    - Access not allowed.\n  Job template:\n    - Access not allowed."
+    )
 
     assert opa_client.query_rule.call_count == 3
 
@@ -290,10 +289,9 @@ def test_evaluate_policy_not_found(opa_client, job):
 
     missing_result_property = 'Call to OPA did not return a "result" property. The path refers to an undefined document.'
 
-    exception = _parse_exception_message(pe)
-    assert exception["Errors"]["Organization"] == missing_result_property
-    assert exception["Errors"]["Inventory"] == missing_result_property
-    assert exception["Errors"]["Job template"] == missing_result_property
+    assert _policy_details(pe) == (
+        f"Errors:\n  Organization: {missing_result_property}\n  Inventory: {missing_result_property}\n  Job template: {missing_result_property}"
+    )
 
     assert opa_client.query_rule.call_count == 3
 
@@ -320,10 +318,16 @@ def test_evaluate_policy_server_error(opa_client, job):
     with pytest.raises(PolicyEvaluationError) as pe:
         policy.evaluate_policy(job)
 
-    exception = _parse_exception_message(pe)
-    assert exception["Errors"]["Organization"] == f'Call to OPA failed. Code: internal_error, Message: {error_response["message"]}'
-    assert exception["Errors"]["Inventory"] == f'Call to OPA failed. Code: internal_error, Message: {error_response["message"]}'
-    assert exception["Errors"]["Job template"] == f'Call to OPA failed. Code: internal_error, Message: {error_response["message"]}'
+    details = _policy_details(pe)
+
+    # The OPA message is multi-line and includes a caret pointing at the
+    # offending ref. It must survive intact: no escaped newlines, no quoting,
+    # and no splitting of the long first line into several string literals.
+    assert '\\n' not in details
+    assert '\\t' not in details
+    assert details.count('Call to OPA failed. Code: internal_error') == 3
+    for line in error_response['message'].splitlines():
+        assert line.strip() in details
 
     assert opa_client.query_rule.call_count == 3
 
@@ -342,10 +346,7 @@ def test_evaluate_policy_invalid_result(opa_client, job):
 
     invalid_result = 'OPA policy returned invalid result.'
 
-    exception = _parse_exception_message(pe)
-    assert exception["Errors"]["Organization"] == invalid_result
-    assert exception["Errors"]["Inventory"] == invalid_result
-    assert exception["Errors"]["Job template"] == invalid_result
+    assert _policy_details(pe) == (f"Errors:\n  Organization: {invalid_result}\n  Inventory: {invalid_result}\n  Job template: {invalid_result}")
 
     assert opa_client.query_rule.call_count == 3
 
@@ -364,10 +365,9 @@ def test_evaluate_policy_failed_exception(opa_client, job):
 
     opa_failed_exception = 'Call to OPA failed. Exception: Invalid JSON'
 
-    exception = _parse_exception_message(pe)
-    assert exception["Errors"]["Organization"] == opa_failed_exception
-    assert exception["Errors"]["Inventory"] == opa_failed_exception
-    assert exception["Errors"]["Job template"] == opa_failed_exception
+    assert _policy_details(pe) == (
+        f"Errors:\n  Organization: {opa_failed_exception}\n  Inventory: {opa_failed_exception}\n  Job template: {opa_failed_exception}"
+    )
 
     assert opa_client.query_rule.call_count == 3
 
@@ -629,3 +629,47 @@ def test_opa_client_token_auth():
         # Verify opa_client was called with the correct headers
         expected_headers = {'X-Custom': 'Header', 'Authorization': 'Bearer secret-token'}
         mock_opa_client_cm.assert_called_once_with(headers=expected_headers)
+
+
+def test_format_policy_results_keeps_long_messages_on_one_line():
+    long_message = "Job Template name 'deploy prod' must start with the team prefix and contain only lowercase letters, digits and hyphens."
+
+    details = format_policy_results({"Violations": {"Job template": [long_message]}})
+
+    assert details == f"Violations:\n  Job template:\n    - {long_message}"
+
+
+def test_format_policy_results_preserves_newlines_in_a_message():
+    message = "Name is invalid.\nSee https://example.com/standards for the naming rules."
+
+    details = format_policy_results({"Violations": {"Job template": [message]}})
+
+    assert details == ("Violations:\n  Job template:\n    - Name is invalid.\n      See https://example.com/standards for the naming rules.")
+
+
+def test_format_policy_results_renders_errors_and_violations_together():
+    details = format_policy_results(
+        {
+            "Errors": {"Organization": "Call to OPA failed. Exception: Invalid JSON"},
+            "Violations": {"Inventory": ["Access not allowed.", "Inventory must be scoped."]},
+        }
+    )
+
+    assert details == (
+        "Errors:\n"
+        "  Organization: Call to OPA failed. Exception: Invalid JSON\n"
+        "Violations:\n"
+        "  Inventory:\n"
+        "    - Access not allowed.\n"
+        "    - Inventory must be scoped."
+    )
+
+
+def test_format_policy_results_does_not_quote_or_escape():
+    message = "Name must not contain 'spaces'.\nUse hyphens instead."
+
+    details = format_policy_results({"Violations": {"Job template": [message]}})
+
+    assert "\\n" not in details
+    assert '"' not in details
+    assert details.count("'spaces'") == 1

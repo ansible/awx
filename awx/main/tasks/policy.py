@@ -2,8 +2,6 @@ import json
 import tempfile
 import contextlib
 
-from pprint import pformat
-
 from typing import Optional, Union
 
 from django.conf import settings
@@ -264,6 +262,35 @@ class OPAResultSerializer(serializers.Serializer):
     violations = fields.ListField(child=fields.CharField())
 
 
+def format_policy_results(results: dict) -> str:
+    """Render policy errors and violations as plain text for the job error.
+
+    ``results`` maps a section name ("Errors", "Violations") to a mapping of
+    resource type to either a single message or a list of messages.
+
+    This used to be ``pprint.pformat``, which renders a Python repr: it wraps
+    messages in quotes, splits a long one into several adjacent string literals,
+    and escapes newlines, so a policy author's carefully written message reached
+    the user mangled. Messages are written to be read, so emit them verbatim and
+    indent any continuation lines under their bullet.
+    """
+    lines = []
+    for section, entries in results.items():
+        lines.append(f'{section}:')
+        for resource, detail in entries.items():
+            if isinstance(detail, str):
+                message_lines = detail.splitlines() or ['']
+                lines.append(f'  {resource}: {message_lines[0]}')
+                lines.extend(f'    {line}' for line in message_lines[1:])
+                continue
+            lines.append(f'  {resource}:')
+            for message in detail:
+                message_lines = str(message).splitlines() or ['']
+                lines.append(f'    - {message_lines[0]}')
+                lines.extend(f'      {line}' for line in message_lines[1:])
+    return '\n'.join(lines)
+
+
 class OPA_AUTH_TYPES:
     NONE = 'None'
     TOKEN = 'Token'
@@ -451,7 +478,7 @@ def evaluate_policy(instance):
                 format_results["Violations"] = violations
 
             if violations or errors:
-                raise PolicyEvaluationError(pformat(format_results, width=80))
+                raise PolicyEvaluationError(format_policy_results(format_results))
 
     except Exception as e:
         raise PolicyEvaluationError(_('This job cannot be executed due to a policy violation or error. See the following details:\n{}').format(e))
