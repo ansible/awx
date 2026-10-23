@@ -545,18 +545,20 @@ def receptor_address_saved(sender, instance, **kwargs):
             with disable_activity_stream():
                 for control_instance in control_instances:
                     InstanceLink.objects.update_or_create(source=control_instance, target=address)
-                schedule_write_receptor_config()
+                if settings.IS_K8S:
+                    schedule_write_receptor_config()
     else:
         if address.peers_from.exists():
             with disable_activity_stream():
                 address.peers_from.remove(*control_instances)
-                schedule_write_receptor_config()
+                if settings.IS_K8S:
+                    schedule_write_receptor_config()
 
 
 @receiver(post_delete, sender=ReceptorAddress)
 def receptor_address_deleted(sender, instance, **kwargs):
     address = instance
-    if address.peers_from_control_nodes:
+    if address.peers_from_control_nodes and settings.IS_K8S:
         schedule_write_receptor_config()
 
 
