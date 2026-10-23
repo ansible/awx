@@ -170,4 +170,10 @@ def test_subsystem_metrics_function_includes_indirect_counting(mock_dispatcherd,
         m.return_value.generate_metrics.return_value = ''
     request = mock.MagicMock()
     subsystem_metrics_module.metrics(request)
-    mock_indirect.return_value.generate_metrics.assert_called_once_with(request)
+    mock_indirect.return_value.generate_metrics.assert_called_once()
+    args, _kwargs = mock_indirect.return_value.generate_metrics.call_args
+    assert args[0] is request
+    assert isinstance(args[1], set)
+    # All subsystem exporters share the same header-tracking set (AAP-84834).
+    assert mock_dispatcher.return_value.generate_metrics.call_args[0][1] is args[1]
+    assert mock_callback.return_value.generate_metrics.call_args[0][1] is args[1]
