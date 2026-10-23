@@ -132,12 +132,11 @@ django==5.2.17
     #   django-crum
     #   django-extensions
     #   django-flags
-    #   django-guid
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
     #   drf-spectacular
-# django-ansible-base[feature-flags,jwt-consumer,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
+# django-ansible-base[feature-flags,jwt-consumer,observability,rbac,resource-registry,rest-filters] @ git+https://github.com/ansible/django-ansible-base@devel  # git requirements installed separately
     # via -r /awx_devel/requirements/requirements_git.txt
 django-cors-headers==4.9.0
     # via -r /awx_devel/requirements/requirements.in
@@ -151,8 +150,6 @@ django-flags==5.1.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
-django-guid==3.5.2
-    # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==4.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.4.0
@@ -185,9 +182,7 @@ gitdb==4.0.12
 gitpython==3.1.62
     # via -r /awx_devel/requirements/requirements.in
 googleapis-common-protos==1.70.0
-    # via
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
+    # via opentelemetry-exporter-otlp-proto-grpc
 grpcio==1.75.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -205,8 +200,6 @@ idna==3.10
     #   requests
     #   twisted
     #   yarl
-importlib-metadata==8.7.0
-    # via opentelemetry-api
 incremental==24.7.2
     # via twisted
 inflection==0.5.1
@@ -298,47 +291,84 @@ opa-python-client==2.0.2
     # via -r /awx_devel/requirements/requirements.in
 openshift==0.13.2
     # via -r /awx_devel/requirements/requirements.in
-opentelemetry-api==1.37.0
+opentelemetry-api==1.45.1
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
     #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-grpc
     #   opentelemetry-instrumentation-logging
+    #   opentelemetry-instrumentation-psycopg
+    #   opentelemetry-instrumentation-psycopg2
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
-opentelemetry-exporter-otlp==1.37.0
-    # via -r /awx_devel/requirements/requirements.in
-opentelemetry-exporter-otlp-proto-common==1.37.0
+opentelemetry-exporter-otlp-common==0.66b1
+    # via opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-exporter-otlp-proto-common==1.45.1
+    # via opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-exporter-otlp-proto-grpc==1.45.1
+    # via django-ansible-base
+opentelemetry-instrumentation==0.66b1
     # via
-    #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-exporter-otlp-proto-grpc==1.37.0
-    # via opentelemetry-exporter-otlp
-opentelemetry-exporter-otlp-proto-http==1.37.0
-    # via opentelemetry-exporter-otlp
-opentelemetry-instrumentation==0.58b0
-    # via opentelemetry-instrumentation-logging
-opentelemetry-instrumentation-logging==0.58b0
-    # via -r /awx_devel/requirements/requirements.in
-opentelemetry-proto==1.37.0
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-grpc
+    #   opentelemetry-instrumentation-logging
+    #   opentelemetry-instrumentation-psycopg
+    #   opentelemetry-instrumentation-psycopg2
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-wsgi
+opentelemetry-instrumentation-dbapi==0.66b1
+    # via
+    #   opentelemetry-instrumentation-psycopg
+    #   opentelemetry-instrumentation-psycopg2
+opentelemetry-instrumentation-django==0.66b1
+    # via django-ansible-base
+opentelemetry-instrumentation-grpc==0.66b1
+    # via django-ansible-base
+opentelemetry-instrumentation-logging==0.66b1
+    # via django-ansible-base
+opentelemetry-instrumentation-psycopg==0.66b1
+    # via django-ansible-base
+opentelemetry-instrumentation-psycopg2==0.66b1
+    # via django-ansible-base
+opentelemetry-instrumentation-requests==0.66b1
+    # via django-ansible-base
+opentelemetry-instrumentation-wsgi==0.66b1
+    # via opentelemetry-instrumentation-django
+opentelemetry-proto==1.45.1
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-sdk==1.37.0
+opentelemetry-sdk==1.45.1
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
+    #   opentelemetry-exporter-otlp-common
     #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-semantic-conventions==0.58b0
+opentelemetry-semantic-conventions==0.66b1
     # via
     #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-grpc
+    #   opentelemetry-instrumentation-logging
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
+opentelemetry-util-http==0.66b1
+    # via
+    #   opentelemetry-instrumentation-django
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-wsgi
 packaging==25.0
     # via
     #   ansible-runner
-    #   django-guid
     #   opentelemetry-instrumentation
     #   setuptools-scm
     #   wheel
@@ -449,7 +479,6 @@ requests==2.32.5
     #   msal
     #   msrest
     #   opa-python-client
-    #   opentelemetry-exporter-otlp-proto-http
     #   pygithub
     #   python-dsv-sdk
     #   python-tss-sdk
@@ -514,7 +543,6 @@ typing-extensions==4.15.0
     #   grpcio
     #   opentelemetry-api
     #   opentelemetry-exporter-otlp-proto-grpc
-    #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
     #   psycopg
@@ -542,11 +570,12 @@ websocket-client==1.8.0
 wheel==0.46.3
     # via -r /awx_devel/requirements/requirements.in
 wrapt==1.17.3
-    # via opentelemetry-instrumentation
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-dbapi
+    #   opentelemetry-instrumentation-grpc
 yarl==1.22.0
     # via aiohttp
-zipp==3.23.0
-    # via importlib-metadata
 zope-interface==8.0.1
     # via twisted
 

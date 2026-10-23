@@ -10,8 +10,7 @@ from django.apps import apps
 from django.db import models
 from django.conf import settings
 
-from django_guid import get_guid
-from django_guid.log_filters import CorrelationId
+from ansible_base.lib.logging.context import trace_id_var
 
 from awx import MODE
 from awx.main.constants import LOGGER_BLOCKLIST
@@ -341,9 +340,13 @@ class SmartFilter(object):
         raise RuntimeError("Parsing the filter_string %s went terribly wrong" % filter_string)
 
 
-class DefaultCorrelationId(CorrelationId):
+class DefaultCorrelationId(Filter):
+    """Puts the request id of the work this record belongs to on the record as ``guid`` (the field awx's log formats
+    and the log aggregator have always used): the X-Request-ID django-ansible-base's ObservabilityMiddleware set for
+    the request, or the one a dispatcher task or callback event carried in from the request that started it."""
+
     def filter(self, record):
-        guid = get_guid() or '-'
+        guid = trace_id_var.get() or '-'
         if MODE == 'development':
             guid = guid[:8]
         record.guid = guid

@@ -11,11 +11,12 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
 from django import db
 from django.db import transaction, connection as django_connection
-from django_guid import set_guid
 
 import psutil
 
 import redis
+
+from ansible_base.lib.logging.context import trace_id_var
 
 from awx.main.utils.redis import get_redis_client
 from awx.main.utils.db import set_connection_name
@@ -298,7 +299,7 @@ class CallbackBrokerWorker:
                 if body.get('event') == 'EOF':
                     try:
                         if 'guid' in body:
-                            set_guid(body['guid'])
+                            trace_id_var.set(body['guid'])
                         final_counter = body.get('final_counter', 0)
                         logger.info('Starting EOF event processing for Job {}'.format(job_identifier))
                         # EOF events are sent when stdout for the running task is
@@ -313,7 +314,7 @@ class CallbackBrokerWorker:
                         logger.exception('Worker failed to perform EOF tasks: Job {}'.format(job_identifier))
                     finally:
                         self.subsystem_metrics.inc('callback_receiver_events_in_memory', -1)
-                        set_guid('')
+                        trace_id_var.set(None)
                     return
 
                 skip_websocket_message = body.pop('skip_websocket_message', False)
