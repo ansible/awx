@@ -234,7 +234,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return (
             RoleEvaluation.objects.filter(
-                **RoleEvaluation._actor_role_filter(accessor),
+                role_id__in=RoleEvaluation.actor_role_ids(accessor),
                 codename__in=all_codenames,
                 content_type_id__in=[ct.id for ct in dab_role_cts],
             )
