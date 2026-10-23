@@ -1,0 +1,17 @@
+---
+# Publishes an artifact with set_stats before the first tick, then ticks like chatty.yml.
+# A workflow's next node receives fp_artifact as an extra var.
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars:
+    iterations: 120
+  tasks:
+    - name: publish the artifact
+      set_stats:
+        data:
+          fp_artifact: "from-job-{{ awx_job_id }}"
+    - name: tick
+      command: sleep 1
+      loop: "{{ range(iterations | int) | list }}"
+      changed_when: false
