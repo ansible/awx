@@ -1,0 +1,163 @@
+name: Metrics utility tests
+
+on:
+  pull_request:
+  push:
+    branches: [devel]
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    name: metrics-utility pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout AWX
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      # Temporary until ansible/metrics-utility#604 is merged. The branch is devel plus SQL fixture compatibility fixes.
+      - name: Checkout metrics-utility fixture PR
+        uses: actions/checkout@v4
+        with:
+          repository: himdel/metrics-utility
+          ref: AAP-93846-awx-migration-fixtures
+          path: metrics-utility
+          show-progress: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
+        with:
+          python-version-file: metrics-utility/pyproject.toml
+
+      - name: Set up PostgreSQL
+        run: |
+          sudo apt install postgresql postgresql-client
+          sudo systemctl start postgresql.service
+
+      - name: Wait for PostgreSQL
+        timeout-minutes: 1
+        run: |
+          until pg_isready; do
+            sleep 4
+          done
+
+      - name: Create AWX database
+        run: |
+          sudo -u postgres psql --set ON_ERROR_STOP=on \
+            --command "CREATE ROLE awx SUPERUSER LOGIN PASSWORD 'awx';"
+          sudo -u postgres psql --set ON_ERROR_STOP=on \
+            --command "CREATE DATABASE awx OWNER awx;"
+
+      - name: Install AWX dependencies
+        run: |
+          uv venv /tmp/awx-venv
+
+          # Filter out uwsgi (needs crypt.h) — not needed for migrations
+          sed '/^uwsgi==/d' requirements/requirements.txt > /tmp/awx-requirements-filtered.txt
+
+          # Filter out backports-zstd on Python 3.14+ (stdlib compression.zstd replaces it)
+          python -c 'import sys; sys.exit(0 if sys.version_info >= (3,14) else 1)' \
+            && sed -i '/^backports-zstd/d' /tmp/awx-requirements-filtered.txt
+
+          uv pip install --python /tmp/awx-venv/bin/python \
+            -r /tmp/awx-requirements-filtered.txt \
+            -r requirements/requirements_git.txt \
+            -r requirements/requirements_dev.txt
+
+          uv pip install --python /tmp/awx-venv/bin/python -e .
+
+      - name: Run AWX migrations
+        run: |
+          TMPDIR="$(mktemp -d)"
+          trap 'rm -rf "$TMPDIR"' EXIT
+          cat > "$TMPDIR/database.py" << 'DBEOF'
+          DATABASES = {
+              'default': {
+                  'ATOMIC_REQUESTS': True,
+                  'ENGINE': 'django.db.backends.postgresql',
+                  'NAME': 'awx',
+                  'USER': 'awx',
+                  'PASSWORD': 'awx',
+                  'HOST': 'localhost',
+                  'PORT': '5432',
+              }
+          }
+          DBEOF
+          # Point AWX at the test database and avoid file logging to /var/log/tower/.
+          AWX_SETTINGS_DIR="$TMPDIR" \
+          AWX_LOGGING_MODE=stdout \
+          /tmp/awx-venv/bin/awx-manage migrate --noinput
+
+      - name: Load metrics-utility test data
+        working-directory: metrics-utility
+        run: |
+          # The AWX migrations above provide the schema; load only utility test fixtures here.
+          cat tools/docker/{conf_setting,main_hostmetric,main_instance,main_jobhostsummary,dab_feature_flags,main_indirectmanagednodeaudit}.sql \
+            | sudo -u postgres psql --set ON_ERROR_STOP=on --dbname=awx
+
+      - name: Pull SeaweedFS
+        run: |
+          mkdir -p ~/.local/bin
+          curl -fL https://github.com/seaweedfs/seaweedfs/releases/latest/download/linux_amd64.tar.gz -o /tmp/seaweedfs.tar.gz
+          curl -fL https://github.com/seaweedfs/seaweedfs/releases/latest/download/linux_amd64.tar.gz.md5 -o /tmp/seaweedfs.md5
+
+          EXPECTED=$(awk '{print $1}' /tmp/seaweedfs.md5)
+          ACTUAL=$(md5sum /tmp/seaweedfs.tar.gz | awk '{print $1}')
+          [ "$EXPECTED" = "$ACTUAL" ]
+
+          tar -xzf /tmp/seaweedfs.tar.gz -C ~/.local/bin
+          chmod +x ~/.local/bin/weed
+
+      - name: Start SeaweedFS
+        run: |
+          AWS_ACCESS_KEY_ID=myuseraccesskey \
+          AWS_SECRET_ACCESS_KEY=myusersecretkey \
+          S3_BUCKET=metricsutilitys3 \
+          weed mini -dir=/tmp/seaweedfs-data &
+
+      - name: Wait for SeaweedFS
+        timeout-minutes: 1
+        run: |
+          until curl -s -o /dev/null http://localhost:8333; do
+            sleep 2
+          done
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: metrics-utility/tools/mock-segment-server/go.mod
+
+      - name: Start mock servers
+        working-directory: metrics-utility
+        timeout-minutes: 1
+        run: |
+          go build -C tools/mock-segment-server -o /tmp/mock-segment-server .
+          go build -C tools/mock-prometheus-server -o /tmp/mock-prometheus-server .
+          /tmp/mock-segment-server &
+          /tmp/mock-prometheus-server &
+          until curl -sf http://localhost:8765/requests > /dev/null; do sleep 1; done
+          until curl -sf http://localhost:9090/requests > /dev/null; do sleep 1; done
+
+      - name: Run metrics-utility pytest
+        working-directory: metrics-utility
+        env:
+          METRICS_UTILITY_BUCKET_ACCESS_KEY: myuseraccesskey
+          METRICS_UTILITY_BUCKET_ENDPOINT: http://localhost:8333
+          METRICS_UTILITY_BUCKET_NAME: metricsutilitys3
+          METRICS_UTILITY_BUCKET_REGION: us-east-1
+          METRICS_UTILITY_BUCKET_SECRET_KEY: myusersecretkey
+          METRICS_UTILITY_DB_HOST: localhost
+          METRICS_UTILITY_DB_NAME: awx
+          METRICS_UTILITY_DB_USER: awx
+          METRICS_UTILITY_DB_PASSWORD: awx
+          MOCK_SEGMENT_URL: http://localhost:8765
+          MOCK_PROMETHEUS_URL: http://localhost:9090
+        # Ignore AWX's parent pytest.ini and run pytest with the utility checkout as root.
+        run: uv run pytest -s -v -c pyproject.toml
