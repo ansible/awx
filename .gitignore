@@ -78,11 +78,11 @@ testem.log
 awx/awx_test.sqlite3-journal
 .pytest_cache/
 
+temp_auto_push.bat
 # Mac OS X
 *.DS_Store
 
 # VSCode
-.vscode/
 
 # Editors
 *.sw[poj]
@@ -160,3 +160,5 @@ _readthedocs/
 
 # Pyenv
 .python-version
+.gitignore
+branch_structure.json
