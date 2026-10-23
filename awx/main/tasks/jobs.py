@@ -1558,6 +1558,7 @@ class RunProjectUpdate(BaseTask):
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
                 'galaxy_task_env': settings.GALAXY_TASK_ENV,
+                'galaxy_update_on_launch': project_update.project.galaxy_update_on_launch,
             }
         )
         # apply custom refspec from user for PR refs and the like
