@@ -2,10 +2,10 @@
 
 #### Modify the docker-compose.yml
 
-You can run the logstash container by adding another compose file to the docker-compose target.
+You can run the logstash container using the dedicated Make target:
 
 ```
-COMPOSE_OPTS="-f tools/docker-compose/logstash-override.yaml" COMPOSE_TAG=devel make docker-compose
+make docker-compose-logstash
 ```
 
 POST the following content to `/api/v2/settings/logging/` (this uses

@@ -1,0 +1,16 @@
+---
+services:
+  # NOTE: upgrading to 10.x requires adding SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+  splunk:
+    image: mirror.gcr.io/splunk/splunk:9.4.2
+    container_name: tools_splunk_1
+    hostname: splunk
+    networks:
+      - awx
+    ports:
+      - "8000:8000"
+      - "8089:8089"
+      - "9199:9199"
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: splunk_admin
