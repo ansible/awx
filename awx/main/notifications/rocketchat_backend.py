@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.utils import get_awx_http_client_headers
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
+from awx.main.notifications.url_validation import SSRFBlockedError, validate_url
 
 logger = logging.getLogger('awx.main.notifications.rocketchat_backend')
 
@@ -38,13 +39,27 @@ class RocketChatBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 if optvalue is not None:
                     payload[optval] = optvalue.strip()
 
+            url = "{}".format(m.recipients()[0])
+            try:
+                validate_url(url)
+            except SSRFBlockedError as e:
+                logger.error(str(e))
+                if not self.fail_silently:
+                    raise Exception(str(e))
+                continue
+
             r = requests.post(
-                "{}".format(m.recipients()[0]), data=json.dumps(payload), headers=get_awx_http_client_headers(), verify=(not self.rocketchat_no_verify_ssl)
+                url,
+                data=json.dumps(payload),
+                headers=get_awx_http_client_headers(),
+                verify=(not self.rocketchat_no_verify_ssl),
+                allow_redirects=False,
             )
 
-            if r.status_code >= 400:
+            if r.status_code < 200 or r.status_code >= 300:
                 logger.error(smart_str(_("Error sending notification rocket.chat: {}").format(r.status_code)))
                 if not self.fail_silently:
                     raise Exception(smart_str(_("Error sending notification rocket.chat: {}").format(r.status_code)))
+                continue
             sent_messages += 1
         return sent_messages

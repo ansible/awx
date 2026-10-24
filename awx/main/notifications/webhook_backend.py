@@ -4,11 +4,14 @@
 import base64
 import json
 import logging
+from urllib.parse import urlparse
+
 import requests
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.utils import get_awx_http_client_headers
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
+from awx.main.notifications.url_validation import SSRFBlockedError, validate_url
 
 logger = logging.getLogger('awx.main.notifications.webhook_backend')
 
@@ -70,6 +73,23 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
 
             err = None
 
+            try:
+                validate_url(url)
+            except SSRFBlockedError as e:
+                err = str(e)
+                logger.error(err)
+                if not self.fail_silently:
+                    raise Exception(err)
+                continue
+
+            def _origin(value):
+                parsed = urlparse(value)
+                scheme = parsed.scheme.lower()
+                port = parsed.port or {"http": 80, "https": 443}.get(scheme)
+                return scheme, parsed.hostname, port
+
+            original_origin = _origin(url)
+
             for retries in range(self.MAX_RETRIES):
                 # Sometimes we hit redirect URLs. We must account for this. We still extract the redirect URL from the response headers and try again. Max retires == 5
                 resp = chosen_method(
@@ -93,7 +113,7 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 url_next_log_safe = base64.b64encode(url_next.encode('UTF-8')) if url_next else b'None'
 
                 # we've hit a redirect. extract the redirect URL out of the first response header and try again
-                logger.warning(f"Received a {resp.status_code} from {url_log_safe}, trying to reach redirect url {url_next_log_safe}; attempt #{retries+1}")
+                logger.warning(f"Received a {resp.status_code} from {url_log_safe}, trying to reach redirect url {url_next_log_safe}; attempt #{retries + 1}")
 
                 # take the first redirect URL in the response header and try that
                 url = url_next
@@ -101,6 +121,17 @@ class WebhookBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 if url is None:
                     err = f"Webhook notification received redirect to a blank URL from {url_log_safe}. Response headers={resp.headers}"
                     break
+
+                try:
+                    validate_url(url)
+                except SSRFBlockedError as e:
+                    err = str(e)
+                    break
+
+                if _origin(url) != original_origin:
+                    logger.warning("Redirect changed origin; stripping credentials")
+                    auth = None
+                    headers = get_awx_http_client_headers()
             else:
                 # no break condition in the loop encountered; therefore we have hit the maximum number of retries
                 err = f"Webhook notification max number of retries [{self.MAX_RETRIES}] exceeded. Failed to send webhook notification to {url_log_safe}"

@@ -438,7 +438,7 @@ class ControllerAPIModule(ControllerModule):
             raise RuntimeError('Expected list from API at {0}, got: {1}'.format(endpoint, response))
         next_page = response['json']['next']
 
-        if response['json']['count'] > 10000:
+        if response['json'].get('count', 0) > 10000:
             self.fail_json(msg='The number of items being queried for is higher than 10,000.')
 
         while next_page is not None:
@@ -493,8 +493,11 @@ class ControllerAPIModule(ControllerModule):
                     fail_msg += ', detail: {0}'.format(response['json']['detail'])
                 self.fail_json(msg=fail_msg)
 
-            if 'count' not in response['json'] or 'results' not in response['json']:
-                self.fail_json(msg="The endpoint did not provide count and results")
+            if 'results' not in response['json']:
+                self.fail_json(msg="The endpoint did not provide a results list")
+
+            if 'count' not in response['json']:
+                response['json']['count'] = len(response['json']['results'])
 
         if response['json']['count'] == 0:
             if allow_none:

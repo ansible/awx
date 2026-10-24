@@ -141,8 +141,8 @@ def test_cred_type_input_schema_validity(input_, valid):
         ({'env': {'99': '{{awx_secret}}'}}, False),
         ({'env': {'AWX_SECRET=': '{{awx_secret}}'}}, False),
         ({'env': {'ANSIBLE_SETTING': '{{awx_secret}}'}}, False),
-        ({'env': {'DRAGON': u'🐉'}}, False),
-        ({'env': {u'🐉': 'DRAGON'}}, False),
+        ({'env': {'DRAGON': '🐉'}}, False),
+        ({'env': {'🐉': 'DRAGON'}}, False),
         ({'extra_vars': 123}, False),
         ({'extra_vars': {}}, True),
         ({'extra_vars': {'hostname': '{{host}}'}}, True),
@@ -306,7 +306,8 @@ def test_implicit_role_field_parents():
                 second_field_descriptor = getattr(cls, field_name)
                 # all supported linkage types
                 assert isinstance(
-                    second_field_descriptor, (ReverseManyToOneDescriptor, ImplicitRoleDescriptor, ForwardManyToOneDescriptor)  # not currently used
+                    second_field_descriptor,
+                    (ReverseManyToOneDescriptor, ImplicitRoleDescriptor, ForwardManyToOneDescriptor),  # not currently used
                 )
                 # only these links are supported
                 if field_attr:

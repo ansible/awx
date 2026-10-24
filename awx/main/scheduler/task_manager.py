@@ -12,6 +12,8 @@ import signal
 
 import redis
 
+from cryptography.fernet import InvalidToken
+
 # Django
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _, gettext_noop
@@ -256,8 +258,7 @@ class WorkflowManager(TaskBase):
                             )
                             display_list = [spawn_node.unified_job_template] + workflow_ancestors
                             job.job_explanation = gettext_noop(
-                                "Workflow Job spawned from workflow could not start because it "
-                                "would result in recursion (spawn order, most recent first: {})"
+                                "Workflow Job spawned from workflow could not start because it would result in recursion (spawn order, most recent first: {})"
                             ).format(', '.join('<{}>'.format(tmp) for tmp in display_list))
                         else:
                             logger.debug(
@@ -272,7 +273,10 @@ class WorkflowManager(TaskBase):
                         )
                     if can_start:
                         if workflow_job.start_args:
-                            start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
+                            try:
+                                start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
+                            except (ValueError, InvalidToken):
+                                start_args = {}
                         else:
                             start_args = {}
                         can_start = job.signal_start(**start_args)
@@ -344,7 +348,7 @@ class DependencyManager(TaskBase):
         if update.status in ['waiting', 'pending', 'running']:
             return False
 
-        return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
+        return bool((update.finished + timedelta(seconds=cache_timeout)) < tz_now())
 
     def get_or_create_project_update(self, project_id):
         project = self.all_projects.get(project_id, None)
@@ -363,7 +367,7 @@ class DependencyManager(TaskBase):
 
         try:
             start_args = json.loads(decrypt_field(task, field_name="start_args"))
-        except ValueError:
+        except (ValueError, InvalidToken):
             start_args = dict()
         # generator for update-on-launch inventory sources related to this task
         for inventory_source in self.all_inventory_sources.get(task.inventory_id, []):

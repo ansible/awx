@@ -46,7 +46,6 @@ def db_requirement_violations() -> Optional[str]:
     if os.getenv('SKIP_PG_VERSION_CHECK', False):
         return None
     if connection.vendor == 'postgresql':
-
         # enforce the postgres version is a minimum of 12 (we need this for partitioning); if not, then terminate program with exit code of 1
         # In the future if we require a feature of a version of postgres > 12 this should be updated to reflect that.
         # The return of connection.pg_version is something like 12013

@@ -39,8 +39,7 @@ class MainConfig(AppConfig):
             read_only=True,
             label=_('List of all named url graph nodes.'),
             help_text=_(
-                'Read-only list of key-value pairs that exposes named URL graph topology.'
-                ' Use this list to programmatically generate named URLs for resources'
+                'Read-only list of key-value pairs that exposes named URL graph topology. Use this list to programmatically generate named URLs for resources'
             ),
             category=_('Named URL'),
             category_slug='named-url',

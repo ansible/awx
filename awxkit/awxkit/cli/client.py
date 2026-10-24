@@ -156,7 +156,7 @@ class CLI(object):
                 self.root.connection.login(username, password)
                 self.root.get()
             except Exception as e:
-                raise RuntimeError(f"Basic authentication failed: {str(e)}. " "Verify credentials and network connectivity.") from e
+                raise RuntimeError(f"Basic authentication failed: {str(e)}. Verify credentials and network connectivity.") from e
             return
 
         # Use session-based authentication (default)

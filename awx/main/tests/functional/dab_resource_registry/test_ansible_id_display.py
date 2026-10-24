@@ -19,7 +19,7 @@ def assert_has_resource(list_response, obj=None):
 
 
 @pytest.mark.django_db
-def test_organization_ansible_id(organization, admin_user, get):
+def test_organization_ansible_id(organization, admin_user, get, setup_managed_roles):
     url = reverse('api:organization_list')
     response = get(url=url, user=admin_user, expect=200)
     assert_has_resource(response, obj=organization)

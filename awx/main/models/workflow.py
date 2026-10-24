@@ -33,7 +33,6 @@ from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
 from awx.main.fields import ImplicitRoleField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
-    ResourceMixin,
     SurveyJobTemplateMixin,
     SurveyJobMixin,
     RelatedJobsMixin,
@@ -460,7 +459,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
         return new_workflow_job
 
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, RelatedJobsMixin, WebhookTemplateMixin):
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = [
         'labels',

@@ -68,4 +68,4 @@ AWX_DISABLE_TASK_MANAGERS = False
 # Needed for launching runserver in debug mode
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
-FEATURE_INDIRECT_NODE_COUNTING_ENABLED = True
+INDIRECT_NODE_COUNTING_ENABLED = True

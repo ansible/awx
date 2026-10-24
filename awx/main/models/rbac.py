@@ -47,6 +47,9 @@ __all__ = [
 
 logger = logging.getLogger('awx.main.models.rbac')
 
+LEGACY_ROLE_NAME_PARTS = 2
+LEGACY_SCOPED_ROLE_NAME_PARTS = 3
+
 ROLE_SINGLETON_SYSTEM_ADMINISTRATOR = 'system_administrator'
 ROLE_SINGLETON_SYSTEM_AUDITOR = 'system_auditor'
 
@@ -180,9 +183,9 @@ class Role(models.Model):
 
     def __str__(self):
         if 'role_field' in self.__dict__:
-            return u'%s-%s' % (self.name, self.pk)
+            return '%s-%s' % (self.name, self.pk)
         else:
-            return u'%s-%s' % (self._meta.verbose_name, self.pk)
+            return '%s-%s' % (self._meta.verbose_name, self.pk)
 
     def save(self, *args, **kwargs):
         super(Role, self).save(*args, **kwargs)
@@ -365,7 +368,8 @@ class Role(models.Model):
                 if len(removals) > 0:
                     for ids in split_ids_for_sqlite(removals):
                         sql_params['ids'] = ','.join(str(x) for x in ids)
-                        cursor.execute('''
+                        cursor.execute(
+                            '''
                             DELETE FROM %(ancestors_table)s
                             WHERE descendent_id IN (%(ids)s)
                                   AND descendent_id != ancestor_id
@@ -377,7 +381,9 @@ class Role(models.Model):
                                        WHERE parents.from_role_id = %(ancestors_table)s.descendent_id
                                              AND %(ancestors_table)s.ancestor_id = inner_ancestors.ancestor_id
                                   )
-                        ''' % sql_params)
+                        '''
+                            % sql_params
+                        )
 
                         delete_ct += cursor.rowcount
 
@@ -385,7 +391,8 @@ class Role(models.Model):
                 if len(additions) > 0:
                     for ids in split_ids_for_sqlite(additions):
                         sql_params['ids'] = ','.join(str(x) for x in ids)
-                        cursor.execute('''
+                        cursor.execute(
+                            '''
                             INSERT INTO %(ancestors_table)s (descendent_id, ancestor_id, role_field, content_type_id, object_id)
                             SELECT from_id, to_id, new_ancestry_list.role_field, new_ancestry_list.content_type_id, new_ancestry_list.object_id FROM  (
                                   SELECT roles.id from_id,
@@ -415,7 +422,9 @@ class Role(models.Model):
                                        AND %(ancestors_table)s.ancestor_id = new_ancestry_list.to_id
                              )
 
-                        ''' % sql_params)
+                        '''
+                            % sql_params
+                        )
                         insert_ct += cursor.rowcount
 
                 if insert_ct == 0 and delete_ct == 0:
@@ -580,39 +589,64 @@ def get_role_definition(role):
     return rd
 
 
+def _legacy_role_name_for_compat(rd, name_parts):
+    if len(name_parts) != LEGACY_SCOPED_ROLE_NAME_PARTS:
+        logger.debug(f'Role definition "{rd.name}" has no legacy role equivalent, skipping translation.')
+        return None
+    _model_name, role_name, _suffix = name_parts
+    return role_name.lower() + '_role'
+
+
+def _legacy_role_name_for_org_model_admin(rd, name_parts):
+    # cases like "Organization Project Admin"
+    target_model_name = name_parts[1]
+    try:
+        model_cls = apps.get_model('main', target_model_name)
+    except LookupError:
+        logger.debug(f'Role definition "{rd.name}" has no legacy role equivalent, skipping translation.')
+        return None
+    target_model_name = get_type_for_model(model_cls)
+
+    # exception cases completely specific to one model naming convention
+    if target_model_name == 'notification_template':
+        target_model_name = 'notification'
+    elif target_model_name == 'workflow_job_template':
+        target_model_name = 'workflow'
+
+    return f'{target_model_name}_admin_role'
+
+
+def _legacy_role_name_generic(rd, name_parts):
+    if len(name_parts) != LEGACY_ROLE_NAME_PARTS:
+        logger.debug(f'Role definition "{rd.name}" has no legacy role equivalent, skipping translation.')
+        return None
+    _model_name, role_name = name_parts
+    return role_name.lower() + '_role'
+
+
+def _legacy_role_name(rd, name_parts):
+    if rd.name.endswith(' Compat'):
+        return _legacy_role_name_for_compat(rd, name_parts)
+    if len(name_parts) == LEGACY_SCOPED_ROLE_NAME_PARTS and name_parts[0] == 'Organization' and name_parts[2] == 'Admin':
+        return _legacy_role_name_for_org_model_admin(rd, name_parts)
+    if len(name_parts) == LEGACY_ROLE_NAME_PARTS and name_parts[1] == 'Admin':
+        # cases like "Project Admin"
+        return 'admin_role'
+    if rd.name == 'Organization Audit':
+        return 'auditor_role'
+    return _legacy_role_name_generic(rd, name_parts)
+
+
 def get_role_from_object_role(object_role):
     """
     Given an object role from the new system, return the corresponding role from the old system
     reverses naming from get_role_definition, and the ANSIBLE_BASE_ROLE_PRECREATE setting.
     """
     rd = object_role.role_definition
-    if rd.name.endswith(' Compat'):
-        model_name, role_name, _ = rd.name.split()
-        role_name = role_name.lower()
-        role_name += '_role'
-    elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
-        # cases like "Organization Project Admin"
-        model_name, target_model_name, role_name = rd.name.split()
-        role_name = role_name.lower()
-        model_cls = apps.get_model('main', target_model_name)
-        target_model_name = get_type_for_model(model_cls)
-
-        # exception cases completely specific to one model naming convention
-        if target_model_name == 'notification_template':
-            target_model_name = 'notification'
-        elif target_model_name == 'workflow_job_template':
-            target_model_name = 'workflow'
-
-        role_name = f'{target_model_name}_admin_role'
-    elif rd.name.endswith(' Admin'):
-        # cases like "project-admin"
-        role_name = 'admin_role'
-    elif rd.name == 'Organization Audit':
-        role_name = 'auditor_role'
-    else:
-        model_name, role_name = rd.name.split()
-        role_name = role_name.lower()
-        role_name += '_role'
+    name_parts = rd.name.split()
+    role_name = _legacy_role_name(rd, name_parts)
+    if role_name is None:
+        return None
     return getattr(object_role.content_object, role_name, None)
 
 
@@ -645,13 +679,19 @@ def disable_rbac_sync():
 
 
 def give_creator_permissions(user, obj):
+    from awx.main.signals import disable_activity_stream
+
     assignment = RoleDefinition.objects.give_creator_permissions(user, obj)
     if assignment:
         with disable_rbac_sync():
             old_role = get_role_from_object_role(assignment.object_role)
             if old_role is None:
                 return
-            old_role.members.add(user)
+            # The new-side assignment above is already recorded by
+            # record_role_assignment_activity_stream. Suppress activity stream for this
+            # mirrored write so it isn't recorded a second time.
+            with disable_activity_stream():
+                old_role.members.add(user)
 
 
 def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
@@ -804,7 +844,17 @@ def _sync_assignments_to_old_rbac(instance, delete=True):
 
 @receiver(post_delete, sender=RoleUserAssignment)
 @receiver(post_delete, sender=RoleTeamAssignment)
-def sync_assignments_to_old_rbac_delete(instance, **kwargs):
+def sync_assignments_to_old_rbac_delete(instance, origin=None, **kwargs):
+    # Skip cascade deletes from non-assignment origins — sync is redundant:
+    #  - Model origin with app_label != dab_rbac: a parent object (e.g.
+    #    Organization) is being deleted and old Role M2M tables cascade from
+    #    the same parent.
+    #  - QuerySet of a different model (e.g. ObjectRole): bulk RBAC cleanup
+    #    such as defer_rbac_computations flush — parent objects already gone.
+    if isinstance(origin, models.Model) and origin._meta.app_label != 'dab_rbac':
+        return
+    if isinstance(origin, models.QuerySet) and origin.model is not type(instance):
+        return
     _sync_assignments_to_old_rbac(instance, delete=True)
 
 

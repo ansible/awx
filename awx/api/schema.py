@@ -86,6 +86,75 @@ def inject_ai_descriptions(
     return result
 
 
+def inject_clean_text_pattern_components(
+    result,
+    generator,  # NOSONAR
+    request,  # NOSONAR
+    public,  # NOSONAR
+):
+    """Declare CleanText pattern fields on CredentialType.inputs in OpenAPI.
+
+    Models ``inputs`` to match runtime credential-type catalogs: ``fields[]``
+    items are ``CleanTextNestedStringField`` (optional pattern / patternDescription /
+    flags; no normalize). ``required`` lists field ids; ``metadata`` is optional
+    and only present on some types. Other keys (e.g. ``dependencies``) remain
+    allowed via ``additionalProperties``.
+    """
+    try:
+        from ansible_base.api_documentation.clean_text_schema_hooks import (
+            inject_clean_text_pattern_components as _dab_inject,
+        )
+    except ImportError:  # pragma: no cover - older DAB without shared schemas
+        return result
+
+    result = _dab_inject(result, generator, request, public)
+    schemas = result.get('components', {}).get('schemas', {})
+    field_item_ref = {'$ref': '#/components/schemas/CleanTextNestedStringField'}
+    for schema_name in (
+        'CredentialType',
+        'CredentialTypeRequest',
+        'PatchedCredentialTypeRequest',
+    ):
+        schema = schemas.get(schema_name)
+        if not isinstance(schema, dict):
+            continue
+        props = schema.setdefault('properties', {})
+        existing = props.get('inputs') if isinstance(props.get('inputs'), dict) else {}
+        base_description = existing.get('description') or ('Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.')
+        note = (
+            'When ENHANCED_INPUT_VALIDATION_ENABLED is on, non-secret string '
+            'entries in fields[] may include optional pattern, patternDescription, '
+            'and flags (Tier 2). Secret and non-string fields omit them. '
+            'Requiredness is expressed via inputs.required, not per-field required.'
+        )
+        description = base_description if note in base_description else f'{base_description} {note}'.strip()
+        props['inputs'] = {
+            'type': 'object',
+            'description': description,
+            'properties': {
+                'fields': {
+                    'type': 'array',
+                    'description': 'Input field catalog. Dynamic per credential type.',
+                    'items': field_item_ref,
+                },
+                'required': {
+                    'type': 'array',
+                    'items': {'type': 'string'},
+                    'description': 'Optional list of field ids that are required.',
+                },
+                'metadata': {
+                    'type': 'array',
+                    'description': ('Optional. Present only on some external-secret credential types; same item shape as fields[].'),
+                    'items': field_item_ref,
+                },
+            },
+            'additionalProperties': True,
+        }
+        if 'default' in existing:
+            props['inputs']['default'] = existing['default']
+    return result
+
+
 class CustomAutoSchema(AutoSchema):
     """Custom AutoSchema to add swagger_topic to tags and handle deprecated endpoints."""
 
@@ -99,9 +168,9 @@ class CustomAutoSchema(AutoSchema):
         except Exception:
             serializer = None
             warnings.warn(
-                '{}.get_serializer() raised an exception during '
-                'schema generation. Serializer fields will not be '
-                'generated for this view.'.format(self.view.__class__.__name__)
+                '{}.get_serializer() raised an exception during schema generation. Serializer fields will not be generated for this view.'.format(
+                    self.view.__class__.__name__
+                )
             )
 
         if hasattr(self.view, 'swagger_topic'):

@@ -7,7 +7,7 @@ import pytest
 from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.models.jobs import JobTemplate
 
-from awx.main.tests.functional.conftest import user, system_auditor  # noqa: F401; pylint: disable=unused-import
+from awx.main.tests.functional.conftest import user, system_auditor  # noqa: F401  # pylint: disable=unused-import
 
 
 ASSETS = set([

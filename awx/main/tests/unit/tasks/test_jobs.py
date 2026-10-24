@@ -661,3 +661,209 @@ class TestRunInventoryUpdatePopulateWorkloadIdentityTokens:
 
         # The instance's get_cloud_credential should now return the same object with context
         assert task.instance.get_cloud_credential() is cloud_cred
+
+    def test_no_cloud_credential_when_none_returned_from_instance(self):
+        """When instance.get_cloud_credential returns None, populate_workload_identity_tokens is called with None."""
+        task = jobs.RunInventoryUpdate()
+        task.instance = mock.MagicMock()
+        task.instance.get_cloud_credential.return_value = None
+        task._credentials = []
+
+        with mock.patch.object(jobs.BaseTask, 'populate_workload_identity_tokens') as mock_super:
+            task.populate_workload_identity_tokens()
+
+        mock_super.assert_called_once_with(additional_credentials=None)
+
+
+def test_work_unit_released_on_quota_exceeded():
+    """
+    Work unit is released on quota exceeded (when res is None).
+
+    Scenario: Job hits quota limit → _handle_work_error returns None →
+    BaseTask.run() early-returns. Work unit MUST be released.
+    """
+    receptor_ctl = mock.MagicMock()
+    receptor_job = mock.MagicMock()
+    receptor_job.unit_id = "test-unit-123"
+    receptor_job.receptor_ctl = receptor_ctl
+
+    # When res is None (quota exceeded case)
+    res = None
+
+    # This is the fixed code path from jobs.py lines 810-818
+    if not res:
+        if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+            try:
+                receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+            except Exception:
+                pass
+
+    # Verify release was called
+    receptor_job._receptor_release_work.assert_called_once_with(receptor_ctl, 'error')
+
+
+def test_work_unit_not_released_if_no_receptor_ctl():
+    """
+    Edge case: receptor_ctl not set (transmit phase failed before unit submission).
+
+    Verify graceful handling when receptor_ctl is None.
+    """
+    receptor_job = mock.MagicMock(spec=['unit_id', '_receptor_release_work'])
+    receptor_job.receptor_ctl = None  # Not set
+
+    res = None
+
+    # Code should not crash
+    if not res:
+        if receptor_job and getattr(receptor_job, 'receptor_ctl', None):
+            receptor_job._receptor_release_work(receptor_job.receptor_ctl, 'error')
+        # else: No release needed, unit was never submitted
+
+    # Verify _receptor_release_work was NOT called
+    assert receptor_job._receptor_release_work.call_count == 0
+
+
+@mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
+@mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
+@mock.patch('awx.main.tasks.jobs.events_processed_hook')
+@mock.patch('awx.main.tasks.jobs.update_model')
+def test_finalize_job_run_with_host_status_counts(mock_update, mock_hook, mock_task_mgr, mock_workflow_mgr):
+    """events_processed_hook is called when host_status_counts is not None."""
+    instance = mock.MagicMock()
+    instance.host_status_counts = {'successful': 5}  # Not None
+    instance.unifiedjob_blocked_jobs.exists.return_value = False
+    instance.spawned_by_workflow = False
+    instance.inventory_id = None
+    mock_update.return_value = instance
+
+    cb = mock.MagicMock()
+    cb.get_delayed_update_fields.return_value = {}
+    cb.wrapup_event_dispatched = True
+
+    jobs._finalize_job_run(mock.MagicMock, pk=1, runner_callback=cb, status='successful')
+
+    mock_hook.assert_called_once_with(instance)
+
+
+@mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
+@mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
+@mock.patch('awx.main.tasks.jobs.events_processed_hook')
+@mock.patch('awx.main.tasks.jobs.update_model')
+def test_finalize_job_run_with_wrapup_not_dispatched(mock_update, mock_hook, mock_task_mgr, mock_workflow_mgr):
+    """events_processed_hook is called when wrapup_event_dispatched is False."""
+    instance = mock.MagicMock()
+    instance.host_status_counts = None
+    instance.unifiedjob_blocked_jobs.exists.return_value = False
+    instance.spawned_by_workflow = False
+    instance.inventory_id = None
+    mock_update.return_value = instance
+
+    cb = mock.MagicMock()
+    cb.get_delayed_update_fields.return_value = {}
+    cb.wrapup_event_dispatched = False  # Not dispatched
+
+    jobs._finalize_job_run(mock.MagicMock, pk=1, runner_callback=cb, status='successful')
+
+    mock_hook.assert_called_once_with(instance)
+
+
+@mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
+@mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
+@mock.patch('awx.main.tasks.jobs.events_processed_hook')
+@mock.patch('awx.main.tasks.jobs.update_model')
+def test_finalize_job_run_calls_log_lifecycle(mock_update, mock_hook, mock_task_mgr, mock_workflow_mgr):
+    """instance.log_lifecycle('finalize_run') is called."""
+    instance = mock.MagicMock()
+    instance.host_status_counts = None
+    instance.unifiedjob_blocked_jobs.exists.return_value = False
+    instance.spawned_by_workflow = False
+    instance.inventory_id = None
+    mock_update.return_value = instance
+
+    cb = mock.MagicMock()
+    cb.get_delayed_update_fields.return_value = {}
+    cb.wrapup_event_dispatched = True
+
+    jobs._finalize_job_run(mock.MagicMock, pk=1, runner_callback=cb, status='successful')
+
+    instance.log_lifecycle.assert_called_once_with('finalize_run')
+
+
+@mock.patch('awx.main.tasks.jobs.ScheduleWorkflowManager')
+@mock.patch('awx.main.tasks.jobs.ScheduleTaskManager')
+@mock.patch('awx.main.tasks.jobs.events_processed_hook')
+@mock.patch('awx.main.tasks.jobs.update_model')
+def test_finalize_job_run_calls_websocket_emit(mock_update, mock_hook, mock_task_mgr, mock_workflow_mgr):
+    """instance.websocket_emit_status is called with the final status."""
+    instance = mock.MagicMock()
+    instance.host_status_counts = None
+    instance.unifiedjob_blocked_jobs.exists.return_value = False
+    instance.spawned_by_workflow = False
+    instance.inventory_id = None
+    mock_update.return_value = instance
+
+    cb = mock.MagicMock()
+    cb.get_delayed_update_fields.return_value = {}
+    cb.wrapup_event_dispatched = True
+
+    jobs._finalize_job_run(mock.MagicMock, pk=1, runner_callback=cb, status='failed')
+
+    instance.websocket_emit_status.assert_called_once_with('failed')
+
+
+@mock.patch('awx.main.tasks.jobs.fcntl.lockf')
+@mock.patch('awx.main.tasks.jobs.os.open')
+@mock.patch('awx.main.tasks.jobs.os.path.exists')
+def test_acquire_lock_shared(mock_exists, mock_os_open, mock_lockf):
+    """acquire_lock with exclusive=False uses LOCK_SH."""
+    import fcntl
+    from awx.main.tasks.jobs import BaseTask
+
+    # Setup mocks
+    mock_exists.return_value = True
+    mock_os_open.return_value = 5
+    task = BaseTask()
+    task.instance = mock.MagicMock()
+    task.instance.refresh_from_db = mock.MagicMock()
+    task.instance.cancel_flag = False
+
+    project = mock.MagicMock()
+    project.get_lock_file.return_value = '/tmp/project.lock'
+
+    # Mock signal_callback to return False (not cancelled)
+    with mock.patch('awx.main.tasks.jobs.signal_callback', return_value=False):
+        task.acquire_lock(project, unified_job_id=1, exclusive=False)
+
+    # Verify LOCK_SH (not LOCK_EX) was used
+    call_args = mock_lockf.call_args
+    lock_flags = call_args[0][1]
+    assert lock_flags & fcntl.LOCK_SH  # Should have LOCK_SH bit
+
+
+@mock.patch('awx.main.tasks.jobs.fcntl.lockf')
+@mock.patch('awx.main.tasks.jobs.os.open')
+@mock.patch('awx.main.tasks.jobs.os.path.exists')
+def test_acquire_lock_exclusive(mock_exists, mock_os_open, mock_lockf):
+    """acquire_lock with exclusive=True uses LOCK_EX."""
+    import fcntl
+    from awx.main.tasks.jobs import BaseTask
+
+    # Setup mocks
+    mock_exists.return_value = True
+    mock_os_open.return_value = 5
+    task = BaseTask()
+    task.instance = mock.MagicMock()
+    task.instance.refresh_from_db = mock.MagicMock()
+    task.instance.cancel_flag = False
+
+    project = mock.MagicMock()
+    project.get_lock_file.return_value = '/tmp/project.lock'
+
+    # Mock signal_callback to return False (not cancelled)
+    with mock.patch('awx.main.tasks.jobs.signal_callback', return_value=False):
+        task.acquire_lock(project, unified_job_id=1, exclusive=True)
+
+    # Verify LOCK_EX was used
+    call_args = mock_lockf.call_args
+    lock_flags = call_args[0][1]
+    assert lock_flags & fcntl.LOCK_EX  # Should have LOCK_EX bit

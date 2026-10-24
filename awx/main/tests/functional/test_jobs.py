@@ -199,7 +199,6 @@ class TestAnsibleFactsSave:
 
 @pytest.mark.django_db
 def test_update_hosts_resolved_deadlock(inventory, mocker):
-
     hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
 
     # Set ansible_facts for each host

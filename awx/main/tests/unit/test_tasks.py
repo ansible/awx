@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import tarfile
 from pathlib import Path
 
 import fcntl
@@ -469,11 +470,12 @@ class TestGenericRun:
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with mock.patch('awx.main.tasks.jobs.shutil.copytree'), mock.patch('awx.main.tasks.jobs.evaluate_policy'):
-            with pytest.raises(Exception):
-                task.run(1)
+        with mock.patch('awx.main.tasks.jobs.update_model', return_value=job) as mock_update_model:
+            with mock.patch('awx.main.tasks.jobs.shutil.copytree'), mock.patch('awx.main.tasks.jobs.evaluate_policy'):
+                with pytest.raises(Exception):
+                    task.run(1)
 
-        update_model_call = task.update_model.call_args[1]
+        update_model_call = mock_update_model.call_args[1]
         assert 'OSError' in update_model_call['result_traceback']
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
@@ -574,11 +576,12 @@ class TestAdhocRun(TestJobExecution):
         task.model.objects.get = mock.Mock(return_value=adhoc_job)
         task.build_inventory = mock.Mock()
 
-        with pytest.raises(Exception):
-            task.run(adhoc_job.pk)
+        with mock.patch('awx.main.tasks.jobs.update_model', return_value=adhoc_job) as mock_update_model:
+            with pytest.raises(Exception):
+                task.run(adhoc_job.pk)
 
         call_args, _ = task.update_model.call_args_list[0]
-        update_model_call = task.update_model.call_args[1]
+        update_model_call = mock_update_model.call_args[1]
         assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
 
     '''
@@ -965,7 +968,7 @@ class TestCallbacksEnabled(TestJobExecution):
 
         assert env['ANSIBLE_CALLBACKS_ENABLED'] == 'indirect_instance_count,my_callback'
 
-    def test_collect_host_queries_set_when_flag_on(self, patch_Job, private_data_dir, execution_environment, mock_me):
+    def test_collect_host_queries_set_when_indirect_node_counting_enabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
@@ -974,12 +977,12 @@ class TestCallbacksEnabled(TestJobExecution):
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
-            with mock.patch('awx.main.tasks.jobs.flag_enabled', return_value=True):
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', True):
                 env = task.build_env(job, private_data_dir)
 
         assert env['AWX_COLLECT_HOST_QUERIES'] == '1'
 
-    def test_collect_host_queries_not_set_when_flag_off(self, patch_Job, private_data_dir, execution_environment, mock_me):
+    def test_collect_host_queries_not_set_when_indirect_node_counting_disabled(self, patch_Job, private_data_dir, execution_environment, mock_me):
         job = Job(project=Project(), inventory=Inventory())
         job.execution_environment = execution_environment
 
@@ -988,7 +991,8 @@ class TestCallbacksEnabled(TestJobExecution):
         task._write_extra_vars_file = mock.Mock()
 
         with mock.patch.object(task, 'build_credentials_list', return_value=[], autospec=True):
-            env = task.build_env(job, private_data_dir)
+            with mock.patch('awx.main.tasks.jobs.settings.INDIRECT_NODE_COUNTING_ENABLED', False):
+                env = task.build_env(job, private_data_dir)
 
         assert 'AWX_COLLECT_HOST_QUERIES' not in env
 
@@ -1169,6 +1173,40 @@ class TestProjectUpdateCredentials(TestJobExecution):
         assert env['FOO'] == 'BAR'
 
 
+class TestProjectUpdateSignatureValidation(TestJobExecution):
+    """Tests that ProjectUpdate.save() adds GPG validation job tags when a
+    signature_validation_credential is set on the project."""
+
+    def test_project_update_with_signature_credential_adds_validation_tags(self):
+        gpg_credential_type = CredentialType(pk=1, namespace='gpg_public_key', kind='cryptography')
+        gpg_credential = Credential(pk=1, credential_type=gpg_credential_type)
+        project = Project(pk=1, organization=Organization(pk=1), scm_type='git', signature_validation_credential=gpg_credential)
+        project_update = ProjectUpdate(pk=1, project=project, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+
+        # Simulate the save logic that sets job_tags without hitting the database
+        with mock.patch.object(UnifiedJob, 'save', return_value=None):
+            project_update.save()
+
+        assert 'validation_gpg_public_key' in project_update.job_tags
+        assert 'validation_checksum_manifest' in project_update.job_tags
+        assert 'update_git' in project_update.job_tags
+
+    def test_project_update_without_signature_credential_no_validation_tags(self):
+        project = Project(pk=1, organization=Organization(pk=1), scm_type='git')
+        project_update = ProjectUpdate(pk=1, project=project, scm_type='git')
+        project_update.websocket_emit_status = mock.Mock()
+
+        with mock.patch.object(UnifiedJob, 'save', return_value=None):
+            project_update.save()
+
+        assert 'validation_gpg_public_key' not in project_update.job_tags
+        assert 'validation_checksum_manifest' not in project_update.job_tags
+        assert 'update_git' in project_update.job_tags
+        assert 'install_roles' in project_update.job_tags
+        assert 'install_collections' in project_update.job_tags
+
+
 @pytest.mark.django_db
 class TestProjectUpdateRefspec(TestJobExecution):
     @pytest.fixture
@@ -1303,10 +1341,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             if credential:
                 credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
-        env["VMWARE_USER"] == "bob",
-        env["VMWARE_PASSWORD"] == "secret",
-        env["VMWARE_HOST"] == "https://example.org",
-        env["VMWARE_VALIDATE_CERTS"] == "False",
+        (env["VMWARE_USER"] == "bob",)
+        (env["VMWARE_PASSWORD"] == "secret",)
+        (env["VMWARE_HOST"] == "https://example.org",)
+        (env["VMWARE_VALIDATE_CERTS"] == "False",)
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker, mock_me):
         task = jobs.RunInventoryUpdate()
@@ -1634,6 +1672,536 @@ def test_acquire_lock_acquisition_fail_logged(fcntl_lockf, logger_mock, os_close
     logger_mock.error.assert_called_with(
         "I/O error({0}) while trying to acquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message')
     )
+
+
+@pytest.mark.parametrize(
+    'kwargs,expected_flag',
+    [
+        ({}, fcntl.LOCK_EX | fcntl.LOCK_NB),  # default is exclusive
+        ({'exclusive': False}, fcntl.LOCK_SH | fcntl.LOCK_NB),
+    ],
+)
+@mock.patch('os.open')
+@mock.patch('fcntl.lockf')
+def test_acquire_lock_flag(fcntl_lockf, os_open, mock_me, kwargs, expected_flag):
+    """acquire_lock passes the correct fcntl flag based on the exclusive parameter."""
+    instance = mock.Mock()
+    instance.get_lock_file.return_value = '/fake/path.lock'
+    os_open.return_value = 3
+
+    task = jobs.RunProjectUpdate()
+    task.acquire_lock(instance, **kwargs)
+
+    assert fcntl_lockf.call_args[0][1] == expected_flag
+
+
+# Each entry: (sync_needs, has_pk, expected exclusive= sequence, expected refresh_from_db count)
+# - copy-only path: refresh once under LOCK_SH
+# - upgrade path: refresh under LOCK_SH and again under LOCK_EX (POSIX locks cannot
+#   be upgraded atomically, so state may change in the gap between releasing SH and
+#   acquiring EX)
+# - pk=None cases: refresh_from_db is skipped (unsaved model instances used in some tests)
+@pytest.mark.parametrize(
+    'sync_needs,has_pk,expected_exclusive_seq,expected_refresh_count',
+    [
+        ([], True, [False], 1),  # copy-only: shared lock, refresh once
+        (['update_git'], True, [False, True], 2),  # upgrade path: refresh under SH and EX
+        ([], False, [False], 0),  # copy-only, no pk: refresh skipped
+        (['update_git'], False, [False, True], 0),  # upgrade path, no pk: refresh skipped
+    ],
+)
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.release_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.acquire_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.sync_and_copy_without_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.get_sync_needs')
+def test_sync_and_copy_lock_behavior(
+    get_sync_needs, sync_without_lock, acquire_lock, release_lock, mock_me, sync_needs, has_pk, expected_exclusive_seq, expected_refresh_count
+):
+    """sync_and_copy acquires LOCK_SH first, upgrading to LOCK_EX only when a sync is needed.
+    project.refresh_from_db() is called after each lock acquisition to ensure current DB state,
+    but only when the project has a pk (i.e. is persisted to the database)."""
+    get_sync_needs.return_value = sync_needs
+
+    project = mock.Mock()
+    project.pk = 1 if has_pk else None
+    project.get_reason_if_failed.return_value = None
+    project.scm_type = 'git'
+    project.scm_branch = 'main'
+
+    task = jobs.RunJob()
+    task.instance = mock.Mock()
+    task.instance.id = 1
+    task.update_model = mock.Mock(return_value=task.instance)
+
+    task.sync_and_copy(project, '/fake/private_data_dir')
+
+    assert acquire_lock.call_count == len(expected_exclusive_seq)
+    for i, exclusive in enumerate(expected_exclusive_seq):
+        assert acquire_lock.call_args_list[i] == mock.call(project, task.instance.id, exclusive=exclusive)
+    assert release_lock.call_count == len(expected_exclusive_seq)
+    assert project.refresh_from_db.call_count == expected_refresh_count
+
+
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.release_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.acquire_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.sync_and_copy_without_lock')
+@mock.patch('awx.main.tasks.jobs.SourceControlMixin.get_sync_needs')
+def test_sync_and_copy_get_sync_needs_called_under_shared_lock(get_sync_needs, sync_without_lock, acquire_lock, release_lock, mock_me):
+    """get_sync_needs is called after acquiring LOCK_SH, not before any lock."""
+    call_order = []
+    acquire_lock.side_effect = lambda *a, **kw: call_order.append('acquire')
+    get_sync_needs.side_effect = lambda *a, **kw: call_order.append('get_sync_needs') or []
+
+    project = mock.Mock()
+    project.get_reason_if_failed.return_value = None
+    project.scm_type = 'git'
+    project.scm_branch = 'main'
+
+    task = jobs.RunJob()
+    task.instance = mock.Mock()
+    task.instance.id = 1
+    task.update_model = mock.Mock(return_value=task.instance)
+
+    task.sync_and_copy(project, '/fake/private_data_dir')
+
+    assert call_order[0] == 'acquire', 'lock must be acquired before get_sync_needs is called'
+    assert call_order[1] == 'get_sync_needs'
+
+
+class TestClearProjectCachePreservesReqcache:
+    def test_reqcache_entries_preserved(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'abc123').mkdir()
+        (cache_dir / 'reqcache_deadbeef').mkdir()
+        (cache_dir / 'reqcache_cafebabe').mkdir()
+        (cache_dir / 'old_revision').mkdir()
+        (cache_dir / 'stage').mkdir()
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'abc123')
+
+        remaining = set(os.listdir(cache_dir))
+        assert 'abc123' in remaining
+        assert 'reqcache_deadbeef' in remaining
+        assert 'reqcache_cafebabe' in remaining
+        assert 'stage' in remaining
+        assert 'old_revision' not in remaining
+
+    def test_no_reqcache_entries(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'keep_me').mkdir()
+        (cache_dir / 'delete_me').mkdir()
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'keep_me')
+
+        remaining = set(os.listdir(cache_dir))
+        assert 'keep_me' in remaining
+        assert 'delete_me' not in remaining
+
+    def test_evicts_oldest_reqcache_when_over_limit(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'current').mkdir()
+
+        for i in range(12):
+            entry = cache_dir / f'reqcache_hash{i:02d}'
+            entry.mkdir()
+            os.utime(str(entry), (1000 + i, 1000 + i))
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'current', max_reqcache=10)
+
+        remaining = set(os.listdir(cache_dir))
+        assert 'reqcache_hash00' not in remaining
+        assert 'reqcache_hash01' not in remaining
+        assert 'reqcache_hash02' in remaining
+        assert 'reqcache_hash11' in remaining
+        assert len([e for e in remaining if e.startswith('reqcache_')]) == 10
+
+    def test_eviction_protects_current_reqcache(self, tmp_path):
+        cache_dir = tmp_path / 'cache'
+        cache_dir.mkdir()
+        (cache_dir / 'current').mkdir()
+
+        stage_dir = cache_dir / 'stage'
+        stage_dir.mkdir()
+        (stage_dir / '.requirements_hash').write_text('hash00')
+
+        for i in range(12):
+            entry = cache_dir / f'reqcache_hash{i:02d}'
+            entry.mkdir()
+            os.utime(str(entry), (1000 + i, 1000 + i))
+
+        jobs.RunProjectUpdate.clear_project_cache(str(cache_dir), 'current', max_reqcache=10)
+
+        remaining = set(os.listdir(cache_dir))
+        # hash00 is the oldest but should be protected (current update's hash)
+        assert 'reqcache_hash00' in remaining
+        # hash01 is the next oldest and should be evicted
+        assert 'reqcache_hash01' not in remaining
+        # hash02+ should survive (only 1 non-protected entry evicted)
+        assert 'reqcache_hash02' in remaining
+        assert 'reqcache_hash11' in remaining
+
+
+class TestSyncRequirementsCache:
+    def test_saves_collections_to_reqcache(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        # Simulate a galaxy install that produced collections
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'ansible_collections').mkdir()
+        (collections_dir / 'ansible_collections' / 'test.txt').write_text('test')
+
+        # Write the hash marker
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        reqcache = base_path / 'reqcache_deadbeef1234' / 'requirements_collections'
+        assert reqcache.exists()
+        assert (reqcache / 'ansible_collections' / 'test.txt').read_text() == 'test'
+
+    def test_skips_when_no_hash_file(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        entries = os.listdir(base_path)
+        assert not any(e.startswith('reqcache_') for e in entries)
+
+    def test_no_partial_cache_on_copytree_failure(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'test.txt').write_text('test')
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        with mock.patch('shutil.copytree', side_effect=OSError('disk full')):
+            try:
+                jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+            except OSError:
+                pass
+
+        reqcache = base_path / 'reqcache_deadbeef1234'
+        assert not reqcache.exists()
+        tmp_dirs = [e for e in os.listdir(base_path) if e.startswith('.reqcache_')]
+        assert len(tmp_dirs) == 0
+
+    def test_creates_tarball_after_sync(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'ansible_collections').mkdir()
+        (collections_dir / 'ansible_collections' / 'test.txt').write_text('test')
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        tar_path = base_path / 'reqcache_deadbeef1234' / 'requirements_collections.tar'
+        assert tar_path.exists()
+        with tarfile.open(str(tar_path), 'r') as tar:
+            names = tar.getnames()
+            assert 'requirements_collections/ansible_collections/test.txt' in names
+
+    def test_skips_when_reqcache_already_exists(self, tmp_path):
+        base_path = tmp_path / 'cache'
+        base_path.mkdir()
+        cache_path = base_path / 'abc123'
+        cache_path.mkdir()
+
+        # Pre-existing reqcache
+        reqcache = base_path / 'reqcache_deadbeef1234' / 'requirements_collections'
+        reqcache.mkdir(parents=True)
+        (reqcache / 'existing.txt').write_text('original')
+
+        # New cache with same hash but different content
+        collections_dir = cache_path / 'requirements_collections'
+        collections_dir.mkdir()
+        (collections_dir / 'new.txt').write_text('new')
+        (cache_path / '.requirements_hash').write_text('deadbeef1234')
+
+        jobs.RunProjectUpdate._sync_requirements_cache(str(base_path), str(cache_path))
+
+        # Should not overwrite existing reqcache
+        assert (reqcache / 'existing.txt').read_text() == 'original'
+        assert not (reqcache / 'new.txt').exists()
+
+
+class TestMakeLocalCopyReqcacheFallback:
+    def test_falls_back_to_reqcache(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        # Create cache_id directory with hash pointer but no collections
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Create reqcache with collections
+        reqcache_collections = cache_base / 'reqcache_deadbeef1234' / 'requirements_collections'
+        reqcache_collections.mkdir(parents=True)
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        # Create project path
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        # Create job private data dir
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        # Collections should be copied from reqcache
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_uses_tarball_from_reqcache(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Create reqcache with collections directory AND tarball
+        reqcache = cache_base / 'reqcache_deadbeef1234'
+        reqcache.mkdir()
+        reqcache_collections = reqcache / 'requirements_collections'
+        reqcache_collections.mkdir()
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        tar_path = reqcache / 'requirements_collections.tar'
+        with tarfile.open(str(tar_path), 'w') as tar:
+            tar.add(str(reqcache_collections), arcname='requirements_collections')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_direct_cache_ignores_reqcache_tarball(self, tmp_path):
+        """Direct cache hit must use copytree, not a reqcache tarball that could have stale content."""
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        direct_collections = cache_id_dir / 'requirements_collections'
+        direct_collections.mkdir()
+        (direct_collections / 'direct.txt').write_text('direct content')
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Reqcache tarball with DIFFERENT content — must not be used
+        reqcache = cache_base / 'reqcache_deadbeef1234'
+        reqcache.mkdir()
+        stale_dir = tmp_path / '_stale'
+        stale_dir.mkdir()
+        stale_collections = stale_dir / 'requirements_collections'
+        stale_collections.mkdir()
+        (stale_collections / 'direct.txt').write_text('stale tarball content')
+        tar_path = reqcache / 'requirements_collections.tar'
+        with tarfile.open(str(tar_path), 'w') as tar:
+            tar.add(str(stale_collections), arcname='requirements_collections')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        dest = job_dir / 'requirements_collections' / 'direct.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'direct content'
+
+    def test_tarball_partial_extract_falls_back_to_copytree(self, tmp_path):
+        """If tarball extraction partially writes then fails, copytree fallback must still work."""
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        reqcache = cache_base / 'reqcache_deadbeef1234'
+        reqcache.mkdir()
+        reqcache_collections = reqcache / 'requirements_collections'
+        reqcache_collections.mkdir()
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        # Create a valid tarball that we'll make fail during extraction
+        tar_path = reqcache / 'requirements_collections.tar'
+        with tarfile.open(str(tar_path), 'w') as tar:
+            tar.add(str(reqcache_collections), arcname='requirements_collections')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        # Simulate partial extraction: create dest dir to mimic what a failed extractall leaves behind
+        partial_dest = job_dir / 'requirements_collections'
+        partial_dest.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        original_open = tarfile.open
+
+        def failing_tarfile_open(*args, **kwargs):
+            tar = original_open(*args, **kwargs)
+
+            def raise_after_partial(*a, **kw):
+                raise OSError("Simulated extraction failure")
+
+            tar.extractall = raise_after_partial
+            return tar
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            with mock.patch('awx.main.tasks.jobs.tarfile.open', side_effect=failing_tarfile_open):
+                jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_falls_back_to_copytree_when_no_tarball(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        (cache_id_dir / '.requirements_hash').write_text('deadbeef1234')
+
+        # Reqcache with directory but NO tarball
+        reqcache_collections = cache_base / 'reqcache_deadbeef1234' / 'requirements_collections'
+        reqcache_collections.mkdir(parents=True)
+        (reqcache_collections / 'community').mkdir()
+        (reqcache_collections / 'community' / 'general.txt').write_text('collection content')
+
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        # Should still work via copytree fallback
+        dest = job_dir / 'requirements_collections' / 'community' / 'general.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'collection content'
+
+    def test_uses_direct_cache_when_available(self, tmp_path):
+        cache_base = tmp_path / 'cache'
+        cache_base.mkdir()
+
+        # Create cache_id directory with collections directly present
+        cache_id_dir = cache_base / 'abc123'
+        cache_id_dir.mkdir()
+        direct_collections = cache_id_dir / 'requirements_collections'
+        direct_collections.mkdir()
+        (direct_collections / 'direct.txt').write_text('direct content')
+
+        # Create project path
+        project_path = tmp_path / 'project'
+        project_path.mkdir()
+        (project_path / 'playbook.yml').write_text('- hosts: all')
+
+        job_dir = tmp_path / 'job'
+        job_dir.mkdir()
+
+        project = mock.Mock()
+        project.get_project_path.return_value = str(project_path)
+        project.get_cache_path.return_value = str(cache_base)
+        project.cache_id = 'abc123'
+        project.pk = 1
+
+        with mock.patch('awx.main.tasks.jobs.settings') as mock_settings:
+            mock_settings.AWX_COLLECTIONS_ENABLED = True
+            mock_settings.AWX_ROLES_ENABLED = False
+            jobs.RunProjectUpdate.make_local_copy(project, str(job_dir))
+
+        # Should use direct cache, not reqcache
+        dest = job_dir / 'requirements_collections' / 'direct.txt'
+        assert dest.exists()
+        assert dest.read_text() == 'direct content'
 
 
 @pytest.mark.parametrize('injector_cls', [cls for cls in ManagedCredentialType.registry.values() if cls.injectors])

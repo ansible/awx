@@ -76,6 +76,16 @@ def swagger_autogen(requests=__SWAGGER_REQUESTS__):
     return requests
 
 
+class FakeLock:
+    # Never acquirable, so callers that guard work with a redis lock take the
+    # "someone else holds it" branch instead of reaching for real services.
+    def acquire(self, *args, **kwargs):
+        return False
+
+    def release(self, *args, **kwargs):
+        pass
+
+
 class FakeRedis:
     def __init__(self, *args, **kwargs):
         # Accept and ignore all arguments to match redis.Redis signature
@@ -89,6 +99,21 @@ class FakeRedis:
 
     def get(self, *args, **kwargs):
         return None
+
+    def hset(self, *args, **kwargs):
+        return 1
+
+    def hget(self, *args, **kwargs):
+        return None
+
+    def hincrby(self, *args, **kwargs):
+        return 0
+
+    def hincrbyfloat(self, *args, **kwargs):
+        return 0.0
+
+    def lock(self, *args, **kwargs):
+        return FakeLock()
 
     def rpush(self, *args, **kwargs):
         return 1
@@ -111,6 +136,9 @@ class FakeRedis:
 
     def pipeline(self):
         return self
+
+    def execute(self, *args, **kwargs):
+        return []
 
     def ping(self):
         return
@@ -830,14 +858,13 @@ class MockCopy:
     events = []
     index = -1
 
-    def __init__(self, sql):
+    def __init__(self):
         self.events = []
-        parts = sql.split(' ')
-        tablename = parts[parts.index('from') + 1]
         for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
-            if cls._meta.db_table == tablename:
-                for event in cls.objects.order_by('start_line').all():
-                    self.events.append(event.stdout)
+            events = list(cls.objects.order_by('start_line').values_list('stdout', flat=True))
+            if events:
+                self.events = events
+                break
 
     def read(self):
         self.index = self.index + 1
@@ -858,9 +885,8 @@ def sqlite_copy(request, mocker):
     # copy is postgres-specific, and SQLite doesn't support it; mock its
     # behavior to test that it writes a file that contains stdout from events
 
-    def write_stdout(self, sql):
-        mock_copy = MockCopy(sql)
-        return mock_copy
+    def write_stdout(self, sql, params=None):
+        return MockCopy()
 
     mocker.patch.object(SQLiteCursorWrapper, 'copy', write_stdout, create=True)
 

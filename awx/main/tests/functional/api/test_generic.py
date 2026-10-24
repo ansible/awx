@@ -6,7 +6,7 @@ from awx.api.versioning import reverse
 from django.test.utils import override_settings
 
 from ansible_base.jwt_consumer.common.util import generate_x_trusted_proxy_header
-from ansible_base.lib.testing.fixtures import rsa_keypair_factory, rsa_keypair  # noqa: F401; pylint: disable=unused-import
+from ansible_base.lib.testing.fixtures import rsa_keypair_factory, rsa_keypair  # noqa: F401  # pylint: disable=unused-import
 
 
 class HeaderTrackingMiddleware(object):

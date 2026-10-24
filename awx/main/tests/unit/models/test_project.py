@@ -11,4 +11,4 @@ def test_clean_credential_insights():
     with pytest.raises(ValidationError) as e:
         proj.clean_credential()
 
-    assert json.dumps(str(e.value)) == json.dumps(str([u'Insights Credential is required for an Insights Project.']))
+    assert json.dumps(str(e.value)) == json.dumps(str(['Insights Credential is required for an Insights Project.']))
