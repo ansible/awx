@@ -282,7 +282,7 @@
           when:
             - roles_enabled | bool
             - req_file | length > 0
-            - not (requirements_cache_hit | default(false) | bool)
+            - not (requirements_cache_hit | default(false) | bool) or (galaxy_update_on_launch | default(false) | bool)
           tags:
             - install_roles
 
@@ -301,7 +301,7 @@
           when:
             - collections_enabled | bool
             - req_file | length > 0
-            - not (requirements_cache_hit | default(false) | bool)
+            - not (requirements_cache_hit | default(false) | bool) or (galaxy_update_on_launch | default(false) | bool)
           tags:
             - install_collections
 
@@ -322,7 +322,7 @@
             - collections_enabled | bool
             - roles_enabled | bool
             - req_file | length > 0
-            - not (requirements_cache_hit | default(false) | bool)
+            - not (requirements_cache_hit | default(false) | bool) or (galaxy_update_on_launch | default(false) | bool)
           tags:
             - install_collections
             - install_roles
