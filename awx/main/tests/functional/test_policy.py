@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 import requests.exceptions
 from django.test import override_settings
+from django.utils.translation import gettext_lazy
 
 from awx.main.models import (
     Job,
@@ -673,3 +674,17 @@ def test_format_policy_results_does_not_quote_or_escape():
     assert "\\n" not in details
     assert '"' not in details
     assert details.count("'spaces'") == 1
+
+
+def test_format_policy_results_handles_lazy_translated_messages():
+    """Error messages are gettext_lazy proxies, not str.
+
+    They are not str instances and iterate character by character, so a
+    sequence check that tests for str instead of list would bullet every
+    single letter of the message.
+    """
+    message = gettext_lazy('OPA policy returned invalid result.')
+
+    details = format_policy_results({"Errors": {"Organization": message}})
+
+    assert details == "Errors:\n  Organization: OPA policy returned invalid result."

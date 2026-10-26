@@ -278,16 +278,20 @@ def format_policy_results(results: dict) -> str:
     for section, entries in results.items():
         lines.append(f'{section}:')
         for resource, detail in entries.items():
-            if isinstance(detail, str):
-                message_lines = detail.splitlines() or ['']
-                lines.append(f'  {resource}: {message_lines[0]}')
-                lines.extend(f'    {line}' for line in message_lines[1:])
+            # Errors hold one message, violations hold a list of them. Test for
+            # the list rather than for str: error messages are gettext_lazy
+            # proxies, which are not str instances and iterate character by
+            # character, so treating them as a sequence would bullet every letter.
+            if isinstance(detail, (list, tuple)):
+                lines.append(f'  {resource}:')
+                for message in detail:
+                    message_lines = str(message).splitlines() or ['']
+                    lines.append(f'    - {message_lines[0]}')
+                    lines.extend(f'      {line}' for line in message_lines[1:])
                 continue
-            lines.append(f'  {resource}:')
-            for message in detail:
-                message_lines = str(message).splitlines() or ['']
-                lines.append(f'    - {message_lines[0]}')
-                lines.extend(f'      {line}' for line in message_lines[1:])
+            message_lines = str(detail).splitlines() or ['']
+            lines.append(f'  {resource}: {message_lines[0]}')
+            lines.extend(f'    {line}' for line in message_lines[1:])
     return '\n'.join(lines)
 
 
