@@ -385,6 +385,8 @@ def test_send_messages_redirect_strips_credentials_on_host_change():
     with (
         mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
         mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+        # no-op: redirect tests use fake hostnames that would fail DNS resolution in validate_url
+        mock.patch('awx.main.notifications.webhook_backend.validate_url', side_effect=lambda url: url),
     ):
         requests_mock.post.side_effect = [
             mock.Mock(status_code=301, headers={"Location": "http://other-host.com/hook"}),
@@ -410,6 +412,8 @@ def test_send_messages_redirect_strips_credentials_on_scheme_downgrade():
     with (
         mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
         mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+        # no-op: redirect tests use fake hostnames that would fail DNS resolution in validate_url
+        mock.patch('awx.main.notifications.webhook_backend.validate_url', side_effect=lambda url: url),
     ):
         requests_mock.post.side_effect = [
             mock.Mock(status_code=301, headers={"Location": "http://example.com/hook"}),
@@ -430,6 +434,8 @@ def test_send_messages_redirect_keeps_auth_on_same_origin():
     with (
         mock.patch('awx.main.notifications.webhook_backend.requests') as requests_mock,
         mock.patch('awx.main.notifications.webhook_backend.get_awx_http_client_headers') as version_mock,
+        # no-op: redirect tests use fake hostnames that would fail DNS resolution in validate_url
+        mock.patch('awx.main.notifications.webhook_backend.validate_url', side_effect=lambda url: url),
     ):
         requests_mock.post.side_effect = [
             mock.Mock(status_code=301, headers={"Location": "http://example.com/new-path"}),

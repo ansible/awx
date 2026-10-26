@@ -602,7 +602,7 @@ def test_credential_type_fields_include_patterns_when_toggle_on(get, admin, fake
     assert response.status_code == 200
     fields = {f['id']: f for f in response.data['inputs']['fields']}
     assert fields['username']['pattern'] == FAKE_TIER2_PATTERN
-    assert 'pattern_description' in fields['username']
+    assert 'patternDescription' in fields['username']
     assert 'pattern' not in fields['api_token']
     assert 'pattern' not in fields['verify_ssl']
 
@@ -621,7 +621,7 @@ def test_credential_type_fields_omit_patterns_when_toggle_off(get, admin, fake_t
     assert response.status_code == 200
     username = response.data['inputs']['fields'][0]
     assert 'pattern' not in username
-    assert 'pattern_description' not in username
+    assert 'patternDescription' not in username
 
 
 @pytest.mark.django_db

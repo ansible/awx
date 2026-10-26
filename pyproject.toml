@@ -7,6 +7,7 @@ build-backend = "setuptools.build_meta"
 # [tool.setuptools_scm]
 
 [tool.ruff]
+required-version = "~=0.16.0"
 line-length = 160
 extend-exclude = ["awx_collection"]
 
