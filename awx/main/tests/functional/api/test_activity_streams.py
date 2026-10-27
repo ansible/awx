@@ -142,30 +142,30 @@ def test_stream_queryset_hides_shows_items(
 
 
 @pytest.mark.django_db
-def test_activity_stream_job_serialization_query_count(get, job_factory, org_admin, settings):
-    """Job activity stream serialization should not issue one query per row."""
+def test_activity_stream_mixed_serialization_query_count(get, job_factory, project, org_admin, settings):
+    """Mixed activity-stream serialization should not issue one query per row."""
     settings.ACTIVITY_STREAM_ENABLED = True
     job = job_factory()
     entry_ids = []
 
-    for _ in range(10):
+    for object_type, related_object in [('job', job), ('project', project)] * 10:
         entry = ActivityStream.objects.create(
             operation='create',
-            object1='job',
+            object1=object_type,
             object2='',
             actor=org_admin,
             changes='{}',
         )
-        entry.job.add(job)
+        getattr(entry, object_type).add(related_object)
         entry_ids.append(entry.id)
 
     url = reverse('api:activity_stream_list')
     query_counts = []
     unified_job_query_counts = []
-    for page_size in (1, 10):
+    for page_size in (1, 20):
         with CaptureQueriesContext(connection) as queries:
             response = get(
-                f'{url}?or__object1__in=job&or__object2__in=job&order_by=-id&page=1&page_size={page_size}',
+                f'{url}?or__object1__in=job%2Cproject&or__object2__in=job%2Cproject&order_by=-id&page=1&page_size={page_size}',
                 org_admin,
             )
         assert response.status_code == 200

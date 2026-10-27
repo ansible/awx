@@ -2676,26 +2676,7 @@ class ActivityStreamAccess(BaseAccess):
     """
 
     model = ActivityStream
-    prefetch_related = (
-        'organization',
-        'user',
-        'inventory',
-        'host',
-        'group',
-        'inventory_update',
-        'credential',
-        'credential_type',
-        'team',
-        'ad_hoc_command',
-        'notification_template',
-        'notification',
-        'label',
-        'role',
-        'actor',
-        'schedule',
-        'unified_job_template',
-        'workflow_job_template_node',
-    )
+    select_related = ('actor',)
 
     def filtered_queryset(self):
         """
