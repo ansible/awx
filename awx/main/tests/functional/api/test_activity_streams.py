@@ -142,13 +142,14 @@ def test_stream_queryset_hides_shows_items(
 
 
 @pytest.mark.django_db
-def test_activity_stream_mixed_serialization_query_count(get, job_factory, project, org_admin, settings):
+def test_activity_stream_mixed_serialization_query_count(get, job_factory, project, inventory, org_credential, org_admin, settings):
     """Mixed activity-stream serialization should not issue one query per row."""
     settings.ACTIVITY_STREAM_ENABLED = True
     job = job_factory()
     entry_ids = []
 
-    for object_type, related_object in [('job', job), ('project', project)] * 10:
+    events = [('job', job), ('project', project), ('inventory', inventory), ('credential', org_credential)] * 25
+    for object_type, related_object in events:
         entry = ActivityStream.objects.create(
             operation='create',
             object1=object_type,
@@ -162,22 +163,21 @@ def test_activity_stream_mixed_serialization_query_count(get, job_factory, proje
     url = reverse('api:activity_stream_list')
     query_counts = []
     unified_job_query_counts = []
-    for page_size in (1, 20):
+    for page_size in (1, 20, 100):
         with CaptureQueriesContext(connection) as queries:
             response = get(
-                f'{url}?or__object1__in=job%2Cproject&or__object2__in=job%2Cproject&order_by=-id&page=1&page_size={page_size}',
+                f'{url}?or__object1__in=job%2Cproject%2Cinventory%2Ccredential&or__object2__in=job%2Cproject%2Cinventory%2Ccredential&order_by=-id&page=1&page_size={page_size}',
                 org_admin,
             )
         assert response.status_code == 200
         assert all(result['id'] in entry_ids for result in response.data['results'])
         query_counts.append(len(queries))
         unified_job_table = connection.ops.quote_name('main_unifiedjob').lower()
-        unified_job_query_counts.append(
-            sum(unified_job_table in query['sql'].lower() and 'activitystream' not in query['sql'].lower() for query in queries)
-        )
+        unified_job_query_counts.append(sum(unified_job_table in query['sql'].lower() and 'activitystream' not in query['sql'].lower() for query in queries))
 
     assert query_counts[1] - query_counts[0] <= 5, query_counts
-    assert unified_job_query_counts[1] <= 2, unified_job_query_counts
+    assert query_counts[2] - query_counts[1] <= 5, query_counts
+    assert max(unified_job_query_counts) <= 2, unified_job_query_counts
 
 
 @pytest.mark.django_db
