@@ -181,6 +181,66 @@ def test_activity_stream_mixed_serialization_query_count(get, job_factory, proje
 
 
 @pytest.mark.django_db
+def test_activity_stream_unfiltered_mixed_serialization_query_count(
+    get,
+    admin,
+    job_factory,
+    project,
+    inventory,
+    org_credential,
+    organization,
+    org_admin,
+    team,
+    deploy_jobtemplate,
+    host,
+    workflow_job_template,
+    instance,
+    settings,
+):
+    """Unfiltered pages cover the mixed association types seen in production."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    jobs = [job_factory() for _ in range(8)]
+    related_objects = [
+        ('organization', organization),
+        ('user', org_admin),
+        ('team', team),
+        ('job_template', deploy_jobtemplate),
+        ('host', host),
+        ('job', None),
+        ('project', project),
+        ('inventory', inventory),
+        ('workflow_job_template', workflow_job_template),
+        ('instance', instance),
+        ('credential', org_credential),
+    ]
+    entry_ids = []
+    for index in range(8):
+        for object_type, related_object in related_objects:
+            related_object = jobs[index] if object_type == 'job' else related_object
+            entry = ActivityStream.objects.create(
+                operation='create',
+                object1=object_type,
+                object2='',
+                actor=org_admin,
+                changes='{}',
+            )
+            getattr(entry, object_type).add(related_object)
+            entry_ids.append(entry.id)
+
+    url = reverse('api:activity_stream_list')
+    query_counts = []
+    for page_size in (20, 100):
+        with CaptureQueriesContext(connection) as queries:
+            response = get(f'{url}?order_by=-id&page=1&page_size={page_size}', admin)
+        assert response.status_code == 200
+        query_counts.append(len(queries))
+
+    returned_types = {result['object1'] for result in response.data['results'] if result['id'] in entry_ids}
+    assert {object_type for object_type, _ in related_objects} <= returned_types
+    assert query_counts[1] - query_counts[0] <= 20, query_counts
+
+
+@pytest.mark.django_db
 def test_activity_stream_pagination_uses_unfiltered_count(get, organization, project, user, settings):
     """The pagination count should reflect total activity stream rows, not
     the RBAC-filtered subset.  The RBAC-filtered COUNT is catastrophically
