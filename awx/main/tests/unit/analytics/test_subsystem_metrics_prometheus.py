@@ -4,17 +4,12 @@ from django.test import RequestFactory
 from rest_framework.request import Request
 
 from awx.main.analytics.subsystem_metrics import (
+    SHARED_SUBSYSTEM_METRIC_FIELDS,
     CallbackReceiverMetrics,
     DispatcherMetrics,
     FloatM,
+    IndirectCountingMetrics,
     metrics,
-)
-
-
-SHARED_SUBSYSTEM_METRICS = (
-    'subsystem_metrics_pipe_execute_seconds',
-    'subsystem_metrics_pipe_execute_calls',
-    'subsystem_metrics_send_metrics_seconds',
 )
 
 
@@ -32,16 +27,27 @@ def test_to_prometheus_can_omit_help_type_header():
     assert 'subsystem="callback_receiver"' in without_header
 
 
+def _family_line_indexes(payload, metric_name):
+    indexes = []
+    for i, line in enumerate(payload.splitlines()):
+        if (
+            line.startswith(f'# HELP {metric_name} ')
+            or line.startswith(f'# TYPE {metric_name} ')
+            or line.startswith(f'{metric_name}{{')
+        ):
+            indexes.append(i)
+    return indexes
+
+
+@mock.patch.object(IndirectCountingMetrics, 'load_other_metrics', return_value={})
 @mock.patch.object(CallbackReceiverMetrics, 'load_other_metrics')
 @mock.patch.object(DispatcherMetrics, 'load_other_metrics')
 @mock.patch('awx.main.analytics.subsystem_metrics.get_redis_client')
 @mock.patch('awx.main.analytics.subsystem_metrics.get_dispatcherd_metrics', return_value='')
-@mock.patch('awx.main.analytics.subsystem_metrics.IndirectCountingMetrics')
 def test_metrics_emits_single_help_type_for_shared_subsystem_metrics(
-    mock_indirect, _mock_dispatcherd, _mock_redis, mock_dispatcher_load, mock_callback_load
+    _mock_dispatcherd, _mock_redis, mock_dispatcher_load, mock_callback_load, _mock_indirect_load
 ):
-    """AAP-84834: shared operational metrics must not repeat HELP/TYPE across subsystems."""
-    mock_indirect.return_value.generate_metrics.return_value = ''
+    """AAP-84834: shared metrics — one HELP/TYPE and contiguous samples across subsystems."""
     mock_dispatcher_load.return_value = {
         'node.example.com': {
             'subsystem_metrics_pipe_execute_seconds': 0.1,
@@ -62,8 +68,14 @@ def test_metrics_emits_single_help_type_for_shared_subsystem_metrics(
     request = Request(RequestFactory().get('/api/v2/metrics/'))
     payload = metrics(request)
 
-    for metric_name in SHARED_SUBSYSTEM_METRICS:
+    for metric_name in SHARED_SUBSYSTEM_METRIC_FIELDS:
         assert payload.count(f'# HELP {metric_name} ') == 1
         assert payload.count(f'# TYPE {metric_name} ') == 1
         assert f'{metric_name}{{node="node.example.com",subsystem="dispatcher"}}' in payload
         assert f'{metric_name}{{node="node.example.com",subsystem="callback_receiver"}}' in payload
+
+        indexes = _family_line_indexes(payload, metric_name)
+        assert indexes, metric_name
+        assert indexes == list(range(indexes[0], indexes[0] + len(indexes))), (
+            f'{metric_name} family is not contiguous: indexes={indexes}\n{payload}'
+        )

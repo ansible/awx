@@ -20,6 +20,15 @@ from .dispatcherd_metrics import get_dispatcherd_metrics
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')
 
+# Operational metrics present on every Metrics subclass (_METRICSLIST). When
+# multiple subsystems contribute samples, Prometheus text format requires one
+# contiguous family (single HELP/TYPE, then all samples) — AAP-84834.
+SHARED_SUBSYSTEM_METRIC_FIELDS = (
+    'subsystem_metrics_pipe_execute_seconds',
+    'subsystem_metrics_pipe_execute_calls',
+    'subsystem_metrics_send_metrics_seconds',
+)
+
 
 class MetricsNamespace:
     def __init__(self, namespace):
@@ -363,25 +372,25 @@ class Metrics(MetricsNamespace):
                     instance_data[instance] = json.loads(instance_data_from_redis.decode('UTF-8'))
         return instance_data
 
-    def generate_metrics(self, request, emitted_metric_headers=None):
+    def generate_metrics(self, request, emitted_metric_headers=None, skip_fields=None):
         # takes the api request, filters, and generates prometheus data
         # if additional filtering is added, update metrics_view.md
         # emitted_metric_headers tracks metric families that already have HELP/TYPE so
-        # shared operational metrics across subsystems stay Prometheus-compliant (AAP-84834).
+        # overlapping names stay Prometheus-compliant (AAP-84834).
+        # skip_fields: omit families already emitted contiguously by metrics().
         if emitted_metric_headers is None:
             emitted_metric_headers = set()
+        skip_fields = set(skip_fields or ())
         instance_data = self.load_other_metrics(request)
         metrics_filter = request.query_params.getlist("metric")
         output_text = ''
         if instance_data:
             for field in self.METRICS:
+                if field in skip_fields:
+                    continue
                 if len(metrics_filter) == 0 or field in metrics_filter:
                     # Add subsystem label only for operational metrics
-                    namespace = (
-                        self._namespace
-                        if field in ['subsystem_metrics_pipe_execute_seconds', 'subsystem_metrics_pipe_execute_calls', 'subsystem_metrics_send_metrics_seconds']
-                        else None
-                    )
+                    namespace = self._namespace if field in SHARED_SUBSYSTEM_METRIC_FIELDS else None
                     include_header = field not in emitted_metric_headers
                     output_text += self.METRICS[field].to_prometheus(instance_data, namespace, include_header=include_header)
                     if include_header:
@@ -454,13 +463,31 @@ class CallbackReceiverMetrics(Metrics):
 
 
 def metrics(request):
-    # Share header tracking across subsystems so duplicated metric family names
-    # (e.g. subsystem_metrics_pipe_execute_*) emit HELP/TYPE only once (AAP-84834).
-    emitted_metric_headers = set()
+    # Shared operational metrics must be one contiguous family across subsystems
+    # (HELP/TYPE once, then all samples) per Prometheus text exposition format.
+    exporters = (
+        DispatcherMetrics(),
+        CallbackReceiverMetrics(),
+        IndirectCountingMetrics(),
+    )
+    loaded = [(exporter, exporter.load_other_metrics(request)) for exporter in exporters]
+    metrics_filter = request.query_params.getlist("metric")
     output_text = ''
-    output_text += DispatcherMetrics().generate_metrics(request, emitted_metric_headers)
-    output_text += CallbackReceiverMetrics().generate_metrics(request, emitted_metric_headers)
-    output_text += IndirectCountingMetrics().generate_metrics(request, emitted_metric_headers)
+
+    for field in SHARED_SUBSYSTEM_METRIC_FIELDS:
+        if metrics_filter and field not in metrics_filter:
+            continue
+        metric = exporters[0].METRICS[field]
+        include_header = True
+        for exporter, instance_data in loaded:
+            if not instance_data:
+                continue
+            output_text += metric.to_prometheus(instance_data, namespace=exporter._namespace, include_header=include_header)
+            include_header = False
+
+    # Remaining (non-shared) metrics per subsystem; skip shared fields already emitted.
+    for exporter, _instance_data in loaded:
+        output_text += exporter.generate_metrics(request, skip_fields=SHARED_SUBSYSTEM_METRIC_FIELDS)
 
     dispatcherd_metrics = get_dispatcherd_metrics(request)
     if dispatcherd_metrics:
