@@ -6,6 +6,7 @@ azure-identity
 azure-keyvault
 boto3
 botocore
+Brotli>=1.2.1  # CVE-2026-111497, required by aiohttp[speedups]
 cachetools  # Used by awx/conf/settings.py for TTLCache
 channels
 channels-redis
