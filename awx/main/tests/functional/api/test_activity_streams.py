@@ -204,7 +204,7 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
 ):
     """Unfiltered pages cover the mixed association types seen in production."""
     settings.ACTIVITY_STREAM_ENABLED = True
-    jobs = [job_factory() for _ in range(8)]
+    jobs = [job_factory() for _ in range(25)]
     schedule = Schedule.objects.create(rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1', unified_job_template=deploy_jobtemplate)
     related_objects = [
         ('organization', organization),
@@ -225,7 +225,7 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
         ('schedule', schedule),
     ]
     entry_ids = []
-    for index in range(8):
+    for index in range(len(jobs)):
         for object_type, related_object in related_objects:
             related_object = jobs[index] if object_type == 'job' else related_object
             entry = ActivityStream.objects.create(
