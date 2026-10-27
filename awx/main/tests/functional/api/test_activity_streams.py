@@ -4,6 +4,7 @@ from django.test.utils import CaptureQueriesContext
 
 from awx.api.versioning import reverse
 from awx.main.models.activity_stream import ActivityStream
+from awx.main.models.schedules import Schedule
 from awx.main.access import ActivityStreamAccess
 from awx.conf.models import Setting
 
@@ -195,11 +196,16 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
     host,
     workflow_job_template,
     instance,
+    execution_environment,
+    group,
+    instance_group,
+    inventory_source,
     settings,
 ):
     """Unfiltered pages cover the mixed association types seen in production."""
     settings.ACTIVITY_STREAM_ENABLED = True
     jobs = [job_factory() for _ in range(8)]
+    schedule = Schedule.objects.create(rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1', unified_job_template=deploy_jobtemplate)
     related_objects = [
         ('organization', organization),
         ('user', org_admin),
@@ -212,6 +218,11 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
         ('workflow_job_template', workflow_job_template),
         ('instance', instance),
         ('credential', org_credential),
+        ('execution_environment', execution_environment),
+        ('group', group),
+        ('instance_group', instance_group),
+        ('inventory_source', inventory_source),
+        ('schedule', schedule),
     ]
     entry_ids = []
     for index in range(8):
@@ -226,6 +237,7 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
             )
             getattr(entry, object_type).add(related_object)
             entry_ids.append(entry.id)
+    ActivityStream.objects.create(operation='create', object1='setting', object2='', setting={'category': 'foo'})
 
     url = reverse('api:activity_stream_list')
     query_counts = []
@@ -237,6 +249,7 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
 
     returned_types = {result['object1'] for result in response.data['results'] if result['id'] in entry_ids}
     assert {object_type for object_type, _ in related_objects} <= returned_types
+    assert 'setting' in {result['object1'] for result in response.data['results']}
     assert query_counts[1] - query_counts[0] <= 20, query_counts
 
 
