@@ -1,12 +1,34 @@
 import json
 import os
 import tempfile
+from collections import deque
 from unittest import mock
 
-from awx.main.tasks.callback import RunnerCallback, try_load_query_file
+import pytest
+
+from awx.main.tasks.callback import RunnerCallback, RunnerCallbackForProjectUpdate, try_load_query_file
 from awx.main.constants import ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
+from awx.main.redact import UriCleaner
 
 from django.utils.translation import gettext_lazy as _
+
+SCM_USERNAME = 'scmuser'
+SCM_PASSWORD = 'scmpass'
+SCM_URL = f'https://{SCM_USERNAME}:{SCM_PASSWORD}@git.example.com/org/repo.git'
+
+
+def _project_update_callback():
+    cb = RunnerCallbackForProjectUpdate()
+    cb.instance = mock.Mock(id=1)
+    cb.event_data_key = 'project_update_id'
+    cb.wrapup_event_type = 'playbook_on_stats'
+    cb.job_created = '2026-01-01T00:00:00Z'
+    cb.parent_workflow_job_id = None
+    cb.host_map = {}
+    cb.recent_event_timings = deque(maxlen=0)
+    cb.dispatcher = mock.Mock()
+    cb.guid = 'test-guid'
+    return cb
 
 
 def test_delay_update(mock_me):
@@ -151,3 +173,48 @@ class TestArtifactsHandler:
         assert 'installed_collections' not in rc.extra_update_fields
         assert 'ansible_version' not in rc.extra_update_fields
         assert rc.artifacts_processed is True
+
+
+@pytest.mark.parametrize('task_action', ['git', 'svn', 'ansible.builtin.git', 'ansible.builtin.svn'])
+def test_project_update_redacts_scm_credentials(task_action, mock_me):
+    """Git/SVN events redact HTTP basic-auth from dispatched project-update payloads."""
+    cb = _project_update_callback()
+    cb.event_handler(
+        {
+            'event': 'runner_on_failed',
+            'stdout': f'failed: {SCM_URL}',
+            'event_data': {'task_action': task_action, 'res': {'msg': f'Failed to clone {SCM_URL}'}},
+        }
+    )
+    dispatched = json.dumps(cb.dispatcher.dispatch.call_args[0][0])
+    assert SCM_USERNAME not in dispatched
+    assert SCM_PASSWORD not in dispatched
+    assert UriCleaner.REPLACE_STR in dispatched
+
+
+def test_project_update_skips_scm_redaction_without_task_action(mock_me):
+    """Omitted event_data has no task_action, so UriCleaner never runs on SCM stdout."""
+    cb = _project_update_callback()
+    cb.event_handler({'event': 'runner_on_failed', 'stdout': f'failed: {SCM_URL}', 'event_data': {}})
+    dispatched = cb.dispatcher.dispatch.call_args[0][0]
+    assert SCM_PASSWORD in dispatched['stdout']
+
+
+@pytest.mark.parametrize('task_action', ['set_fact', 'ansible.builtin.set_fact'])
+def test_project_update_captures_scm_version(task_action, mock_me):
+    """Successful set_fact events still populate playbook_new_revision."""
+    cb = _project_update_callback()
+    cb.event_handler(
+        {
+            'event': 'runner_on_ok',
+            'event_data': {'task_action': task_action, 'res': {'ansible_facts': {'scm_version': 'abc123def'}}},
+        }
+    )
+    assert cb.playbook_new_revision == 'abc123def'
+
+
+def test_project_update_skips_revision_capture_without_task_action(mock_me):
+    """Omitted successful-event payloads never expose scm_version to the callback."""
+    cb = _project_update_callback()
+    cb.event_handler({'event': 'runner_on_ok', 'event_data': {}})
+    assert cb.playbook_new_revision is None

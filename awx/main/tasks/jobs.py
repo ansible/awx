@@ -764,8 +764,9 @@ class BaseTask(object):
                 'envvars': env,
                 # ansible-runner overwrites RUNNER_OMIT_EVENTS / RUNNER_ONLY_FAILED_EVENTS from
                 # these kwargs after merging envvars, so AWX_TASK_ENV flags only take effect here.
-                'omit_event_data': env_flag_enabled(env, 'RUNNER_OMIT_EVENTS'),
-                'only_failed_event_data': env_flag_enabled(env, 'RUNNER_ONLY_FAILED_EVENTS'),
+                # Project updates need event metadata for SCM credential redaction and revision tracking.
+                'omit_event_data': (not isinstance(self.instance, ProjectUpdate) and env_flag_enabled(env, 'RUNNER_OMIT_EVENTS')),
+                'only_failed_event_data': (not isinstance(self.instance, ProjectUpdate) and env_flag_enabled(env, 'RUNNER_ONLY_FAILED_EVENTS')),
             }
 
             if ssh_key_data is not None:
