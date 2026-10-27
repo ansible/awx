@@ -386,8 +386,9 @@ pygithub==2.8.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   awx-plugins-core
-pyjwt[crypto]==2.10.1
+pyjwt[crypto]==2.15.1
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   adal
     #   django-ansible-base
     #   msal

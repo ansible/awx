@@ -50,6 +50,7 @@ psutil
 pyasn1>=0.6.2  # CVE-2026-2349
 pygerduty
 PyGithub
+PyJWT>=2.14.0  # CVE-2026-102268
 pyopenssl
 pyparsing>3.0 # Upgraded to v3 and changed import patterns
 python-daemon
