@@ -1,4 +1,6 @@
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from awx.api.versioning import reverse
 from awx.main.models.activity_stream import ActivityStream
@@ -137,6 +139,45 @@ def test_stream_queryset_hides_shows_items(
     assert queryset.filter(team__pk=team.pk, operation='create').count() == 1
     assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1
     assert access.can_read(activity_stream_entry)
+
+
+@pytest.mark.django_db
+def test_activity_stream_job_serialization_query_count(get, job_factory, org_admin, settings):
+    """Job activity stream serialization should not issue one query per row."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    job = job_factory()
+    entry_ids = []
+
+    for _ in range(10):
+        entry = ActivityStream.objects.create(
+            operation='create',
+            object1='job',
+            object2='',
+            actor=org_admin,
+            changes='{}',
+        )
+        entry.job.add(job)
+        entry_ids.append(entry.id)
+
+    url = reverse('api:activity_stream_list')
+    query_counts = []
+    unified_job_query_counts = []
+    for page_size in (1, 10):
+        with CaptureQueriesContext(connection) as queries:
+            response = get(
+                f'{url}?or__object1__in=job&or__object2__in=job&order_by=-id&page=1&page_size={page_size}',
+                org_admin,
+            )
+        assert response.status_code == 200
+        assert all(result['id'] in entry_ids for result in response.data['results'])
+        query_counts.append(len(queries))
+        unified_job_table = connection.ops.quote_name('main_unifiedjob').lower()
+        unified_job_query_counts.append(
+            sum(unified_job_table in query['sql'].lower() and 'activitystream' not in query['sql'].lower() for query in queries)
+        )
+
+    assert query_counts[1] - query_counts[0] <= 5, query_counts
+    assert unified_job_query_counts[1] <= 2, unified_job_query_counts
 
 
 @pytest.mark.django_db
