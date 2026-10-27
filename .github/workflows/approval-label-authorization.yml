@@ -1,0 +1,17 @@
+name: Approval label authorization
+
+on:
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+jobs:
+  approval-label-authorization:
+    if: github.event.label.name == 'breaking-change-approved'
+    uses: ansible/actions/.github/workflows/approval-label-authorization.yml@23012942a4f161b50657a2a446c8f43fbcf1ed89
+    secrets:
+      team-membership-token: ${{ secrets.TEAM_MEMBERSHIP_TOKEN }}
