@@ -9,7 +9,8 @@ from functools import reduce
 
 # Django
 from django.conf import settings
-from django.db.models import Q, Prefetch
+from django.db.models import F, Q, Prefetch, Window
+from django.db.models.functions import RowNumber
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -2678,6 +2679,11 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
     select_related = ('actor',)
 
+    def __init__(self, user, save_messages=False, activity_stream_limit=None, activity_stream_ordering='id'):
+        super().__init__(user, save_messages=save_messages)
+        self.activity_stream_limit = activity_stream_limit
+        self.activity_stream_ordering = activity_stream_ordering
+
     def filtered_queryset(self):
         """
         The full set is returned if the user is:
@@ -2772,6 +2778,15 @@ class ActivityStreamAccess(BaseAccess):
         team_set = Team.access_ids_qs(self.user, 'view')
         if team_set.exists():
             activity_stream_ids.append(AS.team.through.objects.filter(team__in=team_set).values('activitystream_id'))
+
+        if self.activity_stream_limit:
+            branch_ordering = F('activitystream_id').desc() if self.activity_stream_ordering == '-id' else F('activitystream_id').asc()
+            activity_stream_ids = [
+                ids.annotate(_activity_stream_rank=Window(RowNumber(), order_by=branch_ordering))
+                .filter(_activity_stream_rank__lte=self.activity_stream_limit)
+                .values('activitystream_id')
+                for ids in activity_stream_ids
+            ]
 
         visible_activity_stream_ids = activity_stream_ids[0].union(*activity_stream_ids[1:])
         return qs.filter(pk__in=visible_activity_stream_ids)

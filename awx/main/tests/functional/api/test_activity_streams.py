@@ -258,6 +258,21 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
 
 
 @pytest.mark.django_db
+def test_activity_stream_limited_visibility_preserves_pages(get, org_admin, settings):
+    """Per-branch top-N visibility limits must preserve paginated results."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    url = reverse('api:activity_stream_list')
+    visible_ids = list(ActivityStreamAccess(org_admin).get_queryset().order_by('-id').values_list('id', flat=True))
+
+    for page, page_size in ((1, 1), (1, 20), (1, 100)):
+        response = get(f'{url}?order_by=-id&page={page}&page_size={page_size}', org_admin)
+        assert response.status_code == 200
+        start = (page - 1) * page_size
+        expected_ids = visible_ids[start : start + page_size]
+        assert [result['id'] for result in response.data['results']] == expected_ids
+
+
+@pytest.mark.django_db
 def test_activity_stream_pagination_uses_unfiltered_count(get, organization, project, user, settings):
     """The pagination count should reflect total activity stream rows, not
     the RBAC-filtered subset.  The RBAC-filtered COUNT is catastrophically

@@ -67,7 +67,7 @@ from flags.state import flag_enabled
 # AWX
 from awx.main.utils.workload_identity import retrieve_workload_identity_jwt_with_claims
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset
+from awx.main.access import ActivityStreamAccess, get_user_queryset
 from awx.api.generics import (
     APIView,
     BaseUsersList,
@@ -4887,6 +4887,32 @@ class ActivityStreamList(SimpleListAPIView):
     search_fields = ('changes',)
     pagination_class = ActivityStreamPagination
     resource_purpose = 'audit trail entries for tracking system changes'
+
+    def get_queryset(self):
+        # For the unfiltered list, bound each Activity Stream visibility branch
+        # to the end of the requested page. Filtered requests need the complete
+        # queryset because their count and result semantics differ.
+        pagination = self.pagination_class()
+        if pagination.has_filter_params(self.request, self):
+            return super().get_queryset()
+
+        requested_ordering = self.request.query_params.get('order_by', 'id')
+        if requested_ordering not in ('id', '-id'):
+            return super().get_queryset()
+
+        try:
+            page = max(int(self.request.query_params.get('page', 1)), 1)
+            page_size = int(self.request.query_params.get('page_size', pagination.page_size or settings.PAGE_SIZE))
+        except (TypeError, ValueError):
+            return super().get_queryset()
+
+        page_size = min(max(page_size, 1), settings.MAX_PAGE_SIZE)
+        limit = page * page_size
+        return ActivityStreamAccess(
+            self.request.user,
+            activity_stream_limit=limit,
+            activity_stream_ordering=requested_ordering,
+        ).get_queryset()
 
     @extend_schema_if_available(
         extensions={
