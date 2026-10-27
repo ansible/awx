@@ -241,16 +241,20 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
 
     url = reverse('api:activity_stream_list')
     query_counts = []
+    unified_job_query_counts = []
     for page_size in (20, 100):
         with CaptureQueriesContext(connection) as queries:
             response = get(f'{url}?order_by=-id&page=1&page_size={page_size}', admin)
         assert response.status_code == 200
         query_counts.append(len(queries))
+        unified_job_table = connection.ops.quote_name('main_unifiedjob').lower()
+        unified_job_query_counts.append(sum(unified_job_table in query['sql'].lower() and 'activitystream' not in query['sql'].lower() for query in queries))
 
     returned_types = {result['object1'] for result in response.data['results'] if result['id'] in entry_ids}
     assert {object_type for object_type, _ in related_objects} <= returned_types
     assert 'setting' in {result['object1'] for result in response.data['results']}
     assert query_counts[1] - query_counts[0] <= 20, query_counts
+    assert max(unified_job_query_counts) <= 2, unified_job_query_counts
 
 
 @pytest.mark.django_db
