@@ -6,8 +6,8 @@ from awxkit.config import config
 
 @pytest.fixture(autouse=True)
 def setup_config(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(config, "credentials", {"default": {"username": "foo", "password": "bar"}}, raising=False)
-    monkeypatch.setattr(config, "base_url", "", raising=False)
+    monkeypatch.setitem(config, "credentials", {"default": {"username": "foo", "password": "bar"}})
+    monkeypatch.setitem(config, "base_url", "")
 
 
 @pytest.fixture
