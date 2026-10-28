@@ -628,6 +628,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
 
         # Build the query for access_qs according the user & permission(s)
         filter_args = []
+        ids_with_role = None
         for perm_path in paths:
             if '.' in perm_path:
                 res_path = '__'.join(perm_path.split('.')[:-1])
@@ -688,7 +689,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                     for org_id, role_id in member_evaluations:
                         for target_id in role_users.get(role_id, ()):
                             memberships.setdefault(target_id, set()).add(org_id)
-                    if target_evaluations is None:
+                    if display_method == 'delete' and target_evaluations is None:
                         target_evaluations = list(
                             RoleEvaluation.objects.filter(role_id__in=role_ids).values_list('object_id', 'content_type_id', 'codename', 'role_id')
                         )
@@ -696,17 +697,9 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                             for target_id in role_users.get(role_id, ()):
                                 target_permissions.setdefault(target_id, set()).add((object_id, content_type_id, codename))
                         actor_role_ids = RoleUserAssignment.objects.filter(user_id=user.pk).values_list('object_role_id', flat=True)
-                        actor_permissions = (
-                            set(RoleEvaluation.objects.filter(role_id__in=actor_role_ids).values_list('object_id', 'content_type_id', 'codename'))
-                            if actor_permissions is None
-                            else actor_permissions
+                        actor_permissions = set(
+                            RoleEvaluation.objects.filter(role_id__in=actor_role_ids).values_list('object_id', 'content_type_id', 'codename')
                         )
-                    actor_role_ids = RoleUserAssignment.objects.filter(user_id=user.pk).values_list('object_role_id', flat=True)
-                    actor_permissions = (
-                        set(RoleEvaluation.objects.filter(role_id__in=actor_role_ids).values_list('object_id', 'content_type_id', 'codename'))
-                        if actor_permissions is None
-                        else actor_permissions
-                    )
                     user_access = UserAccess(user)
                     allowed_ids = {
                         target.pk
@@ -722,7 +715,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                             superuser_count,
                         )
                     }
-                    filter_args.append(Q(pk__in=allowed_ids))
+                    ids_with_role = allowed_ids
                 elif hasattr(model, 'access_qs'):
                     filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
                 else:
@@ -734,8 +727,9 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
             display_method = action
 
         # Union that query with the list of items on page
-        filter_args.append(Q(pk__in=page_ids))
-        ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
+        if ids_with_role is None:
+            filter_args.append(Q(pk__in=page_ids))
+            ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
 
         # Save data item-by-item
         for obj in page:

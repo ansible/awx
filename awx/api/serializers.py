@@ -619,7 +619,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         if view and view.request and view.request.user:
             capabilities_cache = {}
             # if serializer has parent, it is ListView, apply page capabilities prefetch
-            if self.parent and hasattr(self, 'capabilities_prefetch') and self.capabilities_prefetch:
+            if self.parent and hasattr(self, 'capabilities_prefetch') and self.capabilities_prefetch and not view.request.user.is_superuser:
                 qs = self.parent.instance
                 if 'capability_map' not in self.context:
                     if hasattr(self, 'polymorphic_base'):
