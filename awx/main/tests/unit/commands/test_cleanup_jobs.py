@@ -1,6 +1,9 @@
+import datetime
 from unittest import mock
 
-from awx.main.management.commands.cleanup_jobs import _pre_delete_job_host_summaries, JHS_CHUNK_SIZE
+from django.utils.timezone import now
+
+from awx.main.management.commands.cleanup_jobs import Command, _pre_delete_job_host_summaries, JHS_CHUNK_SIZE
 
 
 class TestPreDeleteJobHostSummaries:
@@ -115,3 +118,111 @@ class TestDeleteMetaPreDelete:
         dm.delete_jobs()
 
         mock_pre_delete.assert_not_called()
+
+
+class TestCleanupJobsCommand:
+    def _make_command(self, batch_size=10, dry_run=False):
+        cmd = Command()
+        cmd.batch_size = batch_size
+        cmd.dry_run = dry_run
+        cmd.cutoff = now() - datetime.timedelta(days=1)
+        cmd.logger = mock.MagicMock()
+        return cmd
+
+    def test_empty_gap_batches_no_keyerror(self):
+        """Batch windows over ID gaps return (0, {}) — must not raise KeyError."""
+        cmd = self._make_command(batch_size=10)
+
+        mock_batch = mock.MagicMock()
+        mock_batch.values_list.return_value = []
+        mock_batch.delete.return_value = (0, {})
+
+        mock_qs = mock.MagicMock()
+        mock_qs.aggregate.return_value = {'min': 2, 'max': 1000}
+        mock_qs.filter.return_value = mock_batch
+
+        mock_filter_qs = mock.MagicMock()
+        mock_combined = mock.MagicMock()
+        mock_combined.count.return_value = 5
+        mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
+
+        with (
+            mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob,
+            mock.patch('awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'),
+            mock.patch.object(cmd, '_delete_unpartitioned_events'),
+        ):
+            MockJob.objects.filter.return_value = mock_filter_qs
+            MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
+            skipped, deleted = cmd.cleanup_jobs()
+
+        assert skipped == 5
+        assert deleted == 0
+
+        agg = mock_qs.aggregate.return_value
+        expected_starts = list(range(agg['min'], agg['max'] + 1, cmd.batch_size))
+        # Guard against extra or missing filter calls beyond the expected windows
+        assert mock_qs.filter.call_count == len(expected_starts)
+        for i, start in enumerate(expected_starts):
+            kwargs = mock_qs.filter.call_args_list[i].kwargs
+            assert kwargs['id__gte'] == start, f"batch {i}: expected id__gte={start}, got {kwargs['id__gte']}"
+            assert kwargs['id__lt'] == start + cmd.batch_size, f"batch {i}: expected id__lt={start + cmd.batch_size}, got {kwargs['id__lt']}"
+
+    def test_mixed_batches_sum_correctly(self):
+        """Batches returning {} and {'main.Job': N} are summed correctly."""
+        cmd = self._make_command(batch_size=10)
+
+        # 3 batches for range(1, 31, 10): first empty, second has 2 jobs, third empty
+        mock_batch = mock.MagicMock()
+        mock_batch.values_list.return_value = []
+        mock_batch.delete.side_effect = [(0, {}), (2, {'main.Job': 2}), (0, {})]
+
+        mock_qs = mock.MagicMock()
+        mock_qs.aggregate.return_value = {'min': 1, 'max': 30}
+        mock_qs.filter.return_value = mock_batch
+
+        mock_filter_qs = mock.MagicMock()
+        mock_combined = mock.MagicMock()
+        mock_combined.count.return_value = 0
+        mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
+
+        with (
+            mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob,
+            mock.patch('awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries'),
+            mock.patch.object(cmd, '_delete_unpartitioned_events'),
+        ):
+            MockJob.objects.filter.return_value = mock_filter_qs
+            MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
+            skipped, deleted = cmd.cleanup_jobs()
+
+        assert deleted == 2
+
+        assert mock_qs.filter.call_args_list == [
+            mock.call(id__gte=1, id__lt=11),
+            mock.call(id__gte=11, id__lt=21),
+            mock.call(id__gte=21, id__lt=31),
+        ]
+
+    def test_no_eligible_jobs_skips_loop(self):
+        """When aggregate returns min=None the batch loop is skipped entirely."""
+        cmd = self._make_command()
+
+        mock_qs = mock.MagicMock()
+        mock_qs.aggregate.return_value = {'min': None, 'max': None}
+
+        mock_filter_qs = mock.MagicMock()
+        mock_combined = mock.MagicMock()
+        mock_combined.count.return_value = 10
+        mock_filter_qs.__or__ = mock.Mock(return_value=mock_combined)
+
+        with (
+            mock.patch('awx.main.management.commands.cleanup_jobs.Job') as MockJob,
+            mock.patch('awx.main.management.commands.cleanup_jobs._pre_delete_job_host_summaries') as mock_pre,
+            mock.patch.object(cmd, '_delete_unpartitioned_events'),
+        ):
+            MockJob.objects.filter.return_value = mock_filter_qs
+            MockJob.objects.select_related.return_value.filter.return_value.exclude.return_value = mock_qs
+            skipped, deleted = cmd.cleanup_jobs()
+
+        assert skipped == 10
+        assert deleted == 0
+        mock_pre.assert_not_called()
