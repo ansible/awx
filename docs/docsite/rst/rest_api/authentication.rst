@@ -63,8 +63,9 @@ A typical response might look like:
 	Session-Timeout: 1800
 	Content-Language: en
 	X-API-Total-Time: 0.377s
-	X-API-Request-Id: 700826696425433fb0c8807cd40c00a0
-	Access-Control-Expose-Headers: X-API-Request-Id
+	X-Request-ID: 70082669-6425-433f-b0c8-807cd40c00a0
+	X-API-Request-Id: 70082669-6425-433f-b0c8-807cd40c00a0
+	Access-Control-Expose-Headers: X-Request-ID, X-API-Request-Id
 	Set-Cookie: userLoggedIn=true; Path=/
 	Set-Cookie: current_user=<user cookie data>; Path=/
 	Set-Cookie: csrftoken=<csrftoken>; Path=/; SameSite=Lax
