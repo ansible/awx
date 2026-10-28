@@ -75,7 +75,23 @@ class Command(BaseCommand):
         django_cache.close()
         dispatcher_setup(config)
 
-        run_service()
+        try:
+            run_service()
+        finally:
+            # dispatcherd installs its own SIGINT/SIGTERM handlers and run_service() returns
+            # only once pool.shutdown() has drained, so by here every job has already
+            # detached from its work unit. That ordering is what makes announcing safe: a
+            # peer that adopts now cannot collide with a stream we are still reading.
+            #
+            # Imported late and guarded because this is the exit path. Nothing here is worth
+            # masking the exception that actually ended the service, and failing to announce
+            # only costs us the old lost-instance timeout.
+            try:
+                from awx.main.tasks.system import announce_shutdown
+
+                announce_shutdown()
+            except Exception:
+                logger.exception('Could not announce shutdown; peers will fall back to lost-instance detection')
 
     def configure_dispatcher_logging(self):
         # Apply special log rule for the parent process

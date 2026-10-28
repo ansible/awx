@@ -1,7 +1,11 @@
+from collections import namedtuple
+
 import pytest
 
 from awx.main.tasks.jobs import RunJob
 from awx.main.models import Job
+
+_Result = namedtuple('result', ['status', 'rc'])
 
 
 @pytest.mark.django_db
@@ -56,6 +60,110 @@ def test_runjob_run_can_accept_waiting_status(jt_linked, mocker):
 
     mock_pre_run.assert_called_once()
     assert status_at_pre_run == 'running'
+
+
+def _detached_receptor_job(mocker, unit_id='unit-detach'):
+    """Stand in for an AWXReceptorJob whose stream was interrupted by a shutdown signal."""
+    receptor_job = mocker.MagicMock()
+    receptor_job.detached = True
+    receptor_job.unit_id = unit_id
+    receptor_job.run.return_value = _Result(status='canceled', rc=1)
+    return receptor_job
+
+
+@pytest.mark.django_db
+def test_run_leaves_detached_job_running_and_adoptable(jt_linked, execution_environment, mocker):
+    """A detached stream must leave the job exactly as the next adopter needs to find it.
+
+    Marking it failed, running post-run hooks or releasing the work unit would each on their
+    own make the still-running EE unrecoverable: the orphan scan only looks at jobs that are
+    still 'running' and still carry a work_unit_id.
+    """
+    job = jt_linked.create_unified_job()
+    job.status = 'running'
+    job.work_unit_id = 'unit-detach'
+    job.execution_environment = execution_environment
+    job.save()
+
+    receptor_job = _detached_receptor_job(mocker)
+    mocker.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job)
+    mocker.patch.object(RunJob, 'pre_run_hook')
+    mocker.patch.object(RunJob, 'build_project_dir')
+    mock_finalize = mocker.patch('awx.main.tasks.jobs._finalize_job_run')
+    mock_post_run = mocker.patch.object(RunJob, 'post_run_hook')
+
+    RunJob().run(job.id)
+
+    receptor_job.run.assert_called_once()
+    job.refresh_from_db()
+    assert job.status == 'running'
+    assert job.work_unit_id == 'unit-detach'
+    mock_finalize.assert_not_called()
+    mock_post_run.assert_not_called()
+    receptor_job._receptor_release_work.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_run_leaves_detached_job_running_when_shutdown_raises(jt_linked, execution_environment, mocker):
+    """Detaching must survive an exception thrown after the decision to detach was made.
+
+    Everything the shutdown path touches afterwards — the receptor control socket, the
+    results socket — is dying at the same moment, so it can fail. Reaching the generic
+    handler would mark the job 'error' and strand the live EE, which is the one outcome
+    detaching exists to avoid. The decision, not a clean return, is what counts.
+    """
+    job = jt_linked.create_unified_job()
+    job.status = 'running'
+    job.work_unit_id = 'unit-detach'
+    job.execution_environment = execution_environment
+    job.save()
+
+    receptor_job = _detached_receptor_job(mocker)
+    receptor_job.run.side_effect = ConnectionRefusedError(111, 'Connection refused')
+    mocker.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job)
+    mocker.patch.object(RunJob, 'pre_run_hook')
+    mocker.patch.object(RunJob, 'build_project_dir')
+    mock_finalize = mocker.patch('awx.main.tasks.jobs._finalize_job_run')
+    mock_post_run = mocker.patch.object(RunJob, 'post_run_hook')
+
+    RunJob().run(job.id)
+
+    job.refresh_from_db()
+    assert job.status == 'running'
+    assert job.work_unit_id == 'unit-detach'
+    mock_finalize.assert_not_called()
+    mock_post_run.assert_not_called()
+    receptor_job._receptor_release_work.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_run_finalizes_normally_when_not_detached(jt_linked, execution_environment, mocker):
+    """The guard must not swallow the shutdown path it replaces: an undetached stream still
+    finalizes and releases, exactly as it did before."""
+    job = jt_linked.create_unified_job()
+    job.status = 'running'
+    job.work_unit_id = 'unit-cancel'
+    job.execution_environment = execution_environment
+    job.save()
+
+    receptor_job = _detached_receptor_job(mocker, unit_id='unit-cancel')
+    receptor_job.detached = False
+    mocker.patch('awx.main.tasks.jobs.AWXReceptorJob', return_value=receptor_job)
+    mocker.patch.object(RunJob, 'pre_run_hook')
+    mocker.patch.object(RunJob, 'build_project_dir')
+    mock_finalize = mocker.patch('awx.main.tasks.jobs._finalize_job_run')
+    mocker.patch.object(RunJob, 'post_run_hook')
+
+    task = RunJob()
+
+    # AwxTaskError.TaskError is a plain Exception carrying attributes, so the message is the
+    # only thing that distinguishes the failed-job raise from an unrelated error.
+    with pytest.raises(Exception, match=r'encountered an error \(rc=1\)'):
+        task.run(job.id)
+
+    mock_finalize.assert_called_once()
+    assert mock_finalize.call_args[0][3] == 'failed'
+    receptor_job._receptor_release_work.assert_called_once()
 
 
 @pytest.mark.django_db

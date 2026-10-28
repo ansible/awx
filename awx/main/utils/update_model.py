@@ -9,9 +9,13 @@ from awx.main.tasks.signals import signal_callback
 logger = logging.getLogger('awx.main.tasks.utils')
 
 
-def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False, **updates):
+def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False, _required_status=None, **updates):
     """Reload the model instance from the database and update the
     given fields.
+
+    _required_status: when set, the update is skipped and None is returned if
+    the row's current status does not match. The check runs inside the
+    select_for_update transaction, making check+write an atomic CAS.
     """
     try:
         with transaction.atomic():
@@ -20,6 +24,12 @@ def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False
                 instance = model.objects.select_for_update().get(pk=pk)
             else:
                 instance = model.objects.get(pk=pk)
+
+            # Fencing gate: bail if the current status is not what the caller requires.
+            # Must be inside the select_for_update transaction so the check and the write
+            # are atomic — two callers cannot both pass the guard and both commit.
+            if _required_status is not None and instance.status != _required_status:
+                return None
 
             # Update the appropriate fields and save the model
             # instance, then return the new instance.
