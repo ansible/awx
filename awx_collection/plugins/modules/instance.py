@@ -82,17 +82,17 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Create an instance
-  awx.awx.instance:
+  instance:
     hostname: my-instance.prod.example.com
     capacity_adjustment: 0.4
 
 - name: Deprovision the instance
-  awx.awx.instance:
+  instance:
     hostname: my-instance.prod.example.com
     node_state: deprovisioning
 
 - name: Create execution node
-  awx.awx.instance:
+  instance:
     hostname: execution.example.com
     node_type: execution
     peers:
@@ -100,7 +100,7 @@ EXAMPLES = '''
       - route.to.hop.example.com
 
 - name: Remove peers
-  awx.awx.instance:
+  instance:
     hostname: execution.example.com
     peers:
 '''
