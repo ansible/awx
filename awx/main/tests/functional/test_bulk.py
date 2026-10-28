@@ -35,6 +35,12 @@ def test_bulk_host_create_num_queries(organization, inventory, post, get, user, 
     organization.inventory_admin_role.members.add(org_inv_admin)
     inventory.admin_role.members.add(inventory_admin)
 
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': uuid4()}]}, superuser, expect=201)
+
     for u in [org_admin, inventory_admin, org_inv_admin, superuser]:
         hosts = [{'name': uuid4()} for i in range(num_hosts)]
         with django_assert_max_num_queries(num_queries):
@@ -100,6 +106,17 @@ def test_bulk_job_launch_queries(job_template, organization, inventory, project,
     jt.save()
     inventory.save()
     jobs = [{'unified_job_template': jt.id, 'inventory': inventory.id} for _ in range(num_jobs)]
+
+    # The first request in a process pays one query per database-backed
+    # setting it reads; later ones hit the settings wrapper's in-memory
+    # cache. Warm it so the budget below measures steady state regardless
+    # of which test ran first in this xdist worker.
+    post(
+        reverse('api:bulk_job_launch'),
+        {'name': 'Bulk Job Launch Warmup', 'jobs': [{'unified_job_template': jt.id, 'inventory': inventory.id}]},
+        normal_user,
+        expect=201,
+    )
 
     # This is not working, we need to figure that out if we want to include tests for more jobs
     # with mock.patch('awx.api.serializers.settings.BULK_JOB_MAX_LAUNCH', num_jobs + 1):

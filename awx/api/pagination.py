@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import (
     FieldLookupBackend,
 )
-from awx.main.models import ActivityStream, UnifiedJob
+from awx.main.models import ActivityStream
 
 
 class DisabledPaginator(DjangoPaginator):
@@ -38,11 +38,28 @@ class ActivityStreamPaginator(DjangoPaginator):
 
 
 class UnifiedJobPaginator(DjangoPaginator):
-    """Use unfiltered table count for unified job pagination."""
+    """Count only the unified jobs the requesting user can see.
+
+    Uses a PK subquery so the database can index-scan the RBAC-filtered
+    primary keys instead of counting the full UNION queryset directly.
+    Same approach as JobPaginator.
+    """
 
     @cached_property
     def count(self):
-        return UnifiedJob.objects.count()
+        # Collect PKs from the RBAC-filtered queryset (stripping ORDER BY for efficiency),
+        # then COUNT against the base table using an index-only scan on the PK.
+        visible_pks = self.object_list.order_by().values("pk")
+        return self.object_list.model.objects.filter(pk__in=visible_pks).count()
+
+
+class JobPaginator(DjangoPaginator):
+    """Count visible jobs through a primary-key subquery instead of full rows."""
+
+    @cached_property
+    def count(self):
+        visible_pks = self.object_list.order_by().values("pk")
+        return self.object_list.model.objects.filter(pk__in=visible_pks).count()
 
 
 class Pagination(pagination.PageNumberPagination):
@@ -133,6 +150,10 @@ class UnifiedJobPagination(Pagination):
 
     def get_filtered_paginator_class(self):
         return DjangoPaginator
+
+
+class JobPagination(Pagination):
+    django_paginator_class = JobPaginator
 
 
 class LimitPagination(pagination.BasePagination):
