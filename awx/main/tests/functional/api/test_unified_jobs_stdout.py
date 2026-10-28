@@ -285,6 +285,7 @@ def test_unicode_with_base64_ansi(sqlite_copy, get, admin):
 
 @pytest.mark.django_db
 def test_system_job_list_serializer(sqlite_copy, get, admin):
+    """List omits result_stdout; detail still returns event stdout."""
     created = tz_now()
     job = SystemJob(created=created)
     job.save()
