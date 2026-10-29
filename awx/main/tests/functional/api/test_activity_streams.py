@@ -1,9 +1,11 @@
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models.activity_stream import ActivityStream
-from awx.main.access import ActivityStreamAccess
 from awx.conf.models import Setting
+from awx.main.access import ActivityStreamAccess
+from awx.main.models import Job, Schedule
+from awx.main.models.activity_stream import ActivityStream
+from awx.main.signals import emit_activity_stream_change
 
 
 @pytest.fixture
@@ -38,6 +40,33 @@ def test_basic_fields(monkeypatch, organization, get, user, settings):
     assert 'summary_fields' in response.data
     assert 'organization' in response.data['summary_fields']
     assert response.data['summary_fields']['organization'][0]['name'] == 'test-org'
+
+
+@pytest.mark.django_db
+def test_scheduled_job_activity_stream_actor(monkeypatch, job_template, settings):
+    settings.ACTIVITY_STREAM_ENABLED = True
+    schedule = Schedule.objects.create(
+        name='test schedule',
+        rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY',
+        unified_job_template=job_template,
+    )
+    job = Job.objects.create(
+        name='scheduled job',
+        job_template=job_template,
+        launch_type='scheduled',
+        schedule=schedule,
+    )
+    activity_entry = ActivityStream.objects.filter(job=job, operation='create').latest('pk')
+    logged_event = {}
+
+    def capture_activity_stream_log(message, extra=None):
+        logged_event.update(extra or {})
+
+    monkeypatch.setattr('awx.main.signals.analytics_logger.info', capture_activity_stream_log)
+    emit_activity_stream_change(activity_entry)
+
+    assert logged_event['actor'] == schedule.name
+    assert logged_event['summary_fields']['actor'] == job.launched_by
 
 
 @pytest.mark.django_db
