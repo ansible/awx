@@ -5335,7 +5335,7 @@ class BulkJobLaunchSerializer(PromptFieldCleanTextMixin, serializers.Serializer)
 
         self.check_list_permission(Credential, requested_use_credentials, 'use')
         self.check_list_permission(Label, requested_use_labels)
-        self.check_list_permission(InstanceGroup, requested_use_instance_groups, 'use_role')
+        self.check_list_permission(InstanceGroup, requested_use_instance_groups, 'use')
         self.check_list_permission(ExecutionEnvironment, requested_use_execution_environments)  # TODO: change if roles introduced
 
         jobs_object = self.get_objectified_jobs(attrs, key_to_obj_map)

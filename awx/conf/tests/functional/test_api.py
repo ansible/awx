@@ -302,8 +302,8 @@ def test_setting_singleton_skips_task_env_shell_expansion(api_request, enforce_c
         response = api_request(
             'patch',
             reverse('api:setting_singleton_detail', kwargs={'category_slug': 'jobs'}),
-            data={'AWX_TASK_ENV': {'PATH': '${PATH}:/opt/bin', 'CUSTOM': '$(echo hi)'}},
+            data={'AWX_TASK_ENV': {'MY_PATH': '${PATH}:/opt/bin', 'CUSTOM': '$(echo hi)'}},
         )
         assert response.status_code == 200
-        assert response.data['AWX_TASK_ENV']['PATH'] == '${PATH}:/opt/bin'
+        assert response.data['AWX_TASK_ENV']['MY_PATH'] == '${PATH}:/opt/bin'
         assert response.data['AWX_TASK_ENV']['CUSTOM'] == '$(echo hi)'
