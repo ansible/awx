@@ -3,6 +3,7 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 from awx.api.versioning import reverse
+from awx.main.models import WorkflowJobTemplate
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.schedules import Schedule
 from awx.main.access import ActivityStreamAccess
@@ -143,6 +144,43 @@ def test_stream_queryset_hides_shows_items(
 
 
 @pytest.mark.django_db
+def test_activity_stream_prefetches_only_types_present_on_page(get, project, org_admin, mocker, settings):
+    """A page should not prefetch unrelated Activity Stream associations."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    entry = ActivityStream.objects.create(
+        operation='create',
+        object1='project',
+        object2='',
+        actor=org_admin,
+        changes='{}',
+    )
+    entry.project.add(project)
+
+    prefetch = mocker.patch('awx.api.serializers.prefetch_related_objects')
+    url = reverse('api:activity_stream_list')
+    response = get(
+        f'{url}?or__object1__in=project&or__object2__in=project&order_by=-id&page=1&page_size=1',
+        org_admin,
+    )
+
+    assert response.status_code == 200
+    assert response.data['results'][0]['id'] == entry.id
+    prefetches = prefetch.call_args.args[1:]
+    assert 'project' in prefetches
+    assert not {'credential', 'inventory', 'job', 'user'}.intersection(prefetches)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('query', ['order_by=operation', 'page=not-an-integer', 'page_size=not-an-integer'])
+def test_activity_stream_invalid_optimization_inputs_fall_back(get, org_admin, query, settings):
+    """Unsupported pagination inputs use the normal Activity Stream queryset."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    response = get(f'{reverse("api:activity_stream_list")}?{query}', org_admin)
+
+    assert response.status_code in (200, 400, 404)
+
+
+@pytest.mark.django_db
 def test_activity_stream_mixed_serialization_query_count(get, job_factory, project, inventory, org_credential, org_admin, settings):
     """Mixed activity-stream serialization should not issue one query per row."""
     settings.ACTIVITY_STREAM_ENABLED = True
@@ -255,6 +293,15 @@ def test_activity_stream_unfiltered_mixed_serialization_query_count(
     assert 'setting' in {result['object1'] for result in response.data['results']}
     assert query_counts[1] - query_counts[0] <= 20, query_counts
     assert max(unified_job_query_counts) <= 2, unified_job_query_counts
+
+
+@pytest.mark.django_db
+def test_activity_stream_access_includes_workflow_template_branches(org_admin, workflow_job_template, mocker, settings):
+    """Workflow template visibility contributes its Activity Stream branches."""
+    settings.ACTIVITY_STREAM_ENABLED = True
+    mocker.patch.object(WorkflowJobTemplate, 'access_ids_qs', return_value=WorkflowJobTemplate.objects.filter(pk=workflow_job_template.pk))
+
+    assert ActivityStreamAccess(org_admin).get_queryset().exists()
 
 
 @pytest.mark.django_db
