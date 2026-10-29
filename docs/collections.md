@@ -51,6 +51,43 @@ Example of the resultant job `tmp` directory where job is running:
             └── Archlinux.yml
 ```
 
+### Galaxy Response Cache
+
+`ansible-galaxy` maintains a response cache at `~/.ansible/galaxy_cache/api.json` inside
+the execution environment to avoid repeatedly fetching collection version metadata from
+Galaxy/Automation Hub servers. By default, this cache has a 24-hour TTL.
+
+In environments where the same execution environment container persists across many project
+updates (for example, Controller task pods with long-lived EE sidecars on OpenShift),
+the cache can become stale and cause project sync to install older collection versions
+even after newer versions have been published to Automation Hub.
+
+#### Bypassing the Galaxy Cache
+
+To ensure project sync always resolves collections against fresh metadata from
+Galaxy/Automation Hub servers, you can enable the **Update Galaxy cache on launch**
+project option via the API:
+
+```json
+PATCH /api/v2/projects/N/
+{
+  "galaxy_update_on_launch": true
+}
+```
+
+When enabled, project updates will pass the `--no-cache` flag to `ansible-galaxy collection install`,
+bypassing the response cache and fetching the latest available collection versions that match
+the requirements specified in `collections/requirements.yml`.
+
+**Use this option when:**
+- You've recently published a new collection version to Private Automation Hub
+- Pinning to a specific version fails with resolution errors
+- You need to guarantee project sync installs the latest matching version
+
+**Performance consideration:** Bypassing the cache adds a small number of HTTP GET requests
+to fetch collection metadata during each project sync. This is typically negligible compared
+to the git clone and collection artifact downloads that project sync already performs.
+
 ### Cache Folder Mechanics
 
 Every time a project is updated as a "check" job

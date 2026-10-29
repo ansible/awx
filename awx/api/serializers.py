@@ -1545,6 +1545,7 @@ class ProjectSerializer(CleanTextMixin, UnifiedJobTemplateSerializer, ProjectOpt
             '-execution_environment',
             'organization',
             'scm_update_on_launch',
+            'galaxy_update_on_launch',
             'scm_update_cache_timeout',
             'allow_override',
             'custom_virtualenv',
