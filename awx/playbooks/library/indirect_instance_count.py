@@ -178,7 +178,20 @@ class CallbackModule(CallbackBase):
         collect_host_queries = self.get_option('collect_host_queries')
 
         collections_print = {}
-        for candidate in list_collections():
+        try:
+            candidates = list_collections()
+        except Exception as exc:
+            # list_collections() reuses ansible-core's ansible-galaxy CLI internals
+            # (with_collection_artifacts_manager), which assume they are always invoked
+            # from the ansible-galaxy CLI and read CLI-only context.CLIARGS entries
+            # directly. Outside that CLI context (i.e. here, in a playbook run) those
+            # entries are absent, so ansible-core can raise unexpectedly. Degrade to an
+            # empty collection list instead of losing ansible_version/installed_collections
+            # for the whole job.
+            self._display.warning(f"indirect_instance_count: failed to enumerate installed collections, skipping: {exc}")
+            candidates = []
+
+        for candidate in candidates:
             collection_print = {
                 'version': candidate.ver,
             }
