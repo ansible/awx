@@ -48,7 +48,7 @@ prometheus-client
 psycopg
 psutil
 pyasn1>=0.6.2  # CVE-2026-2349
-pygerduty
+pagerduty
 PyGithub
 PyJWT>=2.14.0  # CVE-2026-102268
 pyopenssl
