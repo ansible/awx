@@ -104,7 +104,7 @@ services:
     image: mirror.gcr.io/library/redis:7.4.8
     container_name: tools_redis_{{ container_postfix }}
     volumes:
-      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
+      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:z"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     networks:
       - awx
@@ -265,7 +265,7 @@ services:
     ports:
       - "5555:5555"
     volumes:
-      - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
+      - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf:z"
   {% for i in range(execution_node_count|int) %}
   receptor-{{ loop.index }}:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
