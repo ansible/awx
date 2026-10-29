@@ -725,6 +725,23 @@ class UserAccess(BaseAccess):
         else:
             return self.is_all_org_admin(obj)
 
+    def prefetched_capability_allowed(
+        self, target, display_method, admin_org_ids, memberships, system_auditor_ids, target_permissions, actor_permissions, superuser_count
+    ):
+        """Apply UserAccess capability rules to page-prefetched permission data."""
+        if target == self.user:
+            return display_method == 'edit'
+        if target.is_superuser:
+            return self.user.is_superuser and (display_method == 'edit' or (display_method == 'delete' and superuser_count > 1))
+        if target.pk in system_auditor_ids:
+            return False
+        target_org_ids = memberships.get(target.pk, set())
+        if target_org_ids and target_org_ids.issubset(admin_org_ids):
+            return True
+        if display_method == 'delete' and not target_org_ids:
+            return target_permissions.get(target.pk, set()).issubset(actor_permissions)
+        return False
+
     def can_delete(self, obj):
         if obj == self.user:
             # cannot delete yourself

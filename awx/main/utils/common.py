@@ -605,10 +605,15 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
       --> prefetch logical combination of use permission to inventory AND
           project, put into cache dictionary as 'copy'
     """
+    from awx.main.access import UserAccess
+
     page_ids = [obj.id for obj in page]
     mapping = {}
     for obj in page:
         mapping[obj.id] = {}
+
+    admin_org_ids = assignments = system_auditor_ids = org_ct = None
+    target_permissions = member_evaluations = target_evaluations = actor_permissions = None
 
     for prefetch_entry in prefetch_list:
         display_method = None
@@ -623,6 +628,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
 
         # Build the query for access_qs according the user & permission(s)
         filter_args = []
+        ids_with_role = None
         for perm_path in paths:
             if '.' in perm_path:
                 res_path = '__'.join(perm_path.split('.')[:-1])
@@ -634,7 +640,83 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
                 filter_args.append(Q(Q(**{'%s__in' % res_path: access_qs}) | Q(**{'%s__isnull' % res_path: True})))
             else:
                 action = perm_path
-                if hasattr(model, 'access_qs'):
+                if model._meta.model_name == 'user':
+                    # User has no DAB access_qs. User capabilities for an
+                    # Organization Admin are derived from membership in an
+                    # organization the actor can administer.
+                    from awx.main.models.organization import Organization
+
+                    from ansible_base.rbac.models import RoleEvaluation, RoleUserAssignment
+                    from ansible_base.rbac.permission_registry import permission_registry
+
+                    admin_org_ids = set(Organization.access_qs(user, 'change').values_list('id', flat=True)) if admin_org_ids is None else admin_org_ids
+                    superuser_count = model.objects.filter(is_superuser=True).count() if display_method == 'delete' else 0
+                    target_ids = {target.pk for target in page}
+                    assignments = (
+                        list(RoleUserAssignment.objects.filter(user_id__in=target_ids).values_list('user_id', 'object_role_id'))
+                        if assignments is None
+                        else assignments
+                    )
+                    system_auditor_ids = (
+                        set(
+                            RoleUserAssignment.objects.filter(
+                                user_id__in=target_ids,
+                                role_definition__name='Platform Auditor',
+                            ).values_list('user_id', flat=True)
+                        )
+                        if system_auditor_ids is None
+                        else system_auditor_ids
+                    )
+                    role_users = {}
+                    role_ids = set()
+                    for target_id, role_id in assignments:
+                        role_users.setdefault(role_id, set()).add(target_id)
+                        role_ids.add(role_id)
+                    org_ct = permission_registry.content_type_model.objects.get_for_model(Organization) if org_ct is None else org_ct
+                    memberships = {}
+                    target_permissions = target_permissions if target_permissions is not None else {}
+                    member_evaluations = (
+                        list(
+                            RoleEvaluation.objects.filter(
+                                role_id__in=role_ids,
+                                content_type_id=org_ct.id,
+                                codename='member_organization',
+                            ).values_list('object_id', 'role_id')
+                        )
+                        if member_evaluations is None
+                        else member_evaluations
+                    )
+                    for org_id, role_id in member_evaluations:
+                        for target_id in role_users.get(role_id, ()):
+                            memberships.setdefault(target_id, set()).add(org_id)
+                    if display_method == 'delete' and target_evaluations is None:
+                        target_evaluations = list(
+                            RoleEvaluation.objects.filter(role_id__in=role_ids).values_list('object_id', 'content_type_id', 'codename', 'role_id')
+                        )
+                        for object_id, content_type_id, codename, role_id in target_evaluations:
+                            for target_id in role_users.get(role_id, ()):
+                                target_permissions.setdefault(target_id, set()).add((object_id, content_type_id, codename))
+                        actor_role_ids = RoleUserAssignment.objects.filter(user_id=user.pk).values_list('object_role_id', flat=True)
+                        actor_permissions = set(
+                            RoleEvaluation.objects.filter(role_id__in=actor_role_ids).values_list('object_id', 'content_type_id', 'codename')
+                        )
+                    user_access = UserAccess(user)
+                    allowed_ids = {
+                        target.pk
+                        for target in page
+                        if user_access.prefetched_capability_allowed(
+                            target,
+                            display_method,
+                            admin_org_ids,
+                            memberships,
+                            system_auditor_ids,
+                            target_permissions,
+                            actor_permissions,
+                            superuser_count,
+                        )
+                    }
+                    ids_with_role = allowed_ids
+                elif hasattr(model, 'access_qs'):
                     filter_args.append(Q(**{'pk__in': model.access_qs(user, action)}))
                 else:
                     # UnifiedJobTemplate is not registered with the permission registry,
@@ -645,8 +727,9 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
             display_method = action
 
         # Union that query with the list of items on page
-        filter_args.append(Q(pk__in=page_ids))
-        ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
+        if ids_with_role is None:
+            filter_args.append(Q(pk__in=page_ids))
+            ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
 
         # Save data item-by-item
         for obj in page:
