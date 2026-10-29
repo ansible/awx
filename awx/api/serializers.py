@@ -1717,15 +1717,10 @@ class BaseSerializerWithVariables(BaseSerializer):
 
 class LabelsListMixin(object):
     def _summary_field_labels(self, obj):
-        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
-        if has_model_field_prefetched(obj, 'labels'):
-            label_ct = len(obj.labels.all())
-        else:
-            if len(label_list) < 10:
-                label_ct = len(label_list)
-            else:
-                label_ct = obj.labels.count()
-        return {'count': label_ct, 'results': label_list}
+        # Return every attached label. Truncating results to 10 while advertising
+        # the full count confused UI/API consumers (AAP-71342).
+        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()]
+        return {'count': len(label_list), 'results': label_list}
 
     def get_summary_fields(self, obj):
         res = super(LabelsListMixin, self).get_summary_fields(obj)
