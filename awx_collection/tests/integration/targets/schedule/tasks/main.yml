@@ -9,6 +9,7 @@
     org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
     sched1: "AWX-Collection-tests-schedule-sched1-{{ test_id }}"
     sched2: "AWX-Collection-tests-schedule-sched2-{{ test_id }}"
+    sched_id: "AWX-Collection-tests-schedule-id-{{ test_id }}"
     cred1: "AWX-Collection-tests-schedule-cred1-{{ test_id }}"
     proj1: "AWX-Collection-tests-schedule-proj1-{{ test_id }}"
     proj2: "AWX-Collection-tests-schedule-proj2-{{ test_id }}"
@@ -197,6 +198,10 @@
         state: present
       register: result
 
+    - name: Save job template ID
+      ansible.builtin.set_fact:
+        jt1_id: "{{ result.id }}"
+
     - name: Assert result changed
       ansible.builtin.assert:
         that:
@@ -351,6 +356,19 @@
         that:
           - result is changed
 
+    - name: Create schedule with unified_job_template ID
+      schedule:
+        name: "{{ sched_id }}"
+        unified_job_template: "{{ jt1_id }}"
+        rrule: "DTSTART:20260716T000000Z RRULE:FREQ=DAILY;INTERVAL=1"
+        state: present
+      register: result
+
+    - name: Assert result changed
+      ansible.builtin.assert:
+        that:
+          - result is changed
+
   always:
     - name: Delete the schedules
       schedule:
@@ -359,6 +377,7 @@
       loop:
         - "{{ sched1 }}"
         - "{{ sched2 }}"
+        - "{{ sched_id }}"
       failed_when: false
 
     - name: Delete the jt1
