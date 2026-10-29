@@ -625,7 +625,7 @@ class WebhookMixin(models.Model):
 
         if status_host not in allowed_hosts:
             logger.error(
-                "Webhook status URL host '%s' does not match project SCM host '%s'. " "Refusing to send credentials to unrecognized host.",
+                "Webhook status URL host '%s' does not match project SCM host '%s'. Refusing to send credentials to unrecognized host.",
                 status_host,
                 scm_host,
             )

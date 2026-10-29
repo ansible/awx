@@ -71,7 +71,6 @@ def test_is_dangerous_task_env_key_allows_safe(key):
 
 
 class TestJobsValidate:
-
     def test_rejects_dangerous_key_in_awx_task_env(self):
         assert _guard_present, "fix not applied: jobs_validate missing"
         attrs = {'AWX_TASK_ENV': {'LD_PRELOAD': '/tmp/evil.so', 'HTTP_PROXY': 'http://proxy:8080'}}
@@ -120,7 +119,6 @@ class TestJobsValidate:
 
 
 class TestBuildEnvFiltering:
-
     def _make_base_task(self):
         """Create a BaseTask without calling __init__ (avoids DB/settings)."""
         task = jobs.BaseTask.__new__(jobs.BaseTask)
@@ -175,7 +173,6 @@ class TestBuildEnvFiltering:
 
 
 class TestBuildExtraVarsFileFiltering:
-
     def _make_project_update_task(self):
         """Create a RunProjectUpdate without calling __init__."""
         task = jobs.RunProjectUpdate.__new__(jobs.RunProjectUpdate)

@@ -25,7 +25,7 @@ _RSYSLOG_UNSAFE_RE = re.compile(r'["\\\(\)\x00-\x1f]')
 def validate_rsyslog_safe(value):
     if value and _RSYSLOG_UNSAFE_RE.search(str(value)):
         raise serializers.ValidationError(
-            'Value contains characters not allowed in rsyslog configuration ' '(quotes, backslashes, parentheses, or control characters).'
+            'Value contains characters not allowed in rsyslog configuration (quotes, backslashes, parentheses, or control characters).'
         )
 
 

@@ -162,7 +162,7 @@ class TestValidatePodSpecOverride:
                             {
                                 'name': 'steal',
                                 'secret': {
-                                    'secretName': 'automation-controller-postgres' '-configuration',
+                                    'secretName': 'automation-controller-postgres-configuration',
                                 },
                             },
                         ],

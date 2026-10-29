@@ -489,7 +489,6 @@ class TestJobTemplateCallbackProxyIntegration:
 
 @pytest.mark.django_db
 class TestHostConfigKeyRedaction:
-
     @pytest.fixture
     def jt_with_callback(self, project, inventory):
         return JobTemplate.objects.create(

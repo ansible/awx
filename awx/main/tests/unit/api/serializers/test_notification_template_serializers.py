@@ -314,9 +314,11 @@ class TestModelSaveStaleKeyCleanup:
         old_nt = mock.Mock(spec=NotificationTemplate)
         old_nt.messages = None
 
-        with mock.patch.object(NotificationTemplate.objects, 'get', return_value=old_nt), mock.patch(
-            'awx.main.models.notifications.encrypt_field'
-        ), mock.patch.object(type(nt).__mro__[1], 'save', create=True):
+        with (
+            mock.patch.object(NotificationTemplate.objects, 'get', return_value=old_nt),
+            mock.patch('awx.main.models.notifications.encrypt_field'),
+            mock.patch.object(type(nt).__mro__[1], 'save', create=True),
+        ):
             nt.save()
 
         assert 'token' not in nt.notification_configuration
@@ -339,9 +341,11 @@ class TestModelSaveStaleKeyCleanup:
         old_nt = mock.Mock(spec=NotificationTemplate)
         old_nt.messages = None
 
-        with mock.patch.object(NotificationTemplate.objects, 'get', return_value=old_nt), mock.patch(
-            'awx.main.models.notifications.encrypt_field'
-        ), mock.patch.object(type(nt).__mro__[1], 'save', create=True):
+        with (
+            mock.patch.object(NotificationTemplate.objects, 'get', return_value=old_nt),
+            mock.patch('awx.main.models.notifications.encrypt_field'),
+            mock.patch.object(type(nt).__mro__[1], 'save', create=True),
+        ):
             nt.save()
 
         assert nt.notification_configuration['channels'] == ['#alerts']

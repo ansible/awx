@@ -133,13 +133,16 @@ class TestOpenCallsValidation:
             use_tls=True,
             use_ssl=False,
         )
-        with mock.patch(
-            'awx.main.notifications.email_backend.socket.getaddrinfo',
-            return_value=_make_addrinfo('93.184.216.34'),
-        ), mock.patch(
-            'django.core.mail.backends.smtp.EmailBackend.open',
-            return_value=True,
-        ) as mock_super_open:
+        with (
+            mock.patch(
+                'awx.main.notifications.email_backend.socket.getaddrinfo',
+                return_value=_make_addrinfo('93.184.216.34'),
+            ),
+            mock.patch(
+                'django.core.mail.backends.smtp.EmailBackend.open',
+                return_value=True,
+            ) as mock_super_open,
+        ):
             result = backend.open()
             mock_super_open.assert_called_once()
             assert result is True

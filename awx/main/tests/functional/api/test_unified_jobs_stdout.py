@@ -133,11 +133,11 @@ def test_osc_escape_sequences_stripped_from_html_stdout(sqlite_copy, get, admin)
     job.save()
 
     # OSC 8 hyperlink with javascript: URL using BEL (\x07) terminator
-    osc_bel = '\x1b]8;;javascript:alert(document.domain)\x07' 'CLICKME-XSS' '\x1b]8;;\x07\n'
+    osc_bel = '\x1b]8;;javascript:alert(document.domain)\x07CLICKME-XSS\x1b]8;;\x07\n'
     JobEvent(job=job, stdout=osc_bel, start_line=0).save()
 
     # OSC 8 hyperlink using ST (ESC \) terminator
-    osc_st = '\x1b]8;;javascript:alert(2)\x1b\\' 'STLABEL' '\x1b]8;;\x1b\\\n'
+    osc_st = '\x1b]8;;javascript:alert(2)\x1b\\STLABEL\x1b]8;;\x1b\\\n'
     JobEvent(job=job, stdout=osc_st, start_line=1).save()
 
     # Normal ANSI-colored output (should still render correctly)
